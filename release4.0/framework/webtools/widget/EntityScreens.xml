@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/widget-screen.xsd">
+    <screen name="EntitySQLProcessor">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <set field="title" value="Entity SQL Processor"/>
+                <set field="titleProperty" value="PageTitleEntitySQLProcessor"/>
+                <set field="labelTitleProperty" value="PageTitleEntitySQLProcessor"/>
+                <set field="sqlCommand" from-field="parameters.sqlCommand"/>
+                <set field="selGroup" from-field="parameters.group"/>
+                <set field="rowLimit" from-field="parameters.rowLimit" type="Integer"/>
+                <set field="parameters.TRANSACTION_TIMEOUT" value="7200"/>
+                
+                <script location="component://webtools/webapp/webtools/WEB-INF/actions/entity/EntitySQLProcessor.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWebtoolsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://webtools/webapp/webtools/entity/EntitySQLProcessor.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <label style="head3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="EntityExportAll">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <set field="title" value="XML Export from DataSource(s)"/>
+                <set field="titleProperty" value="PageTitleEntityExportAll"/>
+                <set field="parameters.TRANSACTION_TIMEOUT" value="7200"/>
+                <set field="results" from-field="parameters.results"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWebtoolsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://webtools/webapp/webtools/entity/EntityExportAll.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <label style="head3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="EntityImportDir">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <set field="title" value="XML Import Dir"/>
+                <set field="titleProperty" value="PageTitleEntityImportDir"/>
+                <set field="parameters.TRANSACTION_TIMEOUT" value="7200"/>
+                
+                <set field="messages" from-field="parameters.messages"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWebtoolsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://webtools/webapp/webtools/entity/EntityImportDir.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <label style="head3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="EntityImport">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <set field="title" value="XML Import"/>
+                <set field="titleProperty" value="PageTitleEntityImport"/>
+                <set field="parameters.TRANSACTION_TIMEOUT" value="7200"/>
+                
+                <set field="messages" from-field="parameters.messages"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWebtoolsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://webtools/webapp/webtools/entity/EntityImport.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <label style="head3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="EntityImportReaders">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <set field="title" value="XML Import"/>
+                <set field="titleProperty" value="PageTitleEntityImportReaders"/>
+                <set field="parameters.TRANSACTION_TIMEOUT" value="7200"/>
+                
+                <set field="messages" from-field="parameters.messages"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWebtoolsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://webtools/webapp/webtools/entity/EntityImportReaders.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <label style="head3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="EntityMaint">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <set field="titleProperty" value="WebtoolsEntityDataMaintenance"/>
+                <script location="component://webtools/webapp/webtools/WEB-INF/actions/entity/EntityMaint.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWebtoolsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://webtools/webapp/webtools/entity/EntityMaint.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <label style="head3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="FindGeneric">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <set field="titleProperty" value="WebtoolsFindValues"/>
+                <script location="component://webtools/webapp/webtools/WEB-INF/actions/entity/FindGeneric.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWebtoolsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://webtools/webapp/webtools/entity/FindGeneric.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <label style="head3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="ViewGeneric">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <set field="titleProperty" value="WebtoolsViewValue"/>
+                <script location="component://webtools/webapp/webtools/WEB-INF/actions/entity/ViewGeneric.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWebtoolsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://webtools/webapp/webtools/entity/ViewGeneric.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <label style="head3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="ViewRelations">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <set field="titleProperty" value="WebtoolsRelations"/>
+                <script location="component://webtools/webapp/webtools/WEB-INF/actions/entity/ViewRelations.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWebtoolsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://webtools/webapp/webtools/entity/ViewRelations.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <label style="head3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="EntityRef">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="WebtoolsEntityReferenceChart"/>           
+                <script location="component://webtools/webapp/webtools/WEB-INF/actions/entity/EntityRef.bsh"/>                            
+            </actions>
+            <widgets> 
+                <section>
+                    <widgets>
+                        <platform-specific>
+                            <html>
+                                <html-template location="component://webtools/webapp/webtools/entity/EntityRef.ftl"/>
+                            </html>
+                        </platform-specific>
+                    </widgets>
+                </section>                               
+            </widgets>
+            <fail-widgets>
+                <label style="head3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="EntityRefMain">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="WebtoolsEntityReferenceChart"/>           
+                <script location="component://webtools/webapp/webtools/WEB-INF/actions/entity/EntityRefMain.bsh"/>                            
+            </actions>
+            <widgets> 
+                <section>
+                    <widgets>
+                        <platform-specific>
+                            <html>
+                                <html-template location="component://webtools/webapp/webtools/entity/EntityRefMain.ftl"/>
+                            </html>
+                        </platform-specific>
+                    </widgets>
+                </section>                               
+            </widgets>
+            <fail-widgets>
+                <label style="head3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="EntityRefList">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="WebtoolsEntityReference"/>           
+                <script location="component://webtools/webapp/webtools/WEB-INF/actions/entity/EntityRefList.bsh"/>                            
+            </actions>
+            <widgets> 
+                <section>
+                    <widgets>
+                        <platform-specific>
+                            <html>
+                                <html-template location="component://webtools/webapp/webtools/entity/EntityRefList.ftl"/>
+                            </html>
+                        </platform-specific>
+                    </widgets>
+                </section>                               
+            </widgets>
+            <fail-widgets>
+                <label style="head3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="CheckDb">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="WebtoolsCheckUpdateDatabase"/>           
+                <script location="component://webtools/webapp/webtools/WEB-INF/actions/entity/CheckDb.bsh"/>                            
+            </actions>
+            <widgets>  
+                <decorator-screen name="CommonWebtoolsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://webtools/webapp/webtools/entity/CheckDb.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <label style="head3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="EntityPerformanceTest">
+        <section>
+            <actions>
+                <set field="headerItem" value="main"/>
+<!--                <set field="titleProperty" value="insertTitleHere"/> -->
+                <script location="component://webtools/webapp/webtools/WEB-INF/actions/entity/EntityPerformanceTest.bsh"/>                            
+            </actions>
+            <widgets>  
+                <decorator-screen name="CommonWebtoolsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://webtools/webapp/webtools/performance/EntityPerformanceTest.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="xmldsdump">
+        <section>
+            <actions>
+                <set field="headerItem" value="main"/>
+<!--                <set field="titleProperty" value="insertTitleHere"/> -->
+                <script location="component://webtools/webapp/webtools/WEB-INF/actions/entity/xmldsdump.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWebtoolsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific><html><html-template location="component://webtools/webapp/webtools/entity/xmldsdump.ftl"/></html></platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+
+</screens>
+
+
+
+
+
+
+

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/widget-screen.xsd">
+    <screen name="CommonMrpDecorator">
+        <section>
+            <actions>
+                <!-- <set field="leftbarScreenName" value="leftbar"/> -->
+                <!-- <set field="leftbarScreenLocation" value=""/> -->
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for MANUFACTURING, _VIEW permission -->
+                            <condition>
+                                <if-has-permission permission="MANUFACTURING" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <platform-specific>
+                                    <html><html-template location="component://manufacturing/webapp/manufacturing/mrp/MrpTabBar.ftl"/></html>
+                                </platform-specific>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="head3">${uiLabelMap.ManufacturingViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="MrpExecution">
+        <section>
+            <actions>
+                <set field="title" value="Run MRP"/>
+                <set field="titleProperty" value="ManufacturingRunMrp"/>
+                <set field="tabButtonItem" value="RunMrp"/>
+                <set field="headerItem" value="mrp"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonMrpDecorator">
+                    <decorator-section name="body">
+                        <container>
+                            <label style="head1" text="${uiLabelMap.ManufacturingRunMrp}"/>
+                        </container>
+                        <container>
+                            <include-form name="RunMrp" location="component://manufacturing/webapp/manufacturing/mrp/MrpForms.xml"/>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FindMrpPlannedEvents">
+        <section>
+            <actions>
+                <set field="title" value="MRP Planned Events"/>
+                <set field="titleProperty" value="PageTitleFindInventoryEventPlan"/>
+                <set field="tabButtonItem" value="findInventoryEventPlan"/>
+                <set field="headerItem" value="mrp"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="50"/>
+
+                <entity-condition entity-name="JobSandbox" list-name="mrpActiveJobs">
+                    <condition-list combine="and">
+                        <condition-expr field-name="serviceName" value="executeMrp"/>
+                        <condition-list combine="or">
+                            <condition-expr field-name="statusId" value="SERVICE_PENDING"/>
+                            <condition-expr field-name="statusId" value="SERVICE_QUEUED"/>
+                            <condition-expr field-name="statusId" value="SERVICE_RUNNING"/>
+                        </condition-list>
+                    </condition-list>
+                    <order-by field-name="-createdStamp"/>
+                </entity-condition>
+                <entity-condition entity-name="JobSandbox" list-name="mrpRunningJobs">
+                    <condition-list combine="and">
+                        <condition-expr field-name="serviceName" value="executeMrp"/>
+                        <condition-expr field-name="statusId" value="SERVICE_RUNNING"/>
+                    </condition-list>
+                    <order-by field-name="-createdStamp"/>
+                </entity-condition>
+                <entity-condition entity-name="JobSandbox" list-name="mrpFinishedJobs">
+                    <condition-list combine="and">
+                        <condition-expr field-name="serviceName" value="executeMrp"/>
+                        <condition-list combine="or">
+                            <condition-expr field-name="statusId" value="SERVICE_FINISHED"/>
+                            <condition-expr field-name="statusId" value="SERVICE_FAILED"/>
+                            <condition-expr field-name="statusId" value="SERVICE_CRASHED"/>
+                            <condition-expr field-name="statusId" value="SERVICE_CANCELLED"/>
+                        </condition-list>
+                    </condition-list>
+                    <order-by field-name="-finishDateTime"/>
+                </entity-condition>
+                <set field="lastFinishedJob" from-field="mrpFinishedJobs[0]"/>
+                <set field="lastFinishedJobs[]" from-field="lastFinishedJob"/>
+                
+                <script location="component://manufacturing/webapp/manufacturing/WEB-INF/actions/mrp/findInventoryEventPlan.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonMrpDecorator">
+                    <decorator-section name="body">
+                        <label style="head2">${uiLabelMap.ManufacturingMrpJobLastExecuted}</label>
+                        <include-form name="ListFinishedMrpJobs" location="component://manufacturing/webapp/manufacturing/mrp/MrpForms.xml"/>
+                        <label style="head2">${uiLabelMap.ManufacturingMrpJobScheduledOrRunning}</label>
+                        <include-form name="ListRunningMrpJobs" location="component://manufacturing/webapp/manufacturing/mrp/MrpForms.xml"/>
+                        <section>
+                            <condition>
+                                <if-empty field-name="mrpRunningJobs"/>
+                            </condition>
+                            <widgets>
+                                <platform-specific>
+                                    <html><html-template location="component://manufacturing/webapp/manufacturing/mrp/findInventoryEventPlan.ftl"/></html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="head1">${uiLabelMap.ManufacturingMrpJobIsRunning}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>
+

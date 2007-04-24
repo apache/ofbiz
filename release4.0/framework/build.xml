@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<project name="OFBiz Framework Build" default="build" basedir=".">
+
+    <filelist id="framework-builds" dir="."
+        files="base/build.xml,
+               entity/build.xml,geronimo/build.xml,
+               catalina/build.xml,jetty/build.xml,
+               security/build.xml,service/build.xml,entityext/build.xml,
+               datafile/build.xml,minilang/build.xml,
+               common/build.xml,workflow/build.xml,
+               webapp/build.xml,guiapp/build.xml,widget/build.xml,
+               testtools/build.xml,
+               appserver/build.xml,webtools/build.xml,example/build.xml"/>
+      <!-- For Shark add "shark/build.xml" to the list above, in the framework-builds list (after workflow, before webapp works fine)  -->
+
+    <filelist id="test-builds" dir="." files="base/build.xml,entity/build.xml"/>
+
+    <property name="memory.max.param" value="-Xmx384M"/>
+    
+    <!-- ================================================================== -->
+    <!-- Initialization of all property settings                            -->
+    <!-- ================================================================== -->
+
+    <target name="ofbiz-init">
+        <property environment="env"/>
+    </target>
+
+    <target name="dir-init" depends="ofbiz-init">
+        <mkdir dir="../runtime"/>
+        <mkdir dir="../runtime/logs"/>
+        <mkdir dir="../runtime/data"/>
+        <mkdir dir="../runtime/data/derby"/>
+        <mkdir dir="../runtime/data/hsql"/>
+
+        <condition property="isMac">
+            <os family="mac"/>
+        </condition>
+        <antcall target="copy-derby-props" inheritall="true"/>
+    </target>
+
+    <target name="copy-derby-props" if="isMac">
+        <copy file="../runtime/data/derby.properties" todir="../runtime/data/derby"/>
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- Removes all created files and directories                          -->
+    <!-- ================================================================== -->
+
+    <target name="refresh">
+        <antcall target="clean-all"/>
+        <antcall target="build"/>
+    </target>
+
+    <target name="clean-all">
+        <antcall target="clean-data"/>
+        <antcall target="clean-logs"/>
+        <antcall target="clean-xtra"/>
+        <antcall target="clean-catalina"/>
+        <antcall target="clean"/>
+    </target>
+
+    <target name="clean-data">
+        <delete verbose="on" includeemptydirs="true">
+            <fileset dir="../runtime/data" includes="**/*">
+                <exclude name="README"/>
+                <exclude name="derby.properties"/>
+            </fileset>
+        </delete>
+    </target>
+
+    <target name="clean-logs">
+        <delete verbose="on">
+            <fileset dir="../runtime/logs" includes="*">
+                <exclude name="README"/>
+            </fileset>
+        </delete>
+    </target>
+
+    <target name="clean-xtra" depends="">
+        <delete verbose="on">
+            <fileset dir="." includes="**/.nbattrs,**/*~,**/.#*,**/.DS_Store,**/*.rej,**/*.orig"/>
+        </delete>
+    </target>
+
+    <target name="clean-catalina" depends="">
+        <delete dir="../runtime/catalina/work"/>
+    </target>
+
+    <target name="tests">
+        <subant target="tests">
+            <filelist refid="test-builds"/>
+        </subant>
+    </target>
+
+    <target name="clean">
+        <subant target="clean">
+            <filelist refid="framework-builds"/>
+        </subant>
+        <delete file="ofbiz.jar"/>
+        <echo message="[clean] ========== Done Cleaning Framework =========="/>
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- Build Components                                                   -->
+    <!-- ================================================================== -->
+
+    <target name="build" depends="dir-init">
+        <echo message="[build] ========== Start Building Framework (Compile) =========="/>
+
+        <!-- make sure the data and logs directories exist (they should exist, because they are in svn) -->
+        <mkdir dir="../runtime/data"/>
+        <mkdir dir="../runtime/logs"/>
+
+        <subant inheritall="false">
+            <filelist refid="framework-builds"/>
+        </subant>
+
+        <!-- copy the ofbiz.jar file -->
+        <copy todir="${basedir}/..">
+            <fileset dir="base/build/lib" includes="ofbiz.jar"/>
+        </copy>
+        
+        <echo message="[build] ========== Done Building Framework (Compile) =========="/>
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- Build JavaDocs                                                     -->
+    <!-- ================================================================== -->
+
+    <target name="docs" depends="">
+        <echo message="[docs] ========== Start Building Framework (JavaDoc) =========="/>
+
+        <subant target="docs">
+            <filelist refid="framework-builds"/>
+        </subant>
+
+        <echo message="[docs] ========== Done Building Framework (JavaDocs) =========="/>
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- Contrib Targets                                                    -->
+    <!-- ================================================================== -->
+
+    <target name="copy-contrib">
+        <copy todir="${basedir}" overwrite="true" verbose="true">
+            <fileset dir="${basedir}/contrib" excludes="contrib/**,**/*.class"/>
+        </copy>
+    </target>
+
+    <target name="build-contrib" depends="copy-contrib,refresh"/>
+
+    <!-- ================================================================== -->
+    <!-- Script Targets                                                     -->
+    <!-- ================================================================== -->
+
+    <target name="scriptfix">
+        <fixcrlf srcdir="${basedir}" eol="lf" eof="remove" includes="**/*.sh"/>
+        <fixcrlf srcdir="${basedir}" eol="crlf" includes="**/*.bat"/>
+    </target>
+</project>

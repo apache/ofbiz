@@ -1,0 +1,40 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+ 
+import org.ofbiz.entity.*;
+import org.ofbiz.base.util.*;
+
+delegator = request.getAttribute("delegator");
+
+String custRequestId = request.getParameter("custRequestId");
+String custRequestItemSeqId = request.getParameter("custRequestItemSeqId");
+String showAll = request.getParameter("showAll");
+if (showAll == null) {
+    showAll = "false";
+}
+context.put("showAll", showAll);
+
+Map fields = UtilMisc.toMap("custRequestId", custRequestId);
+if (showAll.equals("false")) {
+    fields.put("custRequestItemSeqId", custRequestItemSeqId);
+}
+List notes = delegator.findByAnd("CustRequestItemNoteView", fields, UtilMisc.toList("-noteDateTime"));
+if (notes != null && notes.size() > 0) {
+    context.put("notes", notes);
+}

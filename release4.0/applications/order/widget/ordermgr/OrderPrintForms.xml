@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<!-- These forms are for generating printed documents, such as invoices, bills, statements, etc. -->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/widget-screen.xsd">
+
+    <!-- generate a PDF for the order, sharing the same BSH file as the HTML page for viewing the order -->
+    <screen name="OrderPDF">
+        <section>
+            <actions>
+                <set field="title" value="Order"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/order/orderview.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="FoReportDecorator" location="component://common/widget/CommonScreens.xml">
+                    <!-- at the top left of every page we put the logo and company information -->
+                    <decorator-section name="topLeft">
+                        <section>
+                            <widgets>
+                                <include-screen name="CompanyLogo" location="component://order/widget/ordermgr/OrderPrintForms.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <!-- at the top right of every page we put the order information -->
+                    <decorator-section name="topRight">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <html><html-template location="component://order/webapp/ordermgr/order/orderReportHeaderInfo.fo.ftl"/></html>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <!-- the contach mechanisms, terms, payment and shipping methods are shown in the first page -->
+                                <platform-specific>
+                                    <html><html-template location="component://order/webapp/ordermgr/order/orderReportContactMechs.fo.ftl"/></html>
+                                </platform-specific>
+                                <!-- order items and totals -->
+                                <platform-specific>
+                                    <html><html-template location="component://order/webapp/ordermgr/order/orderReportBody.fo.ftl"/></html>
+                                </platform-specific>
+                                <!-- return policies and notes are shown in the last page -->
+                                <platform-specific>
+                                    <html><html-template location="component://order/webapp/ordermgr/order/orderReportConditions.fo.ftl"/></html>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CompanyLogo">
+        <section>
+            <actions>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/order/companyHeader.bsh"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://order/webapp/ordermgr/order/companyHeader.fo.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ReturnPDF">
+        <section>
+            <actions>
+                <set field="title" value="Return"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/return/returnHeader.bsh"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/return/returnItems.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="FoReportDecorator" location="component://common/widget/CommonScreens.xml">
+                    <!-- at the top left of every page we put the logo and company information -->
+                    <decorator-section name="topLeft">
+                        <section>
+                            <widgets>
+                                <include-screen name="CompanyLogo" location="component://order/widget/ordermgr/OrderPrintForms.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <!-- at the top right of every page we put the order information -->
+                    <decorator-section name="topRight">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <html><html-template location="component://order/webapp/ordermgr/return/returnReportHeaderInfo.fo.ftl"/></html>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <!-- the contach mechanisms, terms, payment and shipping methods are shown in the first page -->
+                                <platform-specific>
+                                    <html><html-template location="component://order/webapp/ordermgr/return/returnReportContactMechs.fo.ftl"/></html>
+                                </platform-specific>
+                                <!-- order items and totals -->
+                                <platform-specific>
+                                    <html><html-template location="component://order/webapp/ordermgr/return/returnReportBody.fo.ftl"/></html>
+                                </platform-specific>
+                                <!-- return policies and notes are shown in the last page -->
+                                <platform-specific>
+                                    <html><html-template location="component://order/webapp/ordermgr/return/returnReportConditions.fo.ftl"/></html>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ShipGroupsPDF">
+        <section>
+            <actions>
+                <set field="title" value="Ship Groups"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/order/shipGroups.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="FoReportDecorator" location="component://common/widget/CommonScreens.xml">
+                    <!-- at the top left of every page we put the logo and company information -->
+                    <decorator-section name="topLeft">
+                        <section>
+                            <widgets>
+                                <include-screen name="CompanyLogo" location="component://order/widget/ordermgr/OrderPrintForms.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <html><html-template location="component://order/webapp/ordermgr/order/shipGroups.fo.ftl"/></html>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+</screens>

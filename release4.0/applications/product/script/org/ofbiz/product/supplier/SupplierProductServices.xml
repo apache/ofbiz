@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/simple-methods.xsd">
+    <simple-method method-name="createSupplierProduct" short-description="Create a Supplier Product record">
+        <check-permission permission="CATALOG" action="_CREATE"><fail-message message="Security Error: to run createSupplierProduct you must have the CATALOG_CREATE or CATALOG_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value value-name="newEntity" entity-name="SupplierProduct"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+
+        <create-value value-name="newEntity"/>
+    </simple-method>
+
+    <simple-method method-name="updateSupplierProduct" short-description="Update a Supplier Product record">
+        <check-permission permission="CATALOG" action="_UPDATE"><fail-message message="Security Error: to run updateSupplierProduct you must have the CATALOG_UPDATE or CATALOG_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value value-name="lookupPKMap" entity-name="SupplierProduct"/>
+        <set-pk-fields map-name="parameters" value-name="lookupPKMap"/>
+        
+        <find-by-primary-key entity-name="SupplierProduct" map-name="lookupPKMap" value-name="sprod"/>
+        <set-nonpk-fields map-name="parameters" value-name="sprod"/>
+        <store-value value-name="sprod"/>
+    </simple-method>
+
+    <simple-method method-name="removeSupplierProduct" short-description="Remove a Supplier Product record">
+        <check-permission permission="CATALOG" action="_DELETE"><fail-message message="Security Error: to run removeSupplierProduct you must have the CATALOG_UPDATE or CATALOG_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value value-name="lookupPKMap" entity-name="SupplierProduct"/>
+        <set-pk-fields map-name="parameters" value-name="lookupPKMap"/>
+        
+        <find-by-primary-key entity-name="SupplierProduct" map-name="lookupPKMap" value-name="sprod"/>                
+        <remove-value value-name="sprod"/>
+    </simple-method>
+
+    <!-- services for supplier product features -->
+    <simple-method method-name="createSupplierProductFeature" short-description="Create a Supplier Product Feature record">
+        <check-permission permission="CATALOG" action="_CREATE"><fail-message message="Security Error: to run createSupplierProductFeature you must have the CATALOG_CREATE or CATALOG_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value value-name="newEntity" entity-name="SupplierProductFeature"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+ 
+        <create-value value-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateSupplierProductFeature" short-description="Update a Supplier Product Feature record">
+        <check-permission permission="CATALOG" action="_UPDATE"><fail-message message="Security Error: to run updateSupplierProductFeature you must have the CATALOG_UPDATE or CATALOG_ADMIN permission"/></check-permission>
+        <check-errors/>
+ 
+        <entity-one entity-name="SupplierProductFeature" value-name="sprod"/>
+        <set-nonpk-fields map-name="parameters" value-name="sprod"/>
+        <store-value value-name="sprod"/>
+    </simple-method>
+    <simple-method method-name="removeSupplierProductFeature" short-description="Remove a Supplier Product record">
+        <check-permission permission="CATALOG" action="_DELETE"><fail-message message="Security Error: to run updateSupplierProductFeature you must have the CATALOG_DELETE or CATALOG_ADMIN permission"/></check-permission>
+        <check-errors/>
+ 
+        <entity-one entity-name="SupplierProductFeature" value-name="sprod"/>
+        <remove-value value-name="sprod"/>
+    </simple-method>
+    <simple-method method-name="getSupplierProductFeatures" short-description="Get all supplier information for a product feature" login-required="false">
+        <entity-and entity-name="SupplierProductFeature" list-name="supplierProductFeatures">
+            <field-map field-name="partyId" env-name="parameters.partyId"/>
+            <field-map field-name="productFeatureId" env-name="parameters.productFeatureId"/>
+        </entity-and>
+        <field-to-result field-name="supplierProductFeatures"/>
+    </simple-method>
+</simple-methods>

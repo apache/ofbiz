@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/simple-methods.xsd">
+    <!-- ProductCategoryContent -->
+    <simple-method method-name="createCategoryContent" short-description="Create Content For Product Category">
+        <make-value value-name="newEntity" entity-name="ProductCategoryContent"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+
+        <if-empty field-name="fromDate" map-name="newEntity">
+            <now-timestamp-to-env env-name="nowTimestamp"/>
+            <set field="newEntity.fromDate" from-field="nowTimestamp" />
+        </if-empty>
+
+        <create-value value-name="newEntity"/>
+
+        <set-service-fields service-name="updateContent" map-name="parameters" to-map-name="updateContent"/>
+        <call-service service-name="updateContent" in-map-name="updateContent"/>
+
+        <field-to-result map-name="newEntity" field-name="contentId"/>
+        <field-to-result map-name="newEntity" field-name="productCategoryId"/>
+        <field-to-result map-name="newEntity" field-name="prodCatContentTypeId"/>
+    </simple-method>
+    <simple-method method-name="updateCategoryContent" short-description="Update Content For Category">
+        <make-value value-name="lookupPKMap" entity-name="ProductCategoryContent"/>
+        <set-pk-fields map-name="parameters" value-name="lookupPKMap"/>
+        <find-by-primary-key entity-name="ProductCategoryContent" map-name="lookupPKMap" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+
+        <set-service-fields service-name="updateContent" map-name="parameters" to-map-name="updateContent"/>
+        <call-service service-name="updateContent" in-map-name="updateContent"/>
+    </simple-method>
+    <simple-method method-name="removeCategoryContent" short-description="Remove Content From Category">
+        <make-value value-name="lookupPKMap" entity-name="ProductCategoryContent"/>
+        <set-pk-fields map-name="parameters" value-name="lookupPKMap"/>
+        <find-by-primary-key entity-name="ProductCategoryContent" map-name="lookupPKMap" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="createSimpleTextContentForCategory" short-description="Create Simple Text Content For Product Category">
+        <set-service-fields service-name="createCategoryContent" map-name="parameters" to-map-name="createCategoryContentMap"/>
+        <set-service-fields service-name="createSimpleTextContent" map-name="parameters" to-map-name="createSimpleTextMap"/>
+        <call-service service-name="createSimpleTextContent" in-map-name="createSimpleTextMap">
+            <result-to-field result-name="contentId" map-name="createCategoryContentMap" />
+        </call-service>
+        <call-service service-name="createCategoryContent" in-map-name="createCategoryContentMap"/>
+    </simple-method>
+    <simple-method method-name="updateSimpleTextContentForCategory" short-description="Update Simple Text Content For Product Category">
+        <set-service-fields service-name="updateCategoryContent" map-name="parameters" to-map-name="updateCategoryContent"/>
+        <call-service service-name="updateCategoryContent" in-map-name="updateCategoryContent"/>
+        <set-service-fields service-name="updateSimpleTextContent" map-name="parameters" to-map-name="updateSimpleText"/>
+        <call-service service-name="updateSimpleTextContent" in-map-name="updateSimpleText"/>
+    </simple-method>
+</simple-methods>

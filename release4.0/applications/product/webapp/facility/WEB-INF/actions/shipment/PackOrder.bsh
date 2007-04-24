@@ -1,0 +1,125 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import org.ofbiz.entity.*;
+import org.ofbiz.base.util.*;
+import org.ofbiz.order.order.*;
+import org.ofbiz.entity.util.EntityUtil;
+
+facilityId = parameters.get("facilityId");
+if (UtilValidate.isNotEmpty(facilityId)) {
+    facility = delegator.findByPrimaryKey("Facility", UtilMisc.toMap("facilityId", facilityId));
+    context.put("facilityId", facilityId);
+    context.put("facility", facility);
+}
+
+orderId = parameters.get("orderId");
+shipGroupSeqId = parameters.get("shipGroupSeqId");
+shipmentId = parameters.get("shipmentId");
+if (shipmentId == null) {
+    shipmentId = request.getAttribute("shipmentId");
+}
+context.put("shipmentId", shipmentId);
+
+// If a shipment exists, provide the IDs of any related invoices
+if (UtilValidate.isNotEmpty(shipmentId)) {
+
+    // Get the primaryOrderId from the shipment
+    shipment = delegator.findByPrimaryKey("Shipment", UtilMisc.toMap("shipmentId", shipmentId));
+    if (shipment != null && shipment.getString("primaryOrderId") != null) {
+        orderItemBillingList = delegator.findByAnd("OrderItemBilling", UtilMisc.toMap("orderId", shipment.getString("primaryOrderId")), UtilMisc.toList("invoiceId"));
+        invoiceIds = EntityUtil.getFieldListFromEntityList(orderItemBillingList, "invoiceId", true);
+        if (invoiceIds != null) {
+            context.put("invoiceIds", invoiceIds);
+        }
+    }
+}
+if (UtilValidate.isNotEmpty(orderId) && UtilValidate.isEmpty(shipGroupSeqId) && orderId.indexOf("/") > -1) {
+    // split the orderID/shipGroupSeqID
+    idSplit = orderId.split("\\/");
+    orderId = idSplit[0];
+    shipGroupSeqId = idSplit[1];
+}
+
+packSession = session.getAttribute("packingSession");
+if (packSession == null) {
+    packSession = new org.ofbiz.shipment.packing.PackingSession(dispatcher, userLogin);
+    session.setAttribute("packingSession", packSession);
+    Debug.log("Created NEW packing session!!");
+} else {
+    if (packSession.getStatus() == 0) {
+        packSession.clear();
+        shipGroupSeqId = null;
+        orderId = null;
+    }
+}
+
+// make sure we always re-set the infos
+packSession.setPrimaryShipGroupSeqId(shipGroupSeqId);
+packSession.setPrimaryOrderId(orderId);
+packSession.setFacilityId(facilityId);
+
+context.put("packingSession", packSession);
+context.put("orderId", orderId);
+context.put("shipGroupSeqId", shipGroupSeqId);
+
+if (UtilValidate.isNotEmpty(orderId)) {
+    orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+    if (orderHeader != null) {
+        OrderReadHelper orh = new OrderReadHelper(orderHeader);
+        context.put("orderId", orderId);
+        context.put("orderHeader", orderHeader);
+        context.put("orderReadHelper", orh);
+        orderItemShipGroup = orh.getOrderItemShipGroup(shipGroupSeqId);
+        context.put("orderItemShipGroup", orderItemShipGroup);
+
+        if ("ORDER_APPROVED".equals(orderHeader.getString("statusId"))) {
+            if (UtilValidate.isNotEmpty(shipGroupSeqId)) {
+
+                // Generate the shipment cost estimate for the ship group
+                productStoreId = orh.getProductStoreId();
+                shippableItemInfo = orh.getOrderItemAndShipGroupAssoc(shipGroupSeqId);
+                shippableTotal = new Double(orh.getShippableTotalBd(shipGroupSeqId).doubleValue());
+                shippableWeight = new Double(orh.getShippableWeightBd(shipGroupSeqId).doubleValue());
+                shippableQuantity = new Double(orh.getShippableQuantityBd(shipGroupSeqId).doubleValue());
+                shipmentCostEstimate = packSession.getShipmentCostEstimate(orderItemShipGroup, productStoreId, shippableItemInfo, shippableTotal, shippableWeight, shippableQuantity);                
+                context.put("shipmentCostEstimateForShipGroup", shipmentCostEstimate);
+                context.put("productStoreId", productStoreId);
+
+                context.put("itemInfos", shippableItemInfo);
+            } else {
+                request.setAttribute("errorMessageList", UtilMisc.toList("No ship group sequence ID. Cannot process."));
+            }
+        } else {
+            request.setAttribute("errorMessageList", UtilMisc.toList("Order #" + orderId + " is not approved for packing."));
+        }
+    } else {
+        request.setAttribute("errorMessageList", UtilMisc.toList("Order #" + orderId + " cannot be found."));
+    }
+}
+
+// Try to get the defaultWeightUomId first from the facility, then from the shipment properties, and finally defaulting to kilos
+defaultWeightUomId = null; 
+if (! UtilValidate.isEmpty(facility)) {
+    defaultWeightUomId = facility.getString("defaultWeightUomId");
+}
+if (UtilValidate.isEmpty(defaultWeightUomId)) {
+    defaultWeightUomId = UtilProperties.getPropertyValue("shipment.properties", "shipment.default.weight.uom", "WT_kg");
+}
+context.put("defaultWeightUomId", defaultWeightUomId);

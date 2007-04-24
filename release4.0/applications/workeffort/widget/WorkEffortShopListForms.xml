@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/widget-form.xsd">
+    <form name="ListWorkEffortShopLists" target="" title="" type="list" separate-columns="false">
+        <actions>
+            <entity-and entity-name="WorkEffortShoppingListView">
+                <field-map field-name="workEffortId" />
+                <order-by field-name="shoppingListId"/>
+            </entity-and>
+        </actions>
+        <field name="workEffortId"><hidden/></field>
+        <field name="shoppingListId" title="${uiLabelMap.WorkEffortShopListId}" widget-style="buttontext">
+            <hyperlink target="/partymgr/control/editShoppingList?shoppingListId=${shoppingListId}" target-type="inter-app" description="${shoppingListId}"/>
+        </field>
+        <field name="shoppingListTypeDescription" title="${uiLabelMap.CommonType}"><display/></field>
+        <field name="listName"><display/></field>
+        <field name="description"><display/></field>
+        <field name="partyId" title="${uiLabelMap.PartyParty}"><display-entity entity-name="PartyNameView" description="${firstName} ${lastName} ${groupName} [${partyId}]"/></field>
+        <field name="deleteLink" title="" widget-style="buttontext"><hyperlink target="deleteShoppingListWorkEffort?workEffortId=${workEffortId}&amp;shoppingListId=${shoppingListId}" also-hidden="false" description="${uiLabelMap.CommonDelete}"/></field>
+    </form>
+    <form name="AddWorkEffortShopList" target="createShoppingListWorkEffort" title="" type="single">
+        <field name="workEffortId"><hidden/></field>
+        <field name="shoppingListId" ><lookup target-form-name="LookupShoppingList"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="buttontext"><submit button-type="text-link"/></field>
+    </form>
+</forms>

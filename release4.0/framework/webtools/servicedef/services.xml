@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/services.xsd">
+	<description>OFBiz WebTools Services</description>
+	<vendor>OFBiz</vendor>
+	<version>1.0</version>
+
+    <!-- Entity Import Services 
+         Transacitons are turned off for these services because they set transactions and timeouts inside the services with txTimeout parameter -->
+    <service name="parseEntityXmlFile" engine="java" require-new-transaction="true"
+            location="org.ofbiz.webtools.WebToolsServices" invoke="parseEntityXmlFile" auth="true" use-transaction="false">
+        <description>Parses an entity xml file or an entity xml text</description>
+        <attribute name="url" type="java.net.URL" mode="IN" optional="true"/>
+        <attribute name="xmltext" type="String" mode="IN" optional="true"/>
+        <attribute name="mostlyInserts" type="String" mode="IN" optional="true"/>
+        <attribute name="maintainTimeStamps" type="String" mode="IN" optional="true"/>
+        <attribute name="txTimeout" type="Integer" mode="IN" optional="true"/>
+        <attribute name="createDummyFks" type="String" mode="IN" optional="true"/>
+        <attribute name="rowProcessed" type="Long" mode="OUT" optional="false"/>
+    </service>
+    <service name="entityImport" engine="java"
+            location="org.ofbiz.webtools.WebToolsServices" invoke="entityImport" auth="true" use-transaction="false">
+        <description>Imports an entity xml file or text string</description>
+        <attribute name="filename" type="String" mode="IN" optional="true"/>
+        <attribute name="fmfilename" type="String" mode="IN" optional="true"/>
+        <attribute name="fulltext" type="String" mode="IN" optional="true"/>
+        <attribute name="isUrl" type="String" mode="IN" optional="true"/>
+        <attribute name="mostlyInserts" type="String" mode="IN" optional="true"/>
+        <attribute name="maintainTimeStamps" type="String" mode="IN" optional="true"/>
+        <attribute name="createDummyFks" type="String" mode="IN" optional="true"/>
+        <attribute name="txTimeout" type="Integer" mode="IN" optional="true"/>
+        <attribute name="messages" type="List" mode="OUT" optional="false"/>
+    </service>
+    <service name="entityImportDir" engine="java"
+            location="org.ofbiz.webtools.WebToolsServices" invoke="entityImportDir" auth="true" use-transaction="false">
+        <description>Imports all entity xml files contained in a directory</description>
+        <attribute name="path" type="String" mode="IN" optional="true"/>
+        <attribute name="mostlyInserts" type="String" mode="IN" optional="true"/>
+        <attribute name="maintainTimeStamps" type="String" mode="IN" optional="true"/>
+        <attribute name="createDummyFks" type="String" mode="IN" optional="true"/>
+        <attribute name="deleteFiles" type="String" mode="IN" optional="true"/>
+        <attribute name="txTimeout" type="Integer" mode="IN" optional="true"/>
+        <attribute name="filePause" type="Long" mode="IN" optional="true"/>
+        <attribute name="messages" type="List" mode="OUT" optional="false"/>
+    </service>
+    <service name="entityImportReaders" engine="java"
+        location="org.ofbiz.webtools.WebToolsServices" invoke="entityImportReaders" auth="true" use-transaction="false">
+        <description>Imports an entity xml file or text string</description>
+        <attribute name="readers" type="String" mode="IN" optional="true"/>
+        <attribute name="overrideDelegator" type="String" mode="IN" optional="true"/>
+        <attribute name="overrideGroup" type="String" mode="IN" optional="true"/>
+        <attribute name="mostlyInserts" type="String" mode="IN" optional="true"/>
+        <attribute name="maintainTimeStamps" type="String" mode="IN" optional="true"/>
+        <attribute name="createDummyFks" type="String" mode="IN" optional="true"/>
+        <attribute name="txTimeout" type="Integer" mode="IN" optional="true"/>
+        <attribute name="messages" type="List" mode="OUT" optional="false"/>
+    </service>
+    <service name="entityExportAll" engine="java"
+            location="org.ofbiz.webtools.WebToolsServices" invoke="entityExportAll" auth="true" use-transaction="false">
+        <description>Exports all entities into xml files</description>
+        <attribute name="outpath" type="String" mode="IN" optional="true"/>
+        <attribute name="txTimeout" type="Integer" mode="IN" optional="true"/>
+        <attribute name="results" type="List" mode="OUT" optional="false"/>
+    </service>
+
+</services>

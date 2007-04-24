@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/simple-methods.xsd">
+    <simple-method method-name="createOrderAdjustment" short-description="Create an OrderAdjustment">
+        <check-permission permission="ORDERMGR" action="_CREATE"><fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunCreateOrderAdjustement"/></check-permission>
+        <check-errors/>
+
+        <make-value entity-name="OrderAdjustment" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+
+        <sequenced-id-to-env sequence-name="OrderAdjustment" env-name="newEntity.orderAdjustmentId"/>
+        <field-to-result field-name="newEntity.orderAdjustmentId" result-name="orderAdjustmentId"/>
+
+        <now-timestamp-to-env env-name="newEntity.createdDate"/>
+        <set from-field="userLogin.userLoginId" field="newEntity.createdByUserLogin"/>
+
+        <create-value value-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateOrderAdjustment" short-description="Update an OrderAdjustment">
+        <check-permission permission="ORDERMGR" action="_UPDATE"><fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunUpdateOrderAdjustement"/></check-permission>
+        <check-errors/>
+        <entity-one entity-name="OrderAdjustment" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+        
+        <!-- now reset the order grand total -->
+        <set from-field="lookedUpValue.orderId" field="params.orderId"/>
+        <call-service service-name="resetGrandTotal" in-map-name="params"/>
+    </simple-method>
+    <simple-method method-name="deleteOrderAdjustment" short-description="Delete an OrderAdjustment">
+        <check-permission permission="ORDERMGR" action="_DELETE"><fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunDeleteOrderAdjustement"/></check-permission>
+        <check-errors/>
+        <entity-one entity-name="OrderAdjustment" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+     
+        <!-- now reset the order grand total -->
+        <set from-field="lookedUpValue.orderId" field="params.orderId"/>
+        <call-service service-name="resetGrandTotal" in-map-name="params"/>
+    </simple-method>
+    
+    <simple-method method-name="createOrderAdjustmentBilling" short-description="Create an OrderAdjustmentBilling">
+        <make-value entity-name="OrderAdjustmentBilling" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+    </simple-method>
+
+    <simple-method method-name="createOrderItemBilling" short-description="Create an OrderItemBilling">
+        <make-value entity-name="OrderItemBilling" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+    </simple-method>
+
+    <simple-method method-name="createNotificationLog" short-description="Log an order notification" login-required="false">
+        <make-value entity-name="OrderNotification" value-name="orderNotification"/>
+        <sequenced-id-to-env sequence-name="OrderNotification" env-name="orderNotification.orderNotificationId"/>
+        <set from-field="parameters.orderId" field="orderNotification.orderId"/>
+        <set from-field="parameters.emailType" field="orderNotification.emailType"/>
+        <set from-field="parameters.comments" field="orderNotification.comments"/>
+        <now-timestamp-to-env env-name="orderNotification.notificationDate"/>
+        <create-value value-name="orderNotification"/>
+    </simple-method>
+
+    <simple-method method-name="updateOrderStatusFromReceipt" short-description="Update Order Status From ShipmentReceipt">
+        <check-permission permission="ORDERMGR" action="_UPDATE"><fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunUpdateOrderStatusFromReceipt"/></check-permission>
+        <check-errors/>
+
+        <entity-one entity-name="OrderHeader" value-name="orderHeader"/>
+        <entity-and entity-name="ShipmentReceipt" list-name="shipmentReceipts">
+            <field-map field-name="orderId" env-name="parameters.orderId"/>
+        </entity-and>
+        <iterate list-name="shipmentReceipts" entry-name="receipt">
+            <if-empty field-name="totalsMap.${receipt.orderItemSeqId}">
+                <set field="totalsMap.${receipt.orderItemSeqId}" value="0" type="Double"/>
+            </if-empty>
+            <calculate field-name="${receipt.orderItemSeqId}" map-name="totalsMap" type="Double">
+                <calcop field-name="${receipt.orderItemSeqId}" map-name="totalsMap" operator="add">
+                    <calcop field-name="quantityAccepted" map-name="receipt" operator="get"/>
+                    <calcop field-name="quantityRejected" map-name="receipt" operator="get"/>
+                </calcop>
+            </calculate>
+            <set from-field="receipt.orderId" field="newLookupMap.orderId"/>
+            <set from-field="receipt.orderItemSeqId" field="newLookupMap.orderItemSeqId"/>
+            <find-by-primary-key entity-name="OrderItem" map-name="newLookupMap" value-name="orderItem"/>
+            <if-compare field-name="statusId" map-name="orderItem" operator="not-equals" value="ITEM_COMPLETED">
+                <if-compare-field field-name="quantity" map-name="orderItem" operator="less-equals" to-field-name="${receipt.orderItemSeqId}" to-map-name="totalsMap" type="Double">
+                    <!-- update the status for the item -->
+                    <set field="orderItem.statusId" value="ITEM_COMPLETED"/>
+                    <store-value value-name="orderItem"/>
+                    <!-- create status change history -->
+                    <make-value entity-name="OrderStatus" value-name="newValue"/>
+                    <sequenced-id-to-env sequence-name="OrderStatus" env-name="newValue.orderStatusId"/>
+                    <set from-field="orderItem.orderItemSeqId" field="newValue.orderItemSeqId"/>
+                    <set from-field="orderItem.orderId" field="newValue.orderId"/>
+                    <set from-field="orderItem.statusId" field="newValue.statusId"/>
+                    <now-timestamp-to-env env-name="newValue.statusDatetime"/>
+                    
+                    <create-value value-name="newValue"/>
+                </if-compare-field>
+            </if-compare>
+        </iterate>
+
+        <!-- check to see if all items have been completed -->
+        <entity-and entity-name="OrderItem" list-name="allOrderItems">
+            <field-map field-name="orderId" env-name="parameters.orderId"/>
+        </entity-and>
+        <set value="true" field="allCompleted"/>
+        <iterate list-name="allOrderItems" entry-name="item">
+            <if-compare field-name="item.statusId" operator="not-equals" value="ITEM_COMPLETED">
+                <set value="false" field="allCompleted"/>
+            </if-compare>
+        </iterate>
+        
+        <if-compare field-name="allCompleted" operator="equals" value="true">
+            <!-- update the order header -->
+            <set field="orderHeader.statusId" value="ORDER_COMPLETED"/>
+            <store-value value-name="orderHeader"/>
+            <!-- create the status history -->
+            <make-value entity-name="OrderStatus" value-name="newValue"/>
+            <sequenced-id-to-env sequence-name="OrderStatus" env-name="newValue.orderStatusId"/>
+            
+            <set from-field="orderHeader.orderId" field="newValue.orderId"/>
+            <set from-field="orderHeader.statusId" field="newValue.statusId"/>
+            <now-timestamp-to-env env-name="newValue.statusDatetime"/>
+            
+            <create-value value-name="newValue"/>
+        </if-compare>
+
+        <!-- return the current return header status -->
+        <field-to-result field-name="statusId" map-name="orderHeader" result-name="currentStatusId"/>
+    </simple-method>
+</simple-methods>

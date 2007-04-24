@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/widget-screen.xsd">
+
+    <screen name="OrderConfirmNoticePdf">
+        <section>
+            <actions>
+                <set field="title" value="Order Confirmation Notice"/>
+                <set field="baseEcommerceSecureUrl" value="${baseSecureUrl}/ecommerce/control/"/>
+                <set field="title" value="Order"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/order/orderview.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="FoReportDecorator" location="component://common/widget/CommonScreens.xml">
+                    <!-- at the top left of every page we put the logo and company information -->
+                    <decorator-section name="topLeft">
+                        <section>
+                            <widgets>
+                                <include-screen name="CompanyLogo" location="component://order/widget/ordermgr/OrderPrintForms.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <!-- at the top right of every page we put the order information -->
+                    <decorator-section name="topRight">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <html><html-template location="component://order/webapp/ordermgr/order/orderReportHeaderInfo.fo.ftl"/></html>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <!-- the contach mechanisms, terms, payment and shipping methods are shown in the first page -->
+                                <platform-specific>
+                                    <html><html-template location="component://order/webapp/ordermgr/order/orderReportContactMechs.fo.ftl"/></html>
+                                </platform-specific>
+                                <!-- order items and totals -->
+                                <platform-specific>
+                                    <html><html-template location="component://order/webapp/ordermgr/order/orderReportBody.fo.ftl"/></html>
+                                </platform-specific>
+                                <!-- return policies and notes are shown in the last page -->
+                                <platform-specific>
+                                    <html><html-template location="component://order/webapp/ordermgr/order/orderReportConditions.fo.ftl"/></html>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="OrderConfirmNotice">
+        <section>
+            <actions>
+                <set field="title" value="Order Confirmation Notice"/>
+                <set field="baseEcommerceSecureUrl" value="${baseSecureUrl}/ecommerce/control/"/>
+                <set field="allowAnonymousView" value="Y"/>  <!-- this field will instruction orderstatus.bsh to allow an anonymous order to be viewed by anybody, so the email confirmation screen will work -->
+                <script location="component://ecommerce/webapp/ecommerce/WEB-INF/actions/order/orderstatus.bsh"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://ecommerce/templates/email/OrderNoticeEmail.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="OrderCompleteNotice">
+        <section>
+            <actions>
+                <property-map resource="EcommerceUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ContentUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="title" value="${uiLabelMap.PageTitleOrderCompleteNotice}"/>
+                <set field="baseEcommerceSecureUrl" value="${baseSecureUrl}/ecommerce/control/"/>
+                <script location="component://ecommerce/webapp/ecommerce/WEB-INF/actions/order/orderstatus.bsh"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://ecommerce/templates/email/OrderNoticeEmail.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="BackorderNotice">
+        <section>
+            <actions>
+                <set field="title" value="Order Backorder Notice"/>
+                <set field="baseEcommerceSecureUrl" value="${baseSecureUrl}/ecommerce/control/"/>
+                <set field="allowAnonymousView" value="Y"/>  <!-- this field will instruction orderstatus.bsh to allow an anonymous order to be viewed by anybody, so the email confirmation screen will work -->
+                <script location="component://ecommerce/webapp/ecommerce/WEB-INF/actions/order/orderstatus.bsh"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://ecommerce/templates/email/OrderNoticeEmail.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="OrderChangeNotice">
+        <section>
+            <actions>
+                <set field="title" value="Order Change Notice"/>
+                <set field="baseEcommerceSecureUrl" value="${baseSecureUrl}/ecommerce/control/"/>
+                <set field="allowAnonymousView" value="Y"/>  <!-- this field will instruction orderstatus.bsh to allow an anonymous order to be viewed by anybody, so the email confirmation screen will work -->
+                <script location="component://ecommerce/webapp/ecommerce/WEB-INF/actions/order/orderstatus.bsh"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://ecommerce/templates/email/OrderNoticeEmail.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="PaymentRetryNotice">
+        <section>
+            <actions>
+                <set field="title" value="Order Payment Retry Notice"/>
+                <set field="baseEcommerceSecureUrl" value="${baseSecureUrl}/ecommerce/control/"/>
+                <script location="component://ecommerce/webapp/ecommerce/WEB-INF/actions/order/orderstatus.bsh"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://ecommerce/templates/email/emailpayretry.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+</screens>

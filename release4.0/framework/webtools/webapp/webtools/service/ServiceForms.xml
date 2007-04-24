@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/widget-form.xsd">
+
+    <form name="scheduleJob" type="single" target="setServiceParameters">
+        <field name="JOB_NAME" title="${uiLabelMap.WebtoolsJob}"><text/></field>
+        <field name="SERVICE_NAME" title="${uiLabelMap.WebtoolsService}"><text/></field>
+        <field name="POOL_NAME" title="${uiLabelMap.WebtoolsPool}"><text/></field>
+        <field name="SERVICE_TIME" title="${uiLabelMap.CommonStartDateTime}"><date-time/></field>
+        <field name="SERVICE_END_TIME" title="${uiLabelMap.CommonEndDateTime}"><date-time/></field>
+        <field name="SERVICE_FREQUENCY" title="${uiLabelMap.WebtoolsFrequency}">
+            <drop-down>
+                <option key="" description="${uiLabelMap.CommonNone}"/>
+                <option key="4" description="${uiLabelMap.CommonDaily}"/>
+                <option key="5" description="${uiLabelMap.CommonWeekly}"/>
+                <option key="6" description="${uiLabelMap.CommonMonthly}"/>
+                <option key="7" description="${uiLabelMap.CommonYearly}"/>
+                <option key="3" description="${uiLabelMap.CommonHourly}"/>
+                <option key="2" description="${uiLabelMap.CommonMinutely}"/>
+                <option key="1" description="${uiLabelMap.CommonSecondly}"/>
+            </drop-down>
+        </field>
+        <field name="SERVICE_INTERVAL" title="${uiLabelMap.WebtoolsInterval}" tooltip="${uiLabelMap.WebtoolsMessage8}"><text/></field>
+        <field name="SERVICE_COUNT" title="${uiLabelMap.WebtoolsCount}" tooltip="${uiLabelMap.WebtoolsMessage9}"><text default-value="1"/></field>
+        <field name="SERVICE_MAXRETRY" title="${uiLabelMap.WebtoolsMaxRetry}" tooltip="${uiLabelMap.WebtoolsMessage10}"><text/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}"><submit button-type="button"/></field> 
+    </form>
+
+    <form name="runService" type="single" target="setSyncServiceParameters">
+        <field name="SERVICE_NAME" title="${uiLabelMap.WebtoolsService}"><text/></field>
+        <field name="POOL_NAME" title="${uiLabelMap.WebtoolsPool}"><text/></field>
+        <field name="_RUN_SYNC_"><hidden value="Y"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}"><submit button-type="button"/></field> 
+    </form>
+</forms>

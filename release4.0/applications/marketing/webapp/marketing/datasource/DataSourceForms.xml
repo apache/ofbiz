@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/widget-form.xsd">
+    <form name="EditDataSource" type="single" target="updateDataSource" title="" default-map-name="dataSource">
+        <alt-target use-when="dataSource==null" target="createDataSource"/>
+        
+        <field use-when="dataSource!=null" name="dataSourceId" title="${uiLabelMap.DataSourceDataSourceId}" tooltip="${uiLabelMap.CommonNotModifRecreat}" widget-style="tabletext"><display/></field>
+        <field use-when="dataSource==null&amp;&amp;dataSourceId==null" name="dataSourceId" title="${uiLabelMap.DataSourceDataSourceId}"><text/></field>
+        <field use-when="dataSource==null&amp;&amp;dataSourceId!=null" name="dataSourceId" title="${uiLabelMap.DataSourceDataSourceId}" tooltip="${uiLabelMap.CommonCannotBeFound}: [${dataSourceId}]" widget-style="tabletext"><display/></field>
+
+        <field name="dataSourceTypeId" title="${uiLabelMap.DataSourceDataSourceTypeId}">
+            <drop-down>
+                <entity-options description="${description}" entity-name="DataSourceType" key-field-name="dataSourceTypeId">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="description" widget-style="inputBox" title="${uiLabelMap.DataSourceDataSourceDescription}"><text/></field>
+        
+        <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="buttontext"><submit button-type="text-link"/></field>
+        <!-- <field name="DONE_PAGE"><hidden value="${donePage}"/></field> -->
+        <!-- <field name="cancelLink" title="" widget-style="buttontext"><hyperlink target="${donePage}" also-hidden="false" description="${uiLabelMap.CommonCancelDone}" target-type="inter-app"/></field> -->
+    </form>
+
+    <form name="ListDataSource" target="ListDataSource" title="" type="list">
+        <actions>
+            <entity-condition entity-name="DataSource"/>
+        </actions>
+        <field name="dataSourceId"  widget-style="buttontext" title="${uiLabelMap.DataSourceDataSourceId}">
+            <hyperlink target="EditDataSource?dataSourceId=${dataSourceId}" description="${dataSourceId}" also-hidden="false"/>
+        </field>
+        <field name="description" title="${uiLabelMap.DataSourceDataSourceDescription}"><display/></field>
+        <field name="dataSourceTypeId" title="${uiLabelMap.DataSourceDataSourceTypeId}"><display-entity entity-name="DataSourceType"/></field>
+        <field name="deleteLink" title="&amp;nbsp;" widget-style="buttontext">
+            <hyperlink target="deleteDataSource?dataSourceId=${dataSourceId}" description="${uiLabelMap.CommonDelete}" also-hidden="false"/>
+        </field>
+    </form>
+    
+    <form name="EditDataSourceType" type="single" target="updateDataSourceType" title="" default-map-name="dataSourceType">
+        <alt-target use-when="dataSourceType==null" target="createDataSourceType"/>
+        
+        <field use-when="dataSourceType!=null" name="dataSourceTypeId" title="${uiLabelMap.DataSourceDataSourceTypeId}" tooltip="${uiLabelMap.CommonNotModifRecreat}" widget-style="tabletext"><display/></field>
+        <field use-when="dataSourceType==null&amp;&amp;dataSourceTypeId==null" name="dataSourceTypeId" title="${uiLabelMap.DataSourceDataSourceTypeId}"><text/></field>
+        <field use-when="dataSourceType==null&amp;&amp;dataSourceTypeId!=null" name="dataSourceTypeId" title="${uiLabelMap.DataSourceDataSourceTypeId}" tooltip="${uiLabelMap.CommonCannotBeFound}: [${dataSourceTypeId}]" widget-style="tabletext"><display/></field>
+        <field name="description" title="${uiLabelMap.DataSourceTypeDescription}"><text/></field>
+        
+        <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="buttontext"><submit button-type="text-link"/></field>
+     </form>
+        
+    <form name="FindDataSourceTypes" type="single" target="ListDataSourceTypes" title="">
+        
+        <field name="dataSourceTypeId" title="${uiLabelMap.DataSourceDataSourceTypeId}"><text-find/></field>
+        <field name="description" title="${uiLabelMap.DataSourceTypeDescription}"><text-find/></field>
+        
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="buttontext"><submit button-type="text-link"/></field>
+    </form>
+    <form name="ListDataSourceType" type="list" title="" list-name="listIt">
+        <actions>
+            <service service-name="performFind" result-map-name="result" result-map-list-name="listIt">
+                <field-map field-name="inputFields" env-name="parameters"/>
+                <field-map field-name="orderBy" value="dataSourceTypeId"/>
+                <field-map field-name="entityName" value="DataSourceType"/>
+            </service>
+        </actions>
+        
+        <field name="dataSourceTypeId" title="${uiLabelMap.DataSourceDataSourceTypeId}"><display/></field>
+        <field name="description" title="${uiLabelMap.DataSourceTypeDescription}"><display/></field>
+        <field name="editLink" title="&amp;nbsp;" widget-style="buttontext">
+            <hyperlink target="EditDataSourceType?dataSourceTypeId=${dataSourceTypeId}"
+                description="${uiLabelMap.CommonEdit}" also-hidden="false"/>
+        </field>
+        <field name="deleteLink" title="&amp;nbsp;" widget-style="buttontext">
+            <hyperlink target="deleteDataSourceType?dataSourceTypeId=${dataSourceTypeId}" description="${uiLabelMap.CommonDelete}" also-hidden="false"/>
+        </field>
+    </form>
+
+    <form name="LookupDataSource" default-map-name="dataSource" target="LookupDataSource" title="" type="single">
+        <field name="dataSourceId" title="${uiLabelMap.DataSourceDataSourceId}"><text-find/></field>
+        <field name="description" title="${uiLabelMap.DataSourceDataSourceDescription}"><text-find/></field>
+        <field name="dataSourceTypeId" title="${uiLabelMap.DataSourceDataSourceTypeId}">
+            <drop-down>
+                <entity-options description="${description}" entity-name="DataSourceType" key-field-name="dataSourceTypeId">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="buttontext"><submit button-type="text-link"/></field>
+    </form>
+    <form name="ListLookupDataSource" target="" title="" type="list">
+        <actions>
+            <service result-map-list-name="listIt" result-map-name="result" service-name="performFind">
+                <field-map env-name="parameters" field-name="inputFields"/>
+                <field-map env-name="entityName" field-name="entityName"/>
+            </service>
+        </actions>
+        <field name="dataSourceId" title="${uiLabelMap.DataSourceDataSourceId}" widget-style="buttontext">
+            <hyperlink also-hidden="false" description="${dataSourceId}" target="javascript:set_value('${dataSourceId}')" target-type="plain"/>
+        </field>
+        <field name="description" title="${uiLabelMap.DataSourceDataSourceDescription}"><display/></field>
+        <field name="dataSourceTypeId" title="${uiLabelMap.DataSourceDataSourceTypeId}"><display-entity entity-name="DataSourceType"/></field>
+    </form>
+    
+    <form name="LookupDataSourceType" target="LookupDataSourceType" title="" type="single">
+        <field name="dataSourceTypeId" title="${uiLabelMap.DataSourceDataSourceTypeId}"><text-find/></field>
+        <field name="description" title="${uiLabelMap.DataSourceTypeDescription}"><lookup target-form-name="LookupDataSourceType"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}"><submit button-type="button"/></field>
+    </form>
+    <form name="ListLookupDataSourceType" target="" title="" type="list">
+        <actions>
+            <service result-map-list-name="listIt" result-map-name="result" service-name="performFind">
+                <field-map env-name="parameters" field-name="inputFields"/>
+                <field-map env-name="entityName" field-name="entityName"/>
+            </service>
+        </actions>
+        <field name="dataSourceTypeId" title="${uiLabelMap.DataSourceDataSourceTypeId}" widget-style="buttontext">
+            <hyperlink also-hidden="false" description="${dataSourceTypeId}" target="javascript:set_value('${dataSourceTypeId}')" target-type="plain"/>
+        </field>
+        <field name="description" title="${uiLabelMap.DataSourceTypeDescription}"><display/></field>
+    </form>
+</forms>

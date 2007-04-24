@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/widget-screen.xsd">
+	
+    <screen name="FinancialSummaryReportOptions">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFinancialSummaryReportOptions"/>
+                <set field="headerItem" value="FinancialSummryReports"/>
+                
+                <set field="month" from-field="parameters.month" default-value="${bsh:org.ofbiz.base.util.UtilDateTime.nowDateString(&quot;MM&quot;)}"/>
+                <set field="year" from-field="parameters.year" default-value="${bsh:org.ofbiz.base.util.UtilDateTime.nowDateString(&quot;yyyy&quot;)}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container><label style="head1" text="${uiLabelMap.PageTitleFinancialSummaryReportOptions}"/></container>
+                        
+                        <container><label style="head2" text="${uiLabelMap.PageTitleSalesInvoiceByProductCategorySummary}"/></container>
+                        <include-form name="SalesInvoiceByProductCategorySummaryOptions" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        
+                        <container><label style="head2" text="${uiLabelMap.PageTitleSalesInvoiceByProductGlAccountSummary}"/></container>
+                        <include-form name="SalesInvoiceByProductGlAccountSummaryOptions" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        
+                        <container><label style="head2" text="${uiLabelMap.PageTitlePaymentByMethodSummary}"/></container>
+                        <include-form name="PaymentByMethodSummaryOptions" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        
+                        <container><label style="head2" text="${uiLabelMap.PageTitleInventoryIssueSummary}"/></container>
+                        <include-form name="InventoryIssueSummaryOptions" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        
+                        <container><label style="head2" text="${uiLabelMap.PageTitleFinancialAccountSummary}"/></container>
+                        <include-form name="FinancialAccountSummaryOptions" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+	
+    <screen name="FinancialSummaryDataPrep">
+        <section>
+            <actions>
+                <set field="headerItem" value="FinancialSummryReports"/>
+
+                <set field="month" from-field="parameters.month" type="Integer" default-value="${bsh:org.ofbiz.base.util.UtilDateTime.nowDateString(&quot;MM&quot;)}"/>
+                <set field="year" from-field="parameters.year" type="Integer" default-value="${bsh:org.ofbiz.base.util.UtilDateTime.nowDateString(&quot;yyyy&quot;)}"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="currencyUomId" from-field="parameters.currencyUomId"/>
+                
+                <entity-one entity-name="PartyNameView" value-name="organizationPartyName" auto-field-map="false" use-cache="true">
+                    <field-map field-name="partyId" env-name="organizationPartyId"/>
+                </entity-one>
+                <entity-one entity-name="Uom" value-name="currencyUom" auto-field-map="false" use-cache="true">
+                    <field-map field-name="uomId" env-name="currencyUomId"/>
+                </entity-one>
+            </actions>
+            <widgets></widgets>
+        </section>
+    </screen>
+    
+    <screen name="SalesInvoiceByProductCategorySummary">
+        <section>
+            <widgets>
+                <include-screen name="FinancialSummaryDataPrep" share-scope="true"/>
+                <section>
+                    <actions>
+                        <set field="titleProperty" value="PageTitleSalesInvoiceByProductCategorySummary"/>
+                        
+                        <set field="rootProductCategoryId" from-field="parameters.rootProductCategoryId"/>
+                        <entity-one entity-name="ProductCategory" value-name="rootProductCategory" auto-field-map="false" use-cache="true">
+                            <field-map field-name="productCategoryId" env-name="rootProductCategoryId"/>
+                        </entity-one>
+                        
+                        <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/SalesInvoiceByProductCategorySummary.bsh"/>
+                    </actions>
+                    <widgets>
+                        <decorator-screen name="CommonFinAccountDecorator" location="${parameters.mainDecoratorLocation}">
+                            <decorator-section name="body">
+                                <label style="head1" text="${uiLabelMap.PageTitleSalesInvoiceByProductCategorySummary}"/>
+                                <platform-specific><html><html-template location="component://accounting/webapp/accounting/reports/SalesInvoiceByProductCategorySummary.ftl"/></html></platform-specific>
+                            </decorator-section>
+                        </decorator-screen>
+                    </widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="SalesInvoiceByProductGlAccountSummary">
+        <section>
+            <widgets>
+                <include-screen name="FinancialSummaryDataPrep" share-scope="true"/>
+                <section>
+                    <actions>
+                        <set field="titleProperty" value="PageTitleSalesInvoiceByProductGlAccountSummary"/>
+                        
+                        <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/SalesInvoiceByProductGlAccountSummary.bsh"/>
+                    </actions>
+                    <widgets>
+                        <decorator-screen name="CommonFinAccountDecorator" location="${parameters.mainDecoratorLocation}">
+                            <decorator-section name="body">
+                                <label style="head1" text="${uiLabelMap.PageTitleSalesInvoiceByProductGlAccountSummary}"/>
+                                <platform-specific><html><html-template location="component://accounting/webapp/accounting/reports/SalesInvoiceByProductGlAccountSummary.ftl"/></html></platform-specific>
+                            </decorator-section>
+                        </decorator-screen>
+                    </widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="PaymentByMethodSummary">
+        <section>
+            <widgets>
+                <include-screen name="FinancialSummaryDataPrep" share-scope="true"/>
+                <section>
+                    <actions>
+                        <set field="titleProperty" value="PageTitlePaymentByMethodSummary"/>
+                        
+                        <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/PaymentByMethodSummary.bsh"/>
+                    </actions>
+                    <widgets>
+                        <decorator-screen name="CommonFinAccountDecorator" location="${parameters.mainDecoratorLocation}">
+                            <decorator-section name="body">
+                                <label style="head1" text="${uiLabelMap.PageTitlePaymentByMethodSummary}"/>
+                                <platform-specific><html><html-template location="component://accounting/webapp/accounting/reports/PaymentByMethodSummary.ftl"/></html></platform-specific>
+                            </decorator-section>
+                        </decorator-screen>
+                    </widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="InventoryIssueSummary">
+        <section>
+            <widgets>
+                <include-screen name="FinancialSummaryDataPrep" share-scope="true"/>
+                <section>
+                    <actions>
+                        <set field="titleProperty" value="PageTitleInventoryIssueSummary"/>
+                        
+                        <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/InventoryIssueSummary.bsh"/>
+                    </actions>
+                    <widgets>
+                        <decorator-screen name="CommonFinAccountDecorator" location="${parameters.mainDecoratorLocation}">
+                            <decorator-section name="body">
+                                <label style="head1" text="${uiLabelMap.PageTitleInventoryIssueSummary}"/>
+                                <platform-specific><html><html-template location="component://accounting/webapp/accounting/reports/InventoryIssueSummary.ftl"/></html></platform-specific>
+                            </decorator-section>
+                        </decorator-screen>
+                    </widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FinancialAccountSummary">
+        <section>
+            <widgets>
+                <include-screen name="FinancialSummaryDataPrep" share-scope="true"/>
+                <section>
+                    <actions>
+                        <set field="titleProperty" value="PageTitleFinancialAccountSummary"/>
+                        
+                        <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/FinancialAccountSummary.bsh"/>
+                    </actions>
+                    <widgets>
+                        <decorator-screen name="CommonFinAccountDecorator" location="${parameters.mainDecoratorLocation}">
+                            <decorator-section name="body">
+                                <label style="head1" text="${uiLabelMap.PageTitleFinancialAccountSummary}"/>
+                                <platform-specific><html><html-template location="component://accounting/webapp/accounting/reports/FinancialAccountSummary.ftl"/></html></platform-specific>
+                            </decorator-section>
+                        </decorator-screen>
+                    </widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+</screens>

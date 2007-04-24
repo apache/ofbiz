@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/simple-methods.xsd">
+    <!-- SecurityGroup methods -->
+    <simple-method method-name="createSecurityGroup" short-description="Create an SecurityGroup">
+        <check-permission permission="SECURITY" action="_CREATE"><fail-message message="Security Error: to run createSecurityGroup you must have the SECURITY_CREATE or SECURITY_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value value-name="newEntity" entity-name="SecurityGroup"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        
+        <create-value value-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateSecurityGroup" short-description="Update an SecurityGroup">
+        <check-permission permission="SECURITY" action="_UPDATE"><fail-message message="Security Error: to run updateSecurityGroup you must have the SECURITY_UPDATE or SECURITY_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value entity-name="SecurityGroup" value-name="lookupPKMap"/>
+        <set-pk-fields map-name="parameters" value-name="lookupPKMap"/>
+        <find-by-primary-key entity-name="SecurityGroup" map-name="lookupPKMap" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+
+    <!-- SecurityPermission methods -->
+    <simple-method method-name="createSecurityPermission" short-description="Create an SecurityPermission">
+        <check-permission permission="SECURITY" action="_CREATE"><fail-message message="Security Error: to run createSecurityPermission you must have the SECURITY_CREATE or SECURITY_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value value-name="newEntity" entity-name="SecurityPermission"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        
+        <create-value value-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateSecurityPermission" short-description="Update an SecurityPermission">
+        <check-permission permission="SECURITY" action="_UPDATE"><fail-message message="Security Error: to run updateSecurityPermission you must have the SECURITY_UPDATE or SECURITY_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value entity-name="SecurityPermission" value-name="lookupPKMap"/>
+        <set-pk-fields map-name="parameters" value-name="lookupPKMap"/>
+        <find-by-primary-key entity-name="SecurityPermission" map-name="lookupPKMap" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+
+    <!-- SecurityPermission to SecurityGroup methods -->
+    <simple-method method-name="addSecurityPermissionToSecurityGroup" short-description="Add SecurityPermission To SecurityGroup">
+        <check-permission permission="SECURITY" action="_CREATE"><fail-message message="Security Error: to run addSecurityPermissionToSecurityGroup you must have the SECURITY_CREATE or SECURITY_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value value-name="newEntity" entity-name="SecurityGroupPermission"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+        
+        <!-- clear the org.ofbiz.security.Security object's custom cache by newEntity -->
+        <call-bsh><![CDATA[ org.ofbiz.security.Security.securityGroupPermissionCache.remove(newEntity); ]]></call-bsh>
+    </simple-method>
+    <simple-method method-name="removeSecurityPermissionFromSecurityGroup" short-description="Remove SecurityPermission From SecurityGroup">
+        <check-permission permission="SECURITY" action="_DELETE"><fail-message message="Security Error: to run removeSecurityPermissionFromSecurityGroup you must have the SECURITY_DELETE or SECURITY_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value entity-name="SecurityGroupPermission" value-name="lookupPKMap"/>
+        <set-pk-fields map-name="parameters" value-name="lookupPKMap"/>
+        <find-by-primary-key entity-name="SecurityGroupPermission" map-name="lookupPKMap" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+        
+        <!-- clear the org.ofbiz.security.Security object's custom cache by lookupPKMap -->
+        <call-bsh><![CDATA[ org.ofbiz.security.Security.securityGroupPermissionCache.remove(lookupPKMap); ]]></call-bsh>
+    </simple-method>
+
+    <!-- UserLogin to SecurityGroup methods -->
+    <simple-method method-name="addUserLoginToSecurityGroup" short-description="Add UserLogin To SecurityGroup">
+        <check-permission permission="SECURITY" action="_CREATE"><fail-message message="Security Error: to run addUserLoginToSecurityGroup you must have the SECURITY_CREATE or SECURITY_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value value-name="newEntity" entity-name="UserLoginSecurityGroup"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        
+        <if-empty field-name="fromDate" map-name="newEntity">
+            <now-timestamp-to-env env-name="nowTimestamp"/>
+            <set from-field="nowTimestamp" field="newEntity.fromDate"/>
+        </if-empty>
+        
+        <create-value value-name="newEntity"/>
+        
+        <!-- clear the org.ofbiz.security.Security object's custom cache by userLoginId -->
+        <call-bsh><![CDATA[ org.ofbiz.security.Security.userLoginSecurityGroupByUserLoginId.remove(parameters.get("userLoginId")); ]]></call-bsh>
+    </simple-method>
+    <simple-method method-name="updateUserLoginToSecurityGroup" short-description="Update UserLogin to SecurityGroup">
+        <check-permission permission="SECURITY" action="_UPDATE"><fail-message message="Security Error: to run updateUserLoginToSecurityGroup you must have the SECURITY_UPDATE or SECURITY_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value entity-name="UserLoginSecurityGroup" value-name="lookupPKMap"/>
+        <set-pk-fields map-name="parameters" value-name="lookupPKMap"/>
+        <find-by-primary-key entity-name="UserLoginSecurityGroup" map-name="lookupPKMap" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+        
+        <!-- clear the org.ofbiz.security.Security object's custom cache by userLoginId -->
+        <call-bsh><![CDATA[ org.ofbiz.security.Security.userLoginSecurityGroupByUserLoginId.remove(parameters.get("userLoginId")); ]]></call-bsh>
+    </simple-method>
+    <simple-method method-name="removeUserLoginFromSecurityGroup" short-description="Remove UserLogin From SecurityGroup">
+        <check-permission permission="SECURITY" action="_DELETE"><fail-message message="Security Error: to run removeUserLoginFromSecurityGroup you must have the SECURITY_DELETE or SECURITY_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value entity-name="UserLoginSecurityGroup" value-name="lookupPKMap"/>
+        <set-pk-fields map-name="parameters" value-name="lookupPKMap"/>
+        <find-by-primary-key entity-name="UserLoginSecurityGroup" map-name="lookupPKMap" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+        
+        <!-- clear the org.ofbiz.security.Security object's custom cache by userLoginId -->
+        <call-bsh><![CDATA[ org.ofbiz.security.Security.userLoginSecurityGroupByUserLoginId.remove(parameters.get("userLoginId")); ]]></call-bsh>
+    </simple-method>
+</simple-methods>

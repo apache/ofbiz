@@ -1,0 +1,82 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+/*
+ * This script is also referenced by the ecommerce's screens and
+ * should not contain order component's specific code.
+ */
+
+import org.ofbiz.base.util.*;
+import org.ofbiz.entity.*;
+import org.ofbiz.product.catalog.*;
+import org.ofbiz.product.category.CategoryWorker;
+
+detailScreen = "categorydetail";
+catalogName = CatalogWorker.getCatalogName(request);
+
+productCategoryId = request.getAttribute("productCategoryId");
+if (productCategoryId == null) {
+    productCategoryId = parameters.get("category_id");
+}
+context.put("productCategoryId", productCategoryId);
+
+/* NOTE DEJ20070220: this is a weird way to do this and caused unacceptable side effects as described in the related
+ * comment in the main.bsh file
+ *
+ * NOTE JLR 20070221 this should be done using the same method than in add to cart. I will do it like that and remove all this after.
+ *
+if (productCategoryId != null) {
+    session.setAttribute("productCategoryId",productCategoryId);// for language change
+    previousParams = session.getAttribute("_PREVIOUS_PARAMS_");
+    if (previousParams != null && previousParams.length() > 0) {
+        previousParams = UtilHttp.stripNamedParamsFromQueryString(previousParams, UtilMisc.toList("category_id"));
+        previousParams = previousParams + "&category_id=" + productCategoryId;
+    } else {
+        previousParams = "category_id=" + productCategoryId;
+    }
+    session.setAttribute("_PREVIOUS_PARAMS_", previousParams);    // for login
+    context.put("previousParams", previousParams);
+}
+ */    
+
+category = delegator.findByPrimaryKeyCache("ProductCategory", UtilMisc.toMap("productCategoryId", productCategoryId));
+if (category != null) {
+    if (category.get("detailScreen") != null) 
+        detailScreen = category.getString("detailScreen");
+    pageContext = context.get("page");
+    if (pageContext instanceof Map) {
+        pageContext.put("title", category.getString("description"));
+    } else {
+        pageContext.setProperty("title", category.getString("description"));
+    }
+    context.put("metaDescription", category.getString("description"));
+    context.put("metaKeywords", category.getString("description") + ", " + catalogName);
+    context.put("productCategory", category);
+}
+
+// check the catalogs template path and update
+templatePathPrefix = CatalogWorker.getTemplatePathPrefix(request);
+if (templatePathPrefix != null) {
+    detailScreen = templatePathPrefix + detailScreen;
+}
+context.put("detailScreen", detailScreen);
+
+request.setAttribute("productCategoryId", productCategoryId);
+request.setAttribute("defaultViewSize", new Integer(10));
+request.setAttribute("limitView", new Boolean(true));

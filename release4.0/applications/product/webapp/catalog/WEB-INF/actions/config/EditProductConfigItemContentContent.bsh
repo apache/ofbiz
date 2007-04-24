@@ -1,0 +1,80 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import org.ofbiz.entity.*;
+import org.ofbiz.entity.util.*;
+import org.ofbiz.base.util.*;
+import org.ofbiz.widget.html.*;
+import javax.servlet.HttpServletRequest;
+
+contentId = request.getParameter("contentId");
+if("".equals(contentId)) contentId = null;
+
+confItemContentTypeId = request.getParameter("confItemContentTypeId");
+fromDate = request.getParameter("fromDate");
+if("".equals(fromDate)) fromDate = null;
+
+description = request.getParameter("description");
+if("".equals(description)) description = null;
+
+productContent = delegator.findByPrimaryKey("ProdConfItemContent", UtilMisc.toMap("contentId", contentId, "configItemId", configItemId, "confItemContentTypeId", confItemContentTypeId, "fromDate", fromDate));
+if(productContent == null) {
+    productContent = new HashMap();
+    productContent.put("configItemId", configItemId);
+    productContent.put("contentId", contentId);
+    productContent.put("confItemContentTypeId", confItemContentTypeId);
+    productContent.put("fromDate", fromDate);
+    productContent.put("thruDate", request.getParameter("thruDate"));
+}
+context.put("productContent", productContent);
+
+productContentData = new HashMap();
+productContentData.putAll(productContent);
+Map content = null;
+
+context.put("contentId", contentId);
+if(contentId != null) {
+    content = delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", contentId));
+    context.put("content", content);
+} else {
+    content = new HashMap();
+    if(description != null) content.put("description", description);
+}
+
+HtmlFormWrapper updateProductContentWrapper = null;
+
+//Assume it is a generic simple text content
+textData = new HashMap();
+if (contentId != null && content != null) {
+    textDr = content.getRelatedOne("DataResource");
+    if (textDr != null) {
+        text = textDr.getRelatedOne("ElectronicText");
+        textData.put("text", text.get("textData"));
+        textData.put("textDataResourceId", text.get("dataResourceId"));
+    }
+}
+updateProductContentWrapper = new HtmlFormWrapper("component://product/webapp/catalog/config/ConfigForms.xml", "EditProductConfigItemContentSimpleText", request, response);
+updateProductContentWrapper.putInContext("textData", textData);
+
+context.put("updateProductContentWrapper", updateProductContentWrapper);
+updateProductContentWrapper.putInContext("productContentData", productContentData);
+
+context.put("productContentData", productContentData);
+updateProductContentWrapper.putInContext("content", content);
+updateProductContentWrapper.putInContext("contentId", contentId);

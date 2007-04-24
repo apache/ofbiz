@@ -1,0 +1,52 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.GenericValue;
+import org.ofbiz.order.order.OrderReadHelper;
+import org.ofbiz.content.email.NotificationServices;
+
+delegator = request.getAttribute("delegator");
+
+orderId = request.getParameter("orderId");
+if (orderId == null) orderId = parameters.get("orderId");
+context.put("orderId", orderId);
+ 
+partyId = request.getParameter("partyId");
+sendTo = request.getParameter("sendTo");
+
+context.put("partyId", partyId);
+context.put("sendTo", sendTo);
+
+donePage = request.getParameter("DONE_PAGE");
+if (donePage == null || donePage.length() <= 0) 
+    donePage="orderview?orderId=" + orderId;
+context.put("donePage", donePage);
+
+// Provide the correct order confirmation ProductStoreEmailSetting, if one exists
+orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+if (orderHeader.getString("productStoreId") != null) {
+    productStoreEmailSetting = delegator.findByPrimaryKeyCache("ProductStoreEmailSetting", UtilMisc.toMap("productStoreId", orderHeader.getString("productStoreId"), "emailType", "PRDS_ODR_CONFIRM"));    
+    if (productStoreEmailSetting != null) {
+        context.put("productStoreEmailSetting", productStoreEmailSetting);        
+    }
+}
+
+// set the baseUrl parameter, required by some email bodies
+NotificationServices.setBaseUrl(delegator, context.get("webSiteId"), context);

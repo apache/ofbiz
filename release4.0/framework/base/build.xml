@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<project name="OFBiz - Base" default="jar" basedir=".">
+
+    <!-- ================================================================== -->
+    <!-- Initialization of all property settings                            -->
+    <!-- ================================================================== -->
+
+    <target name="init">                
+        <property environment="env"/>
+        <property name="name" value="ofbiz-base"/>
+        <property name="ofbiz.home.dir" value="../.."/>
+        <property name="src.dir" value="src"/>
+        <property name="dtd.dir" value="dtd"/>
+        <property name="lib.dir" value="lib"/>
+        <property name="build.dir" value="build"/>        
+    </target>
+    
+    <target name="classpath">		        
+        <path id="local.class.path">
+            <fileset dir="${lib.dir}" includes="*.jar"/>
+            <fileset dir="${lib.dir}/commons" includes="*.jar"/>
+            <fileset dir="${lib.dir}/j2eespecs" includes="*.jar"/>
+            <fileset dir="${lib.dir}/scripting" includes="*.jar"/>
+        </path>
+    </target>
+    
+    <!-- ================================================================== -->
+    <!-- Removes all created files and directories                          -->
+    <!-- ================================================================== -->
+
+    <target name="clean" depends="clean-lib">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="clean-lib" depends="init">
+        <delete dir="${build.dir}/lib"/>        
+    </target>
+    
+    <!-- ================================================================== -->
+    <!-- Makes sure the needed directory structure is in place              -->
+    <!-- ================================================================== -->
+
+    <target name="prepare" depends="clean-lib">
+        <mkdir dir="${build.dir}/classes"/>
+        <mkdir dir="${build.dir}/classes/base/META-INF"/>
+        <mkdir dir="${build.dir}/classes/start/META-INF"/>        
+        <mkdir dir="${build.dir}/lib"/>
+    </target>
+    
+    <target name="prepare-docs" depends="init">
+        <mkdir dir="${build.dir}/javadocs"/>        
+    </target>
+    
+    <!-- ================================================================== -->
+    <!-- Compilation of the source files                                                                                                                         -->
+    <!-- ================================================================== -->               
+
+    <target name="classes" depends="prepare,classpath">
+        <!-- compile start -->
+    	<javac debug="on" source="1.4" deprecation="on" destdir="${build.dir}/classes/start">
+            <src path="${src.dir}/start"/>
+        </javac>
+        <copy todir="${build.dir}/classes/start">
+          <fileset dir="${src.dir}/start" includes="**/*.properties,**/*.xml,**/*.bsh,**/*.logic,**/*.js,**/*.jacl,**/*.py"/>
+        </copy>
+
+        <!-- make sure we have crypto packages available -->
+        <condition property="exclude.crypto" value="org/ofbiz/base/crypto/**">
+            <not>
+                <available classname="javax.crypto.Cipher" classpathref="local.class.path"/>
+            </not>
+        </condition>
+
+        <!-- compile base -->
+    	<javac debug="on" source="1.4" deprecation="on" destdir="${build.dir}/classes/base">
+            <classpath>
+                <path refid="local.class.path"/>
+                <pathelement path="${build.dir}/classes/start"/>
+            </classpath>
+            <src path="${src.dir}/base"/>
+            <exclude name="${exclude.crypto}"/>
+            <exclude name="org/ofbiz/base/util/OfbizJsBsfEngine.java"/>
+        </javac>
+        <!-- also put the DTDs in the jar file... -->
+        <copy todir="${build.dir}/classes/base">
+            <fileset dir="${dtd.dir}" includes="*.dtd"/>
+            <fileset dir="${src.dir}/base" includes="**/*.properties,**/*.xml,**/*.bsh,**/*.logic,**/*.js,**/*.jacl,**/*.py"/>
+        </copy>
+        
+        <!-- now add the NOTICE and LICENSE files to allow the jar file to be distributed alone -->
+        <copy todir="${build.dir}/classes/start/META-INF">
+            <fileset dir="${ofbiz.home.dir}" includes="NOTICE,LICENSE"/>
+        </copy>        
+        <copy todir="${build.dir}/classes/base/META-INF">
+            <fileset dir="${ofbiz.home.dir}" includes="NOTICE,LICENSE"/>
+        </copy>        
+    </target>
+    
+    <target name="jar" depends="classes">
+        <jar jarfile="${build.dir}/lib/ofbiz.jar" basedir="${build.dir}/classes/start" manifest="${src.dir}/start/org/ofbiz/base/start/Start.mf"/>
+        <jar jarfile="${build.dir}/lib/ofbiz-base.jar" basedir="${build.dir}/classes/base"/>         
+    </target>    
+    
+    <!-- ================================================================== -->
+    <!-- Build JavaDoc                                                      -->
+    <!-- ================================================================== -->
+
+    <target name="docs" depends="prepare-docs,classpath">
+        <javadoc packagenames="org.ofbiz.base.*" 
+                 classpathref="local.class.path"
+                 destdir="${build.dir}/javadocs" 
+                 Windowtitle="Open for Business - Base API">
+            <sourcepath path="${src.dir}/start"/>
+            <sourcepath path="${src.dir}/base"/>            
+        </javadoc>
+    </target>
+    
+    <target name="all" depends="jar,docs"/>   
+</project>

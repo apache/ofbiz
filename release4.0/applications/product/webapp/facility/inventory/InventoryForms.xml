@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/widget-form.xsd">
+    <form name="CreatePhysicalInventoryAndVariance" type="single" target="createPhysicalInventoryAndVariance" title=""
+        default-title-style="tableheadtext" default-widget-style="inputBox" default-tooltip-style="tabletext">
+        <auto-fields-service service-name="createPhysicalInventoryAndVariance"/>
+        <field name="physicalInventoryId"><ignored/></field>
+        <field name="physicalInventoryDate"><ignored/></field>
+        <field name="partyId"><ignored/></field>
+        <field name="generalComments"><ignored/></field>
+        <field name="inventoryItemId" map-name="inventoryItem"><hidden/></field>
+        <field name="varianceReasonId" widget-style="selectBox">
+            <drop-down>
+                <entity-options entity-name="VarianceReason" description="${description}">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="comments"/>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ViewPhysicalInventoryAndVariance" type="list" target="" title="" list-name="physicalInventoryAndVarianceDatas"
+        default-title-style="tableheadtext" default-widget-style="tabletext" default-tooltip-style="tabletext">
+        <auto-fields-entity entity-name="PhysicalInventoryAndVariance" map-name="physicalInventoryAndVariance" default-field-type="display"/>
+        <field name="inventoryItemId"><hidden/></field>
+        <field name="partyId"><display description="${person.firstName} ${person.lastName} ${partyGroup.groupName} [${physicalInventoryAndVariance.partyId}]"/></field>
+        <field name="varianceReasonId"><display description="${varianceReason.description}"/></field>
+    </form>    
+
+    <form name="ViewInventoryItemShipmentReceipts" type="list" target="" title="" list-name="shipmentReceiptList"
+        default-title-style="tableheadtext" default-widget-style="tabletext" default-tooltip-style="tabletext">
+        <actions>
+            <entity-and entity-name="ShipmentReceipt" list-name="shipmentReceiptList">
+                <field-map field-name="inventoryItemId"/>
+            </entity-and>
+        </actions>
+        <auto-fields-entity entity-name="ShipmentReceipt" map-name="shipmentReceipt" default-field-type="display"/>
+        <field name="inventoryItemId"><hidden/></field>
+    </form>    
+    
+    <form name="ListInventoryItemDetail" type="list" target="" title="" list-name="inventoryItemDetails"
+        default-title-style="tableheadtext" default-widget-style="tabletext" default-tooltip-style="tabletext">
+        <auto-fields-entity entity-name="InventoryItemDetail" map-name="inventoryItemDetail" default-field-type="display"/>
+        <field name="inventoryItemId"><hidden/></field> <!-- this field is redundant -->
+        <field name="orderId" widget-style="buttontext">
+            <hyperlink target="/ordermgr/control/orderview?orderId=${orderId}" target-type="inter-app" description="${orderId}" />
+        </field>
+        <field name="shipmentId" widget-style="buttontext">
+            <hyperlink target="ViewShipment?shipmentId=${shipmentId}" description="${shipmentId}" />
+        </field>
+        <!-- workEffortId - not sure if it's better to show manufacturing or workeffort app
+        itemIssuanceId, receiptId, physicalInventoryId - no natural screens to show these -->
+    </form>
+    <form name="InventoryItemReservations" type="list" target="" title="" list-name="inventoryItemReservations">
+        <auto-fields-entity entity-name="OrderItemShipGrpInvRes" default-field-type="display"/>
+        <field name="inventoryItemId"><hidden/></field>
+        <field name="orderId" widget-style="buttontext">
+            <hyperlink target="/ordermgr/control/orderview?orderId=${orderId}" target-type="inter-app" description="${orderId}" />
+        </field>
+    </form>
+</forms>

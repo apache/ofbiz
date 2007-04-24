@@ -1,0 +1,43 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import org.ofbiz.base.util.*;
+import org.ofbiz.party.contact.*;
+
+context.put("nowStr", UtilDateTime.nowTimestamp());
+
+facilityId = parameters.get("facilityId");
+facility = delegator.findByPrimaryKey("Facility", UtilMisc.toMap("facilityId", facilityId));
+facilityType = null;
+if (facility == null) {
+  context.put("facility", delegator.makeValue( "Facility", null ) );
+  context.put("facilityType", delegator.makeValue( "FacilityType", null ) );
+} else {
+  facilityType = facility.getRelatedOne("FacilityType");
+}
+context.put("facility", facility);
+context.put("facilityType", facilityType);
+context.put("facilityId", facilityId);
+
+boolean showOld = "true".equals(request.getParameter("SHOW_OLD"));
+context.put("showOld", new Boolean(showOld));
+
+List facilityContactMechValueMaps = ContactMechWorker.getFacilityContactMechValueMaps(delegator, facilityId, showOld, null);
+context.put("contactMeches", facilityContactMechValueMaps);
+

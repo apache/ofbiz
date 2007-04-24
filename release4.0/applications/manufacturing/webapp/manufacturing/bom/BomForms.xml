@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/widget-form.xsd">
+    <form name="RunBomSimulation" type="single" target="runBomSimulation" title="">
+        <field name="lookupFlag"><hidden value="Y"/></field>
+        <field name="productId">
+            <lookup target-form-name="LookupProduct"/>
+        </field>
+        <field name="bomType" title="${uiLabelMap.ManufacturingBomType}">
+            <drop-down allow-empty="false" no-current-selected-key="MANUF_COMPONENT">
+                <entity-options entity-name="ProductAssocType" key-field-name="productAssocTypeId" description="${description}">
+                    <entity-constraint name="parentTypeId" value="PRODUCT_COMPONENT"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromDate" title="${uiLabelMap.ManufacturingFromDate}">
+            <date-time/>
+        </field>
+        <field name="quantity" title="${uiLabelMap.CommonQuantity}">
+            <text default-value="1"/>
+        </field>
+        <field name="amount" title="${uiLabelMap.CommonAmount}">
+            <text default-value="0"/>
+        </field>
+        <field name="type">
+            <drop-down>
+                <option key="0" description="${uiLabelMap.ManufacturingExplosion}"/>
+                <option key="1" description="${uiLabelMap.ManufacturingExplosionSingleLevel}"/>
+                <option key="2" description="${uiLabelMap.ManufacturingExplosionManufacturing}"/>
+                <option key="3" description="${uiLabelMap.ManufacturingImplosion}"/>
+            </drop-down>
+        </field>
+        <field name="facilityId" title="${uiLabelMap.ProductFacilityId}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Facility" key-field-name="facilityId" description="${facilityName} [${facilityId}]">
+                    <entity-constraint name="facilityTypeId" value="WAREHOUSE"/>
+                </entity-options>
+             </drop-down>
+        </field>
+        <field name="currencyUomId" title="${uiLabelMap.ProductCurrencyUomId}">
+            <drop-down allow-empty="true" no-current-selected-key="${defaultCurrencyUomId}">
+                <entity-options entity-name="Uom" key-field-name="uomId" description="${description} [${uomId}]">
+                    <entity-constraint name="uomTypeId" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}">
+            <submit button-type="button"/>
+        </field>
+    </form>
+        
+    <form name="ListProductManufacturingRules" type="list" target="UpdateProductManufacturingRule" title="" list-name="manufacturingRules">
+        <auto-fields-service service-name="updateProductManufacturingRule" map-name="manufacturingRule"/>
+        <field name="ruleId"><display/></field>
+        <field name="ruleSeqId"><display/></field>
+        <field name="description"><display/></field>
+        <field name="productId"><display/></field>
+        <field name="productIdFor"><display/></field>
+        <field name="productIdIn"><display/></field>
+        <field name="productIdInSubst"><display/></field>
+        <field name="productFeature"><display/></field>
+        <field name="quantity"><display/></field>
+        <field name="ruleOperator"><display/></field>
+        <field name="fromDate"><display/></field>
+        <field name="thruDate"><display/></field>
+        <field name="updateLink" title="" widget-style="buttontext">
+            <hyperlink target="EditProductManufacturingRules?ruleId=${ruleId}" description="${uiLabelMap.CommonSelect}" />
+        </field> 
+        <field name="deleteLink" title="" widget-style="buttontext">
+            <hyperlink target="DeleteProductManufacturingRule?ruleId=${ruleId}" description="${uiLabelMap.CommonDelete}" also-hidden="false"/>
+        </field>
+    </form>
+
+    <form name="UpdateProductManufacturingRule" type="single" target="UpdateProductManufacturingRule" title="">
+        <alt-target use-when="ruleId==null" target="AddProductManufacturingRule"/>
+        <auto-fields-service service-name="updateProductManufacturingRule" map-name="manufacturingRule"/>
+        <field name="ruleId"><display/></field>
+        <field name="productId">
+            <lookup target-form-name="LookupProduct"/>
+        </field>
+        <field name="productIdFor">
+            <lookup target-form-name="LookupProduct"/>
+        </field>
+        <field name="productIdIn">
+            <lookup target-form-name="LookupVirtualProduct"/>
+        </field>
+        <field name="productIdInSubst">
+            <lookup target-form-name="LookupProduct"/>
+        </field>
+        <field name="productFeature">
+            <lookup target-form-name="LookupProductFeature"/>
+        </field>
+        <field name="ruleOperator">
+            <drop-down>
+                <option key="OR" description="${uiLabelMap.CommonOr}"/>
+                <option key="AND" description="${uiLabelMap.CommonAnd}"/>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}">
+            <submit button-type="button"/>
+        </field>
+    </form>
+</forms>

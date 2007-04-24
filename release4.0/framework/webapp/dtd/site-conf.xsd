@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:element name="site-conf">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="include"/>
+                <xs:element minOccurs="0" ref="description"/>
+                <xs:element minOccurs="0" ref="owner"/>
+                <xs:element minOccurs="0" ref="errorpage"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="handler"/>
+                <xs:element minOccurs="0" ref="firstvisit"/>
+                <xs:element minOccurs="0" ref="preprocessor"/>
+                <xs:element minOccurs="0" ref="postprocessor"/>
+                <xs:element minOccurs="0" ref="after-login"/>
+                <xs:element minOccurs="0" ref="before-logout"/>
+                <xs:element minOccurs="0" maxOccurs="1" ref="default-request"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="request-map"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="view-map"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="include">
+        <xs:annotation>
+            <xs:documentation>
+                This includes all elements of the controller.xml file references.
+                
+                Note that if you define any of the event blocks in this file (the including file) they 
+                will override (replace) the one in the included file, effectively emptying it. The event 
+                blocks are: firstvisit, preprocessor, postprocessor, after-login, and before-logout.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attributeGroup ref="attlist.include"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.include">
+        <xs:attribute type="xs:string" name="location" use="required"/>
+    </xs:attributeGroup>
+    <xs:element name="description" type="xs:string"/>
+    <xs:element name="owner" type="xs:string"/>
+    <xs:element name="errorpage" type="xs:string"/>
+    <xs:element name="handler">
+        <xs:complexType>
+            <xs:attributeGroup ref="attlist.handler"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.handler">
+        <xs:attribute type="xs:string" name="name" use="required"/>
+        <xs:attribute name="type" default="request">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="view"/>
+                    <xs:enumeration value="request"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="class" use="required"/>
+    </xs:attributeGroup>
+    <xs:element name="firstvisit">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="event"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="preprocessor">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="event"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="postprocessor">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="event"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="after-login">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="event"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="before-logout">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="event"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="default-request">
+        <xs:complexType>
+            <xs:attributeGroup ref="attlist.default-request"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.default-request">
+        <xs:attribute type="xs:string" name="request-uri" use="required"/>        
+    </xs:attributeGroup>
+    <xs:element name="request-map">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="description"/>
+                <xs:element minOccurs="0" ref="security"/>
+                <xs:element minOccurs="0" ref="event"/>
+                <xs:element maxOccurs="unbounded" ref="response"/>
+            </xs:sequence>
+            <xs:attributeGroup ref="attlist.request-map"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.request-map">
+        <xs:attribute type="xs:string" name="uri" use="required"/>
+        <xs:attribute name="edit" default="true">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:attributeGroup>
+    <xs:element name="security">
+        <xs:complexType>
+            <xs:attributeGroup ref="attlist.security"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.security">
+        <xs:attribute name="https" default="false">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="auth" default="false">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="cert" default="false">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>        
+        <xs:attribute name="external-view" default="true">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="direct-request" default="true">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:attributeGroup>
+    <xs:element name="event">
+        <xs:complexType>
+            <xs:attributeGroup ref="attlist.event"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.event">
+        <xs:attribute type="xs:string" name="type" use="required"/>
+        <xs:attribute type="xs:string" name="path"/>
+        <xs:attribute type="xs:string" name="invoke"/>
+        <xs:attribute name="global-transaction" default="true">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:attributeGroup>
+    <xs:element name="response">
+        <xs:complexType>
+            <xs:attributeGroup ref="attlist.response"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.response">
+        <xs:attribute type="xs:string" name="name" use="required"/>
+        <xs:attribute name="type" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="none"/>
+                    <xs:enumeration value="view"/>
+                    <xs:enumeration value="request"/>
+                    <xs:enumeration value="request-redirect"/>
+                    <xs:enumeration value="request-redirect-noparam"/>
+                    <xs:enumeration value="url"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="value"/>
+    </xs:attributeGroup>
+    <xs:element name="view-map">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="description"/>
+            </xs:sequence>
+            <xs:attributeGroup ref="attlist.view-map"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.view-map">
+        <xs:attribute type="xs:string" name="name" use="required"/>
+        <xs:attribute type="xs:string" name="page"/>
+        <xs:attribute type="xs:string" name="type" default="default"/>
+        <xs:attribute type="xs:string" name="info"/>
+        <xs:attribute type="xs:string" name="content-type"/>
+        <xs:attribute type="xs:string" name="encoding"/>
+    </xs:attributeGroup>
+</xs:schema>

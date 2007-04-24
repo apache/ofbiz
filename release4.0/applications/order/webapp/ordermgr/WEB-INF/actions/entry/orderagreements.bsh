@@ -1,0 +1,68 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import org.ofbiz.service.*;
+import org.ofbiz.entity.*;
+import org.ofbiz.entity.condition.*;
+import org.ofbiz.entity.util.*;
+import org.ofbiz.base.util.*;
+import org.ofbiz.order.shoppingcart.*;
+import org.ofbiz.party.party.PartyWorker;
+import org.ofbiz.product.catalog.CatalogWorker;
+import org.ofbiz.product.store.ProductStoreWorker;
+import org.ofbiz.order.shoppingcart.product.ProductDisplayWorker;
+import org.ofbiz.order.shoppingcart.product.ProductPromoWorker;
+
+// Get the Cart and Prepare Size
+shoppingCart = ShoppingCartEvents.getCartObject(request);
+context.put("cart", shoppingCart);
+
+// check the selected product store
+productStoreId = shoppingCart.getProductStoreId();
+productStore = null;
+if (UtilValidate.isNotEmpty(productStoreId)) {
+    productStore = ProductStoreWorker.getProductStore(productStoreId, delegator);
+    if (productStore != null) {
+        // put in the default currency, to help selecting a currency for a purchase order
+        context.put("defaultCurrencyUomId", productStore.getString("defaultCurrencyUomId"));
+        payToPartyId = productStore.getString("payToPartyId");
+        partyId = shoppingCart.getOrderPartyId();
+        
+        // get applicable agreements for order entry
+        if ("PURCHASE_ORDER".equals(shoppingCart.getOrderType())) {
+            // the agreement for a PO is from customer to payToParty (ie, us)
+            agreements = delegator.findByAndCache("Agreement", UtilMisc.toMap("partyIdTo", partyId, "partyIdFrom", payToPartyId));
+        } else {
+            // the agreement for a sales order is from us to the customer
+            agreements = delegator.findByAndCache("Agreement", UtilMisc.toMap("partyIdTo", payToPartyId, "partyIdFrom", partyId));
+        }
+        if (agreements != null && agreements.size() > 0) {
+            context.put("agreements", agreements);
+        }
+    }
+}
+
+partyId = shoppingCart.getPartyId();
+if (partyId != null && partyId.equals("_NA_")) partyId = null;
+context.put("partyId", partyId);  
+
+// currencies and shopping cart currency
+currencies = delegator.findByAndCache("Uom", UtilMisc.toMap("uomTypeId","CURRENCY_MEASURE"));
+context.put("currencies", currencies);
+context.put("currencyUomId", shoppingCart.getCurrency());

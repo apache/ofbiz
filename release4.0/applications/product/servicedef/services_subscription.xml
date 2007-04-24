@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/services.xsd">
+    <description>Product Component Services for subscriptions entity (subscription entity not ContentRoles)</description>
+    <vendor>OFBiz</vendor>
+    
+    <service name="createSubscription" default-entity-name="Subscription" auth="true" engine="simple"
+        location="org/ofbiz/product/subscription/SubscriptionServices.xml" invoke="createSubscription">
+        <description>Create a Subscription Record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateSubscription" default-entity-name="Subscription" auth="true" engine="simple"
+        location="org/ofbiz/product/subscription/SubscriptionServices.xml" invoke="updateSubscription">
+        <description>Update a Subscription Record</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    
+    <service name="isSubscribed" default-entity-name="Subscription" auth="true" engine="simple"
+        location="org/ofbiz/product/subscription/SubscriptionServices.xml" invoke="isSubscribed">
+        <description>check if a particular party has at this moment a subscription</description>
+        <auto-attributes include="all" mode="IN" optional="true"/>
+        <attribute name="filterByDate" type="String" mode="IN" optional="true"/><!-- default is "Y" -->
+        <attribute name="isSubscribed" type="Boolean" mode="OUT"/>
+        <attribute name="subscriptionId" type="String" mode="OUT" optional="true"/>
+        <override name="partyId" optional="false" mode="IN"/>
+    </service>
+    
+    <service name="getSubscriptionEnt" default-entity-name="Subscription" auth="true" engine="simple"
+        location="org/ofbiz/product/subscription/SubscriptionServices.xml" invoke="getSubscription">
+        <description>Retrieve a single Subscription Entity Record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+        <attribute name="subscription" type="GenericValue" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="createSubscriptionResource" default-entity-name="SubscriptionResource" auth="true" engine="simple"
+        location="org/ofbiz/product/subscription/SubscriptionServices.xml" invoke="createSubscriptionResource">
+        <description>Create a SubscriptionResource Record</description>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateSubscriptionResource" default-entity-name="SubscriptionResource" auth="true" engine="simple"
+        location="org/ofbiz/product/subscription/SubscriptionServices.xml" invoke="updateSubscriptionResource">
+        <description>Update a SubscriptionResource Record</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+
+    <service name="createProductSubscriptionResource" default-entity-name="ProductSubscriptionResource" auth="true" engine="simple"
+        location="org/ofbiz/product/subscription/SubscriptionServices.xml" invoke="createProductSubscriptionResource">
+        <description>Create a ProductSubscriptionResource Record</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="updateProductSubscriptionResource" default-entity-name="ProductSubscriptionResource" auth="true" engine="simple"
+        location="org/ofbiz/product/subscription/SubscriptionServices.xml" invoke="updateProductSubscriptionResource">
+        <description>Update a ProductSubscriptionResource Record</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteProductSubscriptionResource" default-entity-name="ProductSubscriptionResource" auth="true" engine="simple"
+        location="org/ofbiz/product/subscription/SubscriptionServices.xml" invoke="deleteProductSubscriptionResource">
+        <description>Delete a ProductSubscriptionResource Record</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="processExtendSubscription" engine="java" auth="true"
+        location="org.ofbiz.product.subscription.SubscriptionServices" invoke="processExtendSubscription">
+        <description>Creates or updates Subscription record</description>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="subscriptionResourceId" type="String" mode="IN" optional="false"/>
+        <attribute name="productId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="useRoleTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="useTimeUomId" type="String" mode="IN" optional="false"/>
+        <attribute name="useTime" type="Integer" mode="IN" optional="false"/>
+        <attribute name="alwaysCreateNewRecord" type="String" mode="IN" optional="true"><!-- This defaults to Y (true) which means new Subscription records will be created instead of updating old ones with new thruDates. This keeps a more complete history of subscription activity. --></attribute>
+        <attribute name="subscriptionId" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="processExtendSubscriptionByProduct" engine="java" auth="true"
+        location="org.ofbiz.product.subscription.SubscriptionServices" invoke="processExtendSubscriptionByProduct">
+        <description>Creates or updates Subscription record</description>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="productId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderCreatedDate" type="Timestamp" mode="IN" optional="true" />
+        <attribute name="quantity" type="Integer" mode="IN" optional="false"/>
+    </service>
+    <service name="processExtendSubscriptionByOrder" engine="java" auth="true"
+        location="org.ofbiz.product.subscription.SubscriptionServices" invoke="processExtendSubscriptionByOrder">
+        <description>Creates or updates Subscription record</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="updateSubscriptionAttribute" default-entity-name="SubscriptionAttribute" auth="true" engine="simple"
+        location="org/ofbiz/product/subscription/SubscriptionServices.xml" invoke="updateSubscriptionAttribute">
+        <description>Create (when not exist) or update (when exist) a Subscription attribute</description>
+        <attribute name="subscriptionId" type="String" mode="INOUT" optional="false"/>
+        <attribute name="attrName" type="String" mode="IN" optional="false"/>
+        <attribute name="attrValue" type="String" mode="IN" optional="true"/>
+    </service>
+    
+    <service name="createSubscriptionCommEvent" engine="simple"
+        location="org/ofbiz/product/subscription/SubscriptionServices.xml" invoke="createSubscriptionCommEvent" auth="true">
+        <description>Create a Subscription Communication Event </description>
+        <auto-attributes entity-name="SubscriptionCommEvent" include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="removeSubscriptionCommEvent" engine="simple"
+        location="org/ofbiz/product/subscription/SubscriptionServices.xml" invoke="removeSubscriptionCommEvent" auth="true">
+        <description>Remove a Subscription Communication Event </description>
+        <auto-attributes entity-name="SubscriptionCommEvent" include="pk" mode="IN" optional="false"/>
+    </service>
+</services>

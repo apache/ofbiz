@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<menus xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/widget-menu.xsd">
+    <menu name="CommEventTabBar" default-menu-item-name="viewprofile" menu-container-style="button-bar button-style-1"
+        type="simple" selected-menuitem-context-field-name="subTabButtonItem">
+        <menu-item name="CommunicationEvent" title="${uiLabelMap.PartyCommEvent}">
+            <link target="EditCommunicationEvent?partyId=${partyId}&amp;communicationEventId=${communicationEventId}"/>
+        </menu-item>
+        <menu-item name="UpdateCommPurposes" title="${uiLabelMap.PartyEventPurpose}">
+            <link target="UpdateCommPurposes?partyId=${partyId}&amp;communicationEventId=${communicationEventId}"/>
+        </menu-item>
+        <menu-item name="UpdateCommRoles" title="${uiLabelMap.PartyRoles}">
+            <link target="UpdateCommRoles?partyId=${partyId}&amp;communicationEventId=${communicationEventId}"/>
+        </menu-item>
+        <menu-item name="UpdateCommWorkEfforts" title="${uiLabelMap.PartyCommWorkEfforts}">
+            <link target="ListCommWorkEfforts?partyId=${partyId}&amp;communicationEventId=${communicationEventId}"/>
+        </menu-item>
+        <menu-item name="CommContent" title="${uiLabelMap.CommonContent}">
+            <link target="ListCommContent?partyId=${partyId}&amp;communicationEventId=${communicationEventId}"/>
+        </menu-item>
+        <!-- TODO! 
+        <menu-item name="ListCommCustRequests" title="CustRequests">
+            <link target="ListCommCustRequests?partyId=${partyId}&amp;communicationEventId=${communicationEventId}"/>
+        </menu-item>
+        -->
+    </menu>
+    <menu name="CommFindTabBar" default-menu-item-name="find" type="simple">
+        <menu-item name="find" title="${uiLabelMap.CommonFind}">
+            <link target="findCommunications?partyId=${partyId}&amp;communicationEventId=${communicationEventId}" url-mode="intra-app"/>
+        </menu-item>
+        <menu-item name="showall" title="${uiLabelMap.CommonShowAll}">
+            <link target="listCommunications?partyId=${partyId}&amp;communicationEventId=${communicationEventId}" url-mode="intra-app"/>
+        </menu-item>
+        <menu-item name="pending" title="${uiLabelMap.PartyPending}">
+            <link target="pendingCommunications?partyId=${partyId}&amp;communicationEventId=${communicationEventId}" url-mode="intra-app"/>
+        </menu-item>
+    </menu>
+</menus>

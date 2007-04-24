@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<!--
+This file contains basic services for SalesOpportunity and SalesForecast.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/simple-methods.xsd">
+
+    <simple-method method-name="createSalesForecast" short-description="Creates a sales forecast and stores a copy in sales forecast history.">
+
+        <!-- make the value and set the fields from the parameters -->
+        <make-value value-name="salesForecast" entity-name="SalesForecast"/>
+        <sequenced-id-to-env sequence-name="SalesForecast" env-name="salesForecastId"/>
+        <set field="salesForecast.salesForecastId" from-field="salesForecastId"/> 
+        <set-nonpk-fields map-name="parameters" value-name="salesForecast"/>
+        
+        <!-- set the creation info -->
+        <set field="salesForecast.createdByUserLoginId" from-field="userLogin.userLoginId"/>
+        <set field="salesForecast.modifiedByUserLoginId" from-field="userLogin.userLoginId"/>
+
+        <!-- create the value -->
+        <create-value value-name="salesForecast"/>
+
+        <!-- save a copy to history -->
+        <call-simple-method method-name="saveSalesForecastHistory"/>
+
+        <!-- return the ID -->
+        <field-to-result result-name="salesForecastId" field-name="salesForecastId"/>
+    </simple-method>
+
+    <simple-method method-name="updateSalesForecast" short-description="Updates a sales forecast and stores a copy in sales forecast history.">
+
+        <!-- get the forecast -->
+        <entity-one entity-name="SalesForecast" auto-field-map="true" value-name="salesForecast"/>
+
+        <!-- set the fields from the parameters -->
+        <set-nonpk-fields map-name="parameters" value-name="salesForecast"/>
+        
+        <!-- store the value -->
+        <store-value value-name="salesForecast"/>
+
+        <!-- save a copy to history -->
+        <call-simple-method method-name="saveSalesForecastHistory"/>
+    </simple-method>
+
+    <simple-method method-name="saveSalesForecastHistory" short-description="Given a salesForecast map, saves the data in the history.">
+
+        <!-- make the value and set the fields from the salesForecast map -->
+        <make-value value-name="salesForecastHistory" entity-name="SalesForecastHistory"/>
+        <sequenced-id-to-env sequence-name="SalesForecastHistory" env-name="salesForecastHistoryId"/>
+        <set field="salesForecastHistory.salesForecastHistoryId" from-field="salesForecastHistoryId"/> 
+        <set-nonpk-fields value-name="salesForecastHistory" map-name="salesForecast"/>
+
+        <!-- get the change note from the parameters -->
+        <set field="salesForecastHistory.changeNote" from-field="parameters.changeNote"/>
+
+        <!-- set the modified info -->
+        <now-timestamp-to-env env-name="nowTimestamp"/>
+        <set field="salesForecastHistory.modifiedTimestamp" from-field="nowTimestamp"/>
+        <set field="salesForecast.modifiedByUserLoginId" from-field="userLogin.userLoginId"/>
+
+        <!-- create the value -->
+        <create-value value-name="salesForecastHistory"/>
+    </simple-method>
+
+</simple-methods>

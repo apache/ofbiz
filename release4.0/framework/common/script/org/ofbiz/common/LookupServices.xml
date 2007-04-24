@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/simple-methods.xsd">
+    <simple-method method-name="lookupParty" short-description="Lookup a party">
+        <if-not-empty field-name="firstName" map-name="parameters">
+            <set from-field="parameters.firstName" field="LookupMap.firstName"/>
+        </if-not-empty>
+        <if-not-empty field-name="lastName" map-name="parameters">
+            <set from-field="parameters.lastName" field="LookupMap.lastName"/>
+        </if-not-empty>               
+        <find-by-and entity-name="Person" map-name="LookupMap" list-name="parties" /> 
+        <iterate entry-name="party" list-name="parties">
+        	<set from-field="party.firstName" field="resultEntry.label"/>
+        	<set from-field="party.partyId" field="resultEntry.value"/>
+        	<field-to-list field-name="resultEntry" list-name="lookupResult"/>
+        </iterate>
+        <if-empty field-name="parties">
+        	<set value="No match" field="resultEntry.label"/>
+        	<set value="" field="resultEntry.value"/>
+        	<field-to-list field-name="resultEntry" list-name="lookupResult"/>
+        </if-empty>
+        <field-to-result field-name="lookupResult"/>    
+    </simple-method>       
+</simple-methods>

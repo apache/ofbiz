@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/widget-screen.xsd">
+    <screen name="FindLayout">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindLayout"/>
+                <set field="headerItem" value="Layout"/>
+                <set field="tabButtonItem" to-scope="user" value="FindLayout"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="50"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonLayoutDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <link target="EditLayoutSubContent?mode=add&amp;contentIdTo=TEMPLATE_MASTER" text="${uiLabelMap.CommonCreateNew}" style="buttontext"/>
+                        </container>
+                        <include-form name="findLayout" location="component://content/webapp/content/layout/LayoutForms.xml"/>
+                        <include-form name="listFindLayout" location="component://content/webapp/content/layout/LayoutForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListLayout">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListLayout"/>
+                <set field="headerItem" value="Layout"/>
+                <set field="tabButtonItem" to-scope="user" value="ListLayout"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="50"/>
+                <entity-and entity-name="ContentAssocDataResourceViewFrom" list-name="layoutList">
+                    <field-map field-name="caContentIdTo" value="TEMPLATE_MASTER"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonLayoutDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <link target="EditLayoutSubContent?mode=add&amp;contentIdTo=TEMPLATE_MASTER" text="${uiLabelMap.CommonCreateNew}" style="buttontext"/>
+                        </container>
+                        <include-form name="listListLayout" location="component://content/webapp/content/layout/LayoutForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditLayout">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditLayout"/>
+                <set field="headerItem" value="Layout"/>
+                <set field="tabButtonItem" to-scope="user" value="EditLayout"/>
+                
+                <set field="wrapTemplateId" value="STDWRAP001"/>
+                <entity-one entity-name="ContentDataResourceView" value-name="currentValue"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonLayoutDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="EditLayout" location="component://content/webapp/content/layout/LayoutForms.xml"/>
+                        <platform-specific>
+                            <html>
+                                <html-template location="component://content/webapp/content/layout/renderSubContent.ftl"/>
+                            </html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditLayoutSubContent">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditLayout"/>
+                <set field="headerItem" value="Layout"/>
+                <set field="tabButtonItem" to-scope="user" value="EditLayoutSubContent"/>
+                
+                <entity-one entity-name="SubContentDataResourceView" value-name="currentValue"/>
+                <script location="component://content/webapp/content/WEB-INF/actions/layout/editsubcontent.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonLayoutDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="EditLayoutSubContent" location="component://content/webapp/content/layout/LayoutForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditLayoutText">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditLayout"/>
+                <set field="headerItem" value="Layout"/>
+                <set field="tabButtonItem" to-scope="user" value="EditLayoutText"/>
+                
+                <entity-one entity-name="SubContentDataResourceView" value-name="currentValue"/>
+                <script location="component://content/webapp/content/WEB-INF/actions/layout/editsubcontent.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonLayoutDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <!--
+                        <include-form name="EditLayoutText" location="component://content/webapp/content/layout/LayoutForms.xml"/>
+                        -->
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditLayoutHtml">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditLayout"/>
+                <set field="headerItem" value="Layout"/>
+                <set field="tabButtonItem" to-scope="user" value="EditLayoutHtml"/>
+                
+                <entity-one entity-name="SubContentDataResourceView" value-name="currentValue"/>
+                <script location="component://content/webapp/content/WEB-INF/actions/layout/editsubcontent.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonLayoutDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <!--
+                        <include-form name="EditLayoutHtml" location="component://content/webapp/content/layout/LayoutForms.xml"/>
+                        -->
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditLayoutUrl">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditLayout"/>
+                <set field="headerItem" value="Layout"/>
+                <set field="tabButtonItem" to-scope="user" value="EditLayoutUrl"/>
+                
+                <entity-one entity-name="SubContentDataResourceView" value-name="currentValue"/>
+                <script location="component://content/webapp/content/WEB-INF/actions/layout/editsubcontent.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonLayoutDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <!--
+                        <include-form name="EditLayoutUrl" location="component://content/webapp/content/layout/LayoutForms.xml"/>
+                        -->
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditLayoutImage">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditLayout"/>
+                <set field="headerItem" value="Layout"/>
+                <set field="tabButtonItem" to-scope="user" value="EditLayoutImage"/>
+                
+                <entity-one entity-name="SubContentDataResourceView" value-name="currentValue"/>
+                <script location="component://content/webapp/content/WEB-INF/actions/layout/editsubcontent.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonLayoutDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <!--
+                        <include-form name="EditLayoutImage" location="component://content/webapp/content/layout/LayoutForms.xml"/>
+                        -->
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="AddLayout">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditLayout"/>
+                <set field="headerItem" value="Layout"/>
+                <set field="tabButtonItem" to-scope="user" value="EditLayout"/>
+                
+            </actions>
+            <widgets>
+                <decorator-screen name="commonLayoutDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="AddLayout" location="component://content/webapp/content/layout/LayoutForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/service-eca.xsd">
+    <eca service="createPerson" event="commit">
+        <action service="ensureNaPartyRole" mode="sync"/>
+    </eca>
+    <eca service="createPartyGroup" event="commit">
+        <action service="ensureNaPartyRole" mode="sync"/>
+    </eca>
+    <eca service="createAffiliate" event="commit">
+        <action service="ensureNaPartyRole" mode="sync"/>
+    </eca>
+
+    <eca service="updatePerson" event="invoke">
+        <action service="savePartyNameChange" mode="sync"/>
+    </eca>
+    <eca service="updatePartyGroup" event="invoke">
+        <action service="savePartyNameChange" mode="sync"/>
+    </eca>
+    
+    <!-- before running the createPartyRelationship service, make sure the party is in the _NA_ role if that is the desired roleTypeId for From or To -->
+    <eca service="createPartyRelationship" event="invoke">
+        <condition field-name="roleTypeIdFrom" operator="equals" value="_NA_"/>
+        <action service="ensureNaPartyRoleFrom" mode="sync"/>
+    </eca>
+    <eca service="createPartyRelationship" event="invoke">
+        <condition field-name="roleTypeIdTo" operator="equals" value="_NA_"/>
+        <action service="ensureNaPartyRoleTo" mode="sync"/>
+    </eca>
+    
+    <!-- party contact mech service ECAs -->
+    <!-- NOTE: because we have an ECA on createPartyContactMech, we don't need to do it on createPartyPostalAddress, createPartyEmailAddress, createPartyTelecomNumber because those will call it -->
+    <eca service="createPartyContactMech" event="commit">
+        <condition field-name="contactMechPurposeTypeId" operator="is-not-empty"/>
+        <action service="createPartyContactMechPurpose" mode="sync"/>
+    </eca>
+
+    <eca service="createCommEventWorkEffort" event="invoke">
+        <condition field-name="workEffortId" operator="is-empty"/>
+        <action service="createWorkEffort" mode="sync" />
+    </eca>
+    
+    <!-- when an email communictaion event for a contact list is marked "IN PROGRESS", launch a background process to send them out -->
+    <eca service="updateCommunicationEvent" event="commit">
+        <condition field-name="statusId" operator="equals" value="COM_IN_PROGRESS"/>
+        <condition field-name="communicationEventTypeId" operator="equals" value="EMAIL_COMMUNICATION"/>
+        <condition field-name="contactListId" operator="is-not-empty"/>
+        <action service="sendCommEventAsEmail" mode="async"/>
+    </eca>
+    <!-- if there is no contact list, then send it in the same thread and complete it -->
+    <eca service="updateCommunicationEvent" event="commit">
+        <condition field-name="statusId" operator="equals" value="COM_IN_PROGRESS"/>
+        <condition field-name="communicationEventTypeId" operator="equals" value="EMAIL_COMMUNICATION"/>
+        <condition field-name="contactListId" operator="is-empty"/>
+        <action service="sendCommEventAsEmail" mode="sync"/>
+    </eca>
+
+    <!-- After all the emails have been sent to a contact list, mark it as complete. -->
+    <eca service="sendEmailToContactList" event="commit">
+        <action service="setCommEventComplete" mode="sync"/>
+    </eca>
+    
+</service-eca>

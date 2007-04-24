@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/simple-methods.xsd">
+    <!-- ProductConfig methods -->
+    <simple-method method-name="createProductConfig" short-description="Create a ProductConfig">
+        <set field="callingMethodName" value="createProductConfig" />
+        <set field="checkAction" value="CREATE" /> 
+        <call-simple-method method-name="checkProductRelatedPermission" xml-resource="org/ofbiz/product/product/ProductServices.xml"/>
+        <check-permission permission="CATALOG_PRICE_MAINT"><fail-property resource="ProductUiLabels" property="ProductPriceMaintPermissionError"/></check-permission>
+        <check-errors/>
+
+        <make-value value-name="newEntity" entity-name="ProductConfig"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+
+        <now-timestamp-to-env env-name="nowTimestamp"/>
+
+        <if-empty field-name="fromDate" map-name="newEntity">
+            <set field="newEntity.fromDate" from-field="nowTimestamp" />
+        </if-empty>
+        <field-to-result field-name="fromDate" map-name="newEntity"/>
+
+        <create-value value-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateProductConfig" short-description="Update an ProductConfig">
+        <set field="callingMethodName" value="updateProductConfig" />
+        <set field="checkAction" value="UPDATE" />        
+        <call-simple-method method-name="checkProductRelatedPermission" xml-resource="org/ofbiz/product/product/ProductServices.xml"/>
+        <check-permission permission="CATALOG_PRICE_MAINT"><fail-property resource="ProductUiLabels" property="ProductPriceMaintPermissionError"/></check-permission>
+        <check-errors/>
+
+        <make-value entity-name="ProductConfig" value-name="lookupPKMap"/>
+        <set-pk-fields map-name="parameters" value-name="lookupPKMap"/>
+        <find-by-primary-key entity-name="ProductConfig" map-name="lookupPKMap" value-name="lookedUpValue"/>
+
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="deleteProductConfig" short-description="Delete an ProductConfig">
+        <set field="callingMethodName" value="deleteProductConfig" />
+        <set field="checkAction" value="DELETE" />        
+        <call-simple-method method-name="checkProductRelatedPermission" xml-resource="org/ofbiz/product/product/ProductServices.xml"/>
+        <check-permission permission="CATALOG_PRICE_MAINT"><fail-property resource="ProductUiLabels" property="ProductPriceMaintPermissionError"/></check-permission>
+        <check-errors/>
+
+        <make-value entity-name="ProductConfig" value-name="lookupPKMap"/>
+        <set-pk-fields map-name="parameters" value-name="lookupPKMap"/>
+        <find-by-primary-key entity-name="ProductConfig" map-name="lookupPKMap" value-name="lookedUpValue"/>
+
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+
+    <!-- Methods for Config Items -->
+    <simple-method method-name="createProductConfigItem" short-description="Create a Config Item">
+        <check-permission action="_CREATE" permission="CATALOG">
+            <fail-message message="Security Error: to run createProductConfigItem you must have the CATALOG_CREATE or CATALOG_ADMIN permission"/>
+        </check-permission>
+        <check-errors/>
+        <make-value entity-name="ProductConfigItem" value-name="newEntity"/>
+        <sequenced-id-to-env sequence-name="ProductConfigItem" env-name="newEntity.configItemId"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+        <field-to-result field-name="configItemId" map-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateProductConfigItem" short-description="Update a Config Item">
+        <check-permission action="_UPDATE" permission="CATALOG">
+            <fail-message message="Security Error: to run updateProductConfigItem you must have the CATALOG_UPDATE or CATALOG_ADMIN permission"/>
+        </check-permission>
+        <check-errors/>
+        <make-value entity-name="ProductConfigItem" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="deleteProductConfigItem" short-description="Delete a Config Item">
+        <check-permission action="_DELETE" permission="CATALOG">
+            <fail-message message="Security Error: to run deleteProductConfigItem you must have the CATALOG_DELETE or CATALOG_ADMIN permission"/>
+        </check-permission>
+        <check-errors/>
+        <make-value entity-name="ProductConfigItem" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+    <!-- Methods for Config Options -->
+    <simple-method method-name="createProductConfigOption" short-description="Create a Config Option">
+        <check-permission action="_CREATE" permission="CATALOG">
+            <fail-message message="Security Error: to run createProductConfigOption you must have the CATALOG_CREATE or CATALOG_ADMIN permission"/>
+        </check-permission>
+        <check-errors/>
+        <make-value entity-name="ProductConfigOption" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <sequenced-id-to-env sequence-name="ProductConfigOption" env-name="newEntity.configOptionId"/>
+        <create-value value-name="newEntity"/>
+        <field-to-result field-name="newEntity.configItemId" result-name="configItemId"/>
+        <field-to-result field-name="newEntity.configOptionId" result-name="configOptionId"/>
+    </simple-method>
+    <simple-method method-name="updateProductConfigOption" short-description="Update a Config Option">
+        <check-permission action="_UPDATE" permission="CATALOG">
+            <fail-message message="Security Error: to run updateProductConfigOption you must have the CATALOG_UPDATE or CATALOG_ADMIN permission"/>
+        </check-permission>
+        <check-errors/>
+        <make-value entity-name="ProductConfigOption" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="deleteProductConfigOption" short-description="Delete a Config Option">
+        <check-permission action="_DELETE" permission="CATALOG">
+            <fail-message message="Security Error: to run deleteProductConfigOption you must have the CATALOG_DELETE or CATALOG_ADMIN permission"/>
+        </check-permission>
+        <check-errors/>
+        <make-value entity-name="ProductConfigOption" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+    <!-- Methods for ProductConfigProduct -->
+    <simple-method method-name="createProductConfigProduct" short-description="Create a ProductConfigProduct">
+        <check-permission action="_CREATE" permission="CATALOG">
+            <fail-message message="Security Error: to run createProductConfigProduct you must have the CATALOG_CREATE or CATALOG_ADMIN permission"/>
+        </check-permission>
+        <check-errors/>
+        <make-value entity-name="ProductConfigProduct" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateProductConfigProduct" short-description="Update a ProductConfigProduct">
+        <check-permission action="_UPDATE" permission="CATALOG">
+            <fail-message message="Security Error: to run updateProductConfigProduct you must have the CATALOG_UPDATE or CATALOG_ADMIN permission"/>
+        </check-permission>
+        <check-errors/>
+        <make-value entity-name="ProductConfigProduct" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="deleteProductConfigProduct" short-description="Delete a ProductConfigProduct">
+        <check-permission action="_DELETE" permission="CATALOG">
+            <fail-message message="Security Error: to run deleteProductConfigProduct you must have the CATALOG_DELETE or CATALOG_ADMIN permission"/>
+        </check-permission>
+        <check-errors/>
+        <make-value entity-name="ProductConfigProduct" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+
+</simple-methods>

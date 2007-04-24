@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/widget-screen.xsd">
+
+    <screen name="FindProductStore">
+       <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditProductStoreList"/>
+                <set field="headerItem" value="store"/>
+                <set field="tabButtonItem" value="EditProductStoreList"/>
+
+                <entity-condition entity-name="ProductStore" list-name="productStores">
+                    <order-by field-name="storeName"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProductStoreDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <label style="head1">${uiLabelMap.ProductProductStoreList}</label>
+                        <container><link target="EditProductStore" text="[${uiLabelMap.ProductCreateNewProductStore}]" style="buttontext"/></container>
+                        <include-form name="FindProductStore" location="component://product/webapp/catalog/store/ProductStoreForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+
+    <screen name="EditProductStore">
+       <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditProductStore"/>
+                <set field="headerItem" value="store"/>
+                <set field="tabButtonItem" value="EditProductStore"/>
+                <set field="labelTitleProperty" value="ProductStore"/>
+
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+                <entity-one entity-name="ProductStore" value-name="productStore" auto-field-map="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProductStoreDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="EditProductStore" location="component://product/webapp/catalog/store/ProductStoreForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    <screen name="EditProductStoreRoles">
+       <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditProductStoreRoles"/>
+                <set field="headerItem" value="store"/>
+                <set field="tabButtonItem" value="EditProductStoreRoles"/>
+                <set field="labelTitleProperty" value="ProductProductStoreRoles"/>
+
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+                <entity-one entity-name="ProductStore" value-name="productStore" auto-field-map="true"/>
+
+                <script location="component://product/webapp/catalog/WEB-INF/actions/store/EditProductStoreRoles.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProductStoreDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://product/webapp/catalog/store/EditProductStoreRoles.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    <screen name="EditProductStorePromos">
+       <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditProductStorePromos"/>
+                <set field="headerItem" value="store"/>
+                <set field="tabButtonItem" value="EditProductStorePromos"/>
+                <set field="labelTitleProperty" value="ProductPromotions"/>
+
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+                <entity-one entity-name="ProductStore" value-name="productStore" auto-field-map="true"/>
+
+                <script location="component://product/webapp/catalog/WEB-INF/actions/store/EditProductStorePromos.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProductStoreDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://product/webapp/catalog/store/EditProductStorePromos.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    <screen name="EditProductStoreCatalogs">
+       <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditProductStoreCatalogs"/>
+                <set field="headerItem" value="store"/>
+                <set field="tabButtonItem" value="EditProductStoreCatalogs"/>
+                <set field="labelTitleProperty" value="ProductCatalogs"/>
+
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+                <entity-one entity-name="ProductStore" value-name="productStore" auto-field-map="true"/>
+
+                <entity-condition entity-name="ProductStoreCatalog" list-name="productStoreCatalogs">
+                    <condition-expr field-name="productStoreId" env-name="productStoreId"/>
+                    <order-by field-name="sequenceNum"/>
+                    <order-by field-name="productStoreId"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProductStoreDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="UpdateProductStoreCatalog" location="component://product/webapp/catalog/store/ProductStoreForms.xml"/>
+                        <include-form name="CreateProductStoreCatalog" location="component://product/webapp/catalog/store/ProductStoreForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    <screen name="EditProductStoreWebSites">
+       <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditProductStoreWebSites"/>
+                <set field="headerItem" value="store"/>
+                <set field="tabButtonItem" value="EditProductStoreWebSites"/>
+                <set field="labelTitleProperty" value="ProductProductStoreWebSites"/>
+
+                <set field="productStoreId" from-field="parameters.viewProductStoreId"/>
+                <set field="productStoreId" from-field="parameters.productStoreId" default-value="${productStoreId}"/>
+                <entity-one entity-name="ProductStore" value-name="productStore" auto-field-map="true"/>
+
+                <entity-condition entity-name="WebSite" list-name="storeWebSites">
+                    <condition-expr field-name="productStoreId" env-name="productStoreId"/>
+                    <order-by field-name="siteName"/>
+                </entity-condition>
+                <entity-condition entity-name="WebSite" list-name="webSites">
+                    <order-by field-name="siteName"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProductStoreDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://product/webapp/catalog/store/EditProductStoreWebSites.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    <screen name="EditProductStoreTaxSetup">
+       <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditProductStoreTaxSetup"/>
+                <set field="headerItem" value="store"/>
+                <set field="tabButtonItem" value="EditProductStoreTaxSetup"/>
+                <set field="labelTitleProperty" value="ProductProductStoreTaxSettings"/>
+
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+                <entity-one entity-name="ProductStore" value-name="productStore" auto-field-map="true"/>
+
+                <entity-condition entity-name="SimpleSalesTaxLookup" list-name="taxItems">
+                    <condition-expr field-name="productStoreId" env-name="productStoreId"/>
+                    <order-by field-name="stateProvinceGeoId"/>
+                    <order-by field-name="taxCategory"/>
+                    <order-by field-name="-fromDate"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProductStoreDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://product/webapp/catalog/store/EditProductStoreTaxSetup.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    <screen name="EditProductStoreShipSetup">
+       <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditProductStoreShipSetup"/>
+                <set field="headerItem" value="store"/>
+                <set field="tabButtonItem" value="EditProductStoreShipSetup"/>
+                <set field="labelTitleProperty" value="ProductProductStoreShipmentSettings"/>
+
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+                <entity-one entity-name="ProductStore" value-name="productStore" auto-field-map="true"/>
+                <entity-condition entity-name="ProductStoreShipmentMethView" list-name="storeShipMethods">
+                    <condition-expr field-name="productStoreId" env-name="productStoreId"/>
+                    <order-by field-name="sequenceNumber"/>
+                </entity-condition>
+                <entity-one entity-name="ProductStoreShipmentMeth" value-name="productStoreShipmentMeth" auto-field-map="true"/>
+                <entity-condition entity-name="CarrierShipmentMethod" list-name="carrierShipmentMethods">
+                    <order-by field-name="sequenceNumber"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProductStoreDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="ListProductStoreShipmentMeths" location="component://product/webapp/catalog/store/ProductStoreForms.xml"/>
+                        <section>
+                            <condition>
+                                <and>
+                                    <if-empty field-name="productStoreShipmentMeth"/>
+                                    <if-empty field-name="parameters.addCarrierShipMeth"/>
+                                </and>
+                            </condition>
+                            <widgets>
+                                <platform-specific>
+                                    <html><html-template location="component://product/webapp/catalog/store/EditProductStoreShipSetup.ftl"/></html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+                                <include-form name="EditProductStoreShipmentMeth" location="component://product/webapp/catalog/store/ProductStoreForms.xml"/>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    <screen name="EditProductStoreShipmentCostEstimates">
+       <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditProductStoreShipSetup"/>
+                <set field="headerItem" value="store"/>
+                <set field="tabButtonItem" value="EditProductStoreShipmentCostEstimates"/>
+                <set field="labelTitleProperty" value="ProductProductStoreShipmentSettings"/>
+
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+                <entity-one entity-name="ProductStore" value-name="productStore" auto-field-map="true"/>
+                <entity-condition entity-name="ShipmentCostEstimate" list-name="estimates">
+                    <condition-expr field-name="productStoreId" env-name="productStoreId"/>
+                    <order-by field-name="geoIdFrom"/>
+                    <order-by field-name="shipmentMethodTypeId"/>
+                    <order-by field-name="geoIdTo"/>
+                </entity-condition>
+                <entity-one entity-name="ShipmentCostEstimate" value-name="estimate" auto-field-map="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProductStoreDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="ListShipmentCostEstimates" location="component://product/webapp/catalog/store/ProductStoreForms.xml"/>
+                        <section>
+                            <condition>
+                                <if-empty field-name="estimate"/>
+                            </condition>
+                            <widgets>
+                                <label style="head2">${uiLabelMap.ProductNewShipmentEstimate}</label>
+                                <include-form name="AddShipmentCostEstimate" location="component://product/webapp/catalog/store/ProductStoreForms.xml"/>
+                            </widgets>
+                            <fail-widgets>
+                                <include-form name="ViewShipmentCostEstimate" location="component://product/webapp/catalog/store/ProductStoreForms.xml"/>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    <screen name="EditProductStorePaySetup">
+       <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditProductStorePaySetup"/>
+                <set field="headerItem" value="store"/>
+                <set field="tabButtonItem" value="EditProductStorePaySetup"/>
+                <set field="labelTitleProperty" value="ProductProductStorePaymentSettings"/>
+
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+                <entity-one entity-name="ProductStore" value-name="productStore" auto-field-map="true"/>
+
+                <script location="component://product/webapp/catalog/WEB-INF/actions/store/EditProductStorePaySetup.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProductStoreDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://product/webapp/catalog/store/EditProductStorePaySetup.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    <screen name="EditProductStoreEmails">
+       <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditProductStoreEmailSetup"/>
+                <set field="headerItem" value="store"/>
+                <set field="tabButtonItem" value="EditProductStoreEmails"/>
+                <set field="labelTitleProperty" value="ProductProductStoreEmailSettings"/>
+
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+                <entity-one entity-name="ProductStore" value-name="productStore" auto-field-map="true"/>
+                
+                <entity-condition entity-name="ProductStoreEmailSetting" list-name="productStoreEmailSettings">
+                    <condition-expr field-name="productStoreId" env-name="productStoreId"/>
+                    <order-by field-name="emailType"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProductStoreDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="updateProductStoreEmail" location="component://product/webapp/catalog/store/ProductStoreForms.xml"/>
+                        <include-form name="createProductStoreEmail" location="component://product/webapp/catalog/store/ProductStoreForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    <screen name="EditProductStoreSurveys">
+       <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditProductStoreSurveys"/>
+                <set field="headerItem" value="store"/>
+                <set field="tabButtonItem" value="EditProductStoreSurveys"/>
+                <set field="labelTitleProperty" value="ProductStoreSurveySettings"/>
+
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+                <entity-one entity-name="ProductStore" value-name="productStore" auto-field-map="true"/>
+
+                <script location="component://product/webapp/catalog/WEB-INF/actions/store/EditProductStoreSurveys.bsh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProductStoreDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://product/webapp/catalog/store/EditProductStoreSurveys.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    <screen name="EditProductStoreKeywordOvrd">
+       <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditProductStoreKeywordOvrd"/>
+                <set field="headerItem" value="store"/>
+                <set field="tabButtonItem" value="EditProductStoreKeywordOvrd"/>
+                <set field="labelTitleProperty" value="ProductStoreKeywordOverrides"/>
+
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+                <entity-one entity-name="ProductStore" value-name="productStore" auto-field-map="true"/>
+
+                <entity-condition entity-name="ProductStoreKeywordOvrd" list-name="productStorekeywordOvrdList">
+                    <condition-expr field-name="productStoreId" env-name="productStoreId"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProductStoreDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="UpdateproductStorekeywordOvrdForm" location="component://product/webapp/catalog/store/ProductStoreForms.xml"/>
+                        <include-form name="CreateproductStorekeywordOvrdForm" location="component://product/webapp/catalog/store/ProductStoreForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    <screen name="ViewProductStoreSegments">
+       <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleViewProductStoreSegments"/>
+                <set field="headerItem" value="store"/>
+                <set field="tabButtonItem" value="ViewProductStoreSegments"/>
+                <set field="labelTitleProperty" value="ProductSegments"/>
+
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+               
+                <entity-one entity-name="ProductStore" value-name="productStore">
+                    <field-map field-name="productStoreId"/>
+                </entity-one>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProductStoreDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <link target="/marketing/control/viewSegmentGroup?productStoreId=${productStoreId}" text="${uiLabelMap.ProductNewSegment}" style="buttontext" url-mode="inter-app"/>
+                        </container>
+                        <include-form name="ViewProductStoreSegments" location="component://product/webapp/catalog/store/ProductStoreForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+</screens>

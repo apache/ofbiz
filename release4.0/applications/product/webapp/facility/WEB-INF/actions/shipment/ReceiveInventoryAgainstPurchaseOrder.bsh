@@ -1,0 +1,273 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import org.ofbiz.entity.condition.*;
+import org.ofbiz.entity.util.*;
+import org.ofbiz.service.ServiceUtil;
+import org.ofbiz.base.util.*;
+
+delegator = request.getAttribute("delegator");
+
+shipmentId = request.getParameter("shipmentId");
+orderId = request.getParameter("purchaseOrderId");
+shipGroupSeqId = request.getParameter("shipGroupSeqId");
+context.put("shipmentId", shipmentId);
+context.put("shipGroupSeqId", shipGroupSeqId);
+
+// Retrieve the map resident in session which stores order item quantities to receive
+itemQuantitiesToReceive = session.getAttribute("purchaseOrderItemQuantitiesToReceive");
+if (! UtilValidate.isEmpty(itemQuantitiesToReceive)) {
+    sessionShipmentId = itemQuantitiesToReceive.get("_shipmentId");
+    sessionOrderId = itemQuantitiesToReceive.get("_orderId");
+    if ( (UtilValidate.isNotEmpty(sessionShipmentId) && ! sessionShipmentId.equals(shipmentId)) || 
+         ((UtilValidate.isNotEmpty(sessionOrderId) && ! sessionOrderId.equals(orderId)))        ||
+         "Y".equals(request.getParameter("clearAll")) ) {
+
+             // Clear the map if the shipmentId or orderId are different than the current ones, or
+             // if the clearAll parameter is present
+             itemQuantitiesToReceive.clear();
+    }
+}
+
+shipment = delegator.findByPrimaryKey("Shipment", UtilMisc.toMap("shipmentId", shipmentId));
+context.put("shipment", shipment);
+if (UtilValidate.isEmpty(shipment)) {
+    return;
+}
+
+isPurchaseShipment = "PURCHASE_SHIPMENT".equals(shipment.getString("shipmentTypeId"));
+context.put("isPurchaseShipment", isPurchaseShipment);
+if (! isPurchaseShipment) {
+    return;
+}
+
+facility = shipment.getRelatedOne("DestinationFacility");
+context.put("facility", facility);
+context.put("facilityId", shipment.get("destinationFacilityId"));
+context.put("now", UtilDateTime.nowTimestamp());
+
+if (UtilValidate.isEmpty(orderId)) {
+    orderId = shipment.get("primaryOrderId");
+}
+if (UtilValidate.isEmpty(shipGroupSeqId)) {
+    shipGroupSeqId = shipment.get("primaryShipGroupSeqId");
+}
+context.put("orderId", orderId);
+
+if (UtilValidate.isEmpty(orderId)) {
+    return;
+}
+
+orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+context.put("orderHeader", orderHeader);
+if (UtilValidate.isEmpty(orderHeader)) {
+    return;
+}
+
+isPurchaseOrder = "PURCHASE_ORDER".equals(orderHeader.getString("orderTypeId"));
+context.put("isPurchaseOrder", isPurchaseOrder);
+if (! isPurchaseOrder) {
+    return;
+}
+
+// Get the base currency from the facility owner, for currency conversions
+baseCurrencyUomId = null;
+if (! UtilValidate.isEmpty(facility)) {
+    owner = facility.getRelatedOne("OwnerParty");
+    if (! UtilValidate.isEmpty(owner)) {
+        ownerAcctgPref = owner.getRelatedOne("PartyAcctgPreference");
+    }
+    if (! UtilValidate.isEmpty(ownerAcctgPref)) {
+        baseCurrencyUomId = ownerAcctgPref.get("baseCurrencyUomId");
+    }
+}
+
+inventoryItemTypes = delegator.findAll("InventoryItemType");
+context.put("inventoryItemTypes", inventoryItemTypes);
+
+// Populate the tracking map with shipment and order IDs
+if (UtilValidate.isEmpty(itemQuantitiesToReceive)) {
+    itemQuantitiesToReceive = UtilMisc.toMap("_shipmentId", shipmentId, "_orderId", orderId);
+}
+
+oiasgaLimitMap = null;
+if (! UtilValidate.isEmpty(shipGroupSeqId)) {
+    oiasgaLimitMap = UtilMisc.toMap("shipGroupSeqId", shipGroupSeqId);
+}
+
+orderItemDatas = new TreeMap();
+totalAvailableToReceive = 0;
+
+// Populate the order item data for the FTL
+orderItems = orderHeader.getRelated("OrderItemAndShipGroupAssoc", oiasgaLimitMap, UtilMisc.toList("shipGroupSeqId", "orderItemSeqId"));
+orderItemIter = orderItems.iterator();
+while (orderItemIter.hasNext()) {
+    orderItemAndShipGroupAssoc = orderItemIter.next();
+    product = orderItemAndShipGroupAssoc.getRelatedOne("Product");
+    
+    // Get the order item, since the orderItemAndShipGroupAssoc's quantity field is manipulated in some cases
+    orderItem = delegator.findByPrimaryKey("OrderItem", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", orderItemAndShipGroupAssoc.get("orderItemSeqId")));
+    orderItemData = new HashMap();
+
+    // Get the item's ordered quantity
+    totalOrdered = 0;
+    ordered = orderItem.getDouble("quantity");
+    if (ordered != null)
+        totalOrdered += ordered.doubleValue();
+    cancelled = orderItem.getDouble("cancelQuantity");
+    if (cancelled != null)
+        totalOrdered -= cancelled.doubleValue();
+
+    // Get the item quantity received from all shipments via the ShipmentReciept entity
+    totalReceived = 0.0;
+    receipts = delegator.findByAnd("ShipmentReceipt", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", orderItem.get("orderItemSeqId")));
+    fulfilledReservations = new ArrayList();
+    if (receipts != null && receipts.size() > 0) {
+        recIter = receipts.iterator();
+        while (recIter.hasNext()) {
+            rec = recIter.next();
+            accepted = rec.getDouble("quantityAccepted");
+            rejected = rec.getDouble("quantityRejected");
+            if (accepted != null)
+                totalReceived += accepted.doubleValue();
+            if (rejected != null)
+                totalReceived += rejected.doubleValue();                                            
+
+            // Get the reservations related to this receipt
+            oisgirs = delegator.findByAnd("OrderItemShipGrpInvRes", UtilMisc.toMap("inventoryItemId", rec.get("inventoryItemId")));
+            if (! UtilValidate.isEmpty(oisgirs)) {
+                fulfilledReservations.addAll(oisgirs);
+            }
+        }            
+    }
+    orderItemData.put("fulfilledReservations", fulfilledReservations);
+
+    // Update the unit cost with the converted value, if any
+    if (UtilValidate.isNotEmpty(baseCurrencyUomId) && UtilValidate.isNotEmpty(orderHeader.getString("currencyUom"))) {
+        if (! UtilValidate.isEmpty(product)) {
+            result = dispatcher.runSync("convertUom", UtilMisc.toMap("uomId", orderHeader.getString("currencyUom"), "uomIdTo", baseCurrencyUomId, "originalValue", orderItem.get("unitPrice")));
+            if (!ServiceUtil.isError(result)) {
+                orderItem.put("unitPrice", result.get("convertedValue"));
+            }
+        }
+    }
+
+    // Retrieve the backordered quantity
+    // TODO: limit to a facility? The shipment destination facility is not necessarily the same facility as the inventory
+    conditions = UtilMisc.toList(new EntityExpr("productId", EntityOperator.EQUALS, product.get("productId")), new EntityExpr("availableToPromiseTotal", EntityOperator.LESS_THAN, new Double(0)));
+    negativeInventoryItems = delegator.findByCondition("InventoryItem",  new EntityConditionList(conditions, EntityOperator.AND), null, null);
+    backOrderedQuantity = 0;
+    niit = negativeInventoryItems.iterator();
+    while (niit.hasNext()) {
+        negativeInventoryItem = niit.next();
+        backOrderedQuantity += negativeInventoryItem.getDouble("availableToPromiseTotal").doubleValue();
+    }
+    orderItemData.put("backOrderedQuantity", Math.abs(backOrderedQuantity));
+
+    // Calculate how many units it should be possible to recieve for this purchase order
+    availableToReceive = totalOrdered - totalReceived;
+    totalAvailableToReceive += availableToReceive;
+    orderItemData.put("availableToReceive", availableToReceive);
+    orderItemData.put("totalQuantityReceived", totalReceived);
+    orderItemData.put("shipGroupSeqId", orderItemAndShipGroupAssoc.get("shipGroupSeqId"));
+    orderItemData.put("orderItem", orderItem);
+    orderItemData.put("product", product);
+    orderItemDatas.put(orderItem.getString("orderItemSeqId"), orderItemData);
+}
+context.put("orderItemDatas", orderItemDatas.values());
+
+// Handle any item product quantities to receive by adding to the map in session
+productIdToReceive = request.getParameter("productId");
+productQtyToReceive = request.getParameter("quantity");
+if (UtilValidate.isNotEmpty(productIdToReceive)) {
+
+    // Get the first order item with the productId
+    orderItem = EntityUtil.getFirst(EntityUtil.filterByAnd(orderItems, UtilMisc.toMap("productId", productIdToReceive)));
+
+    // If the productId as given isn't found in the order, try any goodIdentifications and use the first match
+    if (UtilValidate.isEmpty(orderItem)) {
+        goodIdentifications = delegator.findByAnd("GoodIdentification", UtilMisc.toMap("idValue", productIdToReceive));
+        if (! UtilValidate.isEmpty(goodIdentifications)) {
+            giit = goodIdentifications.iterator();
+            while (giit.hasNext()) {
+                goodIdentification = giit.next();
+                orderItem = EntityUtil.getFirst(EntityUtil.filterByAnd(orderItems, UtilMisc.toMap("productId", goodIdentification.get("productId"))));
+                if (! UtilValidate.isEmpty(orderItem)) {
+                    productIdToReceive = goodIdentification.get("productId");
+                    break;
+                }
+            }
+        }
+    }
+
+    if (! UtilValidate.isEmpty(orderItem)) {
+        orderItemSeqId = orderItem.getString("orderItemSeqId");
+        oldQuantity = 0;
+        newQuantity = 0;
+        quantity = 0;
+        if (! UtilValidate.isEmpty(productQtyToReceive)) {
+            try {
+                quantity = Double.parseDouble(productQtyToReceive);
+            } catch (Exception e) {
+                // Ignore the quantity update if there's a problem parsing it
+            }
+            
+            if (itemQuantitiesToReceive.containsKey(orderItemSeqId)) {
+                try {
+                    oldQuantity = itemQuantitiesToReceive.get(orderItemSeqId);
+                    newQuantity = oldQuantity + quantity;
+                } catch (Exception e) {
+                    // Ignore the quantity update if there's a problem parsing it
+                }
+            } else {
+                newQuantity = quantity;
+            }
+        }
+
+        if (newQuantity <= orderItemDatas.get(orderItemSeqId).get("availableToReceive")) {
+            itemQuantitiesToReceive.put(orderItemSeqId, newQuantity);
+        } else {
+
+            // If the new quantity would be more than the quantity left to receive for this purchase order item, add an error message to the context
+            context.put("newQuantity", newQuantity);
+            context.put("ProductReceiveInventoryAgainstPurchaseOrderQuantityExceedsAvailableToReceive", true);
+            return;
+        }
+        
+        // Notify if some or all of the quantity to receive for the item will go to a backorder
+        oldBackOrderedQuantity = orderItemDatas.get(orderItemSeqId).get("backOrderedQuantity") - oldQuantity;
+        if (oldBackOrderedQuantity < 0) oldBackOrderedQuantity = new Double(0).doubleValue();
+        newBackOrderedQuantity = orderItemDatas.get(orderItemSeqId).get("backOrderedQuantity") - newQuantity;
+        if (newBackOrderedQuantity < 0) newBackOrderedQuantity = new Double(0).doubleValue();
+        if (oldBackOrderedQuantity != newBackOrderedQuantity) {
+            context.put("quantityToReceive", quantity);
+            context.put("quantityToBackOrder", (oldBackOrderedQuantity - newBackOrderedQuantity));
+            context.put("ProductReceiveInventoryAgainstPurchaseOrderQuantityGoesToBackOrder", true);
+        }
+    } else {
+
+        // Add an error message to the context if the productId doesn't exist in this purchase order
+        context.put("ProductReceiveInventoryAgainstPurchaseOrderProductNotFound", true);
+    }
+}
+
+// Put the tracking map back into the session, in case it has been reconstructed
+session.setAttribute("purchaseOrderItemQuantitiesToReceive", itemQuantitiesToReceive);
+context.put("itemQuantitiesToReceive", itemQuantitiesToReceive);
+context.put("totalAvailableToReceive", totalAvailableToReceive);

@@ -1,0 +1,754 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/services.xsd">
+    <description>Order Services</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <!-- Order processing services -->
+    <service name="processOrderWf" engine="workflow" location="org.ofbiz.order" invoke="ProcessOrder">
+        <description>Service for testing the workflow engine</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="orderNotificationInterface" engine="interface" location="" invoke="">
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="emailType" type="String" mode="OUT" optional="false"/>
+        <attribute name="screenUri" type="String" mode="IN" optional="true"/>
+        <attribute name="comments" type="String" mode="IN" optional="true"/>
+        <attribute name="body" type="String" mode="OUT" optional="true"/>
+        <attribute name="sendTo" type="String" mode="IN" optional="true"/>
+        <attribute name="sendCc" type="String" mode="IN" optional="true"/>
+        <attribute name="note" type="String" mode="IN" optional="true"/>
+        <attribute name="temporaryAnonymousUserLogin" type="GenericValue" mode="IN" optional="true"/>
+    </service>
+    <service name="sendOrderConfirmation" engine="java" require-new-transaction="true" max-retry="3"
+            location="org.ofbiz.order.order.OrderServices" invoke="sendOrderConfirmNotification">
+        <description>Send a order confirmation</description>
+        <implements service="orderNotificationInterface"/>        
+    </service>
+    <service name="sendOrderChangeNotification" engine="java" require-new-transaction="true" max-retry="3"
+            location="org.ofbiz.order.order.OrderServices" invoke="sendOrderChangeNotification">
+        <description>Send a order notification</description>
+        <implements service="orderNotificationInterface"/>
+    </service>
+    <service name="sendOrderCompleteNotification" engine="java" require-new-transaction="true" max-retry="3"
+            location="org.ofbiz.order.order.OrderServices" invoke="sendOrderCompleteNotification">
+        <description>Send a order notification</description>
+        <implements service="orderNotificationInterface"/>
+    </service>
+    <service name="sendOrderBackorderNotification" engine="java" require-new-transaction="true" max-retry="3"
+            location="org.ofbiz.order.order.OrderServices" invoke="sendOrderBackorderNotification">
+        <description>Send a order notification</description>
+        <implements service="orderNotificationInterface"/>
+    </service>
+    <service name="sendOrderPayRetryNotification" engine="java" require-new-transaction="true" max-retry="3"
+            location="org.ofbiz.order.order.OrderServices" invoke="sendOrderPayRetryNotification">
+        <description>Send a order notification</description>
+        <implements service="orderNotificationInterface"/>
+    </service>
+
+    <service name="sendProcessNotification" engine="java" require-new-transaction="true" max-retry="3"
+            location="org.ofbiz.order.order.OrderServices" invoke="sendProcessNotification">
+    	<description>Limit Service for order processing workflow; sends activitiy notifications</description>
+    	<attribute name="workEffortId" type="String" mode="IN"/>
+    	<attribute name="adminEmailList" type="String" mode="IN"/>
+    	<attribute name="assignedPartyId" type="String" mode="IN" optional="true"/>
+    	<attribute name="assignedRoleTypeId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="createOrderNotificationLog" engine="simple"
+            location="org/ofbiz/order/order/OrderSimpleMethods.xml" invoke="createNotificationLog">
+        <description>Logs when a notification was sent</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="emailType" type="String" mode="IN" optional="false"/>
+        <attribute name="comments" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="storeOrder" engine="java" validate="true" auth="true"
+            location="org.ofbiz.order.order.OrderServices" invoke="createOrder">
+        <description>Creates order entities</description>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="placingCustomerPartyId" type="String" mode="IN" optional="true"/>
+        <attribute name="billToCustomerPartyId" type="String" mode="IN" optional="true"/>
+        <attribute name="shipToCustomerPartyId" type="String" mode="IN" optional="true"/>
+        <attribute name="endUserCustomerPartyId" type="String" mode="IN" optional="true"/>
+        <attribute name="billFromVendorPartyId" type="String" mode="IN" optional="true"/>
+        <attribute name="shipFromVendorPartyId" type="String" mode="IN" optional="true"/>
+        <attribute name="supplierAgentPartyId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderName" type="String" mode="IN" optional="true"/>
+        <attribute name="visitId" type="String" mode="IN" optional="true"/>
+        <attribute name="affiliateId" type="String" mode="IN" optional="true"/>
+        <attribute name="productStoreId" type="String" mode="IN" optional="true"/>
+        <attribute name="originFacilityId" type="String" mode="IN" optional="true"/>
+        <attribute name="transactionId" type="String" mode="IN" optional="true"/>
+        <attribute name="terminalId" type="String" mode="IN" optional="true"/>
+        <attribute name="autoOrderShoppingListId" type="String" mode="IN" optional="true"/>
+        <attribute name="webSiteId" type="String" mode="IN" optional="true"/>
+        <attribute name="externalId" type="String" mode="IN" optional="true"/>
+        <attribute name="internalCode" type="String" mode="IN" optional="true"/>
+        <attribute name="distributorId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderTypeId" type="String" mode="INOUT" optional="false"/>
+        <attribute name="salesChannelEnumId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderItemGroups" type="List" mode="IN" optional="true"/>
+        <attribute name="orderItems" type="List" mode="IN" optional="false"/>
+        <attribute name="orderTerms" type="List" mode="IN" optional="false"/>
+        <!-- workeffort contains the rental start/enddate, nbr of persons. WorkEfforts is mandatory for ordertype = RENTAL_ORDER_ITEM-->
+        <attribute name="workEfforts" type="List" mode="IN" optional="true"/>
+        <attribute name="orderAdjustments" type="List" mode="IN" optional="false"/>
+        <attribute name="billingAccountId" type="String" mode="IN" optional="true"/>
+        <attribute name="shippingAmount" type="Double" mode="IN" optional="true"/>
+        <attribute name="firstAttemptOrderId" type="String" mode="IN" optional="true"/>
+        <attribute name="currencyUom" type="String" mode="IN" optional="false"/>
+        <attribute name="grandTotal" type="Double" mode="IN" optional="true"/>
+        <attribute name="taxAmount" type="Double" mode="IN" optional="true"/>
+        <attribute name="orderDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="orderItemShipGroupInfo" type="List" mode="IN" optional="true"/>
+        <attribute name="orderItemAttributes" type="List" mode="IN" optional="true"/>
+        <attribute name="orderAttributes" type="List" mode="IN" optional="true"/>
+        <attribute name="orderPaymentInfo" type="List" mode="IN" optional="true"/>
+        <attribute name="orderContactMechs" type="List" mode="IN" optional="true"/>
+        <attribute name="orderItemContactMechs" type="List" mode="IN" optional="true"/>
+        <attribute name="orderItemPriceInfos" type="List" mode="IN" optional="true"/>
+        <attribute name="orderProductPromoUses" type="List" mode="IN" optional="true"/>
+        <attribute name="orderItemSurveyResponses" type="List" mode="IN" optional="true"/>
+        <attribute name="trackingCodeOrders" type="List" mode="IN" optional="true"/>
+        <attribute name="orderAdditionalPartyRoleMap" type="Map" mode="IN" optional="true"/>
+        <attribute name="orderItemAssociations" type="List" mode="IN" optional="true"/>
+        <attribute name="orderInternalNotes" type="List" mode="IN" optional="true"/>
+        <attribute name="orderNotes" type="List" mode="IN" optional="true"/>
+        <attribute name="orderId" type="String" mode="OUT" optional="false"/>
+        <attribute name="statusId" type="String" mode="OUT" optional="false"/>
+    </service>
+    
+    <service name="callProcessOrderPayments" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="callProcessOrderPayments" auth="false">
+        <attribute name="shoppingCart" type="org.ofbiz.order.shoppingcart.ShoppingCart" mode="IN" optional="false"/>
+        <attribute name="manualHold" type="Boolean" mode="IN" optional="true"/>
+    </service>
+    <service name="createOrderFromShoppingCart" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="createOrderFromShoppingCart" auth="false">
+        <attribute name="shoppingCart" type="org.ofbiz.order.shoppingcart.ShoppingCart" mode="INOUT" optional="false"/>
+        <attribute name="orderId" type="String" mode="OUT" optional="false"/> 
+    </service>
+    <service name="createSimpleNonProductSalesOrder" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="createSimpleNonProductSalesOrder" auth="true">
+        <attribute name="paymentMethodId" type="String" mode="IN" optional="false"/>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"/>
+        <attribute name="currency" type="String" mode="IN" optional="false"/>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="itemMap" type="Map" mode="IN" optional="false"/>
+        <attribute name="orderId" type="String" mode="OUT" optional="false"/>  
+    </service>
+    
+    <service name="createOrderItemBilling" engine="simple"
+    	    location="org/ofbiz/order/order/OrderSimpleMethods.xml" invoke="createOrderItemBilling">
+        <description>Create a new order item billing record</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="invoiceId" type="String" mode="IN" optional="false"/>
+        <attribute name="invoiceItemSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="quantity" type="Double" mode="IN" optional="true"/>
+        <attribute name="amount" type="Double" mode="IN" optional="true"/>
+        <attribute name="itemIssuanceId" type="String" mode="IN" optional="true"/>
+        <attribute name="shipmentReceiptId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="createOrderAdjustment" default-entity-name="OrderAdjustment" engine="simple"
+            location="org/ofbiz/order/order/OrderSimpleMethods.xml" invoke="createOrderAdjustment">
+        <description>Creates a new order adjustment record</description>
+        <auto-attributes mode="OUT" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <override name="orderAdjustmentTypeId" optional="false"/>
+        <override name="orderId" optional="false"/>
+    </service>
+    <service name="updateOrderAdjustment" default-entity-name="OrderAdjustment" engine="simple"
+        location="org/ofbiz/order/order/OrderSimpleMethods.xml" invoke="updateOrderAdjustment">
+        <description>Update an order adjustment record and reset the order grand total</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <override name="orderId" optional="false"/>
+    </service>
+    <service name="deleteOrderAdjustment" default-entity-name="OrderAdjustment" engine="simple"
+        location="org/ofbiz/order/order/OrderSimpleMethods.xml" invoke="deleteOrderAdjustment">
+        <description>Delete an order adjustment record and reset the order grand total</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+    </service>
+    
+    <service name="createOrderAdjustmentBilling" engine="simple"
+            location="org/ofbiz/order/order/OrderSimpleMethods.xml" invoke="createOrderAdjustmentBilling">
+        <description>Create a new order adjustment billing record</description>
+        <attribute name="orderAdjustmentId" type="String" mode="IN" optional="false"/>
+        <attribute name="invoiceId" type="String" mode="IN" optional="false"/>
+        <attribute name="invoiceItemSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="amount" type="Double" mode="IN" optional="true"/>
+    </service>
+
+    <service name="createPaymentFromPreference" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="createPaymentFromPreference">
+        <description>Creates a payment using the order payment preference</description>
+        <attribute name="orderPaymentPreferenceId" type="String" mode="IN" optional="false"/>
+        <attribute name="paymentFromId" type="String" mode="IN" optional="true"/>
+        <attribute name="paymentRefNum" type="String" mode="IN" optional="true"/>
+        <attribute name="comments" type="String" mode="IN" optional="true"/>
+        <attribute name="paymentId" type="String" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="updateTrackingNumber" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="updateTrackingNumber">
+        <description>Sets the tracking number on a shipment preference</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="trackingNumber" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="resetGrandTotal" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="resetGrandTotal" require-new-transaction="false">
+        <!-- NOTE: require-new-transaction is false because this service is often run as a sync action on an ECA, so generally at the same time and in a separate TX it runs into locking problems -->
+        <description>Reset the grandTotal of an existing order</description>
+        <attribute name="orderId" type="String" mode="IN"/>
+    </service>
+    <service name="setEmptyGrandTotals" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="setEmptyGrandTotals">
+        <description>Find all OrderHeaders with no grandTotal and call resetGrandTotal</description>
+        <attribute name="forceAll" type="Boolean" mode="IN" optional="true"/>
+    </service>
+
+    <service name="recalcShippingTotal" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="recalcOrderShipping">
+        <description>Adjust the order shipping amount</description>
+        <attribute name="orderId" type="String" mode="IN"/>
+    </service>
+    <service name="recalcTaxTotal" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="recalcOrderTax">
+        <description>Adjust the order tax amount</description>
+        <attribute name="orderId" type="String" mode="IN"/>
+    </service>
+
+    <service name="changeOrderStatus" engine="java" auth="true"
+            location="org.ofbiz.order.order.OrderServices" invoke="setOrderStatus">
+        <description>Change the status of an existing order</description>
+        <attribute name="orderId" type="String" mode="IN"/>
+        <attribute name="statusId" type="String" mode="IN"/>
+        <attribute name="oldStatusId" type="String" mode="OUT" optional="false"/>
+        <attribute name="orderStatusId" type="String" mode="OUT" optional="true"/>
+        <attribute name="orderTypeId" type="String" mode="OUT" optional="true"/>
+        <attribute name="needsInventoryIssuance" type="String" mode="OUT" optional="true"/>
+        <attribute name="grandTotal" type="Double" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="changeOrderItemStatus" engine="java" auth="true"
+    		location="org.ofbiz.order.order.OrderServices" invoke="setItemStatus">
+    	<description>Change the status of an existing order item.  If no orderItemSeqId is specified, the status of all order items will be changed.</description>
+    	<attribute name="orderId" type="String" mode="IN" optional="false"/>
+    	<attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+    	<attribute name="fromStatusId" type="String" mode="IN" optional="true"/>
+    	<attribute name="statusId" type="String" mode="IN" optional="false"/>
+        <attribute name="statusDateTime" type="Timestamp" mode="IN" optional="true"/>
+    </service>
+
+    <service name="cancelOrderItem" engine="java" auth="true"
+    		location="org.ofbiz.order.order.OrderServices" invoke="cancelOrderItem">
+    	<description>Cancel an Order Item Quantity</description>
+    	<attribute name="orderId" type="String" mode="IN" optional="false"/>
+    	<attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="true"/>
+    	<attribute name="cancelQuantity" type="Double" mode="IN" optional="true"/>
+    </service>
+    <service name="cancelOrderItemNoActions" engine="java" auth="true"
+    		location="org.ofbiz.order.order.OrderServices" invoke="cancelOrderItem">
+    	<description>Cancel an Order Item Quantity. This is equal to cancelOrderItem but no ECAs are attached to this service.</description>
+    	<attribute name="orderId" type="String" mode="IN" optional="false"/>
+    	<attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="true"/>
+    	<attribute name="cancelQuantity" type="Double" mode="IN" optional="true"/>
+    </service>
+
+    <service name="updateOrderItems" engine="java" auth="true"
+            location="org.ofbiz.order.order.OrderServices" invoke="updateApprovedOrderItems">
+        <description>Update the quantities/prices for an existing order</description>
+        <attribute name="orderId" type="String" mode="INOUT" optional="false"/>
+        <attribute name="itemDescriptionMap" type="Map" mode="IN" string-map-prefix="idm_" optional="true"/>
+        <attribute name="itemQtyMap" type="Map" mode="IN" string-map-prefix="iqm_" optional="false"/>
+        <attribute name="itemPriceMap" type="Map" mode="IN" string-map-prefix="ipm_" optional="false"/>
+        <attribute name="overridePriceMap" type="Map" mode="IN" string-map-prefix="opm_" optional="false"/>
+        <attribute name="shoppingCart" type="org.ofbiz.order.shoppingcart.ShoppingCart" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="appendOrderItem" engine="java" auth="true"
+            location="org.ofbiz.order.order.OrderServices" invoke="addItemToApprovedOrder">
+        <description>Append an itemto an existing order</description>
+        <attribute name="orderId" type="String" mode="INOUT" optional="false"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="productId" type="String" mode="IN" optional="false"/>
+        <attribute name="prodCatalogId" type="String" mode="IN" optional="false"/>
+        <attribute name="basePrice" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="quantity" type="Double" mode="IN" optional="false"/>
+        <attribute name="amount" type="Double" mode="IN" optional="true"/>
+        <attribute name="overridePrice" type="String" mode="IN" optional="true"/>
+        <attribute name="shoppingCart" type="org.ofbiz.order.shoppingcart.ShoppingCart" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="recreateOrderAdjustments" engine="simple" auth="true"
+            location="org/ofbiz/order/order/OrderServices.xml" invoke="recreateOrderAdjustments">
+        <description>Remove all existing order adjustments, recalc them and persist in OrderAdjustment.</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="processOrderPayments" engine="java" auth="true"
+            location="org.ofbiz.order.order.OrderServices" invoke="processOrderPayments">
+        <description>Process payments for an order</description>
+        <attribute name="shoppingCart" type="org.ofbiz.order.shoppingcart.ShoppingCart" mode="IN" optional="true"/>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="updateOrderPaymentPreference" engine="java" auth="true" default-entity-name="OrderPaymentPreference"
+            location="org.ofbiz.order.order.OrderServices" invoke="updateOrderPaymentPreference">
+        <auto-attributes mode="INOUT" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <attribute name="checkOutPaymentId" type="String" mode="IN" optional="true"/>
+        <attribute name="cancelThis" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="checkOrderItemStatus" engine="java"
+    		location="org.ofbiz.order.order.OrderServices" invoke="checkItemStatus">
+      <description>Check the status of all items and cancel/approve/complete the order if we can</description>
+    	<attribute name="orderId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="updateOrderStatusFromReceipt" engine="simple"
+    		location="org/ofbiz/order/order/OrderSimpleMethods.xml" invoke="updateOrderStatusFromReceipt">
+    	<description>Updates the (purchase) order/order item status based on receipt</description>
+    	<attribute name="orderId" type="String" mode="IN" optional="false"/>
+    	<attribute name="currentStatusId" type="String" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="autoCancelOrderItems" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="cancelFlaggedSalesOrders">
+            <description>Batch service which automatically cancels sales order and/or sales order items.
+                Sales orders : These will be cancelled if the order status equals CREATED and it has been 
+                  either 30 days or ProductStore.daysCancelNoPay since the order was created. A value of 0 for 
+                  ProductStore.daysCancelNoPay means do not auto-cancel.
+                Sales order items : This is only for orders on the APPROVED status. Items will be cancelled if the 
+                  item is flagged with an autoCancelDate and does not have a dontCancelDate and dontCancelUserLogin 
+                  associated with it, and it is past the autoCancelDate.</description> 
+                
+        <!-- this service has no parameters IN or OUT -->
+    </service>
+
+    <service name="setAllowOrderSplit" engine="java" auth="true"
+            location="org.ofbiz.order.order.OrderServices" invoke="allowOrderSplit">
+        <description>Set the Allow Split Flag To 'Y' (true)</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="getOrderItemShipGroupEstimatedShipDate" engine="simple"
+            location="org/ofbiz/order/order/OrderServices.xml" invoke="getOrderItemShipGroupEstimatedShipDate" auth="true">
+        <description>Compute and return the OrderItemShipGroup estimated ship date based on the associated items.</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="estimatedShipDate" type="Timestamp" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="addOrderRole" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="addRoleType">
+        <description>Adds a RoleType to an order</description>
+        <attribute name="removeOld" type="Boolean" mode="IN" optional="true"/>
+        <attribute name="orderId" type="String" mode="IN"/>
+        <attribute name="partyId" type="String" mode="IN"/>
+        <attribute name="roleTypeId" type="String" mode="IN"/>
+    </service>
+
+    <service name="removeOrderRole" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="removeRoleType">
+        <description>Removes a RoleType from an order</description>
+        <attribute name="orderId" type="String" mode="IN"/>
+        <attribute name="partyId" type="String" mode="IN"/>
+        <attribute name="roleTypeId" type="String" mode="IN"/>
+    </service>
+
+    <service name="createOrderPaymentPreference" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="createPaymentPreference">
+        <description>Creates an order payment preference</description>
+        <attribute name="orderId" type="String" mode="IN"/>
+        <attribute name="paymentMethodTypeId" type="String" mode="IN"/>
+        <attribute name="paymentMethodId" type="String" mode="IN" optional="true"/>
+        <attribute name="maxAmount" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="orderPaymentPreferenceId" type="String" mode="OUT"/>
+    </service>
+
+    <service name="createOrderNote" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="createOrderNote" auth="true">
+        <description>Create a note item and associate with a order header</description>
+        <attribute name="orderId" type="String" mode="IN"/>
+        <attribute name="note" type="String" mode="IN"/>
+        <attribute name="internalNote" type="String" mode="IN"/>
+    </service>
+
+    <service name="updateOrderNote" engine="simple" default-entity-name="OrderHeaderNote"
+            location="org/ofbiz/order/order/OrderServices.xml" invoke="updateOrderNote" auth="true">
+        <description>Toggle Order Note and make it either Public or Private</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="noteId" type="String" mode="IN" optional="false"/>
+        <attribute name="internalNote" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Order (digital) Fulfillment Services -->
+    <service name="checkDigitalItemFulfillment" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="checkDigitalItemFulfillment" auth="true">
+        <description>Check an order for digital items and invoice/capture + fulfill the items</description>
+        <attribute name="orderId" type="String" mode="IN"/>
+    </service>
+   <service name="fulfillDigitalItems" engine="java" require-new-transaction="true" transaction-timeout="300"
+       location="org.ofbiz.order.order.OrderServices" invoke="fulfillDigitalItems">
+       <description>Order Fulfillment</description>
+       <attribute name="orderId" type="String" mode="IN" optional="false"/>
+       <attribute name="orderItems" type="java.util.List" mode="IN" optional="false"/>
+   </service>
+   <service name="itemFulfillmentInterface" engine="interface" invoke="" location="" auth="false" >
+       <auto-attributes entity-name="ProductContent" include="pk" mode="IN" optional="false"/>
+       <attribute name="orderItem" type="GenericValue" mode="IN" optional="false"/>
+   </service>
+
+    <!-- Order View Services -->
+    <service name="getOrderedSummaryInformation" engine="simple"
+            location="org/ofbiz/order/order/OrderServices.xml" invoke="getOrderedSummaryInformation">
+        <description>Get Ordered Summary Information</description>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="roleTypeId" type="String" mode="IN" optional="true"/> <!-- defaults to PLACING_CUSTOMER -->
+        <attribute name="orderTypeId" type="String" mode="IN" optional="true"/> <!-- defaults to SALES_ORDER -->
+        <attribute name="statusId" type="String" mode="IN" optional="true"/> <!-- defaults to ORDER_COMPLETED -->
+        <attribute name="fromDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="monthsToInclude" type="Integer" mode="IN" optional="true"/> <!-- if monthsToInclude specified along with fromDate/thruDate, will override fromDate/thruDate -->
+        <attribute name="totalOrders" type="Long" mode="OUT" optional="false"/>
+        <attribute name="totalGrandAmount" type="Double" mode="OUT" optional="false"/>
+        <attribute name="totalSubRemainingAmount" type="Double" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="getOrderHeaderInformation" engine="java" validate="false"
+            location="org.ofbiz.order.order.OrderServices" invoke="getOrderHeaderInformation">
+        <description>Get basic order header information.</description>
+        <auto-attributes entity-name="OrderHeader" include="pk" mode="INOUT" optional="false"/>
+        <auto-attributes entity-name="OrderHeader" include="nonpk" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="getOrderShippingAmount" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="getOrderShippingAmount">
+        <description>Get the total shipping for an order</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="shippingAmount" type="BigDecimal" mode="OUT" optional="false"/>
+    </service>
+
+    <!-- Order Delivery Services -->
+    <service name="createOrderDeliverySchedule" default-entity-name="OrderDeliverySchedule" engine="simple"
+            location="org/ofbiz/order/order/OrderDeliveryServices.xml" invoke="createOrderDeliverySchedule">
+        <description>Creates a delivery schedule for the specified order</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="orderItemSeqId" optional="true"/>
+    </service>
+    <service name="updateOrderDeliverySchedule" default-entity-name="OrderDeliverySchedule" engine="simple"
+            location="org/ofbiz/order/order/OrderDeliveryServices.xml" invoke="updateOrderDeliverySchedule">
+        <description>Update an existing delivery schedule for a specified purchase order</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="sendOrderDeliveryScheduleNotification" engine="simple"
+            location="org/ofbiz/order/order/OrderDeliveryServices.xml" invoke="sendOrderDeliveryScheduleNotification">
+        <description>Send Order Delivery Schedule Notification</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="checkSupplierRelatedOrderPermission" engine="simple"
+            location="org/ofbiz/order/order/OrderDeliveryServices.xml" invoke="checkSupplierRelatedOrderPermissionService">
+        <description>Check Supplier Related Order Permission</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="checkAction" type="String" mode="IN" optional="true"/>
+        <attribute name="callingMethodName" type="String" mode="IN" optional="true"/>
+        <attribute name="hasSupplierRelatedPermission" type="String" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="updateShoppingListQuantitiesFromOrder" engine="java"
+            location="org.ofbiz.order.shoppinglist.ShoppingListServices" invoke="updateShoppingListQuantitiesFromOrder">
+            <description>Given an orderId, this service will look through all its OrderItems and for each shoppingListItemId
+              and shoppingListItemSeqId, update the quantity purchased in the ShoppingListItem entity.  Used for
+              tracking how many of shopping list items are purchased.  This service is mounted as a seca on storeOrder.</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <!-- serialization test -->
+    <service name="shoppingCartRemoteTest" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="shoppingCartRemoteTest">
+        <attribute name="cart" type="org.ofbiz.order.shoppingcart.ShoppingCart" mode="IN" optional="false"/>
+    </service>
+    <service name="shoppingCartTest" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="shoppingCartTest">
+    </service>
+
+    <!-- OrderShipment Services -->
+    <service name="createOrderShipment" default-entity-name="OrderShipment" engine="simple"
+            location="org/ofbiz/order/order/OrderServices.xml" invoke="createOrderShipment" auth="true">
+        <description>Create OrderShipment</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderShipment" default-entity-name="OrderShipment" engine="simple"
+            location="org/ofbiz/order/order/OrderServices.xml" invoke="deleteOrderShipment" auth="true">
+        <description>Delete OrderShipment</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- mass order changes -->
+    <service name="massOrderChangeInterface" engine="interface" location="" invoke="">
+        <description>Interface for Mass Order Change Services</description>
+        <attribute name="orderIdList" type="List" mode="IN" optional="false"/>
+    </service>
+
+    <service name="massPickOrders" engine="java" transaction-timeout="300"
+            location="org.ofbiz.order.order.OrderServices" invoke="massPickOrders" auth="true">
+        <implements service="massOrderChangeInterface"/>
+    </service>
+    <service name="massChangeOrderApproved" engine="java" transaction-timeout="300"
+            location="org.ofbiz.order.order.OrderServices" invoke="massChangeApproved" auth="true">
+        <implements service="massOrderChangeInterface"/>
+    </service>
+    <service name="massPrintOrders" engine="java" transaction-timeout="300"
+            location="org.ofbiz.order.order.OrderServices" invoke="massPrintOrders" auth="true">
+        <implements service="massOrderChangeInterface"/>
+        <attribute name="screenLocation" type="String" mode="IN" optional="false"/>
+        <attribute name="printerName" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="massCreateFileForOrders" engine="java" transaction-timeout="300"
+            location="org.ofbiz.order.order.OrderServices" invoke="massCreateFileForOrders" auth="true">
+        <implements service="massOrderChangeInterface"/>
+        <attribute name="screenLocation" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="getNextOrderId" engine="simple"
+        location="org/ofbiz/order/order/OrderServices.xml" invoke="getNextOrderId">
+        <description>Get the Next Order ID According to Settings on the PartyAcctgPreference Entity for the given Party</description>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="productStoreId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderId" type="String" mode="OUT" optional="false"/>
+    </service>
+
+    <!-- OrderHeader -->
+    <service name="createOrderHeader" default-entity-name="OrderHeader" engine="simple"
+            location="org/ofbiz/order/order/OrderServices.xml" invoke="createOrderHeader" auth="true">
+        <description>Create OrderHeader</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateOrderHeader" default-entity-name="OrderHeader" engine="simple"
+            location="org/ofbiz/order/order/OrderServices.xml" invoke="updateOrderHeader" auth="true">
+        <description>Update OrderHeader</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    
+    <!-- CommunicationEvents related to orders -->
+    <service name="createCommunicationEventOrder" engine="simple"
+            location="org/ofbiz/order/communication/CommunicationEventServices.xml" invoke="createCommunicationEventOrder" auth="true">
+        <description>Create a Communication Event Order</description>
+        <auto-attributes entity-name="CommunicationEventOrder" include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="removeCommunicationEventOrder" engine="simple"
+            location="org/ofbiz/order/communication/CommunicationEventServices.xml" invoke="removeCommunicationEventOrder" auth="true">
+        <description>Remove a Communication Event Order</description>
+        <auto-attributes entity-name="CommunicationEventOrder" include="pk" mode="IN" optional="false"/>
+    </service>
+    
+    <!-- Order Shipping and Contacts -->
+    <service name="updateOrderItemShipGroup" engine="simple"
+            location="org/ofbiz/order/order/OrderServices.xml" invoke="updateOrderItemShipGroup" auth="true">
+        <description>Updates OrderItemShipGroup.  The shipmentMethod field is of the format ${shipmentMethodTypeId}@${carrierPartyId}</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="contactMechId" type="String" mode="IN" optional="true"/>
+        <attribute name="oldContactMechId" type="String" mode="IN" optional="true"/>
+        <attribute name="shipmentMethod" type="String" mode="IN" optional="true"/>
+        <attribute name="contactMechPurposeTypeId" type="String" mode="IN" optional="true"/>
+    </service>    
+    
+    <service name="createOrderContactMech" default-entity-name="OrderContactMech" engine="simple"
+            location="org/ofbiz/order/order/OrderServices.xml" invoke="createOrderContactMech" auth="true">
+        <description>Create Order Contact Mech</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    
+    <service name="updateOrderContactMech" engine="simple"
+            location="org/ofbiz/order/order/OrderServices.xml" invoke="updateOrderContactMech" auth="true" default-entity-name="OrderContactMech">
+        <description>Update Order Contact Mech</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <attribute name="oldContactMechId" type="String" mode="IN" optional="true"/>
+    </service>    
+    
+    <service name="removeOrderContactMech" default-entity-name="OrderContactMech" engine="simple"
+        location="org/ofbiz/order/order/OrderServices.xml" invoke="removeOrderContactMech" auth="true">
+        <description>Remove Order Contact Mech</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- OrderTerms -->
+    <service name="createOrderTerm" engine="simple"
+            location="org/ofbiz/order/order/OrderServices.xml" invoke="createOrderTerm" auth="true">
+        <description>Create an Order Term</description>
+        <auto-attributes entity-name="OrderTerm" include="pk" mode="IN" optional="false"/>
+        <auto-attributes entity-name="OrderTerm" include="nonpk" mode="IN" optional="true"/>
+        <override name="orderItemSeqId" optional="true"/>
+    </service>
+    <service name="updateOrderTerm" engine="simple"
+            location="org/ofbiz/order/order/OrderServices.xml" invoke="updateOrderTerm" auth="true">
+        <description>Update an Order Term</description>
+        <auto-attributes entity-name="OrderTerm" include="pk" mode="IN" optional="false"/>
+        <auto-attributes entity-name="OrderTerm" include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeOrderTerm" engine="simple"
+            location="org/ofbiz/order/order/OrderServices.xml" invoke="removeOrderTerm" auth="true">
+        <description>Remove an Order Term</description>
+        <auto-attributes entity-name="OrderTerm" include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="checkCreateDropShipPurchaseOrders" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="checkCreateDropShipPurchaseOrders" auth="true">
+        <description>If the order is a sales order, create purchase orders (drop shipments) for each ship group associated to a supplier</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+    </service>
+    
+    <service name="addPaymentMethodToOrder" engine="simple"
+            location="org/ofbiz/order/order/OrderServices.xml" invoke="addPaymentMethodToOrder" auth="true">
+        <description>Add Payment Method to Order.From this servicewe will call the createOrderPaymentPreference service to create OrderPaymentPreference</description>
+        <attribute type="String" mode="IN" name="orderId" optional="false"/>
+        <attribute type="String" mode="IN" name="paymentMethodId" optional="false"/>
+        <attribute type="BigDecimal" mode="IN" name="maxAmount"/>
+        <attribute type="String" mode="OUT" name="orderPaymentPreferenceId"/>
+    </service>
+    
+    <service name="completePurchaseOrder" engine="group" auth="true">
+        <description>Completes a purchase order by cancelling remaining (unreceived) item quantities and generating new product requirements
+            from those quantities</description>
+        <group>
+            <invoke name="cancelRemainingPurchaseOrderItems" result-to-context="true"/>
+            <invoke name="generateReqsFromCancelledPOItems" result-to-context="true"/>
+            <invoke name="checkOrderItemStatus" result-to-context="true"/>
+        </group>
+    </service>
+
+    <service name="cancelRemainingPurchaseOrderItems" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="cancelRemainingPurchaseOrderItems" auth="true">
+        <description>Cancels remaining (unreceived) quantities for items of an order. Does not consider received-but-rejected quantities.</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="generateReqsFromCancelledPOItems" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="generateReqsFromCancelledPOItems" auth="true">
+        <description>Generates a product requirement for the total cancelled quantity over all order items for each product</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="getOrderItemValue" engine="java"
+            location="org.ofbiz.order.order.OrderServices" invoke="getOrderItemValue" auth="true">
+        <description>Calculates the value of a given orderItem by totalling the item subtotal, any adjustments for that item, and
+            the item's share of any order-level adjustments (which is calculated by applying the percentage of the items total that the
+            item represents to the order-level adjustments total.</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderItemValue" type="BigDecimal" mode="OUT" optional="true"/>
+    </service>
+
+    <!-- order lookup services -->
+    <service name="findOrders" engine="java" transaction-timeout="300" auth="true"
+            location="org.ofbiz.order.order.OrderLookupServices" invoke="findOrders">
+        <description>Uses dynamic view entity to find orders; returns a list of Order (OrderHeader) objects</description>
+        <!-- order header fields -->
+        <attribute name="orderId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderName" type="String" mode="IN" optional="true"/>
+        <attribute name="orderTypeId" type="List" mode="IN" optional="true"/> <!-- can pass multiple values as list -->
+        <attribute name="orderStatusId" type="List" mode="IN" optional="true"/> <!-- can pass multiple values as list -->
+        <attribute name="productStoreId" type="List" mode="IN" optional="true"/> <!-- can pass multiple values as list -->
+        <attribute name="orderWebSiteId" type="List" mode="IN" optional="true"/> <!-- can pass multiple values as list -->
+        <attribute name="salesChannelEnumId" type="List" mode="IN" optional="true"/> <!-- can pass multiple values as list -->
+        <attribute name="createdBy" type="String" mode="IN" optional="true"/>
+        <attribute name="terminalId" type="String" mode="IN" optional="true"/>
+        <attribute name="transactionId" type="String" mode="IN" optional="true"/>
+        <attribute name="externalId" type="String" mode="IN" optional="true"/>
+        <attribute name="internalCode" type="String" mode="IN" optional="true"/>
+        <attribute name="useEntryDate" type="String" mode="IN" optional="true"/> <!-- Y/N use entryDate instead of orderDate -->
+        <attribute name="minDate" type="String" mode="IN" optional="true"/> <!-- converted to Timestamp -->
+        <attribute name="maxDate" type="String" mode="IN" optional="true"/> <!-- converted to Timestamp -->
+
+        <!-- order role fields -->
+        <attribute name="userLoginId" type="String" mode="IN" optional="true"/>
+        <attribute name="roleTypeId" type="List" mode="IN" optional="true"/> <!-- can pass multiple values as list -->
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+
+        <!-- order item fields -->
+        <attribute name="correspondingPoId" type="String" mode="IN" optional="true"/>
+        <attribute name="subscriptionId" type="String" mode="IN" optional="true"/>
+        <attribute name="productId" type="String" mode="IN" optional="true"/>
+        <attribute name="budgetId" type="String" mode="IN" optional="true"/>
+        <attribute name="quoteId" type="String" mode="IN" optional="true"/>
+
+        <attribute name="billingAccountId" type="String" mode="IN" optional="true"/>
+        <attribute name="finAccountId" type="String" mode="IN" optional="true"/>
+        <attribute name="cardNumber" type="String" mode="IN" optional="true"/>
+        <attribute name="accountNumber" type="String" mode="IN" optional="true"/>
+
+        <!-- shipment/inventory fields -->
+        <attribute name="inventoryItemId" type="String" mode="IN" optional="true"/>
+        <attribute name="softIdentifier" type="String" mode="IN" optional="true"/>
+        <attribute name="serialNumber" type="String" mode="IN" optional="true"/>
+        <attribute name="shipmentId" type="String" mode="IN" optional="true"/>
+
+        <!-- inventory problem fields -->
+        <attribute name="filterInventoryProblems" type="String" mode="IN" optional="true"/>
+        <attribute name="filterPOsWithRejectedItems" type="String" mode="IN" optional="true"/>
+        <attribute name="filterPOsOpenPastTheirETA" type="String" mode="IN" optional="true"/>
+        <attribute name="filterPartiallyReceivedPOs" type="String" mode="IN" optional="true"/>
+
+        <!-- view and page fields -->
+        <attribute name="viewIndex" type="Integer" mode="INOUT" optional="false"/>
+        <attribute name="viewSize" type="Integer" mode="INOUT" optional="false"/>
+        <attribute name="showAll" type="String" mode="INOUT" optional="true"/>
+
+        <!-- index fields -->
+        <attribute name="highIndex" type="Integer" mode="OUT" optional="false"/>
+        <attribute name="lowIndex" type="Integer" mode="OUT" optional="false"/>
+
+        <!-- inventory problem results -->
+        <attribute name="filterInventoryProblemsList" type="List" mode="OUT" optional="true"/>
+        <attribute name="filterPOsWithRejectedItemsList" type="List" mode="OUT" optional="true"/>
+        <attribute name="filterPOsOpenPastTheirETAList" type="List" mode="OUT" optional="true"/>
+        <attribute name="filterPartiallyReceivedPOsList" type="List" mode="OUT" optional="true"/>
+
+        <!-- actual results -->
+        <attribute name="paramList" type="String" mode="OUT" optional="false"/>
+        <attribute name="orderList" type="List" mode="OUT" optional="false"/>
+        <attribute name="orderListSize" type="Integer" mode="OUT" optional="false"/>
+    </service>
+
+</services>

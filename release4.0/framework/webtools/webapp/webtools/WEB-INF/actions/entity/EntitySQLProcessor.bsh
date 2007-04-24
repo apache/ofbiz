@@ -1,0 +1,83 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import org.ofbiz.entity.jdbc.SQLProcessor;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import org.ofbiz.entity.*;
+import org.ofbiz.entity.model.ModelGroupReader;
+
+String resultMessage = "";
+ResultSet rs = null;
+ArrayList columns = new ArrayList();
+ArrayList records = new ArrayList();
+ArrayList groups = new ArrayList();
+ModelGroupReader mgr = delegator.getModelGroupReader();
+Iterator groupMapIt = mgr.getGroupNames().iterator();
+
+while (groupMapIt.hasNext()) {
+    groups.add(groupMapIt.next());
+}
+
+if (sqlCommand != null && sqlCommand.length() > 0 && selGroup != null && selGroup.length() > 0) {
+    String helperName = delegator.getGroupHelperName(selGroup);
+    SQLProcessor du = new SQLProcessor(helperName);
+    try {
+        if (sqlCommand.toUpperCase().startsWith("SELECT")) {
+            rs = du.executeQuery(sqlCommand);
+            if (rs != null) {
+                ResultSetMetaData rsmd = rs.getMetaData();
+                int numberOfColumns = rsmd.getColumnCount();
+                for (int i = 1; i <= numberOfColumns; i++) {
+                    columns.add(rsmd.getColumnName(i));
+                }
+                boolean rowLimitReached = false;
+                while (rs.next()) {
+                    if (records.size() >= rowLimit) {
+                        resultMessage = "Returned top " + rowLimit + " rows.";
+                        rowLimitReached = true;
+                        break;
+                    }
+                    ArrayList record = new ArrayList();
+                    for (int i = 1; i <= numberOfColumns; i++) {
+                        record.add(rs.getObject(i));
+                    }
+                    records.add(record);
+                }
+                resultMessage = "Returned " + (rowLimitReached? "top " + rowLimit : "" + records.size()) + " rows.";
+                rs.close();
+            }
+        } else {
+            du.prepareStatement(sqlCommand);
+            int numOfaffectedRows = du.executeUpdate();
+            resultMessage = "Affected " + numOfaffectedRows + " rows.";
+        }
+    } catch(Exception exc) {
+        resultMessage = exc.getMessage();
+    }
+}
+context.put("groups", groups);
+context.put("resultMessage", resultMessage);
+context.put("columns", columns);
+context.put("records", records);
+
+

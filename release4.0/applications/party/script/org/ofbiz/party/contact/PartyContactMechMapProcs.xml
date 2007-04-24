@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-map-processors xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/simple-methods.xsd">
+  <!-- ContactMech map procs -->
+    <simple-map-processor name="deleteContactMech">
+        <process field="contactMechId"><copy/><not-empty><fail-property resource="PartyUiLabels" property="PartyContactMechIdMissing"/></not-empty></process>
+        <process field="partyId"><copy/></process>
+    </simple-map-processor>
+
+    <simple-map-processor name="postalAddress">
+        <process field="partyId"><copy/></process>
+        <process field="toName"><copy/></process>
+        <process field="attnName"><copy/></process>
+        <process field="address1"><copy/><not-empty><fail-property resource="PartyUiLabels" property="PartyAddressLine1Missing"/></not-empty></process>
+        <process field="address2"><copy/></process>
+        <process field="directions"><copy/></process>
+        <process field="city"><copy/><not-empty><fail-property resource="PartyUiLabels" property="PartyCityMissing"/></not-empty></process>
+        <process field="stateProvinceGeoId"><copy/></process>
+        <process field="postalCode"><copy/><not-empty><fail-property resource="PartyUiLabels" property="PartyPostalCodeMissing"/></not-empty></process>
+        <process field="countryGeoId"><copy/></process>
+        <process field="postalCodeGeoId"><copy/></process>
+        <process field="allowSolicitation"><copy/></process>
+    </simple-map-processor>
+
+    <simple-map-processor name="telecomNumber">
+        <process field="partyId"><copy/></process>
+        <process field="countryCode"><copy/></process>
+        <process field="areaCode"><copy/></process>
+        <process field="contactNumber"><copy/><not-empty><fail-property resource="PartyUiLabels" property="PartyContactNumberMissing"/></not-empty></process>
+        <process field="extension"><copy/></process>
+        <process field="allowSolicitation"><copy/></process>
+    </simple-map-processor>
+
+    <!-- PartyContactMechPurpose map procs -->
+    <simple-map-processor name="createPartyContactMechPurpose">
+        <process field="partyId"><copy/></process>
+        <process field="contactMechId"><copy/><not-empty><fail-property resource="PartyUiLabels" property="PartyContactMechIdMissing"/></not-empty></process>
+        <process field="contactMechPurposeTypeId"><copy/><not-empty><fail-property resource="PartyUiLabels" property="PartyPurposeTypeMissingCannotAdd"/></not-empty></process>
+    </simple-map-processor>
+    <simple-map-processor name="deletePartyContactMechPurpose">
+        <process field="partyId"><copy/></process>
+        <process field="contactMechId"><copy/><not-empty><fail-property resource="PartyUiLabels" property="PartyContactMechIdMissing"/></not-empty></process>
+        <process field="contactMechPurposeTypeId"><copy/><not-empty><fail-property resource="PartyUiLabels" property="PartyPurposeTypeMissingCannotRemove"/></not-empty></process>
+        <process field="fromDate">
+            <not-empty><fail-property resource="PartyUiLabels" property="CommonFromDateMissing"/></not-empty>
+            <convert type="Timestamp"><fail-property resource="PartyUiLabels" property="CommonFromDateNotValidDateTime"/></convert></process>
+    </simple-map-processor>
+</simple-map-processors>

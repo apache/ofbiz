@@ -1,0 +1,309 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+
+import java.util.*;
+import org.ofbiz.base.util.*;
+import org.ofbiz.entity.*;
+import org.ofbiz.entity.condition.*;
+import org.ofbiz.entity.transaction.*;
+import org.ofbiz.entity.model.DynamicViewEntity;
+import org.ofbiz.entity.model.ModelKeyMap;
+import org.ofbiz.entity.util.EntityFindOptions;
+import org.ofbiz.product.inventory.*;
+
+import org.ofbiz.widget.html.*;
+
+delegator = request.getAttribute("delegator");
+dispatcher = request.getAttribute("dispatcher");
+
+action = request.getParameter("action");
+
+String searchParameterString = "";
+searchParameterString = "action=Y&facilityId=" + facilityId;
+
+offsetQOH = -1;
+offsetATP = -1;
+boolean hasOffsetQOH = false;
+boolean hasOffsetATP = false;
+
+List rows = new ArrayList();
+
+if (action != null) {
+    // ------------------------------
+    DynamicViewEntity prodView = new DynamicViewEntity();
+    Map conditionMap = UtilMisc.toMap("facilityId", facilityId);
+
+    if (offsetQOHQty != null && offsetQOHQty.length() > 0) {
+        try {
+            offsetQOH = Integer.parseInt(offsetQOHQty);
+            hasOffsetQOH = true;
+            searchParameterString = searchParameterString + "&offsetQOHQty=" + offsetQOH;
+        } catch(NumberFormatException nfe) {
+        }
+    }
+    if (offsetATPQty != null && offsetATPQty.length() > 0) {
+        try {
+            offsetATP = Integer.parseInt(offsetATPQty);
+            hasOffsetATP = true;
+            searchParameterString = searchParameterString + "&offsetATPQty=" + offsetATP;
+        } catch(NumberFormatException nfe) {
+        }
+    }
+
+    prodView.addMemberEntity("PRFA", "ProductFacility");
+    prodView.addAliasAll("PRFA", null);
+
+    prodView.addMemberEntity("PROD", "Product");
+    prodView.addViewLink("PROD", "PRFA", Boolean.FALSE, ModelKeyMap.makeKeyMapList("productId"));
+    prodView.addAlias("PROD", "internalName");
+    prodView.addAlias("PROD", "isVirtual");
+    prodView.addAlias("PROD", "salesDiscontinuationDate");
+    if (productTypeId != null && productTypeId.length() > 0) {
+        prodView.addAlias("PROD", "productTypeId");
+        conditionMap.put("productTypeId", productTypeId);
+        searchParameterString = searchParameterString + "&productTypeId=" + productTypeId;
+    }
+    if (searchInProductCategoryId != null && searchInProductCategoryId.length() > 0) {
+        prodView.addMemberEntity("PRCA", "ProductCategoryMember");
+        prodView.addViewLink("PRFA", "PRCA", Boolean.FALSE, ModelKeyMap.makeKeyMapList("productId"));
+        prodView.addAlias("PRCA", "productCategoryId");
+        conditionMap.put("productCategoryId", searchInProductCategoryId);
+        searchParameterString = searchParameterString + "&searchInProductCategoryId=" + searchInProductCategoryId;
+    }
+
+    if (productSupplierId != null && productSupplierId.length() > 0) {
+        prodView.addMemberEntity("SPPR", "SupplierProduct");
+        prodView.addViewLink("PRFA", "SPPR", Boolean.FALSE, ModelKeyMap.makeKeyMapList("productId"));
+        prodView.addAlias("SPPR", "partyId");
+        conditionMap.put("partyId", productSupplierId);
+        searchParameterString = searchParameterString + "&productSupplierId=" + productSupplierId;
+    }
+    
+    // set distinct on so we only get one row per product
+    EntityFindOptions findOpts = new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, true);
+    EntityCondition searchCondition = new EntityFieldMap(conditionMap, EntityOperator.AND);
+    EntityCondition notVirtualCondition = new EntityExpr(new EntityExpr("isVirtual", EntityOperator.EQUALS, null),
+                                                         EntityOperator.OR,
+                                                         new EntityExpr("isVirtual", EntityOperator.NOT_EQUAL, "Y"));
+
+    whereConditionsList = UtilMisc.toList(searchCondition, notVirtualCondition);
+    // add the discontinuation date condition
+    if (UtilValidate.isNotEmpty(productsSoldThruTimestamp)) {
+        EntityCondition discontinuationDateCondition = new EntityConditionList(UtilMisc.toList(
+                new EntityExpr("salesDiscontinuationDate", EntityOperator.EQUALS, null),
+                new EntityExpr("salesDiscontinuationDate", EntityOperator.GREATER_THAN, productsSoldThruTimestamp)),
+            EntityOperator.OR);
+        whereConditionsList.add(discontinuationDateCondition);
+        searchParameterString = searchParameterString + "&productsSoldThruTimestamp=" + productsSoldThruTimestamp;
+    }
+
+    // add search on internal name
+    if (UtilValidate.isNotEmpty(internalName)) {
+        whereConditionsList.add(new EntityExpr("internalName", true, EntityOperator.LIKE, "%" + internalName + "%", true));
+        searchParameterString = searchParameterString + "&internalName=" + internalName;
+    }
+    
+    // add search on productId 
+    if (UtilValidate.isNotEmpty(productId)) {
+        whereConditionsList.add(new EntityExpr("productId", true, EntityOperator.LIKE, productId + "%", true));
+        searchParameterString = searchParameterString + "&productId=" + productId;
+    }
+    EntityCondition whereCondition = new EntityConditionList(whereConditionsList, EntityOperator.AND);
+
+    boolean beganTransaction = false;
+    List prods = null;
+    try {
+        beganTransaction = TransactionUtil.begin();
+        prodsEli = delegator.findListIteratorByCondition(prodView, whereCondition, null, null, UtilMisc.toList("productId"), findOpts);
+        prods = prodsEli.getCompleteList();
+        prodsEli.close();
+    } catch (GenericEntityException e) {
+        String errMsg = "Failure in operation, rolling back transaction";
+        Debug.logError(e, errMsg, "ViewFacilityInventoryByProduct");
+        try {
+            // only rollback the transaction if we started one...
+            TransactionUtil.rollback(beganTransaction, errMsg, e);
+        } catch (GenericEntityException e2) {
+            Debug.logError(e2, "Could not rollback transaction: " + e2.toString(), "ViewFacilityInventoryByProduct");
+        }
+        // after rolling back, rethrow the exception
+        throw e;
+    } finally {
+        // only commit the transaction if we started one... this will throw an exception if it fails
+        TransactionUtil.commit(beganTransaction);
+    }
+
+    // If the user has specified a number of months over which to sum usage quantities, define the correct timestamp
+    checkTime = null;
+    monthsInPastLimitStr = request.getParameter("monthsInPastLimit");
+    if (UtilValidate.isNotEmpty(monthsInPastLimitStr)) {
+        try {
+            monthsInPastLimit = Integer.parseInt(monthsInPastLimitStr);
+            cal = UtilDateTime.toCalendar(null);
+            cal.add(Calendar.MONTH, 0 - monthsInPastLimit);
+            checkTime = UtilDateTime.toTimestamp(cal.getTime());
+            searchParameterString += "&monthsInPastLimit=" + monthsInPastLimitStr;
+        } catch (Exception e) {
+            // Ignore
+        }
+    }
+
+    if (! UtilValidate.isEmpty(checkTime)) {
+
+        // Construct a dynamic view entity to search against for sales usage quantities
+        salesUsageViewEntity = new DynamicViewEntity();
+        salesUsageViewEntity.addMemberEntity("OI", "OrderItem");
+        salesUsageViewEntity.addMemberEntity("OH", "OrderHeader");
+        salesUsageViewEntity.addMemberEntity("ItIss", "ItemIssuance");
+        salesUsageViewEntity.addMemberEntity("InvIt", "InventoryItem");
+        salesUsageViewEntity.addViewLink("OI", "OH", false, ModelKeyMap.makeKeyMapList("orderId"));
+        salesUsageViewEntity.addViewLink("OI", "ItIss", false, ModelKeyMap.makeKeyMapList("orderId", "orderId", "orderItemSeqId", "orderItemSeqId"));
+        salesUsageViewEntity.addViewLink("ItIss", "InvIt", false, ModelKeyMap.makeKeyMapList("inventoryItemId"));
+        salesUsageViewEntity.addAlias("OI", "productId");
+        salesUsageViewEntity.addAlias("OH", "statusId");
+        salesUsageViewEntity.addAlias("OH", "orderTypeId");
+        salesUsageViewEntity.addAlias("OH", "orderDate");
+        salesUsageViewEntity.addAlias("ItIss", "inventoryItemId");
+        salesUsageViewEntity.addAlias("ItIss", "quantity");
+        salesUsageViewEntity.addAlias("InvIt", "facilityId");
+    
+        // Construct a dynamic view entity to search against for production usage quantities
+        productionUsageViewEntity = new DynamicViewEntity();
+        productionUsageViewEntity.addMemberEntity("WEIA", "WorkEffortInventoryAssign");
+        productionUsageViewEntity.addMemberEntity("WE", "WorkEffort");
+        productionUsageViewEntity.addMemberEntity("II", "InventoryItem");
+        productionUsageViewEntity.addViewLink("WEIA", "WE", false, ModelKeyMap.makeKeyMapList("workEffortId"));
+        productionUsageViewEntity.addViewLink("WEIA", "II", false, ModelKeyMap.makeKeyMapList("inventoryItemId"));
+        productionUsageViewEntity.addAlias("WEIA", "quantity");
+        productionUsageViewEntity.addAlias("WE", "actualCompletionDate");
+        productionUsageViewEntity.addAlias("WE", "workEffortTypeId");
+        productionUsageViewEntity.addAlias("II", "facilityId");
+        productionUsageViewEntity.addAlias("II", "productId");
+
+    }
+
+    prodsIt = prods.iterator();
+
+    while (prodsIt.hasNext()) {
+        oneProd = prodsIt.next();
+        contextInput = UtilMisc.toMap("productId",oneProd.getString("productId"), "facilityId", facilityId);
+        GenericValue product = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId",oneProd.getString("productId")));
+        if ("MARKETING_PKG_AUTO".equals(product.getString("productTypeId"))) {
+            resultOutput = dispatcher.runSync("getMktgPackagesAvailable", contextInput);
+        } else {
+            resultOutput = dispatcher.runSync("getInventoryAvailableByFacility", contextInput);
+        }
+
+        // filter for quantities
+        minimumStockInt = 0;
+        if (oneProd.get("minimumStock") != null) {
+            minimumStockInt = (oneProd.getDouble("minimumStock")).intValue();
+        }
+
+        quantityOnHandTotalInt = 0;
+        if (resultOutput.get("quantityOnHandTotal") != null) {
+            quantityOnHandTotalInt = ((Double)resultOutput.get("quantityOnHandTotal")).intValue();
+        }
+        offsetQOHQtyAvailable = quantityOnHandTotalInt - minimumStockInt;
+        if (hasOffsetQOH && offsetQOHQtyAvailable > offsetQOH) continue;
+
+        availableToPromiseTotalInt = 0;
+        if (resultOutput.get("availableToPromiseTotal") != null) {
+            availableToPromiseTotalInt = ((Double)resultOutput.get("availableToPromiseTotal")).intValue();
+        }
+        offsetATPQtyAvailable = availableToPromiseTotalInt - minimumStockInt;
+        if (hasOffsetATP && offsetATPQtyAvailable > offsetATP) continue;
+        
+        quantityOnOrder = InventoryWorker.getOutstandingPurchasedQuantity(oneProd.getString("productId"), delegator);
+        
+        oneInventory = new HashMap();
+        oneInventory.put("productId", oneProd.getString("productId"));
+        oneInventory.put("minimumStock", oneProd.getString("minimumStock"));
+        oneInventory.put("reorderQuantity", oneProd.getString("reorderQuantity"));
+        oneInventory.put("daysToShip", oneProd.getString("daysToShip"));
+        oneInventory.put("totalQuantityOnHand", resultOutput.get("quantityOnHandTotal"));
+        oneInventory.put("totalAvailableToPromise", resultOutput.get("availableToPromiseTotal"));
+        oneInventory.put("offsetQOHQtyAvailable", offsetQOHQtyAvailable);
+        oneInventory.put("offsetATPQtyAvailable", offsetATPQtyAvailable);
+        oneInventory.put("quantityOnOrder", quantityOnOrder);
+
+        if (! UtilValidate.isEmpty(checkTime)) {
+        
+            // Make a query against the sales usage view entity
+            salesUsageIt = delegator.findListIteratorByCondition(salesUsageViewEntity, 
+                    new EntityConditionList(
+                        UtilMisc.toList(
+                            new EntityExpr("facilityId", EntityOperator.EQUALS, "WebStoreWarehouse"),
+                            new EntityExpr("productId", EntityOperator.EQUALS, oneProd.getString("productId")),
+                            new EntityExpr("statusId", EntityOperator.IN, UtilMisc.toList("ORDER_COMPLETED", "ORDER_APPROVED", "ORDER_HELD")),
+                            new EntityExpr("orderTypeId", EntityOperator.EQUALS, "SALES_ORDER"),
+                            new EntityExpr("orderDate", EntityOperator.GREATER_THAN_EQUAL_TO, checkTime)
+                        ),
+                    EntityOperator.AND),
+                null, null, null, null);
+    
+            // Sum the sales usage quantities found
+            salesUsageQuantity = 0;
+            while((salesUsageItem = salesUsageIt.next()) != null) {
+                if (salesUsageItem.get("quantity") != null) {
+                    try {
+                        salesUsageQuantity += salesUsageItem.getDouble("quantity").doubleValue();
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                }
+            }
+            salesUsageIt.close();
+    
+            // Make a query against the production usage view entity
+            productionUsageIt = delegator.findListIteratorByCondition(productionUsageViewEntity, 
+                    new EntityConditionList(
+                        UtilMisc.toList(
+                            new EntityExpr("facilityId", EntityOperator.EQUALS, "WebStoreWarehouse"),
+                            new EntityExpr("productId", EntityOperator.EQUALS, oneProd.getString("productId")),
+                            new EntityExpr("workEffortTypeId", EntityOperator.EQUALS, "PROD_ORDER_TASK"),
+                            new EntityExpr("actualCompletionDate", EntityOperator.GREATER_THAN_EQUAL_TO, checkTime)
+                        ),
+                    EntityOperator.AND),
+                null, null, null, null);
+    
+            // Sum the production usage quantities found
+            productionUsageQuantity = 0;
+            while((productionUsageItem = productionUsageIt.next()) != null) {
+                if (productionUsageItem.get("quantity") != null) {
+                    try {
+                        productionUsageQuantity += productionUsageItem.getDouble("quantity").doubleValue();
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                }
+            }
+            productionUsageIt.close();
+    
+            oneInventory.put("usageQuantity", salesUsageQuantity + productionUsageQuantity);
+
+        }
+
+        rows.add(oneInventory);
+    }
+
+}
+context.put("inventoryByProduct", rows);
+context.put("searchParameterString", searchParameterString);

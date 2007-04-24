@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/widget-form.xsd">
+    <form name="EditOrderHeader" type="single" target="updateOrderHeader" title=""
+        default-title-style="tableheadtext" default-widget-style="inputBox" default-tooltip-style="tabletext" >
+        <actions>
+            <entity-one entity-name="StatusItem" value-name="currentStatus" auto-field-map="false">
+                <field-map field-name="statusId" env-name="orderHeader.statusId"/>
+            </entity-one>
+        </actions>
+        <alt-target target="createOrderHeader" use-when="orderHeader==null"/>
+        <auto-fields-entity entity-name="OrderHeader" />
+        
+        <field name="orderId" use-when="orderHeader!=null" ><display/></field>
+        <field name="orderId" use-when="orderHeader==null" ><ignored/></field>
+        <field name="orderTypeId" widget-style="selectBox">
+            <drop-down>
+                <entity-options description="${description}" entity-name="OrderType" key-field-name="orderTypeId">
+                </entity-options>
+            </drop-down>
+        </field>
+        
+        <field name="statusId" use-when="orderHeader==null" title="${uiLabelMap.CommonStatus}" widget-style="selectBox">
+            <drop-down>
+                <entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" operator="equals" value="ORDER_STATUS"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" use-when="orderHeader!=null" title="${uiLabelMap.CommonStatus}" widget-style="selectBox">
+            <drop-down allow-empty="false" current-description="${currentStatus.description}">
+                <entity-options entity-name="StatusValidChangeToDetail" key-field-name="statusIdTo" description="${transitionName} (${description})">
+                    <entity-constraint name="statusId" value="${orderHeader.statusId}"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        
+        <field name="salesChannelEnumId" widget-style="selectBox">
+            <drop-down>
+                <entity-options description="${description}" entity-name="Enumeration" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="ORDER_SALES_CHANNEL"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        
+        <field name="currencyUom" widget-style="selectBox">
+            <drop-down>
+                <entity-options description="${description}" entity-name="Uom" key-field-name="uomId">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        
+        <field name="firstAttemptOrderId" ><lookup target-form-name="/ordermgr/control/LookupOrderHeader"/></field>
+        <field name="productStoreId">
+            <lookup target-form-name="/marketing/control/LookupProductStore"/>
+        </field>
+        <field name="submitButton" title="Update" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListOrderHeaders" type="single" target="" title=""
+        default-title-style="tableheadtext" default-widget-style="inputBox" default-tooltip-style="tabletext" >
+        <actions>
+            <entity-and entity-name="OrderHeader">
+                <field-map field-name="orderId"/>
+            </entity-and>
+        </actions>
+        <auto-fields-entity entity-name="OrderHeader" default-field-type="display"/>
+        <field name="orderId" widget-style="buttontext">
+            <hyperlink target="EditOrderHeader?orderId=${orderId}" description="[${orderId}]" />
+        </field>
+        <field name="statusId"> <display-entity entity-name="StatusItem"/> </field>
+        <field name="productStoreId"> <display-entity entity-name="ProductStore"/> </field>
+    </form>
+    <form name="ListOrderTerms" type="list" list-name="orderTerms" target="updateOrderTerm" title=""
+        default-title-style="tableheadtext" default-tooltip-style="tabletext" default-widget-style="tabletext"
+        paginate-target="ListOrderTerms">
+        <auto-fields-entity entity-name="OrderTerm" default-field-type="edit"/>
+        <field name="termTypeId"><display-entity also-hidden="true" entity-name="TermType"/></field>
+        <field name="orderId"><hidden/></field>
+        <field name="orderItemSeqId"><display/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <field name="deleteLink" title="" widget-style="buttontext">
+            <hyperlink target="removeOrderTerm?orderId=${orderId}&amp;termTypeId=${termTypeId}&amp;orderItemSeqId=${orderItemSeqId}" description="${uiLabelMap.CommonRemove}" also-hidden="false"/>
+        </field>
+    </form>
+    <form name="AddOrderTerm" type="single" target="createOrderTerm" title=""
+        default-title-style="tableheadtext" default-widget-style="inputBox" default-tooltip-style="tabletext">
+        <auto-fields-entity entity-name="OrderTerm" default-field-type="edit"/>
+        <field name="orderId"><hidden value="${parameters.orderId}"/></field>
+        <field name="termTypeId">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="TermType" description="${description}">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="addButton" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+</forms>

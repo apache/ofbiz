@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/widget-form.xsd">
+    <form name="searchQuery" target="AdminSearch" title="" type="single"
+        default-title-style="tableheadtext" default-tooltip-style="tabletext" default-widget-style="inputBox">
+        <field name="queryLine" title="${uiLabelMap.EcommerceEnterQueryParameters}"><text size="60"/></field>
+        <field name="submitButton" title="Query" widget-style="smallSubmit"><submit button-type="button"/></field>
+
+    </form>
+    <form name="searchList" type="list" target="" list-name="queryResults" 
+        default-title-style="tableheadtext" default-widget-style="inputBox" default-tooltip-style="tabletext" 
+        paginate-target="/AdminSearch">
+        <field name="editContent" title="">
+            <hyperlink also-hidden="false" description="Edit" target="CMSContentEdit?contentId=${contentId}&amp;drDataResourceId=${drDataResourceId}&amp;contentIdTo=${contentIdTo}"/> 
+        </field>
+        <field name="contentId" title="${uiLabelMap.ProductContentId}" ><display/></field>
+        <field name="dataResourceId" title="${uiLabelMap.EcommerceDataResourceId}" ><display/></field>
+        <field name="contentName" title="${uiLabelMap.CommonName}" ><display/></field>
+    </form>
+</forms>

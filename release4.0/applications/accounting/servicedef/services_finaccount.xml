@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/services.xsd">
+    <description>Accounting Services: Financial Account</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <!-- Financial Account -->
+    <service name="createFinAccount" engine="simple" default-entity-name="FinAccount"
+            location="org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="createFinAccount">
+        <description>Create a new Financial Account.  If no finAccountId is provided, an auto-sequenced one will be used.</description>
+        <auto-attributes mode="INOUT" optional="true" include="pk"/>
+        <auto-attributes mode="IN" optional="true" include="nonpk">
+            <exclude field-name="actualBalance"/>
+            <exclude field-name="availableBalance"/>
+        </auto-attributes>
+    </service>
+    <service name="updateFinAccount" engine="simple" default-entity-name="FinAccount"
+            location="org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="updateFinAccount">
+        <description>Update a Financial Account</description>
+        <auto-attributes mode="INOUT" optional="false" include="pk"/>
+        <auto-attributes mode="IN" optional="true" include="nonpk">
+            <exclude field-name="actualBalance"/>
+            <exclude field-name="availableBalance"/>
+        </auto-attributes>
+    </service>
+    <service name="deleteFinAccount" engine="simple" default-entity-name="FinAccount"
+            location="org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="deleteFinAccount">
+        <description>Delete a Financial Account</description>
+        <auto-attributes mode="IN" optional="false" include="pk"/>
+    </service>
+    <service name="updateFinAccountBalancesFromTrans" engine="simple"
+        location="org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="updateFinAccountBalancesFromTrans">
+        <description>Update FinAccount.actualBalance and FinAccount.availableBalance based on a new FinAccountTrans; meant to be called as an EECA as it is for data maintenance</description>
+        <attribute name="finAccountTransId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="updateFinAccountBalancesFromAuth" engine="simple"
+        location="org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="updateFinAccountBalancesFromAuth">
+        <description>Update FinAccount.availableBalance based on a new FinAccountAuth; meant to be called as an EECA as it is for data maintenance</description>
+        <attribute name="finAccountAuthId" type="String" mode="IN" optional="false"/>
+    </service>
+    
+    <service name="createFinAccountTrans" engine="simple" default-entity-name="FinAccountTrans"
+            location="org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="createFinAccountTrans">
+        <description>Create a new Financial Account Transaction.  Will use current timestamp for entryDate and trasanctionDate if none is provided.</description>
+        <auto-attributes mode="OUT" optional="false" include="pk"/>
+        <auto-attributes mode="IN" optional="true" include="nonpk">
+            <exclude field-name="performedByPartyId"/>
+        </auto-attributes>
+    </service>
+    <service name="postFinAccountTransToGl" engine="simple"
+        location="org/ofbiz/accounting/finaccount/FinAccountGlPostServices.xml" invoke="postFinAccountTransToGl">
+        <description>Post a Financial Account Transaction to the General Ledger; meant to be called as an SECA</description>
+        <attribute name="finAccountTransId" type="String" mode="IN" optional="false"/>
+    </service>
+    
+    <service name="createFinAccountRole" engine="simple" default-entity-name="FinAccountRole"
+            location="org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="createFinAccountRole">
+        <description>Create a new Financial Account Role</description>
+        <auto-attributes mode="IN" optional="false" include="pk"/>
+        <auto-attributes mode="IN" optional="true" include="nonpk"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="updateFinAccountRole" engine="simple" default-entity-name="FinAccountRole"
+            location="org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="updateFinAccountRole">
+        <description>Update a Financial Account Role</description>
+        <auto-attributes mode="IN" optional="false" include="pk"/>
+        <auto-attributes mode="IN" optional="true" include="nonpk"/>
+    </service>
+    <service name="deleteFinAccountRole" engine="simple" default-entity-name="FinAccountRole"
+            location="org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="deleteFinAccountRole">
+        <description>Remove a Financial Account Role</description>
+        <auto-attributes mode="IN" optional="false" include="pk"/>
+    </service>
+
+    <service name="createFinAccountAuth" engine="simple" default-entity-name="FinAccountAuth"
+            location="org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="createFinAccountAuth">
+        <description>Lower level service for creating authorization against a fin account.  Will use current time for authorizationDate and thruDate if not supplied.</description>
+        <auto-attributes mode="OUT" optional="false" include="pk"/>
+        <auto-attributes mode="IN" optional="true" include="nonpk"/>
+    </service>   
+    <service name="expireFinAccountAuth" engine="simple" default-entity-name="FinAccountAuth"
+            location="org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="expireFinAccountAuth">
+        <description>Expires a fin account authorization.  Will use current time if no time is supplied in parameter</description>
+        <attribute name="finAccountAuthId" type="String" mode="IN" optional="false"/>
+        <attribute name="expireDateTime" type="Timestamp" mode="IN" optional="true"/>
+    </service>
+    
+    <!-- these services use the product store's fin account settings -->
+    <service name="createFinAccountForStore" engine="java" default-entity-name="FinAccount"
+            location="org.ofbiz.accounting.finaccount.FinAccountServices" invoke="createFinAccountForStore">
+        <description>Creates a new FinAccount, using defaults from the ProductStoreFinActSetting for expiration date and to generate an automatic account code.
+            Note this would override any user values for from, thru, and acount code</description>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <attribute type="String" mode="IN" name="productStoreId" optional="false"/>
+        <attribute type="String" mode="OUT" name="finAccountId" optional="true"/>
+        <attribute type="String" mode="OUT" name="finAccountCode" optional="true"/>
+        <attribute type="String" mode="OUT" name="finAccountPin" optional="true"/>
+        <override name="finAccountTypeId" mode="IN" optional="false"/> <!-- Required to find the store's settings for this fin account type -->
+     </service>
+
+    <!-- financial account transactions -->
+    <service name="finAccountDeposit" engine="java"
+            location="org.ofbiz.accounting.finaccount.FinAccountPaymentServices" invoke="finAccountDeposit" auth="true">
+        <description>Deposit Funds into a Financial Account</description>
+        <attribute name="finAccountId" type="String" mode="IN" optional="false"/>
+        <attribute name="productStoreId" type="String" mode="IN" optional="true"/>
+        <attribute name="isRefund" type="Boolean" mode="IN" optional="true"/>
+        <attribute name="currency" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="amount" type="Double" mode="INOUT" optional="false"/>
+        <attribute name="balance" type="Double" mode="OUT" optional="false"/>
+        <attribute name="previousBalance" type="Double" mode="OUT" optional="true"/>
+        <attribute name="processResult" type="Boolean" mode="OUT" optional="false"/>
+        <attribute name="referenceNum" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="finAccountWithdraw" engine="java"
+            location="org.ofbiz.accounting.finaccount.FinAccountPaymentServices" invoke="finAccountWithdraw" auth="true">
+        <description>Deposit Funds into a Financial Account</description>
+        <attribute name="finAccountId" type="String" mode="IN" optional="false"/>        
+        <attribute name="productStoreId" type="String" mode="IN" optional="true"/>
+        <attribute name="requireBalance" type="Boolean" mode="IN" optional="true"/> 
+        <attribute name="currency" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="amount" type="Double" mode="INOUT" optional="false"/>
+        <attribute name="balance" type="Double" mode="OUT" optional="false"/>
+        <attribute name="previousBalance" type="Double" mode="OUT" optional="true"/>
+        <attribute name="processResult" type="Boolean" mode="OUT" optional="false"/>
+        <attribute name="referenceNum" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="finAccountReplenish" engine="java"
+            location="org.ofbiz.accounting.finaccount.FinAccountPaymentServices" invoke="finAccountReplenish" auth="true">
+        <description>Auto-replenish a financial account</description>
+        <attribute name="finAccountId" type="String" mode="IN" optional="false"/>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="checkFinAccountBalance" engine="java"
+            location="org.ofbiz.accounting.finaccount.FinAccountServices" invoke="checkFinAccountBalance" auth="true">
+        <description>Checks the balance of the financial account</description>
+        <attribute name="finAccountId" type="String" mode="IN" optional="false"/>
+        <attribute name="availableBalance" type="Double" mode="OUT" optional="false"/>
+        <attribute name="balance" type="Double" mode="OUT" optional="false"/>
+        <attribute name="isFrozen" type="Boolean" mode="OUT" optional="false"/> 
+    </service>
+    <service name="checkFinAccountStatus" engine="java"
+            location="org.ofbiz.accounting.finaccount.FinAccountServices" invoke="checkFinAccountStatus" auth="true">
+        <description>Checks the status of the financial account; changes the isFrozen flag</description>
+        <attribute name="finAccountAuthId" type="String" mode="IN" optional="true"/>
+        <attribute name="finAccountId" type="String" mode="IN" optional="true"/>
+    </service>
+    
+    <!-- balance account created from product purchase -->
+    <service name="createPartyFinAccountFromPurchase" engine="java"
+            location="org.ofbiz.accounting.finaccount.FinAccountProductServices" invoke="createPartyFinAccountFromPurchase" auth="true">
+        <implements service="itemFulfillmentInterface"/>
+        <attribute name="finAccountId" type="String" mode="OUT" optional="false"/>
+    </service>
+
+    <!-- financial account as payment method services -->
+    <service name="ofbFaAuthorize" engine="java"
+             location="org.ofbiz.accounting.finaccount.FinAccountPaymentServices" invoke="finAccountPreAuth" auth="true">
+        <description>Authorize a potential transaction against a financial account</description>
+        <implements service="paymentProcessInterface"/>
+        <attribute name="finAccountCode" type="String" mode="IN" optional="true"/>
+        <attribute name="finAccountPin" type="String" mode="IN" optional="true"/>
+        <attribute name="finAccountId" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="ofbFaCapture" engine="java"
+             location="org.ofbiz.accounting.finaccount.FinAccountPaymentServices" invoke="finAccountCapture" auth="true">
+        <description>Capture funds from a pre-authroized financial account transaction</description>
+        <implements service="ccCaptureInterface"/>
+    </service>
+    <service name="ofbFaRelease" engine="java"
+             location="org.ofbiz.accounting.finaccount.FinAccountPaymentServices" invoke="finAccountRelease" auth="true">
+        <description>Release authorizations back to a financial account.</description>
+        <implements service="paymentReleaseInterface"/>
+    </service>
+    <service name="ofbFaRefund" engine="java"
+             location="org.ofbiz.accounting.finaccount.FinAccountPaymentServices" invoke="finAccountRefund" auth="true">
+        <description>Return funds back to a financial account.</description>
+        <implements service="paymentRefundInterface"/>
+        <attribute name="finAccountId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Gift Certificate -->
+    <service name="createGiftCertificate" engine="java"
+             location="org.ofbiz.accounting.payment.GiftCertificateServices" invoke="createGiftCertificate" auth="true">
+        <description>Generate a Gift Certificate number/pin and store as a FinAccount</description>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"/>
+        <attribute name="initialAmount" type="Double" mode="INOUT" optional="false"/>
+        <attribute name="currency" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="cardNumber" type="String" mode="OUT" optional="false"/>
+        <attribute name="pinNumber" type="String" mode="OUT" optional="true"/>
+        <attribute name="processResult" type="Boolean" mode="OUT" optional="false"/>
+        <attribute name="responseCode" type="String" mode="OUT" optional="false"/>
+        <attribute name="referenceNum" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="addFundsToGiftCertificate" engine="java"
+             location="org.ofbiz.accounting.payment.GiftCertificateServices" invoke="addFundsToGiftCertificate" auth="true">
+        <description>Add funds to a Gift Certificate</description>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"/>
+        <attribute name="cardNumber" type="String" mode="IN" optional="false"/>
+        <attribute name="pinNumber" type="String" mode="IN" optional="true"/>
+        <attribute name="amount" type="Double" mode="INOUT" optional="false"/>
+        <attribute name="currency" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="balance" type="Double" mode="OUT" optional="false"/>
+        <attribute name="previousBalance" type="Double" mode="OUT" optional="true"/>
+        <attribute name="processResult" type="Boolean" mode="OUT" optional="false"/>
+        <attribute name="responseCode" type="String" mode="OUT" optional="false"/>
+        <attribute name="referenceNum" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="redeemGiftCertificate" engine="java"
+             location="org.ofbiz.accounting.payment.GiftCertificateServices" invoke="redeemGiftCertificate" auth="true">
+        <description>Deduct funds from a Gift Certificate</description>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"/>
+        <attribute name="cardNumber" type="String" mode="IN" optional="false"/>
+        <attribute name="pinNumber" type="String" mode="IN" optional="false"/>
+        <attribute name="amount" type="Double" mode="INOUT" optional="false"/>
+        <attribute name="currency" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="balance" type="Double" mode="OUT" optional="false"/>
+        <attribute name="previousBalance" type="Double" mode="OUT" optional="true"/>
+        <attribute name="processResult" type="Boolean" mode="OUT" optional="false"/>
+        <attribute name="responseCode" type="String" mode="OUT" optional="false"/>
+        <attribute name="referenceNum" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="checkGiftCertificateBalance" engine="java"
+             location="org.ofbiz.accounting.payment.GiftCertificateServices" invoke="checkGiftCertificateBalance" auth="true">
+        <description>Obtain the balanace of a Gift Certificate</description>
+        <attribute name="cardNumber" type="String" mode="IN" optional="false"/>
+        <attribute name="pinNumber" type="String" mode="IN" optional="false"/>
+        <attribute name="currency" type="String" mode="IN" optional="true"/>
+        <attribute name="balance" type="Double" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="createGcFulFillmentRecord" engine="java" require-new-transaction="true" use-transaction="true"
+            location="org.ofbiz.accounting.payment.GiftCertificateServices" invoke="createFulfillmentRecord" auth="true">
+        <description>Creates the fulfillment log</description>
+        <attribute name="typeEnumId" type="String" mode="IN" optional="false"/>
+        <attribute name="merchantId" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="surveyResponseId" type="String" mode="IN" optional="true"/>
+        <attribute name="cardNumber" type="String" mode="IN" optional="true"/>
+        <attribute name="pinNumber" type="String" mode="IN" optional="true"/>
+        <attribute name="amount" type="Double" mode="IN" optional="true"/>
+        <attribute name="responseCode" type="String" mode="IN" optional="true"/>
+        <attribute name="referenceNum" type="String" mode="IN" optional="true"/>
+        <attribute name="authCode" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="refundGcPurchase" engine="java" require-new-transaction="true" use-transaction="true"
+            location="org.ofbiz.accounting.payment.GiftCertificateServices" invoke="refundGcPurchase" auth="true">
+        <description>Creates return for reload on failure</description>
+        <attribute name="orderItem" type="GenericValue" mode="IN" optional="false"/>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Gift Certificate Payment Process -->
+    <service name="ofbGcProcessor" engine="java"
+             location="org.ofbiz.accounting.payment.GiftCertificateServices" invoke="giftCertificateProcessor" auth="true">
+        <description>Process a sale using FinAccount Gift Certificate</description>
+        <implements service="giftCardProcessInterface"/>
+    </service>
+    <service name="ofbGcAuthorize" engine="java"
+             location="org.ofbiz.accounting.payment.GiftCertificateServices" invoke="giftCertificateAuthorize" auth="true">
+        <description>Authorize a potential transaction against a Gift Certificate</description>
+        <implements service="giftCardProcessInterface"/>
+    </service>
+    <service name="ofbGcRelease" engine="java"
+             location="org.ofbiz.accounting.payment.GiftCertificateServices" invoke="giftCertificateRelease" auth="true">
+        <description>Release authorizations back to a Gift Certificate.  No amount is added back, but an authorization is cancelled.</description>
+        <implements service="paymentReleaseInterface"/>
+    </service>
+    <service name="ofbGcRefund" engine="java"
+             location="org.ofbiz.accounting.payment.GiftCertificateServices" invoke="giftCertificateRefund" auth="true">
+        <description>Return funds back to a Gift Certificate.  Amounts are added back to the gift certificate.</description>
+        <implements service="paymentRefundInterface"/>
+    </service>
+
+    <!-- Gift Certificate Fulfillment Services -->
+    <service name="ofbGcPurchase" engine="java"
+            location="org.ofbiz.accounting.payment.GiftCertificateServices" invoke="giftCertificatePurchase" auth="true">
+        <description>Automatic CG Purchase Fulfillment Service</description>
+        <implements service="itemFulfillmentInterface"/>
+    </service>
+    <service name="ofbGcReload" engine="java"
+            location="org.ofbiz.accounting.payment.GiftCertificateServices" invoke="giftCertificateReload" auth="true">
+        <description>Automatic GC Reload Service</description>
+        <implements service="itemFulfillmentInterface"/>
+    </service>
+</services>

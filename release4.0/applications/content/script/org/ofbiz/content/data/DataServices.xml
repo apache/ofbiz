@@ -1,0 +1,922 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/simple-methods.xsd">
+	<!-- Methods for DataResource -->
+    <simple-method method-name="createDataResource" short-description="Create a Data Resource">
+        <make-value entity-name="DataResource" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+
+        <if-empty field-name="newEntity.dataResourceId">
+            <sequenced-id-to-env sequence-name="DataResource" env-name="dataResourceId"/>
+            <set field="newEntity.dataResourceId" from-field="dataResourceId"/>
+        </if-empty>
+
+        <now-timestamp-to-env env-name="nowTimestamp"/>
+        <set field="newEntity.lastModifiedByUserLogin" from-field="userLogin.userLoginId"/>
+        <set field="newEntity.createdByUserLogin" from-field="userLogin.userLoginId"/>
+        <set field="newEntity.lastModifiedDate" from-field="nowTimestamp"/>
+        <set field="newEntity.createdDate" from-field="nowTimestamp"/>
+
+        <if-empty field-name="dataTemplateTypeId">
+            <set field="newEntity.dataTemplateTypeId" value="NONE"/>
+        </if-empty>
+
+        <if-empty field-name="content.statusId">
+            <!-- get the first status item -->
+            <entity-and entity-name="StatusItem" list-name="contentStatus">
+                <field-map field-name="statusTypeId" value="CONTENT_STATUS"/>
+                <order-by field-name="sequenceId"/>
+            </entity-and>
+            <first-from-list entry-name="statusItem" list-name="contentStatus"/>
+            <set field="newEntity.statusId" from-field="statusItem.statusId"/>
+        </if-empty>
+
+        <create-value value-name="newEntity"/>
+        <field-to-result field-name="dataResourceId" map-name="newEntity"/>
+    </simple-method>
+
+    <simple-method method-name="updateDataResource" short-description="Update a Data Resource">
+        <make-value entity-name="DataResource" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="DataResource" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+
+        <to-string map-name="parameters" field-name="locale" />
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+
+        <now-timestamp-to-env env-name="nowTimestamp"/>
+        <set field="lookedUpValue.lastModifiedByUserLogin" from-field="userLogin.userLoginId"/>
+        <set field="lookedUpValue.lastModifiedDate" from-field="nowTimestamp"/>
+
+        <store-value value-name="lookedUpValue"/>
+        <field-to-result field-name="dataResourceId" map-name="lookedUpValue"/>
+    </simple-method>
+
+    <simple-method method-name="deleteDataResource" short-description="Delete a Data Resource">        
+        <make-value entity-name="DataResource" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="DataResource" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+
+	<!-- Methods for DataCategory -->
+    <simple-method method-name="createDataCategory" short-description="Create a Data Category">
+        <make-value entity-name="DataCategory" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        
+        <create-value value-name="newEntity"/>
+        <field-to-result field-name="dataCategoryId" map-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateDataCategory" short-description="Update a Data Category">
+        <make-value entity-name="DataCategory" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="DataCategory" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="deleteDataCategory" short-description="Delete a Data Category">
+        <make-value entity-name="DataCategory" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="DataCategory" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+    
+	<!-- Methods for DataResourceMetaData -->
+    <simple-method method-name="createDataResourceMetaData" short-description="Create Data Resource Meta Data">
+        <check-permission permission="CONTENTMGR" action="_CREATE"><fail-message message="Security Error: to run createDataResourceMetaData you must have the CONTENTMGR_CREATE or CONTENTMGR_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value entity-name="DataResourceMetaData" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateDataResourceMetaData" short-description="Update Data Resource Meta Data">
+        <check-permission permission="CONTENTMGR" action="_UPDATE"><fail-message message="Security Error: to run updateDataResourceMetaData you must have the CONTENTMGR_UPDATE or CONTENTMGR_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value entity-name="DataResourceMetaData" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="DataResourceMetaData" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeDataResourceMetaData" short-description="Remove Data Resource Meta Data">
+        <check-permission permission="CONTENTMGR" action="_DELETE"><fail-message message="Security Error: to run removeDataResourceMetaData you must have the CONTENTMGR_DELETE or CONTENTMGR_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value entity-name="DataResourceMetaData" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="DataResourceMetaData" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>    
+    
+	<!-- Methods for DataResourcePurpose -->
+    <simple-method method-name="createDataResourcePurpose" short-description="Create Data Resource Purpose">
+        <check-permission permission="CONTENTMGR" action="_CREATE"><fail-message message="Security Error: to run createDataResourcePurpose you must have the CONTENTMGR_CREATE or CONTENTMGR_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value entity-name="DataResourcePurpose" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateDataResourcePurpose" short-description="Update Data Resource Purpose">
+        <check-permission permission="CONTENTMGR" action="_UPDATE"><fail-message message="Security Error: to run updateDataResourcePurpose you must have the CONTENTMGR_UPDATE or CONTENTMGR_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value entity-name="DataResourcePurpose" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="DataResourcePurpose" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeDataResourcePurpose" short-description="Remove Data Resource Purpose">
+        <check-permission permission="CONTENTMGR" action="_DELETE"><fail-message message="Security Error: to run removeDataResourcePurpose you must have the CONTENTMGR_DELETE or CONTENTMGR_ADMIN permission"/></check-permission>
+        <check-errors/>
+
+        <make-value entity-name="DataResourcePurpose" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="DataResourcePurpose" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>    
+    
+	<!-- Methods for DataResourceRole -->
+    <simple-method method-name="createDataResourceRole" short-description="Create Data Resource Role">
+        <make-value entity-name="DataResourceRole" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+
+        <if-empty field-name="newEntity.fromDate">
+            <now-timestamp-to-env env-name="nowTimestamp"/>
+            <set field="newEntity.fromDate" from-field="nowTimestamp"/>
+        </if-empty>
+        
+        <create-value value-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateDataResourceRole" short-description="Update Data Resource Role">
+        <make-value entity-name="DataResourceRole" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="DataResourceRole" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeDataResourceRole" short-description="Remove Data Resource Role">        
+        <make-value entity-name="DataResourceRole" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="DataResourceRole" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+    
+  <!-- Methods for DataCategory -->
+    <simple-method method-name="createDataCategory" short-description="Create Data Category">
+        <make-value entity-name="DataCategory" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+        <field-to-result field-name="dataCategoryId" map-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateDataCategory" short-description="Update Data Category">
+        <make-value entity-name="DataCategory" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="DataCategory" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeDataCategory" short-description="Remove Data DateCategory">       
+        <make-value entity-name="DataCategory" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="DataCategory" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+
+    <!-- Methods for DataResourceType -->
+    <simple-method method-name="createDataResourceType" short-description="Create Data Resource Type">
+        <make-value entity-name="DataResourceType" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+        <field-to-result field-name="dataResourceTypeId" map-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateDataResourceType" short-description="Update Data Resource Type">
+        <make-value entity-name="DataResourceType" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="DataResourceType" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeDataResourceType" short-description="Remove Data Resource Type">
+        <make-value entity-name="DataResourceType" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="DataResourceType" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+    
+    <!-- Methods for DataResourceAttribute -->
+    <simple-method method-name="createDataResourceAttribute" short-description="Create Data Resource Attribute">
+        <make-value entity-name="DataResourceAttribute" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateDataResourceAttribute" short-description="Update Data Resource Attribute">
+        <make-value entity-name="DataResourceAttribute" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="DataResourceAttribute" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeDataResourceAttribute" short-description="Remove Data Resource Attribute">        
+        <make-value entity-name="DataResourceAttribute" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="DataResourceAttribute" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+   
+    <!-- Methods for DataResourceTypeAttr -->
+    <simple-method method-name="createDataResourceTypeAttr" short-description="Create Data Resource Type Attribute">
+        <make-value entity-name="DataResourceTypeAttr" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="removeDataResourceTypeAttr" short-description="Remove Data Resource Type Attribute">        
+        <make-value entity-name="DataResourceTypeAttr" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="DataResourceTypeAttr" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+    
+    <!-- Methods for CharacterSet -->
+    <simple-method method-name="createCharacterSet" short-description="Create Character Set">
+        <make-value entity-name="CharacterSet" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+        <field-to-result field-name="characterSetId" map-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateCharacterSet" short-description="Update Character Set">
+        <make-value entity-name="CharacterSet" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="CharacterSet" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeCharacterSet" short-description="Remove Character Set">
+        <make-value entity-name="CharacterSet" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="CharacterSet" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+    
+    <!-- Methods for FileExtension -->
+    <simple-method method-name="createFileExtension" short-description="Create Data Resource Role">
+        <make-value entity-name="FileExtension" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+        <field-to-result field-name="fileExtensionId" map-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateFileExtension" short-description="Update Data Resource Role">
+        <make-value entity-name="FileExtension" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="FileExtension" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeFileExtension" short-description="Remove Data Resource Role">
+        <make-value entity-name="FileExtension" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="FileExtension" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+    
+    <!-- Methods for MetaDataPredicate -->
+    <simple-method method-name="createMetaDataPredicate" short-description="Create Data Resource Role">
+        <make-value entity-name="MetaDataPredicate" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+        <field-to-result field-name="metaDataPredicateId" map-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateMetaDataPredicate" short-description="Update Data Resource Role">
+        <make-value entity-name="MetaDataPredicate" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="MetaDataPredicate" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeMetaDataPredicate" short-description="Remove Data Resource Role">
+        <make-value entity-name="MetaDataPredicate" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="MetaDataPredicate" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+    
+    <!-- Methods for MimeType -->
+    <simple-method method-name="createMimeType" short-description="Create MimeType">
+        <make-value entity-name="MimeType" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+        <field-to-result field-name="mimeTypeId" map-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateMimeType" short-description="Update MimeType">
+        <make-value entity-name="MimeType" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="MimeType" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeMimeType" short-description="Remove MimeType">        
+        <make-value entity-name="MimeType" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="MimeType" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+
+    <!-- Methods for MimeTypeHtmlTemplate -->
+    <simple-method method-name="createMimeTypeHtmlTemplate" short-description="Create MimeTypeHtmlTemplate">
+        <make-value entity-name="MimeTypeHtmlTemplate" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>        
+        <create-value value-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateMimeTypeHtmlTemplate" short-description="Update MimeTypeHtmlTemplate">
+        <make-value entity-name="MimeTypeHtmlTemplate" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="MimeTypeHtmlTemplate" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeMimeTypeHtmlTemplate" short-description="Remove MimeTypeHtmlTemplate">
+        <make-value entity-name="MimeTypeHtmlTemplate" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="MimeTypeHtmlTemplate" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+
+    <!-- Methods for ElectronicText -->
+    <simple-method method-name="createElectronicText" short-description="Create Electronic Text">
+        <make-value entity-name="ElectronicText" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+
+        <create-value value-name="newEntity"/>
+        <field-to-result field-name="dataResourceId" map-name="newEntity"/> 
+    </simple-method>
+
+    <simple-method method-name="updateElectronicText" short-description="Update Electronic Text">
+        <make-value entity-name="ElectronicText" value-name="lookupKeyValue"/>
+
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="ElectronicText" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+        <field-to-result field-name="dataResourceId" map-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeElectronicText" short-description="Remove Electronic Text">
+        <make-value entity-name="ElectronicText" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        
+        <find-by-primary-key entity-name="ElectronicText" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+
+    <!-- Methods for ImageDataResource -->
+    <simple-method method-name="createImageDataResource" short-description="Create Image Data Resource">
+        <make-value entity-name="ImageDataResource" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateImageDataResource" short-description="Update Image Data Resource">
+        <make-value entity-name="ImageDataResource" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="ImageDataResource" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeImageDataResource" short-description="Remove Image Data Resource">
+        <make-value entity-name="ImageDataResource" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="ImageDataResource" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+
+    <!-- Methods for VideoDataResource -->
+    <simple-method method-name="createVideoDataResource" short-description="Create Video Data Resource">
+        <make-value entity-name="VideoDataResource" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateVideoDataResource" short-description="Update Video Data Resource">
+        <make-value entity-name="VideoDataResource" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="VideoDataResource" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeVideoDataResource" short-description="Remove Video Data Resource">
+        <make-value entity-name="VideoDataResource" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="VideoDataResource" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+
+    <!-- Methods for AudioDataResource -->
+    <simple-method method-name="createAudioDataResource" short-description="Create Audio Data Resource">
+        <make-value entity-name="AudioDataResource" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateAudioDataResource" short-description="Update Audio Data Resource">
+        <make-value entity-name="AudioDataResource" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="AudioDataResource" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeAudioDataResource" short-description="Remove Audio Data Resource">
+        <make-value entity-name="AudioDataResource" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="AudioDataResource" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+
+    <!-- Methods for OtherDataResource -->
+    <simple-method method-name="createOtherDataResource" short-description="Create Other Data Resource">
+        <make-value entity-name="OtherDataResource" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+        <log level="always" message="created new OtherDataResource: ${newEntity}"/>
+    </simple-method>
+    <simple-method method-name="updateOtherDataResource" short-description="Update Other Data Resource">
+        <make-value entity-name="OtherDataResource" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="OtherDataResource" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeOtherDataResource" short-description="Remove Other Data Resource">        
+        <make-value entity-name="OtherDataResource" value-name="lookupKeyValue"/>
+        <set-pk-fields map-name="parameters" value-name="lookupKeyValue"/>
+        <find-by-primary-key entity-name="OtherDataResource" map-name="lookupKeyValue" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+
+    <!-- 
+    getElectronicText
+    Passed a Content GenericValue or a contentId, this service returns the text data from
+        ElectronicText in result.textData.
+
+    Not that this service does not now do permission checking.
+    -->
+
+    <simple-method method-name="getElectronicText" short-description="Get Electronic Text" login-required="false">
+        <set field="userLogin" from-field="parameters.userLogin" />
+        <set field="currentContent" from-field="parameters.content" />
+        <log level="always" message="GETELECTRONICTEXT, currentContent:${currentContent}"/>
+        
+        <if-empty field-name="currentContent">
+            <if-not-empty field-name="contentId" map-name="parameters">
+                <set field="contextA.contentId" from-field="parameters.contentId" />
+                <find-by-primary-key value-name="currentContent" entity-name="Content"
+                         map-name="contextA" use-cache="true" />
+            </if-not-empty>
+            <if-empty field-name="currentContent" >
+                <add-error>
+                    <fail-message message="Neither content nor contentId supplied." />
+                </add-error>
+            </if-empty>
+        </if-empty>
+        <check-errors/>
+        <if-empty field-name="dataResourceId" map-name="currentContent">
+                <add-error>
+                    <fail-message message="No dataResourceId found" />
+                </add-error>
+        </if-empty>
+        <check-errors/>
+        <field-to-result field-name="currentContent.dataResourceId" result-name="dataResourceId"/>    
+        <set field="contextB.dataResourceId" from-field="currentContent.dataResourceId" />
+        <find-by-primary-key value-name="eText" entity-name="ElectronicText"
+                         map-name="contextB" use-cache="true" />
+        <if-empty field-name="eText" >
+                <add-error>
+                    <fail-message message="Electronic Text not found." />
+                </add-error>
+        </if-empty>
+        <check-errors/>
+
+
+        <field-to-result map-name="eText" field-name="textData" result-name="textData"/>
+        <log level="always" message="result:${result}"/>
+        <log level="always" message="parameters:${parameters}"/>
+    </simple-method>
+    
+    <simple-method method-name="attachUploadToDataResource" short-description="Attach an uploaded file to a data resource">
+        <set field="isUpdate" value="false"/>
+        <if-empty field-name="parameters.dataResourceTypeId">
+            <!-- create default behavior -->
+            <if>
+                <condition>
+                    <not>
+                        <if-empty field-name="parameters._uploadedFile_contentType"/>
+                    </not>
+                </condition>
+                <then>
+                    <if>
+                        <condition>
+                            <if-regexp field-name="parameters._uploadedFile_contentType" expr="image.*"/>
+                        </condition>
+                        <then>
+                            <set field="parameters.dataResourceTypeId" value="IMAGE_OBJECT"/>
+                        </then>
+                        <else-if>
+                            <condition>
+                                <if-regexp field-name="parameters._uploadedFile_contentType" expr="video.*"/>
+                            </condition>
+                            <then>
+                                <set field="parameters.dataResourceTypeId" value="VIDEO_OBJECT"/>
+                            </then>
+                        </else-if>
+                        <else-if>
+                            <condition>
+                                <if-regexp field-name="parameters._uploadedFile_contentType" expr="audio.*"/>
+                            </condition>
+                            <then>
+                                <set field="parameters.dataResourceTypeId" value="AUDIO_OBJECT"/>
+                            </then>
+                        </else-if>
+                        <else>
+                            <set field="parameters.dataResourceTypeId" value="OTHER_OBJECT"/>    
+                        </else>
+                    </if>
+                </then>
+                <else>
+                    <set field="parameters.dataResourceTypeId" value="OTHER_OBJECT"/>
+                </else>
+            </if>
+        </if-empty>
+
+        <if-compare field-name="parameters.dataResourceTypeId" value="LOCAL_FILE" operator="equals">
+            <call-simple-method method-name="saveLocalFileDateResource"/>
+            <return/>
+        </if-compare>
+
+        <if-compare field-name="parameters.dataResourceTypeId" value="IMAGE_OBJECT" operator="equals">
+            <entity-one entity-name="ImageDataResource" value-name="dataResObj">
+                <field-map field-name="dataResourceId" env-name="parameters.dataResourceId"/>
+            </entity-one>
+            <if-not-empty field-name="dataResObj">
+                <set field="isUpdate" value="true"/>
+            </if-not-empty>
+            <call-simple-method method-name="saveImageObjectDateResource"/>
+            <return/>
+        </if-compare>
+
+        <if-compare field-name="parameters.dataResourceTypeId" value="VIDEO_OBJECT" operator="equals">
+            <entity-one entity-name="VideoDataResource" value-name="dataResObj">
+                <field-map field-name="dataResourceId" env-name="parameters.dataResourceId"/>
+            </entity-one>
+            <if-not-empty field-name="dataResObj">
+                <set field="isUpdate" value="true"/>
+            </if-not-empty>
+            <call-simple-method method-name="saveVideoObjectDateResource"/>
+            <return/>
+        </if-compare>
+
+        <if-compare field-name="parameters.dataResourceTypeId" value="AUDIO_OBJECT" operator="equals">
+            <entity-one entity-name="AudioDataResource" value-name="dataResObj">
+                <field-map field-name="dataResourceId" env-name="parameters.dataResourceId"/>
+            </entity-one>
+            <if-not-empty field-name="dataResObj">
+                <set field="isUpdate" value="true"/>
+            </if-not-empty>
+            <call-simple-method method-name="saveAudioObjectDateResource"/>
+            <return/>
+        </if-compare>
+
+        <if-compare field-name="parameters.dataResourceTypeId" value="OTHER_OBJECT" operator="equals">
+            <entity-one entity-name="OtherDataResource" value-name="dataResObj">
+                <field-map field-name="dataResourceId" env-name="parameters.dataResourceId"/>
+            </entity-one>
+            <if-not-empty field-name="dataResObj">
+                <set field="isUpdate" value="true"/>
+            </if-not-empty>
+            <call-simple-method method-name="saveOtherObjectDateResource"/>
+            <return/>
+        </if-compare>
+
+        <add-error><fail-message message="Data type [${dataResourceTypeId} is not yet supported!"/></add-error>
+        <check-errors/>
+    </simple-method>
+
+    <!-- save LOCAL_FILE data -->
+    <simple-method method-name="saveLocalFileDateResource" short-description="Attach an uploaded file to a data resource as LOCAL_FILE">
+        <entity-one entity-name="DataResource" value-name="dataResource">
+            <field-map field-name="dataResourceId" env-name="parameters.dataResourceId"/>
+        </entity-one>
+        <if-empty field-name="dataResource">
+            <add-error><fail-message message="No data resource found for ID: [$parameters.dataResourceId}]"/></add-error>
+        </if-empty>
+        <if>
+            <condition>
+                <if-empty field-name="_uploadedFile_fileName" map-name="parameters"/>
+            </condition>
+            <then>
+                <if>
+                    <condition>
+                        <or>
+                            <if-empty field-name="isUpdate"/>
+                            <if-compare field-name="isUpdate" value="Y" operator="not-equals"/>
+                        </or>
+                    </condition>
+                    <then>
+                        <add-error><fail-message message="No uploaded content found in context"/></add-error>
+                    </then>
+                    <else>
+                        <!-- if not upload is found on an update; its okay, don't do anything just return -->
+                        <field-to-result field-name="dataResourceId" map-name="dataResource"/>
+                        <field-to-result field-name="mimeTypeId" map-name="dataResource"/>
+                        <return/>
+                    </else>
+                </if>
+
+            </then>
+        </if>
+        <check-errors/>
+
+        <call-class-method class-name="org.ofbiz.content.data.DataResourceWorker" method-name="getDataResourceContentUploadPath" ret-field-name="uploadPath"/>
+        <log level="info" message="[attachLocalFileToDataResource] - Found Subdir : ${uploadPath}"/>
+
+        <set from-field="parameters._uploadedFile_contentType" field="extenLookup.mimeTypeId"/>
+        <find-by-and entity-name="FileExtension" map-name="extenLookup" list-name="extensions"/>
+        <first-from-list entry-name="extension" list-name="extensions"/>
+
+        <set from-field="parameters._uploadedFile_fileName" field="dataResource.dataResourceName"/>
+        <set from-field="parameters._uploadedFile_contentType" field="dataResource.mimeTypeId"/>
+        <set value="${uploadPath}/${dataResource.dataResourceId}" field="dataResource.objectInfo"/>
+        <if-not-empty field-name="extension">
+            <set value="${uploadPath}/${dataResource.dataResourceId}.${extension.fileExtensionId}" field="dataResource.objectInfo"/>
+        </if-not-empty>
+        <set value="LOCAL_FILE" field="dataResource.dataResourceTypeId"/>
+        <store-value value-name="dataResource"/>
+
+        <set-service-fields service-name="createAnonFile" map-name="dataResource" to-map-name="fileCtx"/>
+        <set from-field="parameters.uploadedFile" field="fileCtx.binData"/>
+        <set from-field="dataResource" field="fileCtx.dataResource"/>
+        <call-service service-name="createAnonFile" in-map-name="fileCtx" include-user-login="true"/>
+
+        <field-to-result field-name="dataResourceId" map-name="dataResource"/>
+        <field-to-result field-name="mimeTypeId" map-name="dataResource"/>
+    </simple-method>
+
+    <!-- save OTHER_OBJECT data -->
+    <simple-method method-name="saveOtherObjectDateResource" short-description="Attach an uploaded file to a data resource as OTHER_OBJECT">
+        <entity-one entity-name="DataResource" value-name="dataResource">
+            <field-map field-name="dataResourceId" env-name="parameters.dataResourceId"/>
+        </entity-one>
+        <if-empty field-name="dataResource">
+            <add-error><fail-message message="No data resource found for ID: [$parameters.dataResourceId}]"/></add-error>
+        </if-empty>
+        <if>
+            <condition>
+                <if-empty field-name="_uploadedFile_fileName" map-name="parameters"/>
+            </condition>
+            <then>
+                <if>
+                    <condition>
+                        <or>
+                            <if-empty field-name="isUpdate"/>
+                            <if-compare field-name="isUpdate" value="Y" operator="not-equals"/>
+                        </or>
+                    </condition>
+                    <then>
+                        <add-error><fail-message message="No uploaded content found in context"/></add-error>
+                    </then>
+                    <else>
+                        <!-- if not upload is found on an update; its okay, don't do anything just return -->
+                        <field-to-result field-name="dataResourceId" map-name="dataResource"/>
+                        <field-to-result field-name="mimeTypeId" map-name="dataResource"/>
+                        <return/>
+                    </else>
+                </if>
+
+            </then>
+        </if>
+        <check-errors/>
+
+        <!-- update the data resource with file data -->
+        <set from-field="parameters.dataResourceTypeId" field="dataResource.dataResourceTypeId"/>
+        <set from-field="parameters._uploadedFile_fileName" field="dataResource.dataResourceName"/>
+        <set from-field="parameters._uploadedFile_contentType" field="dataResource.mimeTypeId"/>
+        <store-value value-name="dataResource"/>
+
+        <!-- fields serviceName and fileField are required to be set by calling method -->
+        <set-service-fields service-name="createOtherDataResource" map-name="dataResource" to-map-name="serviceContext"/>
+        <set from-field="parameters.uploadedFile" field="serviceContext.dataResourceContent"/>        
+
+        <if-compare field-name="isUpdate" value="true" operator="equals">
+            <call-service service-name="updateOtherDataResource" in-map-name="serviceContext"/>
+            <else>
+                <call-service service-name="createOtherDataResource" in-map-name="serviceContext"/>
+            </else>
+        </if-compare>
+
+        <field-to-result field-name="dataResourceId" map-name="dataResource"/>
+        <field-to-result field-name="mimeTypeId" map-name="dataResource"/>
+    </simple-method>
+
+    <!-- save IMAGE_OBJECT data -->
+    <simple-method method-name="saveImageObjectDateResource" short-description="Attach an uploaded file to a data resource as IMAGE_OBJECT">
+        <entity-one entity-name="DataResource" value-name="dataResource">
+            <field-map field-name="dataResourceId" env-name="parameters.dataResourceId"/>
+        </entity-one>
+        <if-empty field-name="dataResource">
+            <add-error><fail-message message="No data resource found for ID: [$parameters.dataResourceId}]"/></add-error>
+        </if-empty>
+        <if>
+            <condition>
+                <if-empty field-name="_uploadedFile_fileName" map-name="parameters"/>
+            </condition>
+            <then>
+                <if>
+                    <condition>
+                        <or>
+                            <if-empty field-name="isUpdate"/>
+                            <if-compare field-name="isUpdate" value="Y" operator="not-equals"/>
+                        </or>
+                    </condition>
+                    <then>
+                        <add-error><fail-message message="No uploaded content found in context"/></add-error>
+                    </then>
+                    <else>
+                        <!-- if not upload is found on an update; its okay, don't do anything just return -->
+                        <field-to-result field-name="dataResourceId" map-name="dataResource"/>
+                        <field-to-result field-name="mimeTypeId" map-name="dataResource"/>
+                        <return/>
+                    </else>
+                </if>
+
+            </then>
+        </if>
+        <check-errors/>
+
+        <!-- update the data resource with file data -->
+        <set from-field="parameters.dataResourceTypeId" field="dataResource.dataResourceTypeId"/>
+        <set from-field="parameters._uploadedFile_fileName" field="dataResource.dataResourceName"/>
+        <set from-field="parameters._uploadedFile_contentType" field="dataResource.mimeTypeId"/>
+        <store-value value-name="dataResource"/>
+
+        <!-- fields serviceName and fileField are required to be set by calling method -->
+        <set-service-fields service-name="createImageDataResource" map-name="dataResource" to-map-name="serviceContext"/>
+        <set from-field="parameters.uploadedFile" field="serviceContext.imageData"/>        
+
+        <if-compare field-name="isUpdate" value="true" operator="equals">
+            <call-service service-name="updateImageDataResource" in-map-name="serviceContext"/>
+            <else>
+                <call-service service-name="createImageDataResource" in-map-name="serviceContext"/>
+            </else>
+        </if-compare>
+
+        <field-to-result field-name="dataResourceId" map-name="dataResource"/>
+        <field-to-result field-name="mimeTypeId" map-name="dataResource"/>
+    </simple-method>
+
+    <!-- save VIDEO_OBJECT data -->
+    <simple-method method-name="saveVideoObjectDateResource" short-description="Attach an uploaded file to a data resource as VIDEO_OBJECT">
+        <entity-one entity-name="DataResource" value-name="dataResource">
+            <field-map field-name="dataResourceId" env-name="parameters.dataResourceId"/>
+        </entity-one>
+        <if-empty field-name="dataResource">
+            <add-error><fail-message message="No data resource found for ID: [$parameters.dataResourceId}]"/></add-error>
+        </if-empty>
+        <if>
+            <condition>
+                <if-empty field-name="_uploadedFile_fileName" map-name="parameters"/>
+            </condition>
+            <then>
+                <if>
+                    <condition>
+                        <or>
+                            <if-empty field-name="isUpdate"/>
+                            <if-compare field-name="isUpdate" value="Y" operator="not-equals"/>
+                        </or>
+                    </condition>
+                    <then>
+                        <add-error><fail-message message="No uploaded content found in context"/></add-error>
+                    </then>
+                    <else>
+                        <!-- if not upload is found on an update; its okay, don't do anything just return -->
+                        <field-to-result field-name="dataResourceId" map-name="dataResource"/>
+                        <field-to-result field-name="mimeTypeId" map-name="dataResource"/>
+                        <return/>
+                    </else>
+                </if>
+
+            </then>
+        </if>
+        <check-errors/>
+
+        <!-- update the data resource with file data -->
+        <set from-field="parameters.dataResourceTypeId" field="dataResource.dataResourceTypeId"/>
+        <set from-field="parameters._uploadedFile_fileName" field="dataResource.dataResourceName"/>
+        <set from-field="parameters._uploadedFile_contentType" field="dataResource.mimeTypeId"/>
+        <store-value value-name="dataResource"/>
+
+        <!-- fields serviceName and fileField are required to be set by calling method -->
+        <set-service-fields service-name="createVideoDataResource" map-name="dataResource" to-map-name="serviceContext"/>
+        <set from-field="parameters.uploadedFile" field="serviceContext.videoData"/>
+
+        <if-compare field-name="isUpdate" value="true" operator="equals">
+            <call-service service-name="updateVideoDataResource" in-map-name="serviceContext"/>
+            <else>
+                <call-service service-name="createVideoDataResource" in-map-name="serviceContext"/>
+            </else>
+        </if-compare>
+
+        <field-to-result field-name="dataResourceId" map-name="dataResource"/>
+        <field-to-result field-name="mimeTypeId" map-name="dataResource"/>
+    </simple-method>
+
+    <!-- save AUDIO_OBJECT data -->
+    <simple-method method-name="saveAudioObjectDateResource" short-description="Attach an uploaded file to a data resource as AUDIO_OBJECT">
+        <entity-one entity-name="DataResource" value-name="dataResource">
+            <field-map field-name="dataResourceId" env-name="parameters.dataResourceId"/>
+        </entity-one>
+        <if-empty field-name="dataResource">
+            <add-error><fail-message message="No data resource found for ID: [$parameters.dataResourceId}]"/></add-error>
+        </if-empty>
+        <if>
+            <condition>
+                <if-empty field-name="_uploadedFile_fileName" map-name="parameters"/>
+            </condition>
+            <then>
+                <if>
+                    <condition>
+                        <or>
+                            <if-empty field-name="isUpdate"/>
+                            <if-compare field-name="isUpdate" value="Y" operator="not-equals"/>
+                        </or>
+                    </condition>
+                    <then>
+                        <add-error><fail-message message="No uploaded content found in context"/></add-error>
+                    </then>
+                    <else>
+                        <!-- if not upload is found on an update; its okay, don't do anything just return -->
+                        <field-to-result field-name="dataResourceId" map-name="dataResource"/>
+                        <field-to-result field-name="mimeTypeId" map-name="dataResource"/>
+                        <return/>
+                    </else>
+                </if>
+
+            </then>
+        </if>
+        <check-errors/>
+
+        <!-- update the data resource with file data -->
+        <set from-field="parameters.dataResourceTypeId" field="dataResource.dataResourceTypeId"/>
+        <set from-field="parameters._uploadedFile_fileName" field="dataResource.dataResourceName"/>
+        <set from-field="parameters._uploadedFile_contentType" field="dataResource.mimeTypeId"/>
+        <store-value value-name="dataResource"/>
+
+        <!-- fields serviceName and fileField are required to be set by calling method -->
+        <set-service-fields service-name="createAudioDataResource" map-name="dataResource" to-map-name="serviceContext"/>
+        <set from-field="parameters.uploadedFile" field="serviceContext.audioData"/>
+
+        <if-compare field-name="isUpdate" value="true" operator="equals">
+            <call-service service-name="updateAudioDataResource" in-map-name="serviceContext"/>
+            <else>
+                <call-service service-name="createAudioDataResource" in-map-name="serviceContext"/>
+            </else>
+        </if-compare>
+
+        <field-to-result field-name="dataResourceId" map-name="dataResource"/>
+        <field-to-result field-name="mimeTypeId" map-name="dataResource"/>
+    </simple-method>
+</simple-methods>

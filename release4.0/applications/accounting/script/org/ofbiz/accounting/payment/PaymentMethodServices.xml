@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/simple-methods.xsd">
+
+<!-- DEJ20050428 Commenting out for now, does not appear to be used anywhere
+    <simple-method method-name="captureAll" short-description="Capture Payments for Orders" login-required="false">
+        <field-to-field field-name="orderStatusId" map-name="parameters" to-map-name="orderLookup" />
+        <field-to-field field-name="currency" map-name="parameters" to-map-name="captureParams" />
+        <string-to-field string="PAYMENT_AUTHORIZED" field-name="paymentStatusId" map-name="orderLookup" />
+        <find-by-and entity-name="OrderHeaderAndPaymentPref" map-name="orderLookup" list-name="orderHeaderAndPaymentPrefs" />
+        <iterate entry-name="orderHeaderAndPaymentPref" list-name="orderHeaderAndPaymentPrefs" >
+            <field-to-field map-name="orderHeaderAndPaymentPref" field-name="orderId" to-map-name="captureParams" />
+            <call-service service-name="capturePayment" in-map-name="captureParams" error-code="ignore-error">
+                <result-to-field map-name="captureResult" result-name="responseMessage" />
+            </call-service>
+            <if-compare map-name="captureResult" operator="equals" field-name="responseMessage" value="error">
+                <field-to-list map-name="orderHeaderAndPaymentPref" field-name="orderId" list-name="badOrders" />
+            </if-compare>
+        </iterate>
+        <if-not-empty field-name="badOrders">
+            <string-to-field string="mail.smtp.host" field-name="sendType" map-name="emailParams" />
+
+            <property-to-field resource="payment" property="mailhost" field-name="sendVia" map-name="emailParams"/>
+            <property-to-field resource="payment" property="sendTo" field-name="sendTo" map-name="emailParams"/>
+            <property-to-field resource="payment" property="sendFrom" field-name="sendFrom" map-name="emailParams"/>
+            <property-to-field resource="payment" property="subject" field-name="subject" map-name="emailParams"/>
+            <call-bsh><![CDATA[
+            String body = "Bad orders: " + org.ofbiz.base.util.StringUtils.join(badOrders, ", ");
+            emailParams.put("body", body);
+            ]]></call-bsh>   
+            <call-service service-name="sendMail" in-map-name="emailParams"/>
+        </if-not-empty>       
+    </simple-method>
+-->
+            
+    <simple-method method-name="setPaymentMethodAddress" short-description="Set the initial payment method address">
+        <make-value value-name="lookupPKMap" entity-name="PaymentMethod"/>
+        <set-pk-fields map-name="parameters" value-name="lookupPKMap"/>
+        <find-by-primary-key entity-name="PaymentMethod" map-name="lookupPKMap" value-name="lookedUpValue"/>
+        <if-compare map-name="lookedUpValue" field-name="paymentMethodTypeId" operator="equals" value="CREDIT_CARD">
+            <find-by-primary-key entity-name="CreditCard" map-name="lookupPKMap" value-name="mainValue"/>
+            <clone-value value-name="mainValue" new-value-name="savedValue"/>
+            <set-nonpk-fields map-name="parameters" value-name="mainValue"/>
+            <if-compare-field field-name="mainValue" operator="not-equals" to-field-name="savedValue" type="Object">
+                <store-value value-name="mainValue"/>
+            </if-compare-field>
+        </if-compare>
+        <if-compare map-name="lookedUpValue" field-name="paymentMethodTypeId" operator="equals" value="EFT_ACCOUNT">
+            <find-by-primary-key entity-name="CreditCard" map-name="lookupPKMap" value-name="mainValue"/>
+            <clone-value value-name="mainValue" new-value-name="savedValue"/>
+            <set-nonpk-fields map-name="parameters" value-name="mainValue"/>
+            <if-compare-field field-name="mainValue" operator="not-equals" to-field-name="savedValue" type="Object">
+                <store-value value-name="mainValue"/>
+            </if-compare-field>
+        </if-compare>
+    </simple-method>
+    <simple-method method-name="updatePaymentMethodAddress" short-description="Update payment method addresses" use-transaction="false">
+        <!-- find all CreditCard and EftAccount instances that use the current oldContactMechId and update them
+            through the updateCreditCard or updateEftAccount services to use the new contactMechId -->
+        <set field="lookupMap.contactMechId" from-field="parameters.oldContactMechId"/>
+        
+        <find-by-and entity-name="CreditCard" map-name="lookupMap" list-name="creditCards"/>
+        <iterate entry-name="creditCard" list-name="creditCards">
+            <call-class-method class-name="org.ofbiz.base.util.UtilValidate" method-name="isDateAfterToday" ret-field-name="isNotExpired">
+                <field field-name="creditCard.expireDate"/>
+            </call-class-method>
+            <if-compare field-name="isNotExpired" operator="equals" type="Boolean" value="true">
+                <set-service-fields service-name="updateCreditCard" map-name="creditCard" to-map-name="uccMap"/>
+                <set field="uccMap.contactMechId" from-field="parameters.contactMechId"/>
+                <set field="uccMap.partyId" from-field="parameters.partyId"/>
+                <!-- use the service so it will expire the old card and create a new one; don't break on error since this is a background process, just get whatever we can done... -->
+                <call-service service-name="updateCreditCard" in-map-name="uccMap" break-on-error="false"/>
+            </if-compare>
+        </iterate>
+        
+        <find-by-and entity-name="EftAccount" map-name="lookupMap" list-name="eftAccounts"/>
+        <iterate entry-name="eftAccount" list-name="eftAccounts">
+            <set-service-fields service-name="updateEftAccount" map-name="eftAccount" to-map-name="ueaMap"/>
+            <set field="ueaMap.contactMechId" from-field="parameters.contactMechId"/>
+            <set field="ueaMap.partyId" from-field="parameters.partyId"/>
+            <!-- use the service so it will expire the old account and create a new one; don't break on error since this is a background process, just get whatever we can done... -->
+            <call-service service-name="updateEftAccount" in-map-name="ueaMap" break-on-error="false"/>
+        </iterate>
+    </simple-method>
+</simple-methods>

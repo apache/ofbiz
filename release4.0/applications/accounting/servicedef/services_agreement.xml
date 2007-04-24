@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/services.xsd">
+    <description>Accounting Services: Agreements </description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+    
+    <!-- Agreement  -->
+    <service name="createAgreement" default-entity-name="Agreement" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="createAgreement" auth="true">
+        <description>Create an Agreement</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="OUT" optional="true"/>
+    </service>
+    <service name="updateAgreement" default-entity-name="Agreement" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="updateAgreement" auth="true">
+        <description>Update an Agreement</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="cancelAgreement" default-entity-name="Agreement" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="cancelAgreement" auth="true">
+        <description>Cancel an Agreement</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="copyAgreement" default-entity-name="Agreement" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="copyAgreement" auth="true">
+        <description>Copy an Agreement</description>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+        <attribute name="copyAgreementTerms" type="String" mode="IN" optional="true"/>
+        <attribute name="copyAgreementProducts" type="String" mode="IN" optional="true"/>
+        <attribute name="copyAgreementParties" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <!-- AgreementItem  -->
+    <service name="createAgreementItem" default-entity-name="AgreementItem" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="createAgreementItem" auth="true">
+        <description>Create an AgreementItem</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateAgreementItem" default-entity-name="AgreementItem" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="updateAgreementItem" auth="true">
+        <description>Update an AgreementItem</description>
+        <auto-attributes include="pk" mode="IN" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeAgreementItem" default-entity-name="AgreementItem" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="removeAgreementItem" auth="true">
+        <description>Remove an AgreementItem</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <!-- AgreementTerm  -->
+    <service name="createAgreementTerm" default-entity-name="AgreementTerm" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="createAgreementTerm" auth="true">
+        <description>Create an AgreementTerm</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateAgreementTerm" default-entity-name="AgreementTerm" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="updateAgreementTerm" auth="true">
+        <description>Update an AgreementTerm</description>
+        <auto-attributes include="pk" mode="IN" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteAgreementTerm" default-entity-name="AgreementTerm" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="deleteAgreementTerm" auth="true">
+        <description>Delete an AgreementTerm</description>
+        <auto-attributes include="pk" mode="IN" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <!-- AgreementPromoAppl  -->
+    <service name="createAgreementPromoAppl" default-entity-name="AgreementPromoAppl" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="createAgreementPromoAppl" auth="true">
+        <description>Create an AgreementPromoAppl</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateAgreementPromoAppl" default-entity-name="AgreementPromoAppl" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="updateAgreementPromoAppl" auth="true">
+        <description>Update an AgreementPromoAppl</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeAgreementPromoAppl" default-entity-name="AgreementPromoAppl" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="removeAgreementPromoAppl" auth="true">
+        <description>Remove an AgreementPromoAppl</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="getCommissionForProduct" engine="java"
+                location="org.ofbiz.accounting.agreement.AgreementServices" invoke="getCommissionForProduct" auth="true">
+        <description>Get commission receiving parties and amounts for a product. &lt;br/&gt;
+            amount input is for the entire quantity. &lt;br/&gt;&lt;br/&gt;
+            Returns a List of Maps each containing &lt;br/&gt;
+            partyIdFrom     String  commission paying party &lt;br/&gt;
+            partyIdTo       String  commission receiving party &lt;br/&gt;
+            commission      BigDecimal  Commission &lt;br/&gt;
+            days            Long    term days &lt;br/&gt;
+            currencyUomId   String  Currency &lt;br/&gt;
+            productId       String  Product Id &lt;br/&gt;
+            Will use the virtual product if no agreement is found for a variant product.  If no quantity is specified, defaults to one (1).
+        </description>
+        <attribute name="productId" type="String" mode="IN" optional="false"/>
+        <attribute name="invoiceItemTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="amount" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="commissions" type="List" mode="OUT" optional="false"/>
+    </service>
+    <!-- AgreementProductAppl  -->
+    <service name="createAgreementProductAppl" default-entity-name="AgreementProductAppl" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="createAgreementProductAppl" auth="true">
+        <description>Create an AgreementProductAppl</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateAgreementProductAppl" default-entity-name="AgreementProductAppl" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="updateAgreementProductAppl" auth="true">
+        <description>Update an AgreementProductAppl</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeAgreementProductAppl" default-entity-name="AgreementProductAppl" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="removeAgreementProductAppl" auth="true">
+        <description>Remove an AgreementProductAppl</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <!-- AgreementPartyApplic  -->
+    <service name="createAgreementPartyApplic" default-entity-name="AgreementPartyApplic" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="createAgreementPartyApplic" auth="true">
+        <description>Create an AgreementPartyApplic</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateAgreementPartyApplic" default-entity-name="AgreementPartyApplic" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="updateAgreementPartyApplic" auth="true">
+        <description>Update an AgreementPartyApplic</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeAgreementPartyApplic" default-entity-name="AgreementPartyApplic" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="removeAgreementPartyApplic" auth="true">
+        <description>Remove an AgreementPartyApplic</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <!-- AgreementGeographicalApplic  -->
+    <service name="createAgreementGeographicalApplic" default-entity-name="AgreementGeographicalApplic" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="createAgreementGeographicalApplic" auth="true">
+        <description>Create an AgreementGeographicalApplic</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateAgreementGeographicalApplic" default-entity-name="AgreementGeographicalApplic" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="updateAgreementGeographicalApplic" auth="true">
+        <description>Update an AgreementGeographicalApplic</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeAgreementGeographicalApplic" default-entity-name="AgreementGeographicalApplic" engine="simple"
+                location="org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="removeAgreementGeographicalApplic" auth="true">
+        <description>Remove an AgreementGeographicalApplic</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+</services>

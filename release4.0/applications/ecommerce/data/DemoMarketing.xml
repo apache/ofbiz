@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<entity-engine-xml>
+    <MarketingCampaign statusId="MKTG_CAMP_INPROGRESS" marketingCampaignId="9000" parentCampaignId="" campaignName="eCommerce Site Internal Campaign" campaignSummary=""/>
+        
+    <ContactList contactListId="9000" contactListTypeId="ANNOUNCEMENT" contactMechTypeId="EMAIL_ADDRESS" statusId="MKTG_CAMP_INPROGRESS" marketingCampaignId="9000" 
+        contactListName="New Product Announcements" description="New Product Announcements Mailing List (email)" comments="" isPublic="Y" ownerPartyId="Company" 
+        verifyEmailFrom="ofbiztest@yahoo.com" verifyEmailScreen="component://ecommerce/widget/EmailContactListScreens.xml#ContactListVerifyEmail" 
+        verifyEmailSubject="Subscription Verify Email" verifyEmailWebSiteId="WebStore"/>
+    <ContactList contactListId="9010" contactListTypeId="NEWSLETTER" contactMechTypeId="EMAIL_ADDRESS" statusId="MKTG_CAMP_INPROGRESS" marketingCampaignId="9000" 
+        contactListName="Product Tips Newsletter" description="Product Tips Newsletter Mailing List (email)" comments="" isPublic="Y" ownerPartyId="Company" 
+        verifyEmailFrom="ofbiztest@yahoo.com" verifyEmailScreen="component://ecommerce/widget/EmailContactListScreens.xml#ContactListVerifyEmail" 
+        verifyEmailSubject="Subscription Verify Email" verifyEmailWebSiteId="WebStore"/>
+    
+    <ContactListParty contactListId="9000" partyId="DemoCustCompany" preferredContactMechId="9021" statusId="CLPT_ACCEPTED" fromDate="2001-05-13 00:00:00"/>
+    <ContactListParty contactListId="9000" partyId="DemoCustAgent" preferredContactMechId="9023" statusId="CLPT_ACCEPTED" fromDate="2001-05-13 00:00:00"/>
+    <ContactListParty contactListId="9000" partyId="DemoCustomer" preferredContactMechId="9026" statusId="CLPT_ACCEPTED" fromDate="2001-05-13 00:00:00"/>
+        
+    <!-- some sample affiliate and tracking codes for marketing campaigns -->
+    <MarketingCampaign statusId="MKTG_CAMP_INPROGRESS" marketingCampaignId="9001" campaignName="Pay Per Click Advertising"/>
+    <MarketingCampaign statusId="MKTG_CAMP_INPROGRESS" marketingCampaignId="9002" campaignName="Affiliate Sites"/>
+    
+    <!-- tracking codes are used in URLs to track specific campaigns.  The lifetimes are defined in seconds -->
+    <TrackingCode trackingCodeId="9000" trackingCodeTypeId="EXTERNAL" description ="PPC Campaign 1" statusId="MKTG_CAMP_INPROGRESS" marketingCampaignId="9001" trackableLifetime="2592000" billableLifetime="2592000"/>
+    <TrackingCode trackingCodeId="9001" trackingCodeTypeId="EXTERNAL" description ="PPC Campaign 2" statusId="MKTG_CAMP_INPROGRESS" marketingCampaignId="9001" trackableLifetime="2592000" billableLifetime="2592000"/>
+    <TrackingCode trackingCodeId="9002" trackingCodeTypeId="EXTERNAL" description ="PPC Campaign 3" statusId="MKTG_CAMP_INPROGRESS" marketingCampaignId="9001" trackableLifetime="2592000" billableLifetime="2592000"/>
+
+    <TrackingCode trackingCodeId="9010" trackingCodeTypeId="EXTERNAL" description ="Affiliate 1" statusId="MKTG_CAMP_INPROGRESS" marketingCampaignId="9002" trackableLifetime="2592000" billableLifetime="2592000"/>
+    <TrackingCode trackingCodeId="9011" trackingCodeTypeId="EXTERNAL" description ="Affiliate 2" statusId="MKTG_CAMP_INPROGRESS" marketingCampaignId="9002" trackableLifetime="2592000" billableLifetime="2592000"/>
+    <TrackingCode trackingCodeId="9012" trackingCodeTypeId="EXTERNAL" description ="Affiliate 3" statusId="MKTG_CAMP_INPROGRESS" marketingCampaignId="9002" trackableLifetime="2592000" billableLifetime="2592000"/>
+    
+</entity-engine-xml>

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<entity-engine-xml>
+    <Party partyId="USPS" partyTypeId="PARTY_GROUP"/>
+    <Party partyId="UPS" partyTypeId="PARTY_GROUP"/>
+    <Party partyId="DHL" partyTypeId="PARTY_GROUP"/>
+    <Party partyId="FEDEX" partyTypeId="PARTY_GROUP"/>
+    
+    <PartyGroup partyId="USPS" groupName="USPS"/>
+    <PartyGroup partyId="UPS" groupName="UPS"/>
+    <PartyGroup partyId="DHL" groupName="DHL"/>
+    <PartyGroup partyId="FEDEX" groupName="Federal Express"/>
+    
+    <PartyRole partyId="USPS" roleTypeId="CARRIER"/>
+    <PartyRole partyId="UPS" roleTypeId="CARRIER"/>
+    <PartyRole partyId="DHL" roleTypeId="CARRIER"/>
+    <PartyRole partyId="Company" roleTypeId="CARRIER"/>
+    <PartyRole partyId="_NA_" roleTypeId="CARRIER"/>
+    <PartyRole partyId="FEDEX" roleTypeId="CARRIER"/>
+    
+    <ShipmentMethodType description="Standard" shipmentMethodTypeId="STANDARD"/>
+    <ShipmentMethodType description="Express" shipmentMethodTypeId="EXPRESS"/>
+    <ShipmentMethodType description="Ground" shipmentMethodTypeId="GROUND"/>
+    <ShipmentMethodType description="Air" shipmentMethodTypeId="AIR"/>
+    <ShipmentMethodType description="Guaranteed Next Day" shipmentMethodTypeId="NEXT_DAY"/>
+    <ShipmentMethodType description="Local Delivery" shipmentMethodTypeId="LOCAL_DELIVERY"/>
+    <ShipmentMethodType description="No Shipping" shipmentMethodTypeId="NO_SHIPPING"/>
+    <ShipmentMethodType description="Second Day" shipmentMethodTypeId="SECOND_DAY"/>
+    <ShipmentMethodType description="Next Afternoon" shipmentMethodTypeId="NEXT_PM"/>
+    <ShipmentMethodType description="Next Morning" shipmentMethodTypeId="NEXT_AM"/>
+    <ShipmentMethodType description="Ground Home Delivery" shipmentMethodTypeId="GROUND_HOME"/>
+
+    <CarrierShipmentMethod partyId="Company" roleTypeId="CARRIER" shipmentMethodTypeId="LOCAL_DELIVERY" sequenceNumber="4"/>
+    <!-- For USPS, only certain container types are allowed for rate estimates of Priority or Express service codes -->
+    <CarrierShipmentMethod partyId="USPS" roleTypeId="CARRIER" shipmentMethodTypeId="STANDARD" sequenceNumber="7" carrierServiceCode="Parcel"/> 
+    <CarrierShipmentMethod partyId="USPS" roleTypeId="CARRIER" shipmentMethodTypeId="EXPRESS" sequenceNumber="6" carrierServiceCode="Express"/>
+    <CarrierShipmentMethod partyId="UPS" roleTypeId="CARRIER" shipmentMethodTypeId="GROUND" sequenceNumber="3" carrierServiceCode="03"/>
+    <CarrierShipmentMethod partyId="UPS" roleTypeId="CARRIER" shipmentMethodTypeId="AIR" sequenceNumber="2" carrierServiceCode="02"/>
+    <CarrierShipmentMethod partyId="UPS" roleTypeId="CARRIER" shipmentMethodTypeId="NEXT_DAY" sequenceNumber="1" carrierServiceCode="01"/>
+    <CarrierShipmentMethod partyId="_NA_" roleTypeId="CARRIER" shipmentMethodTypeId="STANDARD" sequenceNumber="5"/>
+    <CarrierShipmentMethod partyId="_NA_" roleTypeId="CARRIER" shipmentMethodTypeId="NO_SHIPPING" sequenceNumber="8"/>
+    <CarrierShipmentMethod partyId="DHL" roleTypeId="CARRIER" shipmentMethodTypeId="EXPRESS" sequenceNumber="9" carrierServiceCode="E"/>
+    <CarrierShipmentMethod partyId="DHL" roleTypeId="CARRIER" shipmentMethodTypeId="NEXT_PM" sequenceNumber="10" carrierServiceCode="N"/>
+    <CarrierShipmentMethod partyId="DHL" roleTypeId="CARRIER" shipmentMethodTypeId="SECOND_DAY" sequenceNumber="11" carrierServiceCode="S"/>
+    <CarrierShipmentMethod partyId="DHL" roleTypeId="CARRIER" shipmentMethodTypeId="GROUND" sequenceNumber="12" carrierServiceCode="G"/>
+    <CarrierShipmentMethod partyId="FEDEX" roleTypeId="CARRIER" shipmentMethodTypeId="NEXT_AM" sequenceNumber="13" carrierServiceCode="FIRSTOVERNIGHT"/>
+    <CarrierShipmentMethod partyId="FEDEX" roleTypeId="CARRIER" shipmentMethodTypeId="NEXT_DAY" sequenceNumber="14" carrierServiceCode="PRIORITYOVERNIGHT"/>
+    <CarrierShipmentMethod partyId="FEDEX" roleTypeId="CARRIER" shipmentMethodTypeId="NEXT_PM" sequenceNumber="15" carrierServiceCode="STANDARDOVERNIGHT"/>
+    <CarrierShipmentMethod partyId="FEDEX" roleTypeId="CARRIER" shipmentMethodTypeId="SECOND_DAY" sequenceNumber="16" carrierServiceCode="FEDEX2DAY"/>
+    <CarrierShipmentMethod partyId="FEDEX" roleTypeId="CARRIER" shipmentMethodTypeId="EXPRESS" sequenceNumber="17" carrierServiceCode="FEDEXEXPRESSSAVER"/>
+    <CarrierShipmentMethod partyId="FEDEX" roleTypeId="CARRIER" shipmentMethodTypeId="GROUND" sequenceNumber="18" carrierServiceCode="FEDEXGROUND"/>
+    <CarrierShipmentMethod partyId="FEDEX" roleTypeId="CARRIER" shipmentMethodTypeId="GROUND_HOME" sequenceNumber="19" carrierServiceCode="GROUNDHOMEDELIVERY"/>
+    
+    <ProductStoreShipmentMeth productStoreShipMethId="9000" productStoreId="9000" partyId="_NA_" includeNoChargeItems="Y" allowUspsAddr="N" requireUspsAddr="N" roleTypeId="CARRIER" shipmentMethodTypeId="NO_SHIPPING" sequenceNumber="6"/>
+    <ProductStoreShipmentMeth productStoreShipMethId="9001" productStoreId="9000" partyId="UPS" includeNoChargeItems="N" allowUspsAddr="N" requireUspsAddr="N" roleTypeId="CARRIER" shipmentMethodTypeId="GROUND" sequenceNumber="3"/>
+    <ProductStoreShipmentMeth productStoreShipMethId="9002" productStoreId="9000" partyId="UPS" includeNoChargeItems="N" allowUspsAddr="N" requireUspsAddr="N" roleTypeId="CARRIER" shipmentMethodTypeId="AIR" sequenceNumber="2"/>
+    <ProductStoreShipmentMeth productStoreShipMethId="9003" productStoreId="9000" partyId="UPS" includeNoChargeItems="N" allowUspsAddr="N" requireUspsAddr="N" roleTypeId="CARRIER" shipmentMethodTypeId="NEXT_DAY" sequenceNumber="1"/>
+    <ProductStoreShipmentMeth productStoreShipMethId="9004" productStoreId="9000" partyId="USPS" includeNoChargeItems="N" allowUspsAddr="Y" requireUspsAddr="N" roleTypeId="CARRIER" shipmentMethodTypeId="STANDARD" serviceName="uspsRateInquire" sequenceNumber="5"/>
+    <ProductStoreShipmentMeth productStoreShipMethId="9005" productStoreId="9000" partyId="USPS" includeNoChargeItems="N" allowUspsAddr="Y" requireUspsAddr="N" roleTypeId="CARRIER" shipmentMethodTypeId="EXPRESS" serviceName="uspsRateInquire" sequenceNumber="4"/>
+    <ProductStoreShipmentMeth productStoreShipMethId="9006" productStoreId="9000" partyId="DHL" includeNoChargeItems="N" allowUspsAddr="N" requireUspsAddr="N" roleTypeId="CARRIER" shipmentMethodTypeId="EXPRESS" sequenceNumber="7"/>
+    <ProductStoreShipmentMeth productStoreShipMethId="9007" productStoreId="9000" partyId="DHL" includeNoChargeItems="N" allowUspsAddr="N" requireUspsAddr="N" roleTypeId="CARRIER" shipmentMethodTypeId="NEXT_PM" sequenceNumber="8"/>
+    <ProductStoreShipmentMeth productStoreShipMethId="9008" productStoreId="9000" partyId="DHL" includeNoChargeItems="N" allowUspsAddr="N" requireUspsAddr="N" roleTypeId="CARRIER" shipmentMethodTypeId="SECOND_DAY" sequenceNumber="9"/>
+    <ProductStoreShipmentMeth productStoreShipMethId="9009" productStoreId="9000" partyId="DHL" includeNoChargeItems="N" allowUspsAddr="N" requireUspsAddr="N" roleTypeId="CARRIER" shipmentMethodTypeId="GROUND" sequenceNumber="10"/>
+    <ProductStoreShipmentMeth productStoreShipMethId="9010" productStoreId="9000" partyId="FEDEX" includeNoChargeItems="N" allowUspsAddr="N" requireUspsAddr="N" roleTypeId="CARRIER" shipmentMethodTypeId="NEXT_AM" sequenceNumber="11"/>
+    <ProductStoreShipmentMeth productStoreShipMethId="9011" productStoreId="9000" partyId="FEDEX" includeNoChargeItems="N" allowUspsAddr="N" requireUspsAddr="N" roleTypeId="CARRIER" shipmentMethodTypeId="NEXT_DAY" sequenceNumber="12"/>
+    <ProductStoreShipmentMeth productStoreShipMethId="9012" productStoreId="9000" partyId="FEDEX" includeNoChargeItems="N" allowUspsAddr="N" requireUspsAddr="N" roleTypeId="CARRIER" shipmentMethodTypeId="NEXT_PM" sequenceNumber="13"/>
+    <ProductStoreShipmentMeth productStoreShipMethId="9013" productStoreId="9000" partyId="FEDEX" includeNoChargeItems="N" allowUspsAddr="N" requireUspsAddr="N" roleTypeId="CARRIER" shipmentMethodTypeId="SECOND_DAY" sequenceNumber="14"/>
+    <ProductStoreShipmentMeth productStoreShipMethId="9014" productStoreId="9000" partyId="FEDEX" includeNoChargeItems="N" allowUspsAddr="N" requireUspsAddr="N" roleTypeId="CARRIER" shipmentMethodTypeId="EXPRESS" sequenceNumber="15"/>
+    <ProductStoreShipmentMeth productStoreShipMethId="9015" productStoreId="9000" partyId="FEDEX" includeNoChargeItems="N" allowUspsAddr="N" requireUspsAddr="N" roleTypeId="CARRIER" shipmentMethodTypeId="GROUND" sequenceNumber="16"/>
+    <ProductStoreShipmentMeth productStoreShipMethId="9016" productStoreId="9000" partyId="FEDEX" includeNoChargeItems="N" allowUspsAddr="N" requireUspsAddr="N" roleTypeId="CARRIER" shipmentMethodTypeId="GROUND_HOME" sequenceNumber="17"/>
+    
+    <QuantityBreak fromQuantity="0.0" quantityBreakId="9000" quantityBreakTypeId="SHIP_WEIGHT" thruQuantity="0.0"/>
+    <QuantityBreak fromQuantity="0.0" quantityBreakId="9001" quantityBreakTypeId="SHIP_WEIGHT" thruQuantity="0.0"/>
+    <QuantityBreak fromQuantity="0.0" quantityBreakId="9002" quantityBreakTypeId="SHIP_WEIGHT" thruQuantity="0.0"/>
+    <QuantityBreak fromQuantity="0.0" quantityBreakId="9003" quantityBreakTypeId="SHIP_WEIGHT" thruQuantity="0.0"/>
+    <QuantityBreak fromQuantity="0.0" quantityBreakId="9004" quantityBreakTypeId="SHIP_WEIGHT" thruQuantity="0.0"/>
+    <QuantityBreak fromQuantity="0.0" quantityBreakId="9005" quantityBreakTypeId="SHIP_WEIGHT" thruQuantity="0.0"/>
+    <QuantityBreak fromQuantity="0.0" quantityBreakId="9006" quantityBreakTypeId="SHIP_WEIGHT" thruQuantity="0.0"/>
+    <QuantityBreak fromQuantity="0.0" quantityBreakId="9007" quantityBreakTypeId="SHIP_WEIGHT" thruQuantity="0.0"/>
+    <QuantityBreak fromQuantity="0.0" quantityBreakId="9008" quantityBreakTypeId="SHIP_WEIGHT" thruQuantity="0.0"/>
+    <QuantityBreak fromQuantity="0.0" quantityBreakId="9009" quantityBreakTypeId="SHIP_WEIGHT" thruQuantity="0.0"/>
+
+    <ShipmentCostEstimate productStoreId="9000" orderFlatPrice="5.0" orderItemFlatPrice="0.0" orderPricePercent="0.0" shipmentCostEstimateId="9000" shipmentMethodTypeId="AIR" carrierPartyId="UPS" carrierRoleTypeId="CARRIER" weightBreakId="9000" weightUnitPrice="0.2"/>
+    <ShipmentCostEstimate productStoreId="9000" orderFlatPrice="3.0" orderItemFlatPrice="0.0" orderPricePercent="0.0" shipmentCostEstimateId="9001" shipmentMethodTypeId="GROUND" carrierPartyId="UPS" carrierRoleTypeId="CARRIER" weightBreakId="9001" weightUnitPrice="0.1"/>
+    <ShipmentCostEstimate productStoreId="9000" orderFlatPrice="5.0" orderItemFlatPrice="0.0" carrierPartyId="Company" carrierRoleTypeId="CARRIER" orderPricePercent="0.0" shipmentCostEstimateId="9002" shipmentMethodTypeId="LOCAL_DELIVERY"/>
+    <ShipmentCostEstimate productStoreId="9000" orderFlatPrice="10.0" orderItemFlatPrice="0.0" orderPricePercent="0.0" shipmentCostEstimateId="9003" shipmentMethodTypeId="NEXT_DAY" carrierPartyId="UPS" carrierRoleTypeId="CARRIER" weightBreakId="9002" weightUnitPrice="0.35"/>
+    <ShipmentCostEstimate productStoreId="9000" shipmentCostEstimateId="9004" shipmentMethodTypeId="STANDARD" carrierPartyId="_NA_" carrierRoleTypeId="CARRIER" orderFlatPrice="0.0" orderPricePercent="20.0" orderItemFlatPrice="0.0"/>
+    <ShipmentCostEstimate productStoreId="9000" shipmentCostEstimateId="9005" shipmentMethodTypeId="NO_SHIPPING" carrierPartyId="_NA_" carrierRoleTypeId="CARRIER" orderFlatPrice="0.0" orderPricePercent="0.0" orderItemFlatPrice="0.0"/>
+    <ShipmentCostEstimate productStoreId="9000" orderFlatPrice="10.0" orderItemFlatPrice="0.0" orderPricePercent="0.0" shipmentCostEstimateId="9100" shipmentMethodTypeId="EXPRESS" carrierPartyId="DHL" carrierRoleTypeId="CARRIER" weightBreakId="9003" weightUnitPrice="0.2"/>
+    <ShipmentCostEstimate productStoreId="9000" orderFlatPrice="9.0" orderItemFlatPrice="0.0" orderPricePercent="0.0" shipmentCostEstimateId="9101" shipmentMethodTypeId="NEXT_PM" carrierPartyId="DHL" carrierRoleTypeId="CARRIER" weightBreakId="9004" weightUnitPrice="0.2"/>
+    <ShipmentCostEstimate productStoreId="9000" orderFlatPrice="5.0" orderItemFlatPrice="0.0" orderPricePercent="0.0" shipmentCostEstimateId="9102" shipmentMethodTypeId="SECOND_DAY" carrierPartyId="DHL" carrierRoleTypeId="CARRIER" weightBreakId="9005" weightUnitPrice="0.2"/>
+    <ShipmentCostEstimate productStoreId="9000" orderFlatPrice="3.0" orderItemFlatPrice="0.0" orderPricePercent="0.0" shipmentCostEstimateId="9103" shipmentMethodTypeId="GROUND" carrierPartyId="DHL" carrierRoleTypeId="CARRIER" weightBreakId="9006" weightUnitPrice="0.1"/>
+    <ShipmentCostEstimate productStoreId="9000" orderFlatPrice="0.0" orderItemFlatPrice="0.0" orderPricePercent="0.0" shipmentCostEstimateId="9203" shipmentMethodTypeId="NEXT_AM" carrierPartyId="FEDEX" carrierRoleTypeId="CARRIER"/>
+    <ShipmentCostEstimate productStoreId="9000" orderFlatPrice="0.0" orderItemFlatPrice="0.0" orderPricePercent="0.0" shipmentCostEstimateId="9204" shipmentMethodTypeId="NEXT_DAY" carrierPartyId="FEDEX" carrierRoleTypeId="CARRIER"/>
+    <ShipmentCostEstimate productStoreId="9000" orderFlatPrice="0.0" orderItemFlatPrice="0.0" orderPricePercent="0.0" shipmentCostEstimateId="9205" shipmentMethodTypeId="NEXT_PM" carrierPartyId="FEDEX" carrierRoleTypeId="CARRIER"/>
+    <ShipmentCostEstimate productStoreId="9000" orderFlatPrice="0.0" orderItemFlatPrice="0.0" orderPricePercent="0.0" shipmentCostEstimateId="9206" shipmentMethodTypeId="SECOND_DAY" carrierPartyId="FEDEX" carrierRoleTypeId="CARRIER"/>
+    <ShipmentCostEstimate productStoreId="9000" orderFlatPrice="0.0" orderItemFlatPrice="0.0" orderPricePercent="0.0" shipmentCostEstimateId="9207" shipmentMethodTypeId="EXPRESS" carrierPartyId="FEDEX" carrierRoleTypeId="CARRIER"/>
+    <ShipmentCostEstimate productStoreId="9000" orderFlatPrice="0.0" orderItemFlatPrice="0.0" orderPricePercent="0.0" shipmentCostEstimateId="9208" shipmentMethodTypeId="GROUND" carrierPartyId="FEDEX" carrierRoleTypeId="CARRIER"/>
+    <ShipmentCostEstimate productStoreId="9000" orderFlatPrice="0.0" orderItemFlatPrice="0.0" orderPricePercent="0.0" shipmentCostEstimateId="9209" shipmentMethodTypeId="GROUND_HOME" carrierPartyId="FEDEX" carrierRoleTypeId="CARRIER"/>
+
+    <ShipmentBoxType shipmentBoxTypeId="FXENV" description="FedEx Envelope" dimensionUomId="LEN_in" boxLength="9.5" boxWidth="12.5" boxHeight="0"/>
+    <ShipmentBoxType shipmentBoxTypeId="FXENV_LGL" description="FedEx Envelope (Legal)" dimensionUomId="LEN_in" boxLength="10" boxWidth="15.75" boxHeight="0"/>
+    <ShipmentBoxType shipmentBoxTypeId="FXPAK_SM" description="FedEx Pak (Small)" dimensionUomId="LEN_in" boxLength="10.25" boxWidth="12.75" boxHeight="0"/>
+    <ShipmentBoxType shipmentBoxTypeId="FXPAK_LRG" description="FedEx Pak (Large)" dimensionUomId="LEN_in" boxLength="12" boxWidth="15.5" boxHeight="0"/>
+    <ShipmentBoxType shipmentBoxTypeId="FXBOX_SM" description="FedEx Box (Small)" dimensionUomId="LEN_in" boxLength="12.25" boxWidth="10.875" boxHeight="1.5"/>
+    <ShipmentBoxType shipmentBoxTypeId="FXBOX_MED" description="FedEx Box (Medium)" dimensionUomId="LEN_in" boxLength="13.25" boxWidth="11.5" boxHeight="2.375"/>
+    <ShipmentBoxType shipmentBoxTypeId="FXBOX_LRG" description="FedEx Box (Large)" dimensionUomId="LEN_in" boxLength="17.875" boxWidth="12.375" boxHeight="3"/>
+    <ShipmentBoxType shipmentBoxTypeId="FXTUBE" description="FedEx Tube" dimensionUomId="LEN_in" boxLength="38" boxWidth="6" boxHeight="5.2"/>
+    <ShipmentBoxType shipmentBoxTypeId="FX10KGBOX" description="FedEx 10KG Box" dimensionUomId="LEN_in" boxLength="15.8125" boxWidth="12.9375" boxHeight="10.1875"/>
+    <ShipmentBoxType shipmentBoxTypeId="FX25KGBOX" description="FedEx 25KG Box" dimensionUomId="LEN_in" boxLength="21.5625" boxWidth="16.5625" boxHeight="13.1875"/>
+    <ShipmentBoxType shipmentBoxTypeId="YOURPACKNG" description="Your Packaging" dimensionUomId="LEN_in" boxLength="" boxWidth="" boxHeight=""/>
+
+    <CarrierShipmentBoxType shipmentBoxTypeId="FXENV" partyId="FEDEX" packagingTypeCode="FEDEXENVELOPE"/>
+    <CarrierShipmentBoxType shipmentBoxTypeId="FXENV_LGL" partyId="FEDEX" packagingTypeCode="FEDEXENVELOPE"/>
+    <CarrierShipmentBoxType shipmentBoxTypeId="FXPAK_SM" partyId="FEDEX" packagingTypeCode="FEDEXPAK"/>
+    <CarrierShipmentBoxType shipmentBoxTypeId="FXPAK_LRG" partyId="FEDEX" packagingTypeCode="FEDEXPAK"/>
+    <CarrierShipmentBoxType shipmentBoxTypeId="FXBOX_SM" partyId="FEDEX" packagingTypeCode="FEDEXBOX"/>
+    <CarrierShipmentBoxType shipmentBoxTypeId="FXBOX_MED" partyId="FEDEX" packagingTypeCode="FEDEXBOX"/>
+    <CarrierShipmentBoxType shipmentBoxTypeId="FXBOX_LRG" partyId="FEDEX" packagingTypeCode="FEDEXBOX"/>
+    <CarrierShipmentBoxType shipmentBoxTypeId="FXTUBE" partyId="FEDEX" packagingTypeCode="FEDEXTUBE"/>
+    <CarrierShipmentBoxType shipmentBoxTypeId="FX10KGBOX" partyId="FEDEX" packagingTypeCode="FEDEX10KGBOX"/>
+    <CarrierShipmentBoxType shipmentBoxTypeId="FX25KGBOX" partyId="FEDEX" packagingTypeCode="FEDEX25KGBOX"/>
+    <CarrierShipmentBoxType shipmentBoxTypeId="YOURPACKNG" partyId="FEDEX" packagingTypeCode="YOURPACKAGING"/>
+
+</entity-engine-xml>

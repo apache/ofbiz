@@ -1,0 +1,1146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/simple-methods.xsd">
+        
+    <simple-method method-name="createWorkEffort" short-description="Create Work Effort">
+        <make-value value-name="newEntity" entity-name="WorkEffort"/>
+        <if-empty field-name="parameters.workEffortId">
+            <sequenced-id-to-env sequence-name="WorkEffort" env-name="newEntity.workEffortId"/>
+            <else>
+                <set field="newEntity.workEffortId" from-field="parameters.workEffortId"/>
+            </else>
+        </if-empty>
+        <field-to-result field-name="newEntity.workEffortId" result-name="workEffortId"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        
+        <now-timestamp-to-env env-name="nowTimestamp"/>
+        <set from-field="nowTimestamp" field="newEntity.lastStatusUpdate"/>
+        <set from-field="nowTimestamp" field="newEntity.lastModifiedDate"/>
+        <set from-field="nowTimestamp" field="newEntity.createdDate"/>
+        <set field="newEntity.revisionNumber" value="1" type="Long"/>
+        <set from-field="userLogin.userLoginId" field="newEntity.lastModifiedByUserLogin"/>
+        <set from-field="userLogin.userLoginId" field="newEntity.createdByUserLogin"/>
+        <create-value value-name="newEntity"/>
+        
+        <!-- create new status entry, and set lastStatusUpdate date -->
+        <make-value value-name="newWorkEffortStatus" entity-name="WorkEffortStatus"/>
+        <set from-field="newEntity.workEffortId" field="newWorkEffortStatus.workEffortId"/>
+        <set from-field="newEntity.currentStatusId" field="newWorkEffortStatus.statusId"/>
+        <set from-field="nowTimestamp" field="newWorkEffortStatus.statusDatetime"/>
+        <set from-field="userLogin.userLoginId" field="newWorkEffortStatus.setByUserLogin"/>
+        <create-value value-name="newWorkEffortStatus"/>
+        
+        <!-- Attach the workeffort to a requirement if passed -->
+        <if-not-empty field-name="requirementId" map-name="parameters">
+            <make-value value-name="workFullfillment" entity-name="WorkRequirementFulfillment"/>
+            <set from-field="newEntity.workEffortId" field="workFullfillment.workEffortId"/>
+            <set from-field="parameters.requirementId" field="workFullfillment.requirementId"/>
+            <create-value value-name="workFullfillment"/>
+        </if-not-empty>
+    </simple-method>
+    <simple-method method-name="updateWorkEffort" short-description="Update Work Effort">
+        <!-- check permissions before moving on: if update or delete logged in user must be associated OR have the corresponding UPDATE or DELETE permissions -->
+        
+        <!-- temporarily commented out, because users assigned to a project or phase should
+              have the capability to modify status on sub-tasks, right? Hmmmm.... -->
+              
+<!--        <set from-field="workEffortId" map-name="parameters" to-map-name="findWepaMap"/>
+        <set from-field="partyId" map-name="userLogin" to-map-name="findWepaMap"/>
+        <find-by-and entity-name="WorkEffortPartyAssignment" map-name="findWepaMap" list-name="wepaList"/>
+        <if-empty field-name="wepaList">
+            <check-permission permission="WORKEFFORTMGR" action="_UPDATE"><fail-message message="Security Error: to run updateWorkEffort you must have the WORKEFFORTMGR_UPDATE or WORKEFFORTMGR_ADMIN permission"/></check-permission>
+            <check-errors/>
+        </if-empty>-->
+        
+        <entity-one entity-name="WorkEffort" value-name="lookedUpValue"/>
+        <clone-value value-name="lookedUpValue" new-value-name="savedValue"/>
+        
+        <now-timestamp-to-env env-name="nowTimestamp"/>
+        
+        <!-- if necessary create new status entry, and set lastStatusUpdate date -->
+        <if>
+            <condition>
+                <and>
+                    <not><if-empty field-name="parameters.currentStatusId"/></not>
+                    <if-compare-field field-name="parameters.currentStatusId" operator="not-equals" to-field-name="lookedUpValue.currentStatusId"/>
+                </and>
+            </condition>
+            <then>
+                <if-not-empty field-name="lookedUpValue.currentStatusId">
+                    <!-- check if the status change is a valid change -->
+                    <entity-and entity-name="StatusValidChange" list-name="validChange">
+                        <field-map field-name="statusId" env-name="lookedUpValue.currentStatusId"/>
+                        <field-map field-name="statusIdTo" env-name="parameters.currentStatusId"/>
+                    </entity-and>
+                    
+                    <if-empty field-name="validChange">
+                        <add-error><fail-message message="The status change from ${lookedUpValue.currentStatusId} to ${parameters.currentStatusId} is not a valid change"/></add-error>
+                        <log level="error" message="The status change from ${lookedUpValue.currentStatusId} to ${parameters.currentStatusId} is not a valid change"/>
+                        <check-errors/>
+                    </if-empty>
+                </if-not-empty>
+                
+                <set from-field="nowTimestamp" field="lookedUpValue.lastStatusUpdate"/>
+                <make-value value-name="newWorkEffortStatus" entity-name="WorkEffortStatus"/>
+                <set from-field="lookedUpValue.workEffortId" field="newWorkEffortStatus.workEffortId"/>
+                <set from-field="parameters.currentStatusId" field="newWorkEffortStatus.statusId"/>
+                <set from-field="nowTimestamp" field="newWorkEffortStatus.statusDatetime"/>
+                <set from-field="userLogin.userLoginId" field="newWorkEffortStatus.setByUserLogin"/>
+                <create-value value-name="newWorkEffortStatus"/>
+            </then>
+        </if>
+        <!-- after checking status change, set all parameters -->        
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+
+        <!-- only save if something has changed -->
+        <if-compare-field field-name="lookedUpValue" operator="not-equals" to-field-name="savedValue" type="Object">
+            <!-- only set lastModifiedDate after comparing new & old to see if anything has changed -->
+            <set from-field="nowTimestamp" field="lookedUpValue.lastModifiedDate"/>
+            <set from-field="userLogin.userLoginId" field="lookedUpValue.lastModifiedByUserLogin"/>
+            <if-not-empty field-name="lookedUpValue.revisionNumber">
+                <calculate field-name="lookedUpValue.revisionNumber" type="Long">
+                    <calcop operator="get" field-name="lookedUpValue.revisionNumber"/>
+                    <number value="1"/>
+                </calculate>
+            <else>
+                <set field="lookedUpValue.revisionNumber" value="1" type="Long"/>
+            </else>
+            </if-not-empty>
+            <store-value value-name="lookedUpValue"/>
+        </if-compare-field>
+    </simple-method>
+    <simple-method method-name="deleteWorkEffort" short-description="Delete Work Effort">
+        <!-- check permissions before moving on: if update or delete logged in user must be associated OR have the corresponding UPDATE or DELETE permissions -->
+        <entity-and entity-name="WorkEffortPartyAssignment" list-name="wepaList">
+            <field-map field-name="workEffortId" env-name="parameters.workEffortId"/>
+            <field-map field-name="partyId" env-name="userLogin.partyId"/>
+        </entity-and>
+        <if-empty field-name="wepaList">
+            <check-permission permission="WORKEFFORTMGR" action="_DELETE"><fail-message message="Security Error: to run deleteWorkEffort you must have the WORKEFFORTMGR_DELETE or WORKEFFORTMGR_ADMIN permission"/></check-permission>
+            <check-errors/>
+        </if-empty>
+
+        <entity-one entity-name="WorkEffort" value-name="lookedUpValue"/>
+
+        <!-- Remove associated/dependent entries from other entities here -->
+        <remove-related value-name="lookedUpValue" relation-name="WorkEffortKeyword"/>
+        <remove-related value-name="lookedUpValue" relation-name="WorkEffortAttribute"/>
+        <remove-related value-name="lookedUpValue" relation-name="WorkOrderItemFulfillment"/>
+        <remove-related value-name="lookedUpValue" relation-name="FromWorkEffortAssoc"/>
+        <remove-related value-name="lookedUpValue" relation-name="ToWorkEffortAssoc"/>
+        <remove-related value-name="lookedUpValue" relation-name="NoteData"/>
+        <remove-related value-name="lookedUpValue" relation-name="RecurrenceInfo"/>
+        <remove-related value-name="lookedUpValue" relation-name="RuntimeData"/>
+        <remove-related value-name="lookedUpValue" relation-name="WorkEffortPartyAssignment"/>
+        <remove-related value-name="lookedUpValue" relation-name="WorkEffortStatus"/>
+
+        <!-- Delete actual main entity last -->
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+
+    <!-- communication event workeffort -->
+    <simple-method method-name="makeCommunicationEventWorkEffort" short-description="Make a Communication Event WorkEffort">
+        <make-value entity-name="CommunicationEventWorkEff" value-name="lookupMap"/>
+        <set-pk-fields map-name="parameters" value-name="lookupMap"/>
+        <find-by-primary-key entity-name="CommunicationEventWorkEff" map-name="lookupMap" value-name="eventWe"/>
+        <if-not-empty field-name="workEffortId" map-name="eventWe">
+            <set-nonpk-fields map-name="parameters" value-name="eventWe"/>
+            <store-value value-name="eventWe"/>
+        </if-not-empty>
+        <if-empty field-name="workEffortId" map-name="eventWe">
+            <set-nonpk-fields map-name="parameters" value-name="lookupMap"/>
+            <create-value value-name="lookupMap"/>
+        </if-empty>
+        <field-to-result field-name="workEffortId" map-name="lookupMap"/>
+        <field-to-result field-name="communicationEventId" map-name="lookupMap"/>
+    </simple-method>
+
+    <simple-method method-name="updateCommunicationEventWorkEff" short-description="Delete a CommunicationEventWorkEff">
+        <check-permission permission="WORKEFFORTMGR" action="_UPDATE"><fail-message message="You do not have permission to perform this operation for this work effort."/></check-permission>
+        <check-errors/>
+        <!-- Find old value -->
+        <make-value entity-name="CommunicationEventWorkEff" value-name="communicationEventWorkEff"/>
+        <set-pk-fields value-name="communicationEventWorkEff" map-name="parameters"/>
+        <find-by-primary-key entity-name="CommunicationEventWorkEff" map-name="communicationEventWorkEff" value-name="communicationEventWorkEff"/>
+        <if-empty field-name="communicationEventWorkEff">
+            <add-error><fail-message message="ERROR: Cannot update specified contact info because it does not correspond to the specified work effort"/></add-error>
+        </if-empty>
+        <check-errors/>
+        <set-nonpk-fields value-name="communicationEventWorkEff" map-name="parameters"/>
+        <store-value value-name="communicationEventWorkEff"/>  
+    </simple-method>
+     
+    <simple-method method-name="deleteCommunicationEventWorkEff" short-description="Delete a CommunicationEventWorkEff">
+        <check-permission permission="WORKEFFORTMGR" action="_DELETE"><fail-message message="You do not have permission to perform this operation for this work effort."/></check-permission>
+        <check-errors/>
+        <!-- Find old value -->
+        <make-value entity-name="CommunicationEventWorkEff" value-name="communicationEventWorkEff"/>
+        <set-pk-fields value-name="communicationEventWorkEff" map-name="parameters"/>
+        <find-by-primary-key entity-name="CommunicationEventWorkEff" map-name="communicationEventWorkEff" value-name="communicationEventWorkEff"/>
+        <if-empty field-name="communicationEventWorkEff">
+            <add-error><fail-message message="ERROR: Cannot delete specified contact info because it does not correspond to the specified work effort"/></add-error>
+        </if-empty>
+        <check-errors/>
+        <remove-value value-name="communicationEventWorkEff"/>  
+    </simple-method>
+     
+     
+    <!-- WorkEffortPartyAssignment -->    
+    <simple-method method-name="assignPartyToWorkEffort" short-description="Assign Party to Work Effort">
+        <!-- check if the requested party Assignment already exist -->
+        <entity-and entity-name="WorkEffortPartyAssignment" list-name="currentAssignments" filter-by-date="true">
+            <field-map field-name="workEffortId" env-name="parameters.workEffortId"/>
+            <field-map field-name="partyId" env-name="parameters.partyId"/>
+            <field-map field-name="roleTypeId" env-name="parameters.roleTypeId"/>
+        </entity-and>
+        <if-not-empty field-name="currentAssignments">
+            <first-from-list entry-name="firstAssignment" list-name="currentAssignments"/>
+            <log level="info" message="Party: ${parameters.partyId} with role ${parameters.roleTypeId} already assigned to workEffortId ${parameters.workEffortId} startDate: ${firstAssignment.startDate}, not adding again"></log>
+            <return/>
+        </if-not-empty>
+
+        <make-value value-name="newEntity" entity-name="WorkEffortPartyAssignment"/>
+
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+
+        <if-empty field-name="newEntity.fromDate">
+            <now-timestamp-to-env env-name="newEntity.fromDate"/>
+        </if-empty>
+        <field-to-result field-name="newEntity.fromDate" result-name="fromDate"/>
+
+        <if-not-empty field-name="parameters.statusId">
+            <now-timestamp-to-env env-name="newEntity.statusDateTime"/>
+            <call-class-method class-name="org.ofbiz.workeffort.workeffort.WorkEffortPartyAssignmentServices" method-name="updateWorkflowEngine">
+                <field field-name="newEntity" type="org.ofbiz.entity.GenericValue"/>
+                <field field-name="userLogin" type="org.ofbiz.entity.GenericValue"/>
+                <field field-name="dispatcher" type="org.ofbiz.service.LocalDispatcher"/>
+            </call-class-method>
+        </if-not-empty>
+        <create-value value-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updatePartyToWorkEffortAssignment" short-description="Update WorkEffortPartyAssignment entity">
+        <entity-one entity-name="WorkEffortPartyAssignment" value-name="workEffortPartyAssignment"/>
+        
+        <if-compare-field field-name="userLogin.partyId" operator="not-equals" to-field-name="workEffortPartyAssignment.partyId">                
+            <check-permission permission="WORKEFFORTMGR" action="_UPDATE">
+                <fail-message message="You cannot update this Work Effort Party Assignment, you must either be associated with it or have administration permission."/>
+               </check-permission>
+            <check-errors/>
+        </if-compare-field>
+        
+        <set from-field="workEffortPartyAssignment.statusId" field="oldStatusId"/>
+        <set-nonpk-fields map-name="parameters" value-name="workEffortPartyAssignment"/>
+        
+        <if-compare-field field-name="parameters.statusId" operator="not-equals" to-field-name="oldStatusId">
+            <now-timestamp-to-env env-name="workEffortPartyAssignment.statusDateTime"/>
+            <call-class-method class-name="org.ofbiz.workeffort.workeffort.WorkEffortPartyAssignmentServices" method-name="updateWorkflowEngine" >
+                <field field-name="workEffortPartyAssignment" type="org.ofbiz.entity.GenericValue"/>
+                <field field-name="userLogin" type="org.ofbiz.entity.GenericValue"/>
+                <field field-name="dispatcher" type="org.ofbiz.service.LocalDispatcher"/>
+            </call-class-method>
+        </if-compare-field>
+        <store-value value-name="workEffortPartyAssignment"/>
+    </simple-method>
+    <simple-method method-name="unassignPartyFromWorkEffort" short-description="Service that deletes a WorkEffortPartyAssignment entity">
+        <entity-one entity-name="WorkEffortPartyAssignment" value-name="workEffortPartyAssignment"/>
+        <if-compare-field field-name="userLogin.partyId" operator="not-equals" to-field-name="workEffortPartyAssignment.partyId">                
+            <check-permission permission="WORKEFFORTMGR" action="_DELETE">
+                <fail-message message="You cannot delete this Work Effort Party Assignment, you must either be associated with it or have administration permission."/>
+            </check-permission>
+            <check-errors/>
+        </if-compare-field>
+        <remove-value value-name="workEffortPartyAssignment"/>
+    </simple-method>
+
+    <!-- Create a WorkEffortContactMech -->
+    <simple-method method-name="createWorkEffortContactMech" short-description="Create a WorkEffortContactMech">
+        <check-permission permission="WORKEFFORTMGR" action="_CREATE"><fail-message message="You do not have permission to perform this operation for this work effort."/></check-permission>
+        <check-errors/>
+        <make-value value-name="newValue" entity-name="WorkEffortContactMech"/>
+        <if-empty map-name="parameters" field-name="contactMechId">
+            <if-not-empty map-name="parameters" field-name="addToParty">
+                <call-map-processor xml-resource="org/ofbiz/party/contact/PartyContactMechMapProcs.xml"
+                    processor-name="partyContactMech" in-map-name="parameters" out-map-name="context"/>
+                <call-service service-name="createPartyContactMech" in-map-name="context">
+                    <default-message>Party Contact Mechanism successfully created.</default-message>
+                    <result-to-field result-name="contactMechId" map-name="newValue"/>
+                </call-service> 
+                <log level="info" message="Party ContactMech created"/>             
+                <else>
+                    <call-map-processor xml-resource="org/ofbiz/party/contact/ContactMechMapProcs.xml"
+                        processor-name="contactMech" in-map-name="parameters" out-map-name="context"/>
+                    <call-service service-name="createContactMech" in-map-name="context">
+                        <default-message>Contact Mechanism successfully created.</default-message>
+                        <result-to-field result-name="contactMechId" map-name="newValue"/>
+                    </call-service> 
+                    <log level="info" message="ContactMech created"/>
+                </else> 
+            </if-not-empty>            
+            <else>
+                <set from-field="parameters.contactMechId" field="newValue.contactMechId"/>
+            </else> 
+        </if-empty>   
+        <log level="info" message="Creating a WorkEffortContactMech"/>
+        <set from-field="parameters.workEffortId" field="newValue.workEffortId"/>
+        <set-nonpk-fields map-name="parameters" value-name="newValue"/>
+        <field-to-result field-name="contactMechId" map-name="newValue"/>
+        <field-to-request field-name="contactMechId" map-name="newValue"/>        
+        <create-value value-name="newValue"/>
+    </simple-method>
+    
+    <simple-method method-name="updateWorkEffortContactMech" short-description="Update a WorkEffortContactMech">
+        <check-permission permission="WORKEFFORTMGR" action="_UPDATE"><fail-message message="You do not have permission to perform this operation for this work effort."/></check-permission>
+        <check-errors/>
+        <make-value entity-name="WorkEffortContactMech" value-name="newWorkEffortContactMech"/>
+        <!-- Find old value -->
+        <entity-one entity-name="WorkEffortContactMech" value-name="workEffortContactMech"/>
+        <if-empty field-name="workEffortContactMech">
+            <add-error><fail-message message="ERROR: Cannot update specified contact info because it does not correspond to the specified work effort"/></add-error>
+        </if-empty>
+        <check-errors/>
+        
+        <clone-value value-name="workEffortContactMech" new-value-name="newWorkEffortContactMech"/>
+        
+        <!-- If we already have a new contactMechId don't update ContactMech -->
+        <if-empty map-name="parameters" field-name="newContactMechId">                
+            <log level="info" message="Calling map procs"/>
+            <call-map-processor xml-resource="org/ofbiz/party/contact/ContactMechMapProcs.xml"
+                processor-name="updateContactMech" in-map-name="parameters" out-map-name="context"/>
+            <to-string field-name="contactMechId" map-name="context"/>
+            <log level="info" message="Calling generic updateContactMech method"/>
+            <call-service service-name="updateContactMech" in-map-name="context">
+                <default-message>Contact Mechanism successfully updated.</default-message>
+                <result-to-field result-name="contactMechId" map-name="newWorkEffortContactMech"/>
+            </call-service>
+            <else>
+                <set from-field="parameters.newContactMechId" field="newWorkEffortContactMech.contactMechId"/>
+            </else> 
+        </if-empty> 
+        
+        <if-compare-field field-name="contactMechId" map-name="parameters" to-map-name="newWorkEffortContactMech" operator="not-equals">                
+            <set-nonpk-fields value-name="newWorkEffortContactMech" map-name="parameters" set-if-null="false"/>
+            <create-value value-name="newWorkEffortContactMech"/>
+            <remove-value value-name="workEffortContactMech"/>
+        </if-compare-field>
+        
+        <field-to-result field-name="contactMechId" map-name="newWorkEffortContactMech"/>
+        <field-to-request field-name="contactMechId" map-name="newWorkEffortContactMech"/>      
+    </simple-method>    
+    
+    <simple-method method-name="deleteWorkEffortContactMech" short-description="Delete a WorkEffortContactMech">
+        <check-permission permission="WORKEFFORTMGR" action="_DELETE"><fail-message message="You do not have permission to perform this operation for this work effort."/></check-permission>
+        <check-errors/>
+        <!-- Find old value -->
+        <entity-one entity-name="WorkEffortContactMech" value-name="workEffortContactMech"/>
+        <if-empty field-name="workEffortContactMech">
+            <add-error><fail-message message="ERROR: Cannot delete specified contact info because it does not correspond to the specified work effort"/></add-error>
+        </if-empty>
+        <check-errors/>
+        <remove-value value-name="workEffortContactMech"/>          
+    </simple-method>
+     
+    <simple-method method-name="createWorkEffortPostalAddress" short-description="Create a PostalAddress for WorkEffort">
+        <make-value entity-name="WorkEffortContactMech" value-name="newValue"/>
+        <log level="info" message="Creating postal address"/>
+        <if-not-empty map-name="parameters" field-name="addToParty">
+            <call-map-processor xml-resource="org/ofbiz/party/contact/PartyContactMechMapProcs.xml"
+                processor-name="postalAddress" in-map-name="parameters" out-map-name="context"/>
+            <call-service service-name="createPartyPostalAddress" in-map-name="context">
+                <default-message>Party Contact Mechanism successfully created.</default-message>
+                <result-to-field result-name="contactMechId" map-name="newValue"/>
+            </call-service> 
+            <log level="info" message="Party ContactMech created"/> 
+            <else>
+                <call-map-processor xml-resource="org/ofbiz/party/contact/ContactMechMapProcs.xml"
+                    processor-name="postalAddress" in-map-name="parameters" out-map-name="context"/>        
+                <call-service in-map-name="context" service-name="createPostalAddress">
+                    <default-message>Postal Address successfully created</default-message>
+                    <result-to-field result-name="contactMechId" map-name="newValue"/>             
+                </call-service>
+            </else>
+        </if-not-empty>
+        <log level="info" message="ContactMech for postal address was ${newValue.contactMechId}, now creating work effort contact mech"/>
+        <call-map-processor xml-resource="org/ofbiz/workeffort/workeffort/WorkflowMapProcessors.xml"
+                processor-name="workEffortContactMech" in-map-name="parameters" out-map-name="context2"/>  
+        <set from-field="newValue.contactMechId" field="context2.contactMechId"/> 
+        <log level="info" message="Copied id to context2: ${context2.contactMechId}"/>      
+        <call-service in-map-name="context2" break-on-error="true" service-name="createWorkEffortContactMech">
+            <default-message>WorkEffort Contact Mechanism successfully created</default-message>       
+        </call-service>
+        <field-to-request field-name="contactMechId" map-name="newValue"/>
+        <field-to-result field-name="contactMechId" map-name="newValue"/>
+    </simple-method>
+    
+    <simple-method method-name="updateWorkEffortPostalAddress" short-description="Update a PostalAddress for WorkEffort">
+        <make-value entity-name="WorkEffortContactMech" value-name="newValue"/>
+        <call-map-processor xml-resource="org/ofbiz/party/contact/ContactMechMapProcs.xml"
+                processor-name="postalAddress" in-map-name="parameters" out-map-name="context"/>        
+        <call-service in-map-name="context" service-name="updatePostalAddress">
+            <default-message>Postal Address successfully updated</default-message>
+            <result-to-field result-name="contactMechId" map-name="newValue" field-name="contactMechId" />             
+        </call-service>
+        <call-map-processor xml-resource="org/ofbiz/workeffort/workeffort/WorkflowMapProcessors.xml"
+                processor-name="workEffortContactMech" in-map-name="parameters" out-map-name="context2"/>  
+        <set from-field="newValue.contactMechId"  field="context2.newContactMechId"/>   
+        <set field="context2.contactMechTypeId" value="POSTAL_ADDRESS"/>
+        <log level="info" message="Copied id to context2: ${context2.newContactMechId}"/>
+        <call-service in-map-name="context2" service-name="updateWorkEffortContactMech">
+            <default-message>WorkEffort Contact Mechanism successfully updated</default-message>       
+        </call-service>
+        <field-to-request field-name="contactMechId" map-name="newValue"/>
+        <field-to-result field-name="contactMechId" map-name="newValue"/>                   
+    </simple-method>
+     
+    <simple-method method-name="createWorkEffortTelecomNumber" short-description="Create a TelecomNumber for WorkEffort">
+        <make-value entity-name="WorkEffortContactMech" value-name="newValue"/>
+        <log level="info" message="Creating telecom number"/>
+        <if-not-empty map-name="parameters" field-name="addToParty">
+            <call-map-processor xml-resource="org/ofbiz/party/contact/PartyContactMechMapProcs.xml"
+                processor-name="telecomNumber" in-map-name="parameters" out-map-name="context"/>
+            <call-service service-name="createPartyTelecomNumber" in-map-name="context">
+                <default-message>Party Contact Mechanism successfully created.</default-message>
+                <result-to-field result-name="contactMechId" map-name="newValue"/>
+            </call-service> 
+            <log level="info" message="Party ContactMech created"/> 
+            <else>
+                <call-map-processor xml-resource="org/ofbiz/party/contact/ContactMechMapProcs.xml"
+                    processor-name="telecomNumber" in-map-name="parameters" out-map-name="context"/>        
+                <call-service in-map-name="context" service-name="createTelecomNumber">
+                    <default-message>Telecom number successfully created</default-message>
+                    <result-to-field result-name="contactMechId" map-name="newValue"/>             
+                </call-service>
+            </else>
+        </if-not-empty>                
+        <call-map-processor xml-resource="org/ofbiz/workeffort/workeffort/WorkflowMapProcessors.xml"
+                processor-name="workEffortContactMech" in-map-name="parameters" out-map-name="context2"/>  
+        <set from-field="newValue.contactMechId" field="context2.contactMechId"/> 
+        <log level="info" message="Copied id to context2: ${context2.contactMechId}"/>      
+        <call-service in-map-name="context2" break-on-error="true" service-name="createWorkEffortContactMech">
+            <default-message>WorkEffort Contact Mechanism successfully created</default-message>       
+        </call-service>
+        <field-to-request field-name="contactMechId" map-name="newValue"/>
+        <field-to-result field-name="contactMechId" map-name="newValue"/>
+    </simple-method>
+    
+    <simple-method method-name="updateWorkEffortTelecomNumber" short-description="Update a TelecomNumber for WorkEffort">
+        <make-value entity-name="WorkEffortContactMech" value-name="newValue"/>
+        <call-map-processor xml-resource="org/ofbiz/party/contact/ContactMechMapProcs.xml"
+                processor-name="telecomNumber" in-map-name="parameters" out-map-name="context"/>        
+        <call-service in-map-name="context" service-name="updateTelecomNumber">
+            <default-message>Telecom Number successfully updated</default-message>
+            <result-to-field result-name="contactMechId" map-name="newValue" field-name="contactMechId" />             
+        </call-service>
+        
+        <call-map-processor xml-resource="org/ofbiz/workeffort/workeffort/WorkflowMapProcessors.xml"
+                processor-name="workEffortContactMech" in-map-name="parameters" out-map-name="context2"/>  
+        <set from-field="newValue.contactMechId"  field="context2.newContactMechId"/>   
+        <set field="context2.contactMechTypeId" value="TELECOM_NUMBER"/>
+        <log level="info" message="Copied id to context2: ${context2.newContactMechId}"/>
+        <call-service in-map-name="context2" service-name="updateWorkEffortContactMech">
+            <default-message>Party Contact Mechanism successfully updated</default-message>       
+        </call-service>
+        <log level="info" message="Setting result id: ${newValue.contactMechId}"/>
+        <field-to-request field-name="contactMechId" map-name="newValue"/>
+        <field-to-result field-name="contactMechId" map-name="newValue"/>                   
+    </simple-method>  
+    
+    <simple-method method-name="createWorkEffortEmailAddress" short-description="Create an email address for WorkEffort">
+        <call-map-processor xml-resource="org/ofbiz/workeffort/workeffort/WorkflowMapProcessors.xml"
+            processor-name="emailAddress" in-map-name="parameters" out-map-name="cwecmMap"/>
+        <check-errors/>
+        <set field="cwecmMap.contactMechTypeId" value="EMAIL_ADDRESS"/>
+        <call-service service-name="createWorkEffortContactMech" in-map-name="cwecmMap">
+            <default-message>WorkEffort Contact Mechanism successfully created.</default-message>
+            <result-to-result result-name="contactMechId"/>
+            <result-to-request result-name="contactMechId"/>
+        </call-service>         
+    </simple-method>
+    <simple-method method-name="updateWorkEffortEmailAddress" short-description="Update an email address for WorkEffort">
+        <call-map-processor xml-resource="org/ofbiz/workeffort/workeffort/WorkflowMapProcessors.xml"
+            processor-name="emailAddress" in-map-name="parameters" out-map-name="uwecmMap"/>
+        <check-errors/>
+        <set field="uwecmMap.contactMechTypeId" value="EMAIL_ADDRESS"/>
+        <call-service service-name="updateWorkEffortContactMech" in-map-name="uwecmMap">
+            <default-message>WorkEffort Contact Mechanism successfully updated.</default-message>
+            <result-to-result result-name="contactMechId"/>
+            <result-to-request result-name="contactMechId"/>
+        </call-service>         
+    </simple-method> 
+                
+    <simple-method method-name="quickAssignPartyToWorkEffort" short-description="Quick Assign Party To WorkEffort as Owner">
+        <if-not-empty field-name="quickAssignPartyId" map-name="parameters">
+            <now-timestamp-to-env env-name="nowTimestamp"/>
+            <!-- add a party assignment for the creator of the event, use the list method and let the EE do the update or create... -->
+            <make-value value-name="newPartyRole" entity-name="PartyRole"/>
+            <set from-field="parameters.quickAssignPartyId" field="newPartyRole.partyId"/>
+            <set value="CAL_OWNER" field="newPartyRole.roleTypeId"/>
+            <field-to-list field-name="newPartyRole" list-name="newPartyRoleList"/>
+            <store-list list-name="newPartyRoleList"/>
+            
+            <make-value value-name="newWorkEffortPartyAssignment" entity-name="WorkEffortPartyAssignment"/>
+            <set from-field="parameters.workEffortId" field="newWorkEffortPartyAssignment.workEffortId"/>
+            <set from-field="parameters.quickAssignPartyId" field="newWorkEffortPartyAssignment.partyId"/>
+            <set value="CAL_OWNER" field="newWorkEffortPartyAssignment.roleTypeId"/>
+            <set value="PRTYASGN_ASSIGNED" field="newWorkEffortPartyAssignment.statusId"/>
+            <set from-field="nowTimestamp" field="newWorkEffortPartyAssignment.fromDate"/>
+            <create-value value-name="newWorkEffortPartyAssignment"/>
+        </if-not-empty>
+    </simple-method>
+    <simple-method method-name="quickAssignPartyToWorkEffortWithRole" short-description="Quick Assign Party To WorkEffort">
+        <if-not-empty field-name="parameters.quickAssignPartyId">
+            <!-- add a party assignment for the creator of the event, use the list method and let the EE do the update or create... -->
+            <make-value value-name="newPartyRole" entity-name="PartyRole"/>
+            <set from-field="parameters.quickAssignPartyId" field="newPartyRole.partyId"/>
+            <set from-field="parameters.roleTypeId" field="newPartyRole.roleTypeId"/>
+            <set field="newPartyRoleList[]" from-field="newPartyRole"/>
+            <store-list list-name="newPartyRoleList"/>
+            
+            <make-value value-name="newWorkEffortPartyAssignment" entity-name="WorkEffortPartyAssignment"/>
+            <set from-field="parameters.workEffortId" field="newWorkEffortPartyAssignment.workEffortId"/>
+            <set from-field="parameters.quickAssignPartyId" field="newWorkEffortPartyAssignment.partyId"/>
+            <set from-field="parameters.roleTypeId" field="newWorkEffortPartyAssignment.roleTypeId"/>
+            <set value="CAL_ACCEPTED" field="newWorkEffortPartyAssignment.statusId"/>
+            <now-timestamp-to-env env-name="newWorkEffortPartyAssignment.fromDate"/>
+            <create-value value-name="newWorkEffortPartyAssignment"/>
+        </if-not-empty>
+    </simple-method>
+    <simple-method method-name="createWorkEffortNote" short-description="Create Work Effort Note">
+        <make-value value-name="newEntity" entity-name="NoteData"/>
+        <sequenced-id-to-env sequence-name="NoteData" env-name="newEntity.noteId"/>
+        <field-to-result field-name="newEntity.noteId" result-name="noteId"/>
+        <set from-field="parameters.noteInfo" field="newEntity.noteInfo"/>
+        <if-not-empty field-name="parameters.noteParty">
+           <set from-field="parameters.noteParty" field="newEntity.noteParty"/>
+        <else>
+            <set field="newEntity.noteParty" from-field="parameters.userLogin.userLoginId"></set>
+        </else>    
+        </if-not-empty>
+        <set from-field="parameters.noteName" field="newEntity.noteName"/>
+        <now-timestamp-to-env env-name="newEntity.noteDateTime"/>
+        <create-value value-name="newEntity"/>
+        
+        <!-- create new status entry, and set lastStatusUpdate date -->
+        <make-value value-name="newWorkEffortNote" entity-name="WorkEffortNote"/>
+        <set from-field="newEntity.noteId" field="newWorkEffortNote.noteId"/>
+        <set from-field="parameters.workEffortId" field="newWorkEffortNote.workEffortId"/>
+        <create-value value-name="newWorkEffortNote"/>
+    </simple-method>
+    
+    <simple-method method-name="createWorkEffortAndAssoc" short-description="Create a WorkEffort and association">
+        <if-empty field-name="parameters.fromDate">
+            <now-timestamp-to-env env-name="parameters.fromDate"/>
+        <else>
+            <entity-one entity-name="WorkEffortAssoc" value-name="lookedUpValue"/>
+        </else>
+        </if-empty>        
+        <if-not-empty field-name="lookedUpValue">
+            <add-error><fail-property resource="WorkEffortUiLabels" property="WorkEffortWorkEffortAssocIdAlreadyExist"/></add-error>
+            <check-errors/>
+        <else>
+            <if-empty field-name="parameters.workEffortIdTo">
+                <set-service-fields service-name="createWorkEffort" map-name="parameters" to-map-name="createWorkeEffortParams"/>
+                <call-service in-map-name="createWorkeEffortParams" service-name="createWorkEffort">
+                    <result-to-result result-name="workEffortId"/>
+                    <result-to-field result-name="workEffortId" field-name="workEffortIdTo"/>
+                </call-service>
+                <set field="parameters.workEffortIdTo" from-field="workEffortIdTo"/>
+            </if-empty>
+            <set-service-fields service-name="createWorkEffortAssoc"  map-name="parameters" to-map-name="createWorkEffortAssocParams"/>
+            <call-service in-map-name="createWorkEffortAssocParams" service-name="createWorkEffortAssoc"/>
+        </else>
+        </if-not-empty>        
+    </simple-method>
+
+    <simple-method method-name="createWorkEffortAssoc" short-description="Create a WorkEffort association">
+        <if-empty field-name="parameters.fromDate">
+            <now-timestamp-to-env env-name="parameters.fromDate"/>
+        <else>
+            <entity-one entity-name="WorkEffortAssoc" value-name="lookedUpValue"/>
+        </else>
+        </if-empty>        
+
+        <if-not-empty field-name="lookedUpValue">
+            <add-error><fail-property resource="WorkEffortUiLabels" property="WorkEffortWorkEffortAssocIdAlreadyExist"/></add-error>
+            <check-errors/>
+        <else>
+            <make-value value-name="newEntity" entity-name="WorkEffortAssoc"/>  
+            <set-pk-fields map-name="parameters" value-name="newEntity"/>  
+            <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+            <if-empty field-name="newEntity.sequenceNum">
+                <set field="newEntity.sequenceNum" value="0" type="Long"/>
+            </if-empty>        
+            <create-value value-name="newEntity"/>
+        </else>
+        </if-not-empty>
+    </simple-method>
+    <simple-method method-name="updateWorkEffortAssoc" short-description="Update a WorkEffort association">
+        <entity-one entity-name="WorkEffortAssoc" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeWorkEffortAssoc" short-description="Remove a WorkEffort association">
+        <entity-one entity-name="WorkEffortAssoc" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+
+    <simple-method method-name="createWorkEffortGoodStandard" short-description="Create a link between a WorkEffort and a Product">
+        <entity-one entity-name="WorkEffortGoodStandard" value-name="lookedUpValue"/>
+        <if-not-empty field-name="lookedUpValue">
+            <add-error><fail-property resource="WorkEffortUiLabels" property="WorkEffortWorkEffortGoodStandardAlreadyExist"/></add-error>
+            <check-errors/>
+        <else>
+            <make-value value-name="newEntity" entity-name="WorkEffortGoodStandard"/>  
+            <set-pk-fields map-name="parameters" value-name="newEntity"/>  
+            <if-empty field-name="newEntity.fromDate">
+                <now-timestamp-to-env env-name="newEntity.fromDate"/>
+            </if-empty>        
+            <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+            <create-value value-name="newEntity"/>
+        </else>
+        </if-not-empty>
+    </simple-method>
+    <simple-method method-name="updateWorkEffortGoodStandard" short-description="Update a link between a WorkEffort and a Product">
+        <entity-one entity-name="WorkEffortGoodStandard" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeWorkEffortGoodStandard" short-description="Remove a link between a WorkEffort and a Product">
+        <entity-one entity-name="WorkEffortGoodStandard" value-name="lookedUpValue"/>
+        <remove-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="assignInventoryToWorkEffort" short-description="Create or update WorkEffortInventoryAssign">
+        <set value="Create or update WorkEffortInventoryAssign" field="operationName"/>
+
+        <entity-one entity-name="WorkEffortInventoryAssign" value-name="foundEntity"/>
+        <if-not-empty field-name="foundEntity">
+            <calculate field-name="foundEntity.quantity" type="Double">
+                <calcop field-name="foundEntity.quantity" operator="get"/>
+                <calcop field-name="parameters.quantity" operator="get"/>
+            </calculate>
+            <store-value value-name="foundEntity"/>
+        <else>
+            <make-value value-name="newEntity" entity-name="WorkEffortInventoryAssign"/>
+            <set-pk-fields map-name="parameters" value-name="newEntity"/>
+            <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+            <create-value value-name="newEntity"/>
+        </else>
+        </if-not-empty>
+    </simple-method>
+
+    <!-- CustRequest workeffort -->
+    <simple-method method-name="createWorkEffortRequest" short-description="Create a CustRequestWorkEffort">
+        <make-value entity-name="CustRequestWorkEffort" value-name="lookupMap"/>
+        <set-pk-fields map-name="parameters" value-name="lookupMap"/>
+        <find-by-primary-key entity-name="CustRequestWorkEffort" map-name="lookupMap" value-name="custRequestWorkEffort"/>
+        <if-not-empty field-name="custRequestWorkEffort">
+            <add-error><fail-message message="ERROR: CustRequestWorkEffort [${parameters.custRequestId}][${parameters.workEffortId}] already exists."/></add-error>
+            <check-errors/>
+        </if-not-empty>
+        <set-nonpk-fields map-name="parameters" value-name="lookupMap"/>
+        <create-value value-name="lookupMap"/>
+        <field-to-result field-name="custRequestId" map-name="lookupMap"/>
+    </simple-method>
+    <simple-method method-name="deleteWorkEffortRequest" short-description="Delete a CustRequestWorkEffort">
+        <entity-one entity-name="CustRequestWorkEffort" value-name="custRequestWorkEffort"/>
+        <if-empty field-name="custRequestWorkEffort">
+            <add-error><fail-message message="ERROR: CustRequestWorkEffort [${parameters.custRequestId}][${parameters.workEffortId}] does not exist."/></add-error>
+            <check-errors/>
+        </if-empty>
+        <remove-value value-name="lookupMap"/>
+    </simple-method>
+
+    <!-- CustRequestItem workeffort -->
+    <simple-method method-name="createWorkEffortRequestItem" short-description="Create a CustRequestItemWorkEffort">
+        <make-value entity-name="CustRequestItemWorkEffort" value-name="lookupMap"/>
+        <set-pk-fields map-name="parameters" value-name="lookupMap"/>
+        <find-by-primary-key entity-name="QuoteWorkEffort" map-name="lookupMap" value-name="custRequestItemWorkEffort"/>
+        <if-not-empty field-name="custRequestItemWorkEffort">
+            <add-error><fail-message message="ERROR: CustRequestItemWorkEffort [${parameters.custRequestItemSeqId}][${parameters.workEffortId}] already exists."/></add-error>
+            <check-errors/>
+        </if-not-empty>
+        <set-nonpk-fields map-name="parameters" value-name="lookupMap"/>
+        <create-value value-name="lookupMap"/>
+    </simple-method>
+    <simple-method method-name="deleteWorkEffortRequestItem" short-description="Delete a CustRequestItemWorkEffort">
+        <entity-one entity-name="CustRequestItemWorkEffort" value-name="custRequestItemWorkEffort"/>
+        <if-empty field-name="custRequestItemSeqId" map-name="custRequestItemWorkEffort">
+            <add-error><fail-message message="ERROR: CustRequestItemWorkEffort [${parameters.custRequestItemSeqId}][${parameters.workEffortId}] does not exist."/></add-error>
+            <check-errors/>
+        </if-empty>
+        <remove-value value-name="lookupMap"/>
+    </simple-method>
+    <simple-method method-name="checkCustRequestItemExists" short-description="Checks to see if a CustRequestItem exists">
+        <make-value entity-name="CustRequestItem" value-name="lookupMap"/>
+        <set-pk-fields map-name="parameters" value-name="lookupMap"/>
+        <find-by-primary-key entity-name="CustRequestItem" map-name="lookupMap" value-name="custRequestItem"/>
+        <if-not-empty field-name="custRequestItem">
+            <set field="custRequestItemExists" value="true"/>
+            <field-to-result field-name="custRequestItemExists"/>
+            <log level="always" message="custRequestItemExists: ${custRequestItemExists}" />
+            <else>
+                <log level="always" message="custRequestItemExists: empty" />
+            </else>
+        </if-not-empty>
+    </simple-method>
+
+    <!--Quote workeffort -->
+    <simple-method method-name="createWorkEffortQuote" short-description="Create a QuoteWorkEffort">
+        <make-value entity-name="QuoteWorkEffort" value-name="lookupMap"/>
+        <set-pk-fields map-name="parameters" value-name="lookupMap"/>
+        <find-by-primary-key entity-name="QuoteWorkEffort" map-name="lookupMap" value-name="quoteWorkEffort"/>
+        <if-not-empty field-name="quoteWorkEffort">
+            <add-error><fail-message message="ERROR: QuoteWorkEffort [${parameters.quoteId}][${parameters.workEffortId}] already exists."/></add-error>
+            <check-errors/>
+        </if-not-empty>
+        <set-nonpk-fields map-name="parameters" value-name="lookupMap"/>
+        <create-value value-name="lookupMap"/>
+        <field-to-result field-name="quoteId" map-name="lookupMap"/>
+    </simple-method>
+    <simple-method method-name="deleteWorkEffortQuote" short-description="Delete a QuoteWorkEffort">
+        <entity-one entity-name="QuoteWorkEffort" value-name="quoteWorkEffort"/>
+        <if-empty field-name="quoteWorkEffort">
+            <add-error><fail-message message="ERROR: QuoteWorkEffort [${parameters.quoteId}][${parameters.workEffortId}] does not exist."/></add-error>
+            <check-errors/>
+        </if-empty>
+        <remove-value value-name="quoteWorkEffort"/>
+    </simple-method>
+
+    <!--Requirement workeffort -->
+    <simple-method method-name="createWorkRequirementFulfillment" short-description="Create a WorkRequirementFulfillment">
+        <make-value entity-name="WorkRequirementFulfillment" value-name="lookupMap"/>
+        <set-pk-fields map-name="parameters" value-name="lookupMap"/>
+        <find-by-primary-key entity-name="WorkRequirementFulfillment" map-name="lookupMap" value-name="workRequirementFulfillment"/>
+        <if-not-empty field-name="workRequirementFulfillment">
+            <add-error><fail-message message="ERROR: WorkRequirementFulfillment [${parameters.requirementId}][${parameters.workEffortId}] already exists."/></add-error>
+            <check-errors/>
+        </if-not-empty>
+        <set-nonpk-fields map-name="parameters" value-name="lookupMap"/>
+        <create-value value-name="lookupMap"/>
+        <field-to-result field-name="requirementId" map-name="lookupMap"/>
+    </simple-method>
+    <simple-method method-name="deleteWorkRequirementFulfillment" short-description="Delete a WorkRequirementFulfillment">
+        <entity-one entity-name="WorkRequirementFulfillment" value-name="workRequirementFulfillment"/>
+        <if-empty field-name="workRequirementFulfillment">
+            <add-error><fail-message message="ERROR: WorkRequirementFulfillment [${parameters.requirementId}][${parameters.workEffortId}] does not exist."/></add-error>
+            <check-errors/>
+        </if-empty>
+        <remove-value value-name="workRequirementFulfillment"/>
+    </simple-method>
+
+    <!--ShoppingList workeffort -->
+    <simple-method method-name="createShoppingListWorkEffort" short-description="Create a ShoppingListWorkEffort">
+        <make-value entity-name="ShoppingListWorkEffort" value-name="lookupMap"/>
+        <set-pk-fields map-name="parameters" value-name="lookupMap"/>
+        <find-by-primary-key entity-name="ShoppingListWorkEffort" map-name="lookupMap" value-name="shoppingListWorkEffort"/>
+        <if-not-empty field-name="shoppingListWorkEffort">
+            <add-error><fail-message message="ERROR: ShoppingListWorkEffort [${parameters.shoppingListId}][${parameters.workEffortId}] already exists."/></add-error>
+            <check-errors/>
+        </if-not-empty>
+        <set-nonpk-fields map-name="parameters" value-name="lookupMap"/>
+        <create-value value-name="lookupMap"/>
+        <field-to-result field-name="shoppingListId" map-name="lookupMap"/>
+    </simple-method>
+    <simple-method method-name="deleteShoppingListWorkEffort" short-description="Delete a ShoppingListWorkEffort">
+        <entity-one entity-name="ShoppingListWorkEffort" value-name="shoppingListWorkEffort"/>
+        <if-empty field-name="shoppingListWorkEffort">
+            <add-error><fail-message message="ERROR: ShoppingListWorkEffort [${parameters.shoppingListId}][${parameters.workEffortId}] does not exist."/></add-error>
+            <check-errors/>
+        </if-empty>
+        <remove-value value-name="shoppingListWorkEffort"/>
+    </simple-method>
+
+    <!--OrderHeader workeffort -->
+    <simple-method method-name="createOrderHeaderWorkEffort" short-description="Create a OrderHeaderWorkEffort">
+        <make-value entity-name="OrderHeaderWorkEffort" value-name="lookupMap"/>
+        <set-pk-fields map-name="parameters" value-name="lookupMap"/>
+        <find-by-primary-key entity-name="OrderHeaderWorkEffort" map-name="lookupMap" value-name="orderWorkEffort"/>
+        <if-not-empty field-name="orderWorkEffort">
+            <add-error><fail-message message="ERROR: OrderHeaderWorkEffort [${parameters.orderId}][${parameters.workEffortId}] already exists."/></add-error>
+            <check-errors/>
+        </if-not-empty>
+        <set-nonpk-fields map-name="parameters" value-name="lookupMap"/>
+        <create-value value-name="lookupMap"/>
+        <field-to-result field-name="orderId" map-name="lookupMap"/>
+    </simple-method>
+    <simple-method method-name="deleteOrderHeaderWorkEffort" short-description="Delete a OrderHeaderWorkEffort">
+        <entity-one entity-name="OrderHeaderWorkEffort" value-name="orderWorkEffort"/>
+        <if-empty field-name="orderWorkEffort">
+            <add-error><fail-message message="ERROR: OrderHeaderWorkEffort [${parameters.orderId}][${parameters.workEffortId}] does not exist."/></add-error>
+            <check-errors/>
+        </if-empty>
+        <remove-value value-name="orderWorkEffort"/>
+    </simple-method>
+    
+    <simple-method method-name="setWorkEffortFixedAssetAssign" short-description="Based on task's estimate dates, write assign entries for the fixed asset the task is assigned to">
+        <entity-one entity-name="WorkEffort" value-name="workEffort"/>
+        <set from-field="workEffort.workEffortId" field="findMap.workEffortId"/>
+        <set from-field="workEffort.fixedAssetId" field="findMap.fixedAssetId"/>
+        <find-by-and entity-name="WorkEffortFixedAssetAssign" map-name="findMap" list-name="existingAssignments"/>
+        <filter-list-by-date list-name="existingAssignments"/>
+        <iterate list-name="existingAssignments" entry-name="existingAssignment">
+            <remove-value value-name="existingAssignment"/>
+        </iterate>
+        <make-value value-name="newEntity" entity-name="WorkEffortFixedAssetAssign"/>
+        <set from-field="workEffort.workEffortId" field="newEntity.workEffortId"/>
+        <set from-field="workEffort.fixedAssetId" field="newEntity.fixedAssetId"/>
+        <set from-field="workEffort.currentStatusId" field="newEntity.statusId"/>
+        <set from-field="workEffort.estimatedStartDate" field="newEntity.fromDate"/>
+        <set from-field="workEffort.estimatedCompletionDate" field="newEntity.thruDate"/>
+        <create-value value-name="newEntity"/>
+    </simple-method>
+
+    <!-- WorkEffort-FixedAsset -->
+    <simple-method method-name="createWorkEffortFixedAssetStd" 
+            short-description="Create a WorkEffort FixedAsset Standard">
+        <check-permission permission="WORKEFFORTMGR" action="_CREATE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortCreatePermissionError"/>
+        </check-permission>
+        <check-errors />
+        <entity-one entity-name="WorkEffortFixedAssetStd" value-name="lookedUpValue" />
+        <if-not-empty field-name="lookedUpValue">
+            <add-error>
+                <fail-property resource="WorkEffortUiLabels" property="WorkEffortWorkEffortFixedAssetAlreadyExist"/>
+            </add-error>
+            <check-errors />
+        <else>
+            <make-value entity-name="WorkEffortFixedAssetStd" value-name="newWEFixedAssetStd" />
+            <set-pk-fields map-name="parameters" value-name="newWEFixedAssetStd" />
+            <set-nonpk-fields map-name="parameters" value-name="newWEFixedAssetStd" />
+            <create-value value-name="newWEFixedAssetStd" />            
+        </else>
+        </if-not-empty>
+    </simple-method>
+    <simple-method method-name="updateWorkEffortFixedAssetStd" 
+            short-description="Update an existing WorkEffort FixedAsset Standard">
+        <check-permission permission="WORKEFFORTMGR" action="_UPDATE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortUpdatePermissionERror"/>
+        </check-permission>
+        <check-errors />
+        <entity-one entity-name="WorkEffortFixedAssetStd" value-name="lookedUpValue" />
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue" />
+        <store-value value-name="lookedUpValue" />
+    </simple-method>
+    <simple-method method-name="removeWorkEffortFixedAssetStd" 
+            short-description="Delete a WorkEffort FixedAsset Standard">
+        <check-permission permission="WORKEFFORTMGR" action="_DELETE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortDeletePermissionError"/>
+        </check-permission>
+        <check-errors />
+        <entity-one entity-name="WorkEffortFixedAssetStd" value-name="lookedUpValue" />
+        <remove-value value-name="lookedUpValue" />
+    </simple-method>
+    <simple-method method-name="createWorkEffortFixedAssetAssign" 
+            short-description="Create a WorkEffort FixedAsset Assign">
+        <check-permission permission="WORKEFFORTMGR" action="_CREATE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortCreatePermissionError"/>
+        </check-permission>
+        <check-errors />
+        <entity-one entity-name="WorkEffortFixedAssetAssign" value-name="lookedUpValue" />
+        <if-not-empty field-name="lookedUpValue">
+            <add-error>
+                <fail-property resource="WorkEffortUiLabels" property="WorkEffortWorkEffortFixedAssetAsgAlreadyExist"/>
+            </add-error>
+        <else>
+            <make-value entity-name="WorkEffortFixedAssetAssign" value-name="newWEFixedAssetAssign" />
+            <set-pk-fields map-name="parameters" value-name="newWEFixedAssetAssign" />
+            <set-nonpk-fields map-name="parameters" value-name="newWEFixedAssetAssign" />
+            <!-- if the user hasn't specified a fromDate, set it from the actual start date of the task
+                if there is no actual start date, default to now (to the current date and time) -->
+            <if-empty map-name="parameters" field-name="fromDate">
+                <entity-one entity-name="WorkEffort" value-name="prodRunTask" />
+                <if-not-empty map-name="prodRunTask" field-name="actualStartDate">                    
+                    <set field="newWEFixedAssetAssign.fromDate" from-field="prodRunTask.actualStartDate" />
+                <else>
+                    <now-timestamp-to-env env-name="newWEFixedAssetAssign.fromDate"/>
+                </else>
+                </if-not-empty>
+            </if-empty>
+            <create-value value-name="newWEFixedAssetAssign" />
+        </else>
+        </if-not-empty>
+    </simple-method>
+    <simple-method method-name="updateWorkEffortFixedAssetAssign" 
+            short-description="Update an existing WorkEffort FixedAsset Assign">
+        <check-permission permission="WORKEFFORTMGR" action="_UPDATE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortUpdatePermissionError"/>
+        </check-permission>
+        <check-errors />
+        <entity-one entity-name="WorkEffortFixedAssetAssign" value-name="lookedUpValue" />
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue" />
+        <store-value value-name="lookedUpValue" />
+    </simple-method>
+    <simple-method method-name="removeWorkEffortFixedAssetAssign" 
+            short-description="Remove a WorkEffort FixedAsset Assign">
+        <check-permission permission="WORKEFFORTMGR" action="_DELETE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortDeletePermissionError"/>
+        </check-permission>
+        <check-errors />
+        <entity-one entity-name="WorkEffortFixedAssetAssign" value-name="lookedUpValue" />
+        <remove-value value-name="lookedUpValue" />
+    </simple-method>
+
+    <!-- Create/Update/Delete Work Effort Content-->    
+    <simple-method method-name="createWorkEffortContent" short-description="Create Work Effort Content">
+        <!-- need a better way to handle per workeffort permissions
+        <check-permission permission="WORKEFFORTMGR" action="_CREATE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortCreatePermissionError"/>
+        </check-permission>
+        <check-errors />
+        -->
+        <make-value entity-name="WorkEffortContent" value-name="newEntity"/>
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        
+        <if-empty field-name="fromDate" map-name="newEntity">
+            <now-timestamp-to-env env-name="nowTimestamp"/>
+            <set field="newEntity.fromDate" from-field="nowTimestamp"/>
+        </if-empty>
+        
+        <create-value value-name="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateWorkEffortContent" short-description="Update Work Effort Content">
+        <!-- need a better way to handle permissions
+        <check-permission permission="WORKEFFORTMGR" action="_UPDATE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortUpdatePermissionERror"/>
+        </check-permission>
+        <check-errors />
+        -->
+        <entity-one entity-name="WorkEffortContent" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="deleteWorkEffortContent" 
+            short-description="Remove a WorkEffort Content">
+        <!-- need a better way to handle per workeffort permissions 
+        <check-permission permission="WORKEFFORTMGR" action="_DELETE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortDeletePermissionError"/>
+        </check-permission>
+        <check-errors />
+        -->
+        <entity-one entity-name="WorkEffortContent" value-name="lookedUpValue" />
+        <remove-value value-name="lookedUpValue" />
+    </simple-method>
+
+    <!-- Create/Update/Delete Work Effort Review-->    
+    <simple-method method-name="createWorkEffortReview" short-description="Create Work Effort Review">
+        <check-permission permission="WORKEFFORTMGR" action="_CREATE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortCreatePermissionError"/>
+        </check-permission>
+        <check-errors />
+        <entity-one entity-name="WorkEffortReview" value-name="lookedUpValue"/>
+        <if-not-empty field-name="lookedUpValue">
+            <add-error><fail-property resource="WorkEffortUiLabels" property="WorkEffortWorkEffortReviewAlreadyExist"/></add-error>
+            <check-errors/>
+        <else>
+            <make-value entity-name="WorkEffortReview" value-name="newEntity"/>
+            <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+            <set-pk-fields map-name="parameters" value-name="newEntity"/>
+        
+            <if-empty field-name="reviewDate" map-name="newEntity">
+                <now-timestamp-to-env env-name="nowTimestamp"/>
+                <set field="newEntity.reviewDate" from-field="nowTimestamp"/>
+            </if-empty>
+            <create-value value-name="newEntity"/>
+        </else>
+        </if-not-empty>        
+    </simple-method>
+    <simple-method method-name="updateWorkEffortReview" short-description="Update Work Effort Review">
+        <check-permission permission="WORKEFFORTMGR" action="_UPDATE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortUpdatePermissionError"/>
+        </check-permission>
+        <check-errors />
+        <entity-one entity-name="WorkEffortReview" value-name="lookedUpValue"/>
+        <set-nonpk-fields map-name="parameters" value-name="lookedUpValue"/>
+        <store-value value-name="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="deleteWorkEffortReview" 
+            short-description="Remove a WorkEffort Review">
+        <check-permission permission="WORKEFFORTMGR" action="_DELETE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortDeletePermissionError"/>
+        </check-permission>
+        <check-errors />
+        <entity-one entity-name="WorkEffortReview" value-name="lookedUpValue" />
+        <remove-value value-name="lookedUpValue" />
+    </simple-method>
+    
+    <simple-method method-name="indexWorkEffortKeywords" short-description="Index the Keywords for a WorkEffort" login-required="false">
+        <!-- this service is meant to be called from an entity ECA for entities that include a workEffortId 
+             if it is the WorkEffort entity itself triggering this action, then a worokEffort parameter
+             will be passed and we can save a few cycles looking that up -->
+        <set from-field="parameters.workEffort" field="workEffort"/>
+        <if-empty field-name="workEffort">
+            <set from-field="parameters.workEffortId" field="findWorkEffortMap.workEffortId"/>
+            <find-by-primary-key entity-name="WorkEffort" map-name="findWorkEffortMap" value-name="workEffort"/>
+        </if-empty>
+        <check-errors />
+        <!-- index keywords -->
+        <call-class-method class-name="org.ofbiz.workeffort.workeffort.WorkEffortKeywordIndex" method-name="indexKeywords">
+            <field field-name="workEffort" type="org.ofbiz.entity.GenericValue"/>
+        </call-class-method>
+    </simple-method>
+    
+    <simple-method method-name="createWorkEffortKeyword" short-description="Create Work Effort Keyword">
+        <check-permission permission="WORKEFFORTMGR" action="_CREATE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortCreatePermissionError"/>
+        </check-permission>
+        <check-errors />
+        <entity-one entity-name="WorkEffortKeyword" value-name="lookedUpValue"/>
+        <if-not-empty field-name="lookedUpValue">
+            <add-error><fail-property resource="WorkEffortUiLabels" property="WorkEffortWorkEffortKeywordAlreadyExist"/></add-error>
+        <else>
+        <make-value value-name="newEntity" entity-name="WorkEffortKeyword"/>
+        <if-empty field-name="parameters.workEffortId">
+            <add-error><fail-property resource="WorkEffortUiLabels" property="WorkEffortIdMissing"/></add-error>
+        </if-empty>    
+        <if-empty field-name="parameters.keyword">
+            <add-error><fail-property resource="ProductUiLabels" property="productevents.keyword_missing"/></add-error>
+        </if-empty>
+        <check-errors/>
+        <set-pk-fields value-name="newEntity" map-name="parameters"></set-pk-fields> 
+        <set-nonpk-fields map-name="parameters" value-name="newEntity"/>
+        <create-value value-name="newEntity"/>
+         </else>   
+       </if-not-empty>
+       <check-errors/>
+    </simple-method>
+   
+    <simple-method method-name="deleteWorkEffortKeyword" 
+            short-description="Remove a WorkEffort Keyword">
+        <check-permission permission="WORKEFFORTMGR" action="_DELETE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortDeletePermissionError"/>
+        </check-permission>
+        <check-errors />
+        <entity-one entity-name="WorkEffortKeyword" value-name="lookedUpValue" />
+        <remove-value value-name="lookedUpValue" />
+    </simple-method>
+    
+    <simple-method method-name="createWorkEffortKeywords" short-description="Create all Work Effort Keyword">
+        <check-permission permission="WORKEFFORTMGR" action="_CREATE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortCreatePermissionError"/>
+        </check-permission>
+        <check-errors />
+        <set from-field="parameters.workEffortId" field="findWorkEffortMap.workEffortId"/>
+        <find-by-primary-key entity-name="WorkEffort" map-name="findWorkEffortMap" value-name="workEffortInstance"/>
+        <call-class-method class-name="org.ofbiz.workeffort.workeffort.WorkEffortKeywordIndex" method-name="indexKeywords">
+            <field field-name="workEffortInstance" type="org.ofbiz.entity.GenericValue"/>
+        </call-class-method>
+    </simple-method>
+    
+    <simple-method method-name="deleteWorkEffortKeywords" 
+            short-description="Remove all WorkEffort Keyword">
+        <check-permission permission="WORKEFFORTMGR" action="_DELETE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortDeletePermissionError"/>
+        </check-permission>
+        <check-errors />
+        <set from-field="parameters.workEffortId" field="findWorkEffortMap.workEffortId"/>
+        <find-by-primary-key entity-name="WorkEffort" map-name="findWorkEffortMap" value-name="workEffortInstance"/>
+        <if-not-empty field-name="workEffortId" map-name="workEffortInstance">            
+        <remove-related relation-name="WorkEffortKeyword" value-name="workEffortInstance"></remove-related>            
+        </if-not-empty>
+        <check-errors/>
+    </simple-method>
+
+    <simple-method method-name="duplicateWorkEffort" short-description="Duplicate a WorkEffort" login-required="false">
+        
+        <check-permission permission="WORKEFFORTMGR" action="_CREATE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortCreatePermissionError"/>
+        </check-permission>
+        <check-errors />
+        <check-permission permission="WORKEFFORTMGR" action="_DELETE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortCreatePermissionError"/>
+        </check-permission>
+        <check-errors />
+        <!-- look up the old workEffort and clone it -->
+        <entity-one entity-name="WorkEffort" value-name="oldWorkEffort">
+            <field-map field-name="workEffortId" env-name="parameters.oldWorkEffortId"/>
+        </entity-one>
+        <clone-value value-name="oldWorkEffort" new-value-name="newWorkEffort"/>
+        
+        <!-- set the workEffortId, and write it to the datasource -->
+        <set from-field="parameters.workEffortId" field="newWorkEffort.workEffortId"/>
+        <create-value value-name="newWorkEffort"/>
+        
+        <!-- set up entity filter for workEffortAssoc-->
+        <set field="workEffortAssocFindContext.workEffortIdFrom" from-field="parameters.oldWorkEffortId"/>
+        <set field="reverseWorkEffortFindContext.workEffortIdTo" from-field="parameters.oldWorkEffortId"/>
+        <if-not-empty field-name="duplicateWorkEffortAssocs" map-name="parameters">
+            <find-by-and entity-name="WorkEffortAssoc" map-name="workEffortAssocFindContext" list-name="foundValues"/>
+            <iterate entry-name="foundValue" list-name="foundValues">
+                <clone-value value-name="foundValue" new-value-name="newTempValue"/>
+                <set from-field="parameters.workEffortId" field="newTempValue.workEffortIdFrom"/>
+                <create-value value-name="newTempValue"/>
+            </iterate>
+            <entity-and entity-name="WorkEffortAssoc" list-name="foundValues">
+                <field-map field-name="workEffortIdTo" env-name="parameters.oldWorkEffortId"/>
+            </entity-and>
+            <iterate entry-name="foundValue" list-name="foundValues">
+                <clone-value value-name="foundValue" new-value-name="newTempValue"/>
+                <set from-field="parameters.workEffortId" field="newTempValue.workEffortIdTo"/>
+                <create-value value-name="newTempValue"/>                
+            </iterate>
+        </if-not-empty>
+        
+        
+        <!-- set up entity filter -->
+        <set field="workEffortFindContext.workEffortId" from-field="parameters.oldWorkEffortId"/>
+        <if-not-empty field-name="duplicateWorkEffortNotes" map-name="parameters">
+            <find-by-and entity-name="WorkEffortNote" map-name="workEffortFindContext" list-name="foundValues"/>
+            <iterate entry-name="foundValue" list-name="foundValues">
+                <clone-value value-name="foundValue" new-value-name="newTempValue"/>
+                <set from-field="parameters.workEffortId" field="newTempValue.workEffortId"/>
+                <create-value value-name="newTempValue"/>
+            </iterate>
+        </if-not-empty>
+        <if-not-empty field-name="duplicateWorkEffortContents" map-name="parameters">
+            <find-by-and entity-name="WorkEffortContent" map-name="workEffortFindContext" list-name="foundValues"/>
+            <iterate entry-name="foundValue" list-name="foundValues">
+                <clone-value value-name="foundValue" new-value-name="newTempValue"/>
+                <set from-field="parameters.workEffortId" field="newTempValue.workEffortId"/>
+                <create-value value-name="newTempValue"/>
+            </iterate>
+        </if-not-empty>
+        <if-not-empty field-name="duplicateWorkEffortAssignmentRates" map-name="parameters">
+            <find-by-and entity-name="WorkEffortAssignmentRate" map-name="workEffortFindContext" list-name="foundValues"/>
+            <iterate entry-name="foundValue" list-name="foundValues">
+                <clone-value value-name="foundValue" new-value-name="newTempValue"/>
+                <set from-field="parameters.workEffortId" field="newTempValue.workEffortId"/>
+                <create-value value-name="newTempValue"/>
+            </iterate>
+        </if-not-empty>
+
+        <if-not-empty field-name="removeWorkEffortAssocs" map-name="parameters">
+            <remove-by-and entity-name="WorkEffortAssoc" map-name="workEffortAssocFindContext"/>            
+            <!-- small difference here, also do the reverse assocs... -->
+            <remove-by-and entity-name="WorkEffortAssoc" map-name="reverseWorkEffortFindContext"/>
+        </if-not-empty>
+        <if-not-empty field-name="removeWorkEffortContents" map-name="parameters">
+            <remove-by-and entity-name="WorkEffortContent" map-name="workEffortFindContext"/>
+        </if-not-empty>
+        <if-not-empty field-name="removeWorkEffortNotes" map-name="parameters">
+            <remove-by-and entity-name="WorkEffortNote" map-name="workEffortFindContext"/>
+        </if-not-empty>
+        <if-not-empty field-name="removeWorkEffortAssignmentRates" map-name="parameters">
+            <remove-by-and entity-name="WorkEffortAssignmentRate" map-name="workEffortFindContext"/>
+        </if-not-empty>
+    </simple-method>
+</simple-methods>
