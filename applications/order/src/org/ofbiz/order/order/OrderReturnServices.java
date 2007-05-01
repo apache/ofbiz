@@ -455,7 +455,7 @@ public class OrderReturnServices {
                         }
                         if (product != null) {
                             itemTypeKey = product.getString("productTypeId");
-                        } else if (item != null) {
+                        } else if (item != null && item.getString("orderItemTypeId") != null) {
                             itemTypeKey = item.getString("orderItemTypeId");
                         }
                         returnInfo.put("itemTypeKey", itemTypeKey);
