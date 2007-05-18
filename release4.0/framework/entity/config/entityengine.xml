@@ -320,6 +320,7 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             field-type-name="oracle"
             check-on-start="true"
             add-missing-on-start="true"
+            alias-view-columns="false"
             join-style="ansi">
         <read-data reader-name="seed"/>
         <read-data reader-name="demo"/>
