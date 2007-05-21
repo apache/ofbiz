@@ -273,11 +273,11 @@ public class OrderReturnServices {
                 }
 
                 // check for errors
-                if (sendResp != null && !ServiceUtil.isError(sendResp)) {
+                if (sendResp != null && ServiceUtil.isError(sendResp)) {
                     sendResp.put("emailType", emailType);
                     return ServiceUtil.returnError(UtilProperties.getMessage(resource_error, "OrderProblemSendingEmail", locale), null, null, sendResp);
                 }
-                return sendResp;
+                return ServiceUtil.returnSuccess();
             }
         }
 
