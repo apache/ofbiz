@@ -628,6 +628,12 @@ under the License.
             <option value="${role.roleTypeId}">${role.description?default(role.roleTypeId)}</option>
           </#list>
         </select>
+        <select name="mimeTypeId">
+          <option value="">${uiLabelMap.PartySelectMimeType}</option>
+          <#list mimeTypes as mimeType>
+            <option value="${mimeType.mimeTypeId}">${mimeType.get("description", locale)?default(mimeType.mimeTypeId)}</option>
+          </#list>
+        </select>
         <input type="submit" value="${uiLabelMap.CommonUpload}"/>
       </form>
     </div>
