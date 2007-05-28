@@ -163,12 +163,6 @@ under the License.
         <action service="cancelReturnItems" mode="sync" persist="true"/>
     </eca>
 	
-    <eca service="updateReturnItem" event="commit">
-        <condition field-name="statusId" operator="equals" value="RETURN_RECEIVED"/>
-        <condition field-name="currentStatusId" operator="not-equals" value="RETURN_RECEIVED"/>
-        <action service="resetGrandTotal" mode="sync"/>
-    </eca>
-
     <eca service="updateReturnStatusFromReceipt" event="global-commit">
         <condition field-name="returnHeaderStatus" operator="equals" value="RETURN_RECEIVED"/>
         <action service="processReplacementReturn" mode="sync" persist="true"/>
