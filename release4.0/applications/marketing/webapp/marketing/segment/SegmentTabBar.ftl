@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
 -->
 <#assign unselectedClassName = "tabButton">
-<#assign selectedClassMap = {page.tabButtonItem?default("void") : "tabButtonSelected"}>
+<#assign selectedClassMap = {page.segmentTabButtonItem?default("void") : "tabButtonSelected"}>
 
 <#if security.hasEntityPermission("MARKETING", "_VIEW", session)>
 <#if segmentGroup?has_content>
