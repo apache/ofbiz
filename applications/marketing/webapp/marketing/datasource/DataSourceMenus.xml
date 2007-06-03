@@ -19,7 +19,7 @@ under the License.
 -->
 <menus xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/widget-menu.xsd">
 
-    <menu name="DataSourceTabBar" default-menu-item-name="DataSource" type="simple">
+    <menu name="DataSourceTabBar" default-menu-item-name="DataSource" type="simple" selected-menuitem-context-field-name="dataSourceTabButtonItem">
         <menu-item name="DataSource" title="${uiLabelMap.DataSource}">
             <link target="/FindDataSource"/>
         </menu-item>
