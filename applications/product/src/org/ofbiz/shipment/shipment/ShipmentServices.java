@@ -241,8 +241,7 @@ public class ShipmentServices {
         try {
             shipAddress = delegator.findByPrimaryKey("PostalAddress", UtilMisc.toMap("contactMechId", shippingContactMechId));
         } catch (GenericEntityException e) {
-            Debug.logError(e, module);
-            return ServiceUtil.returnError("Cannot get shipping address entity");
+            return ServiceUtil.returnFailure("Cannot get shipping address entity");
         }
 
         // Get the possible estimates.
@@ -340,7 +339,7 @@ public class ShipmentServices {
         }
 
         if (estimateList.size() < 1) {
-            return ServiceUtil.returnError("No shipping estimate found for carrier [" + carrierPartyId + "] and shipment method type [" + shipmentMethodTypeId +"]");
+            return ServiceUtil.returnFailure("No shipping estimate found for carrier [" + carrierPartyId + "] and shipment method type [" + shipmentMethodTypeId +"]");
         }
 
         // make the shippable item size/feature objects
