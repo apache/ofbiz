@@ -128,11 +128,15 @@ public class ServiceEventHandler implements EventHandler {
             maxUploadSize = -1;
         }
 
+        String encoding = request.getCharacterEncoding();
         // check for multipart content types which may have uploaded items
         boolean isMultiPart = FileUpload.isMultipartContent(request);
         Map multiPartMap = new HashMap();
         if (isMultiPart) {
             DiskFileUpload upload = new DiskFileUpload();
+            if (encoding != null) {
+                upload.setHeaderEncoding(encoding);
+            }
             upload.setSizeMax(maxUploadSize);
 
             List uploadedItems = null;
@@ -163,7 +167,16 @@ public class ServiceEventHandler implements EventHandler {
                                 Debug.logWarning("Form field found [" + fieldName + "] which was not handled!", module);
                             }
                         } else {
-                            multiPartMap.put(fieldName, item.getString());
+                            if (encoding != null) {
+                                try {
+                                    multiPartMap.put(fieldName, item.getString(encoding));
+                                } catch (java.io.UnsupportedEncodingException uee){
+                                    Debug.logError(uee, "Unsupported Encoding, using deafault", module);
+                                    multiPartMap.put(fieldName, item.getString());
+                                }
+                            } else {
+                                multiPartMap.put(fieldName, item.getString());
+                            }
                         }
                     } else {
                         String fileName = item.getName();
