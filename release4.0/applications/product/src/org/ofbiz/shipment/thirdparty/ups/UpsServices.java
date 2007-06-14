@@ -1710,7 +1710,7 @@ public class UpsServices {
             return resp;
         } else {
             errorList.add("Error status code : " + responseStatusCode);
-            return ServiceUtil.returnError(errorList);
+            return ServiceUtil.returnFailure(errorList);
         }
     }
 
@@ -2028,7 +2028,7 @@ public class UpsServices {
         } catch (IOException e) {
             String ioeErrMsg = "Error writing the RatingServiceSelectionRequest XML Document to a String: " + e.toString();
             Debug.logError(e, ioeErrMsg, module);
-            return ServiceUtil.returnError(ioeErrMsg);
+            return ServiceUtil.returnFailure(ioeErrMsg);
         }
         
         // create AccessRequest XML doc
@@ -2039,7 +2039,7 @@ public class UpsServices {
         } catch (IOException e) {
             String ioeErrMsg = "Error writing the AccessRequest XML Document to a String: " + e.toString();
             Debug.logError(e, ioeErrMsg, module);
-            return ServiceUtil.returnError(ioeErrMsg);
+            return ServiceUtil.returnFailure(ioeErrMsg);
         }
 
         // prepare the access/inquire request string
@@ -2054,7 +2054,7 @@ public class UpsServices {
         } catch (UpsConnectException e) {
             String uceErrMsg = "Error sending UPS request for UPS Service Rate: " + e.toString();
             Debug.logError(e, uceErrMsg, module);
-            return ServiceUtil.returnError(uceErrMsg);
+            return ServiceUtil.returnFailure(uceErrMsg);
         }
         Debug.logInfo(rateResponseString, module);       
         Document rateResponseDocument = null;
@@ -2063,15 +2063,15 @@ public class UpsServices {
         } catch (SAXException e2) {
             String excErrMsg = "Error parsing the RatingServiceSelectionResponse: " + e2.toString();
             Debug.logError(e2, excErrMsg, module);
-            return ServiceUtil.returnError(excErrMsg);
+            return ServiceUtil.returnFailure(excErrMsg);
         } catch (ParserConfigurationException e2) {
             String excErrMsg = "Error parsing the RatingServiceSelectionResponse: " + e2.toString();
             Debug.logError(e2, excErrMsg, module);
-            return ServiceUtil.returnError(excErrMsg);
+            return ServiceUtil.returnFailure(excErrMsg);
         } catch (IOException e2) {
             String excErrMsg = "Error parsing the RatingServiceSelectionResponse: " + e2.toString();
             Debug.logError(e2, excErrMsg, module);
-            return ServiceUtil.returnError(excErrMsg);
+            return ServiceUtil.returnFailure(excErrMsg);
         }        
         return handleUpsRateInquireResponse(rateResponseDocument);
 
