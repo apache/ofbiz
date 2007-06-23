@@ -141,9 +141,11 @@ public class PackingSession implements java.io.Serializable {
             while (i.hasNext() && qtyRemain > 0) {
                 GenericValue res = (GenericValue) i.next();
                 double resQty = res.getDouble("quantity").doubleValue();
-                PackingSessionLine line = this.findLine(orderId, orderItemSeqId, shipGroupSeqId, res.getString("inventoryItemId"), packageSeqId);
-                if (UtilValidate.isNotEmpty(line) && !update) {
-                    resQty -= line.getQuantity();
+                double resPackedQty = this.getPackedQuantity(orderId, orderItemSeqId, shipGroupSeqId, res.getString("inventoryItemId"), -1);
+                if (resPackedQty >= resQty) {
+                    continue;
+                } else if (!update) {
+                    resQty -= resPackedQty;
                 }
 
                 double thisQty = resQty > qtyRemain ? qtyRemain : resQty;
