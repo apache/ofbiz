@@ -477,13 +477,15 @@ public class OrderReturnServices {
 
     // check return items status and update return header status
     public static Map checkReturnComplete(DispatchContext dctx, Map context) {
-        //appears to not be used: LocalDispatcher dispatcher = ctx.getDispatcher();
+        LocalDispatcher dispatcher = dctx.getDispatcher();
         GenericDelegator delegator = dctx.getDelegator();
         String returnId = (String) context.get("returnId");
         Locale locale = (Locale) context.get("locale");
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
 
         GenericValue returnHeader = null;
         List returnItems = null;
+
         try {
             returnHeader = delegator.findByPrimaryKey("ReturnHeader", UtilMisc.toMap("returnId", returnId));
             if (returnHeader != null) {
@@ -501,6 +503,9 @@ public class OrderReturnServices {
                 return ServiceUtil.returnSuccess();
             }
         }
+
+        // statusId resulting from the run of this service, which will be modified if we set it to completed
+        String resultStatusId = returnHeader.getString("statusId");
 
         // now; to be used for all timestamps
         Timestamp now = UtilDateTime.nowTimestamp();
@@ -521,29 +526,37 @@ public class OrderReturnServices {
 
             // if all items are completed/cancelled these should match
             if (completedItems.size() == returnItems.size()) {
-                List toStore = new LinkedList();
-                returnHeader.set("statusId", "RETURN_COMPLETED");
-                toStore.add(returnHeader);
+                resultStatusId = "RETURN_COMPLETED";
 
                 // create the status change history and set it to be stored
                 String returnStatusId = delegator.getNextSeqId("ReturnStatus");
                 GenericValue returnStatus = delegator.makeValue("ReturnStatus", UtilMisc.toMap("returnStatusId", returnStatusId));
-                returnStatus.set("statusId", "RETURN_COMPLETED");
+                returnStatus.set("statusId", resultStatusId);
                 returnStatus.set("returnId", returnId);
                 returnStatus.set("statusDatetime", now);
-                toStore.add(returnStatus);
                 try {
-                    delegator.storeAll(toStore);
+                    returnStatus.create();
                 } catch (GenericEntityException e) {
                     Debug.logError(e, module);
                     return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,"OrderErrorUnableToCreateReturnStatusHistory", locale));
+                }
+
+                // update the return header to completed
+                try {
+                    Map tmpResult = dispatcher.runSync("updateReturnHeader", UtilMisc.toMap("returnId", returnId, "statusId", resultStatusId, "userLogin", userLogin));
+
+                    if (ServiceUtil.isError(tmpResult)) {
+                        return tmpResult;
+                    }
+                } catch (GenericServiceException ex) {
+                    return ServiceUtil.returnError(ex.getMessage());
                 }
             }
 
         }
 
         Map result = ServiceUtil.returnSuccess();
-        result.put("statusId", returnHeader.get("statusId"));
+        result.put("statusId", resultStatusId);
         return result;
     }
 
