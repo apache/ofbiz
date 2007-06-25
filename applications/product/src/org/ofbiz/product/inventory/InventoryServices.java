@@ -918,7 +918,7 @@ public class InventoryServices {
                 salesUsageIt = delegator.findListIteratorByCondition(salesUsageViewEntity, 
                         new EntityConditionList(
                             UtilMisc.toList(
-                                new EntityExpr("facilityId", EntityOperator.EQUALS, "WebStoreWarehouse"),
+                                new EntityExpr("facilityId", EntityOperator.EQUALS, facilityId),
                                 new EntityExpr("productId", EntityOperator.EQUALS, productId),
                                 new EntityExpr("statusId", EntityOperator.IN, UtilMisc.toList("ORDER_COMPLETED", "ORDER_APPROVED", "ORDER_HELD")),
                                 new EntityExpr("orderTypeId", EntityOperator.EQUALS, "SALES_ORDER"),
@@ -956,7 +956,7 @@ public class InventoryServices {
                 productionUsageIt = delegator.findListIteratorByCondition(productionUsageViewEntity, 
                         new EntityConditionList(
                             UtilMisc.toList(
-                                new EntityExpr("facilityId", EntityOperator.EQUALS, "WebStoreWarehouse"),
+                                new EntityExpr("facilityId", EntityOperator.EQUALS, facilityId),
                                 new EntityExpr("productId", EntityOperator.EQUALS, productId),
                                 new EntityExpr("workEffortTypeId", EntityOperator.EQUALS, "PROD_ORDER_TASK"),
                                 new EntityExpr("actualCompletionDate", EntityOperator.GREATER_THAN_EQUAL_TO, checkTime)
