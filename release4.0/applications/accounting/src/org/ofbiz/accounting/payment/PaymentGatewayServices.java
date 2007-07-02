@@ -1191,15 +1191,11 @@ public class PaymentGatewayServices {
                     // create any splits which are needed
                     if (authAmount.compareTo(amountThisCapture) == 1) {
                         BigDecimal splitAmount = authAmount.subtract(amountThisCapture);
-                        Map splitResp = null;
                         try {
                             Map splitCtx = UtilMisc.toMap("userLogin", userLogin, "orderPaymentPreference", paymentPref, "splitAmount", splitAmount);
                             dispatcher.addCommitService("processCaptureSplitPayment", splitCtx, true);
                         } catch (GenericServiceException e) {
                             Debug.logWarning(e, "Problem processing the capture split payment", module);
-                        }
-                        if (ServiceUtil.isError(splitResp)) {
-                            Debug.logWarning("Problem processing the capture split payment: " + ServiceUtil.getErrorMessage(splitResp), module);
                         }
                     }
                 } else {
