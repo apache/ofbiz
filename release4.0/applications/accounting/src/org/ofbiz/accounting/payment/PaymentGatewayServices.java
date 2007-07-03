@@ -1119,7 +1119,7 @@ public class PaymentGatewayServices {
                     Debug.logInfo("Nothing to capture; authAmount = 0", module);
                     continue;
                 }
- 
+
                 // if the authAmount is more then the remaining total; just use remaining total
                 if (authAmount.compareTo(remainingTotalBd) == 1) {
                     authAmount = new BigDecimal(remainingTotalBd.doubleValue());
@@ -1152,7 +1152,7 @@ public class PaymentGatewayServices {
                     Debug.logError("The amount to capture was more then what was authorized; we only captured the authorized amount : " + paymentPref, module);
                     amountThisCapture = authAmount;
                 }
-           
+
                 Debug.logInfo("Payment preference = [" + paymentPref + "] amount to capture = [" + amountToCapture +"] amount of this capture = [" + amountThisCapture +"] actual auth amount =[" + authAmount + "] amountToBillAccount = [" + amountToBillAccount + "]", module); 
                 Map captureResult = capturePayment(dctx, userLogin, orh, paymentPref, amountThisCapture.doubleValue());
                 if (captureResult != null) {
@@ -1191,6 +1191,7 @@ public class PaymentGatewayServices {
                         } catch (GenericServiceException e) {
                             Debug.logWarning(e, "Problem processing the capture split payment", module);
                         }
+                        Debug.logInfo("Captured: " + amountThisCapture + " Remaining (re-auth): " + splitAmount, module);
                     }
                 } else {
                     Debug.logError("Payment not captured", module);
