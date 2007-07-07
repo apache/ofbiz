@@ -3346,8 +3346,8 @@ public class ShoppingCart implements Serializable {
             opp.set("statusId", "PAYMENT_NOT_RECEIVED");
             allOpPrefs.add(opp);
             remainingAmount = remainingAmount.subtract(billingAccountAmountSelected);
-            if (remainingAmount.compareTo(BigDecimal.ZERO) < 0) {
-                remainingAmount = BigDecimal.ZERO;
+            if (remainingAmount.compareTo(ZERO) < 0) {
+                remainingAmount = ZERO;
             }
         }
         Iterator i = paymentInfo.iterator();
@@ -3355,7 +3355,7 @@ public class ShoppingCart implements Serializable {
             CartPaymentInfo inf = (CartPaymentInfo) i.next();
             if (inf.amount == null) {
                 inf.amount = new Double(remainingAmount.doubleValue());
-                remainingAmount = BigDecimal.ZERO;
+                remainingAmount = ZERO;
             }
             allOpPrefs.addAll(inf.makeOrderPaymentInfos(this.getDelegator()));
         }

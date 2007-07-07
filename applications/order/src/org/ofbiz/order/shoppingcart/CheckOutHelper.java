@@ -908,12 +908,9 @@ public class CheckOutHelper {
         Map paymentFields = UtilMisc.toMap("statusId", "PAYMENT_NOT_AUTH");
         List onlinePaymentPrefs = EntityUtil.filterByAnd(allPaymentPreferences, paymentFields);
 
-        if (onlinePaymentPrefs != null && onlinePaymentPrefs.size() > 0) {
-            requireAuth = true;
-        }
-
+        // Check the payment preferences; if we have ANY w/ status PAYMENT_NOT_AUTH invoke payment service.
         // Invoke payment processing.
-        if (requireAuth) {
+        if (onlinePaymentPrefs != null && onlinePaymentPrefs.size() > 0) {
             boolean autoApproveOrder = UtilValidate.isEmpty(productStore.get("autoApproveOrder")) || "Y".equalsIgnoreCase(productStore.getString("autoApproveOrder"));
             if (orderTotal == 0 && autoApproveOrder) {
                 // if there is nothing to authorize; don't bother
@@ -1391,7 +1388,7 @@ public class CheckOutHelper {
         return result;
     }
 
-    public double availableAccountBalance(String billingAccountId) {
+    public static double availableAccountBalance(String billingAccountId, LocalDispatcher dispatcher) {
         if (billingAccountId == null) return 0.0;
         try {
             Map res = dispatcher.runSync("calcBillingAccountBalance", UtilMisc.toMap("billingAccountId", billingAccountId));
@@ -1403,6 +1400,10 @@ public class CheckOutHelper {
             Debug.logError(e, module);
         }
         return 0.0;
+    }
+
+    public double availableAccountBalance(String billingAccountId) {
+        return availableAccountBalance(billingAccountId, dispatcher);
     }
 
     public Map makeBillingAccountMap(List paymentPrefs) {

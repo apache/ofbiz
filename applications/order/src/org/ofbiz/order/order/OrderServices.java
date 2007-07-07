@@ -3248,7 +3248,7 @@ public class OrderServices {
         toStore.addAll(cart.makeOrderItems());
         toStore.addAll(cart.makeAllAdjustments());
         toStore.addAll(cart.makeAllShipGroupInfos());
-        toStore.addAll(cart.makeAllOrderPaymentInfos());
+        toStore.addAll(cart.makeAllOrderPaymentInfos(dispatcher));
 
         // set the orderId & other information on all new value objects
         List dropShipGroupIds = FastList.newInstance(); // this list will contain the ids of all the ship groups for drop shipments (no reservations)
