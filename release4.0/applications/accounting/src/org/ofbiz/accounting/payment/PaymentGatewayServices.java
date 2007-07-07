@@ -1090,7 +1090,7 @@ public class PaymentGatewayServices {
                         BigDecimal amountCapturedBd = new BigDecimal(amountCaptured.doubleValue());
                         amountCapturedBd = amountCapturedBd.setScale(2, BigDecimal.ROUND_HALF_UP);
 
-                        if (amountCapturedBd.compareTo(BigDecimal.ZERO) == 0) {
+                        if (amountCapturedBd.compareTo(ZERO) == 0) {
                             continue;
                         }
                         // add the invoiceId to the result for processing
@@ -1386,7 +1386,7 @@ public class PaymentGatewayServices {
         Double captureAmountDbl = (Double) context.get("captureAmount");
         BigDecimal captureAmount = new BigDecimal(captureAmountDbl.doubleValue());
         String orderId = (String) context.get("orderId");
-        BigDecimal capturedAmount = BigDecimal.ZERO;
+        BigDecimal capturedAmount = ZERO;
         
         try {
             // Select all the unapplied payment applications associated to the billing account
