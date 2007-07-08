@@ -281,8 +281,12 @@ under the License.
         <field name="thruDate" title="${uiLabelMap.CommonThruDate}"><date-find/></field>
 
         <field name="partyTaxId"><text-find/></field>
-        <field name="isExempt" widget-style="smallSelect"><drop-down no-current-selected-key="N"><option key="Y"/><option key="N"/></drop-down></field>
-        <field name="isNexus" widget-style="smallSelect"><drop-down no-current-selected-key="N"><option key="Y"/><option key="N"/></drop-down></field>
+        <field name="isExempt" widget-style="smallSelect">
+            <drop-down allow-empty="true"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
+        </field>
+        <field name="isNexus" widget-style="smallSelect">
+            <drop-down allow-empty="true"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
+        </field>
         
         <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="buttontext"><submit button-type="text-link"/></field>
     </form>
