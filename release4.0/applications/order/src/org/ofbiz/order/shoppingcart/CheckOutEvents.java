@@ -299,7 +299,7 @@ public class CheckOutEvents {
             selectedPaymentMethods.put("EXT_BILLACT", billingAccountAmt);
         }
 
-        if (UtilValidate.isEmpty(selectedPaymentMethods)) {
+        if (selectedPaymentMethods == null) {
             return "error";
         }
 
