@@ -102,8 +102,8 @@ under the License.
                 <td><div class="tableheadtext">${uiLabelMap.EcommercePublic}?</div></td>
                 <td>
                   <select name="isPublic" class="selectBox">
-                    <#if ((shoppingList.isPublic)!"" == "Y")><option value="test">${uiLabelMap.CommonY}</option></#if>
-                    <#if ((shoppingList.isPublic)!"" == "N")><option value="N">${uiLabelMap.CommonN}</option></#if>
+                    <#if (((shoppingList.isPublic)!"") == "Y")><option value="test">${uiLabelMap.CommonY}</option></#if>
+                    <#if (((shoppingList.isPublic)!"") == "N")><option value="N">${uiLabelMap.CommonN}</option></#if>
                     <option></option>
                     <option value="Y">${uiLabelMap.CommonY}</option>
                     <option value="N">${uiLabelMap.CommonN}</option>
@@ -114,8 +114,8 @@ under the License.
                 <td><div class="tableheadtext">${uiLabelMap.EcommerceActive}?</div></td>
                 <td>
                   <select name="isActive" class="selectBox">
-                    <#if ((shoppingList.isActive)!"" == "Y")><option value="test">${uiLabelMap.CommonY}</option></#if>
-                    <#if ((shoppingList.isActive)!"" == "N")><option value="N">${uiLabelMap.CommonN}</option></#if>
+                    <#if (((shoppingList.isActive)!"") == "Y")><option value="test">${uiLabelMap.CommonY}</option></#if>
+                    <#if (((shoppingList.isActive)!"") == "N")><option value="N">${uiLabelMap.CommonN}</option></#if>
                     <option></option>
                     <option value="Y">${uiLabelMap.CommonY}</option>
                     <option value="N">${uiLabelMap.CommonN}</option>
