@@ -29,10 +29,10 @@ under the License.
         </div></td>
         <#if (adjEditable)>
            <td>
-              <input type="text" class="inputBox" size="8" name="amount_o_${rowCount}" value="${returnAdjustment.amount?string("##0.00")}"/>
+              <input type="text" class="inputBox" size="8" name="amount_o_${rowCount}" value="${returnAdjustment.amount?default(0)?string("##0.00")}"/>
            </td>
         <#else>
-           <td class="tabletextright"><@ofbizCurrency amount=returnAdjustment.amount isoCode=returnHeader.currencyUomId/></td>
+           <td class="tabletextright"><@ofbizCurrency amount=returnAdjustment.amount?default(0) isoCode=returnHeader.currencyUomId/></td>
         </#if>
         <td colspan="2">&nbsp;</td>
         <td><div class="tabletext">
@@ -57,7 +57,7 @@ under the License.
        <td>&nbsp;</td>
        </#if>
        <#assign rowCount = rowCount + 1>
-       <#assign returnTotal = returnTotal + returnAdjustment.get("amount")>
+       <#assign returnTotal = returnTotal + returnAdjustment.amount?default(0)>
     </tr>    
 </#macro>
 
@@ -260,7 +260,7 @@ under the License.
    <tr><td colspan="10"><hr class="sepbar"></td></tr>
 
 <#-- these are general return adjustments not associated with a particular item (itemSeqId = "_NA_" -->
-<#if (returnAdjustments?has_content)>                  
+<#if (returnAdjustments?has_content)>
     <#list returnAdjustments as returnAdjustment>
         <#assign adjEditable = !readOnly> <#-- they are editable if the rest of the return items are -->
         <@displayReturnAdjustment returnAdjustment=returnAdjustment adjEditable=adjEditable/>
