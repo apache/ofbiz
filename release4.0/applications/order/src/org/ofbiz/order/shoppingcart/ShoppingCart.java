@@ -4220,6 +4220,9 @@ public class ShoppingCart implements Serializable {
                     }
                 }
 
+                BigDecimal amountBd = new BigDecimal(amount.doubleValue());
+                amountBd = amountBd.setScale(scale, rounding);
+                
                 // create the OrderPaymentPreference record
                 GenericValue opp = delegator.makeValue("OrderPaymentPreference", new HashMap());
                 opp.set("paymentMethodTypeId", valueObj.getString("paymentMethodTypeId"));
@@ -4228,7 +4231,7 @@ public class ShoppingCart implements Serializable {
                 opp.set("paymentMethodId", paymentMethodId);
                 opp.set("finAccountId", finAccountId);
                 opp.set("billingPostalCode", postalCode);
-                opp.set("maxAmount", amount);
+                opp.set("maxAmount", amountBd);
                 if (refNum != null) {
                     opp.set("manualRefNum", refNum[0]);
                     opp.set("manualAuthCode", refNum[1]);
