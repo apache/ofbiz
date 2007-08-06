@@ -53,7 +53,7 @@ public class Start implements Runnable {
 
     private static final String SHUTDOWN_COMMAND = "SHUTDOWN";
     private static final String STATUS_COMMAND = "STATUS";
-    private static final double REQUIRED_JDK = 1.5;
+    private static final double REQUIRED_JDK = 1.4;
 
     public void init(String[] args, boolean fullInit) throws IOException {
         String firstArg = args.length > 0 ? args[0] : "";
