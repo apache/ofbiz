@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.MapStack;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
@@ -41,9 +42,9 @@ import freemarker.template.TemplateException;
  */
 public class HtmlWidget extends ModelScreenWidget {
     public static final String module = HtmlWidget.class.getName();
-    
+
     protected ModelScreenWidget childWidget;
-    
+
     public HtmlWidget(ModelScreen modelScreen, Element htmlElement) {
         super(modelScreen, htmlElement);
         List childElementList = UtilXml.childElementList(htmlElement);
@@ -67,11 +68,15 @@ public class HtmlWidget extends ModelScreenWidget {
     public String rawString() {
         return "<html-widget>" + (this.childWidget==null?"":this.childWidget.rawString());
     }
-    
+
     public static void renderHtmlTemplate(Writer writer, FlexibleStringExpander locationExdr, Map context) {
         String location = locationExdr.expandString(context);
         //Debug.logInfo("Rendering template at location [" + location + "] with context: \n" + context, module);
-        
+
+        if (UtilValidate.isEmpty(location)) {
+            throw new IllegalArgumentException("Template location is empty");
+        }
+
         if (location.endsWith(".ftl")) {
             try {
                 FreeMarkerWorker.renderTemplateAtLocation(location, context, writer);
@@ -89,13 +94,13 @@ public class HtmlWidget extends ModelScreenWidget {
                 throw new RuntimeException(errMsg);
             }
         } else {
-            throw new IllegalArgumentException("Rending not yet support for the tempalte at location: " + location);
+            throw new IllegalArgumentException("Rendering not yet supported for the template at location: " + location);
         }
     }
-    
+
     public static class HtmlTemplate extends ModelScreenWidget {
         protected FlexibleStringExpander locationExdr;
-        
+
         public HtmlTemplate(ModelScreen modelScreen, Element htmlTemplateElement) {
             super(modelScreen, htmlTemplateElement);
             this.locationExdr = new FlexibleStringExpander(htmlTemplateElement.getAttribute("location"));
@@ -113,11 +118,11 @@ public class HtmlWidget extends ModelScreenWidget {
     public static class HtmlTemplateDecorator extends ModelScreenWidget {
         protected FlexibleStringExpander locationExdr;
         protected Map sectionMap = new HashMap();
-        
+
         public HtmlTemplateDecorator(ModelScreen modelScreen, Element htmlTemplateDecoratorElement) {
             super(modelScreen, htmlTemplateDecoratorElement);
             this.locationExdr = new FlexibleStringExpander(htmlTemplateDecoratorElement.getAttribute("location"));
-            
+
             List htmlTemplateDecoratorSectionElementList = UtilXml.childElementList(htmlTemplateDecoratorElement, "html-template-decorator-section");
             Iterator htmlTemplateDecoratorSectionElementIter = htmlTemplateDecoratorSectionElementList.iterator();
             while (htmlTemplateDecoratorSectionElementIter.hasNext()) {
@@ -139,7 +144,7 @@ public class HtmlWidget extends ModelScreenWidget {
             MapStack standAloneStack = contextMs.standAloneChildStack();
             standAloneStack.put("screens", new ScreenRenderer(writer, standAloneStack, screenStringRenderer));
             SectionsRenderer sections = new SectionsRenderer(this.sectionMap, standAloneStack, writer, screenStringRenderer);
-            
+
             // put the sectionMap in the context, make sure it is in the sub-scope, ie after calling push on the MapStack
             contextMs.push();
             context.put("sections", sections);
@@ -155,7 +160,7 @@ public class HtmlWidget extends ModelScreenWidget {
     public static class HtmlTemplateDecoratorSection extends ModelScreenWidget {
         protected String name;
         protected List subWidgets;
-        
+
         public HtmlTemplateDecoratorSection(ModelScreen modelScreen, Element htmlTemplateDecoratorSectionElement) {
             super(modelScreen, htmlTemplateDecoratorSectionElement);
             this.name = htmlTemplateDecoratorSectionElement.getAttribute("name");
