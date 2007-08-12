@@ -162,7 +162,7 @@ under the License.
         <condition field-name="statusId" operator="equals" value="RETURN_CANCELLED"/>
         <action service="cancelReturnItems" mode="sync"/>
     </eca>
-	
+
     <eca service="updateReturnStatusFromReceipt" event="global-commit">
         <condition field-name="returnHeaderStatus" operator="equals" value="RETURN_RECEIVED"/>
         <action service="processReplacementReturn" mode="sync"/>
@@ -255,7 +255,7 @@ under the License.
     </eca>
     <!-- WorkEffort -->
     <eca service="createQuoteWorkEffort" event="invoke">
-        <condition field-name="workEffotId" operator="is-empty" />
+        <condition field-name="workEffortId" operator="is-empty" />
         <action service="createWorkEffort" mode="sync"/>
     </eca>
 </service-eca>
