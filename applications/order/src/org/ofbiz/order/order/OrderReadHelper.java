@@ -108,7 +108,7 @@ public class OrderReadHelper {
             }
         }
         if (this.orderHeader == null) {
-            throw new IllegalArgumentException("Order header is not valid");
+            throw new IllegalArgumentException("Order header passed in is not valid for orderId [" + orderHeader.getString("orderId") + "]");
         }
     }
 
@@ -125,7 +125,12 @@ public class OrderReadHelper {
         try {
             this.orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
         } catch (GenericEntityException e) {
-            throw new IllegalArgumentException("Invalid orderId");
+            String errMsg = "Error finding order with ID [" + orderId + "]: " + e.toString();
+            Debug.logError(e, errMsg, module);
+            throw new IllegalArgumentException(errMsg);
+        }
+        if (this.orderHeader == null) {
+            throw new IllegalArgumentException("Order not found with orderId [" + orderId + "]");
         }
     }
 
@@ -155,7 +160,7 @@ public class OrderReadHelper {
             GenericValue productStore = delegator.findByPrimaryKeyCache("ProductStore", UtilMisc.toMap("productStoreId", productStoreId));
             return productStore;
         } catch (GenericEntityException ex) {
-            Debug.logError("Failed to get product store for order header [" + orderHeader + "] due to exception "+ ex.getMessage(), module);
+            Debug.logError(ex, "Failed to get product store for order header [" + orderHeader + "] due to exception "+ ex.getMessage(), module);
             return null;
         }
     }
