@@ -64,6 +64,10 @@ function shipBillAddr() {
           </#if>
           <#if paymentMethodTypeId?if_exists == "GIFT_CARD"> <#--Don't know much how this is handled -->
             <form method="post" action="<@ofbizUrl>enterGiftCard</@ofbizUrl>" name="${parameters.formNameValue}">
+          <#elseif paymentMethodTypeId?if_exists == "EXT_OFFLINE">
+            <form method="post" action="<@ofbizUrl>processPaymentSettings</@ofbizUrl>" name="${parameters.formNameValue}">
+          <#else>
+            <div class="tabletext">${uiLabelMap.AccountingPaymentMethodTypeNotHandled} ${paymentMethodTypeId?if_exists}</div>
           </#if>
 
           <#if requestParameters.singleUsePayment?default("N") == "Y">
