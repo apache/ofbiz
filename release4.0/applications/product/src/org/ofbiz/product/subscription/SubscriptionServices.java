@@ -86,6 +86,8 @@ public class SubscriptionServices {
         }
         
         Timestamp thruDate = lastSubscription != null ? (Timestamp) lastSubscription.get("thruDate") : null;
+        
+        // set the fromDate, one way or another
         if (thruDate == null) {
             // no thruDate? start with NOW
             thruDate = nowTimestamp;
@@ -95,10 +97,10 @@ public class SubscriptionServices {
             //don't want to penalize for skipping time, in other words if they had a subscription last year for a month and buy another month, we want that second month to start now and not last year
             if (thruDate.before(nowTimestamp)) {
                 thruDate = nowTimestamp;
-            } else {
-                newSubscription.set("fromDate", thruDate);
             }
+            newSubscription.set("fromDate", thruDate);
         }
+        
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(thruDate);
         int field = Calendar.MONTH;
