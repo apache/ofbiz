@@ -140,6 +140,10 @@ public class LoginWorker {
     }
 
     public static void setLoggedOut(String userLoginId, GenericDelegator delegator) {
+        if (UtilValidate.isEmpty(userLoginId)) {
+            Debug.logWarning("Called setLogged out with empty userLoginId", module);
+        }
+        
         Transaction parentTx = null;
         boolean beganTransaction = false;
 
@@ -154,8 +158,12 @@ public class LoginWorker {
                 beganTransaction = TransactionUtil.begin();
 
                 GenericValue userLogin = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", userLoginId));
-                userLogin.set("hasLoggedOut", "Y");
-                userLogin.store();
+                if (userLogin == null) {
+                    Debug.logError("Could not find UserLogin record for setLoggedOut with userLoginId [" + userLoginId + "]", module);
+                } else {
+                    userLogin.set("hasLoggedOut", "Y");
+                    userLogin.store();
+                }
             } catch (GenericEntityException e) {
                 String errMsg = "Unable to set logged out flag on UserLogin";
                 Debug.logError(e, errMsg, module);
