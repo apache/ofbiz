@@ -588,9 +588,9 @@ public class GenericEntity extends Observable implements Map, LocalizedMap, Seri
         // NOTE: for this to be used properly it should really be used as the java-type in the field type def XML files
         Object value = get(name);
         if (value instanceof Double) {
-            return new BigDecimal(((Double) value).doubleValue());
+            return BigDecimal.valueOf(((Double) value).doubleValue());
         } else {
-            return (BigDecimal) get(name);
+            return (BigDecimal) value;
         }
     }
 
