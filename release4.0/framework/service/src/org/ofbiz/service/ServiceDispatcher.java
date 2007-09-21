@@ -243,6 +243,10 @@ public class ServiceDispatcher {
                 "/" + modelService.invoke + "] (" + modelService.engineName + ")", module);
         }
 
+        if (context == null) {
+            context = FastMap.newInstance();
+        }
+
         // setup the result map
         Map result = FastMap.newInstance();
         boolean isFailure = false;
@@ -483,6 +487,10 @@ public class ServiceDispatcher {
         if (Debug.verboseOn()) {
             Debug.logVerbose("[ServiceDispatcher.runAsync] : prepareing service " + service.name + " [" + service.location + "/" + service.invoke +
                 "] (" + service.engineName + ")", module);
+        }
+        
+        if (context == null) {
+            context = FastMap.newInstance();
         }
 
         // setup the result map
