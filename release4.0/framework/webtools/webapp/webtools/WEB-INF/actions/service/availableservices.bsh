@@ -78,7 +78,7 @@ getEcaListForService(String selectedService){
             runOnFailure.setAccessible(false);
 
             //extract actions
-            actions = curRuleClass.getDeclaredField("actionsAndSets");            
+            actions = curRuleClass.getDeclaredField("actions");            
             actions.setAccessible(true);
             actionsVal = actions.get(curRule);
             if(actionsVal != null){
@@ -474,17 +474,17 @@ if(selectedService != null && selectedService.length() > 0){
     
     showWsdl = request.getParameter("show_wsdl");
     if(showWsdl == null || showWsdl.length() == 0){
-    	showWsdl = request.getAttribute("show_wsdl");
+      showWsdl = request.getAttribute("show_wsdl");
     }
     
     if(showWsdl != null && showWsdl.equals("true")) {
-    	try {
-    		wsdl = curServiceModel.toWSDL("http://" + request.getServerName() + ":" + UtilProperties.getPropertyValue("url.properties", "port.http", "80") + (String) request.getAttribute("_CONTROL_PATH_") + "/SOAPService");
-    		curServiceMap.put("wsdl", UtilXml.writeXmlDocument(wsdl));
-    	} catch (WSDLException ex) {
-    		curServiceMap.put("wsdl", ex.getLocalizedMessage());
-    	}
-    	context.put("showWsdl", Boolean.TRUE);
+      try {
+        wsdl = curServiceModel.toWSDL("http://" + request.getServerName() + ":" + UtilProperties.getPropertyValue("url.properties", "port.http", "80") + (String) request.getAttribute("_CONTROL_PATH_") + "/SOAPService");
+        curServiceMap.put("wsdl", UtilXml.writeXmlDocument(wsdl));
+      } catch (WSDLException ex) {
+        curServiceMap.put("wsdl", ex.getLocalizedMessage());
+      }
+      context.put("showWsdl", Boolean.TRUE);
     }
     context.put("selectedServiceMap", curServiceMap);
 }
