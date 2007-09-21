@@ -207,7 +207,7 @@ under the License.
         <!-- this service has no parameters IN or OUT -->
     </service>
 
-    <service name="balanceInventoryItems" engine="simple"
+    <service name="balanceInventoryItems" engine="simple" transaction-timeout="600"
             location="org/ofbiz/product/inventory/InventoryServices.xml" invoke="balanceInventoryItems" auth="true">
         <description>Balance inventory items based on the item passed</description>
         <attribute name="inventoryItemId" type="String" mode="IN" optional="false"/>
