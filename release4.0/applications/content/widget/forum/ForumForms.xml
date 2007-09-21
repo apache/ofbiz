@@ -154,7 +154,6 @@ under the License.
         <field name="contentIdTo"><hidden/></field>
         <field name="contentAssocTypeId"><hidden value="RESPONSE"/></field>
         <field name="dataResourceTypeId"><hidden value="ELECTRONIC_TEXT"/></field>
-        <field name="dataResourceTypeId"><hidden value="ELECTRONIC_TEXT"/></field>
         <field name="forumMessageText" parameter-name="textData"><textarea rows="10"/></field>
         <field name="addButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
