@@ -24,7 +24,7 @@ import org.ofbiz.security.Security;
 import org.ofbiz.webapp.stats.*;
 
 String clearBins = request.getParameter("clear");
-if (UtilValidate.isNotEmpty(clearBins) && "true".equals(clearBin)) {
+if (UtilValidate.isNotEmpty(clearBins) && "true".equals(clearBins)) {
     ServerHitBin.requestSinceStarted.clear();
     ServerHitBin.eventSinceStarted.clear();
     ServerHitBin.viewSinceStarted.clear();
