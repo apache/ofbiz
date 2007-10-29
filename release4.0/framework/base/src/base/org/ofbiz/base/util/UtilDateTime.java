@@ -609,6 +609,7 @@ public class UtilDateTime {
 
         try {
             calendar.set(year, month - 1, day, hour, minute, second);
+            calendar.set(Calendar.MILLISECOND, 0);
         } catch (Exception e) {
             return null;
         }
