@@ -123,7 +123,7 @@ under the License.
         <field name="datetimeEnded" title="${uiLabelMap.CommonFinishDate}"><date-time/></field>
         <field name="subject"><text size="60"/></field>
         <field name="contentMimeTypeId">
-            <drop-down no-current-selected-key="_NA_" allow-empty="false">
+            <drop-down no-current-selected-key="text/plain" allow-empty="false">
                 <entity-options description="${mimeTypeId}" entity-name="MimeType" key-field-name="mimeTypeId">
                     <entity-order-by field-name="mimeTypeId"/>
                 </entity-options>
