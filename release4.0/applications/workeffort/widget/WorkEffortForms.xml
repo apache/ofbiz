@@ -19,7 +19,7 @@ under the License.
 -->
 
 <forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="D:\workspace\ofbizRun\framework\widget\dtd\widget-form.xsd"><!-- http://www.ofbiz.org/dtds/widget-form.xsd -->
+    xsi:noNamespaceSchemaLocation="http://www.ofbiz.org/dtds/widget-form.xsd">
 
     <form name="FilterUserJobs" title="" type="single">
         <field name="statusId">
