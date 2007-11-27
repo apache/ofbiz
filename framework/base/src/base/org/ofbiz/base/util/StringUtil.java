@@ -419,10 +419,10 @@ public class StringUtil {
      * @return
      */
     public static String addToNumberString(String numberString, long addAmount) {
-	if (numberString == null) return null;
-	
-	int origLength = numberString.length();
-	long number = Long.parseLong(numberString);
+    if (numberString == null) return null;
+    
+    int origLength = numberString.length();
+    long number = Long.parseLong(numberString);
         return padNumberString(Long.toString(number + addAmount), origLength);
     }
     
@@ -451,7 +451,7 @@ public class StringUtil {
      * </ol>
      */
     public static String htmlSpecialChars(String html, boolean doubleQuotes, boolean singleQuotes, boolean insertBR) {
-        html = StringUtil.replaceString(html, "&", "&amps;");
+        html = StringUtil.replaceString(html, "&", "&amp;");
         html = StringUtil.replaceString(html, "<", "&lt;");
         html = StringUtil.replaceString(html, ">", "&gt;");
         if (doubleQuotes) {
