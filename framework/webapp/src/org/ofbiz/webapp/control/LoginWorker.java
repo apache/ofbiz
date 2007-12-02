@@ -21,6 +21,8 @@ package org.ofbiz.webapp.control;
 import java.util.*;
 import java.security.cert.X509Certificate;
 import java.math.BigInteger;
+import java.net.URLEncoder;
+import java.io.UnsupportedEncodingException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
@@ -87,8 +89,21 @@ public class LoginWorker {
             String paramName = (String) parameterNames.nextElement();
 
             if (paramName != null) {
-                if (queryString == null) queryString = paramName + "=" + request.getParameter(paramName);
-                else queryString = queryString + "&" + paramName + "=" + request.getParameter(paramName);
+                String sane_paramName, sane_value;
+                try {
+                    sane_paramName = URLEncoder.encode((String) paramName, "UTF-8");
+                    sane_value = URLEncoder.encode(request.getParameter(paramName), "UTF-8");
+                } catch (UnsupportedEncodingException ex) {
+                    Debug.logError(ex, module);
+                    sane_paramName = paramName;
+                    sane_value = request.getParameter(paramName);
+                }
+
+                if (queryString == null) {
+                    queryString = sane_paramName + "=" + sane_value;
+                } else {
+                    queryString = queryString + "&" + sane_paramName + "=" + sane_value;
+                }
             }
         }
 
