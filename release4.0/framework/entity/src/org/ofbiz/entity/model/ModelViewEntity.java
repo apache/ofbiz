@@ -405,9 +405,6 @@ public class ModelViewEntity extends ModelEntity {
                 field.validators = aliasedField.validators;
                 
                 field.colName = alias.entityAlias + "." + SqlJdbcUtil.filterColName(aliasedField.colName);
-                if (UtilValidate.isEmpty(field.description)) {
-                    field.description = aliasedField.description;
-                }
             }
 
             this.fields.add(field);
