@@ -68,8 +68,8 @@ public class FinAccountTests extends TestCase {
         ctx.put("amount", new Double(100.00));
         ctx.put("userLogin", userLogin);
         Map resp = dispatcher.runSync("finAccountDeposit", ctx);
-        Double balance = ((Double) resp.get("balance")).doubleValue();
-        assertEquals(balance, 100.00, 0.0);
+        Double balance = (Double) resp.get("balance");
+        assertEquals(balance.doubleValue(), 100.00, 0.0);
     }
 
     public void testWithdraw() throws Exception {
@@ -79,7 +79,7 @@ public class FinAccountTests extends TestCase {
         ctx.put("userLogin", userLogin);
         Map resp = dispatcher.runSync("finAccountWithdraw", ctx);
         Double previousBalance = (Double) resp.get("previousBalance");
-        Double balance = ((Double) resp.get("balance")).doubleValue();
-        assertEquals((balance + 50.00), previousBalance.doubleValue(), 0.0);
+        Double balance = (Double) resp.get("balance");
+        assertEquals((balance.doubleValue() + 50.00), previousBalance.doubleValue(), 0.0);
     }
 }
