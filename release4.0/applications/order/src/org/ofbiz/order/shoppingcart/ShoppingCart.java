@@ -1804,7 +1804,7 @@ public class ShoppingCart implements Serializable {
 
     /** Returns the order level shipping amount */
     public double getOrderShipping() {
-        return OrderReadHelper.calcOrderAdjustments(this.getAdjustments(), this.getSubTotal(), false, false, true);
+        return OrderReadHelper.calcOrderAdjustmentsBd(this.getAdjustments(), new BigDecimal(this.getSubTotal()), false, false, true).doubleValue();
     }
 
     // ----------------------------------------
@@ -4088,7 +4088,7 @@ public class ShoppingCart implements Serializable {
             double taxTotal = 0.00;
             for (int i = 0; i < shipTaxAdj.size(); i++) {
                 GenericValue v = (GenericValue) shipTaxAdj.get(i);
-                taxTotal += OrderReadHelper.calcOrderAdjustment(v, cart.getSubTotal());
+                taxTotal += OrderReadHelper.calcOrderAdjustmentBd(v, new BigDecimal(cart.getSubTotal())).doubleValue();
             }
 
             Iterator iter = shipItemInfo.values().iterator();
@@ -4110,7 +4110,7 @@ public class ShoppingCart implements Serializable {
 
                 for (int i = 0; i < itemTaxAdj.size(); i++) {
                     GenericValue v = (GenericValue) itemTaxAdj.get(i);
-                    itemTax += OrderReadHelper.calcItemAdjustment(v, new Double(quantity), new Double(item.getBasePrice()));
+                    itemTax += OrderReadHelper.calcItemAdjustmentBd(v, new BigDecimal(quantity), new BigDecimal(item.getBasePrice())).doubleValue();
                 }
 
                 return itemTax;
