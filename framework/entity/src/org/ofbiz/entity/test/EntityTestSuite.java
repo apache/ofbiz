@@ -131,13 +131,13 @@ public class EntityTestSuite extends TestCase {
         // create the root
         GenericValue root = delegator.create("TestingNode",
                 UtilMisc.toMap(
-                        "testingNodeId", delegator.getNextSeqId("testingNodeId"),
+                        "testingNodeId", delegator.getNextSeqId("testingNode"),
                         "primaryParentNodeId", GenericEntity.NULL_FIELD,
                         "description", "root")
                 );
         int level1;
         for(level1 = 0; level1 < _level1max; level1++) {
-            String nextSeqId = delegator.getNextSeqId("testingNodeId");
+            String nextSeqId = delegator.getNextSeqId("testingNode");
             GenericValue v =
                 delegator.create("TestingNode",
                     UtilMisc.toMap("testingNodeId", nextSeqId,
@@ -172,7 +172,7 @@ public class EntityTestSuite extends TestCase {
             GenericValue node = (GenericValue)nodeIterator.next();
             GenericValue testing = delegator.makeValue("Testing",
                     UtilMisc.toMap(
-                            "testingId", delegator.getNextSeqId("testing"),
+                            "testingId", delegator.getNextSeqId("Testing"),
                             "testingTypeId", "TEST-1"
                             )
                     );
