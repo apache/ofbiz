@@ -1423,12 +1423,12 @@ public class OrderReadHelper {
             GenericValue item = (GenericValue) i.next();
             Timestamp estimatedDeliveryDate = (Timestamp) item.get("estimatedDeliveryDate");
             if (estimatedDeliveryDate != null && UtilDateTime.nowTimestamp().after(estimatedDeliveryDate)) {
-        	return true;
+            return true;
             }            
         }
         return false;
     }*/
-	GenericDelegator delegator = orderHeader.getDelegator();
+    GenericDelegator delegator = orderHeader.getDelegator();
         GenericValue orderDeliverySchedule = null;
         try {
             orderDeliverySchedule = delegator.findByPrimaryKey("OrderDeliverySchedule", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", "_NA_"));
@@ -1439,19 +1439,19 @@ public class OrderReadHelper {
             estimatedShipDate = orderDeliverySchedule.getTimestamp("estimatedReadyDate");
         }
         if (estimatedShipDate != null && UtilDateTime.nowTimestamp().after(estimatedShipDate)) {
-    		return true;
+            return true;
         }
         return false;
     }
 
     public boolean getRejectedOrderItems() {
-    	List items = getOrderItems();	
+        List items = getOrderItems();	
         Iterator i = items.iterator();
         while (i.hasNext()) {
             GenericValue item = (GenericValue) i.next();
             List receipts = null;                  
             try {
-        	receipts = item.getRelated("ShipmentReceipt");
+            receipts = item.getRelated("ShipmentReceipt");
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }                         
@@ -1461,7 +1461,7 @@ public class OrderReadHelper {
                     GenericValue rec = (GenericValue) recIter.next();
                     Double rejected = rec.getDouble("quantityRejected");
                     if (rejected != null && rejected.doubleValue() > 0) {
-                	return true;
+                    return true;
                     }
                 }            
             }
@@ -1478,18 +1478,18 @@ public class OrderReadHelper {
             int shippedQuantity = (int) getItemShippedQuantity(item);            
             Double orderedQuantity = (Double) item.get("quantity");            
             if (shippedQuantity != orderedQuantity.intValue() && shippedQuantity > 0) {
-        	return true;
+            return true;
             }            
         }
         return false;
     }*/
-    	List items = getOrderItems();	
+        List items = getOrderItems();	
         Iterator i = items.iterator();
         while (i.hasNext()) {
             GenericValue item = (GenericValue) i.next();
             List receipts = null;                  
             try {
-        	receipts = item.getRelated("ShipmentReceipt");
+            receipts = item.getRelated("ShipmentReceipt");
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }                         
@@ -1500,7 +1500,7 @@ public class OrderReadHelper {
                     Double acceptedQuantity = rec.getDouble("quantityAccepted");
                     Double orderedQuantity = (Double) item.get("quantity");            
                     if (acceptedQuantity.intValue() != orderedQuantity.intValue() && acceptedQuantity.intValue()  > 0) {
-                	return true;                    
+                    return true;                    
                     }
                 }            
             }
@@ -2045,7 +2045,7 @@ public class OrderReadHelper {
         
         List picked = null;
         try {
-        	picked = orderHeader.getDelegator().findByCondition("PicklistAndBinAndItem", pickedConditions, null, null);
+            picked = orderHeader.getDelegator().findByCondition("PicklistAndBinAndItem", pickedConditions, null, null);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             this.orderHeader = null;
@@ -2685,9 +2685,10 @@ public class OrderReadHelper {
         Iterator itemIter = UtilMisc.toIterator(orderItems);
 
         while (itemIter != null && itemIter.hasNext()) {
-            result = result.add(getOrderItemAdjustmentsTotalBd((GenericValue) itemIter.next(), adjustments, includeOther, includeTax, includeShipping)).setScale(scale, rounding);
+            result = result.add(getOrderItemAdjustmentsTotalBd((GenericValue) itemIter.next(), adjustments, includeOther, includeTax, includeShipping));
+
         }
-        return result;
+        return result.setScale(scale, rounding);
     }
 
     /** @deprecated */
