@@ -184,6 +184,7 @@ under the License.
         default-title-style="tableheadtext" default-widget-style="inputBox" default-tooltip-style="tabletext">
         <field name="action"><hidden value="search"/></field>
         <field name="shipmentId"><hidden/></field>
+        <field name="shipGroupSeqId"><hidden/></field>
         <field name="orderId" title="${uiLabelMap.ProductOrderId}">
             <lookup target-form-name="LookupOrderHeaderAndShipInfo"/>
         </field>
