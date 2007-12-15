@@ -2592,7 +2592,7 @@ public class OrderReadHelper {
             if ("RENTAL_ORDER_ITEM".equals(orderItem.getString("orderItemTypeId")))    { // retrieve related work effort when required.
                 List WorkOrderItemFulfillments = null;
                 try {
-                    WorkOrderItemFulfillments = orderItem.getRelatedCache("WorkOrderItemFulfillment");
+                    WorkOrderItemFulfillments = orderItem.getDelegator().findByAndCache("WorkOrderItemFulfillment", UtilMisc.toMap("orderId", orderItem.getString("orderId"), "orderItemSeqId", orderItem.getString("orderItemSeqId")));
                 } catch (GenericEntityException e) {}
                 Iterator iter = WorkOrderItemFulfillments.iterator();
                 if (iter.hasNext())    {
