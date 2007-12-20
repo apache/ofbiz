@@ -29,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletRequest;
@@ -59,10 +60,13 @@ import org.apache.commons.collections.map.LinkedMap;
 
 public class PayPalEvents {
     
+    public static final String resource = "AccountingUiLabels";
     public static final String module = PayPalEvents.class.getName();
+
     
     /** Initiate PayPal Request */
     public static String callPayPal(HttpServletRequest request, HttpServletResponse response) {
+        Locale locale = UtilHttp.getLocale(request);
         GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin"); 
                 
