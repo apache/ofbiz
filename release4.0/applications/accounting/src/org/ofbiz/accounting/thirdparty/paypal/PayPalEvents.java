@@ -127,7 +127,18 @@ public class PayPalEvents {
         
         // get the paypal account
         String payPalAccount = UtilProperties.getPropertyValue(configString, "payment.paypal.business");
-                
+
+        if (UtilValidate.isEmpty(redirectUrl) 
+                || UtilValidate.isEmpty(notifyUrl) 
+                || UtilValidate.isEmpty(returnUrl) 
+                || UtilValidate.isEmpty(cancelReturnUrl) 
+                || UtilValidate.isEmpty(imageUrl)
+                || UtilValidate.isEmpty(payPalAccount) ) {
+                Debug.logError("Payment properties is not configured properly, some notify URL from PayPal is not correctly defined!", module);
+                request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource, "payPalEvents.problemsGettingMerchantConfiguration", locale));
+                return "error";
+            }
+        
         // create the redirect string
         Map parameters = new LinkedMap();
         parameters.put("cmd", "_xclick");
