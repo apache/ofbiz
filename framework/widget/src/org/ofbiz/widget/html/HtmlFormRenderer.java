@@ -705,11 +705,9 @@ public class HtmlFormRenderer implements FormStringRenderer {
         while (optionValueIter.hasNext()) {
             ModelFormField.OptionValue optionValue = (ModelFormField.OptionValue) optionValueIter.next();
 
-            buffer.append("<div");
+            buffer.append("<input type=\"checkbox\"");
 
             appendClassNames(buffer, context, modelFormField);
-
-            buffer.append("><input type=\"checkbox\"");
             
             // if current value should be selected in the list, select it
             if (Boolean.TRUE.equals(allChecked)) {
@@ -737,7 +735,6 @@ public class HtmlFormRenderer implements FormStringRenderer {
             buffer.append("/>");
 
             buffer.append(optionValue.getDescription());
-            buffer.append("</div>");
         }
 
         this.appendTooltip(buffer, context, modelFormField);
