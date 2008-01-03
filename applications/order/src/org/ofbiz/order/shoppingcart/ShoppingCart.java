@@ -1845,7 +1845,7 @@ public class ShoppingCart implements Serializable {
             return null;
         }
 
-        if (shipInfo.size() == 0) {
+        if (shipInfo.size() == idx) {
             shipInfo.add(new CartShipInfo());
         }
 
