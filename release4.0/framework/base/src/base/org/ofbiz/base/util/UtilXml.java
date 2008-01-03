@@ -223,8 +223,8 @@ public class UtilXml {
         factory.setValidating(validate);
         factory.setNamespaceAware(true);
 
-        factory.setAttribute("http://xml.org/sax/features/validation", validate);
-        factory.setAttribute("http://apache.org/xml/features/validation/schema", validate);
+        factory.setAttribute("http://xml.org/sax/features/validation", new Boolean(validate));
+        factory.setAttribute("http://apache.org/xml/features/validation/schema", new Boolean(validate));
         
         // with a SchemaUrl, a URL object
         //factory.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage", "http://www.w3.org/2001/XMLSchema");
