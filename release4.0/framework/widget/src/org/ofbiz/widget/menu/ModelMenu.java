@@ -326,6 +326,9 @@ public class ModelMenu {
         // render formatting wrapper open
         menuStringRenderer.renderFormatSimpleWrapperOpen(buffer, context, this);
 
+        // Set the selected menu item from the context
+        this.setCurrentMenuItemName(context);
+
             //Debug.logInfo("in ModelMenu, menuItemList:" + menuItemList, module);
         // render each menuItem row, except hidden & ignored rows
         //menuStringRenderer.renderFormatSimpleWrapperRows(buffer, context, this);
@@ -538,6 +541,12 @@ public class ModelMenu {
         this.currentMenuItemName = string;
     }
 
+    /**
+     * @param context Map containing the menu context
+     */
+    public void setCurrentMenuItemName(Map context) {
+        this.currentMenuItemName = this.getSelectedMenuItemContextFieldName(context);
+    }
 
     /**
      * @param string

@@ -156,7 +156,7 @@ public class HtmlMenuRenderer implements MenuStringRenderer {
 
         String style = null;
         
-        if (menuItem.isSelected(context)) {
+        if (menuItem.isSelected()) {
             style = menuItem.getSelectedStyle();
             if (UtilValidate.isEmpty(style)) {
                 style = "selected";
