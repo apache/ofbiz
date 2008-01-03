@@ -1225,7 +1225,7 @@ public class ProductPromoWorker {
 
                         // create an adjustment and add it to the cartItem that implements the promotion action
                         double percentModifier = productPromoAction.get("amount") == null ? 0.0 : (productPromoAction.getDouble("amount").doubleValue()/100.0);
-                        double lineAmount = quantityUsed * cartItem.getBasePrice();
+                        double lineAmount = quantityUsed * cartItem.getBasePrice() * cartItem.getRentalAdjustment();
                         double discountAmount = -(lineAmount * percentModifier);
                         discountAmountTotal += discountAmount;
                         // not doing this any more, now distributing among conditions and actions (see call below): doOrderItemPromoAction(productPromoAction, cartItem, discountAmount, "amount", delegator);
@@ -1270,8 +1270,8 @@ public class ProductPromoWorker {
                     // create an adjustment and add it to the cartItem that implements the promotion action
                     double discount = productPromoAction.get("amount") == null ? 0.0 : productPromoAction.getDouble("amount").doubleValue();
                     // don't allow the discount to be greater than the price
-                    if (discount > cartItem.getBasePrice()) {
-                        discount = cartItem.getBasePrice();
+                    if (discount > cartItem.getBasePrice() * cartItem.getRentalAdjustment()) {
+                        discount = cartItem.getBasePrice() * cartItem.getRentalAdjustment();
                     }
                     double discountAmount = -(quantityUsed * discount);
                     discountAmountTotal += discountAmount;
@@ -1312,7 +1312,7 @@ public class ProductPromoWorker {
                     double quantityUsed = cartItem.addPromoQuantityCandidateUse(quantityDesired, productPromoAction, false);
                     if (quantityUsed > 0) {
                         quantityDesired -= quantityUsed;
-                        totalAmount += quantityUsed * cartItem.getBasePrice();
+                        totalAmount += quantityUsed * cartItem.getBasePrice() * cartItem.getRentalAdjustment();
                         cartItemsUsed.add(cartItem);
                     }
                 }
@@ -1371,7 +1371,7 @@ public class ProductPromoWorker {
                 }
                 
                 // get difference between basePrice and specialPromoPrice and adjust for that
-                double difference = -(cartItem.getBasePrice() - cartItem.getSpecialPromoPrice().doubleValue());
+                double difference = -(cartItem.getBasePrice() * cartItem.getRentalAdjustment() - cartItem.getSpecialPromoPrice().doubleValue());
 
                 if (difference != 0.0) {
                     double quantityUsed = cartItem.addPromoQuantityCandidateUse(cartItem.getQuantity(), productPromoAction, false);
