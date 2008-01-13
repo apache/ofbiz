@@ -1979,31 +1979,32 @@ public class ProductionRunServices {
             }
 
             if (Debug.verboseOn()) { Debug.logVerbose("Order item [" + orderItem + "] Existing ATP = [" + existingAtp + "]", module); } 
-            // we only need to produce more marketing packages if it is out of stock.  note that the ATP quantity already includes this order item
+            // we only need to produce more marketing packages if there isn't enough in stock.
             if (existingAtp < 0.0) {
-                // how much should we produce?  If there already is some inventory, then just produce enough to bring ATP back up to zero, which may be less than the quantity ordered.
-                // Otherwise, the ATP might be more negative due to previous orders, so just produce the quantity on this order
-                double qtyToProduce = Math.min((0 - existingAtp), orderItem.getDouble("quantity").doubleValue());
-                if (Debug.verboseOn()) { Debug.logVerbose("Order quantity = [" + orderItem.getDouble("quantity").doubleValue() + "] quantity to produce = [" + qtyToProduce + "]", module); }
-
+                // how many should we produce?  If there already is some inventory, then just produce enough to bring ATP back up to zero.
+                double qtyRequired = 0 - existingAtp;
+                // ok so that's how many we WANT to produce, but let's check how many we can actually produce based on the available components
                 Map serviceContext = new HashMap();
                 serviceContext.put("productId", orderItem.getString("productId"));
+                serviceContext.put("facilityId", facilityId);
+                serviceContext.put("userLogin", userLogin);
+                Map resultService = dispatcher.runSync("getMktgPackagesAvailable", serviceContext);
+                double mktgPackagesAvailable = ((Double) resultService.get("availableToPromiseTotal")).doubleValue();
+
+                double qtyToProduce = Math.min(qtyRequired, mktgPackagesAvailable);
+
+                if (qtyToProduce > 0) {
+                    if (Debug.verboseOn()) { Debug.logVerbose("Required quantity (all orders) = [" + qtyRequired + "] quantity to produce = [" + qtyToProduce + "]", module); }
+
                 serviceContext.put("pRQuantity", new Double(qtyToProduce));
                 serviceContext.put("startDate", UtilDateTime.nowTimestamp());
-                serviceContext.put("facilityId", facilityId);
                 //serviceContext.put("workEffortName", "");
-                serviceContext.put("userLogin", userLogin);
                 
-                Map resultService = dispatcher.runSync("createProductionRun", serviceContext);
+                    resultService = dispatcher.runSync("createProductionRun", serviceContext);
             
                 String productionRunId = (String)resultService.get("productionRunId");
                 result.put("productionRunId", productionRunId);
 
-                try {
-                    delegator.create("WorkOrderItemFulfillment", UtilMisc.toMap("workEffortId", productionRunId, "orderId", orderId, "orderItemSeqId", orderItemSeqId));
-                } catch (GenericEntityException e) {
-                    return ServiceUtil.returnError("Error creating a production run for marketing package for order [" + orderId + " " + orderItemSeqId + "]: " + e.getMessage());
-                }
                 try {
                     serviceContext.clear();
                     serviceContext.put("productionRunId", productionRunId);
@@ -2022,7 +2023,11 @@ public class ProductionRunServices {
                 return result;
 
             } else {
-                if (Debug.verboseOn()) { Debug.logVerbose("Order item [" + orderItem + "] does not need to be produced - ATP is [" + existingAtp + "]", module); }
+                    if (Debug.verboseOn()) { Debug.logVerbose("There are not enough components available to produce any marketing packages [" + orderItem.getString("productId") + "]", module); }
+                    return ServiceUtil.returnSuccess();
+                }
+            } else {
+                if (Debug.verboseOn()) { Debug.logVerbose("No marketing packages need to be produced - ATP is [" + existingAtp + "]", module); }
                 return ServiceUtil.returnSuccess();
             }
         } catch (GenericServiceException e) {
