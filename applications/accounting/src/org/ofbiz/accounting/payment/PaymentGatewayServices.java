@@ -2196,6 +2196,8 @@ public class PaymentGatewayServices {
                     refundResCtx.put("payToPartyId", payToPartyId);
                     refundResCtx.put("payFromPartyId", payFromPartyId);
                     refundResCtx.put("refundRefNum", refundResponse.get("refundRefNum"));
+                    refundResCtx.put("refundAltRefNum", refundResponse.get("refundAltRefNum"));
+                    refundResCtx.put("refundMessage", refundResponse.get("refundMessage"));
                     refundResCtx.put("refundResult", refundResponse.get("refundResult"));
                     // TODO: should we uncomment the following line?
                     //refundResCtx.put("refundAmount", (Double)refundResponse.get("refundAmount"));
