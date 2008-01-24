@@ -301,6 +301,7 @@ public class ContentManagementServices {
                 contentContext.put("userLogin", userLogin);
                 contentContext.put("displayFailCond", bDisplayFailCond);
                 contentContext.put("skipPermissionCheck", context.get("skipPermissionCheck"));
+                Debug.logInfo("In persistContentAndAssoc calling updateContent with content: " + contentContext, module);
                 Map thisResult = dispatcher.runSync("updateContent", contentContext);
                 if (ServiceUtil.isError(thisResult) || ServiceUtil.isFailure(thisResult)) {
                     return ServiceUtil.returnError("Error updating content (updateContent) in persistContentAndAssoc", null, null, thisResult);
