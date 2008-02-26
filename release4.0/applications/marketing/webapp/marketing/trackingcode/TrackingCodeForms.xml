@@ -260,8 +260,8 @@ under the License.
         <alt-target use-when="trackingCodeType==null" target="createTrackingCodeType"/>
         
         <field use-when="trackingCodeType!=null" name="trackingCodeTypeId" title="${uiLabelMap.TrackingCodeTrackingCodeTypeId}" tooltip="${uiLabelMap.CommonNotModifRecreat}" widget-style="tabletext"><display/></field>
-        <field use-when="trackingCodeType==null&amp;&amp;trackingCodeTypeId==null" name="trackingCodeTypeId" title="${uiLabelMap.TrackingCodeTrackingCodeId}"><text/></field>
-        <field use-when="trackingCodeType==null&amp;&amp;trackingCodeTypeId!=null" name="trackingCodeTypeId" title="${uiLabelMap.TrackingCodeTrackingCodeId}" tooltip="${uiLabelMap.CommonCannotBeFound}: [${trackingCodeTypeId}]" widget-style="tabletext"><display/></field>
+        <field use-when="trackingCodeType==null&amp;&amp;trackingCodeTypeId==null" name="trackingCodeTypeId" title="${uiLabelMap.TrackingCodeTrackingCodeTypeId}"><§text/></field>
+        <field use-when="trackingCodeType==null&amp;&amp;trackingCodeTypeId!=null" name="trackingCodeTypeId" title="${uiLabelMap.TrackingCodeTrackingCodeTypeId}" tooltip="${uiLabelMap.CommonCannotBeFound}: [${trackingCodeTypeId}]" widget-style="tabletext"><display/></field>
 
         <field name="description" widget-style="inputBox" title="${uiLabelMap.TrackingCodeTypeDescription}"><text/></field>
         <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="buttontext"><submit button-type="text-link"/></field>
