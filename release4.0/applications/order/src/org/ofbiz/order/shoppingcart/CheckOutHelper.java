@@ -1524,7 +1524,7 @@ public class CheckOutHelper {
             }else{
                 int cashIndex = paymentTypes.indexOf("CASH");
                 String cashId = (String) paymentTypes.get(cashIndex);
-                double cashAmount = cart.getPaymentAmount(cashId);
+                double cashAmount = cart.getPaymentAmount(cashId).doubleValue();
                 if (cashAmount < changeAmount){
                     Debug.logError("Change Amount : " + changeAmount + " / Cash Amount : " + cashAmount, module);
                     errMsg = UtilProperties.getMessage(resource, "checkhelper.change_returned_cannot_be_greater_than_cash", (cart != null ? cart.getLocale() : Locale.getDefault()));
