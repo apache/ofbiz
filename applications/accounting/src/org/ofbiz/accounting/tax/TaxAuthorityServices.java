@@ -53,8 +53,8 @@ import org.ofbiz.service.ServiceUtil;
 public class TaxAuthorityServices {
 
     public static final String module = TaxAuthorityServices.class.getName();
-    public static final BigDecimal ZERO_BASE = BigDecimal.ZERO; 
-    public static final BigDecimal ONE_BASE = BigDecimal.ONE; 
+    public static final BigDecimal ZERO_BASE = new BigDecimal("0.000");
+    public static final BigDecimal ONE_BASE = new BigDecimal("1.000");
     public static final BigDecimal PERCENT_SCALE = new BigDecimal("100.000"); 
     public static int salestaxFinalDecimals = UtilNumber.getBigDecimalScale("salestax.final.decimals");
     public static int salestaxCalcDecimals = UtilNumber.getBigDecimalScale("salestax.calc.decimals");
@@ -182,7 +182,7 @@ public class TaxAuthorityServices {
             // this is an add and not an addAll because we want a List of Lists of GenericValues, one List of Adjustments per item
             itemAdjustments.add(taxList);
         }
-        if (orderShippingAmount != null && orderShippingAmount.compareTo(BigDecimal.ZERO) > 0) {
+        if (orderShippingAmount != null && orderShippingAmount.doubleValue() > 0) {
             List taxList = getTaxAdjustments(delegator, null, productStore, payToPartyId, billToPartyId, taxAuthoritySet, ZERO_BASE, ZERO_BASE, orderShippingAmount);
             orderAdjustments.addAll(taxList);
         }
@@ -313,7 +313,7 @@ public class TaxAuthorityServices {
                     taxable = taxable.add(shippingAmount);
                 }
                 
-                if (taxable.compareTo(BigDecimal.ZERO) == 0) {
+                if (taxable.doubleValue() == 0) {
                     // this should make it less confusing if the taxable flag on the product is not Y/true, and there is no shipping and such
                     continue;
                 }
