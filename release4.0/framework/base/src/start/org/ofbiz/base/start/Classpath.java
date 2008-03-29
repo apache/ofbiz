@@ -103,7 +103,6 @@ public class Classpath {
         int cnt = _elements.size();
         if (cnt >= 1) {
             cp.append(((File) (_elements.get(0))).getPath());
-            appendPath(cp, ((File) (_elements.get(0))).getPath());
         }
         for (int i = 1; i < cnt; i++) {
             cp.append(File.pathSeparatorChar);
