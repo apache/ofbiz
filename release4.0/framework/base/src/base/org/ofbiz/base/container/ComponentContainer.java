@@ -170,7 +170,7 @@ public class ComponentContainer implements Container {
                 for (int i = 0; i < subs.length; i++) {
                     try {
                         File componentPath = new File(parentPath.getCanonicalPath() + "/" + subs[i]);
-                        if (componentPath.isDirectory() && !subs[i].equals("CVS")) {
+                        if (componentPath.isDirectory() && !sub.equals("CVS") && !sub.equals(".svn")) {
                             // make sure we have a component configuraton file
                             String componentLocation = componentPath.getCanonicalPath();
                             File configFile = new File(componentLocation + "/ofbiz-component.xml");

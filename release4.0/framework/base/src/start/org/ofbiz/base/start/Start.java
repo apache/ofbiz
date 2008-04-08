@@ -169,7 +169,7 @@ public class Start implements Runnable {
             File files[] = libDir.listFiles();
             for (int i = 0; i < files.length; i++) {
                 String fileName = files[i].getName();
-                if (files[i].isDirectory() && !"CVS".equals(fileName) && recurse) {
+                if (file.isDirectory() && !"CVS".equals(fileName) && !".svn".equals(fileName) && recurse) {
                     loadLibs(files[i].getCanonicalPath(), recurse);
                 } else if (fileName.endsWith(".jar") || fileName.endsWith(".zip")) {
                     classPath.addComponent(files[i]);
