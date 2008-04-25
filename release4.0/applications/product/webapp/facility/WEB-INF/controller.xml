@@ -74,7 +74,7 @@ under the License.
     <!-- Request Mappings -->
     <request-map uri="view">
         <security https="true" auth="false"/>
-        <response name="success" type="view" value="main"/>
+        <response name="success" type="request" value="main"/>
         <response name="error" type="view" value="error"/>
     </request-map>
 
@@ -87,8 +87,8 @@ under the License.
     <request-map uri="setSessionLocale">
         <security https="true" auth="false"/>
         <event type="java" path="org.ofbiz.common.CommonEvents" invoke="setSessionLocale"/>
-        <response name="success" type="view" value="main"/>
-        <response name="error" type="view" value="main"/>
+        <response name="success" type="request" value="main"/>
+        <response name="error" type="request" value="main"/>
     </request-map>
 
     <request-map uri="main">
