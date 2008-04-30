@@ -32,12 +32,20 @@ ${virtualJavaScript?if_exists}
             document.addform.quantity.disabled = true;
             var elem = document.getElementById('product_id_display');
             var txt = document.createTextNode('');
-            elem.replaceChild(txt, elem.firstChild);
+            if(elem.hasChildNodes()) {
+                elem.replaceChild(txt, elem.firstChild);
+            } else {
+                elem.appendChild(txt);
+            }
         } else {
             document.addform.quantity.disabled = false;
             var elem = document.getElementById('product_id_display');
             var txt = document.createTextNode(name);
-            elem.replaceChild(txt, elem.firstChild);
+            if(elem.hasChildNodes()) {
+                elem.replaceChild(txt, elem.firstChild);
+            } else {
+                elem.appendChild(txt);
+            }
         }
     }
     function isVirtual(product) {
