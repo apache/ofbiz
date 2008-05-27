@@ -424,7 +424,20 @@ public class ShoppingCartItem implements java.io.Serializable {
                 }
             }
              */
+            
+            // check to see if the product is fully configured
+            if ("AGGREGATED".equals(product.getString("productTypeId"))) {
+                if (configWrapper == null || !configWrapper.isCompleted()) {                
+                    Map messageMap = UtilMisc.toMap("productName", product.getString("productName"), 
+                                                    "productId", product.getString("productId"));
+                    String excMsg = UtilProperties.getMessage(resource, "item.cannot_add_product_not_configured_correctly",
+                                                  messageMap , cart.getLocale() );
+                    Debug.logWarning(excMsg, module);
+                    throw new CartItemModifyException(excMsg);
+                }
+            }                        
         }
+        
         // check to see if the product is a rental item
         if ("ASSET_USAGE".equals(product.getString("productTypeId"))) {
             if (reservStart == null)    {
@@ -476,18 +489,6 @@ public class ShoppingCartItem implements java.io.Serializable {
                                               messageMap, cart.getLocale() );                
                 Debug.logInfo(excMsg, module);
                 throw new CartItemModifyException(isAvailable);
-            }
-        }
-        
-        // check to see if the product is fully configured
-        if ("AGGREGATED".equals(product.getString("productTypeId"))) {
-            if (configWrapper == null || !configWrapper.isCompleted()) {                
-                Map messageMap = UtilMisc.toMap("productName", product.getString("productName"), 
-                                                "productId", product.getString("productId"));
-                String excMsg = UtilProperties.getMessage(resource, "item.cannot_add_product_not_configured_correctly",
-                                              messageMap , cart.getLocale() );
-                Debug.logWarning(excMsg, module);
-                throw new CartItemModifyException(excMsg);
             }
         }
         

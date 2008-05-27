@@ -262,7 +262,7 @@ public class ShoppingCartEvents {
             }
 
             if (reservStart != null && reservEnd != null)	{
-            	reservLength = new Double(UtilDateTime.getInterval(reservStart,reservEnd)/86400000);
+                reservLength = new Double(UtilDateTime.getInterval(reservStart,reservEnd)/86400000);
             }
 
 
@@ -731,11 +731,11 @@ public class ShoppingCartEvents {
         Locale locale = UtilHttp.getLocale(request);
 
         if (UtilValidate.isEmpty(alternateGwpProductId)) {
-        	request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"OrderCouldNotSelectAlternateGiftNoAlternateGwpProductIdPassed", locale));
+            request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"OrderCouldNotSelectAlternateGiftNoAlternateGwpProductIdPassed", locale));
             return "error";
         }
         if (UtilValidate.isEmpty(alternateGwpLineStr)) {
-        	request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"OrderCouldNotSelectAlternateGiftNoAlternateGwpLinePassed", locale));
+            request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"OrderCouldNotSelectAlternateGiftNoAlternateGwpLinePassed", locale));
             return "error";
         }
 
@@ -743,13 +743,13 @@ public class ShoppingCartEvents {
         try {
             alternateGwpLine = Integer.parseInt(alternateGwpLineStr);
         } catch (Exception e) {
-        	request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"OrderCouldNotSelectAlternateGiftAlternateGwpLineIsNotAValidNumber", locale));
+            request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"OrderCouldNotSelectAlternateGiftAlternateGwpLineIsNotAValidNumber", locale));
             return "error";
         }
 
         ShoppingCartItem cartLine = cart.findCartItem(alternateGwpLine);
         if (cartLine == null) {
-        	request.setAttribute("_ERROR_MESSAGE_", "Could not select alternate gift, no cart line item found for #" + alternateGwpLine + ".");
+            request.setAttribute("_ERROR_MESSAGE_", "Could not select alternate gift, no cart line item found for #" + alternateGwpLine + ".");
             return "error";
         }
 
@@ -785,7 +785,7 @@ public class ShoppingCartEvents {
         int i;
 
         if (UtilValidate.isEmpty(partyId) || roleTypeId.length < 1) {
-        	request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"OrderPartyIdAndOrRoleTypeIdNotDefined", locale));
+            request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"OrderPartyIdAndOrRoleTypeIdNotDefined", locale));
             return "error";
         }
 
@@ -816,7 +816,7 @@ public class ShoppingCartEvents {
         int i;
 
         if (UtilValidate.isEmpty(partyId) || roleTypeId.length < 1) {
-        	request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"OrderPartyIdAndOrRoleTypeIdNotDefined", locale));
+            request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"OrderPartyIdAndOrRoleTypeIdNotDefined", locale));
             return "error";
         }
 
@@ -1073,6 +1073,7 @@ public class ShoppingCartEvents {
         try {
             Map outMap = dispatcher.runSync("loadCartFromOrder",
                                             UtilMisc.toMap("orderId", quoteId,
+                                                           "skipProductChecks", Boolean.TRUE, // the products have already been checked in the order, no need to check their validity again
                                                            "userLogin", userLogin));
             cart = (ShoppingCart) outMap.get("shoppingCart");
         } catch (GenericServiceException exc) {
