@@ -60,13 +60,17 @@ under the License.
                   <td align="right"><div class="tableheadtext">${uiLabelMap.OrderQuantity} :</div></td>
                   <td><input type="text" class="inputBox" size="6" name="quantity" value="${requestParameters.quantity?default("1")}"/></td>
                 </tr>
-                <tr>
-                  <td align="right"><div class="tableheadtext">${uiLabelMap.OrderShipGroup} :</div></td>
-                  <td><input type="text" class="inputBox" size="6" name="shipGroupSeqId" value="00001"/></td>
-                </tr>
-                <tr>
-                  <td colspan="2">&nbsp;</td>
-                </tr>
+                <#if (shipGroups?size > 1)>
+                  <tr>
+                    <td align="right"><div class="tableheadtext">${uiLabelMap.OrderShipGroup} :</div></td>
+                    <td><select name="shipGroupSeqId">
+                            <#list shipGroups as shipGroup>
+                               <option value="${shipGroup.shipGroupSeqId}">${shipGroup.shipGroupSeqId}</option>
+                            </#list>
+                            </select>
+                        </td>
+                  </tr>             
+                </#if>               
                 <tr>
                   <td align="right"><div class="tableheadtext">${uiLabelMap.OrderDesiredDeliveryDate} :</div></td>
                   <td>
