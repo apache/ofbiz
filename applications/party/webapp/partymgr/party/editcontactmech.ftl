@@ -29,7 +29,7 @@ under the License.
         <tr>
           <td class="label">${uiLabelMap.PartySelectContactType}</td>
           <td>
-            <select name="preContactMechTypeId"">
+            <select name="preContactMechTypeId">
               <#list mechMap.contactMechTypes as contactMechType>
                 <option value="${contactMechType.contactMechTypeId}">${contactMechType.get("description",locale)}</option>
               </#list>
