@@ -70,7 +70,7 @@ under the License.
         </p>
         <p>${Static["org.ofbiz.base.util.UtilDateTime"].nowTimestamp().toString()}</p>
             <form method="post" action="<@ofbizUrl>setSessionLocale</@ofbizUrl>">
-              <select name="locale">
+              <select name="newLocale">
                 <#list availableLocales as availableLocale>
                     <#assign langAttr = availableLocale.toString()?replace("_", "-")>
                     <#assign langDir = "ltr">
