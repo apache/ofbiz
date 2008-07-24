@@ -1740,7 +1740,6 @@ public class PaymentGatewayServices {
             
             // remove sensitive credit card data regardless of outcome
             orderPaymentPreference.set("securityCode", null);
-            orderPaymentPreference.set("track2", null);    
                 
             boolean needsNsfRetry = needsNsfRetry(orderPaymentPreference, context, delegator);
             if (needsNsfRetry) {
