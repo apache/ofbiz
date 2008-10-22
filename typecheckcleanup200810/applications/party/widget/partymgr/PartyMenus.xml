@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<menus xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-menu.xsd">
+
+    <menu name="ProfileTabBar" default-menu-item-name="viewprofile" default-selected-style="selected"
+        type="simple" menu-container-style="button-bar tab-bar" selected-menuitem-context-field-name="tabButtonItem">
+        <menu-item name="viewprofile" title="${uiLabelMap.PartyProfile}">
+            <link target="viewprofile?partyId=${partyId}"/>
+        </menu-item>
+        <menu-item name="viewroles" title="${uiLabelMap.PartyRoles}">
+            <link target="viewroles?partyId=${partyId}"/>
+        </menu-item>
+        <menu-item name="linkparty" title="${uiLabelMap.PartyLink}">
+            <link target="linkparty?partyId=${partyId}"/>
+        </menu-item>
+        <menu-item name="EditPartyRelationships" title="${uiLabelMap.PartyRelationships}">
+            <link target="EditPartyRelationships?partyId=${partyId}"/>
+        </menu-item>
+        <menu-item name="viewvendor" title="${uiLabelMap.PartyVendor}">
+            <link target="viewvendor?partyId=${partyId}"/>
+        </menu-item>
+        <menu-item name="EditPartyTaxAuthInfos" title="${uiLabelMap.PartyTaxAuthInfos}">
+            <link target="EditPartyTaxAuthInfos?partyId=${partyId}"/>
+        </menu-item>
+        <menu-item name="EditPartyRates" title="${uiLabelMap.CommonRates}">
+            <link target="EditPartyRates?partyId=${partyId}"/>
+        </menu-item>
+        <menu-item name="editShoppingList" title="${uiLabelMap.PartyShoppingLists}">
+            <link target="editShoppingList?partyId=${partyId}"/>
+        </menu-item>
+        <menu-item name="ViewSegmentRoles" title="${uiLabelMap.PartySegments}">
+            <link target="ViewSegmentRoles?partyId=${partyId}"/>
+        </menu-item>
+        <menu-item name="EditPartyClassifications" title="${uiLabelMap.PartyClassifications}">
+            <link target="EditPartyClassifications?partyId=${partyId}"/>
+        </menu-item>
+        <menu-item name="ContactList" title="${uiLabelMap.PartyContactList}">
+            <link target="ListPartyContactLists?partyId=${partyId}"/>
+        </menu-item>
+        <menu-item name="PartyContents" title="${uiLabelMap.PartyContent}">
+            <link target="EditPartyContents?partyId=${partyId}"/>
+        </menu-item>
+        <menu-item name="EditPartySkills" title="${uiLabelMap.CommonPartySkills}">
+            <link target="EditPartySkills?partyId=${partyId}"/>
+        </menu-item>
+        <menu-item name="EditPersonTrainings" title="${uiLabelMap.HumanResTraining}">
+            <link target="EditPersonTrainings?partyId=${partyId}"/>
+        </menu-item>
+        <menu-item name="EditPartyResumes" title="${uiLabelMap.HumanResPartyResume}">
+            <link target="EditPartyResumes?partyId=${partyId}"/>
+        </menu-item>
+        <menu-item name="EditEmploymentApps" title="${uiLabelMap.HumanResEmploymentApp}">
+            <link target="EditEmploymentApps?partyId=${partyId}&amp;&amp;referredByPartyId=${partyId}"/>
+        </menu-item>
+        <menu-item name="FinancialHistory" title="${uiLabelMap.FinancialHistory}">
+            <condition>
+                <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
+            </condition>
+            <link target="PartyFinancialHistory?partyId=${partyId}"/>
+        </menu-item>
+    </menu>
+    <menu name="ProfileSubTabBar" menu-container-style="button-bar button-style-2" default-selected-style="selected">  
+        <menu-item name="createNew" title="${uiLabelMap.AccountingBillingAccount}" >
+            <condition>
+                <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
+            </condition>
+            <link target="/accounting/control/FindBillingAccount?partyId=${partyId}" url-mode="inter-app"/>
+        </menu-item>
+        <menu-item name="finAccounts" title="${uiLabelMap.AccountingFinAccounts}">
+            <condition>
+                <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
+            </condition>
+            <link target="/accounting/control/FindFinAccount?ownerPartyId=${partyId}" url-mode="inter-app"/> 
+        </menu-item>
+        <menu-item name="PartyCommEvents" title="${uiLabelMap.PartyCommunications}" >
+            <link target="ListPartyCommEvents?partyId=${partyId}"/>
+        </menu-item>
+        <menu-item name="findRequest" title="${uiLabelMap.PartyPartyRequests}" >
+            <condition>
+                <if-has-permission permission="ORDERMGR" action="_VIEW"/>
+            </condition>
+            <link target="/ordermgr/control/FindRequest?lookupFlag=Y&amp;fromPartyId=${partyId}&amp;externaLoginKey=${externalLoginKey}" url-mode="inter-app"/> 
+        </menu-item>
+        <menu-item name="findQuote" title="${uiLabelMap.OrderOrderQuotes}" >
+            <condition>
+                <if-has-permission permission="ORDERMGR" action="_VIEW"/>
+            </condition>
+            <link target="/ordermgr/control/FindQuote?partyId=${partyId}&amp;externalLoginKey=${externalLoginKey}" url-mode="inter-app"/> 
+        </menu-item>
+        <menu-item name="searchOrder" title="${uiLabelMap.OrderOrders}" >
+            <condition>
+                <if-has-permission permission="ORDERMGR" action="_VIEW"/>
+            </condition>
+            <link target="/ordermgr/control/searchorders?lookupFlag=Y&amp;hideFields=Y&amp;partyId=${partyId}&amp;externalLoginKey=${externalLoginKey}&amp;viewIndex=1&amp;viewSize=20" url-mode="inter-app"/> 
+        </menu-item>
+        <menu-item name="newQuote" title="${uiLabelMap.OrderNewQuote}">
+            <condition>
+                <if-has-permission permission="ORDERMGR" action="_CREATE"/>
+            </condition>
+            <link target="/ordermgr/control/EditQuote?partyId=${partyId}&amp;externaLoginKey=${externalLoginKey}" url-mode="inter-app"/> 
+        </menu-item>
+        <menu-item name="newOrder" title="${uiLabelMap.OrderNewOrder}">
+            <condition>
+                <if-has-permission permission="ORDERMGR" action="_CREATE"/>
+            </condition>
+            <link target="/ordermgr/control/checkinits?partyId=${partyId}&amp;externaLoginKey=${externalLoginKey}" url-mode="inter-app"/> 
+        </menu-item>
+        <!-- menu-item name="paymentsSent" title="${uiLabelMap.AccountingPaymentsSent}">
+            <condition>
+                <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
+            </condition>
+            <link target="/accounting/control/findPayments?lookupFlag=Y&amp;hideFields=Y&amp;partyIdTo=${partyId}&amp;externaLoginKey=${externalLoginKey}" url-mode="inter-app"/> 
+        </menu-item>
+        <menu-item name="paymentsReceived" title="${uiLabelMap.AccountingPaymentsReceived}">
+            <condition>
+                <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
+            </condition>
+            <link target="/accounting/control/findPayments?lookupFlag=Y&amp;hideFields=Y&amp;partyIdFrom=${partyId}&amp;externaLoginKey=${externalLoginKey}" url-mode="inter-app"/> 
+        </menu-item-->
+    </menu>
+    <menu name="create-new-party" type="simple" menu-container-style="basic-nav">
+        <menu-item name="create-party-group" title="${uiLabelMap.PartyCreateNewPartyGroup}">
+            <link target="editpartygroup?create_new=Y"/>
+        </menu-item>
+        <menu-item name="create-person" title="${uiLabelMap.PartyCreateNewPerson}">
+            <link target="editperson?create_new=Y"/>
+        </menu-item>
+        <menu-item name="create-customer" title="${uiLabelMap.PartyCreateNewCustomer}">
+            <link target="NewCustomer"/>
+        </menu-item>
+        <menu-item name="create-prospect" title="${uiLabelMap.PartyCreateNewProspect}">
+            <link target="NewProspect"/>
+        </menu-item>
+        <menu-item name="create-employee" title="${uiLabelMap.PartyCreateNewEmployee}" >
+            <link target="NewEmployee"/>
+        </menu-item>
+    </menu>
+ 
+    <menu name="PartyInvitationTabBar" default-selected-style="selected" type="simple" 
+        menu-container-style="button-bar tab-bar" selected-menuitem-context-field-name="tabButtonItem">
+        <menu-item name="EditPartyInvitation" title="${uiLabelMap.PartyInvitation}">
+            <link target="editPartyInvitation?partyInvitationId=${partyInvitationId}"/>
+        </menu-item>
+        <menu-item name="PartyInvitationGroupAssocs" title="${uiLabelMap.PartyInvitationGroupAssoc}">
+            <link target="PartyInvitationGroupAssocs?partyInvitationId=${partyInvitationId}"/>
+        </menu-item>
+        <menu-item name="PartyInvitationRoleAssocs" title="${uiLabelMap.PartyInvitationRoleAssoc}">
+            <link target="PartyInvitationRoleAssocs?partyInvitationId=${partyInvitationId}"/>
+        </menu-item>
+    </menu>
+
+    <menu name="personUpdate">
+        <menu-item name="update" title="${uiLabelMap.CommonUpdate}">
+            <link target="editperson?partyId=${party.partyId}"/>
+        </menu-item>
+    </menu>
+
+    <menu name="groupUpdate">
+        <menu-item name="update" title="${uiLabelMap.CommonUpdate}">
+            <link target="editpartygroup?partyId=${party.partyId}"/>
+        </menu-item>
+    </menu>
+    
+    <menu name="addShipper">
+        <menu-item name="new" title="${uiLabelMap.CommonCreateNew}">
+            <condition>
+                <if-has-permission permission="PARTYMGR" action="_CREATE"/>
+            </condition>
+            <link target="editCarrierAccount?partyId=${party.partyId}"/>
+        </menu-item>
+    </menu>
+    
+</menus>

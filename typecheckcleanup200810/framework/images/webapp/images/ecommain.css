@@ -1,0 +1,1051 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+/* ===== This file contains the eCommerce specific styles ===== */
+
+/* ===== Resets/Browser Normalization ===== */
+
+blockquote, body, div, dl, dt, dd, fieldset, form, h1, h2, h3, h4, h5, h6,
+img, input, li, ol, p, select, span, td, textarea, th, ul {
+border-style: none;
+margin: 0;
+padding: 0;
+}
+
+a, address, body, caption, cite, code, dfn, em, strong, th, var {
+font-style: normal;
+font-weight: normal;
+text-decoration: none;
+}
+
+body, caption, th {
+text-align: left;
+}
+
+h1, h2, h3, h4, h5, h6 {
+font-size: 100%;
+}
+
+ol, ul {
+list-style: none;
+}
+
+/* ===== Basic Element Styles ===== */
+
+
+a, a:visited {
+color: #000099;
+font-weight: bold;
+}
+
+a:hover, a:active {
+text-decoration: underline;
+}
+
+.disabled {
+color: #333366;
+text-decoration: none;
+}
+
+body, textarea, input, select {
+font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+body {
+background-color: #FFFFFF;
+color: #000000;
+font-size: 10px;
+margin: 10px;
+}
+
+hr {
+background-color: #999999;
+border: 0;
+height: 1px;
+margin: 5px 0 5px 0;
+}
+
+input[type="radio"], input[type="checkbox"] {
+font-size: 8pt;
+}
+
+input[type="text"], input[type="password"] {
+font-size: 8pt;
+background: white;
+border: #999999 solid 1px;
+margin: 2px;
+}
+
+input[type="submit"], input[type="button"],
+input[type="reset"] {
+font-size: 8pt;
+font-weight: bold;
+color: #000099;
+background: white;
+border: #999999 solid 1px;
+margin: 2px;
+}
+
+input[type="submit"]:hover {
+color: #ff0000;
+cursor: pointer;
+text-decoration: underline;
+}
+
+input[type="file"] {
+font-size: 11px;
+}
+
+select {
+background: #FFFFFF;
+font-size: 8pt;
+border: #999999 solid 1px;
+margin: 2px;
+}
+
+h1, .h1 {
+color: #000099;
+font-size: 12pt;
+font-weight: bold;
+}
+
+h2, .h2 {
+font-size: 10pt;
+font-weight: bold;
+}
+
+h3, .h3 {
+font-size: 8pt;
+font-weight: bold;
+}
+
+/* IE7 fix */
+table {
+font-size: 10px;
+}
+
+/* IE7 fix */
+table input {
+border: #999999 solid 1px;
+}
+
+textarea {
+background: #FFFFFF;
+font-size: 8pt;
+background: white;
+border: #999999 solid 1px;
+margin: 2px;
+}
+
+th, th a {
+color: #000000;
+font-weight: bold;
+}
+
+img {
+behavior: url("/images/pngbehavior.htc");
+}
+
+.endcolumns {
+clear: both;
+height: 0px;
+visibility: hidden;
+}
+
+.hidden {
+visibility: hidden;
+}
+
+.label {
+/* Used for <input> element labels */
+font-weight: bold;
+padding-right: 11px;
+text-align: right;
+white-space: nowrap;
+width: 1%;
+}
+
+/* ===== Header Styles ===== */
+#ecom-header {
+position: relative;
+background: #ffffff;
+height: 80px;
+voice-family: "\"}\"";
+voice-family: inherit;
+height: 80px;
+/* border:1px solid #000; */
+}
+#ecom-header #left {
+position: absolute;
+top: 0px;
+left: 0px;
+width: 280px;
+}
+#ecom-header #middle {
+margin-left: 290px;
+margin-right: 210px;
+padding-top: 10px;
+width: auto;
+
+text-align: center;
+}
+#ecom-header #right {
+position: absolute;
+top: 0px;
+right: 0px;
+width: 200px;
+padding: 0px;
+margin-top: 20px;
+
+text-align: right;
+}
+
+#welcome-message {
+padding-right: 10px;
+padding-left: 10px;
+font-weight: bold;
+text-decoration: none;
+}
+#welcome-message a {
+text-decoration: none;
+color: #000099;
+}
+#welcome-message a:hover {
+color: black;
+text-decoration: underline;
+}
+#company-name {
+font-size: 12pt;
+font-weight: bold;
+color: #000099;
+white-space: nowrap;
+}
+#company-subtitle {
+font-size: 6pt;
+color: #330099;
+white-space: nowrap;
+}
+
+#microcart {
+font-weight: bold;
+text-decoration: none;
+}
+#microcart a {
+text-decoration: none;
+color: #000099;
+}
+#microcart a:hover {
+color: black;
+text-decoration: underline;
+}
+#microcart .disabled {
+color: #666666;
+}
+
+/* ===== Header-Bar Styles ===== */
+#ecom-header-bar {
+background: #B4B0AA;
+text-align: center;
+overflow: visible;
+height: 14px;
+}
+
+#ecom-header-bar ul {
+display: block;
+overflow: visible;
+background: transparent;
+}
+
+#ecom-header-bar ul li {
+height: 14px;
+padding: 0px 8px 0px 8px;
+}
+#ecom-header-bar ul#left-links li {
+float: left;
+border-right: 1px solid #FFFFFF;
+}
+#ecom-header-bar ul#right-links li {
+float: right;
+border-left: 1px solid #FFFFFF;
+}
+
+#ecom-header-bar ul li a {
+font-weight: bold;
+text-decoration: none;
+color: #000099;
+}
+#ecom-header-bar ul li:hover a {
+color: black;
+text-decoration: underline;
+}
+
+
+/* ===== Layout/Formatting Styles ===== */
+/* NOTE: using a combination of a float left/right for the side bars AND
+  wide margins for the center to get 2 desired effects: 1. be able to end
+  columns and put the footer at the bottom of the page and 2. not have the
+  center column expand to full width below the columns.
+
+  The downside to this is that in some browsers we can't effectively use floats
+  within divs in the main column.
+*/
+
+/* ecom-mainarea wraps what is below the header including the divs for left, main, right columns as applicable */
+#ecom-mainarea {
+position: relative;
+background: #FFFFFF;
+width: 100%;
+margin-top: 10px;
+}
+
+#ecom-mainarea .left {
+/* alt: position: absolute; left: 0px; top: 0px; */
+float: left;
+width: 150px;
+background: #ffffff;
+/* border:1px solid #000; */
+}
+#ecom-mainarea .right {
+/* alt: position: absolute; right: 0px; top: 0px; */
+float: right;
+width: 200px;
+background: #ffffff;
+}
+
+
+#ecom-mainarea .center, #ecom-mainarea .leftonly, #ecom-mainarea .rightonly, #ecom-mainarea .nocolumns {
+background:#fff;
+text-align: left;
+vertical-align: top;
+}
+#ecom-mainarea .center {
+margin-left: 160px;
+margin-right: 210px;
+voice-family: "\"}\"";
+voice-family: inherit;
+margin-left: 161px;
+margin-right: 211px;
+}
+#ecom-mainarea .leftonly {
+margin-left: 160px;
+voice-family: "\"}\"";
+voice-family: inherit;
+margin-left: 161px;
+}
+#ecom-mainarea .rightonly {
+margin-right: 210px;
+voice-family: "\"}\"";
+voice-family: inherit;
+margin-right: 211px;
+}
+
+/* ====== eCommerce "Screenlet" Styles ====== */
+#ecom-mainarea .screenlet {
+background: #FFFFFF;
+border: 1px solid #999999;
+margin-bottom: 10px;
+height:auto !important;
+height:1%
+}
+#ecom-mainarea .screenlet-header {
+background: #000099;
+padding-top: 1px;
+padding-bottom: 3px;
+padding-right: 4px;
+padding-left: 4px;
+height:auto !important;
+height:1%
+}
+#ecom-mainarea .screenlet-body {
+background: #FFFFFF;
+padding: 4px;
+height:auto !important;
+height:1%
+}
+
+.boxhead {
+font-size: 8pt;
+font-weight: bold;
+text-decoration: none;
+color: #FFFFFF;
+}
+
+.boxlink {
+float: right;
+}
+
+A.boxheadbutton {
+font-size: 8pt;
+font-weight: bold;
+text-decoration: none;
+color: #FFFFFF;
+}
+
+A.boxheadbutton:hover {
+font-size: 8pt;
+font-weight: bold;
+text-decoration: none;
+color: red;
+}
+
+/* Form layout styles to simulate a table-style layout */
+#ecom-mainarea .form-row {
+clear: both;
+padding-top: 2px;
+}
+#ecom-mainarea .form-label {
+float: left;
+width: 180px;
+text-align: right;
+padding-top: 5px;
+}
+#ecom-mainarea .form-field {
+float: left;
+margin-left: 10px;
+text-align: left;
+}
+
+/* ===== Text/Label Styles ===== */
+.tablebuttontext {
+color: #1E3C66;
+}
+
+.contenttext {
+font-size: 8pt;
+}
+
+DIV.tabletexthidden {
+visibility: hidden;
+}
+
+.info {
+font-style: normal;
+color: #000000;
+}
+
+DIV.graybox {
+font-weight: bold;
+background: #CCCCCC;
+border: 1px solid #000000;
+text-align: center;
+margin: 2px auto;
+width: auto;
+padding: 4px;
+}
+
+
+.boxoutside {
+background: #FFFFFF;
+border-color: #999999;
+border-style: solid;
+border-width: 1px 1px 1px 1px;
+}
+
+.boxtop {
+background: #000099;
+padding-top: 1px;
+padding-bottom: 1px;
+padding-right: 4px;
+padding-left: 4px;
+border-color: #999999;
+border-style: solid;
+border-width: 0px 0px 0px 0px;
+}
+
+.boxbottom {
+background: #FFFFFF;
+padding: 4px;
+border-color: #999999;
+border-style: solid;
+border-width: 0px 0px 0px 0px;
+}
+
+.button {
+border-style: outset; border-color: #9999CC; border-width: 2px;
+background: #dddddd;
+padding-right: 5px; padding-left: 5px;
+}
+
+
+.tableheadtext {
+font-weight: bold;
+color: black;
+}
+
+A.tableheadbutton {
+font-weight: bold;
+color: black;
+}
+
+A.tableheadbutton:hover {
+font-weight: bold;
+color: red;
+}
+
+.browsecategorytext {
+font-weight: bold;
+color: #000099;
+text-indent: -10px;
+}
+
+A.browsecategorybutton {
+font-weight: bold;
+color: #000099;
+}
+
+A.browsecategorybutton:hover {
+color: #000099;
+}
+
+.browsecategorybuttondisabled {
+font-weight: bold;
+color: #333333;
+}
+
+A.buttontext, .buttontextdisabled {
+font-weight: bold;
+background: white;
+border: #999999 solid 1px;
+margin: 2px 1px 2px 1px;
+padding: 1px 4px 1px 4px;
+}
+
+A.buttontext {
+color: #000099;
+}
+
+A.buttontext:hover {
+color: red;
+}
+
+A.linktext {
+font-weight: bold;
+color: #000099;
+}
+
+A.linktext:hover {
+color: red;
+}
+
+.buttontextdisabled {
+color: #333333;
+}
+
+.submenutextinfo {
+font-weight: bold;
+color: white;
+padding-left: 6px;
+padding-right: 5px;
+border-right: 1px solid #5886C6
+}
+
+.submenutext, A.submenutext, A.submenutext:visited {
+font-weight: bold;
+color: yellow;
+padding-left: 6px;
+padding-right: 5px;
+border-right: 1px solid #5886C6
+}
+
+A.submenutext:hover {
+color: yellow;
+}
+
+.submenutextdisabled, A.submenutextdisabled {
+font-weight: bold;
+color: #CCCCCC;
+padding-left: 6px;
+padding-right: 5px;
+border-right: 1px solid #5886C6
+}
+
+A.submenutextdisabled:hover {
+font-weight: bold;
+color: yellow;
+}
+
+.submenutextinforight {
+font-weight: bold;
+color: white;
+padding-left: 6px;
+}
+
+.submenutextright, A.submenutextright {
+font-weight: bold;
+color: yellow;
+padding-left: 6px;
+}
+
+A.submenutextright:hover {
+color: yellow;
+text-decoration: underline;
+}
+
+.submenutextrightdisabled, A.submenutextrightdisabled {
+font-weight: bold;
+color: #CCCCCC;
+padding-left: 6px;
+}
+
+A.submenutextrightdisabled:hover {
+color: yellow;
+}
+
+A.lightbuttontext {
+font-weight: bold;
+color: yellow;
+border: none;
+}
+
+A.lightbuttontext:hover {
+color: yellow;
+}
+
+A.lightbuttontextsmall {
+font-size: 8px;
+font-weight: bold;
+color: yellow;
+border: none;
+}
+
+.lightbuttontextdisabled {
+font-weight: bold;
+color: #CCCCCC;
+}
+
+A.buttontextbig, .buttontextbigdisabled {
+font-size: 15px;
+font-weight: bold;
+background: white;
+border: #999999 solid 1px;
+margin: 2px 2px 2px 2px;
+padding: 1px 4px 1px 4px;
+}
+A.buttontextbig {
+color: #000099;
+}
+.buttontextbigdisabled {
+color: #CCCCCC;
+}
+A.buttontextbig:hover {
+color: red;
+}
+
+A IMG.imageborder {
+border-style: solid;
+border-width: 1px;
+border-color: #999999;
+}
+
+/* ===== Other Header Styles ===== */
+
+
+.headersmalltext {
+font-size: 8pt;
+font-weight: bold;
+color: black;
+}
+a.headersmalllink {
+font-size: 8pt;
+font-weight: bold;
+color: #000099;
+}
+a.headersmalllink:hover {
+color: red;
+}
+
+/* ===== Misc/General Styles ===== */
+.errorMessage {
+font-size: 8pt;
+font-weight: bold;
+color: red;
+}
+
+.eventMessage {
+font-size: 8pt;
+font-weight: bold;
+color: #000099;
+}
+
+.ontab {
+font-size: 8pt;
+background: black;
+padding: 2px;
+border-style: inset;
+border-width: 3px;
+}
+
+a.onlnk {
+font-size: 8pt;
+font-weight: bold;
+color: #FFFFFF;
+padding: 2px;
+}
+
+.offtab {
+background: #CCCCCC;
+padding: 2px;
+border-style: outset;
+border-width: 3px;
+}
+
+a.offlnk {
+font-weight: bold;
+color: #000099;
+padding: 2px;
+}
+
+a.offlnk:hover {
+color: red;
+}
+
+.areaheader {
+font-weight: bold;
+color: #FFFFFF;
+width: 100%;
+background: black;
+padding: 2px;
+}
+
+.edittable {
+border-color: #000000 #000000 #003333;
+border-style: solid;
+border-top-width: thin;
+border-right-width: thin;
+border-bottom-width: thin;
+border-left-width: thin
+}
+
+.editInputBox {
+font-size: 8pt;
+background: #FFFFFF;
+background: white;
+border: #999999 solid 1px;
+margin: 2px;
+}
+.smallSubmit {
+font-size: 8pt;
+font-weight: bold;
+color: #000099;
+background: white;
+border: #999999 solid 1px;
+margin: 2px;
+}
+
+.mediumSubmit,.largeSubmit,.loginButton {
+font-size: 10pt;
+font-weight: bold;
+color: #000099;
+background: white;
+border: #999999 solid 1px;
+margin: 2px;
+}
+
+.smallSubmit:hover,.mediumSubmit:hover,.largeSubmit:hover,.loginButton:hover {
+color: red;
+}
+
+.smallAltSubmit,.mediumAltSubmit,.largeAltSubmit {
+font-size: 8pt;
+}
+
+.basePrice {
+color: black;
+}
+
+.normalPrice {
+color: green;
+}
+
+.salePrice {
+color: red;
+}
+
+/* ===== Product Summary Styles ===== */
+.product-prevnext {
+text-align: right;
+}
+
+.product-prevnext .tabletext {
+font-weight: bold;
+}
+
+.productcategorylink-container {
+position: relative;
+margin-top: 10px;
+margin-bottom: 5px;
+border-top: #999 solid 1px;
+}
+
+.productcategorylink {
+position: relative;
+padding: 5px;
+border-bottom: #999 solid 1px;
+height: 60px;
+}
+
+.productcategorylink .smallimage {
+float: left;
+/* position: absolute; top: 5px; left: 5px; */
+margin: 0px 5px 5px 0px;
+}
+.productcategorylink .smallimage img {
+border: #CCC solid 1px;
+height: 50px;
+}
+
+.productsummary-container {
+position: relative;
+margin-top: 10px;
+margin-bottom: 5px;
+border-top: #999 solid 1px;
+}
+
+.productsummary {
+position: relative;
+padding: 5px;
+border-bottom: #999 solid 1px;
+min-height: 60px;
+}
+
+.productsummary .smallimage {
+float: left;
+/* position: absolute; top: 5px; left: 5px; */
+margin: 0px 5px 5px 0px;
+}
+.productsummary .smallimage img {
+border: #CCC solid 1px;
+height: 50px;
+}
+
+.productsummary .productbuy {
+float: right;
+width: 160px;
+margin: 5px;
+text-align: right;
+}
+
+.matrix .productsummary {
+border: none;
+padding: 10px;
+height: 250px;
+width:  200px;
+}
+
+.matrix .productsummary .smallimage {
+float: none;
+text-align: center;
+}
+.matrix .productsummary .smallimage img {
+height: 100px;
+}
+
+.matrix .productsummary .productbuy {
+float: none;
+text-align: left;
+}
+
+.productsummary .productinfo {
+text-align: left;
+}
+
+/* ===== Product Detail Styles ===== */
+#productdetail #download-files {
+margin-top: 10px;
+padding-top: 5px;
+border-top: #999 solid 1px;
+}
+
+#productdetail #long-description {
+margin-top: 10px;
+padding-top: 5px;
+border-top: #999 solid 1px;
+}
+
+#productdetail #reviews {
+margin-top: 10px;
+padding-top: 5px;
+border-top: #999 solid 1px;
+}
+
+#productdetail #associated-products {
+margin-top: 10px;
+padding-top: 5px;
+border-top: #999 solid 1px;
+}
+
+.lefthalf{
+left:0;
+width:49%;
+height:1%;
+margin:0% 1% 1% 0%;
+float:left;
+}
+.righthalf {
+float:right;
+height:1%;
+width:49%;
+right:0;
+margin:0 0 1% 1%;
+}
+.leftclear{
+height:1%;
+clear: left;
+}
+.bothclear{
+height:1%;
+clear: both;
+}
+
+/* ================================= */
+/* ===== Calendar Date Select ====== */
+/* ================================= */
+
+.calendar_date_select {
+  color: #fff;
+  border: #777 1px solid;
+  display: block;
+  width: 200px;
+  z-index: 1000;
+}
+/* this is a fun ie6 hack to get drop downs to stay behind the popup window.  This should always be just underneath .calendar_date_select */
+iframe.ie6_blocker {
+  position: absolute;
+  z-index: 999;
+}
+
+.calendar_date_select thead th {
+  font-weight:bold;
+  background-color: #4682B4;
+  border-top:1px solid #777;
+  border-bottom:2px solid #777;
+  color: white !important;
+}
+
+.calendar_date_select .cds_buttons {
+  text-align:center;
+  padding:5px 0px;
+  background-color: #4682B4;
+}
+
+.calendar_date_select .cds_footer {
+  background-color: #4682B4;
+  padding:3px;
+  font-size:12px;
+  text-align:center;
+}
+
+.calendar_date_select table {
+  margin: 0px;
+  padding: 0px;
+}
+
+.calendar_date_select .cds_header {
+  background-color: #87CEEB;
+  border-bottom: 2px solid #87CEEB;
+  text-align:center;
+}
+
+.calendar_date_select .cds_header span {
+  font-size:15px;
+  color: #000;
+  font-weight: bold;
+}
+
+.calendar_date_select select { font-size:11px;}
+
+.calendar_date_select .cds_header a:hover {
+  color: #fff;
+}
+.calendar_date_select .cds_header a {
+  width:22px;
+  height:20px;
+  text-decoration: none;
+  font-size:14px;
+  color: #000 !important;
+}
+
+.calendar_date_select .cds_header a.prev {
+  float:left;
+}
+.calendar_date_select .cds_header a.next {
+  float:right;
+}
+.calendar_date_select .cds_header a.close {
+  float:right;
+  display:none;
+}
+
+.calendar_date_select .cds_header select.month {
+  width:90px;
+}
+
+.calendar_date_select .cds_header select.year {
+  width:61px;
+}
+
+.calendar_date_select .cds_buttons a {
+  color: #fff;
+  font-size: 9px;
+}
+.calendar_date_select td {
+  font-size:12px;
+  width: 24px;
+  height: 21px;
+  text-align:center;
+  vertical-align: middle;
+  background-color: #87CEEB;
+}
+.calendar_date_select td.weekend {
+  background-color: #ADD8E6;
+}
+
+.calendar_date_select td div {
+  color: #fff;
+}
+.calendar_date_select td div.other {
+  color: #888;
+}
+.calendar_date_select td.selected div {
+  color: #000;
+}
+
+.calendar_date_select tbody td {
+  border-bottom: 1px solid #FFD700;
+}
+.calendar_date_select td.selected {
+  background-color: #fff;
+}
+
+.calendar_date_select td:hover {
+  background-color:#00BFFF;
+}
+
+.calendar_date_select td.today {
+  border: 1px dashed #FFFF00;
+}
+
+.calendar_date_select td.disabled div {
+  color: #454545;
+}
+
+
+.fieldWithErrors .calendar_date_select {
+  border: 2px solid #FF0000;
+}
