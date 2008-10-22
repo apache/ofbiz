@@ -3410,10 +3410,10 @@ public class ShoppingCart implements Serializable {
                 orderItem.set("productId", UtilValidate.isNotEmpty(aggregatedInstanceId) ? aggregatedInstanceId : item.getProductId());
                 orderItem.set("prodCatalogId", item.getProdCatalogId());
                 orderItem.set("productCategoryId", item.getProductCategoryId());
-                orderItem.set("quantity", new Double(item.getQuantity()));
-                orderItem.set("selectedAmount", new Double(item.getSelectedAmount()));
-                orderItem.set("unitPrice", new Double(item.getBasePrice()));
-                orderItem.set("unitListPrice", new Double(item.getListPrice()));
+                orderItem.set("quantity", new BigDecimal(item.getQuantity()));
+                orderItem.set("selectedAmount", new BigDecimal(item.getSelectedAmount()));
+                orderItem.set("unitPrice", new BigDecimal(item.getBasePrice()));
+                orderItem.set("unitListPrice", new BigDecimal(item.getListPrice()));
                 orderItem.set("isModifiedPrice",item.getIsModifiedPrice() ? "Y" : "N");
                 orderItem.set("isPromo", item.getIsPromo() ? "Y" : "N");
 
@@ -3679,8 +3679,8 @@ public class ShoppingCart implements Serializable {
             productPromoUse.set("promoSequenceId", UtilFormatOut.formatPaddedNumber(sequenceValue, 5));
             productPromoUse.set("productPromoId", productPromoUseInfo.getProductPromoId());
             productPromoUse.set("productPromoCodeId", productPromoUseInfo.getProductPromoCodeId());
-            productPromoUse.set("totalDiscountAmount", new Double(productPromoUseInfo.getTotalDiscountAmount()));
-            productPromoUse.set("quantityLeftInActions", new Double(productPromoUseInfo.getQuantityLeftInActions()));
+            productPromoUse.set("totalDiscountAmount", new BigDecimal(productPromoUseInfo.getTotalDiscountAmount()));
+            productPromoUse.set("quantityLeftInActions", new BigDecimal(productPromoUseInfo.getQuantityLeftInActions()));
             productPromoUse.set("partyId", partyId);
             productPromoUses.add(productPromoUse);
             sequenceValue++;
@@ -4279,7 +4279,7 @@ public class ShoppingCart implements Serializable {
             if (shipEstimate != 0) {
                 GenericValue shipAdj = delegator.makeValue("OrderAdjustment");
                 shipAdj.set("orderAdjustmentTypeId", "SHIPPING_CHARGES");
-                shipAdj.set("amount", new Double(shipEstimate));
+                shipAdj.set("amount", new BigDecimal(shipEstimate));
                 shipAdj.set("shipGroupSeqId", shipGroupSeqId);
                 values.add(shipAdj);
             }
@@ -4301,7 +4301,7 @@ public class ShoppingCart implements Serializable {
                 GenericValue assoc = delegator.makeValue("OrderItemShipGroupAssoc");
                 assoc.set("orderItemSeqId", item.getOrderItemSeqId());
                 assoc.set("shipGroupSeqId", shipGroupSeqId);
-                assoc.set("quantity", new Double(itemInfo.quantity));
+                assoc.set("quantity", new BigDecimal(itemInfo.quantity));
                 values.add(assoc);
 
                 // create the item tax adjustment
