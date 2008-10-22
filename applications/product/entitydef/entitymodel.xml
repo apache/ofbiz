@@ -3345,7 +3345,7 @@ under the License.
       <field name="productPromoCodeId" type="id-ne"></field>
       <field name="partyId" type="id-ne"></field>
       <field name="totalDiscountAmount" type="currency-amount"></field>
-      <field name="quantityLeftInActions" type="floating-point"></field>
+      <field name="quantityLeftInActions" type="fixed-point"></field>
       <prim-key field="orderId"/>
       <prim-key field="promoSequenceId"/>
       <relation type="one" fk-name="PROD_PRUSE_PROMO" rel-entity-name="ProductPromo">

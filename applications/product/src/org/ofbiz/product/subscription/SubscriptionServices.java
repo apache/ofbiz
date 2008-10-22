@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.product.subscription;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -247,7 +248,7 @@ public class SubscriptionServices {
             Iterator orderItemIter = orderItemList.iterator();
             while (orderItemIter.hasNext()) {
                 GenericValue orderItem = (GenericValue)orderItemIter.next();   
-                Double qty = (Double) orderItem.get("quantity");
+                BigDecimal qty = orderItem.getBigDecimal("quantity");
                 String productId = (String) orderItem.get("productId");
                 if (UtilValidate.isEmpty(productId)) {
                     continue;

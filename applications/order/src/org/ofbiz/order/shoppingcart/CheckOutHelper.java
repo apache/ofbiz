@@ -568,14 +568,7 @@ public class CheckOutHelper {
         DecimalFormat formatter = new DecimalFormat(currencyFormat);
         double cartTotal = this.cart.getGrandTotal();
         String grandTotalString = formatter.format(cartTotal);
-        Double grandTotal = null;
-        try {
-            grandTotal = new Double(formatter.parse(grandTotalString).doubleValue());
-        } catch (ParseException e) {
-            Debug.logError(e, "Problem getting parsed currency amount from DecimalFormat", module);
-            String errMsg = UtilProperties.getMessage(resource,"checkhelper.could_not_create_order_parsing_totals", (cart != null ? cart.getLocale() : Locale.getDefault()));
-            return ServiceUtil.returnError(errMsg);
-        }
+        BigDecimal grandTotal = new BigDecimal(grandTotalString);
 
         // store the order - build the context
         Map context = this.cart.makeCartMap(this.dispatcher, areOrderItemsExploded);

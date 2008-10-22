@@ -30,6 +30,7 @@ import javolution.util.FastMap;
 import org.ofbiz.accounting.invoice.InvoiceWorker;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
+import org.ofbiz.base.util.ObjectType;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
@@ -1733,7 +1734,8 @@ public class PaymentGatewayServices {
             response.set("gatewayScoreResult", context.get("scoreCode"));
 
             // set the auth info
-            response.set("amount", context.get("processAmount"));
+            Double processAmount = (Double) context.get("processAmount");
+            response.set("amount", processAmount == null ? null : new BigDecimal(processAmount));
             response.set("referenceNum", context.get("authRefNum"));
             response.set("altReference", context.get("authAltRefNum"));
             response.set("gatewayCode", context.get("authCode"));

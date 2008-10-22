@@ -57,8 +57,8 @@ under the License.
       <field name="maintHistSeqId" type="id"></field>
       <field name="issuedDateTime" type="date-time"></field>
       <field name="issuedByUserLoginId" type="id-vlong"></field>
-      <field name="quantity" type="floating-point"></field>
-      <field name="cancelQuantity" type="floating-point"></field>
+      <field name="quantity" type="fixed-point"></field>
+      <field name="cancelQuantity" type="fixed-point"></field>
       <prim-key field="itemIssuanceId"/>
       <relation type="one" fk-name="ITEM_ISS_INVITM" rel-entity-name="InventoryItem">
         <key-map field-name="inventoryItemId"/>

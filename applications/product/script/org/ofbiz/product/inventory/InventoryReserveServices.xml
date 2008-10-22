@@ -188,8 +188,8 @@ under the License.
                             <set from-field="parameters.shipGroupSeqId" field="reserveOisgirMap.shipGroupSeqId"/>
                             <set from-field="lastNonSerInventoryItem.inventoryItemId" field="reserveOisgirMap.inventoryItemId"/>
                             <set from-field="parameters.reserveOrderEnumId" field="reserveOisgirMap.reserveOrderEnumId"/>
-                            <set from-field="parameters.quantityNotReserved" field="reserveOisgirMap.quantity"/>
-                            <set from-field="parameters.quantityNotReserved" field="reserveOisgirMap.quantityNotAvailable"/>
+                            <set from-field="parameters.quantityNotReserved" field="reserveOisgirMap.quantity" type="BigDecimal"/>
+                            <set from-field="parameters.quantityNotReserved" field="reserveOisgirMap.quantityNotAvailable" type="BigDecimal"/>
                             <set from-field="parameters.reservedDatetime" field="reserveOisgirMap.reservedDatetime"/>
                             <set from-field="promisedDatetime" field="reserveOisgirMap.promisedDatetime"/>
                             <set from-field="parameters.sequenceId" field="reserveOisgirMap.sequenceId"/>
@@ -253,8 +253,8 @@ under the License.
                             <set from-field="parameters.shipGroupSeqId" field="reserveOisgirMap.shipGroupSeqId"/>
                             <set from-field="newNonSerInventoryItem.inventoryItemId" field="reserveOisgirMap.inventoryItemId"/>
                             <set from-field="parameters.reserveOrderEnumId" field="reserveOisgirMap.reserveOrderEnumId"/>
-                            <set from-field="parameters.quantityNotReserved" field="reserveOisgirMap.quantity"/>
-                            <set from-field="parameters.quantityNotReserved" field="reserveOisgirMap.quantityNotAvailable"/>
+                            <set from-field="parameters.quantityNotReserved" field="reserveOisgirMap.quantity" type="BigDecimal"/>
+                            <set from-field="parameters.quantityNotReserved" field="reserveOisgirMap.quantityNotAvailable" type="BigDecimal"/>
                             <set from-field="parameters.reservedDatetime" field="reserveOisgirMap.reservedDatetime"/>
                             <set from-field="promisedDatetime" field="reserveOisgirMap.promisedDatetime"/>
                             <set from-field="parameters.sequenceId" field="reserveOisgirMap.sequenceId"/>
@@ -357,7 +357,7 @@ under the License.
         <set from-field="parameters.reserveOrderEnumId" field="reserveOisgirMap.reserveOrderEnumId"/>
         <set from-field="parameters.reservedDatetime" field="reserveOisgirMap.reservedDatetime"/>
         <set from-field="promisedDatetime" field="reserveOisgirMap.promisedDatetime"/>
-        <set field="reserveOisgirMap.quantity" value="1" type="Double"/>
+        <set field="reserveOisgirMap.quantity" value="1" type="BigDecimal"/>
         <if-not-empty field="parameters.sequenceId">
             <set field="reserveOisgirMap.sequenceId" from-field="parameters.sequenceId"/>
         </if-not-empty>        
@@ -404,7 +404,7 @@ under the License.
                     <set from-field="parameters.reserveOrderEnumId" field="reserveOisgirMap.reserveOrderEnumId"/>
                     <set from-field="parameters.reservedDatetime" field="reserveOisgirMap.reservedDatetime"/>
                     <set from-field="promisedDatetime" field="reserveOisgirMap.promisedDatetime"/>
-                    <set field="reserveOisgirMap.quantity" value="1" type="Double"/>
+                    <set field="reserveOisgirMap.quantity" value="1" type="BigDecimal"/>
                     <if-not-empty field="parameters.sequenceId">
                         <set field="reserveOisgirMap.sequenceId" from-field="parameters.sequenceId"/>
                     </if-not-empty>
@@ -451,7 +451,7 @@ under the License.
                         <set from-field="inventoryItem.inventoryItemId" field="reserveOisgirMap.inventoryItemId"/>
                         <set from-field="parameters.reserveOrderEnumId" field="reserveOisgirMap.reserveOrderEnumId"/>
                         <set from-field="parameters.reservedDatetime" field="reserveOisgirMap.reservedDatetime"/>
-                        <set from-field="parameters.deductAmount" field="reserveOisgirMap.quantity"/>
+                        <set from-field="parameters.deductAmount" field="reserveOisgirMap.quantity" type="BigDecimal"/>
                         <set from-field="promisedDatetime" field="reserveOisgirMap.promisedDatetime"/>
                         <if-not-empty field="parameters.sequenceId">
                             <set field="reserveOisgirMap.sequenceId" from-field="parameters.sequenceId"/>

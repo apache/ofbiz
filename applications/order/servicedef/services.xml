@@ -118,11 +118,11 @@ under the License.
         <attribute name="workEfforts" type="List" mode="IN" optional="true"/>
         <attribute name="orderAdjustments" type="List" mode="IN" optional="false"/>
         <attribute name="billingAccountId" type="String" mode="IN" optional="true"/>
-        <attribute name="shippingAmount" type="Double" mode="IN" optional="true"/>
+        <attribute name="shippingAmount" type="BigDecimal" mode="IN" optional="true"/>
         <attribute name="firstAttemptOrderId" type="String" mode="IN" optional="true"/>
         <attribute name="currencyUom" type="String" mode="IN" optional="false"/>
-        <attribute name="grandTotal" type="Double" mode="IN" optional="true"/>
-        <attribute name="taxAmount" type="Double" mode="IN" optional="true"/>
+        <attribute name="grandTotal" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="taxAmount" type="BigDecimal" mode="IN" optional="true"/>
         <attribute name="orderDate" type="Timestamp" mode="IN" optional="true"/>
         <attribute name="orderItemShipGroupInfo" type="List" mode="IN" optional="true"/>
         <attribute name="orderItemAttributes" type="List" mode="IN" optional="true"/>
@@ -257,7 +257,7 @@ under the License.
         <attribute name="orderStatusId" type="String" mode="OUT" optional="true"/>
         <attribute name="orderTypeId" type="String" mode="OUT" optional="true"/>
         <attribute name="needsInventoryIssuance" type="String" mode="OUT" optional="true"/>
-        <attribute name="grandTotal" type="Double" mode="OUT" optional="true"/>
+        <attribute name="grandTotal" type="BigDecimal" mode="OUT" optional="true"/>
         <attribute name="changeReason" type="String" mode="IN" optional="true"/>
     </service>
 

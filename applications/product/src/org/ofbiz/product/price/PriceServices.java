@@ -1082,7 +1082,7 @@ public class PriceServices {
 
                     orderItemPriceInfo.set("productPriceRuleId", productPriceAction.get("productPriceRuleId"));
                     orderItemPriceInfo.set("productPriceActionSeqId", productPriceAction.get("productPriceActionSeqId"));
-                    orderItemPriceInfo.set("modifyAmount", new Double(modifyAmount));
+                    orderItemPriceInfo.set("modifyAmount", new BigDecimal(modifyAmount));
                     orderItemPriceInfo.set("rateCode", productPriceAction.get("rateCode"));
                     // make sure description is <= than 250 chars
                     String priceInfoDescriptionString = priceInfoDescription.toString();

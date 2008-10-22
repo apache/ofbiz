@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.order.shoppingcart;
 
+import java.math.BigDecimal;
 import java.util.Iterator;
 
 import javax.servlet.http.HttpSession;
@@ -89,13 +90,13 @@ public class CartEventListener implements HttpSessionListener {
                 cartAbandonedLine.set("reservStart", cartItem.getReservStart());
                 cartAbandonedLine.set("reservLength", new Double(cartItem.getReservLength()));
                 cartAbandonedLine.set("reservPersons", new Double(cartItem.getReservPersons()));
-                cartAbandonedLine.set("unitPrice", new Double(cartItem.getBasePrice()));
+                cartAbandonedLine.set("unitPrice", new BigDecimal(cartItem.getBasePrice()));
                 cartAbandonedLine.set("reserv2ndPPPerc", new Double(cartItem.getReserv2ndPPPerc()));
                 cartAbandonedLine.set("reservNthPPPerc", new Double(cartItem.getReservNthPPPerc()));
                 if (cartItem.getConfigWrapper() != null) {
                     cartAbandonedLine.set("configId", cartItem.getConfigWrapper().getConfigId());
                 }
-                cartAbandonedLine.set("totalWithAdjustments", new Double(cartItem.getItemSubTotal()));
+                cartAbandonedLine.set("totalWithAdjustments", new BigDecimal(cartItem.getItemSubTotal()));
                 //not doing pre-reservations now, so this is always N
                 cartAbandonedLine.set("wasReserved", "N");
                 cartAbandonedLine.create();
