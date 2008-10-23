@@ -91,7 +91,7 @@ if (invoice) {
     invoiceItems = invoice.getRelatedOrderBy("InvoiceItem", ["invoiceItemSeqId"]);
     invoiceItemsConv = FastList.newInstance();
     invoiceItems.each { invoiceItem ->
-      invoiceItem.amount = new Double((invoiceItem.getBigDecimal("amount").multiply(conversionRate).setScale(decimals, rounding)).doubleValue());
+      invoiceItem.amount = invoiceItem.getBigDecimal("amount").multiply(conversionRate).setScale(decimals, rounding);
       invoiceItemsConv.add(invoiceItem);
     }
     
