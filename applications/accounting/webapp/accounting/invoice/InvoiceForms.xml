@@ -88,7 +88,7 @@ under the License.
         <actions>
             <set field="total" value="${bsh:
                 import java.text.NumberFormat;
-                return(NumberFormat.getNumberInstance(context.get(&quot;locale&quot;)).format(org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceTotalBd(invoice)));}"/>
+                return(NumberFormat.getNumberInstance(context.get(&quot;locale&quot;)).format(org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceTotal(invoice)));}"/>
             <service service-name="getPartyNameForDate" result-map-name="partyNameResultFrom">
                 <field-map field-name="partyId" env-name="invoice.partyIdFrom"/>
                 <field-map field-name="compareDate" env-name="invoice.invoiceDate"/>

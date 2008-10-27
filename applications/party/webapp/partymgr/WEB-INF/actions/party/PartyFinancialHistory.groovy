@@ -64,8 +64,8 @@ if (invoices != null && invoices.size() > 0) {
     while (inv.hasNext())   {
         invoice = (GenericValue) inv.next();
         if (invoice.statusId.equals("INVOICE_CANCELLED")) continue;
-        BigDecimal invoiceAmount = InvoiceWorker.getInvoiceTotalBd(invoice).setScale(2,BigDecimal.ROUND_HALF_UP);
-        invoiceApplied = InvoiceWorker.getInvoiceAppliedBd(invoice).setScale(2,BigDecimal.ROUND_HALF_UP);
+        BigDecimal invoiceAmount = InvoiceWorker.getInvoiceTotal(invoice).setScale(2,BigDecimal.ROUND_HALF_UP);
+        invoiceApplied = InvoiceWorker.getInvoiceApplied(invoice).setScale(2,BigDecimal.ROUND_HALF_UP);
         if (invoice.getString("partyId").equals(partyId)) { //negate for outgoing payments
             invoiceAmount = invoiceAmount.multiply(new BigDecimal("-1"));
             invoiceApplied = invoiceApplied.multiply(new BigDecimal("-1"));
@@ -224,7 +224,7 @@ if (payments) {
         BigDecimal amount = payment.getBigDecimal("amount").setScale(2,BigDecimal.ROUND_HALF_UP);
         if (amount.compareTo(new BigDecimal("0.00")) == 0) 
             continue;
-        Debug.logInfo(" other company payments: " + payment.paymentId + " amount:" + payment.getBigDecimal("amount") + " applied:" + PaymentWorker.getPaymentAppliedBd(payment),"??");
+        Debug.logInfo(" other company payments: " + payment.paymentId + " amount:" + payment.getBigDecimal("amount") + " applied:" + PaymentWorker.getPaymentApplied(payment),"??");
         List paymentApplications = payment.getRelated("PaymentApplication");
         Iterator pa = paymentApplications.iterator();
         while (pa.hasNext())    {
@@ -256,9 +256,9 @@ if (payments != null && payments.size() > 0) {
     while (pm.hasNext())    {
         payment = (GenericValue) pm.next();
         payment = delegator.findByPrimaryKey("Payment",["paymentId" : payment.paymentId]);
-        notApplied = payment.getBigDecimal("amount").subtract(PaymentWorker.getPaymentAppliedBd(payment)).setScale(2,BigDecimal.ROUND_HALF_UP);
+        notApplied = payment.getBigDecimal("amount").subtract(PaymentWorker.getPaymentApplied(payment)).setScale(2,BigDecimal.ROUND_HALF_UP);
         // check if payment completely applied
-        Debug.logInfo(" payment: " + payment.paymentId + " amount:" + payment.getBigDecimal("amount") + " applied:" + PaymentWorker.getPaymentAppliedBd(payment),"??");  
+        Debug.logInfo(" payment: " + payment.paymentId + " amount:" + payment.getBigDecimal("amount") + " applied:" + PaymentWorker.getPaymentApplied(payment),"??");  
         if (notApplied.compareTo(new BigDecimal("0.00")) == 0) 
             continue;
         Map historyItem = new HashMap();
