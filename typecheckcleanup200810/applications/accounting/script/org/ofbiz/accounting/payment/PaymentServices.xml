@@ -145,10 +145,10 @@ under the License.
             <entity-one entity-name="Invoice" value-name="invoice"/>
 
             <!-- get the amount that has not been applied yet for the invoice (outstanding amount) -->
-            <set field="notApplied" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(invoice).doubleValue()}" type="Double"/>
+            <set field="notApplied" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(invoice)}" type="BigDecimal"/>
 
             <!-- if the amount to apply goes over the outstanding amount, then use the notApplied amount and log a warning -->
-            <if-compare-field field="paymentAppl.amountApplied" to-field="notApplied" operator="greater" type="Double">
+            <if-compare-field field="paymentAppl.amountApplied" to-field="notApplied" operator="greater" type="BigDecimal">
                 <log level="warning" message="Create Payment Application: Amount to apply [${paymentAppl.amountApplied}] is greater than the outstanding amount [${notApplied}] of the invoice [${invoice.invoiceId}]. Creating Payment Application for outstanding amount [${notApplied}] instead."/>
                 <set field="paymentAppl.amountApplied" from-field="notApplied"/>
             </if-compare-field>
@@ -186,8 +186,8 @@ under the License.
                     
                     <!-- check if the payment fully applied when set to confirmed-->
                     <if-compare field="parameters.statusId" operator="equals" value="PMNT_CONFIRMED">
-                        <set field="notYetApplied" value="${bsh:org.ofbiz.accounting.payment.PaymentWorker.getPaymentNotAppliedBd(payment)}"/>
-                        <if-compare field="notYetApplied" operator="greater" value="0.00">
+                        <set field="notYetApplied" value="${bsh:org.ofbiz.accounting.payment.PaymentWorker.getPaymentNotApplied(payment)}"/>
+                        <if-compare field="notYetApplied" operator="greater" value="0.00" type="BigDecimal">
                             <add-error><fail-property resource="AccountingUiLabels" property="AccountingPSNotConfirmedNotFullyApplied"/></add-error>
                             <log level="error" message="Cannot change from ${payment.statusId} to ${parameters.statusId}, payment not fully applied: ${notYetapplied}"/>
                             <check-errors/>
@@ -250,10 +250,10 @@ under the License.
             <set field="invoice" from-field="parameters.invoice"/>
         </else>
         </if-empty>
-        <call-class-method class-name="org.ofbiz.accounting.invoice.InvoiceWorker" method-name="getInvoiceTotalBd" ret-field-name="invoiceTotalAmount">
+        <call-class-method class-name="org.ofbiz.accounting.invoice.InvoiceWorker" method-name="getInvoiceTotal" ret-field-name="invoiceTotalAmount">
             <field field-name="invoice" type="org.ofbiz.entity.GenericValue"/>
         </call-class-method>
-        <call-class-method class-name="org.ofbiz.accounting.invoice.InvoiceWorker" method-name="getInvoiceAppliedBd" ret-field-name="invoiceTotalAmountPaid">
+        <call-class-method class-name="org.ofbiz.accounting.invoice.InvoiceWorker" method-name="getInvoiceApplied" ret-field-name="invoiceTotalAmountPaid">
             <field field-name="invoice" type="org.ofbiz.entity.GenericValue"/>
         </call-class-method>
         <get-related relation-name="InvoiceTerm" value-name="invoice" list-name="invoiceTerms"/>

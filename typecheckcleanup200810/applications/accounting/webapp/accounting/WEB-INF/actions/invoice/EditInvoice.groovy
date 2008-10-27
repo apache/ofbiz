@@ -70,11 +70,11 @@ if ("Y".equalsIgnoreCase(other)) {
         if (!conversionRate) {
             result = dispatcher.runSync("convertUom", [uomId : invoice.currencyUomId, 
                                                uomIdTo : otherCurrency, 
-                                               originalValue : new Double("1.00"), 
+                                               originalValue : new BigDecimal("1.00"), 
                                                asOfDate : invoice.invoiceDate]);
     
             if (result.convertedValue != null) {
-                conversionRate = new BigDecimal(result.convertedValue.doubleValue());
+                conversionRate = result.convertedValue;
                 invoice.invoiceMessage = invoice.get("invoiceMessage") ? 
                           invoice.invoiceMessage.concat(" Converted from " + invoice.currencyUomId + " Rate: " + conversionRate.setScale(6, rounding).toString()) :
                           "Converted from " + invoice.currencyUomId + " Rate: " + conversionRate.setScale(6, rounding).toString();
@@ -98,10 +98,10 @@ if (invoice) {
 
     context.invoiceItems = invoiceItemsConv;
     
-    invoiceTotal = InvoiceWorker.getInvoiceTotalBd(invoice).multiply(conversionRate).setScale(decimals, rounding).doubleValue();
-    invoiceNoTaxTotal = InvoiceWorker.getInvoiceNoTaxTotalBd(invoice).multiply(conversionRate).setScale(decimals, rounding).doubleValue();
-    context.invoiceTotal = new Double(invoiceTotal);    
-    context.invoiceNoTaxTotal = new Double(invoiceNoTaxTotal);
+    invoiceTotal = InvoiceWorker.getInvoiceTotal(invoice).multiply(conversionRate).setScale(decimals, rounding);
+    invoiceNoTaxTotal = InvoiceWorker.getInvoiceNoTaxTotal(invoice).multiply(conversionRate).setScale(decimals, rounding);
+    context.invoiceTotal = invoiceTotal;    
+    context.invoiceNoTaxTotal = invoiceNoTaxTotal;
     
     // each invoice of course has two billing addresses, but the one that is relevant for purchase invoices is the PAYMENT_LOCATION of the invoice
     // (ie Accounts Payable address for the supplier), while the right one for sales invoices is the BILLING_LOCATION (ie Accounts Receivable or
