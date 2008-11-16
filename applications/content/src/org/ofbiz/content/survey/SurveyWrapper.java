@@ -124,6 +124,8 @@ public class SurveyWrapper {
         Map currentAnswers = null;
         if (responseId != null && canUpdate()) {
             currentAnswers = this.getResponseAnswers(responseId);
+        } else {
+            currentAnswers = this.getResponseAnswers(null);
         }
         
         Map sqaaWithColIdListByMultiRespId = FastMap.newInstance();
@@ -310,9 +312,6 @@ public class SurveyWrapper {
 
     // returns a Map of answers keyed on SurveyQuestion ID from the most current SurveyResponse ID
     public Map getResponseAnswers(String responseId) throws SurveyWrapperException {
-        if (responseId == null) {
-            throw new SurveyWrapperException("Null response ID is not supported at this time");
-        }
 
         Map answerMap = new HashMap();
 
