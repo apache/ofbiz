@@ -132,7 +132,10 @@ public abstract class EntityOperator extends EntityConditionBase {
         protected void makeRHSWhereStringValue(ModelEntity entity, List entityConditionParams, StringBuffer sb, ModelField field, Object rhs) { appendRHSList(entityConditionParams, sb, field, rhs); }
     };
     static { register( "in", IN ); }
-    public static final EntityComparisonOperator BETWEEN = new EntityComparisonOperator(ID_BETWEEN, "BETWEEN");
+    public static final EntityComparisonOperator BETWEEN = new EntityComparisonOperator(ID_BETWEEN, "BETWEEN") {
+        public boolean compare(Comparable lhs, Object rhs) { return EntityComparisonOperator.compareIn(lhs, rhs); }
+        protected void makeRHSWhereStringValue(ModelEntity entity, List entityConditionParams, StringBuffer sb, ModelField field, Object rhs, DatasourceInfo datasourceInfo) { appendRHSBetweenList(entityConditionParams, sb, field, rhs); }  
+    };
     static { register( "between", BETWEEN ); }
     public static final EntityComparisonOperator NOT = new EntityComparisonOperator(ID_NOT, "NOT");
     static { register( "not", NOT ); }
@@ -210,6 +213,21 @@ public abstract class EntityOperator extends EntityConditionBase {
         }
         whereStringBuffer.append(')');
     }
+    
+    protected void appendRHSBetweenList(List entityConditionParams, StringBuffer whereStringBuffer, ModelField field, Object rhs) {
+        if (rhs instanceof Collection) {
+            Iterator rhsIter = ((Collection) rhs).iterator();
+
+            while (rhsIter.hasNext()) {
+                Object inObj = rhsIter.next();
+
+                addValue(whereStringBuffer, field, inObj, entityConditionParams);
+                if (rhsIter.hasNext()) {
+                    whereStringBuffer.append(" AND ");
+                }
+            }
+        } 
+    }    
 
     public Object eval(GenericDelegator delegator, Map map, Object lhs, Object rhs) {
         return castBoolean(mapMatches(delegator, map, lhs, rhs));
