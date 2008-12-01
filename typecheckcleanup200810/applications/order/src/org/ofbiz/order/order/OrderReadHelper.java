@@ -203,7 +203,7 @@ public class OrderReadHelper {
     }
 
     /**
-     * Returns a Map of paymentMethodId -> amount charged (Double) based on PaymentGatewayResponse.  
+     * Returns a Map of paymentMethodId -> amount charged (BigDecimal) based on PaymentGatewayResponse.  
      * @return
      */
     public Map getReceivedPaymentTotalsByPaymentMethod() {
@@ -232,10 +232,10 @@ public class OrderReadHelper {
             }
 
             // if chargedToPaymentPref > 0
-            if (chargedToPaymentPref.compareTo(ZERO) == 1) {
+            if (chargedToPaymentPref.compareTo(ZERO) > 0) {
                 // key of the resulting map is paymentMethodId or paymentMethodTypeId if the paymentMethodId is not available
                 String paymentMethodKey = paymentPref.getString("paymentMethodId") != null ? paymentPref.getString("paymentMethodId") : paymentPref.getString("paymentMethodTypeId");
-                paymentMethodAmounts.put(paymentMethodKey, new Double(chargedToPaymentPref.setScale(scale, rounding).doubleValue()));
+                paymentMethodAmounts.put(paymentMethodKey, chargedToPaymentPref.setScale(scale, rounding));
             }
         }
         return paymentMethodAmounts;
@@ -267,7 +267,7 @@ public class OrderReadHelper {
             // if refundedToPaymentPref > 0
             if (refundedToPaymentPref.compareTo(ZERO) == 1) {
                 String paymentMethodId = paymentPref.getString("paymentMethodId") != null ? paymentPref.getString("paymentMethodId") : paymentPref.getString("paymentMethodTypeId");
-                paymentMethodAmounts.put(paymentMethodId, new Double(refundedToPaymentPref.setScale(scale, rounding).doubleValue()));
+                paymentMethodAmounts.put(paymentMethodId, refundedToPaymentPref.setScale(scale, rounding));
             }
         }
         return paymentMethodAmounts;
@@ -658,16 +658,16 @@ public class OrderReadHelper {
      * Returns the OrderPaymentPreference.maxAmount for the billing account associated with the order, or 0 if there is no
      * billing account or no max amount set
      */
-    public double getBillingAccountMaxAmount() {
+    public BigDecimal getBillingAccountMaxAmount() {
         if (getBillingAccount() == null) {
-            return 0.0;
+            return BigDecimal.ZERO;
         } else {
             List paymentPreferences = getPaymentPreferences();
             GenericValue billingAccountPaymentPreference = EntityUtil.getFirst(EntityUtil.filterByAnd(paymentPreferences, UtilMisc.toMap("paymentMethodTypeId", "EXT_BILLACT")));
-            if ((billingAccountPaymentPreference != null) && (billingAccountPaymentPreference.getDouble("maxAmount") != null)) {
-                return billingAccountPaymentPreference.getDouble("maxAmount").doubleValue();
+            if ((billingAccountPaymentPreference != null) && (billingAccountPaymentPreference.getBigDecimal("maxAmount") != null)) {
+                return billingAccountPaymentPreference.getBigDecimal("maxAmount");
             } else {
-                return 0.0;
+                return BigDecimal.ZERO;
             }
         }
     }
@@ -830,11 +830,11 @@ public class OrderReadHelper {
                         Iterator fai = featureAppls.iterator();
                         while (fai.hasNext()) {
                             GenericValue appl = (GenericValue) fai.next();
-                            Double lastQuantity = (Double) featureMap.get(appl.getString("productFeatureId"));
+                            BigDecimal lastQuantity = (BigDecimal) featureMap.get(appl.getString("productFeatureId"));
                             if (lastQuantity == null) {
-                                lastQuantity = new Double(0);
+                                lastQuantity = BigDecimal.ZERO;
                             }
-                            Double newQuantity = new Double(lastQuantity.doubleValue() + getOrderItemQuantity(item).doubleValue());
+                            BigDecimal newQuantity = lastQuantity.add(getOrderItemQuantity(item));
                             featureMap.put(appl.getString("productFeatureId"), newQuantity);
                         }
                     }
@@ -853,11 +853,11 @@ public class OrderReadHelper {
                         GenericValue adj = (GenericValue) afi.next();
                         String featureId = adj.getString("productFeatureId");
                         if (featureId != null) {
-                            Double lastQuantity = (Double) featureMap.get(featureId);
+                            BigDecimal lastQuantity = (BigDecimal) featureMap.get(featureId);
                             if (lastQuantity == null) {
-                                lastQuantity = new Double(0);
+                                lastQuantity = BigDecimal.ZERO;
                             }
-                            Double newQuantity = new Double(lastQuantity.doubleValue() + getOrderItemQuantity(item).doubleValue());
+                            BigDecimal newQuantity = lastQuantity.add(getOrderItemQuantity(item));
                             featureMap.put(featureId, newQuantity);
                         }
                     }
@@ -1038,7 +1038,7 @@ public class OrderReadHelper {
             Iterator i = validItems.iterator();
             while (i.hasNext()) {
                 GenericValue item = (GenericValue) i.next();
-                shippableSizes.add(new Double(this.getItemSize(item)));
+                shippableSizes.add(this.getItemSize(item));
             }
         }
         return shippableSizes;
@@ -1111,23 +1111,22 @@ public class OrderReadHelper {
         return total;
     }
 
-    // TODO: Might want to use BigDecimal here if precision matters
-    public double getItemSize(GenericValue item) {
+    public BigDecimal getItemSize(GenericValue item) {
         GenericDelegator delegator = orderHeader.getDelegator();
-        double size = 0;
+        BigDecimal size = BigDecimal.ZERO;
 
         GenericValue product = null;
         try {
             product = item.getRelatedOne("Product");
         } catch (GenericEntityException e) {
             Debug.logError(e, "Problem getting Product from OrderItem", module);
-            return 0;
+            return BigDecimal.ZERO;
         }
         if (product != null) {
             if (ProductWorker.shippingApplies(product)) {
-                Double height = product.getDouble("shippingHeight");
-                Double width = product.getDouble("shippingWidth");
-                Double depth = product.getDouble("shippingDepth");
+                BigDecimal height = product.getBigDecimal("shippingHeight");
+                BigDecimal width = product.getBigDecimal("shippingWidth");
+                BigDecimal depth = product.getBigDecimal("shippingDepth");
                 String isVariant = product.getString("isVariant");
                 if ((height == null || width == null || depth == null) && "Y".equals(isVariant)) {
                     // get the virtual product and check its values
@@ -1136,9 +1135,9 @@ public class OrderReadHelper {
                         if (UtilValidate.isNotEmpty(virtualId)) {
                             GenericValue virtual = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", virtualId));
                             if (virtual != null) {
-                                if (height == null) height = virtual.getDouble("shippingHeight");
-                                if (width == null) width = virtual.getDouble("shippingWidth");
-                                if (depth == null) depth = virtual.getDouble("shippingDepth");
+                                if (height == null) height = virtual.getBigDecimal("shippingHeight");
+                                if (width == null) width = virtual.getBigDecimal("shippingWidth");
+                                if (depth == null) depth = virtual.getBigDecimal("shippingDepth");
                             }
                         }
                     } catch (GenericEntityException e) {
@@ -1146,15 +1145,15 @@ public class OrderReadHelper {
                     }
                 }
 
-                if (height == null) height = new Double(0);
-                if (width == null) width = new Double(0);
-                if (depth == null) depth = new Double(0);
+                if (height == null) height = BigDecimal.ZERO;
+                if (width == null) width = BigDecimal.ZERO;
+                if (depth == null) depth = BigDecimal.ZERO;
 
                 // determine girth (longest field is length)
-                double[] sizeInfo = { height.doubleValue(), width.doubleValue(), depth.doubleValue() };
+                BigDecimal[] sizeInfo = { height, width, depth };
                 Arrays.sort(sizeInfo);
 
-                size = (sizeInfo[0] * 2) + (sizeInfo[1] * 2) + sizeInfo[2];
+                size = sizeInfo[0].multiply(new BigDecimal("2")).add(sizeInfo[1].multiply(new BigDecimal("2"))).add(sizeInfo[2]);
             }
         }
 
@@ -1223,9 +1222,9 @@ public class OrderReadHelper {
     public Map getItemInfoMap(GenericValue item) {
         Map itemInfo = FastMap.newInstance();
         itemInfo.put("productId", item.getString("productId"));
-        itemInfo.put("quantity", Double.valueOf(getOrderItemQuantity(item).doubleValue()));
-        itemInfo.put("weight", new Double(this.getItemWeight(item).doubleValue()));
-        itemInfo.put("size",  new Double(this.getItemSize(item)));
+        itemInfo.put("quantity", getOrderItemQuantity(item));
+        itemInfo.put("weight", this.getItemWeight(item));
+        itemInfo.put("size",  this.getItemSize(item));
         itemInfo.put("piecesIncluded", new Long(this.getItemPiecesIncluded(item)));
         itemInfo.put("featureSet", this.getItemFeatureSet(item));
         return itemInfo;
@@ -1270,10 +1269,10 @@ public class OrderReadHelper {
      * This works by adding up the amount allocated to each unprocessed OrderPaymentPreference and the
      * amounts received and refunded as payments for the settled ones.
      */
-    public double getOrderOpenAmount() throws GenericEntityException {
+    public BigDecimal getOrderOpenAmount() throws GenericEntityException {
         GenericDelegator delegator = orderHeader.getDelegator();
         BigDecimal total = getOrderGrandTotal();
-        double openAmount = 0;
+        BigDecimal openAmount = BigDecimal.ZERO;
         List prefs = getPaymentPreferences();
 
         // add up the covered amount, but skip preferences which are declined or cancelled
@@ -1285,30 +1284,30 @@ public class OrderReadHelper {
                 List responses = pref.getRelatedByAnd("PaymentGatewayResponse", UtilMisc.toMap("transCodeEnumId", "PGT_CAPTURE"));
                 for (Iterator respIter = responses.iterator(); respIter.hasNext(); ) {
                     GenericValue response = (GenericValue) respIter.next();
-                    Double amount = response.getDouble("amount");
+                    BigDecimal amount = response.getBigDecimal("amount");
                     if (amount != null) {
-                        openAmount += amount.doubleValue();
+                        openAmount = openAmount.add(amount);
                     }
                 }
                 responses = pref.getRelatedByAnd("PaymentGatewayResponse", UtilMisc.toMap("transCodeEnumId", "PGT_REFUND"));
                 for (Iterator respIter = responses.iterator(); respIter.hasNext(); ) {
                     GenericValue response = (GenericValue) respIter.next();
-                    Double amount = response.getDouble("amount");
+                    BigDecimal amount = response.getBigDecimal("amount");
                     if (amount != null) {
-                        openAmount -= amount.doubleValue();
+                        openAmount = openAmount.subtract(amount);
                     }
                 }
             } else {
                 // all others are currently "unprocessed" payment preferences
-                Double maxAmount = pref.getDouble("maxAmount");
+                BigDecimal maxAmount = pref.getBigDecimal("maxAmount");
                 if (maxAmount != null) {
-                    openAmount += maxAmount.doubleValue();
+                    openAmount = openAmount.add(maxAmount);
                 }
             }
         }
-        openAmount = new BigDecimal(openAmount).setScale(scale, rounding).doubleValue();
+        openAmount = total.subtract(openAmount).setScale(scale, rounding);
         // return either a positive amount or positive zero
-        return Math.max(total.doubleValue() - openAmount, 0);
+        return openAmount.compareTo(BigDecimal.ZERO) > 0 ? openAmount : BigDecimal.ZERO;
     }
 
     public List getOrderHeaderAdjustments() {
@@ -1434,9 +1433,9 @@ public class OrderReadHelper {
                 Iterator recIter = receipts.iterator();
                 while (recIter.hasNext()) {
                     GenericValue rec = (GenericValue) recIter.next();
-                    Double rejected = rec.getDouble("quantityRejected");
-                    if (rejected != null && rejected.doubleValue() > 0) {
-                    return true;
+                    BigDecimal rejected = rec.getBigDecimal("quantityRejected");
+                    if (rejected != null && rejected.compareTo(BigDecimal.ZERO) > 0) {
+                    	return true;
                     }
                 }            
             }
@@ -1451,7 +1450,7 @@ public class OrderReadHelper {
         while (i.hasNext()) {
             GenericValue item = (GenericValue) i.next();            
             int shippedQuantity = (int) getItemShippedQuantity(item);            
-            Double orderedQuantity = (Double) item.get("quantity");            
+            BigDecimal orderedQuantity = (BigDecimal) item.get("quantity");            
             if (shippedQuantity != orderedQuantity.intValue() && shippedQuantity > 0) {
             return true;
             }            
@@ -1472,8 +1471,8 @@ public class OrderReadHelper {
                 Iterator recIter = receipts.iterator();
                 while (recIter.hasNext()) {
                     GenericValue rec = (GenericValue) recIter.next();
-                    Double acceptedQuantity = rec.getDouble("quantityAccepted");
-                    Double orderedQuantity = (Double) item.get("quantity");            
+                    BigDecimal acceptedQuantity = rec.getBigDecimal("quantityAccepted");
+                    BigDecimal orderedQuantity = (BigDecimal) item.get("quantity");            
                     if (acceptedQuantity.intValue() != orderedQuantity.intValue() && acceptedQuantity.intValue()  > 0) {
                     return true;                    
                     }
@@ -1705,7 +1704,7 @@ public class OrderReadHelper {
     * In other words, this method will count the ReturnItems
     * related to each OrderItem.
     *
-    * @return  Map of returned quantities as Doubles keyed to the orderItemSeqId
+    * @return  Map of returned quantities as BigDecimals keyed to the orderItemSeqId
     */
    public Map getOrderItemReturnedQuantities() {
        List returnItems = getOrderReturnItems();
@@ -1718,16 +1717,16 @@ public class OrderReadHelper {
                    UtilMisc.toMap("orderId", orderItem.get("orderId"), "orderItemSeqId", orderItem.get("orderItemSeqId")));
 
            // add up the returned quantities for this group TODO: received quantity should be used eventually
-           double returned = 0;
+           BigDecimal returned = BigDecimal.ZERO;
            for (Iterator groupiter = group.iterator(); groupiter.hasNext(); ) {
                GenericValue returnItem = (GenericValue) groupiter.next();
-               if (returnItem.getDouble("returnQuantity") != null) {
-                   returned += (returnItem.getDouble("returnQuantity")).doubleValue();
+               if (returnItem.getBigDecimal("returnQuantity") != null) {
+                   returned = returned.add(returnItem.getBigDecimal("returnQuantity"));
                }
            }
 
            // the quantity returned per order item
-           returnMap.put(orderItem.get("orderItemSeqId"), new Double(returned));
+           returnMap.put(orderItem.get("orderItemSeqId"), returned);
        }
        return returnMap;
    }
@@ -1881,10 +1880,9 @@ public class OrderReadHelper {
             BigDecimal itemTaxes = this.getOrderItemTax(orderItem);
             BigDecimal itemShipping = this.getOrderItemShipping(orderItem);
 
-            BigDecimal quantityReturnedDouble = (BigDecimal) itemReturnedQuantities.get(orderItem.get("orderItemSeqId"));
-            BigDecimal quantityReturned = ZERO;
-            if (quantityReturnedDouble != null) {
-                quantityReturned = quantityReturnedDouble;
+            BigDecimal quantityReturned = (BigDecimal) itemReturnedQuantities.get(orderItem.get("orderItemSeqId"));
+            if (quantityReturned == null) {
+                quantityReturned = BigDecimal.ZERO;
             }
 
             BigDecimal quantityNotReturned = itemQuantity.subtract(quantityReturned);
@@ -2088,10 +2086,10 @@ public class OrderReadHelper {
         return reservedQty.subtract(backordered).setScale(scale, rounding);
     }
 
-    public double getItemCanceledQuantity(GenericValue orderItem) {
-        Double cancelQty = orderItem.getDouble("cancelQuantity");
-        if (cancelQty == null) cancelQty = new Double(0);
-        return cancelQty.doubleValue();
+    public BigDecimal getItemCanceledQuantity(GenericValue orderItem) {
+        BigDecimal cancelQty = orderItem.getBigDecimal("cancelQuantity");
+        if (cancelQty == null) cancelQty = BigDecimal.ZERO;
+        return cancelQty;
     }
 
     public BigDecimal getTotalOrderItemsQuantity() {
@@ -2235,14 +2233,14 @@ public class OrderReadHelper {
         return orderQty.subtract(cancelQty).setScale(scale, rounding);
     }
 
-    public static Double getOrderItemShipGroupQuantity(GenericValue shipGroupAssoc) {
-        Double cancelQty = shipGroupAssoc.getDouble("cancelQuantity");
-        Double orderQty = shipGroupAssoc.getDouble("quantity");
+    public static BigDecimal getOrderItemShipGroupQuantity(GenericValue shipGroupAssoc) {
+        BigDecimal cancelQty = shipGroupAssoc.getBigDecimal("cancelQuantity");
+        BigDecimal orderQty = shipGroupAssoc.getBigDecimal("quantity");
 
-        if (cancelQty == null) cancelQty = new Double(0.0);
-        if (orderQty == null) orderQty = new Double(0.0);
+        if (cancelQty == null) cancelQty = BigDecimal.ZERO;
+        if (orderQty == null) orderQty = BigDecimal.ZERO;
 
-        return new Double(orderQty.doubleValue() - cancelQty.doubleValue());
+        return orderQty.subtract(cancelQty);
     }
 
     public static GenericValue getProductStoreFromOrder(GenericDelegator delegator, String orderId) {
@@ -2493,13 +2491,13 @@ public class OrderReadHelper {
         return promoAdjTotal.setScale(scale, rounding);
     }
 
-    public static Double getWorkEffortRentalLenght(GenericValue workEffort){
-        Double length = null;
+    public static BigDecimal getWorkEffortRentalLength(GenericValue workEffort){
+    	BigDecimal length = null;
         if (workEffort.get("estimatedStartDate") != null && workEffort.get("estimatedCompletionDate") != null) {
-            length = new Double(UtilDateTime.getInterval(workEffort.getTimestamp("estimatedStartDate"),workEffort.getTimestamp("estimatedCompletionDate"))/86400000);
+            length = new BigDecimal(UtilDateTime.getInterval(workEffort.getTimestamp("estimatedStartDate"),workEffort.getTimestamp("estimatedCompletionDate"))/86400000);
         }
         return length;
-        }
+    }
     
     public static BigDecimal getWorkEffortRentalQuantity(GenericValue workEffort){
         BigDecimal persons = BigDecimal.ONE;
@@ -2668,8 +2666,8 @@ public class OrderReadHelper {
         return newOrderAdjustmentsList;
     }
 
-    public static double getQuantityOnOrder(GenericDelegator delegator, String productId) {
-        double quantity = 0.0;
+    public static BigDecimal getQuantityOnOrder(GenericDelegator delegator, String productId) {
+        BigDecimal quantity = BigDecimal.ZERO;
 
         // first find all open purchase orders
         List openOrdersExprs = UtilMisc.toList(EntityCondition.makeCondition("orderTypeId", EntityOperator.EQUALS, "PURCHASE_ORDER"));
@@ -2689,11 +2687,11 @@ public class OrderReadHelper {
             Iterator i = openOrders.iterator();
             while (i.hasNext()) {
                 GenericValue order = (GenericValue) i.next();
-                Double thisQty = order.getDouble("quantity");
+                BigDecimal thisQty = order.getBigDecimal("quantity");
                 if (thisQty == null) {
-                    thisQty = new Double(0);
+                    thisQty = BigDecimal.ZERO;
                 }
-                quantity += thisQty.doubleValue();
+                quantity = quantity.add(thisQty);
             }
         }
 
@@ -2790,16 +2788,16 @@ public class OrderReadHelper {
     }
 
    /** Get the quantity of order items that have been invoiced */
-   public static double getOrderItemInvoicedQuantity(GenericValue orderItem) {
-       double invoiced = 0;
+   public static BigDecimal getOrderItemInvoicedQuantity(GenericValue orderItem) {
+       BigDecimal invoiced = BigDecimal.ZERO;
        try {
            // this is simply the sum of quantity billed in all related OrderItemBillings
            List billings = orderItem.getRelated("OrderItemBilling");
            for (Iterator iter = billings.iterator(); iter.hasNext(); ) {
                GenericValue billing = (GenericValue) iter.next();
-               Double quantity = billing.getDouble("quantity");
+               BigDecimal quantity = billing.getBigDecimal("quantity");
                if (quantity != null) {
-                   invoiced += quantity.doubleValue();
+                   invoiced = invoiced.add(quantity);
                }
            }
        } catch (GenericEntityException e) {

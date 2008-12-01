@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -82,6 +83,7 @@ public class UpsServices {
     }
     public static final int decimals = UtilNumber.getBigDecimalScale("order.decimals");
     public static final int rounding = UtilNumber.getBigDecimalRoundingMode("order.rounding");
+    public static final MathContext generalRounding = new MathContext(10);
 
     public static Map upsShipmentConfirm(DispatchContext dctx, Map context) {
         Map result = new HashMap();
@@ -430,9 +432,9 @@ public class UpsServices {
                         // I guess we'll default to inches...
                         UtilXml.addChildElementValue(unitOfMeasurementElement, "Code", "IN", shipmentConfirmRequestDoc);
                     }
-                    Double boxLength = shipmentBoxType.getDouble("boxLength");
-                    Double boxWidth = shipmentBoxType.getDouble("boxWidth");
-                    Double boxHeight = shipmentBoxType.getDouble("boxHeight");
+                    BigDecimal boxLength = shipmentBoxType.getBigDecimal("boxLength");
+                    BigDecimal boxWidth = shipmentBoxType.getBigDecimal("boxWidth");
+                    BigDecimal boxHeight = shipmentBoxType.getBigDecimal("boxHeight");
                     UtilXml.addChildElementValue(dimensionsElement, "Length", UtilValidate.isNotEmpty(boxLength) ? ""+boxLength.intValue() : "", shipmentConfirmRequestDoc);
                     UtilXml.addChildElementValue(dimensionsElement, "Width", UtilValidate.isNotEmpty(boxWidth) ? ""+boxWidth.intValue() : "", shipmentConfirmRequestDoc);
                     UtilXml.addChildElementValue(dimensionsElement, "Height", UtilValidate.isNotEmpty(boxHeight) ? ""+boxHeight.intValue() : "", shipmentConfirmRequestDoc);
@@ -451,7 +453,7 @@ public class UpsServices {
                 if (shipmentPackage.getString("weight") == null) {
                     return ServiceUtil.returnError("Weight value not found for ShipmentRouteSegment with shipmentId " + shipmentId + ", shipmentRouteSegmentId " + shipmentRouteSegmentId + ", and shipmentPackageSeqId " + shipmentPackage.getString("shipmentPackageSeqId"));
                 }
-                Double boxWeight = shipmentPackage.getDouble("weight");
+                BigDecimal boxWeight = shipmentPackage.getBigDecimal("weight");
                 UtilXml.addChildElementValue(packageWeightElement, "Weight", UtilValidate.isNotEmpty(boxWeight) ? ""+boxWeight.intValue() : "", shipmentConfirmRequestDoc);
                 
                 Element referenceNumberElement = UtilXml.addChildElement(packageElement, "ReferenceNumber", shipmentConfirmRequestDoc);
@@ -496,10 +498,10 @@ public class UpsServices {
                     BigDecimal packageValue = (BigDecimal) getPackageValueResult.get("packageValue");
                     
                     // Convert the value of the COD surcharge to the shipment currency, if necessary
-                    Map convertUomResult = dispatcher.runSync("convertUom", UtilMisc.<String, Object>toMap("uomId", codSurchargeCurrencyUomId, "uomIdTo", currencyCode, "originalValue", new Double(codSurchargePackageAmount.doubleValue())));
+                    Map convertUomResult = dispatcher.runSync("convertUom", UtilMisc.<String, Object>toMap("uomId", codSurchargeCurrencyUomId, "uomIdTo", currencyCode, "originalValue", codSurchargePackageAmount));
                     if (ServiceUtil.isError(convertUomResult)) return convertUomResult;
                     if (convertUomResult.containsKey("convertedValue")) {
-                        codSurchargePackageAmount = new BigDecimal(((Double) convertUomResult.get("convertedValue")).doubleValue()).setScale(decimals, rounding);
+                        codSurchargePackageAmount = ((BigDecimal) convertUomResult.get("convertedValue")).setScale(decimals, rounding);
                     }
                     
                     // Add the amount of the surcharge for the package, if the surcharge should be on all packages or the first and this is the first package
@@ -646,21 +648,21 @@ public class UpsServices {
             }
             
             try {
-                shipmentRouteSegment.set("actualTransportCost", Double.valueOf(transportationMonetaryValue));
+                shipmentRouteSegment.set("actualTransportCost", new BigDecimal(transportationMonetaryValue));
             } catch (NumberFormatException e) {
                 String excErrMsg = "Error parsing the transportationMonetaryValue [" + transportationMonetaryValue + "]: " + e.toString();
                 Debug.logError(e, excErrMsg, module);
                 errorList.add(excErrMsg);
             }
             try {
-                shipmentRouteSegment.set("actualServiceCost", Double.valueOf(serviceOptionsMonetaryValue));
+                shipmentRouteSegment.set("actualServiceCost", new BigDecimal(serviceOptionsMonetaryValue));
             } catch (NumberFormatException e) {
                 String excErrMsg = "Error parsing the serviceOptionsMonetaryValue [" + serviceOptionsMonetaryValue + "]: " + e.toString();
                 Debug.logError(e, excErrMsg, module);
                 errorList.add(excErrMsg);
             }
             try {
-                shipmentRouteSegment.set("actualCost", Double.valueOf(totalMonetaryValue));
+                shipmentRouteSegment.set("actualCost", new BigDecimal(totalMonetaryValue));
             } catch (NumberFormatException e) {
                 String excErrMsg = "Error parsing the totalMonetaryValue [" + totalMonetaryValue + "]: " + e.toString();
                 Debug.logError(e, excErrMsg, module);
@@ -673,7 +675,7 @@ public class UpsServices {
             String billingWeightUnitOfMeasurement = UtilXml.childElementValue(billingWeightUnitOfMeasurementElement, "Code");
             String billingWeight = UtilXml.childElementValue(billingWeightElement, "Weight");
             try {
-                shipmentRouteSegment.set("billingWeight", Double.valueOf(billingWeight));
+                shipmentRouteSegment.set("billingWeight", new BigDecimal(billingWeight));
             } catch (NumberFormatException e) {
                 String excErrMsg = "Error parsing the billingWeight [" + billingWeight + "]: " + e.toString();
                 Debug.logError(e, excErrMsg, module);
@@ -914,21 +916,21 @@ public class UpsServices {
             }
             
             try {
-                shipmentRouteSegment.set("actualTransportCost", Double.valueOf(transportationMonetaryValue));
+                shipmentRouteSegment.set("actualTransportCost", new BigDecimal(transportationMonetaryValue));
             } catch (NumberFormatException e) {
                 String excErrMsg = "Error parsing the transportationMonetaryValue [" + transportationMonetaryValue + "]: " + e.toString();
                 Debug.logError(e, excErrMsg, module);
                 errorList.add(excErrMsg);
             }
             try {
-                shipmentRouteSegment.set("actualServiceCost", Double.valueOf(serviceOptionsMonetaryValue));
+                shipmentRouteSegment.set("actualServiceCost", new BigDecimal(serviceOptionsMonetaryValue));
             } catch (NumberFormatException e) {
                 String excErrMsg = "Error parsing the serviceOptionsMonetaryValue [" + serviceOptionsMonetaryValue + "]: " + e.toString();
                 Debug.logError(e, excErrMsg, module);
                 errorList.add(excErrMsg);
             }
             try {
-                shipmentRouteSegment.set("actualCost", Double.valueOf(totalMonetaryValue));
+                shipmentRouteSegment.set("actualCost", new BigDecimal(totalMonetaryValue));
             } catch (NumberFormatException e) {
                 String excErrMsg = "Error parsing the totalMonetaryValue [" + totalMonetaryValue + "]: " + e.toString();
                 Debug.logError(e, excErrMsg, module);
@@ -941,7 +943,7 @@ public class UpsServices {
             String billingWeightUnitOfMeasurement = UtilXml.childElementValue(billingWeightUnitOfMeasurementElement, "Code");
             String billingWeight = UtilXml.childElementValue(billingWeightElement, "Weight");
             try {
-                shipmentRouteSegment.set("billingWeight", Double.valueOf(billingWeight));
+                shipmentRouteSegment.set("billingWeight", new BigDecimal(billingWeight));
             } catch (NumberFormatException e) {
                 String excErrMsg = "Error parsing the billingWeight [" + billingWeight + "]: " + e.toString();
                 Debug.logError(e, excErrMsg, module);
@@ -994,7 +996,7 @@ public class UpsServices {
                 shipmentPackageRouteSeg.set("boxNumber", "");
                 shipmentPackageRouteSeg.set("currencyUomId", packageServiceOptionsCurrencyCode);
                 try {
-                    shipmentPackageRouteSeg.set("packageServiceCost", Double.valueOf(packageServiceOptionsMonetaryValue));
+                    shipmentPackageRouteSeg.set("packageServiceCost", new BigDecimal(packageServiceOptionsMonetaryValue));
                 } catch (NumberFormatException e) {
                     String excErrMsg = "Error parsing the packageServiceOptionsMonetaryValue [" + packageServiceOptionsMonetaryValue + "] for Package [" + shipmentPackageRouteSeg.getString("shipmentPackageSeqId") + "]: " + e.toString();
                     Debug.logError(e, excErrMsg, module);
@@ -1561,7 +1563,7 @@ public class UpsServices {
         }
     }
 
-    private static void splitEstimatePackages(Document requestDoc, Element shipmentElement, List shippableItemInfo, double maxWeight, double minWeight) {
+    private static void splitEstimatePackages(Document requestDoc, Element shipmentElement, List shippableItemInfo, BigDecimal maxWeight, BigDecimal minWeight) {
         List packages = getPackageSplit(shippableItemInfo, maxWeight);
         if (UtilValidate.isNotEmpty(packages)) {
             Iterator i = packages.iterator();
@@ -1573,9 +1575,9 @@ public class UpsServices {
             
             // Add a dummy package
             String totalWeightStr = UtilProperties.getPropertyValue("shipment", "shipment.ups.min.estimate.weight", "1");
-            double packageWeight = 1;
+            BigDecimal packageWeight = BigDecimal.ONE;
             try {
-                packageWeight = Double.parseDouble(totalWeightStr);
+                packageWeight = new BigDecimal(totalWeightStr);
             } catch (NumberFormatException e) {
                 Debug.logError(e, module);
             }
@@ -1587,15 +1589,15 @@ public class UpsServices {
         }
     }
 
-    private static void addPackageElement(Document requestDoc, Element shipmentElement, List shippableItemInfo, Map packageMap, double minWeight) {
-        double packageWeight = checkForDefaultPackageWeight(calcPackageWeight(packageMap, shippableItemInfo, 0),minWeight);
+    private static void addPackageElement(Document requestDoc, Element shipmentElement, List shippableItemInfo, Map packageMap, BigDecimal minWeight) {
+        BigDecimal packageWeight = checkForDefaultPackageWeight(calcPackageWeight(packageMap, shippableItemInfo, BigDecimal.ZERO), minWeight);
         Element packageElement = UtilXml.addChildElement(shipmentElement, "Package", requestDoc);
         Element packagingTypeElement = UtilXml.addChildElement(packageElement, "PackagingType", requestDoc);
         UtilXml.addChildElementValue(packagingTypeElement, "Code", "00", requestDoc);
         UtilXml.addChildElementValue(packagingTypeElement, "Description", "Unknown PackagingType", requestDoc);
         UtilXml.addChildElementValue(packageElement, "Description", "Package Description", requestDoc);
         Element packageWeightElement = UtilXml.addChildElement(packageElement, "PackageWeight", requestDoc);
-        UtilXml.addChildElementValue(packageWeightElement, "Weight", Double.toString(packageWeight), requestDoc);
+        UtilXml.addChildElementValue(packageWeightElement, "Weight", packageWeight.toPlainString(), requestDoc);
         //If product is in shippable Package then it we should have one product per packagemap
         if (packageMap.size() ==1) {
             Iterator i = packageMap.keySet().iterator();
@@ -1612,7 +1614,7 @@ public class UpsServices {
         
     }
 
-    private static void addPackageElement(Document requestDoc, Element shipmentElement, Double packageWeight) {        
+    private static void addPackageElement(Document requestDoc, Element shipmentElement, BigDecimal packageWeight) {        
         Element packageElement = UtilXml.addChildElement(shipmentElement, "Package", requestDoc);
         Element packagingTypeElement = UtilXml.addChildElement(packageElement, "PackagingType", requestDoc);
         UtilXml.addChildElementValue(packagingTypeElement, "Code", "00", requestDoc);
@@ -1623,11 +1625,11 @@ public class UpsServices {
     }
     
     
-    private static double checkForDefaultPackageWeight(double weight, double minWeight) {
-        return (weight > 0 && weight > minWeight ? weight : minWeight);
+    private static BigDecimal checkForDefaultPackageWeight(BigDecimal weight, BigDecimal minWeight) {
+        return (weight.compareTo(BigDecimal.ZERO) > 0 && weight.compareTo(minWeight) > 0 ? weight : minWeight);
     }
     
-    private static List getPackageSplit(List shippableItemInfo, double maxWeight) {
+    private static List getPackageSplit(List shippableItemInfo, BigDecimal maxWeight) {
         // create the package list w/ the first package
         List packages = new LinkedList();
 
@@ -1636,28 +1638,28 @@ public class UpsServices {
             while (sii.hasNext()) {
                 Map itemInfo = (Map) sii.next();
                 long pieces = ((Long) itemInfo.get("piecesIncluded")).longValue();
-                double totalQuantity = ((Double) itemInfo.get("quantity")).doubleValue();
-                double totalWeight = ((Double) itemInfo.get("weight")).doubleValue();
+                BigDecimal totalQuantity = (BigDecimal) itemInfo.get("quantity");
+                BigDecimal totalWeight = (BigDecimal) itemInfo.get("weight");
                 String productId = (String) itemInfo.get("productId");
 
                 // sanity check
                 if (pieces < 1) {
                     pieces = 1; // can NEVER be less than one
                 }
-                double weight = totalWeight / pieces;
+                BigDecimal weight = totalWeight.divide(BigDecimal.valueOf(pieces), generalRounding);
 
-                for (int z = 1; z <= totalQuantity; z++) {
-                    double partialQty = pieces > 1 ? 1.000 / pieces : 1;
+                for (int z = 1; z <= totalQuantity.intValue(); z++) {
+                	BigDecimal partialQty = pieces > 1 ? BigDecimal.ONE.divide(BigDecimal.valueOf(pieces), generalRounding) : BigDecimal.ONE;
                     for (long x = 0; x < pieces; x++) {
                         if(itemInfo.get("inShippingBox") != null &&  ((String) itemInfo.get("inShippingBox")).equalsIgnoreCase("Y")) {
                             Map newPackage = new HashMap();
-                            newPackage.put(productId, new Double(partialQty));
+                            newPackage.put(productId, partialQty);
                             packages.add(newPackage);
-                        } else if (weight >= maxWeight) {
+                        } else if (weight.compareTo(maxWeight) >= 0) {
                             Map newPackage = new HashMap();
-                            newPackage.put(productId, new Double(partialQty));
+                            newPackage.put(productId, partialQty);
                             packages.add(newPackage);
-                        } else if (totalWeight > 0) {
+                        } else if (totalWeight.compareTo(BigDecimal.ZERO) > 0) {
                             // create the first package
                             if (packages.size() == 0) {
                                 packages.add(new HashMap());
@@ -1669,18 +1671,18 @@ public class UpsServices {
                             for (int pi = 0; pi < packageSize; pi++) {
                                 if (!addedToPackage) {
                                     Map packageMap = (Map) packages.get(pi);
-                                    double packageWeight = calcPackageWeight(packageMap, shippableItemInfo, weight);
-                                    if (packageWeight <= maxWeight) {
-                                        Double qtyD = (Double) packageMap.get(productId);
-                                        double qty = qtyD == null ? 0 : qtyD.doubleValue();
-                                        packageMap.put(productId, new Double(qty + partialQty));
+                                    BigDecimal packageWeight = calcPackageWeight(packageMap, shippableItemInfo, weight);
+                                    if (packageWeight.compareTo(maxWeight) <= 0) {
+                                    	BigDecimal qty = (BigDecimal) packageMap.get(productId);
+                                        qty = qty == null ? BigDecimal.ZERO : qty;
+                                        packageMap.put(productId, qty.add(partialQty));
                                         addedToPackage = true;
                                     }
                                 }
                             }
                             if (!addedToPackage) {
                                 Map packageMap = new HashMap();
-                                packageMap.put(productId, new Double(partialQty));
+                                packageMap.put(productId, partialQty);
                                 packages.add(packageMap);
                             }
                         }
@@ -1691,17 +1693,17 @@ public class UpsServices {
         return packages;
     }
 
-    private static double calcPackageWeight(Map packageMap, List shippableItemInfo, double additionalWeight) {
-        double totalWeight = 0.00;
+    private static BigDecimal calcPackageWeight(Map packageMap, List shippableItemInfo, BigDecimal additionalWeight) {
+        BigDecimal totalWeight = BigDecimal.ZERO;
         Iterator i = packageMap.keySet().iterator();
         while (i.hasNext()) {
             String productId = (String) i.next();
             Map productInfo = getProductItemInfo(shippableItemInfo, productId);
-            double productWeight = ((Double) productInfo.get("weight")).doubleValue();
-            double quantity = ((Double) packageMap.get(productId)).doubleValue();
-            totalWeight += (productWeight * quantity);
+            BigDecimal productWeight = (BigDecimal) productInfo.get("weight");
+            BigDecimal quantity = (BigDecimal) packageMap.get(productId);
+            totalWeight = totalWeight.add(productWeight.multiply(quantity));
         }
-        return totalWeight + additionalWeight;
+        return totalWeight.add(additionalWeight);
     }
 
     private static Map getProductItemInfo(List shippableItemInfo, String productId) {
@@ -1736,7 +1738,7 @@ public class UpsServices {
         if ("1".equals(responseStatusCode)) {
             List rates = UtilXml.childElementList(rateResponseElement, "RatedShipment");
             Map rateMap = new HashMap();
-            Double firstRate = null;
+            BigDecimal firstRate = null;
             if (rates == null || rates.size() == 0) {
                 return ServiceUtil.returnError("No rates available at this time");
             } else {
@@ -1752,9 +1754,9 @@ public class UpsServices {
                     Element totalCharges = UtilXml.firstChildElement(element, "TotalCharges");
                     String totalString = UtilXml.childElementValue(totalCharges, "MonetaryValue");
 
-                    rateMap.put(serviceCode, new Double(totalString));
+                    rateMap.put(serviceCode, new BigDecimal(totalString));
                     if (firstRate == null) {
-                        firstRate = (Double) rateMap.get(serviceCode);
+                        firstRate = (BigDecimal) rateMap.get(serviceCode);
                     }
                 }
             }
@@ -1918,9 +1920,9 @@ public class UpsServices {
         String shippingCountryCode = (String) context.get("shippingCountryCode");
         List packageWeights = (List) context.get("packageWeights");
         List shippableItemInfo = (List) context.get("shippableItemInfo");
-        Double shippableTotal = (Double) context.get("shippableTotal");
-        Double shippableQuantity = (Double) context.get("shippableQuantity");
-        Double shippableWeight = (Double) context.get("shippableWeight");
+        BigDecimal shippableTotal = (BigDecimal) context.get("shippableTotal");
+        BigDecimal shippableQuantity = (BigDecimal) context.get("shippableQuantity");
+        BigDecimal shippableWeight = (BigDecimal) context.get("shippableWeight");
         String isResidentialAddress = (String)context.get("isResidentialAddress");
 
         // Important: DO NOT returnError here or you could trigger a transaction rollback and break other services.
@@ -1929,13 +1931,13 @@ public class UpsServices {
         }
 
         if (shippableTotal == null) {
-            shippableTotal = new Double(0.00);
+            shippableTotal = BigDecimal.ZERO;
         }
         if (shippableQuantity == null) {
-            shippableQuantity = new Double(0.00);
+            shippableQuantity = BigDecimal.ZERO;
         }
         if (shippableWeight == null) {
-            shippableWeight = new Double(0.00);
+            shippableWeight = BigDecimal.ZERO;
         }
         if (serviceConfigProps == null) {
             serviceConfigProps = "shipment.properties";
@@ -2036,18 +2038,18 @@ public class UpsServices {
 
         // package info
         String maxWeightStr = UtilProperties.getPropertyValue(serviceConfigProps, "shipment.ups.max.estimate.weight", "99");
-        double maxWeight = 99;
+        BigDecimal maxWeight = new BigDecimal("99");
         try {
-            maxWeight = Double.parseDouble(maxWeightStr);
+            maxWeight = new BigDecimal(maxWeightStr);
         } catch (NumberFormatException e) {
-            maxWeight = 99;
+            maxWeight = new BigDecimal("99");
         }
         String minWeightStr = UtilProperties.getPropertyValue(serviceConfigProps, "shipment.ups.min.estimate.weight", ".1");
-        double minWeight = .1;
+        BigDecimal minWeight = new BigDecimal("0.1");
         try {
-            minWeight = Double.parseDouble(minWeightStr);
+            minWeight = new BigDecimal(minWeightStr);
         } catch (NumberFormatException e) {
-            minWeight = .1;
+            minWeight = new BigDecimal("0.1");
         }
         
         // Passing in a list of package weights overrides the calculation of same via shippableItemInfo
@@ -2057,7 +2059,7 @@ public class UpsServices {
         } else {
             Iterator i = packageWeights.iterator();
             while (i.hasNext()) {
-                Double packageWeight = (Double) i.next();
+                BigDecimal packageWeight = (BigDecimal) i.next();
                 addPackageElement(rateRequestDoc,  shipmentElement, packageWeight);
             }
         }

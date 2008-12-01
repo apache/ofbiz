@@ -72,10 +72,10 @@ under the License.
         </entity-condition>
 
         <!-- first set the required OUT fields to zero -->
-        <calculate field-name="plainDoubleZero" type="Double"><number value="0.0"/></calculate>
+        <calculate field-name="plainBigDecimalZero" type="BigDecimal"><number value="0.0"/></calculate>
         <calculate field-name="plainLongZero" type="Long"><number value="0"/></calculate>
-        <field-to-result field-name="plainDoubleZero" result-name="totalGrandAmount"/>
-        <field-to-result field-name="plainDoubleZero" result-name="totalSubRemainingAmount"/>
+        <field-to-result field-name="plainBigDecimalZero" result-name="totalGrandAmount"/>
+        <field-to-result field-name="plainBigDecimalZero" result-name="totalSubRemainingAmount"/>
         <field-to-result field-name="plainLongZero" result-name="totalOrders"/>
 
         <!-- because we specified the partyId and the roleTypeId, should only be one item in list returned -->
@@ -242,14 +242,14 @@ under the License.
 
             <if-not-empty field="productFacility.minimumStock">
                 <!-- No requirements are created if we are already under stock -->
-                <if-compare-field field="quantityOnHandTotal" to-field="productFacility.minimumStock" operator="greater-equals" type="Double">
+                <if-compare-field field="quantityOnHandTotal" to-field="productFacility.minimumStock" operator="greater-equals" type="BigDecimal">
                     <calculate field-name="newQuantityOnHand">
                         <calcop field-name="quantityOnHandTotal" operator="subtract">
                             <calcop operator="get" field-name="parameters.quantity"/>
                         </calcop>
                     </calculate>
                     <!-- If this new issuance will cause the quantityOnHandTotal to go below the minimumStock, create a new requirement -->
-                    <if-compare-field field="newQuantityOnHand" to-field="productFacility.minimumStock" operator="less" type="Double">
+                    <if-compare-field field="newQuantityOnHand" to-field="productFacility.minimumStock" operator="less" type="BigDecimal">
                         <set from-field="inventoryItem.productId" field="inputMap.productId"/>
                         <set from-field="productFacility.facilityId" field="inputMap.facilityId"/>
                         <if-not-empty field="productFacility.reorderQuantity">
@@ -289,14 +289,14 @@ under the License.
             <if-not-empty field="productFacility.minimumStock">
                 <!-- No requirements are created if we are not under stock -->
                 <!-- this service is supposed to be called after inventory is reserved, so inventory should have been updated already -->
-                <if-compare-field field="availableToPromiseTotal" to-field="productFacility.minimumStock" operator="less" type="Double">
+                <if-compare-field field="availableToPromiseTotal" to-field="productFacility.minimumStock" operator="less" type="BigDecimal">
                     <calculate field-name="oldAvailableToPromise">
                         <calcop field-name="availableToPromiseTotal" operator="add">
                             <calcop operator="get" field-name="parameters.quantity"/>
                         </calcop>
                     </calculate>
                     <!-- If before this reservation the availableToPromiseTotal was over minimumStock, create a new requirement -->
-                    <if-compare-field field="oldAvailableToPromise" to-field="productFacility.minimumStock" operator="greater-equals" type="Double">
+                    <if-compare-field field="oldAvailableToPromise" to-field="productFacility.minimumStock" operator="greater-equals" type="BigDecimal">
                         <set from-field="inventoryItem.productId" field="inputMap.productId"/>
                         <set from-field="productFacility.facilityId" field="inputMap.facilityId"/>
                         <if-not-empty field="productFacility.reorderQuantity">
@@ -335,14 +335,14 @@ under the License.
 
             <if-not-empty field="productFacility">
             <!-- are we below minimum stock?  this service is supposed to be called after inventory is reserved, so inventory should have been updated already -->
-            <if-compare-field field="availableToPromiseTotal" to-field="productFacility.minimumStock" operator="less" type="Double">
+            <if-compare-field field="availableToPromiseTotal" to-field="productFacility.minimumStock" operator="less" type="BigDecimal">
                 <!-- what is the right quantity?  It is the lesser of the actual quantity and the quantity required to bring us back up to minimum stock -->
                 <calculate field-name="quantityShortfall">
                     <calcop field-name="productFacility.minimumStock" operator="subtract">
                         <calcop operator="get" field-name="availableToPromiseTotal"/>
                     </calcop>
                 </calculate>
-                <if-compare-field field="quantityShortfall" operator="less" to-field="parameters.quantity" type="Double">
+                <if-compare-field field="quantityShortfall" operator="less" to-field="parameters.quantity" type="BigDecimal">
                     <set from-field="quantityShortfall" field="inputMap.quantity"/>
                 <else>
                     <set from-field="parameters.quantity" field="inputMap.quantity"/>
@@ -366,7 +366,7 @@ under the License.
                     </condition-list>
                 </entity-condition>
                 <iterate entry-name="requirement" list-name="requirements">
-                    <calculate field-name="existingRequirementTotal" type="Double">
+                    <calculate field-name="existingRequirementTotal" type="BigDecimal">
                         <calcop operator="add" field-name="existingRequirementTotal">
                             <calcop operator="get" field-name="requirement.quantity"/>
                         </calcop>
@@ -374,7 +374,7 @@ under the License.
                 </iterate>
                 
                 <!-- Subtract the total quantity of existing requirements from the required quantity to determine if a new requirement needs to be created -->
-                <calculate field-name="newRequirementTotal" type="Double">
+                <calculate field-name="newRequirementTotal" type="BigDecimal">
                     <calcop operator="subtract" field-name="inputMap.quantity">
                         <calcop operator="get" field-name="existingRequirementTotal"/>
                     </calcop>
@@ -437,13 +437,13 @@ under the License.
                         </if-compare>
 
                         <!-- No requirements are created if we are already under stock -->
-                        <if-compare-field field="currentQuantity" to-field="productFacility.minimumStock" operator="less" type="Double">
+                        <if-compare-field field="currentQuantity" to-field="productFacility.minimumStock" operator="less" type="BigDecimal">
                             <clear-field field-name="inputMap"/>
                             <set from-field="productFacility.productId" field="inputMap.productId"/>
                             <if-not-empty field="productFacility.reorderQuantity">
-                                <set from-field="productFacility.reorderQuantity" field="inputMap.quantity" type="Double"/>
+                                <set from-field="productFacility.reorderQuantity" field="inputMap.quantity" type="BigDecimal"/>
                             <else>
-                                <set value="0" field="inputMap.quantity" type="Double"/>
+                                <set value="0" field="inputMap.quantity" type="BigDecimal"/>
                             </else>
                             </if-not-empty>
 
@@ -452,8 +452,8 @@ under the License.
                                     <calcop operator="get" field-name="currentQuantity"/>
                                 </calcop>
                             </calculate>
-                            <if-compare-field field="inputMap.quantity" to-field="quantityShortfall" operator="less" type="Double">
-                                <set from-field="quantityShortfall" field="inputMap.quantity" type="Double"/>
+                            <if-compare-field field="inputMap.quantity" to-field="quantityShortfall" operator="less" type="BigDecimal">
+                                <set from-field="quantityShortfall" field="inputMap.quantity" type="BigDecimal"/>
                             </if-compare-field>
 
                             <set value="PRODUCT_REQUIREMENT" field="inputMap.requirementTypeId"/>
@@ -668,7 +668,7 @@ under the License.
             <set field="createOrderAdjContext.orderItemSeqId" value="_NA_"/>
             <set field="createOrderAdjContext.shipGroupSeqId" value="_NA_"/>
             <set field="createOrderAdjContext.description" value="Adjustment due to order change"/>
-            <set field="createOrderAdjContext.amount" from-field="orderAdjustmentTotalDifference" type="Double"/>
+            <set field="createOrderAdjContext.amount" from-field="orderAdjustmentTotalDifference" type="BigDecimal"/>
             <call-service service-name="createOrderAdjustment" in-map-name="createOrderAdjContext" include-user-login="true"/>
             <check-errors/>        
         </if-compare>
@@ -867,7 +867,7 @@ under the License.
     </simple-method>
     
     <simple-method method-name="checkOrderIsOnBackOrder" short-description="Check if an Order is on Back Order" login-required="false">
-        <set field="zeroEnv" value="0" type="Double"/>
+        <set field="zeroEnv" value="0" type="BigDecimal"/>
         <entity-condition entity-name="OrderItemShipGrpInvRes" list-name="orderItemShipGrpInvResList">
             <condition-list combine="and">
                 <condition-expr field-name="orderId" env-name="parameters.orderId"/>

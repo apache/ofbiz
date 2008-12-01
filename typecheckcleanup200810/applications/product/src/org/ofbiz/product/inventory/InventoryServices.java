@@ -18,6 +18,8 @@
  *******************************************************************************/
 package org.ofbiz.product.inventory;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -55,10 +57,12 @@ public class InventoryServices {
     
     public final static String module = InventoryServices.class.getName();
     
+    public static final MathContext generalRounding = new MathContext(10);
+
     public static Map prepareInventoryTransfer(DispatchContext dctx, Map context) {
         GenericDelegator delegator = dctx.getDelegator();
         String inventoryItemId = (String) context.get("inventoryItemId");
-        Double xferQty = (Double) context.get("xferQty");   
+        BigDecimal xferQty = (BigDecimal) context.get("xferQty");   
         GenericValue inventoryItem = null;
         GenericValue newItem = null;        
         GenericValue userLogin = (GenericValue) context.get("userLogin");        
@@ -78,8 +82,8 @@ public class InventoryServices {
             
             String inventoryType = inventoryItem.getString("inventoryItemTypeId");
             if (inventoryType.equals("NON_SERIAL_INV_ITEM")) {
-                Double atp = inventoryItem.getDouble("availableToPromiseTotal");
-                Double qoh = inventoryItem.getDouble("quantityOnHandTotal");
+            	BigDecimal atp = inventoryItem.getBigDecimal("availableToPromiseTotal");
+            	BigDecimal qoh = inventoryItem.getBigDecimal("quantityOnHandTotal");
                 
                 if (atp == null) {
                     return ServiceUtil.returnError("The request transfer amount is not available, there is no available to promise on the Inventory Item with ID " + inventoryItem.getString("inventoryItemId"));
@@ -89,7 +93,7 @@ public class InventoryServices {
                 }
                 
                 // first make sure we have enough to cover the request transfer amount
-                if (xferQty.doubleValue() > atp.doubleValue()) {
+                if (xferQty.compareTo(atp) > 0) {
                     return ServiceUtil.returnError("The request transfer amount is not available, the available to promise [" + atp + "] is not sufficient for the desired transfer quantity [" + xferQty + "] on the Inventory Item with ID " + inventoryItem.getString("inventoryItemId"));
                 }
                             
@@ -102,16 +106,16 @@ public class InventoryServices {
                 // at this point we have already made sure that the xferQty is less than or equals to the atp, so if less that just create a new inventory record for the quantity to be moved
                 // NOTE: atp should always be <= qoh, so if xfer < atp, then xfer < qoh, so no need to check/handle that
                 // however, if atp < qoh && atp == xferQty, then we still need to split; oh, but no need to check atp == xferQty in the second part because if it isn't greater and isn't less, then it is equal
-                if (xferQty.doubleValue() < atp.doubleValue() || atp.doubleValue() < qoh.doubleValue()) {
-                    Double negXferQty = new Double(-xferQty.doubleValue());
+                if (xferQty.compareTo(atp) < 0 || atp.compareTo(qoh) < 0) {
+                	BigDecimal negXferQty = xferQty.negate();
                     // NOTE: new inventory items should always be created calling the
                     //       createInventoryItem service because in this way we are sure
                     //       that all the relevant fields are filled with default values.
                     //       However, the code here should work fine because all the values
                     //       for the new inventory item are inerited from the existing item.
                     newItem = GenericValue.create(inventoryItem);
-                    newItem.set("availableToPromiseTotal", new Double(0));
-                    newItem.set("quantityOnHandTotal", new Double(0));
+                    newItem.set("availableToPromiseTotal", BigDecimal.ZERO);
+                    newItem.set("quantityOnHandTotal", BigDecimal.ZERO);
                     
                     delegator.createSetNextSeqId(newItem);
                     
@@ -151,9 +155,9 @@ public class InventoryServices {
                 GenericValue inventoryItemToClear = newItem == null ? inventoryItem : newItem;
 
                 inventoryItemToClear.refresh();
-                double atp = inventoryItemToClear.get("availableToPromiseTotal") == null ? 0 : inventoryItemToClear.getDouble("availableToPromiseTotal").doubleValue();
-                if (atp != 0) {
-                    Map createDetailMap = UtilMisc.toMap("availableToPromiseDiff", new Double(-atp), 
+                BigDecimal atp = inventoryItemToClear.get("availableToPromiseTotal") == null ? BigDecimal.ZERO : inventoryItemToClear.getBigDecimal("availableToPromiseTotal");
+                if (atp.compareTo(BigDecimal.ZERO) != 0) {
+                    Map createDetailMap = UtilMisc.toMap("availableToPromiseDiff", atp.negate(), 
                             "inventoryItemId", inventoryItemToClear.get("inventoryItemId"), "userLogin", userLogin);
                     try {
                         Map result = dctx.getDispatcher().runSync("createInventoryItemDetail", createDetailMap);
@@ -215,9 +219,9 @@ public class InventoryServices {
             
         if (inventoryType.equals("NON_SERIAL_INV_ITEM")) { 
             // add an adjusting InventoryItemDetail so set ATP back to QOH: ATP = ATP + (QOH - ATP), diff = QOH - ATP
-            double atp = inventoryItem.get("availableToPromiseTotal") == null ? 0 : inventoryItem.getDouble("availableToPromiseTotal").doubleValue();
-            double qoh = inventoryItem.get("quantityOnHandTotal") == null ? 0 : inventoryItem.getDouble("quantityOnHandTotal").doubleValue();
-            Map createDetailMap = UtilMisc.toMap("availableToPromiseDiff", new Double(qoh - atp), 
+        	BigDecimal atp = inventoryItem.get("availableToPromiseTotal") == null ? BigDecimal.ZERO : inventoryItem.getBigDecimal("availableToPromiseTotal");
+        	BigDecimal qoh = inventoryItem.get("quantityOnHandTotal") == null ? BigDecimal.ZERO : inventoryItem.getBigDecimal("quantityOnHandTotal");
+            Map createDetailMap = UtilMisc.toMap("availableToPromiseDiff", qoh.subtract(atp), 
                     "inventoryItemId", inventoryItem.get("inventoryItemId"), "userLogin", userLogin);
             try {
                 Map result = dctx.getDispatcher().runSync("createInventoryItemDetail", createDetailMap);
@@ -305,9 +309,9 @@ public class InventoryServices {
         // re-set the fields on the item
         if (inventoryType.equals("NON_SERIAL_INV_ITEM")) {
             // add an adjusting InventoryItemDetail so set ATP back to QOH: ATP = ATP + (QOH - ATP), diff = QOH - ATP
-            double atp = inventoryItem.get("availableToPromiseTotal") == null ? 0 : inventoryItem.getDouble("availableToPromiseTotal").doubleValue();
-            double qoh = inventoryItem.get("quantityOnHandTotal") == null ? 0 : inventoryItem.getDouble("quantityOnHandTotal").doubleValue();
-            Map createDetailMap = UtilMisc.toMap("availableToPromiseDiff", new Double(qoh - atp), 
+        	BigDecimal atp = inventoryItem.get("availableToPromiseTotal") == null ? BigDecimal.ZERO : inventoryItem.getBigDecimal("availableToPromiseTotal");
+        	BigDecimal qoh = inventoryItem.get("quantityOnHandTotal") == null ? BigDecimal.ZERO : inventoryItem.getBigDecimal("quantityOnHandTotal");
+            Map createDetailMap = UtilMisc.toMap("availableToPromiseDiff", qoh.subtract(atp), 
                                                  "inventoryItemId", inventoryItem.get("inventoryItemId"),
                                                  "userLogin", userLogin);
             try {
@@ -361,7 +365,7 @@ public class InventoryServices {
         // find all inventory items w/ a negative ATP
         List inventoryItems = null;
         try {
-            EntityExpr ee = EntityCondition.makeCondition("availableToPromiseTotal", EntityOperator.LESS_THAN, new Double(0));
+            EntityExpr ee = EntityCondition.makeCondition("availableToPromiseTotal", EntityOperator.LESS_THAN, BigDecimal.ZERO);
             inventoryItems = delegator.findList("InventoryItem", ee, null, null, null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Trouble getting inventory items", module);
@@ -412,7 +416,7 @@ public class InventoryServices {
             Debug.log("Reservations for item: " + reservations.size(), module);
             
             // available at the time of order
-            double availableBeforeReserved = inventoryItem.getDouble("availableToPromiseTotal").doubleValue();
+            BigDecimal availableBeforeReserved = inventoryItem.getBigDecimal("availableToPromiseTotal");
             
             // go through all the reservations in order
             Iterator ri = reservations.iterator();
@@ -436,12 +440,12 @@ public class InventoryServices {
                                                                
                 // find the next possible ship date
                 Timestamp nextShipDate = null;
-                double availableAtTime = 0.00;
+                BigDecimal availableAtTime = BigDecimal.ZERO;
                 Iterator si = shipmentAndItems.iterator();
                 while (si.hasNext()) {
                     GenericValue shipmentItem = (GenericValue) si.next();
-                    availableAtTime += shipmentItem.getDouble("quantity").doubleValue();
-                    if (availableAtTime >= availableBeforeReserved) {
+                    availableAtTime = availableAtTime.add(shipmentItem.getBigDecimal("quantity"));
+                    if (availableAtTime.compareTo(availableBeforeReserved) >= 0) {
                         nextShipDate = shipmentItem.getTimestamp("estimatedArrivalDate");
                         break;
                     }
@@ -514,7 +518,7 @@ public class InventoryServices {
                 }
                                 
                 // subtract our qty from reserved to get the next value
-                availableBeforeReserved -= reservation.getDouble("quantity").doubleValue();
+                availableBeforeReserved = availableBeforeReserved.subtract(reservation.getBigDecimal("quantity"));
             }
         }
                
@@ -650,24 +654,24 @@ public class InventoryServices {
         String facilityId = (String)context.get("facilityId");
         String statusId = (String)context.get("statusId");
         
-        Double availableToPromiseTotal = new Double(0);
-        Double quantityOnHandTotal = new Double(0);
+        BigDecimal availableToPromiseTotal = BigDecimal.ZERO;
+        BigDecimal quantityOnHandTotal = BigDecimal.ZERO;
         
         if (UtilValidate.isNotEmpty(productAssocList)) {
-           // minimum QOH and ATP encountered
-           double minQuantityOnHandTotal = Double.MAX_VALUE;
-           double minAvailableToPromiseTotal = Double.MAX_VALUE;
+            // minimum QOH and ATP encountered
+        	BigDecimal minQuantityOnHandTotal = null;
+        	BigDecimal minAvailableToPromiseTotal = null;
            
            // loop through each associated product.  
            for (int i = 0; productAssocList.size() > i; i++) {
                GenericValue productAssoc = (GenericValue) productAssocList.get(i);
                String productIdTo = productAssoc.getString("productIdTo");
-               Double assocQuantity = productAssoc.getDouble("quantity");
+               BigDecimal assocQuantity = productAssoc.getBigDecimal("quantity");
                
                // if there is no quantity for the associated product in ProductAssoc entity, default it to 1.0
                if (assocQuantity == null) {
                    Debug.logWarning("ProductAssoc from [" + productAssoc.getString("productId") + "] to [" + productAssoc.getString("productIdTo") + "] has no quantity, assuming 1.0", module);
-                   assocQuantity = new Double(1.0);
+                   assocQuantity = BigDecimal.ONE;
                }
                
                // figure out the inventory available for this associated product
@@ -686,16 +690,16 @@ public class InventoryServices {
                }
                
                // Figure out what the QOH and ATP inventory would be with this associated product
-               Double currentQuantityOnHandTotal = (Double) resultOutput.get("quantityOnHandTotal");
-               Double currentAvailableToPromiseTotal = (Double) resultOutput.get("availableToPromiseTotal");
-               double tmpQuantityOnHandTotal = currentQuantityOnHandTotal.doubleValue()/assocQuantity.doubleValue();
-               double tmpAvailableToPromiseTotal = currentAvailableToPromiseTotal.doubleValue()/assocQuantity.doubleValue();
+               BigDecimal currentQuantityOnHandTotal = (BigDecimal) resultOutput.get("quantityOnHandTotal");
+               BigDecimal currentAvailableToPromiseTotal = (BigDecimal) resultOutput.get("availableToPromiseTotal");
+               BigDecimal tmpQuantityOnHandTotal = currentQuantityOnHandTotal.divide(assocQuantity, generalRounding);
+               BigDecimal tmpAvailableToPromiseTotal = currentAvailableToPromiseTotal.divide(assocQuantity, generalRounding);
 
                // reset the minimum QOH and ATP quantities if those quantities for this product are less 
-               if (tmpQuantityOnHandTotal < minQuantityOnHandTotal) {
+               if (minQuantityOnHandTotal == null || tmpQuantityOnHandTotal.compareTo(minQuantityOnHandTotal) < 0) {
                    minQuantityOnHandTotal = tmpQuantityOnHandTotal;
                }
-               if (tmpAvailableToPromiseTotal < minAvailableToPromiseTotal) {
+               if (minAvailableToPromiseTotal == null || tmpAvailableToPromiseTotal.compareTo(minAvailableToPromiseTotal) < 0) {
                    minAvailableToPromiseTotal = tmpAvailableToPromiseTotal;
                }
              
@@ -705,8 +709,8 @@ public class InventoryServices {
                }
            }
           // the final QOH and ATP quantities are the minimum of all the products 
-          quantityOnHandTotal = new Double(minQuantityOnHandTotal);
-          availableToPromiseTotal = new Double(minAvailableToPromiseTotal);
+          quantityOnHandTotal = minQuantityOnHandTotal;
+          availableToPromiseTotal = minAvailableToPromiseTotal;
         }
         
         Map result = ServiceUtil.returnSuccess();
@@ -755,10 +759,10 @@ public class InventoryServices {
                 return ServiceUtil.returnError("Unable to retrive product with id [" + productId + "]");
             }
 
-            double atp = 0.0;
-            double qoh = 0.0;
-            double mktgPkgAtp = 0.0;
-            double mktgPkgQoh = 0.0;
+            BigDecimal atp = BigDecimal.ZERO;
+            BigDecimal qoh = BigDecimal.ZERO;
+            BigDecimal mktgPkgAtp = BigDecimal.ZERO;
+            BigDecimal mktgPkgQoh = BigDecimal.ZERO;
             Iterator facilityIter = facilities.iterator();
 
             // loop through all the facilities
@@ -782,23 +786,23 @@ public class InventoryServices {
 
                 // add the results for this facility to the ATP/QOH counter for all facilities
                 if (!ServiceUtil.isError(invResult)) {
-                    Double fatp = (Double) invResult.get("availableToPromiseTotal");
-                    Double fqoh = (Double) invResult.get("quantityOnHandTotal");
-                    if (fatp != null) atp += fatp.doubleValue();
-                    if (fqoh != null) qoh += fqoh.doubleValue();
+                	BigDecimal fatp = (BigDecimal) invResult.get("availableToPromiseTotal");
+                	BigDecimal fqoh = (BigDecimal) invResult.get("quantityOnHandTotal");
+                    if (fatp != null) atp = atp.add(fatp);
+                    if (fqoh != null) qoh = qoh.add(fqoh);
                 }
                 if (("MARKETING_PKG_AUTO".equals(product.getString("productTypeId")) || "MARKETING_PKG_PICK".equals(product.getString("productTypeId"))) && (!ServiceUtil.isError(mktgPkgInvResult))) {
-                    Double fatp = (Double) mktgPkgInvResult.get("availableToPromiseTotal");
-                    Double fqoh = (Double) mktgPkgInvResult.get("quantityOnHandTotal");
-                    if (fatp != null) mktgPkgAtp += fatp.doubleValue();
-                    if (fqoh != null) mktgPkgQoh += fqoh.doubleValue();
+                	BigDecimal fatp = (BigDecimal) mktgPkgInvResult.get("availableToPromiseTotal");
+                	BigDecimal fqoh = (BigDecimal) mktgPkgInvResult.get("quantityOnHandTotal");
+                    if (fatp != null) mktgPkgAtp = mktgPkgAtp.add(fatp);
+                    if (fqoh != null) mktgPkgQoh = mktgPkgQoh.add(fqoh);
                 }
             }
 
-            atpMap.put(productId, new Double(atp));
-            qohMap.put(productId, new Double(qoh));
-            mktgPkgAtpMap.put(productId, new Double(mktgPkgAtp));
-            mktgPkgQohMap.put(productId, new Double(mktgPkgQoh));
+            atpMap.put(productId, atp);
+            qohMap.put(productId, qoh);
+            mktgPkgAtpMap.put(productId, mktgPkgAtp);
+            mktgPkgQohMap.put(productId, mktgPkgQoh);
         }
 
         results.put("availableToPromiseMap", atpMap);
@@ -815,7 +819,7 @@ public class InventoryServices {
         Timestamp checkTime = (Timestamp)context.get("checkTime");
         String facilityId = (String)context.get("facilityId");
         String productId = (String)context.get("productId");
-        String minimumStock = (String)context.get("minimumStock");
+        String minimumStockStr = (String)context.get("minimumStock");
         String statusId = (String)context.get("statusId");
 
         Map result = new HashMap();
@@ -846,30 +850,30 @@ public class InventoryServices {
             }
         }
         // filter for quantities
-        int minimumStockInt = 0;
-        if (minimumStock != null) {
-            minimumStockInt = new Double(minimumStock).intValue();
+        BigDecimal minimumStock = BigDecimal.ZERO;
+        if (minimumStockStr != null) {
+            minimumStock = new BigDecimal(minimumStockStr);
         }
 
-        int quantityOnHandTotalInt = 0;
+        BigDecimal quantityOnHandTotal = BigDecimal.ZERO;
         if (resultOutput.get("quantityOnHandTotal") != null) {
-            quantityOnHandTotalInt = ((Double)resultOutput.get("quantityOnHandTotal")).intValue();
+            quantityOnHandTotal = (BigDecimal)resultOutput.get("quantityOnHandTotal");
         }
-        int offsetQOHQtyAvailable = quantityOnHandTotalInt - minimumStockInt;
+        BigDecimal offsetQOHQtyAvailable = quantityOnHandTotal.subtract(minimumStock);
 
-        int availableToPromiseTotalInt = 0;
+        BigDecimal availableToPromiseTotal = BigDecimal.ZERO;
         if (resultOutput.get("availableToPromiseTotal") != null) {
-            availableToPromiseTotalInt = ((Double)resultOutput.get("availableToPromiseTotal")).intValue();
+            availableToPromiseTotal = (BigDecimal)resultOutput.get("availableToPromiseTotal");
         }
-        int offsetATPQtyAvailable = availableToPromiseTotalInt - minimumStockInt;
+        BigDecimal offsetATPQtyAvailable = availableToPromiseTotal.subtract(minimumStock);
     
-        double quantityOnOrder = InventoryWorker.getOutstandingPurchasedQuantity(productId, delegator);
+        BigDecimal quantityOnOrder = InventoryWorker.getOutstandingPurchasedQuantity(productId, delegator);
         result.put("totalQuantityOnHand", resultOutput.get("quantityOnHandTotal").toString());
         result.put("totalAvailableToPromise", resultOutput.get("availableToPromiseTotal").toString());
-        result.put("quantityOnOrder", new Double(quantityOnOrder));
+        result.put("quantityOnOrder", quantityOnOrder);
     
-        result.put("offsetQOHQtyAvailable", new Integer(offsetQOHQtyAvailable));
-        result.put("offsetATPQtyAvailable", new Integer(offsetATPQtyAvailable));
+        result.put("offsetQOHQtyAvailable", offsetQOHQtyAvailable);
+        result.put("offsetATPQtyAvailable", offsetATPQtyAvailable);
     
         List productPrices = null;
         try {
@@ -883,15 +887,15 @@ public class InventoryServices {
         while (pricesIt.hasNext()) {
             GenericValue onePrice = (GenericValue)pricesIt.next();
             if(onePrice.getString("productPriceTypeId").equals("DEFAULT_PRICE")){ //defaultPrice
-                result.put("defultPrice", onePrice.getDouble("price"));
+                result.put("defultPrice", onePrice.getBigDecimal("price"));
             }else if(onePrice.getString("productPriceTypeId").equals("WHOLESALE_PRICE")){//
-                result.put("wholeSalePrice", onePrice.getDouble("price"));
+                result.put("wholeSalePrice", onePrice.getBigDecimal("price"));
             }else if(onePrice.getString("productPriceTypeId").equals("LIST_PRICE")){//listPrice
-                result.put("listPrice", onePrice.getDouble("price"));
+                result.put("listPrice", onePrice.getBigDecimal("price"));
             }else{
-                result.put("defultPrice", onePrice.getDouble("price"));
-                result.put("listPrice", onePrice.getDouble("price"));
-                result.put("wholeSalePrice", onePrice.getDouble("price"));
+                result.put("defultPrice", onePrice.getBigDecimal("price"));
+                result.put("listPrice", onePrice.getBigDecimal("price"));
+                result.put("wholeSalePrice", onePrice.getBigDecimal("price"));
             }
         }
     
@@ -950,12 +954,12 @@ public class InventoryServices {
             }
     
             // Sum the sales usage quantities found
-            double salesUsageQuantity = 0;
+            BigDecimal salesUsageQuantity = BigDecimal.ZERO;
             GenericValue salesUsageItem = null;
             while((salesUsageItem = (GenericValue) salesUsageIt.next()) != null) {
                 if (salesUsageItem.get("quantity") != null) {
                     try {
-                        salesUsageQuantity += salesUsageItem.getDouble("quantity").doubleValue();
+                        salesUsageQuantity = salesUsageQuantity.add(salesUsageItem.getBigDecimal("quantity"));
                     } catch (Exception e) {
                         // Ignore
                     }
@@ -987,12 +991,12 @@ public class InventoryServices {
             }
     
             // Sum the production usage quantities found
-            double productionUsageQuantity = 0;
+            BigDecimal productionUsageQuantity = BigDecimal.ZERO;
             GenericValue productionUsageItem = null;
             while((productionUsageItem = (GenericValue) productionUsageIt.next()) != null) {
                 if (productionUsageItem.get("quantity") != null) {
                     try {
-                        productionUsageQuantity += productionUsageItem.getDouble("quantity").doubleValue();
+                        productionUsageQuantity = productionUsageQuantity.add(productionUsageItem.getBigDecimal("quantity"));
                     } catch (Exception e) {
                         // Ignore
                     }
@@ -1005,7 +1009,7 @@ public class InventoryServices {
                 e.printStackTrace();
             }
     
-            result.put("usageQuantity", new Double((salesUsageQuantity + productionUsageQuantity)));
+            result.put("usageQuantity", salesUsageQuantity.add(productionUsageQuantity));
 
         }
         return result;

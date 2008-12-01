@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.product.product;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -304,7 +305,7 @@ public class ProductEvents {
         String quantityStr = request.getParameter("QUANTITY");
         String sequenceNumStr = request.getParameter("SEQUENCE_NUM");
         Timestamp thruDate = null;
-        Double quantity = null;
+        BigDecimal quantity = null;
         Long sequenceNum = null;
 
         if (UtilValidate.isNotEmpty(thruDateStr)) {
@@ -316,8 +317,8 @@ public class ProductEvents {
         }
         if (UtilValidate.isNotEmpty(quantityStr)) {
             try {
-                quantity = Double.valueOf(quantityStr);
-            } catch (Exception e) {
+                quantity = new BigDecimal(quantityStr);
+            } catch (NumberFormatException e) {
                 errMsgList.add(UtilProperties.getMessage(resource,"productevents.quantity_not_formatted_correctly", UtilHttp.getLocale(request)));
             }
         }
@@ -434,10 +435,10 @@ public class ProductEvents {
                     product.set("lastModifiedDate", nowTimestamp);
                     product.setString("lastModifiedByUserLogin", userLogin.getString("userLoginId"));
                     try {
-                        product.set("productHeight", UtilParse.parseDoubleForEntity(request.getParameter("productHeight")));
-                        product.set("productWidth", UtilParse.parseDoubleForEntity(request.getParameter("productWidth")));
-                        product.set("productDepth", UtilParse.parseDoubleForEntity(request.getParameter("productDepth")));
-                        product.set("weight", UtilParse.parseDoubleForEntity(request.getParameter("weight")));
+                        product.set("productHeight", UtilParse.parseBigDecimalForEntity(request.getParameter("productHeight")));
+                        product.set("productWidth", UtilParse.parseBigDecimalForEntity(request.getParameter("productWidth")));
+                        product.set("productDepth", UtilParse.parseBigDecimalForEntity(request.getParameter("productDepth")));
+                        product.set("weight", UtilParse.parseBigDecimalForEntity(request.getParameter("weight")));
     
                         // default unit settings for shipping parameters
                         product.set("heightUomId", "LEN_in");
@@ -445,10 +446,10 @@ public class ProductEvents {
                         product.set("depthUomId", "LEN_in");
                         product.set("weightUomId", "WT_oz");
     
-                        Double floz = UtilParse.parseDoubleForEntity(request.getParameter("~floz"));
-                        Double ml = UtilParse.parseDoubleForEntity(request.getParameter("~ml"));
-                        Double ntwt = UtilParse.parseDoubleForEntity(request.getParameter("~ntwt"));
-                        Double grams = UtilParse.parseDoubleForEntity(request.getParameter("~grams"));
+                        BigDecimal floz = UtilParse.parseBigDecimalForEntity(request.getParameter("~floz"));
+                        BigDecimal ml = UtilParse.parseBigDecimalForEntity(request.getParameter("~ml"));
+                        BigDecimal ntwt = UtilParse.parseBigDecimalForEntity(request.getParameter("~ntwt"));
+                        BigDecimal grams = UtilParse.parseBigDecimalForEntity(request.getParameter("~grams"));
     
                         List currentProductFeatureAndAppls = EntityUtil.filterByDate(delegator.findByAnd("ProductFeatureAndAppl", UtilMisc.toMap("productId", productId, "productFeatureApplTypeId", "STANDARD_FEATURE")), true);
                         setOrCreateProdFeature(delegator, productId, currentProductFeatureAndAppls, "VLIQ_ozUS", "AMOUNT", floz);
@@ -471,14 +472,14 @@ public class ProductEvents {
                     do {
                         GenericValue product = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", productId));
                         try {
-                            product.set("productHeight", UtilParse.parseDoubleForEntity(request.getParameter("productHeight" + attribIdx)));
-                            product.set("productWidth", UtilParse.parseDoubleForEntity(request.getParameter("productWidth" + attribIdx)));
-                            product.set("productDepth", UtilParse.parseDoubleForEntity(request.getParameter("productDepth" + attribIdx)));
-                            product.set("weight", UtilParse.parseDoubleForEntity(request.getParameter("weight" + attribIdx)));
-                            Double floz = UtilParse.parseDoubleForEntity(request.getParameter("~floz" + attribIdx));
-                            Double ml = UtilParse.parseDoubleForEntity(request.getParameter("~ml" + attribIdx));
-                            Double ntwt = UtilParse.parseDoubleForEntity(request.getParameter("~ntwt" + attribIdx));
-                            Double grams = UtilParse.parseDoubleForEntity(request.getParameter("~grams" + attribIdx));
+                            product.set("productHeight", UtilParse.parseBigDecimalForEntity(request.getParameter("productHeight" + attribIdx)));
+                            product.set("productWidth", UtilParse.parseBigDecimalForEntity(request.getParameter("productWidth" + attribIdx)));
+                            product.set("productDepth", UtilParse.parseBigDecimalForEntity(request.getParameter("productDepth" + attribIdx)));
+                            product.set("weight", UtilParse.parseBigDecimalForEntity(request.getParameter("weight" + attribIdx)));
+                            BigDecimal floz = UtilParse.parseBigDecimalForEntity(request.getParameter("~floz" + attribIdx));
+                            BigDecimal ml = UtilParse.parseBigDecimalForEntity(request.getParameter("~ml" + attribIdx));
+                            BigDecimal ntwt = UtilParse.parseBigDecimalForEntity(request.getParameter("~ntwt" + attribIdx));
+                            BigDecimal grams = UtilParse.parseBigDecimalForEntity(request.getParameter("~grams" + attribIdx));
     
                                 List currentProductFeatureAndAppls = EntityUtil.filterByDate(delegator.findByAnd("ProductFeatureAndAppl", UtilMisc.toMap("productId", productId, "productFeatureApplTypeId", "STANDARD_FEATURE")), true);
                                 setOrCreateProdFeature(delegator, productId, currentProductFeatureAndAppls, "VLIQ_ozUS", "AMOUNT", floz);
@@ -528,7 +529,7 @@ public class ProductEvents {
      * @throws GenericEntityException
      */
     private static void setOrCreateProdFeature(GenericDelegator delegator, String productId, List currentProductFeatureAndAppls,
-                                          String uomId, String productFeatureTypeId, Double numberSpecified) throws GenericEntityException {
+                                          String uomId, String productFeatureTypeId, BigDecimal numberSpecified) throws GenericEntityException {
         
         GenericValue productFeatureType = delegator.findByPrimaryKey("ProductFeatureType", UtilMisc.toMap("productFeatureTypeId", productFeatureTypeId));
         GenericValue uom = delegator.findByPrimaryKey("Uom", UtilMisc.toMap("uomId", uomId));
@@ -543,7 +544,7 @@ public class ProductEvents {
         boolean foundOneEqual = false;
         while (typeUomProductFeatureAndApplIter.hasNext()) {
             GenericValue typeUomProductFeatureAndAppl = (GenericValue) typeUomProductFeatureAndApplIter.next();
-            if ((numberSpecified != null) && (numberSpecified.equals(typeUomProductFeatureAndAppl.getDouble("numberSpecified")))) {
+            if ((numberSpecified != null) && (numberSpecified.equals(typeUomProductFeatureAndAppl.getBigDecimal("numberSpecified")))) {
                 foundOneEqual = true;
             } else {
                 // remove the PFA...

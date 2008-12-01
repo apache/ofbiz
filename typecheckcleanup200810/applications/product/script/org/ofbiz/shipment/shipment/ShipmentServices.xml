@@ -768,7 +768,7 @@ under the License.
                 <field-map field-name="orderItemSeqId" env-name="issuance.orderItemSeqId"/>
             </entity-and>
             <iterate list-name="receipts" entry-name="receipt">
-                <calculate field-name="issuanceQuantity" type="Double">
+                <calculate field-name="issuanceQuantity" type="BigDecimal">
                     <calcop field-name="receipt.quantityAccepted" operator="add">
                         <calcop field-name="receipt.quantityRejected" operator="get"/>
                         <calcop field-name="issuanceQuantity" operator="get"/>
@@ -839,7 +839,7 @@ under the License.
         </call-service>
         
         <!-- reduce the originalShipmentItem.quantity  -->
-        <calculate field-name="originalShipmentItem.quantity" type="Double">
+        <calculate field-name="originalShipmentItem.quantity" type="BigDecimal">
             <calcop operator="add" field-name="originalShipmentItem.quantity">
                 <calcop operator="negative" field-name="parameters.newItemQuantity"/>
             </calcop>
@@ -857,12 +857,12 @@ under the License.
         
         <set field="orderShipmentQuantityLeft" from-field="parameters.newItemQuantity"/>
         <iterate entry-name="itemOrderShipment" list-name="itemOrderShipmentList">
-            <if-compare field="orderShipmentQuantityLeft" operator="greater" value="0" type="Double">
-                <if-compare-field field="itemOrderShipment.quantity" to-field="orderShipmentQuantityLeft" operator="greater" type="Double">
+            <if-compare field="orderShipmentQuantityLeft" operator="greater" value="0" type="BigDecimal">
+                <if-compare-field field="itemOrderShipment.quantity" to-field="orderShipmentQuantityLeft" operator="greater" type="BigDecimal">
                     <!-- there is enough in this OrderShipment record, so just adjust it and move on -->
                     <clear-field field-name="updateOrderShipmentMap"/>
                     <set-service-fields service-name="updateOrderShipment" map-name="itemOrderShipment" to-map-name="updateOrderShipmentMap"/>
-                    <calculate field-name="updateOrderShipmentMap.quantity" type="Double">
+                    <calculate field-name="updateOrderShipmentMap.quantity" type="BigDecimal">
                         <calcop operator="add" field-name="itemOrderShipment.quantity">
                             <calcop operator="negative" field-name="orderShipmentQuantityLeft"/>
                         </calcop>
@@ -877,7 +877,7 @@ under the License.
                     <set field="createOrderShipmentMap.quantity" from-field="orderShipmentQuantityLeft"/>
                     <call-service service-name="createOrderShipment" in-map-name="createOrderShipmentMap"/>
                     
-                    <set field="orderShipmentQuantityLeft" value="0" type="Double"/>
+                    <set field="orderShipmentQuantityLeft" value="0" type="BigDecimal"/>
                     
                     <else>
                         <!-- not enough on this one, create a new one for the new item and delete this one -->
@@ -893,7 +893,7 @@ under the License.
                         <set field="createOrderShipmentMap.quantity" from-field="itemOrderShipment.quantity"/>
                         <call-service service-name="createOrderShipment" in-map-name="createOrderShipmentMap"/>
                         
-                        <calculate field-name="orderShipmentQuantityLeft" type="Double">
+                        <calculate field-name="orderShipmentQuantityLeft" type="BigDecimal">
                             <calcop operator="add" field-name="orderShipmentQuantityLeft">
                                 <calcop operator="negative" field-name="itemOrderShipment.quantity"></calcop>
                             </calcop>
@@ -1047,7 +1047,7 @@ under the License.
             </call-service>
         <else>
             <!-- add the quantities and store it -->            
-            <calculate field-name="shipmentPackageContent.quantity" type="Double">
+            <calculate field-name="shipmentPackageContent.quantity" type="BigDecimal">
                 <calcop field-name="shipmentPackageContent.quantity" operator="add"><calcop field-name="parameters.quantity" operator="get"/></calcop>
             </calculate>
             <set-service-fields service-name="updateShipmentPackageContent" map-name="shipmentPackageContent" to-map-name="updateSPCMap"/>
@@ -1859,13 +1859,13 @@ under the License.
         <set from-field="parameters.orderItemSeqId" field="inMap.orderItemSeqId"/>
         <call-service service-name="deleteOrderShipment" in-map-name="inMap"/>
 
-        <calculate field-name="shipmentItem.quantity" type="Double">
+        <calculate field-name="shipmentItem.quantity" type="BigDecimal">
             <calcop field-name="shipmentItem.quantity" operator="subtract">
                 <calcop field-name="orderShipment.quantity" operator="get"/>
             </calcop>
         </calculate>
         <clear-field field-name="inMap"/>
-        <if-compare field="shipmentItem.quantity" operator="greater" value="0.0" type="Double">
+        <if-compare field="shipmentItem.quantity" operator="greater" value="0.0" type="BigDecimal">
             <set from-field="parameters.userLogin" field="inMap.userLogin"/>
             <set from-field="parameters.shipmentId" field="inMap.shipmentId"/>
             <set from-field="parameters.shipmentItemSeqId" field="inMap.shipmentItemSeqId"/>
@@ -1892,7 +1892,7 @@ under the License.
         </check-permission>
 
         <!-- if quantity is greater than 0 we add or update the ShipmentPlan -->
-        <if-compare field="parameters.quantity" operator="greater" value="0" type="Double">
+        <if-compare field="parameters.quantity" operator="greater" value="0" type="BigDecimal">
 
             <!-- get orderHeader -->
             <make-value entity-name="OrderHeader" value-name="orderHeaderLookupPk"/>
@@ -1923,7 +1923,7 @@ under the License.
                 <result-to-field result-name="remainingQuantity" field-name="remainingQuantity"/>
             </call-service>
 
-            <if-compare-field field="parameters.quantity" to-field="remainingQuantity" operator="greater" type="Double">
+            <if-compare-field field="parameters.quantity" to-field="remainingQuantity" operator="greater" type="BigDecimal">
                 <string-to-list string="Not adding Order Item to plan for shipment [${parameters.shipmentId}] because the quantity is greater than the remaining quantity (order [${parameters.orderId}], order item [${parameters.orderItemSeqId}])" list-name="error_list"/>
             </if-compare-field>
             <check-errors/>
@@ -1955,7 +1955,7 @@ under the License.
         <set from-field="parameters.orderItemSeqId" field="orderShipmentLookup.orderItemSeqId"/>
         <find-by-and entity-name="OrderShipment" map-name="orderShipmentLookup" list-name="existingOrderShipments"/>
         <iterate list-name="existingOrderShipments" entry-name="orderShipment">
-            <calculate field-name="plannedQuantity" type="Double">
+            <calculate field-name="plannedQuantity" type="BigDecimal">
                 <calcop field-name="plannedQuantity" operator="add">
                     <calcop field-name="orderShipment.quantity" operator="get"/>
                 </calcop>
@@ -1964,7 +1964,7 @@ under the License.
         <clear-field field-name="existingOrderShipments"/>
         <find-by-and entity-name="ItemIssuance" map-name="orderShipmentLookup" list-name="existingOrderShipments"/>
         <iterate list-name="existingOrderShipments" entry-name="itemIssuance">
-            <calculate field-name="issuedQuantity" type="Double">
+            <calculate field-name="issuedQuantity" type="BigDecimal">
                 <calcop field-name="issuedQuantity" operator="add">
                     <calcop field-name="itemIssuance.quantity" operator="get"/>
                     <calcop field-name="itemIssuance.cancelQuantity" operator="negative"/>                    
@@ -1972,12 +1972,12 @@ under the License.
             </calculate>
         </iterate>
 
-        <calculate field-name="totPlannedOrIssuedQuantity" type="Double">
+        <calculate field-name="totPlannedOrIssuedQuantity" type="BigDecimal">
             <calcop field-name="issuedQuantity" operator="add">
                 <calcop field-name="plannedQuantity" operator="get"/>
             </calcop>
         </calculate>
-        <calculate field-name="remainingQuantity" type="Double">
+        <calculate field-name="remainingQuantity" type="BigDecimal">
             <calcop field-name="orderItem.quantity" operator="subtract">
                 <calcop field-name="orderItem.cancelQuantity" operator="get"/>
                 <calcop field-name="totPlannedOrIssuedQuantity" operator="get"/>

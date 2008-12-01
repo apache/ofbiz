@@ -27,6 +27,7 @@ import org.ofbiz.service.GenericDispatcher;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.base.util.UtilMisc;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
@@ -78,7 +79,7 @@ public class StockMovesTest extends TestCase {
         ppsmCtx.put("facilityId", "WebStoreWarehouse");
         ppsmCtx.put("locationSeqId","TLTLTLUL01" );
         ppsmCtx.put("targetLocationSeqId", "TLTLTLLL01");
-        ppsmCtx.put("quantityMoved", new Double(5));
+        ppsmCtx.put("quantityMoved", new BigDecimal("5"));
         ppsmCtx.put("userLogin", userLogin);
         Map respMap3 = dispatcher.runSync("processPhysicalStockMove", ppsmCtx);
     }

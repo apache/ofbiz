@@ -18,6 +18,8 @@
  *******************************************************************************/
 package org.ofbiz.base.util;
 
+import java.math.BigDecimal;
+
 /**
  * <p/>
  * <p>
@@ -25,25 +27,24 @@ package org.ofbiz.base.util;
  * </p>
  * <br/>
  * <br/>
- * Created on Oct 2, 2004 by dustin
  */
 public class UtilParse {
 
     /**
      * return nulls for empty strings, as the entity engine can deal with nulls. This will provide blanks
      * in fields where doubles display. Blank meaning null, vs. 0 which means 0
-     * @param doubleString
+     * @param bigDecimalString
      * @return
      */
-    public static Double parseDoubleForEntity(String doubleString) throws NumberFormatException {
-        if (doubleString == null) {
+    public static BigDecimal parseBigDecimalForEntity(String bigDecimalString) throws NumberFormatException {
+        if (bigDecimalString == null) {
             return null;
         }
-        doubleString = doubleString.trim();
-        doubleString = doubleString.replaceAll(",", "");
-        if (doubleString.length() < 1) {
+        bigDecimalString = bigDecimalString.trim();
+        bigDecimalString = bigDecimalString.replaceAll(",", "");
+        if (bigDecimalString.length() < 1) {
             return null;
         }
-        return Double.valueOf(doubleString);
+        return new BigDecimal(bigDecimalString);
     }
 }
