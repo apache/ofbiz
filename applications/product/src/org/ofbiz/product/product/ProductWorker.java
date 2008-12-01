@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.sql.Timestamp;
 import javax.servlet.ServletRequest;
 import javax.servlet.jsp.PageContext;
@@ -42,6 +44,7 @@ import org.ofbiz.product.config.ProductConfigWrapper.ConfigOption;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
+
 import javolution.util.FastList;
 import javolution.util.FastSet;
 
@@ -52,6 +55,8 @@ public class ProductWorker {
     
     public static final String module = ProductWorker.class.getName();
     public static final String resource = "ProductUiLabels";
+
+    public static final MathContext generalRounding = new MathContext(10);
 
     /** @deprecated */
     public static void getProduct(PageContext pageContext, String attributeName) {
@@ -240,14 +245,14 @@ public class ProductWorker {
      * invokes the getInventoryAvailableByFacility service, returns true if specified quantity is available, else false
      * this is only used in the related method that uses a ProductConfigWrapper, until that is refactored into a service as well...
      */
-    private static boolean isProductInventoryAvailableByFacility(String productId, String inventoryFacilityId, double quantity, LocalDispatcher dispatcher) throws GenericServiceException {
-        Double availableToPromise = null;
+    private static boolean isProductInventoryAvailableByFacility(String productId, String inventoryFacilityId, BigDecimal quantity, LocalDispatcher dispatcher) throws GenericServiceException {
+        BigDecimal availableToPromise = null;
 
         try {
             Map result = dispatcher.runSync("getInventoryAvailableByFacility",
                                             UtilMisc.toMap("productId", productId, "facilityId", inventoryFacilityId));
 
-            availableToPromise = (Double) result.get("availableToPromiseTotal");
+            availableToPromise = (BigDecimal) result.get("availableToPromiseTotal");
 
             if (availableToPromise == null) {
                 Debug.logWarning("The getInventoryAvailableByFacility service returned a null availableToPromise, the error message was:\n" + result.get(ModelService.ERROR_MESSAGE), module);
@@ -259,7 +264,7 @@ public class ProductWorker {
         }
 
         // check to see if we got enough back...
-        if (availableToPromise.doubleValue() >= quantity) {
+        if (availableToPromise.compareTo(quantity) >= 0) {
             if (Debug.infoOn()) Debug.logInfo("Inventory IS available in facility with id " + inventoryFacilityId + " for product id " + productId + "; desired quantity is " + quantity + ", available quantity is " + availableToPromise, module);
             return true;
         } else {
@@ -272,7 +277,7 @@ public class ProductWorker {
      * Invokes the getInventoryAvailableByFacility service, returns true if specified quantity is available for all the selected parts, else false.
      * Also, set the available flag for all the product configuration's options.
      **/
-    public static boolean isProductInventoryAvailableByFacility(ProductConfigWrapper productConfig, String inventoryFacilityId, double quantity, LocalDispatcher dispatcher) throws GenericServiceException {
+    public static boolean isProductInventoryAvailableByFacility(ProductConfigWrapper productConfig, String inventoryFacilityId, BigDecimal quantity, LocalDispatcher dispatcher) throws GenericServiceException {
         boolean available = true;
         List options = productConfig.getSelectedOptions();
         Iterator optionsIt = options.iterator();
@@ -283,10 +288,10 @@ public class ProductWorker {
             while (productsIt.hasNext()) {
                 GenericValue product = (GenericValue)productsIt.next();
                 String productId = product.getString("productId");
-                Double cmpQuantity = product.getDouble("quantity");
-                double neededQty = 1.0;
+                BigDecimal cmpQuantity = product.getBigDecimal("quantity");
+                BigDecimal neededQty = BigDecimal.ZERO;
                 if (cmpQuantity != null) {
-                    neededQty = quantity * cmpQuantity.doubleValue();
+                    neededQty = quantity.multiply(cmpQuantity);
                 }
                 if (!isProductInventoryAvailableByFacility(productId, inventoryFacilityId, neededQty, dispatcher)) {
                     ci.setAvailable(false);
@@ -590,8 +595,8 @@ public class ProductWorker {
 
     // product calc methods
     
-    public static double calcOrderAdjustments(List orderHeaderAdjustments, double subTotal, boolean includeOther, boolean includeTax, boolean includeShipping) {
-        double adjTotal = 0.0;
+    public static BigDecimal calcOrderAdjustments(List orderHeaderAdjustments, BigDecimal subTotal, boolean includeOther, boolean includeTax, boolean includeShipping) {
+    	BigDecimal adjTotal = BigDecimal.ZERO;
 
         if (UtilValidate.isNotEmpty(orderHeaderAdjustments)) {
             List filteredAdjs = filterOrderAdjustments(orderHeaderAdjustments, includeOther, includeTax, includeShipping, false, false);
@@ -600,20 +605,20 @@ public class ProductWorker {
             while (adjIt.hasNext()) {
                 GenericValue orderAdjustment = (GenericValue) adjIt.next();
 
-                adjTotal += calcOrderAdjustment(orderAdjustment, subTotal);
+                adjTotal = adjTotal.add(calcOrderAdjustment(orderAdjustment, subTotal));
             }
         }
         return adjTotal;
     }
     
-    public static double calcOrderAdjustment(GenericValue orderAdjustment, double orderSubTotal) {
-        double adjustment = 0.0;
+    public static BigDecimal calcOrderAdjustment(GenericValue orderAdjustment, BigDecimal orderSubTotal) {
+        BigDecimal adjustment = BigDecimal.ZERO;
 
         if (orderAdjustment.get("amount") != null) {
-            adjustment += orderAdjustment.getDouble("amount").doubleValue();
+            adjustment = adjustment.add(orderAdjustment.getBigDecimal("amount"));
         }
         else if (orderAdjustment.get("sourcePercentage") != null) {
-            adjustment += (orderAdjustment.getDouble("sourcePercentage").doubleValue() * orderSubTotal);
+            adjustment = adjustment.add(orderAdjustment.getBigDecimal("sourcePercentage").multiply(orderSubTotal));
         }
         return adjustment;
     }    
@@ -655,11 +660,11 @@ public class ProductWorker {
         return newOrderAdjustmentsList;
     }
 
-    public static double getAverageProductRating(GenericDelegator delegator, String productId) {
+    public static BigDecimal getAverageProductRating(GenericDelegator delegator, String productId) {
         return getAverageProductRating(delegator, productId, null);
     }
     
-    public static double getAverageProductRating(GenericDelegator delegator, String productId, String productStoreId) {
+    public static BigDecimal getAverageProductRating(GenericDelegator delegator, String productId, String productStoreId) {
         GenericValue product = null;
         try {
             product = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", productId));
@@ -669,30 +674,30 @@ public class ProductWorker {
         return ProductWorker.getAverageProductRating(product, productStoreId);
     }
 
-    public static double getAverageProductRating(GenericValue product, String productStoreId) {
+    public static BigDecimal getAverageProductRating(GenericValue product, String productStoreId) {
         return getAverageProductRating(product, null, productStoreId);
     }
 
-    public static double getAverageProductRating(GenericValue product, List reviews, String productStoreId) {
+    public static BigDecimal getAverageProductRating(GenericValue product, List reviews, String productStoreId) {
         if (product == null) {
             Debug.logWarning("Invalid product entity passed; unable to obtain valid product rating", module);
-            return 0.00;
+            return BigDecimal.ZERO;
         }
 
-        double productRating = 0.00;
-        Double productEntityRating = product.getDouble("productRating");
+        BigDecimal productRating = BigDecimal.ZERO;
+        BigDecimal productEntityRating = product.getBigDecimal("productRating");
         String entityFieldType = product.getString("ratingTypeEnum");
 
         // null check
         if (productEntityRating == null) {
-            productEntityRating = new Double(0);
+            productEntityRating = BigDecimal.ZERO;
         }
         if (entityFieldType == null) {
             entityFieldType = new String();
         }
 
         if ("PRDR_FLAT".equals(entityFieldType)) {
-            productRating = productEntityRating.doubleValue();
+            productRating = productEntityRating;
         } else {
             // get the product rating from the ProductReview entity; limit by product store if ID is passed
             Map reviewByAnd = UtilMisc.toMap("statusId", "PRR_APPROVED");
@@ -710,32 +715,32 @@ public class ProductWorker {
             }
 
             // tally the average
-            double ratingTally = 0;
-            double numRatings = 0;
+            BigDecimal ratingTally = BigDecimal.ZERO;
+            BigDecimal numRatings = BigDecimal.ZERO;
             if (reviews != null) {
                 Iterator i = reviews.iterator();
                 while (i.hasNext()) {
                     GenericValue productReview = (GenericValue) i.next();
-                    Double rating = productReview.getDouble("productRating");
+                    BigDecimal rating = productReview.getBigDecimal("productRating");
                     if (rating != null) {
-                        ratingTally += rating.doubleValue();
-                        numRatings++;
+                        ratingTally = ratingTally.add(rating);
+                        numRatings.add(BigDecimal.ONE);
                     }
                 }
             }
-            if (ratingTally > 0 && numRatings > 0) {
-                productRating = ratingTally /  numRatings;
+            if (ratingTally.compareTo(BigDecimal.ZERO) > 0 && numRatings.compareTo(BigDecimal.ZERO) > 0) {
+                productRating = ratingTally.divide(numRatings, generalRounding);
             }
 
             if ("PRDR_MIN".equals(entityFieldType)) {
                 // check for min
-                if (productEntityRating.doubleValue() > productRating) {
-                    productRating = productEntityRating.doubleValue();
+                if (productEntityRating.compareTo(productRating) > 0) {
+                    productRating = productEntityRating;
                 }
             } else if ("PRDR_MAX".equals(entityFieldType)) {
                 // check for max
-                if (productRating > productEntityRating.doubleValue()) {
-                    productRating = productEntityRating.doubleValue();
+                if (productRating.compareTo(productEntityRating) > 0) {
+                    productRating = productEntityRating;
                 }
             }
         }
@@ -1121,12 +1126,12 @@ nextProd:       while(assocIter.hasNext()) {
                         if (UtilValidate.isNotEmpty(productFeaturePrices)) {
                             GenericValue productFeaturePrice = productFeaturePrices.get(0);
                             if (UtilValidate.isNotEmpty(productFeaturePrice)) {
-                                productPrice.put("price", productPrice.getDouble("price").doubleValue() + productFeaturePrice.getDouble("price").doubleValue());
+                                productPrice.put("price", productPrice.getBigDecimal("price").add(productFeaturePrice.getBigDecimal("price")));
                             }
                         }
                     }
                     if (productPrice.get("price") == null) {
-                        productPrice.put("price", productPrice.getDouble("price").doubleValue());
+                        productPrice.put("price", productPrice.getBigDecimal("price"));
                     }
                     productPrice.put("productId",  product.getString("productId"));
                     productPrice.create();

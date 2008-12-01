@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -58,13 +59,15 @@ public class UspsServices {
     public final static String module = UspsServices.class.getName();
     public final static String errorResource = "ProductErrorUiLabels";
 
+    public static final MathContext generalRounding = new MathContext(10);
+
     public static Map uspsRateInquire(DispatchContext dctx, Map context) {
 
         GenericDelegator delegator = dctx.getDelegator();
 
         // check for 0 weight
-        Double shippableWeight = (Double) context.get("shippableWeight");
-        if (shippableWeight.doubleValue() == 0) {
+        BigDecimal shippableWeight = (BigDecimal) context.get("shippableWeight");
+        if (shippableWeight.compareTo(BigDecimal.ZERO) == 0) {
             // TODO: should we return an error, or $0.00 ?
             return ServiceUtil.returnFailure("shippableWeight must be greater than 0");
         }
@@ -127,14 +130,14 @@ public class UspsServices {
         Document requestDocument = createUspsRequestDocument("RateV2Request");
 
         // TODO: 70 lb max is valid for Express, Priority and Parcel only - handle other methods
-        double maxWeight = 70;
+        BigDecimal maxWeight = new BigDecimal("70");
         String maxWeightStr = UtilProperties.getPropertyValue((String) context.get("serviceConfigProps"),
                 "shipment.usps.max.estimate.weight", "70");
         try {
-            maxWeight = Double.parseDouble(maxWeightStr);
+            maxWeight = new BigDecimal(maxWeightStr);
         } catch (NumberFormatException e) {
             Debug.logWarning("Error parsing max estimate weight string [" + maxWeightStr + "], using default instead", module);
-            maxWeight = 70;
+            maxWeight = new BigDecimal("70");
         }
 
         List shippableItemInfo = (List) context.get("shippableItemInfo");
@@ -144,8 +147,8 @@ public class UspsServices {
         for (ListIterator li = packages.listIterator(); li.hasNext();) {
             Map packageMap = (Map) li.next();
 
-            double packageWeight = isOnePackage ? shippableWeight.doubleValue() : calcPackageWeight(dctx, packageMap, shippableItemInfo, 0);
-            if (packageWeight == 0) {
+            BigDecimal packageWeight = isOnePackage ? shippableWeight : calcPackageWeight(dctx, packageMap, shippableItemInfo, BigDecimal.ZERO);
+            if (packageWeight.compareTo(BigDecimal.ZERO) == 0) {
                 continue;
             }
 
@@ -156,13 +159,13 @@ public class UspsServices {
             UtilXml.addChildElementValue(packageElement, "ZipOrigination", originationZip.substring(0,5), requestDocument);
             UtilXml.addChildElementValue(packageElement, "ZipDestination", destinationZip.substring(0,5), requestDocument);
 
-            double weightPounds = Math.floor(packageWeight);
+            BigDecimal weightPounds = packageWeight.setScale(0, BigDecimal.ROUND_FLOOR);
             // for Parcel post, the weight must be at least 1 lb
-            if ("PARCEL".equals(serviceCode.toUpperCase()) && (weightPounds < 1.0)) {
-                weightPounds = 1.0;
-                packageWeight = 0.0;
+            if ("PARCEL".equals(serviceCode.toUpperCase()) && (weightPounds.compareTo(BigDecimal.ONE) < 0)) {
+                weightPounds = BigDecimal.ONE;
+                packageWeight = BigDecimal.ZERO;
             }
-            double weightOunces = Math.ceil(packageWeight * 16 % 16);
+            BigDecimal weightOunces = packageWeight.multiply(new BigDecimal("16")).remainder(new BigDecimal("16")).setScale(0, BigDecimal.ROUND_CEILING);
             DecimalFormat df = new DecimalFormat("#");  // USPS only accepts whole numbers like 1 and not 1.0
             UtilXml.addChildElementValue(packageElement, "Pounds", df.format(weightPounds), requestDocument);
             UtilXml.addChildElementValue(packageElement, "Ounces", df.format(weightOunces), requestDocument);
@@ -199,24 +202,24 @@ public class UspsServices {
             return ServiceUtil.returnError("No rate available at this time");
         }
 
-        double estimateAmount = 0.00;
+        BigDecimal estimateAmount = BigDecimal.ZERO;
         for (Iterator i = rates.iterator(); i.hasNext();) {
             Element packageElement = (Element) i.next();
             try {
                 Element postageElement = UtilXml.firstChildElement(packageElement, "Postage");
-                double packageAmount = Double.parseDouble(UtilXml.childElementValue(postageElement, "Rate"));
-                estimateAmount += packageAmount;
+                BigDecimal packageAmount = new BigDecimal(UtilXml.childElementValue(postageElement, "Rate"));
+                estimateAmount = estimateAmount.add(packageAmount);
             } catch (NumberFormatException e) {
                 Debug.log(e, module);
             }
         }
 
         Map result = ServiceUtil.returnSuccess();
-        result.put("shippingEstimateAmount", new Double(estimateAmount));
+        result.put("shippingEstimateAmount", estimateAmount);
         return result;
     }
 
-    private static List getPackageSplit(DispatchContext dctx, List shippableItemInfo, double maxWeight) {
+    private static List getPackageSplit(DispatchContext dctx, List shippableItemInfo, BigDecimal maxWeight) {
         // create the package list w/ the first pacakge
         List packages = FastList.newInstance();
 
@@ -225,24 +228,24 @@ public class UspsServices {
             while (sii.hasNext()) {
                 Map itemInfo = (Map) sii.next();
                 long pieces = ((Long) itemInfo.get("piecesIncluded")).longValue();
-                double totalQuantity = ((Double) itemInfo.get("quantity")).doubleValue();
-                double totalWeight = ((Double) itemInfo.get("weight")).doubleValue();
+                BigDecimal totalQuantity = (BigDecimal) itemInfo.get("quantity");
+                BigDecimal totalWeight = (BigDecimal) itemInfo.get("weight");
                 String productId = (String) itemInfo.get("productId");
 
                 // sanity check
                 if (pieces < 1) {
                     pieces = 1; // can NEVER be less than one
                 }
-                double weight = totalWeight / pieces;
+                BigDecimal weight = totalWeight.divide(BigDecimal.valueOf(pieces), generalRounding);
 
-                for (int z = 1; z <= totalQuantity; z++) {
-                    double partialQty = pieces > 1 ? 1.000 / pieces : 1;
+                for (int z = 1; z <= totalQuantity.intValue(); z++) {
+                	BigDecimal partialQty = pieces > 1 ? BigDecimal.ONE.divide(BigDecimal.valueOf(pieces), generalRounding) : BigDecimal.ONE;
                     for (long x = 0; x < pieces; x++) {
-                        if (weight >= maxWeight) {
+                        if (weight.compareTo(maxWeight) >= 0) {
                             Map newPackage = new HashMap();
-                            newPackage.put(productId, new Double(partialQty));
+                            newPackage.put(productId, partialQty);
                             packages.add(newPackage);
-                        } else if (totalWeight > 0) {
+                        } else if (totalWeight.compareTo(BigDecimal.ZERO) > 0) {
                             // create the first package
                             if (packages.size() == 0) {
                                 packages.add(new HashMap());
@@ -254,18 +257,18 @@ public class UspsServices {
                             for (int pi = 0; pi < packageSize; pi++) {
                                 if (!addedToPackage) {
                                     Map packageMap = (Map) packages.get(pi);
-                                    double packageWeight = calcPackageWeight(dctx, packageMap, shippableItemInfo, weight);
-                                    if (packageWeight <= maxWeight) {
-                                        Double qtyD = (Double) packageMap.get(productId);
-                                        double qty = qtyD == null ? 0 : qtyD.doubleValue();
-                                        packageMap.put(productId, new Double(qty + partialQty));
+                                    BigDecimal packageWeight = calcPackageWeight(dctx, packageMap, shippableItemInfo, weight);
+                                    if (packageWeight.compareTo(maxWeight) <= 0) {
+                                    	BigDecimal qty = (BigDecimal) packageMap.get(productId);
+                                        qty = qty == null ? BigDecimal.ZERO : qty;
+                                        packageMap.put(productId, qty.add(partialQty));
                                         addedToPackage = true;
                                     }
                                 }
                             }
                             if (!addedToPackage) {
                                 Map packageMap = new HashMap();
-                                packageMap.put(productId, new Double(partialQty));
+                                packageMap.put(productId, partialQty);
                                 packages.add(packageMap);
                             }
                         }
@@ -276,10 +279,10 @@ public class UspsServices {
         return packages;
     }
 
-    private static double calcPackageWeight(DispatchContext dctx, Map packageMap, List shippableItemInfo, double additionalWeight) {
+    private static BigDecimal calcPackageWeight(DispatchContext dctx, Map packageMap, List shippableItemInfo, BigDecimal additionalWeight) {
 
         LocalDispatcher dispatcher = dctx.getDispatcher();
-        double totalWeight = 0.00;
+        BigDecimal totalWeight = BigDecimal.ZERO;
         String defaultWeightUomId = UtilProperties.getPropertyValue("shipment.properties", "shipment.default.weight.uom");
         if (UtilValidate.isEmpty(defaultWeightUomId)) {
             Debug.logWarning("No shipment.default.weight.uom set in shipment.properties, setting it to WT_oz for USPS", module);
@@ -290,8 +293,8 @@ public class UspsServices {
         while (i.hasNext()) {
             String productId = (String) i.next();
             Map productInfo = getProductItemInfo(shippableItemInfo, productId);
-            double productWeight = ((Double) productInfo.get("weight")).doubleValue();
-            double quantity = ((Double) packageMap.get(productId)).doubleValue();
+            BigDecimal productWeight = (BigDecimal) productInfo.get("weight");
+            BigDecimal quantity = (BigDecimal) packageMap.get(productId);
 
             // DLK - I'm not sure if this line is working. shipment_package seems to leave this value null so???
             String weightUomId = (String) productInfo.get("weight_uom_id");
@@ -306,23 +309,23 @@ public class UspsServices {
                 // attempt a conversion to pounds
                 Map result = new HashMap();
                 try {
-                    result = dispatcher.runSync("convertUom", UtilMisc.<String, Object>toMap("uomId", weightUomId, "uomIdTo", "WT_lb", "originalValue", new Double(productWeight)));
+                    result = dispatcher.runSync("convertUom", UtilMisc.<String, Object>toMap("uomId", weightUomId, "uomIdTo", "WT_lb", "originalValue", productWeight));
                 } catch (GenericServiceException ex) {
                     Debug.logError(ex, module);
                 }
                     
                 if (result.get(ModelService.RESPONSE_MESSAGE).equals(ModelService.RESPOND_SUCCESS) && result.get("convertedValue") != null) {
-                    productWeight = ((Double) result.get("convertedValue")).doubleValue();
+                    productWeight = (BigDecimal) result.get("convertedValue");
                 } else {
                     Debug.logError("Unsupported weightUom [" + weightUomId + "] for calcPackageWeight running productId " + productId + ", could not find a conversion factor to WT_lb",module);
                 }
                     
             }
 
-            totalWeight += (productWeight * quantity);
+            totalWeight = totalWeight.add(productWeight.multiply(quantity));
         }
         Debug.logInfo("Package Weight : " + String.valueOf(totalWeight) + " lbs.", module);
-        return totalWeight + additionalWeight;
+        return totalWeight.add(additionalWeight);
     }
 
     // lifted from UpsServices with no changes - 2004.09.06 JFE
@@ -866,7 +869,7 @@ public class UspsServices {
                 return ServiceUtil.returnError("No packages found for ShipmentRouteSegment " + srsKeyString);
             }
 
-            double actualTransportCost = 0;
+            BigDecimal actualTransportCost = BigDecimal.ZERO;
 
             String carrierDeliveryZone = null;
             String carrierRestrictionCodes = null;
@@ -901,9 +904,9 @@ public class UspsServices {
                     return ServiceUtil.returnError("weight not found for ShipmentPackage " + spKeyString);
                 }
 
-                double weight = 0;
+                BigDecimal weight = BigDecimal.ZERO;
                 try {
-                    weight = Double.parseDouble(weightStr);
+                    weight = new BigDecimal(weightStr);
                 } catch (NumberFormatException nfe) {
                     nfe.printStackTrace(); // TODO: handle exception
                 }
@@ -916,13 +919,13 @@ public class UspsServices {
                     // attempt a conversion to pounds
                     Map result = new HashMap();
                     try {
-                        result = dispatcher.runSync("convertUom", UtilMisc.<String, Object>toMap("uomId", weightUomId, "uomIdTo", "WT_lb", "originalValue", new Double(weight)));
+                        result = dispatcher.runSync("convertUom", UtilMisc.<String, Object>toMap("uomId", weightUomId, "uomIdTo", "WT_lb", "originalValue", weight));
                     } catch (GenericServiceException ex) {
                         return ServiceUtil.returnError(ex.getMessage());
                     }
                     
                     if (result.get(ModelService.RESPONSE_MESSAGE).equals(ModelService.RESPOND_SUCCESS) && result.get("convertedValue") != null) {
-                        weight *= ((Double) result.get("convertedValue")).doubleValue();
+                        weight = weight.multiply((BigDecimal) result.get("convertedValue"));
                     } else {
                         return ServiceUtil.returnError("Unsupported weightUom [" + weightUomId + "] for ShipmentPackage " +
                                 spKeyString + ", could not find a conversion factor for WT_lb");
@@ -930,8 +933,8 @@ public class UspsServices {
                     
                 }
 
-                double weightPounds = Math.floor(weight);
-                double weightOunces = Math.ceil(weight * 16 % 16);
+                BigDecimal weightPounds = weight.setScale(0, BigDecimal.ROUND_FLOOR);
+                BigDecimal weightOunces = weight.multiply(new BigDecimal("16")).remainder(new BigDecimal("16")).setScale(0, BigDecimal.ROUND_CEILING);
 
                 DecimalFormat df = new DecimalFormat("#");
                 UtilXml.addChildElementValue(packageElement, "Pounds", df.format(weightPounds), requestDocument);
@@ -997,13 +1000,13 @@ public class UspsServices {
                             "missing or empty Postage element");
                 }
 
-                double postage = 0;
+                BigDecimal postage = BigDecimal.ZERO;
                 try {
-                    postage = Double.parseDouble(postageString);
+                    postage = new BigDecimal(postageString);
                 } catch (NumberFormatException nfe) {
                     nfe.printStackTrace(); // TODO: handle exception
                 }
-                actualTransportCost += postage;
+                actualTransportCost = actualTransportCost.add(postage);
 
                 shipmentPackageRouteSeg.setString("packageTransportCost", postageString);
                 shipmentPackageRouteSeg.store();
@@ -1187,9 +1190,9 @@ public class UspsServices {
                     return ServiceUtil.returnError("weight not found for ShipmentPackage " + spKeyString);
                 }
 
-                double weight = 0;
+                BigDecimal weight = BigDecimal.ZERO;
                 try {
-                    weight = Double.parseDouble(weightStr);
+                    weight = new BigDecimal(weightStr);
                 } catch (NumberFormatException nfe) {
                     nfe.printStackTrace(); // TODO: handle exception
                 }
@@ -1207,11 +1210,11 @@ public class UspsServices {
                         return ServiceUtil.returnError("Unsupported weightUom [" + weightUomId + "] for ShipmentPackage " +
                                 spKeyString + ", could not find a conversion factor for WT_oz");
                     }
-                    weight *= uomConversion.getDouble("conversionFactor").doubleValue();
+                    weight = weight.multiply(uomConversion.getBigDecimal("conversionFactor"));
                 }
 
                 DecimalFormat df = new DecimalFormat("#");
-                UtilXml.addChildElementValue(requestElement, "WeightInOunces", df.format(Math.ceil(weight)), requestDocument);
+                UtilXml.addChildElementValue(requestElement, "WeightInOunces", df.format(weight.setScale(0, BigDecimal.ROUND_CEILING)), requestDocument);
 
                 UtilXml.addChildElementValue(requestElement, "ServiceType", serviceType, requestDocument);
                 UtilXml.addChildElementValue(requestElement, "ImageType", "TIF", requestDocument);

@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.product.product;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -273,7 +274,7 @@ public class ProductSearchEvents {
 
         Timestamp thruDate = null;
         Timestamp fromDate = null;
-        Double amount = null;
+        BigDecimal amount = null;
         Long sequenceNum = null;
 
         try {
@@ -284,7 +285,7 @@ public class ProductSearchEvents {
                 thruDate = Timestamp.valueOf(thruDateStr);
             }
             if (UtilValidate.isNotEmpty(amountStr)) {
-                amount = Double.valueOf(amountStr);
+                amount = new BigDecimal(amountStr);
             }
             if (UtilValidate.isNotEmpty(sequenceNumStr)) {
                 sequenceNum= Long.valueOf(sequenceNumStr);

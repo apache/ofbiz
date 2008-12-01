@@ -19,6 +19,7 @@
 package org.ofbiz.base.util.string;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -317,7 +318,7 @@ public class FlexibleStringExpander implements Serializable {
             Object obj = fma.get(context, locale);
             if (obj != null) {
                 String currencyCode = this.codeExpr.expandString(context, timeZone, locale);
-                buffer.append(UtilFormatOut.formatCurrency(Double.valueOf(obj.toString()), currencyCode, locale));
+                buffer.append(UtilFormatOut.formatCurrency(new BigDecimal(obj.toString()), currencyCode, locale));
             }
         }
     }

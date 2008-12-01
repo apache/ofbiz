@@ -554,7 +554,7 @@ under the License.
                 <set from-field="parameters.defaultQuoteUnitPrice" field="quoteItem.quoteUnitPrice"/>
             </if-not-empty>
             <!--
-            <calculate field-name="quoteItem.quoteUnitPrice" type="Double">
+            <calculate field-name="quoteItem.quoteUnitPrice" type="BigDecimal">
                 <calcop operator="multiply">
                     <calcop operator="get" field-name="parameters.averageCost"/>
                     <calcop operator="get" field-name="parameters.costToPriceMult"/>
@@ -627,7 +627,7 @@ under the License.
                 <condition>
                     <or>
                         <if-empty field="quoteItem.quoteUnitPrice"/>
-                        <if-compare field="quoteItem.quoteUnitPrice" value="0" operator="equals" type="Double"/>
+                        <if-compare field="quoteItem.quoteUnitPrice" value="0" operator="equals" type="BigDecimal"/>
                     </or>
                 </condition>
                 <then>
