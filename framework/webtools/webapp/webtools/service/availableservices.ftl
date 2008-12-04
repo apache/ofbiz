@@ -176,7 +176,6 @@ under the License.
                       </tr>
                       <tr>
                         <td><b>${uiLabelMap.WebtoolsSecasResultToContext}:</b> ${action.resultToContext?default(uiLabelMap.CommonNA)}</td>
-                        <td><b>${uiLabelMap.WebtoolsSecasResultToResult}:</b> ${action.resultToResult?default(uiLabelMap.CommonNA)}</td>
                       </tr>
                       <tr>
                         <td><b>${uiLabelMap.WebtoolsSecasServiceMode}:</b> ${action.serviceMode?default(uiLabelMap.CommonNA)}</td>
