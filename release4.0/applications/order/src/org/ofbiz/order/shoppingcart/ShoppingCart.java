@@ -75,6 +75,8 @@ public class ShoppingCart implements Serializable {
     private String poNumber = null;
     private String orderId = null;
     private String orderName = null;
+    private String orderStatusId = null;
+    private String orderStatusString = null;
     private String firstAttemptOrderId = null;
     private String externalId = null;
     private String internalCode = null;
@@ -4323,5 +4325,21 @@ public class ShoppingCart implements Serializable {
     protected void finalize() throws Throwable {
         // DEJ20050518 we should not call clear because it kills the auto-save shopping list and is unnecessary given that when this object is GC'ed it will cause everything it points to that isn't referenced anywhere else to be GC'ed too: this.clear();
         super.finalize();
+    }
+
+    public String getOrderStatusId() {
+        return orderStatusId;
+    }
+
+    public void setOrderStatusId(String orderStatusId) {
+        this.orderStatusId = orderStatusId;
+    }
+
+    public String getOrderStatusString() {
+        return orderStatusString;
+    }
+
+    public void setOrderStatusString(String orderStatusString) {
+        this.orderStatusString = orderStatusString;
     }
 }
