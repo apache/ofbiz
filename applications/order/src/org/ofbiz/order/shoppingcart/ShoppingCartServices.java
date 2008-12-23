@@ -175,12 +175,15 @@ public class ShoppingCartServices {
         String orderTypeId = orh.getOrderTypeId();
         String currency = orh.getCurrency();
         String website = orh.getWebSiteId();
+        String currentStatusString = orh.getCurrentStatusString();
 
         // create the cart
         ShoppingCart cart = new ShoppingCart(delegator, productStoreId, website, locale, currency);
         cart.setOrderType(orderTypeId);
         cart.setChannelType(orderHeader.getString("salesChannelEnumId"));
         cart.setInternalCode(orderHeader.getString("internalCode"));
+        cart.setOrderStatusId(orderHeader.getString("statusId"));
+        cart.setOrderStatusString(currentStatusString);
 
         try {
             cart.setUserLogin(userLogin, dispatcher);
