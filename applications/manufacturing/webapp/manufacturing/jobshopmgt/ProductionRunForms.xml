@@ -137,7 +137,7 @@ under the License.
      <form name="ViewListProductionRunRoutingTasks" type="list" title="" list-name="productionRunRoutingTasks"
          odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
          <row-actions>
-             <set field="estimatedTotalMilliSeconds" value="${bsh:estimatedMilliSeconds * quantity}" type="Double"/>
+             <set field="estimatedTotalMilliSeconds" value="${bsh:estimatedMilliSeconds * quantity.doubleValue()}" type="Double"/>
          </row-actions>
         <field name="priority" title="${uiLabelMap.CommonSequenceNum}"><display/></field>
         <field name="workEffortId"  title="${uiLabelMap.ManufacturingTaskName}"><display description="${workEffortName} [${workEffortId}]" /></field>
@@ -151,7 +151,7 @@ under the License.
     <form name="ListProductionRunRoutingTasks" type="list" target="ProductionRunTasks" title="" list-name="productionRunRoutingTasks"
         odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
         <row-actions>
-            <set field="estimatedTotalMilliSeconds" value="${bsh:estimatedMilliSeconds * quantity}" type="Double"/>
+            <set field="estimatedTotalMilliSeconds" value="${bsh:estimatedMilliSeconds * quantity.doubleValue}" type="Double"/>
         </row-actions>
         <field name="priority" title="${uiLabelMap.CommonSequenceNum}"><display/></field>
         <field name="workEffortId"  title="${uiLabelMap.ManufacturingTaskName}"><display description="${workEffortName} [${workEffortId}]" /></field>
