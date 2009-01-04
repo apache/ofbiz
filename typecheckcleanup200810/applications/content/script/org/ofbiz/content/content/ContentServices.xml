@@ -982,18 +982,15 @@
         <log level="info" message="textDataLen:${textDataLen}"/>
         <property-to-field resource="forum" property="descriptLen" field-name="descriptLen" />
         <log level="info" message="descriptLen:${descriptLen}"/>
-        <set field="dblTextDataLen" from-field="textDataLen" type="Double"/>
-        <set field="dblDescriptLen" from-field="descriptLen" type="Double"/>
         <call-class-method method-name="min" class-name="java.lang.Math" ret-field-name="subStringLen">
-            <field field-name="dblTextDataLen" type="double"/>
-            <field field-name="dblDescriptLen" type="double"/>
+            <field field-name="textDataLen" type="int"/>
+            <field field-name="descriptLen" type="int"/>
         </call-class-method>
-        <set field="intSubStringLen" from-field="subStringLen" type="Integer"/>
         <log level="info" message="subStringLen:${subStringLen}"/>
         <set field="zeroValue" value="0" type="Integer"/>
         <call-object-method method-name="substring" obj-field-name="parameters.textData" ret-field-name="subDescript">
             <field field-name="zeroValue" type="int"/>
-            <field field-name="intSubStringLen" type="int"/>
+            <field field-name="subStringLen" type="int"/>
         </call-object-method>
         <log level="info" message="subDescript:${subDescript}"/>
         <if-compare operator="equals" field="contentAssocTypeId" value="PUBLISH_LINK">
