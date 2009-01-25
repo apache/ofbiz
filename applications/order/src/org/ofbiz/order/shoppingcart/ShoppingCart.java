@@ -106,7 +106,7 @@ public class ShoppingCart implements Serializable {
     private Map itemGroupByNumberMap = FastMap.newInstance();
     protected long nextGroupNumber = 1;
     private List paymentInfo = FastList.newInstance();
-    private List<CartShipInfo> shipInfo = FastList.<CartShipInfo> newInstance();
+    private List shipInfo = FastList.newInstance();
     private Map contactMechIdsMap = new HashMap();
     private Map orderAttributes = new HashMap();
     private Map attributes = new HashMap(); // user defined attributes
@@ -2019,16 +2019,18 @@ public class ShoppingCart implements Serializable {
     }
 
     protected void cleanUpShipGroups() {
-        for (CartShipInfo csi : this.shipInfo) {
-            Iterator si = csi.shipItemInfo.keySet().iterator();
+        Iterator csi = this.shipInfo.iterator();
+        while (csi.hasNext()) {
+            CartShipInfo cartShipInfo = (CartShipInfo) csi.next();
+            Iterator si = cartShipInfo.shipItemInfo.keySet().iterator();
             while (si.hasNext()) {
                 ShoppingCartItem item = (ShoppingCartItem) si.next();
                 if (item.getQuantity() == 0.0) {
                     si.remove();
                 }
             }
-            if (csi.shipItemInfo.size() == 0) {
-                this.shipInfo.remove(csi);
+            if (cartShipInfo.shipItemInfo.size() == 0) {
+                this.shipInfo.remove(cartShipInfo);
             }
         }
     }
