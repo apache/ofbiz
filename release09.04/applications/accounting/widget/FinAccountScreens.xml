@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+    <!-- Custom apps can use their own financial account decorator by specifying its
+         location in parameters.finAccountDecoratorLocation -->
+    <screen name="CommonFinAccountDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="FindFinAccount"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-service-permission service-name="acctgFinAcctPermissionCheck" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                                <section>
+                                    <condition><not><if-empty field="finAccountId"/></not></condition>
+                                    <widgets>
+                                        <include-menu name="FinAccountTabBar" location="component://accounting/widget/Menus.xml"/>
+                                    </widgets>
+                                </section>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3" text="${uiLabelMap.AccountingViewPermissionError}"/>
+                            </fail-widgets>
+                        </section>
+                        <decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="FindFinAccount">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindFinAccount"/>
+                <set field="headerItem" value="FindFinAccount"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonFinAccountDecorator" location="${parameters.finAccountDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <decorator-section name="menu-bar">
+                                        <container style="button-bar">
+                                            <link target="EditFinAccount" text="${uiLabelMap.CommonCreateNew} ${uiLabelMap.AccountingFinAccount}" style="buttontext"/>
+                                        </container>
+                                    </decorator-section>
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindFinAccounts" location="component://accounting/widget/FinAccountForms.xml"/>
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+                                        <include-form name="ListFinAccounts" location="component://accounting/widget/FinAccountForms.xml"/>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditFinAccount">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditFinAccount"/>
+                <set field="tabButtonItem" value="EditFinAccount"/>
+                <set field="finAccountId" from-field="parameters.finAccountId"/>
+                <property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="USD"/>
+                <entity-one entity-name="FinAccount" value-field="finAccount"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonFinAccountDecorator" location="${parameters.finAccountDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <container style="screenlet">
+                                    <container style="screenlet-title-bar">
+                                        <container style="h3">
+                                            <label text="${uiLabelMap.AccountingEditFinAccount}"/>
+                                        </container>
+                                    </container>
+                                    <container style="screenlet-body">
+                                        <section>
+                                            <condition><not><if-empty field="finAccountId"/></not></condition>
+                                            <widgets>
+                                                <container style="button-bar">
+                                                    <link target="EditFinAccount" text="${uiLabelMap.CommonCreateNew} ${uiLabelMap.AccountingFinAccount}" style="buttontext"/>
+                                                </container>
+                                            </widgets>
+                                        </section>
+                                        <include-form name="EditFinAccount" location="component://accounting/widget/FinAccountForms.xml"/>
+                                    </container>
+                                </container>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditFinAccountRoles">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditFinAccountRole"/>
+                <set field="tabButtonItem" value="EditFinAccountRoles"/>
+                <set field="finAccountId" from-field="parameters.finAccountId"/>
+                <entity-one entity-name="FinAccount" value-field="finAccount"/>
+                <set field="partyId" from-field="parameters.partyId"/>
+                <set field="roleTypeId" from-field="parameters.roleTypeId"/>
+                <set field="fromDate" from-field="parameters.fromDate"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonFinAccountDecorator" location="${parameters.finAccountDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="FinAccountRolePanel" title="${uiLabelMap.PageTitleEditFinAccountRole} ${uiLabelMap.CommonFor} ${finAccount.finAccountName} [${finAccountId}]" collapsible="true">
+                            <include-form name="AddFinAccountRole" location="component://accounting/widget/FinAccountForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListFinAccountRoles" location="component://accounting/widget/FinAccountForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditFinAccountTrans">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditFinAccountTrans"/>
+                <set field="tabButtonItem" value="EditFinAccountTrans"/>
+                <set field="finAccountId" from-field="parameters.finAccountId"/>
+                <entity-one entity-name="FinAccount" value-field="finAccount"/>
+                <set field="finAccountTransId" from-field="parameters.finAccountTransId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonFinAccountDecorator" location="${parameters.finAccountDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="FinAccountTransPanel" title="${uiLabelMap.PageTitleEditFinAccountTrans} ${uiLabelMap.CommonFor} ${finAccount.finAccountName} [${finAccountId}]" collapsible="true">
+                            <include-form name="AddFinAccountTrans" location="component://accounting/widget/FinAccountForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListFinAccountTransactions" location="component://accounting/widget/FinAccountForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditFinAccountAuths">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditFinAccountAuths"/>
+                <set field="tabButtonItem" value="EditFinAccountAuths"/>
+                <set field="finAccountId" from-field="parameters.finAccountId"/>
+                <entity-one entity-name="FinAccount" value-field="finAccount"/>
+                <set field="finAccountAuthId" from-field="parameters.finAccountAuthId"/>
+                <property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="USD"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonFinAccountDecorator" location="${parameters.finAccountDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="FinAccountAuthsPanel" title="${uiLabelMap.PageTitleEditFinAccountAuths} ${uiLabelMap.CommonFor} ${finAccount.finAccountName} [${finAccountId}]" collapsible="true">
+                            <include-form name="AddFinAccountAuth" location="component://accounting/widget/FinAccountForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListFinAccountAuths" location="component://accounting/widget/FinAccountForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<menus xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-menu.xsd">
+
+    <menu name="WorkEffortAppBar" title="${uiLabelMap.WorkEffortWorkEffortManagerApplication}" extends="CommonAppBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+        default-menu-item-name="task" >
+        <menu-item name="task" title="${uiLabelMap.WorkEffortTaskList}"><link target="mytasks"/></menu-item>
+        <menu-item name="calendar" title="${uiLabelMap.WorkEffortCalendar}"><link target="day"/></menu-item>
+        <menu-item name="mytime" title="${uiLabelMap.WorkEffortTimesheetMyTime}"><link target="MyTimesheets"/></menu-item>
+        <menu-item name="request" title="${uiLabelMap.WorkEffortRequestList}"><link target="requestlist"/></menu-item>
+        <menu-item name="workeffort" title="${uiLabelMap.WorkEffortWorkEffort}"><link target="FindWorkEffort"/></menu-item>
+        <menu-item name="timesheet" title="${uiLabelMap.WorkEffortTimesheet}"><link target="FindTimesheet"/></menu-item>
+        <menu-item name="userJobs" title="${uiLabelMap.WorkEffortJobList}"><link target="UserJobs"/></menu-item>
+    </menu>
+    <menu name="WorkEffortTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          default-menu-item-name="WorkEffort">
+        <menu-item name="WorkEffortRelatedSummary" title="${uiLabelMap.WorkEffortSummary}">
+            <link target="WorkEffortSummary">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffort" title="${uiLabelMap.WorkEffortWorkEffort}">
+            <link target="EditWorkEffort">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortAssocs" title="${uiLabelMap.CommonEntityChildren}">
+            <link target="ChildWorkEfforts">
+                <parameter param-name="workEffortId"/>
+                <parameter param-name="trail" from-field="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortPartyAssigns" title="${uiLabelMap.WorkEffortParties}">
+            <link target="ListWorkEffortPartyAssigns">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortRates" title="${uiLabelMap.WorkEffortTimesheetRates}">
+            <link target="EditWorkEffortRates">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortCommEvents" title="${uiLabelMap.WorkEffortCommEvents}">
+            <link target="ListWorkEffortCommEvents">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortShopLists" title="${uiLabelMap.WorkEffortShopLists}">
+            <link target="ListWorkEffortShopLists">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortRequests" title="${uiLabelMap.WorkEffortRequests}">
+            <link target="ListWorkEffortRequests">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortRequirements" title="${uiLabelMap.WorkEffortRequirements}">
+            <link target="ListWorkEffortRequirements">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortQuotes" title="${uiLabelMap.WorkEffortQuotes}">
+            <link target="ListWorkEffortQuotes">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortOrderHeaders" title="${uiLabelMap.WorkEffortOrderHeaders}">
+            <link target="ListWorkEffortOrderHeaders">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortTimeEntries" title="${uiLabelMap.WorkEffortTimesheetTimeEntries}">
+            <link target="EditWorkEffortTimeEntries">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortNotes" title="${uiLabelMap.WorkEffortNotes}">
+            <link target="EditWorkEffortNotes">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortContents" title="${uiLabelMap.ContentContent}">
+            <link target="EditWorkEffortContents">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortGoodStandards" title="${uiLabelMap.ProductProduct}">
+            <link target="EditWorkEffortGoodStandards">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortReviews" title="${uiLabelMap.WorkEffortReviews}">
+            <link target="EditWorkEffortReviews">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortKeywords" title="${uiLabelMap.WorkEffortKeywords}">
+            <link target="EditWorkEffortKeywords">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortContactMechs" title="${uiLabelMap.WorkEffortContactMechs}">
+            <link target="EditWorkEffortContactMechs">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortAgreementAppls" title="${uiLabelMap.WorkEffortAgreementAppls}">
+            <link target="EditAgreementWorkEffortAppls">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortFixedAssetAssigns" title="${uiLabelMap.AccountingFixedAssets}">
+            <link target="ListWorkEffortFixedAssetAssigns">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortEventReminders" title="${uiLabelMap.WorkEffortEventReminders}">
+            <link target="listWorkEffortEventReminders">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="MyCompanyCommsMenu">
+        <menu-item name="newEvent" title="${uiLabelMap.WorkEffortNewEvent}">
+            <link target="newEvent"/>
+        </menu-item>
+    </menu>
+
+</menus>
