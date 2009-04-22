@@ -151,7 +151,6 @@ public class InvoiceServices {
 
         String orderId = (String) context.get("orderId");
         List billItems = (List) context.get("billItems");
-        String invoiceId = (String) context.get("invoiceId");
         boolean previousInvoiceFound = false;
 
         if (billItems == null || billItems.size() == 0) {
@@ -242,28 +241,26 @@ public class InvoiceServices {
             }
 
             // create the invoice record
-            if (UtilValidate.isEmpty(invoiceId)) {
-                Map createInvoiceContext = FastMap.newInstance();
-                createInvoiceContext.put("partyId", billToCustomerPartyId);
-                createInvoiceContext.put("partyIdFrom", billFromVendorPartyId);
-                createInvoiceContext.put("billingAccountId", billingAccountId);
-                createInvoiceContext.put("invoiceDate", invoiceDate);
-                createInvoiceContext.put("dueDate", dueDate);
-                createInvoiceContext.put("invoiceTypeId", invoiceType);
-                // start with INVOICE_IN_PROCESS, in the INVOICE_READY we can't change the invoice (or shouldn't be able to...)
-                createInvoiceContext.put("statusId", "INVOICE_IN_PROCESS");
-                createInvoiceContext.put("currencyUomId", orderHeader.getString("currencyUom"));
-                createInvoiceContext.put("userLogin", userLogin);
+            Map createInvoiceContext = FastMap.newInstance();
+            createInvoiceContext.put("partyId", billToCustomerPartyId);
+            createInvoiceContext.put("partyIdFrom", billFromVendorPartyId);
+            createInvoiceContext.put("billingAccountId", billingAccountId);
+            createInvoiceContext.put("invoiceDate", invoiceDate);
+            createInvoiceContext.put("dueDate", dueDate);
+            createInvoiceContext.put("invoiceTypeId", invoiceType);
+            // start with INVOICE_IN_PROCESS, in the INVOICE_READY we can't change the invoice (or shouldn't be able to...)
+            createInvoiceContext.put("statusId", "INVOICE_IN_PROCESS");
+            createInvoiceContext.put("currencyUomId", orderHeader.getString("currencyUom"));
+            createInvoiceContext.put("userLogin", userLogin);
 
-                // store the invoice first
-                Map createInvoiceResult = dispatcher.runSync("createInvoice", createInvoiceContext);
-                if (ServiceUtil.isError(createInvoiceResult)) {
-                    return ServiceUtil.returnError(UtilProperties.getMessage(resource,"AccountingErrorCreatingInvoiceFromOrder",locale), null, null, createInvoiceResult);
-                }
-
-                // call service, not direct entity op: delegator.create(invoice);
-                invoiceId = (String) createInvoiceResult.get("invoiceId");
+            // store the invoice first
+            Map createInvoiceResult = dispatcher.runSync("createInvoice", createInvoiceContext);
+            if (ServiceUtil.isError(createInvoiceResult)) {
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource,"AccountingErrorCreatingInvoiceFromOrder",locale), null, null, createInvoiceResult);
             }
+
+            // call service, not direct entity op: delegator.create(invoice);
+            String invoiceId = (String) createInvoiceResult.get("invoiceId");
 
             // order roles to invoice roles
             List orderRoles = orderHeader.getRelated("OrderRole");
@@ -494,15 +491,12 @@ public class InvoiceServices {
                     }
 
                     if ("ItemIssuance".equals(currentValue.getEntityName())) {
-                        List<GenericValue> shipmentItemBillings = delegator.findByAnd("ShipmentItemBilling", UtilMisc.toMap("shipmentId", currentValue.get("shipmentId")));
-                        if (UtilValidate.isEmpty(shipmentItemBillings)) {
 
-                            // create the ShipmentItemBilling record
-                            GenericValue shipmentItemBilling = delegator.makeValue("ShipmentItemBilling", UtilMisc.toMap("invoiceId", invoiceId, "invoiceItemSeqId", invoiceItemSeqId));
-                            shipmentItemBilling.put("shipmentId", currentValue.get("shipmentId"));
-                            shipmentItemBilling.put("shipmentItemSeqId", currentValue.get("shipmentItemSeqId"));
-                            shipmentItemBilling.create();
-                        }
+                        // create the ShipmentItemBilling record
+                        GenericValue shipmentItemBilling = delegator.makeValue("ShipmentItemBilling", UtilMisc.toMap("invoiceId", invoiceId, "invoiceItemSeqId", invoiceItemSeqId));
+                        shipmentItemBilling.put("shipmentId", currentValue.get("shipmentId"));
+                        shipmentItemBilling.put("shipmentItemSeqId", currentValue.get("shipmentItemSeqId"));
+                        shipmentItemBilling.create();
                     }
 
                     String parentInvoiceItemSeqId = invoiceItemSeqId;
@@ -1544,22 +1538,8 @@ public class InvoiceServices {
                 Debug.logInfo(UtilProperties.getMessage(resource, "AccountingIgnoringAdditionalShipCharges", productStore.getAllFields(), locale), module);
             }
 
-            String invoiceId = null;
-            List<GenericValue> shipmentItemBillings = null;
-            String shipmentId = (String) shipmentIds.get(0);
-            try {
-                shipmentItemBillings = delegator.findByAnd("ShipmentItemBilling", UtilMisc.toMap("shipmentId", shipmentId));
-            } catch ( GenericEntityException e ) {
-                String errMsg = UtilProperties.getMessage(resource, "AccountingProblemGettingShipmentItemBilling", locale);
-                return ServiceUtil.returnError(errMsg);
-            }
-            if (UtilValidate.isNotEmpty(shipmentItemBillings)) {
-                GenericValue shipmentItemBilling = EntityUtil.getFirst(shipmentItemBillings);
-                invoiceId = shipmentItemBilling.getString("invoiceId");
-            }
-
             // call the createInvoiceForOrder service for each order
-            Map serviceContext = UtilMisc.toMap("orderId", orderId, "billItems", toBillItems, "invoiceId", invoiceId, "userLogin", context.get("userLogin"));
+            Map serviceContext = UtilMisc.toMap("orderId", orderId, "billItems", toBillItems, "userLogin", context.get("userLogin"));
             try {
                 Map result = dispatcher.runSync("createInvoiceForOrder", serviceContext);
                 invoicesCreated.add(result.get("invoiceId"));

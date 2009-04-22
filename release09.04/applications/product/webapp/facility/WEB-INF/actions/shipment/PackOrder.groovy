@@ -115,16 +115,6 @@ context.orderId = orderId;
 context.shipGroupSeqId = shipGroupSeqId;
 context.picklistBinId = picklistBinId;
 
-shipment = EntityUtil.getFirst(delegator.findByAnd("Shipment", [primaryOrderId : orderId, statusId : "SHIPMENT_PICKED"]));
-context.shipment = shipment;
-
-if (shipment) {
-    invoice = EntityUtil.getFirst(delegator.findByAnd("ShipmentItemBilling", [shipmentId : shipment.shipmentId]));
-    context.invoice = invoice;
-} else {
-    context.invoice = null;
-}
-
 // grab the order information
 if (orderId) {
     orderHeader = delegator.findOne("OrderHeader", [orderId : orderId], false);
@@ -138,34 +128,30 @@ if (orderId) {
 
         if ("ORDER_APPROVED".equals(orderHeader.statusId)) {
             if (shipGroupSeqId) {
-                if (shipment) {
 
-                    // Generate the shipment cost estimate for the ship group
-                    productStoreId = orh.getProductStoreId();
-                    shippableItemInfo = orh.getOrderItemAndShipGroupAssoc(shipGroupSeqId);
-                    shippableItems = delegator.findList("OrderItemAndShipGrpInvResAndItemSum", EntityCondition.makeCondition([orderId : orderId, shipGroupSeqId : shipGroupSeqId]), null, null, null, false);
-                    shippableTotal = new Double(orh.getShippableTotal(shipGroupSeqId).doubleValue());
-                    shippableWeight = new Double(orh.getShippableWeight(shipGroupSeqId).doubleValue());
-                    shippableQuantity = new Double(orh.getShippableQuantity(shipGroupSeqId).doubleValue());
-                    shipmentCostEstimate = packSession.getShipmentCostEstimate(orderItemShipGroup, productStoreId, shippableItemInfo, shippableTotal, shippableWeight, shippableQuantity);
-                    context.shipmentCostEstimateForShipGroup = shipmentCostEstimate;
-                    context.productStoreId = productStoreId;
+                // Generate the shipment cost estimate for the ship group
+                productStoreId = orh.getProductStoreId();
+                shippableItemInfo = orh.getOrderItemAndShipGroupAssoc(shipGroupSeqId);
+                shippableItems = delegator.findList("OrderItemAndShipGrpInvResAndItemSum", EntityCondition.makeCondition([orderId : orderId, shipGroupSeqId : shipGroupSeqId]), null, null, null, false);
+                shippableTotal = new Double(orh.getShippableTotal(shipGroupSeqId).doubleValue());
+                shippableWeight = new Double(orh.getShippableWeight(shipGroupSeqId).doubleValue());
+                shippableQuantity = new Double(orh.getShippableQuantity(shipGroupSeqId).doubleValue());
+                shipmentCostEstimate = packSession.getShipmentCostEstimate(orderItemShipGroup, productStoreId, shippableItemInfo, shippableTotal, shippableWeight, shippableQuantity);
+                context.shipmentCostEstimateForShipGroup = shipmentCostEstimate;
+                context.productStoreId = productStoreId;
 
-                    if (!picklistBinId) {
-                        packSession.addItemInfo(shippableItems);
-                        //context.put("itemInfos", shippableItemInfo);
-                    }
-                } else {
-                    request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage("OrderErrorUiLabels", "OrderErrorOrderNotVerifiedForPacking", [orderId : orderId], locale));
+                if (!picklistBinId) {
+                    packSession.addItemInfo(shippableItems);
+                    //context.put("itemInfos", shippableItemInfo);
                 }
             } else {
-                request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage("ProductErrorUiLabels", "ProductErrorNoShipGroupSequenceIdFoundCannotProcess", locale));
+                request.setAttribute("errorMessageList", ['No ship group sequence ID. Cannot process.']);
             }
         } else {
-            request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage("OrderErrorUiLabels", "OrderErrorOrderNotApprovedForPacking", [orderId : orderId], locale));
+            request.setAttribute("errorMessageList", ["Order #" + orderId + " is not approved for packing."]);
         }
     } else {
-        request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage("OrderErrorUiLabels", "OrderErrorOrderIdNotFound", [orderId : orderId], locale));
+        request.setAttribute("errorMessageList", ["Order #" + orderId + " cannot be found."]);
     }
 }
 
