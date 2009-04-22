@@ -50,7 +50,6 @@ public class VerifyPickSessionRow implements Serializable {
         this.orderItem = orderItem;
         this.rowItem = rowItem;
         this.shipmentItemSeqId = null;
-        this.invoiceItemSeqId = null;
     }
 
     public String getOrderId() {
