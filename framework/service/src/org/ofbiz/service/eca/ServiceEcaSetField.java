@@ -50,9 +50,9 @@ public class ServiceEcaSetField {
     public void eval(Map<String, Object> context) {
         if (fieldName != null) {
             // try to expand the envName
-            if (UtilValidate.isEmpty(value)) {
-                if (UtilValidate.isNotEmpty(envName) && envName.startsWith("${")) {
-                    FlexibleStringExpander exp = FlexibleStringExpander.getInstance(envName);
+            if (UtilValidate.isEmpty(this.value)) {
+                if (UtilValidate.isNotEmpty(this.envName) && this.envName.startsWith("${")) {
+                    FlexibleStringExpander exp = FlexibleStringExpander.getInstance(this.envName);
                     String s = exp.expandString(context);
                     if (UtilValidate.isNotEmpty(s)) {
                         value = s;
@@ -76,10 +76,10 @@ public class ServiceEcaSetField {
 
             // process the context changes
             String newValue = null;
-            if (UtilValidate.isNotEmpty(value)) {
-                newValue = (String) this.format(value, context);
-            } else if (UtilValidate.isNotEmpty(envName) && context.get(envName) != null) {
-                newValue = (String) this.format((String) context.get(envName), context);
+            if (UtilValidate.isNotEmpty(this.value)) {
+                newValue = (String) this.format(this.value, context);
+            } else if (UtilValidate.isNotEmpty(this.envName) && context.get(this.envName) != null) {
+                newValue = (String) this.format((String) context.get(this.envName), context);
             }
             
             if (newValue != null) {
