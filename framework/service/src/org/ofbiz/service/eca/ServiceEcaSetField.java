@@ -36,6 +36,7 @@ public class ServiceEcaSetField {
     public static final String module = ServiceEcaSetField.class.getName();
 
     protected String fieldName = null;
+    protected String mapName = null;
     protected String envName = null;
     protected String value = null;
     protected String format = null;
@@ -61,19 +62,13 @@ public class ServiceEcaSetField {
                 }
             }
             // TODO: rewrite using the ContextAccessor.java see hack below to be able to use maps for email notifications
-            // check if target is a map
-            String mapName = null;
-    		Map<String, Object> map = null;
-            if (UtilValidate.isNotEmpty(fieldName) && fieldName.indexOf('.') != -1) {
-        		mapName = fieldName.substring(0, fieldName.indexOf('.'));
-        		fieldName = fieldName.substring(fieldName.indexOf('.') +1);
-        		if (context.containsKey(mapName)) {
-        			map = (Map<String, Object>) context.get(mapName);
-        		} else {
-        			map = FastMap.newInstance();
-        		}
-        	}
-
+            // check if target is a map and create/get from contaxt
+            Map<String, Object> valueMap = null;
+            if (UtilValidate.isNotEmpty(this.mapName) && context.containsKey(this.mapName)) {
+                valueMap = (Map<String, Object>) context.get(mapName);
+            } else {
+                valueMap = FastMap.newInstance();
+            }
             // process the context changes
             String newValue = null;
             if (UtilValidate.isNotEmpty(this.value)) {
@@ -83,12 +78,12 @@ public class ServiceEcaSetField {
             }
             
             if (newValue != null) {
-            	if (map != null) {
-            		map.put(fieldName, newValue);
-            		context.put(mapName, map);
-            	} else {
-            		context.put(fieldName, newValue);
-            	}
+                if (UtilValidate.isNotEmpty(this.mapName)) {
+                    valueMap.put(this.fieldName, newValue);
+                    context.put(this.mapName, valueMap);
+                } else {
+                    context.put(this.fieldName, newValue);
+                }
             }
         }
     }
