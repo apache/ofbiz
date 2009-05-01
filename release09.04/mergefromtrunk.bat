@@ -6,10 +6,10 @@ rem since we have now svn:mergeinfo changing root ("."), we need to update befor
 svn up
 set /p version=version to merge :
 set /a prevRev=%version% - 1
-svn log -r %version% > log.tmp
-set /p log = < log.tmp 
+echo "Applied fix from trunk for revision: %version%" > comment.tmp
+svn log https://svn.apache.org/repos/asf/ofbiz/trunk -r %version% > log.tmp
+copy comment.tmp + log.tmp = comment.tmp
 echo on
 svn merge -r %prevRev%:%version% https://svn.apache.org/repos/asf/ofbiz/trunk
-svn commit -m "Applied fix from trunk for revision: %version% \n %log%"
+svn commit -F comment.tmp
 pause
-del log.tmp
