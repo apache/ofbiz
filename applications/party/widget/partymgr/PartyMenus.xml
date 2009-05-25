@@ -423,9 +423,26 @@
                     <not><if-empty field="communicationEvent.partyIdFrom"/></not>
                     <if-compare field="communicationEvent.statusId" operator="not-equals" value="COM_PENDING"/>
                     <if-has-permission permission="ORDERMGR_CRQ_CREATE"/>
+                    <if-compare field="communicationEvent.statusId" operator="equals" value="COM_ENTERED"/>
                 </and>
             </condition>
             <link target="editRequestFromCommEvent">
+                <parameter param-name="communicationEventId" from-field="communicationEvent.communicationEventId"/>
+                <parameter param-name="my" from-field="parameters.my"/>
+            </link>
+        </menu-item>
+        <menu-item name="createRequestFromCommEvent1" title="${uiLabelMap.PartyCreateRequestFromCommEvent}">
+            <condition>
+                <and>
+                    <not><if-empty field="communicationEvent"/></not>
+                    <not><if-empty field="communicationEvent.partyIdFrom"/></not>
+                    <if-compare field="communicationEvent.statusId" operator="not-equals" value="COM_PENDING"/>
+                    <if-has-permission permission="ORDERMGR_CRQ_CREATE"/>
+                    <if-compare field="projectMgrExists" operator="equals" value="true"/> 
+                    <if-compare field="communicationEvent.statusId" operator="equals" value="COM_ENTERED"/>
+                </and>
+            </condition>
+            <link target="newrequest">
                 <parameter param-name="communicationEventId" from-field="communicationEvent.communicationEventId"/>
                 <parameter param-name="my" from-field="parameters.my"/>
             </link>
@@ -436,6 +453,7 @@
                     <not><if-empty field="communicationEvent"/></not>
                     <if-compare field="myCommunicationEventRole.roleStatusId" operator="equals" value="COM_ROLE_READ"/>
                     <if-has-permission permission="PARTYMGR_CME-EMAIL_UPDATE"/>
+                    <if-compare field="communicationEvent.statusId" operator="not-equals" value="COM_UNKNOWN_PARTY"/>
                 </and>
             </condition>
             <link target="setCommunicationEventRoleStatus">
@@ -556,6 +574,7 @@
                     <not><if-empty field="parameters.communicationEventId"/></not>
                     <not><if-empty field="communicationEvent.partyIdFrom"/></not>
                     <if-compare field="communicationEvent.partyIdFrom" operator="not-equals" value="${userLogin.partyId}"/>
+                    <if-compare field="communicationEvent.statusId" operator="not-equals" value="COM_UNKNOWN_PARTY"/>
                 </and>
             </condition>
             <link target="EditCommunicationEvent">
@@ -568,6 +587,7 @@
                     <not><if-empty field="parameters.communicationEventId"/></not>
                     <not><if-empty field="communicationEvent.partyIdFrom"/></not>
                     <if-compare field="communicationEvent.partyIdFrom" operator="not-equals" value="${userLogin.partyId}"/>
+                    <if-compare field="communicationEvent.statusId" operator="not-equals" value="COM_UNKNOWN_PARTY"/>
                 </and>
             </condition>
             <link target="EditCommunicationEvent">
@@ -580,6 +600,7 @@
                     <not><if-empty field="parameters.communicationEventId"/></not>
                     <not><if-empty field="communicationEvent.partyIdFrom"/></not>
                     <if-has-permission permission="ORDERMGR_CRQ_CREATE"/>
+                    <if-compare field="communicationEvent.statusId" operator="equals" value="COM_ENTERED"/>
                 </and>
             </condition>
             <link target="editRequestFromCommEvent">
