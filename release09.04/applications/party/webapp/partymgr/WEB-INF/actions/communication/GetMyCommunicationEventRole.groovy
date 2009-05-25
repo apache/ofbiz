@@ -21,18 +21,11 @@ import org.ofbiz.base.util.*;
 import org.ofbiz.entity.util.EntityUtil;
 
 if (parameters.communicationEventId) {
-    communicationEventRoles = delegator.findByAnd("CommunicationEventAndRole",
+    context.communicationEventRole = delegator.findByPrimaryKey("CommunicationEventRole",
            ["communicationEventId" : parameters.communicationEventId,
-            "partyId" : userLogin.partyId,
-            "statusId" : "COM_ROLE_READ"
+            "partyId" : parameters.partyId,
+            "roleTypeId" : parameters.roleTypeId
            ]);
-    if (!communicationEventRoles) {
-        communicationEventRoles = delegator.findByAnd("CommunicationEventAndRole",
-           ["communicationEventId" : parameters.communicationEventId,
-            "partyId" : userLogin.partyId
-           ]);
-    }
-    if (communicationEventRoles) {
-        context.myCommunicationEventRole = communicationEventRoles.get(0);
-    }
+
+    context.projectMgrExists = ComponentConfig.componentExists("projectmgr");
 }
