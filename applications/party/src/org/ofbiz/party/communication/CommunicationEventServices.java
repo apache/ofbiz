@@ -33,7 +33,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.mail.Address;
-import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -522,8 +521,11 @@ public class CommunicationEventServices {
             }
             if (!commEvents.isEmpty()) {
                 Debug.logInfo("Ignoring Duplicate Email: " + aboutThisEmail, module);
-                return ServiceUtil.returnSuccess(" Message Ignored: duplicate messageId");
+                return ServiceUtil.returnSuccess(" Message Ignored: deplicate messageId");
+            } else {
+                Debug.logInfo("Persisting New Email: " + aboutThisEmail, module);
             }
+
 
             // get the related partId's
             List toParties = buildListOfPartyInfoFromEmailAddresses(addressesTo, userLogin, dispatcher);
@@ -593,24 +595,6 @@ public class CommunicationEventServices {
                 contentIndex = "";
                 commEventMap = addMessageBody(commEventMap, (Multipart) messageContent);
             }
-            
-            // select the plain text bodypart
-            String messageBody = null;
-            if (wrapper.getMainPartCount() > 1) {
-            	for (int ind=0; ind < wrapper.getMainPartCount(); ind++) {
-            		BodyPart p = wrapper.getPart(ind + "");
-            		if (p.getContentType().toLowerCase().indexOf("text/plain") > -1) {
-            			messageBody = (String) p.getContent();
-            		}
-            	}
-            }
-            
-            if (messageBody == null ) {
-            	messageBody = wrapper.getMessageBody();
-            }
-                        
-            commEventMap.put("content", messageBody);
-            commEventMap.put("contentMimeTypeId", messageBodyContentType.toLowerCase());            
 
             // check for for a reply to communication event (using in-reply-to the parent messageID)
             String[] inReplyTo = message.getHeader("In-Reply-To");
@@ -709,7 +693,6 @@ public class CommunicationEventServices {
 
             result = dispatcher.runSync("createCommunicationEvent", commEventMap);
             communicationEventId = (String)result.get("communicationEventId");
-            Debug.logInfo("Persisting New Email: " + aboutThisEmail + " into CommunicationEventId: " + communicationEventId, module);
 
             if (messageContent instanceof Multipart) {
                 Debug.logInfo("===message has attachments=====", module);
