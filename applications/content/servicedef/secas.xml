@@ -29,14 +29,12 @@ under the License.
         <condition field-name="surveyId" operator="is-not-empty"/>
         <action service="createSurveyQuestionAppl" mode="sync"/>
     </eca>
-
     <!-- emails should not be stored as new communication event if there is no partyId or if it is already a commevent being sent out -->
     <eca service="sendMail" event="commit">
         <condition field-name="partyId" operator="is-not-empty"/>
         <condition field-name="communicationEventId" operator="is-empty"/>
         <action service="storeEmailAsCommunication" mode="sync"/>
     </eca>
-
     <!-- create data resource ecas -->
     <eca service="createDataResource" event="commit">
         <condition field-name="partyId" operator="is-not-empty"/>
@@ -82,6 +80,13 @@ under the License.
         <set field-name="dataResourceTypeId" value="ELECTRONIC_TEXT"/>
         <action service="createElectronicText" mode="sync" result-to-context="true"/>
     </eca>
+    <eca service="createDataText" event="invoke">
+        <condition field-name="dataResourceTypeId" operator="equals" value="SHORT_TEXT"/>
+        <condition field-name="textData" operator="is-not-empty"/>
+        <set field-name="dataResourceTypeId" value="SHORT_TEXT"/>
+        <action service="createDataResource" mode="sync" result-to-context="true"/>
+    </eca>
+    <!-- This one is a bit weird, why choosing SHORT_TEXT ?-->
     <eca service="createDataText" event="invoke">
         <condition field-name="dataResourceTypeId" operator="is-empty"/>
         <condition field-name="textData" operator="is-empty"/>
