@@ -558,29 +558,17 @@
         <menu-item name="new" title="${uiLabelMap.PartyNewCommunication}">
             <link target="EditCommunicationEvent"/>
         </menu-item>
-        <menu-item name="newEmail" title="${uiLabelMap.PartyNewEmail}">
-            <link target="EditCommunicationEvent">
-                <parameter param-name="communicationEventTypeId" value="EMAIL_COMMUNICATION"/>
-                <parameter param-name="partyIdFrom" from-field="parameters.userLogin.partyId"/>
-            </link>
-        </menu-item>
-        <menu-item name="newInternalNote" title="${uiLabelMap.PartyNewInternalNote}">
-            <link target="EditCommunicationEvent">
-                <parameter param-name="communicationEventTypeId" value="COMMENT_NOTE"/>
-                <parameter param-name="partyIdFrom" from-field="parameters.userLogin.partyId"/>
-            </link>
-        </menu-item>
         <menu-item name="reply" title="${uiLabelMap.PartyReply}">
             <condition>
                 <and>
                     <not><if-empty field="parameters.communicationEventId"/></not>
                     <not><if-empty field="communicationEvent.partyIdFrom"/></not>
-                    <if-compare field="communicationEvent.partyIdFrom" operator="not-equals" value="${userLogin.partyId}"/>
                     <if-compare field="communicationEvent.statusId" operator="not-equals" value="COM_UNKNOWN_PARTY"/>
                 </and>
             </condition>
             <link target="EditCommunicationEvent">
                 <parameter param-name="parentCommEventId" from-field="parameters.communicationEventId"/>
+                <parameter param-name="partyIdFrom" from-field="parameters.partyId"/>
             </link>
         </menu-item>
         <menu-item name="forward" title="${uiLabelMap.PartyForward}">
@@ -588,7 +576,6 @@
                 <and>
                     <not><if-empty field="parameters.communicationEventId"/></not>
                     <not><if-empty field="communicationEvent.partyIdFrom"/></not>
-                    <if-compare field="communicationEvent.partyIdFrom" operator="not-equals" value="${userLogin.partyId}"/>
                     <if-compare field="communicationEvent.statusId" operator="not-equals" value="COM_UNKNOWN_PARTY"/>
                 </and>
             </condition>
