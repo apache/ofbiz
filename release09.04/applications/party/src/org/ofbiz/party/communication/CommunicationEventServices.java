@@ -595,6 +595,25 @@ public class CommunicationEventServices {
                 contentIndex = "";
                 commEventMap = addMessageBody(commEventMap, (Multipart) messageContent);
             }
+            
+            // select the plain text bodypart
+            String messageBody = null;
+            if (wrapper.getMainPartCount() > 1) {
+            	for (int ind=0; ind < wrapper.getMainPartCount(); ind++) {
+            		BodyPart p = wrapper.getPart(ind + "");
+            		if (p.getContentType().toLowerCase().indexOf("text/plain") > -1) {
+            			messageBody = (String) p.getContent();
+            			break;
+            		}
+            	}
+            }
+            
+            if (messageBody == null ) {
+            	messageBody = wrapper.getMessageBody();
+            }
+                        
+            commEventMap.put("content", messageBody);
+            commEventMap.put("contentMimeTypeId", messageBodyContentType.toLowerCase());            
 
             // check for for a reply to communication event (using in-reply-to the parent messageID)
             String[] inReplyTo = message.getHeader("In-Reply-To");
