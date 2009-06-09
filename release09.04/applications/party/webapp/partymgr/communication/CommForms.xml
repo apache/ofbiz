@@ -217,7 +217,6 @@ under the License.
             </hyperlink>
         </field>
         <field name="communicationEventTypeId"><display-entity entity-name="CommunicationEventType" description="${description}"/></field>
-        <field name="partyIdFrom" use-when="partyIdFrom!=void">
         <field name="contactListId" use-when="communicationEvent.get(&quot;contactListId&quot;)!=null"><display/></field>
         <field name="partyIdFrom" use-when="communicationEvent.get(&quot;partyIdFrom&quot;)!=null">
             <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${firstName} ${middleName} ${lastName} ${groupName} (${contactMechFrom.infoString})">
