@@ -370,8 +370,9 @@ under the License.
         <field name="roleTypeId"><hidden/></field>
         <field name="deleteCommEventIfLast"><hidden value="Y"/></field>
         <field name="delContentDataResource"><hidden value="Y"/></field>
+        <field name="partyId"><hidden/></field>
+        <field name="communicationEventId"><hidden/></field>
         <field name="roleTypeId"><display-entity entity-name="RoleType" description="${description}"/></field>
-        <field name="removeButton" widget-style="smallSubmit"><submit/></field>
         <field name="subject" widget-style="buttontext" widget-area-style="fieldWidth300">
             <hyperlink description="${subject} " target="ViewCommunicationEvent">
                 <parameter param-name="communicationEventId"/>
@@ -392,6 +393,7 @@ under the License.
             </display-entity>
         </field>
         <field name="createdStamp" entry-name="entryDate"/>
+        <field name="removeButton" widget-style="smallSubmit"><submit/></field>
     </form>
     <form name="ListPendingCommEvents" type="list" extends="ListCommEvents" odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
         <actions>
