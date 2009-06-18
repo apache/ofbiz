@@ -50,7 +50,6 @@ under the License.
     <eca service="receiveInventoryProduct" event="commit">
         <condition field-name="facilityId" operator="is-not-empty"/>
         <condition field-name="orderId" operator="is-not-empty"/>
-        <action service="updatePoOnReceiveInventory" mode="sync"/>
     </eca>
     <eca service="changeOrderItemStatus" event="commit">
         <condition field-name="statusId" operator="equals" value="ITEM_CANCELLED"/>
