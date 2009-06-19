@@ -52,7 +52,7 @@ public class ICalendarWorker {
     protected static ProdId prodId = new ProdId("-//Apache Open For Business//Work Effort Calendar//EN");
     protected static Map<String, Status> statusMap = UtilMisc.toMap("CAL_TENTATIVE", Status.VEVENT_TENTATIVE,
             "CAL_CONFIRMED", Status.VEVENT_CONFIRMED, "CAL_CANCELLED", Status.VEVENT_CANCELLED);
-    protected static String workEffortIdPropName = "X-ORG-OFBIZ-WORKEFFORT-ID";
+    protected static final String uidPrefix = "org-apache-ofbiz-we-";
 
     public static net.fortuna.ical4j.model.Calendar getICalendar(GenericDelegator delegator, String workEffortId) throws GenericEntityException {
         GenericValue calendarProperties = delegator.findByPrimaryKey("WorkEffort", UtilMisc.toMap("workEffortId", workEffortId));
@@ -64,6 +64,14 @@ public class ICalendarWorker {
         List<GenericValue> workEfforts = getRelatedWorkEfforts(calendarProperties);
         for (GenericValue workEffort : workEfforts) {
             components.add(makeEvent(workEffort));
+        }
+        if (Debug.verboseOn()) {
+            try {
+                calendar.validate(true);
+                Debug.logVerbose("iCalendar passes validation", module);
+            } catch (ValidationException e) {
+                Debug.logVerbose("iCalendar fails validation: " + e, module);
+            }
         }
         return calendar;
     }
@@ -104,7 +112,7 @@ public class ICalendarWorker {
         if (workEffort.getTimestamp("lastModifiedDate") != null) {
             eventProps.add(new LastModified(new DateTime(workEffort.getTimestamp("lastModifiedDate"))));
         }
-        eventProps.add(new XProperty(workEffortIdPropName, workEffort.getString("workEffortId")));
+        eventProps.add(new Uid(uidPrefix.concat(workEffortId)));
         eventProps.add(new Summary(workEffort.getString("workEffortName")));
         Status eventStatus = statusMap.get(workEffort.getString("currentStatusId"));
         if (eventStatus != null) {
@@ -117,20 +125,26 @@ public class ICalendarWorker {
         }
         List<GenericValue> relatedParties = EntityUtil.filterByDate(delegator.findList("WorkEffortPartyAssignView", EntityCondition.makeCondition("workEffortId", EntityOperator.EQUALS, workEffortId), null, null, null, false));
         for (GenericValue partyValue : relatedParties) {
-            ParameterList paramList = new ParameterList();
+            ParameterList paramList = null;
             String partyName = partyValue.getString("groupName");
             if (UtilValidate.isEmpty(partyName)) {
-                partyName = partyValue.getString("firstName") + " " + partyValue.getString("lastName");
+                partyName = partyValue.getString("firstName") + "_" + partyValue.getString("lastName");
             }
-            paramList.add(new Cn(partyName));
-            // paramList.add(new XParameter(partyIdPropName, partyValue.getString("partyId")));
+            partyName = partyName.replace(" ", "_");
             try {
                 if ("CAL_ORGANIZER~CAL_OWNER".contains(partyValue.getString("roleTypeId"))) {
-                    eventProps.add(new Organizer(paramList, ""));
+                    Organizer organizer = new Organizer("CN:".concat(partyName));
+                    paramList = organizer.getParameters();
+                    eventProps.add(organizer);
                 } else {
-                    eventProps.add(new Attendee(paramList, ""));
+                    Attendee attendee = new Attendee("CN:".concat(partyName));
+                    paramList = attendee.getParameters();
+                    eventProps.add(attendee);
                 }
-            } catch (Exception e) {}
+                paramList.add(new XParameter("X-ORG-APACHE-OFBIZ-PARTY-ID", partyValue.getString("partyId")));
+            } catch (Exception e) {
+                Debug.logError(e, "Error while processing related parties: ", module);
+            }
         }
         DateRange range = new DateRange(workEffort.getTimestamp("estimatedStartDate"), workEffort.getTimestamp("estimatedCompletionDate"));
         eventProps.add(new DtStart(new DateTime(range.start())));
@@ -161,11 +175,6 @@ public class ICalendarWorker {
         propList.add(prodId);
         propList.add(Version.VERSION_2_0);
         propList.add(CalScale.GREGORIAN);
-        if (workEffort.get("description") != null) {
-            propList.add(new Description(workEffort.getString("description")));
-        } else {
-            propList.add(new Description(workEffort.getString("workEffortName")));
-        }
         // TODO: Get time zone from publish properties value
         java.util.TimeZone tz = java.util.TimeZone.getDefault();
         TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
