@@ -125,23 +125,23 @@ public class ICalendarWorker {
         }
         List<GenericValue> relatedParties = EntityUtil.filterByDate(delegator.findList("WorkEffortPartyAssignView", EntityCondition.makeCondition("workEffortId", EntityOperator.EQUALS, workEffortId), null, null, null, false));
         for (GenericValue partyValue : relatedParties) {
-            ParameterList paramList = null;
             String partyName = partyValue.getString("groupName");
             if (UtilValidate.isEmpty(partyName)) {
-                partyName = partyValue.getString("firstName") + "_" + partyValue.getString("lastName");
+                partyName = partyValue.getString("firstName") + " " + partyValue.getString("lastName");
             }
-            partyName = partyName.replace(" ", "_");
             try {
+                Property partyProperty = null;
                 if ("CAL_ORGANIZER~CAL_OWNER".contains(partyValue.getString("roleTypeId"))) {
-                    Organizer organizer = new Organizer("CN:".concat(partyName));
-                    paramList = organizer.getParameters();
-                    eventProps.add(organizer);
+                    partyProperty = new Organizer();
                 } else {
-                    Attendee attendee = new Attendee("CN:".concat(partyName));
-                    paramList = attendee.getParameters();
-                    eventProps.add(attendee);
+                    partyProperty = new Attendee();
                 }
+                eventProps.add(partyProperty);
+                // RFC 2445 4.8.4.1 and 4.8.4.3 Value must be a URL
+                partyProperty.setValue("MAILTO:ofbiz-test@yahoo.com");
+                ParameterList paramList = partyProperty.getParameters();
                 paramList.add(new XParameter("X-ORG-APACHE-OFBIZ-PARTY-ID", partyValue.getString("partyId")));
+                paramList.add(new Cn(partyName));
             } catch (Exception e) {
                 Debug.logError(e, "Error while processing related parties: ", module);
             }
