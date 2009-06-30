@@ -20,7 +20,7 @@ under the License.
 <#macro renderSectionBegin></#macro>
 <#macro renderSectionEnd>
 </#macro>
-<#macro renderContainerBegin id style autoUpdateLink autoUpdateInterval>
+<#macro renderContainerBegin id style autoUpdateLink autoUpdateInterval></#macro>
 <#macro renderContainerEnd></#macro>
 <#macro renderContentBegin></#macro>
 <#macro renderContentBody></#macro>
