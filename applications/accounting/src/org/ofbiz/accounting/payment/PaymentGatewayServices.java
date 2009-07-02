@@ -643,6 +643,10 @@ public class PaymentGatewayServices {
             // type gift card
             GenericValue giftCard = paymentMethod.getRelatedOne("GiftCard");
             toContext.put("giftCard", giftCard);
+            GenericValue orderHeader = paymentPreference.getRelatedOne("OrderHeader");
+            List<GenericValue> orderItems = orderHeader.getRelated("OrderItem");
+            toContext.put("orderId", orderHeader.getString("orderId"));
+            toContext.put("orderItems", orderItems);
         } else if ("FIN_ACCOUNT".equals(paymentMethodTypeId)) {
             toContext.put("finAccountId", paymentPreference.getString("finAccountId"));
         } else {
@@ -1589,7 +1593,14 @@ public class PaymentGatewayServices {
         }
 
         Debug.logInfo("Capture [" + serviceName + "] : " + captureContext, module);
-
+        try {
+            String paymentMethodTypeId = paymentPref.getString("paymentMethodTypeId");
+            if (paymentMethodTypeId != null && "GIFT_CARD".equals(paymentMethodTypeId)) {
+                getBillingInformation(orh, paymentPref, captureContext);
+            }
+        } catch (GenericEntityException e) {
+            Debug.logError(e, module);
+        }
         // now invoke the capture service
         Map captureResult = null;
         try {
