@@ -92,17 +92,24 @@ public class ProductStoreWorker {
 
     public static String getStoreCurrencyUomId(HttpServletRequest request) {
         GenericValue productStore = getProductStore(request);
-        return UtilHttp.getCurrencyUom(request.getSession(), productStore.getString("defaultCurrencyUomId"));
+        if (UtilValidate.isEmpty(productStore)) {
+            Debug.logError(
+                    "No product store found in request, cannot set CurrencyUomId!", module);
+            return null;
+        } else {
+            return UtilHttp.getCurrencyUom(request.getSession(), productStore.getString("defaultCurrencyUomId"));
+        }
     }
 
     public static Locale getStoreLocale(HttpServletRequest request) {
         GenericValue productStore = getProductStore(request);
         if (UtilValidate.isEmpty(productStore)) {
-            Debug.logError("No product store found in request, cannot set locale!", module);
+            Debug.logError(
+                    "No product store found in request, cannot set locale!", module);
             return null;
-    } else {
-        return UtilHttp.getLocale(request, request.getSession(), productStore.getString("defaultLocaleString"));
-    }
+        } else {
+            return UtilHttp.getLocale(request, request.getSession(), productStore.getString("defaultLocaleString"));
+        }
     }
 
     public static String determineSingleFacilityForStore(GenericDelegator delegator, String productStoreId) {
