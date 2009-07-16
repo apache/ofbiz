@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<entity-engine-xml>
+
+    <!-- customer requests -->
+    <PortletCategory portletCategoryId="CUST_REQUEST" description="Customer Requests"/>
+    <PortalPortlet portalPortletId="INCOM_CUST_REQUESTS"
+        portletName="Incoming Cust.Requests"
+        screenName="IncomingCustRequests"
+        screenLocation="component://order/widget/ordermgr/RequestScreens.xml"
+        description="List Request List for a request taker" securityServiceName="portalPermissionIsEmployee" securityMainAction="VIEW"
+        screenshot="/images/portlets/INCOM_CUST_REQUESTS.png"/>
+    <PortletPortletCategory portalPortletId="INCOM_CUST_REQUESTS" portletCategoryId="CUST_REQUEST"/>
+    <PortalPortlet portalPortletId="ViewCustRequest"
+        portletName="View a specific customer request"
+        screenName="ViewCustRequest"
+        screenLocation="component://order/widget/ordermgr/RequestScreens.xml"
+        description="View your own customer request inclusive of notes"/>
+    <PortletPortletCategory portalPortletId="ViewCustRequest" portletCategoryId="CUST_REQUEST"/>
+    
+    <PortletCategory portletCategoryId="LIST_CUSTOMER" description="List(s) used by a Customer"/>
+    <PortalPortlet portalPortletId="ListCustRequests"
+        portletName="List Cust Requests for a customer"
+        screenName="ListCustRequests"
+        screenLocation="component://order/widget/ordermgr/RequestScreens.xml"
+        description="List Cust Requests to the customer" securityServiceName="portalPermissionIsCustomer" securityMainAction="VIEW"
+        editFormName="EditCustReqStatusId"
+        editFormLocation="component://order/webapp/ordermgr/request/RequestForms.xml"/>
+    <PortletPortletCategory portalPortletId="ListCustRequests" portletCategoryId="LIST_CUSTOMER"/>
+    
+    <!--List of order(s) placed by a customer in order -->
+    <PortletCategory portletCategoryId="ORDERMGR" description="List of order(s)"/>
+    <PortalPortlet portalPortletId="ListCustomerOrders"
+        portletName="List Customer Orders"
+        screenName="ListCustomerOrders"
+        screenLocation="component://order/widget/ordermgr/OrderViewScreens.xml"
+        description="List Orders placed by customer" securityServiceName="portalPermissionIsCustomer" securityMainAction="VIEW"
+        editFormName="EditOrderByCustomer"
+        editFormLocation="component://order/webapp/ordermgr/order/OrderForms.xml"/>
+    <PortletPortletCategory portalPortletId="ListCustomerOrders" portletCategoryId="ORDERMGR"/>
+    
+    <!-- List Todays Order -->
+    <PortalPortlet portalPortletId="ListSalesOrders"
+        portletName="List Sales Orders By Date"
+        screenName="ListSalesOrders"
+        screenLocation="component://order/widget/ordermgr/OrderViewScreens.xml"
+        description="List Sales Orders placed today" securityServiceName="portalPermissionIsEmployee" securityMainAction="VIEW"/>
+    <PortletPortletCategory portalPortletId="ListSalesOrders" portletCategoryId="ORDERMGR"/>
+    
+    <PortalPage portalPageId="OrderPortalPage" sequenceNum="0" portalPageName="Order Portal Page" description="Order main page using flexible Portal technology" ownerUserLoginId="_NA_"/>
+    <PortalPageColumn portalPageId="OrderPortalPage" columnSeqId="00001"/>
+    <PortalPageColumn portalPageId="OrderPortalPage" columnSeqId="00002"/>
+
+    <PortalPagePortlet portalPageId="OrderPortalPage" portalPortletId="ListSalesOrders" portletSeqId="00001" columnSeqId="00001" sequenceNum="0"/>
+    <PortalPagePortlet portalPageId="OrderPortalPage" portalPortletId="BestSellingProducts" portletSeqId="00001" columnSeqId="00001" sequenceNum="1"/>
+
+</entity-engine-xml>
