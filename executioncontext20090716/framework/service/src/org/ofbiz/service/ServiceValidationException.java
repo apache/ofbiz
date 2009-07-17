@@ -18,14 +18,16 @@
  *******************************************************************************/
 package org.ofbiz.service;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
+import org.ofbiz.context.service.GenericServiceException;
 import org.ofbiz.base.util.UtilValidate;
 
 /**
  * ServiceValidationException
  */
+@SuppressWarnings("serial")
 public class ServiceValidationException extends GenericServiceException {
 
     protected List<String> messages = new ArrayList<String>();

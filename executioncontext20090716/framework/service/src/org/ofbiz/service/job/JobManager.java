@@ -27,6 +27,10 @@ import java.util.Map;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.context.entity.GenericEntityException;
+import org.ofbiz.context.service.JobManagerException;
+import org.ofbiz.context.service.JobScheduler;
+import org.ofbiz.context.service.LocalDispatcher;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralRuntimeException;
 import org.ofbiz.base.util.UtilDateTime;
@@ -34,7 +38,6 @@ import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityConditionList;
@@ -46,7 +49,6 @@ import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericDispatcher;
-import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.calendar.RecurrenceInfo;
 import org.ofbiz.service.calendar.RecurrenceInfoException;
 import org.ofbiz.service.config.ServiceConfigUtil;
@@ -54,7 +56,7 @@ import org.ofbiz.service.config.ServiceConfigUtil;
 /**
  * JobManager
  */
-public class JobManager {
+public class JobManager implements JobScheduler {
 
     public static final String instanceId = UtilProperties.getPropertyValue("general.properties", "unique.instanceId", "ofbiz0");
     public static final Map<String, Object> updateFields = UtilMisc.<String, Object>toMap("runByInstanceId", instanceId, "statusId", "SERVICE_QUEUED");

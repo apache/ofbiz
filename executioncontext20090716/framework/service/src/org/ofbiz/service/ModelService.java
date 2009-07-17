@@ -55,6 +55,8 @@ import javax.xml.namespace.QName;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.context.service.GenericServiceException;
+import org.ofbiz.context.service.LocalDispatcher;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.ObjectType;

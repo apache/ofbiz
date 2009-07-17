@@ -21,10 +21,11 @@ package org.ofbiz.entity.cache;
 import java.util.Iterator;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.base.util.cache.CacheLine;
-import org.ofbiz.entity.GenericValue;
-import org.ofbiz.entity.GenericPK;
+import org.ofbiz.base.util.cache.UtilCache;
+import org.ofbiz.context.entity.GenericPK;
+import org.ofbiz.context.entity.GenericValue;
+import org.ofbiz.entity.GenericValueImpl;
 import org.ofbiz.entity.condition.EntityCondition;
 
 public class EntityCache extends AbstractCache<GenericPK, GenericValue> {
@@ -52,7 +53,7 @@ public class EntityCache extends AbstractCache<GenericPK, GenericValue> {
         }
 
         if (entity == null) {
-            entity = GenericValue.NULL_VALUE;
+            entity = GenericValueImpl.NULL_VALUE;
         } else {
             // before going into the cache, make this value immutable
             entity.setImmutable();

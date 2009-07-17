@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,13 +15,13 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *******************************************************************************/
+ */
 package org.ofbiz.entity.util;
 
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericEntity;
-import org.ofbiz.entity.GenericPK;
-import org.ofbiz.entity.GenericValue;
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericEntity;
+import org.ofbiz.context.entity.GenericPK;
+import org.ofbiz.context.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 
 /**

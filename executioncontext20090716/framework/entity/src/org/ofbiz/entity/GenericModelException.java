@@ -18,10 +18,13 @@
  *******************************************************************************/
 package org.ofbiz.entity;
 
+import org.ofbiz.context.entity.GenericEntityException;
+
 /**
  * GenericModelException
  *
  */
+@SuppressWarnings("serial")
 public class GenericModelException extends GenericEntityException {
 
     public GenericModelException() {

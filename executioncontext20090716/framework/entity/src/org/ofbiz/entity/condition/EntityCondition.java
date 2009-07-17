@@ -18,15 +18,18 @@
  *******************************************************************************/
 package org.ofbiz.entity.condition;
 
+import static org.ofbiz.base.util.UtilGenerics.cast;
+
 import java.util.List;
 import java.util.Map;
 
 import javolution.lang.Reusable;
 import javolution.util.FastList;
 
-import static org.ofbiz.base.util.UtilGenerics.cast;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericEntity;
+import org.ofbiz.context.entity.EntityConditionInterface;
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericEntity;
+import org.ofbiz.context.entity.ModelEntityInterface;
 import org.ofbiz.entity.GenericModelException;
 import org.ofbiz.entity.config.DatasourceInfo;
 import org.ofbiz.entity.model.ModelEntity;
@@ -42,7 +45,8 @@ import org.ofbiz.entity.model.ModelEntity;
  * These can be used in various combinations using the EntityConditionList and EntityExpr objects.
  *
  */
-public abstract class EntityCondition extends EntityConditionBase implements Reusable {
+@SuppressWarnings("serial")
+public abstract class EntityCondition extends EntityConditionBase implements EntityConditionInterface, Reusable {
 
     public static EntityExpr makeCondition(Object lhs, EntityComparisonOperator operator, Object rhs) {
         EntityExpr expr = EntityExpr.entityExprFactory.object();
@@ -143,7 +147,7 @@ public abstract class EntityCondition extends EntityConditionBase implements Reu
         throw new IllegalArgumentException(getClass().getName() + ".accept not implemented");
     }
 
-    abstract public String makeWhereString(ModelEntity modelEntity, List<EntityConditionParam> entityConditionParams, DatasourceInfo datasourceInfo);
+    abstract public String makeWhereString(ModelEntityInterface modelEntity, List<EntityConditionParam> entityConditionParams, DatasourceInfo datasourceInfo);
 
     abstract public void checkCondition(ModelEntity modelEntity) throws GenericModelException;
 

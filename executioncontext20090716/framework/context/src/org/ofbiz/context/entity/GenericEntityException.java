@@ -16,14 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.service;
+package org.ofbiz.context.entity;
 
-import java.util.Map;
+import org.ofbiz.base.util.*;
 
-public interface GenericServiceCallback {
+/**
+ * GenericEntityException
+ *
+ */
+@SuppressWarnings("serial")
+public class GenericEntityException extends GeneralException {
 
-    public boolean isEnabled();
-    public void receiveEvent(Map<String, Object> context);
-    public void receiveEvent(Map<String, Object> context, Map<String, Object> result);
-    public void receiveEvent(Map<String, Object> context, Throwable error);
+    public GenericEntityException() {
+        super();
+    }
+
+    public GenericEntityException(Throwable nested) {
+        super(nested);
+    }
+
+    public GenericEntityException(String str) {
+        super(str);
+    }
+
+    public GenericEntityException(String str, Throwable nested) {
+        super(str, nested);
+    }
 }

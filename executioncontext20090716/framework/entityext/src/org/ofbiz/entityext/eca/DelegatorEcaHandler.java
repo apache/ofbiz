@@ -24,11 +24,10 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.ofbiz.base.util.Debug;
-import static org.ofbiz.base.util.UtilGenerics.checkList;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericEntity;
-import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.eca.EntityEcaHandler;
+import org.ofbiz.context.entity.EntityEcaHandler;
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericEntity;
+import org.ofbiz.context.entity.GenericEntityException;
 import org.ofbiz.entityext.EntityServiceFactory;
 import org.ofbiz.service.DispatchContext;
 

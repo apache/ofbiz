@@ -27,9 +27,10 @@ import javolution.util.FastMap;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.cache.UtilCache;
-import org.ofbiz.entity.GenericEntity;
-import org.ofbiz.entity.GenericPK;
-import org.ofbiz.entity.GenericValue;
+import org.ofbiz.context.entity.GenericEntity;
+import org.ofbiz.context.entity.GenericPK;
+import org.ofbiz.entity.GenericEntityImpl;
+import org.ofbiz.entity.GenericValueImpl;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelViewEntity;
@@ -50,7 +51,7 @@ public abstract class AbstractEntityConditionCache<K, V> extends AbstractCache<E
     }
 
     protected V put(String entityName, EntityCondition condition, K key, V value) {
-        ModelEntity entity = this.getDelegator().getModelEntity(entityName);
+        ModelEntity entity = (ModelEntity) this.getDelegator().getModelEntity(entityName);
         if (entity.getNeverCache()) {
             Debug.logWarning("Tried to put a value of the " + entityName + " entity in the cache but this entity has never-cache set to true, not caching.", module);
             return null;
@@ -110,20 +111,20 @@ public abstract class AbstractEntityConditionCache<K, V> extends AbstractCache<E
     }
 
     protected static final boolean isNull(Map value) {
-        return value == null || value == GenericEntity.NULL_ENTITY || value == GenericValue.NULL_VALUE;
+        return value == null || value == GenericEntityImpl.NULL_ENTITY || value == GenericValueImpl.NULL_VALUE;
     }
 
     protected ModelEntity getModelCheckValid(GenericEntity oldEntity, GenericEntity newEntity) {
         ModelEntity model;
         if (!isNull(newEntity)) {
-            model = newEntity.getModelEntity();
+            model = (ModelEntity) newEntity.getModelEntity();
             String entityName = model.getEntityName();
             if (oldEntity != null && !entityName.equals(oldEntity.getEntityName())) {
                 throw new IllegalArgumentException("internal error: storeHook called with 2 different entities(old=" + oldEntity.getEntityName() + ", new=" + entityName + ")");
             }
         } else {
             if (!isNull(oldEntity)) {
-                model = oldEntity.getModelEntity();
+                model = (ModelEntity) oldEntity.getModelEntity();
             } else {
                 throw new IllegalArgumentException("internal error: storeHook called with 2 null arguments");
             }
@@ -149,10 +150,11 @@ public abstract class AbstractEntityConditionCache<K, V> extends AbstractCache<E
 
     protected List<? extends Map<String, Object>> convert(boolean isPK, String targetEntityName, GenericEntity entity) {
         if (isNull(entity)) return null;
+        ModelEntity modelEntity = (ModelEntity) entity.getModelEntity();
         if (isPK) {
-            return entity.getModelEntity().convertToViewValues(targetEntityName, (GenericPK) entity);
+            return modelEntity.convertToViewValues(targetEntityName, (GenericPK) entity);
         } else {
-            return entity.getModelEntity().convertToViewValues(targetEntityName, entity);
+            return modelEntity.convertToViewValues(targetEntityName, entity);
         }
     }
 

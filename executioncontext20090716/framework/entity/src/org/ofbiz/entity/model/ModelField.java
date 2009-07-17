@@ -23,12 +23,14 @@ import org.w3c.dom.*;
 
 import org.ofbiz.entity.jdbc.*;
 import org.ofbiz.base.util.*;
+import org.ofbiz.context.entity.ModelFieldInterface;
 
 /**
  * Generic Entity - Field model class
  *
  */
-public class ModelField extends ModelChild {
+@SuppressWarnings("serial")
+public class ModelField extends ModelChild implements ModelFieldInterface {
 
     /** The name of the Field */
     protected String name = "";

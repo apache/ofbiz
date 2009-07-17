@@ -18,10 +18,13 @@
  *******************************************************************************/
 package org.ofbiz.entity;
 
+import org.ofbiz.context.entity.GenericEntityException;
+
 /**
  * GenericResultSetClosedException
  *
  */
+@SuppressWarnings("serial")
 public class GenericResultSetClosedException extends GenericEntityException {
 
     public GenericResultSetClosedException() {

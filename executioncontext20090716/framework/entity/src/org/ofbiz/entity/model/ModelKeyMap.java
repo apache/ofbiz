@@ -20,18 +20,19 @@ package org.ofbiz.entity.model;
 
 import java.util.List;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.context.entity.ModelKeyMapInterface;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 
 /**
  * Generic Entity - KeyMap model class
  *
  */
-public class ModelKeyMap implements java.io.Serializable {
+@SuppressWarnings("serial")
+public class ModelKeyMap implements ModelKeyMapInterface {
 
     /** name of the field in this entity */
     protected String fieldName = "";
@@ -74,17 +75,17 @@ public class ModelKeyMap implements java.io.Serializable {
     }
 
     // ======= Some Convenience Oriented Factory Methods =======
-    public static List<ModelKeyMap> makeKeyMapList(String fieldName1) {
-        return UtilMisc.toList(new ModelKeyMap(fieldName1, null));
+    public static List<ModelKeyMapInterface> makeKeyMapList(String fieldName1) {
+        return UtilMisc.<ModelKeyMapInterface>toList(new ModelKeyMap(fieldName1, null));
     }
-    public static List<ModelKeyMap> makeKeyMapList(String fieldName1, String relFieldName1) {
-        return UtilMisc.toList(new ModelKeyMap(fieldName1, relFieldName1));
+    public static List<ModelKeyMapInterface> makeKeyMapList(String fieldName1, String relFieldName1) {
+        return UtilMisc.<ModelKeyMapInterface>toList(new ModelKeyMap(fieldName1, relFieldName1));
     }
-    public static List<ModelKeyMap> makeKeyMapList(String fieldName1, String relFieldName1, String fieldName2, String relFieldName2) {
-        return UtilMisc.toList(new ModelKeyMap(fieldName1, relFieldName1), new ModelKeyMap(fieldName2, relFieldName2));
+    public static List<ModelKeyMapInterface> makeKeyMapList(String fieldName1, String relFieldName1, String fieldName2, String relFieldName2) {
+        return UtilMisc.<ModelKeyMapInterface>toList(new ModelKeyMap(fieldName1, relFieldName1), new ModelKeyMap(fieldName2, relFieldName2));
     }
-    public static List<ModelKeyMap> makeKeyMapList(String fieldName1, String relFieldName1, String fieldName2, String relFieldName2, String fieldName3, String relFieldName3) {
-        return UtilMisc.toList(new ModelKeyMap(fieldName1, relFieldName1), new ModelKeyMap(fieldName2, relFieldName2), new ModelKeyMap(fieldName3, relFieldName3));
+    public static List<ModelKeyMapInterface> makeKeyMapList(String fieldName1, String relFieldName1, String fieldName2, String relFieldName2, String fieldName3, String relFieldName3) {
+        return UtilMisc.<ModelKeyMapInterface>toList(new ModelKeyMap(fieldName1, relFieldName1), new ModelKeyMap(fieldName2, relFieldName2), new ModelKeyMap(fieldName3, relFieldName3));
     }
 
     @Override

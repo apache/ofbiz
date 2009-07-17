@@ -28,7 +28,7 @@ import java.util.Map;
 import javax.transaction.Transaction;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.context.entity.GenericEntityException;
 import org.ofbiz.entity.jdbc.ConnectionFactory;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;

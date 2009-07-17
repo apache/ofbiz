@@ -18,10 +18,13 @@
  *******************************************************************************/
 package org.ofbiz.entity;
 
+import org.ofbiz.context.entity.GenericEntityException;
+
 /**
  * GenericNotImplementedException
  *
  */
+@SuppressWarnings("serial")
 public class GenericNotImplementedException extends GenericEntityException {
 
     public GenericNotImplementedException() {

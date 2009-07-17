@@ -24,7 +24,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.context.entity.DynamicViewEntityInterface;
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.entity.ModelKeyMapInterface;
+import org.ofbiz.entity.GenericDelegatorImpl;
 import org.ofbiz.entity.model.ModelViewEntity.ComplexAliasMember;
 import org.ofbiz.entity.model.ModelViewEntity.ModelAlias;
 import org.ofbiz.entity.model.ModelViewEntity.ModelAliasAll;
@@ -36,7 +39,7 @@ import org.ofbiz.entity.model.ModelViewEntity.ModelViewLink;
  * of an entity-name.
  *
  */
-public class DynamicViewEntity {
+public class DynamicViewEntity implements DynamicViewEntityInterface {
     public static final String module = DynamicViewEntity.class.getName();
 
     /** The entity-name of the Entity */
@@ -70,7 +73,7 @@ public class DynamicViewEntity {
     }
 
     public ModelViewEntity makeModelViewEntity(GenericDelegator delegator) {
-        ModelViewEntity modelViewEntity = new ModelViewEntity(this, delegator.getModelReader());
+        ModelViewEntity modelViewEntity = new ModelViewEntity(this, ((GenericDelegatorImpl) delegator).getModelReader());
         return modelViewEntity;
     }
 
@@ -194,8 +197,8 @@ public class DynamicViewEntity {
         addList.addAll(this.aliases);
     }
 
-    public void addViewLink(String entityAlias, String relEntityAlias, Boolean relOptional, List<ModelKeyMap> modelKeyMaps) {
-        ModelViewLink modelViewLink = new ModelViewLink(entityAlias, relEntityAlias, relOptional, modelKeyMaps);
+    public void addViewLink(String entityAlias, String relEntityAlias, Boolean relOptional, List<ModelKeyMapInterface> modelKeyMaps) {
+        ModelViewLink modelViewLink = new ModelViewLink(entityAlias, relEntityAlias, relOptional, (List) modelKeyMaps);
         this.viewLinks.add(modelViewLink);
     }
 
@@ -203,8 +206,8 @@ public class DynamicViewEntity {
         addList.addAll(this.viewLinks);
     }
 
-    public void addRelation(String type, String title, String relEntityName, List<ModelKeyMap> modelKeyMaps) {
-        ModelRelation relation = new ModelRelation(type, title, relEntityName, null, modelKeyMaps);
+    public void addRelation(String type, String title, String relEntityName, List<ModelKeyMapInterface> modelKeyMaps) {
+        ModelRelation relation = new ModelRelation(type, title, relEntityName, null, (List) modelKeyMaps);
         this.relations.add(relation);
     }
 

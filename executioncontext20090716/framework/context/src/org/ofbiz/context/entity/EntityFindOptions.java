@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.entity.util;
+package org.ofbiz.context.entity;
 
 import java.sql.ResultSet;
 
 /**
  * Contains a number of variables used to select certain advanced finding options.
  */
+@SuppressWarnings("serial")
 public class EntityFindOptions implements java.io.Serializable {
 
     /** Type constant from the java.sql.ResultSet object for convenience */

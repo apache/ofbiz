@@ -22,22 +22,24 @@ import java.util.Map;
 
 import javolution.context.ObjectFactory;
 
+import org.ofbiz.context.entity.GenericPK;
 import org.ofbiz.entity.model.ModelEntity;
 
 /**
  * Generic Entity Primary Key Object
  *
  */
-public class GenericPK extends GenericEntity {
+@SuppressWarnings("serial")
+public class GenericPKImpl extends GenericEntityImpl implements GenericPK {
 
     protected static final ObjectFactory<GenericPK> genericPKFactory = new ObjectFactory<GenericPK>() {
         @Override
         protected GenericPK create() {
-            return new GenericPK();
+            return new GenericPKImpl();
         }
     };
 
-    protected GenericPK() { }
+    protected GenericPKImpl() { }
 
     /** Creates new GenericPK */
     public static GenericPK create(ModelEntity modelEntity) {

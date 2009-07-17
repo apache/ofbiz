@@ -18,10 +18,13 @@
  *******************************************************************************/
 package org.ofbiz.entity;
 
+import org.ofbiz.context.entity.GenericEntityException;
+
 /**
  * GenericEntityNotFoundException
  *
  */
+@SuppressWarnings("serial")
 public class GenericEntityNotFoundException extends GenericEntityException {
 
     public GenericEntityNotFoundException() {

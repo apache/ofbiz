@@ -18,10 +18,13 @@
  *******************************************************************************/
 package org.ofbiz.entity.transaction;
 
-import javax.transaction.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-import org.ofbiz.entity.*;
+import javax.transaction.TransactionManager;
+import javax.transaction.UserTransaction;
+
+import org.ofbiz.context.entity.GenericEntityException;
 
 /**
  * TransactionFactory - central source for JTA objects

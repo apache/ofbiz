@@ -38,9 +38,12 @@ import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.common.KeywordSearchUtil;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.GenericValue;
+import org.ofbiz.context.entity.EntityFindOptions;
+import org.ofbiz.context.entity.EntityListIterator;
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericEntityException;
+import org.ofbiz.context.entity.GenericValue;
+import org.ofbiz.context.entity.ModelKeyMapInterface;
 import org.ofbiz.entity.condition.EntityComparisonOperator;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityConditionParam;
@@ -54,8 +57,6 @@ import org.ofbiz.entity.model.ModelViewEntity.ComplexAlias;
 import org.ofbiz.entity.model.ModelViewEntity.ComplexAliasField;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
-import org.ofbiz.entity.util.EntityFindOptions;
-import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.party.party.PartyHelper;
 import org.ofbiz.product.category.CategoryContentWrapper;
@@ -819,6 +820,7 @@ public class ProductSearch {
     }
 
 
+    @SuppressWarnings("serial")
     public static class CatalogConstraint extends ProductSearchConstraint {
         public static final String constraintName = "Catalog";
         protected String prodCatalogId;
@@ -892,6 +894,7 @@ public class ProductSearch {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class CategoryConstraint extends ProductSearchConstraint {
         public static final String constraintName = "Category";
         protected String productCategoryId;
@@ -987,6 +990,7 @@ public class ProductSearch {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class FeatureConstraint extends ProductSearchConstraint {
         public static final String constraintName = "Feature";
         protected String productFeatureId;
@@ -1069,6 +1073,7 @@ public class ProductSearch {
     }
 
 
+    @SuppressWarnings("serial")
     public static class FeatureCategoryConstraint extends ProductSearchConstraint {
         public static final String constraintName = "FeatureCategory";
         protected String productFeatureCategoryId;
@@ -1149,6 +1154,7 @@ public class ProductSearch {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class FeatureGroupConstraint extends ProductSearchConstraint {
         public static final String constraintName = "FeatureGroup";
         protected String productFeatureGroupId;
@@ -1229,6 +1235,7 @@ public class ProductSearch {
     }
 
 
+    @SuppressWarnings("serial")
     public static class FeatureSetConstraint extends ProductSearchConstraint {
         public static final String constraintName = "Feature Set";
         protected Set<String> productFeatureIdSet;
@@ -1322,6 +1329,7 @@ public class ProductSearch {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class KeywordConstraint extends ProductSearchConstraint {
         public static final String constraintName = "Keyword";
         protected String keywordsString;
@@ -1442,6 +1450,7 @@ public class ProductSearch {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class LastUpdatedRangeConstraint extends ProductSearchConstraint {
         public static final String constraintName = "LastUpdatedRange";
         protected Timestamp fromDate;
@@ -1494,6 +1503,7 @@ public class ProductSearch {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class StoreGroupPriceConstraint extends ProductSearchConstraint {
         public static final String constraintName = "StoreGroupPrice";
         protected String productStoreGroupId;
@@ -1553,6 +1563,7 @@ public class ProductSearch {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class ListPriceRangeConstraint extends ProductSearchConstraint {
         public static final String constraintName = "ListPriceRange";
         protected BigDecimal lowPrice;
@@ -1659,6 +1670,7 @@ public class ProductSearch {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class SupplierConstraint extends ProductSearchConstraint {
         public static final String constraintName = "Supplier";
         protected String supplierPartyId;
@@ -1709,6 +1721,7 @@ public class ProductSearch {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class ExcludeVariantsConstraint extends ProductSearchConstraint {
         public static final String constraintName = "ExcludeVariants";
 
@@ -1740,6 +1753,7 @@ public class ProductSearch {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class AvailabilityDateConstraint extends ProductSearchConstraint {
         public static final String constraintName = "AvailabilityDate";
 
@@ -1771,6 +1785,7 @@ public class ProductSearch {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class GoodIdentificationConstraint extends ProductSearchConstraint {
         public static final String constraintName = "GoodIdentification";
         protected String goodIdentificationTypeId;
@@ -1868,6 +1883,7 @@ public class ProductSearch {
     // Result Sort Classes
     // ======================================================================
 
+    @SuppressWarnings("serial")
     public static abstract class ResultSortOrder implements java.io.Serializable {
         public ResultSortOrder() {
         }
@@ -1878,6 +1894,7 @@ public class ProductSearch {
         public abstract boolean isAscending();
     }
 
+    @SuppressWarnings("serial")
     public static class SortKeywordRelevancy extends ResultSortOrder {
         public SortKeywordRelevancy() {
         }
@@ -1907,6 +1924,7 @@ public class ProductSearch {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class SortProductField extends ResultSortOrder {
         protected String fieldName;
         protected boolean ascending;
@@ -1963,6 +1981,7 @@ public class ProductSearch {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class SortProductPrice extends ResultSortOrder {
         protected String productPriceTypeId;
         protected String currencyUomId;
@@ -1992,7 +2011,7 @@ public class ProductSearch {
 
             // SortProductPrice, this will be a bit more complex, need to add a ProductPrice member entity
             productSearchContext.dynamicViewEntity.addMemberEntity("SPPRC", "ProductPrice");
-            productSearchContext.dynamicViewEntity.addViewLink("PROD", "SPPRC", Boolean.TRUE, UtilMisc.toList(new ModelKeyMap("productId", "productId")));
+            productSearchContext.dynamicViewEntity.addViewLink("PROD", "SPPRC", Boolean.TRUE, UtilMisc.<ModelKeyMapInterface>toList(new ModelKeyMap("productId", "productId")));
             productSearchContext.dynamicViewEntity.addAlias("SPPRC", "sortProductPriceTypeId", "productPriceTypeId", null, null, null, null);
             productSearchContext.dynamicViewEntity.addAlias("SPPRC", "sortCurrencyUomId", "currencyUomId", null, null, null, null);
             productSearchContext.dynamicViewEntity.addAlias("SPPRC", "sortProductStoreGroupId", "productStoreGroupId", null, null, null, null);

@@ -39,8 +39,8 @@ import org.ofbiz.base.util.UtilTimer;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
+import org.ofbiz.context.entity.GenericEntityException;
 import org.ofbiz.entity.GenericEntityConfException;
-import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericModelException;
 import org.ofbiz.entity.config.DelegatorInfo;
 import org.ofbiz.entity.config.EntityConfigUtil;
@@ -53,6 +53,7 @@ import org.w3c.dom.Node;
  * Generic Entity - Entity Definition Reader
  *
  */
+@SuppressWarnings("serial")
 public class ModelReader implements Serializable {
 
     public static final String module = ModelReader.class.getName();
@@ -359,10 +360,12 @@ public class ModelReader implements Serializable {
                                                     orderedMessages.add(message);
                                                 }
                                             } else {
-                                                String message = "Existing relationship with the same name, but different specs found from what would be auto-created for Entity [" + relatedEnt.getEntityName() + "] ant relationship to entity [" +
-                                                        curModelEntity.getEntityName() + "] title [" + targetTitle + "]; would auto-create: type [" +
-                                                        newRel.getType() + "] and fields [" + newRel.keyMapString(",", "") + "]";
-                                                //Debug.logInfo(message, module);
+                                                if (Debug.infoOn()) {
+                                                    String message = "Existing relationship with the same name, but different specs found from what would be auto-created for Entity [" + relatedEnt.getEntityName() + "] ant relationship to entity [" +
+                                                    curModelEntity.getEntityName() + "] title [" + targetTitle + "]; would auto-create: type [" +
+                                                    newRel.getType() + "] and fields [" + newRel.keyMapString(",", "") + "]";
+                                                    Debug.logInfo(message, module);
+                                                }
                                             }
                                         }
                                     } else {
@@ -539,7 +542,7 @@ public class ModelReader implements Serializable {
         if (entityName == null) {
             return null;
         }
-        Set allEntities = this.getEntityNames();
+        Set<String> allEntities = this.getEntityNames();
         while (!allEntities.contains(entityName) && entityName.length() > 0) {
             entityName = entityName.substring(1);
         }

@@ -18,11 +18,12 @@
  *******************************************************************************/
 package org.ofbiz.entity.transaction;
 
-import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.context.entity.GenericEntityException;
 
 /**
  * GenericTransactionException
  */
+@SuppressWarnings("serial")
 public class GenericTransactionException extends GenericEntityException {
 
     public GenericTransactionException() {

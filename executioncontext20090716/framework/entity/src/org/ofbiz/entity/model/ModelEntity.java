@@ -19,7 +19,6 @@
 package org.ofbiz.entity.model;
 
 import java.io.PrintWriter;
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,10 +40,16 @@ import org.ofbiz.base.util.UtilPlist;
 import org.ofbiz.base.util.UtilTimer;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericEntity;
-import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.GenericValue;
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericEntity;
+import org.ofbiz.context.entity.GenericEntityException;
+import org.ofbiz.context.entity.ModelEntityInterface;
+import org.ofbiz.context.entity.ModelFieldInterface;
+import org.ofbiz.context.entity.ModelKeyMapInterface;
+import org.ofbiz.context.entity.ModelRelationInterface;
+import org.ofbiz.entity.GenericDelegatorImpl;
+import org.ofbiz.entity.GenericEntityImpl;
+import org.ofbiz.entity.GenericValueImpl;
 import org.ofbiz.entity.config.DatasourceInfo;
 import org.ofbiz.entity.config.EntityConfigUtil;
 import org.ofbiz.entity.jdbc.DatabaseUtil;
@@ -56,7 +61,7 @@ import org.w3c.dom.Element;
  *
  */
 @SuppressWarnings("serial")
-public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, Serializable {
+public class ModelEntity extends ModelInfo implements ModelEntityInterface {
 
     public static final String module = ModelEntity.class.getName();
 
@@ -276,9 +281,9 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
     }
 
     public boolean containsAllPkFieldNames(Set<String> fieldNames) {
-        Iterator<ModelField> pksIter = this.getPksIterator();
+        Iterator<ModelFieldInterface> pksIter = this.getPksIterator();
         while (pksIter.hasNext()) {
-            ModelField pkField = pksIter.next();
+            ModelFieldInterface pkField = pksIter.next();
             if (!fieldNames.contains(pkField.getName())) {
                 return false;
             }
@@ -467,15 +472,7 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
         return this.pks.size();
     }
 
-    /**
-     * @deprecated
-     */
-    @Deprecated
-    public ModelField getPk(int index) {
-        return this.pks.get(index);
-    }
-
-    public ModelField getOnlyPk() {
+    public ModelFieldInterface getOnlyPk() {
         if (this.pks.size() == 1) {
             return this.pks.get(0);
         } else {
@@ -483,22 +480,16 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
         }
     }
 
-    public Iterator<ModelField> getPksIterator() {
-        return this.pks.iterator();
+    public Iterator<ModelFieldInterface> getPksIterator() {
+        List<ModelFieldInterface> mfList = FastList.newInstance();
+        mfList.addAll(this.pks);
+        return mfList.iterator();
     }
 
-    /**
-     * @deprecated Use getPkFieldsUnmodifiable instead.
-     */
-    @Deprecated
-    public List<ModelField> getPksCopy() {
-        List<ModelField> newList = FastList.newInstance();
-        newList.addAll(this.pks);
-        return newList;
-    }
-
-    public List<ModelField> getPkFieldsUnmodifiable() {
-        return Collections.unmodifiableList(this.pks);
+    public List<ModelFieldInterface> getPkFieldsUnmodifiable() {
+        List<ModelFieldInterface> mfList = FastList.newInstance();
+        mfList.addAll(this.pks);
+        return Collections.unmodifiableList(mfList);
     }
 
     public String getFirstPkFieldName() {
@@ -514,20 +505,14 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
         return this.nopks.size();
     }
 
-    /**
-     * @deprecated
-     */
-    @Deprecated
-    public ModelField getNopk(int index) {
-        return this.nopks.get(index);
+    public Iterator<ModelFieldInterface> getNopksIterator() {
+        List<ModelFieldInterface> mfList = FastList.newInstance();
+        mfList.addAll(this.nopks);
+        return mfList.iterator();
     }
 
-    public Iterator<ModelField> getNopksIterator() {
-        return this.nopks.iterator();
-    }
-
-    public List<ModelField> getNopksCopy() {
-        List<ModelField> newList = FastList.newInstance();
+    public List<ModelFieldInterface> getNopksCopy() {
+        List<ModelFieldInterface> newList = FastList.newInstance();
         newList.addAll(this.nopks);
         return newList;
     }
@@ -536,30 +521,16 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
         return this.fields.size();
     }
 
-    /**
-     * @deprecated
-     */
-    @Deprecated
-    public ModelField getField(int index) {
-        return this.fields.get(index);
+    public Iterator<ModelFieldInterface> getFieldsIterator() {
+        List<ModelFieldInterface> mfList = FastList.newInstance();
+        mfList.addAll(this.fields);
+        return mfList.iterator();
     }
 
-    public Iterator<ModelField> getFieldsIterator() {
-        return this.fields.iterator();
-    }
-
-    /**
-     * @deprecated Use getFieldsUnmodifiable instead.
-     */
-    @Deprecated
-    public List<ModelField> getFieldsCopy() {
-        List<ModelField> newList = FastList.newInstance();
-        newList.addAll(this.fields);
-        return newList;
-    }
-
-    public List<ModelField> getFieldsUnmodifiable() {
-        return Collections.unmodifiableList(this.fields);
+    public List<ModelFieldInterface> getFieldsUnmodifiable() {
+        List<ModelFieldInterface> mfList = FastList.newInstance();
+        mfList.addAll(this.fields);
+        return Collections.unmodifiableList(mfList);
     }
 
     /** The col-name of the Field, the alias of the field if this is on a view-entity */
@@ -672,9 +643,9 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
 
     public int getRelationsOneSize() {
         int numRels = 0;
-        Iterator<ModelRelation> relationsIter = this.getRelationsIterator();
+        Iterator<ModelRelationInterface> relationsIter = this.getRelationsIterator();
         while (relationsIter.hasNext()) {
-            ModelRelation modelRelation = relationsIter.next();
+            ModelRelationInterface modelRelation = relationsIter.next();
             if ("one".equals(modelRelation.getType())) {
                 numRels++;
             }
@@ -686,15 +657,17 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
         return this.relations.get(index);
     }
 
-    public Iterator<ModelRelation> getRelationsIterator() {
-        return this.relations.iterator();
+    public Iterator<ModelRelationInterface> getRelationsIterator() {
+        List<ModelRelationInterface> mrList = FastList.newInstance();
+        mrList.addAll(this.relations);
+        return mrList.iterator();
     }
 
-    public List<ModelRelation> getRelationsList(boolean includeOne, boolean includeOneNoFk, boolean includeMany) {
-        List<ModelRelation> relationsList = FastList.newInstance();
-        Iterator<ModelRelation> allIter = this.getRelationsIterator();
+    public List<ModelRelationInterface> getRelationsList(boolean includeOne, boolean includeOneNoFk, boolean includeMany) {
+        List<ModelRelationInterface> relationsList = FastList.newInstance();
+        Iterator<ModelRelationInterface> allIter = this.getRelationsIterator();
         while (allIter.hasNext()) {
-            ModelRelation modelRelation = allIter.next();
+            ModelRelationInterface modelRelation = allIter.next();
             if (includeOne && "one".equals(modelRelation.getType())) {
                 relationsList.add(modelRelation);
             } else if (includeOneNoFk && "one-nofk".equals(modelRelation.getType())) {
@@ -706,11 +679,11 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
         return relationsList;
     }
 
-    public List<ModelRelation> getRelationsOneList() {
+    public List<ModelRelationInterface> getRelationsOneList() {
         return getRelationsList(true, true, false);
     }
 
-    public List<ModelRelation> getRelationsManyList() {
+    public List<ModelRelationInterface> getRelationsManyList() {
         return getRelationsList(false, false, true);
     }
 
@@ -777,7 +750,7 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
     }
 
     public List<? extends Map<String, Object>> convertToViewValues(String viewEntityName, GenericEntity entity) {
-        if (entity == null || entity == GenericEntity.NULL_ENTITY || entity == GenericValue.NULL_VALUE) return UtilMisc.toList(entity);
+        if (entity == null || entity == GenericEntityImpl.NULL_ENTITY || entity == GenericValueImpl.NULL_VALUE) return UtilMisc.toList(entity);
         ModelViewEntity view = this.viewEntities.get(viewEntityName);
         return view.convert(getEntityName(), entity);
     }
@@ -1259,16 +1232,16 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
     }
 
     public void convertFieldMapInPlace(Map<String, Object> inContext, GenericDelegator delegator) {
-        convertFieldMapInPlace(inContext, delegator.getModelFieldTypeReader(this));
+        convertFieldMapInPlace(inContext, ((GenericDelegatorImpl) delegator).getModelFieldTypeReader(this));
     }
     public void convertFieldMapInPlace(Map<String, Object> inContext, ModelFieldTypeReader modelFieldTypeReader) {
-        Iterator<ModelField> modelFields = this.getFieldsIterator();
+        Iterator<ModelFieldInterface> modelFields = this.getFieldsIterator();
         while (modelFields.hasNext()) {
-            ModelField modelField = modelFields.next();
+            ModelFieldInterface modelField = modelFields.next();
             String fieldName = modelField.getName();
             Object oldValue = inContext.get(fieldName);
             if (oldValue != null) {
-                inContext.put(fieldName, this.convertFieldValue(modelField, oldValue, modelFieldTypeReader, inContext));
+                inContext.put(fieldName, this.convertFieldValue((ModelField) modelField, oldValue, modelFieldTypeReader, inContext));
             }
         }
     }
@@ -1283,12 +1256,12 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
     }
 
     public Object convertFieldValue(ModelField modelField, Object value, GenericDelegator delegator) {
-        if (value == null || value == GenericEntity.NULL_FIELD) {
+        if (value == null || value == GenericEntityImpl.NULL_FIELD) {
             return null;
         }
         String fieldJavaType = null;
         try {
-            fieldJavaType = delegator.getEntityFieldType(this, modelField.getType()).getJavaType();
+            fieldJavaType = ((GenericDelegatorImpl) delegator).getEntityFieldType(this, modelField.getType()).getJavaType();
         } catch (GenericEntityException e) {
             String errMsg = "Could not convert field value: could not find Java type for the field: [" + modelField.getName() + "] on the [" + this.getEntityName() + "] entity: " + e.toString();
             Debug.logError(e, errMsg, module);
@@ -1309,7 +1282,7 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
      * @return the converted value
      */
     public Object convertFieldValue(ModelField modelField, Object value, GenericDelegator delegator, Map<String, ? extends Object> context) {
-        ModelFieldTypeReader modelFieldTypeReader = delegator.getModelFieldTypeReader(this);
+        ModelFieldTypeReader modelFieldTypeReader = ((GenericDelegatorImpl) delegator).getModelFieldTypeReader(this);
         return this.convertFieldValue(modelField, value, modelFieldTypeReader, context);
     }
     /** Convert a field value from one Java data type to another. This is the preferred method -
@@ -1318,7 +1291,7 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
      * @return the converted value
      */
     public Object convertFieldValue(ModelField modelField, Object value, ModelFieldTypeReader modelFieldTypeReader, Map<String, ? extends Object> context) {
-        if (value == null || value == GenericEntity.NULL_FIELD) {
+        if (value == null || value == GenericEntityImpl.NULL_FIELD) {
             return null;
         }
         String fieldJavaType = modelFieldTypeReader.getModelFieldType(modelField.getType()).getJavaType();
@@ -1414,36 +1387,35 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
         }
 
         // append field elements
-        Iterator<ModelField> fieldIter = this.getFieldsIterator();
+        Iterator<ModelFieldInterface> fieldIter = this.getFieldsIterator();
         while (fieldIter != null && fieldIter.hasNext()) {
-            ModelField field = fieldIter.next();
+            ModelFieldInterface field = fieldIter.next();
             if (!field.getIsAutoCreatedInternal()) {
                 root.appendChild(field.toXmlElement(document));
             }
         }
 
         // append PK elements
-        Iterator<ModelField> pkIter = this.getPksIterator();
+        Iterator<ModelFieldInterface> pkIter = this.getPksIterator();
         while (pkIter != null && pkIter.hasNext()) {
-            ModelField pk = pkIter.next();
+            ModelFieldInterface pk = pkIter.next();
             Element pkey = document.createElement("prim-key");
             pkey.setAttribute("field", pk.getName());
             root.appendChild(pkey);
         }
 
         // append relation elements
-        Iterator relIter = this.getRelationsIterator();
+        Iterator<ModelRelationInterface> relIter = this.getRelationsIterator();
         while (relIter != null && relIter.hasNext()) {
             ModelRelation rel = (ModelRelation) relIter.next();
-
+            root.appendChild(rel.toXmlElement(document));
         }
 
         // append index elements
-        Iterator idxIter = this.getIndexesIterator();
+        Iterator<ModelIndex> idxIter = this.getIndexesIterator();
         while (idxIter != null && idxIter.hasNext()) {
             ModelIndex idx = (ModelIndex) idxIter.next();
             root.appendChild(idx.toXmlElement(document));
-
         }
 
         return root;
@@ -1573,7 +1545,7 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
 
                 List<Map<String, Object>> joinsMapList = FastList.newInstance();
                 relationshipMap.put("joins", joinsMapList);
-                for (ModelKeyMap keyMap: relationship.getKeyMapsClone()) {
+                for (ModelKeyMapInterface keyMap: relationship.getKeyMapsClone()) {
                     Map<String, Object> joinsMap = FastMap.newInstance();
                     joinsMapList.add(joinsMap);
 

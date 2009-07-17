@@ -18,18 +18,18 @@
  *******************************************************************************/
 package org.ofbiz.entity.jdbc;
 
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.config.EntityConfigUtil;
-import org.ofbiz.entity.connection.ConnectionFactoryInterface;
-import org.ofbiz.entity.transaction.TransactionFactory;
-import org.w3c.dom.Element;
-
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
+
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.context.entity.GenericEntityException;
+import org.ofbiz.entity.config.EntityConfigUtil;
+import org.ofbiz.entity.connection.ConnectionFactoryInterface;
+import org.ofbiz.entity.transaction.TransactionFactory;
+import org.w3c.dom.Element;
 
 /**
  * ConnectionFactory - central source for JDBC connections
