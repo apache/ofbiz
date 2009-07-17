@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.service.job;
+package org.ofbiz.context.service;
 
 /**
  * Job Scheduler Exception
  */
+@SuppressWarnings("serial")
 public class JobManagerException extends org.ofbiz.base.util.GeneralException {
 
     /**

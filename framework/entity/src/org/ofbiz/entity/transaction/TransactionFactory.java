@@ -20,11 +20,12 @@ package org.ofbiz.entity.transaction;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.context.entity.GenericEntityException;
 import org.ofbiz.entity.config.DatasourceInfo;
 import org.ofbiz.entity.config.EntityConfigUtil;
 import org.ofbiz.entity.jdbc.CursorConnection;

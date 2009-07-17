@@ -25,17 +25,19 @@ import java.util.List;
 import java.util.Map;
 
 import javolution.context.ObjectFactory;
-import javolution.lang.Reusable;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.context.entity.GenericEntityException;
+import org.ofbiz.context.entity.GenericPK;
+import org.ofbiz.context.entity.GenericValue;
+import org.ofbiz.context.entity.ModelKeyMapInterface;
+import org.ofbiz.context.entity.ModelRelationInterface;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityFieldMap;
 import org.ofbiz.entity.model.ModelEntity;
-import org.ofbiz.entity.model.ModelKeyMap;
-import org.ofbiz.entity.model.ModelRelation;
 import org.ofbiz.entity.util.EntityUtil;
 
 
@@ -44,14 +46,14 @@ import org.ofbiz.entity.util.EntityUtil;
  *
  */
 @SuppressWarnings("serial")
-public class GenericValue extends GenericEntity implements Reusable {
+public class GenericValueImpl extends GenericEntityImpl implements GenericValue {
 
     public static final GenericValue NULL_VALUE = new NullGenericValue();
 
-    protected static final ObjectFactory<GenericValue> genericValueFactory = new ObjectFactory<GenericValue>() {
+    protected static final ObjectFactory<GenericValueImpl> genericValueFactory = new ObjectFactory<GenericValueImpl>() {
         @Override
-        protected GenericValue create() {
-            return new GenericValue();
+        protected GenericValueImpl create() {
+            return new GenericValueImpl();
         }
     };
 
@@ -67,39 +69,39 @@ public class GenericValue extends GenericEntity implements Reusable {
      */
     protected Map<String, Object> originalDbValues = null;
 
-    protected GenericValue() { }
+    protected GenericValueImpl() { }
 
     /** Creates new GenericValue */
     public static GenericValue create(ModelEntity modelEntity) {
-        GenericValue newValue = genericValueFactory.object();
+        GenericValueImpl newValue = genericValueFactory.object();
         newValue.init(modelEntity);
         return newValue;
     }
 
     /** Creates new GenericValue from existing Map */
     public static GenericValue create(ModelEntity modelEntity, Map<String, ? extends Object> fields) {
-        GenericValue newValue = genericValueFactory.object();
+        GenericValueImpl newValue = genericValueFactory.object();
         newValue.init(modelEntity, fields);
         return newValue;
     }
 
     /** Creates new GenericValue from existing Map */
     public static GenericValue create(ModelEntity modelEntity, Object singlePkValue) {
-        GenericValue newValue = genericValueFactory.object();
+        GenericValueImpl newValue = genericValueFactory.object();
         newValue.init(modelEntity, singlePkValue);
         return newValue;
     }
 
     /** Creates new GenericValue from existing GenericValue */
     public static GenericValue create(GenericValue value) {
-        GenericValue newValue = genericValueFactory.object();
+        GenericValueImpl newValue = genericValueFactory.object();
         newValue.init(value);
         return newValue;
     }
 
     /** Creates new GenericValue from existing GenericValue */
     public static GenericValue create(GenericPK primaryKey) {
-        GenericValue newValue = genericValueFactory.object();
+        GenericValueImpl newValue = genericValueFactory.object();
         newValue.init(primaryKey);
         return newValue;
     }
@@ -440,14 +442,14 @@ public class GenericValue extends GenericEntity implements Reusable {
      */
     public boolean checkFks(boolean insertDummy) throws GenericEntityException {
         ModelEntity model = this.getModelEntity();
-        Iterator<ModelRelation> relItr = model.getRelationsIterator();
+        Iterator<ModelRelationInterface> relItr = model.getRelationsIterator();
         while (relItr.hasNext()) {
-            ModelRelation relation = relItr.next();
+            ModelRelationInterface relation = relItr.next();
             if ("one".equalsIgnoreCase(relation.getType())) {
                 // see if the related value exists
                 Map<String, Object> fields = FastMap.newInstance();
                 for (int i = 0; i < relation.getKeyMapsSize(); i++) {
-                    ModelKeyMap keyMap = relation.getKeyMap(i);
+                    ModelKeyMapInterface keyMap = relation.getKeyMap(i);
                     fields.put(keyMap.getRelFieldName(), this.get(keyMap.getFieldName()));
                 }
                 EntityFieldMap ecl = EntityCondition.makeCondition(fields);
@@ -456,10 +458,10 @@ public class GenericValue extends GenericEntity implements Reusable {
                     if (insertDummy) {
                         // create the new related value (dummy)
                         GenericValue newValue = this.getDelegator().makeValue(relation.getRelEntityName());
-                        Iterator<ModelKeyMap> keyMapIter = relation.getKeyMapsIterator();
+                        Iterator<ModelKeyMapInterface> keyMapIter = relation.getKeyMapsIterator();
                         boolean allFieldsSet = true;
                         while (keyMapIter.hasNext()) {
-                            ModelKeyMap mkm = keyMapIter.next();
+                            ModelKeyMapInterface mkm = keyMapIter.next();
                             if (this.get(mkm.getFieldName()) != null) {
                                 newValue.set(mkm.getRelFieldName(), this.get(mkm.getFieldName()));
                                 if (Debug.infoOn()) Debug.logInfo("Set [" + mkm.getRelFieldName() + "] to - " + this.get(mkm.getFieldName()), module);
@@ -495,12 +497,12 @@ public class GenericValue extends GenericEntity implements Reusable {
      */
     @Override
     public Object clone() {
-        GenericValue newEntity = GenericValue.create(this);
+        GenericValue newEntity = GenericValueImpl.create(this);
         newEntity.setDelegator(internalDelegator);
         return newEntity;
     }
 
-    protected static class NullGenericValue extends GenericValue implements NULL {
+    protected static class NullGenericValue extends GenericValueImpl implements org.ofbiz.context.entity.GenericEntity.NULL {
         @Override
         public String getEntityName() {
             return "[null-entity-value]";

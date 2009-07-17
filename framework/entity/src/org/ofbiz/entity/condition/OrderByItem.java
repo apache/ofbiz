@@ -22,7 +22,7 @@ package org.ofbiz.entity.condition;
 import java.util.Comparator;
 
 import org.ofbiz.base.util.UtilGenerics;
-import org.ofbiz.entity.GenericEntity;
+import org.ofbiz.context.entity.GenericEntity;
 import org.ofbiz.entity.GenericModelException;
 import org.ofbiz.entity.config.DatasourceInfo;
 import org.ofbiz.entity.model.ModelEntity;

@@ -23,16 +23,17 @@ package org.ofbiz.entity.util;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.ListIterator;
 
 import javolution.util.FastList;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralRuntimeException;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.context.entity.EntityListIterator;
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericEntityException;
+import org.ofbiz.context.entity.GenericValue;
 import org.ofbiz.entity.GenericResultSetClosedException;
-import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.GenericValueImpl;
 import org.ofbiz.entity.jdbc.SQLProcessor;
 import org.ofbiz.entity.jdbc.SqlJdbcUtil;
 import org.ofbiz.entity.model.ModelEntity;
@@ -43,10 +44,10 @@ import org.ofbiz.entity.model.ModelFieldTypeReader;
 /**
  * Generic Entity Cursor List Iterator for Handling Cursored DB Results
  */
-public class EntityListIterator implements ListIterator<GenericValue> {
+public class EntityListIteratorImpl implements EntityListIterator {
 
     /** Module Name Used for debugging */
-    public static final String module = EntityListIterator.class.getName();
+    public static final String module = EntityListIteratorImpl.class.getName();
 
     protected SQLProcessor sqlp;
     protected ResultSet resultSet;
@@ -59,7 +60,7 @@ public class EntityListIterator implements ListIterator<GenericValue> {
 
     private boolean haveShowHasNextWarning = false;
 
-    public EntityListIterator(SQLProcessor sqlp, ModelEntity modelEntity, List<ModelField> selectFields, ModelFieldTypeReader modelFieldTypeReader) {
+    public EntityListIteratorImpl(SQLProcessor sqlp, ModelEntity modelEntity, List<ModelField> selectFields, ModelFieldTypeReader modelFieldTypeReader) {
         this.sqlp = sqlp;
         this.resultSet = sqlp.getResultSet();
         this.modelEntity = modelEntity;
@@ -67,7 +68,7 @@ public class EntityListIterator implements ListIterator<GenericValue> {
         this.modelFieldTypeReader = modelFieldTypeReader;
     }
 
-    public EntityListIterator(ResultSet resultSet, ModelEntity modelEntity, List<ModelField> selectFields, ModelFieldTypeReader modelFieldTypeReader) {
+    public EntityListIteratorImpl(ResultSet resultSet, ModelEntity modelEntity, List<ModelField> selectFields, ModelFieldTypeReader modelFieldTypeReader) {
         this.sqlp = null;
         this.resultSet = resultSet;
         this.modelEntity = modelEntity;
@@ -156,7 +157,7 @@ public class EntityListIterator implements ListIterator<GenericValue> {
     public GenericValue currentGenericValue() throws GenericEntityException {
         if (closed) throw new GenericResultSetClosedException("This EntityListIterator has been closed, this operation cannot be performed");
 
-        GenericValue value = GenericValue.create(modelEntity);
+        GenericValue value = GenericValueImpl.create(modelEntity);
 
         for (int j = 0; j < selectFields.size(); j++) {
             ModelField curField = selectFields.get(j);

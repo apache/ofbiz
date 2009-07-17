@@ -22,8 +22,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericEntityException;
+import org.ofbiz.context.entity.ModelEntityInterface;
+import org.ofbiz.context.entity.ModelFieldInterface;
 import org.ofbiz.entity.GenericModelException;
 import org.ofbiz.entity.config.DatasourceInfo;
 import org.ofbiz.entity.jdbc.SqlJdbcUtil;
@@ -31,10 +33,11 @@ import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;
 import org.ofbiz.entity.model.ModelViewEntity;
 
+@SuppressWarnings("serial")
 public class EntityConditionSubSelect extends EntityConditionValue {
     public static final String module = EntityConditionSubSelect.class.getName();
 
-    protected ModelEntity localModelEntity = null;
+    protected ModelEntityInterface localModelEntity = null;
     protected String keyFieldName = null;
     protected EntityCondition whereCond = null;
     protected Boolean requireAll = null;
@@ -44,7 +47,7 @@ public class EntityConditionSubSelect extends EntityConditionValue {
     public EntityConditionSubSelect(String entityName, String keyFieldName, EntityCondition whereCond, boolean requireAll, GenericDelegator delegator) {
         this(delegator.getModelEntity(entityName), keyFieldName, whereCond, requireAll);
     }
-    public EntityConditionSubSelect(ModelEntity localModelEntity, String keyFieldName, EntityCondition whereCond, boolean requireAll) {
+    public EntityConditionSubSelect(ModelEntityInterface localModelEntity, String keyFieldName, EntityCondition whereCond, boolean requireAll) {
         this.localModelEntity = localModelEntity;
         this.keyFieldName = keyFieldName;
         this.whereCond = whereCond;
@@ -59,7 +62,7 @@ public class EntityConditionSubSelect extends EntityConditionValue {
         }
         try {
             // add select and where and such, based on local entity not on the main entity
-            ModelField localModelField = localModelEntity.getField(this.keyFieldName);
+            ModelFieldInterface localModelField = localModelEntity.getField(this.keyFieldName);
 
             if (this.requireAll) {
                 sql.append(" ALL(");

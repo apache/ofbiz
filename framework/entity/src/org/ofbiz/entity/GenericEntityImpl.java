@@ -19,7 +19,6 @@
 package org.ofbiz.entity;
 
 import java.io.PrintWriter;
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.SQLException;
@@ -34,7 +33,6 @@ import java.util.Observable;
 import java.util.ResourceBundle;
 import java.util.TreeSet;
 
-import javolution.lang.Reusable;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
@@ -47,7 +45,11 @@ import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
-import org.ofbiz.base.util.collections.LocalizedMap;
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericEntity;
+import org.ofbiz.context.entity.GenericEntityException;
+import org.ofbiz.context.entity.GenericPK;
+import org.ofbiz.context.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.jdbc.SqlJdbcUtil;
 import org.ofbiz.entity.model.ModelEntity;
@@ -57,6 +59,7 @@ import org.ofbiz.entity.model.ModelViewEntity;
 import org.ofbiz.entity.model.ModelViewEntity.ModelAlias;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
 /**
  * Generic Entity Value Object - Handles persistence for any defined entity.
  * <p>Note that this class extends <code>Observable</code> to achieve change notification for
@@ -65,9 +68,10 @@ import org.w3c.dom.Element;
  * <code>Observer</code>.
  *
  */
-public class GenericEntity extends Observable implements Map<String, Object>, LocalizedMap, Serializable, Comparable<GenericEntity>, Cloneable, Reusable {
+@SuppressWarnings("serial")
+public class GenericEntityImpl extends Observable implements GenericEntity {
 
-    public static final String module = GenericEntity.class.getName();
+    public static final String module = GenericEntityImpl.class.getName();
     public static final GenericEntity NULL_ENTITY = new NullGenericEntity();
     public static final NullField NULL_FIELD = new NullField();
 
@@ -104,7 +108,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
     protected boolean isFromEntitySync = false;
 
     /** Creates new GenericEntity - Should never be used, prefer the other options. */
-    protected GenericEntity() { }
+    protected GenericEntityImpl() { }
 
     /** Creates new GenericEntity */
     public static GenericEntity createGenericEntity(ModelEntity modelEntity) {
@@ -112,7 +116,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
             throw new IllegalArgumentException("Cannot create a GenericEntity with a null modelEntity parameter");
         }
 
-        GenericEntity newEntity = new GenericEntity();
+        GenericEntityImpl newEntity = new GenericEntityImpl();
         newEntity.init(modelEntity);
         return newEntity;
     }
@@ -123,7 +127,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
             throw new IllegalArgumentException("Cannot create a GenericEntity with a null modelEntity parameter");
         }
 
-        GenericEntity newEntity = new GenericEntity();
+        GenericEntityImpl newEntity = new GenericEntityImpl();
         newEntity.init(modelEntity, fields);
         return newEntity;
     }
@@ -134,7 +138,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
             throw new IllegalArgumentException("Cannot create a GenericEntity with a null value parameter");
         }
 
-        GenericEntity newEntity = new GenericEntity();
+        GenericEntityImpl newEntity = new GenericEntityImpl();
         newEntity.init(value);
         return newEntity;
     }
@@ -189,15 +193,13 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
     /** Copy Constructor: Creates new GenericEntity from existing GenericEntity */
     protected void init(GenericEntity value) {
         // check some things
-        if (value.entityName == null) {
+        if (value.getEntityName() == null) {
             throw new IllegalArgumentException("Cannot create a GenericEntity with a null entityName in the modelEntity parameter");
         }
         this.entityName = value.getEntityName();
-        // NOTE: could call getModelEntity to insure we have a value, just in case the value passed in has been serialized, but might as well leave it null to keep the object light if it isn't there
-        this.modelEntity = value.modelEntity;
-        if (value.fields != null) this.fields.putAll(value.fields);
-        this.delegatorName = value.delegatorName;
-        this.internalDelegator = value.internalDelegator;
+        this.modelEntity = value.getModelEntity();
+        this.fields.putAll(value.getAllFields());
+        this.delegatorName = value.getDelegatorName();
     }
 
     public void reset() {
@@ -223,10 +225,8 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         if (!thisPK.equals(newPK)) {
             throw new GenericEntityException("Could not refresh value, new value did not have the same primary key; this PK=" + thisPK + ", new value PK=" + newPK);
         }
-        this.fields = newValue.fields;
+        this.fields = newValue.getAllFields();
         this.setDelegator(newValue.getDelegator());
-        this.generateHashCode = newValue.generateHashCode;
-        this.cachedHashCode = newValue.cachedHashCode;
         this.modified = false;
     }
 
@@ -284,13 +284,17 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
      */
     public GenericDelegator getDelegator() {
         if (internalDelegator == null) {
-            if (delegatorName == null) delegatorName = "default";
-            if (delegatorName != null) internalDelegator = GenericDelegator.getGenericDelegator(delegatorName);
+            internalDelegator = GenericDelegatorImpl.getGenericDelegator(this.getDelegatorName());
             if (internalDelegator == null) {
                 throw new IllegalStateException("[GenericEntity.getDelegator] could not find delegator with name " + delegatorName);
             }
         }
         return internalDelegator;
+    }
+    
+    public String getDelegatorName() {
+        if (this.delegatorName == null) return "default";
+        return this.delegatorName;
     }
 
     /** Set the GenericDelegator instance that created this value object and that is responsible for it. */
@@ -779,7 +783,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
             ModelField curField = iter.next();
             pkNames.add(curField.getName());
         }
-        GenericPK newPK = GenericPK.create(getModelEntity(), this.getFields(pkNames));
+        GenericPK newPK = GenericPKImpl.create(getModelEntity(), this.getFields(pkNames));
         newPK.setDelegator(this.getDelegator());
         return newPK;
     }
@@ -975,7 +979,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         // else element = new ElementImpl(null, this.getEntityName());
         if (element == null) return null;
 
-        Iterator modelFields = this.getModelEntity().getFieldsIterator();
+        Iterator<ModelField> modelFields = this.getModelEntity().getFieldsIterator();
         while (modelFields.hasNext()) {
             ModelField modelField = (ModelField) modelFields.next();
             String name = modelField.getName();
@@ -1245,7 +1249,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
 
     protected int compareToFields(GenericEntity that, String name) {
         Comparable<Object> thisVal = UtilGenerics.cast(this.fields.get(name));
-        Object thatVal = that.fields.get(name);
+        Object thatVal = that.get(name);
 
         if (thisVal == null) {
             if (thatVal == null)
@@ -1270,7 +1274,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         // if null, it will push to the beginning
         if (that == null) return -1;
 
-        int tempResult = this.entityName.compareTo(that.entityName);
+        int tempResult = this.entityName.compareTo(that.getEntityName());
 
         // if they did not match, we know the order, otherwise compare the primary keys
         if (tempResult != 0) return tempResult;
@@ -1302,7 +1306,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
      */
     @Override
     public Object clone() {
-        GenericEntity newEntity = new GenericEntity();
+        GenericEntityImpl newEntity = new GenericEntityImpl();
         newEntity.init(this);
 
         newEntity.setDelegator(internalDelegator);
@@ -1375,7 +1379,8 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
     public static interface NULL {
     }
 
-    public static class NullGenericEntity extends GenericEntity implements NULL {
+    @SuppressWarnings("serial")
+    public static class NullGenericEntity extends GenericEntityImpl implements NULL {
         protected NullGenericEntity() { }
 
         @Override

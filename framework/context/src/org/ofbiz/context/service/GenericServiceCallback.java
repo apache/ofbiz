@@ -16,26 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.service;
+package org.ofbiz.context.service;
 
 import java.util.Map;
-import java.io.Serializable;
 
-/**
- * Generic Requester Interface
- */
-public interface GenericRequester extends Serializable {
+public interface GenericServiceCallback {
 
-    /**
-     * Receive the result of an asynchronous service call
-     * @param result Map of name, value pairs composing the result
-     */
-    public void receiveResult(Map<String, Object> result);
-
-    /**
-     * Receive an exception (Throwable) from an asynchronous service cell
-     * @param t The Throwable which was received
-     */
-    public void receiveThrowable(Throwable t);
+    public boolean isEnabled();
+    public void receiveEvent(Map<String, Object> context);
+    public void receiveEvent(Map<String, Object> context, Map<String, Object> result);
+    public void receiveEvent(Map<String, Object> context, Throwable error);
 }
-

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,23 +15,12 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *******************************************************************************/
+ */
 
 package org.ofbiz.entity.condition;
 
 import java.util.List;
 
-/**
- * Represents the conditions to be used to constrain a query
- * <br/>An EntityCondition can represent various type of constraints, including:
- * <ul>
- *  <li>EntityConditionList: a list of EntityConditions, combined with the operator specified
- *  <li>EntityExpr: for simple expressions or expressions that combine EntityConditions
- *  <li>EntityFieldMap: a map of fields where the field (key) equals the value, combined with the operator specified
- * </ul>
- * These can be used in various combinations using the EntityConditionList and EntityExpr objects.
- *
- */
 public interface EntityConditionVisitor {
     void visit(Object obj);
     void accept(Object obj);

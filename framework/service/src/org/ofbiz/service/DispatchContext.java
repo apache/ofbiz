@@ -21,11 +21,10 @@ package org.ofbiz.service;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
 import javax.wsdl.WSDLException;
 
 import javolution.util.FastMap;
@@ -34,6 +33,8 @@ import org.ofbiz.base.component.ComponentConfig;
 import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.config.MainResourceHandler;
 import org.ofbiz.base.config.ResourceHandler;
+import org.ofbiz.context.service.GenericServiceException;
+import org.ofbiz.context.service.LocalDispatcher;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
@@ -42,13 +43,13 @@ import org.ofbiz.security.Security;
 import org.ofbiz.security.authz.Authorization;
 import org.ofbiz.service.config.ServiceConfigUtil;
 import org.ofbiz.service.eca.ServiceEcaUtil;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
  * Dispatcher Context
  */
+@SuppressWarnings("serial")
 public class DispatchContext implements Serializable {
 
     public static final String module = DispatchContext.class.getName();

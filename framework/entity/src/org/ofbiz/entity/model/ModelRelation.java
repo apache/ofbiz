@@ -29,6 +29,8 @@ import javolution.util.FastList;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.context.entity.ModelKeyMapInterface;
+import org.ofbiz.context.entity.ModelRelationInterface;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -37,7 +39,8 @@ import org.w3c.dom.NodeList;
  * Generic Entity - Relation model class
  *
  */
-public class ModelRelation extends ModelChild {
+@SuppressWarnings("serial")
+public class ModelRelation extends ModelChild implements ModelRelationInterface {
 
     /** the title, gives a name/description to the relation */
     protected String title;
@@ -161,12 +164,14 @@ public class ModelRelation extends ModelChild {
     }
 
     /** keyMaps defining how to lookup the relatedTable using columns from this table */
-    public Iterator<ModelKeyMap> getKeyMapsIterator() {
-        return this.keyMaps.iterator();
+    public Iterator<ModelKeyMapInterface> getKeyMapsIterator() {
+        List<ModelKeyMapInterface> kmList = FastList.newInstance();
+        kmList.addAll(this.keyMaps);
+        return kmList.iterator();
     }
 
-    public List<ModelKeyMap> getKeyMapsClone() {
-        List<ModelKeyMap> kmList = FastList.newInstance();
+    public List<ModelKeyMapInterface> getKeyMapsClone() {
+        List<ModelKeyMapInterface> kmList = FastList.newInstance();
         kmList.addAll(this.keyMaps);
         return kmList;
     }
@@ -305,9 +310,9 @@ public class ModelRelation extends ModelChild {
             root.setAttribute("fk-name", this.getFkName());
         }
 
-        Iterator<ModelKeyMap> kmIter = this.getKeyMapsIterator();
+        Iterator<ModelKeyMapInterface> kmIter = this.getKeyMapsIterator();
         while (kmIter != null && kmIter.hasNext()) {
-            ModelKeyMap km = kmIter.next();
+            ModelKeyMapInterface km = kmIter.next();
             root.appendChild(km.toXmlElement(document));
         }
 

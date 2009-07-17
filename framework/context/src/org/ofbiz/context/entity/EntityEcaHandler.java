@@ -16,10 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.entity.eca;
+package org.ofbiz.context.entity;
 
-import java.util.*;
-import org.ofbiz.entity.*;
+import java.util.List;
+import java.util.Map;
+
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericEntity;
+import org.ofbiz.context.entity.GenericEntityException;
 
 /**
  * EntityEcaHandler interface

@@ -193,4 +193,8 @@ public class ServiceEcaArtifactInfo extends ArtifactInfoBase {
             return false;
         }
     }
+    
+    public String toString() {
+        return "ServiceEcaArtifactInfo:" + this.displayPrefix + "_" + this.displaySuffixNum + "::" + this.serviceEcaRule.toString();
+    }
 }

@@ -219,7 +219,9 @@ public class ServiceArtifactInfo extends ArtifactInfoBase {
         if (serviceEventMap == null) return;
         for (List<ServiceEcaRule> ecaRuleList: serviceEventMap.values()) {
             for (ServiceEcaRule ecaRule: ecaRuleList) {
-                this.serviceEcasTriggeredByThisService.add(aif.getServiceEcaArtifactInfo(ecaRule));
+                ServiceEcaArtifactInfo seai = aif.getServiceEcaArtifactInfo(ecaRule);
+                this.serviceEcasTriggeredByThisService.add(seai);
+                if (Debug.infoOn()) Debug.logInfo("Adding triggered Service ECA (now " + this.serviceEcasTriggeredByThisService.size() + " in Set): " + seai.toString(), module);
                 // the reverse reference
                 UtilMisc.addToSortedSetInMap(this, aif.allServiceInfosReferringToServiceEcaRule, ecaRule);
             }

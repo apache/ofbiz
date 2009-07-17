@@ -16,29 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.entity;
+package org.ofbiz.context.service;
 
-import org.ofbiz.base.util.*;
+import java.util.Map;
+import java.io.Serializable;
 
 /**
- * GenericEntityException
- *
+ * Generic Requester Interface
  */
-public class GenericEntityException extends GeneralException {
+public interface GenericRequester extends Serializable {
 
-    public GenericEntityException() {
-        super();
-    }
+    /**
+     * Receive the result of an asynchronous service call
+     * @param result Map of name, value pairs composing the result
+     */
+    public void receiveResult(Map<String, Object> result);
 
-    public GenericEntityException(Throwable nested) {
-        super(nested);
-    }
-
-    public GenericEntityException(String str) {
-        super(str);
-    }
-
-    public GenericEntityException(String str, Throwable nested) {
-        super(str, nested);
-    }
+    /**
+     * Receive an exception (Throwable) from an asynchronous service cell
+     * @param t The Throwable which was received
+     */
+    public void receiveThrowable(Throwable t);
 }
+

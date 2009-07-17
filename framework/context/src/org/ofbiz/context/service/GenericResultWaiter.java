@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.service;
+package org.ofbiz.context.service;
 
 import java.util.Map;
 
@@ -25,6 +25,7 @@ import org.ofbiz.base.util.Debug;
 /**
  * Generic Result Waiter Class
  */
+@SuppressWarnings("serial")
 public class GenericResultWaiter implements GenericRequester {
 
     public static final String module = GenericResultWaiter.class.getName();
