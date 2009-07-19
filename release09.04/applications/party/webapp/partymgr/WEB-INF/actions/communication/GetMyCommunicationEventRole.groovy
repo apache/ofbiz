@@ -18,7 +18,6 @@
  */
 
 import org.ofbiz.base.util.*;
-import org.ofbiz.entity.util.EntityUtil;
 
 if (parameters.communicationEventId) {
     context.communicationEventRole = delegator.findByPrimaryKey("CommunicationEventRole",
