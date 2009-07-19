@@ -27,5 +27,4 @@ if (parameters.communicationEventId) {
             "roleTypeId" : parameters.roleTypeId
            ]);
 
-    context.projectMgrExists = ComponentConfig.componentExists("projectmgr");
 }
