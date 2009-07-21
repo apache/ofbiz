@@ -20,8 +20,8 @@ package org.ofbiz.minilang;
 
 import java.util.Map;
 
+import org.ofbiz.context.service.GenericServiceException;
 import org.ofbiz.service.DispatchContext;
-import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceDispatcher;
 import org.ofbiz.service.engine.GenericAsyncEngine;

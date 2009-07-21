@@ -28,17 +28,17 @@ import javax.servlet.http.HttpServletResponse;
 
 import javolution.util.FastMap;
 
-import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilHttp;
+import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericValue;
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericValue;
+import org.ofbiz.context.service.LocalDispatcher;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.security.Security;
 import org.ofbiz.security.authz.Authorization;
 import org.ofbiz.service.DispatchContext;
-import org.ofbiz.service.LocalDispatcher;
 
 /**
  * A single operation, does the specified operation on the given field

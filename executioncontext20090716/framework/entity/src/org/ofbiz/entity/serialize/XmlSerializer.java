@@ -43,14 +43,14 @@ import java.util.WeakHashMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilObject;
 import org.ofbiz.base.util.StringUtil;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericPK;
-import org.ofbiz.entity.GenericValue;
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilObject;
+import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericPK;
+import org.ofbiz.context.entity.GenericValue;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

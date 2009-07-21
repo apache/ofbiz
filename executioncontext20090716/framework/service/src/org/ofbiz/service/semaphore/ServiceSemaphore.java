@@ -1,21 +1,17 @@
 package org.ofbiz.service.semaphore;
 
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilDateTime;
-import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.GenericValue;
-import org.ofbiz.entity.transaction.GenericTransactionException;
-import org.ofbiz.entity.transaction.GenericXaResource;
-import org.ofbiz.entity.transaction.TransactionUtil;
-import org.ofbiz.service.ModelService;
+import java.sql.Timestamp;
 
 import javax.transaction.Transaction;
-import javax.transaction.xa.Xid;
-import javax.transaction.xa.XAException;
-import java.sql.Timestamp;
-import java.util.Map;
+
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilDateTime;
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericEntityException;
+import org.ofbiz.context.entity.GenericValue;
+import org.ofbiz.entity.transaction.GenericTransactionException;
+import org.ofbiz.entity.transaction.TransactionUtil;
+import org.ofbiz.service.ModelService;
 
 /**
  * ServiceSemaphore

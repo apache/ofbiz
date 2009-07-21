@@ -32,9 +32,13 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.GenericValue;
+import org.ofbiz.context.entity.EntityFindOptions;
+import org.ofbiz.context.entity.EntityListIterator;
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericEntityException;
+import org.ofbiz.context.entity.GenericValue;
+import org.ofbiz.context.entity.ModelEntityInterface;
+import org.ofbiz.entity.GenericDelegatorImpl;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.finder.EntityFinderUtil.GetAll;
 import org.ofbiz.entity.finder.EntityFinderUtil.LimitRange;
@@ -44,8 +48,6 @@ import org.ofbiz.entity.finder.EntityFinderUtil.UseIterator;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelFieldTypeReader;
 import org.ofbiz.entity.transaction.TransactionUtil;
-import org.ofbiz.entity.util.EntityFindOptions;
-import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.entity.util.EntityUtil;
 import org.w3c.dom.Element;
 
@@ -121,7 +123,7 @@ public abstract class ListFinder extends Finder {
         String filterByDateStr = this.filterByDateStrExdr.expandString(context);
         String distinctStr = this.distinctStrExdr.expandString(context);
         String delegatorName = this.delegatorNameExdr.expandString(context);
-        ModelEntity modelEntity = delegator.getModelEntity(entityName);
+        ModelEntityInterface modelEntity = delegator.getModelEntity(entityName);
         String resultSetTypeString = this.resultSetTypeExdr.expandString(context);
 
         if (modelEntity == null) {
@@ -136,11 +138,11 @@ public abstract class ListFinder extends Finder {
             resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 
         if (delegatorName != null && delegatorName.length() > 0) {
-            delegator = GenericDelegator.getGenericDelegator(delegatorName);
+            delegator = GenericDelegatorImpl.getGenericDelegator(delegatorName);
         }
 
-        EntityCondition whereEntityCondition = getWhereEntityCondition(context, modelEntity, delegator.getModelFieldTypeReader(modelEntity));
-        EntityCondition havingEntityCondition = getHavingEntityCondition(context, modelEntity, delegator.getModelFieldTypeReader(modelEntity));
+        EntityCondition whereEntityCondition = getWhereEntityCondition(context, (ModelEntity) modelEntity, ((GenericDelegatorImpl) delegator).getModelFieldTypeReader((ModelEntity) modelEntity));
+        EntityCondition havingEntityCondition = getHavingEntityCondition(context, (ModelEntity) modelEntity, ((GenericDelegatorImpl) delegator).getModelFieldTypeReader((ModelEntity) modelEntity));
         if (useCache) {
             // if useCache == true && outputHandler instanceof UseIterator, throw exception; not a valid combination
             if (outputHandler instanceof UseIterator) {

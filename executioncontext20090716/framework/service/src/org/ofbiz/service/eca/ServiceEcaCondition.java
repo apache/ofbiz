@@ -27,15 +27,16 @@ import org.ofbiz.base.util.ObjectType;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.context.service.GenericServiceException;
+import org.ofbiz.context.service.LocalDispatcher;
 import org.ofbiz.service.DispatchContext;
-import org.ofbiz.service.GenericServiceException;
-import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 import org.w3c.dom.Element;
 
 /**
  * ServiceEcaCondition
  */
+@SuppressWarnings("serial")
 public class ServiceEcaCondition implements java.io.Serializable {
 
     public static final String module = ServiceEcaCondition.class.getName();

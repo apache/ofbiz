@@ -23,7 +23,7 @@ import org.ofbiz.base.config.SecurityConfigUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericDelegator;
 import org.ofbiz.security.SecurityConfigurationException;
 import org.w3c.dom.Element;
 

@@ -1,10 +1,11 @@
 package org.ofbiz.service.semaphore;
 
-import org.ofbiz.service.GenericServiceException;
+import org.ofbiz.context.service.GenericServiceException;
 
 /**
  * SemaphoreFailException
  */
+@SuppressWarnings("serial")
 public class SemaphoreFailException extends GenericServiceException {
 
     public SemaphoreFailException() {

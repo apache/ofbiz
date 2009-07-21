@@ -20,9 +20,12 @@ package org.ofbiz.context.service;
 
 import java.util.Map;
 
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericDelegator;
 import org.ofbiz.security.Security;
 import org.ofbiz.security.authz.Authorization;
+import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.ServiceAuthException;
+import org.ofbiz.service.ServiceValidationException;
 import org.ofbiz.service.jms.JmsListenerFactory;
 import org.ofbiz.service.job.JobManager;
 

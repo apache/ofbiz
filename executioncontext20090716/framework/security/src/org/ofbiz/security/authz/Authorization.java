@@ -22,7 +22,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericDelegator;
 
 public interface Authorization {
 
