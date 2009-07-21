@@ -24,8 +24,8 @@ import java.util.List;
 import javax.servlet.http.HttpSession;
 
 import org.ofbiz.base.util.cache.UtilCache;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericValue;
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericValue;
 
 /**
  * Security handler: This class is an abstract implementation for all commononly used security aspects.

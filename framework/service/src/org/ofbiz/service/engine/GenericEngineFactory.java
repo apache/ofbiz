@@ -24,10 +24,10 @@ import java.util.Map;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.config.GenericConfigException;
-import org.ofbiz.service.GenericServiceException;
+import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.context.service.GenericServiceException;
 import org.ofbiz.service.ServiceDispatcher;
 import org.ofbiz.service.config.ServiceConfigUtil;
-import org.ofbiz.base.util.UtilXml;
 import org.w3c.dom.Element;
 
 /**

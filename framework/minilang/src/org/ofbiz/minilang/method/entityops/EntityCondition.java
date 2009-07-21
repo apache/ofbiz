@@ -20,7 +20,7 @@ package org.ofbiz.minilang.method.entityops;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericDelegator;
 import org.ofbiz.entity.finder.ByConditionFinder;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.MethodContext;

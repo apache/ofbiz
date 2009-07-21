@@ -27,18 +27,19 @@ import java.util.Map;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.ofbiz.context.entity.GenericEntityException;
-import org.ofbiz.context.service.JobManagerException;
-import org.ofbiz.context.service.JobScheduler;
-import org.ofbiz.context.service.LocalDispatcher;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralRuntimeException;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericValue;
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericEntityException;
+import org.ofbiz.context.entity.GenericValue;
+import org.ofbiz.context.service.JobManagerException;
+import org.ofbiz.context.service.JobScheduler;
+import org.ofbiz.context.service.LocalDispatcher;
+import org.ofbiz.entity.GenericValueImpl;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityConditionList;
 import org.ofbiz.entity.condition.EntityExpr;
@@ -240,7 +241,7 @@ public class JobManager implements JobScheduler {
                             if (pJobId == null) {
                                 pJobId = job.getString("jobId");
                             }
-                            GenericValue newJob = GenericValue.create(job);
+                            GenericValue newJob = GenericValueImpl.create(job);
                             newJob.set("statusId", "SERVICE_PENDING");
                             newJob.set("runTime", now);
                             newJob.set("previousJobId", job.getString("jobId"));

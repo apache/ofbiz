@@ -45,8 +45,8 @@ import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
-import org.ofbiz.entity.GenericEntity;
-import org.ofbiz.entity.GenericValue;
+import org.ofbiz.context.entity.GenericValue;
+import org.ofbiz.entity.GenericEntityImpl;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.minilang.method.MethodContext;
@@ -58,14 +58,14 @@ import org.ofbiz.minilang.method.callops.CallSimpleMethod;
 import org.ofbiz.minilang.method.callops.SetServiceFields;
 import org.ofbiz.minilang.method.conditional.MasterIf;
 import org.ofbiz.minilang.method.conditional.While;
-import org.ofbiz.minilang.method.entityops.GetRelated;
-import org.ofbiz.minilang.method.entityops.GetRelatedOne;
 import org.ofbiz.minilang.method.entityops.EntityAnd;
 import org.ofbiz.minilang.method.entityops.EntityCondition;
 import org.ofbiz.minilang.method.entityops.EntityCount;
 import org.ofbiz.minilang.method.entityops.EntityOne;
 import org.ofbiz.minilang.method.entityops.FindByAnd;
 import org.ofbiz.minilang.method.entityops.FindByPrimaryKey;
+import org.ofbiz.minilang.method.entityops.GetRelated;
+import org.ofbiz.minilang.method.entityops.GetRelatedOne;
 import org.ofbiz.minilang.method.entityops.MakeValue;
 import org.ofbiz.minilang.method.envops.Iterate;
 import org.ofbiz.minilang.method.envops.IterateMap;
@@ -82,7 +82,6 @@ import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.ModelService;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 import org.webslinger.invoker.Wrap;
 
 /**
@@ -632,8 +631,8 @@ public class SimpleMethod {
     /** Execute the Simple Method operations */
     public String exec(MethodContext methodContext) {
         // always put the null field object in as "null"
-        methodContext.putEnv("null", GenericEntity.NULL_FIELD);
-        methodContext.putEnv("nullField", GenericEntity.NULL_FIELD);
+        methodContext.putEnv("null", GenericEntityImpl.NULL_FIELD);
+        methodContext.putEnv("nullField", GenericEntityImpl.NULL_FIELD);
 
         methodContext.putEnv(delegatorName, methodContext.getDelegator());
         methodContext.putEnv(securityName, methodContext.getSecurity());

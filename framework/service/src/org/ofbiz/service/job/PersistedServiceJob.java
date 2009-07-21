@@ -20,7 +20,6 @@ package org.ofbiz.service.job;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import com.ibm.icu.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
@@ -33,21 +32,24 @@ import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.service.calendar.TemporalExpression;
-import org.ofbiz.service.calendar.TemporalExpressionWorker;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.GenericValue;
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericEntityException;
+import org.ofbiz.context.entity.GenericValue;
+import org.ofbiz.context.service.GenericRequester;
+import org.ofbiz.entity.GenericValueImpl;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityFieldMap;
 import org.ofbiz.entity.serialize.SerializeException;
 import org.ofbiz.entity.serialize.XmlSerializer;
 import org.ofbiz.service.DispatchContext;
-import org.ofbiz.service.GenericRequester;
 import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.service.calendar.RecurrenceInfo;
+import org.ofbiz.service.calendar.TemporalExpression;
+import org.ofbiz.service.calendar.TemporalExpressionWorker;
 import org.ofbiz.service.config.ServiceConfigUtil;
 import org.xml.sax.SAXException;
+
+import com.ibm.icu.util.Calendar;
 
 /**
  * Entity Service Job - Store => Schedule => Run
@@ -186,7 +188,7 @@ public class PersistedServiceJob extends GenericServiceJob {
             if (pJobId == null) {
                 pJobId = job.getString("jobId");
             }
-            GenericValue newJob = GenericValue.create(job);
+            GenericValue newJob = GenericValueImpl.create(job.create());
             newJob.remove("jobId");
             newJob.set("previousJobId", job.getString("jobId"));
             newJob.set("parentJobId", pJobId);

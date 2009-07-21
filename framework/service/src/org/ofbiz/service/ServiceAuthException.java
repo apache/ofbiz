@@ -18,9 +18,12 @@
  *******************************************************************************/
 package org.ofbiz.service;
 
+import org.ofbiz.context.service.GenericServiceException;
+
 /**
  * ServiceAuthException
  */
+@SuppressWarnings("serial")
 public class ServiceAuthException extends GenericServiceException {
 
     public ServiceAuthException() {

@@ -20,7 +20,7 @@ package org.ofbiz.service.jms;
 
 import javax.jms.MessageListener;
 
-import org.ofbiz.service.GenericServiceException;
+import org.ofbiz.context.service.GenericServiceException;
 
 /**
  * GenericMessageListener - Estension to MessageListener

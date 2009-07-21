@@ -19,19 +19,16 @@
 package org.ofbiz.service.jms;
 
 import java.lang.reflect.Constructor;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javolution.util.FastMap;
 
-import org.ofbiz.service.GenericServiceException;
-import org.ofbiz.service.ServiceDispatcher;
-import org.ofbiz.service.config.ServiceConfigUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.context.service.GenericServiceException;
+import org.ofbiz.service.ServiceDispatcher;
+import org.ofbiz.service.config.ServiceConfigUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 

@@ -26,7 +26,11 @@ import java.util.Set;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.service.GenericRequester;
+import org.ofbiz.context.service.GenericResultWaiter;
+import org.ofbiz.context.service.GenericServiceException;
+import org.ofbiz.context.service.LocalDispatcher;
 
 /**
  * Generic Services Local Dispatcher

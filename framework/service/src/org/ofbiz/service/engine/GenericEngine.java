@@ -20,8 +20,8 @@ package org.ofbiz.service.engine;
 
 import java.util.Map;
 
-import org.ofbiz.service.GenericRequester;
-import org.ofbiz.service.GenericServiceException;
+import org.ofbiz.context.service.GenericRequester;
+import org.ofbiz.context.service.GenericServiceException;
 import org.ofbiz.service.ModelService;
 
 /**

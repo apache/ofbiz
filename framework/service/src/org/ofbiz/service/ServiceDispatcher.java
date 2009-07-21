@@ -21,6 +21,7 @@ package org.ofbiz.service;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.transaction.Transaction;
 
 import javolution.util.FastList;
@@ -34,9 +35,15 @@ import org.ofbiz.base.util.UtilTimer;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.LRUMap;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.GenericValue;
+import org.ofbiz.context.entity.GenericDelegator;
+import org.ofbiz.context.entity.GenericEntityException;
+import org.ofbiz.context.entity.GenericValue;
+import org.ofbiz.context.service.GenericRequester;
+import org.ofbiz.context.service.GenericServiceCallback;
+import org.ofbiz.context.service.GenericServiceException;
+import org.ofbiz.context.service.JobManagerException;
+import org.ofbiz.context.service.LocalDispatcher;
+import org.ofbiz.entity.GenericDelegatorImpl;
 import org.ofbiz.entity.transaction.DebugXaResource;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
@@ -53,7 +60,6 @@ import org.ofbiz.service.engine.GenericEngineFactory;
 import org.ofbiz.service.group.ServiceGroupReader;
 import org.ofbiz.service.jms.JmsListenerFactory;
 import org.ofbiz.service.job.JobManager;
-import org.ofbiz.service.job.JobManagerException;
 import org.ofbiz.service.semaphore.ServiceSemaphore;
 import org.w3c.dom.Element;
 
@@ -104,7 +110,7 @@ public class ServiceDispatcher {
         try {
             GenericDelegator origDelegator = this.delegator;
             if (!this.delegator.getOriginalDelegatorName().equals(this.delegator.getDelegatorName())) {
-                origDelegator = GenericDelegator.getGenericDelegator(this.delegator.getOriginalDelegatorName());
+                origDelegator = GenericDelegatorImpl.getGenericDelegator(this.delegator.getOriginalDelegatorName());
             }
             this.jm = JobManager.getInstance(origDelegator, enableJM);
         } catch (GeneralRuntimeException e) {

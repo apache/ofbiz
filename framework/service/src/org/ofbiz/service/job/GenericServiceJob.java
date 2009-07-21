@@ -21,14 +21,15 @@ package org.ofbiz.service.job;
 import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.context.service.GenericRequester;
+import org.ofbiz.context.service.LocalDispatcher;
 import org.ofbiz.service.DispatchContext;
-import org.ofbiz.service.GenericRequester;
-import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
 
 /**
  * Generic Service Job - A generic async-service Job.
  */
+@SuppressWarnings("serial")
 public class GenericServiceJob extends AbstractJob {
 
     public static final String module = GenericServiceJob.class.getName();

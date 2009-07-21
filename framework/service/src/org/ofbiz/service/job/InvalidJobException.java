@@ -18,7 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.service.job;
 
-import org.ofbiz.context.JobManagerException;
+import org.ofbiz.context.service.JobManagerException;
 
 public class InvalidJobException extends JobManagerException {
 
