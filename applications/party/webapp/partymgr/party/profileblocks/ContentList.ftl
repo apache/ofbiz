@@ -39,7 +39,13 @@ under the License.
                 <#if (content.contentName?has_content)>
                     <a href="<@ofbizUrl>img/${content.contentName}?imgId=${content.dataResourceId}</@ofbizUrl>">${uiLabelMap.CommonView}</a>
                 </#if>
-                <a href="<@ofbizUrl>removePartyContent/viewprofile?contentId=${pContent.contentId}&partyId=${pContent.partyId}&partyContentTypeId=${pContent.partyContentTypeId}&fromDate=${pContent.fromDate}</@ofbizUrl>">${uiLabelMap.CommonRemove}</a>
+                <form name="removePartyContent_${pContent_index}" method="post" action="<@ofbizUrl>removePartyContent/viewprofile</@ofbizUrl>">
+                  <input type="hidden" name="contentId" value="${pContent.contentId}">
+                  <input type="hidden" name="partyId" value="${pContent.partyId}">
+                  <input type="hidden" name="partyContentTypeId" value="${pContent.partyContentTypeId}">
+                  <input type="hidden" name="fromDate" value="${pContent.fromDate}">
+                  <a href="javascript:document.removePartyContent_${pContent_index}.submit()">${uiLabelMap.CommonRemove}</a>
+                </form>
               </td>
             </tr>
           </#list>

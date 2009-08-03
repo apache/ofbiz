@@ -108,8 +108,11 @@ under the License.
                             </form>
                         </td>
                         <td align="center">
-                          <a href="<@ofbizUrl>deleteProductPriceCond?productPriceRuleId=${productPriceCond.productPriceRuleId}&productPriceCondSeqId=${productPriceCond.productPriceCondSeqId}</@ofbizUrl>" class="buttontext">
-                          ${uiLabelMap.CommonDelete}</a>
+                         <form name="deleteProductPriceCond_${productPriceCond_index}" method="post" action="<@ofbizUrl>deleteProductPriceCond</@ofbizUrl>">
+                           <input type="hidden" name="productPriceRuleId" value="${productPriceCond.productPriceRuleId}">
+                           <input type="hidden" name="productPriceCondSeqId" value="${productPriceCond.productPriceCondSeqId}">
+                           <a href="javascript:document.deleteProductPriceCond_${productPriceCond_index}.submit()" class="buttontext">${uiLabelMap.CommonDelete}</a>
+                         </form>
                         </td>
                       </tr>
                       <#-- toggle the row color -->
@@ -176,8 +179,11 @@ under the License.
                             </form>
                         </td>
                         <td align="center">
-                          <a href="<@ofbizUrl>deleteProductPriceAction?productPriceRuleId=${productPriceAction.productPriceRuleId}&productPriceActionSeqId=${productPriceAction.productPriceActionSeqId}</@ofbizUrl>" class="buttontext">
-                          ${uiLabelMap.CommonDelete}</a>
+                          <form name="deleteProductPriceAction_${productPriceAction_index}" method="post" action="<@ofbizUrl>deleteProductPriceAction</@ofbizUrl>">
+                            <input type="hidden" name="productPriceRuleId" value="${productPriceAction.productPriceRuleId}">
+                            <input type="hidden" name="productPriceActionSeqId" value="${productPriceAction.productPriceActionSeqId}">
+                            <a href="javascript:document.deleteProductPriceAction_${productPriceAction_index}.submit()" class="buttontext">${uiLabelMap.CommonDelete}</a>
+                          </form>
                         </td>
                       </tr>
                       <#-- toggle the row color -->
