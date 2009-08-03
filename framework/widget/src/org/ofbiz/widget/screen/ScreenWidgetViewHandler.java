@@ -96,6 +96,7 @@ public class ScreenWidgetViewHandler extends AbstractViewHandler {
             screens.getContext().put("formStringRenderer", new HtmlFormRenderer(request, response));
             screens.getContext().put("simpleEncoder", StringUtil.htmlEncoder);
             screens.render(page);
+            writer.flush();
         } catch (IOException e) {
             throw new ViewHandlerException("Error in the response writer/output stream: " + e.toString(), e);
         } catch (SAXException e) {
