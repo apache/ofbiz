@@ -1019,6 +1019,7 @@ public class ProductServices {
                             }
                         } else {
                             dataResourceCtx.put("dataResourceTypeId", "SHORT_TEXT");
+                            dataResourceCtx.put("mimeTypeId", "text/html");
                             Map<String, Object> dataResourceResult = FastMap.newInstance();
                             try {
                                 dataResourceResult = dispatcher.runSync("createDataResource", dataResourceCtx);
@@ -1049,6 +1050,7 @@ public class ProductServices {
                     }
                 } else {
                     dataResourceCtx.put("dataResourceTypeId", "SHORT_TEXT");
+                    dataResourceCtx.put("mimeTypeId", "text/html");
                     Map<String, Object> dataResourceResult = FastMap.newInstance();
                     try {
                         dataResourceResult = dispatcher.runSync("createDataResource", dataResourceCtx);
