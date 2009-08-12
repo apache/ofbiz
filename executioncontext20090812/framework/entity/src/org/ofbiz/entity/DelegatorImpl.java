@@ -36,6 +36,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.api.context.GenericExecutionArtifact;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralRuntimeException;
 import org.ofbiz.base.util.UtilDateTime;
@@ -145,7 +146,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
     protected final DelegatorData delegatorData;
 
-    protected Locale locale = Locale.getDefault();
+    protected ExecutionContext executionContext;
 
     private boolean testMode = false;
 
@@ -157,99 +158,11 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
     protected String userIdentifier = "";
 
-    protected DelegatorImpl(DelegatorData delegatorData) {
+    protected DelegatorImpl(DelegatorData delegatorData, ExecutionContext executionContext) {
+    	this.executionContext = executionContext;
         this.delegatorData = delegatorData;
         if (!delegatorData.initialized) {
-            synchronized (delegatorData) {
-                if (delegatorData.initialized) {
-                    return;
-                }
-                // do the entity model check
-                List<String> warningList = FastList.newInstance();
-                Debug.logImportant("Doing entity definition check...", module);
-                try {
-                    ModelEntityChecker.checkEntities(this, warningList);
-                } catch (GenericEntityException e) {
-                    Debug.logError(e, "Error while checking entities: ", module);
-                }
-                if (warningList.size() > 0) {
-                    Debug.logWarning("=-=-=-=-= Found " + warningList.size() + " warnings when checking the entity definitions:", module);
-                    for (String warning : warningList) {
-                        Debug.logWarning(warning, module);
-                    }
-                }
-
-                // initialize helpers by group
-                Set<String> groupNames = getModelGroupReader().getGroupNames(this.delegatorData.delegatorName);
-                Iterator<String> groups = UtilMisc.toIterator(groupNames);
-                while (groups != null && groups.hasNext()) {
-                    String groupName = groups.next();
-                    String helperName = this.getGroupHelperName(groupName);
-
-                    if (Debug.infoOn())
-                        Debug.logInfo("Delegator \"" + this.delegatorData.delegatorName + "\" initializing helper \"" + helperName + "\" for entity group \"" + groupName + "\".", module);
-                    TreeSet<String> helpersDone = new TreeSet<String>();
-                    if (helperName != null && helperName.length() > 0) {
-                        // make sure each helper is only loaded once
-                        if (helpersDone.contains(helperName)) {
-                            if (Debug.infoOn())
-                                Debug.logInfo("Helper \"" + helperName + "\" already initialized, not re-initializing.", module);
-                            continue;
-                        }
-                        helpersDone.add(helperName);
-                        // pre-load field type defs, the return value is ignored
-                        ModelFieldTypeReader.getModelFieldTypeReader(helperName);
-                        // get the helper and if configured, do the datasource check
-                        GenericHelper helper = GenericHelperFactory.getHelper(helperName);
-
-                        DatasourceInfo datasourceInfo = EntityConfigUtil.getDatasourceInfo(helperName);
-                        if (datasourceInfo.checkOnStart) {
-                            if (Debug.infoOn())
-                                Debug.logInfo("Doing database check as requested in entityengine.xml with addMissing=" + datasourceInfo.addMissingOnStart, module);
-                            try {
-                                helper.checkDataSource(this.getModelEntityMapByGroup(groupName), null, datasourceInfo.addMissingOnStart);
-                            } catch (GenericEntityException e) {
-                                Debug.logWarning(e, e.getMessage(), module);
-                            }
-                        }
-                    }
-                }
-                // Let other instances know the shared data is ready to use
-                this.delegatorData.initialized = true;
-                // setup the crypto class
-                this.delegatorData.crypto = new EntityCrypto(this);
-
-                // time to do some tricks with manual class loading that resolves
-                // circular dependencies, like calling services...
-                ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-                // if useDistributedCacheClear is false do nothing since the
-                // distributedCacheClear member field with a null value will cause the
-                // dcc code to do nothing
-                if (this.delegatorData.delegatorInfo.useDistributedCacheClear) {
-                    // initialize the distributedCacheClear mechanism
-                    String distributedCacheClearClassName = this.delegatorData.delegatorInfo.distributedCacheClearClassName;
-
-                    try {
-                        Class<?> dccClass = loader.loadClass(distributedCacheClearClassName);
-                        this.delegatorData.distributedCacheClear = (DistributedCacheClear) dccClass.newInstance();
-                        this.delegatorData.distributedCacheClear.setDelegator(this, this.delegatorData.delegatorInfo.distributedCacheClearUserLoginId);
-                    } catch (ClassNotFoundException e) {
-                        Debug.logWarning(e, "DistributedCacheClear class with name " + distributedCacheClearClassName + " was not found, distributed cache clearing will be disabled", module);
-                    } catch (InstantiationException e) {
-                        Debug.logWarning(e, "DistributedCacheClear class with name " + distributedCacheClearClassName + " could not be instantiated, distributed cache clearing will be disabled", module);
-                    } catch (IllegalAccessException e) {
-                        Debug.logWarning(e, "DistributedCacheClear class with name " + distributedCacheClearClassName + " could not be accessed (illegal), distributed cache clearing will be disabled", module);
-                    } catch (ClassCastException e) {
-                        Debug.logWarning(e, "DistributedCacheClear class with name " + distributedCacheClearClassName + " does not implement the DistributedCacheClear interface, distributed cache clearing will be disabled", module);
-                    }
-                } else {
-                    Debug.logInfo("Distributed Cache Clear System disabled for delegator [" + this.delegatorData.delegatorName + "]", module);
-                }
-
-                // setup the Entity ECA Handler
-                initEntityEcaHandler();
-            }
+        	initDelegatorData();
         }
     }
 
@@ -426,7 +339,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
         // creates an exact clone of the delegator; except for the sequencer
         // note that this will not be cached and should be used only when
         // needed to change something for single instance (use).
-        DelegatorImpl newDelegator = new DelegatorImpl((DelegatorData) this.delegatorData.clone());
+        DelegatorImpl newDelegator = new DelegatorImpl((DelegatorData) this.delegatorData.clone(), this.executionContext);
         newDelegator.delegatorData.delegatorName = delegatorName;
         // In case this delegator is in testMode give it a reference to
         // the rollback list
@@ -453,6 +366,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
     }
 
     public GenericValue create(GenericValue value, boolean doCacheClear) throws GenericEntityException {
+    	this.executionContext.pushExecutionArtifact(value);
         boolean beganTransaction = false;
         try {
             if (alwaysUseTransaction) {
@@ -510,6 +424,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
             // after rolling back, rethrow the exception
             throw e;
         } finally {
+        	this.executionContext.popExecutionArtifact();
             // only commit the transaction if we started one... this will throw
             // an exception if it fails
             TransactionUtil.commit(beganTransaction);
@@ -603,6 +518,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
     }
 
     public GenericValue createOrStore(GenericValue value, boolean doCacheClear) throws GenericEntityException {
+    	this.executionContext.pushExecutionArtifact(value);
         boolean beganTransaction = false;
         try {
             if (alwaysUseTransaction) {
@@ -632,6 +548,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
             // after rolling back, rethrow the exception
             throw e;
         } finally {
+        	this.executionContext.popExecutionArtifact();
             // only commit the transaction if we started one... this will throw
             // an exception if it fails
             TransactionUtil.commit(beganTransaction);
@@ -1536,7 +1453,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
     }
 
     public Locale getLocale() {
-        return this.locale;
+        return this.executionContext.getLocale();
     }
 
     public ModelEntity getModelEntity(String entityName) {
@@ -1837,6 +1754,99 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
         return this.getRelated(relationName, null, orderBy, value);
     }
 
+    protected void initDelegatorData() {
+        synchronized (this.delegatorData) {
+            if (this.delegatorData.initialized) {
+                return;
+            }
+            // do the entity model check
+            List<String> warningList = FastList.newInstance();
+            Debug.logImportant("Doing entity definition check...", module);
+            try {
+                ModelEntityChecker.checkEntities(this, warningList);
+            } catch (GenericEntityException e) {
+                Debug.logError(e, "Error while checking entities: ", module);
+            }
+            if (warningList.size() > 0) {
+                Debug.logWarning("=-=-=-=-= Found " + warningList.size() + " warnings when checking the entity definitions:", module);
+                for (String warning : warningList) {
+                    Debug.logWarning(warning, module);
+                }
+            }
+
+            // initialize helpers by group
+            Set<String> groupNames = getModelGroupReader().getGroupNames(this.delegatorData.delegatorName);
+            Iterator<String> groups = UtilMisc.toIterator(groupNames);
+            while (groups != null && groups.hasNext()) {
+                String groupName = groups.next();
+                String helperName = this.getGroupHelperName(groupName);
+
+                if (Debug.infoOn())
+                    Debug.logInfo("Delegator \"" + this.delegatorData.delegatorName + "\" initializing helper \"" + helperName + "\" for entity group \"" + groupName + "\".", module);
+                TreeSet<String> helpersDone = new TreeSet<String>();
+                if (helperName != null && helperName.length() > 0) {
+                    // make sure each helper is only loaded once
+                    if (helpersDone.contains(helperName)) {
+                        if (Debug.infoOn())
+                            Debug.logInfo("Helper \"" + helperName + "\" already initialized, not re-initializing.", module);
+                        continue;
+                    }
+                    helpersDone.add(helperName);
+                    // pre-load field type defs, the return value is ignored
+                    ModelFieldTypeReader.getModelFieldTypeReader(helperName);
+                    // get the helper and if configured, do the datasource check
+                    GenericHelper helper = GenericHelperFactory.getHelper(helperName);
+
+                    DatasourceInfo datasourceInfo = EntityConfigUtil.getDatasourceInfo(helperName);
+                    if (datasourceInfo.checkOnStart) {
+                        if (Debug.infoOn())
+                            Debug.logInfo("Doing database check as requested in entityengine.xml with addMissing=" + datasourceInfo.addMissingOnStart, module);
+                        try {
+                            helper.checkDataSource(this.getModelEntityMapByGroup(groupName), null, datasourceInfo.addMissingOnStart);
+                        } catch (GenericEntityException e) {
+                            Debug.logWarning(e, e.getMessage(), module);
+                        }
+                    }
+                }
+            }
+            // Let other instances know the shared data is ready to use
+            this.delegatorData.initialized = true;
+        }
+        // setup the crypto class
+        this.delegatorData.crypto = new EntityCrypto(this);
+
+        // time to do some tricks with manual class loading that resolves
+        // circular dependencies, like calling services...
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+        // if useDistributedCacheClear is false do nothing since the
+        // distributedCacheClear member field with a null value will cause the
+        // dcc code to do nothing
+        if (this.delegatorData.delegatorInfo.useDistributedCacheClear) {
+        	// initialize the distributedCacheClear mechanism
+        	String distributedCacheClearClassName = this.delegatorData.delegatorInfo.distributedCacheClearClassName;
+
+        	try {
+        		Class<?> dccClass = loader.loadClass(distributedCacheClearClassName);
+        		this.delegatorData.distributedCacheClear = (DistributedCacheClear) dccClass.newInstance();
+        		this.delegatorData.distributedCacheClear.setDelegator(this, this.delegatorData.delegatorInfo.distributedCacheClearUserLoginId);
+        	} catch (ClassNotFoundException e) {
+        		Debug.logWarning(e, "DistributedCacheClear class with name " + distributedCacheClearClassName + " was not found, distributed cache clearing will be disabled", module);
+        	} catch (InstantiationException e) {
+        		Debug.logWarning(e, "DistributedCacheClear class with name " + distributedCacheClearClassName + " could not be instantiated, distributed cache clearing will be disabled", module);
+        	} catch (IllegalAccessException e) {
+        		Debug.logWarning(e, "DistributedCacheClear class with name " + distributedCacheClearClassName + " could not be accessed (illegal), distributed cache clearing will be disabled", module);
+        	} catch (ClassCastException e) {
+        		Debug.logWarning(e, "DistributedCacheClear class with name " + distributedCacheClearClassName + " does not implement the DistributedCacheClear interface, distributed cache clearing will be disabled", module);
+        	}
+        } else {
+        	Debug.logInfo("Distributed Cache Clear System disabled for delegator [" + this.delegatorData.delegatorName + "]", module);
+        }
+
+        // setup the Entity ECA Handler
+        initEntityEcaHandler();
+    }
+
     protected void initEntityEcaHandler() {
         if (this.delegatorData.delegatorInfo.useEntityEca) {
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -2088,11 +2098,13 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
         try {
             for (GenericEntity value : dummyPKs) {
+            	this.executionContext.pushExecutionArtifact(value);
                 if (value.containsPrimaryKey()) {
                     numRemoved += this.removeByPrimaryKey(value.getPrimaryKey(), doCacheClear);
                 } else {
                     numRemoved += this.removeByAnd(value.getEntityName(), value.getAllFields(), doCacheClear);
                 }
+                this.executionContext.popExecutionArtifact();
             }
 
             return numRemoved;
@@ -2108,10 +2120,8 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
             // after rolling back, rethrow the exception
             throw e;
         } finally {
-            // only commit the
-                                                    // transaction if we started
-                                                    // one... this will throw an
-                                                    // exception if it fails
+            // only commit the transaction if we started one... this will throw an
+            // exception if it fails
             TransactionUtil.commit(beganTransaction);
         }
     }
@@ -2142,6 +2152,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
     }
 
     public int removeByCondition(String entityName, EntityCondition condition, boolean doCacheClear) throws GenericEntityException {
+    	this.executionContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.removeByCondition", entityName));
         boolean beganTransaction = false;
         try {
             if (alwaysUseTransaction) {
@@ -2181,14 +2192,9 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
             // after rolling back, rethrow the exception
             throw e;
         } finally {
-            // only commit
-                                                                // the
-                                                                // transaction
-                                                                // if we started
-                                                                // one... this
-                                                                // will throw an
-                                                                // exception if
-                                                                // it fails
+        	this.executionContext.popExecutionArtifact();
+            // only commit the transaction if we started one... this will throw
+            // an exception if it fails
             TransactionUtil.commit(beganTransaction);
         }
     }
@@ -2199,6 +2205,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
     }
 
     public int removeByPrimaryKey(GenericPK primaryKey, boolean doCacheClear) throws GenericEntityException {
+    	this.executionContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.removeByPrimaryKey", primaryKey.getEntityName()));
         boolean beganTransaction = false;
         try {
             if (alwaysUseTransaction) {
@@ -2211,12 +2218,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
             GenericHelper helper = getEntityHelper(primaryKey.getEntityName());
 
             if (doCacheClear) {
-                // always
-                                                                    // clear
-                                                                    // cache
-                                                                    // before
-                                                                    // the
-                                                                    // operation
+                // always clear cache before the operation
                 ecaRunner.evalRules(EntityEcaHandler.EV_CACHE_CLEAR, EntityEcaHandler.OP_REMOVE, primaryKey, false);
                 this.clearCacheLine(primaryKey);
             }
@@ -2255,8 +2257,9 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
             // after rolling back, rethrow the exception
             throw e;
         } finally {
+        	this.executionContext.popExecutionArtifact();
             // only commit the transaction if we started one... this will throw an
-    // exception if it fails
+            // exception if it fails
             TransactionUtil.commit(beganTransaction);
         }
     }
@@ -2287,6 +2290,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
     }
 
     public int removeValue(GenericValue value, boolean doCacheClear) throws GenericEntityException {
+    	this.executionContext.pushExecutionArtifact(value);
         // NOTE: this does not call the GenericDelegator.removeByPrimaryKey
         // method because it has more information to pass to the ECA rule hander
         boolean beganTransaction = false;
@@ -2341,6 +2345,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
             // after rolling back, rethrow the exception
             throw e;
         } finally {
+        	this.executionContext.popExecutionArtifact();
             // only commit the transaction if we started one... this will throw
             // an exception if it fails
             TransactionUtil.commit(beganTransaction);
@@ -2482,7 +2487,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
     }
 
     public void setLocale(Locale locale) {
-        this.locale = locale;
+        this.executionContext.setLocale(locale);
     }
 
     public void setSessionIdentifier(String identifier) {
@@ -2511,6 +2516,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
     }
 
     public int store(GenericValue value, boolean doCacheClear) throws GenericEntityException {
+    	this.executionContext.pushExecutionArtifact(value);
         boolean beganTransaction = false;
         try {
             if (alwaysUseTransaction) {
@@ -2567,6 +2573,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
             // after rolling back, rethrow the exception
             throw e;
         } finally {
+        	this.executionContext.popExecutionArtifact();
             // only commit the transaction if we started one... this will throw
             // an exception if it fails
             TransactionUtil.commit(beganTransaction);
@@ -2671,6 +2678,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
     }
 
     public int storeByCondition(String entityName, Map<String, ? extends Object> fieldsToSet, EntityCondition condition, boolean doCacheClear) throws GenericEntityException {
+    	this.executionContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.storeByCondition", entityName));
         boolean beganTransaction = false;
         try {
             if (alwaysUseTransaction) {
@@ -2722,5 +2730,11 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
         }
         this.testOperations.add(testOperation);
     }
+
+	public void setExecutionContext(ExecutionContext executionContext) {
+		if (executionContext != null) {
+			this.executionContext = executionContext;
+		}
+	}
 
 }

@@ -234,12 +234,8 @@ public class ServiceEventHandler implements EventHandler {
         for (ModelParam modelParam: model.getInModelParamList()) {
             String name = modelParam.name;
 
-            // don't include userLogin, that's taken care of below
-            if ("userLogin".equals(name)) continue;
-            // don't include locale, that is also taken care of below
-            if ("locale".equals(name)) continue;
-            // don't include timeZone, that is also taken care of below
-            if ("timeZone".equals(name)) continue;
+            // don't include non-parameters
+            if ("userLogin~locale~timeZone~executionContext".contains(name)) continue;
 
             Object value = null;
             if (modelParam.stringMapPrefix != null && modelParam.stringMapPrefix.length() > 0) {
@@ -333,6 +329,7 @@ public class ServiceEventHandler implements EventHandler {
             if (ASYNC.equalsIgnoreCase(mode)) {
                 dispatcher.runAsync(serviceName, serviceContext);
             } else {
+                serviceContext.put("executionContext", request.getAttribute("executionContext"));
                 result = dispatcher.runSync(serviceName, serviceContext);
             }
         } catch (ServiceAuthException e) {

@@ -38,6 +38,7 @@ import javolution.lang.Reusable;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.api.context.ExecutionArtifact;
 import org.ofbiz.base.crypto.HashCrypt;
 import org.ofbiz.base.util.Base64;
 import org.ofbiz.base.util.Debug;
@@ -65,7 +66,7 @@ import org.w3c.dom.Element;
  * <code>Observer</code>.
  *
  */
-public class GenericEntity extends Observable implements Map<String, Object>, LocalizedMap, Serializable, Comparable<GenericEntity>, Cloneable, Reusable {
+public class GenericEntity extends Observable implements Map<String, Object>, LocalizedMap, Serializable, Comparable<GenericEntity>, Cloneable, Reusable, ExecutionArtifact {
 
     public static final String module = GenericEntity.class.getName();
     public static final GenericEntity NULL_ENTITY = new NullGenericEntity();
@@ -1400,4 +1401,12 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
             return this != other ? -1 : 0;
         }
     }
+
+	public String getLocation() {
+		return this.modelEntity.getLocation();
+	}
+
+	public String getName() {
+		return this.entityName;
+	}
 }

@@ -18,6 +18,7 @@
  */
 package org.ofbiz.entity;
 
+import org.ofbiz.api.context.ExecutionContextFactory;
 import org.ofbiz.base.util.Debug;
 
 /** GenericDelegator Factory Class. */
@@ -26,6 +27,15 @@ public class DelegatorFactory {
     public static final String module = DelegatorFactory.class.getName();
 
     public static GenericDelegator getGenericDelegator(String delegatorName) {
+    	try {
+			return getGenericDelegator(delegatorName, (ExecutionContext) ExecutionContextFactory.getInstance());
+		} catch (Exception e) {
+            Debug.logError(e, "Could not get ExecutionContext instance: ", module);
+		}
+		return null;
+    }
+
+    public static GenericDelegator getGenericDelegator(String delegatorName, ExecutionContext executionContext) {
         if (delegatorName == null) {
             delegatorName = "default";
             Debug.logWarning(new Exception("Location where getting delegator with null name"), "Got a getGenericDelegator call with a null delegatorName, assuming default for the name.", module);
@@ -37,7 +47,7 @@ public class DelegatorFactory {
             Debug.logError(e, "Could not create delegator with name \"" + delegatorName + "\": ", module);
         }
         if (delegatorData != null) {
-            return new DelegatorImpl(delegatorData);
+            return new DelegatorImpl(delegatorData, executionContext);
         }
         return null;
     }

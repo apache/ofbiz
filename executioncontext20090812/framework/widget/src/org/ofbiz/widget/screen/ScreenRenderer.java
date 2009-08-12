@@ -50,6 +50,7 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.security.Security;
 import org.ofbiz.security.authz.Authorization;
 import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.ExecutionContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.webapp.control.LoginWorker;
@@ -194,6 +195,7 @@ public class ScreenRenderer {
                 (LocalDispatcher) request.getAttribute("dispatcher"), (Authorization) request.getAttribute("authz"),
                 (Security) request.getAttribute("security"), UtilHttp.getLocale(request), userLogin);
 
+        context.put("executionContext", request.getAttribute("executionContext"));
         context.put("autoUserLogin", session.getAttribute("autoUserLogin"));
         context.put("person", session.getAttribute("person"));
         context.put("partyGroup", session.getAttribute("partyGroup"));
@@ -203,6 +205,10 @@ public class ScreenRenderer {
 
         // set up the user's time zone
         context.put("timeZone", UtilHttp.getTimeZone(request));
+
+        ExecutionContext executionContext = (ExecutionContext) request.getAttribute("executionContext");
+        executionContext.initializeContext(context);
+        context.put("executionContext", executionContext);
 
         // ========== setup values that are specific to OFBiz webapps
 

@@ -643,6 +643,14 @@ public class ModelServiceReader implements Serializable {
         def.optional = true;
         def.internal = true;
         service.addParam(def);
+        // executionContext
+        def = new ModelParam();
+        def.name = "executionContext";
+        def.type = "org.ofbiz.api.context.ExecutionContext";
+        def.mode = "IN";
+        def.optional = true;
+        def.internal = true;
+        service.addParam(def);
     }
 
     protected void createOverrideDefs(Element baseElement, ModelService service) {

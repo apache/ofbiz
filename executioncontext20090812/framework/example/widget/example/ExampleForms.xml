@@ -22,6 +22,9 @@ under the License.
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
 
     <form name="FindExamples" type="single" target="FindExample" default-entity-name="Example">
+        <!--  Uncomment this section to see the ExecutionContext in action
+        <field name="testField"><display description="${executionContext}"/></field>
+         -->
         <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
         <field name="exampleId" title="${uiLabelMap.ExampleExampleId}"><text-find/></field>
         <field name="exampleName" title="${uiLabelMap.CommonName}"><text-find/></field>

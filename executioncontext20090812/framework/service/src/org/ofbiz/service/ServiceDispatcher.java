@@ -27,6 +27,7 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.config.GenericConfigException;
+import org.ofbiz.api.context.ExecutionContextFactory;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralRuntimeException;
 import org.ofbiz.base.util.UtilMisc;
@@ -281,7 +282,6 @@ public class ServiceDispatcher {
         DispatchContext ctx = localContext.get(localName);
         GenericDelegator delegator = ctx.getDelegator();
         Locale locale = this.checkLocale(context);
-        delegator.setLocale(locale);
 
         GenericEngine engine = this.getGenericEngine(modelService.engineName);
 
@@ -293,6 +293,17 @@ public class ServiceDispatcher {
         // for isolated transactions
         Transaction parentTransaction = null;
 
+        ExecutionContext executionContext = (ExecutionContext) context.get("executionContext");
+        if (executionContext == null) {
+            try {
+				executionContext = (ExecutionContext) ExecutionContextFactory.getInstance();
+			} catch (Exception e) {
+				throw new GenericServiceException(e);
+			}
+            executionContext.initializeContext(context);
+            context.put("executionContext", executionContext);
+        }
+        executionContext.pushExecutionArtifact(modelService);
         // start the transaction
         boolean beganTrans = false;
         try {
@@ -558,6 +569,7 @@ public class ServiceDispatcher {
             Debug.logError(te, "Problems with the transaction", module);
             throw new GenericServiceException("Problems with the transaction.", te.getNested());
         } finally {
+            executionContext.popExecutionArtifact();
             // release the semaphore lock
             if (lock != null) {
                 lock.release();
@@ -1096,5 +1108,4 @@ public class ServiceDispatcher {
     public static Map<RunningService, ServiceDispatcher> getServiceLogMap() {
         return runLog;
     }
-
 }
