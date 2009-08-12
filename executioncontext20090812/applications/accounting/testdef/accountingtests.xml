@@ -1,0 +1,57 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+  -->
+
+<test-suite suite-name="accountingtests"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/test-suite.xsd">
+    <test-case case-name="accounting-tests"><junit-test-suite class-name="org.ofbiz.accounting.test.FinAccountTests"/></test-case>
+
+    <!-- Test case for Accounting Transaction on Purchase -->
+    <test-case case-name="auto-accounting-transaction-tests-PoReceipt">
+        <simple-method-test location="component://accounting/script/org/ofbiz/accounting/test/AutoAcctgTransTests.xml" name="testAcctgTransOnPoReceipts"/>
+    </test-case>
+    <test-case case-name="auto-accounting-transaction-tests-EditPoInvoice">
+        <simple-method-test location="component://accounting/script/org/ofbiz/accounting/test/AutoAcctgTransTests.xml" name="testAcctgTransOnEditPoInvoice"/>
+    </test-case>
+    <test-case case-name="auto-accounting-transaction-tests-PaymentSentToSupplier">
+        <simple-method-test location="component://accounting/script/org/ofbiz/accounting/test/AutoAcctgTransTests.xml" name="testAcctgTransOnPaymentSentToSupplier"/>
+    </test-case>
+
+    <!-- Test case for Accounting Transaction on Sales -->
+    <test-case case-name="auto-accounting-transaction-tests-SalesOrderShipments">
+        <simple-method-test location="component://accounting/script/org/ofbiz/accounting/test/AutoAcctgTransTests.xml" name="testAcctgTransForSalesOrderShipments"/>
+    </test-case>
+    <test-case case-name="auto-accounting-transaction-tests-SalesInvoice">
+        <simple-method-test location="component://accounting/script/org/ofbiz/accounting/test/AutoAcctgTransTests.xml" name="testAcctgTransOnSalesInvoice"/>
+    </test-case>
+    <test-case case-name="auto-accouning-transaction-tests-PaymentReceivedFromCustomer">
+        <simple-method-test location="component://accounting/script/org/ofbiz/accounting/test/AutoAcctgTransTests.xml" name="testAcctgTransOnPaymentReceivedFromCustomer"/>
+    </test-case>
+
+    <!-- Test case for Accounting Transaction on Manufacturing -->
+    <test-case case-name="auto-accounting-transaction-tests-MaterialIssuance">
+        <simple-method-test location="component://accounting/script/org/ofbiz/accounting/test/AutoAcctgTransTests.xml" name="testAcctgTransOnMaterialIssuance"/>
+    </test-case>
+    <test-case case-name="auto-accounting-transaction-tests-ActualManufacturingCost">
+        <simple-method-test location="component://accounting/script/org/ofbiz/accounting/test/AutoAcctgTransTests.xml" name="testAcctgTransForActualManufacturingCost"/>
+    </test-case>
+    <test-case case-name="auto-accounting-transaction-tests-AddFinishedProductsIntoWareHouse">
+        <simple-method-test location="component://accounting/script/org/ofbiz/accounting/test/AutoAcctgTransTests.xml" name="testAcctgTransOnAddFinishedProductsIntoWarehouse"/>
+    </test-case>
+</test-suite>
