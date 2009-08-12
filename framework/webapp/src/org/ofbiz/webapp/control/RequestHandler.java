@@ -36,6 +36,7 @@ import javax.servlet.http.HttpSession;
 
 import javolution.util.FastMap;
 
+import org.ofbiz.api.context.GenericExecutionArtifact;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.SSLUtil;
 import org.ofbiz.base.util.StringUtil;
@@ -49,6 +50,7 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.service.ExecutionContext;
 import org.ofbiz.webapp.event.EventFactory;
 import org.ofbiz.webapp.event.EventHandler;
 import org.ofbiz.webapp.event.EventHandlerException;
@@ -107,8 +109,6 @@ public class RequestHandler {
             GenericValue userLogin, GenericDelegator delegator) throws RequestHandlerException {
 
         HttpSession session = request.getSession();
-        Locale locale = UtilHttp.getLocale(request);
-        delegator.setLocale(locale);
 
         // get the controllerConfig once for this method so we don't have to get it over and over inside the method
         ConfigXMLReader.ControllerConfig controllerConfig = this.getControllerConfig();
@@ -144,6 +144,10 @@ public class RequestHandler {
             throw new RequestHandlerException(requestMissingErrorMessage);
         }
 
+        ExecutionContext executionContext = (ExecutionContext) request.getAttribute("executionContext");
+        Locale locale = executionContext.getLocale();
+        executionContext.pushExecutionArtifact(new GenericExecutionArtifact(UtilHttp.getFullRequestUrl(request).toString(), cname));
+        
         String eventReturn = null;
         boolean interruptRequest = false;
 
@@ -323,6 +327,7 @@ public class RequestHandler {
         // Warning: this could cause problems if more then one event attempts to return a response.
         if (interruptRequest) {
             if (Debug.infoOn()) Debug.logInfo("[Pre-Processor Interrupted Request, not running: [" + requestMap.uri + "], sessionId=" + UtilHttp.getSessionId(request), module);
+            executionContext.popExecutionArtifact();
             return;
         }
 
@@ -471,6 +476,7 @@ public class RequestHandler {
                 // the old/uglier way: doRequest(request, response, previousRequest, userLogin, delegator);
 
                 // this is needed as the request handled will be taking care of the view, etc
+                executionContext.popExecutionArtifact();
                 return;
             }
         }
@@ -602,6 +608,7 @@ public class RequestHandler {
                 if (Debug.verboseOn()) Debug.logVerbose("[RequestHandler.doRequest]: Response is handled by the event." + " sessionId=" + UtilHttp.getSessionId(request), module);
             }
         }
+        executionContext.popExecutionArtifact();
     }
 
     /** Find the event handler and invoke an event. */

@@ -55,6 +55,9 @@ import javax.xml.namespace.QName;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.api.context.ExecutionArtifact;
+import org.ofbiz.api.context.ExecutionContext;
+import org.ofbiz.api.context.ExecutionContextFactory;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.ObjectType;
@@ -76,7 +79,7 @@ import com.ibm.wsdl.extensions.soap.SOAPOperationImpl;
  * Generic Service Model Class
  */
 @SuppressWarnings("serial")
-public class ModelService extends AbstractMap<String, Object> implements Serializable {
+public class ModelService extends AbstractMap<String, Object> implements Serializable, ExecutionArtifact {
     private static final Field[] MODEL_SERVICE_FIELDS;
     private static final Map<String, Field> MODEL_SERVICE_FIELD_MAP = FastMap.newInstance();
     static {
@@ -859,6 +862,23 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
             }
         }
 
+        // Copy/create ExecutionContext
+        ExecutionContext executionContext = null;
+        if (source.containsKey("executionContext")) {
+        	executionContext = (ExecutionContext) source.get("executionContext");
+        } else {
+        	try {
+				executionContext = ExecutionContextFactory.getInstance();
+	        	executionContext.setLocale(locale);
+	        	executionContext.setTimeZone(timeZone);
+			} catch (Exception e) {
+				Debug.logError(e, "Error while getting ExecutionContext: ", module);
+			}
+        }
+        if (executionContext != null) {
+            target.put("executionContext", executionContext);
+        }
+        
         for (ModelParam param: contextParamList) {
             //boolean internalParam = param.internal;
 
@@ -1283,5 +1303,13 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         service.setQName(new QName(TNS, this.name));
         service.addPort(port);
         def.addService(service);
+    }
+
+    public String getLocation() {
+        return this.definitionLocation;
+    }
+
+    public String getName() {
+        return this.name;
     }
 }

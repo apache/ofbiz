@@ -34,6 +34,7 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 import javolution.util.FastSet;
 
+import org.ofbiz.api.context.ExecutionArtifact;
 import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
@@ -53,6 +54,7 @@ import org.ofbiz.entity.model.ModelField;
 import org.ofbiz.entity.model.ModelReader;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.ExecutionContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelParam;
@@ -68,7 +70,7 @@ import bsh.Interpreter;
  * Widget Library - Form model class
  */
 @SuppressWarnings("serial")
-public class ModelForm extends ModelWidget {
+public class ModelForm extends ModelWidget implements ExecutionArtifact {
 
     public static final String module = ModelForm.class.getName();
     public static final String DEFAULT_FORM_RESULT_LIST_NAME = "defaultFormResultList";
@@ -780,6 +782,8 @@ public class ModelForm extends ModelWidget {
      *   use the same form definitions for many types of form UIs
      */
     public void renderFormString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
+        ExecutionContext executionContext = (ExecutionContext) context.get("executionContext");
+        executionContext.pushExecutionArtifact(this);
         runFormActions(context);
 
         setWidgetBoundaryComments(context);
@@ -805,9 +809,9 @@ public class ModelForm extends ModelWidget {
             } else {
                 throw new IllegalArgumentException("Error rendering form, a field has no FieldInfo, ie no sub-element for the type of field for field named: " + modelFormField.getName());
             }
-       }
+        }
 
-        if ("single".equals(this.type)) {
+       if ("single".equals(this.type)) {
             this.renderSingleFormString(writer, context, formStringRenderer, positions);
         } else if ("list".equals(this.type)) {
             this.renderListFormString(writer, context, formStringRenderer, positions);
@@ -822,6 +826,7 @@ public class ModelForm extends ModelWidget {
                 throw new IllegalArgumentException("The form type " + this.getType() + " is not supported for form with name " + this.getName());
             }
         }
+        executionContext.popExecutionArtifact();
     }
 
     public void renderSingleFormString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer, int positions) throws IOException {
@@ -2958,5 +2963,9 @@ public class ModelForm extends ModelWidget {
         }
 
         return allRequestsUsed;
+    }
+
+    public String getLocation() {
+        return this.formLocation;
     }
 }

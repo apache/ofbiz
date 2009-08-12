@@ -47,7 +47,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 /**
- * Delegator Interface
+ * Delegator Interface.
  */
 public interface GenericDelegator {
 
@@ -1104,14 +1104,16 @@ public interface GenericDelegator {
 
     public void setEntityEcaHandler(EntityEcaHandler<?> entityEcaHandler);
 
+    public void setExecutionContext(ExecutionContext executionContext);
+
+    public void setLocale(Locale locale);
+
     /** Look at existing values for a sub-entity with a sequenced secondary ID, and get the highest plus 1 */
     public void setNextSubSeqId(GenericValue value, String seqFieldName, int numericPadding, int incrementBy);
 
     /** Allows you to pass a SequenceUtil class (possibly one that overrides the getNextSeqId method);
      * if null is passed will effectively refresh the sequencer. */
     public void setSequencer(SequenceUtil sequencer);
-
-    public void setLocale(Locale locale);
 
     public void setSessionIdentifier(String identifier);
 

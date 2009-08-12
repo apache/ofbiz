@@ -26,6 +26,7 @@ import java.util.Set;
 
 import javolution.util.FastSet;
 
+import org.ofbiz.api.context.ExecutionArtifact;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilValidate;
@@ -35,6 +36,7 @@ import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.transaction.TransactionUtil;
+import org.ofbiz.service.ExecutionContext;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.webapp.control.ConfigXMLReader;
 import org.ofbiz.widget.ModelWidget;
@@ -44,7 +46,7 @@ import org.w3c.dom.Element;
  * Widget Library - Screen model class
  */
 @SuppressWarnings("serial")
-public class ModelScreen extends ModelWidget implements Serializable {
+public class ModelScreen extends ModelWidget implements Serializable, ExecutionArtifact {
 
     public static final String module = ModelScreen.class.getName();
 
@@ -345,6 +347,8 @@ public class ModelScreen extends ModelWidget implements Serializable {
      *   use the same screen definitions for many types of screen UIs
      */
     public void renderScreenString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws ScreenRenderException {
+        ExecutionContext executionContext = (ExecutionContext) context.get("executionContext");
+        executionContext.pushExecutionArtifact(this);
         // make sure the "null" object is in there for entity ops
         context.put("null", GenericEntity.NULL_FIELD);
 
@@ -419,6 +423,7 @@ public class ModelScreen extends ModelWidget implements Serializable {
             // after rolling back, rethrow the exception
             throw new ScreenRenderException(errMsg, e);
         } finally {
+            executionContext.popExecutionArtifact();
             // only commit the transaction if we started one... this will throw an exception if it fails
             try {
                 TransactionUtil.commit(beganTransaction);
@@ -437,6 +442,10 @@ public class ModelScreen extends ModelWidget implements Serializable {
         GenericDelegator delegator = (GenericDelegator) context.get("delegator");
         return delegator;
     }
+
+	public String getLocation() {
+		return this.sourceLocation + "#" + this.name;
+	}
 }
 
 

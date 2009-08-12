@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
     <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+    <classpathentry kind="src" path="framework/api/src"/>
+    <classpathentry kind="src" path="framework/context/src"/>
     <classpathentry kind="src" path="framework/testtools/src"/>
     <classpathentry kind="src" path="framework/webslinger/src"/>
     <classpathentry kind="src" path="specialpurpose/oagis/src"/>
