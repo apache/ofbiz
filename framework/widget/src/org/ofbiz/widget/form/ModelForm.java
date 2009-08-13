@@ -677,7 +677,7 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
 
         for (ModelParam modelParam: modelService.getInModelParamList()) {
             // skip auto params that the service engine populates...
-            if ("userLogin".equals(modelParam.name) || "locale".equals(modelParam.name) || "timeZone".equals(modelParam.name)) {
+            if (modelParam.internal) {
                 continue;
             }
             if (modelParam.formDisplay) {

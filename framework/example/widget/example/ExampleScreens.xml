@@ -39,7 +39,7 @@ under the License.
                             <widgets>
                                 <!--  Uncomment this section to see the ExecutionContext in action
                                 <container style="button-bar"><label text="Execution path for this screen: ${executionContext}"/></container>
-                                <container style="button-bar"><label text="What is contains: root/application/screen/screen/decorator/decorator"/></container>
+                                <container style="button-bar"><label text="What it contains: root/application/screen/screen/decorator/decorator"/></container>
                                 -->
                                 <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                                     <decorator-section name="menu-bar">
