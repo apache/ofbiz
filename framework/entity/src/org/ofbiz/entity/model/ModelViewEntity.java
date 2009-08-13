@@ -52,7 +52,7 @@ import org.w3c.dom.NodeList;
  * This class extends ModelEntity and provides additional information appropriate to view entities
  */
 @SuppressWarnings("serial")
-public class ModelViewEntity extends ModelEntity {
+public class ModelViewEntity extends ModelEntityImpl {
     public static final String module = ModelViewEntity.class.getName();
 
     public static Map<String, String> functionPrefixMap = FastMap.newInstance();
@@ -338,9 +338,9 @@ public class ModelViewEntity extends ModelEntity {
         Iterator<ModelField> fldsIt = flds.iterator();
         while (fldsIt.hasNext()) {
             ModelField field = fldsIt.next();
-            returnString.append(field.colName);
+            returnString.append(field.getColName());
             if (alias) {
-                ModelAlias modelAlias = this.getAlias(field.name);
+                ModelAlias modelAlias = this.getAlias(field.getName());
                 if (modelAlias != null) {
                     returnString.append(" AS " + modelAlias.getColAlias());
                 }
@@ -354,7 +354,7 @@ public class ModelViewEntity extends ModelEntity {
         return returnString.toString();
     }
 
-    protected ModelEntity aliasedModelEntity = new ModelEntity();
+    protected ModelEntity aliasedModelEntity = new ModelEntityImpl();
 
     public ModelEntity getAliasedModelEntity() {
         return this.aliasedModelEntity;
@@ -408,7 +408,7 @@ public class ModelViewEntity extends ModelEntity {
             Iterator<ModelField> aliasedFieldIterator = aliasedEntity.getFieldsIterator();
             while (aliasedFieldIterator.hasNext()) {
                 ModelField aliasedModelField = aliasedFieldIterator.next();
-                ModelField newModelField = new ModelField();
+                ModelField newModelField = new ModelFieldImpl();
                 for (int i = 0; i < aliasedModelField.getValidatorsSize(); i++) {
                     newModelField.addValidator(aliasedModelField.getValidator(i));
                 }
@@ -424,9 +424,9 @@ public class ModelViewEntity extends ModelEntity {
         expandAllAliasAlls(modelReader);
 
         for (ModelAlias alias: aliases) {
-            ModelField field = new ModelField();
+        	ModelFieldImpl field = new ModelFieldImpl();
             field.setModelEntity(this);
-            field.name = alias.name;
+            field.setName(alias.name);
             field.description = alias.description;
 
             // if this is a groupBy field, add it to the groupBys list
@@ -449,7 +449,7 @@ public class ModelViewEntity extends ModelEntity {
                 field.isPk = false;
             } else {
                 ModelEntity aliasedEntity = getAliasedEntity(alias.entityAlias, modelReader);
-                ModelField aliasedField = getAliasedField(aliasedEntity, alias.field, modelReader);
+                ModelFieldImpl aliasedField = (ModelFieldImpl) getAliasedField(aliasedEntity, alias.field, modelReader);
                 if (aliasedField == null) {
                     Debug.logError("[ModelViewEntity.populateFields (" + this.getEntityName() + ")] ERROR: could not find ModelField for field name \"" +
                         alias.field + "\" on entity with name: " + aliasedEntity.getEntityName(), module);
@@ -467,7 +467,7 @@ public class ModelViewEntity extends ModelEntity {
                 field.type = aliasedField.type;
                 field.validators = aliasedField.validators;
 
-                field.colName = alias.entityAlias + "." + SqlJdbcUtil.filterColName(aliasedField.colName);
+                field.colName = alias.entityAlias + "." + SqlJdbcUtil.filterColName(aliasedField.getColName());
                 if (UtilValidate.isEmpty(field.description)) {
                     field.description = aliasedField.description;
                 }
@@ -490,7 +490,7 @@ public class ModelViewEntity extends ModelEntity {
                 if (prefix == null) {
                     Debug.logWarning("Specified alias function [" + alias.function + "] not valid; must be: min, max, sum, avg, count or count-distinct; using a column name with no function function", module);
                 } else {
-                    field.colName = prefix + field.colName + ")";
+                    field.setColName(prefix + field.getColName() + ")");
                 }
             }
         }
@@ -987,7 +987,7 @@ public class ModelViewEntity extends ModelEntity {
 
             //set fieldTypeBuffer if not already set
             if (fieldTypeBuffer.length() == 0) {
-                fieldTypeBuffer.append(modelField.type);
+                fieldTypeBuffer.append(modelField.getType());
             }
         }
     }
@@ -1010,7 +1010,7 @@ public class ModelViewEntity extends ModelEntity {
             NodeList keyMapList = viewLinkElement.getElementsByTagName("key-map");
             for (int j = 0; j < keyMapList.getLength(); j++) {
                 Element keyMapElement = (Element) keyMapList.item(j);
-                ModelKeyMap keyMap = new ModelKeyMap(keyMapElement);
+                ModelKeyMap keyMap = new ModelKeyMapImpl(keyMapElement);
 
                 if (keyMap != null) keyMaps.add(keyMap);
             }

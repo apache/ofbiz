@@ -307,7 +307,7 @@ public class ModelReader implements Serializable {
                                         }
 
                                         // create the new relationship even if one exists so we can show what we are looking for in the info message
-                                        ModelRelation newRel = new ModelRelation();
+                                        ModelRelationImpl newRel = new ModelRelationImpl();
                                         newRel.setModelEntity(relatedEnt);
                                         newRel.setRelEntityName(curModelEntity.getEntityName());
                                         newRel.setTitle(targetTitle);
@@ -315,7 +315,7 @@ public class ModelReader implements Serializable {
                                         Set<String> curEntityKeyFields = FastSet.newInstance();
                                         for (int kmn = 0; kmn < modelRelation.getKeyMapsSize(); kmn++) {
                                             ModelKeyMap curkm = modelRelation.getKeyMap(kmn);
-                                            ModelKeyMap newkm = new ModelKeyMap();
+                                            ModelKeyMap newkm = new ModelKeyMapImpl();
                                             newRel.addKeyMap(newkm);
                                             newkm.setFieldName(curkm.getRelFieldName());
                                             newkm.setRelFieldName(curkm.getFieldName());
@@ -549,7 +549,7 @@ public class ModelReader implements Serializable {
     ModelEntity createModelEntity(Element entityElement, UtilTimer utilTimer, ModelInfo def) {
         if (entityElement == null) return null;
         this.numEntities++;
-        ModelEntity entity = new ModelEntity(this, entityElement, utilTimer, def);
+        ModelEntity entity = new ModelEntityImpl(this, entityElement, utilTimer, def);
         return entity;
     }
 
@@ -562,13 +562,13 @@ public class ModelReader implements Serializable {
 
     public ModelRelation createRelation(ModelEntity entity, Element relationElement) {
         this.numRelations++;
-        ModelRelation relation = new ModelRelation(entity, relationElement);
+        ModelRelation relation = new ModelRelationImpl(entity, relationElement);
         return relation;
     }
 
     public ModelField findModelField(ModelEntity entity, String fieldName) {
-        for (ModelField field: entity.fields) {
-            if (field.name.compareTo(fieldName) == 0) {
+        for (ModelField field: entity.getFieldsUnmodifiable()) {
+            if (field.getName().compareTo(fieldName) == 0) {
                 return field;
             }
         }
@@ -577,7 +577,7 @@ public class ModelReader implements Serializable {
 
     public ModelField createModelField(String name, String type, String colName, boolean isPk) {
         this.numFields++;
-        ModelField field = new ModelField(name, type, colName, isPk);
+        ModelField field = new ModelFieldImpl(name, type, colName, isPk);
         return field;
     }
 
@@ -587,7 +587,7 @@ public class ModelReader implements Serializable {
         }
 
         this.numFields++;
-        ModelField field = new ModelField(fieldElement);
+        ModelField field = new ModelFieldImpl(fieldElement);
         return field;
     }
 }

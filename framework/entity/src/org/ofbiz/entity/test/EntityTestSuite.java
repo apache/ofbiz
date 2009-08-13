@@ -29,7 +29,7 @@ import junit.framework.TestCase;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.entity.GenericEntity;
+import org.ofbiz.entity.EntityFactory;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericPK;
 import org.ofbiz.entity.GenericValue;
@@ -113,7 +113,7 @@ public class EntityTestSuite extends EntityTestCase {
     public void testCreateTree() throws Exception {
         try {
         // get how many child nodes did we have before creating the tree
-        EntityCondition isChild = EntityCondition.makeCondition("primaryParentNodeId", EntityOperator.NOT_EQUAL, GenericEntity.NULL_FIELD);
+        EntityCondition isChild = EntityCondition.makeCondition("primaryParentNodeId", EntityOperator.NOT_EQUAL, EntityFactory.NULL_FIELD);
         long alreadyStored = delegator.findCountByCondition("TestingNode", isChild, null, null);
 
         //
@@ -123,7 +123,7 @@ public class EntityTestSuite extends EntityTestCase {
         // create the root
         GenericValue root = delegator.create("TestingNode",
                         "testingNodeId", delegator.getNextSeqId("TestingNode"),
-                        "primaryParentNodeId", GenericEntity.NULL_FIELD,
+                        "primaryParentNodeId", EntityFactory.NULL_FIELD,
                         "description", "root");
         int level1;
         for(level1 = 0; level1 < _level1max; level1++) {
@@ -148,7 +148,7 @@ public class EntityTestSuite extends EntityTestCase {
      */
     public void testAddMembersToTree() throws Exception {
         // get the level1 nodes
-        EntityCondition isLevel1 = EntityCondition.makeCondition("primaryParentNodeId", EntityOperator.NOT_EQUAL, GenericEntity.NULL_FIELD);
+        EntityCondition isLevel1 = EntityCondition.makeCondition("primaryParentNodeId", EntityOperator.NOT_EQUAL, EntityFactory.NULL_FIELD);
         List<GenericValue> nodeLevel1 = delegator.findList("TestingNode", isLevel1, null, null, null, false);
 
         List<GenericValue> newValues = new LinkedList<GenericValue>();
@@ -184,7 +184,7 @@ public class EntityTestSuite extends EntityTestCase {
      * Tests findByCondition and tests searching on a view-entity
      */
     public void testCountViews() throws Exception {
-        EntityCondition isNodeWithMember = EntityCondition.makeCondition("testingId", EntityOperator.NOT_EQUAL, GenericEntity.NULL_FIELD);
+        EntityCondition isNodeWithMember = EntityCondition.makeCondition("testingId", EntityOperator.NOT_EQUAL, EntityFactory.NULL_FIELD);
         List<GenericValue> nodeWithMembers = delegator.findList("TestingNodeAndMember", isNodeWithMember, null, null, null, false);
 
         for (GenericValue v: nodeWithMembers) {
@@ -331,7 +331,7 @@ public class EntityTestSuite extends EntityTestCase {
         // Find all the root nodes,
         // delete them their primary key
         //
-        EntityCondition isRoot = EntityCondition.makeCondition("primaryParentNodeId", EntityOperator.EQUALS, GenericEntity.NULL_FIELD);
+        EntityCondition isRoot = EntityCondition.makeCondition("primaryParentNodeId", EntityOperator.EQUALS, EntityFactory.NULL_FIELD);
         List<GenericValue> rootValues = delegator.findList("TestingNode", isRoot, UtilMisc.toSet("testingNodeId"), null, null, false);
 
         for (GenericValue value: rootValues) {

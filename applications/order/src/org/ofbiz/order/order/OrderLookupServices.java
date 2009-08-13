@@ -27,6 +27,7 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.*;
 import org.ofbiz.entity.model.DynamicViewEntity;
 import org.ofbiz.entity.model.ModelKeyMap;
+import org.ofbiz.entity.model.ModelUtil;
 import org.ofbiz.entity.util.EntityFindOptions;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.entity.util.EntityUtil;
@@ -89,11 +90,11 @@ public class OrderLookupServices {
         }
 
         // dynamic view entity
-        DynamicViewEntity dve = new DynamicViewEntity();
+        DynamicViewEntity dve = ModelUtil.createDynamicViewEntity();
         dve.addMemberEntity("OH", "OrderHeader");
         dve.addAliasAll("OH", ""); // no prefix
-        dve.addRelation("one-nofk", "", "OrderType", UtilMisc.toList(new ModelKeyMap("orderTypeId", "orderTypeId")));
-        dve.addRelation("one-nofk", "", "StatusItem", UtilMisc.toList(new ModelKeyMap("statusId", "statusId")));
+        dve.addRelation("one-nofk", "", "OrderType", UtilMisc.toList(ModelUtil.createModelKeyMap("orderTypeId", "orderTypeId")));
+        dve.addRelation("one-nofk", "", "StatusItem", UtilMisc.toList(ModelUtil.createModelKeyMap("statusId", "statusId")));
 
         // start the lookup
         String orderId = (String) context.get("orderId");
@@ -274,7 +275,7 @@ public class OrderLookupServices {
             dve.addMemberEntity("OISG", "OrderItemShipGroup");
             dve.addAlias("OISG", "shipmentMethodTypeId");
             dve.addAlias("OISG", "carrierPartyId");
-            dve.addViewLink("OH", "OISG", Boolean.FALSE, UtilMisc.toList(new ModelKeyMap("orderId", "orderId")));
+            dve.addViewLink("OH", "OISG", Boolean.FALSE, UtilMisc.toList(ModelUtil.createModelKeyMap("orderId", "orderId")));
 
             if (UtilValidate.isNotEmpty(carrierPartyId )) {
                 paramList.add("carrierPartyId=" + carrierPartyId);
@@ -295,8 +296,8 @@ public class OrderLookupServices {
             dve.addAlias("OPP", "orderPaymentPreferenceId");
             dve.addAlias("PGR", "gatewayAvsResult");
             dve.addAlias("PGR", "gatewayScoreResult");
-            dve.addViewLink("OH", "OPP", Boolean.FALSE, UtilMisc.toList(new ModelKeyMap("orderId", "orderId")));
-            dve.addViewLink("OPP", "PGR", Boolean.FALSE, UtilMisc.toList(new ModelKeyMap("orderPaymentPreferenceId", "orderPaymentPreferenceId")));
+            dve.addViewLink("OH", "OPP", Boolean.FALSE, UtilMisc.toList(ModelUtil.createModelKeyMap("orderId", "orderId")));
+            dve.addViewLink("OPP", "PGR", Boolean.FALSE, UtilMisc.toList(ModelUtil.createModelKeyMap("orderPaymentPreferenceId", "orderPaymentPreferenceId")));
         }
 
         if (UtilValidate.isNotEmpty(gatewayAvsResult)) {
@@ -314,7 +315,7 @@ public class OrderLookupServices {
             dve.addMemberEntity("OT", "OrderRole");
             dve.addAlias("OT", "partyId");
             dve.addAlias("OT", "roleTypeId");
-            dve.addViewLink("OH", "OT", Boolean.FALSE, UtilMisc.toList(new ModelKeyMap("orderId", "orderId")));
+            dve.addViewLink("OH", "OT", Boolean.FALSE, UtilMisc.toList(ModelUtil.createModelKeyMap("orderId", "orderId")));
         }
 
         if (UtilValidate.isNotEmpty(partyId)) {
@@ -349,7 +350,7 @@ public class OrderLookupServices {
             dve.addAlias("OI", "productId");
             dve.addAlias("OI", "budgetId");
             dve.addAlias("OI", "quoteId");
-            dve.addViewLink("OH", "OI", Boolean.FALSE, UtilMisc.toList(new ModelKeyMap("orderId", "orderId")));
+            dve.addViewLink("OH", "OI", Boolean.FALSE, UtilMisc.toList(ModelUtil.createModelKeyMap("orderId", "orderId")));
         }
 
         if (UtilValidate.isNotEmpty(correspondingPoId)) {
@@ -422,7 +423,7 @@ public class OrderLookupServices {
             dve.addAlias("OP", "billingAccountId");
             dve.addAlias("OP", "finAccountId");
             dve.addAlias("OP", "paymentMethodId");
-            dve.addViewLink("OH", "OP", Boolean.FALSE, UtilMisc.toList(new ModelKeyMap("orderId", "orderId")));
+            dve.addViewLink("OH", "OP", Boolean.FALSE, UtilMisc.toList(ModelUtil.createModelKeyMap("orderId", "orderId")));
         }
 
         // search by billing account ID
@@ -441,7 +442,7 @@ public class OrderLookupServices {
         if (UtilValidate.isNotEmpty(cardNumber)) {
             dve.addMemberEntity("CC", "CreditCard");
             dve.addAlias("CC", "cardNumber");
-            dve.addViewLink("OP", "CC", Boolean.FALSE, UtilMisc.toList(new ModelKeyMap("paymentMethodId", "paymentMethodId")));
+            dve.addViewLink("OP", "CC", Boolean.FALSE, UtilMisc.toList(ModelUtil.createModelKeyMap("paymentMethodId", "paymentMethodId")));
 
             paramList.add("cardNumber=" + cardNumber);
             conditions.add(makeExpr("cardNumber", cardNumber));
@@ -451,7 +452,7 @@ public class OrderLookupServices {
         if (UtilValidate.isNotEmpty(accountNumber)) {
             dve.addMemberEntity("EF", "EftAccount");
             dve.addAlias("EF", "accountNumber");
-            dve.addViewLink("OP", "EF", Boolean.FALSE, UtilMisc.toList(new ModelKeyMap("paymentMethodId", "paymentMethodId")));
+            dve.addViewLink("OP", "EF", Boolean.FALSE, UtilMisc.toList(ModelUtil.createModelKeyMap("paymentMethodId", "paymentMethodId")));
 
             paramList.add("accountNumber=" + accountNumber);
             conditions.add(makeExpr("accountNumber", accountNumber));
@@ -467,13 +468,13 @@ public class OrderLookupServices {
             dve.addMemberEntity("II", "ItemIssuance");
             dve.addAlias("II", "shipmentId");
             dve.addAlias("II", "inventoryItemId");
-            dve.addViewLink("OH", "II", Boolean.FALSE, UtilMisc.toList(new ModelKeyMap("orderId", "orderId")));
+            dve.addViewLink("OH", "II", Boolean.FALSE, UtilMisc.toList(ModelUtil.createModelKeyMap("orderId", "orderId")));
 
             if (softIdentifier != null || serialNumber != null) {
                 dve.addMemberEntity("IV", "InventoryItem");
                 dve.addAlias("IV", "softIdentifier");
                 dve.addAlias("IV", "serialNumber");
-                dve.addViewLink("II", "IV", Boolean.FALSE, UtilMisc.toList(new ModelKeyMap("inventoryItemId", "inventoryItemId")));
+                dve.addViewLink("II", "IV", Boolean.FALSE, UtilMisc.toList(ModelUtil.createModelKeyMap("inventoryItemId", "inventoryItemId")));
             }
         }
 
@@ -502,7 +503,7 @@ public class OrderLookupServices {
         if (UtilValidate.isNotEmpty(hasBackOrders)) {
             dve.addMemberEntity("IR", "OrderItemShipGrpInvRes");
             dve.addAlias("IR", "quantityNotAvailable");
-            dve.addViewLink("OH", "IR", Boolean.FALSE, UtilMisc.toList(new ModelKeyMap("orderId", "orderId")));
+            dve.addViewLink("OH", "IR", Boolean.FALSE, UtilMisc.toList(ModelUtil.createModelKeyMap("orderId", "orderId")));
 
             paramList.add("hasBackOrders=" + hasBackOrders);
             if ("Y".equals(hasBackOrders)) {
@@ -528,8 +529,8 @@ public class OrderLookupServices {
             dve.addAlias("OCM", "contactMechId");
             dve.addAlias("OCM", "contactMechPurposeTypeId");
             dve.addAlias("PA", "countryGeoId");
-            dve.addViewLink("OH", "OCM", Boolean.FALSE, ModelKeyMap.makeKeyMapList("orderId"));
-            dve.addViewLink("OCM", "PA", Boolean.FALSE, ModelKeyMap.makeKeyMapList("contactMechId"));
+            dve.addViewLink("OH", "OCM", Boolean.FALSE, ModelUtil.makeKeyMapList("orderId"));
+            dve.addViewLink("OCM", "PA", Boolean.FALSE, ModelUtil.makeKeyMapList("contactMechId"));
             
             EntityConditionList exprs = null;
             if ("Y".equals(includeCountry)) {

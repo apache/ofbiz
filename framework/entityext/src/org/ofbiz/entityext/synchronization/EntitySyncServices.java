@@ -42,6 +42,7 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.UtilURL;
 import org.ofbiz.entity.DelegatorFactory;
+import org.ofbiz.entity.EntityFactory;
 import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
