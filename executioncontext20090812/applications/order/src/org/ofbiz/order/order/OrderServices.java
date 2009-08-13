@@ -49,8 +49,8 @@ import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.collections.ResourceBundleMapWrapper;
 import org.ofbiz.common.DataModelConstants;
+import org.ofbiz.entity.EntityFactory;
 import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
@@ -2865,9 +2865,9 @@ public class OrderServices {
                 itemsExprs.add(EntityCondition.makeCondition("orderId", EntityOperator.EQUALS, orderId));
                 itemsExprs.add(EntityCondition.makeCondition(UtilMisc.toList(EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "ITEM_CREATED"),
                         EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "ITEM_APPROVED")), EntityOperator.OR));
-                itemsExprs.add(EntityCondition.makeCondition("dontCancelSetUserLogin", EntityOperator.EQUALS, GenericEntity.NULL_FIELD));
-                itemsExprs.add(EntityCondition.makeCondition("dontCancelSetDate", EntityOperator.EQUALS, GenericEntity.NULL_FIELD));
-                itemsExprs.add(EntityCondition.makeCondition("autoCancelDate", EntityOperator.NOT_EQUAL, GenericEntity.NULL_FIELD));
+                itemsExprs.add(EntityCondition.makeCondition("dontCancelSetUserLogin", EntityOperator.EQUALS, EntityFactory.NULL_FIELD));
+                itemsExprs.add(EntityCondition.makeCondition("dontCancelSetDate", EntityOperator.EQUALS, EntityFactory.NULL_FIELD));
+                itemsExprs.add(EntityCondition.makeCondition("autoCancelDate", EntityOperator.NOT_EQUAL, EntityFactory.NULL_FIELD));
 
                 ecl = EntityCondition.makeCondition(itemsExprs);
 

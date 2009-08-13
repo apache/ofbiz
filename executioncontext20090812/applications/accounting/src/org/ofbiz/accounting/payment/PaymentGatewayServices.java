@@ -43,6 +43,7 @@ import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilNumber;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.EntityFactory;
 import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
@@ -1525,7 +1526,7 @@ public class PaymentGatewayServices {
         try {
             // Select all the unapplied payment applications associated to the billing account
             List<EntityExpr> conditionList = UtilMisc.toList(EntityCondition.makeCondition("billingAccountId", EntityOperator.EQUALS, billingAccountId),
-                                                  EntityCondition.makeCondition("invoiceId", EntityOperator.EQUALS, GenericEntity.NULL_FIELD));
+                                                  EntityCondition.makeCondition("invoiceId", EntityOperator.EQUALS, EntityFactory.NULL_FIELD));
             EntityCondition conditions = EntityCondition.makeCondition(conditionList, EntityOperator.AND);
 
             List<GenericValue> paymentApplications = delegator.findList("PaymentApplication", conditions, null, UtilMisc.toList("-amountApplied"), null, false);

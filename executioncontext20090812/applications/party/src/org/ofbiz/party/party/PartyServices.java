@@ -45,6 +45,7 @@ import org.ofbiz.entity.condition.EntityFunction;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.DynamicViewEntity;
 import org.ofbiz.entity.model.ModelKeyMap;
+import org.ofbiz.entity.model.ModelUtil;
 import org.ofbiz.entity.util.EntityFindOptions;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.entity.util.EntityTypeUtil;
@@ -1066,15 +1067,15 @@ public class PartyServices {
             paramList = paramList + "&lookupFlag=" + lookupFlag + "&showAll=" + showAll + "&extInfo=" + extInfo;
 
             // create the dynamic view entity
-            DynamicViewEntity dynamicView = new DynamicViewEntity();
+            DynamicViewEntity dynamicView = ModelUtil.createDynamicViewEntity();
 
             // default view settings
             dynamicView.addMemberEntity("PT", "Party");
             dynamicView.addAlias("PT", "partyId");
             dynamicView.addAlias("PT", "statusId");
             dynamicView.addAlias("PT", "partyTypeId");
-            dynamicView.addRelation("one-nofk", "", "PartyType", ModelKeyMap.makeKeyMapList("partyTypeId"));
-            dynamicView.addRelation("many", "", "UserLogin", ModelKeyMap.makeKeyMapList("partyId"));
+            dynamicView.addRelation("one-nofk", "", "PartyType", ModelUtil.makeKeyMapList("partyTypeId"));
+            dynamicView.addRelation("many", "", "UserLogin", ModelUtil.makeKeyMapList("partyId"));
 
             // define the main condition & expression list
             List<EntityCondition> andExprs = FastList.newInstance();
@@ -1094,7 +1095,7 @@ public class PartyServices {
                 dynamicView.addMemberEntity("PRSHP", "PartyRelationship");
                 dynamicView.addAlias("PRSHP", "partyIdTo");
                 dynamicView.addAlias("PRSHP", "partyRelationshipTypeId");
-                dynamicView.addViewLink("PT", "PRSHP", Boolean.FALSE, ModelKeyMap.makeKeyMapList("partyId", "partyIdTo"));
+                dynamicView.addViewLink("PT", "PRSHP", Boolean.FALSE, ModelUtil.makeKeyMapList("partyId", "partyIdTo"));
                 List<String> ownerPartyIds = (List) context.get("ownerPartyIds");
                 EntityCondition relationshipCond = null;
                 if (UtilValidate.isEmpty(ownerPartyIds)) {
@@ -1154,7 +1155,7 @@ public class PartyServices {
                     // modify the dynamic view
                     dynamicView.addMemberEntity("UL", "UserLogin");
                     dynamicView.addAlias("UL", "userLoginId");
-                    dynamicView.addViewLink("PT", "UL", Boolean.FALSE, ModelKeyMap.makeKeyMapList("partyId"));
+                    dynamicView.addViewLink("PT", "UL", Boolean.FALSE, ModelUtil.makeKeyMapList("partyId"));
 
                     // add the expr
                     andExprs.add(EntityCondition.makeCondition(EntityFunction.UPPER_FIELD("userLoginId"), EntityOperator.LIKE, EntityFunction.UPPER("%"+userLoginId+"%")));
@@ -1173,7 +1174,7 @@ public class PartyServices {
                     // modify the dynamic view
                     dynamicView.addMemberEntity("PG", "PartyGroup");
                     dynamicView.addAlias("PG", "groupName");
-                    dynamicView.addViewLink("PT", "PG", Boolean.FALSE, ModelKeyMap.makeKeyMapList("partyId"));
+                    dynamicView.addViewLink("PT", "PG", Boolean.FALSE, ModelUtil.makeKeyMapList("partyId"));
 
                     // add the expr
                     andExprs.add(EntityCondition.makeCondition(EntityFunction.UPPER_FIELD("groupName"), EntityOperator.LIKE, EntityFunction.UPPER("%"+groupName+"%")));
@@ -1190,7 +1191,7 @@ public class PartyServices {
                     dynamicView.addMemberEntity("PE", "Person");
                     dynamicView.addAlias("PE", "firstName");
                     dynamicView.addAlias("PE", "lastName");
-                    dynamicView.addViewLink("PT", "PE", Boolean.FALSE, ModelKeyMap.makeKeyMapList("partyId"));
+                    dynamicView.addViewLink("PT", "PE", Boolean.FALSE, ModelUtil.makeKeyMapList("partyId"));
 
                     fieldsToSelect.add("firstName");
                     fieldsToSelect.add("lastName");
@@ -1221,7 +1222,7 @@ public class PartyServices {
                     // add role to view
                     dynamicView.addMemberEntity("PR", "PartyRole");
                     dynamicView.addAlias("PR", "roleTypeId");
-                    dynamicView.addViewLink("PT", "PR", Boolean.FALSE, ModelKeyMap.makeKeyMapList("partyId"));
+                    dynamicView.addViewLink("PT", "PR", Boolean.FALSE, ModelUtil.makeKeyMapList("partyId"));
 
                     // add the expr
                     andExprs.add(EntityCondition.makeCondition("roleTypeId", EntityOperator.EQUALS, roleTypeId));
@@ -1244,7 +1245,7 @@ public class PartyServices {
                     // add role to view
                     dynamicView.addMemberEntity("II", "InventoryItem");
                     dynamicView.addAlias("II", "ownerPartyId");
-                    dynamicView.addViewLink("PT", "II", Boolean.FALSE, ModelKeyMap.makeKeyMapList("partyId", "ownerPartyId"));
+                    dynamicView.addViewLink("PT", "II", Boolean.FALSE, ModelUtil.makeKeyMapList("partyId", "ownerPartyId"));
                 }
                 if (UtilValidate.isNotEmpty(inventoryItemId)) {
                     paramList = paramList + "&inventoryItemId=" + inventoryItemId;
@@ -1282,8 +1283,8 @@ public class PartyServices {
                     dynamicView.addAlias("PA", "stateProvinceGeoId");
                     dynamicView.addAlias("PA", "countryGeoId");
                     dynamicView.addAlias("PA", "postalCode");
-                    dynamicView.addViewLink("PT", "PC", Boolean.FALSE, ModelKeyMap.makeKeyMapList("partyId"));
-                    dynamicView.addViewLink("PC", "PA", Boolean.FALSE, ModelKeyMap.makeKeyMapList("contactMechId"));
+                    dynamicView.addViewLink("PT", "PC", Boolean.FALSE, ModelUtil.makeKeyMapList("partyId"));
+                    dynamicView.addViewLink("PC", "PA", Boolean.FALSE, ModelUtil.makeKeyMapList("contactMechId"));
 
                     // filter on address1
                     String address1 = (String) context.get("address1");
@@ -1333,8 +1334,8 @@ public class PartyServices {
                     dynamicView.addMemberEntity("CM", "ContactMech");
                     dynamicView.addAlias("PC", "contactMechId");
                     dynamicView.addAlias("CM", "infoString");
-                    dynamicView.addViewLink("PT", "PC", Boolean.FALSE, ModelKeyMap.makeKeyMapList("partyId"));
-                    dynamicView.addViewLink("PC", "CM", Boolean.FALSE, ModelKeyMap.makeKeyMapList("contactMechId"));
+                    dynamicView.addViewLink("PT", "PC", Boolean.FALSE, ModelUtil.makeKeyMapList("partyId"));
+                    dynamicView.addViewLink("PC", "CM", Boolean.FALSE, ModelUtil.makeKeyMapList("contactMechId"));
 
                     // filter on infoString
                     String infoString = (String) context.get("infoString");
@@ -1357,8 +1358,8 @@ public class PartyServices {
                     dynamicView.addAlias("TM", "countryCode");
                     dynamicView.addAlias("TM", "areaCode");
                     dynamicView.addAlias("TM", "contactNumber");
-                    dynamicView.addViewLink("PT", "PC", Boolean.FALSE, ModelKeyMap.makeKeyMapList("partyId"));
-                    dynamicView.addViewLink("PC", "TM", Boolean.FALSE, ModelKeyMap.makeKeyMapList("contactMechId"));
+                    dynamicView.addViewLink("PT", "PC", Boolean.FALSE, ModelUtil.makeKeyMapList("partyId"));
+                    dynamicView.addViewLink("PC", "TM", Boolean.FALSE, ModelUtil.makeKeyMapList("contactMechId"));
 
                     // filter on countryCode
                     String countryCode = (String) context.get("countryCode");

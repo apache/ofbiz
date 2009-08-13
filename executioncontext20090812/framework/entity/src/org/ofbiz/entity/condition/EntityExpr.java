@@ -27,9 +27,9 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.ObjectType;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.EntityCryptoException;
+import org.ofbiz.entity.EntityFactory;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericModelException;
 import org.ofbiz.entity.config.DatasourceInfo;
@@ -89,7 +89,7 @@ public class EntityExpr extends EntityCondition {
             throw new IllegalArgumentException("The operator argument cannot be null");
         }
 
-        if (rhs == null || rhs == GenericEntity.NULL_FIELD) {
+        if (rhs == null || rhs == EntityFactory.NULL_FIELD) {
             if (!EntityOperator.NOT_EQUAL.equals(operator) && !EntityOperator.EQUALS.equals(operator)) {
                 throw new IllegalArgumentException("Operator must be EQUALS or NOT_EQUAL when right/rhs argument is NULL ");
             }
@@ -235,7 +235,7 @@ public class EntityExpr extends EntityCondition {
     }
 
     public void checkRhsType(ModelEntity modelEntity, GenericDelegator delegator) {
-        if (this.rhs == null || this.rhs == GenericEntity.NULL_FIELD || modelEntity == null) return;
+        if (this.rhs == null || this.rhs == EntityFactory.NULL_FIELD || modelEntity == null) return;
 
         Object value = this.rhs;
         if (this.rhs instanceof EntityFunction) {

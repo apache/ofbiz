@@ -16,26 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.entity.model;
+package org.ofbiz.entity;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import javolution.context.ObjectFactory;
 
 /**
- * Generic Entity - KeyMap model class
+ * Generic Entity Primary Key Object
  *
  */
-public interface ModelKeyMap {
+@SuppressWarnings("serial")
+public class GenericPKImpl extends GenericEntityImpl implements GenericPK {
 
-    /** name of the field in this entity */
-    public String getFieldName();
+    protected static final ObjectFactory<GenericPK> genericPKFactory = new ObjectFactory<GenericPK>() {
+        @Override
+        protected GenericPK create() {
+            return new GenericPKImpl();
+        }
+    };
 
-    public void setFieldName(String fieldName);
+    protected GenericPKImpl() { }
 
-    /** name of the field in related entity */
-    public String getRelFieldName();
-
-    public void setRelFieldName(String relFieldName);
-
-    public Element toXmlElement(Document document);
+    /** Clones this GenericPK, this is a shallow clone & uses the default shallow HashMap clone
+     *@return Object that is a clone of this GenericPK
+     */
+    @Override
+    public Object clone() {
+        GenericPK newEntity = EntityFactory.createGenericPK(this);
+        newEntity.setDelegator(internalDelegator);
+        return newEntity;
+    }
 }
