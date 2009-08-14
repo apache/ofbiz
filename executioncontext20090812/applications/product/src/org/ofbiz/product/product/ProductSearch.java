@@ -49,9 +49,8 @@ import org.ofbiz.entity.condition.EntityConditionValue;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.config.EntityConfigUtil;
 import org.ofbiz.entity.model.DynamicViewEntity;
-import org.ofbiz.entity.model.ModelUtil;
-import org.ofbiz.entity.model.ModelViewEntity.ComplexAlias;
-import org.ofbiz.entity.model.ModelViewEntity.ComplexAliasField;
+import org.ofbiz.entity.model.ModelFactory;
+import org.ofbiz.entity.model.ModelViewEntity.*;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.entity.util.EntityFindOptions;
@@ -144,7 +143,7 @@ public class ProductSearch {
         public List<EntityCondition> entityConditionList = FastList.newInstance();
         public List<String> orderByList = FastList.newInstance();
         public List<String> fieldsToSelect = UtilMisc.toList("mainProductId");
-        public DynamicViewEntity dynamicViewEntity = ModelUtil.createDynamicViewEntity();
+        public DynamicViewEntity dynamicViewEntity = ModelFactory.createDynamicViewEntity();
         public boolean productIdGroupBy = false;
         public boolean includedKeywordSearch = false;
         public Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
@@ -186,7 +185,7 @@ public class ProductSearch {
             this.visitId = visitId;
             dynamicViewEntity.addMemberEntity("PROD", "Product");
             dynamicViewEntity.addMemberEntity("PRODCI", "ProductCalculatedInfo");
-            dynamicViewEntity.addViewLink("PROD", "PRODCI", Boolean.TRUE, ModelUtil.makeKeyMapList("productId"));
+            dynamicViewEntity.addViewLink("PROD", "PRODCI", Boolean.TRUE, ModelFactory.makeKeyMapList("productId"));
         }
 
         public GenericDelegator getDelegator() {
@@ -270,7 +269,7 @@ public class ProductSearch {
 
             Debug.logInfo("Finished initial setup of keywords, doingBothAndOr=" + doingBothAndOr + ", andKeywordFixedSet=" + andKeywordFixedSet + "\n keywordFixedOrSetAndList=" + keywordFixedOrSetAndList, module);
 
-            ComplexAlias relevancyComplexAlias = new ComplexAlias("+");
+            ComplexAlias relevancyComplexAlias = ModelFactory.createComplexAlias("+");
             if (andKeywordFixedSet.size() > 0) {
                 // add up the relevancyWeight fields from all keyword member entities for a total to sort by
 
@@ -282,7 +281,7 @@ public class ProductSearch {
 
                     dynamicViewEntity.addMemberEntity(entityAlias, "ProductKeyword");
                     dynamicViewEntity.addAlias(entityAlias, prefix + "Keyword", "keyword", null, null, null, null);
-                    dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+                    dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
                     entityConditionList.add(EntityCondition.makeCondition(prefix + "Keyword", EntityOperator.LIKE, keyword));
 
                     //don't add an alias for this, will be part of a complex alias: dynamicViewEntity.addAlias(entityAlias, prefix + "RelevancyWeight", "relevancyWeight", null, null, null, null);
@@ -290,7 +289,7 @@ public class ProductSearch {
                     if (doingBothAndOr) {
                         dynamicViewEntity.addAlias(entityAlias, prefix + "RelevancyWeight", "relevancyWeight", null, null, Boolean.TRUE, null);
                     }
-                    relevancyComplexAlias.addComplexAliasMember(new ComplexAliasField(entityAlias, "relevancyWeight", null, null));
+                    relevancyComplexAlias.addComplexAliasMember(ModelFactory.createComplexAliasField(entityAlias, "relevancyWeight", null, null));
                 }
 
                 //TODO: find out why Oracle and other dbs don't like the query resulting from this and fix: productIdGroupBy = true;
@@ -308,7 +307,7 @@ public class ProductSearch {
 
                     dynamicViewEntity.addMemberEntity(entityAlias, "ProductKeyword");
                     dynamicViewEntity.addAlias(entityAlias, prefix + "Keyword", "keyword", null, null, null, null);
-                    dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+                    dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
                     List<EntityCondition> keywordOrList = FastList.newInstance();
                     for (String keyword: keywordFixedOrSet) {
                         keywordOrList.add(EntityCondition.makeCondition(prefix + "Keyword", EntityOperator.LIKE, keyword));
@@ -318,7 +317,7 @@ public class ProductSearch {
                     productIdGroupBy = true;
 
                     if (doingBothAndOr) {
-                        relevancyComplexAlias.addComplexAliasMember(new ComplexAliasField(entityAlias, "relevancyWeight", null, "sum"));
+                        relevancyComplexAlias.addComplexAliasMember(ModelFactory.createComplexAliasField(entityAlias, "relevancyWeight", null, "sum"));
                     } else {
                         dynamicViewEntity.addAlias(entityAlias, "totalRelevancy", "relevancyWeight", null, null, null, "sum");
                     }
@@ -361,7 +360,7 @@ public class ProductSearch {
                     this.dynamicViewEntity.addAlias(entityAlias, categoryPrefix + "ProductCategoryId", "productCategoryId", null, null, null, null);
                     this.dynamicViewEntity.addAlias(entityAlias, categoryPrefix + "FromDate", "fromDate", null, null, null, null);
                     this.dynamicViewEntity.addAlias(entityAlias, categoryPrefix + "ThruDate", "thruDate", null, null, null, null);
-                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
                     incExcCondList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(categoryPrefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(categoryPrefix + "ThruDate", EntityOperator.GREATER_THAN, this.nowTimestamp)));
                     incExcCondList.add(EntityCondition.makeCondition(categoryPrefix + "FromDate", EntityOperator.LESS_THAN, this.nowTimestamp));
                     incExcCondList.add(EntityCondition.makeCondition(categoryPrefix + "ProductCategoryId", EntityOperator.EQUALS, includeCategoryId));
@@ -377,7 +376,7 @@ public class ProductSearch {
                     this.dynamicViewEntity.addAlias(entityAlias, featurePrefix + "ProductFeatureId", "productFeatureId", null, null, null, null);
                     this.dynamicViewEntity.addAlias(entityAlias, featurePrefix + "FromDate", "fromDate", null, null, null, null);
                     this.dynamicViewEntity.addAlias(entityAlias, featurePrefix + "ThruDate", "thruDate", null, null, null, null);
-                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
                     incExcCondList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(featurePrefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(featurePrefix + "ThruDate", EntityOperator.GREATER_THAN, this.nowTimestamp)));
                     incExcCondList.add(EntityCondition.makeCondition(featurePrefix + "FromDate", EntityOperator.LESS_THAN, this.nowTimestamp));
                     incExcCondList.add(EntityCondition.makeCondition(featurePrefix + "ProductFeatureId", EntityOperator.EQUALS, includeFeatureId));
@@ -396,8 +395,8 @@ public class ProductSearch {
                     this.dynamicViewEntity.addAlias(otherEntityAlias, otherFeaturePrefix + "ProductFeatureCategoryId", "productFeatureCategoryId", null, null, null, null);
                     this.dynamicViewEntity.addAlias(entityAlias, featurePrefix + "FromDate", "fromDate", null, null, null, null);
                     this.dynamicViewEntity.addAlias(entityAlias, featurePrefix + "ThruDate", "thruDate", null, null, null, null);
-                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
-                    this.dynamicViewEntity.addViewLink(entityAlias, otherEntityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productFeatureId"));
+                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
+                    this.dynamicViewEntity.addViewLink(entityAlias, otherEntityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productFeatureId"));
                     incExcCondList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(featurePrefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(featurePrefix + "ThruDate", EntityOperator.GREATER_THAN, this.nowTimestamp)));
                     incExcCondList.add(EntityCondition.makeCondition(featurePrefix + "FromDate", EntityOperator.LESS_THAN, this.nowTimestamp));
                     incExcCondList.add(EntityCondition.makeCondition(otherFeaturePrefix + "ProductFeatureCategoryId", EntityOperator.EQUALS, includeFeatureCategoryId));
@@ -418,8 +417,8 @@ public class ProductSearch {
                     this.dynamicViewEntity.addAlias(entityAlias, featurePrefix + "ThruDate", "thruDate", null, null, null, null);
                     this.dynamicViewEntity.addAlias(otherEntityAlias, otherFeaturePrefix + "FromDate", "fromDate", null, null, null, null);
                     this.dynamicViewEntity.addAlias(otherEntityAlias, otherFeaturePrefix + "ThruDate", "thruDate", null, null, null, null);
-                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
-                    this.dynamicViewEntity.addViewLink(entityAlias, otherEntityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productFeatureId"));
+                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
+                    this.dynamicViewEntity.addViewLink(entityAlias, otherEntityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productFeatureId"));
                     incExcCondList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(featurePrefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(featurePrefix + "ThruDate", EntityOperator.GREATER_THAN, this.nowTimestamp)));
                     incExcCondList.add(EntityCondition.makeCondition(featurePrefix + "FromDate", EntityOperator.LESS_THAN, this.nowTimestamp));
                     incExcCondList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(otherFeaturePrefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(otherFeaturePrefix + "ThruDate", EntityOperator.GREATER_THAN, this.nowTimestamp)));
@@ -472,7 +471,7 @@ public class ProductSearch {
                 this.dynamicViewEntity.addAlias(entityAlias, categoryPrefix + "ProductCategoryId", "productCategoryId", null, null, null, null);
                 this.dynamicViewEntity.addAlias(entityAlias, categoryPrefix + "FromDate", "fromDate", null, null, null, null);
                 this.dynamicViewEntity.addAlias(entityAlias, categoryPrefix + "ThruDate", "thruDate", null, null, null, null);
-                this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+                this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
                 alwIncCondList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(categoryPrefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(categoryPrefix + "ThruDate", EntityOperator.GREATER_THAN, this.nowTimestamp)));
                 alwIncCondList.add(EntityCondition.makeCondition(categoryPrefix + "FromDate", EntityOperator.LESS_THAN, this.nowTimestamp));
                 alwIncCondList.add(EntityCondition.makeCondition(categoryPrefix + "ProductCategoryId", EntityOperator.IN, alwaysIncludeCategoryIds));
@@ -486,7 +485,7 @@ public class ProductSearch {
                 this.dynamicViewEntity.addAlias(entityAlias, featurePrefix + "ProductFeatureId", "productFeatureId", null, null, null, null);
                 this.dynamicViewEntity.addAlias(entityAlias, featurePrefix + "FromDate", "fromDate", null, null, null, null);
                 this.dynamicViewEntity.addAlias(entityAlias, featurePrefix + "ThruDate", "thruDate", null, null, null, null);
-                this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+                this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
                 alwIncCondList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(featurePrefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(featurePrefix + "ThruDate", EntityOperator.GREATER_THAN, this.nowTimestamp)));
                 alwIncCondList.add(EntityCondition.makeCondition(featurePrefix + "FromDate", EntityOperator.LESS_THAN, this.nowTimestamp));
                 alwIncCondList.add(EntityCondition.makeCondition(featurePrefix + "ProductFeatureId", EntityOperator.IN, alwaysIncludeFeatureIds));
@@ -504,8 +503,8 @@ public class ProductSearch {
                     this.dynamicViewEntity.addAlias(otherEntityAlias, otherFeaturePrefix + "ProductFeatureCategoryId", "productFeatureCategoryId", null, null, null, null);
                     this.dynamicViewEntity.addAlias(entityAlias, featurePrefix + "FromDate", "fromDate", null, null, null, null);
                     this.dynamicViewEntity.addAlias(entityAlias, featurePrefix + "ThruDate", "thruDate", null, null, null, null);
-                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
-                    this.dynamicViewEntity.addViewLink(entityAlias, otherEntityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productFeatureId"));
+                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
+                    this.dynamicViewEntity.addViewLink(entityAlias, otherEntityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productFeatureId"));
                     alwIncCondList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(featurePrefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(featurePrefix + "ThruDate", EntityOperator.GREATER_THAN, this.nowTimestamp)));
                     alwIncCondList.add(EntityCondition.makeCondition(featurePrefix + "FromDate", EntityOperator.LESS_THAN, this.nowTimestamp));
                     alwIncCondList.add(EntityCondition.makeCondition(otherFeaturePrefix + "ProductFeatureCategoryId", EntityOperator.EQUALS, alwaysIncludeFeatureCategoryId));
@@ -526,8 +525,8 @@ public class ProductSearch {
                     this.dynamicViewEntity.addAlias(entityAlias, featurePrefix + "ThruDate", "thruDate", null, null, null, null);
                     this.dynamicViewEntity.addAlias(otherEntityAlias, otherFeaturePrefix + "FromDate", "fromDate", null, null, null, null);
                     this.dynamicViewEntity.addAlias(otherEntityAlias, otherFeaturePrefix + "ThruDate", "thruDate", null, null, null, null);
-                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
-                    this.dynamicViewEntity.addViewLink(entityAlias, otherEntityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productFeatureId"));
+                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
+                    this.dynamicViewEntity.addViewLink(entityAlias, otherEntityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productFeatureId"));
                     alwIncCondList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(featurePrefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(featurePrefix + "ThruDate", EntityOperator.GREATER_THAN, this.nowTimestamp)));
                     alwIncCondList.add(EntityCondition.makeCondition(featurePrefix + "FromDate", EntityOperator.LESS_THAN, this.nowTimestamp));
                     alwIncCondList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(otherFeaturePrefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(otherFeaturePrefix + "ThruDate", EntityOperator.GREATER_THAN, this.nowTimestamp)));
@@ -547,7 +546,7 @@ public class ProductSearch {
                     this.dynamicViewEntity.addAlias(entityAlias, featurePrefix + "ProductFeatureId", "productFeatureId", null, null, null, null);
                     this.dynamicViewEntity.addAlias(entityAlias, featurePrefix + "FromDate", "fromDate", null, null, null, null);
                     this.dynamicViewEntity.addAlias(entityAlias, featurePrefix + "ThruDate", "thruDate", null, null, null, null);
-                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
                     incExcCondList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(featurePrefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(featurePrefix + "ThruDate", EntityOperator.GREATER_THAN, this.nowTimestamp)));
                     incExcCondList.add(EntityCondition.makeCondition(featurePrefix + "FromDate", EntityOperator.LESS_THAN, this.nowTimestamp));
                     incExcCondList.add(EntityCondition.makeCondition(featurePrefix + "ProductFeatureId", EntityOperator.IN, includeFeatureIdOrSet));
@@ -563,7 +562,7 @@ public class ProductSearch {
                     this.dynamicViewEntity.addAlias(entityAlias, featurePrefix + "ProductFeatureId", "productFeatureId", null, null, null, null);
                     this.dynamicViewEntity.addAlias(entityAlias, featurePrefix + "FromDate", "fromDate", null, null, null, null);
                     this.dynamicViewEntity.addAlias(entityAlias, featurePrefix + "ThruDate", "thruDate", null, null, null, null);
-                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
                     alwIncCondList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(featurePrefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(featurePrefix + "ThruDate", EntityOperator.GREATER_THAN, this.nowTimestamp)));
                     alwIncCondList.add(EntityCondition.makeCondition(featurePrefix + "FromDate", EntityOperator.LESS_THAN, this.nowTimestamp));
                     alwIncCondList.add(EntityCondition.makeCondition(featurePrefix + "ProductFeatureId", EntityOperator.IN, alwaysIncludeFeatureIdOrSet));
@@ -581,7 +580,7 @@ public class ProductSearch {
                     this.dynamicViewEntity.addAlias(entityAlias, categoryPrefix + "ProductCategoryId", "productCategoryId", null, null, null, null);
                     this.dynamicViewEntity.addAlias(entityAlias, categoryPrefix + "FromDate", "fromDate", null, null, null, null);
                     this.dynamicViewEntity.addAlias(entityAlias, categoryPrefix + "ThruDate", "thruDate", null, null, null, null);
-                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
                     incExcCondList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(categoryPrefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(categoryPrefix + "ThruDate", EntityOperator.GREATER_THAN, this.nowTimestamp)));
                     incExcCondList.add(EntityCondition.makeCondition(categoryPrefix + "FromDate", EntityOperator.LESS_THAN, this.nowTimestamp));
                     incExcCondList.add(EntityCondition.makeCondition(categoryPrefix + "ProductCategoryId", EntityOperator.IN, includeCategoryIdOrSet));
@@ -597,7 +596,7 @@ public class ProductSearch {
                     this.dynamicViewEntity.addAlias(entityAlias, categoryPrefix + "ProductCategoryId", "productCategoryId", null, null, null, null);
                     this.dynamicViewEntity.addAlias(entityAlias, categoryPrefix + "FromDate", "fromDate", null, null, null, null);
                     this.dynamicViewEntity.addAlias(entityAlias, categoryPrefix + "ThruDate", "thruDate", null, null, null, null);
-                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+                    this.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
                     alwIncCondList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(categoryPrefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(categoryPrefix + "ThruDate", EntityOperator.GREATER_THAN, this.nowTimestamp)));
                     alwIncCondList.add(EntityCondition.makeCondition(categoryPrefix + "FromDate", EntityOperator.LESS_THAN, this.nowTimestamp));
                     alwIncCondList.add(EntityCondition.makeCondition(categoryPrefix + "ProductCategoryId", EntityOperator.IN, alwaysIncludeCategoryIdOrSet));
@@ -845,7 +844,7 @@ public class ProductSearch {
             productSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "ProductCategoryId", "productCategoryId", null, null, null, null);
             productSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "FromDate", "fromDate", null, null, null, null);
             productSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "ThruDate", "thruDate", null, null, null, null);
-            productSearchContext.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+            productSearchContext.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
             productSearchContext.entityConditionList.add(EntityCondition.makeCondition(prefix + "ProductCategoryId", EntityOperator.IN, productCategoryIds));
             productSearchContext.entityConditionList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(prefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(prefix + "ThruDate", EntityOperator.GREATER_THAN, productSearchContext.nowTimestamp)));
             productSearchContext.entityConditionList.add(EntityCondition.makeCondition(prefix + "FromDate", EntityOperator.LESS_THAN, productSearchContext.nowTimestamp));
@@ -1519,7 +1518,7 @@ public class ProductSearch {
             context.dynamicViewEntity.addAlias(entityAlias, prefix + "FromDate", "fromDate", null, null, null, null);
             context.dynamicViewEntity.addAlias(entityAlias, prefix + "ThruDate", "thruDate", null, null, null, null);
 
-            context.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+            context.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
 
             context.entityConditionList.add(EntityCondition.makeCondition(prefix + "ProductPriceTypeId", EntityOperator.EQUALS, productPriceTypeId));
             context.entityConditionList.add(EntityCondition.makeCondition(prefix + "ProductPricePurposeId", EntityOperator.EQUALS, "PURCHASE"));
@@ -1582,7 +1581,7 @@ public class ProductSearch {
             productSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "ThruDate", "thruDate", null, null, null, null);
             productSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "Price", "price", null, null, null, null);
 
-            productSearchContext.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+            productSearchContext.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
 
             productSearchContext.entityConditionList.add(EntityCondition.makeCondition(prefix + "ProductPriceTypeId", EntityOperator.EQUALS, "LIST_PRICE"));
             productSearchContext.entityConditionList.add(EntityCondition.makeCondition(prefix + "ProductPricePurposeId", EntityOperator.EQUALS, "PURCHASE"));
@@ -1676,7 +1675,7 @@ public class ProductSearch {
 
             productSearchContext.dynamicViewEntity.addMemberEntity(entityAlias, "SupplierProduct");
             productSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "SupplierPartyId", "partyId", null, null, null, null);
-            productSearchContext.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+            productSearchContext.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
             productSearchContext.entityConditionList.add(EntityCondition.makeCondition(prefix + "SupplierPartyId", EntityOperator.EQUALS, supplierPartyId));
 
             // add in productSearchConstraint, don't worry about the productSearchResultId or constraintSeqId, those will be fill in later
@@ -1813,7 +1812,7 @@ public class ProductSearch {
                     productSearchContext.entityConditionList.add(EntityCondition.makeCondition(prefix + "GoodIdentificationValue", operator, goodIdentificationValue));
                 }
 
-                productSearchContext.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+                productSearchContext.dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
 
                 productSearchContext.productSearchConstraintList.add(productSearchContext.getDelegator().makeValue("ProductSearchConstraint",
                         UtilMisc.toMap("constraintName", constraintName, "infoString", "goodIdentificationTypeId [" + this.goodIdentificationTypeId + "] goodIdentificationValue [" + this.goodIdentificationValue + "] include [" + this.include + "]")));
@@ -1992,7 +1991,7 @@ public class ProductSearch {
 
             // SortProductPrice, this will be a bit more complex, need to add a ProductPrice member entity
             productSearchContext.dynamicViewEntity.addMemberEntity("SPPRC", "ProductPrice");
-            productSearchContext.dynamicViewEntity.addViewLink("PROD", "SPPRC", Boolean.TRUE, UtilMisc.toList(ModelUtil.createModelKeyMap("productId", "productId")));
+            productSearchContext.dynamicViewEntity.addViewLink("PROD", "SPPRC", Boolean.TRUE, UtilMisc.toList(ModelFactory.createModelKeyMap("productId", "productId")));
             productSearchContext.dynamicViewEntity.addAlias("SPPRC", "sortProductPriceTypeId", "productPriceTypeId", null, null, null, null);
             productSearchContext.dynamicViewEntity.addAlias("SPPRC", "sortCurrencyUomId", "currencyUomId", null, null, null, null);
             productSearchContext.dynamicViewEntity.addAlias("SPPRC", "sortProductStoreGroupId", "productStoreGroupId", null, null, null, null);
@@ -2062,7 +2061,7 @@ public class ProductSearch {
         List entityConditionList = new FastList.newInstance();
         List orderByList = new FastList.newInstance();
         List fieldsToSelect = UtilMisc.toList("productId");
-        DynamicViewEntity dynamicViewEntity = ModelUtil.createDynamicViewEntity();
+        DynamicViewEntity dynamicViewEntity = ModelFactory.createDynamicViewEntity();
         dynamicViewEntity.addMemberEntity("PROD", "Product");
         dynamicViewEntity.addAlias("PROD", "productName");
         boolean productIdGroupBy = false;
@@ -2088,7 +2087,7 @@ public class ProductSearch {
             dynamicViewEntity.addAlias(entityAlias, prefix + "ProductCategoryId", "productCategoryId", null, null, null, null);
             dynamicViewEntity.addAlias(entityAlias, prefix + "FromDate", "fromDate", null, null, null, null);
             dynamicViewEntity.addAlias(entityAlias, prefix + "ThruDate", "thruDate", null, null, null, null);
-            dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+            dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
             entityConditionList.add(EntityCondition.makeCondition(prefix + "ProductCategoryId", EntityOperator.IN, productCategoryIdList));
             entityConditionList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(prefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(prefix + "ThruDate", EntityOperator.GREATER_THAN, nowTimestamp)));
             entityConditionList.add(EntityCondition.makeCondition(prefix + "FromDate", EntityOperator.LESS_THAN, nowTimestamp));
@@ -2101,7 +2100,7 @@ public class ProductSearch {
         if (keywordList.size() > 0) {
             if (isAnd) {
                 // add up the relevancyWeight fields from all keyword member entities for a total to sort by
-                ComplexAlias complexAlias = new ComplexAlias("+");
+                ComplexAlias complexAlias = ModelFactory.createComplexAlias("+");
 
                 for (String keyword: keywordList) {
                     // make index based values and increment
@@ -2111,11 +2110,11 @@ public class ProductSearch {
 
                     dynamicViewEntity.addMemberEntity(entityAlias, "ProductKeyword");
                     dynamicViewEntity.addAlias(entityAlias, prefix + "Keyword", "keyword", null, null, null, null);
-                    dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+                    dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
                     entityConditionList.add(EntityCondition.makeCondition(prefix + "Keyword", EntityOperator.LIKE, keyword));
 
                     //don't add an alias for this, will be part of a complex alias: dynamicViewEntity.addAlias(entityAlias, prefix + "RelevancyWeight", "relevancyWeight", null, null, null, null);
-                    complexAlias.addComplexAliasMember(new ComplexAliasField(entityAlias, "relevancyWeight"));
+                    complexAlias.addComplexAliasMember(ModelFactory.createComplexAliasField(entityAlias, "relevancyWeight"));
                 }
                 dynamicViewEntity.addAlias(null, "totalRelevancy", null, null, null, null, null, complexAlias);
                 orderByList.add("-totalRelevancy");
@@ -2129,7 +2128,7 @@ public class ProductSearch {
                 dynamicViewEntity.addMemberEntity(entityAlias, "ProductKeyword");
                 dynamicViewEntity.addAlias(entityAlias, "totalRelevancy", "relevancyWeight", null, null, null, "sum");
                 dynamicViewEntity.addAlias(entityAlias, prefix + "Keyword", "keyword", null, null, null, null);
-                dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+                dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
                 orderByList.add("-totalRelevancy");
                 fieldsToSelect.add("totalRelevancy");
                 List<EntityCondition> keywordOrList = new FastList.newInstance();
@@ -2154,7 +2153,7 @@ public class ProductSearch {
                 dynamicViewEntity.addAlias(entityAlias, prefix + "ProductFeatureId", "productFeatureId", null, null, null, null);
                 dynamicViewEntity.addAlias(entityAlias, prefix + "FromDate", "fromDate", null, null, null, null);
                 dynamicViewEntity.addAlias(entityAlias, prefix + "ThruDate", "thruDate", null, null, null, null);
-                dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("productId"));
+                dynamicViewEntity.addViewLink("PROD", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("productId"));
                 entityConditionList.add(EntityCondition.makeCondition(prefix + "ProductFeatureId", EntityOperator.EQUALS, productFeatureId));
                 entityConditionList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(prefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(prefix + "ThruDate", EntityOperator.GREATER_THAN, nowTimestamp)));
                 entityConditionList.add(EntityCondition.makeCondition(prefix + "FromDate", EntityOperator.LESS_THAN, nowTimestamp));

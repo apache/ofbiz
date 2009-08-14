@@ -785,14 +785,14 @@ public class EntityPersistentMgr implements PersistentManagerInterface {
         GenericDelegator delegator = SharkContainer.getDelegator();
         List processIds = new ArrayList();
 
-        DynamicViewEntity view = ModelUtil.createDynamicViewEntity();
+        DynamicViewEntity view = ModelFactory.createDynamicViewEntity();
         view.addMemberEntity("WFDL", org.ofbiz.shark.SharkConstants.WfDeadline);
         view.addMemberEntity("WFPR", org.ofbiz.shark.SharkConstants.WfProcess);
         view.addMemberEntity("WFAC", org.ofbiz.shark.SharkConstants.WfActivity);
         view.addAlias("WFPR", org.ofbiz.shark.SharkConstants.currentState, "processState", null, null, null, null);
         view.addAlias("WFAC", org.ofbiz.shark.SharkConstants.currentState, "activityState", null, null, null, null);
-        view.addViewLink("WFDL", "WFPR", Boolean.FALSE, ModelUtil.makeKeyMapList(org.ofbiz.shark.SharkConstants.processId));
-        view.addViewLink("WFDL", "WFAC", Boolean.FALSE, ModelUtil.makeKeyMapList(org.ofbiz.shark.SharkConstants.activityId));
+        view.addViewLink("WFDL", "WFPR", Boolean.FALSE, ModelFactory.makeKeyMapList(org.ofbiz.shark.SharkConstants.processId));
+        view.addViewLink("WFDL", "WFAC", Boolean.FALSE, ModelFactory.makeKeyMapList(org.ofbiz.shark.SharkConstants.activityId));
 
         EntityListIterator eli = null;
         try {

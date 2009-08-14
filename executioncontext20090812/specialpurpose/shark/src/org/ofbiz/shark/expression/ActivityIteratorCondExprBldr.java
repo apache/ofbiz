@@ -42,7 +42,7 @@ public class ActivityIteratorCondExprBldr extends BaseEntityCondExprBldr impleme
     public void addProcess(String field, String fieldAlias) {
         if (!addedProcess) {
             this.addEntity("WFPR", org.ofbiz.shark.SharkConstants.WfProcess);
-            this.addLink("WFAC", "WFAC", false, ModelUtil.makeKeyMapList(org.ofbiz.shark.SharkConstants.processId));
+            this.addLink("WFAC", "WFAC", false, ModelFactory.makeKeyMapList(org.ofbiz.shark.SharkConstants.processId));
         }
         this.addField("WFPR", field, fieldAlias);
     }

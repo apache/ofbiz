@@ -150,7 +150,7 @@ public abstract class BaseEntityCondExprBldr implements ExpressionBuilder, Seria
     }
 
     private DynamicViewEntity makeView() {
-        DynamicViewEntity view = ModelUtil.createDynamicViewEntity();
+        DynamicViewEntity view = ModelFactory.createDynamicViewEntity();
 
 
         // create the members
