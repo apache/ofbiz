@@ -894,7 +894,7 @@ public class ModelViewEntityImpl extends ModelEntityImpl implements ModelViewEnt
 
             Element complexAliasElement = UtilXml.firstChildElement(aliasElement, "complex-alias");
             if (complexAliasElement != null) {
-                complexAliasMember = ModelFactory.createComplexAlias(complexAliasElement);
+                complexAliasMember = new ComplexAliasImpl(complexAliasElement);
             }
         }
 
@@ -982,9 +982,9 @@ public class ModelViewEntityImpl extends ModelEntityImpl implements ModelViewEnt
             for (Element subElement: UtilXml.childElementList(complexAliasElement)) {
                 String nodeName = subElement.getNodeName();
                 if ("complex-alias".equals(nodeName)) {
-                    this.addComplexAliasMember(ModelFactory.createComplexAlias(subElement));
+                    this.addComplexAliasMember(new ComplexAliasImpl(subElement));
                 } else if ("complex-alias-field".equals(nodeName)) {
-                    this.addComplexAliasMember(ModelFactory.createComplexAliasField(subElement));
+                    this.addComplexAliasMember(new ComplexAliasField(subElement));
                 }
             }
         }
