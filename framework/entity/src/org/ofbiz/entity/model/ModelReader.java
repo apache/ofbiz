@@ -556,7 +556,7 @@ public class ModelReader implements Serializable {
     ModelEntity createModelViewEntity(Element entityElement, UtilTimer utilTimer, ModelInfo def) {
         if (entityElement == null) return null;
         this.numViewEntities++;
-        ModelViewEntity entity = new ModelViewEntity(this, entityElement, utilTimer, def);
+        ModelViewEntity entity = new ModelViewEntityImpl(this, entityElement, utilTimer, def);
         return entity;
     }
 

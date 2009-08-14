@@ -19,9 +19,6 @@
 package org.ofbiz.entity.model;
 
 import java.io.*;
-import java.util.List;
-
-import javolution.util.FastList;
 
 import org.ofbiz.base.util.*;
 
@@ -294,47 +291,5 @@ public class ModelUtil {
         } else {
             return "invalid-" + sqlTypeName + ":" + length + ":" + precision;
         }
-    }
-
-    // ======= ModelKeyMap Convenience Oriented Factory Methods ======= //
-
-    public static List<ModelKeyMap> makeKeyMapList(String fieldName1) {
-        return UtilMisc.toList(createModelKeyMap(fieldName1, null));
-    }
-
-    public static List<ModelKeyMap> makeKeyMapList(String fieldName1, String relFieldName1) {
-        return UtilMisc.toList(createModelKeyMap(fieldName1, relFieldName1));
-    }
-
-    public static List<ModelKeyMap> makeKeyMapList(String fieldName1, String relFieldName1, String fieldName2, String relFieldName2) {
-    	List<ModelKeyMap> modelKeyMapList = FastList.newInstance();
-    	modelKeyMapList.add(createModelKeyMap(fieldName1, relFieldName1));
-    	modelKeyMapList.add(createModelKeyMap(fieldName2, relFieldName2));
-        return modelKeyMapList;
-    }
-
-    public static List<ModelKeyMap> makeKeyMapList(String fieldName1, String relFieldName1, String fieldName2, String relFieldName2, String fieldName3, String relFieldName3) {
-    	List<ModelKeyMap> modelKeyMapList = FastList.newInstance();
-    	modelKeyMapList.add(createModelKeyMap(fieldName1, relFieldName1));
-    	modelKeyMapList.add(createModelKeyMap(fieldName2, relFieldName2));
-    	modelKeyMapList.add(createModelKeyMap(fieldName3, relFieldName3));
-        return modelKeyMapList;
-    }
-
-    public static ModelKeyMap createModelKeyMap(String fieldName, String relFieldName) {
-    	ModelKeyMap modelKeyMap = null;
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        try {
-        	modelKeyMap = (ModelKeyMap) loader.loadClass("org.ofbiz.entity.model.ModelKeyMapImpl").newInstance();
-		} catch (Exception e) {
-            Debug.logError(e, module);
-		}
-    	modelKeyMap.setFieldName(fieldName);
-    	modelKeyMap.setRelFieldName(UtilXml.checkEmpty(relFieldName, fieldName));
-        return modelKeyMap;
-    }
-
-    public static DynamicViewEntity createDynamicViewEntity() {
-    	return new DynamicViewEntityImpl();
     }
 }

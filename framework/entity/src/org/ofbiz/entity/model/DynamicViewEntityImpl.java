@@ -25,11 +25,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.model.ModelViewEntity.ComplexAliasMember;
-import org.ofbiz.entity.model.ModelViewEntity.ModelAlias;
-import org.ofbiz.entity.model.ModelViewEntity.ModelAliasAll;
-import org.ofbiz.entity.model.ModelViewEntity.ModelMemberEntity;
-import org.ofbiz.entity.model.ModelViewEntity.ModelViewLink;
+import org.ofbiz.entity.model.ModelViewEntity;
+import org.ofbiz.entity.model.ModelViewEntity.*;
+import org.ofbiz.entity.model.ModelViewEntityImpl.*;
+
 /**
  * This class is used for declaring Dynamic View Entities, to be used and thrown away.
  * A special method exists on the GenericDelegator to accept a DynamicViewEntity instead
@@ -73,7 +72,7 @@ public class DynamicViewEntityImpl implements DynamicViewEntity {
 	 * @see org.ofbiz.entity.model.DynamicViewEntity#makeModelViewEntity(org.ofbiz.entity.GenericDelegator)
 	 */
     public ModelViewEntity makeModelViewEntity(GenericDelegator delegator) {
-        ModelViewEntity modelViewEntity = new ModelViewEntity(this, delegator.getModelReader());
+        ModelViewEntity modelViewEntity = new ModelViewEntityImpl(this, delegator.getModelReader());
         return modelViewEntity;
     }
 
@@ -150,7 +149,7 @@ public class DynamicViewEntityImpl implements DynamicViewEntity {
 	 * @see org.ofbiz.entity.model.DynamicViewEntity#addMemberEntity(java.lang.String, java.lang.String)
 	 */
     public void addMemberEntity(String entityAlias, String entityName) {
-        ModelMemberEntity modelMemberEntity = new ModelMemberEntity(entityAlias, entityName);
+        ModelMemberEntity modelMemberEntity = new ModelMemberEntityImpl(entityAlias, entityName);
         this.memberModelMemberEntities.put(entityAlias, modelMemberEntity);
     }
 
@@ -165,7 +164,7 @@ public class DynamicViewEntityImpl implements DynamicViewEntity {
 	 * @see org.ofbiz.entity.model.DynamicViewEntity#addAliasAll(java.lang.String, java.lang.String)
 	 */
     public void addAliasAll(String entityAlias, String prefix) {
-        ModelAliasAll aliasAll = new ModelAliasAll(entityAlias, prefix);
+        ModelAliasAll aliasAll = new ModelAliasAllImpl(entityAlias, prefix);
         this.aliasAlls.add(aliasAll);
     }
 
@@ -201,7 +200,7 @@ public class DynamicViewEntityImpl implements DynamicViewEntity {
             throw new IllegalArgumentException("name cannot be null in call to DynamicViewEntity.addAlias");
         }
 
-        ModelAlias alias = new ModelAlias(entityAlias, name, field, colAlias, primKey, groupBy, function);
+        ModelAlias alias = new ModelAliasImpl(entityAlias, name, field, colAlias, primKey, groupBy, function);
         if (complexAliasMember != null) {
             alias.setComplexAliasMember(complexAliasMember);
         }
@@ -219,7 +218,7 @@ public class DynamicViewEntityImpl implements DynamicViewEntity {
 	 * @see org.ofbiz.entity.model.DynamicViewEntity#addViewLink(java.lang.String, java.lang.String, java.lang.Boolean, java.util.List)
 	 */
     public void addViewLink(String entityAlias, String relEntityAlias, Boolean relOptional, List<ModelKeyMap> modelKeyMaps) {
-        ModelViewLink modelViewLink = new ModelViewLink(entityAlias, relEntityAlias, relOptional, modelKeyMaps);
+        ModelViewLink modelViewLink = new ModelViewLinkImpl(entityAlias, relEntityAlias, relOptional, modelKeyMaps);
         this.viewLinks.add(modelViewLink);
     }
 

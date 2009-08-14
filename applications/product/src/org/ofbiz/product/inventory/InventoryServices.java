@@ -42,8 +42,7 @@ import org.ofbiz.entity.condition.EntityConditionList;
 import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.DynamicViewEntity;
-import org.ofbiz.entity.model.ModelKeyMap;
-import org.ofbiz.entity.model.ModelUtil;
+import org.ofbiz.entity.model.ModelFactory;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
@@ -874,8 +873,8 @@ public class InventoryServices {
             }
         }
 
-        DynamicViewEntity salesUsageViewEntity = ModelUtil.createDynamicViewEntity();
-        DynamicViewEntity productionUsageViewEntity = ModelUtil.createDynamicViewEntity();
+        DynamicViewEntity salesUsageViewEntity = ModelFactory.createDynamicViewEntity();
+        DynamicViewEntity productionUsageViewEntity = ModelFactory.createDynamicViewEntity();
         if (! UtilValidate.isEmpty(checkTime)) {
 
             // Construct a dynamic view entity to search against for sales usage quantities
@@ -883,9 +882,9 @@ public class InventoryServices {
             salesUsageViewEntity.addMemberEntity("OH", "OrderHeader");
             salesUsageViewEntity.addMemberEntity("ItIss", "ItemIssuance");
             salesUsageViewEntity.addMemberEntity("InvIt", "InventoryItem");
-            salesUsageViewEntity.addViewLink("OI", "OH", Boolean.valueOf(false), ModelUtil.makeKeyMapList("orderId"));
-            salesUsageViewEntity.addViewLink("OI", "ItIss", Boolean.valueOf(false), ModelUtil.makeKeyMapList("orderId", "orderId", "orderItemSeqId", "orderItemSeqId"));
-            salesUsageViewEntity.addViewLink("ItIss", "InvIt", Boolean.valueOf(false), ModelUtil.makeKeyMapList("inventoryItemId"));
+            salesUsageViewEntity.addViewLink("OI", "OH", Boolean.valueOf(false), ModelFactory.makeKeyMapList("orderId"));
+            salesUsageViewEntity.addViewLink("OI", "ItIss", Boolean.valueOf(false), ModelFactory.makeKeyMapList("orderId", "orderId", "orderItemSeqId", "orderItemSeqId"));
+            salesUsageViewEntity.addViewLink("ItIss", "InvIt", Boolean.valueOf(false), ModelFactory.makeKeyMapList("inventoryItemId"));
             salesUsageViewEntity.addAlias("OI", "productId");
             salesUsageViewEntity.addAlias("OH", "statusId");
             salesUsageViewEntity.addAlias("OH", "orderTypeId");
@@ -898,8 +897,8 @@ public class InventoryServices {
             productionUsageViewEntity.addMemberEntity("WEIA", "WorkEffortInventoryAssign");
             productionUsageViewEntity.addMemberEntity("WE", "WorkEffort");
             productionUsageViewEntity.addMemberEntity("II", "InventoryItem");
-            productionUsageViewEntity.addViewLink("WEIA", "WE", Boolean.valueOf(false), ModelUtil.makeKeyMapList("workEffortId"));
-            productionUsageViewEntity.addViewLink("WEIA", "II", Boolean.valueOf(false), ModelUtil.makeKeyMapList("inventoryItemId"));
+            productionUsageViewEntity.addViewLink("WEIA", "WE", Boolean.valueOf(false), ModelFactory.makeKeyMapList("workEffortId"));
+            productionUsageViewEntity.addViewLink("WEIA", "II", Boolean.valueOf(false), ModelFactory.makeKeyMapList("inventoryItemId"));
             productionUsageViewEntity.addAlias("WEIA", "quantity");
             productionUsageViewEntity.addAlias("WE", "actualCompletionDate");
             productionUsageViewEntity.addAlias("WE", "workEffortTypeId");

@@ -47,9 +47,9 @@ import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityFunction;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.DynamicViewEntity;
+import org.ofbiz.entity.model.ModelFactory;
 import org.ofbiz.entity.model.ModelUtil;
-import org.ofbiz.entity.model.ModelViewEntity.ComplexAlias;
-import org.ofbiz.entity.model.ModelViewEntity.ComplexAliasField;
+import org.ofbiz.entity.model.ModelViewEntity.*;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.entity.util.EntityFindOptions;
@@ -139,7 +139,7 @@ public class WorkEffortSearch {
         public List<EntityCondition> entityConditionList = FastList.newInstance();
         public List<String> orderByList = FastList.newInstance();
         public List<String> fieldsToSelect = UtilMisc.toList("workEffortId");
-        public DynamicViewEntity dynamicViewEntity = ModelUtil.createDynamicViewEntity();
+        public DynamicViewEntity dynamicViewEntity = ModelFactory.createDynamicViewEntity();
         public boolean workEffortIdGroupBy = false;
         public boolean includedKeywordSearch = false;
         public Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
@@ -241,7 +241,7 @@ public class WorkEffortSearch {
 
             Debug.logInfo("Finished initial setup of keywords, doingBothAndOr=" + doingBothAndOr + ", andKeywordFixedSet=" + andKeywordFixedSet + "\n keywordFixedOrSetAndList=" + keywordFixedOrSetAndList, module);
 
-            ComplexAlias relevancyComplexAlias = new ComplexAlias("+");
+            ComplexAlias relevancyComplexAlias = ModelFactory.createComplexAlias("+");
             if (andKeywordFixedSet.size() > 0) {
                 // add up the relevancyWeight fields from all keyword member entities for a total to sort by
 
@@ -253,11 +253,11 @@ public class WorkEffortSearch {
 
                     dynamicViewEntity.addMemberEntity(entityAlias, "WorkEffortKeyword");
                     dynamicViewEntity.addAlias(entityAlias, prefix + "Keyword", "keyword", null, null, null, null);
-                    dynamicViewEntity.addViewLink("WEFF", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("workEffortId"));
+                    dynamicViewEntity.addViewLink("WEFF", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("workEffortId"));
                     entityConditionList.add(EntityCondition.makeCondition(prefix + "Keyword", EntityOperator.LIKE, keyword));
 
                     //don't add an alias for this, will be part of a complex alias: dynamicViewEntity.addAlias(entityAlias, prefix + "RelevancyWeight", "relevancyWeight", null, null, null, null);
-                    relevancyComplexAlias.addComplexAliasMember(new ComplexAliasField(entityAlias, "relevancyWeight", null, null));
+                    relevancyComplexAlias.addComplexAliasMember(ModelFactory.createComplexAliasField(entityAlias, "relevancyWeight", null, null));
                 }
 
                 //TODO: find out why Oracle and other dbs don't like the query resulting from this and fix: workEffortIdGroupBy = true;
@@ -275,7 +275,7 @@ public class WorkEffortSearch {
 
                     dynamicViewEntity.addMemberEntity(entityAlias, "WorkEffortKeyword");
                     dynamicViewEntity.addAlias(entityAlias, prefix + "Keyword", "keyword", null, null, null, null);
-                    dynamicViewEntity.addViewLink("WEFF", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("workEffortId"));
+                    dynamicViewEntity.addViewLink("WEFF", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("workEffortId"));
                     List<EntityExpr> keywordOrList = FastList.newInstance();
                     for (String keyword: keywordFixedOrSet) {
                         keywordOrList.add(EntityCondition.makeCondition(prefix + "Keyword", EntityOperator.LIKE, keyword));
@@ -285,7 +285,7 @@ public class WorkEffortSearch {
                     workEffortIdGroupBy = true;
 
                     if (doingBothAndOr) {
-                        relevancyComplexAlias.addComplexAliasMember(new ComplexAliasField(entityAlias, "relevancyWeight", null, "sum"));
+                        relevancyComplexAlias.addComplexAliasMember(ModelFactory.createComplexAliasField(entityAlias, "relevancyWeight", null, "sum"));
                     } else {
                         dynamicViewEntity.addAlias(entityAlias, "totalRelevancy", "relevancyWeight", null, null, null, "sum");
                     }
@@ -532,7 +532,7 @@ public class WorkEffortSearch {
             workEffortSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "WorkEffortAssocTypeId", "workEffortAssocTypeId", null, null, null, null);
             workEffortSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "FromDate", "fromDate", null, null, null, null);
             workEffortSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "ThruDate", "thruDate", null, null, null, null);
-            workEffortSearchContext.dynamicViewEntity.addViewLink("WEFF", entityAlias, Boolean.TRUE, ModelUtil.makeKeyMapList("workEffortId","workEffortIdFrom"));
+            workEffortSearchContext.dynamicViewEntity.addViewLink("WEFF", entityAlias, Boolean.TRUE, ModelFactory.makeKeyMapList("workEffortId","workEffortIdFrom"));
 
             List<EntityExpr> assocConditionFromTo = FastList.newInstance();
             assocConditionFromTo.add(EntityCondition.makeCondition(prefix + "WorkEffortIdTo", EntityOperator.IN, workEffortIdSet));
@@ -553,7 +553,7 @@ public class WorkEffortSearch {
             workEffortSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "WorkEffortAssocTypeId", "workEffortAssocTypeId", null, null, null, null);
             workEffortSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "FromDate", "fromDate", null, null, null, null);
             workEffortSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "ThruDate", "thruDate", null, null, null, null);
-            workEffortSearchContext.dynamicViewEntity.addViewLink("WEFF", entityAlias, Boolean.TRUE, ModelUtil.makeKeyMapList("workEffortId","workEffortIdTo"));
+            workEffortSearchContext.dynamicViewEntity.addViewLink("WEFF", entityAlias, Boolean.TRUE, ModelFactory.makeKeyMapList("workEffortId","workEffortIdTo"));
 
             List<EntityExpr> assocConditionToFrom = FastList.newInstance();
             assocConditionToFrom.add(EntityCondition.makeCondition(prefix + "WorkEffortIdFrom", EntityOperator.IN, workEffortIdSet));
@@ -658,7 +658,7 @@ public class WorkEffortSearch {
 
             workEffortSearchContext.dynamicViewEntity.addMemberEntity(entityAlias, "WorkEffortReview");
             workEffortSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "ReviewText", "reviewText", null, null, null, null);
-            workEffortSearchContext.dynamicViewEntity.addViewLink("WEFF", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("workEffortId"));
+            workEffortSearchContext.dynamicViewEntity.addViewLink("WEFF", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("workEffortId"));
             workEffortSearchContext.entityConditionList.add(EntityCondition.makeCondition(EntityFunction.UPPER_FIELD(prefix + "ReviewText"), EntityOperator.LIKE, EntityFunction.UPPER("%" + reviewTextString + "%")));
             Map<String, String> valueMap = UtilMisc.toMap("constraintName", constraintName, "infoString", this.reviewTextString);
             workEffortSearchContext.workEffortSearchConstraintList.add(workEffortSearchContext.getDelegator().makeValue("WorkEffortSearchConstraint", valueMap));
@@ -717,7 +717,7 @@ public class WorkEffortSearch {
             workEffortSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "RoleTypeId", "roleTypeId", null, null, null, null);
             workEffortSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "FromDate", "fromDate", null, null, null, null);
             workEffortSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "ThruDate", "thruDate", null, null, null, null);
-            workEffortSearchContext.dynamicViewEntity.addViewLink("WEFF", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("workEffortId"));
+            workEffortSearchContext.dynamicViewEntity.addViewLink("WEFF", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("workEffortId"));
 
             workEffortSearchContext.entityConditionList.add(EntityCondition.makeCondition(prefix + "PartyId", EntityOperator.EQUALS, partyId));
             workEffortSearchContext.entityConditionList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(prefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(prefix + "ThruDate", EntityOperator.GREATER_THAN, workEffortSearchContext.nowTimestamp)));
@@ -824,7 +824,7 @@ public class WorkEffortSearch {
             workEffortSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "ProductId", "productId", null, null, null, null);
             workEffortSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "FromDate", "fromDate", null, null, null, null);
             workEffortSearchContext.dynamicViewEntity.addAlias(entityAlias, prefix + "ThruDate", "thruDate", null, null, null, null);
-            workEffortSearchContext.dynamicViewEntity.addViewLink("WEFF", entityAlias, Boolean.FALSE, ModelUtil.makeKeyMapList("workEffortId"));
+            workEffortSearchContext.dynamicViewEntity.addViewLink("WEFF", entityAlias, Boolean.FALSE, ModelFactory.makeKeyMapList("workEffortId"));
 
             workEffortSearchContext.entityConditionList.add(EntityCondition.makeCondition(prefix + "ProductId", EntityOperator.IN, productIdSet));
             workEffortSearchContext.entityConditionList.add(EntityCondition.makeCondition(EntityCondition.makeCondition(prefix + "ThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition(prefix + "ThruDate", EntityOperator.GREATER_THAN, workEffortSearchContext.nowTimestamp)));
