@@ -1859,7 +1859,7 @@
         <value xml:lang="it">Tasse sulle paghe</value>
     </property>
     <property key="InvoiceItemType.description.PAYROL_TAX_FEDERAL">
-        <value xml:lang="en">Federal Witholding</value>
+        <value xml:lang="en">Federal Withholding </value>
         <value xml:lang="it">Tasse federali trattenute</value>
     </property>
     <property key="InvoiceItemType.description.PAYROL_TAX_MD_WITHOL">
