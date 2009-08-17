@@ -1627,7 +1627,7 @@ public class UpsServices {
         GenericValue destCountryGeo = null;
         try {
             destCountryGeo = shipToAddress.getRelatedOne("CountryGeo");
-        } catch ( GenericEntityException e ) {
+        } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(e.getMessage());
         }
@@ -1639,7 +1639,7 @@ public class UpsServices {
         cxt.put("carrierPartyId", context.get("carrierPartyId"));
         cxt.put("shipmentMethodTypeId", context.get("shipmentMethodTypeId"));
         cxt.put("shippingPostalCode", shipToAddress.getString("postalCode"));
-        cxt.put("shippingCountryCode",destCountryGeo.getString("geoCode") );
+        cxt.put("shippingCountryCode",destCountryGeo.getString("geoCode"));
         cxt.put("packageWeights", context.get("packageWeights"));
         cxt.put("shippableItemInfo", context.get("shippableItemInfo"));
         cxt.put("shippableTotal", context.get("shippableTotal"));
@@ -1695,7 +1695,7 @@ public class UpsServices {
             String productId = i.next();
             Map<String, Object> productInfo = getProductItemInfo(shippableItemInfo, productId);
             if (productInfo.get("inShippingBox") != null &&  ((String) productInfo.get("inShippingBox")).equalsIgnoreCase("Y")
-                    && productInfo.get("shippingDepth") !=null && productInfo.get("shippingWidth") !=null && productInfo.get("shippingHeight") !=null ) {
+                    && productInfo.get("shippingDepth") !=null && productInfo.get("shippingWidth") !=null && productInfo.get("shippingHeight") !=null) {
                 Element dimensionsElement = UtilXml.addChildElement(packageElement, "Dimensions", requestDoc);
                 UtilXml.addChildElementValue(dimensionsElement, "Length", productInfo.get("shippingDepth").toString(), requestDoc);
                 UtilXml.addChildElementValue(dimensionsElement, "Width", productInfo.get("shippingWidth").toString(), requestDoc);
@@ -2651,7 +2651,7 @@ public class UpsServices {
             Document acceptAccessRequestDocument = createAccessRequestDocument();
             String acceptAccessRequestString = null;
             try {
-            	acceptAccessRequestString = UtilXml.writeXmlDocument(acceptAccessRequestDocument);
+                acceptAccessRequestString = UtilXml.writeXmlDocument(acceptAccessRequestDocument);
             } catch (IOException e) {
                 String ioeErrMsg = "Error writing the AccessRequest XML Document to a String: " + e.toString();
                 Debug.logError(e, ioeErrMsg, module);

@@ -275,7 +275,7 @@ public class OrderLookupServices {
             dve.addAlias("OISG", "carrierPartyId");
             dve.addViewLink("OH", "OISG", Boolean.FALSE, UtilMisc.toList(ModelFactory.createModelKeyMap("orderId", "orderId")));
 
-            if (UtilValidate.isNotEmpty(carrierPartyId )) {
+            if (UtilValidate.isNotEmpty(carrierPartyId)) {
                 paramList.add("carrierPartyId=" + carrierPartyId);
                 conditions.add(makeExpr("carrierPartyId", carrierPartyId));
             }

@@ -189,7 +189,7 @@ public class UtilMisc {
             throw new IllegalArgumentException("You must pass an even sized array to the toMap method");
         }
         Map<String, V> map = FastMap.newInstance();
-        for (int i = 0; i < data.length; ) {
+        for (int i = 0; i < data.length;) {
             map.put((String) data[i++], (V) data[i++]);
         }
         return map;
@@ -757,7 +757,7 @@ public class UtilMisc {
 
     /** This is meant to be very quick to create and use for small sized maps, perfect for how we usually use UtilMisc.toMap */
     @SuppressWarnings("serial")
-	protected static class SimpleMap<V> implements Map<String, V>, java.io.Serializable {
+    protected static class SimpleMap<V> implements Map<String, V>, java.io.Serializable {
         protected Map<String, V> realMapIfNeeded = null;
 
         String[] names;
