@@ -42,7 +42,7 @@ import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
-import org.ofbiz.security.Security;
+import org.ofbiz.security.AuthorizationManager;
 import org.ofbiz.security.authz.Authorization;
 import org.ofbiz.service.ExecutionContext;
 import org.ofbiz.service.LocalDispatcher;
@@ -191,9 +191,9 @@ public class ControlServlet extends HttpServlet {
         }
         request.setAttribute("authz", authz); // maybe we should also add the value to 'security'
         
-        Security security = (Security) session.getAttribute("security");
+        AuthorizationManager security = (AuthorizationManager) session.getAttribute("security");
         if (security == null) {
-            security = (Security) getServletContext().getAttribute("security");
+            security = (AuthorizationManager) getServletContext().getAttribute("security");
         }
         if (security == null) {
             Debug.logError("[ControlServlet] ERROR: security not found in ServletContext", module);

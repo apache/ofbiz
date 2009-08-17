@@ -18,16 +18,20 @@
  *******************************************************************************/
 package org.ofbiz.service;
 
+import static org.ofbiz.api.authorization.BasicPermissions.Access;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.transaction.Transaction;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.ofbiz.base.config.GenericConfigException;
+import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.api.context.ExecutionContextFactory;
+import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralRuntimeException;
 import org.ofbiz.base.util.UtilMisc;
@@ -42,6 +46,7 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.transaction.DebugXaResource;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
+import org.ofbiz.security.AuthorizationManager;
 import org.ofbiz.security.Security;
 import org.ofbiz.security.SecurityConfigurationException;
 import org.ofbiz.security.SecurityFactory;
@@ -77,7 +82,7 @@ public class ServiceDispatcher {
     protected GenericDelegator delegator = null;
     protected GenericEngineFactory factory = null;
     protected Authorization authz = null;
-    protected Security security = null;
+    protected AuthorizationManager security = null;
     protected Map<String, DispatchContext> localContext = null;
     protected Map<String, List<GenericServiceCallback>> callbacks = null;
     protected JobManager jm = null;
@@ -300,13 +305,17 @@ public class ServiceDispatcher {
 			} catch (Exception e) {
 				throw new GenericServiceException(e);
 			}
-            executionContext.initializeContext(context);
             context.put("executionContext", executionContext);
         }
+        executionContext.initializeContext(context);
+        executionContext.setDelegator(this.delegator);
+        executionContext.setSecurity(this.security);
         executionContext.pushExecutionArtifact(modelService);
         // start the transaction
         boolean beganTrans = false;
         try {
+        	AccessController accessController = executionContext.getAccessController();
+        	accessController.checkPermission(Access);
             //Debug.logInfo("=========================== " + modelService.name + " 1 tx status =" + TransactionUtil.getStatusString() + ", modelService.requireNewTransaction=" + modelService.requireNewTransaction + ", modelService.useTransaction=" + modelService.useTransaction + ", TransactionUtil.isTransactionInPlace()=" + TransactionUtil.isTransactionInPlace(), module);
             if (modelService.useTransaction) {
                 if (TransactionUtil.isTransactionInPlace()) {

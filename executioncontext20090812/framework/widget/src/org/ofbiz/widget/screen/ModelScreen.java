@@ -18,6 +18,8 @@
  *******************************************************************************/
 package org.ofbiz.widget.screen;
 
+import static org.ofbiz.api.authorization.BasicPermissions.*;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.Set;
 
 import javolution.util.FastSet;
 
+import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.api.context.ExecutionArtifact;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
@@ -349,6 +352,8 @@ public class ModelScreen extends ModelWidget implements Serializable, ExecutionA
     public void renderScreenString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws ScreenRenderException {
         ExecutionContext executionContext = (ExecutionContext) context.get("executionContext");
         executionContext.pushExecutionArtifact(this);
+    	AccessController accessController = executionContext.getAccessController();
+    	accessController.checkPermission(View);
         // make sure the "null" object is in there for entity ops
         context.put("null", EntityFactory.NULL_FIELD);
 

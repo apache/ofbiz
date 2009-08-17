@@ -48,6 +48,7 @@ import org.ofbiz.entity.EntityFactory;
 import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.security.Security;
+import org.ofbiz.security.SecurityConfigurationException;
 import org.ofbiz.security.authz.Authorization;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.ExecutionContext;
@@ -207,7 +208,11 @@ public class ScreenRenderer {
         context.put("timeZone", UtilHttp.getTimeZone(request));
 
         ExecutionContext executionContext = (ExecutionContext) request.getAttribute("executionContext");
-        executionContext.initializeContext(context);
+        try {
+			executionContext.initializeContext(context);
+		} catch (Exception e) {
+			Debug.logError(e, module);
+		}
         context.put("executionContext", executionContext);
 
         // ========== setup values that are specific to OFBiz webapps

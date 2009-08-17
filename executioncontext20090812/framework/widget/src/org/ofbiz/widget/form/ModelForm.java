@@ -18,6 +18,8 @@
  *******************************************************************************/
 package org.ofbiz.widget.form;
 
+import static org.ofbiz.api.authorization.BasicPermissions.View;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,6 +36,7 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 import javolution.util.FastSet;
 
+import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.api.context.ExecutionArtifact;
 import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
@@ -784,6 +787,8 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
     public void renderFormString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
         ExecutionContext executionContext = (ExecutionContext) context.get("executionContext");
         executionContext.pushExecutionArtifact(this);
+    	AccessController accessController = executionContext.getAccessController();
+    	accessController.checkPermission(View);
         runFormActions(context);
 
         setWidgetBoundaryComments(context);
