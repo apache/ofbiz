@@ -374,7 +374,7 @@ public class ProductionRunServices {
                                 "fromDate",  workEffortPartyAssignment.getTimestamp("fromDate"),
                                 "statusId",  workEffortPartyAssignment.getString("statusId"),
                                 "userLogin", userLogin
-                        );
+                       );
                         try {
                             resultService = dispatcher.runSync("assignPartyToWorkEffort", partyToWorkEffort);
                         } catch (GenericServiceException e) {
@@ -1133,7 +1133,7 @@ public class ProductionRunServices {
                         if (! priority.equals(routingTask.get("priority"))) {
                             routingTask.set("priority", priority);
                             // update the routingTask List and re-read it to be able to have it sorted with the new value
-                            if ( ! productionRun.store()) {
+                            if (! productionRun.store()) {
                                 Debug.logError("productionRun.store(), in routingTask.priority update, fail for productionRunId ="+productionRunId,module);
                                 return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingProductionRunNotUpdated", locale));
                             }
@@ -1426,7 +1426,7 @@ public class ProductionRunServices {
                         "fromDate",  workEffortPartyAssignment.getTimestamp("fromDate"),
                         "statusId",  workEffortPartyAssignment.getString("statusId"),
                         "userLogin", userLogin
-                );
+               );
                 try {
                     resultService = dispatcher.runSync("assignPartyToWorkEffort", partyToWorkEffort);
                 } catch (GenericServiceException e) {
@@ -2224,34 +2224,34 @@ public class ProductionRunServices {
                 // check if a bom exists
                 List bomList = null;
                 try {
-                	bomList = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", componentProductId, "productAssocTypeId", "MANUF_COMPONENT"));
-                	bomList = EntityUtil.filterByDate(bomList, UtilDateTime.nowTimestamp());
+                    bomList = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", componentProductId, "productAssocTypeId", "MANUF_COMPONENT"));
+                    bomList = EntityUtil.filterByDate(bomList, UtilDateTime.nowTimestamp());
                 } catch (GenericEntityException e) {
-                	return ServiceUtil.returnError("try to get BOM list from productAssoc");
+                    return ServiceUtil.returnError("try to get BOM list from productAssoc");
                 }
                 // if so create a mandatory predecessor to this production run
-                if(UtilValidate.isNotEmpty(bomList)) {
-                	serviceContext.clear();
-                	serviceContext.put("productId", componentProductId);
-                	serviceContext.put("quantity", componentQuantity);
-                	serviceContext.put("startDate", UtilDateTime.nowTimestamp());
-                	serviceContext.put("facilityId", facilityId);
-                	serviceContext.put("userLogin", userLogin);
-                	resultService = null;
-                	try {
-                		resultService = dispatcher.runSync("createProductionRunsForProductBom", serviceContext);
-                		GenericValue workEffortPreDecessor = delegator.makeValue("WorkEffortAssoc", UtilMisc.toMap(
-                				"workEffortIdTo", productionRunId, "workEffortIdFrom", resultService.get("productionRunId"),
-                				"workEffortAssocTypeId", "WORK_EFF_PRECEDENCY", "fromDate", UtilDateTime.nowTimestamp()));
-                		workEffortPreDecessor.create();
-                	} catch (GenericServiceException e) {
-                		return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingProductionRunNotCreated", locale));
-                	} catch (GenericEntityException e) {
-                		return ServiceUtil.returnError("try to create workeffort assoc");
-                	}
-                	
+                if (UtilValidate.isNotEmpty(bomList)) {
+                    serviceContext.clear();
+                    serviceContext.put("productId", componentProductId);
+                    serviceContext.put("quantity", componentQuantity);
+                    serviceContext.put("startDate", UtilDateTime.nowTimestamp());
+                    serviceContext.put("facilityId", facilityId);
+                    serviceContext.put("userLogin", userLogin);
+                    resultService = null;
+                    try {
+                        resultService = dispatcher.runSync("createProductionRunsForProductBom", serviceContext);
+                        GenericValue workEffortPreDecessor = delegator.makeValue("WorkEffortAssoc", UtilMisc.toMap(
+                                "workEffortIdTo", productionRunId, "workEffortIdFrom", resultService.get("productionRunId"),
+                                "workEffortAssocTypeId", "WORK_EFF_PRECEDENCY", "fromDate", UtilDateTime.nowTimestamp()));
+                        workEffortPreDecessor.create();
+                    } catch (GenericServiceException e) {
+                        return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingProductionRunNotCreated", locale));
+                    } catch (GenericEntityException e) {
+                        return ServiceUtil.returnError("try to create workeffort assoc");
+                    }
+                    
                 } else {
-                	components.put(componentProductId, componentQuantity);
+                    components.put(componentProductId, componentQuantity);
                 }
 
                 //  create production run notes from comments

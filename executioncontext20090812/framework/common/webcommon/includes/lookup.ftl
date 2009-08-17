@@ -31,6 +31,17 @@ under the License.
     <script language="javascript" src="<@ofbizContentUrl>/images/fieldlookup.js</@ofbizContentUrl>" type="text/javascript"></script>
     <script language="javascript" src="<@ofbizContentUrl>/images/selectall.js</@ofbizContentUrl>" type="text/javascript"></script>
     <script language="javascript" src="<@ofbizContentUrl>/images/calendar_date_select.js</@ofbizContentUrl>" type="text/javascript"></script>
+    <#if layoutSettings.javaScripts?has_content>
+        <#--layoutSettings.javaScripts is a list of java scripts. -->
+        <#-- use a Set to make sure each javascript is declared only once, but iterate the list to maintain the correct order -->
+        <#assign javaScriptsSet = Static["org.ofbiz.base.util.UtilMisc"].toSet(layoutSettings.javaScripts)/>
+        <#list layoutSettings.javaScripts as javaScript>
+            <#if javaScriptsSet.contains(javaScript)>
+                <#assign nothing = javaScriptsSet.remove(javaScript)/>
+                <script src="<@ofbizContentUrl>${StringUtil.wrapString(javaScript)}</@ofbizContentUrl>" type="text/javascript"></script>
+            </#if>
+        </#list>
+    </#if>
     <#if layoutSettings.styleSheets?has_content>
         <#list layoutSettings.styleSheets as styleSheet>
             <link rel="stylesheet" href="<@ofbizContentUrl>${styleSheet}</@ofbizContentUrl>" type="text/css"/>
@@ -86,15 +97,15 @@ under the License.
             var thisForm = obj_caller.target.form;
             var evalString = "";
 
-    		if (arguments.length > 2 ) {
-        		for(var i=1; i < arguments.length; i=i+2) {
+            if (arguments.length > 2 ) {
+                for(var i=1; i < arguments.length; i=i+2) {
                     evalString = "setSourceColor(thisForm." + arguments[i] + ")";
                     eval(evalString);
-        			evalString = "thisForm." + arguments[i] + ".value='" + arguments[i+1] + "'";
-        			eval(evalString);
-        		}
-    		}
-    		window.close();
+                    evalString = "thisForm." + arguments[i] + ".value='" + arguments[i+1] + "'";
+                    eval(evalString);
+                }
+            }
+            window.close();
          }
     </script>
 </head>

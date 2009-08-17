@@ -21,6 +21,7 @@ under the License.
 <site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
     <include location="component://common/webcommon/WEB-INF/common-controller.xml"/>
+    <include location="component://commonext/webapp/WEB-INF/controller.xml"/>
     <description>Accounting Manager Module Site Configuration File</description>
     <owner>Copyright 2001-2009 The Apache Software Foundation</owner>
 
@@ -2169,6 +2170,11 @@ under the License.
     <request-map uri="SalesInvoiceByProductCategorySummary"><security https="true" auth="true"/><response name="success" type="view" value="SalesInvoiceByProductCategorySummary"/></request-map>
     <request-map uri="TrialBalance"><security https="true" auth="true"/><response name="success" type="view" value="TrialBalance"/></request-map>
     <request-map uri="IncomeStatement"><security https="true" auth="true"/><response name="success" type="view" value="IncomeStatement"/></request-map>
+    <request-map uri="ComparativeIncomeStatement">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ComparativeIncomeStatement"/>
+        <response name="error" type="view" value="ComparativeIncomeStatement"/>
+    </request-map>
     <request-map uri="prepareIncomeStatement">
         <security https="true" auth="true"/>
         <event type="service" invoke="prepareIncomeStatement"/>
@@ -2313,6 +2319,17 @@ under the License.
     <request-map uri="TrialBalanceSearchResultsCsv.csv">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="TrialBalanceSearchResultsCsv"/>
+    </request-map>
+
+    <request-map uri="ComparativeIncomeStatements.csv">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ComparativeIncomeStatementsCsv"/>
+        <response name="error" type="view" value="ComparativeIncomeStatement"/>
+    </request-map>
+    <request-map uri="ComparativeIncomeStatements.pdf">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ComparativeIncomeStatementsPdf"/>
+        <response name="error" type="view" value="ComparativeIncomeStatement"/>
     </request-map>
 
     <!--Global GL Settings -->
@@ -2665,6 +2682,7 @@ under the License.
     <view-map name="SalesInvoiceByProductCategorySummary" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#SalesInvoiceByProductCategorySummary"/>
     <view-map name="TrialBalance" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#TrialBalance"/>
     <view-map name="IncomeStatement" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#IncomeStatement"/>
+    <view-map name="ComparativeIncomeStatement" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#ComparativeIncomeStatement"/>
     <view-map name="BalanceSheet" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#BalanceSheet"/>
     <view-map name="ComparativeBalanceSheet" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#ComparativeBalanceSheet"/>
     <view-map name="TransactionTotals" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#TransactionTotals"/>
@@ -2717,6 +2735,7 @@ under the License.
     <view-map name="CostCenters" type="screen" page="component://accounting/widget/GlobalGlAccountsScreens.xml#CostCenters"/>
     <view-map name="CostCenterReport" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#CostCenterReport"/>
     <view-map name="CostCentersReportPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#CostCentersReportPdf" content-type="application/pdf" encoding="none"/>
-    
+    <view-map name="ComparativeIncomeStatementsPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#ComparativeIncomeStatementsPdf" content-type="application/pdf" encoding="none"/>
+    <view-map name="ComparativeIncomeStatementsCsv" type="screencsv" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#ComparativeIncomeStatementsCsv" content-type="text/csv" encoding="none"/>
     <!-- end of view mappings -->
 </site-conf>

@@ -694,7 +694,7 @@ public class PaymentGatewayServices {
             else {
                 orderId =  (String) context.get("orderId");
             }
-        } catch ( GenericEntityException e ) {
+        } catch (GenericEntityException e) {
             String errMsg = "Problem getting OrderPaymentPreference for orderPaymentPreferenceId " + orderPaymentPreferenceId;
             Debug.logWarning(e, errMsg, module);
             return ServiceUtil.returnError(errMsg);
@@ -739,7 +739,7 @@ public class PaymentGatewayServices {
             Map<String, Object> releaseResult = null;
             try {
                 releaseResult = dispatcher.runSync("releaseOrderPaymentPreference", releaseContext);
-            } catch ( GenericServiceException e ) {
+            } catch (GenericServiceException e) {
                 String errMsg = "Problem calling releaseOrderPaymentPreference service for orderPaymentPreferenceId" + paymentPref.getString("orderPaymentPreferenceId");
                 Debug.logError(e, errMsg, module);
                 return ServiceUtil.returnError(errMsg);
@@ -854,7 +854,7 @@ public class PaymentGatewayServices {
         GenericValue paymentPref = null;
         try {
             paymentPref = delegator.findByPrimaryKey("OrderPaymentPreference", UtilMisc.toMap("orderPaymentPreferenceId", orderPaymentPreferenceId));
-        } catch ( GenericEntityException e ) {
+        } catch (GenericEntityException e) {
             String errMsg = "Problem getting OrderPaymentPreference for orderPaymentPreferenceId " + orderPaymentPreferenceId;
             Debug.logWarning(e, errMsg, module);
             return ServiceUtil.returnError(errMsg);
@@ -870,7 +870,7 @@ public class PaymentGatewayServices {
         String orderId = paymentPref.getString("orderId");
         try {
             orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
-        } catch ( GenericEntityException e ) {
+        } catch (GenericEntityException e) {
             String errMsg = "Problem getting OrderHeader for orderId " + orderId;
             Debug.logWarning(e, errMsg, module);
             return ServiceUtil.returnError(errMsg);
@@ -2206,7 +2206,7 @@ public class PaymentGatewayServices {
                 } catch (GenericEntityException e) {
                     String message = "Failed to process capture result:  Could not find invoice ["+invoiceId+"] due to entity error: " + e.getMessage();
                     Debug.logError(e, message, module);
-                    return ServiceUtil.returnError(message );
+                    return ServiceUtil.returnError(message);
                 }
             }
 
@@ -2986,7 +2986,7 @@ public class PaymentGatewayServices {
         GenericValue paymentPref = null;
         try {
             paymentPref = delegator.findOne("OrderPaymentPreference", UtilMisc.toMap("orderPaymentPreferenceId", orderPaymentPreferenceId), false);
-        } catch ( GenericEntityException e ) {
+        } catch (GenericEntityException e) {
             String errMsg = "Problem getting OrderPaymentPreference for orderPaymentPreferenceId " + orderPaymentPreferenceId;
             Debug.logWarning(e, errMsg, module);
             return ServiceUtil.returnError(errMsg);
@@ -3002,7 +3002,7 @@ public class PaymentGatewayServices {
         String orderId = paymentPref.getString("orderId");
         try {
             orderHeader = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
-        } catch ( GenericEntityException e ) {
+        } catch (GenericEntityException e) {
             String errMsg = "Problem getting OrderHeader for orderId " + orderId;
             Debug.logWarning(e, errMsg, module);
             return ServiceUtil.returnError(errMsg);

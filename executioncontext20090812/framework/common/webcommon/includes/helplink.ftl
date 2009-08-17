@@ -18,17 +18,22 @@ under the License.
 -->
 
   <#assign helpTopic = webSiteId + "_" + requestAttributes._CURRENT_VIEW_ />
-  <#assign helpUrlTopic = helpUrlsMap["HelpNotFound"]/>
   <#assign helpUrlPrefix = "" />
   <#assign helpUrlSuffix = "" />
+
+  <#if Static["org.ofbiz.base.component.ComponentConfig"].componentExists("content")>
+    <#if (helpTopic?length > 20)> 
+     <#assign helpTopic = helpTopic?substring(0,20)>
+    </#if>
+    <#assign helpContent = delegator.findByAnd("Content", {"contentId" : helpTopic})>
+    <#if !helpContent?has_content>
+      <#assign helpContent = delegator.findByAnd("Content", {"contentId" : webSiteId})>
+    </#if>
+  </#if>
 
 <#-- uncomment this to show the current screen help topic key (this is usefull to cut and paste in the help link resources files
 ${helpTopic}
 -->
-  <#if Static["org.ofbiz.base.component.ComponentConfig"].componentExists("content")>
-    <#assign helpContent = delegator.findByAnd("Content", {"contentId" : helpTopic})?if_exists>
-  </#if>
-
   <#if helpUrlsMap["Prefix"] != "Prefix">
     <#assign helpUrlPrefix = helpUrlsMap["Prefix"] />
   </#if>
@@ -37,4 +42,6 @@ ${helpTopic}
   </#if>
   <#if helpUrlsMap[helpTopic] != helpTopic >
     <#assign helpUrlTopic = helpUrlsMap[helpTopic] />
+  <#else>
+    <#assign helpTopic = "navigateHelp"/>
   </#if>

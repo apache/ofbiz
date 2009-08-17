@@ -879,7 +879,7 @@ public class ModelFormField implements ExecutionArtifact {
      * @return
      */
     public boolean shouldBeRed(Map<String, Object> context) {
-        // red-when ( never | before-now | after-now | by-name ) "by-name"
+        // red-when (never | before-now | after-now | by-name) "by-name"
 
         String redCondition = this.redWhen;
 
