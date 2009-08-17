@@ -36,6 +36,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.api.authorization.AccessController;
+import static org.ofbiz.api.authorization.BasicPermissions.*;
 import org.ofbiz.api.context.GenericExecutionArtifact;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralRuntimeException;
@@ -367,8 +369,10 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
     public GenericValue create(GenericValue value, boolean doCacheClear) throws GenericEntityException {
     	this.executionContext.pushExecutionArtifact(value);
+    	AccessController accessController = this.executionContext.getAccessController();
         boolean beganTransaction = false;
         try {
+        	accessController.checkPermission(Create);
             if (alwaysUseTransaction) {
                 beganTransaction = TransactionUtil.begin();
             }
@@ -519,6 +523,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
     public GenericValue createOrStore(GenericValue value, boolean doCacheClear) throws GenericEntityException {
     	this.executionContext.pushExecutionArtifact(value);
+    	AccessController accessController = this.executionContext.getAccessController();
         boolean beganTransaction = false;
         try {
             if (alwaysUseTransaction) {
@@ -527,8 +532,10 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
             GenericValue checkValue = this.findOne(value.getEntityName(), value.getPrimaryKey(), false);
             if (checkValue != null) {
+            	accessController.checkPermission(Update);
                 this.store(value, doCacheClear);
             } else {
+            	accessController.checkPermission(Create);
                 this.create(value, doCacheClear);
             }
             if (value.lockEnabled()) {
@@ -2099,6 +2106,8 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
         try {
             for (GenericEntity value : dummyPKs) {
             	this.executionContext.pushExecutionArtifact(value);
+            	AccessController accessController = this.executionContext.getAccessController();
+            	accessController.checkPermission(Delete);
                 if (value.containsPrimaryKey()) {
                     numRemoved += this.removeByPrimaryKey(value.getPrimaryKey(), doCacheClear);
                 } else {
@@ -2153,8 +2162,10 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
     public int removeByCondition(String entityName, EntityCondition condition, boolean doCacheClear) throws GenericEntityException {
     	this.executionContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.removeByCondition", entityName));
+    	AccessController accessController = this.executionContext.getAccessController();
         boolean beganTransaction = false;
         try {
+        	accessController.checkPermission(Delete);
             if (alwaysUseTransaction) {
                 beganTransaction = TransactionUtil.begin();
             }
@@ -2206,8 +2217,10 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
     public int removeByPrimaryKey(GenericPK primaryKey, boolean doCacheClear) throws GenericEntityException {
     	this.executionContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.removeByPrimaryKey", primaryKey.getEntityName()));
+    	AccessController accessController = this.executionContext.getAccessController();
         boolean beganTransaction = false;
         try {
+        	accessController.checkPermission(Delete);
             if (alwaysUseTransaction) {
                 beganTransaction = TransactionUtil.begin();
             }
@@ -2291,10 +2304,12 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
     public int removeValue(GenericValue value, boolean doCacheClear) throws GenericEntityException {
     	this.executionContext.pushExecutionArtifact(value);
+    	AccessController accessController = this.executionContext.getAccessController();
         // NOTE: this does not call the GenericDelegator.removeByPrimaryKey
         // method because it has more information to pass to the ECA rule hander
         boolean beganTransaction = false;
         try {
+        	accessController.checkPermission(Delete);
             if (alwaysUseTransaction) {
                 beganTransaction = TransactionUtil.begin();
             }
@@ -2517,8 +2532,10 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
     public int store(GenericValue value, boolean doCacheClear) throws GenericEntityException {
     	this.executionContext.pushExecutionArtifact(value);
+    	AccessController accessController = this.executionContext.getAccessController();
         boolean beganTransaction = false;
         try {
+        	accessController.checkPermission(Update);
             if (alwaysUseTransaction) {
                 beganTransaction = TransactionUtil.begin();
             }
@@ -2679,8 +2696,10 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
     public int storeByCondition(String entityName, Map<String, ? extends Object> fieldsToSet, EntityCondition condition, boolean doCacheClear) throws GenericEntityException {
     	this.executionContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.storeByCondition", entityName));
+    	AccessController accessController = this.executionContext.getAccessController();
         boolean beganTransaction = false;
         try {
+        	accessController.checkPermission(Update);
             if (alwaysUseTransaction) {
                 beganTransaction = TransactionUtil.begin();
             }
@@ -2718,6 +2737,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
             // after rolling back, rethrow the exception
             throw e;
         } finally {
+        	this.executionContext.popExecutionArtifact();
             // only commit the transaction if we started one... this will throw
             // an exception if it fails
             TransactionUtil.commit(beganTransaction);

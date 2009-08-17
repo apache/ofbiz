@@ -37,7 +37,7 @@ import org.w3c.dom.Element;
 public class SecurityFactory {
 
     public static final String module = SecurityFactory.class.getName();
-    public static final String DEFAULT_SECURITY = "org.ofbiz.security.OFBizSecurity";
+    public static final String DEFAULT_SECURITY = "org.ofbiz.security.AuthorizationManagerImpl";
 
     private static String securityName = null;
     private static Element rootElement = null;
@@ -50,8 +50,8 @@ public class SecurityFactory {
      * @param delegator the generic delegator
      * @return instance of security implementation (default: OFBizSecurity)
      */
-    public static Security getInstance(GenericDelegator delegator) throws SecurityConfigurationException {
-        Security security = null;
+    public static AuthorizationManager getInstance(GenericDelegator delegator) throws SecurityConfigurationException {
+    	AuthorizationManager security = null;
 
         // Make securityName a singleton
         if (securityName == null) {
@@ -65,7 +65,7 @@ public class SecurityFactory {
             try {
                 ClassLoader loader = Thread.currentThread().getContextClassLoader();
                 Class<?> c = loader.loadClass(getSecurityClass(securityName));
-                security = (Security) c.newInstance();
+                security = (AuthorizationManager) c.newInstance();
                 security.setDelegator(delegator);
             } catch (ClassNotFoundException cnf) {
                 throw new SecurityConfigurationException("Cannot load security implementation class", cnf);

@@ -22,9 +22,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.ofbiz.api.authorization.AccessController;
+import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.security.Security;
+import org.ofbiz.security.AuthorizationManager;
+import org.ofbiz.security.SecurityFactory;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ExecutionContext;
 
@@ -33,10 +36,13 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
 
     protected GenericDelegator delegator = null;
     protected LocalDispatcher dispatcher = null;
-    protected Security security = null;
+    protected AuthorizationManager security = null;
     protected GenericValue userLogin = null;
 
 	public GenericDelegator getDelegator() {
+		if (this.delegator == null) {
+			this.delegator = DelegatorFactory.getGenericDelegator("default");
+		}
 		return this.delegator;
 	}
 
@@ -44,7 +50,13 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
 		return this.dispatcher;
 	}
 
-	public Security getSecurity() {
+	public AuthorizationManager getSecurity() {
+		if (this.security == null) {
+            try {
+				this.security = SecurityFactory.getInstance(this.getDelegator());
+			} catch (Exception e) {
+			}
+		}
 		return this.security;
 	}
 
@@ -53,7 +65,10 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
 	}
 
 	public void initializeContext(Map<String, ? extends Object> params) {
+		this.setDelegator((GenericDelegator) params.get("delegator"));
+		this.setDispatcher((LocalDispatcher) params.get("dispatcher"));
 		this.setLocale((Locale) params.get("locale")); 
+		this.setSecurity((AuthorizationManager) params.get("security"));
 		this.setTimeZone((TimeZone) params.get("timeZone"));
 		this.setUserLogin((GenericValue) params.get("userLogin"));
 	}
@@ -71,7 +86,7 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
 		}
 	}
 
-	public void setSecurity(Security security) {
+	public void setSecurity(AuthorizationManager security) {
 		if (security != null) {
 			this.security = security;
 		}
@@ -81,5 +96,9 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
 		if (userLogin != null) {
 			this.userLogin = userLogin;
 		}
+	}
+
+	public AccessController getAccessController() {
+		return this.getSecurity().getAccessController(this);
 	}
 }

@@ -20,6 +20,7 @@ package org.ofbiz.service;
 
 import java.util.Map;
 
+import org.ofbiz.security.SecurityConfigurationException;
 import org.ofbiz.service.LocalDispatcher;
 
 /**
@@ -38,6 +39,7 @@ public interface ExecutionContext extends org.ofbiz.security.ExecutionContext {
 	 * <code>params</code>.
 	 * 
 	 * @param params
+	 * @throws SecurityConfigurationException 
 	 */
 	public void initializeContext(Map<String, ? extends Object> params);
 

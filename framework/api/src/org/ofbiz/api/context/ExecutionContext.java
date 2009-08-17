@@ -21,8 +21,17 @@ package org.ofbiz.api.context;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.ofbiz.api.authorization.AccessController;
+
 /** ExecutionContext interface. */
 public interface ExecutionContext {
+
+    /** Returns an <code>AccessController</code> instance for this
+     * user login and execution path combination.
+     * 
+     * @return An <code>AccessController</code> instance
+     */
+    public AccessController getAccessController();
 
     /** Returns the currency unit of measure.
      * 

@@ -29,7 +29,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilProperties;
 
 /** Implementation of the ExecutionContext interface. */
-public class ExecutionContextImpl implements ExecutionContext {
+public abstract class ExecutionContextImpl implements ExecutionContext {
 
     public static final String module = ExecutionContextImpl.class.getName();
 

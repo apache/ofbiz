@@ -24,15 +24,15 @@ package org.ofbiz.security;
  */
 public interface ExecutionContext extends org.ofbiz.entity.ExecutionContext {
 
-	/** Returns the current <code>Security</code> instance.
+	/** Returns the current <code>AuthorizationManager</code> instance.
 	 * 
-	 * @return The current <code>Security</code> instance
+	 * @return The current <code>AuthorizationManager</code> instance
 	 */
-	public Security getSecurity();
+	public AuthorizationManager getSecurity();
 
-	/** Sets the current <code>Security</code> instance.
+	/** Sets the current <code>AuthorizationManager</code> instance.
 	 * 
-	 * @param security The new <code>Security</code> instance
+	 * @param security The new <code>AuthorizationManager</code> instance
 	 */
-	public void setSecurity(Security security);
+	public void setSecurity(AuthorizationManager security);
 }
