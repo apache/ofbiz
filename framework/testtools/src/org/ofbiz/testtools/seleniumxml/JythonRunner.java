@@ -38,20 +38,20 @@ import org.python.util.PythonInterpreter;
 
 public class JythonRunner {
 
-	private String urlName;
-	private SeleniumXml parent;
-	private SeleniumXml currentTest;
-	
-	private int currentRowIndx;
-	
-	
-	public JythonRunner(String urlName, SeleniumXml parent) {
-		super();
-		this.urlName = urlName;
-		this.parent = parent;
-	}
+    private String urlName;
+    private SeleniumXml parent;
+    private SeleniumXml currentTest;
+    
+    private int currentRowIndx;
+    
+    
+    public JythonRunner(String urlName, SeleniumXml parent) {
+        super();
+        this.urlName = urlName;
+        this.parent = parent;
+    }
 
-	public void runTest() {
+    public void runTest() {
 
         PythonInterpreter interp = InitJython.getInterpreter();
         
@@ -61,13 +61,13 @@ public class JythonRunner {
             String scriptText = TestUtils.readUrlText(this.urlName);
             interp.set("context", map);
             interp.exec(scriptText);
-        } catch(MalformedURLException e) {
+        } catch (MalformedURLException e) {
             System.out.println("Scriptrunner, runTest, MalformedURLException error: " + e.getMessage());
-        } catch(IOException e) {
+        } catch (IOException e) {
             System.out.println("Scriptrunner, runTest, IOException error: " + e.getMessage());
         }
         
-		
-	}
+        
+    }
     
 }

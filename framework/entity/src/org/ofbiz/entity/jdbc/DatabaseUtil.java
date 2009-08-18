@@ -46,7 +46,6 @@ import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.config.DatasourceInfo;
 import org.ofbiz.entity.config.EntityConfigUtil;
 import org.ofbiz.entity.model.ModelEntity;
-import org.ofbiz.entity.model.ModelEntityImpl;
 import org.ofbiz.entity.model.ModelField;
 import org.ofbiz.entity.model.ModelFieldType;
 import org.ofbiz.entity.model.ModelFieldTypeReader;
@@ -699,7 +698,7 @@ public class DatabaseUtil {
         // iterate over the table names is alphabetical order
         for (String tableName: new TreeSet<String>(colInfo.keySet())) {
             Map<String, ColumnCheckInfo> colMap = colInfo.get(tableName);
-            ModelEntity newEntity = new ModelEntityImpl(tableName, colMap, modelFieldTypeReader, isCaseSensitive);
+            ModelEntity newEntity = new ModelEntity(tableName, colMap, modelFieldTypeReader, isCaseSensitive);
             newEntList.add(newEntity);
         }
 
@@ -748,7 +747,7 @@ public class DatabaseUtil {
         // iterate over the table names is alphabetical order
         for (String tableName: new TreeSet<String>(colInfo.keySet())) {
             Map<String, ColumnCheckInfo> colMap = colInfo.get(tableName);
-            ModelEntity newEntity = new ModelEntityImpl(tableName, colMap, modelFieldTypeReader, isCaseSensitive);
+            ModelEntity newEntity = new ModelEntity(tableName, colMap, modelFieldTypeReader, isCaseSensitive);
             root.appendChild(newEntity.toXmlElement(document, "org.ofbiz.ext." + packageName));
         }
 

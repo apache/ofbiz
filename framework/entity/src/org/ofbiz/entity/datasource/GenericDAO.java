@@ -231,7 +231,7 @@ public class GenericDAO {
         }
 
         if (modelEntity.lock()) {
-            GenericEntity entityCopy = EntityFactory.createGenericEntity(entity);
+            GenericEntity entityCopy = GenericEntity.createGenericEntity(entity);
 
             select(entityCopy, sqlP);
             Object stampField = entity.get(ModelEntity.STAMP_FIELD);

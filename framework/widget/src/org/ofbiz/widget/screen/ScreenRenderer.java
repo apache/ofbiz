@@ -44,8 +44,8 @@ import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.collections.MapStack;
-import org.ofbiz.entity.EntityFactory;
 import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.security.Security;
 import org.ofbiz.security.SecurityConfigurationException;
@@ -153,7 +153,7 @@ public class ScreenRenderer {
         context.put("globalContext", context.standAloneStack());
 
         // make sure the "nullField" object is in there for entity ops; note this is nullField and not null because as null causes problems in FreeMarker and such...
-        context.put("nullField", EntityFactory.NULL_FIELD);
+        context.put("nullField", GenericEntity.NULL_FIELD);
 
         context.put("parameters", parameters);
         context.put("delegator", delegator);

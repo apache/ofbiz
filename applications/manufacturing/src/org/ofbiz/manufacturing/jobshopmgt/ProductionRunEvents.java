@@ -33,7 +33,6 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.entity.EntityFactory;
 import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericPK;
 import org.ofbiz.service.GenericServiceException;
@@ -76,7 +75,7 @@ public class ProductionRunEvents {
                 request.setAttribute("_ERROR_MESSAGE_", errMsg);
                 return "error";
             }
-            GenericPK key = EntityFactory.createGenericPK(delegator.getModelEntity("WorkEffortGoodStandard"), UtilMisc.toMap("workEffortId", (String)componentRow.get("productionRunTaskId"),
+            GenericPK key = GenericPK.create(delegator.getModelEntity("WorkEffortGoodStandard"), UtilMisc.toMap("workEffortId", (String)componentRow.get("productionRunTaskId"),
                                                                                                                 "productId", (String)componentRow.get("productId"),
                                                                                                                 "fromDate", fromDate,
                                                                                                                 "workEffortGoodStdTypeId", "PRUNT_PROD_NEEDED"));

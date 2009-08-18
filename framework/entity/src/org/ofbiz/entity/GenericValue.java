@@ -44,7 +44,7 @@ import org.ofbiz.entity.util.EntityUtil;
  *
  */
 @SuppressWarnings("serial")
-public class GenericValue extends GenericEntityImpl implements Reusable {
+public class GenericValue extends GenericEntity implements Reusable {
 
     public static final GenericValue NULL_VALUE = new NullGenericValue();
 
@@ -147,7 +147,7 @@ public class GenericValue extends GenericEntityImpl implements Reusable {
 
     public Object getOriginalDbValue(String name) {
         if (getModelEntity().getField(name) == null) {
-            throw new IllegalArgumentException("[EntityFactory.get] \"" + name + "\" is not a field of " + entityName);
+            throw new IllegalArgumentException("[GenericEntity.get] \"" + name + "\" is not a field of " + entityName);
         }
         if (originalDbValues == null) return null;
         return originalDbValues.get(name);
@@ -500,7 +500,7 @@ public class GenericValue extends GenericEntityImpl implements Reusable {
         return newEntity;
     }
 
-    protected static class NullGenericValue extends GenericValue implements EntityFactory.NULL {
+    protected static class NullGenericValue extends GenericValue implements NULL {
         @Override
         public String getEntityName() {
             return "[null-entity-value]";

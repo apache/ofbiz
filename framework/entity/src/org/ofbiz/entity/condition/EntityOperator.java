@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.ofbiz.entity.EntityFactory;
 import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericModelException;
@@ -83,7 +82,7 @@ public abstract class EntityOperator<T> extends EntityConditionBase {
         public boolean compare(Comparable lhs, Object rhs) { return EntityComparisonOperator.compareEqual(lhs, rhs); }
         @Override
         protected void makeRHSWhereString(ModelEntity entity, List<EntityConditionParam> entityConditionParams, StringBuilder sb, ModelField field, Object rhs, DatasourceInfo datasourceInfo) {
-            if (rhs == null || rhs == EntityFactory.NULL_FIELD) {
+            if (rhs == null || rhs == GenericEntity.NULL_FIELD) {
                 //Debug.logInfo("makeRHSWhereString: field IS NULL: " + field.getName(), module);
                 sb.append(" IS NULL");
             } else {
@@ -98,7 +97,7 @@ public abstract class EntityOperator<T> extends EntityConditionBase {
         public boolean compare(Comparable lhs, Object rhs) { return EntityComparisonOperator.compareNotEqual(lhs, rhs); }
         @Override
         protected void makeRHSWhereString(ModelEntity entity, List<EntityConditionParam> entityConditionParams, StringBuilder sb, ModelField field, Object rhs, DatasourceInfo datasourceInfo) {
-            if (rhs == null || rhs == EntityFactory.NULL_FIELD) {
+            if (rhs == null || rhs == GenericEntity.NULL_FIELD) {
                 sb.append(" IS NOT NULL");
             } else {
                 super.makeRHSWhereString(entity, entityConditionParams, sb, field, rhs, datasourceInfo);

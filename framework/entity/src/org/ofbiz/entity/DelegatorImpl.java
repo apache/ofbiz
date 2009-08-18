@@ -1713,7 +1713,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
             fields.put(keyMap.getRelFieldName(), value.get(keyMap.getFieldName()));
         }
 
-        GenericPK dummyPK = EntityFactory.createGenericPK(relatedEntity, fields);
+        GenericPK dummyPK = GenericPK.create(relatedEntity, fields);
         dummyPK.setDelegator(this);
         return dummyPK;
     }
@@ -1892,7 +1892,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
         if (entity == null) {
             throw new IllegalArgumentException("[GenericDelegator.makePK] could not find entity for entityName: " + entityName);
         }
-        GenericPK pk = EntityFactory.createGenericPK(entity, fields);
+        GenericPK pk = GenericPK.create(entity, fields);
 
         pk.setDelegator(this);
         return pk;
@@ -1907,7 +1907,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
         if (entity == null) {
             throw new IllegalArgumentException("[GenericDelegator.makePKSingle] could not find entity for entityName: " + entityName);
         }
-        GenericPK pk = EntityFactory.createGenericPK(entity, singlePkValue);
+        GenericPK pk = GenericPK.create(entity, singlePkValue);
 
         pk.setDelegator(this);
         return pk;
@@ -2246,7 +2246,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
             GenericValue removedEntity = null;
             if (testMode) {
-                removedEntity = this.findOne(primaryKey.getEntityName(), primaryKey, false);
+                removedEntity = this.findOne(primaryKey.entityName, primaryKey, false);
             }
             int num = helper.removeByPrimaryKey(primaryKey);
             this.saveEntitySyncRemoveInfo(primaryKey);

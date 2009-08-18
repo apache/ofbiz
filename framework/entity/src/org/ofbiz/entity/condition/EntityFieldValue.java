@@ -29,8 +29,8 @@ import javolution.util.FastList;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.EntityFactory;
 import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericModelException;
 import org.ofbiz.entity.config.DatasourceInfo;
 import org.ofbiz.entity.model.ModelEntity;
@@ -184,7 +184,7 @@ public class EntityFieldValue extends EntityConditionValue implements Reusable {
         if (map == null) {
             return null;
         }
-        if (map instanceof EntityFactory.NULL) {
+        if (map instanceof GenericEntity.NULL) {
             return null;
         } else {
             return map.get(fieldName);

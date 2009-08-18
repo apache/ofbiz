@@ -46,7 +46,6 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.ObjectType;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.EntityFactory;
 import org.ofbiz.entity.GenericDataSourceException;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
@@ -257,7 +256,7 @@ public class SqlJdbcUtil {
             }
 
             Object fieldValue = fields.get(name);
-            if (fieldValue != null && fieldValue != EntityFactory.NULL_FIELD) {
+            if (fieldValue != null && fieldValue != GenericEntity.NULL_FIELD) {
                 returnString.append('=');
                 addValue(returnString, modelField, fieldValue, entityConditionParams);
             } else {
@@ -720,8 +719,8 @@ public class SqlJdbcUtil {
                     entityName + "." + modelField.getName() + ".");
         }
 
-        // if the value is the EntityFactory.NullField, treat as null
-        if (fieldValue == EntityFactory.NULL_FIELD) {
+        // if the value is the GenericEntity.NullField, treat as null
+        if (fieldValue == GenericEntity.NULL_FIELD) {
             fieldValue = null;
         }
 

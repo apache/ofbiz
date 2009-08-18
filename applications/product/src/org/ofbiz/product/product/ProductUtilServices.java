@@ -42,7 +42,7 @@ import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.DynamicViewEntity;
 import org.ofbiz.entity.model.ModelEntity;
-import org.ofbiz.entity.model.ModelFactory;
+import org.ofbiz.entity.model.ModelKeyMap;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.service.DispatchContext;
@@ -175,7 +175,7 @@ public class ProductUtilServices {
         String errMsg = null;
 
         try {
-            DynamicViewEntity dve = ModelFactory.createDynamicViewEntity();
+            DynamicViewEntity dve = new DynamicViewEntity();
             dve.addMemberEntity("PCM", "ProductCategoryMember");
             dve.addAlias("PCM", "productId", null, null, null, Boolean.TRUE, null);
             dve.addAlias("PCM", "productCategoryId", null, null, null, Boolean.TRUE, null);
@@ -227,12 +227,12 @@ public class ProductUtilServices {
 
         Debug.logInfo("Starting makeStandAloneFromSingleVariantVirtuals", module);
 
-        DynamicViewEntity dve = ModelFactory.createDynamicViewEntity();
+        DynamicViewEntity dve = new DynamicViewEntity();
         dve.addMemberEntity("PVIRT", "Product");
         dve.addMemberEntity("PVA", "ProductAssoc");
         //dve.addMemberEntity("PVAR", "Product");
-        dve.addViewLink("PVIRT", "PVA", Boolean.FALSE, UtilMisc.toList(ModelFactory.createModelKeyMap("productId", "productId")));
-        //dve.addViewLink("PVA", "PVAR", Boolean.FALSE, UtilMisc.toList(ModelFactory.createModelKeyMap("productIdTo", "productId")));
+        dve.addViewLink("PVIRT", "PVA", Boolean.FALSE, UtilMisc.toList(new ModelKeyMap("productId", "productId")));
+        //dve.addViewLink("PVA", "PVAR", Boolean.FALSE, UtilMisc.toList(new ModelKeyMap("productIdTo", "productId")));
         dve.addAlias("PVIRT", "productId", null, null, null, Boolean.TRUE, null);
         dve.addAlias("PVIRT", "salesDiscontinuationDate", null, null, null, null, null);
         dve.addAlias("PVA", "productAssocTypeId", null, null, null, null, null);

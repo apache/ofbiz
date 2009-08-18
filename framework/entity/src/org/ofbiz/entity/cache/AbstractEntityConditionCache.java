@@ -27,7 +27,6 @@ import javolution.util.FastMap;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.cache.UtilCache;
-import org.ofbiz.entity.EntityFactory;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericPK;
 import org.ofbiz.entity.GenericValue;
@@ -111,7 +110,7 @@ public abstract class AbstractEntityConditionCache<K, V> extends AbstractCache<E
     }
 
     protected static final boolean isNull(Map value) {
-        return value == null || value == EntityFactory.NULL_ENTITY || value == GenericValue.NULL_VALUE;
+        return value == null || value == GenericEntity.NULL_ENTITY || value == GenericValue.NULL_VALUE;
     }
 
     protected ModelEntity getModelCheckValid(GenericEntity oldEntity, GenericEntity newEntity) {
