@@ -35,8 +35,8 @@ import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
-import org.ofbiz.entity.EntityFactory;
 import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.service.ExecutionContext;
@@ -355,7 +355,7 @@ public class ModelScreen extends ModelWidget implements Serializable, ExecutionA
     	AccessController accessController = executionContext.getAccessController();
     	accessController.checkPermission(View);
         // make sure the "null" object is in there for entity ops
-        context.put("null", EntityFactory.NULL_FIELD);
+        context.put("null", GenericEntity.NULL_FIELD);
 
         setWidgetBoundaryComments(context);
 

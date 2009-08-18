@@ -45,7 +45,7 @@ import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
-import org.ofbiz.entity.EntityFactory;
+import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
@@ -632,8 +632,8 @@ public class SimpleMethod {
     /** Execute the Simple Method operations */
     public String exec(MethodContext methodContext) {
         // always put the null field object in as "null"
-        methodContext.putEnv("null", EntityFactory.NULL_FIELD);
-        methodContext.putEnv("nullField", EntityFactory.NULL_FIELD);
+        methodContext.putEnv("null", GenericEntity.NULL_FIELD);
+        methodContext.putEnv("nullField", GenericEntity.NULL_FIELD);
 
         methodContext.putEnv(delegatorName, methodContext.getDelegator());
         methodContext.putEnv(securityName, methodContext.getSecurity());

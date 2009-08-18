@@ -35,23 +35,23 @@ public class DataLoop {
 
     private String dataListName;
     private SeleniumXml parent;
-	private SeleniumXml currentTest;
-	private List children;
-	
-	private int currentRowIndx;
-	
-	
-	
-	public DataLoop(String dataListName, SeleniumXml parent, List<Element> children) {
-		super();
-		this.dataListName = dataListName;
-		this.parent = parent;
-		this.children = children;
-	}
+    private SeleniumXml currentTest;
+    private List children;
+    
+    private int currentRowIndx;
+    
+    
+    
+    public DataLoop(String dataListName, SeleniumXml parent, List<Element> children) {
+        super();
+        this.dataListName = dataListName;
+        this.parent = parent;
+        this.children = children;
+    }
 
-	public void runTest() {
+    public void runTest() {
 
-		this.currentTest = new SeleniumXml(this.parent);
+        this.currentTest = new SeleniumXml(this.parent);
         Map dataMap = this.parent.getMap();
         List dataList = (List)dataMap.get(this.dataListName);
         Iterator iter = dataList.iterator();
@@ -60,14 +60,14 @@ public class DataLoop {
             // TODO, WARNING - these name could collide with names already in the test context
             Set eSet = mp.entrySet();
             Iterator iter2 = eSet.iterator();
-            while(iter2.hasNext()) {
+            while (iter2.hasNext()) {
                     Map.Entry entry = (Map.Entry)iter2.next();
                     String name = (String)entry.getKey();
                     Object value = entry.getValue();
                     dataMap.put(name, value);
             }
-     	    currentTest.runCommands(this.children);
-		}
-		
-	}
+             currentTest.runCommands(this.children);
+        }
+        
+    }
 }

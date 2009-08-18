@@ -77,6 +77,11 @@ public abstract class ExecutionContextImpl implements ExecutionContext {
     }
 
     public void popExecutionArtifact() {
+    	if (this.artifactStack.size() == 0) {
+    		// This check is temporary - it will be removed when implementation is complete
+    		Debug.logError(new Exception("Attempt to pop an empty stack"), module);
+    		return;
+    	}
 	    ExecutionArtifact artifact = this.artifactStack.pop();
 	    if (this.verbose) {
 	    	Debug.logInfo("Popping artifact [" + artifact.getClass().getName() +
