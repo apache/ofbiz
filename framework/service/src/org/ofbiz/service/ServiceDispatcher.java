@@ -31,6 +31,7 @@ import javolution.util.FastMap;
 
 import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.api.context.ExecutionContextFactory;
+import org.ofbiz.api.context.GenericParametersArtifact;
 import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralRuntimeException;
@@ -109,11 +110,12 @@ public class ServiceDispatcher {
 
         // job manager needs to always be running, but the poller thread does not
         try {
-            GenericDelegator origDelegator = this.delegator;
-            if (!this.delegator.getOriginalDelegatorName().equals(this.delegator.getDelegatorName())) {
-                origDelegator = DelegatorFactory.getGenericDelegator(this.delegator.getOriginalDelegatorName());
+            String delegatorName = this.delegator.getDelegatorName();
+            if (!this.delegator.getOriginalDelegatorName().equals(delegatorName)) {
+            	delegatorName = this.delegator.getOriginalDelegatorName();
             }
-            this.jm = JobManager.getInstance(origDelegator, enableJM);
+            GenericDelegator newDelegator = DelegatorFactory.getGenericDelegator(delegatorName);
+            this.jm = JobManager.getInstance(newDelegator, enableJM);
         } catch (GeneralRuntimeException e) {
             Debug.logWarning(e.getMessage(), module);
         }
@@ -301,21 +303,32 @@ public class ServiceDispatcher {
         ExecutionContext executionContext = (ExecutionContext) context.get("executionContext");
         if (executionContext == null) {
             try {
-				executionContext = (ExecutionContext) ExecutionContextFactory.getInstance();
+                executionContext = (ExecutionContext) ExecutionContextFactory.getInstance();
 			} catch (Exception e) {
 				throw new GenericServiceException(e);
 			}
             context.put("executionContext", executionContext);
         }
-        executionContext.initializeContext(context);
-        executionContext.setDelegator(this.delegator);
+        GenericDelegator newDelegator = DelegatorFactory.getGenericDelegator(this.delegator.getDelegatorName());
+        executionContext.setDelegator(newDelegator);
+        executionContext.setDispatcher(ctx.getDispatcher());
         executionContext.setSecurity(this.security);
-        executionContext.pushExecutionArtifact(modelService);
+        executionContext.initializeContext(context);
+        executionContext.pushExecutionArtifact(new GenericParametersArtifact(modelService, context));
         // start the transaction
         boolean beganTrans = false;
         try {
-        	AccessController accessController = executionContext.getAccessController();
-        	accessController.checkPermission(Access);
+        	boolean permissionService = false;
+            for (ModelServiceIface iface: modelService.implServices) {
+                if ("permissionInterface".equals(iface.getService())) {
+                	permissionService = true;
+                	break;
+                }
+            }
+            if (!permissionService) {
+            	AccessController accessController = executionContext.getAccessController();
+            	accessController.checkPermission(Access);
+            }
             //Debug.logInfo("=========================== " + modelService.name + " 1 tx status =" + TransactionUtil.getStatusString() + ", modelService.requireNewTransaction=" + modelService.requireNewTransaction + ", modelService.useTransaction=" + modelService.useTransaction + ", TransactionUtil.isTransactionInPlace()=" + TransactionUtil.isTransactionInPlace(), module);
             if (modelService.useTransaction) {
                 if (TransactionUtil.isTransactionInPlace()) {

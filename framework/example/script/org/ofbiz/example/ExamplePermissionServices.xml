@@ -38,4 +38,11 @@ under the License.
             </else>
         </if-has-permission>
     </simple-method>
+
+    <simple-method method-name="securityRedesignTest" short-description="Security Redesign Test">
+        <log level="info" message="exampleId = ${parameters.exampleId}"/>
+        <set field="hasPermission" type="Boolean" value="true"/>
+        <field-to-result field="hasPermission"/>
+    </simple-method>
+
 </simple-methods>

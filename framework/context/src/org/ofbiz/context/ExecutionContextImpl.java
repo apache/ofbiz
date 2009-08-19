@@ -28,6 +28,7 @@ import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.security.AuthorizationManager;
 import org.ofbiz.security.SecurityFactory;
+import org.ofbiz.service.GenericDispatcher;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ExecutionContext;
 
@@ -47,6 +48,9 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
 	}
 
 	public LocalDispatcher getDispatcher() {
+		if (this.dispatcher == null) {
+	        this.dispatcher = GenericDispatcher.getLocalDispatcher("ExecutionContext", this.getDelegator());
+		}
 		return this.dispatcher;
 	}
 

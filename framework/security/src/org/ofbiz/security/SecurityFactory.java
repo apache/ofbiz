@@ -37,7 +37,7 @@ import org.w3c.dom.Element;
 public class SecurityFactory {
 
     public static final String module = SecurityFactory.class.getName();
-    public static final String DEFAULT_SECURITY = "org.ofbiz.security.AuthorizationManagerImpl";
+    public static final String DEFAULT_SECURITY = "org.ofbiz.security.OFBizSecurity";
 
     private static String securityName = null;
     private static Element rootElement = null;
@@ -112,7 +112,7 @@ public class SecurityFactory {
         if (securityInfo == null) {
             SecurityConfigUtil.SecurityInfo _securityInfo = SecurityConfigUtil.getSecurityInfo(securityName);
 
-            // Make sure, that the security conetxt name is defined and present
+            // Make sure, that the security context name is defined and present
             if (_securityInfo == null) {
                 throw new SecurityConfigurationException("ERROR: no security definition was found with the name " + securityName + " in security.xml");
             }
@@ -121,7 +121,10 @@ public class SecurityFactory {
 
         // This is the default implementation and uses org.ofbiz.security.OFBizSecurity
         if (UtilValidate.isEmpty(securityInfo.className)) {
-            className = DEFAULT_SECURITY;
+        	className = UtilProperties.getPropertyValue("api.properties", "authorizationManager.class");
+        	if (UtilValidate.isEmpty(className)) {
+        		className = DEFAULT_SECURITY;
+        	}
         } else {
             // Use a customized security
             className = securityInfo.className;

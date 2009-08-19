@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.security;
+package org.ofbiz.context;
 
 import static org.ofbiz.api.authorization.BasicPermissions.Admin;
 
@@ -24,8 +24,14 @@ import java.security.AccessControlException;
 import java.security.Permission;
 
 import org.ofbiz.api.authorization.AccessController;
+import org.ofbiz.api.authorization.PermissionsIntersection;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.security.AuthorizationManager;
+import org.ofbiz.security.OFBizSecurity;
+import org.ofbiz.service.ExecutionContext;
+import org.ofbiz.service.ServicePermission;
 
 /**
  * An implementation of the AuthorizationManager interface that uses the OFBiz database
@@ -34,6 +40,17 @@ import org.ofbiz.base.util.UtilProperties;
 public class AuthorizationManagerImpl extends OFBizSecurity implements AuthorizationManager {
 
     public static final String module = AuthorizationManagerImpl.class.getName();
+    
+    protected Permission testPermission = null;
+    protected Permission getTestPermission(ExecutionContext executionContext) {
+    	if (this.testPermission == null) {
+    		// Build test permissions
+    		this.testPermission = new PermissionsIntersection("TestPermissions",
+    				UtilMisc.toList(new ServicePermission("securityRedesignTest", executionContext),
+    						Admin));
+    	}
+		return this.testPermission;
+    }
 
     public AuthorizationManagerImpl() {
     }
@@ -113,7 +130,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
 	}
 
 	public AccessController getAccessController(org.ofbiz.api.context.ExecutionContext executionContext) {
-		return new AccessControllerImpl(executionContext.getExecutionPath(), Admin);
+		return new AccessControllerImpl(executionContext.getExecutionPath(), this.getTestPermission((ExecutionContext) executionContext));
 	}
 
 	protected static class AccessControllerImpl implements AccessController {
@@ -131,7 +148,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
 
 		public void checkPermission(Permission permission) throws AccessControlException {
 			if (this.verbose) {
-                Debug.logInfo("Checking permission " + permission + " for path " + this.executionPath, module);
+                Debug.logInfo("Checking permission: " + this.executionPath + "[" + permission + "]", module);
 			}
 			if (!this.permission.implies(permission)) {
 				throw new AccessControlException(this.executionPath);

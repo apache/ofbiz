@@ -121,6 +121,13 @@ under the License.
         <implements service="permissionInterface"/>
     </service>
 
+    <!-- Security Redesign Test -->
+    <service name="securityRedesignTest" engine="simple"
+             location="component://example/script/org/ofbiz/example/ExamplePermissionServices.xml" invoke="securityRedesignTest">
+        <implements service="permissionInterface"/>
+        <attribute name="exampleId" mode="IN" type="String" optional="true"/>
+    </service>
+
     <!-- Example ServiceTest Service -->
     <service name="testCreateExampleService" engine="simple"
              location="component://example/script/org/ofbiz/example/example/ExampleServices.xml" invoke="testCreateExampleService">

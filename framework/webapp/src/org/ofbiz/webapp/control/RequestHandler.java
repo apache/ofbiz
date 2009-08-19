@@ -36,7 +36,7 @@ import javax.servlet.http.HttpSession;
 
 import javolution.util.FastMap;
 
-import org.ofbiz.api.context.GenericExecutionArtifact;
+import org.ofbiz.api.context.GenericParametersArtifact;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.SSLUtil;
 import org.ofbiz.base.util.StringUtil;
@@ -146,7 +146,7 @@ public class RequestHandler {
 
         ExecutionContext executionContext = (ExecutionContext) request.getAttribute("executionContext");
         Locale locale = executionContext.getLocale();
-        executionContext.pushExecutionArtifact(new GenericExecutionArtifact(UtilHttp.getFullRequestUrl(request).toString(), cname));
+        executionContext.pushExecutionArtifact(new GenericParametersArtifact(UtilHttp.getFullRequestUrl(request).toString(), cname, UtilHttp.getParameterMap(request)));
         
         String eventReturn = null;
         boolean interruptRequest = false;
