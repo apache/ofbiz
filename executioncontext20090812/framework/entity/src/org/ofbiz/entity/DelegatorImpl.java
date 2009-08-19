@@ -526,16 +526,18 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
     	AccessController accessController = this.executionContext.getAccessController();
         boolean beganTransaction = false;
         try {
-            if (alwaysUseTransaction) {
-                beganTransaction = TransactionUtil.begin();
-            }
-
             GenericValue checkValue = this.findOne(value.getEntityName(), value.getPrimaryKey(), false);
             if (checkValue != null) {
             	accessController.checkPermission(Update);
-                this.store(value, doCacheClear);
             } else {
             	accessController.checkPermission(Create);
+            }
+            if (alwaysUseTransaction) {
+                beganTransaction = TransactionUtil.begin();
+            }
+            if (checkValue != null) {
+                this.store(value, doCacheClear);
+            } else {
                 this.create(value, doCacheClear);
             }
             if (value.lockEnabled()) {
@@ -2105,15 +2107,11 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
         try {
             for (GenericEntity value : dummyPKs) {
-            	this.executionContext.pushExecutionArtifact(value);
-            	AccessController accessController = this.executionContext.getAccessController();
-            	accessController.checkPermission(Delete);
                 if (value.containsPrimaryKey()) {
                     numRemoved += this.removeByPrimaryKey(value.getPrimaryKey(), doCacheClear);
                 } else {
                     numRemoved += this.removeByAnd(value.getEntityName(), value.getAllFields(), doCacheClear);
                 }
-                this.executionContext.popExecutionArtifact();
             }
 
             return numRemoved;
@@ -2216,7 +2214,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
     }
 
     public int removeByPrimaryKey(GenericPK primaryKey, boolean doCacheClear) throws GenericEntityException {
-    	this.executionContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.removeByPrimaryKey", primaryKey.getEntityName()));
+    	this.executionContext.pushExecutionArtifact(primaryKey);
     	AccessController accessController = this.executionContext.getAccessController();
         boolean beganTransaction = false;
         try {

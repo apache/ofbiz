@@ -20,9 +20,9 @@ package org.ofbiz.api.context;
 
 import java.util.Locale;
 import java.util.Map;
-import java.util.Stack;
 import java.util.TimeZone;
 
+import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
@@ -31,9 +31,9 @@ import org.ofbiz.base.util.UtilProperties;
 /** Implementation of the ExecutionContext interface. */
 public abstract class ExecutionContextImpl implements ExecutionContext {
 
-    public static final String module = ExecutionContextImpl.class.getName();
+	public static final String module = ExecutionContextImpl.class.getName();
 
-	protected final Stack<ExecutionArtifact> artifactStack = new Stack<ExecutionArtifact>();
+    protected final FastList<ExecutionArtifact> artifactStack = FastList.newInstance();
 	protected String currencyUom = null;
 	protected Locale locale = Locale.getDefault();
 	protected TimeZone timeZone = TimeZone.getDefault();
@@ -55,7 +55,11 @@ public abstract class ExecutionContextImpl implements ExecutionContext {
         return this.currencyUom;
     }
 
-    public String getExecutionPath() {
+    public ExecutionArtifact getCurrentArtifact() {
+		return this.artifactStack.size() > 0 ? this.artifactStack.getLast() : null;
+	}
+
+	public String getExecutionPath() {
 		StringBuilder sb = new StringBuilder("ofbiz");
 		for (ExecutionArtifact artifact : this.artifactStack) {
 			sb.append("/");
@@ -67,6 +71,16 @@ public abstract class ExecutionContextImpl implements ExecutionContext {
 	public Locale getLocale() {
         return this.locale;
     }
+
+    public Map<String, ? extends Object> getParameters() {
+    	for (int i = this.artifactStack.size() - 1; i >= 0; i--) {
+    		try {
+    			ParametersArtifact artifact = (ParametersArtifact) this.artifactStack.get(i);
+    			return artifact.getParameters();
+    		} catch (Exception e) {}
+    	}
+		return null;
+	}
 
 	public Object getProperty(String key) {
         return this.properties.get(key);
@@ -82,7 +96,26 @@ public abstract class ExecutionContextImpl implements ExecutionContext {
     		Debug.logError(new Exception("Attempt to pop an empty stack"), module);
     		return;
     	}
-	    ExecutionArtifact artifact = this.artifactStack.pop();
+	    ExecutionArtifact artifact = this.artifactStack.removeLast();
+	    if (this.verbose) {
+	    	Debug.logInfo("Popping artifact [" + artifact.getClass().getName() +
+	    			"] location = " + artifact.getLocation() + 
+	    			", name = " + artifact.getName(), module);
+	    }
+	}
+
+    public void popExecutionArtifacts(ExecutionArtifact artifact) {
+    	if (this.artifactStack.size() == 0) {
+    		// This check is temporary - it will be removed when implementation is complete
+    		Debug.logError(new Exception("Attempt to pop an empty stack"), module);
+    		return;
+    	}
+    	if (this.artifactStack.contains(artifact)) {
+    		ExecutionArtifact poppedArtifact = this.artifactStack.removeLast();
+    		while (poppedArtifact != artifact) {
+        		poppedArtifact = this.artifactStack.removeLast();
+    		}
+    	}
 	    if (this.verbose) {
 	    	Debug.logInfo("Popping artifact [" + artifact.getClass().getName() +
 	    			"] location = " + artifact.getLocation() + 
@@ -91,7 +124,7 @@ public abstract class ExecutionContextImpl implements ExecutionContext {
 	}
 
     public void pushExecutionArtifact(ExecutionArtifact artifact) {
-		this.artifactStack.push(artifact);
+		this.artifactStack.addLast(artifact);
 		if (this.verbose) {
 			Debug.logInfo("Pushing artifact [" + artifact.getClass().getName() +
 					"] location = " + artifact.getLocation() + 

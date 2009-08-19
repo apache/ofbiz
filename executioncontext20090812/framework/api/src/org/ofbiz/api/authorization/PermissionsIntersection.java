@@ -32,7 +32,7 @@ public class PermissionsIntersection extends PermissionsList {
 	}
 
 	/** Returns <code>true</code> if all of the contained permissions
-	 * returns <code>true</code>.
+	 * return <code>true</code>.
 	 */
 	@Override
 	public boolean implies(Permission permission) {

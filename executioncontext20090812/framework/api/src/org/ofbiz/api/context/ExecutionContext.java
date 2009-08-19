@@ -19,6 +19,7 @@
 package org.ofbiz.api.context;
 
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 import org.ofbiz.api.authorization.AccessController;
@@ -39,6 +40,14 @@ public interface ExecutionContext {
      */
     public String getCurrencyUom();
 
+    /** Returns the current <code>ExecutionArtifact</code> (the one
+     * at the top of the stack). Returns <code>null</code> if the
+     * stack is empty.
+     * 
+     * @return The current <code>ExecutionArtifact</code>
+     */
+    public ExecutionArtifact getCurrentArtifact();
+
     /** Returns the current execution path. Artifacts in the path are separated
      * with a slash.
      * 
@@ -51,6 +60,13 @@ public interface ExecutionContext {
      * @return The current <code>Locale</code>
      */
     public Locale getLocale();
+
+    /**
+	 * Returns the parameters associated with this context.
+	 * 
+	 * @return The parameters associated with this context
+	 */
+	public Map<String, ? extends Object> getParameters();
 
     /** Returns the specified property.
      * 
@@ -67,6 +83,10 @@ public interface ExecutionContext {
 
     /** Pop an <code>ExecutionArtifact</code> off the stack. */
     public void popExecutionArtifact();
+
+    /** Pops all <code>ExecutionArtifact</code>s off the stack
+     * up to and including <code>artifact</code>. */
+    public void popExecutionArtifacts(ExecutionArtifact artifact);
 
     /** Push an <code>ExecutionArtifact</code> on the stack.
      * 
