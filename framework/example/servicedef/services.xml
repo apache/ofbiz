@@ -126,6 +126,7 @@ under the License.
              location="component://example/script/org/ofbiz/example/ExamplePermissionServices.xml" invoke="securityRedesignTest">
         <implements service="permissionInterface"/>
         <attribute name="exampleId" mode="IN" type="String" optional="true"/>
+        <attribute name="candidateObject" mode="IN" type="java.lang.Object" optional="true"/>
     </service>
 
     <!-- Example ServiceTest Service -->

@@ -32,7 +32,7 @@ public interface ExecutionContext {
      * 
      * @return An <code>AccessController</code> instance
      */
-    public AccessController getAccessController();
+    public AccessController<?> getAccessController();
 
     /** Returns the currency unit of measure.
      * 

@@ -53,6 +53,7 @@ import org.ofbiz.entity.model.ModelViewEntity;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.entity.util.EntityFindOptions;
 import org.ofbiz.entity.util.EntityListIterator;
+import org.ofbiz.entity.util.EntityListIteratorImpl;
 
 /**
  * Generic Entity Data Access Object - Handles persistence for any defined entity.
@@ -758,7 +759,7 @@ public class GenericDAO {
                 Debug.logTiming("Ran query in " + queryTotalTime + " milli-seconds: " + sql, module);
             }
         }
-        return new EntityListIterator(sqlP, modelEntity, selectFields, modelFieldTypeReader);
+        return new EntityListIteratorImpl(sqlP, modelEntity, selectFields, modelFieldTypeReader);
     }
     
     protected StringBuilder makeConditionWhereString(ModelEntity modelEntity, EntityCondition whereEntityCondition, List<EntityCondition> viewWhereConditions, List<EntityConditionParam> whereEntityConditionParams) throws GenericEntityException {

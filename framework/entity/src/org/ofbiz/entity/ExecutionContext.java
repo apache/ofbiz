@@ -24,6 +24,8 @@ package org.ofbiz.entity;
  */
 public interface ExecutionContext extends org.ofbiz.api.context.ExecutionContext {
 
+    public AccessController<?> getAccessController();
+
 	/** Returns the current <code>GenericDelegator</code> instance.
 	 * 
 	 * @return The current <code>GenericDelegator</code> instance

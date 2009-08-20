@@ -16,20 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.api.authorization;
+package org.ofbiz.entity;
 
-import java.security.AccessControlException;
-import java.security.Permission;
-import java.util.List;
-import java.util.ListIterator;
+import org.ofbiz.entity.util.EntityListIterator;
 
 /**
- * AccessController interface.
+ * AccessController interface. This interface extends <code>
+ * org.ofbiz.api.authorization.AccessController</code> so that
+ * the <code>applyFilters</code> method can be overridden to handle
+ * <code>EntityListIterator</code>.
  */
-public interface AccessController<E> {
+public interface AccessController<E> extends org.ofbiz.api.authorization.AccessController<E> {
 
-	public void checkPermission(Permission permission) throws AccessControlException;
-	public List<E> applyFilters(List<E> list);
-	public ListIterator<E> applyFilters(ListIterator<E> list);
+	public EntityListIterator applyFilters(EntityListIterator listIterator);
 
 }
