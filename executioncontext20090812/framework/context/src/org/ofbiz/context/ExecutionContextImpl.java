@@ -22,7 +22,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.ofbiz.api.authorization.AccessController;
+import org.ofbiz.entity.AccessController;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericValue;
@@ -102,7 +102,7 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
 		}
 	}
 
-	public AccessController getAccessController() {
-		return this.getSecurity().getAccessController(this);
+	public AccessController<?> getAccessController() {
+		return (AccessController<?>) this.getSecurity().getAccessController(this);
 	}
 }

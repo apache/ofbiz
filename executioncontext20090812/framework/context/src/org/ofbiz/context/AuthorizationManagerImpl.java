@@ -22,12 +22,15 @@ import static org.ofbiz.api.authorization.BasicPermissions.Admin;
 
 import java.security.AccessControlException;
 import java.security.Permission;
+import java.util.List;
+import java.util.ListIterator;
 
-import org.ofbiz.api.authorization.AccessController;
+import org.ofbiz.entity.AccessController;
 import org.ofbiz.api.authorization.PermissionsIntersection;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.security.AuthorizationManager;
 import org.ofbiz.security.OFBizSecurity;
 import org.ofbiz.service.ExecutionContext;
@@ -37,7 +40,11 @@ import org.ofbiz.service.ServicePermission;
  * An implementation of the AuthorizationManager interface that uses the OFBiz database
  * for authorization data storage.
  */
-public class AuthorizationManagerImpl extends OFBizSecurity implements AuthorizationManager {
+public class AuthorizationManagerImpl<E> extends OFBizSecurity implements AuthorizationManager {
+
+    // Right now this class is being used as a test jig for the various classes
+    // it will be working with. The actual implementation will occur once the
+    // entities are defined and in place.
 
     public static final String module = AuthorizationManagerImpl.class.getName();
     
@@ -129,19 +136,22 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
 		
 	}
 
-	public AccessController getAccessController(org.ofbiz.api.context.ExecutionContext executionContext) {
-		return new AccessControllerImpl(executionContext.getExecutionPath(), this.getTestPermission((ExecutionContext) executionContext));
+	public AccessController<E> getAccessController(org.ofbiz.api.context.ExecutionContext executionContext) {
+		return new AccessControllerImpl<E>((ExecutionContext) executionContext, this.getTestPermission((ExecutionContext) executionContext));
 	}
 
-	protected static class AccessControllerImpl implements AccessController {
+	protected static class AccessControllerImpl<E> implements AccessController<E> {
 
-		protected final String executionPath;
+		protected final ExecutionContext executionContext;
+        protected final String executionPath;
 		protected final Permission permission;
 		// Temporary - will be removed later
 		protected boolean verbose = false;
+		protected List<String> serviceNameList = UtilMisc.toList("securityRedesignTest");
 
-		protected AccessControllerImpl(String executionPath, Permission permission) {
-			this.executionPath = executionPath;
+		protected AccessControllerImpl(ExecutionContext executionContext, Permission permission) {
+			this.executionContext = executionContext;
+			this.executionPath = executionContext.getExecutionPath();
 			this.permission = permission;
 		    this.verbose = "true".equals(UtilProperties.getPropertyValue("api.properties", "authorizationManager.verbose"));
 		}
@@ -154,7 +164,40 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
 				throw new AccessControlException(this.executionPath);
 			}
 		}
-		
+
+		public List<E> applyFilters(List<E> list) {
+		    String upperPath = this.executionPath.toUpperCase();
+		    if (upperPath.startsWith("OFBIZ/EXAMPLE")) {
+	            if (this.verbose) {
+	                Debug.logInfo("Applying List filter \"securityRedesignTest\" for path " + this.executionPath, module);
+	            }
+		        return new SecurityAwareList<E>(list, this.serviceNameList, this.executionContext);
+		    }
+			return list;
+		}
+
+		public ListIterator<E> applyFilters(ListIterator<E> listIterator) {
+            String upperPath = this.executionPath.toUpperCase();
+            if (upperPath.startsWith("OFBIZ/EXAMPLE")) {
+                if (this.verbose) {
+                    Debug.logInfo("Applying ListIterator filter \"securityRedesignTest\" for path " + this.executionPath, module);
+                }
+                return new SecurityAwareListIterator<E>(listIterator, this.serviceNameList, this.executionContext);
+            }
+			return listIterator;
+		}
+
+        public EntityListIterator applyFilters(EntityListIterator listIterator) {
+            String upperPath = this.executionPath.toUpperCase();
+            if (upperPath.startsWith("OFBIZ/EXAMPLE")) {
+                if (this.verbose) {
+                    Debug.logInfo("Applying EntityListIterator filter \"securityRedesignTest\" for path " + this.executionPath, module);
+                }
+                // Commented out for now - causes problems with list pagination in UI
+//                return new SecurityAwareEli(listIterator, this.serviceNameList, this.executionContext);
+            }
+            return listIterator;
+        }
 	}
 
 }
