@@ -132,6 +132,11 @@ function getFinAccountTransRunningTotalAndBalances() {
           <#if grandTotal?exists>
             <th>${uiLabelMap.AccountingCancelTransactionStatus}</th>
           </#if>
+          <#if !grandTotal?exists>
+            <#if (parameters.glReconciliationId?has_content && parameters.glReconciliationId != "_NA_")>
+              <th>${uiLabelMap.AccountingRemoveFromGlReconciliation}</th>
+            </#if>
+          </#if>
           <#if ((glReconciliationId?has_content && glReconciliationId == "_NA_") && (glReconciliations?has_content && finAccountTransList?has_content)) || !grandTotal?exists>
             <th>${uiLabelMap.CommonSelectAll} <input name="selectAll" type="checkbox" value="N" id="checkAllTransactions" onclick="javascript:togglefinAccountTransId(this);"/></th>
           </#if>
@@ -237,26 +242,16 @@ function getFinAccountTransRunningTotalAndBalances() {
             <#if glReconciliationId?has_content && glReconciliationId != "_NA_">
               <input name="glReconciliationId_o_${finAccountTrans_index}" type="hidden" value="${glReconciliationId}"/>
             </#if>
-            <#if ((glReconciliationId?has_content && glReconciliationId == "_NA_") && (glReconciliations?has_content && finAccountTransList?has_content)) || !grandTotal?exists>
-              <td><input id="finAccountTransId_${finAccountTrans_index}" name="_rowSubmit_o_${finAccountTrans_index}" type="checkbox" value="Y" onclick="javascript:getFinAccountTransRunningTotalAndBalances();"/></td>
+            <#if !(grandTotal?exists)>
+              <#if (parameters.glReconciliationId?has_content && parameters.glReconciliationId != "_NA_")>
+                <#if finAccountTrans.statusId == "FINACT_TRNS_CREATED">
+                  <td><a href="javascript:document.removeFinAccountTransFromReconciliation_${finAccountTrans.finAccountTransId}.submit();" class="buttontext">${uiLabelMap.CommonRemove}</a></td>
+                </#if>
+              </#if>
             </#if>
-            <#if !grandTotal?exists>
-              <#if finAccountTrans.finAccountTransTypeId="ADJUSTMENT">
-          </tr>
-          <tr>  
-                <td>
-                  <select name="debitCreditFlag_o_${finAccountTrans_index}">
-                    <option value="D">${uiLabelMap.FormFieldTitle_debit}</option>
-                    <option value="C">${uiLabelMap.FormFieldTitle_credit}</option>
-                  </select>
-                </td>
-                <td>
-                  <select name="glAccountId_o_${finAccountTrans_index}" style="width: 50%">
-                    <#list glAccountOrgAndClassList as glAccountOrgAndClass>
-                      <option value="${glAccountOrgAndClass.glAccountId}">${glAccountOrgAndClass.accountCode} - ${glAccountOrgAndClass.accountName} [${glAccountOrgAndClass.glAccountId}]</option>
-                    </#list>
-                  </select>
-                </td>
+            <#if ((glReconciliationId?has_content && glReconciliationId == "_NA_") && (glReconciliations?has_content && finAccountTransList?has_content)) || !grandTotal?exists>
+              <#if finAccountTrans.statusId == "FINACT_TRNS_CREATED">
+                <td><input id="finAccountTransId_${finAccountTrans_index}" name="_rowSubmit_o_${finAccountTrans_index}" type="checkbox" value="Y" onclick="javascript:getFinAccountTransRunningTotalAndBalances();"/></td>
               </#if>
             </#if>
           </tr>
@@ -265,6 +260,12 @@ function getFinAccountTransRunningTotalAndBalances() {
         </#list>
       </table>
     </form>
+    <#list finAccountTransList as finAccountTrans>
+      <form name="removeFinAccountTransFromReconciliation_${finAccountTrans.finAccountTransId}" method="post" action="<@ofbizUrl>removeFinAccountTransFromReconciliation</@ofbizUrl>">
+        <input name="finAccountTransId" type="hidden" value="${finAccountTrans.finAccountTransId}"/>
+        <input name="finAccountId" type="hidden" value="${finAccountTrans.finAccountId}"/>
+      </form>
+    </#list>
     <#if grandTotal?exists>
       <#list finAccountTransList as finAccountTrans>
         <#if finAccountTrans.statusId?has_content && finAccountTrans.statusId == 'FINACT_TRNS_CREATED'>
