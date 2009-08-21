@@ -306,7 +306,7 @@ under the License.
     </request-map>
     <request-map uri="createPayment">
         <security https="true" auth="true"/>
-        <event type="service" invoke="createPayment"/>
+        <event type="service" invoke="createPaymentAndFinAccountTrans"/>
         <response name="success" type="view" value="editPayment"/>
         <response name="error" type="view" value="newPayment"/>
     </request-map>
@@ -1981,6 +1981,18 @@ under the License.
         <response name="error" type="view" value="FindFinAccountTrans"/>
     </request-map>
 
+    <request-map uri="removeFinAccountTransFromReconciliation">
+        <security auth="true" https="true"/>
+        <event type="service" invoke="removeFinAccountTransFromReconciliation"/>
+        <response name="success" type="view" value="BankReconciliation"/>
+        <response name="error" type="view" value="BankReconciliation"/>
+    </request-map>
+    <request-map uri="reomveFinAccountTransAssociation">
+        <security auth="true" https="true"/>
+        <event type="service" invoke="removeFinAccountTransFromReconciliation"/>
+        <response name="success" type="view" value="ViewGlReconciliationWithTransaction"/>
+        <response name="error" type="view" value="ViewGlReconciliationWithTransaction"/>
+    </request-map>
     <!-- Fin Account Authority-->
     <request-map uri="EditFinAccountAuths">
         <security https="true" auth="true"/>
@@ -2418,9 +2430,9 @@ under the License.
 
     <request-map uri="createGlAcctCatMemFromCostCenters">
         <security https="true" auth="true"/>
-        <event type="service-multi" invoke="createGlAcctCatMemFromCostCenters"/>
-        <response name="success" type="view" value="CostCenters"/>
-        <response name="error" type="view" value="CostCenters"/>
+        <event type="jsonservice" invoke="createGlAcctCatMemFromCostCenters"/>
+        <response name="success" type="none"/>
+        <response name="error" type="none"/>
     </request-map>
 
     <request-map uri="CostCenterReport">
