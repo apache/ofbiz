@@ -31,4 +31,15 @@ under the License.
     <SecurityGroupPermission groupId="FLEXADMIN" permissionId="EXAMPLE_VIEW"/>
     <SecurityGroupPermission groupId="VIEWADMIN" permissionId="EXAMPLE_VIEW"/>
     <SecurityGroupPermission groupId="BIZADMIN" permissionId="EXAMPLE_ADMIN"/>
+
+    <ArtifactPath artifactPath="ofbiz/example" description="Example Application"/>
+    <ArtifactPath artifactPath="ofbiz/exampleext" description="Extended Example Application"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGroupToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/example" permissionValue="admin=true"/>
+    <UserGroupToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/exampleext" permissionValue="admin=true"/>
+
 </entity-engine-xml>

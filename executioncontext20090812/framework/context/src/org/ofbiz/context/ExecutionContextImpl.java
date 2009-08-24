@@ -22,9 +22,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.AccessController;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.security.AuthorizationManager;
 import org.ofbiz.security.SecurityFactory;
@@ -65,6 +67,14 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
 	}
 
 	public GenericValue getUserLogin() {
+	    if (this.userLogin == null) {
+	        GenericDelegator localDelegator = this.getDelegator();
+            try {
+                this.userLogin = localDelegator.findOne("UserLogin", false, "userLoginId", "NOT_LOGGED_IN");
+            } catch (GenericEntityException e) {
+                Debug.logError(e, "Error while getting NOT_LOGGED_IN user: ", module);
+            }
+	    }
 		return this.userLogin;
 	}
 

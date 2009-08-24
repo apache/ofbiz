@@ -70,6 +70,6 @@ under the License.
     <ArtifactPermission permissionValue="update=false" description="Update access denied"/>
     <ArtifactPermission permissionValue="view=true" description="View access granted"/>
     <ArtifactPermission permissionValue="view=false" description="View access denied"/>
-    <UserToArtifactPermissionRel userLoginId="system" artifactPath="ofbiz" permissionValue="admin=true"/>
+    <UserToArtifactPermRel userLoginId="system" artifactPath="ofbiz" permissionValue="admin=true"/>
 
 </entity-engine-xml>

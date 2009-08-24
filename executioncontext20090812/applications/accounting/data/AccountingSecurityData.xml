@@ -112,4 +112,16 @@ under the License.
     <SecurityGroupPermission groupId="BIZADMIN" permissionId="ACCTG_ATX_UPDATE"/>
     <SecurityGroupPermission groupId="BIZADMIN" permissionId="ACCTG_ATX_DELETE"/>
 
+    <ArtifactPath artifactPath="ofbiz/accounting" description="Accounting Application"/>
+    <ArtifactPath artifactPath="ofbiz/ap" description="Accounts Payable Application"/>
+    <ArtifactPath artifactPath="ofbiz/ar" description="Accounts Receivable Application"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGroupToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/accounting" permissionValue="admin=true"/>
+    <UserGroupToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/ap" permissionValue="admin=true"/>
+    <UserGroupToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/ar" permissionValue="admin=true"/>
+
 </entity-engine-xml>
