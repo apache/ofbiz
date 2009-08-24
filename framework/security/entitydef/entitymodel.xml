@@ -316,7 +316,7 @@ under the License.
       <prim-key field="artifactPath"/>
     </entity>
 
-    <entity entity-name="UserToArtifactPermissionRel"
+    <entity entity-name="UserToArtifactPermRel"
             package-name="org.ofbiz.security.artifactsecurity"
             default-resource-name="SecurityEntityLabels"
             title="Security Component - User-To-Artifact Permission Relationship Entity">
@@ -337,7 +337,7 @@ under the License.
       </relation>
     </entity>
 
-    <entity entity-name="UserGroupToArtifactPermissionRel"
+    <entity entity-name="UserGroupToArtifactPermRel"
             package-name="org.ofbiz.security.artifactsecurity"
             default-resource-name="SecurityEntityLabels"
             title="Security Component - User Group-To-Artifact Permission Relationship Entity">

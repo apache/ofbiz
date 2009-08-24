@@ -31,6 +31,10 @@ under the License.
     </div>
     <div class="screenlet-body">
       <a href="<@ofbizUrl>EditFinAccountReconciliations?finAccountId=${finAccountId}&glReconciliationId=${glReconciliationId}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonEdit}</a>
+      <#assign finAcctTransCondList = delegator.findByAnd("FinAccountTrans", {"glReconciliationId" : glReconciliationId, "statusId" : "FINACT_TRNS_CREATED"})>
+      <#if finAcctTransCondList?has_content>
+        <a href="javascript:document.CancelBankReconciliationForm.submit();" class="buttontext">${uiLabelMap.AccountingCancelBankReconciliation}</a>
+      </#if>
       <#if currentGlReconciliation?has_content>
         <table>
           <tr>
@@ -95,7 +99,7 @@ under the License.
             <th>${uiLabelMap.FormFieldTitle_paymentMethodTypeId}</th>
             <th>${uiLabelMap.CommonStatus}</th>
             <th>${uiLabelMap.CommonComments}</th>
-            <#if FinAccountTranstions?has_content>
+            <#if finAccountTransactions?has_content>
               <th>${uiLabelMap.AccountingRemoveFromGlReconciliation}</th>
             </#if>
           </tr>
@@ -155,11 +159,15 @@ under the License.
     </div>
     <div class="right">
       <span class="label">${uiLabelMap.AccountingTotalCapital} </span><@ofbizCurrency amount=transactionTotalAmount.grandTotal isoCode=defaultOrganizationPartyCurrencyUomId/> 
-      <#if !currentGlReconciliation.reconciledBalance?has_content>
+      <#if isReconciled == false>
         <input type="submit" value="${uiLabelMap.AccountingReconcile}"/>
       </#if>
     </div>
   </div>
+</form>
+<form name="CancelBankReconciliationForm" method="post" action="<@ofbizUrl>cancelBankReconciliation</@ofbizUrl>">
+  <input name="finAccountId" type="hidden" value="${finAccountId}"/>
+  <input name="glReconciliationId" type="hidden" value="${glReconciliationId}"/>
 </form>
 <#list finAccountTransList as finAccountTrans>
   <form name="reomveFinAccountTransAssociation_${finAccountTrans.finAccountTransId}" method="post" action="<@ofbizUrl>reomveFinAccountTransAssociation</@ofbizUrl>">

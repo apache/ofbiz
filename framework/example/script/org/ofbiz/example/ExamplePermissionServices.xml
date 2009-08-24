@@ -40,7 +40,7 @@ under the License.
     </simple-method>
 
     <simple-method method-name="securityRedesignTest" short-description="Security Redesign Test">
-        <log level="info" message="candidateObject = ${parameters.candidateObject}"/>
+<!--         <log level="info" message="candidateObject = ${parameters.candidateObject}"/> -->
         <set field="hasPermission" type="Boolean" value="true"/>
         <field-to-result field="hasPermission"/>
     </simple-method>

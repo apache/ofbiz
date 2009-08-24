@@ -25,4 +25,11 @@ under the License.
  <WebslingerHostSuffix hostSuffixId="PREVIEW" hostSuffix=".preview"/>
  <WebslingerHostSuffix hostSuffixId="LOCALHOST" hostSuffix=".localhost"/>
 
+    <ArtifactPath artifactPath="ofbiz/webslinger" description="Webslinger URL"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGroupToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/webslinger" permissionValue="admin=true"/>
 </entity-engine-xml>

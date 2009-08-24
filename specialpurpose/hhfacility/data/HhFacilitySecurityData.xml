@@ -1,4 +1,5 @@
-<#--
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
 distributed with this work for additional information
@@ -16,9 +17,14 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
+<entity-engine-xml>
 
-<#-- For add Captcha Capture -->
-<#assign fileName = Static["org.ofbiz.common.Captcha"].getCodeCaptcha(request,response)>
-<#assign fileName = Static["org.ofbiz.common.Captcha"].CAPTCHA_FILE_NAME>
+    <ArtifactPath artifactPath="ofbiz/hhfacility" description="Handheld Facility Application"/>
 
-<img  src="<@ofbizContentUrl>/tempfiles/captcha/${fileName?if_exists}</@ofbizContentUrl>"/>
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGroupToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/hhfacility" permissionValue="admin=true"/>
+
+</entity-engine-xml>

@@ -50,4 +50,19 @@
     <!-- Temporal expression security -->
     <SecurityPermission description="Temporal expression admin" permissionId="TEMPEXPR_ADMIN"/>
     <SecurityGroupPermission groupId="FULLADMIN" permissionId="TEMPEXPR_ADMIN"/>
+
+    <ArtifactPath artifactPath="ofbiz/bi" description="Business Intelligence Application"/>
+    <ArtifactPath artifactPath="ofbiz/images" description="Public Static Images URL"/>
+    <ArtifactPath artifactPath="ofbiz/tempfiles" description="Temporary Files URL"/>
+    <UserToArtifactPermRel userLoginId="NOT_LOGGED_IN" artifactPath="ofbiz/bi" permissionValue="view=true"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGroupToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/bi" permissionValue="admin=true"/>
+    <UserGroupToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/images" permissionValue="admin=true"/>
+    <UserGroupToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/tempfiles" permissionValue="admin=true"/>
+
+
 </entity-engine-xml>
