@@ -43,3 +43,10 @@ If you want to see the ExecutionContext and AccessController in
 action, change the settings in api.properties. You'll see info
 messages in the console log.
 
+2009-08-26: Added security-aware Freemarker transform. Template
+sections can be controlled with:
+
+<@ofbizSecurity permission="view" artifactId="thisTemplate">Some text</@ofbizSecurity>
+
+If the user has permission to view the artifact, then "Some text"
+will be rendered.
