@@ -62,7 +62,7 @@ public class OfbizSecurityTransform implements TemplateDirectiveModel {
         String permStr = obj.getAsString();
         Permission permission = BasicPermissions.ConversionMap.get(permStr.toUpperCase());
         if (permission == null) {
-            Debug.logError("Unkown permission \"" + permStr + "\", unable to execute transform", module);
+            Debug.logError("Unknown permission \"" + permStr + "\", unable to execute transform", module);
             return;
         }
         BeanModel contextBean = (BeanModel)env.getVariable("executionContext");
