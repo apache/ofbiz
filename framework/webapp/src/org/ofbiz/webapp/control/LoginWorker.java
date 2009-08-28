@@ -61,6 +61,7 @@ import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.security.Security;
 import org.ofbiz.security.authz.Authorization;
+import org.ofbiz.service.ExecutionContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
@@ -366,9 +367,12 @@ public class LoginWorker {
                 password = request.getParameter("newPassword");
             }
         }
+        ExecutionContext executionContext = (ExecutionContext) request.getAttribute("executionContext");
 
         try {
-            result = dispatcher.runSync("userLogin", UtilMisc.toMap("login.username", username, "login.password", password, "visitId", visitId, "locale", UtilHttp.getLocale(request)));
+            result = dispatcher.runSync("userLogin", UtilMisc.toMap("login.username", username,
+                    "login.password", password, "visitId", visitId, "locale", UtilHttp.getLocale(request),
+                    "executionContext", executionContext));
         } catch (GenericServiceException e) {
             Debug.logError(e, "Error calling userLogin service", module);
             Map<String, String> messageMap = UtilMisc.toMap("errorMessage", e.getMessage());
@@ -379,6 +383,7 @@ public class LoginWorker {
 
         if (ModelService.RESPOND_SUCCESS.equals(result.get(ModelService.RESPONSE_MESSAGE))) {
             GenericValue userLogin = (GenericValue) result.get("userLogin");
+            executionContext.setUserLogin(userLogin);
             Map<String, Object> userLoginSession = checkMap(result.get("userLoginSession"), String.class, Object.class);
             if (userLogin != null && "Y".equals(userLogin.getString("requirePasswordChange"))) {
                 return "requirePasswordChange";
@@ -388,7 +393,9 @@ public class LoginWorker {
                 javaScriptEnabled = "Y";
             }
             try {
-                result = dispatcher.runSync("setUserPreference", UtilMisc.toMap("userPrefTypeId", "javaScriptEnabled", "userPrefGroupTypeId", "GLOBAL_PREFERENCES", "userPrefValue", javaScriptEnabled, "userLogin", userLogin));
+                result = dispatcher.runSync("setUserPreference", UtilMisc.toMap("userPrefTypeId", "javaScriptEnabled",
+                        "userPrefGroupTypeId", "GLOBAL_PREFERENCES", "userPrefValue", javaScriptEnabled,
+                        "userLogin", userLogin, "executionContext", executionContext));
             } catch (GenericServiceException e) {
                 Debug.logError(e, "Error setting user preference", module);
             }
@@ -432,7 +439,10 @@ public class LoginWorker {
         String javaScriptEnabled = null;
         try {
             LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
-            Map<String, Object> result = dispatcher.runSync("getUserPreference", UtilMisc.toMap("userPrefTypeId", "javaScriptEnabled", "userPrefGroupTypeId", "GLOBAL_PREFERENCES", "userLogin", userLogin));
+            Map<String, Object> result = dispatcher.runSync("getUserPreference",
+                    UtilMisc.toMap("userPrefTypeId", "javaScriptEnabled",
+                            "userPrefGroupTypeId", "GLOBAL_PREFERENCES", "userLogin", userLogin,
+                            "executionContext", request.getAttribute("executionContext")));
             javaScriptEnabled = (String) result.get("userPrefValue");
         } catch (GenericServiceException e) {
             Debug.logError(e, "Error getting user preference", module);

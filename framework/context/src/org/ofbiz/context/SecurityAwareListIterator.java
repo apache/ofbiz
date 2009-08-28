@@ -18,7 +18,6 @@
  *******************************************************************************/
 package org.ofbiz.context;
 
-import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
@@ -27,7 +26,7 @@ import org.ofbiz.service.ExecutionContext;
 /**
  * SecurityAwareListIterator class.  This class decorates a <code>
  * ListIterator</code> instance and filters a list of
- * <code>GenericValue</code>s based on a set of permission services.
+ * <code>Object</code>s based on a set of permission services.
  * <p>The permission service must implement <code>permissionInterface</code>
  * and accept an optional <code>candidateObject</code> parameter (parameter
  * type is <code>java.lang.Object</code>). The service should

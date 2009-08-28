@@ -306,7 +306,6 @@ public class ServiceDispatcher {
         ExecutionContext executionContext = (ExecutionContext) context.get("executionContext");
         if (executionContext == null) {
             try {
-                Debug.logInfo(new Exception(), modelService.name + ": No executionContext, creating new one", module);
                 executionContext = (ExecutionContext) ExecutionContextFactory.getInstance();
 			} catch (Exception e) {
 				throw new GenericServiceException(e);

@@ -34,7 +34,7 @@ import org.ofbiz.service.GenericDispatcher;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ExecutionContext;
 
-/** ExecutionContext implementation. */
+/** An implementation of the <code>ExecutionContext</code> interface. */
 public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContextImpl implements ExecutionContext {
 
     public static final String module = ExecutionContextImpl.class.getName();
@@ -45,7 +45,7 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
 
 	public GenericDelegator getDelegator() {
 		if (this.delegator == null) {
-			this.delegator = DelegatorFactory.getGenericDelegator("default");
+			this.delegator = DelegatorFactory.getGenericDelegator("default", this);
 		}
 		return this.delegator;
 	}

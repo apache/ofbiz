@@ -21,7 +21,7 @@ package org.ofbiz.api.authorization;
 import java.security.Permission;
 
 /**
- * Admin permission class. Extends GenericPermission.
+ * Admin permission class. Extends BasicPermission.
  */
 @SuppressWarnings("serial")
 public class AdminPermission extends BasicPermission {
@@ -52,6 +52,10 @@ public class AdminPermission extends BasicPermission {
 		return this.permissionString.hashCode();
 	}
 
+	/** Returns <code>true</code> - the admin permission has
+	 * no restrictions.
+	 * 
+	 */
 	@Override
 	public boolean implies(Permission permission) {
 		return true;

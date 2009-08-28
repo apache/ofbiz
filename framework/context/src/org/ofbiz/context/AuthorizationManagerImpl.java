@@ -121,6 +121,12 @@ public class AuthorizationManagerImpl<E> extends OFBizSecurity implements Author
 		
 	}
 
+	@Override
+    public void clearUserData(GenericValue userLogin) {
+        super.clearUserData(userLogin);
+        userPermCache.remove(userLogin.getString("userLogin"));
+    }
+
 	@SuppressWarnings("unchecked")
     public AccessController<?> getAccessController(org.ofbiz.api.context.ExecutionContext executionContext) throws AccessControlException {
         String userLoginId = ((ExecutionContext) executionContext).getUserLogin().getString("userLoginId");

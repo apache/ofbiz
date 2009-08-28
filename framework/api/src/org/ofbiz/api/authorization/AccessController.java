@@ -27,7 +27,7 @@ import java.util.ListIterator;
  * separate the permissions-checking logic from the artifacts
  * that use it.
  */
-public interface AccessController<E> {
+public interface AccessController<E>  {
 
 	/** Returns silently if the user has been granted <code>permission</code>
 	 * access for the current artifact, throws <code>AccessControlException</code>
