@@ -35,6 +35,7 @@ import org.ofbiz.service.ExecutionContext;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
 
+/** An implementation of the <code>AccessController</code> interface. */
 public class AccessControllerImpl<E> implements AccessController<E> {
 
     public static final String module = AccessControllerImpl.class.getName();

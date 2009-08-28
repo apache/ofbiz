@@ -22,6 +22,8 @@ import java.util.Map;
 
 import javolution.util.FastMap;
 
+/** Implements a node in a permissions tree.
+ */
 public class PathNode {
 
     protected Map<String, PathNode> childNodes = null;

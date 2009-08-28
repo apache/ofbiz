@@ -46,7 +46,6 @@ import org.ofbiz.security.AuthorizationManager;
  * saved <code>AuthorizationManager</code> instance.</li>
  * </ul></p>
  * 
- * @param <E>
  */
 public class NullAuthorizationManager<E> implements AuthorizationManager {
 

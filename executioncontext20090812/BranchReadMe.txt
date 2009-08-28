@@ -26,6 +26,21 @@ The workaround I came up with was to have the lowest level methods
 declared in the api component, then have each component extend
 the interfaces and add their methods. It's not pretty, but it works.
 
+This is where you can find the interfaces:
+
+org.ofbiz.api.authorization.AuthorizationManager
+  org.ofbiz.security.AuthorizationManager
+
+org.ofbiz.api.context.ExecutionContext
+  org.ofbiz.entity.ExecutionContext
+    org.ofbiz.security.ExecutionContext
+      org.ofbiz.service.ExecutionContext
+
+When the cross-dependency issues are solved, all of the extended
+interfaces will be consolidated into one.
+
+The interface implementations can be found in the context component. 
+  
 The ultimate goal of ExecutionContext is to have all client code
 get the contained objects from ExecutionContext only - instead of
 getting them from the various classes now in use. This initial
@@ -58,5 +73,14 @@ will be rendered.
 2009-08-28: Permissions checking has been implemented. The code has
 a few bugs, and there are places where the ExecutionContext isn't being
 passed along, so OFBiz won't run with the AuthorizationManager enabled.
-Consequently, the AuthorizationManager is disabled by default. You can
+Consequently, the AuthorizationManager is disabled by default. It still
+"pretends" to check permissions, but it always grants access. You can
 enable it with a property in api.properties.
+
+When a user first logs in, all of their permissions are gathered from the
+security entities and are used to assemble a tree-like Java structure.
+The structure is cached. When an artifact requests the user's permissions,
+an object (OFBizPermission) traverses the tree, accumulating permissions
+along the way. This is how permission inheritance is acheived. The permission
+object is then queried if the user has the requested permission and the
+result is returned to the artifact.

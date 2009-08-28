@@ -26,6 +26,9 @@ import java.util.ListIterator;
 import org.ofbiz.entity.AccessController;
 import org.ofbiz.entity.util.EntityListIterator;
 
+/** An implementation of the <code>AccessController</code> interface
+ * that allows unrestricted access.
+ */
 public class NullAccessController<E> implements AccessController<E> {
 
     public EntityListIterator applyFilters(EntityListIterator listIterator) {
