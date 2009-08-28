@@ -16,28 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.entity;
+package org.ofbiz.context;
 
+import java.security.AccessControlException;
+import java.security.Permission;
+import java.util.List;
+import java.util.ListIterator;
+
+import org.ofbiz.entity.AccessController;
 import org.ofbiz.entity.util.EntityListIterator;
 
-/**
- * AccessController interface. This interface extends <code>
- * org.ofbiz.api.authorization.AccessController</code> so that
- * the <code>applyFilters</code> method can be overridden to handle
- * <code>EntityListIterator</code>.
- */
-public interface AccessController<E> extends org.ofbiz.api.authorization.AccessController<E> {
+public class NullAccessController<E> implements AccessController<E> {
 
-    /** Applies permission filters to an <code>EntityListIterator</code>. The
-     * returned <code>EntityListIterator</code> is security-aware, so methods
-     * that return a <code>GenericValue</code> will return only the
-     * values the user has permission to access.
-     * 
-     * @param list The <code>EntityListIterator</code> to apply filters to
-     * @return A security-aware <code>EntityListIterator</code> if filters
-     * were specified for the current artifact, or the original
-     * <code>EntityListIterator</code> otherwise
-     */
-	public EntityListIterator applyFilters(EntityListIterator listIterator);
+    public EntityListIterator applyFilters(EntityListIterator listIterator) {
+        return listIterator;
+    }
 
+    public List<E> applyFilters(List<E> list) {
+        return list;
+    }
+
+    public ListIterator<E> applyFilters(ListIterator<E> list) {
+        return list;
+    }
+
+    public void checkPermission(Permission permission) throws AccessControlException {}
 }

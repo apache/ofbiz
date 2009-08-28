@@ -39,6 +39,7 @@ under the License.
         <fileset dir="../security/build/lib" includes="*.jar"/>
         <fileset dir="../service/lib" includes="*.jar"/>
         <fileset dir="../service/build/lib" includes="*.jar"/>
+        <fileset dir="../context/build/lib" includes="*.jar"/>
     </path>
 
     <!-- ================================================================== -->

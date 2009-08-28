@@ -18,21 +18,22 @@
  *******************************************************************************/
 package org.ofbiz.context;
 
-import static org.ofbiz.api.authorization.BasicPermissions.Admin;
-
 import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.List;
-import java.util.ListIterator;
 
+import org.ofbiz.api.authorization.BasicPermissions;
 import org.ofbiz.entity.AccessController;
-import org.ofbiz.api.authorization.PermissionsIntersection;
+import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.security.AuthorizationManager;
 import org.ofbiz.security.OFBizSecurity;
 import org.ofbiz.service.ExecutionContext;
-import org.ofbiz.service.ServicePermission;
 
 /**
  * An implementation of the AuthorizationManager interface that uses the OFBiz database
@@ -40,28 +41,17 @@ import org.ofbiz.service.ServicePermission;
  */
 public class AuthorizationManagerImpl<E> extends OFBizSecurity implements AuthorizationManager {
 
-    // Right now this class is being used as a test jig for the various classes
-    // it will be working with. The actual implementation will occur once the
-    // entities are defined and in place.
+    // Right now this class implements permission checking only.
 
     public static final String module = AuthorizationManagerImpl.class.getName();
-    
-    protected Permission testPermission = null;
-    protected Permission getTestPermission(ExecutionContext executionContext) {
-    	if (this.testPermission == null) {
-    		// Build test permissions
-    		this.testPermission = new PermissionsIntersection("TestPermissions",
-    				UtilMisc.toList(new ServicePermission("securityRedesignTest", executionContext),
-    						Admin));
-    	}
-		return this.testPermission;
-    }
+    protected static final UtilCache<String, PathNode> userPermCache = new UtilCache<String, PathNode>("authorization.UserPermissions");
+    public static final AccessController<?> nullAccessController = new NullAccessController();
+    protected static boolean underConstruction = false;
 
     public AuthorizationManagerImpl() {
     }
 
-	public void assignGroupPermission(String userGroupId, String artifactId,
-			Permission permission) {
+	public void assignGroupPermission(String userGroupId, String artifactId, Permission permission) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -71,8 +61,7 @@ public class AuthorizationManagerImpl<E> extends OFBizSecurity implements Author
 		
 	}
 
-	public void assignUserPermission(String userLoginId, String artifactId,
-			Permission permission) {
+	public void assignUserPermission(String userLoginId, String artifactId, Permission permission) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -97,8 +86,7 @@ public class AuthorizationManagerImpl<E> extends OFBizSecurity implements Author
 		
 	}
 
-	public void deleteGroupPermission(String userGroupId, String artifactId,
-			Permission permission) {
+	public void deleteGroupPermission(String userGroupId, String artifactId, Permission permission) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -118,8 +106,7 @@ public class AuthorizationManagerImpl<E> extends OFBizSecurity implements Author
 		
 	}
 
-	public void deleteUserPermission(String userLoginId, String artifactId,
-			Permission permission) {
+	public void deleteUserPermission(String userLoginId, String artifactId, Permission permission) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -134,8 +121,91 @@ public class AuthorizationManagerImpl<E> extends OFBizSecurity implements Author
 		
 	}
 
-	public AccessController<E> getAccessController(org.ofbiz.api.context.ExecutionContext executionContext) {
-		return new AccessControllerImpl<E>((ExecutionContext) executionContext, this.getTestPermission((ExecutionContext) executionContext));
+	@SuppressWarnings("unchecked")
+    public AccessController<?> getAccessController(org.ofbiz.api.context.ExecutionContext executionContext) throws AccessControlException {
+        String userLoginId = ((ExecutionContext) executionContext).getUserLogin().getString("userLoginId");
+        PathNode node = userPermCache.get(userLoginId);
+        if (node == null) {
+            synchronized (userPermCache) {
+                if (underConstruction) {
+                    return nullAccessController;
+                }
+                node = userPermCache.get(userLoginId);
+                if (node == null) {
+                    node = getUserPermissionsNode((ExecutionContext) executionContext);
+                    userPermCache.put(userLoginId, node);
+                }
+            }
+        }
+        return new AccessControllerImpl((ExecutionContext) executionContext, node);
 	}
+
+	@SuppressWarnings("unchecked")
+    protected static PathNode getUserPermissionsNode(ExecutionContext executionContext) throws AccessControlException {
+	    underConstruction = true;
+        // Set up the ExecutionContext for unrestricted access to security-aware artifacts
+	    ExecutionContext localContext = (ExecutionContext) executionContext;
+        AuthorizationManager originalSecurity = localContext.getSecurity();
+        localContext.setSecurity(new NullAuthorizationManager());
+	    String userLoginId = executionContext.getUserLogin().getString("userLoginId");
+	    GenericDelegator delegator = executionContext.getDelegator();
+	    PathNode node = new PathNode();
+	    try {
+	        // Process group membership permissions first
+	        List<GenericValue> groupMemberships = delegator.findList("UserToUserGroupRelationship", EntityCondition.makeCondition(UtilMisc.toMap("userLoginId", userLoginId)), null, null, null, false);
+	        for (GenericValue userGroup : groupMemberships) {
+	            processGroupPermissions(userGroup.getString("groupId"), node, delegator);
+	        }
+	        // Process user permissions last
+	        List<GenericValue> permissionValues = delegator.findList("UserToArtifactPermRel", EntityCondition.makeCondition(UtilMisc.toMap("userLoginId", userLoginId)), null, null, null, false);
+	        setPermissions(userLoginId, node, permissionValues);
+	    } catch (GenericEntityException e) {
+	        throw new AccessControlException(e.getMessage());
+	    } finally {
+	        localContext.setSecurity(originalSecurity);
+            underConstruction = false;
+	    }
+	    return node;
+	}
+
+    protected static void processGroupPermissions(String groupId, PathNode node, GenericDelegator delegator) throws AccessControlException {
+        try {
+            // Process this group's memberships first
+            List<GenericValue> parentGroups = delegator.findList("UserGroupRelationship", EntityCondition.makeCondition(UtilMisc.toMap("toGroupId", groupId)), null, null, null, false);
+            for (GenericValue parentGroup : parentGroups) {
+                processGroupPermissions(parentGroup.getString("fromGroupId"), node, delegator);
+            }
+            // Process this group's permissions
+            List<GenericValue> permissionValues = delegator.findList("UserGroupToArtifactPermRel", EntityCondition.makeCondition(UtilMisc.toMap("groupId", groupId)), null, null, null, false);
+            setPermissions(groupId, node, permissionValues);
+        } catch (GenericEntityException e) {
+            throw new AccessControlException(e.getMessage());
+        }
+    }
+
+    protected static void setPermissions(String id, PathNode node, List<GenericValue> permissionValues) {
+        for (GenericValue value : permissionValues) {
+            String artifactPath = value.getString("artifactPath");
+            OFBizPermission target = new OFBizPermission(id + "@" + artifactPath);
+            String[] pair = value.getString("permissionValue").split("=");
+            if ("filter".equalsIgnoreCase(pair[0])) {
+                target.filters.add(pair[1]);
+            } else if ("service".equalsIgnoreCase(pair[0])) {
+                target.services.add(pair[1]);
+            } else {
+                Permission permission = BasicPermissions.ConversionMap.get(pair[0].toUpperCase());
+                if (permission != null) {
+                    if ("true".equalsIgnoreCase(pair[1])) {
+                        target.includePermissions.getPermissionsSet().add(permission);
+                    } else {
+                        target.excludePermissions.getPermissionsSet().add(permission);
+                    }
+                } else {
+                    throw new AccessControlException("Invalid permission: " + pair[0]);
+                }
+            }
+            node.setPermissions(artifactPath, target);
+        }
+    }
 
 }

@@ -18,7 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.api.context;
 
-/** A basic implementation of the ExecutionArtifact interface. */
+/** A basic implementation of the <code>ExecutionArtifact</code> interface. */
 public class GenericExecutionArtifact implements ExecutionArtifact {
 	
 	protected final String location;

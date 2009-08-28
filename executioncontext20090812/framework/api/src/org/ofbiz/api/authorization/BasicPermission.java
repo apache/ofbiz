@@ -21,7 +21,7 @@ package org.ofbiz.api.authorization;
 import java.security.Permission;
 
 /**
- * Basic permission class. Similar to java.security.BasicPermission.
+ * Generic permission class. Similar to java.security.BasicPermission.
  */
 @SuppressWarnings("serial")
 public class BasicPermission extends Permission {
@@ -39,7 +39,7 @@ public class BasicPermission extends Permission {
 			return true;
 		}
 		try {
-			BasicPermission that = (BasicPermission) obj;
+		    BasicPermission that = (BasicPermission) obj;
 			return this.permissionString.equals(that.permissionString);
 		} catch (Exception e) {}
 		return false;
@@ -59,7 +59,7 @@ public class BasicPermission extends Permission {
 	public boolean implies(Permission permission) {
 		try {
 			PermissionsUnion permissionsUnion = (PermissionsUnion) permission;
-			for (Permission perm : permissionsUnion.permissionsList) {
+			for (Permission perm : permissionsUnion.getPermissionsSet()) {
 				if (this.implies(perm)) {
 					return true;
 				}
@@ -68,7 +68,7 @@ public class BasicPermission extends Permission {
 		} catch (Exception e) {}
 		try {
 			PermissionsIntersection permissionsIntersection = (PermissionsIntersection) permission;
-			for (Permission perm : permissionsIntersection.permissionsList) {
+			for (Permission perm : permissionsIntersection.getPermissionsSet()) {
 				if (!this.implies(perm)) {
 					return false;
 				}

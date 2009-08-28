@@ -22,10 +22,14 @@ import java.security.Permission;
 import java.util.List;
 
 /**
- * A <code>List</code> of permissions that represent an intersection.
+ * A <code>Set</code> of permissions that represents an intersection.
  */
 @SuppressWarnings("serial")
-public class PermissionsIntersection extends PermissionsList {
+public class PermissionsIntersection extends PermissionsSet {
+
+	public PermissionsIntersection(String listName) {
+		super(listName);
+	}
 
 	public PermissionsIntersection(String listName, List<Permission> permissionsList) {
 		super(listName, permissionsList);
@@ -38,7 +42,7 @@ public class PermissionsIntersection extends PermissionsList {
 	public boolean implies(Permission permission) {
 		try {
 			PermissionsUnion permissionsUnion = (PermissionsUnion) permission;
-			for (Permission perm : permissionsUnion.permissionsList) {
+			for (Permission perm : permissionsUnion.getPermissionsSet()) {
 				if (this.implies(perm)) {
 					return true;
 				}
@@ -47,14 +51,14 @@ public class PermissionsIntersection extends PermissionsList {
 		} catch (Exception e) {}
 		try {
 			PermissionsIntersection permissionsIntersection = (PermissionsIntersection) permission;
-			for (Permission perm : permissionsIntersection.permissionsList) {
+			for (Permission perm : permissionsIntersection.getPermissionsSet()) {
 				if (!this.implies(perm)) {
 					return false;
 				}
 			}
 			return true;
 		} catch (Exception e) {}
-		for (Permission perm : this.permissionsList) {
+		for (Permission perm : this.permissionsSet) {
 			if (!perm.implies(permission)) {
 				return false;
 			}

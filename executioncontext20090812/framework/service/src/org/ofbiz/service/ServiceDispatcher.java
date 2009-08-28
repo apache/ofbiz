@@ -34,7 +34,6 @@ import org.ofbiz.api.context.ExecutionContextFactory;
 import org.ofbiz.api.context.GenericParametersArtifact;
 import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.GeneralRuntimeException;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilTimer;
 import org.ofbiz.base.util.UtilValidate;
@@ -114,9 +113,13 @@ public class ServiceDispatcher {
             if (!this.delegator.getOriginalDelegatorName().equals(delegatorName)) {
             	delegatorName = this.delegator.getOriginalDelegatorName();
             }
-            GenericDelegator newDelegator = DelegatorFactory.getGenericDelegator(delegatorName);
+            ExecutionContext executionContext = (ExecutionContext) ExecutionContextFactory.getInstance();
+            GenericDelegator newDelegator = DelegatorFactory.getGenericDelegator(delegatorName, executionContext);
+            GenericValue userLogin = newDelegator.makeValue("UserLogin");
+            userLogin.set("userLoginId", "system");
+            executionContext.setUserLogin(userLogin);
             this.jm = JobManager.getInstance(newDelegator, enableJM);
-        } catch (GeneralRuntimeException e) {
+        } catch (Exception e) {
             Debug.logWarning(e.getMessage(), module);
         }
 
@@ -303,6 +306,7 @@ public class ServiceDispatcher {
         ExecutionContext executionContext = (ExecutionContext) context.get("executionContext");
         if (executionContext == null) {
             try {
+                Debug.logInfo(new Exception(), modelService.name + ": No executionContext, creating new one", module);
                 executionContext = (ExecutionContext) ExecutionContextFactory.getInstance();
 			} catch (Exception e) {
 				throw new GenericServiceException(e);

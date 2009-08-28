@@ -19,7 +19,7 @@
 package org.ofbiz.context;
 
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
 import java.util.Map;
 
 import javolution.util.FastMap;
@@ -44,11 +44,11 @@ public class SecurityAwareIterator<E> implements Iterator<E> {
 
     public static final String module = SecurityAwareIterator.class.getName();
     protected final Iterator<E> iterator;
-    protected final List<String> serviceNameList;
+    protected final Set<String> serviceNameList;
     protected final ExecutionContext executionContext;
     protected E nextValue = null;
 
-    public SecurityAwareIterator(Iterator<E> iterator, List<String> serviceNameList, ExecutionContext executionContext) {
+    public SecurityAwareIterator(Iterator<E> iterator, Set<String> serviceNameList, ExecutionContext executionContext) {
         this.iterator = iterator;
         this.serviceNameList = serviceNameList;
         this.executionContext = executionContext;

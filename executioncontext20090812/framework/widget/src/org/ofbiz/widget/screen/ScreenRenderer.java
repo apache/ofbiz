@@ -164,7 +164,9 @@ public class ScreenRenderer {
         context.put("userLogin", userLogin);
         context.put("nowTimestamp", UtilDateTime.nowTimestamp());
         try {
-            Map<String, Object> result = dispatcher.runSync("getUserPreferenceGroup", UtilMisc.toMap("userLogin", userLogin, "userPrefGroupTypeId", "GLOBAL_PREFERENCES"));
+            Map<String, Object> result = dispatcher.runSync("getUserPreferenceGroup",
+                    UtilMisc.toMap("userLogin", userLogin, "userPrefGroupTypeId", "GLOBAL_PREFERENCES",
+                            "executionContext", context.get("executionContext")));
             context.put("userPreferences", result.get("userPrefMap"));
         } catch (GenericServiceException e) {
             Debug.logError(e, "Error while getting user preferences: ", module);
@@ -192,11 +194,11 @@ public class ScreenRenderer {
 
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
 
+        context.put("executionContext", request.getAttribute("executionContext"));
         populateBasicContext(context, screens, parameterMap, (GenericDelegator) request.getAttribute("delegator"),
                 (LocalDispatcher) request.getAttribute("dispatcher"), (Authorization) request.getAttribute("authz"),
                 (Security) request.getAttribute("security"), UtilHttp.getLocale(request), userLogin);
 
-        context.put("executionContext", request.getAttribute("executionContext"));
         context.put("autoUserLogin", session.getAttribute("autoUserLogin"));
         context.put("person", session.getAttribute("person"));
         context.put("partyGroup", session.getAttribute("partyGroup"));

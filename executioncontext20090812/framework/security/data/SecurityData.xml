@@ -61,6 +61,7 @@ under the License.
     <UserLogin userLoginId="NOT_LOGGED_IN" enabled="N" isSystem="N"/>
     <UserGroup groupId="OFBIZ_USERS" description="All OFBiz users"/>
     <ArtifactPath artifactPath="ofbiz" description="The artifact path root"/>
+    <ArtifactPermission permissionValue="access=true" description="Access granted"/>
     <ArtifactPermission permissionValue="admin=true" description="Admin access granted"/>
     <ArtifactPermission permissionValue="create=true" description="Create access granted"/>
     <ArtifactPermission permissionValue="create=false" description="Create access denied"/>
@@ -71,5 +72,9 @@ under the License.
     <ArtifactPermission permissionValue="view=true" description="View access granted"/>
     <ArtifactPermission permissionValue="view=false" description="View access denied"/>
     <UserToArtifactPermRel userLoginId="system" artifactPath="ofbiz" permissionValue="admin=true"/>
+    <ArtifactPath artifactPath="ofbiz/getUserPreferenceGroup" description="The getUserPreferenceGroup service"/>
+    <ArtifactPath artifactPath="ofbiz/getVisualThemeResources" description="The getVisualThemeResources service"/>
+    <UserToArtifactPermRel userLoginId="NOT_LOGGED_IN" artifactPath="ofbiz/getUserPreferenceGroup" permissionValue="access=true"/>
+    <UserToArtifactPermRel userLoginId="NOT_LOGGED_IN" artifactPath="ofbiz/getVisualThemeResources" permissionValue="access=true"/>
 
 </entity-engine-xml>

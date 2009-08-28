@@ -35,6 +35,9 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilURL;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.context.AuthorizationManagerImpl;
+import org.ofbiz.context.ExecutionContextImpl;
+import org.ofbiz.entity.AccessController;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntityException;
@@ -225,7 +228,7 @@ public class EntityDataLoadContainer implements Container {
 
         String delegatorNameToUse = overrideDelegator != null ? overrideDelegator : delegatorName;
         String groupNameToUse = overrideGroup != null ? overrideGroup : entityGroupName;
-        GenericDelegator delegator = DelegatorFactory.getGenericDelegator(delegatorNameToUse);
+        GenericDelegator delegator = DelegatorFactory.getGenericDelegator(delegatorNameToUse, new LoaderExecutionContext());
         if (delegator == null) {
             throw new ContainerException("Invalid delegator name!");
         }
@@ -469,5 +472,13 @@ public class EntityDataLoadContainer implements Container {
      * @see org.ofbiz.base.container.Container#stop()
      */
     public void stop() throws ContainerException {
+    }
+
+    // TODO: Find an implementation-agnostic way to do this
+    protected static class LoaderExecutionContext extends ExecutionContextImpl {
+        @Override
+        public AccessController<?> getAccessController() {
+            return AuthorizationManagerImpl.nullAccessController;
+        }
     }
 }
