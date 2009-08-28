@@ -43,6 +43,8 @@ If you want to see the ExecutionContext and AccessController in
 action, change the settings in api.properties. You'll see info
 messages in the console log.
 
+---------------------------------------------------------------------
+
 2009-08-26: Added security-aware Freemarker transform. Template
 sections can be controlled with:
 
@@ -50,3 +52,11 @@ sections can be controlled with:
 
 If the user has permission to view the artifact, then "Some text"
 will be rendered.
+
+---------------------------------------------------------------------
+
+2009-08-28: Permissions checking has been implemented. The code has
+a few bugs, and there are places where the ExecutionContext isn't being
+passed along, so OFBiz won't run with the AuthorizationManager enabled.
+Consequently, the AuthorizationManager is disabled by default. You can
+enable it with a property in api.properties.

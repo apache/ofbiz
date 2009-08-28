@@ -24,7 +24,23 @@ import java.util.TimeZone;
 
 import org.ofbiz.api.authorization.AccessController;
 
-/** ExecutionContext interface. */
+/** ExecutionContext interface. The <code>ExecutionContext</code> is a container
+ * for frequently used objects, plus it keeps track of the program's
+ * execution path. <p>As an object container, the <code>ExecutionContext</code>
+ * simplifies framework code - since only one oject needs to be
+ * passed around instead of five or six.</p><p>The <code>ExecutionContext</code>
+ * depends on the artifacts in the program's execution path to implement
+ * the <code>ExecutionArtifact</code> interface, or if that is not possible,
+ * to use a <code>GenericExecutionArtifact</code> instance. At the start of
+ * each method, the artifact calls <code>pushExecutionArtifact</code>, and
+ * as each method exits the artifact calls <code>popExecutionArtifact</code>.
+ * Implementations of this interface will pass the current execution path
+ * to the Authorization Manager so the proper user permissions can be
+ * retrieved for the current artifact.</p>
+ *
+ * @see org.ofbiz.api.context.ExecutionArtifact
+ * @see org.ofbiz.api.context.GenericExecutionArtifact
+ */
 public interface ExecutionContext {
 
     /** Returns an <code>AccessController</code> instance for this

@@ -21,13 +21,11 @@ package org.ofbiz.api.authorization;
 import java.security.Permission;
 
 /**
- * Admin permission class. Similar to java.security.BasicPermission.
+ * Admin permission class. Extends GenericPermission.
  */
 @SuppressWarnings("serial")
-public class AdminPermission extends Permission {
+public class AdminPermission extends BasicPermission {
 
-	protected final String permissionString = "admin=true";
-	
 	public AdminPermission() {
 		super("admin=true");
 	}
@@ -38,7 +36,7 @@ public class AdminPermission extends Permission {
 			return true;
 		}
 		try {
-			BasicPermission that = (BasicPermission) obj;
+		    AdminPermission that = (AdminPermission) obj;
 			return this.permissionString.equals(that.permissionString);
 		} catch (Exception e) {}
 		return false;

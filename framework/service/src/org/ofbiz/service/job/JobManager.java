@@ -167,7 +167,7 @@ public class JobManager {
                                 Debug.logError("Unable to locate DispatchContext object; not running job!", module);
                                 continue;
                             }
-                            Job job = new PersistedServiceJob(dctx, v, null); // TODO fix the requester
+                            Job job = new PersistedServiceJob(dctx, v, null, this.delegator); // TODO fix the requester
                             try {
                                 job.queue();
                                 localPoll.add(job);

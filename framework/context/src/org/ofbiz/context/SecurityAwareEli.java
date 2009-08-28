@@ -19,6 +19,7 @@
 package org.ofbiz.context;
 
 import java.util.List;
+import java.util.Set;
 
 import javolution.util.FastList;
 
@@ -44,7 +45,7 @@ public class SecurityAwareEli extends SecurityAwareListIterator<GenericValue> im
     protected final EntityListIterator listIterator;
     protected GenericValue previousValue = null;
 
-    public SecurityAwareEli(EntityListIterator iterator, List<String> serviceNameList, ExecutionContext executionContext) {
+    public SecurityAwareEli(EntityListIterator iterator, Set<String> serviceNameList, ExecutionContext executionContext) {
         super(iterator, serviceNameList, executionContext);
         this.listIterator = iterator;
     }

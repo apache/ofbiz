@@ -18,6 +18,8 @@
  *******************************************************************************/
 package org.ofbiz.api.authorization;
 
+import java.security.AccessControlException;
+
 import org.ofbiz.api.context.ExecutionContext;
 
 /**
@@ -26,6 +28,6 @@ import org.ofbiz.api.context.ExecutionContext;
 public interface AuthorizationManager {
 
 	// Get the access controller for an artifact/user combination
-	public AccessController getAccessController (ExecutionContext executionContext);
+	public AccessController getAccessController (ExecutionContext executionContext) throws AccessControlException;
 
 }

@@ -20,6 +20,7 @@ package org.ofbiz.context;
 
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 
 import org.ofbiz.service.ExecutionContext;
 
@@ -40,7 +41,7 @@ public class SecurityAwareListIterator<E> extends SecurityAwareIterator<E> imple
     protected E previousValue = null;
     protected int index = 0;
 
-    public SecurityAwareListIterator(ListIterator<E> iterator, List<String> serviceNameList, ExecutionContext executionContext) {
+    public SecurityAwareListIterator(ListIterator<E> iterator, Set<String> serviceNameList, ExecutionContext executionContext) {
         super(iterator, serviceNameList, executionContext);
         this.listIterator = iterator;
     }

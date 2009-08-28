@@ -25,13 +25,14 @@ import java.util.TimeZone;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilProperties;
 
 /** Implementation of the ExecutionContext interface. */
 public abstract class ExecutionContextImpl implements ExecutionContext {
 
-	public static final String module = ExecutionContextImpl.class.getName();
+    public static final String module = ExecutionContextImpl.class.getName();
 
     protected final FastList<ExecutionArtifact> artifactStack = FastList.newInstance();
 	protected String currencyUom = null;
@@ -51,6 +52,16 @@ public abstract class ExecutionContextImpl implements ExecutionContext {
         this.verbose = "true".equals(UtilProperties.getPropertyValue("api.properties", "executionContext.verbose"));
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        if (this.artifactStack.size() > 0) {
+            // This check is temporary - it will be removed when implementation is complete
+            Debug.logError(new Exception("finalize() called with a stack that is not empty"), module);
+            return;
+        }
+        super.finalize();
+    }
+
     public String getCurrencyUom() {
         return this.currencyUom;
     }
@@ -63,7 +74,7 @@ public abstract class ExecutionContextImpl implements ExecutionContext {
 		StringBuilder sb = new StringBuilder("ofbiz");
 		for (ExecutionArtifact artifact : this.artifactStack) {
 			sb.append("/");
-			sb.append(artifact.getName());
+			sb.append(artifact.getName() == null ? "null" : artifact.getName());
 		}
 		return sb.toString();
 	}

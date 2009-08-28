@@ -427,7 +427,11 @@ public class FindServices {
 
         Map<String, Object> prepareResult = null;
         try {
-            prepareResult = dispatcher.runSync("prepareFind", UtilMisc.toMap("entityName", entityName, "orderBy", orderBy, "inputFields", inputFields, "filterByDate", filterByDate,"filterByDateValue", filterByDateValue, "userLogin", userLogin, "locale", context.get("locale"), "timeZone", context.get("timeZone")));
+            prepareResult = dispatcher.runSync("prepareFind", UtilMisc.toMap("entityName", entityName,
+                    "orderBy", orderBy, "inputFields", inputFields, "filterByDate", filterByDate,
+                    "filterByDateValue", filterByDateValue, "userLogin", userLogin,
+                    "locale", context.get("locale"), "timeZone", context.get("timeZone"),
+                    "executionContext", context.get("executionContext")));
         } catch (GenericServiceException gse) {
             return ServiceUtil.returnError("Error preparing conditions: " + gse.getMessage());
         }
@@ -436,7 +440,8 @@ public class FindServices {
 
         Map<String, Object> executeResult = null;
         try {
-            executeResult = dispatcher.runSync("executeFind", UtilMisc.toMap("entityName", entityName, "orderByList", orderByList, "fieldList", fieldList, "entityConditionList", exprList, "noConditionFind", noConditionFind, "distinct", distinct, "locale", context.get("locale"), "timeZone", context.get("timeZone")));
+            executeResult = dispatcher.runSync("executeFind", UtilMisc.toMap("entityName", entityName, "orderByList", orderByList, "fieldList", fieldList, "entityConditionList", exprList, "noConditionFind", noConditionFind, "distinct", distinct, "locale", context.get("locale"), "timeZone", context.get("timeZone"),
+                    "executionContext", context.get("executionContext")));
         } catch (GenericServiceException gse) {
             return ServiceUtil.returnError("Error finding iterator: " + gse.getMessage());
         }

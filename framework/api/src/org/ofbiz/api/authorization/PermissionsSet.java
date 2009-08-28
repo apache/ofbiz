@@ -20,18 +20,26 @@ package org.ofbiz.api.authorization;
 
 import java.security.Permission;
 import java.util.List;
+import java.util.Set;
+
+import javolution.util.FastSet;
 
 /**
- * A <code>List</code> of permissions.
+ * A <code>Set</code> of permissions.
  */
 @SuppressWarnings("serial")
-public abstract class PermissionsList extends Permission {
-	protected final List<Permission> permissionsList;
+public abstract class PermissionsSet extends BasicPermission {
 
-	public PermissionsList(String listName, List<Permission> permissionsList) {
-		super(listName);
-		this.permissionsList = permissionsList;
+	protected final Set<Permission> permissionsSet = FastSet.newInstance();
+
+	public PermissionsSet(String setName) {
+		super(setName);
 	}
+
+    public PermissionsSet(String setName, List<Permission> permissionsList) {
+        super(setName);
+        this.permissionsSet.addAll(permissionsList);
+    }
 
 	@Override
 	public boolean equals(Object obj) {
@@ -39,8 +47,8 @@ public abstract class PermissionsList extends Permission {
 			return true;
 		}
 		try {
-			PermissionsList that = (PermissionsList) obj;
-			return this.permissionsList.equals(that.permissionsList);
+		    PermissionsSet that = (PermissionsSet) obj;
+			return this.permissionsSet.equals(that.permissionsSet);
 		} catch (Exception e) {}
 		return false;
 	}
@@ -52,16 +60,20 @@ public abstract class PermissionsList extends Permission {
 
 	@Override
 	public int hashCode() {
-		return permissionsList.hashCode();
+		return permissionsSet.hashCode();
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		for (Permission perm : this.permissionsList) {
+		for (Permission perm : this.permissionsSet) {
 			sb.append(perm);
 			sb.append(" ");
 		}
 		return sb.toString().trim();
 	}
+
+	public Set<Permission> getPermissionsSet() {
+        return this.permissionsSet;
+    }
 }

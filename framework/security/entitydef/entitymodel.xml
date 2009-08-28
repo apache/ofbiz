@@ -344,7 +344,7 @@ under the License.
       <field name="groupId" type="id-ne"/>
       <field name="artifactPath" type="id-vlong-ne"/>
       <field name="permissionValue" type="id-long-ne"/>
-      <prim-key field="userLoginId"/>
+      <prim-key field="groupId"/>
       <prim-key field="artifactPath"/>
       <prim-key field="permissionValue"/>
       <relation type="one" fk-name="UGAP_USER_GROUP" rel-entity-name="UserGroup">

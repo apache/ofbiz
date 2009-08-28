@@ -101,7 +101,15 @@ public class SetServiceFields extends MethodOperation {
             methodContext.setErrorReturn(errMsg, simpleMethod);
             return false;
         }
+        Map<String, Object> originalParams = methodContext.getParameters();
         for (ModelParam modelParam: modelService.getInModelParamList()) {
+            if (modelParam.internal) {
+                // Copy internal parameters
+                Object value = originalParams.get(modelParam.name);
+                if (value != null) {
+                    toMap.put(modelParam.name, value);
+                }
+            }
             if (fromMap.containsKey(modelParam.name)) {
                 Object value = fromMap.get(modelParam.name);
 

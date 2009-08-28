@@ -18,8 +18,12 @@
  *******************************************************************************/
 package org.ofbiz.api.context;
 
-/** ExecutionArtifact interface. */
+/** ExecutionArtifact interface. Artifacts in the program's execution
+ * path (services, screen widgets, form widgets, entities) should implement
+ * this interface.
+ */
 public interface ExecutionArtifact {
+
 	/**
 	 * Returns the location of this artifact.
 	 * 

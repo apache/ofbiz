@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 
 import org.ofbiz.service.ExecutionContext;
 
@@ -32,10 +33,10 @@ import org.ofbiz.service.ExecutionContext;
 public class SecurityAwareList<E> extends ArrayList<E> implements List<E> {
 
 	protected final static String module = SecurityAwareList.class.getName();
-    protected final List<String> serviceNameList;
+    protected final Set<String> serviceNameList;
     protected final ExecutionContext executionContext;
 
-	public SecurityAwareList(List<E> valueList, List<String> serviceNameList, ExecutionContext executionContext) {
+	public SecurityAwareList(List<E> valueList, Set<String> serviceNameList, ExecutionContext executionContext) {
 		super(valueList.size());
 		this.addAll(valueList);
 		this.trimToSize();

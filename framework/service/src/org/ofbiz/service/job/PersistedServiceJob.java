@@ -28,6 +28,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import javolution.util.FastMap;
 
+import org.ofbiz.api.context.ExecutionContextFactory;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
@@ -35,6 +36,7 @@ import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.service.calendar.TemporalExpression;
 import org.ofbiz.service.calendar.TemporalExpressionWorker;
+import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -43,7 +45,9 @@ import org.ofbiz.entity.condition.EntityFieldMap;
 import org.ofbiz.entity.serialize.SerializeException;
 import org.ofbiz.entity.serialize.XmlSerializer;
 import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.ExecutionContext;
 import org.ofbiz.service.GenericRequester;
+import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.service.calendar.RecurrenceInfo;
 import org.ofbiz.service.config.ServiceConfigUtil;
@@ -72,6 +76,16 @@ public class PersistedServiceJob extends GenericServiceJob {
     public PersistedServiceJob(DispatchContext dctx, GenericValue jobValue, GenericRequester req) {
         super(jobValue.getString("jobId"), jobValue.getString("jobName"));
         this.delegator = dctx.getDelegator();
+        this.requester = req;
+        this.dctx = dctx;
+        this.storedDate = jobValue.getTimestamp("runTime");
+        this.runtime = storedDate.getTime();
+        this.maxRetry = jobValue.get("maxRetry") != null ? jobValue.getLong("maxRetry").longValue() : -1;
+    }
+
+    public PersistedServiceJob(DispatchContext dctx, GenericValue jobValue, GenericRequester req, GenericDelegator delegator) {
+        super(jobValue.getString("jobId"), jobValue.getString("jobName"));
+        this.delegator = delegator;
         this.requester = req;
         this.dctx = dctx;
         this.storedDate = jobValue.getTimestamp("runTime");
@@ -292,6 +306,15 @@ public class PersistedServiceJob extends GenericServiceJob {
             if (!UtilValidate.isEmpty(jobObj.get("runAsUser"))) {
                 context.put("userLogin", ServiceUtil.getUserLogin(dctx, context, jobObj.getString("runAsUser")));
             }
+            ExecutionContext executionContext = (ExecutionContext) context.get("executionContext");
+            if (executionContext == null) {
+                executionContext = (ExecutionContext) ExecutionContextFactory.getInstance();
+                context.put("executionContext", executionContext);
+            }
+            GenericDelegator newDelegator = DelegatorFactory.getGenericDelegator(this.delegator.getDelegatorName());
+            executionContext.setDelegator(newDelegator);
+            executionContext.setDispatcher(this.dctx.getDispatcher());
+            executionContext.initializeContext(context);
         } catch (GenericEntityException e) {
             Debug.logError(e, "PersistedServiceJob.getContext(): Entity Exception", module);
         } catch (SerializeException e) {
@@ -302,6 +325,8 @@ public class PersistedServiceJob extends GenericServiceJob {
             Debug.logError(e, "PersistedServiceJob.getContext(): SAXException", module);
         } catch (IOException e) {
             Debug.logError(e, "PersistedServiceJob.getContext(): IOException", module);
+        } catch (Exception e) {
+            Debug.logError(e, "PersistedServiceJob.getContext(): Exception ", module);
         }
         if (context == null) {
             Debug.logError("Job context is null", module);

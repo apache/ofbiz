@@ -37,6 +37,7 @@ import org.ofbiz.service.ExecutionContext;
 /** ExecutionContext implementation. */
 public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContextImpl implements ExecutionContext {
 
+    public static final String module = ExecutionContextImpl.class.getName();
     protected GenericDelegator delegator = null;
     protected LocalDispatcher dispatcher = null;
     protected AuthorizationManager security = null;
@@ -73,6 +74,10 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
                 this.userLogin = localDelegator.findOne("UserLogin", false, "userLoginId", "NOT_LOGGED_IN");
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error while getting NOT_LOGGED_IN user: ", module);
+            }
+            if (this.userLogin == null) {
+                this.userLogin = localDelegator.makeValue("UserLogin");
+                this.userLogin.set("userLoginId", "NOT_LOGGED_IN");
             }
 	    }
 		return this.userLogin;
@@ -113,6 +118,6 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
 	}
 
 	public AccessController<?> getAccessController() {
-		return (AccessController<?>) this.getSecurity().getAccessController(this);
+        return (AccessController<?>) this.getSecurity().getAccessController(this);
 	}
 }

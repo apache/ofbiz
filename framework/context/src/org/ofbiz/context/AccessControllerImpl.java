@@ -18,80 +18,117 @@
  *******************************************************************************/
 package org.ofbiz.context;
 
-import static org.ofbiz.api.authorization.BasicPermissions.Admin;
-
 import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
+
+import javolution.util.FastMap;
 
 import org.ofbiz.entity.AccessController;
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
-import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.util.EntityListIterator;
+import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.ExecutionContext;
+import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ModelService;
 
 public class AccessControllerImpl<E> implements AccessController<E> {
 
     public static final String module = AccessControllerImpl.class.getName();
-    protected static UtilCache<String, Permission> userGroupPermCache = new UtilCache<String, Permission>("authorization.UserGroupPermissions");
-    protected static UtilCache<String, Permission> userPermCache = new UtilCache<String, Permission>("authorization.UserPermissions");
+
     protected final ExecutionContext executionContext;
-    protected final String executionPath;
-    protected final Permission permission;
+    protected final OFBizPermission permission;
+    protected final PathNode node;
     // Temporary - will be removed later
     protected boolean verbose = false;
-    protected List<String> serviceNameList = UtilMisc.toList("securityRedesignTest");
+    protected boolean disabled = false;
 
-    protected AccessControllerImpl(ExecutionContext executionContext, Permission permission) {
+    protected AccessControllerImpl(ExecutionContext executionContext, PathNode node) {
         this.executionContext = executionContext;
-        this.executionPath = executionContext.getExecutionPath();
-        this.permission = permission;
+        this.node = node;
+        this.permission = new OFBizPermission(executionContext.getUserLogin().getString("userLoginId"));
         this.verbose = "true".equals(UtilProperties.getPropertyValue("api.properties", "authorizationManager.verbose"));
+        this.disabled = "true".equals(UtilProperties.getPropertyValue("api.properties", "authorizationManager.disabled"));
     }
 
     public void checkPermission(Permission permission) throws AccessControlException {
         if (this.verbose) {
-            Debug.logInfo("Checking permission: " + this.executionPath + "[" + permission + "]", module);
+            Debug.logInfo("Checking permission: " + this.executionContext.getExecutionPath() + "[" + permission + "]", module);
         }
-        if (!this.permission.implies(permission)) {
-            throw new AccessControlException(this.executionPath);
+        this.permission.reset();
+        this.node.getPermissions(this.executionContext.getExecutionPath(), this.permission);
+        if (this.verbose) {
+            Debug.logInfo("Found permission(s): " + this.executionContext.getUserLogin().getString("userLoginId") +
+                    "@" + this.executionContext.getExecutionPath() + "[" + this.permission + "]", module);
         }
+        if (this.disabled) {
+            return;
+        }
+        if (this.permission.implies(permission) && this.hasServicePermission()) {
+            return;
+        }
+        throw new AccessControlException(this.executionContext.getUserLogin().getString("userLoginId") +
+                "@" + this.executionContext.getExecutionPath() + "[" + permission + "]");
     }
 
     public List<E> applyFilters(List<E> list) {
-        String upperPath = this.executionPath.toUpperCase();
-        if (upperPath.startsWith("OFBIZ/EXAMPLE")) {
-            if (this.verbose) {
-                Debug.logInfo("Applying List filter \"securityRedesignTest\" for path " + this.executionPath, module);
-            }
-            return new SecurityAwareList<E>(list, this.serviceNameList, this.executionContext);
+        if (this.permission.getFilterNames().size() > 0) {
+            return new SecurityAwareList<E>(list, this.permission.getFilterNames(), this.executionContext);
         }
         return list;
     }
 
     public ListIterator<E> applyFilters(ListIterator<E> listIterator) {
-        String upperPath = this.executionPath.toUpperCase();
-        if (upperPath.startsWith("OFBIZ/EXAMPLE")) {
-            if (this.verbose) {
-                Debug.logInfo("Applying ListIterator filter \"securityRedesignTest\" for path " + this.executionPath, module);
-            }
-            return new SecurityAwareListIterator<E>(listIterator, this.serviceNameList, this.executionContext);
+        if (this.permission.getFilterNames().size() > 0) {
+            return new SecurityAwareListIterator<E>(listIterator, this.permission.getFilterNames(), this.executionContext);
         }
         return listIterator;
     }
 
     public EntityListIterator applyFilters(EntityListIterator listIterator) {
-        String upperPath = this.executionPath.toUpperCase();
-        if (upperPath.startsWith("OFBIZ/EXAMPLE")) {
-            if (this.verbose) {
-                Debug.logInfo("Applying EntityListIterator filter \"securityRedesignTest\" for path " + this.executionPath, module);
-            }
+        if (this.permission.getFilterNames().size() > 0) {
             // Commented out for now - causes problems with list pagination in UI
             //                return new SecurityAwareEli(listIterator, this.serviceNameList, this.executionContext);
         }
         return listIterator;
+    }
+
+    protected boolean hasServicePermission() {
+        try {
+            if (this.permission.getServiceNames().size() == 0) {
+                return true;
+            }
+            LocalDispatcher dispatcher = this.executionContext.getDispatcher();
+            DispatchContext ctx = dispatcher.getDispatchContext();
+            Map<String, ? extends Object> params = this.executionContext.getParameters();
+            for (String serviceName : this.permission.getServiceNames()) {
+                ModelService modelService = ctx.getModelService(serviceName);
+                Map<String, Object> context = FastMap.newInstance();
+                if (params != null) {
+                    context.putAll(params);
+                }
+                if (!context.containsKey("userLogin")) {
+                    context.put("userLogin", this.executionContext.getUserLogin());
+                }
+                if (!context.containsKey("locale")) {
+                    context.put("locale", this.executionContext.getLocale());
+                }
+                if (!context.containsKey("timeZone")) {
+                    context.put("timeZone", this.executionContext.getTimeZone());
+                }
+                context = modelService.makeValid(context, ModelService.IN_PARAM);
+                Map<String, Object> result = dispatcher.runSync(serviceName, context);
+                Boolean hasPermission = (Boolean) result.get("hasPermission");
+                if (hasPermission != null && !hasPermission.booleanValue()) {
+                    return false;
+                }
+            }
+        } catch (Exception e) {
+            Debug.logError(e, module);
+        }
+        return true;
     }
 }
