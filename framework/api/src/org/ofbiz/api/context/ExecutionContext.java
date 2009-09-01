@@ -56,14 +56,6 @@ public interface ExecutionContext {
      */
     public String getCurrencyUom();
 
-    /** Returns the current <code>ExecutionArtifact</code> (the one
-     * at the top of the stack). Returns <code>null</code> if the
-     * stack is empty.
-     * 
-     * @return The current <code>ExecutionArtifact</code>
-     */
-    public ExecutionArtifact getCurrentArtifact();
-
     /** Returns the current execution path. Artifacts in the path are separated
      * with a slash.
      * 
@@ -99,10 +91,6 @@ public interface ExecutionContext {
 
     /** Pop an <code>ExecutionArtifact</code> off the stack. */
     public void popExecutionArtifact();
-
-    /** Pops all <code>ExecutionArtifact</code>s off the stack
-     * up to and including <code>artifact</code>. */
-    public void popExecutionArtifacts(ExecutionArtifact artifact);
 
     /** Push an <code>ExecutionArtifact</code> on the stack.
      * 

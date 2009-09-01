@@ -52,6 +52,7 @@ import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceUtil;
+import org.ofbiz.base.util.StringUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -59,6 +60,11 @@ public class ProductsExportToGoogle {
 
     private static final String resource = "GoogleBaseUiLabels";
     private static final String module = ProductsExportToGoogle.class.getName();
+    private static final String googleBaseNSUrl = "http://base.google.com/ns/1.0";
+    private static final String googleBaseBatchUrl = "http://schemas.google.com/gdata/batch";
+    private static final String googleBaseMetadataUrl = "http://base.google.com/ns-metadata/1.0";
+    private static final String googleBaseAppUrl = "http://purl.org/atom/app#";
+    private static final String configString = "googleBaseExport.properties";
 
     public static Map exportToGoogle(DispatchContext dctx, Map context) {
         Locale locale = (Locale) context.get("locale");
@@ -67,30 +73,14 @@ public class ProductsExportToGoogle {
 
         Map result = null;
         try {
-            String configString = "googleBaseExport.properties";
-
-            // get the Developer Key
-            String developerKey = UtilProperties.getPropertyValue(configString, "googleBaseExport.developerKey");
-
-            // get the Authentication Url
-            String authenticationUrl = UtilProperties.getPropertyValue(configString, "googleBaseExport.authenticationUrl");
-
-            // get the Google Account Email
-            String accountEmail = UtilProperties.getPropertyValue(configString, "googleBaseExport.accountEmail");
-
-            // get the Google Account Password
-            String accountPassword = UtilProperties.getPropertyValue(configString, "googleBaseExport.accountPassword");
-
-            // get the Url to Post Items
-            String postItemsUrl = UtilProperties.getPropertyValue(configString, "googleBaseExport.postItemsUrl");
-
+            Map<String, Object> googleBaseConfigResult = buildGoogleBaseConfig(context, delegator);
             StringBuffer dataItemsXml = new StringBuffer();
 
             result = buildDataItemsXml(dctx, context, dataItemsXml);
-            if (!ServiceUtil.isFailure(result)) {
-                String token = authenticate(authenticationUrl, accountEmail, accountPassword);
+            if (!ServiceUtil.isFailure(result) && UtilValidate.isNotEmpty(googleBaseConfigResult)) {
+                String token = authenticate(googleBaseConfigResult.get("authenticationUrl").toString(), googleBaseConfigResult.get("accountEmail").toString(), googleBaseConfigResult.get("accountPassword").toString());
                 if (token != null) {
-                    result = postItem(token, postItemsUrl, developerKey, dataItemsXml, locale, (String)context.get("testMode"), (List)result.get("newProductsInGoogle"), (List)result.get("productsRemovedFromGoogle"), dispatcher, delegator);
+                    result = postItem(token, googleBaseConfigResult.get("postItemsUrl").toString(), googleBaseConfigResult.get("developerKey").toString(), dataItemsXml, locale, (String)context.get("testMode"), (List)result.get("newProductsInGoogle"), (List)result.get("productsRemovedFromGoogle"), dispatcher, delegator);
                 } else {
                     Debug.logError("Error during authentication to Google Account", module);
                     return ServiceUtil.returnFailure(UtilProperties.getMessage(resource, "productsExportToGoogle.errorDuringAuthenticationToGoogle", locale));
@@ -362,6 +352,7 @@ public class ProductsExportToGoogle {
             feedElem.setAttribute("xmlns", "http://www.w3.org/2005/Atom");
             feedElem.setAttribute("xmlns:openSearch", "http://a9.com/-/spec/opensearchrss/1.0/");
             feedElem.setAttribute("xmlns:g", "http://base.google.com/ns/1.0");
+            feedElem.setAttribute("xmlns:gm", "http://base.google.com/ns-metadata/1.0");
             feedElem.setAttribute("xmlns:batch", "http://schemas.google.com/gdata/batch");
             feedElem.setAttribute("xmlns:app", "http://purl.org/atom/app#");
 
@@ -381,7 +372,13 @@ public class ProductsExportToGoogle {
                 // TODO: improve this (i.e. get the relative path from the properies file)
                 String link = webSiteUrl + "/"+webSiteMountPoint+"/control/product/~product_id=" + prod.getString("productId") + trackingCodeId;
                 String title = UtilFormatOut.encodeXmlValue(prod.getString("productName"));
+                if (UtilValidate.isEmpty(title)) {
+                    title = UtilFormatOut.encodeXmlValue(prod.getString("internalName"));
+                }
                 String description = UtilFormatOut.encodeXmlValue(prod.getString("description"));
+                if (UtilValidate.isEmpty(description)) {
+                    description = UtilFormatOut.encodeXmlValue(prod.getString("internalName"));
+                }
                 String imageLink = "";
                 if (UtilValidate.isNotEmpty(prod.getString("largeImageUrl"))) {
                     imageLink = webSiteUrl + prod.getString("largeImageUrl");
@@ -406,17 +403,23 @@ public class ProductsExportToGoogle {
                     itemActionType = "insert";
                 }
                 Element entryElem = UtilXml.addChildElement(feedElem, "entry", feedDocument);
-                Element batchElem = UtilXml.addChildElement(entryElem, "batch:operation", feedDocument);
-                batchElem.setAttribute("type", itemActionType);
+                Element batchElem = UtilXml.addChildElementNSElement(entryElem, "batch:operation", feedDocument, googleBaseBatchUrl);
+                Element batchOperationElem = UtilXml.firstChildElement(batchElem, "batch:operation");
+                batchOperationElem.setAttribute("type", itemActionType);
+                
+                Element appControlElem = UtilXml.addChildElementNSElement(entryElem, "app:control", feedDocument, googleBaseAppUrl);
+                Element appControlChildElem = UtilXml.firstChildElement(appControlElem, "app:control");
+                // Add the publishing priority for the product. By default it takes about 24 hours to publish your product if you submit data from Data Feed. By adding publishing priority your data
+                // can be published in 15 - 30 minutes.
+                UtilXml.addChildElementNSValue(appControlChildElem, "gm:publishing_priority", "high", feedDocument, googleBaseMetadataUrl);
 
                 // status is draft or deactivate
                 if (statusId != null && ("draft".equals(statusId) || "deactivate".equals(statusId))) {
-                    Element appControlElem = UtilXml.addChildElement(entryElem, "app:control", feedDocument);
-                    UtilXml.addChildElementValue(appControlElem, "app:draft", "yes", feedDocument);
+                    UtilXml.addChildElementNSValue(appControlElem, "app:draft", "yes", feedDocument, googleBaseAppUrl);
 
                     // status is deactivate
                     if ("deactivate".equals(statusId)) {
-                        UtilXml.addChildElement(appControlElem, "gm:disapproved", feedDocument);
+                        UtilXml.addChildElementNSElement(appControlElem, "gm:disapproved", feedDocument, googleBaseMetadataUrl);
                     }
                 }
 
@@ -426,43 +429,64 @@ public class ProductsExportToGoogle {
                 contentElem.setAttribute("type", "xhtml");
 
                 if (UtilValidate.isNotEmpty(googleProductId)) {
-                    UtilXml.addChildElementValue(entryElem, "id", googleProductId, feedDocument);
+                    UtilXml.addChildElementNSValue(entryElem, "g:id", googleProductId, feedDocument, googleBaseNSUrl);
                 } else {
-                    UtilXml.addChildElementValue(entryElem, "id", link, feedDocument);
+                    UtilXml.addChildElementNSValue(entryElem, "g:id", link, feedDocument, googleBaseNSUrl);
                 }
 
                 Element linkElem = UtilXml.addChildElement(entryElem, "link", feedDocument);
                 linkElem.setAttribute("rel", "alternate");
                 linkElem.setAttribute("type", "text/html");
                 linkElem.setAttribute("href", link);
-
-                UtilXml.addChildElementValue(entryElem, "g:item_type", "products", feedDocument);
-                UtilXml.addChildElementValue(entryElem, "g:price", price, feedDocument);
+                
+                // item_type is the categories in which your product should belong.
+                UtilXml.addChildElementNSValue(entryElem, "g:item_type", "products", feedDocument, googleBaseNSUrl);
+                
+                List<GenericValue> productCategoryMembers = delegator.findList("ProductCategoryMember", EntityCondition.makeCondition("productId", EntityOperator.EQUALS, prod.getString("productId")), null, UtilMisc.toList("productCategoryId"), null, false);
+                
+                Iterator productCategoryMembersIter = productCategoryMembers.iterator();
+                while (productCategoryMembersIter.hasNext()) {
+                    GenericValue productCategoryMember = (GenericValue) productCategoryMembersIter.next();
+                    GenericValue productCategory = productCategoryMember.getRelatedOne("ProductCategory");
+                    String categoryDescription = "";
+                    if (UtilValidate.isNotEmpty(productCategory.getString("categoryName"))) {
+                        categoryDescription = productCategory.getString("categoryName");  
+                    } else if (UtilValidate.isNotEmpty(productCategory.getString("description"))) {
+                        categoryDescription = productCategory.getString("description");
+                    } else if (UtilValidate.isNotEmpty(productCategory.getString("longDescription"))) {
+                        categoryDescription = productCategory.getString("longDescription");
+                    }
+                    if (UtilValidate.isNotEmpty(productCategory)) {
+                        UtilXml.addChildElementNSValue(entryElem, "g:product_type", StringUtil.wrapString(categoryDescription).toString() , feedDocument, googleBaseNSUrl);
+                    }
+                }
+                
+                UtilXml.addChildElementNSValue(entryElem, "g:price", price, feedDocument, googleBaseNSUrl);
 
                 // Might be nicer to load this from the product but for now we'll set it based on the country destination
-                UtilXml.addChildElementValue(entryElem, "g:currency", productCurrency, feedDocument);
+                UtilXml.addChildElementNSValue(entryElem, "g:currency", productCurrency, feedDocument, googleBaseNSUrl);
 
                 // Ensure the load goes to the correct country location either US dollar, GB sterling or DE euro
-                UtilXml.addChildElementValue(entryElem, "g:target_country", countryCode, feedDocument);
-
-                UtilXml.addChildElementValue(entryElem, "g:brand", prod.getString("brandName"), feedDocument);
-
+                UtilXml.addChildElementNSValue(entryElem, "g:target_country", countryCode, feedDocument, googleBaseNSUrl);
+                if (UtilValidate.isNotEmpty(prod.getString("brandName"))) { 
+                    UtilXml.addChildElementNSValue(entryElem, "g:brand", prod.getString("brandName"), feedDocument, googleBaseNSUrl);
+                }
                 try {
                     googleProduct = delegator.findByPrimaryKey("GoodIdentification", UtilMisc.toMap("productId", prod.getString("productId"), "goodIdentificationTypeId", "SKU"));
                     if (UtilValidate.isNotEmpty(googleProduct)) {
-                        UtilXml.addChildElementValue(entryElem, "g:ean", googleProduct.getString("idValue"), feedDocument);
+                        UtilXml.addChildElementNSValue(entryElem, "g:ean", googleProduct.getString("idValue"), feedDocument, googleBaseNSUrl);
                     }
                 } catch (GenericEntityException gee) {
                     Debug.logInfo("Unable to get the SKU for product [" + prod.getString("productId") + "]: " + gee.getMessage(), module);
                 }
 
-                UtilXml.addChildElementValue(entryElem, "g:condition", "new", feedDocument);
+                UtilXml.addChildElementNSValue(entryElem, "g:condition", "new", feedDocument, googleBaseNSUrl);
                 // This is a US specific requirement for product feeds
                 //                     UtilXml.addChildElementValue(entryElem, "g:mpn", "", feedDocument);
 
                 // if the product has an image it will be published on Google Product Search
                 if (UtilValidate.isNotEmpty(imageLink)) {
-                    UtilXml.addChildElementValue(entryElem, "g:image_link", imageLink, feedDocument);
+                    UtilXml.addChildElementNSValue(entryElem, "g:image_link", imageLink, feedDocument, googleBaseNSUrl);
                 }
                 // if the product is exported to google for the first time, we add it to the list
                 if ("insert".equals(itemActionType)) {
@@ -477,14 +501,13 @@ public class ProductsExportToGoogle {
                 }
                 index++;
             }
-
+            //Debug.logInfo("The value of generated String is ======== " + UtilXml.writeXmlDocument(feedDocument), module);
             dataItemsXml.append(UtilXml.writeXmlDocument(feedDocument));
         } catch (IOException e) {
             return ServiceUtil.returnError("IO Error creating XML document for Google :" + e.getMessage());
         } catch (GenericEntityException e) {
             return ServiceUtil.returnError("Unable to read from product entity: "  + e.toString());
         }
-
 
         Map result = ServiceUtil.returnSuccess();
         result.put("newProductsInGoogle", newProductsInGoogle);
@@ -566,4 +589,33 @@ public class ProductsExportToGoogle {
         }
         return ServiceUtil.returnSuccess();
     }
+    
+    private static Map<String, Object> buildGoogleBaseConfig(Map<String, Object> context, GenericDelegator delegator) {
+        String productStoreId = (String) context.get("productStoreId");
+        Map<String, Object> buildGoogleBaseConfigContext = FastMap.newInstance();
+        
+        if (UtilValidate.isNotEmpty(productStoreId)) {
+            GenericValue googleBaseConfig = null;
+            try {
+                googleBaseConfig = delegator.findOne("GoogleBaseConfig", false, UtilMisc.toMap("productStoreId", productStoreId));
+            } catch (GenericEntityException e) {
+                Debug.logError("Unable to find value for GoogleBaseConfig", module);
+                e.printStackTrace();
+            }
+            if (UtilValidate.isNotEmpty(googleBaseConfig)) {
+               buildGoogleBaseConfigContext.put("developerKey", googleBaseConfig.getString("developerKey"));
+               buildGoogleBaseConfigContext.put("authenticationUrl", googleBaseConfig.getString("authenticationUrl"));
+               buildGoogleBaseConfigContext.put("accountEmail", googleBaseConfig.getString("accountEmail"));
+               buildGoogleBaseConfigContext.put("accountPassword", googleBaseConfig.getString("accountPassword"));
+               buildGoogleBaseConfigContext.put("postItemsUrl", googleBaseConfig.getString("postItemsUrl"));
+            }
+        } else {
+            buildGoogleBaseConfigContext.put("developerKey", UtilProperties.getPropertyValue(configString, "googleBaseExport.developerKey"));
+            buildGoogleBaseConfigContext.put("authenticationUrl", UtilProperties.getPropertyValue(configString, "googleBaseExport.authenticationUrl"));
+            buildGoogleBaseConfigContext.put("accountEmail", UtilProperties.getPropertyValue(configString, "googleBaseExport.accountEmail"));
+            buildGoogleBaseConfigContext.put("accountPassword", UtilProperties.getPropertyValue(configString, "googleBaseExport.accountPassword"));
+            buildGoogleBaseConfigContext.put("postItemsUrl", UtilProperties.getPropertyValue(configString, "googleBaseExport.postItemsUrl"));
+        }
+        return buildGoogleBaseConfigContext;
+    }    
 }
