@@ -336,10 +336,9 @@ under the License.
     <service name="createWorkRequirementFulfillment" engine="simple" auth="true"
         location="org/ofbiz/workeffort/workeffort/WorkEffortSimpleServices.xml" invoke="createWorkRequirementFulfillment">
         <description>Creates a WorkRequirementFulfillment</description>
-        <auto-attributes include="pk" mode="IN" optional="false" entity-name="WorkRequirementFulfillment"/>
+        <auto-attributes include="pk" mode="IN" optional="true" entity-name="WorkRequirementFulfillment"/>
         <auto-attributes include="nonpk" mode="IN" optional="true" entity-name="WorkRequirementFulfillment"/>
         <auto-attributes include="all" mode="IN" optional="true" entity-name="Requirement"/>
-        <override name="requirementId" optional="true" mode="INOUT"/>
     </service>
     <service name="deleteWorkRequirementFulfillment" engine="simple" auth="true"
         location="org/ofbiz/workeffort/workeffort/WorkEffortSimpleServices.xml" invoke="deleteWorkRequirementFulfillment">
