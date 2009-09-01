@@ -17,14 +17,14 @@ specific language governing permissions and limitations
 under the License.
 -->
 <script language="JavaScript" type="text/javascript">
-     function changeEbayCategory(categ, cat_desc) {
+     function changeEbayCategory(categ) {
          document.forms["ProductsExportToEbay"].action = "<@ofbizUrl>ProductsExportToEbay?categoryCode="+categ+"</@ofbizUrl>";
          document.forms["ProductsExportToEbay"].submit();
      }
 
      function activateSubmitButton() {
          categ = document.forms["ProductsExportToEbay"].ebayCategory.value;
-         if (categ != null && categ.substring(0, 1) == 'Y') {
+         if (categ != null && (categ.substring(0, 1) == 'Y' || categ == '')) {
              document.forms["ProductsExportToEbay"].submitButton.disabled = false;
          } else {
              document.forms["ProductsExportToEbay"].submitButton.disabled = true;
@@ -40,10 +40,11 @@ under the License.
                 <td>&nbsp;</td>
                 <td>
                     <input type="hidden" name="selectResult" value="${selectResult}"/>
-                    <select name="ebayCategory" onchange="changeEbayCategory(this.value, this.options[this.selectedIndex].text)">
+                    <select name="ebayCategory" onchange="changeEbayCategory(this.value)">
+                        <option value=""> </option>
                         <#if categories?exists>
                             <#list categories as category>
-                                <option value="${category.CategoryCode}">${category.CategoryName}</option>
+                                <option value="${category.CategoryCode}" <#if categoryCode?exists && categoryCode == category.CategoryCode>selected</#if>>${category.CategoryName}</option>
                             </#list>
                         </#if>
                     </select>
@@ -85,7 +86,7 @@ under the License.
                 <td align="right" class="label">${uiLabelMap.FormFieldTitle_startPrice}</td>
                 <td>&nbsp;</td>
                 <td>
-                    <input type="text" name="startPrice" size="12" maxlength="12" value="1.0"/>
+                    <input type="text" name="startPrice" size="12" maxlength="12" value=""/>
                 </td>
             </tr>
             <tr>
@@ -93,6 +94,13 @@ under the License.
                 <td>&nbsp;</td>
                 <td>
                     <input type="text" name="quantity" size="12" maxlength="12" value="1"/>
+                </td>
+            </tr>
+            <tr>
+                <td align="right" class="label">${uiLabelMap.FormFieldTitle_webSiteUrl}</td>
+                <td>&nbsp;</td>
+                <td>
+                    <input type="text" name="webSiteUrl" size="100" value="${webSiteUrl?if_exists}"/>
                 </td>
             </tr>
             <tr>
@@ -106,19 +114,19 @@ under the License.
                     <table class="basic-table" cellspacing="0">
                         <tr>
                             <td align="right" width="23%" class="label">${uiLabelMap.FormFieldTitle_paymentPayPal}</td>
-                            <td width="2%"><input type="checkbox" name="paymentPayPal" checked="checked"/></td>
+                            <td width="2%"><input type="checkbox" name="paymentPayPal"/></td>
                             <td align="right" width="23%" class="label">${uiLabelMap.FormFieldTitle_paymentVisaMC}</td>
-                            <td width="2%"><input type="checkbox" name="paymentVisaMC" checked="checked"/></td>
+                            <td width="2%"><input type="checkbox" name="paymentVisaMC"/></td>
                             <td align="right" width="23%" class="label">${uiLabelMap.FormFieldTitle_paymentAmEx}</td>
-                            <td width="2%"><input type="checkbox" name="paymentAmEx" checked="checked"/></td>
+                            <td width="2%"><input type="checkbox" name="paymentAmEx"/></td>
                             <td align="right" width="23%" class="label">${uiLabelMap.FormFieldTitle_paymentDiscover}</td>
-                            <td width="2%"><input type="checkbox" name="paymentDiscover" checked="checked"/></td>
+                            <td width="2%"><input type="checkbox" name="paymentDiscover"/></td>
                         </tr>
                         <tr>
                             <td align="right" width="23%" class="label">${uiLabelMap.FormFieldTitle_paymentMOCC}</td>
-                            <td width="2%"><input type="checkbox" name="paymentMOCC" checked="checked"/></td>
+                            <td width="2%"><input type="checkbox" name="paymentMOCC"/></td>
                             <td align="right" width="23%" class="label">${uiLabelMap.FormFieldTitle_paymentPersonalCheck}</td>
-                            <td width="2%"><input type="checkbox" name="paymentPersonalCheck" checked="checked"/></td>
+                            <td width="2%"><input type="checkbox" name="paymentPersonalCheck"/></td>
                             <td align="right" width="23%" class="label">${uiLabelMap.FormFieldTitle_paymentCCAccepted}</td>
                             <td width="2%"><input type="checkbox" name="paymentCCAccepted"/></td>
                             <td align="right" width="23%" class="label">${uiLabelMap.FormFieldTitle_paymentCashInPerson}</td>

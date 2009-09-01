@@ -65,10 +65,6 @@ public abstract class ExecutionContextImpl implements ExecutionContext {
         return this.currencyUom;
     }
 
-    public ExecutionArtifact getCurrentArtifact() {
-		return this.artifactStack.size() > 0 ? this.artifactStack.getLast() : null;
-	}
-
 	public String getExecutionPath() {
 		StringBuilder sb = new StringBuilder("ofbiz");
 		for (ExecutionArtifact artifact : this.artifactStack) {
@@ -107,25 +103,6 @@ public abstract class ExecutionContextImpl implements ExecutionContext {
     		return;
     	}
 	    ExecutionArtifact artifact = this.artifactStack.removeLast();
-	    if (this.verbose) {
-	    	Debug.logInfo("Popping artifact [" + artifact.getClass().getName() +
-	    			"] location = " + artifact.getLocation() + 
-	    			", name = " + artifact.getName(), module);
-	    }
-	}
-
-    public void popExecutionArtifacts(ExecutionArtifact artifact) {
-    	if (this.artifactStack.size() == 0) {
-    		// This check is temporary - it will be removed when implementation is complete
-    		Debug.logError(new Exception("Attempt to pop an empty stack"), module);
-    		return;
-    	}
-    	if (this.artifactStack.contains(artifact)) {
-    		ExecutionArtifact poppedArtifact = this.artifactStack.removeLast();
-    		while (poppedArtifact != artifact) {
-        		poppedArtifact = this.artifactStack.removeLast();
-    		}
-    	}
 	    if (this.verbose) {
 	    	Debug.logInfo("Popping artifact [" + artifact.getClass().getName() +
 	    			"] location = " + artifact.getLocation() + 

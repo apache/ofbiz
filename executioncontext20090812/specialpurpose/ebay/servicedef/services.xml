@@ -31,7 +31,8 @@ under the License.
         <attribute type="List" mode="IN" name="selectResult" optional="false"/>
         <attribute type="String" mode="IN" name="country" optional="false"/>
         <attribute type="String" mode="IN" name="location" optional="false"/>
-        <attribute type="String" mode="IN" name="ebayCategory" optional="false"/>
+        <attribute type="String" mode="IN" name="webSiteUrl" optional="false"/>
+        <attribute type="String" mode="IN" name="ebayCategory" optional="true"/>
         <attribute type="String" mode="IN" name="paymentPayPal" optional="true"/>
         <attribute type="String" mode="IN" name="paymentVisaMC" optional="true"/>
         <attribute type="String" mode="IN" name="paymentAmEx" optional="true"/>
@@ -46,8 +47,8 @@ under the License.
         <attribute type="String" mode="IN" name="paymentPersonalCheck" optional="true"/>
         <attribute type="String" mode="IN" name="payPalEmail" optional="true"/>
         <attribute type="String" mode="IN" name="listingDuration" optional="false"/>
-        <attribute type="String" mode="IN" name="startPrice" optional="false"/>
-        <attribute type="String" mode="IN" name="quantity" optional="false"/>
+        <attribute type="String" mode="IN" name="startPrice" optional="true"/>
+        <attribute type="String" mode="IN" name="quantity" optional="true"/>
     </service>
     <service name="getEbayCategories" engine="java"
              location="org.ofbiz.ebay.ProductsExportToEbay" invoke="getEbayCategories" auth="true">

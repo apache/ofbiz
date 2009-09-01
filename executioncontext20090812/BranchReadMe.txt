@@ -82,5 +82,5 @@ security entities and are used to assemble a tree-like Java structure.
 The structure is cached. When an artifact requests the user's permissions,
 a permission object (OFBizPermission) uses the supplied artifact ID to traverse
 the tree, accumulating permissions along the way. This is how permission
-inheritance is acheived. The permission object is then queried if the user
+inheritance is achieved. The permission object is then queried if the user
 has the requested permission and the result is returned to the artifact.

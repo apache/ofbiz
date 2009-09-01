@@ -789,6 +789,12 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
         executionContext.pushExecutionArtifact(this);
     	AccessController accessController = executionContext.getAccessController();
     	accessController.checkPermission(View);
+        //  increment the paginator
+        this.incrementPaginatorNumber(context);
+        // Populate the viewSize and viewIndex so they are available for use during form actions
+        context.put("viewIndex", this.getViewIndex(context));
+        context.put("viewSize", this.getViewSize(context));
+
         runFormActions(context);
 
         setWidgetBoundaryComments(context);
@@ -1293,8 +1299,6 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
 
     public void preparePager(Map<String, Object> context) {
 
-        //  increment the paginator
-        this.incrementPaginatorNumber(context);
         this.rowCount = 0;
         String lookupName = this.getListName();
         if (UtilValidate.isEmpty(lookupName)) {
@@ -1352,7 +1356,7 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
 
         if (iter instanceof EntityListIterator) {
             try {
-                ((EntityListIterator) iter).first();
+                ((EntityListIterator) iter).beforeFirst();
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error rewinding list form render EntityListIterator: " + e.toString(), module);
             }
@@ -2439,9 +2443,7 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
         } else if (entryList instanceof EntityListIterator) {
             EntityListIterator iter = (EntityListIterator) entryList;
             try {
-                iter.last();
-                listSize = iter.currentIndex();
-                iter.beforeFirst();
+                listSize = iter.getResultsSizeAfterPartialList();
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error getting list size", module);
                 listSize = 0;

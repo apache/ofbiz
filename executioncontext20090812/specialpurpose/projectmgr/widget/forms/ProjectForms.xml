@@ -150,6 +150,8 @@
                 <field-map field-name="entityName" value="WorkEffortAndPartyAssign"/>
                 <field-map field-name="distinct" value="Y"/>
                 <field-map field-name="orderBy" value="-lastStatusUpdate"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>           
             </service>
         </actions>
         <row-actions>
@@ -827,6 +829,9 @@
                 <parameter param-name="workEffortContentTypeId"/>
                 <parameter param-name="fromDate"/>
             </hyperlink>
+        </field>
+        <field name="downloadLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.ContentDownload}" target="ViewSimpleContent?contentId=${contentId}"/>
         </field>
         <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" use-when="headerItem.equals(&quot;EditTaskContents&quot;)">
             <hyperlink also-hidden="false" description="${uiLabelMap.CommonDelete}" target="deleteTaskContent">

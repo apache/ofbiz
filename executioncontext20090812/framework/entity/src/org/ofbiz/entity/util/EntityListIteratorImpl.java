@@ -32,6 +32,8 @@ import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericResultSetClosedException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.datasource.GenericDAO;
 import org.ofbiz.entity.jdbc.SQLProcessor;
 import org.ofbiz.entity.jdbc.SqlJdbcUtil;
 import org.ofbiz.entity.model.ModelEntity;
@@ -55,15 +57,28 @@ public class EntityListIteratorImpl implements EntityListIterator {
     protected boolean closed = false;
     protected boolean haveMadeValue = false;
     protected GenericDelegator delegator = null;
+    protected GenericDAO genericDAO = null;
+    protected EntityCondition whereCondition = null;
+    protected EntityCondition havingCondition = null;
+    protected boolean distinctQuery = false;
 
     private boolean haveShowHasNextWarning = false;
+    private Integer resultSize = null;
 
     public EntityListIteratorImpl(SQLProcessor sqlp, ModelEntity modelEntity, List<ModelField> selectFields, ModelFieldTypeReader modelFieldTypeReader) {
+        this(sqlp, modelEntity, selectFields, modelFieldTypeReader, null, null, null, false);
+    }
+
+    public EntityListIteratorImpl(SQLProcessor sqlp, ModelEntity modelEntity, List<ModelField> selectFields, ModelFieldTypeReader modelFieldTypeReader, GenericDAO genericDAO, EntityCondition whereCondition, EntityCondition havingCondition, boolean distinctQuery) {
         this.sqlp = sqlp;
         this.resultSet = sqlp.getResultSet();
         this.modelEntity = modelEntity;
         this.selectFields = selectFields;
         this.modelFieldTypeReader = modelFieldTypeReader;
+        this.genericDAO = genericDAO;
+        this.whereCondition = whereCondition;
+        this.havingCondition = havingCondition;
+        this.distinctQuery = distinctQuery;
     }
 
     public EntityListIteratorImpl(ResultSet resultSet, ModelEntity modelEntity, List<ModelField> selectFields, ModelFieldTypeReader modelFieldTypeReader) {
@@ -74,16 +89,11 @@ public class EntityListIteratorImpl implements EntityListIterator {
         this.modelFieldTypeReader = modelFieldTypeReader;
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.entity.util.EntityListIterator#setDelegator(org.ofbiz.entity.GenericDelegator)
-     */
     public void setDelegator(GenericDelegator delegator) {
         this.delegator = delegator;
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.entity.util.EntityListIterator#afterLast()
-     */
+    /** Sets the cursor position to just after the last result so that previous() will return the last result */
     public void afterLast() throws GenericEntityException {
         try {
             resultSet.afterLast();
@@ -96,9 +106,7 @@ public class EntityListIteratorImpl implements EntityListIterator {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.entity.util.EntityListIterator#beforeFirst()
-     */
+    /** Sets the cursor position to just before the first result so that next() will return the first result */
     public void beforeFirst() throws GenericEntityException {
         try {
             resultSet.beforeFirst();
@@ -111,9 +119,7 @@ public class EntityListIteratorImpl implements EntityListIterator {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.entity.util.EntityListIterator#last()
-     */
+    /** Sets the cursor position to last result; if result set is empty returns false */
     public boolean last() throws GenericEntityException {
         try {
             return resultSet.last();
@@ -126,9 +132,7 @@ public class EntityListIteratorImpl implements EntityListIterator {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.entity.util.EntityListIterator#first()
-     */
+    /** Sets the cursor position to first result; if result set is empty returns false */
     public boolean first() throws GenericEntityException {
         try {
             return resultSet.first();
@@ -141,9 +145,6 @@ public class EntityListIteratorImpl implements EntityListIterator {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.entity.util.EntityListIterator#close()
-     */
     public void close() throws GenericEntityException {
         if (closed) {
             //maybe not the best way: throw new GenericResultSetClosedException("This EntityListIterator has been closed, this operation cannot be performed");
@@ -165,9 +166,7 @@ public class EntityListIteratorImpl implements EntityListIterator {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.entity.util.EntityListIterator#currentGenericValue()
-     */
+    /** NOTE: Calling this method does return the current value, but so does calling next() or previous(), so calling one of those AND this method will cause the value to be created twice */
     public GenericValue currentGenericValue() throws GenericEntityException {
         if (closed) throw new GenericResultSetClosedException("This EntityListIterator has been closed, this operation cannot be performed");
 
@@ -188,9 +187,6 @@ public class EntityListIteratorImpl implements EntityListIterator {
         return value;
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.entity.util.EntityListIterator#currentIndex()
-     */
     public int currentIndex() throws GenericEntityException {
         if (closed) throw new GenericResultSetClosedException("This EntityListIterator has been closed, this operation cannot be performed");
 
@@ -205,8 +201,10 @@ public class EntityListIteratorImpl implements EntityListIterator {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.entity.util.EntityListIterator#absolute(int)
+    /** performs the same function as the ResultSet.absolute method;
+     * if rowNum is positive, goes to that position relative to the beginning of the list;
+     * if rowNum is negative, goes to that position relative to the end of the list;
+     * a rowNum of 1 is the same as first(); a rowNum of -1 is the same as last()
      */
     public boolean absolute(int rowNum) throws GenericEntityException {
         if (closed) throw new GenericResultSetClosedException("This EntityListIterator has been closed, this operation cannot be performed");
@@ -222,8 +220,9 @@ public class EntityListIteratorImpl implements EntityListIterator {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.entity.util.EntityListIterator#relative(int)
+    /** performs the same function as the ResultSet.relative method;
+     * if rows is positive, goes forward relative to the current position;
+     * if rows is negative, goes backward relative to the current position;
      */
     public boolean relative(int rows) throws GenericEntityException {
         if (closed) throw new GenericResultSetClosedException("This EntityListIterator has been closed, this operation cannot be performed");
@@ -410,9 +409,6 @@ public class EntityListIteratorImpl implements EntityListIterator {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.entity.util.EntityListIterator#setFetchSize(int)
-     */
     public void setFetchSize(int rows) throws GenericEntityException {
         try {
             resultSet.setFetchSize(rows);
@@ -425,9 +421,6 @@ public class EntityListIteratorImpl implements EntityListIterator {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.entity.util.EntityListIterator#getCompleteList()
-     */
     public List<GenericValue> getCompleteList() throws GenericEntityException {
         try {
             // if the resultSet has been moved forward at all, move back to the beginning
@@ -457,8 +450,8 @@ public class EntityListIteratorImpl implements EntityListIterator {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.entity.util.EntityListIterator#getPartialList(int, int)
+    /** Gets a partial list of results starting at start and containing at most number elements.
+     * Start is a one based value, ie 1 is the first element.
      */
     public List<GenericValue> getPartialList(int start, int number) throws GenericEntityException {
         try {
@@ -475,7 +468,7 @@ public class EntityListIteratorImpl implements EntityListIterator {
                 }
             } else {
                 // if can't reposition to desired index, throw exception
-                if (!resultSet.absolute(start)) {
+                if (!this.absolute(start)) {
                     // maybe better to just return an empty list here...
                     return list;
                     //throw new GenericEntityException("Could not move to the start position of " + start + ", there are probably not that many results for this find.");
@@ -510,11 +503,18 @@ public class EntityListIteratorImpl implements EntityListIterator {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.entity.util.EntityListIterator#getResultsSizeAfterPartialList()
-     */
     public int getResultsSizeAfterPartialList() throws GenericEntityException {
-        if (this.last()) {
+        if (genericDAO != null) {
+            if (resultSize == null) {
+                EntityFindOptions efo = null;
+                if (distinctQuery) {
+                    efo = new EntityFindOptions();
+                    efo.setDistinct(distinctQuery);
+                }
+                resultSize = (int) genericDAO.selectCountByCondition(modelEntity, whereCondition, havingCondition, efo);
+            }
+            return resultSize;
+        } else if (this.last()) {
             return this.currentIndex();
         } else {
             // evidently no valid rows in the ResultSet, so return 0

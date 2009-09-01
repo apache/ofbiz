@@ -77,11 +77,10 @@
                         <platform-specific><html>
                             <html-template location="component://cmssite/template/cms/BlogList.ftl"/>
                         </html></platform-specific>
-                </decorator-section>
+                    </decorator-section>
                 </decorator-screen>
             </widgets>
         </section>
     </screen>
-
 
 </screens>

@@ -150,14 +150,13 @@ if ("true".equals(find)) {
     }
     condition = EntityCondition.makeCondition(conditionList, EntityOperator.AND);
 
-    // DEJ 20080701 avoid using redundant query, will use eli.getResultsSizeAfterPartialList() below instead: arraySize = (int) delegator.findCountByCondition(entityName, condition, null, null);
-
     if ((highIndex - lowIndex + 1) > 0) {
         boolean beganTransaction = false;
         try {
             beganTransaction = TransactionUtil.begin();
 
             EntityFindOptions efo = new EntityFindOptions();
+            efo.setMaxRows(highIndex);
             efo.setResultSetType(EntityFindOptions.TYPE_SCROLL_INSENSITIVE);
             EntityListIterator resultEli = null;
             fieldsToSelect = null;
