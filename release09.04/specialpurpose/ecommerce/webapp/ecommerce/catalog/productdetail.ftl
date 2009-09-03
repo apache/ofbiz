@@ -596,7 +596,7 @@ ${virtualJavaScript?if_exists}
     <div id="download-files">
       <div>${uiLabelMap.OrderDownloadFilesTitle}:</div>
       <#list downloadProductContentAndInfoList as downloadProductContentAndInfo>
-        <div>${downloadProductContentAndInfo.contentName}<#if downloadProductContentAndInfo.description?has_content> - ${downloadProductContentAndInfo.description}</#if></div>
+        <div>${downloadProductContentAndInfo.contentName?if_exists}<#if downloadProductContentAndInfo.description?has_content> - ${downloadProductContentAndInfo.description}</#if></div>
       </#list>
     </div>
   </#if>
