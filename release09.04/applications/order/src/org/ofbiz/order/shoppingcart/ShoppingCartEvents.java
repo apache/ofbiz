@@ -1293,12 +1293,17 @@ public class ShoppingCartEvents {
 
         ShoppingCart cart = null;
         try {
-            Map outMap = dispatcher.runSync("loadCartFromOrder",
+            Map<String, Object> outMap = dispatcher.runSync("loadCartFromOrder",
                                                 UtilMisc.<String, Object>toMap("orderId", quoteId,
                                                         "skipProductChecks", Boolean.TRUE, // the products have already been checked in the order, no need to check their validity again
                                                         "userLogin", userLogin));
+            if (ServiceUtil.isError(outMap) || ServiceUtil.isFailure(outMap)) {
+                request.setAttribute("_ERROR_MESSAGE_", ServiceUtil.getErrorMessage(outMap));
+                return "error";
+             }
 
             cart = (ShoppingCart) outMap.get("shoppingCart");
+            
         } catch (GenericServiceException exc) {
             request.setAttribute("_ERROR_MESSAGE_", exc.getMessage());
             return "error";
