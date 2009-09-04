@@ -58,7 +58,7 @@ ${virtualJavaScript?if_exists}
 
     function popupDetail() {
         var defaultDetailImage = "${firstDetailImage?default(mainDetailImageUrl?default("_NONE_"))}";
-        if (defaultDetailImage == null || defaultDetailImage == "null") {
+        if (defaultDetailImage == null || defaultDetailImage == "null" || defaultDetailImage == "") {
             defaultDetailImage = "_NONE_";
         }
 
@@ -67,9 +67,13 @@ ${virtualJavaScript?if_exists}
         }
 
         if (detailImageUrl == "_NONE_") {
-            alert("No detail image available to display.");
+            hack = document.createElement('span');
+            hack.innerHTML="${uiLabelMap.CommonNoDetailImageAvailableToDisplay}";
+            alert(hack.innerHTML);
+            return;
             return;
         }
+        alert(detailImageUrl);
         popUp("<@ofbizUrl>detailImage?detail=" + detailImageUrl + "</@ofbizUrl>", 'detailImage', '400', '550');
     }
 
@@ -429,6 +433,7 @@ function getConfigDetails(event) {
 
   <tr><td colspan="2"><hr class='sepbar'></td></tr>
 
+
   <#-- Long description of product -->
   <tr>
     <td colspan="2">
@@ -607,6 +612,7 @@ function getConfigDetails(event) {
   </tr>
   <tr><td colspan="2"><hr class='sepbar'></td></tr>
 
+
   <#-- Product Reviews -->
   <tr>
     <td colspan="2">
@@ -726,6 +732,7 @@ ${setRequestAttribute("productValue", productValue)}
 <#if commonFeatureResultIds?has_content>
   <h2>Similar Products That Might Interest You...</h2>
   <hr/>
+
 
   <#list commonFeatureResultIds as commonFeatureResultId>
     <div>
