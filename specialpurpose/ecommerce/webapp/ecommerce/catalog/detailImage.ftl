@@ -20,8 +20,8 @@ under the License.
   <body>
     <center>
       <#if requestParameters.detail?has_content>
-        <#assign detailImage = Static["org.ofbiz.base.util.Base64"].base64Decode(requestParameters.detail)>
-        <img src="${detailImage}" border="0" width='500'>
+        <#--assign detailImage = Static["org.ofbiz.base.util.Base64"].base64Decode(requestParameters.detail)-->
+        <img src="${requestParameters.detail}">
       <#else>
         <script language="JavaScript" type="text/javascript">
         <!-- //
