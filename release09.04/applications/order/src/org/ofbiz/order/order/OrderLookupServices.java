@@ -376,9 +376,6 @@ public class OrderLookupServices {
 
         // search by billing account ID
         if (UtilValidate.isNotEmpty(billingAccountId)) {
-            dve.addMemberEntity("BL", "BillingAccount");
-            dve.addAlias("BL", "billingAccountId");
-            dve.addViewLink("OH", "BL", Boolean.FALSE, UtilMisc.toList(new ModelKeyMap("billingAccountId", "billingAccountId")));
             paramList.add("billingAccountId=" + billingAccountId);
             conditions.add(makeExpr("billingAccountId", billingAccountId));
         }
