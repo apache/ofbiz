@@ -30,7 +30,7 @@ under the License.
     </div>
     <div id="displayCreateAddressForm" class="popup" style="display: none;">
       <div id="serverError" class="errorMessage"></div>
-      <form id="createPostalAddressForm" name="createPostalAddressForm" method="post" action="<@ofbizUrl></@ofbizUrl>">
+      <form id="createPostalAddressForm" method="post" action="">
         <input type="hidden" name="roleTypeId" value="CUSTOMER">
         <input type="hidden" name="productStoreId" value="${productStoreId?if_exists}"/>
         <div class="form-row">
