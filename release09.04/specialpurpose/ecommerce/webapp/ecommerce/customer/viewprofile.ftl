@@ -144,7 +144,11 @@ under the License.
                         <#if contactMechPurposeType.contactMechPurposeTypeId == "SHIPPING_LOCATION" && (profiledefs.defaultShipAddr)?default("") == contactMech.contactMechId>
                           <span class="buttontextdisabled">${uiLabelMap.EcommerceIsDefault}</span>
                         <#elseif contactMechPurposeType.contactMechPurposeTypeId == "SHIPPING_LOCATION">
-                          <a href="<@ofbizUrl>setprofiledefault/viewprofile?productStoreId=${productStoreId}&defaultShipAddr=${contactMech.contactMechId}&partyId=${party.partyId}</@ofbizUrl>" class="buttontext">${uiLabelMap.EcommerceSetDefault}</a>
+                          <form name="defaultShippingAddressForm" method="post" action="<@ofbizUrl>setprofiledefault/viewprofile</@ofbizUrl>">
+                            <input type="hidden" name="productStoreId" value="${productStoreId}" />
+                            <input type="hidden" name="defaultShipAddr" value="${contactMech.contactMechId}" />
+                            <input type="hidden" name="partyId" value="${party.partyId}" />
+                            <input type="submit" value="${uiLabelMap.EcommerceSetDefault}" class="button" />
                         </#if>
                       <#else>
                         <b>${uiLabelMap.PartyPurposeTypeNotFound}: "${partyContactMechPurpose.contactMechPurposeTypeId}"</b>
@@ -324,8 +328,11 @@ under the License.
                         <#if (profiledefs.defaultPayMeth)?default("") == paymentMethod.paymentMethodId>
                           <span class="buttontextdisabled">${uiLabelMap.EcommerceIsDefault}</span>
                         <#else>
-                          <div><a href="<@ofbizUrl>setprofiledefault/viewprofile?productStoreId=${productStoreId}&defaultPayMeth=${paymentMethod.paymentMethodId}&partyId=${party.partyId}</@ofbizUrl>" class="buttontext">
-                          ${uiLabelMap.EcommerceSetDefault}</a></div>
+                          <form name="defaultPaymentMethodForm" method="post" action="<@ofbizUrl>setprofiledefault/viewprofile</@ofbizUrl>">
+                            <input type="hidden" name="productStoreId" value="${productStoreId}" />
+                            <input type="hidden" name="defaultPayMeth" value="=${paymentMethod.paymentMethodId}" />
+                            <input type="hidden" name="partyId" value="${party.partyId}" />
+                            <input type="submit" value="${uiLabelMap.EcommerceSetDefault}" class="button" />                          
                         </#if>
                       </td>
                     </tr>
