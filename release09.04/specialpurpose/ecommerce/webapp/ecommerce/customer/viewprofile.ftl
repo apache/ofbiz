@@ -333,6 +333,7 @@ under the License.
                             <input type="hidden" name="defaultPayMeth" value="=${paymentMethod.paymentMethodId}" />
                             <input type="hidden" name="partyId" value="${party.partyId}" />
                             <input type="submit" value="${uiLabelMap.EcommerceSetDefault}" class="button" />                          
+                          </form>
                         </#if>
                       </td>
                     </tr>
