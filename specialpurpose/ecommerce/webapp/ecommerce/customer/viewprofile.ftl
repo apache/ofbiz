@@ -149,6 +149,7 @@ under the License.
                             <input type="hidden" name="defaultShipAddr" value="${contactMech.contactMechId}" />
                             <input type="hidden" name="partyId" value="${party.partyId}" />
                             <input type="submit" value="${uiLabelMap.EcommerceSetDefault}" class="button" />
+                          </form>
                         </#if>
                       <#else>
                         <b>${uiLabelMap.PartyPurposeTypeNotFound}: "${partyContactMechPurpose.contactMechPurposeTypeId}"</b>
