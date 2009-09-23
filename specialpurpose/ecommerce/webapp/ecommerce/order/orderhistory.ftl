@@ -66,11 +66,12 @@ under the License.
               <#-- invoices -->
               <td width="10">&nbsp;</td>
               <#assign invoices = delegator.findByAnd("OrderItemBilling", Static["org.ofbiz.base.util.UtilMisc"].toMap("orderId", "${orderHeader.orderId}"), Static["org.ofbiz.base.util.UtilMisc"].toList("invoiceId"))>
-              <#if invoices?has_content>
+              <#assign distinctInvoiceIds = Static["org.ofbiz.entity.util.EntityUtil"].getFieldListFromEntityList(invoices, "invoiceId", true)>
+              <#if distinctInvoiceIds?has_content>
                 <td>
-                  <#list invoices as invoice>
-                     <a href="<@ofbizUrl>invoice.pdf?invoiceId=${invoice.invoiceId}</@ofbizUrl>" class="buttontext">(${invoice.invoiceId} PDF) </a>
-                 </#list>
+                  <#list distinctInvoiceIds as invoiceId>
+                     <a href="<@ofbizUrl>invoice.pdf?invoiceId=${invoiceId}</@ofbizUrl>" class="buttontext">(${invoiceId} PDF) </a>
+                  </#list>
                 </td>
               <#else>
                 <td width="10">&nbsp;</td>
