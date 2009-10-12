@@ -768,12 +768,6 @@ width: 25em;
 margin-right: 1em;
 }
 
-#column-container .leftonly-larger {
-margin-left: 26em;
-width: auto;
-}
-
-
 .left-border {
 float: left;
 margin-right: 1em;
@@ -791,6 +785,11 @@ width: 22em;
 
 #column-container .leftonly {
 margin-left: 23em;
+width: auto;
+}
+
+#column-container .leftonly-larger {
+margin-left: 26em;
 width: auto;
 }
 
