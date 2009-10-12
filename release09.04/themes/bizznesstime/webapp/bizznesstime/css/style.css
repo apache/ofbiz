@@ -721,6 +721,32 @@ Content Sections
     height:auto;
 }
 
+.left-larger {
+    float: right ; 
+    overflow: hidden; 
+    margin: 0 0 0 0; 
+    padding: 0;
+    z-index: 1;
+    background:#fff;
+    color: #666666;
+    width: 30%; 
+    min-height:600px;
+    height:auto;
+}
+
+.leftonly-larger {
+    float: left; 
+    overflow: hidden; 
+    margin: 0; 
+    padding: 0;
+    z-index: 1;
+    background:#fff;
+    color: #666666;
+    width: 68%; 
+    min-height:600px;
+    height:auto;
+}
+
 /***********************************************
 Tab Bar Navigation
 ***********************************************/
