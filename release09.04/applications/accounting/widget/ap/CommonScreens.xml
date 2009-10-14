@@ -60,9 +60,9 @@ under the License.
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameter.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <screenlet title="${uiLabelMap.AccountingAp}"/>
+                        <screenlet title="${uiLabelMap.AccountingAp}">
                         <container style="lefthalf">
-                            <container style="left">
+                            <container style="lefthalf">
                                 <label style="h1">${uiLabelMap.AccountingAgreements}</label>
                                 <section>
                                     <widgets>
@@ -70,7 +70,7 @@ under the License.
                                     </widgets>
                                 </section>
                             </container>
-                            <container style="right">
+                            <container style="righthalf">
                                 <label style="h1">${uiLabelMap.PartyVendor} ${uiLabelMap.CommonList}</label>
                                 <section>
                                     <widgets>
@@ -80,7 +80,7 @@ under the License.
                             </container>
                         </container>
                         <container style="righthalf">
-                            <container style="right">
+                            <container style="lefthalf">
                                 <label style="h1">${uiLabelMap.AccountingReports}</label>
                                 <section>
                                     <widgets>
@@ -91,7 +91,6 @@ under the License.
                         </container>
                         <container>
                             <label style="h1">${uiLabelMap.AccountingPaymentsMenu}</label>
-                            <container>
                                 <container style="lefthalf">
                                     <container style="lefthalf">
                                         <iterate-section list="paymentTypes" entry="paymentType">
@@ -113,7 +112,7 @@ under the License.
                                     </container>
                                 </container>
                                 <container style="righthalf">
-                                    <container style="left">
+                                    <container style="lefthalf">
                                         <iterate-section list="paymentStatus" entry="paymentsStatus">
                                             <section>
                                                 <widgets>
@@ -123,12 +122,9 @@ under the License.
                                         </iterate-section>
                                     </container>
                                 </container>
-                            </container>
                         </container>
-                        <container style="clear"/>
                         <container>
                             <label style="h1">${uiLabelMap.AccountingInvoicesMenu}</label>
-                            <container>
                                 <container style="lefthalf">
                                     <container style="lefthalf">
                                         <iterate-section list="invoiceTypes" entry="invoiceType">
@@ -139,7 +135,7 @@ under the License.
                                              </section>
                                         </iterate-section>
                                     </container>
-                                    <container style="right">
+                                    <container style="righthalf">
                                         <iterate-section list="invoiceStatus" entry="invoicesStatus">
                                             <section>
                                                 <widgets>
@@ -149,8 +145,9 @@ under the License.
                                         </iterate-section>
                                     </container>
                                 </container>
-                            </container>
                         </container>
+                        <container style="clear"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
