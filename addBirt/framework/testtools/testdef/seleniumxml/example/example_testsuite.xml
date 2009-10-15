@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<testcase>
+    <setSpeed value="500" />
+    <windowMaximize />
+    <testcase file="example_start.xml"/>
+    <testcase file="example_login.xml"/>
+    <testcase file="example_new.xml"/>
+    <testcase file="example_search.xml"/>
+</testcase>
+

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+    <!-- ========================================================= -->
+    <!-- ======================== Defaults ======================= -->
+    <!-- ========================================================= -->
+    <title>Entity of an Open For Business Project Component</title>
+    <description>None</description>
+    <copyright>Copyright 2001-2009 The Apache Software Foundation</copyright>
+    <author>None</author>
+    <version>1.0</version>
+
+    <!-- ========================================================= -->
+    <!-- ======================== Data Model ===================== -->
+    <!-- The modules in this file are as follows:                  -->
+    <!--  - org.ofbiz.entity.audit -->
+    <!--  - org.ofbiz.entity.crypto -->
+    <!--  - org.ofbiz.entity.sequence -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="EntityAuditLog" package-name="org.ofbiz.entity.audit" title="Entity Audit Log">
+        <field name="auditHistorySeqId" type="id-ne"><description>Sequenced primary key</description></field>
+        <field name="changedEntityName" type="long-varchar"></field>
+        <field name="changedFieldName" type="long-varchar"></field>
+        <field name="pkCombinedValueText" type="long-varchar"></field>
+        <field name="oldValueText" type="long-varchar"></field>
+        <field name="newValueText" type="long-varchar"></field>
+        <field name="changedDate" type="date-time"></field>
+        <field name="changedByInfo" type="long-varchar"><description>This should contain whatever information is available about the user or system that changed the value. This could be a userLoginId, but could be something else too, so there is no foreign key.</description></field>
+        <field name="changedSessionInfo" type="long-varchar"><description>This should contain whatever information is available about the session during which the value was changed. This could be a visitId, but could be something else too, so there is no foreign key.</description></field>
+        <prim-key field="auditHistorySeqId"/>
+    </entity>
+    <entity entity-name="EntityKeyStore" package-name="org.ofbiz.entity.crypto" title="Entity Key Store Entity">
+        <field name="keyName" type="id-vlong-ne"></field>
+        <field name="keyText" type="long-varchar"></field>
+        <prim-key field="keyName"/>
+    </entity>
+    <entity entity-name="SequenceValueItem" package-name="org.ofbiz.entity.sequence" title="Sequence Value Item Entity">
+      <field name="seqName" type="id-long-ne"></field>
+      <field name="seqId" type="numeric"></field>
+      <prim-key field="seqName"/>
+    </entity>
+</entitymodel>
