@@ -601,7 +601,9 @@ under the License.
             child roll up is where oldProductCategoryId = ProductCategoryRollup.parentProductCategoryId and hence
             requires a new find-by map -->
         <if-not-empty field-name="duplicateParentRollup" map-name="parameters">
-            <find-by-and entity-name="ProductCategoryRollup" map-name="categoryFindContext" list-name="foundValues"/>
+            <entity-and entity-name="ProductCategoryRollup" list-name="foundValues">
+                <field-map field-name="productCategoryId" env-name="parameters.oldProductCategoryId"/>
+            </entity-and>
             <iterate entry-name="foundValue" list-name="foundValues">
                 <clone-value value-name="foundValue" new-value-name="newTempValue"/>
                 <set field="newTempValue.productCategoryId" from-field="parameters.productCategoryId"/>
