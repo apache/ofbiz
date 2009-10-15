@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+   
+http://www.apache.org/licenses/LICENSE-2.0
+   
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="5.0" 
+    xmlns:xl="http://www.w3.org/1999/xlink" 
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xsi:schemaLocation="http://docbook.org/ns/docbook ../../../content/dtd/docbook.xsd"
+    xmlns="http://docbook.org/ns/docbook">
+    
+    <title>BIRT Overview</title>
+    <para>
+        BIRT is an Eclipse-based open source reporting system for web applications,
+        especially those based on Java and J2EE. BIRT has two main components: a report designer based on Eclipse,
+        and a runtime component that you can add to your app server.
+        BIRT also offers a charting engine that lets you add charts to your own application. 
+    </para>
+    <section>
+        <title>With BIRT, you can add a rich variety of reports to your application.</title>
+        <para>Lists - The simplest reports are lists of data. As the lists get longer,
+            you can add grouping to organize related data together (orders grouped by customer,
+            products grouped by supplier). If your data is numeric, you can easily add totals, averages and other summaries.</para>
+        <para>Charts - Numeric data is much easier to understand when presented as a chart.
+            BIRT provides pie charts, line &amp; bar charts and many more.
+            BIRT charts can be rendered in SVG and support events to allow user interaction.</para>
+        <para>Crosstabs - Crosstabs (also called a cross-tabulation or matrix) shows data in two dimensions: sales per quarter or hits per web page.</para>
+        <para>Letters &amp; Documents - Notices, form letters, and other textual documents are easy to create with BIRT.
+            Documents can include text, formatting, lists, charts and more.</para>
+        <para>Compound Reports - Many reports need to combine the above into a single document.
+            For example, a customer statement may list the information for the customer,
+            provide text about current promotions, and provide side-by-side lists of payments and charges. A financial report may include disclaimers,
+            charts, tables all with extensive formatting that matches corporate color schemes.</para>
+    </section>
+</section>

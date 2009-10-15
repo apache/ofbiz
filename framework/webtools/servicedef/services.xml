@@ -137,4 +137,20 @@ under the License.
         <attribute name="localeValues" type="List" mode="IN" optional="true"/>
         <attribute name="localeComments" type="List" mode="IN" optional="true"/>
     </service>
+    
+    <!-- Birt Email Services -->
+    <service name="sendBirtMail" engine="java" location="org.ofbiz.birt.email.BirtEmailServices" invoke="sendBirtMail">
+        <description>Birt Email Service</description>
+        <implements service="sendMailInterface"/>
+        <attribute name="bodyText" type="String" mode="IN" optional="true"/>
+        <attribute name="bodyScreenUri" type="String" mode="IN" optional="true"/>
+        <attribute name="birtReportLocation" type="String" mode="IN" optional="false"/>
+        <attribute name="attachmentName" type="String" mode="IN" optional="false"/>
+        <attribute name="bodyParameters" type="Map" mode="IN" optional="true"/>
+        <attribute name="birtParameters" type="Map" mode="IN" optional="true"/>
+        <attribute name="birtLocale" type="Locale" mode="IN" optional="true"/>
+        <attribute name="birtContentType" type="String" mode="IN" optional="true"></attribute>
+        <attribute name="webSiteId" type="String" mode="IN" optional="true"/>
+        <attribute name="body" type="String" mode="OUT" optional="false"/>
+    </service>
 </services>
