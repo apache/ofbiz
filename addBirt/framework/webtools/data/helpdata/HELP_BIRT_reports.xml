@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+   
+http://www.apache.org/licenses/LICENSE-2.0
+   
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="5.0" 
+    xmlns:xl="http://www.w3.org/1999/xlink" 
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xsi:schemaLocation="http://docbook.org/ns/docbook ../../../content/dtd/docbook.xsd"
+    xmlns="http://docbook.org/ns/docbook">
+    
+    <section>
+        <title>How do I create BIRT report in OFBiz.</title>
+        <para>Create new report</para>
+        <para>Create Scripted Data Source</para>
+        <para>Create Data Set that use Scripted Data Source</para>
+        <para>Add output columns</para>
+        <para>Add script to Data Set</para>
+        <para>Bind report's element to Data Set</para>
+    </section>
+    <section>
+        <title>How do I add script code to report.</title>
+        <para>Report can use delegator, dispatcher and security object in script.</para>
+        <para>Report can use same classpath with ofbiz.</para>
+    </section>
+    <section>
+        <title>How do I send parameter to report.</title>
+        <para>If report be rendered through view map, you can send parameter through attribute of request object, attribute's name "birtParameters" that is map.</para>
+        <para>If report be rendered through e-mail, you can send parameter through service's parameter name is birtParameters.</para>
+    </section>
+    <section>
+        <title>How do I send report through e-mail.</title>
+        <para>Report can sent through email by using sendBirtMail service.</para>
+    </section>
+    <section>
+        <title>How do I embed report to screen.</title>
+        <para>Report can embeded in screen by using jsp tag, viewer and report tag, that can use in ftl file.</para>
+    </section>
+    <section>
+        <title>What content's type that report supported.</title>
+        <para>text/html</para>
+        <para>application/pdf</para>
+        <para>application/vnd.ms-excel</para>
+        <para>application/vnd.ms-word</para>
+        <para>application/vnd.ms-powerpoint</para>
+    </section>
+    <section>
+        <title>How do I change report content's type</title>
+        <para>If report be rendered through view map, can set content's type at content-type attribute of view map.</para>
+        <para>If report be rendered through e-mail, can set content's type at service's parameter name is birtContentType.</para>
+    </section>
+</section>

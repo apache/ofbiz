@@ -263,4 +263,12 @@ under the License.
         <property name="telnet-port" value="9990"/>
         <property name="app-name" value="OFBiz"/>
     </container>
+    
+    <!-- load the BIRT container -->
+    <container name="birt-container" class="org.ofbiz.birt.container.BirtContainer">
+        <!-- the port below and port-1 will be opened by beanshell -->
+        <property name="delegator-name" value="default"/>
+        <property name="dispatcher-name" value="birt-dispatcher"/>
+        <property name="delegator-group-helper-name" value="org.ofbiz"/>
+    </container>
 </ofbiz-containers>

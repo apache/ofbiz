@@ -48,6 +48,9 @@ under the License.
         <menu-item name="tests" title="Tests">
             <link target="selenium"/>
         </menu-item>
+        <menu-item name="birt" title="Birt">
+            <link target="birt"/>
+        </menu-item>
     </menu>
 
     <menu name="configurationTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
@@ -184,4 +187,10 @@ under the License.
         </menu-item>
     </menu>
 
+    <menu name="birtTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="Viewer" title="${uiLabelMap.BirtViewer}"><link target="BirtViewer"/></menu-item>
+        <menu-item name="Report" title="${uiLabelMap.BirtReport}"><link target="BirtReport"/></menu-item>
+        <menu-item name="Mail" title="${uiLabelMap.BirtMail}"><link target="BirtMail"/></menu-item>
+        <menu-item name="Export" title="${uiLabelMap.BirtViewHandler}"><link target="BirtViewHandler"/></menu-item>
+    </menu>
 </menus>
