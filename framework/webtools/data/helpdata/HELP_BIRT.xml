@@ -23,27 +23,64 @@ under the License.
     xsi:schemaLocation="http://docbook.org/ns/docbook ../../../content/dtd/docbook.xsd"
     xmlns="http://docbook.org/ns/docbook">
     
-    <title>BIRT Overview</title>
+    <title>OFBiz BIRT </title>
     <para>
-        BIRT is an Eclipse-based open source reporting system for web applications,
-        especially those based on Java and J2EE. BIRT has two main components: a report designer based on Eclipse,
-        and a runtime component that you can add to your app server.
-        BIRT also offers a charting engine that lets you add charts to your own application. 
+    	Welcome to OFBiz Birt. The part installed within OFBiz allows you to run the reports which are prepared using Eclipse with the Birt plugin installed.
+    	As a demo we have prepared a product report as an example.
+    	Look at the <link xl:href="http://eclipse.org/birt/phoenix/">Eclipse BIRT web site</link> for more information.
+    </para>
+    <para>
+        This is a short document to help you get started using BIRT to make a report.
     </para>
     <section>
-        <title>With BIRT, you can add a rich variety of reports to your application.</title>
-        <para>Lists - The simplest reports are lists of data. As the lists get longer,
-            you can add grouping to organize related data together (orders grouped by customer,
-            products grouped by supplier). If your data is numeric, you can easily add totals, averages and other summaries.</para>
-        <para>Charts - Numeric data is much easier to understand when presented as a chart.
-            BIRT provides pie charts, line &amp; bar charts and many more.
-            BIRT charts can be rendered in SVG and support events to allow user interaction.</para>
-        <para>Crosstabs - Crosstabs (also called a cross-tabulation or matrix) shows data in two dimensions: sales per quarter or hits per web page.</para>
-        <para>Letters &amp; Documents - Notices, form letters, and other textual documents are easy to create with BIRT.
-            Documents can include text, formatting, lists, charts and more.</para>
-        <para>Compound Reports - Many reports need to combine the above into a single document.
-            For example, a customer statement may list the information for the customer,
-            provide text about current promotions, and provide side-by-side lists of payments and charges. A financial report may include disclaimers,
-            charts, tables all with extensive formatting that matches corporate color schemes.</para>
+        <title>1. Viewer tab</title>
+        <para>When you click on the Viewer tab. It will show the report in the viewer where the report can be paged.</para>
+    </section>
+    <section>
+        <title>2. Report tab</title>
+        <para>When you click on the Report tab. It will show the complete report in an iframe.</para>
+    </section>
+    <section>
+        <title>3. Mail tab</title>
+        <para>When you click on the Mail tab. It will show a form that can send the report per email.</para>
+    </section>
+    <section>
+        <title>4. View Handler tab</title>
+        <para>When you click on the View Handler tab. It will render the report in a pdf format</para>
+    </section>
+    <section>
+        <title>Examine the Example Report</title>
+        <para>
+        	The example report that run in OFBiz is in the file component://webtools/webapp/birt/report/product.rptdesign. When you have started Eclipse Birt, open this document.
+        	This report show how a report receives data from OFBiz through Scripted Data Source using the OFBiz delegator.
+            This report has the scripted data source name "OFBiz" and the data set that use the script data source name is called "Product". 
+            Open the script editor for Product data set, it uses the delegator object query data from the Product entity.
+            A report that runs on the OFBiz platform can use the delegator object, dispatcher object, security object and classpath of OFBiz environment in the script.</para>
+    </section>
+    <section>
+        <title>Important file for using BIRT's jsp tags</title>
+        <para>
+        	If a web applications wants to use the report in a screen, copy birt.tld file to [WEB APP]/WEB-INF/ directory ant assign in in ftl 
+        	like &lt;#assign birt = JspTaglibs["/WEB-INF/birt.tld"]/&gt;</para>
+    </section>
+    <section>
+        <title>Important tag's attribute in ftl.</title>
+        <para>
+            The BIRT Viewer uses some servlets and resource files such as image, js, css for rendering the report and viewer.
+            When you use the viewer tag or report tag in a ftl file you must add a specific "baseURL" attribute to the birt webapp for these resources like baseURL="/birt".
+        </para>
+    </section>
+    <section>
+        <title>How do I send parameter to report.</title>
+        <para>If a report is to be rendered through a view map, you can send a parameter through attribute of the request object, the attribute's name is "birtParameters" which is a map.</para>
+        <para>If a report is to be rendered through an e-mail, you can send the parameter through the service's parameter name called birtParameters.</para>
+    </section>
+    <section>
+        <title>Which are the supported content types?</title>
+        <para>text/html</para>
+        <para>application/pdf</para>
+        <para>application/vnd.ms-excel</para>
+        <para>application/vnd.ms-word</para>
+        <para>application/vnd.ms-powerpoint</para>
     </section>
 </section>

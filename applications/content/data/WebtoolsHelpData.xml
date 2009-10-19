@@ -45,5 +45,12 @@
     <Content contentId="SELENIUM_HTTPS" contentTypeId="DOCUMENT" contentName="OFBiz Selenium with HTTPS" templateDataResourceId="HELP_TEMPL" dataResourceId="SELENIUM_HTTPS" localeString="en" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>/>    
     <ContentAssoc contentId="DOCUMENTS" contentIdTo="SELENIUM_HTTPS" contentAssocTypeId="SUB_CONTENT" fromDate="2006-01-12 01:01:01" sequenceNum="" />
     
+    <!-- BIRT Help -->
+    <DataResource dataResourceId="HELP_BIRT" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="framework/webtools/data/helpdata/HELP_BIRT.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS"
+        dataResourceName="BIRT" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_BIRT" contentTypeId="DOCUMENT" contentName="BIRT" templateDataResourceId="HELP_TEMPL" 
+        dataResourceId="HELP_BIRT" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>/>
+    <ContentAssoc contentId="HELP_WEBTOOLS" contentIdTo="HELP_BIRT" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="" mapKey="WEBTOOLS_birt"/>
      
  </entity-engine-xml>
