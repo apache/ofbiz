@@ -552,7 +552,7 @@ under the License.
                 <parameter param-name="workEffortId"/>
                 <parameter param-name="fixedAssetId"/>
                 <parameter param-name="fromDate"/>
-                <parameter param-name="productionRunId" from-field="productionRunId}"/>
+                <parameter param-name="productionRunId" from-field="productionRunId"/>
             </hyperlink>
         </field>
     </form>
