@@ -1076,6 +1076,9 @@ public class RequestHandler {
     public boolean trackStats(HttpServletRequest request) {
         if (!"false".equalsIgnoreCase(context.getInitParameter("track-serverhit"))) {
             String uriString = RequestHandler.getRequestUri(request.getPathInfo());
+            if (uriString == null) {
+                uriString="";
+            }
             ConfigXMLReader.RequestMap requestMap = getControllerConfig().requestMapMap.get(uriString);
             if (requestMap == null) return false;
             return requestMap.trackServerHit;
@@ -1087,6 +1090,9 @@ public class RequestHandler {
     public boolean trackVisit(HttpServletRequest request) {
         if (!"false".equalsIgnoreCase(context.getInitParameter("track-visit"))) {
             String uriString = RequestHandler.getRequestUri(request.getPathInfo());
+            if (uriString == null) {
+                uriString="";
+            }
             ConfigXMLReader.RequestMap requestMap = getControllerConfig().requestMapMap.get(uriString);
             if (requestMap == null) return false;
             return requestMap.trackVisit;
