@@ -124,8 +124,10 @@ public class InvoiceServices {
             if (userLogin != null) {
                 context.put("userLogin", userLogin);
             }
-
-            return dispatcher.runSync("createInvoiceForOrder", context);
+            
+            Map<String, Object> result = dispatcher.runSync("createInvoiceForOrder", context);
+            result.remove("invoiceTypeId");
+            return result;
         }
         catch (GenericServiceException e) {
             String errMsg = UtilProperties.getMessage(resource,"AccountingEntityDataProblemCreatingInvoiceFromOrderItems",UtilMisc.toMap("reason",e.toString()),(Locale) context.get("locale"));
