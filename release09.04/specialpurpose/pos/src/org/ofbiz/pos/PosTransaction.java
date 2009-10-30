@@ -263,7 +263,7 @@ public class PosTransaction implements Serializable {
     }
 
     public List<Map<String, Object>> getItemConfigInfo(int index) {
-        List<Map> list = new ArrayList<Map>();
+        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         // I think I need to initialize the list in a special way
         // to use foreach in receipt.java
 
