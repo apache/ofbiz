@@ -31,7 +31,7 @@ under the License.
                webapp/build.xml,guiapp/build.xml,widget/build.xml,
                common/build.xml,
                testtools/build.xml,
-               appserver/build.xml,webtools/build.xml,example/build.xml"/>
+               appserver/build.xml,webtools/build.xml,example/build.xml,birt/build.xml"/>
 
     <filelist id="test-builds" dir="." files="base/build.xml,entity/build.xml"/>
 
