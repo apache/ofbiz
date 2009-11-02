@@ -987,6 +987,15 @@ a.linktext:hover {
 	color: #1c334d;
 }
 
+.basic-table td a {
+    font-weight: bold;
+    color:#A80000;
+}
+
+.basic-table td a.buttontext  {
+    color:#333;
+}
+
 .buttontextdisabled {
 	color: #ccc;
 }
