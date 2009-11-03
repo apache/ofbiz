@@ -1160,7 +1160,7 @@
     <property key="PageTitleCreateLeadFromVCard">
         <value xml:lang="en">Create Lead from vCard</value>
         <value xml:lang="es">Crear nuevo lead desde vCard</value>
-        <value xml:lang="fr">Créer un prospect depuis la vCard</value>
+        <value xml:lang="fr">Créer un prospect depuis une vCard</value>
         <value xml:lang="it">Creare lead dalla vCard</value>
     </property>
     <property key="PageTitleEditAccount">
