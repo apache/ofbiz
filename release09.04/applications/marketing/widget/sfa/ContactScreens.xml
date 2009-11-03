@@ -111,7 +111,6 @@ under the License.
                                 </container>
                             </container>
                             <container style="screenlet-body">
-                                <label>&lt;br/&gt;</label>
                                 <include-form name="MergeContacts" location="component://marketing/widget/sfa/forms/ContactForms.xml"/>
                             </container>
                         </container>

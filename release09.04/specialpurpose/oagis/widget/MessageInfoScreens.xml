@@ -41,7 +41,6 @@
                                         <container>
                                             <link target="EditMessageInfo" text="${uiLabelMap.OagisNewMessageInfo}" style="buttontext"/>
                                         </container>
-                                        <label>&lt;br/&gt;</label>
                                         <include-form name="FindMessageInfos" location="component://oagis/widget/forms/MessageInfoForms.xml"/>
                                     </widgets>
                                 </section>
@@ -122,7 +121,6 @@
                                         <container>
                                             <link target="EditMessageErrorInfo" text="${uiLabelMap.OagisNewMessageErrorInfo}" style="buttontext"/>
                                         </container>
-                                        <label>&lt;br/&gt;</label>
                                         <include-form name="FindMessageErrorInfos" location="component://oagis/widget/forms/MessageInfoForms.xml"/>
                                     </widgets>
                                 </section>

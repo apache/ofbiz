@@ -173,7 +173,6 @@ under the License.
                                 <container style="h3"><label text="${uiLabelMap.SfaMergeLeads}"/></container>
                             </container>
                             <container style="screenlet-body">
-                                <label>&lt;br/&gt;</label>
                                 <include-form name="MergeLeads" location="component://marketing/widget/sfa/forms/LeadForms.xml"/>
                             </container>
                         </container>
@@ -213,7 +212,6 @@ under the License.
                             <container style="screenlet-body">
                                 <section>
                                     <widgets>
-                                        <label>&lt;br/&gt;</label>
                                         <include-form  name="CreateLeadFromVCard" location="component://marketing/widget/sfa/forms/LeadForms.xml"/>
                                     </widgets>
                                 </section>
