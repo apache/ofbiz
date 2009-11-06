@@ -23,7 +23,6 @@ public class BirtViewerServlet extends BirtSoapMessageDispatcherServlet {
     
     public final static String module = BirtViewerServlet.class.getName();
     
-    @Override
     protected void __init(ServletConfig config) {
         // TODO Auto-generated method stub
         BirtReportServiceFactory.init( new OFBizBirtViewerReportService( config
