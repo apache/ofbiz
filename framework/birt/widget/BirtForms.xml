@@ -25,7 +25,7 @@ under the License.
         <field name="sendFrom"><text/></field>
         <field name="sendTo"><text/></field>
         <field name="subject"><text/></field>
-        <field name="birtReportLocation" tooltip="Example is component://webtools/webapp/birt/report/product.rptdesign"><text/></field>
+        <field name="birtReportLocation" tooltip="Example is component://birt/webapp/birt/report/product.rptdesign"><text/></field>
         <field name="birtContentType">
             <drop-down>
                 <option key="text/html" description="text/html"/>

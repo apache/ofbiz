@@ -42,7 +42,6 @@ public class BirtViewerAttributeBean extends ViewerAttributeBean {
      * @param request
      * @throws Exception
      */
-    @Override
     protected void __init( HttpServletRequest request ) throws Exception
     {
         // If GetImage operate, return directly.

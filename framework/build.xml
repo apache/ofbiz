@@ -29,9 +29,9 @@ under the License.
                webslinger/build.xml,
                bi/build.xml,datafile/build.xml,minilang/build.xml,
                webapp/build.xml,guiapp/build.xml,widget/build.xml,
-               common/build.xml,
+               common/build.xml,birt/build.xml,
                testtools/build.xml,
-               appserver/build.xml,webtools/build.xml,example/build.xml,birt/build.xml"/>
+               appserver/build.xml,webtools/build.xml,example/build.xml"/>
 
     <filelist id="test-builds" dir="." files="base/build.xml,entity/build.xml"/>
 

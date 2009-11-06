@@ -15,7 +15,6 @@ public class OFBizBirtContext extends BirtContext {
         // TODO Auto-generated constructor stub
     }
 
-    @Override
     protected void __init() {
         // TODO Auto-generated method stub
         this.bean = (ViewerAttributeBean) request
