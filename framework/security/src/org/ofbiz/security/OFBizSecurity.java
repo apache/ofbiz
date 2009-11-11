@@ -145,9 +145,13 @@ public class OFBizSecurity extends org.ofbiz.security.Security {
      * @see org.ofbiz.security.Security#hasEntityPermission(java.lang.String, java.lang.String, javax.servlet.http.HttpSession)
      */
     public boolean hasEntityPermission(String entity, String action, HttpSession session) {
+        if (session == null) { 
+            return false;
+        }
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
-
-        if (userLogin == null) return false;
+        if (userLogin == null) {
+            return false;
+        }
         return hasEntityPermission(entity, action, userLogin);
     }
 
