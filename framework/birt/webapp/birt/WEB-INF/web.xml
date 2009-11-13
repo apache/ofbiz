@@ -119,7 +119,7 @@ under the License.
     -->
     <context-param>
         <param-name>BIRT_VIEWER_SCRIPTLIB_DIR</param-name>
-        <param-value>${ofbiz.home}/framework/birt/scriptlib</param-value>
+        <param-value>${ofbiz.home}/framework/birt/lib/scriptlib</param-value>
     </context-param>
     
     <!-- Resource location directory. Defaults to ${birt home} -->
@@ -191,7 +191,7 @@ under the License.
         <init-param><param-name>disableContextSecurity</param-name><param-value>N</param-value></init-param>
         <init-param>
             <param-name>allowedPaths</param-name>
-            <param-value>/control:/select:/index.html:/index.jsp:/default.html:/default.jsp:/images:/includes/maincss.css:/frameset:/preview:/webcontent:/CancelTask.jsp</param-value>
+            <param-value>/control:/select:/index.html:/index.jsp:/default.html:/default.jsp:/images:/includes/maincss.css:/frameset:/run:/preview:/download:/parameter:/document:/output:/extract:/webcontent:/CancelTask.jsp</param-value>
         </init-param>
         <init-param><param-name>errorCode</param-name><param-value>403</param-value></init-param>
         <init-param><param-name>redirectPath</param-name><param-value>/control/main</param-value></init-param>        
@@ -242,13 +242,45 @@ under the License.
         <servlet-class>org.ofbiz.birt.report.servlet.BirtEngineServlet</servlet-class>
     </servlet>
     <servlet-mapping><servlet-name>ControlServlet</servlet-name><url-pattern>/control/*</url-pattern></servlet-mapping>
+    
     <servlet-mapping>
         <servlet-name>ViewerServlet</servlet-name>
         <url-pattern>/frameset</url-pattern>
     </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>ViewerServlet</servlet-name>
+        <url-pattern>/run</url-pattern>
+    </servlet-mapping>
+    
     <servlet-mapping>
         <servlet-name>EngineServlet</servlet-name>
         <url-pattern>/preview</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>EngineServlet</servlet-name>
+        <url-pattern>/download</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>EngineServlet</servlet-name>
+        <url-pattern>/parameter</url-pattern>
+    </servlet-mapping>  
+
+    <servlet-mapping>
+        <servlet-name>EngineServlet</servlet-name>
+        <url-pattern>/document</url-pattern>
+    </servlet-mapping>  
+
+    <servlet-mapping>
+        <servlet-name>EngineServlet</servlet-name>
+        <url-pattern>/output</url-pattern>
+    </servlet-mapping>  
+    
+    <servlet-mapping>
+        <servlet-name>EngineServlet</servlet-name>
+        <url-pattern>/extract</url-pattern>
     </servlet-mapping>
 
     <session-config><session-timeout>60</session-timeout><!-- in minutes --></session-config>
