@@ -103,8 +103,11 @@ public class OFBizBirtViewerReportService extends BirtViewerReportService {
                 // put all app context from Birt Container to Report Engine Service
                 ReportEngineService.getInstance().getEngineConfig().getAppContext().putAll(
                         BirtContainer.getReportEngine().getConfig().getAppContext());
+                /*
+                --- DISABLE JDBC FEATURE
                 Connection connection = getConnection();
                 BirtContainer.getReportEngine().getConfig().getAppContext().put("OdaJDBCDriverPassInConnection", connection);
+                */
             } catch (Exception e) {
                 Debug.logError(e, module);
             }
@@ -265,8 +268,11 @@ public class OFBizBirtViewerReportService extends BirtViewerReportService {
                 // put all app context from Birt Container to Report Engine Service
                 ReportEngineService.getInstance().getEngineConfig().getAppContext().putAll(
                         BirtContainer.getReportEngine().getConfig().getAppContext());
+                /*
+                --- DISABLE JDBC FEATURE
                 Connection connection = getConnection();
                 ReportEngineService.getInstance( ).getEngineConfig().getAppContext().put("OdaJDBCDriverPassInConnection", connection);
+                */
             } catch (Exception e) {
                 Debug.logError(e, module);
             }

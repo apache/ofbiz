@@ -2306,7 +2306,6 @@ The following libraries distributed with Apache OFBiz are licensed under the
 Eclipse Public License - v 1.0:
 ofbiz/trunk/framework/catalina/lib/tomcat-6.0.16-jasper-jdt.jar
 ofbiz/trunk/framework/birt/lib/chartengineapi.jar
-ofbiz/trunk/framework/birt/lib/com.ibm.icu_4.0.1.v20090415.jar
 ofbiz/trunk/framework/birt/lib/coreapi.jar
 ofbiz/trunk/framework/birt/lib/crosstabcoreapi.jar
 ofbiz/trunk/framework/birt/lib/dataadapterapi.jar
@@ -2315,18 +2314,10 @@ ofbiz/trunk/framework/birt/lib/dataextraction.jar
 ofbiz/trunk/framework/birt/lib/dteapi.jar
 ofbiz/trunk/framework/birt/lib/emitterconfig.jar
 ofbiz/trunk/framework/birt/lib/engineapi.jar
-ofbiz/trunk/framework/birt/lib/flute.jar
-ofbiz/trunk/framework/birt/lib/javax.wsdl_1.5.1.v200806030408.jar
 ofbiz/trunk/framework/birt/lib/jaxrpc.jar
-ofbiz/trunk/framework/birt/lib/js.jar
 ofbiz/trunk/framework/birt/lib/modelapi.jar
 ofbiz/trunk/framework/birt/lib/modelodaapi.jar
 ofbiz/trunk/framework/birt/lib/odadesignapi.jar
-ofbiz/trunk/framework/birt/lib/org.apache.commons.codec_1.3.0.v20080530-1600.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.emf.common_2.5.0.v200906080927.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.emf.ecore_2.5.0.v200906080927.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.emf.ecore.xmi_2.5.0.v200906080927.jar
-ofbiz/trunk/framework/birt/lib/org.w3c.css.sac_1.3.0.v200805290154.jar
 ofbiz/trunk/framework/birt/lib/saaj.jar
 ofbiz/trunk/framework/birt/lib/scriptapi.jar
 ofbiz/trunk/framework/birt/lib/viewservlets.jar
@@ -2440,10 +2431,6 @@ ofbiz/trunk/framework/birt/lib/platform/plugins/org.w3c.dom.smil_1.0.0.v20080604
 ofbiz/trunk/framework/birt/lib/platform/plugins/org.w3c.dom.svg_1.1.0.v200806040011.jar
 ofbiz/trunk/framework/birt/lib/platform/plugins/com.lowagie.itext_1.5.4.v20090608/lib/itext_1.5.4.jar
 ofbiz/trunk/framework/birt/lib/platform/plugins/com.lowagie.itext_1.5.4.v20090608/lib/itextasian-1.5.2.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.apache.derby.core_10.3.1.4/derby.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.data.oda.jdbc_2.5.0.v20090605/oda-jdbc.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.data.oda.sampledb_2.5.0.v20090605/sampledb.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.data.oda.sampledb_2.5.0.v20090605/db/BirtSample.jar
 ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.core.runtime.compatibility.registry_3.2.200.v20090429-1800/runtime_registry_compatibility.jar
 ofbiz/trunk/framework/birt/lib/platform/plugins/org.mozilla.rhino_1.7.1.v20090608/lib/js.jar
 ofbiz/trunk/framework/birt/lib/platform/plugins/org.w3c.sac_1.3.0.v20090608/lib/flute.jar
