@@ -77,6 +77,8 @@ public class BirtWorker {
         Debug.logInfo("Get report engine", module);
         IReportEngine engine = BirtContainer.getReportEngine();
     
+        /*
+        --- DISABLE JDBC FEATURE
         // set the jdbc connection
         String delegatorGroupHelperName = BirtContainer.getDelegatorGroupHelperName();
         Delegator delegator = BirtContainer.getDelegator();
@@ -84,6 +86,7 @@ public class BirtWorker {
         String helperName = delegator.getGroupHelperName(delegatorGroupHelperName);    // gets the helper (localderby, localmysql, localpostgres, etc.) for your entity group org.ofbiz
         Connection connection = ConnectionFactory.getConnection(helperName); 
         engine.getConfig().getAppContext().put("OdaJDBCDriverPassInConnection", connection);
+        */
         
         IRunAndRenderTask task = engine.createRunAndRenderTask(design);
         if (birtLocale != null) {

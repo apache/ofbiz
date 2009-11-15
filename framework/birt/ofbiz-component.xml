@@ -23,6 +23,15 @@ under the License.
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/ofbiz-component.xsd">
     <resource-loader name="main" type="component"/>
     <classpath type="jar" location="lib/*"/>
+    <classpath type="jar" location="lib/platform/plugins/com.ibm.icu_4.0.1.v20090822.jar"/>
+    <classpath type="jar" location="lib/platform/plugins/javax.wsdl_1.5.1.v200806030408.jar"/>
+    <classpath type="jar" location="lib/platform/plugins/org.apache.commons.codec_1.3.0.v20080530-1600.jar"/>
+    <classpath type="jar" location="lib/platform/plugins/org.eclipse.emf.common_2.5.0.v200906151043.jar"/>
+    <classpath type="jar" location="lib/platform/plugins/org.eclipse.emf.ecore_2.5.0.v200906151043.jar"/>
+    <classpath type="jar" location="lib/platform/plugins/org.eclipse.emf.ecore.xmi_2.5.0.v200906151043.jar"/>
+    <classpath type="jar" location="lib/platform/plugins/org.w3c.css.sac_1.3.0.v200805290154.jar"/>
+    <classpath type="jar" location="lib/platform/plugins/org.mozilla.rhino_1.7.1.v20090521/lib/js.jar"/>
+    <classpath type="jar" location="lib/platform/plugins/org.w3c.sac_1.3.0.v20070710/lib/flute.jar"/>
     <classpath type="jar" location="build/lib/*"/>
     <classpath type="dir" location="config"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/BirtHelpData.xml"/>
