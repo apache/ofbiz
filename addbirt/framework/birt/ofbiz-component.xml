@@ -34,7 +34,6 @@ under the License.
     <classpath type="jar" location="lib/platform/plugins/org.w3c.sac_1.3.0.v20070710/lib/flute.jar"/>
     <classpath type="jar" location="build/lib/*"/>
     <classpath type="dir" location="config"/>
-    <entity-resource type="data" reader-name="seed" loader="main" location="data/BirtHelpData.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services.xml"/>
     <webapp name="birt"
         title="BIRT"
