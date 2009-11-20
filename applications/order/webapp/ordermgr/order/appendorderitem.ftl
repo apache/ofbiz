@@ -37,6 +37,9 @@ under the License.
             <td>
               <form method="post" action="<@ofbizUrl>appendItemToOrder?${paramString}</@ofbizUrl>" name="appendItemForm" style="margin: 0;">
               <#-- TODO: Presently, this is the ofbiz way of getting the prodCatalog, which is not generic. Replace with a selecatble list defaulting to this instead -->
+              <#if shipGroups?size == 1>
+                <input type="hidden" name="shipGroupSeqId" value="${shipGroups.first.shipGroupSeqId}"/>
+              </#if>
               <input type="hidden" name="prodCatalogId" value="${Static["org.ofbiz.product.catalog.CatalogWorker"].getCurrentCatalogId(request)?if_exists}"/>
               <table border="0">
                 <tr>
