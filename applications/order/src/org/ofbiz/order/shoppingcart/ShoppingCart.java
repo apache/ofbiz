@@ -826,7 +826,6 @@ public class ShoppingCart implements Serializable {
             return null;
         }
         return (ShoppingCartItem) cartLines.get(index);
-        
     }
 
     public ShoppingCartItem findCartItem(String orderItemSeqId) {
@@ -2010,10 +2009,7 @@ public class ShoppingCart implements Serializable {
     }
 
     public void setItemShipGroupQty(int itemIndex, BigDecimal quantity, int idx) {
-        ShoppingCartItem itemIdx = this.findCartItem(itemIndex);
-        if(itemIdx != null) {
-            this.setItemShipGroupQty(itemIdx, itemIndex, quantity, idx);
-        }
+        this.setItemShipGroupQty(this.findCartItem(itemIndex), itemIndex, quantity, idx);
     }
 
     public void setItemShipGroupQty(ShoppingCartItem item, BigDecimal quantity, int idx) {
@@ -2030,19 +2026,16 @@ public class ShoppingCart implements Serializable {
             }
 
             // never set more than quantity ordered
-            if (item != null) {
-                if (quantity.compareTo(item.getQuantity()) > 0) {
-                    quantity = item.getQuantity();
-                }
-            
+            if (quantity.compareTo(item.getQuantity()) > 0) {
+                quantity = item.getQuantity();
+            }
 
-                // re-set the ship group's before and after dates based on the item's
-                csi.resetShipBeforeDateIfAfter(item.getShipBeforeDate());
-                csi.resetShipAfterDateIfBefore(item.getShipAfterDate());
-    
-                CartShipInfo.CartShipItemInfo csii = csi.setItemInfo(item, quantity);
-                this.checkShipItemInfo(csi, csii);
-            } 
+            // re-set the ship group's before and after dates based on the item's
+            csi.resetShipBeforeDateIfAfter(item.getShipBeforeDate());
+            csi.resetShipAfterDateIfBefore(item.getShipAfterDate());
+
+            CartShipInfo.CartShipItemInfo csii = csi.setItemInfo(item, quantity);
+            this.checkShipItemInfo(csi, csii);
         }
     }
 
