@@ -1,0 +1,375 @@
+Signature-Version: 1.0
+SHA1-Digest-Manifest: 6HMTTXkgiVggR+YMVLcIgkV+1H8=
+Created-By: 1.6.0 (IBM Corporation)
+SHA1-Digest-Manifest-Main-Attributes: mkrPlnFR9oQ8dwd1QZ1fnPI8Z4Y=
+
+Name: com/ibm/wsdl/extensions/soap/SOAPConstants.class
+SHA1-Digest: o2hNvbsTl6BZlj0mrKKi6LWcbmI=
+
+Name: com/ibm/wsdl/extensions/soap/SOAPHeaderFaultImpl.class
+SHA1-Digest: nDnURywqAO/ypkFkN6/LTigHzKQ=
+
+Name: com/ibm/wsdl/util/IOUtils.class
+SHA1-Digest: s3ZbhS/OHjMzl6Zz47AlRDBcBbk=
+
+Name: com/ibm/wsdl/extensions/soap/SOAPOperationSerializer.class
+SHA1-Digest: At3bmmDuKr9vN2R2NHXrMMuC8LM=
+
+Name: com/ibm/wsdl/PortImpl.class
+SHA1-Digest: rn+KUhDQL/0U3TQXORh7gUGgcw8=
+
+Name: com/ibm/wsdl/OutputImpl.class
+SHA1-Digest: h8t4QouVFrHeNtuVF/QGuJg1J6Y=
+
+Name: com/ibm/wsdl/util/ObjectRegistry.class
+SHA1-Digest: c6vk/uwrWGKYNSyptt0T0AaI6pc=
+
+Name: com/ibm/wsdl/extensions/mime/MIMEMultipartRelatedSerializer.clas
+ s
+SHA1-Digest: Cl/SjOvsIxMHI1kIOu9vIv4a9Rs=
+
+Name: javax/wsdl/extensions/http/HTTPUrlReplacement.class
+SHA1-Digest: ZZtmhxWuqOwrWXm0X9cTEvVw0FE=
+
+Name: javax/wsdl/BindingFault.class
+SHA1-Digest: a6KItBam+rfZDkaqegApNzi9g88=
+
+Name: com/ibm/wsdl/extensions/soap/SOAPAddressSerializer.class
+SHA1-Digest: tFodo0Jdt2WcEBLw2CF7xBLU1Jk=
+
+Name: javax/wsdl/BindingOperation.class
+SHA1-Digest: hAyoRzO/b7BcXlV4jrbebcECHXA=
+
+Name: com/ibm/wsdl/util/xml/QNameUtils.class
+SHA1-Digest: T+iXGZMBOOh1MF0I8JQrk2bR5SQ=
+
+Name: com/ibm/wsdl/extensions/schema/SchemaConstants.class
+SHA1-Digest: icmyf+fn6UX0VScV0z0SuqEcZ4o=
+
+Name: com/ibm/wsdl/extensions/http/HTTPUrlReplacementImpl.class
+SHA1-Digest: WmIsSSbn9aVEsDHMM20wcxMUwCw=
+
+Name: com/ibm/wsdl/extensions/PopulatedExtensionRegistry.class
+SHA1-Digest: jpshHHJINVauiNBwA5WdRwV1Vf0=
+
+Name: javax/wsdl/extensions/mime/MIMEMimeXml.class
+SHA1-Digest: lf0RGnFdXdZMY/XmPaspj026lJ8=
+
+Name: com/ibm/wsdl/BindingFaultImpl.class
+SHA1-Digest: bA6uf9oQQ1T9qY5tR0S9ZojfQ2I=
+
+Name: com/ibm/wsdl/extensions/soap/SOAPBodySerializer.class
+SHA1-Digest: Vz8CQf4HvQTfrFEcGX+wQ1lxicA=
+
+Name: javax/wsdl/extensions/UnknownExtensionSerializer.class
+SHA1-Digest: AdWWsRoQpHiA291whXHzCtvK07A=
+
+Name: javax/wsdl/extensions/UnknownExtensionDeserializer.class
+SHA1-Digest: aLqTdiowdOJ0c/myYU7K0Ge/AjA=
+
+Name: javax/wsdl/Operation.class
+SHA1-Digest: LOsncFokpLnivqjcXNpv8z1AMXQ=
+
+Name: com/ibm/wsdl/TypesImpl.class
+SHA1-Digest: qgkurGBoR6bR7iYALVaTcVe2UVY=
+
+Name: com/ibm/wsdl/extensions/soap/SOAPBodyImpl.class
+SHA1-Digest: FrFGrM+AWIN6YoceCKKsWfZmYjg=
+
+Name: javax/wsdl/WSDLException.class
+SHA1-Digest: KUeaQFt29jhke4YWI1bYQs4KX8U=
+
+Name: javax/wsdl/extensions/ExtensibilityElement.class
+SHA1-Digest: yJqZovIy0FoAhi2H3eBOOc4fzy0=
+
+Name: javax/wsdl/extensions/http/HTTPOperation.class
+SHA1-Digest: sKz5nokqXnvPtuHLc3eCQ9uVUzw=
+
+Name: javax/wsdl/xml/WSDLWriter.class
+SHA1-Digest: HWe79O6qMF30vob2MVc9T+FuSW0=
+
+Name: com/ibm/wsdl/extensions/mime/MIMEContentImpl.class
+SHA1-Digest: CWbwuPI33Z/W8odl9cnLhrYgIgs=
+
+Name: javax/wsdl/extensions/schema/Schema.class
+SHA1-Digest: ns6ICLzsztrjgBm8IOW1ntbYSUY=
+
+Name: com/ibm/wsdl/InputImpl.class
+SHA1-Digest: 2+IUqMWCEd4tRZKqH83bDbvHGTg=
+
+Name: com/ibm/wsdl/extensions/schema/SchemaSerializer.class
+SHA1-Digest: 4V/n1BfRFIyb0vvdpQLVgwDv9wE=
+
+Name: com/ibm/wsdl/extensions/schema/SchemaDeserializer.class
+SHA1-Digest: YjCwNSvQq1bswsMe75G7oWVtfnE=
+
+Name: com/ibm/wsdl/extensions/http/HTTPUrlReplacementSerializer.class
+SHA1-Digest: TxBwR6+YArbFCh4jNTTJcpgyX9M=
+
+Name: javax/wsdl/PortType.class
+SHA1-Digest: cfmi5tDthBkl9nObnUwX+3nR890=
+
+Name: com/ibm/wsdl/xml/WSDLWriterImpl.class
+SHA1-Digest: z/i93ullDNJd38b8SnzqrDSfPPo=
+
+Name: javax/wsdl/Binding.class
+SHA1-Digest: sSYNxbPr+moOUecLiMSN1nYsH84=
+
+Name: javax/wsdl/Message.class
+SHA1-Digest: pVEuRu5wTMyAC0WxF8WHCVYr7mY=
+
+Name: com/ibm/wsdl/util/xml/XPathUtils.class
+SHA1-Digest: M305gFKX/REPuD9c8G5/smf8Fmc=
+
+Name: javax/wsdl/Input.class
+SHA1-Digest: fOQyR6KFBp0pRD+H8qOXz/OakEQ=
+
+Name: com/ibm/wsdl/extensions/mime/MIMEConstants.class
+SHA1-Digest: hjUkl8ycPgw3ug+ufubTR6y1rXo=
+
+Name: com/ibm/wsdl/PortTypeImpl.class
+SHA1-Digest: 9n05jvnFpZ6jnpacXCyfCHYw0zo=
+
+Name: javax/wsdl/extensions/http/HTTPBinding.class
+SHA1-Digest: 3sCw4EQ05TlWQoXIUCA/haVbm3c=
+
+Name: javax/wsdl/extensions/soap/SOAPOperation.class
+SHA1-Digest: FQwynJ/esEAnlQtZ5I9bOJqFUWY=
+
+Name: about.html
+SHA1-Digest: MmYUx3r1Ms4kopWb3S1JuZsBabw=
+
+Name: com/ibm/wsdl/BindingOutputImpl.class
+SHA1-Digest: qgGLjt4+qqy2VM/8wtvpbSnhSFI=
+
+Name: javax/wsdl/extensions/schema/SchemaReference.class
+SHA1-Digest: lEYo0qt1y8uQY30uCc8dHk91XYQ=
+
+Name: javax/wsdl/factory/WSDLFactory.class
+SHA1-Digest: 5ONxUhxWbj8YeKkJLgfbkxj7ZmA=
+
+Name: com/ibm/wsdl/util/xml/DOMUtils.class
+SHA1-Digest: ButKIcmZNo9REZ63tq4/b9qUkRs=
+
+Name: javax/wsdl/BindingOutput.class
+SHA1-Digest: vpjnpHovnY0xHlff2dqxAduM3DA=
+
+Name: com/ibm/wsdl/extensions/http/HTTPAddressImpl.class
+SHA1-Digest: TvAW9NELgiHiqHzenx0k42bFtA0=
+
+Name: javax/wsdl/extensions/soap/SOAPBinding.class
+SHA1-Digest: HH3ocIGI0yKbh+VOnvT5L6nrXwo=
+
+Name: com/ibm/wsdl/extensions/http/HTTPBindingSerializer.class
+SHA1-Digest: Sg9JBdMZJLEBwlyvhBR/MIC7qyg=
+
+Name: javax/wsdl/Service.class
+SHA1-Digest: /H6SnROURAb8wcsNvo9ZxmZ850Q=
+
+Name: javax/wsdl/extensions/http/HTTPUrlEncoded.class
+SHA1-Digest: Zslys9oBqzG+HsyHtTmWMYsTXNs=
+
+Name: com/ibm/wsdl/extensions/mime/MIMEMimeXmlImpl.class
+SHA1-Digest: zLyiXeTRk4gLhRMIDZSKRWANBis=
+
+Name: javax/wsdl/extensions/http/HTTPAddress.class
+SHA1-Digest: 9D4D7VwztiDwD2jdihWdtYyLpjY=
+
+Name: javax/wsdl/extensions/soap/SOAPHeaderFault.class
+SHA1-Digest: 1EIXEb/xxkpdqtazFXc5Yo4goyM=
+
+Name: javax/wsdl/OperationType.class
+SHA1-Digest: DXL67c0VdBytz5PMwtKiRQpF9n4=
+
+Name: javax/wsdl/xml/WSDLReader.class
+SHA1-Digest: 1AA3weD1ULJJpK2sPw6jHGmNOAY=
+
+Name: javax/wsdl/extensions/ExtensionRegistry.class
+SHA1-Digest: mOdfhGjAsVmfGKtve0ZT8LicLL0=
+
+Name: com/ibm/wsdl/extensions/http/HTTPUrlEncodedImpl.class
+SHA1-Digest: n7tYYlB2ub6MXhiFZGTpyeAWe7s=
+
+Name: com/ibm/wsdl/extensions/soap/SOAPHeaderSerializer.class
+SHA1-Digest: sGwvZrhII5lAs5+U9XWuAM9KMrc=
+
+Name: com/ibm/wsdl/util/StringUtils.class
+SHA1-Digest: v++UCzJ0wRq6jW3ThkRNCxJW9ks=
+
+Name: javax/wsdl/Import.class
+SHA1-Digest: muDDpV65gkBDkWJK48qJY+AoSw4=
+
+Name: META-INF/eclipse.inf
+SHA1-Digest: SAqY+5ITAL0mkdYeijlSRhyIaZk=
+
+Name: com/ibm/wsdl/extensions/soap/SOAPAddressImpl.class
+SHA1-Digest: +DzRqifUFe/OkYXHOi4l66mcy7Q=
+
+Name: com/ibm/wsdl/FaultImpl.class
+SHA1-Digest: BaVl9EZg0Tn8JZqidYadVIPNRN0=
+
+Name: com/ibm/wsdl/extensions/soap/SOAPBindingSerializer.class
+SHA1-Digest: fBnh1Jtg0zZDtY56SZ96uiUrzrU=
+
+Name: com/ibm/wsdl/xml/WSDLReaderImpl.class
+SHA1-Digest: cA+O2pniCFiwBr0w8htJwdbWt4w=
+
+Name: com/ibm/wsdl/BindingOperationImpl.class
+SHA1-Digest: alE9lF39KmxCNYRVNIRbeifRKJI=
+
+Name: com/ibm/wsdl/OperationImpl.class
+SHA1-Digest: ODQJU3qNfDcUxMjQVe9mDkwHVfM=
+
+Name: com/ibm/wsdl/ImportImpl.class
+SHA1-Digest: ndp9sa1ybrVGvqRum/05AfAJ8I4=
+
+Name: javax/wsdl/extensions/soap/SOAPBody.class
+SHA1-Digest: RffAOeVaBBYei4sncZhQowenVlc=
+
+Name: javax/wsdl/extensions/ExtensionSerializer.class
+SHA1-Digest: eOHHLNueqzXXGqZ1mgC/og/ZyOE=
+
+Name: javax/wsdl/extensions/ExtensionDeserializer.class
+SHA1-Digest: MJqlJIA4jgH1W6D6bTkIIBfGlAk=
+
+Name: javax/wsdl/extensions/soap/SOAPAddress.class
+SHA1-Digest: /W/gyPqZ36smcxZGNIX8itBoiEs=
+
+Name: javax/wsdl/extensions/AttributeExtensible.class
+SHA1-Digest: UVcEsg6ur+r4HU7pevzjNhwjbvY=
+
+Name: javax/wsdl/Fault.class
+SHA1-Digest: UIKCeOJZEZFZGQfbgC9K2VQlrQs=
+
+Name: com/ibm/wsdl/extensions/http/HTTPOperationImpl.class
+SHA1-Digest: dbqAJf2EnsWnJ1TjFBs6V9nyaoY=
+
+Name: javax/wsdl/extensions/UnknownExtensibilityElement.class
+SHA1-Digest: lHvv7tEDb4TGtwbgN4k74r1nQiU=
+
+Name: javax/wsdl/BindingInput.class
+SHA1-Digest: s3B0FS+/GhAajm+GW4Amxp35c+8=
+
+Name: about_files/license.html
+SHA1-Digest: v1iJOFijpH6+LSCyQ7tDo8FTLN0=
+
+Name: com/ibm/wsdl/extensions/soap/SOAPFaultSerializer.class
+SHA1-Digest: AEv+x0Tcs+hcOTF+wzg61NVt0Hc=
+
+Name: com/ibm/wsdl/extensions/mime/MIMEMimeXmlSerializer.class
+SHA1-Digest: k/PSqoKzuz2xgXTuI/ZvLHNJju4=
+
+Name: com/ibm/wsdl/BindingImpl.class
+SHA1-Digest: 8cGE0p9tflv/Et21EMBfoyxig48=
+
+Name: plugin.properties
+SHA1-Digest: t9pthdEdr28+T3vDq7G42EDxuOE=
+
+Name: javax/wsdl/extensions/mime/MIMEMultipartRelated.class
+SHA1-Digest: pupm29rL1PWgr3U3BvBJnRP6U3I=
+
+Name: com/ibm/wsdl/MessageImpl.class
+SHA1-Digest: Sby+3kGgRLZgGvYYAUGat8Qu4ec=
+
+Name: javax/wsdl/Definition.class
+SHA1-Digest: 8uTwNfQa8E76Ro8TXevXF8DGK1A=
+
+Name: com/ibm/wsdl/extensions/http/HTTPUrlEncodedSerializer.class
+SHA1-Digest: plDmvggzyvIcsy5vdeJlAq85duI=
+
+Name: com/ibm/wsdl/BindingInputImpl.class
+SHA1-Digest: /nLlcx08H5QPaEsQy/n7l+nGrQI=
+
+Name: javax/wsdl/Types.class
+SHA1-Digest: SblTNddmSJoxmLtkFIF2AE5V7cQ=
+
+Name: javax/wsdl/xml/WSDLLocator.class
+SHA1-Digest: qCWnVhkkIRU7nM/2xDS3l7Q8HX4=
+
+Name: javax/wsdl/extensions/schema/SchemaImport.class
+SHA1-Digest: PV3emjMMCByozk0k9dPmD/bBBzk=
+
+Name: com/ibm/wsdl/extensions/soap/SOAPFaultImpl.class
+SHA1-Digest: fxYezSLkh2g7McjeEIweNbe75Ds=
+
+Name: com/ibm/wsdl/Constants.class
+SHA1-Digest: TlvRccuWEtWDqyZ7gDs2+R9pLNw=
+
+Name: javax/wsdl/extensions/ElementExtensible.class
+SHA1-Digest: OsGwlTULVKhhZqGS6ixFXzY4UGw=
+
+Name: com/ibm/wsdl/extensions/http/HTTPBindingImpl.class
+SHA1-Digest: f1pTLVPU3usy+u38EbroRSOoLts=
+
+Name: com/ibm/wsdl/extensions/soap/SOAPOperationImpl.class
+SHA1-Digest: y+/Bm5ofkzsMCREYVwHZTah5cX8=
+
+Name: javax/wsdl/extensions/mime/MIMEContent.class
+SHA1-Digest: 7nmMZG3OK+jG/nWibbO55aAeR1Q=
+
+Name: javax/wsdl/extensions/soap/SOAPHeader.class
+SHA1-Digest: UdDKA3WriCPz34gUbpRCwyez+OM=
+
+Name: com/ibm/wsdl/DefinitionImpl.class
+SHA1-Digest: bVaVriHBkZaRuhIhJN9p+ZUnpyg=
+
+Name: com/ibm/wsdl/extensions/mime/MIMEMultipartRelatedImpl.class
+SHA1-Digest: ld9Ee67xROrRpEn39K+rr5p26i4=
+
+Name: com/ibm/wsdl/extensions/schema/SchemaReferenceImpl.class
+SHA1-Digest: mTf4cWCQRZke+g1bXHRPI9G6OZo=
+
+Name: com/ibm/wsdl/extensions/schema/SchemaImpl.class
+SHA1-Digest: dG/j8f5KWYvvQHtSxG6I3u20zJo=
+
+Name: com/ibm/wsdl/extensions/http/HTTPConstants.class
+SHA1-Digest: +RwYOT8MmbXyiDNv7+1wFUZdAfg=
+
+Name: javax/wsdl/extensions/mime/MIMEPart.class
+SHA1-Digest: KPTBKOiG6Xwq7TJ54xItmikUsis=
+
+Name: com/ibm/wsdl/extensions/schema/SchemaImportImpl.class
+SHA1-Digest: dvtWVcOe1s/A9Dt1vojRKtpX2yM=
+
+Name: javax/wsdl/extensions/soap/SOAPFault.class
+SHA1-Digest: U4z/79cItJiMSIEja3qkia7VaQI=
+
+Name: com/ibm/wsdl/factory/WSDLFactoryImpl.class
+SHA1-Digest: wohwOjHsdCJIB7eYZkQAwAFdX2o=
+
+Name: com/ibm/wsdl/extensions/soap/SOAPHeaderImpl.class
+SHA1-Digest: rWucZSJQk8/Iy+kmfcxyT3Rtzy4=
+
+Name: com/ibm/wsdl/extensions/http/HTTPOperationSerializer.class
+SHA1-Digest: HXHUbafqQTTNnQp4VpGeLLEW10Q=
+
+Name: javax/wsdl/Part.class
+SHA1-Digest: KeP6kOLaIBfCqdpnfMJCh0m5VCg=
+
+Name: com/ibm/wsdl/util/xml/DOM2Writer.class
+SHA1-Digest: ExAqFbYet17ECrVCVArqsEO0qjM=
+
+Name: com/ibm/wsdl/extensions/mime/MIMEPartImpl.class
+SHA1-Digest: 4JUPEUB2MaR6BEwK3gam+49m2hE=
+
+Name: com/ibm/wsdl/extensions/soap/SOAPBindingImpl.class
+SHA1-Digest: uk2UD2LHFR25I2nFWj6oQwLDuvQ=
+
+Name: com/ibm/wsdl/extensions/http/HTTPAddressSerializer.class
+SHA1-Digest: /cABgFnq7jkD03ecZV8yAc3Y4to=
+
+Name: javax/wsdl/Port.class
+SHA1-Digest: hW4kLPUd435c5mqSb0rLfW+5Dog=
+
+Name: javax/wsdl/Output.class
+SHA1-Digest: mcQOZfwuf3JloPyKjkfLJuuQ2ec=
+
+Name: com/ibm/wsdl/ServiceImpl.class
+SHA1-Digest: SDZC0PgqDDHuOr8/vEhLLp2wpVM=
+
+Name: com/ibm/wsdl/PartImpl.class
+SHA1-Digest: kXDnXYmlNkJImBGBHGEEvihl23o=
+
+Name: com/ibm/wsdl/extensions/mime/MIMEContentSerializer.class
+SHA1-Digest: SFwknPyt+SWY9kOwq/vlIJwwiHA=
+

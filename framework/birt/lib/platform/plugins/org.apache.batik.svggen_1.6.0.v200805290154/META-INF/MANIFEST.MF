@@ -1,0 +1,511 @@
+Manifest-Version: 1.0
+Bundle-Vendor: %providerName
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: J2SE-1.3
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.apache.batik.svggen
+Require-Bundle: org.apache.batik.ext.awt;version="[1.6.0,1.7.0)",org.a
+ pache.batik.util;version="[1.6.0,1.7.0)"
+Export-Package: org.apache.batik.svggen;version="1.6.0",org.apache.bat
+ ik.svggen.font;version="1.6.0",org.apache.batik.svggen.font.table;ver
+ sion="1.6.0"
+Bundle-Version: 1.6.0.v200805290154
+Bundle-ClassPath: ../../../../../base/lib/batik-all-1.7.jar
+Bundle-ManifestVersion: 2
+
+Name: org/apache/batik/svggen/AbstractImageHandlerEncoder.class
+SHA1-Digest: tmYeG0F0HOY2kAFMousFLpuv24c=
+
+Name: org/apache/batik/svggen/font/table/Script.class
+SHA1-Digest: jZVaQXHbezv6NZ9/bzvms7v8C6Y=
+
+Name: org/apache/batik/svggen/DefaultExtensionHandler.class
+SHA1-Digest: rQLayOCgtDuV2CSDcf7JmIcJ4Rs=
+
+Name: org/apache/batik/svggen/ErrorHandler.class
+SHA1-Digest: rZEIaKv2gbINAfnMUBI/L0taZfI=
+
+Name: org/apache/batik/svggen/ErrorConstants.class
+SHA1-Digest: Uj6CsF1+TGAsDwJC9nklp/ebRng=
+
+Name: org/apache/batik/svggen/ImageCacher$ImageCacheEntry.class
+SHA1-Digest: HmWM9QCWYPDHW1V2ae0ssnDkAiQ=
+
+Name: org/apache/batik/svggen/SVGDescriptor.class
+SHA1-Digest: UjgPwY0xWG/S721yDxrsjNl/U4M=
+
+Name: about_files/LICENSE.dom-software.txt
+SHA1-Digest: XNbqOp6dhf0vNTs5HtmIUCUe53I=
+
+Name: org/apache/batik/svggen/font/table/FeatureTags.class
+SHA1-Digest: IMBbsohKfAQ+PLgOz8b2+e82Bso=
+
+Name: org/apache/batik/svggen/SVGLine.class
+SHA1-Digest: kJRMxZhJt4yGQA4casd5h8HmD70=
+
+Name: org/apache/batik/svggen/SVGLinearGradient.class
+SHA1-Digest: 7Au/XT9QloEXaozlKiqDUQ3WBUM=
+
+Name: org/apache/batik/svggen/font/table/KernSubtableFormat0.class
+SHA1-Digest: pAFuEIIUf84KD37enxvdT4tMC6A=
+
+Name: org/apache/batik/svggen/font/table/Os2Table.class
+SHA1-Digest: +sd48axKSV3TKlBhUGO+sggH+Ag=
+
+Name: org/apache/batik/svggen/font/table/FpgmTable.class
+SHA1-Digest: s5CmrJwVf3Aye5jwLUYdtt0fiqY=
+
+Name: org/apache/batik/svggen/SVGCSSStyler.class
+SHA1-Digest: ZAHN2HKfBldv/2+ySTChjVoL3SA=
+
+Name: org/apache/batik/svggen/SVGStrokeDescriptor.class
+SHA1-Digest: dwGng5WV+gfouMBDhdviQYDk954=
+
+Name: org/apache/batik/svggen/SimpleImageHandler.class
+SHA1-Digest: A5KSDISP9xZ5fGbQmELeqKJYKqk=
+
+Name: org/apache/batik/svggen/ImageHandlerPNGEncoder.class
+SHA1-Digest: 5afynPuVoGW/ZB/UjIrwAUL/b7Y=
+
+Name: org/apache/batik/svggen/font/table/ClassDef.class
+SHA1-Digest: UFD6RDHhYP4V8M5HxxSzTW58Mg4=
+
+Name: org/apache/batik/svggen/DOMGroupManager.class
+SHA1-Digest: KHIki80nxvA6sd5fkYwLlllJ7QQ=
+
+Name: org/apache/batik/svggen/font/table/GlyfSimpleDescript.class
+SHA1-Digest: hofKqUlUHDt1/2Iqifg3HoPLaB4=
+
+Name: org/apache/batik/svggen/DefaultCachedImageHandler.class
+SHA1-Digest: gsahiGNyR/ZZcqrXqHag3x8wjr0=
+
+Name: org/apache/batik/svggen/SVGFont.class
+SHA1-Digest: 15ihASXxD0CmXiPaku9OEiiccFE=
+
+Name: org/apache/batik/svggen/font/Point.class
+SHA1-Digest: QFgqaiF8RZEezLhi7xd2zYKU4Uc=
+
+Name: org/apache/batik/svggen/font/table/HheaTable.class
+SHA1-Digest: Qlc/J0rtp5U8P3nP4mPWgG7eCqM=
+
+Name: org/apache/batik/svggen/CachedImageHandlerBase64Encoder.class
+SHA1-Digest: k9wiuhMouuT34EPwHQf0oPQ3V4Y=
+
+Name: org/apache/batik/svggen/SVGCustomComposite.class
+SHA1-Digest: xn2P4Znav0ky9sK01TBKAtJcgVw=
+
+Name: org/apache/batik/svggen/font/table/NameRecord.class
+SHA1-Digest: D6SMOYY7+MpQiVfVUv/DsDeRy6o=
+
+Name: org/apache/batik/svggen/font/table/GsubTable.class
+SHA1-Digest: YbnVQfxqqeDl1wWIJvvIA2e6370=
+
+Name: org/apache/batik/svggen/SVGIDGenerator.class
+SHA1-Digest: /cvGbyab97lg+MuwX6UrR99TZLs=
+
+Name: org/apache/batik/svggen/font/table/LigatureSet.class
+SHA1-Digest: ZqtBDS/rguMHHQlyKNdh/O9Rpd8=
+
+Name: org/apache/batik/svggen/SVGGraphics2D.class
+SHA1-Digest: GymzpO3g5QbJYihVY2FZdKvuFh8=
+
+Name: org/apache/batik/svggen/SVGAttributeMap.class
+SHA1-Digest: kmGzzGpAmkMNuNa3EY8hose93R8=
+
+Name: org/apache/batik/svggen/font/table/KernSubtable.class
+SHA1-Digest: hG5Xhg31nfNqQ1dp8hgaParm8UQ=
+
+Name: org/apache/batik/svggen/font/table/MaxpTable.class
+SHA1-Digest: mJDkX0AWzDLP9x9fk8Rf8kEFgQ0=
+
+Name: org/apache/batik/svggen/ImageCacher.class
+SHA1-Digest: nFqUbsGe7bxd1/xH40dlBMP6svM=
+
+Name: org/apache/batik/svggen/font/table/Ligature.class
+SHA1-Digest: tKUx4b0J9S03JQN1BEE2VlbI174=
+
+Name: org/apache/batik/svggen/ClipKey.class
+SHA1-Digest: 0slaLqdmYn5qJkLaIAKmCVxJ108=
+
+Name: org/apache/batik/svggen/SVGPaintDescriptor.class
+SHA1-Digest: M8io73cuIPmwumPBcBc3OTVpWgs=
+
+Name: org/apache/batik/svggen/font/table/ClassDefFormat1.class
+SHA1-Digest: brrS1bjCw5zNagn98A7qSNc2lvw=
+
+Name: org/apache/batik/svggen/font/table/Device.class
+SHA1-Digest: NnPcOUrBxiSVrZAPR4Ea375MiKs=
+
+Name: org/apache/batik/svggen/font/table/LangSysRecord.class
+SHA1-Digest: O5ghGGvcM3syB+lYO3dLh7KyDsw=
+
+Name: org/apache/batik/svggen/font/table/GlyfDescript.class
+SHA1-Digest: IYyVUQGOYla8ir0vVN5zgqEh/Wk=
+
+Name: org/apache/batik/svggen/SVGLookupOp.class
+SHA1-Digest: ThrKm+Ug/vu/3Wy7iwNf2FXJ78s=
+
+Name: org/apache/batik/svggen/SVGTransform$1.class
+SHA1-Digest: rXD04fXmc2TYGzk4XB9RICM56WY=
+
+Name: org/apache/batik/svggen/SVGPolygon.class
+SHA1-Digest: Zhlhj0IzSFAXspxo2uipmsMK/HE=
+
+Name: org/apache/batik/svggen/font/table/SingleSubstFormat1.class
+SHA1-Digest: j8ZF4+yo4hVQAsl29RxqrpHWhME=
+
+Name: org/apache/batik/svggen/CachedImageHandlerJPEGEncoder.class
+SHA1-Digest: uQyKmUb+M7UEaFtqIkB6lsjsYoc=
+
+Name: org/apache/batik/svggen/font/table/LigatureSubstFormat1.class
+SHA1-Digest: 600WP0Va05HRsSQWjV6MAlXqRXI=
+
+Name: org/apache/batik/svggen/font/table/GlyfTable.class
+SHA1-Digest: 64xv/avFoZrWIhu0fpvP6kjA4rk=
+
+Name: org/apache/batik/svggen/SVGGeneratorContext$GraphicContextDefaul
+ ts.class
+SHA1-Digest: Ddr51VB2vt48eAjMq2N2gwN72yU=
+
+Name: org/apache/batik/svggen/font/table/Coverage.class
+SHA1-Digest: z3l/LnFWXkW6WIVu7hFKGKnUCy4=
+
+Name: org/apache/batik/svggen/font/table/LookupSubtableFactory.class
+SHA1-Digest: cslJW78rG2Ft4BI4VbRYGGjcBaA=
+
+Name: org/apache/batik/svggen/font/table/CmapFormat2.class
+SHA1-Digest: Pmz3rFp5+SPtJ+a+qFgFB/Bpl4o=
+
+Name: org/apache/batik/svggen/SVGFilterDescriptor.class
+SHA1-Digest: cyGxkOqDVexToQ6/MUfv6kuuWd0=
+
+Name: org/apache/batik/svggen/SVGAlphaComposite.class
+SHA1-Digest: WCuHMhBcpW5acyWrDgk04DMkyIA=
+
+Name: org/apache/batik/svggen/font/table/HmtxTable.class
+SHA1-Digest: nZbJ2wrCNb+DTymHYsy3qMNatag=
+
+Name: org/apache/batik/svggen/ImageCacher$External.class
+SHA1-Digest: D81aoVS8lLQjY60f/ArVQYjVKh0=
+
+Name: org/apache/batik/svggen/font/table/CmapFormat6.class
+SHA1-Digest: b8U3qG2MBM3uLibt1mHjlA4XPzE=
+
+Name: org/apache/batik/svggen/DefaultImageHandler.class
+SHA1-Digest: T22q30Zi1mDACM9MDZujztN+5IY=
+
+Name: org/apache/batik/svggen/SVGGraphics2DIOException.class
+SHA1-Digest: Y6IkwyFzI4Rq2CnI7p+WY4lX6jw=
+
+Name: org/apache/batik/svggen/SVGClip.class
+SHA1-Digest: Bo3/H0bJK0zCf/zxYN7Gt5WezHU=
+
+Name: org/apache/batik/svggen/font/table/Table.class
+SHA1-Digest: M6Dt9YgjlevMdgsTXjKvRii+5G0=
+
+Name: org/apache/batik/svggen/font/table/HeadTable.class
+SHA1-Digest: YIoycvrTFR5PQ3TMEjvP2W/3NYM=
+
+Name: about.html
+SHA1-Digest: aUBU6RabbxQ6jZKJ1dHLruvJSL0=
+
+Name: org/apache/batik/svggen/SVGGraphics2DRuntimeException.class
+SHA1-Digest: mPGghUEIhPbCd4H0qLgm65Fh7p4=
+
+Name: org/apache/batik/svggen/font/table/CmapIndexEntry.class
+SHA1-Digest: pXl8QhHfzwaqWvw0Da9T2tyoCsg=
+
+Name: org/apache/batik/svggen/font/table/Lookup.class
+SHA1-Digest: GiNBWlIfnm7Uzmfb60G9z82tHiU=
+
+Name: org/apache/batik/svggen/font/table/ScriptRecord.class
+SHA1-Digest: R81+7QpgY++VPu3z0aWF1vHrke0=
+
+Name: org/apache/batik/svggen/font/table/TableDirectory.class
+SHA1-Digest: N45qES5QQpRSg4clbMK7ZbsegI0=
+
+Name: org/apache/batik/svggen/font/table/KernTable.class
+SHA1-Digest: pdkC9lKmcBTZi0qeGvUxHtKGhgM=
+
+Name: org/apache/batik/svggen/GenericImageHandler.class
+SHA1-Digest: AH+HQ0FTtGnMrlm36OxDl5h42Ig=
+
+Name: org/apache/batik/svggen/SVGPath.class
+SHA1-Digest: hZzW7CZhmfNbTmLnAyWgRwNM5Qk=
+
+Name: about_files/LICENSE-2.0.txt
+SHA1-Digest: NV/tRSeBE64tS1EXrewu6DAklWI=
+
+Name: org/apache/batik/svggen/font/resources/Messages.properties
+SHA1-Digest: mc4pskBXMcyHsa7U7Ck9usPqm1M=
+
+Name: org/apache/batik/svggen/SVGRectangle.class
+SHA1-Digest: d7FDA8JWc+6fTSilL+zT/nqVOVM=
+
+Name: org/apache/batik/svggen/font/table/LocaTable.class
+SHA1-Digest: GrBCiWpgInBnJCk6SyrwC+enCc0=
+
+Name: org/apache/batik/svggen/font/table/RangeRecord.class
+SHA1-Digest: SVAoQTohkfXfdSZj9p4Y3tbtssY=
+
+Name: org/apache/batik/svggen/font/table/ClassDefFormat2.class
+SHA1-Digest: UpEwd2C0ArCbj4No1ntkjIXod2I=
+
+Name: org/apache/batik/svggen/ImageHandler.class
+SHA1-Digest: YzXYuCvOTg1tiUBnlVAeXcm2ImQ=
+
+Name: org/apache/batik/svggen/CachedImageHandler.class
+SHA1-Digest: j91QyyvJQ63i7UnKRGRenbSV2QU=
+
+Name: org/apache/batik/svggen/font/table/CmapTable.class
+SHA1-Digest: qZfmTCU3gfty7etI9OVhvZgp88A=
+
+Name: org/apache/batik/svggen/SVGRescaleOp.class
+SHA1-Digest: nCiKfecD0STXkuIBLt+8/JXTa3I=
+
+Name: org/apache/batik/svggen/font/table/Feature.class
+SHA1-Digest: G+mqPqjM8FbqZYdQGzVRh01Wfe8=
+
+Name: org/apache/batik/svggen/SVGGraphicContextConverter.class
+SHA1-Digest: vVeWUPVbE144H2rUsTi1KaOX/kQ=
+
+Name: org/apache/batik/svggen/font/table/KernSubtableFormat2.class
+SHA1-Digest: lmi1kn1iDLhaZBjyabp8XH5HUr4=
+
+Name: org/apache/batik/svggen/font/table/SingleSubst.class
+SHA1-Digest: Fo3glXkk4yRzrTehAIMgq/L+2LE=
+
+Name: org/apache/batik/svggen/font/table/SingleSubstFormat2.class
+SHA1-Digest: 8iprFECTYdU1AHKqlCRYzBeoxR0=
+
+Name: org/apache/batik/svggen/SVGBufferedImageOp.class
+SHA1-Digest: TvHd7vWh1BOPWf0XLIOWJzwaElM=
+
+Name: org/apache/batik/svggen/SVGConvolveOp.class
+SHA1-Digest: pAzLDloN2FdMzqZJrrGv51K54WA=
+
+Name: org/apache/batik/svggen/ImageHandlerJPEGEncoder.class
+SHA1-Digest: WMnJzCs7FTwqCnYGehaYhwYt3OU=
+
+Name: org/apache/batik/svggen/font/table/LookupSubtable.class
+SHA1-Digest: 2J9NkjcnLBTx98guG721/A28+vI=
+
+Name: org/apache/batik/svggen/font/table/GposTable.class
+SHA1-Digest: 9sbPiPZkYlrbe0u2VBC1DJmAQ2c=
+
+Name: org/apache/batik/svggen/SVGBasicStroke.class
+SHA1-Digest: iB+B1k7qzjQ8OS+j/5Wm8XHxNZE=
+
+Name: org/apache/batik/svggen/font/Messages.class
+SHA1-Digest: LMv6HP7hUhiBbLu+pFAVFQfAXWE=
+
+Name: org/apache/batik/svggen/font/table/Program.class
+SHA1-Digest: i/c6sbdNboWYUe4x2EKv3gyB4Bc=
+
+Name: org/apache/batik/svggen/SVGComposite.class
+SHA1-Digest: qVljpncsAGESdy54doGqgL8NuWQ=
+
+Name: org/apache/batik/svggen/font/table/CvtTable.class
+SHA1-Digest: 9JYUz/Sf1q4JTKnX7x1LdYUo1Mk=
+
+Name: org/apache/batik/svggen/CachedImageHandlerPNGEncoder.class
+SHA1-Digest: 4e/9iV/jREzwnFJjDrdIS7YTDf0=
+
+Name: org/apache/batik/svggen/SVGFilterConverter.class
+SHA1-Digest: 4jre7TEDNM5l6DiR6GP4x9BWzow=
+
+Name: META-INF/eclipse.inf
+SHA1-Digest: KyT9FF7C7t86NoBoa2kZT3ZJBfw=
+
+Name: org/apache/batik/svggen/font/table/KerningPair.class
+SHA1-Digest: RCWWWDsLRkkGgrdZZmw4koepavs=
+
+Name: org/apache/batik/svggen/font/table/GlyphDescription.class
+SHA1-Digest: o0UiXmT/ClXhx9rOyyK/MV1jFEI=
+
+Name: org/apache/batik/svggen/ExtensionHandler.class
+SHA1-Digest: yvPHcxRhBA3AnhXiTGzqtKsZOFw=
+
+Name: org/apache/batik/svggen/font/table/PostTable.class
+SHA1-Digest: 2/ZL1kH0WbixFTTThgppov0qkIM=
+
+Name: org/apache/batik/svggen/font/table/LookupList.class
+SHA1-Digest: OGw6Aj09srtXJrUnnREUfl4wTOk=
+
+Name: org/apache/batik/svggen/font/table/CoverageFormat1.class
+SHA1-Digest: IaAvAA/dqm4P9h3O84tOOIF8iRo=
+
+Name: org/apache/batik/svggen/SVGGraphicObjectConverter.class
+SHA1-Digest: EM5+FS4rmcf+UFWixXh6oV9J96Q=
+
+Name: org/apache/batik/svggen/SVGHintsDescriptor.class
+SHA1-Digest: RB3vzGk00nXvcbyVumP6rYF/hCY=
+
+Name: about_files/README
+SHA1-Digest: 6ucCCJgwbMHFjoa+zJeAytt+bwA=
+
+Name: org/apache/batik/svggen/XmlWriter$IndentWriter.class
+SHA1-Digest: aPYdzrlElSUkOhH+93qWTKSpdRw=
+
+Name: org/apache/batik/svggen/SVGPaint.class
+SHA1-Digest: iDeNb0e8TGug7U4Mdh0Ggq8P+rg=
+
+Name: org/apache/batik/svggen/font/table/Panose.class
+SHA1-Digest: 2JgG4JO/j4u3PRr3BHATgQMrSiw=
+
+Name: org/apache/batik/svggen/font/table/DirectoryEntry.class
+SHA1-Digest: NrXWJi8HJNp215PUPKFRWhJHgW0=
+
+Name: org/apache/batik/svggen/SVGShape.class
+SHA1-Digest: gW1ugTXqOElLJ9QkiGKyLOHPO8I=
+
+Name: org/apache/batik/svggen/AbstractSVGConverter.class
+SHA1-Digest: NQLCLm5bqv5tYeTwWBHjHUcyXRU=
+
+Name: org/apache/batik/svggen/font/table/ScriptList.class
+SHA1-Digest: /IbshqUVtYmRMgMA2K2+V22bumg=
+
+Name: org/apache/batik/svggen/XmlWriter.class
+SHA1-Digest: Ywl/DA6pKK2aAXwzq5XV02FWMwY=
+
+Name: org/apache/batik/svggen/SVGGraphicContext.class
+SHA1-Digest: OP4xzO4BoVPSWZuTXIegpr8CFk0=
+
+Name: org/apache/batik/svggen/SVGStylingAttributes.class
+SHA1-Digest: XQhk6x20cdvzKy3tUzlsfcu1oNg=
+
+Name: org/apache/batik/svggen/font/table/GlyfCompositeComp.class
+SHA1-Digest: eZNQrFEXYhBMvOtRJ3jtkmEqE3M=
+
+Name: org/apache/batik/svggen/font/table/FeatureRecord.class
+SHA1-Digest: cgFISCgDeJ1hUNSy5YkRIZxkZe8=
+
+Name: org/apache/batik/svggen/SwingSVGPrettyPrint.class
+SHA1-Digest: /sA7N1VyPyNeS3AOURYh36aiCb8=
+
+Name: org/apache/batik/svggen/SVGTransform.class
+SHA1-Digest: hzSCX6uaQE7t3P/uz0LpbeZ9RTg=
+
+Name: org/apache/batik/svggen/SVGCustomPaint.class
+SHA1-Digest: hiEfnFeRvxjrorqydehymxMdRHY=
+
+Name: org/apache/batik/svggen/font/Glyph.class
+SHA1-Digest: Y7JJwJNn/Cko+Zd6h+u1yem4els=
+
+Name: plugin.properties
+SHA1-Digest: jrOfxvzM5anI7JM5G8DoiaJCtZ4=
+
+Name: org/apache/batik/svggen/DefaultStyleHandler.class
+SHA1-Digest: b25wmpb0cWJ0SyXi5ceaNcEiSYA=
+
+Name: org/apache/batik/svggen/font/table/TableFactory.class
+SHA1-Digest: gJ5LCP0Gj1U0bEaWGXFe5xEu0xQ=
+
+Name: org/apache/batik/svggen/font/table/FeatureList.class
+SHA1-Digest: PH2nt8ql3wU6iRnP1eKWKYmHZkM=
+
+Name: about_files/LICENSE.sax.txt
+SHA1-Digest: gFItA7prCLPVpuy1smfUwi/tP+s=
+
+Name: org/apache/batik/svggen/SVGTransformDescriptor.class
+SHA1-Digest: 8BQm9DBfwMX5dygYjaTBoklixmY=
+
+Name: org/apache/batik/svggen/DefaultErrorHandler.class
+SHA1-Digest: eEaW3wscOW/7eHuRn54BNkZ4t74=
+
+Name: org/apache/batik/svggen/SVGTexturePaint.class
+SHA1-Digest: iPVewSS5QlprCCxKyB6P7kipQ3Q=
+
+Name: org/apache/batik/svggen/font/table/LangSys.class
+SHA1-Digest: vPf4O3BLAH9x25trcUmBomOWyD0=
+
+Name: org/apache/batik/svggen/font/table/CmapFormat0.class
+SHA1-Digest: N3dYoAN2gCMsg9/ytwruuEwOfFI=
+
+Name: org/apache/batik/svggen/font/table/NameTable.class
+SHA1-Digest: 59lRO+033VXgkWjstdgd2O3/2CM=
+
+Name: org/apache/batik/svggen/font/table/CmapFormat4.class
+SHA1-Digest: e78vqvMjmASmmRBIe/GBPV7Rp/s=
+
+Name: org/apache/batik/svggen/ImageCacher$Embedded.class
+SHA1-Digest: aiMkKA2c4WbPzhyrB1npoID61yM=
+
+Name: about_files/NOTICE
+SHA1-Digest: 7sj4n7c6wtvZjq7hnNMC2mGUdTE=
+
+Name: org/apache/batik/svggen/font/Font.class
+SHA1-Digest: j5OM3NQyro7mVLnhOC8PFlBjAqU=
+
+Name: org/apache/batik/svggen/AbstractSVGFilterConverter.class
+SHA1-Digest: 1kxcAtfMVt9MAvhq+eX3b013zvA=
+
+Name: org/apache/batik/svggen/font/table/CmapFormat.class
+SHA1-Digest: fC8MokTJL5ljoKOq6pJZLKBndc0=
+
+Name: org/apache/batik/svggen/NullOp.class
+SHA1-Digest: F086NTSaN3f8gSIVW/MMlwirrOU=
+
+Name: org/apache/batik/svggen/SVGCustomBufferedImageOp.class
+SHA1-Digest: UmCVmWNU8FIr7IKfgGlFl9vkmTg=
+
+Name: org/apache/batik/svggen/DOMTreeManager.class
+SHA1-Digest: RVRJDhU0NnpkMAGIcIYIPXS3iwk=
+
+Name: org/apache/batik/svggen/SVGArc.class
+SHA1-Digest: ejGZq1kTs2Enop7N4jZvUIHioT0=
+
+Name: org/apache/batik/svggen/font/table/CoverageFormat2.class
+SHA1-Digest: wY0Od6UyigQQYDHSXbBRYrmhC6g=
+
+Name: org/apache/batik/svggen/SVGCompositeDescriptor.class
+SHA1-Digest: +hvaMXMHSbAj+Vgla+SoCPPRMyQ=
+
+Name: org/apache/batik/svggen/font/SVGFont.class
+SHA1-Digest: 3b+j5QvXweQUvyy6K5Ctk0gXkns=
+
+Name: org/apache/batik/svggen/ImageHandlerBase64Encoder.class
+SHA1-Digest: cl2iLx30tw/MFg8JUjiFzqqLuhs=
+
+Name: org/apache/batik/svggen/font/table/LigatureSubst.class
+SHA1-Digest: PSyvWBoEP6hqbZ2L4NRg0SLQS5U=
+
+Name: org/apache/batik/svggen/SVGGeneratorContext.class
+SHA1-Digest: dyJB66c2JQh5zsT6gDPCT9ISRXo=
+
+Name: org/apache/batik/svggen/SVGAttribute.class
+SHA1-Digest: MCs+n9jodTqk+lYPv2neEnGSJbs=
+
+Name: org/apache/batik/svggen/SVGFontDescriptor.class
+SHA1-Digest: 3lVBNiXUlJ+A5tSSpI7Ob77MrZQ=
+
+Name: org/apache/batik/svggen/SVGClipDescriptor.class
+SHA1-Digest: D86PFUfn+iFX8LA44gw5/f0n45Y=
+
+Name: org/apache/batik/svggen/StyleHandler.class
+SHA1-Digest: pnS3WskYMqUW2P/WvVRYIfOZUUs=
+
+Name: org/apache/batik/svggen/SVGEllipse.class
+SHA1-Digest: fU8QBqndcYwJNqNeQSZlU3XWgyU=
+
+Name: org/apache/batik/svggen/SVGRenderingHints.class
+SHA1-Digest: 9WkiTelaB52Ku+D0KLoC/FPN1pw=
+
+Name: org/apache/batik/svggen/font/table/ScriptTags.class
+SHA1-Digest: bFTvLkVUSL86fdf2mwC/XLAUq3Q=
+
+Name: org/apache/batik/svggen/SVGConverter.class
+SHA1-Digest: ofyJRKWFHvSAoYWKV4e9dpxgVmI=
+
+Name: org/apache/batik/svggen/SVGSyntax.class
+SHA1-Digest: WzioZjMg70YNgqdRboMMZvAIpyo=
+
+Name: org/apache/batik/svggen/SVGColor.class
+SHA1-Digest: GdnbmysutgM8MiepTCtcegrZBoE=
+
+Name: org/apache/batik/svggen/font/table/PrepTable.class
+SHA1-Digest: QyuKPriHmji0tl4Jzk5aZOd8GDU=
+
+Name: org/apache/batik/svggen/font/table/GlyfCompositeDescript.class
+SHA1-Digest: E/4kHdSbmWkbmFsTl+xYtQr8Kdk=
+
