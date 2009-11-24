@@ -2848,3 +2848,2853 @@ SHA1-Digest: K72rtYfQOKba0whz3Y4eAOZFRXQ=
 Name: org/apache/xerces/impl/msg/XMLSerializerMessages.properties
 SHA1-Digest: WPLgG/4XQv+hUZOSTlW4wKlQ3DY=
 
+Signature-Version: 1.0
+SHA1-Digest-Manifest: jp2SMvc9TTBcBlL0xLEPNj0/mRc=
+Created-By: 1.6.0 (IBM Corporation)
+SHA1-Digest-Manifest-Main-Attributes: hAPD6BC74762zNeZ5io+tBTIg4A=
+
+Name: org/apache/xerces/parsers/SecuritySupport$4.class
+SHA1-Digest: 5ltQcKnjkL24H1GfyVdvI5CGZxs=
+
+Name: org/apache/xml/serialize/SecuritySupport$8.class
+SHA1-Digest: F9jZLhxyNEhBUCCYjB9agsaf03M=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDAbstractIDConstraintTrav
+ erser.class
+SHA1-Digest: JftLOuLgBbfYKGp1lFfHeOJNqNc=
+
+Name: org/apache/wml/WMLOneventElement.class
+SHA1-Digest: 4q6py3r0t+U2txerqt6Hhc2v2Ss=
+
+Name: org/apache/xerces/jaxp/UnparsedEntityHandler.class
+SHA1-Digest: rn8AhlUCAXorPK6R1pVxmdDyK24=
+
+Name: org/apache/xerces/impl/XMLEntityManager$InternalEntity.class
+SHA1-Digest: Bm0d4ko6bHDOv98RxpZtaq5WPKw=
+
+Name: org/apache/xerces/impl/XMLErrorReporter.class
+SHA1-Digest: obtwEWmgP2A3o4EFU0gzYSjgho4=
+
+Name: org/apache/wml/dom/WMLOptgroupElementImpl.class
+SHA1-Digest: 9HLY/4j0DUnhq1mErCnXbf9BY5s=
+
+Name: org/apache/xml/serialize/XHTMLSerializer.class
+SHA1-Digest: XqpRCDdeAqO13vHpxEZbPCUZPNs=
+
+Name: org/apache/xerces/impl/dv/ValidationContext.class
+SHA1-Digest: uX7dcvglDwXUqYCn1m+CeSCbRd0=
+
+Name: org/apache/xerces/xinclude/SecuritySupport.class
+SHA1-Digest: jZ7UnWmkb5EzEPDntHF+Lswd1Mo=
+
+Name: org/apache/xerces/impl/XMLEntityManager$ExternalEntity.class
+SHA1-Digest: Cx+9DTP2eV7jS3EXX5LR5YlhXqQ=
+
+Name: org/apache/xerces/xs/XSSimpleTypeDefinition.class
+SHA1-Digest: ID8H37HiBc+sH+sNHjefIrRcrjk=
+
+Name: org/apache/xerces/util/DOMUtil.class
+SHA1-Digest: al7d3wynC3uiND87yT8GJ+ntAN0=
+
+Name: org/apache/wml/WMLOptgroupElement.class
+SHA1-Digest: 1U4TcDE8KL/2uoJD6nL3CTMzGOs=
+
+Name: org/apache/wml/WMLFieldsetElement.class
+SHA1-Digest: NcUhV2X/E2mL7nA6QWSYwq/sbTM=
+
+Name: org/apache/xerces/xs/datatypes/XSDecimal.class
+SHA1-Digest: oLEE0oOx9ADSiBnupqLdneurUyU=
+
+Name: org/apache/xerces/util/AugmentationsImpl.class
+SHA1-Digest: wz1W7OOpG3QtLUO0fIfq+FYLCP8=
+
+Name: org/apache/xerces/impl/dv/DatatypeException.class
+SHA1-Digest: ANtjymxq/HwDl1ZZKxSH6LOadQ4=
+
+Name: org/apache/xerces/impl/XMLNamespaceBinder.class
+SHA1-Digest: 588ej8j8SkKzhEhk5Jd/vSoDZXk=
+
+Name: org/apache/xerces/impl/dv/xs/DecimalDV$XDecimal.class
+SHA1-Digest: dbKjM6KkAeyNpayB5Ld956FY5yA=
+
+Name: org/apache/xerces/dom/DocumentImpl$LEntry.class
+SHA1-Digest: icIcltvBDbTVNjnJ5hP7lJokZEs=
+
+Name: org/apache/xerces/impl/dv/xs/HexBinaryDV.class
+SHA1-Digest: B1vUXw0wXcnkODWK+JWjV9DKeRU=
+
+Name: org/apache/xerces/impl/dv/xs/DayTimeDurationDV.class
+SHA1-Digest: dLRGD153INKSc5okes78nBZmbi0=
+
+Name: org/apache/xerces/xni/parser/XMLDTDScanner.class
+SHA1-Digest: 6oCUPe0ug0VwFg11+nxD7xnNiec=
+
+Name: org/apache/xerces/impl/dtd/DTDGrammarBucket.class
+SHA1-Digest: YhQap4s21ue4ZPP42bU7/L3LCGA=
+
+Name: org/apache/xerces/dom/NamedNodeMapImpl.class
+SHA1-Digest: TVxJJRLN2sl2EDD9XRQVesZDKuY=
+
+Name: org/apache/wml/WMLOptionElement.class
+SHA1-Digest: lGou6WCgrHLcnxsFLnRNs2PxvzQ=
+
+Name: org/apache/xerces/xni/XMLResourceIdentifier.class
+SHA1-Digest: K1JNmy4YkACdW7igZHE3qQsuZ/o=
+
+Name: org/apache/xerces/xinclude/XIncludeMessageFormatter.class
+SHA1-Digest: aPwTNhInFCoVOPUD2eRNrl/D170=
+
+Name: org/apache/html/dom/ObjectFactory$ConfigurationError.class
+SHA1-Digest: Gfe+Tj1Q9oTrXD/Z2GyLRN4RKcc=
+
+Name: org/apache/xerces/dom/ElementNSImpl.class
+SHA1-Digest: 2A+cjKmnzicRwQnF8bxkUlbVkcI=
+
+Name: org/apache/xerces/util/SoftReferenceSymbolTable$SREntryData.clas
+ s
+SHA1-Digest: M73q9XlSE1WHJl2V2wYtqR+jWwk=
+
+Name: org/apache/xerces/parsers/BasicParserConfiguration.class
+SHA1-Digest: wV/pij/6IDBl+R0jJ63rwR8BYrw=
+
+Name: org/apache/html/dom/HTMLParamElementImpl.class
+SHA1-Digest: kfuxq8WsibbR+Rjzn8j427fKJNA=
+
+Name: org/apache/xerces/jaxp/SAXParserImpl.class
+SHA1-Digest: NT9neM1V4V1iLGkjoT7/Gnx1/BU=
+
+Name: org/apache/xerces/impl/dv/xs/XSSimpleTypeDecl$1.class
+SHA1-Digest: zLLRqKMrpEXXeYtTfxNjUwvjkCw=
+
+Name: org/apache/xerces/util/AugmentationsImpl$AugmentationsItemsConta
+ iner.class
+SHA1-Digest: +Hz5sCJcMjspJ7d27hGhqkO4foo=
+
+Name: org/apache/wml/WMLSmallElement.class
+SHA1-Digest: ZC97Ox2etm29K+SMb2x32EqTmgc=
+
+Name: org/apache/xerces/util/JAXPNamespaceContextWrapper$1.class
+SHA1-Digest: XO96mlkvEK9rJdiwXk29N8sAr5U=
+
+Name: org/apache/xerces/xs/XSObject.class
+SHA1-Digest: UA/UKWtJL2i+pB8I8JF4ZlPiDAE=
+
+Name: org/apache/html/dom/SecuritySupport$1.class
+SHA1-Digest: qoMmlvHdkV9BryO0sT1E2ztZwbA=
+
+Name: org/apache/wml/dom/WMLElementImpl.class
+SHA1-Digest: sqjmw4Jl4DmzSkh+k9D4MhJy8RU=
+
+Name: org/apache/xerces/xni/parser/XMLDocumentFilter.class
+SHA1-Digest: g2anOwxFRT+OgWySr5Vix6lPsRY=
+
+Name: org/apache/xerces/impl/xpath/regex/Token$FixedStringContainer.cl
+ ass
+SHA1-Digest: GaZzOtkN06EuLba28rSWKQEaYvU=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDElementTraverser.class
+SHA1-Digest: tGzcyB0gZVv7HliMb3jsQ03mSyk=
+
+Name: org/apache/xerces/impl/xs/traversers/SmallContainer.class
+SHA1-Digest: OYq7a5/oel2yJBTjUN2CAhzgGgk=
+
+Name: org/apache/xerces/xinclude/XIncludeHandler$UnparsedEntity.class
+SHA1-Digest: frnyfVEy/d29PX2d3c2eifOvO1w=
+
+Name: org/apache/xml/serialize/HTMLdtd.class
+SHA1-Digest: GQaKP9oIgSXg4SzZnCWAloq1xtY=
+
+Name: org/apache/xerces/dom/DeferredDocumentTypeImpl.class
+SHA1-Digest: tChvV/1rpDrXtxcYgVL9jcdY6bA=
+
+Name: org/apache/xml/serialize/Serializer.class
+SHA1-Digest: 2wo1Pdj1rDwMa8jW8RHhtvLQYtQ=
+
+Name: org/apache/xerces/parsers/CachingParserPool.class
+SHA1-Digest: 2Ux5o8P2iG+f3YnY7Mi592V5+8o=
+
+Name: org/apache/xerces/impl/dv/dtd/ENTITYDatatypeValidator.class
+SHA1-Digest: 6kpJzg002HDSF+phuAihVWOSp9U=
+
+Name: org/apache/xerces/xni/parser/XMLEntityResolver.class
+SHA1-Digest: gKVca86UVpnPSflNxN7OCIz7KrQ=
+
+Name: org/apache/xerces/impl/io/UTF8Reader.class
+SHA1-Digest: R+1fqtShqcyXm3LLjDbsEeXFMbA=
+
+Name: org/apache/xerces/impl/validation/ValidationManager.class
+SHA1-Digest: EHko93Ve9Jo47a59tjFYB6mg5nM=
+
+Name: org/apache/xerces/dom/ProcessingInstructionImpl.class
+SHA1-Digest: utc6XcekpzMYfM7TWVG8MpJaHLY=
+
+Name: org/apache/xerces/util/URI$MalformedURIException.class
+SHA1-Digest: lf77O4eD6K9M+4Ys7wrUjFX7gFU=
+
+Name: org/apache/xerces/jaxp/DefaultValidationErrorHandler.class
+SHA1-Digest: Xf1wSkbySsANXnwgBwq5EnPOzdA=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDocumentInfo.class
+SHA1-Digest: Ul1CySZqWrS8YH+prQ7UbrUy+5U=
+
+Name: org/apache/xerces/dom/CDATASectionImpl.class
+SHA1-Digest: sQxI02EQf+c3Q7uyxl5JAsuty7g=
+
+Name: org/apache/xerces/impl/xs/XMLSchemaValidator$XSIErrorReporter.cl
+ ass
+SHA1-Digest: SZKip3NC9XUfgAYSugV06VyZiEo=
+
+Name: org/apache/xerces/impl/xpath/regex/Token$ParenToken.class
+SHA1-Digest: KX5T0Bf90HTgP/VIqTCQ2U6/xHg=
+
+Name: org/apache/wml/dom/WMLWmlElementImpl.class
+SHA1-Digest: JV/1EAjw84m/a7+gmi5eU5N+9/s=
+
+Name: org/apache/xerces/util/SynchronizedSymbolTable.class
+SHA1-Digest: JUDQxcttsc8ucwErFwJcpcqqdjY=
+
+Name: org/apache/xerces/xni/Augmentations.class
+SHA1-Digest: TYVHYtcVNEVdrz89SULp/Zdo98M=
+
+Name: org/apache/xerces/xinclude/MultipleScopeNamespaceSupport.class
+SHA1-Digest: 5pUTSOwXAoK6pCyEX3dUHv1OgKs=
+
+Name: org/apache/html/dom/SecuritySupport$6.class
+SHA1-Digest: B9LGPD2cYUmlpfpcF9rue1FEbcg=
+
+Name: org/apache/xerces/impl/XML11NSDocumentScannerImpl.class
+SHA1-Digest: 82kqaaHFDQNlVINyCGqaZ0HfNbo=
+
+Name: org/apache/xerces/xinclude/SecuritySupport$5.class
+SHA1-Digest: S8lkuuxBh5CM5QUQNugbnG5tSoI=
+
+Name: org/apache/xerces/dom3/as/DOMASBuilder.class
+SHA1-Digest: LEfo97nDpRxarge5RMPBJmjpQh0=
+
+Name: org/apache/xerces/parsers/AbstractDOMParser.class
+SHA1-Digest: vOhzWU1OILi7E8xu+fgL9javTHs=
+
+Name: org/apache/xerces/impl/dv/xs/SchemaDateTimeException.class
+SHA1-Digest: M7IbVcvqf3sNRf+79EKTsPML0Vg=
+
+Name: org/apache/xerces/xni/grammars/XMLGrammarPool.class
+SHA1-Digest: 63K0bbTO9LljT+fX17ptkkmmOFo=
+
+Name: org/apache/xerces/impl/dv/xs/IDDV.class
+SHA1-Digest: /HFuaVjCqQjojNPtreS61bhUppI=
+
+Name: org/apache/xerces/impl/xpath/XPath$Step.class
+SHA1-Digest: XMZJbifqS6r5dlmDuW/XrQkmvZk=
+
+Name: org/apache/xerces/dom/PSVIDocumentImpl.class
+SHA1-Digest: lVyw16bR0WkYwt86orjv1PhhiYE=
+
+Name: org/apache/xerces/jaxp/datatype/DurationImpl.class
+SHA1-Digest: iZYEqsgPgtl/1vAoE1biRjLHa4c=
+
+Name: org/apache/xerces/dom3/as/ASContentModel.class
+SHA1-Digest: mlLYADy0fZ1aNxZnD2I338ksXew=
+
+Name: org/apache/xerces/impl/xs/util/XIntPool.class
+SHA1-Digest: NcgdhFe/O566Eb1Bm7B27HV4cfg=
+
+Name: org/apache/xerces/xs/XSTypeDefinition.class
+SHA1-Digest: bM3wlhhVyTC4z00orURoQLtTWiQ=
+
+Name: org/apache/xerces/xni/parser/XMLErrorHandler.class
+SHA1-Digest: vCHxbWLCce3Ra19BCTxKuuyLhMs=
+
+Name: org/apache/xerces/util/AttributesProxy.class
+SHA1-Digest: P+oYjvyW6fQBTzUJIyzkGOargJU=
+
+Name: about_files/NOTICE
+SHA1-Digest: BsmiDEPPfMGYhOMaKuyX7Qx7e6o=
+
+Name: org/apache/xerces/impl/dtd/models/CMAny.class
+SHA1-Digest: b8Tg3x5htohOVzEbuZev6elPmSs=
+
+Name: org/apache/xerces/impl/XMLEntityManager$CharacterBuffer.class
+SHA1-Digest: U9ic1bQ6dFa27yO38HT79b2YdRU=
+
+Name: org/apache/xerces/dom3/as/DOMImplementationAS.class
+SHA1-Digest: dkjvAfuUXYY0tY4YbFmOzewmhV0=
+
+Name: org/apache/xerces/dom3/as/ASObjectList.class
+SHA1-Digest: DotxqMc28l2kfJuqR42KGE1gFgs=
+
+Name: org/apache/xerces/impl/XML11NSDocumentScannerImpl$NS11ContentDis
+ patcher.class
+SHA1-Digest: d8gbxXB/R07cfDBZT5W/zHA7p/E=
+
+Name: org/apache/xerces/xpointer/ElementSchemePointer$Tokens.class
+SHA1-Digest: 1zdPzj7IGLJPSDsE1DnByMV9kzo=
+
+Name: org/apache/xerces/dom/CommentImpl.class
+SHA1-Digest: Ysf9Du42/S6Ww79hF1ZKSRPYeLI=
+
+Name: org/apache/xerces/jaxp/datatype/XMLGregorianCalendarImpl.class
+SHA1-Digest: HJh/DZJipoBQ0eoMVqkDpUfi6II=
+
+Name: org/apache/xerces/dom/DOMOutputImpl.class
+SHA1-Digest: odHDqtPAjM0LKZB128iSLtXsDnM=
+
+Name: org/apache/xerces/impl/dv/dtd/IDREFDatatypeValidator.class
+SHA1-Digest: ZVZQgfl6hhZco4zj8kkJ5n+eNVc=
+
+Name: org/apache/xerces/impl/xs/util/XSObjectListImpl.class
+SHA1-Digest: cOomDaODp2nt+vcrr9OZU1z3hGM=
+
+Name: org/apache/xerces/impl/xs/identity/IdentityConstraint.class
+SHA1-Digest: 6MzEEzGTvfXzQGz7aBZgGi726Ks=
+
+Name: org/apache/xerces/dom/DeferredDOMImplementationImpl.class
+SHA1-Digest: hNsQtUEQF/06+7eMllLViPY90LU=
+
+Name: org/apache/xerces/xni/grammars/XMLGrammarLoader.class
+SHA1-Digest: 2MsNgdrog0HPzQQudEM/EhtbNII=
+
+Name: org/apache/html/dom/HTMLTableCaptionElementImpl.class
+SHA1-Digest: KI67BxEz/YbBRPe9ln33YmgYSoE=
+
+Name: org/apache/xerces/impl/dv/xs/PrecisionDecimalDV.class
+SHA1-Digest: wwVr97J/Z+Dnz/ZH+Tc+SHGn0+o=
+
+Name: org/apache/xerces/xs/XSNamedMap.class
+SHA1-Digest: I4GYE7BIFI/heaXpMQdB8tCmwfA=
+
+Name: org/apache/xerces/impl/xpath/regex/Token$ClosureToken.class
+SHA1-Digest: z8Bqlxoc5bZKMs3g+tLUO8Qfw9k=
+
+Name: org/apache/xerces/dom/ParentNode.class
+SHA1-Digest: pveCGO3UgMO0uuWyS9OklnJBkW4=
+
+Name: org/apache/wml/dom/WMLTemplateElementImpl.class
+SHA1-Digest: 9S07xgI+g67+JGA6vjDmE3/Fvtk=
+
+Name: org/apache/xerces/parsers/DTDConfiguration.class
+SHA1-Digest: ukJ7vYOauNL0Na8kHSD7ivWtMXc=
+
+Name: org/apache/xerces/impl/xs/opti/SchemaDOMParser$BooleanStack.clas
+ s
+SHA1-Digest: TjMiLoH5gos3+DNMNnerKdG/mio=
+
+Name: org/apache/html/dom/HTMLHRElementImpl.class
+SHA1-Digest: 0yBQLKwS+jAX/4/LoaEVg6Mbd/I=
+
+Name: org/apache/xerces/util/XMLChar.class
+SHA1-Digest: wPLMXYQ1V5hdV7obRj/JrPB9Fjc=
+
+Name: org/apache/xerces/xs/PSVIProvider.class
+SHA1-Digest: 9PkbGf0dTRdbuTbAKjF8tikJ8qQ=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDHandler$XSDKey.class
+SHA1-Digest: hdQKCG2O+Fkkh2Fab2NLad7lyk8=
+
+Name: org/apache/xerces/impl/dtd/DTDGrammar$ChildrenList.class
+SHA1-Digest: CHXagjY8W4qJ8hCQSRQs0derZHw=
+
+Name: org/apache/xerces/xni/grammars/XSGrammar.class
+SHA1-Digest: v/U5KreuN+UW4EeaYFkRjsiTzzc=
+
+Name: org/apache/xerces/dom3/as/ASObject.class
+SHA1-Digest: EUVULVM/6O/mn8d1ksLbLohRbaQ=
+
+Name: org/apache/xerces/impl/dv/SecuritySupport$2.class
+SHA1-Digest: un6TXOC5+nOfpWya2/h4jJotCD4=
+
+Name: org/apache/xerces/xs/datatypes/ObjectList.class
+SHA1-Digest: LIzpU9YtXRi7iPCFd1mqWag6Dr4=
+
+Name: org/apache/xerces/impl/xpath/XPathException.class
+SHA1-Digest: fxsfYI7bUoZrkc77RLkW92Jsihs=
+
+Name: org/apache/xerces/impl/xs/XSDeclarationPool.class
+SHA1-Digest: 6oU9R2GNQKlpOZIQpL0zXMEg34Y=
+
+Name: org/apache/xerces/util/ErrorHandlerProxy.class
+SHA1-Digest: uMCdL/OAJ6/bJNv+uS4mY2ln1rA=
+
+Name: org/apache/html/dom/HTMLFieldSetElementImpl.class
+SHA1-Digest: bIPEh84TNuaOBESgHCq5z6G6n94=
+
+Name: org/apache/xerces/impl/xs/identity/XPathMatcher.class
+SHA1-Digest: RHsFCCObY0gWGvcXY+RyrAqoU/M=
+
+Name: org/apache/wml/dom/WMLBigElementImpl.class
+SHA1-Digest: gf7E7s2o7qAX5qCQFzPUZzEAlaM=
+
+Name: org/apache/xerces/parsers/DOMParser.class
+SHA1-Digest: v1wNZi8CPErL/zPifOQnEIOz764=
+
+Name: org/apache/xerces/util/AugmentationsImpl$LargeContainer.class
+SHA1-Digest: UtRjgaWHpGWT8WYvpL3xt1Pno2w=
+
+Name: org/apache/xml/serialize/TextSerializer.class
+SHA1-Digest: lXg69m5rkp0ihlKAsoUoXVtq5JY=
+
+Name: org/apache/xerces/xinclude/XIncludeHandler$Notation.class
+SHA1-Digest: oolLqKNPp0oDOZQ9xFvdrsTa6zs=
+
+Name: org/apache/xml/serialize/SecuritySupport$1.class
+SHA1-Digest: qY6X8peOfuHc6igBxtBkspMxXZ8=
+
+Name: org/apache/xerces/dom/ElementImpl.class
+SHA1-Digest: QPg4YDhYhZqJ1vGEIDp1HOxyBmw=
+
+Name: org/apache/xerces/xpointer/XPointerErrorHandler.class
+SHA1-Digest: m305gvLcnwTIMFxJFuTSiDMvZXc=
+
+Name: org/apache/xerces/dom/SecuritySupport$3.class
+SHA1-Digest: 5VbeqkSNqfDowj0ID+n4GmRXPkg=
+
+Name: org/apache/html/dom/HTMLAreaElementImpl.class
+SHA1-Digest: IZJ32uwr4+WUpd7XnFox3Vrgfvw=
+
+Name: org/apache/xerces/impl/xs/AttributePSVImpl.class
+SHA1-Digest: 5KTdeFj0uKyoWsClzohtI1qLtOc=
+
+Name: org/apache/xerces/impl/dv/xs/DecimalDV.class
+SHA1-Digest: OFws/Zfv0LHY3vBCwtg8d3bEAKg=
+
+Name: org/apache/xerces/parsers/XMLGrammarPreparser.class
+SHA1-Digest: 2Y/A4Ew10ZVe2jfUmXK57+xvKsk=
+
+Name: org/apache/xerces/util/SecurityManager.class
+SHA1-Digest: ODV5fkqQXmxGnm9W9U6wIrSdfkY=
+
+Name: org/apache/xerces/dom/DeferredCDATASectionImpl.class
+SHA1-Digest: 9RkWJMxiZ0BZWUU3OYa6L2NAfo8=
+
+Name: org/apache/xerces/impl/dv/xs/StringDV.class
+SHA1-Digest: S7tjgatQTZ+CeM0r/q1YzCsXQVk=
+
+Name: org/apache/xerces/impl/xs/XSModelImpl.class
+SHA1-Digest: OH+Ny8E4SbtL1R2CB+S2Et03VRo=
+
+Name: org/apache/wml/WMLStrongElement.class
+SHA1-Digest: f7Ne4aQC0nZR8mkMw/xI6geM/5M=
+
+Name: org/apache/xerces/impl/xs/XSGrammarBucket.class
+SHA1-Digest: hbpEbPAvPXb6LLBSEW+6OoouJRw=
+
+Name: org/apache/xerces/dom/PSVIAttrNSImpl.class
+SHA1-Digest: O3tHk/nI+CV9BuOlXxEhS08L5Go=
+
+Name: org/apache/xerces/impl/dv/SecuritySupport$7.class
+SHA1-Digest: 5sBTvIhcQsCMDD+U/X7NhcO01JI=
+
+Name: org/apache/xerces/dom/ASDOMImplementationImpl.class
+SHA1-Digest: l9BbAlLbjATKiRVIgHGfkFgf7B8=
+
+Name: org/apache/xerces/util/XMLCatalogResolver.class
+SHA1-Digest: ppUwodReTJ1BlHYqsF44xMeAyNc=
+
+Name: org/apache/xerces/impl/xs/models/XSEmptyCM.class
+SHA1-Digest: YOreJD1OArza+lJPDb+x3iWy9sk=
+
+Name: org/apache/xerces/dom/DeferredAttrImpl.class
+SHA1-Digest: pZTbURMPgWbXkWSwkEduv5F+ZpI=
+
+Name: org/apache/xerces/xs/XSException.class
+SHA1-Digest: VE7Dda8s/6wJyIZiY6gQV5WbgVo=
+
+Name: org/apache/xerces/dom/DOMLocatorImpl.class
+SHA1-Digest: nypDYD2iCC1uC9q8mWHYDSjsChA=
+
+Name: org/apache/xerces/jaxp/validation/ValidatorImpl.class
+SHA1-Digest: AKU94E0KGZ9o5RHvtY8TaHb1dAs=
+
+Name: org/apache/xerces/impl/XMLEntityScanner$1.class
+SHA1-Digest: aqOCD6YHbJw5vZx5t3tyTNYIAfc=
+
+Name: org/apache/wml/WMLElement.class
+SHA1-Digest: i4jWbd6Ef7gK5JjaG6weJM4s3OQ=
+
+Name: org/apache/xerces/parsers/SecuritySupport$2.class
+SHA1-Digest: Vrz2IcYCfAZa50OrGGJxz14OSkU=
+
+Name: org/apache/xerces/impl/msg/XPointerMessages.properties
+SHA1-Digest: zmT14Q0F15QuMp64b452DkFNy4I=
+
+Name: org/apache/xerces/impl/xs/XMLSchemaValidator$KeyValueStore.class
+SHA1-Digest: CBtIWrrbX3zRBJuTGvunscsokwo=
+
+Name: org/apache/wml/dom/WMLDOMImplementationImpl.class
+SHA1-Digest: +W87XW8MCkMW6Bq+gNdABXjCKOU=
+
+Name: org/apache/html/dom/HTMLLinkElementImpl.class
+SHA1-Digest: XITl7PPKthVgvCKfKAdV8Vg9HRY=
+
+Name: org/apache/xerces/xs/datatypes/XSDateTime.class
+SHA1-Digest: 2TUt1U6MJHUzyCMY4eqwYGcMtIc=
+
+Name: org/apache/xml/serialize/Encodings.class
+SHA1-Digest: /xxC94XdeiExmAsqT+QLdap0agA=
+
+Name: org/apache/xml/serialize/SecuritySupport$6.class
+SHA1-Digest: rBRXVRv/mG9Y/Oo12llq/O3rdjg=
+
+Name: org/apache/xerces/parsers/XMLGrammarPreparser$XMLGrammarLoaderCo
+ ntainer.class
+SHA1-Digest: pRRgIBsAZflcgAclW7TOPzQ8aQ4=
+
+Name: org/apache/xerces/impl/xs/SchemaSymbols.class
+SHA1-Digest: UONbx7Lv5+Nz5G/G+SCL5Uu/roU=
+
+Name: org/apache/xerces/impl/XMLNSDocumentScannerImpl.class
+SHA1-Digest: sLer5CayFS/w2T+QYzIRHRK2Fdc=
+
+Name: org/apache/xerces/dom/SecuritySupport$8.class
+SHA1-Digest: OyfFCMTz8rYIGw44tWJkd7HRqSE=
+
+Name: org/apache/xerces/impl/xs/util/StringListImpl.class
+SHA1-Digest: FAo4cyGnHOJywIzYfXWXwMrc4W8=
+
+Name: org/apache/xerces/util/SAXMessageFormatter.class
+SHA1-Digest: L+m66HnGZOCvXgcg10ETH7c17dM=
+
+Name: org/apache/xerces/impl/XML11DocumentScannerImpl.class
+SHA1-Digest: 2NRN+5xeZliG4RS/3k7z6JqPvB4=
+
+Name: org/apache/xerces/impl/xs/SchemaGrammar$BuiltinAttrDecl.class
+SHA1-Digest: HxkID6vltjyzg1sWk8hZxWIlwks=
+
+Name: org/apache/wml/dom/WMLSmallElementImpl.class
+SHA1-Digest: QYGEVpD6ZUKQynt79ypXCBFTegc=
+
+Name: org/apache/xerces/impl/XMLDocumentScannerImpl$PrologDispatcher.c
+ lass
+SHA1-Digest: fEMFDiWgacPzWPu6AQX0uFFkDQw=
+
+Name: org/apache/xerces/util/SoftReferenceSymbolTable.class
+SHA1-Digest: g3FV4RpF275/M1HMSwGFenLZVu8=
+
+Name: org/apache/wml/dom/WMLDoElementImpl.class
+SHA1-Digest: Xq2XDwVZ4Wez+KjI00l3EAx4N6o=
+
+Name: org/apache/xerces/impl/dv/util/ByteListImpl.class
+SHA1-Digest: T2pR2GJO9LTt3NmeYU/DCiei2lE=
+
+Name: org/apache/xerces/impl/dv/xs/DurationDV.class
+SHA1-Digest: 9qV+ggtVNBPa6LNMVkmHFm8ofKg=
+
+Name: org/apache/xerces/impl/xs/XSImplementationImpl.class
+SHA1-Digest: VfLL6AD00VbmHV8vPqq+gMyHlgs=
+
+Name: org/apache/xerces/xpointer/XPointerHandler$Scanner.class
+SHA1-Digest: w4a+WIfKbShmecfovkam5TCcMrc=
+
+Name: org/apache/xerces/dom/DOMInputImpl.class
+SHA1-Digest: VvxRU26w2zC1LVQLnbtJ+exq7Cs=
+
+Name: org/apache/xerces/impl/Constants$ArrayEnumeration.class
+SHA1-Digest: x89IReht2333zD0By+mKJCl1ItQ=
+
+Name: org/apache/xerces/dom/DeferredTextImpl.class
+SHA1-Digest: CTdu8cqcUB2JsuuXs7Loy1x9wjg=
+
+Name: org/apache/xerces/impl/xs/SchemaNamespaceSupport.class
+SHA1-Digest: OLWx1u8EElUszNeYJI4tOX5O+jw=
+
+Name: org/apache/xerces/dom/NodeListCache.class
+SHA1-Digest: DqRFf81xZYJKw3RKIJr8CnpsFHM=
+
+Name: org/apache/wml/dom/WMLTableElementImpl.class
+SHA1-Digest: 2zQ51NGuJ/evJM+DR2w77XHB3kE=
+
+Name: org/apache/xerces/jaxp/validation/WeakReferenceXMLSchema.class
+SHA1-Digest: jhHd7yKZJiy4ZtEtKOl/nUAx4Hs=
+
+Name: org/apache/xerces/dom/AttrImpl.class
+SHA1-Digest: tvNHno3GauRuAZK+mOVFTSpAJ5o=
+
+Name: org/apache/wml/dom/WMLAnchorElementImpl.class
+SHA1-Digest: VfsG78Jfdc9XGky/i8gTsw45oWs=
+
+Name: about_files/LICENSE.resolver.txt
+SHA1-Digest: EoBElTFHswXzBUfhQ5kOVx17+V0=
+
+Name: org/apache/xerces/dom3/as/DocumentAS.class
+SHA1-Digest: xO360s1hnyqumL1bMnrEd2XV6U4=
+
+Name: org/apache/xerces/parsers/SecuritySupport$7.class
+SHA1-Digest: N7Uqder0zqQeNd+Z6dJ1/ysUPnw=
+
+Name: org/apache/xerces/impl/dv/xs/Base64BinaryDV.class
+SHA1-Digest: 6Dl4REEuDnIhHuajColF9YZUK9E=
+
+Name: org/apache/xerces/impl/XML11DTDScannerImpl.class
+SHA1-Digest: Jz52WKEnCuDgNyZ7jsi5UC67koM=
+
+Name: org/apache/xerces/impl/xpath/regex/Op$ModifierOp.class
+SHA1-Digest: Bbs5/IaKRRnoV7mlwuKDAgHPWHo=
+
+Name: org/apache/xerces/util/XMLEntityDescriptionImpl.class
+SHA1-Digest: YzhAbzroV6D9r0Se9wUVoisThyE=
+
+Name: org/apache/html/dom/HTMLFontElementImpl.class
+SHA1-Digest: /3uluxjEVTeXEBgrR4H73QqQyoE=
+
+Name: org/apache/xerces/impl/xs/XSComplexTypeDecl.class
+SHA1-Digest: 3ojTb9ohUiurKXcxnL28Tlfffq0=
+
+Name: org/apache/xerces/impl/xpath/regex/Op$UnionOp.class
+SHA1-Digest: BqPnwVpV1ojQKJVZRqPCpLO2Y4A=
+
+Name: org/apache/xerces/dom/events/UIEventImpl.class
+SHA1-Digest: vPwDa5rfusE46ywbPIVPWrjOkcw=
+
+Name: org/apache/xerces/impl/dtd/BalancedDTDGrammar.class
+SHA1-Digest: ekrOsucntIplWmybZpljkFSA5x0=
+
+Name: org/apache/xerces/xs/LSInputList.class
+SHA1-Digest: gXCcJkG8zPSkTSy4Edi427jFeTA=
+
+Name: org/apache/xerces/dom3/as/DOMASWriter.class
+SHA1-Digest: tB7iOQQDlmwzB+CLrEPL+3Qhk10=
+
+Name: org/apache/xerces/xinclude/ObjectFactory$ConfigurationError.clas
+ s
+SHA1-Digest: 8f9uYcwAN4GojXHuLAWCq7sjcW8=
+
+Name: org/apache/wml/dom/WMLMetaElementImpl.class
+SHA1-Digest: lHXU+DSk528zTFtjP93H1etJOIY=
+
+Name: org/apache/html/dom/HTMLTableSectionElementImpl.class
+SHA1-Digest: Y8SjC5GTfI7e4A+6lCDn6AnCL9s=
+
+Name: org/apache/xerces/impl/XMLErrorReporter$1.class
+SHA1-Digest: VWg3gNPSRggm6uj6Anh8Nzni3Qc=
+
+Name: org/apache/xerces/xpointer/ElementSchemePointer$1.class
+SHA1-Digest: p39ItgDqXRv3q39/V+nnU4NYPVk=
+
+Name: org/apache/xerces/dom/TextImpl.class
+SHA1-Digest: rD25w6orGmM2mxXWQ4vI/F+s+AI=
+
+Name: org/apache/xerces/xs/XSParticle.class
+SHA1-Digest: PMe7s+ZzClXPJMiYZsa/3XWQSNQ=
+
+Name: org/apache/xerces/impl/xpath/XPath.class
+SHA1-Digest: 93RlqssThBb97m9nqnVvLB5yJa8=
+
+Name: org/apache/html/dom/HTMLHtmlElementImpl.class
+SHA1-Digest: WQ8yI+oGP42x08spJGgAQN6Ae6E=
+
+Name: org/apache/xerces/impl/XMLDocumentFragmentScannerImpl$ElementSta
+ ck.class
+SHA1-Digest: bTJfXB7tpIB1rR+4jZ6V4yuZ64s=
+
+Name: org/apache/html/dom/HTMLTableCellElementImpl.class
+SHA1-Digest: b2BhQv/+cJTkz04LGUQH+4aHXEo=
+
+Name: org/apache/html/dom/HTMLFormElementImpl.class
+SHA1-Digest: q7nHSOTqDLXWDoAac6F1zy+oORo=
+
+Name: org/apache/xerces/xni/parser/XMLDocumentScanner.class
+SHA1-Digest: h4IdY5XjH3mIua1ZrNxai+VbP6Q=
+
+Name: org/apache/xerces/dom/events/MutationEventImpl.class
+SHA1-Digest: mFO3aTnXq6Oq4YgO/6VvGzx8aCw=
+
+Name: org/apache/xerces/impl/xpath/XPath$LocationPath.class
+SHA1-Digest: lxSAxnLKKkwBI/iWOj1N/ecutR8=
+
+Name: org/apache/xerces/impl/dv/xs/AnySimpleDV.class
+SHA1-Digest: jz+zSKwrHR7NERfcPWqPniDRe+c=
+
+Name: org/apache/xerces/jaxp/validation/ValidatorHandlerImpl$Resolutio
+ nForwarder.class
+SHA1-Digest: OCwdvv5FrNPoM7HyYzQfWZZSuK0=
+
+Name: org/apache/xerces/impl/XMLDocumentFragmentScannerImpl.class
+SHA1-Digest: JF3pRajIu/GO7jMRUpdIa/snCMs=
+
+Name: org/apache/html/dom/HTMLHeadingElementImpl.class
+SHA1-Digest: YY4R2nEMkeK2lesen5sfAafPos4=
+
+Name: org/apache/xerces/impl/io/UCSReader.class
+SHA1-Digest: c4gNvJK+L5qwC3lcmoDj25pgRsw=
+
+Name: org/apache/xerces/impl/dv/xs/PrecisionDecimalDV$XPrecisionDecima
+ l.class
+SHA1-Digest: TjKlfLzsOOpruAExEkIDCPNhoIQ=
+
+Name: org/apache/xerces/dom/DocumentImpl$EnclosingAttr.class
+SHA1-Digest: UXOhVUhZudJbjT/qUniGmFWwAuk=
+
+Name: about_files/LICENSE.dom-documentation.txt
+SHA1-Digest: hUGF7wp27gGWFBUjeNWVRu1c5R4=
+
+Name: org/apache/xerces/dom/ObjectFactory.class
+SHA1-Digest: 7zUkK8/gbH+uz/hctu5hQ4y4J+Q=
+
+Name: org/apache/xerces/xni/grammars/XMLGrammarDescription.class
+SHA1-Digest: F3hD3jKCokVFlZslxnGZal+2boo=
+
+Name: org/apache/xerces/parsers/ObjectFactory$ConfigurationError.class
+SHA1-Digest: Y7yCba3mAgTqSMbYVR9Jz9dRdPo=
+
+Name: org/apache/xerces/impl/dv/xs/DayDV.class
+SHA1-Digest: BNoL6iQG+kcHvosJiUR9rL1nCEs=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDComplexTypeTraverser.cla
+ ss
+SHA1-Digest: lGNzKKziP1REZWKGU66lLi5e5c0=
+
+Name: org/apache/xerces/impl/dv/dtd/XML11IDREFDatatypeValidator.class
+SHA1-Digest: Pik6C/Fm2mnnaseqBTyUxZfWZDk=
+
+Name: org/apache/xerces/impl/dv/xs/XSSimpleTypeDecl$4.class
+SHA1-Digest: VM80DUW0ZWQFNsieS2N0Sod9vuM=
+
+Name: org/apache/xml/serialize/SerializerFactory.class
+SHA1-Digest: kBoo0b+mAGbYWZllvAMY+jKlrXg=
+
+Name: org/apache/wml/WMLTemplateElement.class
+SHA1-Digest: qWWERobTW0zV4tyRKM10eo/A5XI=
+
+Name: org/apache/html/dom/HTMLFrameSetElementImpl.class
+SHA1-Digest: fDVl77+Y3laQmnH06Z5OTgICuh8=
+
+Name: org/apache/xerces/impl/xs/XSLoaderImpl$XSGrammarMerger.class
+SHA1-Digest: l+Bfrg1xc7OFMDKSHPj0+gUpVlE=
+
+Name: org/apache/xerces/impl/dtd/models/CMStateSet.class
+SHA1-Digest: 15dwfOYQbJuSV5Lle12W3tKyS5c=
+
+Name: org/apache/html/dom/SecuritySupport$4.class
+SHA1-Digest: WvH1pXFUeU0MLVM9pYXkO8+6q/U=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDWildcardTraverser.class
+SHA1-Digest: BQyY11PsyAID3Z5Br4EkVt9GBfc=
+
+Name: org/apache/xerces/impl/xpath/regex/Match.class
+SHA1-Digest: d4mQRNSqxMOVk/9Zn1oabYif3Jk=
+
+Name: org/apache/xerces/impl/XMLDocumentScannerImpl$ContentDispatcher.
+ class
+SHA1-Digest: pMZwaB9/rxh3RjHaQERi5hc0i+o=
+
+Name: org/apache/xerces/impl/dv/xs/AnyURIDV.class
+SHA1-Digest: ofsB/ZVdapWSp4fESRDYNOxGSFY=
+
+Name: org/apache/xerces/xinclude/SecuritySupport$3.class
+SHA1-Digest: M/tn6l2zMASiUbWKQzD4DAJ0+Jo=
+
+Name: org/apache/xerces/dom/DOMNormalizer.class
+SHA1-Digest: yAVLDP6Uqtimx+WiItpbrovswFg=
+
+Name: org/apache/xerces/impl/xs/models/XSCMRepeatingLeaf.class
+SHA1-Digest: vMEtKyW6NmMFwA3nnMwXft2lEYY=
+
+Name: org/apache/xerces/impl/xs/SchemaNamespaceSupport$SchemaRootConte
+ xt.class
+SHA1-Digest: txsxEZDmo+93bGvFA0Q7hdBWSKA=
+
+Name: org/apache/xerces/impl/dv/xs/YearMonthDurationDV.class
+SHA1-Digest: x/8+r7CrAXvF0y9QAhQssbmpWW4=
+
+Name: org/apache/xerces/impl/dv/xs/IntegerDV.class
+SHA1-Digest: LOOzmvI+4EnFyaxToKtyWqa3VhU=
+
+Name: org/apache/html/dom/HTMLSelectElementImpl.class
+SHA1-Digest: lFQTL+hNuk+i0/wl+G/KL2iKJxA=
+
+Name: org/apache/xerces/xs/XSWildcard.class
+SHA1-Digest: cfJLqG20OFvaHTY7dl98/E0Hjpk=
+
+Name: org/apache/xerces/dom/CoreDOMImplementationImpl$RevalidationHand
+ lerHolder.class
+SHA1-Digest: t5dq8eB+JDVYtqWONV/VBdlYRXs=
+
+Name: org/apache/xerces/impl/dv/dtd/XML11DTDDVFactoryImpl.class
+SHA1-Digest: 956tTdukD0iRZJLiZQOibheKSBY=
+
+Name: org/apache/wml/dom/WMLPElementImpl.class
+SHA1-Digest: bf2DER66CKhQgZd1SfPSBLvmQ4k=
+
+Name: org/apache/xerces/parsers/XMLDocumentParser.class
+SHA1-Digest: x/5fzydTi+ZQGHlA55X4xXnULTE=
+
+Name: org/apache/xerces/util/NamespaceSupport$Prefixes.class
+SHA1-Digest: /eG74I2GFzQTgdJ/M2T6luPns1A=
+
+Name: org/apache/xerces/jaxp/JAXPValidatorComponent$DraconianErrorHand
+ ler.class
+SHA1-Digest: CvIRDVdhM98ySWcXftyVwPRfKp4=
+
+Name: org/apache/xerces/impl/xs/SchemaGrammar.class
+SHA1-Digest: NZW/L13uG8TrsJQG1hcHLprrvNg=
+
+Name: org/apache/xerces/xpointer/XPointerPart.class
+SHA1-Digest: kGGjnA/ylGUUmuIXSUxe00SqQao=
+
+Name: org/apache/xerces/impl/xpath/XPath$Tokens.class
+SHA1-Digest: Ox+Ip0m6xwwM4q5NBuuNBViMu9g=
+
+Name: org/apache/xerces/impl/xs/models/XSCMLeaf.class
+SHA1-Digest: 0kEx56zTtGUmrxEPYrL8RgylMD0=
+
+Name: org/apache/html/dom/HTMLObjectElementImpl.class
+SHA1-Digest: ZVvmynAh1KN/qOeKJnKv4YRYitQ=
+
+Name: org/apache/xerces/xs/XSAttributeGroupDefinition.class
+SHA1-Digest: DaiXHvrR6goEy8imWVmEoaKwqXk=
+
+Name: org/apache/xerces/impl/dv/xs/TimeDV.class
+SHA1-Digest: uZTGzFfGI8nmctKb09VWI4DgAXE=
+
+Name: org/apache/xerces/impl/xs/opti/AttrImpl.class
+SHA1-Digest: /bf/zQo2ehSPhm8Bx0S31p1rwdE=
+
+Name: org/apache/xerces/dom/DOMImplementationImpl.class
+SHA1-Digest: igoS6BZyws+dsDG5hjf8isRTf18=
+
+Name: org/apache/xerces/jaxp/validation/XSGrammarPoolContainer.class
+SHA1-Digest: J0iL9aGFZQzF4UH8gxAlPiel3ZI=
+
+Name: org/apache/html/dom/HTMLDListElementImpl.class
+SHA1-Digest: GzJpGCH+WLk7auzjk5QfIi0foUE=
+
+Name: org/apache/xerces/dom/DeferredDocumentImpl$IntVector.class
+SHA1-Digest: sAaScmo900JoLENr3XHWiceHceY=
+
+Name: org/apache/xerces/impl/xs/util/XSNamedMapImpl$1.class
+SHA1-Digest: d5ZPumLPp1CNp9ZbTNqbr/39uTk=
+
+Name: org/apache/xerces/util/DOMEntityResolverWrapper.class
+SHA1-Digest: LMH9ycT4663TC+6ZG1jA5jRhqhI=
+
+Name: org/apache/xerces/xs/XSConstants.class
+SHA1-Digest: TVU7LPTYbI7VfJX09ESM6jYIq5c=
+
+Name: org/apache/xerces/impl/XMLDocumentScannerImpl.class
+SHA1-Digest: WdSNcKgoMDYSjU7sxSlYqy8ONR8=
+
+Name: org/apache/xerces/dom/AttrNSImpl.class
+SHA1-Digest: NwdJqT2qjKeVfB9FirdmEVRtdao=
+
+Name: org/apache/xml/serialize/HTMLEntities.res
+SHA1-Digest: TjtGve5q7krasCCpTilB3Zg3xLQ=
+
+Name: org/apache/xerces/xinclude/SecuritySupport$8.class
+SHA1-Digest: FBd9j1QfNgH44kf4oymk7dhzOx8=
+
+Name: org/apache/xerces/jaxp/datatype/XMLGregorianCalendarImpl$1.class
+SHA1-Digest: 6rN3XpudWzCGsB/pqHWwuYwmu7A=
+
+Name: org/apache/wml/dom/WMLAElementImpl.class
+SHA1-Digest: P3p77i18PWeWHlIvcFivN/+Ec5Q=
+
+Name: org/apache/html/dom/HTMLBaseFontElementImpl.class
+SHA1-Digest: yJnDR6icREWJkKCUnbiQJA5lqow=
+
+Name: org/apache/xerces/impl/xpath/XPath$1.class
+SHA1-Digest: wIhm6uY7d9xzG3SQ5c5NdHqBZs0=
+
+Name: org/apache/xerces/util/AugmentationsImpl$SmallContainer$SmallCon
+ tainerKeyEnumeration.class
+SHA1-Digest: PX5RRp4cdaDB4EyoAOvz0EdU3N0=
+
+Name: org/apache/wml/WMLInputElement.class
+SHA1-Digest: mSiwPwhKQx3QAvMLUzFjJAU8Iv8=
+
+Name: org/apache/xerces/xs/datatypes/XSFloat.class
+SHA1-Digest: EaJAz2tk8KNN6ddrYs5Juj5Zg9A=
+
+Name: org/apache/wml/dom/WMLOneventElementImpl.class
+SHA1-Digest: 3YyH90RtWeJ0a1EaO/uyyz4M4NQ=
+
+Name: org/apache/xerces/impl/dv/xs/AbstractDateTimeDV$DateTimeData.cla
+ ss
+SHA1-Digest: 0ujm7to4o87ICqj3Rw8C3Cg9gj8=
+
+Name: org/apache/xerces/impl/xpath/regex/Token$StringToken.class
+SHA1-Digest: GE6sNhE7DeFk7uM0h7SY/hLvkIs=
+
+Name: org/apache/xerces/util/DatatypeMessageFormatter.class
+SHA1-Digest: Xo2kUoSjJ4T7BCR4v2aiPTmRUEg=
+
+Name: org/apache/xerces/impl/msg/XMLMessageFormatter.class
+SHA1-Digest: u5L76Z1/7GJOqVwrFg7813qpJi8=
+
+Name: org/apache/xerces/impl/xs/XSWildcardDecl.class
+SHA1-Digest: AsOJteqW0fZido8MkJaa30sFbb4=
+
+Name: org/apache/xerces/impl/io/MalformedByteSequenceException.class
+SHA1-Digest: Z81Me9Zcnxy/Kj2c4wuulyAZXGA=
+
+Name: org/apache/xerces/impl/xs/util/XInt.class
+SHA1-Digest: RfR9wwJclEERML8yTAfqgXT6X1M=
+
+Name: org/apache/html/dom/HTMLParagraphElementImpl.class
+SHA1-Digest: vW+U7WG3/3AJMXcYmUyz0tlDBiE=
+
+Name: org/apache/xerces/impl/xs/opti/TextImpl.class
+SHA1-Digest: kEaKorCrhapjECiYD6eEw2nhNww=
+
+Name: org/apache/xerces/impl/ExternalSubsetResolver.class
+SHA1-Digest: DpR5oUB9xq3S7cbR2TMh2pdKJAg=
+
+Name: org/apache/xerces/impl/xs/XMLSchemaValidator$XPathMatcherStack.c
+ lass
+SHA1-Digest: TYkunBgZ4R5lpZExl+wKWstS2Ow=
+
+Name: org/apache/xerces/dom/DeferredEntityImpl.class
+SHA1-Digest: hySYYIwLXjr8RoSxMvSdPPgMgkM=
+
+Name: org/apache/xerces/util/ErrorHandlerWrapper$1.class
+SHA1-Digest: 0fG4oRIOUk9Z/Wlsp9kl4EIl+aA=
+
+Name: org/apache/xerces/parsers/XIncludeParserConfiguration.class
+SHA1-Digest: wjK33o15yy2yRbvwFz4GKB+pebY=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDAbstractTraverser$FacetI
+ nfo.class
+SHA1-Digest: y2FJpVxAOF650bE0bYXZm231bB4=
+
+Name: org/apache/xerces/impl/dtd/models/MixedContentModel.class
+SHA1-Digest: eLp4lAdI72jK9QIYEkY+63LjV08=
+
+Name: org/apache/xerces/impl/xpath/XPath$Scanner.class
+SHA1-Digest: 20D46FT/lNnRd2Nw1TDydmb+MUs=
+
+Name: org/apache/xml/serialize/BaseMarkupSerializer.class
+SHA1-Digest: 9wHRzMWzJ43zgNUGZluGJMlZKaU=
+
+Name: org/apache/xerces/parsers/XPointerParserConfiguration.class
+SHA1-Digest: eASxNR4FGAtzvB3uhwOt+X4suqA=
+
+Name: org/apache/xerces/impl/xpath/regex/message.properties
+SHA1-Digest: ircwpPkOKKdG4h2np+ReJocodGk=
+
+Name: org/apache/xerces/impl/dtd/models/CMLeaf.class
+SHA1-Digest: 4RU6M33gFp3FqAngoeYiNaazLXk=
+
+Name: org/apache/xerces/xs/ShortList.class
+SHA1-Digest: bMkrVO/6Fb1SelWuwnZlaJgQCWM=
+
+Name: org/apache/html/dom/HTMLMenuElementImpl.class
+SHA1-Digest: vL/6MQRxOdUAdnwyxyiYjPkW0fw=
+
+Name: org/apache/html/dom/HTMLInputElementImpl.class
+SHA1-Digest: r6lYhLXoHOHM1Cbnj0RPlisrpus=
+
+Name: org/apache/xerces/impl/xpath/regex/Op$StringOp.class
+SHA1-Digest: jMr0XHagRKYM/orqoaZhaJIB4xk=
+
+Name: org/apache/xerces/dom/SecuritySupport$1.class
+SHA1-Digest: XSj8Iw4d3He4tmgth0Ed2QzPwGQ=
+
+Name: org/apache/wml/WMLAElement.class
+SHA1-Digest: PfUb/kRzYYOZdCnHZuHEhNk3I6U=
+
+Name: org/apache/wml/WMLBigElement.class
+SHA1-Digest: QDSkkyR7YEGyKtOg5NmOjJXHOzc=
+
+Name: org/apache/xerces/impl/XMLEntityManager$ScannedEntity.class
+SHA1-Digest: YsGdmKBjr6uYohdHrbVnGIeznjw=
+
+Name: org/apache/xerces/dom/ParentNode$UserDataRecord.class
+SHA1-Digest: UQLw+P27OqgS9AH0ILU9q/0k/sE=
+
+Name: org/apache/html/dom/HTMLButtonElementImpl.class
+SHA1-Digest: 9lUcnIgWz43YNuM3MKk7MdgP0bM=
+
+Name: org/apache/xerces/impl/dv/ObjectFactory$ConfigurationError.class
+SHA1-Digest: cwbXsNSFcIG0EzFQEqFHbMfGtuE=
+
+Name: org/apache/xerces/impl/xs/XMLSchemaValidator.class
+SHA1-Digest: iHl/2u6lJ5qsTFVdA0IQdI9oE8M=
+
+Name: org/apache/wml/WMLDOMImplementation.class
+SHA1-Digest: 3Kuq0FQa8l1Sdsq45AJqtg9lHm4=
+
+Name: org/apache/xerces/dom/DeferredEntityReferenceImpl.class
+SHA1-Digest: /z7x4RpgWQiNsjicSIg4PxVeRsw=
+
+Name: org/apache/html/dom/HTMLMetaElementImpl.class
+SHA1-Digest: pvbP95DQR2bsARR40E/uhPXyz60=
+
+Name: org/apache/xerces/impl/dtd/XML11DTDValidator.class
+SHA1-Digest: EqE/9tM/mYK1MAWr4zrflhKVpkY=
+
+Name: org/apache/xerces/dom/AttributeMap.class
+SHA1-Digest: mvko6Zu43Rzf6PfvEUPAfcqbhFI=
+
+Name: org/apache/xml/serialize/SerializerFactoryImpl.class
+SHA1-Digest: IVLfWhrtWHecvgm6flLlY0xYNrg=
+
+Name: META-INF/services/javax.xml.datatype.DatatypeFactory
+SHA1-Digest: UpKnV/kk9/7VNjPmBTwq/1JBSkA=
+
+Name: org/apache/wml/WMLTimerElement.class
+SHA1-Digest: 5Yf+b5Zb+4lPWNeD8+QIHbiP8do=
+
+Name: org/apache/wml/dom/WMLAccessElementImpl.class
+SHA1-Digest: ChFHzMpfQli9hOZ4MbGHoxAeihY=
+
+Name: org/apache/xerces/impl/dtd/XMLDTDDescription.class
+SHA1-Digest: r79ydSn6Mtt3nj0CdWAZfxDF0KE=
+
+Name: org/apache/xerces/impl/dv/SecuritySupport$5.class
+SHA1-Digest: EjJkShtUBKAQ/o5L14CT7P/7ueE=
+
+Name: org/apache/xerces/jaxp/validation/ValidatorHandlerImpl$1.class
+SHA1-Digest: A5Nik5+GZKG7bU/5EORYFwzmMNk=
+
+Name: org/apache/xerces/jaxp/JAXPValidatorComponent$XNI2SAX.class
+SHA1-Digest: xgPsAPtZgfdp8EslTiLkRTK1lHQ=
+
+Name: org/apache/wml/WMLHeadElement.class
+SHA1-Digest: +c9StCaKCj0Vztpbg/sJbQbYAms=
+
+Name: org/apache/xerces/impl/io/Latin1Reader.class
+SHA1-Digest: DkoQ8/RrlDFt9+Y0deCcCyvKZD4=
+
+Name: org/apache/xerces/jaxp/validation/DOMResultAugmentor.class
+SHA1-Digest: xYe2woPTuDRcjHEtcVKxRGfMNH4=
+
+Name: org/apache/xerces/parsers/DOMParserImpl.class
+SHA1-Digest: 837X79VccZoTTYHjggd0pIwleOM=
+
+Name: org/apache/xerces/impl/xs/XMLSchemaValidator$ValueStoreCache.cla
+ ss
+SHA1-Digest: /ksyxtAauWbU2HyN8JEiOQdYwUo=
+
+Name: org/apache/xerces/jaxp/JAXPValidatorComponent$3.class
+SHA1-Digest: 4GkoOAQ8PkCRo/z/sPk5Telhfwk=
+
+Name: org/apache/xml/serialize/Method.class
+SHA1-Digest: 06eel804VP7En2kCwTnvRC9riBA=
+
+Name: org/apache/xerces/xni/XMLDocumentHandler.class
+SHA1-Digest: 07xRhJQlx8mXPT5PEMspSyaN2f0=
+
+Name: org/apache/xml/serialize/SecuritySupport$4.class
+SHA1-Digest: t2VBhZ+9dn6R8KmfGM8v33hbLgE=
+
+Name: org/apache/xerces/dom/SecuritySupport$6.class
+SHA1-Digest: ItOWbnU1dsaDXfjSCs0rQ56r5yo=
+
+Name: org/apache/wml/dom/WMLTimerElementImpl.class
+SHA1-Digest: hC1rKSWyCi9Jh+uuawBGDTfLX54=
+
+Name: org/apache/wml/WMLPElement.class
+SHA1-Digest: SMrF7DNJjpiDU+LQuZ51dkJDFqI=
+
+Name: org/apache/xerces/impl/msg/JAXPValidationMessages.properties
+SHA1-Digest: +HoMz9ik4g4aset7Xr/XzgwR688=
+
+Name: org/apache/xerces/impl/dv/xs/FloatDV.class
+SHA1-Digest: S0m7GTL/vHSXKGRU5iqHfNLjtAQ=
+
+Name: org/apache/xerces/impl/XMLEntityManager$CharacterBufferPool.clas
+ s
+SHA1-Digest: Zweh8ASG63I77ZXx0lhx3eaYdEc=
+
+Name: org/apache/xerces/dom/DeferredElementDefinitionImpl.class
+SHA1-Digest: upZzz0cpQ9TOi5xYw1Mzq33pCw8=
+
+Name: org/apache/xerces/impl/xpath/regex/Op$ChildOp.class
+SHA1-Digest: kErkjqUZNRCawEBHD5YOf8mS1Ws=
+
+Name: org/apache/xerces/impl/msg/DOMMessages.properties
+SHA1-Digest: Ll7bzlEUbFKzSv7tjDMKdq1dYLo=
+
+Name: org/apache/xerces/impl/xs/identity/Field.class
+SHA1-Digest: krcd8GeTT+IgGghBK0r0UJ6OmGo=
+
+Name: org/apache/xerces/impl/xs/traversers/XSAttributeChecker.class
+SHA1-Digest: V5T0mCqEFb+7Xdex7SVxR0adwC8=
+
+Name: org/apache/xerces/impl/dv/xs/BooleanDV.class
+SHA1-Digest: 84Ee1sxZ1rvn3Qfz2tOxG6jMe9Y=
+
+Name: org/apache/xerces/impl/validation/ValidationState.class
+SHA1-Digest: QTkEDAWUnVAAN3zUMIeHf25VPzc=
+
+Name: org/apache/xerces/util/SAXLocatorWrapper.class
+SHA1-Digest: o4DvtJEWLFgDKty76u1iUmkMmes=
+
+Name: org/apache/xerces/impl/dv/dtd/NMTOKENDatatypeValidator.class
+SHA1-Digest: Acpe9jClgGdMeyzu0aSwiEmsEjw=
+
+Name: org/apache/html/dom/HTMLOptGroupElementImpl.class
+SHA1-Digest: LoBiRNt094NczbN1W0NeFfcaruQ=
+
+Name: org/apache/xerces/dom/DOMMessageFormatter.class
+SHA1-Digest: ZW0dasx11kPC8NGUuCP4N7S3VLY=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDHandler.class
+SHA1-Digest: oLdeeSGdjp/4t37u8HYFJCXg9Lg=
+
+Name: org/apache/wml/WMLGoElement.class
+SHA1-Digest: b3UnK3FrXV1Z3YLsRPP+dmMN2ac=
+
+Name: org/apache/xerces/jaxp/DocumentBuilderImpl.class
+SHA1-Digest: sQlgDqGaZ4RmJ5fJzsGobc6qFtg=
+
+Name: org/apache/wml/WMLUElement.class
+SHA1-Digest: 3x68a9Bj0hmRqc2iZgS2vCPhXTg=
+
+Name: org/apache/xerces/impl/dv/xs/EntityDV.class
+SHA1-Digest: LpNW+J3831dDFOY/rvLSd2KHwkQ=
+
+Name: org/apache/wml/WMLSetvarElement.class
+SHA1-Digest: jXTQuH9eCD9DGuvleSsNxHw7GaU=
+
+Name: org/apache/xerces/xni/XMLDTDContentModelHandler.class
+SHA1-Digest: JqeAKnuJgK38S3Wr4dbK/n7p7cY=
+
+Name: org/apache/xerces/dom/DOMNormalizer$XMLAttributesProxy.class
+SHA1-Digest: 4Ljjff8TvttpRG3TUWSh79KVd9g=
+
+Name: org/apache/xerces/impl/dtd/XMLDTDValidator.class
+SHA1-Digest: 8qNhsFbt6zp8NH9gHZujPDhmknc=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDHandler$1.class
+SHA1-Digest: 76IeUejtcqWNrjKkKp4S4A2T9ak=
+
+Name: org/apache/xerces/parsers/SecuritySupport$5.class
+SHA1-Digest: 2FgVFsyG/ISSPoh4wDU04MbGxlI=
+
+Name: org/apache/xerces/xs/XSIDCDefinition.class
+SHA1-Digest: bLOdhtJhqDn20gx++LKZ665TzyU=
+
+Name: org/apache/html/dom/CollectionIndex.class
+SHA1-Digest: Dx274ZIseTP+O/L7apko7M1mlIE=
+
+Name: org/apache/xerces/impl/xpath/regex/RegexParser$ReferencePosition
+ .class
+SHA1-Digest: dtfOafNNqB8HyOlCnnx6fzQAqa8=
+
+Name: META-INF/services/javax.xml.parsers.SAXParserFactory
+SHA1-Digest: lQ0nN1IPYjeMZ+NSDYXbkwA624A=
+
+Name: org/apache/xerces/util/SAXInputSource.class
+SHA1-Digest: K0VBQAO9jI0u5ps6KBRn7DBxAGU=
+
+Name: org/apache/xerces/impl/dv/XSSimpleType.class
+SHA1-Digest: 4En5bvjHCnQHD8kio2H8ZZLdj5I=
+
+Name: org/apache/xerces/dom/ChildNode.class
+SHA1-Digest: lWQ2CKt8aeD98aJQflKES7IUlNs=
+
+Name: org/apache/xerces/impl/XML11EntityScanner.class
+SHA1-Digest: fKC5emQ4Ioln0AxuB8U+weHPAMs=
+
+Name: about_files/LICENSE.DOM-software.html
+SHA1-Digest: r+qCJbs7AAVH/S9eI//SxsVPPWg=
+
+Name: org/apache/xerces/parsers/XML11Configurable.class
+SHA1-Digest: +GrxKDiZXJRKmVlk6ij5m4SiH4g=
+
+Name: org/apache/xerces/impl/XMLVersionDetector.class
+SHA1-Digest: oqRsIOxlYy/8QYiuaN3LqGFBz94=
+
+Name: about_files/LICENSE
+SHA1-Digest: BPGcVt6OZEy6kl/cMdS74u9zu1E=
+
+Name: org/apache/xerces/xs/XSAnnotation.class
+SHA1-Digest: Wl8AncM7rj4wyEML1TiO+6/fQJY=
+
+Name: org/apache/html/dom/HTMLElementImpl.class
+SHA1-Digest: 9xkvLmoKW7xmILzqTeXJK+5D0ak=
+
+Name: org/apache/xerces/util/SymbolTable.class
+SHA1-Digest: Gu52Rm2AOGIhbRfJdy6SLXjovPA=
+
+Name: org/apache/xerces/util/ShadowedSymbolTable.class
+SHA1-Digest: bK5JX1KCYcRgDEGd4j7pKSbI7HU=
+
+Name: org/apache/xerces/impl/xs/models/XSCMValidator.class
+SHA1-Digest: ch9u0fEZ3ysaXgUHBSxm7FM4qIQ=
+
+Name: org/apache/xerces/impl/xpath/regex/Token.class
+SHA1-Digest: NtgaDbw7hpfUxKdGQBrt9S2Co+Q=
+
+Name: org/apache/xerces/jaxp/validation/StreamValidatorHelper.class
+SHA1-Digest: qWlUSdONlXucSwA0CUxyIElikLs=
+
+Name: org/apache/xerces/parsers/AbstractSAXParser.class
+SHA1-Digest: Peo1umwnJ03RQoY+Y3vPym9Az2w=
+
+Name: org/apache/wml/dom/WMLHeadElementImpl.class
+SHA1-Digest: JUqTCOnw91Ap3ZfYJ2b+ekgoTDA=
+
+Name: org/apache/xerces/jaxp/validation/SoftReferenceGrammarPool.class
+SHA1-Digest: U2UC5MlA1tuIC8XRChc3cfcilK0=
+
+Name: org/apache/xerces/parsers/DOMParserImpl$AbortHandler.class
+SHA1-Digest: JY7efYoZaY5ib2N6LEwpWdOp5h8=
+
+Name: org/apache/xerces/impl/dtd/XMLSimpleType.class
+SHA1-Digest: hwWuSXEcMnWr8GrCQLDFbYgDD4g=
+
+Name: org/apache/xerces/xni/parser/XMLConfigurationException.class
+SHA1-Digest: LlYm6hCig9bI+TlN2D4IS84/xpI=
+
+Name: org/apache/xerces/impl/xpath/regex/ParserForXMLSchema.class
+SHA1-Digest: X6n6P0uZouM+sApXbFEKnD9Xx7s=
+
+Name: org/apache/xerces/impl/xs/opti/SchemaParsingConfig.class
+SHA1-Digest: 8a5/6Fxg6+OkYdrZlanGJantwHI=
+
+Name: org/apache/xerces/dom3/as/ElementEditAS.class
+SHA1-Digest: miOUgMSQNjQvJAnYKbpA7F3aKFw=
+
+Name: org/apache/wml/WMLEmElement.class
+SHA1-Digest: P9TXNdgVaKOu0xuW7U30Xd34g5k=
+
+Name: org/apache/wml/dom/WMLIElementImpl.class
+SHA1-Digest: rgN+XWe8fpBloYhC5lSJviY+xdE=
+
+Name: org/apache/html/dom/HTMLDOMImplementationImpl.class
+SHA1-Digest: YOkghoaCxDFceNFE8m4bYCDELPE=
+
+Name: org/apache/xerces/impl/msg/SAXMessages.properties
+SHA1-Digest: g2FNUHk2iJKL9JSVvmxJrFN0Yd8=
+
+Name: org/apache/xml/serialize/OutputFormat.class
+SHA1-Digest: wnEEREg+o4mZgWbVeC9n5KsZffw=
+
+Name: org/apache/html/dom/HTMLDirectoryElementImpl.class
+SHA1-Digest: Knmb5eOmq0uOBtznp86Qvg2KiQ4=
+
+Name: org/apache/html/dom/HTMLFrameElementImpl.class
+SHA1-Digest: YBkzuPY3tci/BNxsQv6HTa6gxOI=
+
+Name: org/apache/xerces/jaxp/validation/XMLSchema.class
+SHA1-Digest: +NIkkRdSQRisB6p9XqxFUI44y/k=
+
+Name: org/apache/xerces/dom/DeferredNode.class
+SHA1-Digest: WwXwcO6ZQX0Y8AHgv59IeI3MjIs=
+
+Name: org/apache/xerces/xni/NamespaceContext.class
+SHA1-Digest: kTxwZ2U4Tt+UzxqK/OKxwGFeUNc=
+
+Name: about_files/README.dom.txt
+SHA1-Digest: 4htsMEyYIHddjrKHm8OT1+dI9Zw=
+
+Name: org/apache/xerces/xni/XNIException.class
+SHA1-Digest: xo/JSmTs5zGsHXpxBpWxfaJFEis=
+
+Name: org/apache/html/dom/HTMLBaseElementImpl.class
+SHA1-Digest: 9Q8R+LmWM92+3tSMqDsa3/Q9ghs=
+
+Name: org/apache/xerces/xinclude/XIncludeHandler.class
+SHA1-Digest: lEfeTUHsn+mOSAn8Y+GcEV/GKuk=
+
+Name: org/apache/xerces/impl/XMLScanner.class
+SHA1-Digest: pRnt1qmd5Y5jM5QBK1zvyg86+/A=
+
+Name: org/apache/xerces/dom/NodeIteratorImpl.class
+SHA1-Digest: jzBWGtWjvXq1QAHe7vc2y2ryTfE=
+
+Name: org/apache/html/dom/HTMLTableRowElementImpl.class
+SHA1-Digest: B698h5OCLndA38peP1LWLNkZg2E=
+
+Name: org/apache/xerces/impl/dv/xs/BaseDVFactory.class
+SHA1-Digest: SdJFwZzBRgx7wuwHB6ijjzfmQ1o=
+
+Name: org/apache/xerces/xni/XMLDocumentFragmentHandler.class
+SHA1-Digest: kGS3Dgad2Q57MyBdxD/9QB4tFNU=
+
+Name: org/apache/xerces/impl/xs/util/NSItemListImpl.class
+SHA1-Digest: 8Nao1FbFumqDzx7CeQ+iIMZjx2Y=
+
+Name: org/apache/xerces/impl/dv/xs/XSSimpleTypeDecl$2.class
+SHA1-Digest: nJtcn541W35K6uxSEjXs1C9hTZY=
+
+Name: org/apache/xml/serialize/HTMLSerializer.class
+SHA1-Digest: xtTCSPr3eIFifoc0Ec99DWira9M=
+
+Name: org/apache/xerces/impl/RevalidationHandler.class
+SHA1-Digest: oTkKA7aDt/yBmql6loEfDQL1rS0=
+
+Name: org/apache/xerces/impl/xpath/regex/Token$ConcatToken.class
+SHA1-Digest: 94udA8RO3hAzo83A3jH/yqUeTeQ=
+
+Name: org/apache/xerces/xni/parser/XMLDTDSource.class
+SHA1-Digest: gIA1eiqWGT4DooeY3OimemJRv/E=
+
+Name: org/apache/xerces/impl/dv/xs/TypeValidator.class
+SHA1-Digest: Ow5pmjWmCfaDn1LhEY7aZ5I0vP8=
+
+Name: org/apache/html/dom/SecuritySupport$2.class
+SHA1-Digest: 52v7WzDCfR6P2ODe71PHJqkfrRo=
+
+Name: org/apache/xerces/util/XMLAttributesImpl$Attribute.class
+SHA1-Digest: dZziOvc5KDZNkQloZ9e0Y2Fmc0E=
+
+Name: org/apache/xerces/xinclude/SecuritySupport$1.class
+SHA1-Digest: cHTRBz/hKT8CMMqS/OqIUwpBqb8=
+
+Name: org/apache/xerces/impl/xs/traversers/LargeContainer.class
+SHA1-Digest: vmQrX3M6Ka+dMdttCa+atYaOfyc=
+
+Name: org/apache/xerces/impl/XMLEntityManager$ByteBufferPool.class
+SHA1-Digest: 091pwCeYb80IoAQTkXvDYvvV18M=
+
+Name: org/apache/xerces/xs/XSModelGroup.class
+SHA1-Digest: yzYsHEj0ZcIqkcRaCclVZbxsJ1A=
+
+Name: org/apache/xerces/impl/xs/XSElementDecl.class
+SHA1-Digest: wIF3OEXHEZmgLYyCWp7XC1VVZf4=
+
+Name: org/apache/xerces/impl/xs/models/XSCMUniOp.class
+SHA1-Digest: 2PziCbbZYEO4PzfK6IQZ8f0WPiI=
+
+Name: org/apache/xerces/impl/dtd/XMLContentSpec.class
+SHA1-Digest: uxkmnpbExYOTo6RSD6zwDsdENxE=
+
+Name: org/apache/xerces/impl/xs/XMLSchemaValidator$KeyRefValueStore.cl
+ ass
+SHA1-Digest: RtZXoAfeBgaaFwUY05LQt91Wt/4=
+
+Name: org/apache/wml/WMLCardElement.class
+SHA1-Digest: EAkQMhJNKfKvevJ9wObxpRfYPVY=
+
+Name: org/apache/xerces/impl/dtd/models/DFAContentModel.class
+SHA1-Digest: reC/C3Z62X+Of4eEAgC/mo9+ydQ=
+
+Name: org/apache/xerces/parsers/AbstractXMLDocumentParser.class
+SHA1-Digest: xpHoJfIX2JnmW+ox7KDqBJfrb84=
+
+Name: META-INF/services/javax.xml.validation.SchemaFactory
+SHA1-Digest: CP5r17S9u18HieUN5/uGdcZVLaU=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDUniqueOrKeyTraverser.cla
+ ss
+SHA1-Digest: +dvIyXMBM4e2KPupC5Lx2vV0CnM=
+
+Name: org/apache/xerces/impl/dtd/DTDGrammar$QNameHashtable.class
+SHA1-Digest: SBY46Z2W8Wi6Y/6kdhAr3kYdheA=
+
+Name: org/apache/xerces/impl/xs/XMLSchemaValidator$UniqueValueStore.cl
+ ass
+SHA1-Digest: 9ETIpZ6k/zLcb75QsjcQj3X0lug=
+
+Name: org/apache/xerces/impl/xs/util/ShortListImpl.class
+SHA1-Digest: McmpKGp0LiyQOP4LfECNeW+HZmM=
+
+Name: org/apache/xerces/impl/XMLNSDocumentScannerImpl$NSContentDispatc
+ her.class
+SHA1-Digest: Difg/XGAdbnmY73Cofmyna5VYQU=
+
+Name: org/apache/xerces/parsers/SAXParser.class
+SHA1-Digest: /uggI/peh1GPG9pE+QldZTAqi98=
+
+Name: org/apache/html/dom/SecuritySupport$7.class
+SHA1-Digest: NAp5EwYZ/i/oKAaYfJCBzDGmYqc=
+
+Name: org/apache/xerces/impl/dv/xs/AbstractDateTimeDV.class
+SHA1-Digest: WnfZVKWn6OQUOKMrzLIbwMZGnU4=
+
+Name: org/apache/xerces/impl/xs/opti/NamedNodeMapImpl.class
+SHA1-Digest: HHwJlRwHAYw9nM3jY0z71tjqxnY=
+
+Name: org/apache/wml/dom/WMLOptionElementImpl.class
+SHA1-Digest: utrrXcrcyYEtYMhhNiynXalS2uc=
+
+Name: org/apache/xerces/jaxp/validation/XMLSchemaValidatorComponentMan
+ ager.class
+SHA1-Digest: em+y1/JHfgJBU8Z6M74s0doRZWM=
+
+Name: org/apache/xerces/xni/parser/XMLDTDContentModelSource.class
+SHA1-Digest: cJg/l8XV7VJeiifIfAD9Jpn4Hao=
+
+Name: org/apache/xerces/xinclude/SecuritySupport$6.class
+SHA1-Digest: ITWQTu9OU6LkHcrQR/iaEePVmNI=
+
+Name: org/apache/xerces/dom/events/MouseEventImpl.class
+SHA1-Digest: IoNomSy0H2NkNTJyO1+c8/fewS8=
+
+Name: org/apache/xerces/impl/dv/dtd/XML11IDDatatypeValidator.class
+SHA1-Digest: Hnch3ujBQ8rmCDDgGcfb/zqhHzg=
+
+Name: org/apache/xml/serialize/DOMSerializer.class
+SHA1-Digest: A9c/mK+G3jxjHhHKOgVLqga2NuY=
+
+Name: org/apache/xerces/impl/dtd/XMLContentSpec$Provider.class
+SHA1-Digest: ji8BLy2AUVceJkj1BhWbJnOtLQk=
+
+Name: org/apache/xerces/util/HTTPInputSource.class
+SHA1-Digest: fN4QNvZMXsfC3kTmZapRzqnfi0c=
+
+Name: org/apache/html/dom/HTMLModElementImpl.class
+SHA1-Digest: eUpsoCTgbkYE4nAm4cSSTMYw7Ik=
+
+Name: org/apache/xerces/impl/msg/XMLSchemaMessages.properties
+SHA1-Digest: 1PSvBLs0M/Qmw1fEKYGsSN5xQoc=
+
+Name: org/apache/xerces/util/XMLSymbols.class
+SHA1-Digest: B6j0hS+SHg8fbnYivRO6ZwgReeM=
+
+Name: org/apache/html/dom/HTMLCollectionImpl.class
+SHA1-Digest: KNZK16AtdNF+zg0kOOBIEpcwGAI=
+
+Name: org/apache/wml/dom/WMLTrElementImpl.class
+SHA1-Digest: bcHOk/dT5rYkFAEcx4vI61Yukss=
+
+Name: org/apache/xml/serialize/OutputFormat$DTD.class
+SHA1-Digest: WGSGIPC79AfEcHcAKXRyZy5In6A=
+
+Name: org/apache/xerces/dom/CharacterDataImpl$1.class
+SHA1-Digest: Sp5TsWV5JH+4l1/3QbFbxW6Jlrg=
+
+Name: org/apache/xerces/impl/dv/xs/XSSimpleTypeDecl.class
+SHA1-Digest: TaXQYAJQka571rswKYpSQTdiZOA=
+
+Name: org/apache/xerces/xni/parser/XMLParseException.class
+SHA1-Digest: NkJaocqRIcx6wn/LNLyqB6hmiWc=
+
+Name: org/apache/xerces/impl/dv/xs/FullDVFactory.class
+SHA1-Digest: MQ1R8kbsulO1s7J7oXflrKD7MWI=
+
+Name: org/apache/xerces/util/ErrorHandlerWrapper.class
+SHA1-Digest: vd+NMdrtYU22TRzgionxtCvC4Oo=
+
+Name: org/apache/xerces/impl/dv/SecuritySupport.class
+SHA1-Digest: hrK0SdOUooWmwZehKC9Ejo3yGmw=
+
+Name: org/apache/xerces/impl/dtd/XML11DTDProcessor.class
+SHA1-Digest: Cmu65WhigD/3OZTAXgTzaVcrAAM=
+
+Name: org/apache/xerces/impl/xpath/regex/RangeToken.class
+SHA1-Digest: bR1TaxXEWaKDfxC89qmfUmced1Q=
+
+Name: org/apache/xerces/parsers/SoftReferenceSymbolTableConfiguration.
+ class
+SHA1-Digest: vRMu6sSyEMh02sFSpEShSOLJpZg=
+
+Name: org/apache/xerces/parsers/CachingParserPool$SynchronizedGrammarP
+ ool.class
+SHA1-Digest: 4QT09B/OSUr5shtvaP1PVhdZgRA=
+
+Name: org/apache/xerces/impl/XMLEntityManager$1.class
+SHA1-Digest: Cdrel7n2h3Ndn2AJJtYp1ZEx4nk=
+
+Name: org/apache/xerces/impl/dv/xs/XSSimpleTypeDecl$XSFacetImpl.class
+SHA1-Digest: 4yaNuT2oP4O5/vKG7HrbdNx8kXU=
+
+Name: org/apache/xerces/impl/XMLEntityScanner.class
+SHA1-Digest: Rv0pBa2Nma1JOQkYkojpm88yi9Q=
+
+Name: org/apache/xerces/impl/xs/XSConstraints.class
+SHA1-Digest: CuG7tJVtZS2E4nLecgnSVGimbGI=
+
+Name: org/apache/xerces/xs/ElementPSVI.class
+SHA1-Digest: +683QBBSOl3Z7DxPUR+q754xIp0=
+
+Name: org/apache/xerces/impl/dtd/XMLElementDecl.class
+SHA1-Digest: uUNf5Zn5j4uyq/ss/EudG32FmXg=
+
+Name: org/apache/xerces/impl/xpath/XPath$NodeTest.class
+SHA1-Digest: 88yFhuihqOP96DsKyBDuRlsAvII=
+
+Name: org/apache/wml/dom/WMLCardElementImpl.class
+SHA1-Digest: DGVmcenwMZRxmzO+Upcl2T6OsJo=
+
+Name: org/apache/xerces/util/NamespaceSupport.class
+SHA1-Digest: fvJ2TcS8jXu1pPl4zhr8Bhzi5AI=
+
+Name: org/apache/wml/dom/WMLDocumentImpl.class
+SHA1-Digest: tNNwISm5E7qy587CcgrnTmq5uOQ=
+
+Name: org/apache/xerces/impl/xs/opti/DefaultDocument.class
+SHA1-Digest: FoLlW9fxvaH5gnyCOtMpafcvISY=
+
+Name: org/apache/xerces/dom/CoreDOMImplementationImpl.class
+SHA1-Digest: rikSsI+kkFsjEkhlPN3ENe9tKVs=
+
+Name: org/apache/xerces/impl/xs/SchemaGrammar$XSAnyType.class
+SHA1-Digest: ldxCToaQvqxaM28UNQFAQWf2Ya0=
+
+Name: org/apache/xerces/impl/xs/XSGroupDecl.class
+SHA1-Digest: u9C+M6Kw2ygntI0Ai9ALiRIYItE=
+
+Name: org/apache/xerces/impl/xs/traversers/SchemaContentHandler.class
+SHA1-Digest: UjCp9vD39X+Mg2nV59MsHcp17oc=
+
+Name: org/apache/xerces/impl/xs/XSParticleDecl.class
+SHA1-Digest: gURoFHSeEIBTQTRtnCoPbdcM6L0=
+
+Name: org/apache/xerces/impl/dv/xs/SchemaDVFactoryImpl.class
+SHA1-Digest: flmOCVMbHOBGrX/WoP3sNKCFjvU=
+
+Name: org/apache/xerces/impl/xs/XSModelGroupImpl.class
+SHA1-Digest: vSXiTpkY/ECHr5SZCYLYyNHlkpo=
+
+Name: org/apache/xerces/xni/XMLAttributes.class
+SHA1-Digest: Y/PYnycRCfLFYaV+L6slEdo9D4Y=
+
+Name: org/apache/xerces/impl/xs/models/CMNodeFactory.class
+SHA1-Digest: VrZlcsFEMqYySlhm9Bj3vHMP38I=
+
+Name: org/apache/xerces/util/XMLGrammarPoolImpl.class
+SHA1-Digest: A7aAJkURaVdxu1Xy8796dGnbeeM=
+
+Name: org/apache/xerces/xs/XSTerm.class
+SHA1-Digest: TEvmny1jPMGhpzAzpw0b2pLmOP8=
+
+Name: org/apache/xerces/jaxp/datatype/DatatypeFactoryImpl.class
+SHA1-Digest: E1kcrba/wNaUEcSW2r7QtNvFSbg=
+
+Name: org/apache/xerces/util/XMLAttributesImpl.class
+SHA1-Digest: v42jcat+K33SSUeqcgSWwNNEpEs=
+
+Name: org/apache/xml/serialize/ElementState.class
+SHA1-Digest: gTETSueKpRjWkfFlW81I8q4MdEs=
+
+Name: org/apache/xerces/dom/CoreDocumentImpl.class
+SHA1-Digest: NguifymWfdJaFJkxmX037dSN94M=
+
+Name: org/apache/xerces/jaxp/validation/XMLSchemaFactory.class
+SHA1-Digest: nweNZ2FL7f/xwTluqIDJBv3vowE=
+
+Name: org/apache/html/dom/HTMLHeadElementImpl.class
+SHA1-Digest: WFLSn+l91B7xjMVc1LRJ0mQ36J8=
+
+Name: org/apache/xerces/impl/xpath/regex/Token$CharToken.class
+SHA1-Digest: g1L5GO9AQaq52qRaHIjuc8OnH9Y=
+
+Name: org/apache/wml/WMLBElement.class
+SHA1-Digest: SwO9elDS204e0sKoIapUQpTepDs=
+
+Name: org/apache/xerces/impl/xs/traversers/XSAnnotationInfo.class
+SHA1-Digest: HIkz4cxaTG8rvagEodbgK7tSMjg=
+
+Name: org/apache/xerces/impl/dv/SecuritySupport$3.class
+SHA1-Digest: XRnPylWsXhcM1/A9itUBqkuroM0=
+
+Name: org/apache/xerces/impl/xpath/regex/Token$ConditionToken.class
+SHA1-Digest: RQqPqS3SUEIRycMPYglxY0KiSxc=
+
+Name: org/apache/xerces/impl/dv/dtd/StringDatatypeValidator.class
+SHA1-Digest: ii+riAF67PF1W1oG/dxONQtKrq4=
+
+Name: org/apache/xerces/dom3/as/DOMASException.class
+SHA1-Digest: 6qaVN5wWzMJjMp37AmX+QQ0hEuw=
+
+Name: org/apache/wml/WMLPostfieldElement.class
+SHA1-Digest: 2T5Nnb8EOtpy1PMUKsI8JJMZiKM=
+
+Name: org/apache/wml/WMLDoElement.class
+SHA1-Digest: U1VlfJBSE95SD92qM+gYoNCnApc=
+
+Name: org/apache/xml/serialize/XML11Serializer.class
+SHA1-Digest: MIPXLpXft8zHCkk/dy4Rrsrpxzk=
+
+Name: org/apache/xerces/jaxp/JAXPConstants.class
+SHA1-Digest: 6utskpfqwOkiT3TKx9xp636oQ1k=
+
+Name: org/apache/xerces/impl/XMLEntityHandler.class
+SHA1-Digest: g5I+lWzWU0M8Fn5LAuT9IOpM6MI=
+
+Name: org/apache/wml/dom/WMLBrElementImpl.class
+SHA1-Digest: +TXTA5PQBinTg/oq1OT/pZcSd2s=
+
+Name: org/apache/xerces/dom/ElementDefinitionImpl.class
+SHA1-Digest: nQ8p/oWolX+KgQXXr5Z2lCGGICk=
+
+Name: org/apache/xerces/impl/dtd/XMLDTDProcessor.class
+SHA1-Digest: jJcWI2ssUf3qWxUKcmRVY/2VIBM=
+
+Name: org/apache/xerces/dom3/as/ASEntityDeclaration.class
+SHA1-Digest: hephnJXDC1BEds41dAgl0fPyBYA=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDAbstractParticleTraverse
+ r.class
+SHA1-Digest: 4kcBsM8JvJDD8UuuCZCgfUIXzbs=
+
+Name: org/apache/xerces/jaxp/JAXPValidatorComponent$1.class
+SHA1-Digest: Yuj/GeFSHGp/K5yJA6c53gWYilA=
+
+Name: org/apache/xerces/dom/NodeImpl.class
+SHA1-Digest: q/cUWSeNJlwQo2mm7Oaoz9BZnGQ=
+
+Name: org/apache/xerces/util/XMLErrorCode.class
+SHA1-Digest: wG67S/S4W3aZNDerR69N87q14R4=
+
+Name: org/apache/xerces/jaxp/validation/ReadOnlyGrammarPool.class
+SHA1-Digest: xmvc6puP8JFcSQd2RqbGgE0jnM8=
+
+Name: org/apache/xml/serialize/SecuritySupport$2.class
+SHA1-Digest: zOamzDNVCmzd5wYTuLtefgsw5vU=
+
+Name: org/apache/wml/WMLDocument.class
+SHA1-Digest: pxHtcS6hLZXxiepGin9tc30gppA=
+
+Name: org/apache/xerces/dom/SecuritySupport$4.class
+SHA1-Digest: 89raCzfR07rlI8onqi/dGXtlQ5w=
+
+Name: org/apache/xerces/impl/dv/xs/UnionDV.class
+SHA1-Digest: tyAhUGUYBPwaJMPUP1RQxAY9v68=
+
+Name: org/apache/xerces/parsers/XMLParser.class
+SHA1-Digest: q1+ne4q/5+H59ua5ZXsPL3KmNiU=
+
+Name: org/apache/xerces/parsers/DOMASBuilderImpl.class
+SHA1-Digest: xyQMUzQyqbRXeEc5TAgUDVYzNOI=
+
+Name: org/apache/xerces/xs/XSImplementation.class
+SHA1-Digest: iDvJFgHdecKqFN84XWr/mL8VuR8=
+
+Name: org/apache/wml/dom/WMLBElementImpl.class
+SHA1-Digest: MXcAETntOrlJ6eNw2gJH0O8FDbE=
+
+Name: org/apache/xerces/xni/parser/XMLInputSource.class
+SHA1-Digest: d14kAsxNKYFDWEYaKKQ4+1xO2Bo=
+
+Name: org/apache/xerces/dom/DOMImplementationListImpl.class
+SHA1-Digest: eQbvK8TTUVcNTSf/abgbAKkcyQo=
+
+Name: org/apache/xerces/impl/dv/xs/XSSimpleTypeDecl$XSMVFacetImpl.clas
+ s
+SHA1-Digest: 0WgWsuKb84Ri0JGn/eLE+4k5+4o=
+
+Name: org/apache/xerces/jaxp/datatype/DurationImpl$1.class
+SHA1-Digest: F++YPMe0PTaDXAwY053m72Fy2K0=
+
+Name: org/apache/xerces/impl/xs/SubstitutionGroupHandler.class
+SHA1-Digest: WLM9VGnEwpoQ7syhGR+qSFJisDY=
+
+Name: org/apache/xerces/impl/xs/opti/SchemaDOM.class
+SHA1-Digest: VNiUpoCCBgpnN3oGOPQZGGLtVrg=
+
+Name: org/apache/xerces/impl/dv/util/Base64.class
+SHA1-Digest: O0m+asYzLIVMMlqE6nOCOwrKsI8=
+
+Name: org/apache/xerces/dom3/as/ASDataType.class
+SHA1-Digest: fyAC4PK0FQ4Ncgl77OY0Dx0yA+w=
+
+Name: org/apache/html/dom/HTMLTableColElementImpl.class
+SHA1-Digest: D9g2kjpYXujgiENcw1I9VXLRK0g=
+
+Name: org/apache/xerces/impl/dtd/XMLNotationDecl.class
+SHA1-Digest: 0S3C/Fqs4R7I0O3K7gVaIgAOXbc=
+
+Name: org/apache/xerces/impl/dv/xs/DateTimeDV.class
+SHA1-Digest: zVRIWaBSnP56kZs02ShPbpKXfws=
+
+Name: org/apache/xerces/impl/dv/SecuritySupport$8.class
+SHA1-Digest: iIssGigjBL/m0ArvegEa3aLVe5E=
+
+Name: org/apache/xerces/xs/ItemPSVI.class
+SHA1-Digest: 9OSM1xBow+gsKfrIbWXJ/3NDtIg=
+
+Name: org/apache/xerces/impl/dv/ObjectFactory.class
+SHA1-Digest: V0SRy5DpduHE/0/1H/zwUsIY3dk=
+
+Name: org/apache/xerces/impl/dv/DVFactoryException.class
+SHA1-Digest: DTktjkD4YY/0C+SH7IvGbLm06D4=
+
+Name: org/apache/wml/WMLNoopElement.class
+SHA1-Digest: bLhLf+gFEkAfeyMYtpxhAu3sMAY=
+
+Name: org/apache/xerces/xpointer/XPointerHandler$1.class
+SHA1-Digest: LspNkRptpaNLigH+U3IBUFZbFgM=
+
+Name: org/apache/xerces/impl/xs/XSConstraints$1.class
+SHA1-Digest: kKxKS5fK4udkEEkGKXNfTKt7W5s=
+
+Name: org/apache/xerces/parsers/SecuritySupport$3.class
+SHA1-Digest: DjiBM5bZ0qwdf6Tih+SVjfDy5AA=
+
+Name: org/apache/xerces/jaxp/validation/ValidatorHelper.class
+SHA1-Digest: XDSp0tVoz3STTdmqLoScFQczZ1g=
+
+Name: org/apache/xml/serialize/SecuritySupport$7.class
+SHA1-Digest: IsxiIoIcd1lSHBAYlO0BVDBMSZg=
+
+Name: org/apache/xerces/impl/XMLDocumentScannerImpl$TrailingMiscDispat
+ cher.class
+SHA1-Digest: b93HL5MTLTfv/UyiOWcns2MxxgQ=
+
+Name: org/apache/xerces/dom/DocumentFragmentImpl.class
+SHA1-Digest: EYPoeBMkjtW9b7PtcVGXMwn1/Ro=
+
+Name: org/apache/wml/WMLBrElement.class
+SHA1-Digest: mW6jXTOhLC869B5YL6fdOUbmou4=
+
+Name: org/apache/xerces/dom/DeferredCommentImpl.class
+SHA1-Digest: eXi6SqEOzidENnjDRTTWdDLWd/E=
+
+Name: org/apache/xml/serialize/XMLSerializer.class
+SHA1-Digest: Vp2ShIabzVWzbWwgIjxi5ScmGwM=
+
+Name: org/apache/xerces/impl/xs/identity/UniqueOrKey.class
+SHA1-Digest: 9b5GhAXTTZcWUztsqS6nWe0iTeE=
+
+Name: org/apache/html/dom/HTMLLabelElementImpl.class
+SHA1-Digest: Ftm+OPoK+K0Dhl5Vzm3X+nBtf70=
+
+Name: org/apache/xerces/xpointer/ShortHandPointer.class
+SHA1-Digest: uOFYhQsf0t+K7G4e/t/vEeySHX8=
+
+Name: org/apache/xerces/impl/xs/models/XSCMBinOp.class
+SHA1-Digest: j7X6Uu3P3+Bm7/7qouPfHMg97Uo=
+
+Name: org/apache/wml/dom/WMLImgElementImpl.class
+SHA1-Digest: WhTiXfaMfN5VblCADN+lIJx8CV8=
+
+Name: org/apache/html/dom/HTMLBodyElementImpl.class
+SHA1-Digest: QkmqDSRU3CBy1FVcGQ/IYjb31OI=
+
+Name: org/apache/xerces/impl/xs/traversers/Container.class
+SHA1-Digest: EKH3dTSbJ3w3pSTFUCv1745DmA8=
+
+Name: org/apache/xerces/impl/dv/dtd/DTDDVFactoryImpl.class
+SHA1-Digest: zR0utz+cm4LRFkBQCvxOoJ0q/Vk=
+
+Name: org/apache/xerces/impl/xs/opti/DefaultNode.class
+SHA1-Digest: RlsatPFTMU/bUP4Dh/a1sJiD7ww=
+
+Name: org/apache/xerces/impl/XMLDTDScannerImpl.class
+SHA1-Digest: wV+fMqzcLupp/anUVlVY3salywg=
+
+Name: org/apache/wml/WMLImgElement.class
+SHA1-Digest: uVSO6kQd7QzP27EIo7XTcJc2o/s=
+
+Name: org/apache/wml/dom/WMLUElementImpl.class
+SHA1-Digest: XJwbvpun/cWWlS3OC3wIJ6W7H0c=
+
+Name: org/apache/xerces/util/DOMInputSource.class
+SHA1-Digest: mrw9tb9BcyqDwvHTKAka8tQOJp8=
+
+Name: org/apache/html/dom/HTMLMapElementImpl.class
+SHA1-Digest: OfoZIyC5saWbmGtHwetpiclKgXI=
+
+Name: org/apache/xerces/xs/XSModelGroupDefinition.class
+SHA1-Digest: vifLQbUGWnOsY1aWatHaUbJO7o0=
+
+Name: org/apache/xerces/impl/XMLDocumentFragmentScannerImpl$Dispatcher
+ .class
+SHA1-Digest: Pig3G5WuldB+rZ1sHyjgOGjO5V0=
+
+Name: org/apache/xerces/jaxp/JAXPValidatorComponent.class
+SHA1-Digest: qnX2esHugQ7qMorrBaUk4POG2nE=
+
+Name: org/apache/xerces/impl/xs/identity/ValueStore.class
+SHA1-Digest: 3hwhr2Q61umDxMnv4abjSnhKahs=
+
+Name: org/apache/xerces/impl/dv/DatatypeValidator.class
+SHA1-Digest: YkLx/RiPx0pt4+EYS35C+6NCLIs=
+
+Name: org/apache/wml/WMLTableElement.class
+SHA1-Digest: IctcXxaPD+oSk+9T9uRYBWFmzs0=
+
+Name: org/apache/xerces/xs/XSNotationDeclaration.class
+SHA1-Digest: wvzBdtAJKVi7JiVJCKw6aLFuhxk=
+
+Name: org/apache/xerces/xinclude/XIncludeNamespaceSupport.class
+SHA1-Digest: IA2hChf9Va/2lR4CcFXRGcAKVL4=
+
+Name: org/apache/html/dom/HTMLLIElementImpl.class
+SHA1-Digest: IzYefHBwnZlgppgWkkJLUL98iKc=
+
+Name: org/apache/xerces/impl/xs/XSAttributeGroupDecl.class
+SHA1-Digest: KhKCAVUT0kT/sG69dvK9aRnHF48=
+
+Name: org/apache/xerces/parsers/SecuritySupport$8.class
+SHA1-Digest: Pey367i82gUlN3u99o+u6dDIoLs=
+
+Name: org/apache/xml/serialize/EncodingInfo.class
+SHA1-Digest: L63ZB7fzj/zaoWNEjYBQ7jv+03s=
+
+Name: org/apache/xerces/impl/dv/DTDDVFactory.class
+SHA1-Digest: MGd55ShEO90QLVadIPqnxlA1O8U=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDAttributeTraverser.class
+SHA1-Digest: FdLyLTJaLKtpLBTq3MCRh40sM6w=
+
+Name: org/apache/xerces/impl/dv/xs/MonthDayDV.class
+SHA1-Digest: Yiz5Sux+aqCqYxUf7wfUk6hL+zM=
+
+Name: org/apache/xerces/dom/DOMXSImplementationSourceImpl.class
+SHA1-Digest: yy6SSLNuyYzwhopZ2ZR/kgk5Uak=
+
+Name: org/apache/xerces/impl/xs/identity/Selector$XPath.class
+SHA1-Digest: ZRRaP/H15uTrw4jFEg/O3tr/ePA=
+
+Name: org/apache/html/dom/HTMLTextAreaElementImpl.class
+SHA1-Digest: O0ypltXVCV9GpYZzmoIHemIGZPM=
+
+Name: org/apache/xerces/impl/dv/xs/DoubleDV.class
+SHA1-Digest: yGP7J3jv7vRjzx4bTTd9gt1w7CU=
+
+Name: org/apache/xerces/jaxp/DocumentBuilderFactoryImpl.class
+SHA1-Digest: YnYYwGNMks/cJ5+lPlHxpipqRu8=
+
+Name: org/apache/xerces/dom/DeferredElementImpl.class
+SHA1-Digest: c0ABY1DoFUDhE+avXhQ9IY2FhxU=
+
+Name: org/apache/html/dom/NameNodeListImpl.class
+SHA1-Digest: nqqSyEUJr/A3U/AvRoWRmAvgyzI=
+
+Name: org/apache/xerces/parsers/SecuritySupport.class
+SHA1-Digest: INu8MrkoI/L+3YqsnHG0vOUCZdA=
+
+Name: org/apache/xerces/impl/xs/opti/NodeImpl.class
+SHA1-Digest: QklvfhOpc+6nVJb/HBziwR9NDUY=
+
+Name: META-INF/services/org.w3c.dom.DOMImplementationSourceList
+SHA1-Digest: b3yizlleycaeC4vySdyj3Ht0wYA=
+
+Name: org/apache/xerces/impl/msg/XIncludeMessages.properties
+SHA1-Digest: kcQOizVd334xNhIQyqBXSpxFe0w=
+
+Name: org/apache/wml/dom/WMLInputElementImpl.class
+SHA1-Digest: hxtyCG6T4J1J/1iFXomIqeOxL2k=
+
+Name: org/apache/xerces/impl/xs/identity/KeyRef.class
+SHA1-Digest: oaDMYzQjwXZcI8cM2jpF7Q29sp0=
+
+Name: org/apache/xerces/dom/SecuritySupport.class
+SHA1-Digest: /06emLFVNjcXyUEo60DQMtoWdFk=
+
+Name: org/apache/xerces/xs/StringList.class
+SHA1-Digest: 3VhxH6IUaR0XHNjvL5BI2R93Qv8=
+
+Name: org/apache/xerces/impl/xs/XMLSchemaLoader$LocationArray.class
+SHA1-Digest: cGxJSD60h3lSmFs2SAE34hC9vMs=
+
+Name: org/apache/xerces/xni/parser/XMLDTDFilter.class
+SHA1-Digest: EZOhXI7GjMefBTfQHbbXkIiIy/Y=
+
+Name: org/apache/xerces/impl/dv/SchemaDVFactory.class
+SHA1-Digest: r+IDwOoGq7PQ/nCFF4FQBxaGSa0=
+
+Name: org/apache/xerces/impl/dv/dtd/IDDatatypeValidator.class
+SHA1-Digest: OKCINBa7BGK5OG4vBcDy24+U0+M=
+
+Name: org/apache/xerces/jaxp/validation/DOMValidatorHelper.class
+SHA1-Digest: 5+YmlBhUVgy9W+Eo5ufPg4zb3l8=
+
+Name: org/apache/xerces/jaxp/validation/DraconianErrorHandler.class
+SHA1-Digest: XzdcY79kl6aLFriakgBjQHhwLfE=
+
+Name: org/apache/html/dom/HTMLImageElementImpl.class
+SHA1-Digest: uWYES0WuHkF3y0akRC1T9Zz05DQ=
+
+Name: org/apache/wml/WMLRefreshElement.class
+SHA1-Digest: qjUGvGa3Dq2U5jwjacbeNrR5glg=
+
+Name: org/apache/xerces/impl/xpath/regex/message_ja.properties
+SHA1-Digest: QZ/JjjWAJqz6qqSvpHzDwZfPfmA=
+
+Name: org/apache/xerces/impl/xpath/regex/REUtil.class
+SHA1-Digest: 3p72jHa2F/EqjcILEb2NVenPUoY=
+
+Name: org/apache/xerces/parsers/XIncludeAwareParserConfiguration.class
+SHA1-Digest: oR1gqIuq94fk+O7S/6rvFhJV1vs=
+
+Name: org/apache/xerces/parsers/XML11DTDConfiguration.class
+SHA1-Digest: 1pImtoKodoZVMXIICJeumAcepzE=
+
+Name: org/apache/xerces/dom/DOMImplementationSourceImpl.class
+SHA1-Digest: jmrCpme9+lCVrSuyfC8vK1XwBrY=
+
+Name: about_files/LICENSE.DOM-documentation.html
+SHA1-Digest: jsBgq/r+d2wxc0SOyNZWsGCtySI=
+
+Name: org/apache/wml/WMLTrElement.class
+SHA1-Digest: eVDZlq9CZlFWVO3KLyGeWefKt1k=
+
+Name: org/apache/xerces/xpointer/ElementSchemePointer.class
+SHA1-Digest: iU1ohJa5r7Mn1QyIH2+55N+K2/E=
+
+Name: org/apache/xml/serialize/Printer.class
+SHA1-Digest: BUL2ipwmHFNzxnugMSWIFgk1Rzw=
+
+Name: META-INF/services/org.xml.sax.driver
+SHA1-Digest: N+ohezwyccX1Bkw8jDTtEOoQFEI=
+
+Name: about.html
+SHA1-Digest: fQChiontg8b4LnAMsWLCPufNcJ4=
+
+Name: org/apache/xerces/dom3/as/CharacterDataEditAS.class
+SHA1-Digest: bDnFWHrG76K1lPGrgCHe/biKv40=
+
+Name: org/apache/html/dom/SecuritySupport$5.class
+SHA1-Digest: HAWgU3BFeuQYyAi1U808HoeUq8M=
+
+Name: org/apache/xerces/impl/xs/ElementPSVImpl.class
+SHA1-Digest: 43CYULNuCVm9VY10raNq8Q966Qo=
+
+Name: org/apache/xerces/impl/dtd/models/SimpleContentModel.class
+SHA1-Digest: KXpntRB9jwEDx31srMSNFq2gIRU=
+
+Name: org/apache/xerces/xs/datatypes/ByteList.class
+SHA1-Digest: bLI31l6qA4Z6KR89GIB8/05KubI=
+
+Name: org/apache/xerces/xinclude/SecuritySupport$4.class
+SHA1-Digest: JwMzPJ6WF+OWbo9h9nuClaiKk00=
+
+Name: org/apache/xerces/impl/io/ASCIIReader.class
+SHA1-Digest: 9iQGIhs1DvmcnN95vWVsaZMYazM=
+
+Name: org/apache/xerces/util/XML11Char.class
+SHA1-Digest: KiEOBgCPBTcjpCXit3y1+64mRtU=
+
+Name: org/apache/xerces/impl/dv/xs/AnyAtomicDV.class
+SHA1-Digest: QuSLTpCjmm1LUM1nVrkAHogmoO8=
+
+Name: org/apache/xml/serialize/EncodingInfo$CharToByteConverterMethods
+ .class
+SHA1-Digest: EgYWny1GD6JPx+AQahXwT/hnkpM=
+
+Name: org/apache/xerces/xinclude/XInclude11TextReader.class
+SHA1-Digest: 4q0UEHWBpqUd1qqrg9ByjdJLzTw=
+
+Name: org/apache/xerces/impl/dv/xs/HexBinaryDV$XHex.class
+SHA1-Digest: re3VCku72ezreu4T9gVETzTC8G0=
+
+Name: org/apache/xerces/impl/xs/opti/DefaultXMLDocumentHandler.class
+SHA1-Digest: 9JbSrKIuzkVepE4x4l0UtQJhcFI=
+
+Name: org/apache/html/dom/HTMLBuilder.class
+SHA1-Digest: s7oXcyDqqZY0UvMH844RTCK5vmk=
+
+Name: org/apache/xerces/impl/xs/opti/ElementImpl.class
+SHA1-Digest: Kys4UFGo53ydiu8E0cY0QtOL6BQ=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDSimpleTypeTraverser.clas
+ s
+SHA1-Digest: G0FBGIcxSGe01FAvy4MNP4u/WkA=
+
+Name: org/apache/xerces/dom/NotationImpl.class
+SHA1-Digest: x+gCrp4GCGvL4bf6O9GGg1OwZeo=
+
+Name: org/apache/xerces/impl/dv/util/HexBin.class
+SHA1-Digest: d71H3MRs5nQIfYwFDtTDwuCk6eI=
+
+Name: org/apache/wml/WMLPrevElement.class
+SHA1-Digest: bLQd95b6AB2br4Sa1XLkvV+fiRE=
+
+Name: org/apache/xerces/util/DefaultErrorHandler.class
+SHA1-Digest: Ee4Ysrk+wPZfiUmwgBr8Rkq22YE=
+
+Name: org/apache/xerces/xs/AttributePSVI.class
+SHA1-Digest: 4uMQ2nyVuKBcZiw27kQZzGYcHoE=
+
+Name: org/apache/xerces/xni/parser/XMLDTDContentModelFilter.class
+SHA1-Digest: RJ0iXf9+tmvxoN+aPAcTbY967rY=
+
+Name: org/apache/xerces/dom/RangeExceptionImpl.class
+SHA1-Digest: RMLCqJBOTcSBjGa+dtT5NPDzP+U=
+
+Name: org/apache/xerces/util/JAXPNamespaceContextWrapper.class
+SHA1-Digest: P4qsfcxqfRlPLOfbrvJVM0qoCg4=
+
+Name: org/apache/xerces/dom/PSVIElementNSImpl.class
+SHA1-Digest: 9fvsGb6hKgPMTyI80n6qZz5uOAU=
+
+Name: org/apache/xerces/parsers/StandardParserConfiguration.class
+SHA1-Digest: wPAMhvuyaONByP5NGaX+wDndHXQ=
+
+Name: org/apache/xerces/impl/dv/dtd/XML11NMTOKENDatatypeValidator.clas
+ s
+SHA1-Digest: bvben6Uk8fyn+otqhbCDBQjnLOM=
+
+Name: org/apache/wml/dom/WMLPostfieldElementImpl.class
+SHA1-Digest: aUVrgcayCbovf60gdMqHElD8ZTI=
+
+Name: org/apache/html/dom/HTMLAnchorElementImpl.class
+SHA1-Digest: ZhMXDIaxkVpQgtFH7FEvD5dTGio=
+
+Name: org/apache/xerces/jaxp/validation/SimpleXMLSchema.class
+SHA1-Digest: ypHd5hZrOdGgh37oGFexDAvYwHY=
+
+Name: org/apache/xerces/dom/PSVIDOMImplementationImpl.class
+SHA1-Digest: EGkGi11gpYaz4/3lbHZp411JPJ0=
+
+Name: org/apache/xerces/dom/CoreDOMImplementationImpl$XMLDTDLoaderHold
+ er.class
+SHA1-Digest: Lyiwma+PtbWqBNddJrPW7LTQH9I=
+
+Name: org/apache/xerces/xni/parser/XMLParserConfiguration.class
+SHA1-Digest: TZE0F5/CbnOdj1dpssJ8gVAKXdM=
+
+Name: org/apache/xerces/util/DOMErrorHandlerWrapper$DOMErrorTypeMap.cl
+ ass
+SHA1-Digest: vQ+pj1VVKaoQR4Im2gGtxz6VYG8=
+
+Name: org/apache/xerces/xni/grammars/Grammar.class
+SHA1-Digest: /nX5i7/W2eD521ECocDO1wjDpDU=
+
+Name: org/apache/xerces/impl/dtd/DTDGrammar.class
+SHA1-Digest: lh4wiHcMuDEWXH/8XpDjCNtjDmg=
+
+Name: org/apache/xerces/impl/xpath/regex/Token$UnionToken.class
+SHA1-Digest: w7Qg2YNJr31VaSE+/Th0AI/qOAY=
+
+Name: org/apache/html/dom/HTMLIFrameElementImpl.class
+SHA1-Digest: 4pOOmJGHWk/2oUSpNzTOfNFsyX8=
+
+Name: org/apache/xerces/parsers/AbstractSAXParser$AttributesProxy.clas
+ s
+SHA1-Digest: c4ZW+hptV4+lOFxge4Jyk6dLLXY=
+
+Name: org/apache/xerces/xs/datatypes/XSDouble.class
+SHA1-Digest: lIBG8OoC25YD0m2jmVnLC6Ls8Qw=
+
+Name: org/apache/xerces/jaxp/SchemaValidatorConfiguration.class
+SHA1-Digest: rrp5gkAV9542Klir5ZCJaEkg0pI=
+
+Name: org/apache/xerces/jaxp/validation/XMLSchemaFactory$XMLGrammarPoo
+ lWrapper.class
+SHA1-Digest: WUshDxW+Sh6SksIqaoVhsmT2na8=
+
+Name: org/apache/xerces/dom3/as/ASNotationDeclaration.class
+SHA1-Digest: ZDb0MYqMkc/UEE0vcCuCHA16iVo=
+
+Name: org/apache/xerces/dom/DeferredNotationImpl.class
+SHA1-Digest: fkRWzlPnHYpMHeUkSPIjvHLG2VU=
+
+Name: org/apache/xerces/impl/xpath/regex/Token$ModifierToken.class
+SHA1-Digest: FJvmrzblInrb58+9rLdJ+b63sOE=
+
+Name: org/apache/xerces/parsers/IntegratedParserConfiguration.class
+SHA1-Digest: DwZ6VQcKv/gBfT2s/EVZkwncETk=
+
+Name: org/apache/xerces/impl/xs/XSLoaderImpl.class
+SHA1-Digest: fPKS7RTKpXMSzDB9LyHdXh8OJ7Y=
+
+Name: org/apache/xerces/parsers/AbstractDOMParser$1.class
+SHA1-Digest: mm6EVTdRHM3Fm8IulRPIYwEl4zo=
+
+Name: org/w3c/dom/html/HTMLDOMImplementation.class
+SHA1-Digest: H61d/Xpnl2V7SfnPnPADSnRBOaQ=
+
+Name: org/apache/xerces/impl/dtd/XMLEntityDecl.class
+SHA1-Digest: W3/HDRh7uEhyunKddNo7rr4tTqI=
+
+Name: org/apache/xerces/util/EntityResolver2Wrapper.class
+SHA1-Digest: x94o8+dJqijX6KKWGfT1VrbmGfQ=
+
+Name: org/apache/xml/serialize/EncodingInfo$CharsetMethods.class
+SHA1-Digest: UEMZZU2fOwwK5sqxlmPK9BYFA6w=
+
+Name: org/apache/xml/serialize/IndentPrinter.class
+SHA1-Digest: sMbKwrSj9sbLDhZuy+5EcHvD+6w=
+
+Name: org/apache/xerces/parsers/CachingParserPool$ShadowedGrammarPool.
+ class
+SHA1-Digest: 5/S7T04262FssTaPwN8BZhRO6bk=
+
+Name: org/apache/xerces/impl/xs/util/StringListImpl$1.class
+SHA1-Digest: dIJ0Fo57Q1SsR5KG363TgpkERnI=
+
+Name: org/apache/xerces/impl/xs/util/XSNamedMapImpl.class
+SHA1-Digest: nSYPB+eNHWW6rsDJnjezXAPdiso=
+
+Name: org/apache/xerces/impl/xpath/XPath$Axis.class
+SHA1-Digest: hS2GsfCfEITR+No0tghgZr/xc1A=
+
+Name: org/apache/xerces/impl/dv/SecuritySupport$1.class
+SHA1-Digest: zSCxnX5Op24n2Pyn/5RcgzwymJs=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDComplexTypeTraverser$Com
+ plexTypeRecoverableError.class
+SHA1-Digest: FNdvGq9MBCfHqSglr/OXyHLGUUw=
+
+Name: org/apache/xerces/parsers/XML11NonValidatingConfiguration.class
+SHA1-Digest: CPKghhuyw3EoVaV+QfwYEPXX6/I=
+
+Name: org/apache/html/dom/HTMLTitleElementImpl.class
+SHA1-Digest: mowS1nLDdICTxcTSXZPhif6qrqk=
+
+Name: org/apache/xerces/xs/XSNamespaceItem.class
+SHA1-Digest: TgNvxXkblq8KLYmisx1TZEYkcow=
+
+Name: org/apache/xerces/dom/TreeWalkerImpl.class
+SHA1-Digest: RS/2uisYH6jU6Ffuma0Ad28G9Lc=
+
+Name: org/apache/xerces/util/AugmentationsImpl$SmallContainer.class
+SHA1-Digest: rP4zKYQjap73NTXAI7/n/Nrya7A=
+
+Name: org/apache/xerces/impl/xs/XMLSchemaValidator$LocalIDKey.class
+SHA1-Digest: sXHeX2ziX3qVmBrNgVF7zhZ/dlg=
+
+Name: org/apache/xerces/jaxp/validation/AbstractXMLSchema.class
+SHA1-Digest: s3VS27m5OB1GYgc5qpkL6/cJhRo=
+
+Name: org/apache/wml/WMLAnchorElement.class
+SHA1-Digest: JE6lzgNROS8fV5R+H350oeOc1l4=
+
+Name: about_files/LICENSE.dom-software.txt
+SHA1-Digest: bDn6237TpN73s42y3+hT9ehpfNM=
+
+Name: org/apache/xerces/dom/SecuritySupport$2.class
+SHA1-Digest: 49XI/8FYXrPUMgAJ62Sn1C0ivBU=
+
+Name: org/apache/xerces/util/SoftReferenceSymbolTable$SREntry.class
+SHA1-Digest: 0Rn4lQTRehVkkRfkTLfuTxQJq3U=
+
+Name: org/apache/xerces/xni/grammars/XMLDTDDescription.class
+SHA1-Digest: CdbTu6m21KXKocF8tT8kqTv4zhQ=
+
+Name: org/apache/xerces/impl/xs/XMLSchemaException.class
+SHA1-Digest: dwJufTBTkV2CuC9G/posyhgFV5I=
+
+Name: org/apache/xerces/impl/xs/identity/Field$Matcher.class
+SHA1-Digest: dio6BhTBQ2RK41JQ/gn9cObDDSE=
+
+Name: org/apache/wml/dom/WMLStrongElementImpl.class
+SHA1-Digest: 5T1bDj/3LQ5TVmdTMn1dt5c87Xc=
+
+Name: org/apache/xerces/jaxp/validation/DOMDocumentHandler.class
+SHA1-Digest: 2zACzI88T/Q5QSP7Q0etCjP6vqw=
+
+Name: org/apache/xerces/xpointer/ElementSchemePointer$Scanner.class
+SHA1-Digest: sXS/HqcRoX7IAcELJjsQ5AFe74M=
+
+Name: org/apache/xerces/impl/dv/InvalidDatatypeFacetException.class
+SHA1-Digest: 9b0e/hvRHcYDoegDT45f3v/8Hy8=
+
+Name: org/apache/xerces/impl/xs/XMLSchemaValidator$ValueStoreBase.clas
+ s
+SHA1-Digest: aGLmPtMR4Tv0v2O85hJviuMhQKg=
+
+Name: org/apache/xerces/impl/xs/opti/SchemaDOMParser.class
+SHA1-Digest: pTiaO8HyzsmdXHbKHi22S7Lw2dI=
+
+Name: org/apache/wml/dom/WMLFieldsetElementImpl.class
+SHA1-Digest: zNeoKOruNnbut+Cw/iQcD7aV8rI=
+
+Name: org/apache/xerces/xs/XSObjectList.class
+SHA1-Digest: u3Ne90sZzDZVmBTCWoWf/l6ICq4=
+
+Name: org/apache/xerces/jaxp/validation/DOMResultBuilder.class
+SHA1-Digest: UDH4cJYOB5BRdi0kPJBkEGLnyhk=
+
+Name: org/apache/xerces/xni/parser/XMLComponentManager.class
+SHA1-Digest: 017q7BMBul0t0+HVzA6CGRMQ65I=
+
+Name: org/apache/wml/dom/WMLNoopElementImpl.class
+SHA1-Digest: i6vKSAe9I8eDHPCyd3RvSRymd6o=
+
+Name: org/apache/xerces/impl/msg/XMLMessages.properties
+SHA1-Digest: ANm6le0v3QHMkoiGElCjcb6VVoc=
+
+Name: org/apache/xerces/impl/dv/SecuritySupport$6.class
+SHA1-Digest: 4p/AAHM/1LdiOncepGrPBDwQHmQ=
+
+Name: org/apache/xerces/util/XMLStringBuffer.class
+SHA1-Digest: P8F9S1reOD+GR8mA03T5Og3xmBM=
+
+Name: org/apache/xerces/xs/XSNamespaceItemList.class
+SHA1-Digest: /eacRPjMKT2PFoa+yH02WxYT9q8=
+
+Name: about_files/README.sax.txt
+SHA1-Digest: BFST15Lf9MLQ65HK+tMDmuX7Fqg=
+
+Name: org/apache/xerces/impl/dtd/XMLDTDLoader.class
+SHA1-Digest: heZE+t1ZdnTqct8gN9cuctmd9s0=
+
+Name: org/apache/xerces/jaxp/validation/SoftReferenceGrammarPool$SoftG
+ rammarReference.class
+SHA1-Digest: qexJ8N85luDH0hCYpda+GHVPgS0=
+
+Name: org/apache/xerces/parsers/SecuritySupport$1.class
+SHA1-Digest: g+6ehDfwMz+ApfhPLWXSSpZyu5o=
+
+Name: org/apache/xerces/xs/XSLoader.class
+SHA1-Digest: 8/5EaHRxyPpdZQdFgFPMBxLEL+E=
+
+Name: org/apache/xerces/impl/xpath/regex/Op$RangeOp.class
+SHA1-Digest: JZ6W9q3A51lnbukWDY2Qbmj4s8Y=
+
+Name: org/apache/xerces/impl/xpath/regex/ParseException.class
+SHA1-Digest: ja/qXftJegpv36XECSiXmqA+g3M=
+
+Name: org/apache/xerces/impl/dv/xs/DateDV.class
+SHA1-Digest: O3veWwoJfMdyp8YqqVRHmvyhOo4=
+
+Name: org/apache/xerces/impl/xs/models/XSAllCM.class
+SHA1-Digest: +N+IwzTLGIWFdOHWJ7N0uoXqGGI=
+
+Name: org/apache/xerces/impl/xs/util/XSNamedMap4Types.class
+SHA1-Digest: ncMRlh1MJrSBYFeT5zMWip36MyY=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDGroupTraverser.class
+SHA1-Digest: RJRBXlutcQs9xVHIikfIYlMpG+g=
+
+Name: org/apache/xml/serialize/OutputFormat$Defaults.class
+SHA1-Digest: QBlGl6Z6Kl9pyUvfa051w2lrEw0=
+
+Name: org/apache/xml/serialize/SecuritySupport$5.class
+SHA1-Digest: rug04B5iL71PA13aaBVQSyLaSRA=
+
+Name: org/apache/html/dom/HTMLQuoteElementImpl.class
+SHA1-Digest: VRqivHBcNzNurRy4O4Ywe8X73Sk=
+
+Name: org/apache/wml/dom/WMLSelectElementImpl.class
+SHA1-Digest: 9AeqDnR29J0z/jxNyj4pfNWbYkI=
+
+Name: org/apache/xerces/dom/SecuritySupport$7.class
+SHA1-Digest: oh3GPhx0/JGCztG/y8QYqg+5MPk=
+
+Name: org/apache/html/dom/HTMLScriptElementImpl.class
+SHA1-Digest: OTOZmV7UwmcM25T3oKieg0Pva1c=
+
+Name: org/apache/xerces/impl/dtd/XMLAttributeDecl.class
+SHA1-Digest: q4J4C9F/vZjfqVn44LQUq4NkTT0=
+
+Name: org/apache/html/dom/HTMLDivElementImpl.class
+SHA1-Digest: xAlMhHrnGvD5mANafxa3huGlWts=
+
+Name: org/apache/xerces/impl/dv/xs/IDREFDV.class
+SHA1-Digest: NysR1NTMhuSqmVUB/ioKKJp1V6M=
+
+Name: org/apache/wml/dom/WMLTdElementImpl.class
+SHA1-Digest: wAx3PEfLze6IyIGLVs9S6zU1JjU=
+
+Name: org/apache/xerces/dom/ParentNode$1.class
+SHA1-Digest: HP+BXN3urZr6qtj6lmE63s1LCB8=
+
+Name: org/apache/html/dom/HTMLFormControl.class
+SHA1-Digest: NktnuJg/yduCVTtzGuJAT2flCnQ=
+
+Name: org/apache/xerces/impl/dtd/models/CMNode.class
+SHA1-Digest: N8i1PWbIPJoJ7CDqzonFhbEg49o=
+
+Name: org/apache/xerces/util/IntStack.class
+SHA1-Digest: TRM8ryKzLreDYqO4mD5x09N+/Zs=
+
+Name: org/apache/xerces/parsers/NonValidatingConfiguration.class
+SHA1-Digest: +hGlvgDhiGSrl8Z95OgddMgDwYc=
+
+Name: org/apache/xerces/dom/DOMErrorImpl.class
+SHA1-Digest: W8K1aglEhgaxBvWGy9XePRvY7YA=
+
+Name: org/apache/xerces/dom3/as/DocumentEditAS.class
+SHA1-Digest: byHEIKA1IGrD0njhtMi0OmDgT24=
+
+Name: org/apache/xerces/jaxp/validation/XMLSchemaFactory$XMLGrammarPoo
+ lImplExtension.class
+SHA1-Digest: 1zRTrEe3Vuiyt6X6ImUkBc+bpyA=
+
+Name: org/apache/xerces/impl/XMLEntityManager$RewindableInputStream.cl
+ ass
+SHA1-Digest: /fIoFiF5dXkn3iO1c5lYJW69hYo=
+
+Name: org/apache/xerces/impl/xs/util/SimpleLocator.class
+SHA1-Digest: Hcwm6PArkFT1NBLCymDLeUvQCgo=
+
+Name: org/apache/xerces/dom/DeferredAttrNSImpl.class
+SHA1-Digest: T1RyKcUJ5yCIGg8kAHqTfjCkt50=
+
+Name: org/apache/xerces/util/DOMUtil$ThrowableMethods.class
+SHA1-Digest: oaalN4qUrF8Osubw7+WPsShYfwg=
+
+Name: org/apache/xerces/impl/xpath/regex/RegularExpression.class
+SHA1-Digest: s5f6R8/e3U/H4u5fhELbEPG1BMA=
+
+Name: org/apache/xerces/parsers/SecuritySupport$6.class
+SHA1-Digest: 7ipiUs3cDnmzF18HCbxRfG1c5tE=
+
+Name: org/apache/xerces/impl/xs/identity/FieldActivator.class
+SHA1-Digest: r+VaKvrRnm+02OIJW4YVk/PDeqM=
+
+Name: org/apache/xerces/dom3/as/ASElementDeclaration.class
+SHA1-Digest: B39dqem0Yr64oIAMZE2Vdwfdy+Q=
+
+Name: org/apache/xerces/impl/dv/xs/YearMonthDV.class
+SHA1-Digest: FmjRpSMmKdVEBXIRVcXE7+S/Aa4=
+
+Name: org/apache/xerces/impl/xs/models/CMBuilder.class
+SHA1-Digest: 0qGM8IeGlB9doBdm7jyJozR6aZ4=
+
+Name: org/apache/xerces/xni/XMLString.class
+SHA1-Digest: KqsFL/8KUmcGn3BdSWj6qhaQJ4E=
+
+Name: org/apache/html/dom/HTMLPreElementImpl.class
+SHA1-Digest: zv+o7GWfZuw1fjfr5OG+nhnLkHU=
+
+Name: org/apache/xerces/dom3/as/ASNamedObjectMap.class
+SHA1-Digest: DCP3+V2kE1I0UpFwCva1+gJRD/o=
+
+Name: org/apache/xerces/parsers/ObjectFactory.class
+SHA1-Digest: dzVEplBbw2BkyNs1Z2MZx1npq3U=
+
+Name: org/apache/xerces/xni/XMLDTDHandler.class
+SHA1-Digest: k0IG4DlbyYQeaTCv+WPDFyGlU+U=
+
+Name: org/apache/xerces/impl/XMLDocumentScannerImpl$DTDDispatcher.clas
+ s
+SHA1-Digest: +CyZos5uFtH88BFPdJxcIZhKQkU=
+
+Name: org/apache/html/dom/HTMLBRElementImpl.class
+SHA1-Digest: gV7ZIQVMEy8U44iSou6U6Bh6y6o=
+
+Name: org/apache/xerces/util/EntityResolverWrapper.class
+SHA1-Digest: 9eauSrdvD61/RNZQj8Wz2Lyo1qk=
+
+Name: org/apache/xerces/xni/QName.class
+SHA1-Digest: Odwh5Cc4tSCgmrEW6u/Y3bMQiLs=
+
+Name: org/apache/xerces/impl/xs/SchemaGrammar$BuiltinSchemaGrammar.cla
+ ss
+SHA1-Digest: BR7iNZZDatbQaBpGctL+l0Jy9Y4=
+
+Name: org/apache/html/dom/SecuritySupport.class
+SHA1-Digest: /EQKijxcHgpexNgYSDfQ4KxdA6Y=
+
+Name: org/apache/xerces/impl/XMLEntityManager.class
+SHA1-Digest: dCh658iAISet0FjpbHYkfOSghZw=
+
+Name: org/apache/xerces/impl/xpath/regex/message_fr.properties
+SHA1-Digest: 66IAnobnX7YKtoDoZfkDGTfo+GE=
+
+Name: org/apache/xerces/impl/xs/XSAttributeDecl.class
+SHA1-Digest: /Zrq2jrYad72dp+umHE2fztIbNk=
+
+Name: META-INF/eclipse.inf
+SHA1-Digest: SAqY+5ITAL0mkdYeijlSRhyIaZk=
+
+Name: org/apache/xerces/impl/dtd/models/ContentModelValidator.class
+SHA1-Digest: AhEPHNxke7iGitrfPahnisMWl+A=
+
+Name: org/apache/xerces/xs/XSComplexTypeDefinition.class
+SHA1-Digest: MMookT/m77jVvXLCpyLASalhavw=
+
+Name: org/apache/html/dom/HTMLAppletElementImpl.class
+SHA1-Digest: 47xuftIHnKdpTVrr3CuMVd+EywA=
+
+Name: org/apache/xerces/dom/EntityImpl.class
+SHA1-Digest: +sysqAUOK4yUxz0FOZUbn4GLr8U=
+
+Name: org/apache/xerces/jaxp/datatype/XMLGregorianCalendarImpl$Parser.
+ class
+SHA1-Digest: +wqUDB35mQOiaVrKL2PChprGin8=
+
+Name: org/apache/xerces/impl/dtd/models/CMUniOp.class
+SHA1-Digest: iVAOxPTvlBtt0g5GVedZaqr0u1Q=
+
+Name: org/apache/xerces/dom/DeferredProcessingInstructionImpl.class
+SHA1-Digest: whb4vkreGvhsw317i0hPjslAyoU=
+
+Name: org/apache/wml/WMLTdElement.class
+SHA1-Digest: fS4oIF+aekb6B7tOUa4PFE8Fivs=
+
+Name: org/apache/xerces/jaxp/datatype/XMLGregorianCalendarImpl$DaysInM
+ onth.class
+SHA1-Digest: CXpvU+agTvqaAIOJ6lXthsOhzqg=
+
+Name: org/apache/xerces/impl/xs/XMLSchemaValidator$ShortVector.class
+SHA1-Digest: 6bqFMA1cmgO5Gd7/6GSqmduZ4ik=
+
+Name: org/apache/xerces/xni/XMLLocator.class
+SHA1-Digest: iK0bf/8HZyNf00hRzVgcuS3Tomo=
+
+Name: org/apache/xerces/jaxp/TeeXMLDocumentFilterImpl.class
+SHA1-Digest: 6QqRrU3Ru9h19MntUBCesAfq6LQ=
+
+Name: org/apache/xerces/jaxp/SAXParserImpl$JAXPSAXParser.class
+SHA1-Digest: HXe1xmP99fJwQwSiSWtV+Z34QXk=
+
+Name: org/apache/xml/serialize/DOMSerializerImpl.class
+SHA1-Digest: oav3DdYhs4hXhpn+scRm05teZTg=
+
+Name: org/apache/xerces/dom/DOMStringListImpl.class
+SHA1-Digest: AHlyYg9BKbdI0pLYJ7k4jwYA56I=
+
+Name: org/apache/xerces/util/LocatorProxy.class
+SHA1-Digest: 6ZajMXOa1/jTx2J2ovczCCpx96s=
+
+Name: org/apache/xerces/impl/xs/XSNotationDecl.class
+SHA1-Digest: r0OyUvNGKT3s3Xd7T2D7DBRq9Nc=
+
+Name: org/apache/xerces/xs/datatypes/XSQName.class
+SHA1-Digest: qq6/Synb4Z7vktsA0AN4rAuBTYM=
+
+Name: org/apache/xerces/impl/xs/SubstitutionGroupHandler$OneSubGroup.c
+ lass
+SHA1-Digest: LnWPkdTU23vZZUU1uCiMwqxPSc0=
+
+Name: org/apache/xerces/impl/xs/models/XSDFACM.class
+SHA1-Digest: Aq9v/Ax4V2oU9UGZb/iNVgIcuyo=
+
+Name: org/apache/xerces/dom/ASModelImpl.class
+SHA1-Digest: fiMSMXf5HvqpPiXaZumFQP9hqK8=
+
+Name: org/apache/xerces/impl/xpath/regex/Op$CharOp.class
+SHA1-Digest: G5MDoymZ66VcvBpTEaK0r2YqIBY=
+
+Name: plugin.properties
+SHA1-Digest: e1oaFKWW680QBvuEiUEVelp8nKY=
+
+Name: org/apache/xerces/xni/parser/XMLDocumentSource.class
+SHA1-Digest: 5FGjTQYpSlK4vYlzuB6iXfoGTdI=
+
+Name: org/apache/xerces/dom/DeepNodeListImpl.class
+SHA1-Digest: SCH9nuQMMSUTmJ7wgMvGqy3ljbk=
+
+Name: org/apache/xerces/dom3/as/NodeEditAS.class
+SHA1-Digest: Sq29+z0rVjaHZSjBMTc8jjVpe48=
+
+Name: about_files/LICENSE.sax.txt
+SHA1-Digest: kJvsylkvQTIb/yhQi1gpCnrXwqc=
+
+Name: org/apache/xerces/parsers/DTDParser.class
+SHA1-Digest: 4hLcrZeYNNT+tyNFy1fG/hxP4/0=
+
+Name: org/apache/xerces/impl/xs/traversers/OneAttr.class
+SHA1-Digest: 3EjhmYm5Vc8bEUeWHAWJjAqCzZ4=
+
+Name: org/apache/xerces/jaxp/validation/EmptyXMLSchema.class
+SHA1-Digest: IM2i39XhzMljuRQDxnPDBgRSvkk=
+
+Name: org/apache/xerces/impl/dtd/XMLDTDValidatorFilter.class
+SHA1-Digest: eX7ZMLjyXUbkK/dYoNN8pOybHdA=
+
+Name: org/apache/xerces/util/XMLLocatorWrapper.class
+SHA1-Digest: LPkPYMapmqEaa5fISfs7mXzCN3o=
+
+Name: org/apache/xerces/impl/dv/xs/XSSimpleTypeDecl$3.class
+SHA1-Digest: uIH/XBjj0NdC93vNt/xluaOZRkU=
+
+Name: org/apache/wml/dom/WMLGoElementImpl.class
+SHA1-Digest: NQ7kItq5fvloVKDPAyC6Kd2L9W4=
+
+Name: org/apache/xerces/jaxp/validation/ValidatorHandlerImpl.class
+SHA1-Digest: l3W5pbAMT+AcTotvJtJuhpUcfZk=
+
+Name: org/apache/xerces/impl/dtd/XML11NSDTDValidator.class
+SHA1-Digest: Of77V+usuqbglfP/LwHWZ9ZyCXk=
+
+Name: org/apache/wml/dom/WMLSetvarElementImpl.class
+SHA1-Digest: lvP+VPrAw/G7YINliO9K8BBLXlQ=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDAttributeGroupTraverser.
+ class
+SHA1-Digest: s5TyF7wCq0AyWxhFBeJFcrZgLa4=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDAbstractTraverser.class
+SHA1-Digest: +DqDRdzhlJlgZZRCWNIREcMIyjI=
+
+Name: org/apache/xerces/xni/parser/XMLPullParserConfiguration.class
+SHA1-Digest: PJOxfunxj6t+Xbk3tj2SbOXeydU=
+
+Name: org/apache/html/dom/SecuritySupport$3.class
+SHA1-Digest: SUhG631IK9CLeedEfzWjo2A9UD0=
+
+Name: org/apache/xerces/impl/xs/XSDDescription.class
+SHA1-Digest: ZIMejIM8Dq2DrSZ7/KqhdxrznnQ=
+
+Name: org/apache/xerces/xinclude/SecuritySupport$2.class
+SHA1-Digest: frICpoC/bWTKLlZLB3jO0SXU/Yg=
+
+Name: org/apache/xerces/impl/xs/util/ShortListImpl$1.class
+SHA1-Digest: xnSwDorZFWzzy7kfbI9myKPBpEQ=
+
+Name: org/apache/xerces/impl/Constants.class
+SHA1-Digest: i5uSNRgcAvlQfrhiH+5BuZYknFA=
+
+Name: org/apache/html/dom/HTMLUListElementImpl.class
+SHA1-Digest: A2hwaUVgKnd/bdmlsdhlnTVcZ70=
+
+Name: org/apache/xerces/parsers/XMLGrammarCachingConfiguration.class
+SHA1-Digest: HelLnV1VB2Y7FUv6tYyKAqJ97xg=
+
+Name: org/apache/wml/WMLMetaElement.class
+SHA1-Digest: PvMApHNiUPrT5/YDHNh6kDO9XQc=
+
+Name: org/apache/xml/serialize/SecuritySupport.class
+SHA1-Digest: DxpIKEc2UcSywsyRzG9gaxAQsqI=
+
+Name: org/apache/xerces/impl/dv/dtd/NOTATIONDatatypeValidator.class
+SHA1-Digest: +rzUCt5Qp3h8EiZTk2fmfFffhYs=
+
+Name: org/apache/xerces/xinclude/ObjectFactory.class
+SHA1-Digest: awF9HvFsSUsBD9/5OtqCl5LtL0I=
+
+Name: org/apache/html/dom/HTMLIsIndexElementImpl.class
+SHA1-Digest: ZHbuzcZKQN917r3fehoZ8AdeH5g=
+
+Name: org/apache/xerces/dom/LCount.class
+SHA1-Digest: A0JN29RbwMOunR3Ichu/aqp3mJg=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDNotationTraverser.class
+SHA1-Digest: J6krtM1GRneLCzZnm2H62XWgz8k=
+
+Name: org/apache/xerces/impl/xs/util/XSObjectListImpl$1.class
+SHA1-Digest: qp/6BdkPEl/O2kDBH+Zl0wZVeWQ=
+
+Name: org/apache/xerces/impl/dv/ValidatedInfo.class
+SHA1-Digest: MjhyuLguFCVzzicIO4lIIYmC+r8=
+
+Name: org/apache/xerces/impl/dv/xs/DoubleDV$XDouble.class
+SHA1-Digest: zpiQ8RLyFqlA81dEKF0bBBGhKIY=
+
+Name: META-INF/services/javax.xml.parsers.DocumentBuilderFactory
+SHA1-Digest: vfDsyg8qFtaqNrH66GYoZptnpo0=
+
+Name: org/apache/xerces/util/SymbolTable$Entry.class
+SHA1-Digest: J26/7dJRcLEYsf5dsBC6h/a8Txo=
+
+Name: org/apache/xerces/util/EncodingMap.class
+SHA1-Digest: Z0xEe0t2iH3pL4jXy+21RqJYlVs=
+
+Name: org/apache/xerces/xni/parser/XMLComponent.class
+SHA1-Digest: HGSR/hCHYH/buxalIiUMRfYBQEk=
+
+Name: org/apache/xml/serialize/ObjectFactory.class
+SHA1-Digest: mwTmEKKq977GS8xIuKRUUE9krkI=
+
+Name: org/apache/xerces/parsers/SecurityConfiguration.class
+SHA1-Digest: kiNCucwcBPasKEpqDAT8FpTpgSc=
+
+Name: org/apache/xerces/impl/XMLDocumentScannerImpl$XMLDeclDispatcher.
+ class
+SHA1-Digest: 0iEc8cKiE5zH3kG0mxV7Ed2pIyM=
+
+Name: org/apache/xml/serialize/LineSeparator.class
+SHA1-Digest: +li4ymnKMBGNn9JILkt3G1/r56o=
+
+Name: org/apache/xerces/impl/xs/identity/Field$XPath.class
+SHA1-Digest: exyd/Y+LoYW6Y8IN36Iti9gGE1c=
+
+Name: org/apache/wml/WMLSelectElement.class
+SHA1-Digest: +Pc/eoufAQgcTMtA9hafiPBZyZk=
+
+Name: org/apache/xerces/impl/xs/XMLSchemaLoader.class
+SHA1-Digest: jpDtqu3xtdQIbCkX644OGert7Tk=
+
+Name: org/apache/wml/dom/WMLEmElementImpl.class
+SHA1-Digest: 68EK2x8gn6wbXnMu3c/PMeSwqm8=
+
+Name: org/apache/xerces/impl/dv/InvalidDatatypeValueException.class
+SHA1-Digest: zfWAOT9BoKV5WI0Qzh3T9cvdnsU=
+
+Name: org/apache/xerces/impl/xs/SchemaGrammar$Schema4Annotations.class
+SHA1-Digest: PkGjGKdfCR5mvb8jlOoFtJmtdRQ=
+
+Name: org/apache/xerces/impl/xpath/regex/RegularExpression$Context.cla
+ ss
+SHA1-Digest: pJK4oPVxMKv8Ki5isrQ3/bjekW8=
+
+Name: org/apache/html/dom/SecuritySupport$8.class
+SHA1-Digest: 8Q4ma5W/i5b6sX0Fp6lgHt+/YrY=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDAbstractParticleTraverse
+ r$ParticleArray.class
+SHA1-Digest: WE12qw1jR6B3rJOWs634bV3KueI=
+
+Name: org/apache/xerces/impl/dv/xs/ListDV.class
+SHA1-Digest: HjQ4nUvpXDaDRMxm/i1N3f6fTR8=
+
+Name: org/apache/xerces/jaxp/datatype/DurationImpl$DurationStream.clas
+ s
+SHA1-Digest: pE1sXB4J8oF9b9D1gKYsenqv1wA=
+
+Name: org/apache/xerces/util/URI.class
+SHA1-Digest: NUe35wf0LniGW5tvAdaX7hyO3xs=
+
+Name: org/apache/wml/WMLWmlElement.class
+SHA1-Digest: cOELnoZ3A1XWLAgAMGjwsvuLjWY=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDKeyrefTraverser.class
+SHA1-Digest: +9yFRtxU0dcxCXpamsd9GWukjuE=
+
+Name: org/apache/xerces/xinclude/SecuritySupport$7.class
+SHA1-Digest: +Qus++L5/xYz8HLCiyckp+NWfpo=
+
+Name: org/apache/html/dom/ObjectFactory.class
+SHA1-Digest: BABK9ZQa3BGVg05S6uCeScV1GIs=
+
+Name: org/apache/html/dom/HTMLTableElementImpl.class
+SHA1-Digest: 6D+QfyzqkiPKOR9VKd3xjJfaPKw=
+
+Name: org/apache/xerces/util/SymbolHash$Entry.class
+SHA1-Digest: 3dk+1+gcsZ/Xr5Ebl+71wfKHLCo=
+
+Name: org/apache/html/dom/HTMLOListElementImpl.class
+SHA1-Digest: W+2/cJ+VTmz9xJHqQWuUixmk9rw=
+
+Name: org/apache/xerces/impl/Version.class
+SHA1-Digest: X3K0+pSt4idMpng1l4JzGAPBcqE=
+
+Name: org/apache/xerces/impl/xs/XSAttributeUseImpl.class
+SHA1-Digest: OoE9QZ1mOahLFf1FwHtqCJ0vgok=
+
+Name: org/apache/xerces/impl/dv/xs/MonthDV.class
+SHA1-Digest: nvyJlJXNlbvY9gp10ML9Nfh22PY=
+
+Name: org/apache/xerces/impl/dtd/XMLNSDTDValidator.class
+SHA1-Digest: qS+w0MKnDB/UM9GdqTZ2L7DRvtc=
+
+Name: org/apache/xerces/impl/xs/traversers/XSDHandler$XSAnnotationGram
+ marPool.class
+SHA1-Digest: 1d88aPrJdangjq4gAFixakqrp0Q=
+
+Name: org/apache/html/dom/HTMLLegendElementImpl.class
+SHA1-Digest: dCxj4XreffcVI0YDosUrIen7qj8=
+
+Name: org/apache/xerces/impl/xpath/regex/BMPattern.class
+SHA1-Digest: db6cqRNhzJ1mM0rc4z/Ug97g8q4=
+
+Name: org/apache/xerces/impl/XMLDocumentFragmentScannerImpl$FragmentCo
+ ntentDispatcher.class
+SHA1-Digest: P9Z1BRVjlkIlwjO4x3bSSdmlIQw=
+
+Name: org/apache/xerces/impl/xs/identity/Selector$Matcher.class
+SHA1-Digest: Bbdyux//+LjzS0ChoPiDvv+nC8k=
+
+Name: org/apache/xerces/util/XMLResourceIdentifierImpl.class
+SHA1-Digest: ZWvjIJK4XAbzeHWOJ3pgNKkIHxs=
+
+Name: org/apache/xerces/impl/XML11NamespaceBinder.class
+SHA1-Digest: zuZqhEb0fdiSfJ2zKNVMaWp9EhU=
+
+Name: org/apache/xerces/impl/dv/xs/FloatDV$XFloat.class
+SHA1-Digest: XSlDwKhKZLsPoBxnKR2kChZKpcc=
+
+Name: org/apache/xerces/impl/dv/xs/QNameDV$XQName.class
+SHA1-Digest: h9JPKBUzAQNiWd/6HU+IBRMyq1Q=
+
+Name: org/apache/xerces/dom/DocumentImpl.class
+SHA1-Digest: AC6u7qqAM6zKCGOLFNhN/VhNIj8=
+
+Name: org/apache/xerces/impl/dv/xs/QNameDV.class
+SHA1-Digest: hb/wzGtnAY1U+V5xcm/NYg3nxxg=
+
+Name: org/apache/xerces/dom3/as/ASAttributeDeclaration.class
+SHA1-Digest: jETaGJ8OtzpzSfQInKX6uwfHly0=
+
+Name: org/apache/xerces/impl/xs/XSAnnotationImpl.class
+SHA1-Digest: Vf8iW7ONA+zi+zm0V2W+f/YvjEw=
+
+Name: org/apache/xerces/impl/xs/identity/Selector.class
+SHA1-Digest: lLC96rNzf/rvhoJuSzfPUZqs6Q0=
+
+Name: org/apache/xerces/impl/xs/opti/DefaultElement.class
+SHA1-Digest: tUVy3FUnRUwArnbRW5JRcswJmT8=
+
+Name: org/apache/xerces/jaxp/validation/ValidatorHandlerImpl$XMLSchema
+ TypeInfoProvider.class
+SHA1-Digest: twB0KPlM1LYVYErWoFKi8P9CmHU=
+
+Name: org/apache/xerces/impl/validation/ConfigurableValidationState.cl
+ ass
+SHA1-Digest: ulITr3UU3KviOMQ6YcLYPKXRNyk=
+
+Name: org/apache/xerces/dom/DeferredDocumentImpl$RefCount.class
+SHA1-Digest: LBl4BQ9NBUMGSeGjE/B2Z+9Ayz8=
+
+Name: org/apache/xerces/impl/xs/util/XSGrammarPool.class
+SHA1-Digest: pQPdEDiON6zGq6fQSrU9yC53L/M=
+
+Name: org/apache/wml/dom/WMLPrevElementImpl.class
+SHA1-Digest: JZWRZ0EntFzkzakV/PQnxL3J/AE=
+
+Name: org/apache/xerces/util/DOMErrorHandlerWrapper.class
+SHA1-Digest: KH9j+ZRFWyPrGn581HM2Nq3fshw=
+
+Name: org/apache/xerces/jaxp/JAXPValidatorComponent$SAX2XNI.class
+SHA1-Digest: Icms/Rgk0KXo8Ovi8RKzmjJtgVg=
+
+Name: org/apache/xerces/xpointer/XPointerHandler$Tokens.class
+SHA1-Digest: u1OYE3smxge1BtjcSyJZm0nIfuU=
+
+Name: org/apache/xerces/dom/CharacterDataImpl.class
+SHA1-Digest: w+juDM67TI+M/TE0AKBM8fEdOYo=
+
+Name: org/apache/xerces/util/XMLGrammarPoolImpl$Entry.class
+SHA1-Digest: gkXz4MioSZn1zIWSmrhFAghwLxI=
+
+Name: org/apache/xerces/impl/validation/EntityState.class
+SHA1-Digest: IdVqc6NaLDWJtMqFybi+ItZUno4=
+
+Name: org/apache/xerces/impl/dv/xs/XSSimpleTypeDecl$ValidationContextI
+ mpl.class
+SHA1-Digest: k20EDhC6dMJEDbT2xKZ3D+etED0=
+
+Name: org/apache/xerces/xs/XSMultiValueFacet.class
+SHA1-Digest: Si0LW7q1YRcCV85+Qs9OwZDqbZ0=
+
+Name: org/apache/xerces/impl/xpath/regex/Op.class
+SHA1-Digest: 3RwufAlB3Ov6DsFiCf+ZXewZQ+A=
+
+Name: org/apache/xerces/util/MessageFormatter.class
+SHA1-Digest: tYrmNpUOgql+faeIwUz27vQkQTM=
+
+Name: org/apache/xerces/jaxp/validation/Util.class
+SHA1-Digest: kTzaKkb0iAz8dCcnxjs6LlsWpVA=
+
+Name: org/apache/xerces/parsers/DOMParserImpl$1.class
+SHA1-Digest: j6yWVh63cPstqa0UYX62F6C7JjY=
+
+Name: org/apache/xerces/util/SymbolHash.class
+SHA1-Digest: i2LhsDOSMRwdJU4iM2pncnEkpls=
+
+Name: org/apache/xerces/parsers/XML11Configuration.class
+SHA1-Digest: HFNygc9y1K0LSbRXjWcjts6ubZo=
+
+Name: org/apache/xerces/dom3/as/ASModel.class
+SHA1-Digest: i3dPgQs7saEMqoc8Lz62eIoCzJw=
+
+Name: org/apache/xerces/dom/DeferredDocumentImpl.class
+SHA1-Digest: I+HfpUYySO4fOWZgpzXmCEKlZWE=
+
+Name: org/apache/xerces/impl/xpath/regex/Op$ConditionOp.class
+SHA1-Digest: WvHwPvqZ8BI4IcSPqKQppXzFd58=
+
+Name: org/apache/xerces/parsers/XMLGrammarParser.class
+SHA1-Digest: G3mFXSfuC2a4vw/GJepp8bCmRB0=
+
+Name: org/apache/xerces/util/ParserConfigurationSettings.class
+SHA1-Digest: IaH6haUa6tVUJQuWy3MzQHmGR1U=
+
+Name: org/apache/xerces/impl/dv/xs/Base64BinaryDV$XBase64.class
+SHA1-Digest: aZdPthjb/XCPtNTE9x2Bss35PDQ=
+
+Name: org/apache/xerces/xs/XSAttributeDeclaration.class
+SHA1-Digest: +5TzMd8uApB4HqrBELtc7tKtYP0=
+
+Name: org/apache/xerces/impl/dv/xs/ListDV$ListData.class
+SHA1-Digest: ZCkmQ1qfz7Ruadc+jpum3TVAa4g=
+
+Name: org/apache/xerces/impl/dv/SecuritySupport$4.class
+SHA1-Digest: aFd6kPwbnJxi7MD5Ipl9gEMFFec=
+
+Name: org/apache/xerces/impl/XMLEntityDescription.class
+SHA1-Digest: l+/PHPngrAWcHlB+RnkRiP9Jp9c=
+
+Name: org/apache/xml/serialize/ObjectFactory$ConfigurationError.class
+SHA1-Digest: ymgU56eZyEXKlpS2foHidP+91B4=
+
+Name: org/apache/xerces/impl/xs/models/XSDFACM$Occurence.class
+SHA1-Digest: mdC+uivqF4EXcWg2GgGAGX+3aoQ=
+
+Name: org/apache/xerces/dom/DocumentTypeImpl.class
+SHA1-Digest: lmTNraHTDcZC65TmVPTpjRBnBO8=
+
+Name: org/apache/xerces/xpointer/XPointerProcessor.class
+SHA1-Digest: Hh+nBXQ31T/w1F8KrOxklKxdhUU=
+
+Name: org/apache/xerces/impl/xs/XSMessageFormatter.class
+SHA1-Digest: DwcFpF6L5W05sLu9CJQ22TPdiAM=
+
+Name: org/apache/wml/WMLAccessElement.class
+SHA1-Digest: L7PyMu7MWTIkumF4mgSrYbt4xm4=
+
+Name: org/apache/html/dom/HTMLStyleElementImpl.class
+SHA1-Digest: 3t+szrKq+HnmQoEZRpAkwG6HHi4=
+
+Name: org/apache/xerces/impl/XMLEntityManager$Entity.class
+SHA1-Digest: UyjCLnfDejYodGANiL55+1i9hIw=
+
+Name: org/apache/xerces/jaxp/validation/DOMValidatorHelper$DOMNamespac
+ eContext.class
+SHA1-Digest: e4DT+3cZ4aSx9ND7yl29fmrXggM=
+
+Name: org/apache/xerces/impl/dtd/models/CMBinOp.class
+SHA1-Digest: qsXc03aOzRLnmuGxzUxY/t9nnmE=
+
+Name: org/apache/xerces/impl/dv/dtd/ListDatatypeValidator.class
+SHA1-Digest: /0mWuuQer2/nBX9ilwzJi0KV/9o=
+
+Name: org/apache/wml/WMLIElement.class
+SHA1-Digest: HiOMh/DFfDPdTTgiYKhjgpSWLnY=
+
+Name: org/apache/wml/dom/WMLRefreshElementImpl.class
+SHA1-Digest: /ME7e7R+xAzM2WizUUKNiG/1uH0=
+
+Name: org/apache/xerces/jaxp/JAXPValidatorComponent$2.class
+SHA1-Digest: Fo8ebPPexnTwOxxBl/M2IzTg6dE=
+
+Name: org/apache/xerces/parsers/AbstractSAXParser$LocatorProxy.class
+SHA1-Digest: +6o+n8x8COwiEW7Qn1A2XLNSaMQ=
+
+Name: org/apache/xerces/xni/grammars/XMLSchemaDescription.class
+SHA1-Digest: c/qehPmmpo8ji6octQ4yinJQxnU=
+
+Name: org/apache/xerces/xs/XSElementDeclaration.class
+SHA1-Digest: +EvcFE0rjwZvBYJ0r+klzaFf27I=
+
+Name: org/apache/xml/serialize/SecuritySupport$3.class
+SHA1-Digest: h/8Oq6/0UGN3sg9x4p67Lwjhx78=
+
+Name: org/apache/html/dom/HTMLDocumentImpl.class
+SHA1-Digest: mFbrMR5c8UsHBxyQWRR828m7sUk=
+
+Name: org/apache/xerces/dom/RangeImpl.class
+SHA1-Digest: x927JFLOUL3t5Fpkj6lAZZxKtbo=
+
+Name: org/apache/xerces/dom/ObjectFactory$ConfigurationError.class
+SHA1-Digest: sgBD5nVT4yTKvF24H7w3SEcYkho=
+
+Name: org/apache/xerces/dom/SecuritySupport$5.class
+SHA1-Digest: CX5lhkp8zbO0vvv0j43ovH4VFRs=
+
+Name: org/apache/xerces/xs/XSModel.class
+SHA1-Digest: sVnKYv5KGClGdwroRrm/BTa1TLI=
+
+Name: org/apache/xerces/impl/xs/opti/DefaultText.class
+SHA1-Digest: qO5UdmYLwb2wUWAUw3qFW2fm/n0=
+
+Name: org/apache/xerces/impl/dv/xs/YearDV.class
+SHA1-Digest: jnYJBsbcuCSE/b7NPLvhFRrDWYE=
+
+Name: org/apache/xml/serialize/DOMSerializerImpl$DocumentMethods.class
+SHA1-Digest: DSIBsyegpVmipSUK0BiC0xkFSSg=
+
+Name: org/apache/xerces/dom/DOMConfigurationImpl.class
+SHA1-Digest: nG6vBpX1NwFu/DR37EFgCFOnoXk=
+
+Name: org/apache/xerces/jaxp/validation/JAXPValidationMessageFormatter
+ .class
+SHA1-Digest: xTFc1E325nkxDs08mSpfFKjtWI4=
+
+Name: org/apache/xerces/xinclude/XIncludeTextReader.class
+SHA1-Digest: Gul0++MCWIEtA/FHOZaaHt5oTbA=
+
+Name: org/apache/xerces/impl/dv/XSFacets.class
+SHA1-Digest: 7lyIJdvHXQeopgbFodtnUIVzThE=
+
+Name: org/apache/xerces/jaxp/validation/SoftReferenceGrammarPool$Entry
+ .class
+SHA1-Digest: mfbdftAyUoBHOiomGJWeHW666ow=
+
+Name: org/apache/xerces/jaxp/SAXParserFactoryImpl.class
+SHA1-Digest: pOACE9fKxjnBLG5UYSnHPmpjyFE=
+
+Name: org/apache/xerces/xs/XSFacet.class
+SHA1-Digest: eMKPCuo1Uf5i5kK+d1Xq6SL0fLI=
+
+Name: org/apache/xerces/impl/msg/DatatypeMessages.properties
+SHA1-Digest: 5Vg+0rnt4BqDxJRsAQvmpLmcnkA=
+
+Name: org/apache/xerces/dom/events/EventImpl.class
+SHA1-Digest: udd0uqKD6eLhxqJBusC39XnOEzM=
+
+Name: org/apache/html/dom/HTMLOptionElementImpl.class
+SHA1-Digest: kUC6hg4GURQ2MB8agE7YThwP/UM=
+
+Name: org/apache/xerces/xpointer/XPointerMessageFormatter.class
+SHA1-Digest: EDu/SalyQOT1B2yN1e7wNugGRF8=
+
+Name: org/apache/xerces/xpointer/XPointerHandler.class
+SHA1-Digest: Wj8M1kTTS/Z/eMpe7P5QHyC4jc8=
+
+Name: org/apache/xerces/dom/DeferredElementNSImpl.class
+SHA1-Digest: hlBmX22U+Nedc0VhVEz1REU5ZKU=
+
+Name: org/apache/xerces/impl/xpath/regex/RegexParser.class
+SHA1-Digest: 3/LyVXfZMTy/K0oMQtNfkS1qvgs=
+
+Name: org/apache/xerces/xs/XSAttributeUse.class
+SHA1-Digest: QaYOthqjiMOOOjdLAIQGgCWG6EY=
+
+Name: org/apache/xerces/dom/EntityReferenceImpl.class
+SHA1-Digest: K72rtYfQOKba0whz3Y4eAOZFRXQ=
+
+Name: org/apache/xerces/impl/msg/XMLSerializerMessages.properties
+SHA1-Digest: WPLgG/4XQv+hUZOSTlW4wKlQ3DY=
+

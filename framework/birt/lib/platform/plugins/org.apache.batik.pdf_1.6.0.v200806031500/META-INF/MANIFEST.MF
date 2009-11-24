@@ -801,3 +801,806 @@ SHA1-Digest: DXrCvYUbViQXj42f7FnCJq1f+9Y=
 Name: org/apache/fop/pdf/PDFFontDescriptor.class
 SHA1-Digest: 6BegRTDJa0Q/0ow6YDs8/9odE8M=
 
+Manifest-Version: 1.0
+Bundle-Vendor: %Bundle-Vendor
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: J2SE-1.4
+Bundle-Name: %Bundle-Name
+Bundle-SymbolicName: org.apache.batik.pdf
+Export-Package: org.apache.avalon.framework,org.apache.avalon.framewor
+ k.activity,org.apache.avalon.framework.configuration,org.apache.avalo
+ n.framework.container,org.apache.commons.io,org.apache.commons.io.out
+ put,org.apache.commons.logging,org.apache.commons.logging.impl,org.ap
+ ache.fop.apps,org.apache.fop.fo,org.apache.fop.fonts,org.apache.fop.f
+ onts.apps,org.apache.fop.fonts.base14,org.apache.fop.fonts.truetype,o
+ rg.apache.fop.fonts.type1,org.apache.fop.image,org.apache.fop.image.a
+ nalyser,org.apache.fop.pdf,org.apache.fop.render.pdf,org.apache.fop.r
+ ender.ps,org.apache.fop.svg,org.apache.fop.util
+Bundle-Version: 1.6.0.v200806031500
+Bundle-ClassPath: ../../../../../base/lib/batik-all-1.7.jar
+Bundle-ManifestVersion: 2
+Import-Package: org.apache.batik.bridge;version="[1.6.0,1.7.0)",org.ap
+ ache.batik.dom.svg;version="[1.6.0,1.7.0)",org.apache.batik.dom.util;
+ version="[1.6.0,1.7.0)",org.apache.batik.ext.awt;version="[1.6.0,1.7.
+ 0)",org.apache.batik.ext.awt.g2d;version="[1.6.0,1.7.0)",org.apache.b
+ atik.gvt;version="[1.6.0,1.7.0)",org.apache.batik.gvt.renderer;versio
+ n="[1.6.0,1.7.0)",org.apache.batik.gvt.text;version="[1.6.0,1.7.0)",o
+ rg.apache.batik.transcoder;version="[1.6.0,1.7.0)",org.apache.batik.t
+ ranscoder.image;version="[1.6.0,1.7.0)",org.apache.batik.transcoder.k
+ eys;version="[1.6.0,1.7.0)",org.apache.batik.util;version="[1.6.0,1.7
+ .0)",org.w3c.dom
+
+Name: org/apache/fop/pdf/PDFColorSpace.class
+SHA1-Digest: tpoubqrAdDCe/Zr/smIZ7SHIPYI=
+
+Name: org/apache/fop/pdf/PDFFilterException.class
+SHA1-Digest: lzu9LlsnUtcHJ1qEyCRYrq2Rku0=
+
+Name: org/apache/fop/svg/AbstractFOPTranscoder$FOPTranscoderUserAgent.
+ class
+SHA1-Digest: oyGc4gQekca6ePEP+DZrfSpI2Ic=
+
+Name: org/apache/fop/render/ps/PSXMLHandler$SVGHandler.class
+SHA1-Digest: IlX4fuJZ6Yyv0sFVywVcVXjPnNc=
+
+Name: org/apache/commons/logging/impl/LogKitLogger.class
+SHA1-Digest: ZbbUa9GD/2mGVtXNXfeQBcWCwYU=
+
+Name: org/apache/fop/fonts/truetype/TTFFile.class
+SHA1-Digest: i6oQ9xwe8mWr2zq742jr461bc2M=
+
+Name: org/apache/fop/svg/PDFTranscoder.class
+SHA1-Digest: VZe2+Z9TBWaKBMX7XZSrstrjtdU=
+
+Name: org/apache/fop/fonts/truetype/TTFMtxEntry.class
+SHA1-Digest: YooaeSV7V3nL+Je/S/3ckCkHPEE=
+
+Name: org/apache/fop/image/analyser/GIFReader.class
+SHA1-Digest: tPrRXuOVtJ8ifFlzB5BlwjwRfDo=
+
+Name: org/apache/commons/logging/impl/package.html
+SHA1-Digest: wuiw5sqpnOnGHNV+obeTfzoi9I4=
+
+Name: org/apache/fop/pdf/PDFAction.class
+SHA1-Digest: Jbvg1u5Q8ZHoQVsUsNsNv3yMssE=
+
+Name: org/apache/fop/svg/PDFTextElementBridge.class
+SHA1-Digest: Tv71ZvkmrAoAmayjNC82LgMCIP0=
+
+Name: org/apache/fop/fonts/Glyphs.class
+SHA1-Digest: CpYek7S8UTOJ4EQp25fDvAYwhpk=
+
+Name: org/apache/avalon/framework/configuration/Reconfigurable.class
+SHA1-Digest: z8zr7MRR4pb0EyPetvHYSVTBF5A=
+
+Name: org/apache/commons/logging/LogSource.class
+SHA1-Digest: SjKeXbzM7vqeZ7q0KNJwHu//jdo=
+
+Name: org/apache/fop/pdf/PDFFactory.class
+SHA1-Digest: kXCrOwrxPhIgwdx45Ha5Lxxlywg=
+
+Name: org/apache/fop/pdf/PDFPattern.class
+SHA1-Digest: IDulYE/SoflbaXftTQLZ8GmEcIw=
+
+Name: org/apache/fop/pdf/PDFEncryption.class
+SHA1-Digest: m3oI+LgO9geGwjNzE5Hgg49A4lg=
+
+Name: org/apache/fop/pdf/StreamCacheFactory.class
+SHA1-Digest: Vk65HUyXPXMCx/7yvr+Bb6uvEuk=
+
+Name: org/apache/fop/pdf/TransitionDictionary.class
+SHA1-Digest: Rs3Ewxea2Tr6Ox8OJLFLm8Rvqz8=
+
+Name: org/apache/fop/fonts/FontInfo.class
+SHA1-Digest: MwE4F/gWdq3O34k1mkA4UcNUMsQ=
+
+Name: org/apache/fop/fonts/FontDescriptor.class
+SHA1-Digest: 5ipZnHio4WOErE/g5RbIo/ud5pg=
+
+Name: org/apache/fop/fonts/SingleByteFont.class
+SHA1-Digest: M1Aao5uew4sssWgc+Q7JzKtdcRQ=
+
+Name: org/apache/fop/util/CMYKColorSpace.class
+SHA1-Digest: YRsC5OkqW+4BgfC1wjC3SbCADSk=
+
+Name: org/apache/fop/pdf/PDFInternalLink.class
+SHA1-Digest: Y4t1jPUFTQSzxFp4PdFQa7ahIS8=
+
+Name: org/apache/fop/pdf/PDFFontType0.class
+SHA1-Digest: aVHOfnhS52VSF5SzkkruXUmJPLM=
+
+Name: org/apache/fop/pdf/DCTFilter.class
+SHA1-Digest: fpCeFU2u+ataDtKwXKzZgyW/rvQ=
+
+Name: org/apache/fop/render/ps/AbstractPSTranscoder.class
+SHA1-Digest: EobV0ZHla6Qby3Ph0P7gYeST2nY=
+
+Name: org/apache/commons/logging/LogFactory.class
+SHA1-Digest: C23sHOlhUGtkvwb9nIneh6cKZgU=
+
+Name: org/apache/commons/logging/package.html
+SHA1-Digest: jlhff5I8+7tFatDnv115BjAmrZc=
+
+Name: org/apache/fop/render/ps/PSRenderer.class
+SHA1-Digest: cRgNuFpXOQWLffTRhWt/ByLvMUE=
+
+Name: org/apache/fop/pdf/PDFFormXObject.class
+SHA1-Digest: K8xDQBdVry862DzSkUsoG2OhA0c=
+
+Name: org/apache/commons/logging/LogFactory$1.class
+SHA1-Digest: JQr1QEjXNIX8tV4bbGgM4HMVE4Q=
+
+Name: org/apache/fop/render/ps/PSTextElementBridge.class
+SHA1-Digest: 6IvUQvNV6H8GmPJhfQuy8NfgtxU=
+
+Name: org/apache/fop/pdf/PDFInfo.class
+SHA1-Digest: yjeYQmK1eIV6CnSzbUvVZ/0NSHU=
+
+Name: org/apache/fop/render/ps/PSImageUtils.class
+SHA1-Digest: ArT0Kle1N73JXe8e+OGFkyLqzTM=
+
+Name: org/apache/fop/image/analyser/BMPReader.class
+SHA1-Digest: TBBYKRE3kpst5wgAClRTRQQc+Kc=
+
+Name: org/apache/fop/fonts/base14/ZapfDingbats.class
+SHA1-Digest: 8tk/4SBz7YeFRKeWzaj6wo7SIBg=
+
+Name: org/apache/fop/render/ps/PSDocumentGraphics2D.class
+SHA1-Digest: B2+QobBLuMTkvrPPLA9J3eA2ZUA=
+
+Name: org/apache/avalon/framework/configuration/AbstractConfiguration.
+ class
+SHA1-Digest: zfTyeZqvOhZ/37aDPHhdn9YR7Lg=
+
+Name: org/apache/fop/fonts/base14/CourierBoldOblique.class
+SHA1-Digest: W2I2mgpz+9Va9uqiXL26Oo9vq28=
+
+Name: org/apache/fop/svg/ACIUtils.class
+SHA1-Digest: EoguaqOdLkS/YCw3evhxtGcCOh8=
+
+Name: org/apache/fop/pdf/AbstractPDFStream.class
+SHA1-Digest: a1vsLCLgppVOSrtxza08NADx3Gg=
+
+Name: org/apache/fop/pdf/PDFObject.class
+SHA1-Digest: fvLxCdsq8YDkWqZmW7BIOvp6nSw=
+
+Name: org/apache/fop/svg/FOPSAXSVGDocumentFactory.class
+SHA1-Digest: rqpVbJX7U6MsXhYR2qpocfl5PnM=
+
+Name: org/apache/fop/fonts/base14/TimesBold.class
+SHA1-Digest: 38SwqXyocm3+OvaCxrEzWQeHdQA=
+
+Name: org/apache/avalon/framework/configuration/SAXConfigurationHandle
+ r.class
+SHA1-Digest: PfxZPnSJ/bcBwKaPQzJojTqRJWY=
+
+Name: org/apache/commons/logging/impl/SimpleLog$1.class
+SHA1-Digest: QcYAuP84k/XIUpfM5DYagLCmB1I=
+
+Name: org/apache/fop/fonts/FontTriplet.class
+SHA1-Digest: RRsENdrDuMLpb/Djgot3yLpJtDk=
+
+Name: org/apache/fop/svg/SVGUserAgent.class
+SHA1-Digest: y1+6Z5G1IfTfd093L0ExkDicsQ4=
+
+Name: org/apache/fop/pdf/PDFArray.class
+SHA1-Digest: tvWgobGhvuIhiXJfT05GArNv530=
+
+Name: org/apache/fop/pdf/PDFCIDSystemInfo.class
+SHA1-Digest: XiD1qh/ASMfbgiGbBXLMDm7b0FE=
+
+Name: org/apache/fop/pdf/PDFWArray$Entry.class
+SHA1-Digest: E5qp9rOulgtqFnGzEwhFtfD2KD0=
+
+Name: org/apache/fop/pdf/ASCII85Filter.class
+SHA1-Digest: QXvUVQdLM2gXm92RoukG06br0KQ=
+
+Name: org/apache/fop/render/ps/PSGenerator$1.class
+SHA1-Digest: Q3dg52ZxhY01NiRAH0tXEXm8v5E=
+
+Name: org/apache/fop/render/ps/DSCConstants.class
+SHA1-Digest: 5hTIefv4Vilz6QpcbmS+mRNx+sc=
+
+Name: org/apache/fop/fonts/EmbedFontInfo.class
+SHA1-Digest: tIv8CwzVjaKWhMRDzCB/Lguxwm0=
+
+Name: org/apache/fop/pdf/PDFFunction.class
+SHA1-Digest: 3TL7iFpDGcOmZp6bLdmZ0iOhUYw=
+
+Name: org/apache/fop/util/ASCII85Constants.class
+SHA1-Digest: hDnkAyO05ehPtOpmo/kw8FtM45Q=
+
+Name: org/apache/fop/render/pdf/CTMHelper.class
+SHA1-Digest: VFvkRzvpH2CW6zJBZwf89WeqvcA=
+
+Name: org/apache/fop/pdf/PDFEncryptionManager.class
+SHA1-Digest: XevPRcbl/ZfK7kYB5g31b6KxeWI=
+
+Name: about_files/LICENSE-2.0.txt
+SHA1-Digest: K4uBUimqimHkg/tLoFiLi2xJGJA=
+
+Name: org/apache/fop/render/pdf/FopPDFImage.class
+SHA1-Digest: 1Ju9oGckUD0F3T91CZzzKgHpvr0=
+
+Name: org/apache/fop/pdf/PDFRectangle.class
+SHA1-Digest: QRbVzl7Gv3/9s7NZ8wb4hnTVZEI=
+
+Name: org/apache/fop/fonts/FontUtil.class
+SHA1-Digest: 92fjWPgqrMMKsbTlD83i6b1syek=
+
+Name: org/apache/fop/fonts/FontReader.class
+SHA1-Digest: Bz49uW2vNu5lvC4IEG7LOKyU7D8=
+
+Name: org/apache/fop/pdf/InMemoryStreamCache.class
+SHA1-Digest: 5eRZflzD9SzaqfRQeqViQlq/c6Y=
+
+Name: org/apache/fop/pdf/PDFResourceContext.class
+SHA1-Digest: gwuYWFLyiXzvcKyic+iYIIQAxyA=
+
+Name: org/apache/fop/util/ASCII85InputStream.class
+SHA1-Digest: QirEh7WguedS4F/HG2WF6UvD4q0=
+
+Name: org/apache/avalon/framework/configuration/DefaultConfigurationSe
+ rializer.class
+SHA1-Digest: g6RqsHB/J9fpDAx8QWuIHoSninM=
+
+Name: org/apache/fop/svg/PDFAElementBridge.class
+SHA1-Digest: U+MK54tjNy+QcYcDu1ZQu2rWz8Q=
+
+Name: org/apache/fop/pdf/PDFAnnotList.class
+SHA1-Digest: ycXsRYFgaNd1M8W/C7rt/zskI8Q=
+
+Name: org/apache/fop/pdf/PDFFilterList.class
+SHA1-Digest: MuSK6t4hFo2emLIO/6d8oUoO64U=
+
+Name: org/apache/commons/logging/impl/Log4JCategoryLog.class
+SHA1-Digest: eHht2nExse/2nlTNXLuGUK54Lio=
+
+Name: org/apache/fop/fonts/truetype/TTFCmapEntry.class
+SHA1-Digest: bilUEw3p81VZDItj0MJdw5uHv3M=
+
+Name: org/apache/fop/pdf/PDFLink.class
+SHA1-Digest: PHQlJQlgpv69YJKOgDRkS49PVts=
+
+Name: org/apache/fop/util/Finalizable.class
+SHA1-Digest: x6Xap4Kr0LCM/aqxFytWNilXrCc=
+
+Name: org/apache/fop/fonts/type1/PFMFile.class
+SHA1-Digest: OFUG9snR+AlirXHIpTWD12IJm/8=
+
+Name: org/apache/commons/logging/impl/LogFactoryImpl$1.class
+SHA1-Digest: Z5QgBwY9KnFTQyv36s/D7huLLW0=
+
+Name: org/apache/fop/util/RunLengthEncodeOutputStream.class
+SHA1-Digest: tN4bJEUmYXKAUG31LxYywv6cGQI=
+
+Name: META-INF/eclipse.inf
+SHA1-Digest: KyT9FF7C7t86NoBoa2kZT3ZJBfw=
+
+Name: org/apache/fop/pdf/PDFState.class
+SHA1-Digest: NWiG22acWRNFq/Tp4k/eVLvoh5w=
+
+Name: org/apache/fop/pdf/PDFFontNonBase14.class
+SHA1-Digest: Pda7ooKlioDdr8GfgNCWcHnQPvQ=
+
+Name: org/apache/fop/render/ps/PSState.class
+SHA1-Digest: 4lhvzLo/uMrC8l2267GhCpdF5V0=
+
+Name: org/apache/fop/image/analyser/ImageReader.class
+SHA1-Digest: /28vGs2QMdVvxvaT2ooW2zIg8Lk=
+
+Name: org/apache/fop/apps/FOPException.class
+SHA1-Digest: xs6YVnZis0/D/WYrbgCTONHYaqM=
+
+Name: org/apache/fop/image/AbstractFopImage.class
+SHA1-Digest: 4TQvgu+++/8Ro2o+gC74mYB0nos=
+
+Name: org/apache/fop/image/analyser/SVGReader.class
+SHA1-Digest: /TozOdhNT8C1DX96fM/98O1SKCI=
+
+Name: org/apache/fop/pdf/FlateFilter.class
+SHA1-Digest: U6ombj600f2nlDfILaJ6HCHfkL4=
+
+Name: org/apache/fop/fonts/base14/Symbol.class
+SHA1-Digest: u97eXR+7BXxerKCcdf9+MD1RiMg=
+
+Name: org/apache/fop/pdf/PDFFileSpec.class
+SHA1-Digest: SwtiPeOyhRxM3WWQjcNHUR/orwc=
+
+Name: org/apache/fop/pdf/PDFResources.class
+SHA1-Digest: tikEuvfE1k8Z31dFbctrnkJuAxU=
+
+Name: org/apache/commons/io/CopyUtils.class
+SHA1-Digest: lpvPBzHTdZ9hQU6sTTp+sjB3CGY=
+
+Name: org/apache/fop/pdf/PDFShading.class
+SHA1-Digest: Pt4iXhAb4xlLomACEqabdun9q64=
+
+Name: org/apache/fop/fonts/CodePointMapping.class
+SHA1-Digest: lbIs7JhtMa3PcdsA/v2QNNq9EZs=
+
+Name: org/apache/avalon/framework/activity/Initializable.class
+SHA1-Digest: pEfVc3XUKjXWQU+t7OKok5TTUMg=
+
+Name: org/apache/avalon/framework/CascadingError.class
+SHA1-Digest: 91Vb5ELHefPpWGrhOGjzA9OaUnI=
+
+Name: org/apache/commons/logging/LogFactory$3.class
+SHA1-Digest: a1SCwaniR9jRqVYbv80qpIKb3po=
+
+Name: org/apache/fop/pdf/PDFPathPaint.class
+SHA1-Digest: UyJpGv9rEpJ/DkknmWYKcJUKps4=
+
+Name: plugin.properties
+SHA1-Digest: uUIKfD10PKqRMVmI16oV18dUQYg=
+
+Name: org/apache/fop/fonts/base14/TimesItalic.class
+SHA1-Digest: qm8dHIi7F5STNXXHLu3EtSgvL7w=
+
+Name: org/apache/fop/fonts/BFEntry.class
+SHA1-Digest: WlrCMdVIU3H0XtBQr2Amd7imBes=
+
+Name: org/apache/avalon/framework/CascadingException.class
+SHA1-Digest: c5V+HETQcku+nmgXqd6s8gOG0IE=
+
+Name: org/apache/fop/svg/PDFGraphicsDevice.class
+SHA1-Digest: MKUkyXiPgbwjqlU3pgLKZQc8Ha4=
+
+Name: org/apache/fop/image/analyser/ImageReaderFactory.class
+SHA1-Digest: LOYwTwKoRWi8ha5QdxitYxHd+Ls=
+
+Name: org/apache/fop/pdf/PDFTTFStream.class
+SHA1-Digest: EIBkRYxnId2Qa+u3i4vChcZ+TEg=
+
+Name: org/apache/fop/pdf/PDFEncryptionJCE.class
+SHA1-Digest: wVPzTh2pzjLYetWOymYi6NJ3DKI=
+
+Name: org/apache/fop/svg/PDFImageElementBridge.class
+SHA1-Digest: P6fjq1U+EhvW1HdovQXSiMj6VWw=
+
+Name: org/apache/fop/util/FlateEncodeOutputStream.class
+SHA1-Digest: doaBB8epwjGvo4jT2NxqyLn3dkA=
+
+Name: org/apache/fop/pdf/TempFileStreamCache.class
+SHA1-Digest: ufoCei5Bh38ErD9OQxY+9/QZsPI=
+
+Name: about_files/NOTICE
+SHA1-Digest: 7sj4n7c6wtvZjq7hnNMC2mGUdTE=
+
+Name: org/apache/fop/svg/PDFANode.class
+SHA1-Digest: Uc/tTJEZNg2SLEjCDvbjQ7Nu2ew=
+
+Name: org/apache/fop/fonts/CIDFontType.class
+SHA1-Digest: XGuSdKBAwUlerVbj9bMPj8chZmg=
+
+Name: about_files/commons-io.LICENSE.txt
+SHA1-Digest: iA7yqyd8sB5tr7835Zsa7VJOjvc=
+
+Name: org/apache/fop/pdf/PDFNumber.class
+SHA1-Digest: j8bJ4GF232YhRrOcoTAPRZrsuxo=
+
+Name: org/apache/fop/fonts/base14/HelveticaBold.class
+SHA1-Digest: STsdFYYrQ/Gf5FY+UVLnL94l9Uk=
+
+Name: org/apache/fop/image/EPSImage.class
+SHA1-Digest: AowWx50UomfjcqLf8DcKXmFIb9E=
+
+Name: org/apache/avalon/framework/ExceptionUtil.class
+SHA1-Digest: 4LUk0oIj2Y1iG6VQ3pbeblp0W2U=
+
+Name: org/apache/fop/fo/Constants.class
+SHA1-Digest: OC6STQOMr9kNjsSpXhEL36ivYDo=
+
+Name: org/apache/avalon/framework/activity/Startable.class
+SHA1-Digest: oAW2JK9KMhywlg2SWP6YHUisxpI=
+
+Name: org/apache/commons/logging/impl/Log4JLogger.class
+SHA1-Digest: +z+VoK4eOdP8Kip0/4vjbRjxqng=
+
+Name: org/apache/fop/render/ps/PSTextPainter.class
+SHA1-Digest: iMKRg9+B+y66vK2XvjUaH+5VEyg=
+
+Name: org/apache/fop/render/ps/PSGenerator$AtendIndicator.class
+SHA1-Digest: Q5dAhky2L9fADD1wUVCH7nwr8IM=
+
+Name: org/apache/commons/io/output/ProxyOutputStream.class
+SHA1-Digest: hEO+mRKwYUFN6T5Lfz2OjuZxEyM=
+
+Name: org/apache/fop/image/analyser/PNGReader.class
+SHA1-Digest: T4Jm+nkLTxtPOAFVADGIJxG/6Rk=
+
+Name: org/apache/commons/io/output/ByteArrayOutputStream.class
+SHA1-Digest: kzTkh8J/nT5CT6xXUTQe6L2PukQ=
+
+Name: org/apache/fop/util/CloseBlockerOutputStream.class
+SHA1-Digest: 9vMErKWBNPttYIA2vAE8FEpkDVk=
+
+Name: org/apache/fop/fonts/base14/HelveticaOblique.class
+SHA1-Digest: Yco4XH5Ri+UYIz/PBRdFgAw+C1I=
+
+Name: org/apache/fop/pdf/PDFICCStream.class
+SHA1-Digest: +TbB+3883ekItmuPJqTZPxzccxg=
+
+Name: org/apache/fop/pdf/PDFT1Stream.class
+SHA1-Digest: A06/tXd1ygPPWeeJBr5Grixd7CE=
+
+Name: org/apache/fop/svg/PDFTextPainter.class
+SHA1-Digest: UsR3JanU5H4QtUBRSUV9i5kZICc=
+
+Name: org/apache/fop/pdf/PDFCIDFont.class
+SHA1-Digest: veMo4t7RqKiyXLncnBNjeVcqvP4=
+
+Name: org/apache/fop/pdf/PDFWArray.class
+SHA1-Digest: ZaR8ff/gGlFwl6YaOnIHjlZ24c8=
+
+Name: org/apache/avalon/framework/CascadingThrowable.class
+SHA1-Digest: 99w9GzJfrwgXRTSY/2ythC7H+BI=
+
+Name: org/apache/fop/pdf/NullFilter.class
+SHA1-Digest: fgV6WSnpHi+w1HlQt0/dMX6XlY0=
+
+Name: org/apache/avalon/framework/activity/Executable.class
+SHA1-Digest: KnAPOXBBcQ6mbR74UW+pxAhvCUI=
+
+Name: org/apache/fop/fonts/base14/CourierBold.class
+SHA1-Digest: gq0UNKfQ6bK/YJ/vUs9HlGu/6eE=
+
+Name: org/apache/fop/svg/PDFGraphicsConfiguration.class
+SHA1-Digest: z7I/6zPdjscL/R+695z3mgmPoLs=
+
+Name: org/apache/fop/fonts/CIDFont.class
+SHA1-Digest: Eed6ZY1sA811wsBLh3RAX6fRGcA=
+
+Name: org/apache/fop/fonts/apps/PFMReader.class
+SHA1-Digest: /Hxbn516Uy+ccdmHfq7qSWcQL3o=
+
+Name: org/apache/fop/render/ps/AbstractPSDocumentGraphics2D.class
+SHA1-Digest: p/HoXok8ZxGMI425v2welHUZYX0=
+
+Name: org/apache/fop/render/ps/PSGraphics2D.class
+SHA1-Digest: 4FLGXiCEPesYUAj25gqdNhJMCQY=
+
+Name: org/apache/commons/logging/impl/Log4jFactory.class
+SHA1-Digest: Bp4DiD1jEYQ6pQPZ8kDShfXkQXc=
+
+Name: org/apache/fop/pdf/PDFState$Data.class
+SHA1-Digest: Rd1zEWg355VBo0OKPO0qQ4KrKPI=
+
+Name: org/apache/avalon/framework/CascadingRuntimeException.class
+SHA1-Digest: XyB0b5U7WtTj2VBeKryWDiGlXo0=
+
+Name: org/apache/avalon/framework/ValuedEnum.class
+SHA1-Digest: XVD+TYRBV9Ud1zyehZRU4mOgBhg=
+
+Name: org/apache/fop/util/ASCII85OutputStream.class
+SHA1-Digest: GisIml+cgmnPfVe3OG6frv/MRO8=
+
+Name: org/apache/fop/pdf/PDFXObject.class
+SHA1-Digest: b0m/uqnMSM9wn8vkEwPM2CE0was=
+
+Name: org/apache/fop/svg/GraphicsConfiguration.class
+SHA1-Digest: f3LvqvMcTPl0tHmgItxIuHIGDhE=
+
+Name: org/apache/fop/pdf/PDFFont.class
+SHA1-Digest: 1ZHrkysJbuNlATbYFg2VLHAnzJI=
+
+Name: org/apache/fop/fonts/MultiByteFont.class
+SHA1-Digest: OO7BFZAapVXNJFRFR3dqU7DBdgo=
+
+Name: org/apache/fop/fonts/base14/TimesRoman.class
+SHA1-Digest: 50Xu5TvmkIiPPwYc15W5Ml7ZVac=
+
+Name: org/apache/fop/svg/PDFImageElementBridge$PDFJpegNode.class
+SHA1-Digest: D2TbZsVYsnnz7awoB7tBdfl1Ks8=
+
+Name: org/apache/fop/render/ps/PSXMLHandler$PSInfo.class
+SHA1-Digest: YgWuGjtFH05B2l9bJ6ViBQCS68I=
+
+Name: org/apache/fop/pdf/PDFFontTrueType.class
+SHA1-Digest: EKt2rOSMqSvJuyuZkoNnonCKQoE=
+
+Name: org/apache/fop/fonts/truetype/UnicodeMapping.class
+SHA1-Digest: C9dgh5vTo1Siv4XxMOv+6nx07u4=
+
+Name: org/apache/fop/pdf/PDFCharProcs.class
+SHA1-Digest: LwVq5LQ3tj+5hYevte1uZVTS4Ps=
+
+Name: about_files/NOTICE-FOP
+SHA1-Digest: Bd8Fy0XAUb1bOmmK8NGsuCwAHpI=
+
+Name: org/apache/fop/fonts/apps/TTFReader.class
+SHA1-Digest: 1ir0wON26+Pt0cLQ06d1Zj7TDKs=
+
+Name: org/apache/fop/image/analyser/SVGReader$1.class
+SHA1-Digest: cOKH3g+PqGBH7kWJQGoyuUOA18g=
+
+Name: org/apache/fop/render/ps/PSProcSets.class
+SHA1-Digest: t2w8eubslDanjXjw4+DDxcm3eOE=
+
+Name: org/apache/commons/logging/impl/NoOpLog.class
+SHA1-Digest: Ft7YfhGyOmb3Tag1lDSF+1qCcyo=
+
+Name: org/apache/fop/pdf/PDFGState.class
+SHA1-Digest: aIuXFjJF2xL5C4i02AFchnX7rLE=
+
+Name: org/apache/fop/apps/Fop.class
+SHA1-Digest: ynnBCk0dCHoOkZx584k3VLQ0zvY=
+
+Name: org/apache/fop/pdf/PDFOutline.class
+SHA1-Digest: lNIvKRR8i/2DpBKteb5R0D5gH+M=
+
+Name: org/apache/fop/fonts/truetype/FontFileReader.class
+SHA1-Digest: CrhPlYmB5n/qI+pVqjOvGQO7QPU=
+
+Name: org/apache/avalon/framework/Version.class
+SHA1-Digest: euEvF9CGQW93w0ClK/r2YjUrzr0=
+
+Name: org/apache/fop/pdf/PDFEncryptionJCE$EncryptionFilter.class
+SHA1-Digest: 31pmKBaF22MNTSIidk+CmJgdAm8=
+
+Name: org/apache/fop/image/analyser/SVGReader$Loader.class
+SHA1-Digest: si1pB6AMX3xP/q5E5OdaVJVcP9Y=
+
+Name: org/apache/fop/render/ps/EPSDocumentGraphics2D.class
+SHA1-Digest: S+Lh94Dxg8WdYMAo7YGPzVwmo/I=
+
+Name: org/apache/fop/pdf/PDFCMap.class
+SHA1-Digest: bAllo5iEMKTrpLDsF5My2xWWwyc=
+
+Name: org/apache/fop/svg/PDFTranscoder$1.class
+SHA1-Digest: KA8ySVcu+F62L6yAABykvVaSmNQ=
+
+Name: org/apache/fop/fonts/base14/CourierOblique.class
+SHA1-Digest: xJS3kKcq2mOCZnzDF4gv0kMm+Hk=
+
+Name: org/apache/commons/logging/Log.class
+SHA1-Digest: SAPJye9Mhs2xo5LAZ4XTZBVJUoI=
+
+Name: org/apache/fop/svg/AbstractFOPTranscoder.class
+SHA1-Digest: xET44IrEK2LmowbmL1gGeGRM1IY=
+
+Name: org/apache/fop/pdf/PDFGoTo.class
+SHA1-Digest: 2ci3isSjAJNENC0nzFqJJ48pMUs=
+
+Name: org/apache/avalon/framework/configuration/ConfigurationException
+ .class
+SHA1-Digest: 8AS+JCWyfq28tBJ6cDiLx9P89Xk=
+
+Name: org/apache/fop/svg/AbstractFOPTranscoder$FOPErrorHandler.class
+SHA1-Digest: kS7HbmSKDqgxpB1dGupAb6CLEoE=
+
+Name: org/apache/fop/render/ps/PSGenerator.class
+SHA1-Digest: u5ia3HoKNOkeSha2iWc7aMKR8i4=
+
+Name: about.html
+SHA1-Digest: uQvrOpff0jwJ9O51ijlBqJbci/M=
+
+Name: org/apache/commons/logging/impl/Jdk14Logger.class
+SHA1-Digest: H0E3fmzw0dKNhiEjJvUbsX3jE/k=
+
+Name: org/apache/fop/pdf/PDFPage.class
+SHA1-Digest: fqzgv+WA1mKYfvpYcZ84CUizE68=
+
+Name: org/apache/fop/pdf/StreamCache.class
+SHA1-Digest: Y1+vNnG8VuNbebJSDvurQAmgrWs=
+
+Name: org/apache/fop/fonts/CustomFont.class
+SHA1-Digest: 2L3qLlvaHhowTthC3bIXILsp5zw=
+
+Name: org/apache/fop/image/analyser/EPSReader.class
+SHA1-Digest: Af8tlkYBy59jK6c7IErqfObwuV4=
+
+Name: org/apache/fop/svg/SVGUtilities.class
+SHA1-Digest: q2bPd86Zwj7I5ZS6vymYVDV+iGY=
+
+Name: org/apache/commons/logging/LogConfigurationException.class
+SHA1-Digest: 4svZR+UUozW301eOaKCY74LyMtA=
+
+Name: org/apache/fop/render/ps/PSTranscoder.class
+SHA1-Digest: rrIWaQ89DHkuqxSCtLCaii+dBOk=
+
+Name: org/apache/avalon/framework/configuration/NamespacedSAXConfigura
+ tionHandler.class
+SHA1-Digest: msedD7DdZoMkIRzhAbnHWMsrgXw=
+
+Name: org/apache/fop/pdf/BitmapImage.class
+SHA1-Digest: ZKHGuizb8E9gTJG5koiSILpWqcU=
+
+Name: org/apache/fop/pdf/PDFFontType1.class
+SHA1-Digest: AZpyYcor5tKyCysEN6C9ozTO7xU=
+
+Name: org/apache/fop/pdf/PDFDocument.class
+SHA1-Digest: KCEv0w1zjAj9zS9iC13OofX8hVs=
+
+Name: org/apache/fop/render/ps/EPSTranscoder.class
+SHA1-Digest: r0ID1PQRIzCLAstsqL1jumeG/bg=
+
+Name: org/apache/avalon/framework/configuration/ConfigurationUtil.clas
+ s
+SHA1-Digest: gDtBLEbFLMSmA5SbR6MdJvppu9I=
+
+Name: org/apache/fop/pdf/PDFUri.class
+SHA1-Digest: aulin/8gg8lJlIL9alHj397MTZA=
+
+Name: org/apache/commons/io/output/CountingOutputStream.class
+SHA1-Digest: iRpctYI4g+9jm63/gbdW+LjnvWA=
+
+Name: org/apache/fop/pdf/PDFRoot.class
+SHA1-Digest: a506MNIj9RfGX6QVlsZm0kxe8jk=
+
+Name: org/apache/fop/image/FopImageConsumer.class
+SHA1-Digest: vG09FSx4KgDHcSMap3DiSb+Pgkc=
+
+Name: org/apache/fop/pdf/ASCIIHexFilter.class
+SHA1-Digest: yEoU3OHQ18V8ec1GS+JJr2kE4KA=
+
+Name: org/apache/fop/fonts/base14/Helvetica.class
+SHA1-Digest: Y6neT4vsrVhgWXp6oZFjwm5X1XY=
+
+Name: org/apache/commons/io/IOUtils.class
+SHA1-Digest: ImXaHczN6ztfhQpxIOeoJl8EHXY=
+
+Name: org/apache/avalon/framework/activity/Suspendable.class
+SHA1-Digest: iP9yC4Ku7MVYu9ZUfdaytTeB6e4=
+
+Name: org/apache/commons/logging/LogFactory$2.class
+SHA1-Digest: yZR6mQBYwLKtcQ6H4HMNvELHKeg=
+
+Name: org/apache/avalon/framework/configuration/DefaultConfigurationBu
+ ilder.class
+SHA1-Digest: sZOD7W4K1U6InRpYVqTkfvcTmXA=
+
+Name: org/apache/fop/fonts/truetype/TTFDirTabEntry.class
+SHA1-Digest: +BlkOu5NZBpYxBits6LaHBcpXXg=
+
+Name: org/apache/fop/pdf/PDFText.class
+SHA1-Digest: rwnhDyYT4P8uo10Q7l7graSZGQE=
+
+Name: org/apache/fop/image/analyser/JPEGReader.class
+SHA1-Digest: /Dzb9LalsbBleFtigB5usSaZoRE=
+
+Name: org/apache/fop/fonts/FontMetrics.class
+SHA1-Digest: 3IbkfVL9RzhRvima/zVPLFgJX24=
+
+Name: org/apache/fop/image/FopImage$ImageInfo.class
+SHA1-Digest: e5NmH4xgnfWifz1/0jB4CI802cc=
+
+Name: org/apache/fop/fo/FOTreeBuilder.class
+SHA1-Digest: +5YYobKbSNAx271e79cM+67CEII=
+
+Name: org/apache/fop/pdf/PDFPages.class
+SHA1-Digest: ksfcAaC8ORkNWoDl/0JwOzwW9Ak=
+
+Name: org/apache/commons/logging/impl/SimpleLog.class
+SHA1-Digest: kofMdFHhWEaTEv8dO/6c/bQ3gzU=
+
+Name: org/apache/fop/image/EPSImage$EPSData.class
+SHA1-Digest: W+Uc/WgTjsegb3WbWZhX23Tpm+I=
+
+Name: org/apache/fop/fonts/type1/PFMInputStream.class
+SHA1-Digest: h1iIxOipug3nYxT0sJh/jDFmpSY=
+
+Name: org/apache/avalon/framework/activity/Disposable.class
+SHA1-Digest: xjnimg66XVdIhcJbfPWhexyLCJg=
+
+Name: org/apache/fop/image/analyser/TIFFReader.class
+SHA1-Digest: T5zt9l/TCt53+9LBearQtxpMQSw=
+
+Name: org/apache/avalon/framework/configuration/DefaultConfiguration.c
+ lass
+SHA1-Digest: BWj2+XezgLC8VVXQPMQjerJnuEk=
+
+Name: org/apache/fop/util/ASCIIHexOutputStream.class
+SHA1-Digest: Uq8+IPOxdNmbYgOSDDIjqd0lnhA=
+
+Name: org/apache/fop/fonts/base14/Courier.class
+SHA1-Digest: YP5ZCKle89fOuw/+MbMiwgw9gKA=
+
+Name: org/apache/avalon/framework/configuration/Configurable.class
+SHA1-Digest: rO1Cwq2sEkGKn8yhlIJvqTALfQM=
+
+Name: org/apache/fop/fonts/Typeface.class
+SHA1-Digest: 2cKxbUcEnuaJ8uXo14ff/ix1WMk=
+
+Name: org/apache/fop/svg/PDFGraphics2D.class
+SHA1-Digest: z3mYXw6G2qkvbAMWQdsQyMeZWtE=
+
+Name: org/apache/fop/fonts/truetype/TTFSubSetFile.class
+SHA1-Digest: pV6uxOtMG6kFU7HyxVUU1vb5c1U=
+
+Name: org/apache/fop/render/ps/PSXMLHandler.class
+SHA1-Digest: FReiMr1X6ht1CjGF8YSNznlXCrM=
+
+Name: org/apache/fop/pdf/PDFEncoding.class
+SHA1-Digest: ZGkhRYWlhaV6WGDJfiTsjS2A5lI=
+
+Name: org/apache/fop/fonts/FontType.class
+SHA1-Digest: cEG6+iK544ENwVh3hx5iroO8A2M=
+
+Name: org/apache/fop/render/ps/PSGraphics2D$TempImage.class
+SHA1-Digest: 7lILGttlTD4K6D+HKxj9cCdYyXo=
+
+Name: about_files/avalon.LICENSE.txt
+SHA1-Digest: Nxt7zctu2Z0yZbbNQSFYZpe6phU=
+
+Name: org/apache/fop/image/analyser/XMLReader$Converter.class
+SHA1-Digest: a4YKATiXXSaUKMwI1xELIIFIH0k=
+
+Name: org/apache/fop/pdf/PDFEncryptionParams.class
+SHA1-Digest: Mw+sCDu5G8R8dOATtbg20fM9cg4=
+
+Name: org/apache/fop/pdf/PDFGoToRemote.class
+SHA1-Digest: I5bdhRSMa1IcUyl0lNSMKWZiAKI=
+
+Name: org/apache/fop/image/JpegImage.class
+SHA1-Digest: DPfFgIdX/wP+eMeaQPRLqp+87Js=
+
+Name: org/apache/fop/fonts/FontSetup.class
+SHA1-Digest: 7q9yabe5ddJhdzdyMwocnv8HB9o=
+
+Name: org/apache/fop/pdf/PDFCIDFontDescriptor.class
+SHA1-Digest: zixe7saHybis2WMHGaXOKMcPAb4=
+
+Name: org/apache/commons/logging/impl/LogFactoryImpl.class
+SHA1-Digest: dXapxXcMwyqcGzHbQNdR02sIk8Y=
+
+Name: org/apache/avalon/framework/container/ContainerUtil.class
+SHA1-Digest: vAVduXhMSePpLvM/Jg/IvHtCxII=
+
+Name: org/apache/fop/pdf/PDFFilter.class
+SHA1-Digest: W817XWIuE2LYsgU2h0KjydRPPkA=
+
+Name: org/apache/avalon/framework/configuration/Configuration.class
+SHA1-Digest: CeP2H3TcX2y06GPeniU9ROv9FG4=
+
+Name: org/apache/fop/pdf/PDFStream.class
+SHA1-Digest: JWsNSIzgQgjz9vtxmpbEY70l0DA=
+
+Name: org/apache/fop/fonts/Font.class
+SHA1-Digest: OmN6GgI0Q53OlMuIa5Zrp/AKoTw=
+
+Name: about_files/commons-logging.LICENSE.txt
+SHA1-Digest: pr+1qQ83+3sYcK8OB01FAd57WzM=
+
+Name: org/apache/fop/image/analyser/XMLReader.class
+SHA1-Digest: rtoTBe9W7EqTtLav3A+D/8Bv8b0=
+
+Name: org/apache/fop/svg/PDFDocumentGraphics2D.class
+SHA1-Digest: Sgl5lmLIbDLjc1ea+kWowEXumUA=
+
+Name: org/apache/fop/pdf/PDFImage.class
+SHA1-Digest: Nls8YibnFpbZrXGiZsSnUDVLBK4=
+
+Name: org/apache/fop/image/FopImage.class
+SHA1-Digest: esGrj5pkjmr1HF+4Y6w4WM18yMY=
+
+Name: org/apache/fop/fonts/base14/TimesBoldItalic.class
+SHA1-Digest: vX/PCfXPuzMw7XMjw4lT3Mk/gqo=
+
+Name: org/apache/fop/fonts/type1/PFBParser.class
+SHA1-Digest: XXs3xBTBq904nTGfSWqKc7eRnQA=
+
+Name: org/apache/fop/fonts/MutableFont.class
+SHA1-Digest: 8q2ThV6xzYl+HWbLDF3BzjEHZ38=
+
+Name: org/apache/fop/fonts/LazyFont.class
+SHA1-Digest: 7ZP6Gnk+U1X8VD0TnRSXZ+eJVkM=
+
+Name: org/apache/avalon/framework/Enum.class
+SHA1-Digest: HEHzKScYuk/N0rjAvAWbRYMNC3E=
+
+Name: org/apache/fop/pdf/PDFColor.class
+SHA1-Digest: pX/zc3OJo6DioOWvYFxhn9l2aUs=
+
+Name: org/apache/fop/fonts/base14/HelveticaBoldOblique.class
+SHA1-Digest: A9NZSkS/PPU8sKd4xcNOAXGifYQ=
+
+Name: org/apache/fop/pdf/PDFFontType3.class
+SHA1-Digest: 6EHmEkzaK6CVLfeCbmJKFlRtsqk=
+
+Name: org/apache/fop/fonts/type1/PFBData.class
+SHA1-Digest: DXrCvYUbViQXj42f7FnCJq1f+9Y=
+
+Name: org/apache/fop/pdf/PDFFontDescriptor.class
+SHA1-Digest: 6BegRTDJa0Q/0ow6YDs8/9odE8M=
+

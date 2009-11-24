@@ -647,3 +647,652 @@ SHA1-Digest: MVCqBq6wY29nO/gdO8Fzzl0Bd3A=
 Name: org/apache/batik/util/gui/resources/JErrorPane.properties
 SHA1-Digest: 9GhvirXbUktQSZnjxI5peumBqrM=
 
+Signature-Version: 1.0
+SHA1-Digest-Manifest: YEKMb4/rs///q6mVO5aWoqO9LY4=
+Created-By: 1.6.0 (IBM Corporation)
+SHA1-Digest-Manifest-Main-Attributes: yhCr59P7YYJ4TEE81RHlSBiMr5g=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_nl.gif
+SHA1-Digest: ceMGj7jIUAefO+JBzPqXOjMC0xM=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_be.gif
+SHA1-Digest: ALLsVu/64nwN71kbkk3oU/ivIOU=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ru.gif
+SHA1-Digest: sfKx1x28xUvCsYdyl5Dy5bvsb1U=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_fj.gif
+SHA1-Digest: KofSkNAjFRvvmSMXueMV0D+dkds=
+
+Name: about_files/LICENSE.dom-software.txt
+SHA1-Digest: +q8abzjueKJCB9CfxWlafgw032k=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_bi.gif
+SHA1-Digest: SsZgRptNTQRdJhkfeypykDOip/A=
+
+Name: org/apache/batik/util/gui/URIChooser.class
+SHA1-Digest: Omjb+w/cOe+SrfBxe6zST79verA=
+
+Name: org/apache/batik/util/gui/MemoryMonitor$Usage.class
+SHA1-Digest: Fr/qEoavFcvurIi96d42WtQ9K/A=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_fr.gif
+SHA1-Digest: SEH+apZuixbWnPSmotyIAFPaBs0=
+
+Name: org/apache/batik/util/gui/CSSMediaPanel$Dialog$CancelButtonActio
+ n.class
+SHA1-Digest: ihuj9MJ9SrJJ1RC+CIYk5MJTroc=
+
+Name: org/apache/batik/util/gui/DOMViewer$1.class
+SHA1-Digest: ir5OhGLyfrJyHupTnTESxcdtuxg=
+
+Name: org/apache/batik/util/gui/resources/CSSMediaPanel.properties
+SHA1-Digest: w03eaFeunl6S1kiKePGGc24mzEg=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_wo.gif
+SHA1-Digest: C8cw+v2U7ibdBFabHLeb1LWNK9I=
+
+Name: org/apache/batik/util/gui/LanguageDialog$Panel$DownLanguageButto
+ nAction.class
+SHA1-Digest: PHaov+KXGCTHFhHhsU+jUwRDq8Y=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_sr.gif
+SHA1-Digest: lGiH9ueC+3xdHVEvBUVOzJ1sA/s=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_kl.gif
+SHA1-Digest: wfn4BLkTb5Rv4rDkhQrlsBDTe0w=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_sv.gif
+SHA1-Digest: zECBYjBd83CaiS6iVgAma+rEG1Q=
+
+Name: org/apache/batik/util/gui/MemoryMonitor$Panel.class
+SHA1-Digest: GSCeQ6+PcvmY3HrVsSyVd/dkeiY=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_xh.gif
+SHA1-Digest: vmKKbv6nwzffdi91ppAKxnpS7i8=
+
+Name: org/apache/batik/util/gui/CSSMediaPanel$MediaListDataListener.cl
+ ass
+SHA1-Digest: kJXfYsrzqtrgEdcIz01bwxJjKps=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_tg.gif
+SHA1-Digest: fbs7Rewov0eYMM8H5cRsw8e1t+Q=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_la.gif
+SHA1-Digest: gag0g2z4aGCphTZ5op791QcvuD0=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_tk.gif
+SHA1-Digest: h2X1XEaNJTYx9LLRxWTHyfHNOW4=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_to.gif
+SHA1-Digest: FLgXK1nYZzPAdYGEv/uANLJ2hzo=
+
+Name: org/apache/batik/util/gui/MemoryMonitor$History.class
+SHA1-Digest: mGyWkC2NCLAte7xpAkXYVLc/h9Q=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ts.gif
+SHA1-Digest: 1i3fKJoC0KtfCLw3ScVCvLTdeEk=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_tw.gif
+SHA1-Digest: 5k7cUFQSsz4aNHmCsogJm2qIErw=
+
+Name: org/apache/batik/util/gui/MemoryMonitor$CloseButtonAction.class
+SHA1-Digest: Cid6zTGJq2H6pd5DjsWPyZpEb4g=
+
+Name: org/apache/batik/util/gui/resource/ButtonFactory.class
+SHA1-Digest: JyyS8IWwiIq+0wwMhJtUYYjFpVQ=
+
+Name: org/apache/batik/util/gui/LanguageDialog$Panel.class
+SHA1-Digest: e7sWmOY2TPK6mOQ81TI3mpTHMS0=
+
+Name: org/apache/batik/util/gui/LanguageDialog.class
+SHA1-Digest: J0g3vWBLCdufKiJvfdN/I/QLa+k=
+
+Name: org/apache/batik/util/gui/resources/text.gif
+SHA1-Digest: D2BfI+dd9nnh/ZCAmBh8Ro9C5KE=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_mn.gif
+SHA1-Digest: g6Ya/bxvzt4zcSRL+eiFm7JIG9c=
+
+Name: org/apache/batik/util/gui/LanguageDialog$Panel$IconAndTextCellRe
+ nderer.class
+SHA1-Digest: UTEdsU4+96GHyo2kic8nQDD3IeU=
+
+Name: org/apache/batik/util/gui/ExtendedGridBagConstraints.class
+SHA1-Digest: U9BU8HrRG65usGsFLiNpxZIrLE0=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_el.gif
+SHA1-Digest: 7gFna+yZNT8YK95AdGObqV7RIZc=
+
+Name: org/apache/batik/util/gui/resources/pi.gif
+SHA1-Digest: DAjwkEYMxYY85Hxlv51wY4MKSZw=
+
+Name: org/apache/batik/util/gui/MemoryMonitor.class
+SHA1-Digest: g69/4IHSspF8ZjHcBKovjl67tAo=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_et.gif
+SHA1-Digest: Ojyk9VArt1FZ4v9In/TSgTOS6Jk=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_as.gif
+SHA1-Digest: Y3n93HAQIhaug90+4aCQiufl25s=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_vi.gif
+SHA1-Digest: t+OsMhJ8jPLBOMkSii5hDra8ot8=
+
+Name: org/apache/batik/util/gui/DOMViewer$Panel$NodeAttributesModel.cl
+ ass
+SHA1-Digest: copFLX0U+tTsxEOJr4m0p/eBEjM=
+
+Name: org/apache/batik/util/gui/MemoryMonitor$CollectButtonAction.clas
+ s
+SHA1-Digest: L8llabb1X6wB++arDYwW4cADkuU=
+
+Name: org/apache/batik/util/gui/LanguageDialog$OKButtonAction.class
+SHA1-Digest: 1CM6MbeBeFtHjsJkSfAAxl0O2M8=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_fa.gif
+SHA1-Digest: ccda1xzD0Y4jyU3dyeLiD92ZRtw=
+
+Name: about_files/LICENSE-2.0.txt
+SHA1-Digest: WQPAMR6UasOuSXQqhMW2ZmVd4y8=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_no.gif
+SHA1-Digest: wsRBy34vSCHhLmqMeW1lCo2lVRc=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_fi.gif
+SHA1-Digest: UQOSequXqYTAC3ng1HYo+z7AJs0=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_pt_BR.gif
+SHA1-Digest: f8CRl1wJexLDfLp4hil8QFkmx2M=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_se.gif
+SHA1-Digest: dW7vs6ZOyZyYnmUUDFBU3UsGA7c=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_si.gif
+SHA1-Digest: 6B+6p6UC+86K5hKqwj3wJu1CP4w=
+
+Name: org/apache/batik/util/gui/LanguageDialog$Panel$AddLanguageButton
+ Action.class
+SHA1-Digest: aNsw832IkMYZ0Xlr+CYZLIKngnk=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_sm.gif
+SHA1-Digest: d2nEu0hgjYTj1qbDIhrwwnds1GY=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_sq.gif
+SHA1-Digest: DmvJyyLXzI+A7F6IHWEOQ28LPmo=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ca.gif
+SHA1-Digest: Co+OBtALbbIUgtc0EsScRG4t2Zw=
+
+Name: org/apache/batik/util/gui/resource/ActionMap.class
+SHA1-Digest: O7A+H8DaEKT2jKNPo5d8oc0RmJw=
+
+Name: org/apache/batik/util/gui/resource/JComponentModifier.class
+SHA1-Digest: nk3/jtBDKQVdK7XuiSxZ50P8u9g=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_kk.gif
+SHA1-Digest: VYhHWdi37PikrsmGKg5VA/mI9sY=
+
+Name: META-INF/eclipse.inf
+SHA1-Digest: SAqY+5ITAL0mkdYeijlSRhyIaZk=
+
+Name: org/apache/batik/util/gui/DOMViewer$CloseButtonAction.class
+SHA1-Digest: C6LNXh+jWvD2tYqZ2WpJ52zK2NI=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ko.gif
+SHA1-Digest: 5gAEIxFFz3tPkEiEA44Ftbhxdgs=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_gn.gif
+SHA1-Digest: WPXiFRFL1CxHk3DyA/IjsLUinIk=
+
+Name: org/apache/batik/util/gui/resource/JToolbarButton$MouseListener.
+ class
+SHA1-Digest: HdmngP0sGYRtaJ5E4AGhoIK8TLc=
+
+Name: org/apache/batik/util/gui/UserStyleDialog$CancelButtonAction.cla
+ ss
+SHA1-Digest: 4+MneH21omeSgV7LOEte0zxPEW4=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_cy.gif
+SHA1-Digest: uxqNAxkCWmisvmU0iZVDaluWHPM=
+
+Name: org/apache/batik/util/gui/CSSMediaPanel.class
+SHA1-Digest: hfac1coG7HnpM4LMUQVSQCLwkuA=
+
+Name: org/apache/batik/util/gui/DOMViewer$NodeInfo.class
+SHA1-Digest: OymJJInj7ZcT4ZaXJticg6UjWMU=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_tn.gif
+SHA1-Digest: KPRnvQUV+Qtw9Xxn0deZ2bb/fG4=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_tr.gif
+SHA1-Digest: q8u6BiIyHgaOjIg5O+R+ITW28Og=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_lt.gif
+SHA1-Digest: /YoSTbN5CqWWcNXcZTasJzAkH4s=
+
+Name: org/apache/batik/util/gui/MemoryMonitor$MemoryChangeListener.cla
+ ss
+SHA1-Digest: olIcy1onEa4TY1D04Bf9jlyTAJ8=
+
+Name: plugin.properties
+SHA1-Digest: ynN+1yeDIzOw5u4aHks/gBsXclA=
+
+Name: org/apache/batik/util/gui/CSSMediaPanel$AddMediumDialog.class
+SHA1-Digest: 51rVQwu49roGiZMv+yM2UuPbVns=
+
+Name: about_files/LICENSE.sax.txt
+SHA1-Digest: 1sJ5H3rPLXIxdoDsDZ7vKlkTzkw=
+
+Name: org/apache/batik/util/gui/CSSMediaPanel$Dialog$OKButtonAction.cl
+ ass
+SHA1-Digest: XRQIHuXbbq42Tc2FOWVRrOnit+E=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_uk.gif
+SHA1-Digest: JxNM+irwT3I2ZFv9G3qb4lkIFk0=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_dz.gif
+SHA1-Digest: eAAxqM5PA6M26aLH1PZpd1wW7Gk=
+
+Name: org/apache/batik/util/gui/resource/ResourceManager.class
+SHA1-Digest: gUprjs/HQoxOMNHfkbS0lLHZAfQ=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_mi.gif
+SHA1-Digest: /OhrALwywM+kPYCrVxHOGgOjXsg=
+
+Name: about_files/NOTICE
+SHA1-Digest: WZ6T40Fu3zPOKXEBn1eZXrrr/4I=
+
+Name: org/apache/batik/util/gui/JErrorPane.class
+SHA1-Digest: m62icItbJ/ge/NHoTHaEdvToeCA=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ab.gif
+SHA1-Digest: ZLCHtUTuaJu6b3GPvXs2dcjRDlk=
+
+Name: org/apache/batik/util/gui/CSSMediaPanel$Dialog.class
+SHA1-Digest: LPAH7nYyJykZXyq4YFK1x5tcPms=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_af.gif
+SHA1-Digest: tg68SExaRkIIJqKrLRANQSjIXMU=
+
+Name: org/apache/batik/util/gui/resources/blank.gif
+SHA1-Digest: K7/m+BaPd/BW5a+3CG8Dcm69mWY=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_eo.gif
+SHA1-Digest: WYzuQcdJIdHgC+qV9jpxxCuPExY=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_it.gif
+SHA1-Digest: gNsT70y+McetSfxvO3gnusI1zDw=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_my.gif
+SHA1-Digest: ibIzA04Hs63qRgOQGbVrHAePhpQ=
+
+Name: org/apache/batik/util/gui/LanguageDialog$Panel$UserListSelection
+ Listener.class
+SHA1-Digest: EI3rwgf/SFDl4k1OR7aYH/5fbGc=
+
+Name: org/apache/batik/util/gui/URIChooser$OKButtonAction.class
+SHA1-Digest: PjzvX0M0nqtPkedrFkXa9epgaP0=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_es.gif
+SHA1-Digest: oXRU3vXoVZmBysgzNnmR6XkFU3M=
+
+Name: org/apache/batik/util/gui/DOMViewer$Panel$NodeCSSValuesModel.cla
+ ss
+SHA1-Digest: LU26m+lpc8osiE75TK/bGTyFgOk=
+
+Name: org/apache/batik/util/gui/LocationBar.class
+SHA1-Digest: MQC83YyHuRY5tjzMZLapRiICoAA=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ar.gif
+SHA1-Digest: XKFE3bvvH+z03rkxSRuSlIIqvKI=
+
+Name: org/apache/batik/util/gui/UserStyleDialog$Panel$FileCheckBoxChan
+ geListener.class
+SHA1-Digest: sIat3RpQFf6fkzs6REnGTp6wbN4=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ja.gif
+SHA1-Digest: Ac+pel8IuopnaLmdt/ZUm3cibNE=
+
+Name: org/apache/batik/util/gui/URIChooser$DocumentAdapter.class
+SHA1-Digest: 6EculkpRRbq4rC+FWShimMPjVV4=
+
+Name: org/apache/batik/util/gui/CSSMediaPanel$MediaListSelectionListen
+ er.class
+SHA1-Digest: UtpQ+9PqP1M8TSZ8wPjLWNhPmmc=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_blank.gif
+SHA1-Digest: 1sKnwvkoYWQFl7druNIM7J9ZXx8=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_az.gif
+SHA1-Digest: 3QCZln/7Xs+XcqlvNC8ua3BK/0o=
+
+Name: org/apache/batik/util/gui/resources/DOMViewerMessages.properties
+SHA1-Digest: U5wd8WB8NQm+yWILoSO7zPzrR/U=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_zu.gif
+SHA1-Digest: vfsAkcIrJXxXv77YjAWZ1WkjzrY=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ro.gif
+SHA1-Digest: Qgcl7WHyldz+AaSB9JemH1qjAjI=
+
+Name: org/apache/batik/util/gui/resource/ResourceFormatException.class
+SHA1-Digest: SxIbdeMj+IMSXp/cGmUq6s1+qnE=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_bg.gif
+SHA1-Digest: XLxqwChZTgHhmj4sT6GG6fE8cRA=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_rw.gif
+SHA1-Digest: Ud6Kh9pvBWcxDFp7bWI9rA6VXbU=
+
+Name: org/apache/batik/util/gui/DOMViewer$Panel.class
+SHA1-Digest: FSL+oXoT76XJhZbeozI9vzOkYNM=
+
+Name: org/apache/batik/util/gui/resource/JToolbarSeparator.class
+SHA1-Digest: mvAXQtTvtenYgHvAMe5j1QO3Oao=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_bo.gif
+SHA1-Digest: 4z4lg5/6k4K+5aNY8gPnkLhwQJY=
+
+Name: org/apache/batik/util/gui/DOMViewer$Panel$NodeRenderer.class
+SHA1-Digest: d76Ubj2MkIOzEkl/JAva4LAZXBM=
+
+Name: org/apache/batik/util/gui/LanguageDialog$Panel$UpLanguageButtonA
+ ction.class
+SHA1-Digest: W8FnkpKPN3x2M/pNPAgH3zQ2Ugo=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_us_eu.gif
+SHA1-Digest: Go/qkO1rONv2tAYpbDXIH5m8NRc=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_sl.gif
+SHA1-Digest: uZNWCiLdqUdj2TdIT0LHdiuKCeg=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ga.gif
+SHA1-Digest: d+woDdOhBmGfdDKATjC3qCdLFsQ=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_st.gif
+SHA1-Digest: z+p5cj6noPMT5RncBU5idNHrVzA=
+
+Name: org/apache/batik/util/gui/CSSMediaPanel$AddMediumDialog$OKButton
+ Action.class
+SHA1-Digest: hNMtP1WpUEne/MfK5jAuHOxkSaY=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ch.gif
+SHA1-Digest: 9APKPTEuFRdt27BZoyvCF75VPV0=
+
+Name: org/apache/batik/util/gui/CSSMediaPanel$ClearButtonAction.class
+SHA1-Digest: JyUZsTfF0AowS2vbhwaCMUcUyz8=
+
+Name: org/apache/batik/util/gui/URIChooser$CancelButtonAction.class
+SHA1-Digest: olwrVaRsG1guMkO7GSE6rm3MUro=
+
+Name: org/apache/batik/util/gui/resources/MemoryMonitorMessages.proper
+ ties
+SHA1-Digest: lOTGDGQMEYLnARoLShYj78A+4nQ=
+
+Name: org/apache/batik/util/gui/JErrorPane$OKButtonAction.class
+SHA1-Digest: YiPLvyZAvL8Z26VbpBYJmT/OYRQ=
+
+Name: org/apache/batik/util/gui/LanguageDialog$CancelButtonAction.clas
+ s
+SHA1-Digest: LrbRsaAcfTQ+DZz5sVLAhDBTke4=
+
+Name: org/apache/batik/util/gui/URIChooser$BrowseButtonAction.class
+SHA1-Digest: 1g2B40rT7nhEr6E8HZSPSgbU6L4=
+
+Name: org/apache/batik/util/gui/LanguageDialog$Panel$RemoveLanguageBut
+ tonAction.class
+SHA1-Digest: /UgrY8189xFLd+AAj+YUBOLEf2U=
+
+Name: org/apache/batik/util/gui/resources/LocationBar.properties
+SHA1-Digest: +42NX4EJf0W/SpLLS8jJyax68xE=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_pl.gif
+SHA1-Digest: qU8hDpMOcrrc6QCI1oQwXdYoXkQ=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_da.gif
+SHA1-Digest: 34SCSDN9dhGc2BTDAqKtPzhmQ+4=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_de.gif
+SHA1-Digest: 0v0OcxLCuLShRhZp9QbaV485ct4=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_lo.gif
+SHA1-Digest: AVQ5Di5CeZJsIaKrxEhgTtFAlvc=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_pt.gif
+SHA1-Digest: yH639hEuaR8IH/rkiinFFkJCW08=
+
+Name: org/apache/batik/util/gui/CSSMediaPanel$RemoveButtonAction.class
+SHA1-Digest: 3B5p6EWlssdW0J02BaZgeX9EUnY=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_hr.gif
+SHA1-Digest: 5GmxpL7Bx4RsUe2jdrhWgB25eIk=
+
+Name: org/apache/batik/util/gui/resources/UserStyleDialog.properties
+SHA1-Digest: sK7AGVnGO8X4RiWnnNsy0vPWfMI=
+
+Name: org/apache/batik/util/gui/MemoryMonitor$RepaintThread.class
+SHA1-Digest: KRM53n6C0SsHJZfy4LutNJkOxqs=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_aa.gif
+SHA1-Digest: /GV2Li7qb+Ti3l8dlGrxqiT6S0s=
+
+Name: org/apache/batik/util/gui/CSSMediaPanel$AddMediumDialog$CancelBu
+ ttonAction.class
+SHA1-Digest: kRKGNkGDwlHdK1OKcgJXidTkecI=
+
+Name: org/apache/batik/util/gui/resource/ToolBarFactory.class
+SHA1-Digest: UWeLbuNk9lx0pT98P13GWzVZsqs=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_qu.gif
+SHA1-Digest: iipfZkd1IIEm7uqHDbt/gC/CgZI=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_uz.gif
+SHA1-Digest: wx0tE0C6YPRum/C95Hfpt+3ZJw8=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_C.gif
+SHA1-Digest: 7ENHHeuzOeMid1y+7e1AcTOeOAo=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_mt.gif
+SHA1-Digest: cpU14ijZPNZ7nFcdG3cNSuI/ZaM=
+
+Name: about.html
+SHA1-Digest: 1VFiOyUC9oSjaTa2ygnp2kkkHvY=
+
+Name: org/apache/batik/util/gui/resource/MissingListenerException.clas
+ s
+SHA1-Digest: rnmNEs01E8cdB7rmXviZcyjYXrI=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_en.gif
+SHA1-Digest: rxPMZkK9O/GqO/uYYHdAT29xweg=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_is.gif
+SHA1-Digest: nEKn6SSPWnvKNwAXSe3BCnNOcJY=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_zh.gif
+SHA1-Digest: WYnTfG/pCzAp/MajUgSzkSDcaRc=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_na.gif
+SHA1-Digest: HUmspz9Ia4RjoucZ7Tmpg4QekR8=
+
+Name: org/apache/batik/util/gui/resource/JToolbarButton.class
+SHA1-Digest: RsmKKpomdfYYC3VrG3vRC3dIwBM=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ne.gif
+SHA1-Digest: CeRYj/Ix/V58Y3cjrdxjq+6595E=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ay.gif
+SHA1-Digest: UV5lNDmPk/RL3PSgBiDL41BlIpQ=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_vo.gif
+SHA1-Digest: m4oPXjYqEPDEut/rN1r9csdic40=
+
+Name: org/apache/batik/util/gui/CSSMediaPanel$AddButtonAction.class
+SHA1-Digest: Q//JyPk9Ht5dcSnU/474ItGCejo=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_rn.gif
+SHA1-Digest: 2b7PMf2sxtWkkgFQM5KGdVwA/gs=
+
+Name: org/apache/batik/util/gui/LanguageDialog$Panel$ClearLanguageButt
+ onAction.class
+SHA1-Digest: 0JlYG9VZOxjGOa6wtFvpx3mjpOo=
+
+Name: org/apache/batik/util/gui/resources/URIChooserMessages.propertie
+ s
+SHA1-Digest: sj0rT+wfkk+AGw3q4h+t7wsg9HY=
+
+Name: org/apache/batik/util/gui/DOMViewer.class
+SHA1-Digest: JbVajBkHxiXtifoUR1wyWTEDk7s=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_fo.gif
+SHA1-Digest: +GhNlMsOjNApSpmdPz8UVHNw7ks=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_bn.gif
+SHA1-Digest: zEOnLYShleU/3j6A/zRDbRVo1eg=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_br.gif
+SHA1-Digest: mIZrS+Z2QFRt+rYO8dlhdS4///k=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_en_UK.gif
+SHA1-Digest: qQ7HW+b67amVXVqqdN0d5WA8U7c=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ka.gif
+SHA1-Digest: yTpItl8TuYaGpE3pqo4ocZHB3Oo=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_sk.gif
+SHA1-Digest: oeDsw1u02sYgMTvhrC3aZocXx/o=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_so.gif
+SHA1-Digest: kjTnn3gSkKdObi8AuJRR0OnVbQg=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_gd.gif
+SHA1-Digest: 5GzXZXH59nNifxzk9MIs2h2aqj0=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ss.gif
+SHA1-Digest: J8ytn5e+bVeiMRS5geCHbH7ZlqY=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_km.gif
+SHA1-Digest: z4TH2FwkRnkVLMqnrt78pGHk80E=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_or.gif
+SHA1-Digest: MKMsZDaawstJs6jzrIGB+SN4nj0=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_sw.gif
+SHA1-Digest: IT70IP9IVS/uyxnrseW9YxPO2BY=
+
+Name: org/apache/batik/util/gui/JErrorPane$ShowDetailButtonAction.clas
+ s
+SHA1-Digest: VmpoU9J9b2LKqLL9fOCtLExnRSc=
+
+Name: org/apache/batik/util/gui/resources/web.gif
+SHA1-Digest: zdPkR9laKubwodO8RpvrYIomZXw=
+
+Name: org/apache/batik/util/gui/DOMViewer$Panel$DOMTreeSelectionListen
+ er.class
+SHA1-Digest: HqkuKla+sHB18s4u9CPyxlaAhLw=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ku.gif
+SHA1-Digest: bGAXy3y1EIXVfRczNfu6aBqSAeg=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_co.gif
+SHA1-Digest: SXwOiDC7FlmkeVAGA4Yz1AQHJuI=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ky.gif
+SHA1-Digest: Q00fL8GqFoe3Os2h7RFWJycRFoA=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_cs.gif
+SHA1-Digest: BHgyDVyCXGlH2//OoCpk9H5NQ8g=
+
+Name: org/apache/batik/util/gui/resources/comment.gif
+SHA1-Digest: 2/4FVnJVT/GtfKW/1O5TeHaWxbs=
+
+Name: about_files/README
+SHA1-Digest: eqzl2DMeTAYplW/IJ958qY4L4og=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_th.gif
+SHA1-Digest: mN1bPnFpuAbOifHuc90hjSBeRMk=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_tl.gif
+SHA1-Digest: EtS6nsUBj5oJ10O+TsEfWrePLQc=
+
+Name: org/apache/batik/util/gui/MemoryMonitor$1.class
+SHA1-Digest: x/YXlw+n/mc4iT5Dv8jbnGSUUwk=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ha.gif
+SHA1-Digest: rilwuRo6j741a7zUNwmiWMtNht8=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_he.gif
+SHA1-Digest: Hpyvn0ojUxrCbp+Pm0Py3UNpTW0=
+
+Name: org/apache/batik/util/gui/LanguageDialog$Panel$LanguageListSelec
+ tionListener.class
+SHA1-Digest: Z02ujqMrx6IfPJ34lRpiif0Oc4M=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ln.gif
+SHA1-Digest: bIeqKQhivgBAIslBr3gLs1rhs1A=
+
+Name: org/apache/batik/util/gui/resource/MenuFactory.class
+SHA1-Digest: LQpMHx0e7SkIxoL5HhDb3yh+D9Q=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ps.gif
+SHA1-Digest: PQJNCGjyN41KWYyhIYVawHiTR4g=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_lv.gif
+SHA1-Digest: vDbd67BJVhidaiDU9+scEzdXhUk=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_hu.gif
+SHA1-Digest: oLaJkyme3B8uRGvrEqvCQTjc6FI=
+
+Name: org/apache/batik/util/gui/resources/element.gif
+SHA1-Digest: 7lDG+miin0ayQ+BrTnkU4grRv1M=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_hy.gif
+SHA1-Digest: gw/PioPxmK2Rf4bpjRoIv0mIf0k=
+
+Name: org/apache/batik/util/gui/resources/LanguageDialogMessages.prope
+ rties
+SHA1-Digest: AEE+M8xEdPgZ6ahvzuKBJttu5l0=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_fr_CA.gif
+SHA1-Digest: GXXXUReJvyPTTZlqlKzDH1AdrRc=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_mg.gif
+SHA1-Digest: 2ObqsD17gJuaC1MC6nxOfEgGbzQ=
+
+Name: org/apache/batik/util/gui/UserStyleDialog$Panel$FileBrowseButton
+ Action.class
+SHA1-Digest: gaUiJA8E3FeAqZ6UtCHj8MzJu9g=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_mk.gif
+SHA1-Digest: MAnE+gVlBD/xRXNqQEIa2PUkWhU=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ij.gif
+SHA1-Digest: nNNYnd0uTw81GPRxFmv9X6uCcMk=
+
+Name: org/apache/batik/util/gui/UserStyleDialog$Panel.class
+SHA1-Digest: 8ryUgucYuCplVuDZ8/fefh/jidI=
+
+Name: org/apache/batik/util/gui/UserStyleDialog.class
+SHA1-Digest: juvnVF2OTMHSL1TZHI1BR9UaAas=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_mo.gif
+SHA1-Digest: 9gGgBDb4lSNsgazSBPjBh9/BA8Y=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_in.gif
+SHA1-Digest: d6VD9QrpvySTg7tHdJt5/XzWGFA=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_ms.gif
+SHA1-Digest: 48/Ln6VTyeiFrj5Z2OlKfR1fJmc=
+
+Name: org/apache/batik/util/gui/resources/flags/flag_eu.gif
+SHA1-Digest: Cw/aOLJTObfkEDI6Z2lZydpqDs0=
+
+Name: org/apache/batik/util/gui/UserStyleDialog$OKButtonAction.class
+SHA1-Digest: Ad+vr6hAMU9fSRftJXuyS82ZYeQ=
+
+Name: org/apache/batik/util/gui/URIChooser$ClearButtonAction.class
+SHA1-Digest: MVCqBq6wY29nO/gdO8Fzzl0Bd3A=
+
+Name: org/apache/batik/util/gui/resources/JErrorPane.properties
+SHA1-Digest: 9GhvirXbUktQSZnjxI5peumBqrM=
+
