@@ -1,0 +1,173 @@
+Manifest-Version: 1.0
+Bundle-Vendor: %providerName
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: J2SE-1.3
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.apache.batik.parser
+Require-Bundle: org.apache.batik.ext.awt;version="[1.6.0,1.7.0)",org.a
+ pache.batik.util;version="[1.6.0,1.7.0)",org.apache.batik.xml;version
+ ="[1.6.0,1.7.0)",org.w3c.dom.svg;version="[1.1.0,1.3.0)"
+Export-Package: org.apache.batik.parser;version="1.6.0"
+Bundle-Version: 1.6.0.v200805290154
+Bundle-ClassPath: ../../../../../base/lib/batik-all-1.7.jar
+Bundle-ManifestVersion: 2
+
+Name: about_files/LICENSE-2.0.txt
+SHA1-Digest: NV/tRSeBE64tS1EXrewu6DAklWI=
+
+Name: org/apache/batik/parser/AngleHandler.class
+SHA1-Digest: 0Uy0p5LO8LMMPzqRx5K6AUiEFd4=
+
+Name: about_files/LICENSE.dom-software.txt
+SHA1-Digest: 6uOOyZFUb1nBN64jYQgo8do6MEg=
+
+Name: org/apache/batik/parser/NumberListHandler.class
+SHA1-Digest: 10SDZw2qW1FUj2bTqDL3bFBGhi8=
+
+Name: org/apache/batik/parser/AWTTransformProducer.class
+SHA1-Digest: L3Cl0YFZFK0r3wWs/gVtYnFWVOw=
+
+Name: org/apache/batik/parser/LengthHandler.class
+SHA1-Digest: GOsHk9frIujLS+3lT6ZLJ6WAfsw=
+
+Name: org/apache/batik/parser/TransformListHandler.class
+SHA1-Digest: YyYMx6/xY5Moy5R2CtK1mbhGm2U=
+
+Name: org/apache/batik/parser/UnitProcessor$UnitResolver.class
+SHA1-Digest: bHTTLCCYy5F841IeiD82Yq52pOg=
+
+Name: org/apache/batik/parser/LengthListHandler.class
+SHA1-Digest: UQS46R80iNOckl3WMjfxGG8t3Fs=
+
+Name: org/apache/batik/parser/NumberParser.class
+SHA1-Digest: pcUEC6oalVwSR+IxQKGD+oayGMQ=
+
+Name: org/apache/batik/parser/ClockParser.class
+SHA1-Digest: AJdWUVSfVLtNJx/UddWj5QvS9+g=
+
+Name: org/apache/batik/parser/AWTPolylineProducer.class
+SHA1-Digest: rlz7fD9hLtZHCKgfBU/ZIq6mv68=
+
+Name: org/apache/batik/parser/ShapeProducer.class
+SHA1-Digest: KQW7TjMFv6/W3+B/++O1ayh8Ytg=
+
+Name: org/apache/batik/parser/UnitProcessor$Context.class
+SHA1-Digest: 07fxWTAOuy/01B+W9gz2bTybfD8=
+
+Name: META-INF/eclipse.inf
+SHA1-Digest: KyT9FF7C7t86NoBoa2kZT3ZJBfw=
+
+Name: org/apache/batik/parser/ClockHandler.class
+SHA1-Digest: 84orKjm//p1cE1EOYIcFcfEUu3c=
+
+Name: org/apache/batik/parser/ParseException.class
+SHA1-Digest: aw7LqnRP7ucPl6ktx9bxfn6BK9U=
+
+Name: org/apache/batik/parser/resources/Messages.properties
+SHA1-Digest: HHFpxZGtjKPEJu3r2S3t4rUIRfU=
+
+Name: org/apache/batik/parser/Parser.class
+SHA1-Digest: 20y03JhiFS44VsZXeZ7evF+OKeQ=
+
+Name: org/apache/batik/parser/PathHandler.class
+SHA1-Digest: iKIg6/rO7DV/Dpdc3YHR0+yxYlk=
+
+Name: org/apache/batik/parser/PointsParser.class
+SHA1-Digest: qJd9CnOEdzxFmb7pRju+UP1ikzE=
+
+Name: org/apache/batik/parser/PreserveAspectRatioParser.class
+SHA1-Digest: tH9Ox8p0d2Rz9NwhGxaJ4JyTFrg=
+
+Name: org/apache/batik/parser/PointsHandler.class
+SHA1-Digest: gnSBauLbNpCrfcROQAiJFKRDnR4=
+
+Name: org/apache/batik/parser/PreserveAspectRatioHandler.class
+SHA1-Digest: boBG/rc+exr4WRrgIj3lZqe4Pzk=
+
+Name: org/apache/batik/parser/DefaultPathHandler.class
+SHA1-Digest: /7/d7T9ypt53fNK5Y9N94QD/aR4=
+
+Name: org/apache/batik/parser/LengthParser.class
+SHA1-Digest: l8Tdfrb8gBU2Ye0LpklrMwtOgNg=
+
+Name: org/apache/batik/parser/TransformListParser.class
+SHA1-Digest: v6O03ZWS3EW0JKwyGQ9Erw2FXE4=
+
+Name: about_files/README
+SHA1-Digest: 6ucCCJgwbMHFjoa+zJeAytt+bwA=
+
+Name: org/apache/batik/parser/FragmentIdentifierHandler.class
+SHA1-Digest: 1jbPEi3dPsg5JQ20BdUOWBZB+HY=
+
+Name: org/apache/batik/parser/AWTPathProducer.class
+SHA1-Digest: aOuWduU8BcN+y2KUrwjFdP2uBTs=
+
+Name: org/apache/batik/parser/style/resources/Messages.properties
+SHA1-Digest: YHKERWHzsxPXpc6ixOfCgYMtM6k=
+
+Name: org/apache/batik/parser/DefaultErrorHandler.class
+SHA1-Digest: xVDxuHnPpBm01lW3ngvXi+cEkN0=
+
+Name: org/apache/batik/parser/DefaultPreserveAspectRatioHandler.class
+SHA1-Digest: /jj7sGSn/y57LXSR1YWiL6VgfAk=
+
+Name: plugin.properties
+SHA1-Digest: i36iXyLmX5uOJI65Tnr8gr0RX9I=
+
+Name: org/apache/batik/parser/DefaultNumberListHandler.class
+SHA1-Digest: gz0uskIQCYb2MiIhiq5N/uzgfFc=
+
+Name: org/apache/batik/parser/DefaultLengthHandler.class
+SHA1-Digest: 7Ail+JjYtgyeHGUl3PE1uzTf/hU=
+
+Name: org/apache/batik/parser/DefaultLengthListHandler.class
+SHA1-Digest: 6Yb5+w3AFlB9QYoROnN09TR8Up4=
+
+Name: org/apache/batik/parser/NumberListParser.class
+SHA1-Digest: 2+YD2TAL8co6/je82sf5cBNuC9o=
+
+Name: about_files/LICENSE.sax.txt
+SHA1-Digest: 4sKd1zxmR+SqVcG24HEXttPm19s=
+
+Name: org/apache/batik/parser/AngleParser.class
+SHA1-Digest: BfJyDswVaL2s2KLjhVWJ9E88CzE=
+
+Name: org/apache/batik/parser/AWTPolygonProducer.class
+SHA1-Digest: vBLyO5q+chMjwvv8fq473YfALUU=
+
+Name: org/apache/batik/parser/DefaultAngleHandler.class
+SHA1-Digest: OOFMkv2GpdT3EBgUXftLUd3WjFU=
+
+Name: about_files/NOTICE
+SHA1-Digest: 7sj4n7c6wtvZjq7hnNMC2mGUdTE=
+
+Name: org/apache/batik/parser/FragmentIdentifierParser.class
+SHA1-Digest: OGXU3FFk3nEKwGa2kRAY0LEBCMk=
+
+Name: org/apache/batik/parser/DefaultTransformListHandler.class
+SHA1-Digest: a6WUEQTFuAxpAfmbGV0SZl4vMwc=
+
+Name: about.html
+SHA1-Digest: Gd1w1EA1bPQk+Tpcje+L+O9Wr10=
+
+Name: org/apache/batik/parser/AbstractParser.class
+SHA1-Digest: vj18Kjsn1ZudXr1CopmYZfh1KPs=
+
+Name: org/apache/batik/parser/ErrorHandler.class
+SHA1-Digest: sj2GWxaKQJMWwXG7yEnLYSi2zRA=
+
+Name: org/apache/batik/parser/LengthListParser.class
+SHA1-Digest: Bxa1DJx8O1+J3SfLvp8wckYoBFU=
+
+Name: org/apache/batik/parser/PathParser.class
+SHA1-Digest: MpwzDod4uYSjg9+mHxXC91E6LXA=
+
+Name: org/apache/batik/parser/DefaultPointsHandler.class
+SHA1-Digest: VjUfHvUZ4uN2bxtjcltaCWmTBpM=
+
+Name: org/apache/batik/parser/UnitProcessor.class
+SHA1-Digest: KMDZYkdMvihsXe5jYyE1TPbYhAc=
+
+Name: org/apache/batik/parser/DefaultFragmentIdentifierHandler.class
+SHA1-Digest: 0CUJj3RJNMH8r/PZXvjXLXuPujQ=
+

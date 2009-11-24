@@ -1,0 +1,1348 @@
+Signature-Version: 1.0
+SHA1-Digest-Manifest: 68BcIjPqbLxy9WXcxuk8E8GbyWU=
+Created-By: 1.6.0 (IBM Corporation)
+SHA1-Digest-Manifest-Main-Attributes: OHPfF54rRRVbvRrg4rkZ5MmFK40=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeFloodElementFact
+ ory.class
+SHA1-Digest: Rjgb5Jcy9aHhwzJgpuzsal1JbrM=
+
+Name: org/apache/batik/dom/svg/SVGOMSVGElement$2.class
+SHA1-Digest: TjbCQBD1vbVvjRE5M/ZTCiaNDTI=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$UseElementFactory.
+ class
+SHA1-Digest: eBhvcKG4LO+cwrEB2CejqAN6Yjg=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$11.class
+SHA1-Digest: 4h3MkVkmToLne8Iive+M2iKCg8o=
+
+Name: org/apache/batik/dom/svg/SVGOMRectElement$2.class
+SHA1-Digest: de6mXprVlAcfRqDEBrBoo7yJK+w=
+
+Name: org/apache/batik/dom/svg/SVGOMLinearGradientElement.class
+SHA1-Digest: tbNndR2C5H+2FH5tHXtNtqRkYa4=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$VkernElementFactor
+ y.class
+SHA1-Digest: BKUBOqO4H7zB8kSld8LpU2GMJB8=
+
+Name: org/apache/batik/dom/svg/AbstractSVGTransformList.class
+SHA1-Digest: li6HdA/9eT/3/jAdNCrIVof+1q8=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$SwitchElementFacto
+ ry.class
+SHA1-Digest: orN+iTwaL/kE5/S+oPMf90ZQbOc=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$AltGlyphItemElemen
+ tFactory.class
+SHA1-Digest: Do7HUNPxQnzvWC+iOLKJFuao9iw=
+
+Name: org/apache/batik/dom/svg12/SVG12DOMImplementation$SubImageRefEle
+ mentFactory.class
+SHA1-Digest: +NndQpGxyr6VniZcisK5vb1eQ+8=
+
+Name: org/apache/batik/dom/svg/resources/svg11-basic-attribs.mod
+SHA1-Digest: RK90pbxGVjeLqE2XnflmEI8KZhg=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$ScriptElementFacto
+ ry.class
+SHA1-Digest: gTFxMXG3FBOPVsLeprLhn0b6L0Y=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimatedEnumeration.class
+SHA1-Digest: cRvyn84Aovk307ZjkE10t9FscSE=
+
+Name: org/apache/batik/dom/svg/SVGStylableElement.class
+SHA1-Digest: myRiDGOw4Uv3V/Eta4btH7+BEzI=
+
+Name: org/apache/batik/dom/svg/resources/svg-graphevents-attrib.mod
+SHA1-Digest: 7Li7f5wAF3Fn0qZGfn0iYflqxbY=
+
+Name: org/apache/batik/dom/svg/AbstractSVGList.class
+SHA1-Digest: ygP+iwvKNhVqVlN7ojLCn9w7h04=
+
+Name: org/apache/batik/dom/svg/resources/svg-graphics-attrib.mod
+SHA1-Digest: gcvMkodWFKYRgITa9wMhHCTCutk=
+
+Name: org/apache/batik/dom/svg12/SVG12DOMImplementation$MultiImageElem
+ entFactory.class
+SHA1-Digest: rOHbiH50XYTTkiZcytaTkSanb4Q=
+
+Name: org/apache/batik/dom/svg/SVGOMFEDiffuseLightingElement.class
+SHA1-Digest: mbw1UmQ//Jus0cCrphA+Yl9bS2g=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$16.class
+SHA1-Digest: Pz0mbNahqAmEWMBhsxtFyQb4hXE=
+
+Name: org/apache/batik/dom/svg/SVGOMFEComponentTransferElement.class
+SHA1-Digest: 4nJv1EyParY+Cny/dYQLBemJW9o=
+
+Name: org/apache/batik/dom/svg/SAXSVGDocumentFactory.class
+SHA1-Digest: AZEBiVIqa/oMcr1tW1H7JuOVm34=
+
+Name: org/apache/batik/dom/svg/SVGStyleSheetProcessingInstruction.clas
+ s
+SHA1-Digest: 8OM7KXvz2oRnq5pDMBpJ4e2QWmk=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeDistantLightElem
+ entFactory.class
+SHA1-Digest: hxBK8k/HLsvri6l/m9oi7b/xrMk=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$LineElementFactory
+ .class
+SHA1-Digest: 5NPBz5QW8VPmQwn4RAT8uSAIfNo=
+
+Name: org/apache/batik/dom/svg/SVGDocumentFactory.class
+SHA1-Digest: A3fMRb8cHc3eQFowVUw5CeOSmBQ=
+
+Name: org/apache/batik/dom/svg/SVGOMTextElement.class
+SHA1-Digest: 1vuTnKW1ZqlJeIIOOob0p6lT3qo=
+
+Name: org/apache/batik/dom/svg/SVGURIReferenceGraphicsElement.class
+SHA1-Digest: YMS/Q4Or79eDITizdkrnJcYP4zI=
+
+Name: org/apache/batik/dom/svg/SVGOMFontFaceUriElement.class
+SHA1-Digest: F8kmzaUjPyPlP4AFAn7fsMczc4U=
+
+Name: org/apache/batik/dom/svg12/SVG12DOMImplementation$FlowRegionBrea
+ kElementFactory.class
+SHA1-Digest: MvoWz8Kzmr/mwLF7D4vrI2ikacc=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement.class
+SHA1-Digest: 29ipelLD9YiHwBS9AXZuFMFL1T4=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$AnimateColorElemen
+ tFactory.class
+SHA1-Digest: gbZb4LOpX9U3PTBsOboBuGfKUuo=
+
+Name: org/apache/batik/dom/svg/SVGTextPositioningElementSupport.class
+SHA1-Digest: +FPxMJ03rD6bOlNvdm0BnXRb9Rs=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$SvgElementFactory.
+ class
+SHA1-Digest: YvAeL37d4oEEr5mbC01qtheThjA=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$1.class
+SHA1-Digest: YVyQulNk9tI6FH/Dwb2neXBnRBM=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$DefsElementFactory
+ .class
+SHA1-Digest: MXUbXuBJmMCY/2litj/8a5Fpw8A=
+
+Name: org/apache/batik/dom/svg/SVGAnimatedPointsSupport.class
+SHA1-Digest: IISVrL3WBzKC5XqZjoximLDumr8=
+
+Name: org/apache/batik/dom/svg/SVGLocatableSupport$2.class
+SHA1-Digest: hmkwkKbqoLwbo0BTdn8ZQSIwNNA=
+
+Name: org/apache/batik/dom/svg/SVGOMFontElement.class
+SHA1-Digest: 5UteSJqtltTTEbQIQtRIC08yyK8=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$SymbolElementFacto
+ ry.class
+SHA1-Digest: k590vEBoOmTmBwfuFPp+PwmKPMM=
+
+Name: org/apache/batik/dom/svg/SVGOMScriptElement.class
+SHA1-Digest: PQUuSFmmXj/JTgjWlgBdgYSeJMA=
+
+Name: org/apache/batik/dom/svg/resources/svg11-attribs.mod
+SHA1-Digest: cQOZk0wcf7MCj0c8YKY+UE3xq2g=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$TrefElementFactory
+ .class
+SHA1-Digest: 9+TwnnovZAQOJZEwrP1sueMN4oo=
+
+Name: org/apache/batik/dom/svg/SVGStylableElement$PresentationAttribut
+ eColorValue.class
+SHA1-Digest: HP2vKLIyvWxFtT0GT8SGel48xlw=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeFuncAElementFact
+ ory.class
+SHA1-Digest: 31kOd6LmcGYyumV+YVWmMlyGyQw=
+
+Name: org/apache/batik/dom/svg/SVGOMTitleElement.class
+SHA1-Digest: 212jzVxDAh4Bkj6c3T6HVowlLHM=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FontFaceUriElement
+ Factory.class
+SHA1-Digest: 962B1DbbcpCJTLf2DlXPa+H3O4c=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$ViewElementFactory
+ .class
+SHA1-Digest: +YtEXS+yJaewCmxvBgEnR1k2oEE=
+
+Name: org/apache/batik/dom/svg/resources/svg-pattern.mod
+SHA1-Digest: ibll7xHQLFhn1N/oQpEEf3UUhFQ=
+
+Name: org/apache/batik/dom/svg/resources/svg-extresources-attrib.mod
+SHA1-Digest: p0OArx765pBE/I3+ROVKBDntB8o=
+
+Name: org/apache/batik/dom/svg/SVGTransformableSupport.class
+SHA1-Digest: oUxLQCQb4lpGlZFFCIctjmC2v/g=
+
+Name: org/apache/batik/dom/svg/SVGOMFEFuncRElement.class
+SHA1-Digest: bRMDupC+c14VAq44yO13LF0tGaU=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeOffsetElementFac
+ tory.class
+SHA1-Digest: Vo4uaGYRGnBz3liU0wUOj1RCkrY=
+
+Name: org/apache/batik/dom/svg/SVGTextContentSupport$1.class
+SHA1-Digest: A9fLtc7rQqBfdkmJ7qvLO8dlJc4=
+
+Name: org/apache/batik/dom/svg/SVGOMCircleElement.class
+SHA1-Digest: OLYKXOYh7hE6yxUEvR/TGD6esik=
+
+Name: org/apache/batik/dom/svg/SVGContext.class
+SHA1-Digest: DIW2hClugwYxV1BxfsXdGqWIEqU=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$MpathElementFactor
+ y.class
+SHA1-Digest: RfSrWB3AaboJu93sLQufNUUmpR8=
+
+Name: org/apache/batik/dom/svg/SVGOMException.class
+SHA1-Digest: vixzuzqV6ZsLm3zfYnhiu/eq8B0=
+
+Name: org/apache/batik/dom/svg/SVGOMFETileElement.class
+SHA1-Digest: 1UcguGXtZpoBzefuT+o79hH2xoA=
+
+Name: org/apache/batik/dom/svg/resources/svg-hyperlink.mod
+SHA1-Digest: zUH/G+9nV9hYYaBWOHctxj+mrwM=
+
+Name: org/apache/batik/dom/svg/SVGOMFEFloodElement.class
+SHA1-Digest: pOQ7Ge01uhHJTP6j6nkR/gu1YZM=
+
+Name: org/apache/batik/dom/svg/SVGOMEvent.class
+SHA1-Digest: ZshtIUHboB6elS5I3FgYU3MMrVI=
+
+Name: org/apache/batik/dom/svg/SVGOMPolylineElement.class
+SHA1-Digest: Jp2873FWH5YAEbIlWlfKeVEn0qs=
+
+Name: org/apache/batik/dom/svg/SVGStylableElement$PresentationAttribut
+ ePaintValue.class
+SHA1-Digest: URUn3rgCM1gpIU6FZnrFxOTBUEs=
+
+Name: org/apache/batik/dom/svg12/SVGOMSolidColorElement.class
+SHA1-Digest: azxgLIa1GoIkuXew4MqCnVBJq8A=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FontFaceElementFac
+ tory.class
+SHA1-Digest: FaYYrHC5Lmm/a8zrQ8mDIp8onHY=
+
+Name: org/apache/batik/dom/svg/resources/svg-view.mod
+SHA1-Digest: saZsD6IGGkxFSfkXLWJwmhdvnOw=
+
+Name: org/apache/batik/dom/svg/SVGOMSwitchElement.class
+SHA1-Digest: 5VKd7vF5pFPm1uKOYVexcrCGv5E=
+
+Name: org/apache/batik/dom/svg/SVGOMVKernElement.class
+SHA1-Digest: LHaI47sAHOvpfD8LR29dsM73ahU=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$6.class
+SHA1-Digest: TvNLCNSIiRAvYWEH3O2jk40iQ3Q=
+
+Name: org/apache/batik/dom/svg/SVGOMTextPathElement.class
+SHA1-Digest: vCbS9ja2Y+GoSOY9WlRHpCOOyAA=
+
+Name: org/apache/batik/dom/svg12/SVGOMFlowRootElement.class
+SHA1-Digest: zf9BmEclZK0UyOPiCLRak8mFSjc=
+
+Name: org/apache/batik/dom/svg/SVGOMUseElement.class
+SHA1-Digest: 1tdP/xD6fL0cvDOCqKgCFsx6iK4=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeSpotLightElement
+ Factory.class
+SHA1-Digest: liDZmflOhGwHRUBlbpLohlFD3fA=
+
+Name: org/apache/batik/dom/svg/resources/svg-animation.mod
+SHA1-Digest: yNOaoBywLciswI9CsUOa0ABsxG0=
+
+Name: org/apache/batik/dom/svg12/SVGOMMultiImageElement.class
+SHA1-Digest: 5veeWxAc2qquc9aR5fCSZuXl8RU=
+
+Name: org/apache/batik/dom/svg/SVGOMTransform$1.class
+SHA1-Digest: tJgnhM9/lrQNjPdIMmJEHLkeDmg=
+
+Name: org/apache/batik/dom/svg/resources/svg11-tiny-model.mod
+SHA1-Digest: 8pr/Wd0y4yQMtROqeCjiYU1X25E=
+
+Name: org/apache/batik/dom/svg/SVGOMSVGElement$1.class
+SHA1-Digest: iCXOO6Bx3kGcF6gx0VE+2+llE+w=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$MissingGlyphElemen
+ tFactory.class
+SHA1-Digest: /JZEY2/gDS+kWk4+IX4O+vCxEI0=
+
+Name: org/apache/batik/dom/svg/SVGStylableElement$PresentationAttribut
+ eValue.class
+SHA1-Digest: z4NwTmLTk2GRimKr/Bn7TvSsebU=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimatedNumber.class
+SHA1-Digest: kWuK9Wjio1VOE6ktttPxSuszDbU=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$10.class
+SHA1-Digest: BbHO6dGF+q9NxU4dGsP0ME/E2WQ=
+
+Name: org/apache/batik/dom/svg/SVGOMSymbolElement.class
+SHA1-Digest: Jx/48qyY3g2dQHHlsc964Hy42Ww=
+
+Name: org/apache/batik/dom/svg/SVGOMRectElement$1.class
+SHA1-Digest: 55XfYGQniG4QTseVvH3uEjrPITw=
+
+Name: org/apache/batik/dom/svg/AttributeInitializer.class
+SHA1-Digest: BbXd5FO86yGsjc6Cuoqn5wWk4Rc=
+
+Name: org/apache/batik/dom/svg12/SVG12DOMImplementation$FlowParaElemen
+ tFactory.class
+SHA1-Digest: 4FmwiC74znXak5p29wRo8ODQB0M=
+
+Name: org/apache/batik/dom/svg12/SVG12DOMImplementation$FlowRootElemen
+ tFactory.class
+SHA1-Digest: LaO9kfiOtsLemD+xJG9AtArdQFE=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeDiffuseLightingE
+ lementFactory.class
+SHA1-Digest: LEX9lcDay8pxUKtOWK94kWC2/T4=
+
+Name: org/apache/batik/dom/svg/AbstractSVGPointList$SVGPointItem.class
+SHA1-Digest: VWcCUDTvFlKSe2/idfucVM2JuOc=
+
+Name: org/apache/batik/dom/svg/SVGOMGElement.class
+SHA1-Digest: Opznt60IzS0mTej6pXNWVk/Dd68=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeBlendElementFact
+ ory.class
+SHA1-Digest: p/heKx+Ga5T0h3ISQo+9TvBAiZQ=
+
+Name: org/apache/batik/dom/svg/AbstractSVGList$ListBuilder.class
+SHA1-Digest: M9BI3qPKfgyPIGoV9rrQk+gMB48=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimationElement.class
+SHA1-Digest: FndGDFXiYDf1A+Z7whbKohDL2Yc=
+
+Name: org/apache/batik/dom/svg/SVGExternalResourcesRequiredSupport.cla
+ ss
+SHA1-Digest: T7C3NsEBS8gj3s2zDLvOA3W8xG4=
+
+Name: org/apache/batik/dom/svg/SVGOMDocument.class
+SHA1-Digest: U6AJTazQINKlvUNcziZ4lZaUy4A=
+
+Name: about_files/NOTICE
+SHA1-Digest: WZ6T40Fu3zPOKXEBn1eZXrrr/4I=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeImageElementFact
+ ory.class
+SHA1-Digest: ddu5/bor1MlzoRMErkdPcbN1wJg=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$AltGlyphElementFac
+ tory.class
+SHA1-Digest: oOZynbqSQjPODT64udmLM7IWrp8=
+
+Name: org/apache/batik/dom/svg/SVGOMRect.class
+SHA1-Digest: YqnM4hmwsewKgUY5W9oFtFhS1sA=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimatedTransformList$SVGOMTransfo
+ rmList.class
+SHA1-Digest: bUx+GHP2Ca4oJseKobinrY74Ots=
+
+Name: org/apache/batik/dom/svg/SVGOMClipPathElement.class
+SHA1-Digest: ntZKYuTJ5r/rZTwyBsUDOti1mw4=
+
+Name: org/apache/batik/dom/svg/SVGOMLineElement.class
+SHA1-Digest: sTkk+OOkv4IbWBP2q1TdmXLEUoA=
+
+Name: org/apache/batik/dom/svg/SVGOMMaskElement.class
+SHA1-Digest: 5FHI3F8uo0SRDppby/ogrNct4Rg=
+
+Name: org/apache/batik/dom/svg/resources/svg-conditional.mod
+SHA1-Digest: JBsgLK6gUMjhcg+RUFhYHuGmes0=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FontFaceSrcElement
+ Factory.class
+SHA1-Digest: 0HSkXM7jk7iGb7ST7rEmz8Panpk=
+
+Name: org/apache/batik/dom/svg/SVGOMFEFuncAElement.class
+SHA1-Digest: b5nmkmmfrv9jdEBR7Cxo1LLtKvE=
+
+Name: org/apache/batik/dom/svg/SVGOMRectElement.class
+SHA1-Digest: htibsN3ebjOwo7DhFca4AtJOeak=
+
+Name: org/apache/batik/dom/svg/AbstractSVGPathSegList$SVGPathSegCurvet
+ oCubicSmoothItem.class
+SHA1-Digest: G/JwbTzp0vSkAeBEgb75JTHIRuY=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$AltGlyphDefElement
+ Factory.class
+SHA1-Digest: dxFqiZo+n/pZtczZvqxVS7O+esQ=
+
+Name: org/apache/batik/dom/svg/SVGSVGContext.class
+SHA1-Digest: clm4rPvJPHEbVqX92XnQgEFuW1c=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$MetadataElementFac
+ tory.class
+SHA1-Digest: VX2I66SC5vDP4M7D3crjBao7swc=
+
+Name: org/apache/batik/dom/svg/XMLBaseSupport.class
+SHA1-Digest: tsqK87waEARt4eJH9xUPvawOghc=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$15.class
+SHA1-Digest: MXMbtqhJih2kQUgWIcSObsZSqTE=
+
+Name: org/apache/batik/dom/svg/SVGOMFEColorMatrixElement.class
+SHA1-Digest: 0xIhdxz/eUgV4IJ1xtp8wxw6foQ=
+
+Name: org/apache/batik/dom/svg12/SVG12DOMImplementation$SolidColorElem
+ entFactory.class
+SHA1-Digest: 7GlYrGCN9HH2TxFIL1qH6tAWTHU=
+
+Name: org/apache/batik/dom/svg12/SVG12DOMImplementation$SubImageElemen
+ tFactory.class
+SHA1-Digest: qL6P5mtQYjwNhy16xHgpUrilaRw=
+
+Name: org/apache/batik/dom/svg/SVGOMFEPointLightElement.class
+SHA1-Digest: bFJNQFfkskluEHYAsImzGGlzsA0=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$PolylineElementFac
+ tory.class
+SHA1-Digest: MHbcCRuJ3asZIy6Cw8RUr5S4PNg=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeSpecularLighting
+ ElementFactory.class
+SHA1-Digest: IRLfEfEp6g0PgDbkan27UvWYL6w=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FontElementFactory
+ .class
+SHA1-Digest: gREMC5Rg1k1BVf6wh/15yFVApWs=
+
+Name: org/apache/batik/dom/svg/resources/svg11-basic-flat.dtd
+SHA1-Digest: OzRRkArmYp9WD4eIKiz+v0n6Xu0=
+
+Name: org/apache/batik/dom/svg/SVGLocatableSupport$1.class
+SHA1-Digest: dwNsJ2fZ7xqRtxUrIMcS5BYWCac=
+
+Name: org/apache/batik/dom/svg/resources/svg11-flat.dtd
+SHA1-Digest: mY8hwlTJI/tRFjxUfKB5SpUerwo=
+
+Name: org/apache/batik/dom/svg/SVGDescriptiveElement.class
+SHA1-Digest: 3nxycqlp7ap8T3mVP2pPGQd1nhY=
+
+Name: org/apache/batik/dom/svg/SVGOMGradientElement.class
+SHA1-Digest: ZoSfvW3Z1UBAHmbIKltMASXp4+w=
+
+Name: org/apache/batik/dom/svg/resources/svg11-tiny.dtd
+SHA1-Digest: NhYkSYmdg12WDDHPgnCjDlSmScM=
+
+Name: org/apache/batik/dom/svg/resources/svg-animevents-attrib.mod
+SHA1-Digest: RppmtDHylPOC0Dxa8MpjuZg+ZBE=
+
+Name: org/apache/batik/dom/svg/AbstractSVGTransformList$TransformListB
+ uilder.class
+SHA1-Digest: kATcs0OFQg5Af2PLfq9SSR2W0fY=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$TextPathElementFac
+ tory.class
+SHA1-Digest: atoVx2t2/td4FBc1yNi9hdj5Hhg=
+
+Name: org/apache/batik/dom/svg/resources/svg-basic-font.mod
+SHA1-Digest: DcljkD26UWALMYJXKGJirezYsgc=
+
+Name: org/apache/batik/dom/svg/SVGOMRadialGradientElement.class
+SHA1-Digest: ZzSjE0VCGbNwgVgt99vn6inLu+U=
+
+Name: org/apache/batik/dom/svg/resources/svg-font.mod
+SHA1-Digest: JZ6jVp0aFZDMyHg47pmSs5A9DN8=
+
+Name: org/apache/batik/dom/svg/SVGGraphicsElement.class
+SHA1-Digest: iobosR0j9qGlyhbEjB/lwUWD9Lk=
+
+Name: org/apache/batik/dom/svg/SVGOMToBeImplementedElement.class
+SHA1-Digest: FgPACor40OV7n9Q3Z96xo6BxRC4=
+
+Name: org/apache/batik/dom/svg/SVGPathSupport$1.class
+SHA1-Digest: c21ELXTcsPXeIQ4L9GUUEEIY16w=
+
+Name: org/apache/batik/dom/svg/SVGOMColorProfileElement.class
+SHA1-Digest: lenL5+76dTXoTIcXEdvwF6izOsU=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$ImageElementFactor
+ y.class
+SHA1-Digest: 9pSBV+dA3+i9l5FM+tPdiT4c/a8=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$StopElementFactory
+ .class
+SHA1-Digest: jrwOqFE9qUyL6kJz0bdmcNSWT88=
+
+Name: org/apache/batik/dom/svg/SVGOMLength.class
+SHA1-Digest: pmh0JJLBI7qTPHfZZt5sPP4wyQk=
+
+Name: about.html
+SHA1-Digest: uqi17o84fnxOv3z+Afo98RQ6UVA=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimatedPathData$SVGOMPathSegList.
+ class
+SHA1-Digest: QdyOXYRzY4+RqxGrzEY3zBFH81U=
+
+Name: org/apache/batik/dom/svg/SVGOMMarkerElement.class
+SHA1-Digest: b/QE795nMUbXmus2onjiwY3VUbM=
+
+Name: org/apache/batik/dom/svg/SVGOMAltGlyphItemElement.class
+SHA1-Digest: nC1DXBZxaagwJ4x7+VI3fWB4bUA=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$5.class
+SHA1-Digest: GbXn8T41azCvwuh2ON+n1ZARANE=
+
+Name: org/apache/batik/dom/svg/resources/svg-mask.mod
+SHA1-Digest: SEJauazAkPHMmDU0vien2EROxPg=
+
+Name: org/apache/batik/dom/svg/SVGOMDescElement.class
+SHA1-Digest: R8Apeaa0dEYSpKzLQjzo6h16KiE=
+
+Name: org/apache/batik/dom/svg/resources/svg-marker.mod
+SHA1-Digest: ZH4QDU4WMJY7WQSLGMOcmgdgnxM=
+
+Name: org/apache/batik/dom/svg/resources/svg11-tiny-attribs.mod
+SHA1-Digest: Zs/lqqVmX1FGLBBHHYkxAChT1g0=
+
+Name: org/apache/batik/dom/svg/SVGStylableElement$3.class
+SHA1-Digest: j3dMgeBXGHZg0D1D4vh23XIKbHQ=
+
+Name: org/apache/batik/dom/svg/SVGOMFEConvolveMatrixElement.class
+SHA1-Digest: 5XH9AzBKTN6jqUrEHSRHTlH+67w=
+
+Name: org/apache/batik/dom/svg12/SVG12DOMImplementation$FlowDivElement
+ Factory.class
+SHA1-Digest: OOUecDsjeomxFWgYmIF6NMH8b3M=
+
+Name: org/apache/batik/dom/svg/AbstractSVGLength.class
+SHA1-Digest: zxEV0yCFHpFgauXqZK8qTzCJwj8=
+
+Name: org/apache/batik/dom/svg/resources/UserAgentStyleSheet.css
+SHA1-Digest: IXeCMwH0XQ39dWrl5MgaTLQP4kg=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeFuncGElementFact
+ ory.class
+SHA1-Digest: Lbdrg+Qttm1SHicEL9FMTz2NAG0=
+
+Name: org/apache/batik/dom/svg/SVGOMForeignObjectElement.class
+SHA1-Digest: l4nmboRMd49KDFUiUFkpbOl2EFM=
+
+Name: org/apache/batik/dom/svg/resources/svg-xlink-attrib.mod
+SHA1-Digest: j28QvUuHkAn1d8grmIWcVDYCnDM=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimatedPreserveAspectRatio.class
+SHA1-Digest: AUkcr6tfDYYztTX6coz9ryINvac=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimatedTransformList.class
+SHA1-Digest: ILuthV4whqFzAB/OdSKK0maniY4=
+
+Name: org/apache/batik/dom/svg/SVGPathSupport.class
+SHA1-Digest: P/2oyTjIhWCaHkYjDmvXknWf5z4=
+
+Name: org/apache/batik/dom/svg/resources/svg-script.mod
+SHA1-Digest: xFifLprSKS6/UZdfYGiEASfUxd4=
+
+Name: org/apache/batik/dom/svg/SVGOMFEOffsetElement.class
+SHA1-Digest: kQSiQ55YN+RwAtQrmf7+K60wubA=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeMorphologyElemen
+ tFactory.class
+SHA1-Digest: B6xjvT7bdk4pZldmrtFMKJ1bmks=
+
+Name: org/apache/batik/dom/svg/resources/svg-container-attrib.mod
+SHA1-Digest: odj4oD8VUkUAh30jrm8VpL9m10E=
+
+Name: org/apache/batik/dom/svg/SVGOMFESpotLightElement.class
+SHA1-Digest: KYTLAdDGHg/5SsCU8bA2Z9mUuNY=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$GlyphRefElementFac
+ tory.class
+SHA1-Digest: liMSYNKzQbr5UymlB3CD0hNtU4k=
+
+Name: org/apache/batik/dom/svg/AbstractSVGPathSegList$SVGPathSegLineto
+ HorizontalItem.class
+SHA1-Digest: 629p0ERbv06w4rJCO4WRJF4SyYo=
+
+Name: org/apache/batik/dom/svg/SVGOMTextPositioningElement.class
+SHA1-Digest: ZfzRKCaw2SgowFRbJoRbiB0GkfA=
+
+Name: org/apache/batik/dom/svg/SVGOMSetElement.class
+SHA1-Digest: b/t4p059QbYZkiv9PKYFf0luvgQ=
+
+Name: org/apache/batik/dom/svg/AbstractSVGPathSegList$SVGPathSegLineto
+ VerticalItem.class
+SHA1-Digest: OyYBOWvAcHDaqtUA+orMTvKWCuo=
+
+Name: org/apache/batik/dom/svg/SVGOMEllipseElement.class
+SHA1-Digest: Vjjq9lAD+MBCSUxXNQ0Q77/GWZ4=
+
+Name: org/apache/batik/dom/svg/resources/svg-filter.mod
+SHA1-Digest: mmvY7oNdpWUmieYwUqI9sc9kVII=
+
+Name: org/apache/batik/dom/svg/resources/Messages.properties
+SHA1-Digest: TJAWAkTDOLYpaRT3soBXTyQMzhU=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeGaussianBlurElem
+ entFactory.class
+SHA1-Digest: cqMyw8EFodFvdPi1vpmw5cwFTXU=
+
+Name: org/apache/batik/dom/svg/SVGOMFEGaussianBlurElement.class
+SHA1-Digest: XTrz9rmK3POmsXRGDmndMRAmppM=
+
+Name: org/apache/batik/dom/svg/SVGPreserveAspectRatioSupport.class
+SHA1-Digest: brlMhZHtB3FDiUKKf02HIKehCpk=
+
+Name: org/apache/batik/dom/svg/SVGOMStyleElement.class
+SHA1-Digest: X7+D0pciZj+GwV2yjP+iihAZLKU=
+
+Name: org/apache/batik/dom/svg/SVGOMFontFaceNameElement.class
+SHA1-Digest: c75UlRNqfcX3LypcVXDF59Kg82Y=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimatedBoolean.class
+SHA1-Digest: jm1B3KhuFtZ3R9bRL8nj1+leUQ8=
+
+Name: org/apache/batik/dom/svg/AbstractSVGPreserveAspectRatio.class
+SHA1-Digest: 1waMgmJXCjsRzTci03nEOmOCzSY=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$RadialGradientElem
+ entFactory.class
+SHA1-Digest: z88FV5C4GVjk2oVsv3OEiB6gAUQ=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$14.class
+SHA1-Digest: CdVqrDh4yHMduzs71WwZtZYqAxY=
+
+Name: org/apache/batik/dom/svg/AbstractSVGTransform.class
+SHA1-Digest: cSx+codufKTMwF5Yr5k85OEipZc=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$LinearGradientElem
+ entFactory.class
+SHA1-Digest: 1BB6vn4wzCodCMeXbDROn0s7GRM=
+
+Name: org/apache/batik/dom/svg/resources/svg-shape.mod
+SHA1-Digest: MDKejdOWjRNRkhMIWMZcApKSgIQ=
+
+Name: org/apache/batik/dom/svg12/SVGOMFlowDivElement.class
+SHA1-Digest: CFHR8fUeTxkkdNILTrdu7OpS78Y=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$TitleElementFactor
+ y.class
+SHA1-Digest: AZEc+Fqz0LX9puOVU+y0sfKDOQg=
+
+Name: org/apache/batik/dom/svg/SVGOMComponentTransferFunctionElement.c
+ lass
+SHA1-Digest: FHs3q8qx4DNfM51ZHbkJOu8gEDc=
+
+Name: org/apache/batik/dom/svg/SVGOMViewElement.class
+SHA1-Digest: kcikwtvCHL3yv286KtBLnt0YKXg=
+
+Name: org/apache/batik/dom/svg/SVGOMFontFaceFormatElement.class
+SHA1-Digest: xwHypkbNCsy2jo7jFvBtoNh8z7Q=
+
+Name: org/apache/batik/dom/svg/SVGOMPolygonElement.class
+SHA1-Digest: DhlaMLYA8Fn0BKmmlQIPO0Jc1CE=
+
+Name: org/apache/batik/dom/svg/SVGOMTransform.class
+SHA1-Digest: JlaRUSJpg4DjPH+v+I4TRGDA6AU=
+
+Name: org/apache/batik/dom/svg/SVGItem.class
+SHA1-Digest: wIZRG+/CHkSvJu9vCoDVRLzbsM8=
+
+Name: org/apache/batik/dom/svg/SVGOMFESpecularLightingElement.class
+SHA1-Digest: Nn5VY9F9Gnd76cj67//c502TVTQ=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$AnimateMotionEleme
+ ntFactory.class
+SHA1-Digest: 8Fb38NCERzRpdR3wmVx/bjzf+sk=
+
+Name: org/apache/batik/dom/svg/SVGOMGlyphRefElement.class
+SHA1-Digest: pwQ2dPLaDShb8t0K9gRbvygDXNA=
+
+Name: org/apache/batik/dom/svg/resources/svg-basic-filter.mod
+SHA1-Digest: YdVNYow34hd2k4QndHwP8yt02O8=
+
+Name: org/apache/batik/dom/svg/SVGOMMatrix.class
+SHA1-Digest: qGPq1wB7bE3kIX+ANEsvzNJdzZk=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$HkernElementFactor
+ y.class
+SHA1-Digest: Je7C2E7vtfaICwKihHOVWRkjSq0=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeFuncBElementFact
+ ory.class
+SHA1-Digest: tCV0+uQp0rTa//Uu2XKJ0a7JAuA=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$PathElementFactory
+ .class
+SHA1-Digest: RDSJVmNU87T6kTYykt5fj6y1r1Q=
+
+Name: about_files/LICENSE.dom-software.txt
+SHA1-Digest: 1OF1wwlRByyVUrisNm3Qan4Dv/c=
+
+Name: org/apache/batik/dom/svg/SVGTextContentSupport.class
+SHA1-Digest: rCYpswBmTUjX4UL5WErtWyrXhjw=
+
+Name: org/apache/batik/dom/svg/SVGTextContentSupport$SVGTextPoint.clas
+ s
+SHA1-Digest: nMKsu/hKlyzTDj5OV3eRT2h3PJ8=
+
+Name: org/apache/batik/dom/svg/SVGOMFETurbulenceElement.class
+SHA1-Digest: TDxPlmy1Lm6rQAquDxLerU/alQ4=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeFuncRElementFact
+ ory.class
+SHA1-Digest: yyyQDNsOAXA4Th3tGpfLQzTdIns=
+
+Name: org/apache/batik/dom/svg/resources/svg-opacity-attrib.mod
+SHA1-Digest: oVA+FKZxt/guAC5wnrXUm2droJc=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$19.class
+SHA1-Digest: dMWA1ZPeNYsHO4HzEMFaMahFa2A=
+
+Name: org/apache/batik/dom/svg/SVGOMDefsElement.class
+SHA1-Digest: V7jaAaQVfDHwuOH+KxZ41/vuFuc=
+
+Name: org/apache/batik/dom/svg/SVGOMAltGlyphDefElement.class
+SHA1-Digest: w9vyNDkpzrTq7PXAfzv2gR9gI1Y=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$MarkerElementFacto
+ ry.class
+SHA1-Digest: UhHOQFM5f20SuAHMCuwXXH/eCpA=
+
+Name: org/apache/batik/dom/svg/resources/svg-profile.mod
+SHA1-Digest: lZaWvCBgmqPZpyMSWaYxJ/kHuY4=
+
+Name: org/apache/batik/dom/svg/resources/svg-paint-attrib.mod
+SHA1-Digest: VtU5z+5eAWHkJVPLh7xlg3pYhrk=
+
+Name: org/apache/batik/dom/svg/AbstractSVGMatrix.class
+SHA1-Digest: flX7rHNmlXZfAxvVZP1tNEFYzzI=
+
+Name: org/apache/batik/dom/svg/SVGPathSegConstants.class
+SHA1-Digest: FxtdRbesYsAHMcIwZ3lY9pmGZ3w=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$ColorProfileElemen
+ tFactory.class
+SHA1-Digest: 7YwPxt9y2g9a3F7t60hFHSJrY0s=
+
+Name: org/apache/batik/dom/svg/resources/svg-core-attrib.mod
+SHA1-Digest: e7kYnxO0RhVNbK0BUprETMcMu3Q=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$4.class
+SHA1-Digest: LT1tKTEtGEqh+IqGxYMCq+zO4nM=
+
+Name: org/apache/batik/dom/svg/SVGOMGlyphElement.class
+SHA1-Digest: x2zlYcOdym5m5yyUOgtG9vJrxow=
+
+Name: org/apache/batik/dom/svg/SVGURIReferenceTextPositioningElement.c
+ lass
+SHA1-Digest: hw3vE89L3BM5e+8XjWQAnBKwd1M=
+
+Name: org/apache/batik/dom/svg/resources/svg-framework.mod
+SHA1-Digest: XIcwSxYOiXY58kUUUfze/jlRdXU=
+
+Name: org/apache/batik/dom/svg/AbstractSVGLength$DefaultContext.class
+SHA1-Digest: WD+1PIg2vCWRoSjBF9yx4sifukA=
+
+Name: org/apache/batik/dom/svg12/SVG12DOMImplementation.class
+SHA1-Digest: XrKNJ1+cBzUDJ2M/EauoRzIXXjQ=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation.class
+SHA1-Digest: dcz7/N9YotuvJIxGRfvBFODbtVA=
+
+Name: org/apache/batik/dom/svg12/SVG12DOMImplementation$FlowRegionExcl
+ udeElementFactory.class
+SHA1-Digest: yc6P7ZqXauuvgf/wTG74jd83jXo=
+
+Name: org/apache/batik/dom/svg/SVGOMAltGlyphElement.class
+SHA1-Digest: bms6+kbI0Nxao54ILyMbqldvXWY=
+
+Name: org/apache/batik/dom/svg/SVGOMFEMergeNodeElement.class
+SHA1-Digest: 5iSzM/g8EGzdHrbmwfWvnVrvPro=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$TspanElementFactor
+ y.class
+SHA1-Digest: eAXgw3cqAZhv091R8lwQQmzOrbU=
+
+Name: org/apache/batik/dom/svg/SVGStylableElement$2.class
+SHA1-Digest: ixp8PQ7f+vuHXnlT2w/cQMXKkRA=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$RectElementFactory
+ .class
+SHA1-Digest: uHV6Od89mFiBiDm+y4RCzjbgP6w=
+
+Name: org/apache/batik/dom/svg/resources/svg11-tiny-flat.dtd
+SHA1-Digest: IKYNgtBYLOYoiHT/zemk5D8KrUY=
+
+Name: org/apache/batik/dom/svg/AbstractSVGPathSegList$SVGPathSegMoveto
+ LinetoItem.class
+SHA1-Digest: HpSWvrZ4JAky4Yy4ex0AjPzW0zM=
+
+Name: org/apache/batik/dom/svg/resources/svg12-flat.dtd
+SHA1-Digest: veXJ3BLlR2N5Enbz5oruGvni7sQ=
+
+Name: org/apache/batik/dom/svg/AbstractSVGPathSegList$SVGPathSegItem.c
+ lass
+SHA1-Digest: XPZ6lUUgfhIdhHCZK2+M2aXjtbU=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FilterElementFacto
+ ry.class
+SHA1-Digest: vqbrfzxn7FxdDyVUmHd81fmPPyE=
+
+Name: org/apache/batik/dom/svg/resources/svg11-basic-model.mod
+SHA1-Digest: nTlqyDivOBuWHnkKbRskxKjA/BU=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeConvolveMatrixEl
+ ementFactory.class
+SHA1-Digest: Oh9jdr5C37SMSHCc648yTsv4qzE=
+
+Name: org/apache/batik/dom/svg/SVGOMFEImageElement.class
+SHA1-Digest: mbgnN9aL8oZg0gCWp+0I7pqtWWc=
+
+Name: org/apache/batik/dom/svg/SVGOMImageElement.class
+SHA1-Digest: feMyU/8ib6mAJowHHtKEib1bRZU=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimatedInteger.class
+SHA1-Digest: 7NrKx7HOxt4Yj5hRPass7ib/kMQ=
+
+Name: org/apache/batik/dom/svg/SVGLocatableSupport.class
+SHA1-Digest: XUroDnhQazjEuhsWseVpP0qTKHc=
+
+Name: org/apache/batik/dom/svg12/SVG12DOMImplementation$FlowRegionElem
+ entFactory.class
+SHA1-Digest: eMTNfbPztoWp/Cw9pKn6LZPqYEE=
+
+Name: org/apache/batik/dom/svg12/SVGOMSubImageRefElement.class
+SHA1-Digest: EjjNJelz+9Rtxp10E7Of7Qwaph4=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$AElementFactory.cl
+ ass
+SHA1-Digest: w+ceEJOjFA94mvA4vjQxbm6DPrY=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimatedLengthList.class
+SHA1-Digest: whJS6qatzOW7i7iHwaH5thZdaLw=
+
+Name: org/apache/batik/dom/svg/ListHandler.class
+SHA1-Digest: zFGeIaRbrXG9Bwq8L72uimUJDPs=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeTileElementFacto
+ ry.class
+SHA1-Digest: cp/xhNGvFoCJaxp1VJV4+WNWza8=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$DescElementFactory
+ .class
+SHA1-Digest: t8ORPxyJ2vOE7P7V1zeiUMvoLPk=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$9.class
+SHA1-Digest: XFe/y1bGLbPk1gHJBYRggxuHVDo=
+
+Name: org/apache/batik/dom/svg12/SVGOMFlowParaElement.class
+SHA1-Digest: JLDnDkICHkqbCTfljsv0m16G46Y=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$ClipPathElementFac
+ tory.class
+SHA1-Digest: vdU1fddDq7JcmGaj+IryrIUQVDg=
+
+Name: org/apache/batik/dom/svg/SVGOMFEDisplacementMapElement.class
+SHA1-Digest: 6Mb1YwebbNrDcG9ePlq50Kkq310=
+
+Name: about_files/LICENSE-2.0.txt
+SHA1-Digest: WQPAMR6UasOuSXQqhMW2ZmVd4y8=
+
+Name: org/apache/batik/dom/svg/resources/svg11-model.mod
+SHA1-Digest: RMi0TlAAktt6m/Tr6Rx53TlM0Ts=
+
+Name: org/apache/batik/dom/svg/SVGOMElement.class
+SHA1-Digest: j5WktcvaAqUx3Qf+xEZk9TGrFFs=
+
+Name: org/apache/batik/dom/svg12/SVGOMFlowRegionExcludeElement.class
+SHA1-Digest: Ey7fp+sQXnwJ2yXk16AJX7wKnB4=
+
+Name: org/apache/batik/dom/svg/resources/svg-basic-structure.mod
+SHA1-Digest: uJV5PkIrOtTx472Mg0q267Nd1gs=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeDisplacementMapE
+ lementFactory.class
+SHA1-Digest: 3dI9DTp+z11/qR5/fTplxDOlmV8=
+
+Name: org/apache/batik/dom/svg/AbstractSVGPathSegList$SVGPathSegArcIte
+ m.class
+SHA1-Digest: H9Lb6o0CTqwoYWuWYpy7pQJvia4=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeCompositeElement
+ Factory.class
+SHA1-Digest: w4AJNGbDeLZQ032yX4ncae3J/y8=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeComponentTransfe
+ rElementFactory.class
+SHA1-Digest: Ss6oCcyzmXRqEb2oCDBol6uSCos=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$13.class
+SHA1-Digest: gs+pq6h8yL8N3ED7ysCtWBlgLf0=
+
+Name: org/apache/batik/dom/svg/SVGOMFEDistantLightElement.class
+SHA1-Digest: evVlHSCk4cumLEgHgdlC3KjvdQM=
+
+Name: org/apache/batik/dom/svg/resources/svg-image.mod
+SHA1-Digest: ujB9Z4ffBHrcSDYVru0XZN9uRHY=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$PatternElementFact
+ ory.class
+SHA1-Digest: eVjcvyBxLgZnl8A/WqwkU+4pmlY=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$DefinitionSrcEleme
+ ntFactory.class
+SHA1-Digest: rjhl2siKTmZRiALtTrw5YxVt32E=
+
+Name: org/apache/batik/dom/svg/AbstractSVGPathSegList.class
+SHA1-Digest: legRv9VBV6m5mqWtSDIlDe81jcE=
+
+Name: org/apache/batik/dom/svg/AbstractElement.class
+SHA1-Digest: xz1DDN7wZrKEdUFKUEmQ2Rs6SSI=
+
+Name: org/apache/batik/dom/svg/SVGOMFontFaceElement.class
+SHA1-Digest: RAxzuB/u74HJdo1Kg6A32ysQ5fs=
+
+Name: org/apache/batik/dom/svg/SVGOMFEFuncBElement.class
+SHA1-Digest: poXZBSFbpKwUStu5F0qM30GEPek=
+
+Name: org/apache/batik/dom/svg/resources/svg-cursor.mod
+SHA1-Digest: e1gdp7ua0lUKenTEN+p03bdmP9o=
+
+Name: META-INF/eclipse.inf
+SHA1-Digest: SAqY+5ITAL0mkdYeijlSRhyIaZk=
+
+Name: org/apache/batik/dom/svg12/SVGOMFlowRegionElement.class
+SHA1-Digest: ZaAUVuLvLPfTTpf9hEGNT5ZVknk=
+
+Name: org/apache/batik/dom/svg/AbstractSVGPreserveAspectRatio$Preserve
+ AspectRatioParserHandler.class
+SHA1-Digest: tDkHgUMLU3WxGhWWICJI59wyMPc=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimateColorElement.class
+SHA1-Digest: LmGDFv4T/uGVmOmTM/S13MPBrww=
+
+Name: org/apache/batik/dom/svg/SVGOMFEMergeElement.class
+SHA1-Digest: lUebkcJFCTYZWbXWu4L6WOtQlOo=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimatedLength.class
+SHA1-Digest: wHdUpcX922bY6OoczhgnOD9IWSk=
+
+Name: org/apache/batik/dom/svg/AbstractSVGPointList$PointsListBuilder.
+ class
+SHA1-Digest: Wd7Ct+kNaa3EsI6ka+MlAvqlcAA=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$GlyphElementFactor
+ y.class
+SHA1-Digest: NMMWgnrHxteI95ge4D9SyiPwOHE=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimatedPathData.class
+SHA1-Digest: e270U1YE9PovrmGu7qy0u7S6+a8=
+
+Name: org/apache/batik/dom/svg/SVGTextContent.class
+SHA1-Digest: sLTfOzyOqcjUJFXF+cJe96VeHnI=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$StyleElementFactor
+ y.class
+SHA1-Digest: yLmJCYjngGiOZcJOfMQAx54tgDI=
+
+Name: org/apache/batik/dom/svg/SVGURIReferenceSupport.class
+SHA1-Digest: f+vKbxLbpKT+AEcnx1epRFWAZ0M=
+
+Name: org/apache/batik/dom/svg/SVGOMFEFuncGElement.class
+SHA1-Digest: mjIvgyavwVbXVBnLUx/7FiQvygs=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimateTransformElement.class
+SHA1-Digest: 10yDiokZYYKQbSWAvmfqPF3TIDM=
+
+Name: org/apache/batik/dom/svg/SVGOMMissingGlyphElement.class
+SHA1-Digest: lgHwAkA2Bnm8SihymLRuaPgCfjE=
+
+Name: org/apache/batik/dom/svg/SVGOMTSpanElement.class
+SHA1-Digest: +nytjZHNh80toRG8LO7K+XPGNXQ=
+
+Name: org/apache/batik/dom/svg/AbstractSVGLengthList.class
+SHA1-Digest: sMVP/2SrNHyepOCA+jntSufzlTg=
+
+Name: org/apache/batik/dom/svg/resources/svg-datatypes.mod
+SHA1-Digest: 9PlM9ImopScN8S8/4XHb9ugk3cA=
+
+Name: plugin.properties
+SHA1-Digest: pFB3Z8bV5/4MBBtBApOwVhyMXWw=
+
+Name: org/apache/batik/dom/svg12/SVGOMSubImageElement.class
+SHA1-Digest: SLQW7X1cUxhR6esMVig0vTCDFY0=
+
+Name: org/apache/batik/dom/svg/AbstractSVGAnimatedLength.class
+SHA1-Digest: bcA5XW7EHHVOeTC2BCDOy+V9kco=
+
+Name: about_files/LICENSE.sax.txt
+SHA1-Digest: d52IFq46dcaUFZ1NE9DE1k0S5Ew=
+
+Name: org/apache/batik/dom/svg/AbstractSVGPathSegList$SVGPathSegCurvet
+ oQuadraticSmoothItem.class
+SHA1-Digest: G6iF00+oNQlZQBpPtk6DLF4RJsA=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$18.class
+SHA1-Digest: 3b59gXc8Tvst79GlLHccLo8R2E8=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FontFaceNameElemen
+ tFactory.class
+SHA1-Digest: Ar0Gm1H83hctNW0PzWPa2l4Yebw=
+
+Name: org/apache/batik/dom/svg/AbstractSVGLengthList$SVGLengthItem.cla
+ ss
+SHA1-Digest: zALThg3A7b3Uydmx3tNW6pdNKC8=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeMergeNodeElement
+ Factory.class
+SHA1-Digest: 8JH6pwLu8RVTyhYCYj6eapr3KLg=
+
+Name: org/apache/batik/dom/svg12/SVGOMFlowLineElement.class
+SHA1-Digest: EVqrys71pBVwKcC9erAIwjAfsuw=
+
+Name: org/apache/batik/dom/svg/resources/svg-basic-graphics-attrib.mod
+SHA1-Digest: O1fhudvunruRy955WUdCGlmokI4=
+
+Name: org/apache/batik/dom/svg/AbstractSVGNumberList$SVGNumberItem.cla
+ ss
+SHA1-Digest: 38fpSgG4tU9eM0ov87h4u+0nS7s=
+
+Name: org/apache/batik/dom/svg/SVGOMFontFaceSrcElement.class
+SHA1-Digest: qVQbPUB3PcvqSzkTF4vnhdvrBLY=
+
+Name: org/apache/batik/dom/svg12/SVG12DOMImplementation$FlowLineElemen
+ tFactory.class
+SHA1-Digest: eozLb+EDep9VcBvgrD4akqYfyaM=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimatedPoints.class
+SHA1-Digest: 5ajB8uuGxdtwSQQpTA7SKoL8bDw=
+
+Name: org/apache/batik/dom/svg/SVGOMMPathElement.class
+SHA1-Digest: R/vEM+5FZoe4L6IXxvTnkMleRIk=
+
+Name: org/apache/batik/dom/svg/SVGOMFilterElement.class
+SHA1-Digest: +1MkSOXa7f5oaPRYLMspQDYaiiY=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$3.class
+SHA1-Digest: 8oT6kD933wT2s15Z171Y3D5fGN0=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimatedNumberList$SVGOMNumberList
+ .class
+SHA1-Digest: Y7TlIKY6DMoI6L47ukXi5lcz/FI=
+
+Name: org/apache/batik/dom/svg/SVGOMStyleElement$DOMCharacterDataModif
+ iedListener.class
+SHA1-Digest: qdg5TFiuRwfc5/k3b1k9ktJwV7M=
+
+Name: org/apache/batik/dom/svg/AbstractSVGItem.class
+SHA1-Digest: NzbHsz+p0WL2k6eGCEqFxY3PFRU=
+
+Name: org/apache/batik/dom/svg/SVGLocatableSupport$4.class
+SHA1-Digest: n/Ic/JYYFBEcrWsIzY77Obhm4Vo=
+
+Name: org/apache/batik/dom/svg/AbstractSVGNumberList$NumberListBuilder
+ .class
+SHA1-Digest: gsO3Oxm8UTrxyhYaL/nuXykiAtc=
+
+Name: org/apache/batik/dom/svg/SVGOMSVGElement.class
+SHA1-Digest: HOZXlMJ29HRtpx930RX/FY4etDg=
+
+Name: org/apache/batik/dom/svg/SVGOMHKernElement.class
+SHA1-Digest: bhnlnHOJBa9QLRGgSK6T2NfLTs0=
+
+Name: org/apache/batik/dom/svg/SVGStylableElement$1.class
+SHA1-Digest: uqNya3Jr1crs+kZiwbQwR6hNu9Y=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimatedPreserveAspectRatio$SVGOMP
+ reserveAspectRatio.class
+SHA1-Digest: 1gUwPAjRqhCTLHeKuaHbIxhRViI=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimatedNumberList.class
+SHA1-Digest: U+bZGbG49H1kIH8+Vp8/fy3QP/g=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$TextElementFactory
+ .class
+SHA1-Digest: 0/wmR3mUunJ6T/x9uPLCg6WyvJk=
+
+Name: org/apache/batik/dom/svg/SVGTestsSupport.class
+SHA1-Digest: Fa7+xxaREue6b4gkQX7I3QclAkI=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeTurbulenceElemen
+ tFactory.class
+SHA1-Digest: V86MQOW03cWsGTatgQ3WYXHFD60=
+
+Name: org/apache/batik/dom/svg/SVGTextContentSupport$3.class
+SHA1-Digest: BOc1BZnYB2FNisQ4VkYQK3pBJKM=
+
+Name: org/apache/batik/dom/svg/SVGOMCSSImportedElementRoot.class
+SHA1-Digest: YVAwQOFLdSBxXrt+6T6N+M0qs8g=
+
+Name: org/apache/batik/dom/svg/AbstractSVGLengthList$LengthListBuilder
+ .class
+SHA1-Digest: +YG4oxInFm8UlfU2fcl68lDxIfs=
+
+Name: org/apache/batik/dom/svg/SVGOMPoint.class
+SHA1-Digest: takqmiyu7regmFyLfwGLNoAxQDg=
+
+Name: org/apache/batik/dom/svg/SVGOMAElement.class
+SHA1-Digest: LUP1Ngrrjj3X5O2cj02JtcN3ksA=
+
+Name: org/apache/batik/dom/svg/AbstractSVGAnimatedLength$BaseSVGLength
+ .class
+SHA1-Digest: uB7CzEu5rKtzW8OE0N0ZnAnJnmU=
+
+Name: org/apache/batik/dom/svg/resources/svg-extensibility.mod
+SHA1-Digest: kieQ5RPxfcjDiSlVYLl5Bv9X+qw=
+
+Name: org/apache/batik/dom/svg/SVGOMRadialGradientElement$2.class
+SHA1-Digest: +Y9v2TAe9eJs11vqn5XZzwfHwwk=
+
+Name: org/apache/batik/dom/svg/resources/svg-structure.mod
+SHA1-Digest: VsZls0GjXINl0nUGUSTZSG4gkog=
+
+Name: org/apache/batik/dom/svg/SVGOMFEBlendElement.class
+SHA1-Digest: WPfB+R7EgggzqedSSVwVd11fdlI=
+
+Name: org/apache/batik/dom/svg/resources/svg-qname.mod
+SHA1-Digest: c9NZKPt7w9m0uw/uW1L+Kjx4dFM=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$8.class
+SHA1-Digest: SC7iLf6gkOnYa0XOBF4AOpktc5o=
+
+Name: org/apache/batik/dom/svg/resources/svg-basic-text.mod
+SHA1-Digest: QJ/y5i+v8hhzDHHDFlIm2TohTyg=
+
+Name: org/apache/batik/dom/svg/SVGOMFECompositeElement.class
+SHA1-Digest: 6QiqOf6HBmDsCYS2dd191sk7fBA=
+
+Name: org/apache/batik/dom/svg/resources/svg-text.mod
+SHA1-Digest: QnTdHgGEEcEPn2fw949jAdC+zCs=
+
+Name: org/apache/batik/dom/svg/resources/svg11.dtd
+SHA1-Digest: 1uk7GSWWv0+WAJH8dl36YO3rN+4=
+
+Name: org/apache/batik/dom/svg/AbstractSVGPathSegList$SVGPathSegCurvet
+ oCubicItem.class
+SHA1-Digest: 1BtdmxD8fzXJwEMMXnNg6jQ1KaU=
+
+Name: org/apache/batik/dom/svg/AbstractSVGPointList.class
+SHA1-Digest: j9WzEXpKv9d91K1BtZ86zrIeEKA=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$CursorElementFacto
+ ry.class
+SHA1-Digest: nk/++d5u8pZG2t7TbIpG1AAIcXE=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$ForeignObjectEleme
+ ntFactory.class
+SHA1-Digest: gXMGvwiK4CNiPzEgseJj3KZzmb4=
+
+Name: org/apache/batik/dom/svg/resources/svg-gradient.mod
+SHA1-Digest: STT6mcUpEgYzwAxBbxAMM28J49o=
+
+Name: org/apache/batik/dom/svg12/SVG12DOMImplementation$FlowSpanElemen
+ tFactory.class
+SHA1-Digest: 01JP4nY/FC96RJItDD4icARmThk=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeMergeElementFact
+ ory.class
+SHA1-Digest: Vs6GhufEERxjaMPVB7Ssr5PEliU=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$PolygonElementFact
+ ory.class
+SHA1-Digest: Aw56O3fbUbgVXw8mGbNCGF/LX8M=
+
+Name: org/apache/batik/dom/svg12/SVGOMFlowRegionBreakElement.class
+SHA1-Digest: wtJDDdRlvx8PtroolhkOrMFGBG0=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimateMotionElement.class
+SHA1-Digest: Ydc/0rSDcVDWTOHuAydDZXqaFQs=
+
+Name: org/apache/batik/dom/svg/SVGOMTRefElement.class
+SHA1-Digest: j8ud3kNab/zmkRckHw3zGEPP5GY=
+
+Name: org/apache/batik/dom/svg/resources/svg-viewport-attrib.mod
+SHA1-Digest: A/Q2yrEcBADLvd6e41/C1tLJtLI=
+
+Name: org/apache/batik/dom/svg/SVGOMSVGElement$3.class
+SHA1-Digest: d//Yg/caz8rNwXyU1PAu3vqAb2o=
+
+Name: org/apache/batik/dom/svg12/SVGOMFlowSpanElement.class
+SHA1-Digest: tTbVOBqIPXd/FUON3UL1ngEw1e8=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$MaskElementFactory
+ .class
+SHA1-Digest: bBUTHB5a8PL4LAy3FKoZmSN/yxg=
+
+Name: org/apache/batik/dom/svg/SVGOMPatternElement.class
+SHA1-Digest: y7ovvIDlt1sGiWb9wf63Xp4T+Lo=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$12.class
+SHA1-Digest: 7Al3LN0lJT3nBJ/fdQiiO6NQGCs=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimatedPoints$SVGOMPointList.clas
+ s
+SHA1-Digest: J4idCj20w+yvbsZ2L1SiuIiUjYM=
+
+Name: org/apache/batik/dom/svg/AbstractSVGTransformList$SVGTransformIt
+ em.class
+SHA1-Digest: z0S4s2fru90SV5Mdtf+RAZb0oTs=
+
+Name: org/apache/batik/dom/svg/AbstractSVGTransformList$1.class
+SHA1-Digest: JjBf73ifAVTEHLhK4HJiOR0v3lc=
+
+Name: org/apache/batik/dom/svg/SVGStylableElement$StyleDeclaration.cla
+ ss
+SHA1-Digest: IHS3FJNX0kfDSNq3U8mwB6i9rzA=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$AnimateElementFact
+ ory.class
+SHA1-Digest: oS8MVh5nmt8e1IXE8ihWjIoF3tQ=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FePointLightElemen
+ tFactory.class
+SHA1-Digest: cJGKXoeNsf3i9IO5XZl7KAe4GrY=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$SetElementFactory.
+ class
+SHA1-Digest: g83APTfOcfS7ykfUBCJeJLzyQWM=
+
+Name: org/apache/batik/dom/svg/AbstractSVGNumberList.class
+SHA1-Digest: Uis+zsLPasawHzUIvcWTmjwxJ4A=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$GElementFactory.cl
+ ass
+SHA1-Digest: DJj2PlxIiWT0qzGZCb5TA+2LDr8=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$AnimateTransformEl
+ ementFactory.class
+SHA1-Digest: TX1aXBWozsoJ9m6ABoHvEhDYKoU=
+
+Name: org/apache/batik/dom/svg/SVGPathContext.class
+SHA1-Digest: 5zssmggDppGsP/+Ln5yswRvE6jA=
+
+Name: org/apache/batik/dom/svg/AbstractSVGPathSegList$SVGPathSegCurvet
+ oQuadraticItem.class
+SHA1-Digest: 2aQKSTMG1vRQHSn3DIzCksjHCeg=
+
+Name: org/apache/batik/dom/svg/SVGOMURIReferenceElement.class
+SHA1-Digest: zegCHu7BD05jm524Dp1EubV1HOo=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$1.class
+SHA1-Digest: gL5EvS1+pn5kPksI3IBny8lD9UI=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$17.class
+SHA1-Digest: /ZibY8dwSzYXNajPcoHRiP8ffQs=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimatedString.class
+SHA1-Digest: EUNj1Qw4y7jZzi15xZRmTiqJrBM=
+
+Name: org/apache/batik/dom/svg/SVGOMMetadataElement.class
+SHA1-Digest: gp2TkVmkvF5euJonaHMyHDpt+/M=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimateElement.class
+SHA1-Digest: YPfL/4QN2y2ODLKqWOouOS46u0I=
+
+Name: org/apache/batik/dom/svg/SVGOMTextContentElement$1.class
+SHA1-Digest: OduWDJTJqXGLSyeQokI3YK7Xd2w=
+
+Name: org/apache/batik/dom/svg/AbstractElement$ExtendedNamedNodeHashMa
+ p.class
+SHA1-Digest: zdQMreV6YzwO+exGLEX+Ekvt3r8=
+
+Name: org/apache/batik/dom/svg/SVGOMStopElement.class
+SHA1-Digest: ds7qnlAvY3MFr3Pd7mFD4H16KV4=
+
+Name: org/apache/batik/dom/svg/SVGAnimatedPathDataSupport.class
+SHA1-Digest: /eXFhM7JKFafh2bMDxPkJYDrPH0=
+
+Name: org/apache/batik/dom/svg/SVGOMAnimatedLengthList$SVGOMLengthList
+ .class
+SHA1-Digest: OhMrSOKgZOKwgN/rO7bHJeKQPQ8=
+
+Name: org/apache/batik/dom/svg/AbstractSVGNumber.class
+SHA1-Digest: eQLE4DP+Q5HRjab1AaPbOa0EruY=
+
+Name: org/apache/batik/dom/svg/SVGOMFEMorphologyElement.class
+SHA1-Digest: zCTV8aLJyNrrb7PuAn3siSE2ZSE=
+
+Name: org/apache/batik/dom/svg/LiveAttributeValue.class
+SHA1-Digest: c38a1nMx/lxqdqiINgvtZaCGStI=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$2.class
+SHA1-Digest: NqUuOER0CRMMHfqWOtjK1o8M2pc=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$CircleElementFacto
+ ry.class
+SHA1-Digest: FcikjZcY/eIvTLw4NITXW0SyOvA=
+
+Name: about_files/README
+SHA1-Digest: eqzl2DMeTAYplW/IJ958qY4L4og=
+
+Name: org/apache/batik/dom/svg/resources/svg10.dtd
+SHA1-Digest: jyj3K5cP35KkUxFwQkVoxe7eGYE=
+
+Name: org/apache/batik/dom/svg/SVGLocatableSupport$3.class
+SHA1-Digest: 2cuVn1SSVKym/myuBqYAW2pw9Ug=
+
+Name: org/apache/batik/dom/svg/SVGZoomAndPanSupport.class
+SHA1-Digest: 0mQ87RDP7hvo6HX6kwC/+O6N1OU=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FontFaceFormatElem
+ entFactory.class
+SHA1-Digest: Cm1aPdaPGBY6MkDFj6kznwy+DeM=
+
+Name: org/apache/batik/dom/svg/AbstractSVGPathSegList$PathSegListBuild
+ er.class
+SHA1-Digest: 567f+P2aWxCFw5BIf1YhHsCK88w=
+
+Name: org/apache/batik/dom/svg/resources/dtdids.properties
+SHA1-Digest: ZCoLCgq/g5d89WRhzdvycDYF9/4=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$FeColorMatrixEleme
+ ntFactory.class
+SHA1-Digest: 66epU8u7Fw0WliXiOuLCNtLNML0=
+
+Name: org/apache/batik/dom/svg/resources/svg-docevents-attrib.mod
+SHA1-Digest: fIbhwQt3oCtj4p5ts+vtyan4+ds=
+
+Name: org/apache/batik/dom/svg/SVGOMCursorElement.class
+SHA1-Digest: 9w7/8altqI4SPKYrhR7Co6DQMus=
+
+Name: org/apache/batik/dom/svg/SVGOMTextContentElement.class
+SHA1-Digest: vm5OveiLe4zyaEOoOm98Ei0DlwA=
+
+Name: org/apache/batik/dom/svg/SVGOMTextContentElement$1$SVGTextLength
+ .class
+SHA1-Digest: VZitxcbLGPGpYrOIhHDz/ku8ozk=
+
+Name: org/apache/batik/dom/svg/SVGTextContentSupport$2.class
+SHA1-Digest: MSERpVO3ZX6Zy55dM1a0Q2zvKEo=
+
+Name: org/apache/batik/dom/svg/resources/svg11-basic.dtd
+SHA1-Digest: NkdfYSUese1cVnBlB3QL6rvjWwI=
+
+Name: org/apache/batik/dom/svg/resources/svg-basic-clip.mod
+SHA1-Digest: IQLMsKLDplxu5zNcfO4I5IysjS4=
+
+Name: org/apache/batik/dom/svg/resources/svg-clip.mod
+SHA1-Digest: jZZLvu8poqgTpeEDDfM13BPKrHU=
+
+Name: org/apache/batik/dom/svg/SVGOMRadialGradientElement$1.class
+SHA1-Digest: 9EsGdU4LbIAHSVQUXdYjVA/MfGs=
+
+Name: org/apache/batik/dom/svg/SVGDOMImplementation$EllipseElementFact
+ ory.class
+SHA1-Digest: 4OWGDds1WeqyxhJUufBumji+A30=
+
+Name: org/apache/batik/dom/svg/resources/svg-style.mod
+SHA1-Digest: y3fSDXkN6asG5bBI16PIgHxUIK4=
+
+Name: org/apache/batik/dom/svg/SVGOMFilterPrimitiveStandardAttributes.
+ class
+SHA1-Digest: ISI/6urN8bnfztU4XEuvx5cJWb4=
+
+Name: org/apache/batik/dom/svg/SVGOMDefinitionSrcElement.class
+SHA1-Digest: OnDyMDcDshdu3GH6/5W1+6dnnvM=
+
+Name: org/apache/batik/dom/svg/SVGOMPathElement$7.class
+SHA1-Digest: s94EKDNtZ6cb78wjvqp0roBBVoM=
+

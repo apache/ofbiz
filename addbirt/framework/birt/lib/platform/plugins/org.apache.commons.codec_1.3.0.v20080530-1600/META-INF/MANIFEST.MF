@@ -1,0 +1,119 @@
+Manifest-Version: 1.0
+Bundle-Vendor: %bundleProvider
+Bundle-Localization: plugin
+Bundle-Name: %bundleName
+Bundle-SymbolicName: org.apache.commons.codec
+Export-Package: org.apache.commons.codec;version="1.3.0",org.apache.co
+ mmons.codec.binary;version="1.3.0",org.apache.commons.codec.digest;ve
+ rsion="1.3.0",org.apache.commons.codec.language;version="1.3.0",org.a
+ pache.commons.codec.net;version="1.3.0"
+Bundle-Version: 1.3.0.v20080530-1600
+Bundle-ClassPath: ../../../../../base/lib/commons/commons-codec-1.3.jar
+Bundle-ManifestVersion: 2
+
+Name: org/apache/commons/codec/language/DoubleMetaphone.class
+SHA1-Digest: bjBTI/BDV1z8+z3hEVApJvwkVM8=
+
+Name: org/apache/commons/codec/digest/DigestUtils.class
+SHA1-Digest: wq18yMHHBd1moTQ8AtyCMsGj95k=
+
+Name: org/apache/commons/codec/net/BCodec.class
+SHA1-Digest: ZJMl6QGO7uOd9kINQd85uxh0eTM=
+
+Name: org/apache/commons/codec/StringDecoder.class
+SHA1-Digest: RVPBToocCwWd/DUTajCAJgVGE30=
+
+Name: org/apache/commons/codec/binary/BinaryCodec.class
+SHA1-Digest: X+G48+0rT74WoI2DlI/Xq7F7PVw=
+
+Name: org/apache/commons/codec/net/QuotedPrintableCodec.class
+SHA1-Digest: pmfEzso5XtCeWq0S7qtZ9FY7oXY=
+
+Name: org/apache/commons/codec/binary/package.html
+SHA1-Digest: 5QhuWhHiab81vS0aJeia/Z8M1Mc=
+
+Name: org/apache/commons/codec/language/Soundex.class
+SHA1-Digest: 2oHgbHLMUtt0mwiCIkBWVv4Ww+o=
+
+Name: org/apache/commons/codec/binary/Hex.class
+SHA1-Digest: 3HCzfhHisCVj80SpQp9ocGLzQo0=
+
+Name: plugin.properties
+SHA1-Digest: TPF3gR0+r9XYebyNaf3SbSKDfYY=
+
+Name: org/apache/commons/codec/net/StringEncodings.class
+SHA1-Digest: qf4vuSsKwlYm8Pp74YiPdoYk3Yc=
+
+Name: org/apache/commons/codec/language/Metaphone.class
+SHA1-Digest: fqhTV44h+rFjtb4CZkhnGQTgIBc=
+
+Name: org/apache/commons/codec/EncoderException.class
+SHA1-Digest: 6noEPjvRMiZV64IvGDHX6rBE0wQ=
+
+Name: org/apache/commons/codec/language/package.html
+SHA1-Digest: NkP/cavbTwKhLLejSUFP7DxqVAU=
+
+Name: org/apache/commons/codec/StringEncoderComparator.class
+SHA1-Digest: IRFEQ/kBsYm/i70e2RJJ8QHpVgo=
+
+Name: org/apache/commons/codec/language/RefinedSoundex.class
+SHA1-Digest: 3zKeZeLMAzK9BXSEvumfEuwXsdI=
+
+Name: org/apache/commons/codec/net/QCodec.class
+SHA1-Digest: Qd4NFXllW2C1jmXCa0LRFG7iYis=
+
+Name: org/apache/commons/codec/BinaryDecoder.class
+SHA1-Digest: qzHigNqM9xLBAccuCZ5d7FSUgNI=
+
+Name: org/apache/commons/codec/Decoder.class
+SHA1-Digest: VZVllcafY4XPvWeVcKdNa3j9kB0=
+
+Name: org/apache/commons/codec/net/URLCodec.class
+SHA1-Digest: D5bYH0ZSxv78UFtvjj9Kf07WWDA=
+
+Name: about_files/LICENSE.txt
+SHA1-Digest: K4uBUimqimHkg/tLoFiLi2xJGJA=
+
+Name: org/apache/commons/codec/net/package.html
+SHA1-Digest: VPMJgkNKnhh/cdySG2xI+oBE8aY=
+
+Name: org/apache/commons/codec/StringEncoder.class
+SHA1-Digest: LH1NpQjcaYBGa1mUBbq8SNdPVGQ=
+
+Name: META-INF/eclipse.inf
+SHA1-Digest: KyT9FF7C7t86NoBoa2kZT3ZJBfw=
+
+Name: org/apache/commons/codec/digest/package.html
+SHA1-Digest: e9kZxTv+uxZfkn+xNcwp6XvJ+xA=
+
+Name: org/apache/commons/codec/package.html
+SHA1-Digest: IM3/K5MCXeG4gEjw3nDQyCI6Lic=
+
+Name: org/apache/commons/codec/overview.html
+SHA1-Digest: QIM760pmca/cNoXqOCkv3BESON4=
+
+Name: org/apache/commons/codec/DecoderException.class
+SHA1-Digest: XmTXvmZg0gnoiV5/nWkQrPG1Z6E=
+
+Name: about.html
+SHA1-Digest: +9ps3k00taYIS03ey1LoHmjQtUE=
+
+Name: org/apache/commons/codec/BinaryEncoder.class
+SHA1-Digest: GXKY4EGy4ZV/R0yj0BIuWDZUepo=
+
+Name: org/apache/commons/codec/Encoder.class
+SHA1-Digest: kAKKHUbN9ODIY2/yPFQL2X5sYZY=
+
+Name: org/apache/commons/codec/binary/Base64.class
+SHA1-Digest: UvrnxMTHeDSMHkjKqEWMD25OiDM=
+
+Name: org/apache/commons/codec/language/DoubleMetaphone$DoubleMetaphon
+ eResult.class
+SHA1-Digest: 2+fCLSjosqyBEQq/lRPCGAbQvZc=
+
+Name: org/apache/commons/codec/net/RFC1522Codec.class
+SHA1-Digest: ENgYuGeeCM+X1163jrpijwtBb6w=
+
+Name: org/apache/commons/codec/language/SoundexUtils.class
+SHA1-Digest: 1Yk9BLhjHuXvhtjAY/gtm5zGKKI=
+

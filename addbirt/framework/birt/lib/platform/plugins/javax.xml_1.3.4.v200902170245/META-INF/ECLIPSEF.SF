@@ -1,0 +1,971 @@
+Signature-Version: 1.0
+SHA1-Digest-Manifest: gSltc4kxgJcg9PNh6VRUOJzi2zY=
+Created-By: 1.6.0 (IBM Corporation)
+SHA1-Digest-Manifest-Main-Attributes: fLMl0tokAC6VDfVD8MqtNiOyQo8=
+
+Name: org/w3c/dom/html/HTMLStyleElement.class
+SHA1-Digest: SA8Hy4skSxi9q/Y14bkFjgrUvdo=
+
+Name: javax/xml/xpath/SecuritySupport$3.class
+SHA1-Digest: NQzO0UW1eCKn9wAFItP12A1qKsg=
+
+Name: org/w3c/dom/css/DOMImplementationCSS.class
+SHA1-Digest: fsOM7ZlOUUhTwdP4Eof43FYQ5E0=
+
+Name: org/w3c/dom/css/DocumentCSS.class
+SHA1-Digest: Vdi4lJPEzwO871hnRTo8D6P70fA=
+
+Name: javax/xml/parsers/SAXParser.class
+SHA1-Digest: rYn6Aa0LlXOYhTp9GS6dPNGsRM4=
+
+Name: about_files/LICENSE.dom-software.txt
+SHA1-Digest: V+RjtHqut3aT/TQBpcJAr46XAso=
+
+Name: org/w3c/dom/css/CSSPrimitiveValue.class
+SHA1-Digest: 66eDexSMHen0WKY9PvBFAEmn5t0=
+
+Name: org/w3c/dom/html/HTMLHtmlElement.class
+SHA1-Digest: BvbT2N6sSYBNsBk4aSydODWDspw=
+
+Name: javax/xml/transform/Templates.class
+SHA1-Digest: 7uy8B1dIw8A+wHUQU9sUJQoWEcQ=
+
+Name: org/w3c/dom/css/ElementCSSInlineStyle.class
+SHA1-Digest: 8QvSINHGhMUiKWltyVVPpJAGJI0=
+
+Name: org/xml/sax/DocumentHandler.class
+SHA1-Digest: MxxaJo9f6uGGm1Kyhig1puH4LAQ=
+
+Name: org/w3c/dom/html/HTMLPreElement.class
+SHA1-Digest: i0cTA6VMIHvIKLeDimXQebcZvjs=
+
+Name: org/w3c/dom/html/HTMLModElement.class
+SHA1-Digest: 1kAaYwyr2rrSkt01WkIml4jrPj8=
+
+Name: org/xml/sax/ErrorHandler.class
+SHA1-Digest: EKLPIR3A5itoRgi3mKHJQTzyWG0=
+
+Name: org/w3c/dom/ranges/RangeException.class
+SHA1-Digest: 7TvaKF60lcjdqII4v9E6bC2jKAg=
+
+Name: license/LICENSE.dom-documentation.txt
+SHA1-Digest: qFd6u50FKX3+6CcRB39OdoOsTVU=
+
+Name: org/w3c/dom/html/HTMLCollection.class
+SHA1-Digest: xQDXck9ZLDhugf/hW2EM5JV1Tr0=
+
+Name: org/w3c/dom/css/CSS2Properties.class
+SHA1-Digest: N114KU39y8WdHw2OwAjcZWMYXj4=
+
+Name: about_files/LICENSE.dom-documentation.txt
+SHA1-Digest: aUZ7RinJX8U7hnJdSA/d92Ds7rw=
+
+Name: org/w3c/dom/css/Counter.class
+SHA1-Digest: lm/Xcr6OfGbJmNZxdxcbE4oE3pM=
+
+Name: org/w3c/dom/html/HTMLSelectElement.class
+SHA1-Digest: fGqd5HlYW9yHLFdUDu1+QavrwH4=
+
+Name: org/w3c/dom/html/HTMLLinkElement.class
+SHA1-Digest: ThKgYlKbTJfdykDzOyDkeLliXls=
+
+Name: javax/xml/parsers/SecuritySupport$4.class
+SHA1-Digest: vfbshA7ZXrN6guEQCKON5DbcrYs=
+
+Name: javax/xml/validation/SchemaFactoryFinder$2.class
+SHA1-Digest: FA8nf0O3S5TV3/Fua3EOi85bTm4=
+
+Name: org/w3c/dom/css/CSSValue.class
+SHA1-Digest: aVdaQ6MHngSrnx+Ixhiotkqf0+s=
+
+Name: org/xml/sax/helpers/XMLReaderAdapter$AttributesAdapter.class
+SHA1-Digest: xPV9hv0sSyezhUqzL3vIWzFoTIM=
+
+Name: javax/xml/validation/SecuritySupport$5.class
+SHA1-Digest: fEMgN/R0lgPyRm39aJLBYubHsMM=
+
+Name: org/w3c/dom/Element.class
+SHA1-Digest: Vu+V5YR/PvZN+PyDv/keLlnJ558=
+
+Name: javax/xml/validation/TypeInfoProvider.class
+SHA1-Digest: 03uFp1DcI8TUKfFOFZvWqIaeOBY=
+
+Name: org/xml/sax/helpers/XMLReaderFactory.class
+SHA1-Digest: 022/Ep3dPzCUsYyWCvJQsUbg8UA=
+
+Name: org/w3c/dom/html/HTMLDListElement.class
+SHA1-Digest: gBSsD9yBPYhr6nHjeaF3nBzkoV0=
+
+Name: org/xml/sax/helpers/SecuritySupport12$1.class
+SHA1-Digest: gpKVzEz+3LlLf6ysInX35SizcdE=
+
+Name: org/w3c/dom/DocumentFragment.class
+SHA1-Digest: DYCE8EZsiSM945CtO9V9sXlkdTw=
+
+Name: about_files/README.sax.txt
+SHA1-Digest: XyI6WGS+7j4ZfFXOHwciyOJJAeg=
+
+Name: org/w3c/dom/css/CSSRuleList.class
+SHA1-Digest: 3DQLZam4SoekjlyC6JPzieiXGTE=
+
+Name: org/w3c/dom/html/HTMLTextAreaElement.class
+SHA1-Digest: 7pkOxPSfzf8SRUES6JIhD39lvPo=
+
+Name: javax/xml/datatype/SecuritySupport.class
+SHA1-Digest: YTqrHKo/+hTeV+MEfCSRZFN/axY=
+
+Name: javax/xml/xpath/XPathFactoryFinder.class
+SHA1-Digest: gCwSF93+KrYDbP/DkQ4RNmIRJPU=
+
+Name: org/w3c/dom/html/HTMLUListElement.class
+SHA1-Digest: JXDENP1+rOOlOgDl/baBxmKg1t0=
+
+Name: org/w3c/dom/html/HTMLTableCellElement.class
+SHA1-Digest: aWm4DoYdG/PSnE2dKLTHXFqgGSY=
+
+Name: javax/xml/xpath/SecuritySupport$8.class
+SHA1-Digest: jTfOd3F36x+kXkeXiWbvszmqJ8w=
+
+Name: org/w3c/dom/bootstrap/DOMImplementationRegistry$4.class
+SHA1-Digest: 3XZ17YlEBGsVBQALT34bbSnhyic=
+
+Name: javax/xml/parsers/SecuritySupport.class
+SHA1-Digest: DqijPxBv3fvO+XCt5oDB6EzHprA=
+
+Name: javax/xml/datatype/SecuritySupport$3.class
+SHA1-Digest: nAEnPmp+5mvMdb4th2oA7OWLRms=
+
+Name: org/xml/sax/Parser.class
+SHA1-Digest: 0g39z4hj5KsTHRRZ0YAcmlBFz24=
+
+Name: org/w3c/dom/ranges/DocumentRange.class
+SHA1-Digest: TdkFEBQObCuKgg+DpYMAl9rs51Q=
+
+Name: license/LICENSE
+SHA1-Digest: FfLNaR6epjgbyiX1YFl9EAz7a6I=
+
+Name: javax/xml/transform/SecuritySupport$3.class
+SHA1-Digest: g52jmpv4mEFjI04dnHu82PCp++Q=
+
+Name: javax/xml/transform/sax/SAXSource.class
+SHA1-Digest: x64UckBrJn0xNNabYzrUwkTyFF4=
+
+Name: javax/xml/datatype/Duration.class
+SHA1-Digest: 1AxHpDDaVqa1KVPE7MYthM/ObRw=
+
+Name: javax/xml/parsers/SecuritySupport$1.class
+SHA1-Digest: sFtlhOWFUsQzL3pa2aAlWamPeSI=
+
+Name: org/w3c/dom/css/Rect.class
+SHA1-Digest: Oh+YCbMiA6yLEYTNlAAca+jDHhc=
+
+Name: javax/xml/transform/Result.class
+SHA1-Digest: A1ZLm8VSH+7bUI9tLeKLLQMw5/Y=
+
+Name: org/w3c/dom/CharacterData.class
+SHA1-Digest: QQvaAkKIm3ZVuJIg2dG5acBQGMA=
+
+Name: javax/xml/datatype/FactoryFinder.class
+SHA1-Digest: YQ7fNoLOvtEIoZJ3p0qgpNDkZYQ=
+
+Name: javax/xml/validation/SecuritySupport$2.class
+SHA1-Digest: 6/o0gYa1WXla/wyorGoJJZ5+eaY=
+
+Name: org/w3c/dom/ls/LSSerializerFilter.class
+SHA1-Digest: wINlXUUZyOnKIzoI8fSLLabqdYI=
+
+Name: org/w3c/dom/events/MutationEvent.class
+SHA1-Digest: nMIECbZHhxQYkFDUHULGqnCOgaE=
+
+Name: license/NOTICE
+SHA1-Digest: VfISS/5DLWpjZTEAv6768WtfFm4=
+
+Name: org/xml/sax/InputSource.class
+SHA1-Digest: rJquzf8/IU1tac+yS81nSna4/uw=
+
+Name: org/w3c/dom/html/HTMLAreaElement.class
+SHA1-Digest: 7hSsuyzTE/KUZ2/9jIzZ6CgTq8Q=
+
+Name: org/w3c/dom/Node.class
+SHA1-Digest: aEckoUYTrq8QZVgcf9Ku30JyMfk=
+
+Name: org/w3c/dom/Notation.class
+SHA1-Digest: HaHSEAiO/N4bP9Af7071E8JCgOU=
+
+Name: javax/xml/parsers/ParserConfigurationException.class
+SHA1-Digest: DLnTFlA9TzV8VlaBIBpiQH3SmZE=
+
+Name: org/xml/sax/ext/Attributes2Impl.class
+SHA1-Digest: O5zsnvy8XeuAsRWwR14qdpLglNA=
+
+Name: org/xml/sax/ext/DeclHandler.class
+SHA1-Digest: fGwA8XfLk274gpfz9NMOp+yuKmA=
+
+Name: org/w3c/dom/html/HTMLElement.class
+SHA1-Digest: oBvuXV9tphyu0JsVMVuJC56o3gg=
+
+Name: javax/xml/parsers/FactoryConfigurationError.class
+SHA1-Digest: QUDn3nN45BRJ10x5EliuEf2IF3k=
+
+Name: javax/xml/xpath/XPathFactory.class
+SHA1-Digest: 9n3Wiw2SiFwgy88uw0dyO374T8g=
+
+Name: org/xml/sax/ext/Locator2.class
+SHA1-Digest: whhvxyroyUHHhk2AlhQNyps7Ejg=
+
+Name: javax/xml/xpath/XPathException.class
+SHA1-Digest: ioqC4dPryohuLj+vk9BhePKiy80=
+
+Name: org/w3c/dom/stylesheets/StyleSheet.class
+SHA1-Digest: 60nMKTgOMWn+a+TKPhgU8PN3NNc=
+
+Name: javax/xml/xpath/SecuritySupport$5.class
+SHA1-Digest: UAenCYxmofAS0TxynIGQy7/kkDU=
+
+Name: org/w3c/dom/bootstrap/DOMImplementationRegistry$1.class
+SHA1-Digest: 0GjUn8fRwtLU4E6bAS82bckA2hE=
+
+Name: org/xml/sax/SAXParseException.class
+SHA1-Digest: PCamlvIZYlfLzqkHGl/n0s4YcOs=
+
+Name: javax/xml/transform/TransformerConfigurationException.class
+SHA1-Digest: /vJhZqUf2k2GJx4ZoK9oDf8Y7+Y=
+
+Name: org/w3c/dom/html/HTMLInputElement.class
+SHA1-Digest: MUasoUOWw5cK5GyySzW9ruf0GOM=
+
+Name: org/w3c/dom/xpath/XPathEvaluator.class
+SHA1-Digest: ns0h0gFwOdSflDAOTbvfHF/9jo8=
+
+Name: license/LICENSE.dom-software.txt
+SHA1-Digest: oLM7ClH7MMLTJs3zCk4xI48RQBI=
+
+Name: org/w3c/dom/html/HTMLDocument.class
+SHA1-Digest: E6jDTKo+csmob+2w5Hs+TGGVpDw=
+
+Name: javax/xml/validation/SchemaFactoryFinder.class
+SHA1-Digest: 4VuIxqb0SkHDxjchCx4GLo3G2Fw=
+
+Name: org/w3c/dom/stylesheets/LinkStyle.class
+SHA1-Digest: Fnj9QMH5+dXNMXg/89j/bSmkDR4=
+
+Name: org/w3c/dom/html/HTMLBaseFontElement.class
+SHA1-Digest: VUyd+x2KQqnOOsxLSd4QW9IBIRU=
+
+Name: org/w3c/dom/css/CSSUnknownRule.class
+SHA1-Digest: cOXHmWMhUFcNy8i2yaGlOk9Gv7o=
+
+Name: org/w3c/dom/html/HTMLImageElement.class
+SHA1-Digest: 4qVkNVH3Iz3YG5EmxVxPsxIsGpQ=
+
+Name: org/w3c/dom/DOMStringList.class
+SHA1-Digest: CJSjs3q9P27cCIl0Ull+vnYAcGc=
+
+Name: org/xml/sax/HandlerBase.class
+SHA1-Digest: 3VICZayxZxXabUQgsHBXMUtuk3I=
+
+Name: javax/xml/namespace/QName.class
+SHA1-Digest: bIMiVIWqi1J7uliIFAi7teftEkQ=
+
+Name: org/w3c/dom/events/EventListener.class
+SHA1-Digest: 7ZksJdemNigf88wVREG/6TS/qVc=
+
+Name: META-INF/eclipse.inf
+SHA1-Digest: SAqY+5ITAL0mkdYeijlSRhyIaZk=
+
+Name: javax/xml/transform/FactoryFinder$ConfigurationError.class
+SHA1-Digest: UaXU3LICaV/egHmeN+kqcWyWBK8=
+
+Name: org/w3c/dom/html/HTMLBaseElement.class
+SHA1-Digest: CRpUwmP+8vIV7CRjeBgCHyEOPnc=
+
+Name: javax/xml/validation/SecuritySupport$7.class
+SHA1-Digest: 4R6VajksPaaF40wh+p7NrIcjtE4=
+
+Name: org/w3c/dom/html/HTMLParamElement.class
+SHA1-Digest: oQqW36B4GrOJYLpNuB4Pcyud+F8=
+
+Name: javax/xml/transform/URIResolver.class
+SHA1-Digest: p6hfIQ0jPUMYs+fOdtfS4eq3aNU=
+
+Name: org/w3c/dom/html/HTMLLegendElement.class
+SHA1-Digest: tOC+v+BBNgiId+A7OPcpdpZ6cD8=
+
+Name: org/w3c/dom/html/HTMLScriptElement.class
+SHA1-Digest: CnJ5PCeNZ2Lxj1TJv+8K8Nf/Wnc=
+
+Name: org/w3c/dom/xpath/XPathException.class
+SHA1-Digest: N5wcm4WQW7ieX6dZgr7SCVyGnHc=
+
+Name: org/xml/sax/ext/Attributes2.class
+SHA1-Digest: IjoUC1GEF2uguai33/8WsZBs68g=
+
+Name: org/xml/sax/helpers/XMLReaderAdapter.class
+SHA1-Digest: w3cGXZmQqbmZZv6OqD8LAAJDOME=
+
+Name: org/w3c/dom/events/DocumentEvent.class
+SHA1-Digest: i1u/O8krw1Zlw/uJsz9KLIxI6/c=
+
+Name: org/w3c/dom/events/EventException.class
+SHA1-Digest: vMeZqMi226DE3+f11EBBOGg8H6s=
+
+Name: org/xml/sax/helpers/SecuritySupport12$3.class
+SHA1-Digest: XQ6gKy1XfR1OL6OS5P+WfEyfcRg=
+
+Name: org/w3c/dom/html/HTMLObjectElement.class
+SHA1-Digest: 4twOY1vwdATRrenjGXeEu/6WO6o=
+
+Name: org/w3c/dom/xpath/XPathNamespace.class
+SHA1-Digest: 4O+gPjgYpeTD857kGo6RMZoupaU=
+
+Name: org/w3c/dom/html/HTMLTitleElement.class
+SHA1-Digest: syAFqZckb9DIWDJ5UxjnExAYGF4=
+
+Name: org/w3c/dom/DOMImplementation.class
+SHA1-Digest: YlJKcLUrBdfmnETfXxisXzYsOQk=
+
+Name: org/w3c/dom/events/EventTarget.class
+SHA1-Digest: GDBBKDZzJIolp/+cG5zimu606Ms=
+
+Name: org/w3c/dom/stylesheets/StyleSheetList.class
+SHA1-Digest: U8E9vL+RaRHfVMwq6O7Fk8GWKAU=
+
+Name: javax/xml/validation/SchemaFactoryLoader.class
+SHA1-Digest: 8Dnkk7JIYua3kUWGZlfCNbNMEAA=
+
+Name: org/xml/sax/helpers/ParserFactory.class
+SHA1-Digest: NU3+kRzNLcpGE7oZDH0N7wUM9N4=
+
+Name: javax/xml/xpath/SecuritySupport$2.class
+SHA1-Digest: WPClkyevQw2aYk+otSxysUba39Q=
+
+Name: org/w3c/dom/Document.class
+SHA1-Digest: XZhiwtEbcWpUGxzfD5jLjBH0M3Q=
+
+Name: org/xml/sax/helpers/SecuritySupport.class
+SHA1-Digest: EtHJ8KlV3TL+nnKRIV4TxsSWBa4=
+
+Name: plugin.properties
+SHA1-Digest: 7NZ5Wwfi+S6mp7ktEiKgVLZGT4c=
+
+Name: javax/xml/xpath/XPathFactoryFinder$2.class
+SHA1-Digest: 6k+f16F+gAuygwNZQKlkYzkM4sc=
+
+Name: org/w3c/dom/events/Event.class
+SHA1-Digest: YVvihfxiM6JvpqsoRsqHJTN50k8=
+
+Name: javax/xml/datatype/SecuritySupport$5.class
+SHA1-Digest: JyMcix295aXnR9XjYONp4VY+qEY=
+
+Name: org/xml/sax/XMLFilter.class
+SHA1-Digest: P6JH0ufiaxu74Kh2j3A49C3M0kA=
+
+Name: org/w3c/dom/EntityReference.class
+SHA1-Digest: QQo37TsG6vDGxsjTMUXcTuGKc8Y=
+
+Name: javax/xml/transform/OutputKeys.class
+SHA1-Digest: WHOEY7VnW10/+946PupsxV5ZnWE=
+
+Name: javax/xml/validation/SecuritySupport.class
+SHA1-Digest: K+xEl8itSyZYeNr5f66f9GNzLk4=
+
+Name: about_files/LICENSE.sax.txt
+SHA1-Digest: uO10bmuQL1hTf9z7mKKhOkNwTC0=
+
+Name: javax/xml/transform/SecuritySupport$5.class
+SHA1-Digest: Xd2oJIFj6K6555HQ/lOeI/xk6FQ=
+
+Name: javax/xml/parsers/SAXParserFactory.class
+SHA1-Digest: 7Su2OMHJqcsi943WMEPuUL9GCnA=
+
+Name: org/w3c/dom/html/HTMLMenuElement.class
+SHA1-Digest: y6kBiDKrXglEN78aKFxvggX/eZY=
+
+Name: javax/xml/transform/sax/SAXResult.class
+SHA1-Digest: RkFHu/s/rKEfsYWpZT06t+g4MRc=
+
+Name: javax/xml/validation/SchemaFactoryFinder$SingleIterator.class
+SHA1-Digest: GELViEHhxB6FVaErSRYbgDFj/mI=
+
+Name: javax/xml/parsers/SecuritySupport$3.class
+SHA1-Digest: loakTvYXg1Y/sZYb2NahcLYOXnc=
+
+Name: javax/xml/validation/SchemaFactoryFinder$1.class
+SHA1-Digest: E4AXRmOtJHHmO5RkhzOv0rlrHMY=
+
+Name: about_files/NOTICE
+SHA1-Digest: BsmiDEPPfMGYhOMaKuyX7Qx7e6o=
+
+Name: org/w3c/dom/html/HTMLDivElement.class
+SHA1-Digest: 0WG+kiHLIfUzP1ttFH6NAcaU/34=
+
+Name: javax/xml/validation/SecuritySupport$4.class
+SHA1-Digest: 0ykgdsGpeGk6Nf4hYPXwBuTNcX8=
+
+Name: org/xml/sax/helpers/SecuritySupport12.class
+SHA1-Digest: n+CW95/hiFj33Ojhh6xGL7itsy0=
+
+Name: org/w3c/dom/ls/LSProgressEvent.class
+SHA1-Digest: 5jOOlDuqYzo7FvWnMcaFY/pOpy0=
+
+Name: org/w3c/dom/css/CSSFontFaceRule.class
+SHA1-Digest: blK143CmFHMSoiSaY2QFGogPm9c=
+
+Name: javax/xml/transform/TransformerFactory.class
+SHA1-Digest: SP6MP1AY4DXfrJTzDeIjZeqDLy0=
+
+Name: javax/xml/transform/Transformer.class
+SHA1-Digest: uYupMvkVPx+zHkCtKBnaxkxpqzI=
+
+Name: org/w3c/dom/ls/LSParserFilter.class
+SHA1-Digest: AdFEXClfZCO76z52UN5O+rJofJ4=
+
+Name: javax/xml/validation/Schema.class
+SHA1-Digest: kWZ2wzeXet5Ga8sarZ2OPhyqdO4=
+
+Name: org/w3c/dom/xpath/XPathResult.class
+SHA1-Digest: bAJioG+bdPSyLorqBvAgyeT2tMM=
+
+Name: org/w3c/dom/TypeInfo.class
+SHA1-Digest: hRgGxCpakq4wRjF+48G7PcxFOLo=
+
+Name: org/w3c/dom/NameList.class
+SHA1-Digest: tcfKQRMv1/mW5ZZTjyrD9+GxfCA=
+
+Name: org/w3c/dom/DOMImplementationList.class
+SHA1-Digest: zpeRQk4+FkW/HYEUmbX8g9gm5R8=
+
+Name: org/xml/sax/ext/DefaultHandler2.class
+SHA1-Digest: YEXFcrGzCnyEble0QjalzCC4hUE=
+
+Name: org/w3c/dom/ls/DOMImplementationLS.class
+SHA1-Digest: t9XOz0AHtPbeT+q9XKHu+8MniFs=
+
+Name: org/w3c/dom/html/HTMLTableSectionElement.class
+SHA1-Digest: quphjeS7WT6zvXSh1kzqnvPzuIE=
+
+Name: javax/xml/transform/TransformerFactoryConfigurationError.class
+SHA1-Digest: qOIGMRsHGBzgj692aioMPEUUQJI=
+
+Name: org/w3c/dom/html/HTMLAnchorElement.class
+SHA1-Digest: Azyzwvn2at2rNKOUcYpwehtxUxY=
+
+Name: javax/xml/namespace/NamespaceContext.class
+SHA1-Digest: q/vL0C66v6v54zbslYSLUHKrMr4=
+
+Name: javax/xml/transform/dom/DOMSource.class
+SHA1-Digest: yQ6Sm7qOAitjQ1sOFBWU9oAfgk4=
+
+Name: javax/xml/xpath/XPathVariableResolver.class
+SHA1-Digest: Vs4iqouhdWN0RMkLrO4Ot0JlQAw=
+
+Name: org/xml/sax/helpers/XMLFilterImpl.class
+SHA1-Digest: P+y3PdyY8bQ6DaRYv8ULGFhZ4go=
+
+Name: org/w3c/dom/html/HTMLTableElement.class
+SHA1-Digest: nnsk8UIn+6180ctCumAyhaXxZ7k=
+
+Name: javax/xml/xpath/SecuritySupport$7.class
+SHA1-Digest: LrxXM3hY9npUKRvaCs4ZmCnHFWg=
+
+Name: org/w3c/dom/bootstrap/DOMImplementationRegistry$3.class
+SHA1-Digest: jWtsALdVk8EHbcXRe0b0naHzzGk=
+
+Name: javax/xml/datatype/SecuritySupport$2.class
+SHA1-Digest: AJ9pwRTcaE1yQ71NkUuyYxIhHgM=
+
+Name: org/w3c/dom/ls/LSLoadEvent.class
+SHA1-Digest: Eo4jl850yvo657r8MD2Qf44zuJs=
+
+Name: javax/xml/datatype/DatatypeConstants$Field.class
+SHA1-Digest: OEGmjg33iRJTTxC30JXjMGwEdAc=
+
+Name: license/README.dom.txt
+SHA1-Digest: OYaDz50a0nUVkoKIhQ6PbtjVv+k=
+
+Name: javax/xml/transform/SecuritySupport$2.class
+SHA1-Digest: 941dC/OOMViawqcVcSAJwf9uugw=
+
+Name: javax/xml/datatype/DatatypeFactory.class
+SHA1-Digest: K8m9/JHnx6lkfbzRsHI5PORiFnQ=
+
+Name: org/w3c/dom/html/HTMLQuoteElement.class
+SHA1-Digest: +Jc9JXf35EjJbAvoiWCrIL7Iqkg=
+
+Name: javax/xml/datatype/DatatypeConstants.class
+SHA1-Digest: gjsn+BdkM4UkhpFKbjk4BsrBq6o=
+
+Name: org/w3c/dom/Attr.class
+SHA1-Digest: HCmxKmYK4kzwhmHttVsudpnWRVg=
+
+Name: org/w3c/dom/css/CSSCharsetRule.class
+SHA1-Digest: xrGSz9bGCDe95Q3u0hGqwDVVrYQ=
+
+Name: javax/xml/parsers/FactoryFinder$ConfigurationError.class
+SHA1-Digest: h2mG6BeANPl2D9k3eP4+rPJt9uk=
+
+Name: javax/xml/parsers/DocumentBuilder.class
+SHA1-Digest: wKcokCYl3rWqJ2I8bowFXB7qCns=
+
+Name: javax/xml/transform/dom/DOMLocator.class
+SHA1-Digest: 01I891Xaz/VcavacuMloXv9ARIw=
+
+Name: org/w3c/dom/DocumentType.class
+SHA1-Digest: S2h9jRP7+tJBr0ynuSEZhJo03Vk=
+
+Name: javax/xml/validation/SecuritySupport$1.class
+SHA1-Digest: Utow9kKnDPaSVlrQFANdnMWpIEg=
+
+Name: org/w3c/dom/stylesheets/MediaList.class
+SHA1-Digest: E3mFXeNkVEzr/LuwOUF0vPjH/as=
+
+Name: org/xml/sax/helpers/NewInstance.class
+SHA1-Digest: STQgyziPidfTGWSmJmOqlK56SOo=
+
+Name: org/xml/sax/helpers/NamespaceSupport.class
+SHA1-Digest: 5kERCMZp/+WDG16nRxgavLM2v9o=
+
+Name: org/xml/sax/helpers/AttributeListImpl.class
+SHA1-Digest: gG+6KD/hlYXBgJHZkmQxMw+IzCs=
+
+Name: org/xml/sax/SAXException.class
+SHA1-Digest: Xp5tCWdSgDZ5unNDBOtJKSWCKGU=
+
+Name: org/w3c/dom/ls/LSOutput.class
+SHA1-Digest: zBPtaQ+O6OV71TydFoqqls9TieA=
+
+Name: org/w3c/dom/events/UIEvent.class
+SHA1-Digest: tG2EOHBDHtJDt68nWjcMU/gdn3M=
+
+Name: javax/xml/transform/stream/StreamSource.class
+SHA1-Digest: rRJMlykLMaRDOa2p8TRN05nNGjE=
+
+Name: org/w3c/dom/html/HTMLOptionElement.class
+SHA1-Digest: zysDyZEpg51ESL2fM+qmhFvDJr8=
+
+Name: org/xml/sax/ContentHandler.class
+SHA1-Digest: n1amFhltqMHGWx4mDu0xYdOQOoc=
+
+Name: javax/xml/xpath/SecuritySupport$4.class
+SHA1-Digest: DPhavqCK84NBGsgKgj1DTFNVY/o=
+
+Name: javax/xml/xpath/XPathExpressionException.class
+SHA1-Digest: q7hXRw4nJ8q2impkv8Uml40TyXE=
+
+Name: org/xml/sax/helpers/ParserAdapter.class
+SHA1-Digest: 8xYOJ2FMj4C9r833kLvzBx9gHWc=
+
+Name: org/w3c/dom/html/HTMLDirectoryElement.class
+SHA1-Digest: tqc/Gox6R8wX8Q5TVsAQ6sp08qE=
+
+Name: org/w3c/dom/Comment.class
+SHA1-Digest: fxhP3vq/c6EqmEkLgXx6W14ipCk=
+
+Name: org/w3c/dom/css/CSSStyleDeclaration.class
+SHA1-Digest: cQHc+iqLd/QBITluLMBXS56/rQo=
+
+Name: org/w3c/dom/html/HTMLOptGroupElement.class
+SHA1-Digest: UBl40iJC23aJvF4qsqfGhNXWlIc=
+
+Name: org/w3c/dom/html/HTMLFieldSetElement.class
+SHA1-Digest: /gRaCGeG5Ra8qysFAKjDMPuND6M=
+
+Name: about_files/LICENSE.DOM-software.html
+SHA1-Digest: 0s5XUUJ0hBL6zDAMmebWGcLZDhA=
+
+Name: org/w3c/dom/DOMError.class
+SHA1-Digest: 5V1ktQgyP/YndlIk3InbR8qDwmY=
+
+Name: javax/xml/transform/SourceLocator.class
+SHA1-Digest: mTV4cfu6qb4Y1hXVyPwMX36QNnY=
+
+Name: about_files/LICENSE
+SHA1-Digest: BPGcVt6OZEy6kl/cMdS74u9zu1E=
+
+Name: org/w3c/dom/DOMException.class
+SHA1-Digest: msBQSMv0Ss6nMC5sEATlDJwTihU=
+
+Name: org/w3c/dom/Text.class
+SHA1-Digest: zVc0RCNopg+CkwIVcQnRyRFi8Yw=
+
+Name: javax/xml/parsers/SecuritySupport$5.class
+SHA1-Digest: RiGkrNC9U6n/FetQo7P5tHcO1W8=
+
+Name: javax/xml/transform/stream/FilePathToURI.class
+SHA1-Digest: aWZ7xD2aW9cotkuiaJ8rrrYQFLs=
+
+Name: about_files/LICENSE.DOM-documentation.html
+SHA1-Digest: jyCzgysSz0jhHB2UPu0dlYoJLIk=
+
+Name: javax/xml/xpath/XPathFunctionResolver.class
+SHA1-Digest: dNL8B24KxZjrmEDACDBXEbOx3hU=
+
+Name: org/w3c/dom/css/CSSValueList.class
+SHA1-Digest: z1WJI2kj5cNK+MxdsQuQSPh2g/Q=
+
+Name: org/w3c/dom/ProcessingInstruction.class
+SHA1-Digest: 4c0mZGKkc7cwNTt8YVlzarXUiBY=
+
+Name: org/xml/sax/ext/LexicalHandler.class
+SHA1-Digest: jDVUZLDqtQsa3J8fGS5Q/3Kb+48=
+
+Name: javax/xml/validation/SecuritySupport$6.class
+SHA1-Digest: CJs3OfaI9Dn0dkxBSRi+n6ZOnIw=
+
+Name: javax/xml/transform/FactoryFinder.class
+SHA1-Digest: /VNK6u5DaSOduJuUfmceBX5tNlQ=
+
+Name: javax/xml/validation/ValidatorHandler.class
+SHA1-Digest: AroYcq+78WyuVE7zcvINaIhuUnw=
+
+Name: javax/xml/datatype/FactoryFinder$ConfigurationError.class
+SHA1-Digest: HVXIRDx2O+2+cYwo0KvHwjsPhAE=
+
+Name: org/w3c/dom/traversal/NodeIterator.class
+SHA1-Digest: OtmCgg4msHzJzImfYGniJVD1nvQ=
+
+Name: about.html
+SHA1-Digest: Ursb4UgvocxmZoUXNeyWbdHOQ1E=
+
+Name: org/w3c/dom/ls/LSResourceResolver.class
+SHA1-Digest: rqCzNxYg8VVcdh/tQKB1Oab/KSc=
+
+Name: org/w3c/dom/html/HTMLHRElement.class
+SHA1-Digest: rN315xs/ZSHy0Jz03DBUGJW92Zs=
+
+Name: org/w3c/dom/ranges/Range.class
+SHA1-Digest: Ccfda68nytNgOBUzdK+bcdEKyGo=
+
+Name: javax/xml/transform/ErrorListener.class
+SHA1-Digest: ZRmEnSZ8QX5pBR6ojJK3WKro1M0=
+
+Name: org/w3c/dom/html/HTMLBodyElement.class
+SHA1-Digest: pyELrsL5zB97bjjFFqqw5DOcM7c=
+
+Name: org/xml/sax/helpers/SecuritySupport12$2.class
+SHA1-Digest: yo3se9dLIvBnL7fZk4eDTsy+3Og=
+
+Name: org/xml/sax/AttributeList.class
+SHA1-Digest: boAv3yQ+DSUyusLKkBwWolXVT8A=
+
+Name: org/w3c/dom/traversal/DocumentTraversal.class
+SHA1-Digest: hDfy7AGMwPof9VUpVYWBFf66rcc=
+
+Name: org/w3c/dom/css/CSSRule.class
+SHA1-Digest: 8gCt605Z7L6qyGSRTkx7FQpDoso=
+
+Name: org/w3c/dom/html/HTMLAppletElement.class
+SHA1-Digest: Th3HKd4RmtJaSLXRjLAgs7lsjqE=
+
+Name: javax/xml/xpath/XPathConstants.class
+SHA1-Digest: FYK1t1GpMUNnYloivzKDqFa9kIU=
+
+Name: org/w3c/dom/css/CSSStyleRule.class
+SHA1-Digest: EM7va+50+/HKztq3A5rwY/OEZ6g=
+
+Name: javax/xml/datatype/DatatypeConfigurationException.class
+SHA1-Digest: 9bulhQleQhnk/UUzzGcwJ2tthCo=
+
+Name: org/w3c/dom/CDATASection.class
+SHA1-Digest: 9uKlP3AwTQqxsJ2ILFx8KHqtYpg=
+
+Name: javax/xml/xpath/SecuritySupport$1.class
+SHA1-Digest: NjVasMGfw4JyRBr43Kr2qJJkuHE=
+
+Name: org/w3c/dom/ls/LSInput.class
+SHA1-Digest: 6nQIpgLejiuH0yo1gW687UCySbE=
+
+Name: javax/xml/xpath/XPathFunctionException.class
+SHA1-Digest: JcEso4/iYGSga942cJrZzoxo4Zk=
+
+Name: org/w3c/dom/html/HTMLOListElement.class
+SHA1-Digest: m4Mp09AwO8xuP5gEoDSZsFEblUw=
+
+Name: javax/xml/transform/dom/DOMResult.class
+SHA1-Digest: b1wa76bDLshmxGdQOtGM06Rfgbk=
+
+Name: org/xml/sax/Attributes.class
+SHA1-Digest: aP0DSjaYoMQaccH1bpoudvixxS0=
+
+Name: org/w3c/dom/views/DocumentView.class
+SHA1-Digest: YjxoNyooZB9N6nI/05ujZmqQ6p8=
+
+Name: org/w3c/dom/ls/LSSerializer.class
+SHA1-Digest: pFokKMwnLerpE9FL+cHABWj3FRE=
+
+Name: org/w3c/dom/css/RGBColor.class
+SHA1-Digest: Db0gMxzQuv5iU8LUqJSj2dWA+2I=
+
+Name: org/w3c/dom/html/HTMLIsIndexElement.class
+SHA1-Digest: zHx8Li7E3Ij2KOyjSteGW9khiu8=
+
+Name: javax/xml/xpath/XPathFactoryFinder$1.class
+SHA1-Digest: TLyrKVShaDf9DIdtiiHLWlsDZwU=
+
+Name: org/w3c/dom/Entity.class
+SHA1-Digest: AiNxdtqB76pIicNDygbrX4V/SxM=
+
+Name: about_files/README.dom.txt
+SHA1-Digest: eHd5tQrCNszBBKEA+IUof9A0VWw=
+
+Name: org/w3c/dom/traversal/TreeWalker.class
+SHA1-Digest: +pQWgmwSWMuLnKAWLXJf8aXKL1c=
+
+Name: javax/xml/datatype/SecuritySupport$4.class
+SHA1-Digest: EuPF3lE7U6FA1K4IwHmRYaB5q8o=
+
+Name: org/xml/sax/helpers/AttributesImpl.class
+SHA1-Digest: pqSY3FVRghMzvmQdIi6PlO28HAg=
+
+Name: org/w3c/dom/html/HTMLIFrameElement.class
+SHA1-Digest: fhXv7j9trfnVDhOsL9saMQbsePk=
+
+Name: org/w3c/dom/html/HTMLHeadingElement.class
+SHA1-Digest: dRACuUqmWpQqKcqh123jVuw9onA=
+
+Name: org/w3c/dom/html/HTMLFormElement.class
+SHA1-Digest: w6TGIThTUnmWLTA9da9yaa7oPrA=
+
+Name: javax/xml/transform/SecuritySupport$4.class
+SHA1-Digest: ZgCVTnDedlSZPjCz1JoCdt+kkqM=
+
+Name: org/apache/xmlcommons/Version.class
+SHA1-Digest: 7hQpxvn5C/Xj/0xHEdsHX+1ELcw=
+
+Name: javax/xml/parsers/SecuritySupport$2.class
+SHA1-Digest: g3VHa1bLGr28yUN7elSDhnw0zIY=
+
+Name: org/xml/sax/SAXNotSupportedException.class
+SHA1-Digest: rZJ3OLpESmkClSspi0L1Vg4EoZ4=
+
+Name: org/w3c/dom/html/HTMLTableCaptionElement.class
+SHA1-Digest: WPdKRlhp6nNQERWYasTE+kIpbmQ=
+
+Name: org/w3c/dom/xpath/XPathNSResolver.class
+SHA1-Digest: QcKsesQX2aQ0yNcJIz5tEhQA4fM=
+
+Name: org/w3c/dom/html/HTMLLabelElement.class
+SHA1-Digest: 3+lhbcMYYj89n2ykbYk75bYV3J4=
+
+Name: javax/xml/validation/SecuritySupport$3.class
+SHA1-Digest: 1ORCeOkeQ+MTOmDCywQH8Tm72uw=
+
+Name: org/xml/sax/helpers/ParserAdapter$AttributeListAdapter.class
+SHA1-Digest: 1GG9GQ9Dzx/XVlTVh3yZrAq1YWk=
+
+Name: org/w3c/dom/html/HTMLButtonElement.class
+SHA1-Digest: i7KVu3ZwK7xfUMM4b+w6K5olbVc=
+
+Name: javax/xml/datatype/DatatypeConstants$1.class
+SHA1-Digest: pdIzTOXzor905N7XTtk8SsW12h0=
+
+Name: org/w3c/dom/NodeList.class
+SHA1-Digest: 1kfkoPlVSPsZJ6iPjmxLskvXz9I=
+
+Name: org/w3c/dom/html/HTMLTableRowElement.class
+SHA1-Digest: gVF68qQBtSDpBcQg/depq4f6KVs=
+
+Name: org/w3c/dom/NamedNodeMap.class
+SHA1-Digest: PYHfAsAOwxlUskNV9rv1ETWi748=
+
+Name: org/w3c/dom/xpath/XPathExpression.class
+SHA1-Digest: 6EJQQshTn5GbvI5hpGCJ/BTwwd8=
+
+Name: javax/xml/namespace/QName$1.class
+SHA1-Digest: Z+QkvFkD8DrTJSGkxpNUQ49x0D8=
+
+Name: javax/xml/xpath/XPathFactoryFinder$SingleIterator.class
+SHA1-Digest: Mbq/HnwUlYNnWa6Lp1IRbQrXVQk=
+
+Name: org/w3c/dom/DOMErrorHandler.class
+SHA1-Digest: PurRjiiIeVbK0febJHNfJsph/Hs=
+
+Name: org/xml/sax/SAXNotRecognizedException.class
+SHA1-Digest: 1sJ+witJD2nlTmBXG4BhkKRVNNo=
+
+Name: javax/xml/XMLConstants.class
+SHA1-Digest: 7A5iOqxvFEBkBQSwgQ9XFjo+nJk=
+
+Name: javax/xml/transform/sax/TransformerHandler.class
+SHA1-Digest: N9VWGXdbVfCiY7iWUcfDrP/KgWQ=
+
+Name: javax/xml/transform/TransformerException.class
+SHA1-Digest: ke3BoWjzPi5yxd2woPBCSWJyRx4=
+
+Name: org/w3c/dom/traversal/NodeFilter.class
+SHA1-Digest: lGtlB+o/fg6PR86B8T4hfv6T/x0=
+
+Name: javax/xml/xpath/SecuritySupport.class
+SHA1-Digest: roZyx9Mr/KuKy7Bh4q+Nzo3g61A=
+
+Name: javax/xml/validation/Validator.class
+SHA1-Digest: CsMPdtMrcjPtwMcg00n3cnvZTqU=
+
+Name: org/xml/sax/Locator.class
+SHA1-Digest: EBfPWdT1CJYZbVtASdn3LK0JeW8=
+
+Name: org/w3c/dom/DOMImplementationSource.class
+SHA1-Digest: gLJh++/WrwurPSkzaSiyAxzTx1Y=
+
+Name: license/README.sax.txt
+SHA1-Digest: oUoZkeSLQi9y96joRSW7PyL9ub0=
+
+Name: org/w3c/dom/bootstrap/DOMImplementationRegistry.class
+SHA1-Digest: W0PKNEvIO7VAtNnMeim3loANsX0=
+
+Name: org/xml/sax/EntityResolver.class
+SHA1-Digest: s+VGppfdXoU+RgvbUG8dVYLpFp0=
+
+Name: org/xml/sax/ext/Locator2Impl.class
+SHA1-Digest: X2xspWLmcSni7OLkH7Q08QBBdPE=
+
+Name: javax/xml/xpath/XPathFunction.class
+SHA1-Digest: XajqZXJrL2Lt3I5BcRekiI2AEa8=
+
+Name: org/w3c/dom/css/ViewCSS.class
+SHA1-Digest: xtf4vVv0nA43cUGuRkql/c1jy+U=
+
+Name: org/xml/sax/ext/EntityResolver2.class
+SHA1-Digest: YG8q7AxYQOZNSQMKvBOVkNO6cUY=
+
+Name: org/w3c/dom/DOMConfiguration.class
+SHA1-Digest: QWVNxqt0PqvvtqfX/hyWvfQG6L8=
+
+Name: org/w3c/dom/html/HTMLFrameSetElement.class
+SHA1-Digest: 1ExDirOgPFERB/kzrwOqLQxSxdg=
+
+Name: javax/xml/transform/stream/StreamResult.class
+SHA1-Digest: DOlDowsMRYOzPaPGkEYhdjFfGXQ=
+
+Name: org/w3c/dom/css/CSSImportRule.class
+SHA1-Digest: UbJZMueQt/G0z8OUT3TIw6DTS20=
+
+Name: javax/xml/xpath/XPath.class
+SHA1-Digest: BIiy9HKoXOua1/lXxk6thdkaOas=
+
+Name: org/xml/sax/helpers/DefaultHandler.class
+SHA1-Digest: MXsySZT9ZgrM+PQFz4CBSrumCaE=
+
+Name: org/w3c/dom/html/HTMLTableColElement.class
+SHA1-Digest: 7/m9dojnoj48X2aadCPqwCXHlHk=
+
+Name: javax/xml/transform/SecuritySupport.class
+SHA1-Digest: eK6IM8zab81NZQjPUGYp0r3UTwA=
+
+Name: org/xml/sax/DTDHandler.class
+SHA1-Digest: LVjOopKrMFAcZ+lLLzPBTXWE/wY=
+
+Name: org/w3c/dom/html/HTMLFrameElement.class
+SHA1-Digest: Xk+o+ju6MHORbT7qRh52WWzVL2Y=
+
+Name: javax/xml/xpath/SecuritySupport$6.class
+SHA1-Digest: Q3j0BSdt2ehsXKPJKqxV5YISzyI=
+
+Name: org/w3c/dom/bootstrap/DOMImplementationRegistry$2.class
+SHA1-Digest: b2Azl+v0DLa/bUIrvdYBfo68oxM=
+
+Name: org/w3c/dom/ls/LSException.class
+SHA1-Digest: q72pgiJccbyIKhXirzC0ucgDkcg=
+
+Name: javax/xml/datatype/SecuritySupport$1.class
+SHA1-Digest: chwUmDkYzzGHH2i8NbZGs4d8QIs=
+
+Name: javax/xml/validation/SchemaFactory.class
+SHA1-Digest: IcNpKmG7FAdiLGEA0Uq4ZPoVes8=
+
+Name: javax/xml/parsers/FilePathToURI.class
+SHA1-Digest: yi6x3c5tg4etYYjVrUu/Ri+ROvQ=
+
+Name: license/LICENSE.sax.txt
+SHA1-Digest: dzQoX3BdlNH1njQ1vHBBguTZbjc=
+
+Name: org/w3c/dom/views/AbstractView.class
+SHA1-Digest: Bc1U1LkmZyaEQaitk3CXN3nTabw=
+
+Name: javax/xml/transform/SecuritySupport$1.class
+SHA1-Digest: AzKmsTKDF9hTIUNT3fqFAuTLre8=
+
+Name: javax/xml/xpath/XPathFactoryConfigurationException.class
+SHA1-Digest: qxZqznWolvBnT/eB0eU61itPUjo=
+
+Name: javax/xml/transform/sax/TemplatesHandler.class
+SHA1-Digest: 6vsQsD2ddKBoGbuPIadNm/8+7Qw=
+
+Name: org/w3c/dom/events/MouseEvent.class
+SHA1-Digest: bcJDYG9UqtMfAxiAOL+C0moJkRs=
+
+Name: org/w3c/dom/stylesheets/DocumentStyle.class
+SHA1-Digest: yfX/eHT/su5lpPVgNEbqTMcR1k8=
+
+Name: org/w3c/dom/ls/LSParser.class
+SHA1-Digest: gPsdAjsC9WlynCUZZnUOvPaK0K4=
+
+Name: javax/xml/transform/Source.class
+SHA1-Digest: QG4oejkoJV2jDm7mMWsdgBw9lD4=
+
+Name: org/w3c/dom/html/HTMLLIElement.class
+SHA1-Digest: eeFTTz2Ke7g7ScK3Kf3q9bI40CQ=
+
+Name: org/xml/sax/helpers/NamespaceSupport$Context.class
+SHA1-Digest: jPfVJtc+TJEEst6pE/V2wyKazkc=
+
+Name: org/xml/sax/XMLReader.class
+SHA1-Digest: WP5Ffu7nNxa4IoHggpKxD7fhyE4=
+
+Name: org/w3c/dom/DOMLocator.class
+SHA1-Digest: dUGAe11gg3m6P2qfy+IcwXRMA9A=
+
+Name: org/w3c/dom/UserDataHandler.class
+SHA1-Digest: 70HhwNudqt6OJtQd5FjxUoGF5fQ=
+
+Name: javax/xml/parsers/DocumentBuilderFactory.class
+SHA1-Digest: an0+0cFHhcT00bDrKGoVxOZsVP4=
+
+Name: org/w3c/dom/html/HTMLParagraphElement.class
+SHA1-Digest: MNo7uSwiCfFeIUBQ491ZsGhrrK4=
+
+Name: org/w3c/dom/html/HTMLBRElement.class
+SHA1-Digest: u0ofz45sC0pYXhFvJiVZSVB3IFI=
+
+Name: org/w3c/dom/html/HTMLFontElement.class
+SHA1-Digest: EW7FI5IhAOsKN020QiNl9BrACe0=
+
+Name: javax/xml/validation/SecuritySupport$8.class
+SHA1-Digest: ptLbWRq3oS55WaQtNkybHhvJqMg=
+
+Name: javax/xml/transform/sax/SAXTransformerFactory.class
+SHA1-Digest: u6hgpKw9ad9tdX7uIhL+/Xgy5dc=
+
+Name: org/w3c/dom/css/CSSPageRule.class
+SHA1-Digest: v92OECs12k8N0Jf7y9ewr0xP7w8=
+
+Name: org/xml/sax/helpers/LocatorImpl.class
+SHA1-Digest: 52uYlp3iDTc8jp2yv4uE39/j28E=
+
+Name: javax/xml/parsers/FactoryFinder.class
+SHA1-Digest: sKBEvjFBJ0/F8gSvg1OSMca2ij4=
+
+Name: org/w3c/dom/css/CSSStyleSheet.class
+SHA1-Digest: vt1lfCxx77XDKpatSjPK95xsuqU=
+
+Name: javax/xml/datatype/XMLGregorianCalendar.class
+SHA1-Digest: Wbuzthyp2285cdOi1LU5lvhvv3k=
+
+Name: org/w3c/dom/html/HTMLMetaElement.class
+SHA1-Digest: WrZeB+WYe8JG1/UzbNiH+umGrcQ=
+
+Name: org/w3c/dom/css/CSSMediaRule.class
+SHA1-Digest: 67aV4Cl4r58EnYm8VVhcLPJidQk=
+
+Name: org/w3c/dom/html/HTMLHeadElement.class
+SHA1-Digest: hcCltXMGRXmrcfxflLxLdZNhfrs=
+
+Name: org/xml/sax/helpers/SecuritySupport12$4.class
+SHA1-Digest: QoS9/XA4Dk/6jvXDSpE/y4tB0Rw=
+
+Name: org/w3c/dom/html/HTMLMapElement.class
+SHA1-Digest: sE9xkEq3TwYMImYbL86Fo7/1zx8=
+
+Name: javax/xml/xpath/XPathExpression.class
+SHA1-Digest: gdBdsliRYl+8FSZkb4f/Ll6L6Ls=
+

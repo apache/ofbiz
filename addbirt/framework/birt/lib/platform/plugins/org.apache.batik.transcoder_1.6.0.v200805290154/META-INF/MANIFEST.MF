@@ -1,0 +1,202 @@
+Manifest-Version: 1.0
+Bundle-Vendor: %providerName
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: J2SE-1.3
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.apache.batik.transcoder
+Require-Bundle: org.apache.batik.bridge;version="[1.6.0,1.7.0)",org.ap
+ ache.batik.dom;version="[1.6.0,1.7.0)",org.apache.batik.dom.svg;versi
+ on="[1.6.0,1.7.0)",org.apache.batik.ext.awt;version="[1.6.0,1.7.0)",o
+ rg.apache.batik.svggen;version="[1.6.0,1.7.0)",org.apache.batik.util;
+ version="[1.6.0,1.7.0)",org.apache.batik.xml;version="[1.6.0,1.7.0)",
+ org.w3c.dom.svg;version="[1.1.0,1.3.0)"
+Export-Package: org.apache.batik.transcoder;version="1.6.0",org.apache
+ .batik.transcoder.image;version="1.6.0",org.apache.batik.transcoder.i
+ mage.resources;version="1.6.0",org.apache.batik.transcoder.keys;versi
+ on="1.6.0",org.apache.batik.transcoder.print;version="1.6.0",org.apac
+ he.batik.transcoder.svg2svg;version="1.6.0",org.apache.batik.transcod
+ er.wmf;version="1.6.0",org.apache.batik.transcoder.wmf.tosvg;version=
+ "1.6.0"
+Bundle-Version: 1.6.0.v200805290154
+Bundle-ClassPath: ../../../../../base/lib/batik-all-1.7.jar
+Bundle-ManifestVersion: 2
+
+Name: about_files/LICENSE-2.0.txt
+SHA1-Digest: NV/tRSeBE64tS1EXrewu6DAklWI=
+
+Name: org/apache/batik/transcoder/keys/PaintKey.class
+SHA1-Digest: mG3Oz446ui/NjY0UOjqerSZUfng=
+
+Name: org/apache/batik/transcoder/image/JPEGTranscoder.class
+SHA1-Digest: jrZVLlq5TfQqbD13YgzBJ8FfoCE=
+
+Name: org/apache/batik/transcoder/TranscodingHints.class
+SHA1-Digest: Jcm3S2666xn0Utve5heiODZMtiw=
+
+Name: about_files/LICENSE.dom-software.txt
+SHA1-Digest: QsuZHrnWBBm9V1GF/sdtN13m1AA=
+
+Name: org/apache/batik/transcoder/TranscoderOutput.class
+SHA1-Digest: FU873cXaHLqUVfP+JAIsOvt1O7I=
+
+Name: org/apache/batik/transcoder/keys/DOMImplementationKey.class
+SHA1-Digest: 2WguYULutGp4eQNfAwBkoRCz5o0=
+
+Name: org/apache/batik/transcoder/wmf/tosvg/WMFTranscoder.class
+SHA1-Digest: pOXTOM91uVslfMps8EfFidHopRs=
+
+Name: org/apache/batik/transcoder/print/PrintTranscoder.class
+SHA1-Digest: QeA7rzEF0rMxROdD0qEBs4BY7cw=
+
+Name: org/apache/batik/transcoder/image/JPEGTranscoder$QualityKey.clas
+ s
+SHA1-Digest: qlufi0QVYt6Esu3O1Mvw8iqOXgE=
+
+Name: org/apache/batik/transcoder/image/JPEGTranscoder$1.class
+SHA1-Digest: 9MafxKyw5EUgfS79/ScCMb4dQTw=
+
+Name: org/apache/batik/transcoder/image/TIFFTranscoder.class
+SHA1-Digest: 98NrBue2NT9umNmvzyQRkHb4+NA=
+
+Name: org/apache/batik/transcoder/wmf/tosvg/StringRecord.class
+SHA1-Digest: 3STUaHbMihtwvyqLHSjiEQSzmgA=
+
+Name: org/apache/batik/transcoder/svg2svg/OutputManager.class
+SHA1-Digest: vuWNn918F643X/wawtD5te/g5ps=
+
+Name: org/apache/batik/transcoder/XMLAbstractTranscoder.class
+SHA1-Digest: xoXiSyY/d2sEPFn3lcp7wWmBLsc=
+
+Name: META-INF/eclipse.inf
+SHA1-Digest: KyT9FF7C7t86NoBoa2kZT3ZJBfw=
+
+Name: org/apache/batik/transcoder/DefaultErrorHandler.class
+SHA1-Digest: Cps8fWYpdmhiXSbMJQIGax3WktQ=
+
+Name: org/apache/batik/transcoder/wmf/tosvg/GdiObject.class
+SHA1-Digest: lN6LkSkuEF91S521w+IjYWu5q2k=
+
+Name: org/apache/batik/transcoder/keys/LengthKey.class
+SHA1-Digest: YeribvzCBHl8eP8FtHY5i8h70ko=
+
+Name: org/apache/batik/transcoder/AbstractTranscoder.class
+SHA1-Digest: JJdLKf63WqGhlMLOW8ZrV7ImUFQ=
+
+Name: org/apache/batik/transcoder/wmf/tosvg/RecordStore.class
+SHA1-Digest: 6EmDbH4YR6xuhLO2RzRZ3rqKyX4=
+
+Name: org/apache/batik/transcoder/wmf/tosvg/WMFRecordStore.class
+SHA1-Digest: M+kOlNSE1JVwFtCSQQH641tzL8U=
+
+Name: org/apache/batik/transcoder/image/JPEGTranscoder$OutputStreamWra
+ pper.class
+SHA1-Digest: juCXOYEvNwO+gp2NkWRe4OD0XB4=
+
+Name: org/apache/batik/transcoder/svg2svg/SVGTranscoder$DoctypeKey.cla
+ ss
+SHA1-Digest: U6J9j11cXKUWvfLCPBlY6iuopew=
+
+Name: org/apache/batik/transcoder/TranscoderException.class
+SHA1-Digest: fRUKmH3UTMhP4Q5SsGurXcflClY=
+
+Name: about_files/README
+SHA1-Digest: 6ucCCJgwbMHFjoa+zJeAytt+bwA=
+
+Name: org/apache/batik/transcoder/image/PNGTranscoder.class
+SHA1-Digest: D59rGTT3dRO7nn+szj2X7klrDvU=
+
+Name: org/apache/batik/transcoder/keys/BooleanKey.class
+SHA1-Digest: ZFT4SBFzAO5iMiCpzioCugvJAIo=
+
+Name: org/apache/batik/transcoder/svg2svg/OutputManager$NameInfo.class
+SHA1-Digest: PLDls6lIbKWD/s+QG1V8wT6Vt9Q=
+
+Name: org/apache/batik/transcoder/svg2svg/SVGTranscoder$1.class
+SHA1-Digest: ScGjGQo5vWjMGCmAmsem+vOHdbQ=
+
+Name: org/apache/batik/transcoder/keys/FloatKey.class
+SHA1-Digest: xpcdbC5zFbC3lbqro+AjNVrmqkY=
+
+Name: org/apache/batik/transcoder/SVGAbstractTranscoder$SVGAbstractTra
+ nscoderUserAgent.class
+SHA1-Digest: JqVHdFwjN6UbQULvObY2O23THcc=
+
+Name: org/apache/batik/transcoder/wmf/tosvg/MetaRecord.class
+SHA1-Digest: CycIY/yM0XYQ+B0w3hv6Y2f6Eu8=
+
+Name: org/apache/batik/transcoder/svg2svg/SVGTranscoder$DoctypeValue.c
+ lass
+SHA1-Digest: kgo9G1WN+x6bmGU3NbOwmi+7ZmE=
+
+Name: plugin.properties
+SHA1-Digest: 6hfy3WXwfTPBtgCINoo2+uN4a7U=
+
+Name: org/apache/batik/transcoder/ErrorHandler.class
+SHA1-Digest: tdWpSnBzNYtz+6y+AGCMP0c8fS0=
+
+Name: org/apache/batik/transcoder/image/resources/Messages.properties
+SHA1-Digest: Mm1RkXQXj9v+foIUHK8fg+lzoPg=
+
+Name: about_files/LICENSE.sax.txt
+SHA1-Digest: fsN88K2R9MJ66jxaP8zR9RHEwVY=
+
+Name: org/apache/batik/transcoder/svg2svg/SVGTranscoder$NewlineKey.cla
+ ss
+SHA1-Digest: SoA29wxUh7lf/S6uqzsEsLC0ccM=
+
+Name: org/apache/batik/transcoder/image/resources/Messages.class
+SHA1-Digest: msgBvfdKjyoyRMthEa057kkg5g8=
+
+Name: org/apache/batik/transcoder/keys/StringKey.class
+SHA1-Digest: gH7S2JKzRuaxohMSFbfBQME1kRY=
+
+Name: about_files/NOTICE
+SHA1-Digest: 7sj4n7c6wtvZjq7hnNMC2mGUdTE=
+
+Name: org/apache/batik/transcoder/keys/IntegerKey.class
+SHA1-Digest: XO7sgYqqsRYFhOkp0N2AJ9+dbSI=
+
+Name: org/apache/batik/transcoder/TranscodingHints$Key.class
+SHA1-Digest: OJIAmTismwxL3EPQiWQ9U9Wz5pk=
+
+Name: org/apache/batik/transcoder/svg2svg/SVGTranscoder$NewlineValue.c
+ lass
+SHA1-Digest: De2Fd/yu5pG1r8HxMXE1dSYzA+A=
+
+Name: org/apache/batik/transcoder/SVGAbstractTranscoder.class
+SHA1-Digest: rAZifnDQlzNaF0MPHgoeEw6uzX8=
+
+Name: org/apache/batik/transcoder/image/ImageTranscoder.class
+SHA1-Digest: 4uNh5YMMcq6X2TD7+X689JbBFJ0=
+
+Name: org/apache/batik/transcoder/Transcoder.class
+SHA1-Digest: 45leYKilxdyMKsd689q78dys9t8=
+
+Name: about.html
+SHA1-Digest: TrAIHi7sJ7KRHaWs8o3nKJyVh6s=
+
+Name: org/apache/batik/transcoder/wmf/WMFConstants.class
+SHA1-Digest: 1jXcyZCbkdlzZfy3tyekVlnqpow=
+
+Name: org/apache/batik/transcoder/wmf/tosvg/WMFPainter.class
+SHA1-Digest: 0wEitKr2gchXy0L+KDv7ouR0pX0=
+
+Name: org/apache/batik/transcoder/svg2svg/SVGTranscoder.class
+SHA1-Digest: gsCfYH4LDYEkOIQywc16BBCnXek=
+
+Name: org/apache/batik/transcoder/svg2svg/PrettyPrinter.class
+SHA1-Digest: ICzJ1OfqnxAwkadCTCFVmoYf+aY=
+
+Name: org/apache/batik/transcoder/TranscoderInput.class
+SHA1-Digest: /Xr5WvkhmohVqiV3v9rYVFgu+go=
+
+Name: org/apache/batik/transcoder/TranscoderSupport.class
+SHA1-Digest: D+ddG3zuZdhGDGPH/nhdQN5RCsE=
+
+Name: org/apache/batik/transcoder/keys/Rectangle2DKey.class
+SHA1-Digest: Ud85kBVoA2SIKp5einQJeFglWpQ=
+
+Name: org/apache/batik/transcoder/svg2svg/OutputManager$AttributeInfo.
+ class
+SHA1-Digest: jef97rX3Zlsnjud2GPNDXGaPvO4=
+
