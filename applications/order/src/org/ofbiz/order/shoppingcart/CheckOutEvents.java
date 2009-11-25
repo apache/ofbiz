@@ -285,8 +285,6 @@ public class CheckOutEvents {
     public static Map getSelectedPaymentMethods(HttpServletRequest request) {
         ShoppingCart cart = (ShoppingCart) request.getSession().getAttribute("shoppingCart");
         //Locale locale = UtilHttp.getLocale(request);
-        String currencyFormat = UtilProperties.getPropertyValue("general.properties", "currency.decimal.format", "##0.00");
-        DecimalFormat formatter = new DecimalFormat(currencyFormat);
         Map selectedPaymentMethods = new HashMap();
         String[] paymentMethods = request.getParameterValues("checkOutPaymentId");
         String errMsg = null;
@@ -1042,8 +1040,6 @@ public class CheckOutEvents {
         if (UtilValidate.isNotEmpty(billingAccountId)) {
             // parse the amount to a decimal
             if (UtilValidate.isNotEmpty(billingAccountAmount)) {
-                String currencyFormat = UtilProperties.getPropertyValue("general.properties", "currency.decimal.format", "##0.00");
-                DecimalFormat formatter = new DecimalFormat(currencyFormat);
                 try {
                     billingAccountAmt = new BigDecimal(billingAccountAmount);
                 } catch (NumberFormatException e) {
