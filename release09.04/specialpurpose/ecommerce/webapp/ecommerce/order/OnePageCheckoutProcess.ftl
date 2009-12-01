@@ -60,7 +60,7 @@ under the License.
                   <tr id="cartItemDisplayRow_${cartLineIndex}">
                     <td><div><img src="<@ofbizContentUrl>${requestAttributes.contentPathPrefix?if_exists}${smallImageUrl}</@ofbizContentUrl>" align="center" height="20" hspace="0" vspace="0" width="20"></div></td>
                     <td><div>${cartLine.getName()?if_exists}</div></td>
-                    <td align="center"><div id="completedCartItemPrice_${cartLineindex}">${cartLine.getDisplayPrice()}</div></td>
+                    <td align="center"><div id="completedCartItemPrice_${cartLineIndex}">${cartLine.getDisplayPrice()}</div></td>
                     <td align="center"><div><span id="completedCartItemQty_${cartLineIndex}">${cartLine.getQuantity()?string.number}</span></div></td>
                     <td align="center"><div><span id="completedCartItemAdjustment_${cartLineIndex}"><@ofbizCurrency amount=cartLine.getOtherAdjustments() isoCode=shoppingCart.getCurrency()/></span></div></td>
                     <td align="right"><div id="completedCartItemSubTotal_${cartLineIndex}"><@ofbizCurrency amount=cartLine.getDisplayItemSubTotal() isoCode=shoppingCart.getCurrency()/></div></td>
