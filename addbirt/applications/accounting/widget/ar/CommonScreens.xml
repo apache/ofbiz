@@ -44,32 +44,60 @@ under the License.
         <section>
             <actions>
                 <set field="headerItem" value="main"/>
-                <entity-condition entity-name="PaymentType" list="paymentTypes">
-                    <order-by field-name="paymentTypeId"/>
-                </entity-condition>
-                <entity-condition entity-name="InvoiceType" list="invoiceTypes">
-                    <order-by field-name="invoiceTypeId"/>
-                </entity-condition>
-                <entity-condition entity-name="PaymentMethodType" list="paymentMethodTypes">
-                    <order-by field-name="paymentMethodTypeId"/>
-                </entity-condition>
-                <entity-condition entity-name="StatusItem" list="invoiceStatus">
-                    <condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
-                    <order-by field-name="statusId"/>
-                </entity-condition>
-                <entity-condition entity-name="StatusItem" list="paymentStatus">
-                    <condition-expr field-name="statusTypeId" operator="equals" value="PMNT_STATUS"/>
-                    <order-by field-name="statusId"/>
-                </entity-condition>
+                <set field="parameters.portalPageId" value="ArPortalPage"/>
+                <set field="invoiceTypeId" value="SALES_INVOICE"/>
+                <set field="organizationPartyId" from-field="organizationPartyId" default-value="${defaultOrganizationPartyId}"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/InvoiceReport.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <screenlet title="${uiLabelMap.AccountingAr}">
-                            <platform-specific><html><html-template location="component://accounting/webapp/ar/main.ftl"/></html></platform-specific>
-                        </screenlet>
+                        <section>
+                            <actions>
+                                <entity-one entity-name="PortalPage" value-field="portalPage"/>
+                                <entity-and entity-name="PortalPageColumn" list="portalPageColumns">
+                                    <field-map field-name="portalPageId" from-field="parameters.portalPageId"/>
+                                    <order-by field-name="columnSeqId"/>
+                                </entity-and>
+                                <entity-and entity-name="PortalPagePortletView" list="portalPagePortlets">
+                                    <field-map field-name="portalPageId" from-field="portalPage.portalPageId"/>
+                                    <order-by field-name="columnSeqId"/>
+                                    <order-by field-name="sequenceNum"/>
+                                </entity-and>
+                            </actions>
+                            <widgets>
+                                <platform-specific>
+                                    <html><html-template location="component://common/webcommon/portal/showPortalPage.ftl"/></html>
+                                </platform-specific>
+                            </widgets>
+                        </section>
                     </decorator-section>
                 </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ArPastDueInvoices">
+        <section>
+           <actions>
+                <set field="invoices" from-field="PastDueInvoices"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.AccountingPastDueInvoices}: (${PastDueInvoicestotalAmount})">
+                    <include-form name="ListReports" location="component://accounting/widget/ar/forms/InvoiceForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ArInvoicesDueSoon">
+        <section>
+            <actions>
+                <set field="invoices" from-field="InvoicesDueSoon"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.AccountingInvoicesDueSoon}: (${InvoicesDueSoonTotalAmount})">
+                    <include-form name="ListReports"  location="component://accounting/widget/ar/forms/InvoiceForms.xml"/>
+                </screenlet>
             </widgets>
         </section>
     </screen>
@@ -106,13 +134,11 @@ under the License.
         <section>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <include-menu name="ArPaymentTabBar" location="component://accounting/widget/ar/ArMenus.xml"/>
+                    </decorator-section>
                     <decorator-section name="body">
-                        <section>
-                            <widgets>
-                                <include-menu name="ArPaymentTabBar" location="component://accounting/widget/ar/ArMenus.xml"/>
-                                <decorator-section-include name="body"/>
-                            </widgets>
-                        </section>
+                        <decorator-section-include name="body"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -121,7 +147,7 @@ under the License.
     <screen name="CommonPaymentGroupDecorator">
         <section>
             <actions>
-                <set field="headerItem" value="PaymentGroup"/>
+                <set field="headerItem" value="paymentGroups"/>
                 <set field="paymentGroupId" from-field="parameters.paymentGroupId"/>
                 <entity-one entity-name="PaymentGroup" value-field="paymentGroup"/>
                 <entity-and entity-name="PaymentGroupMember" list="paymentGroupMembers" filter-by-date="true">
@@ -131,11 +157,7 @@ under the License.
             <widgets>
                 <decorator-screen name="main-decorator">
                     <decorator-section name="pre-body">
-                        <section>
-                            <widgets>
-                                <include-menu name="PaymentGroupTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
-                            </widgets>
-                        </section>
+                        <include-menu name="PaymentGroupTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
                     </decorator-section>
                     <decorator-section name="body">
                         <section>
@@ -146,10 +168,10 @@ under the License.
                                     </condition>
                                     <widgets>
                                         <include-menu name="PaymentGroupSubTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
-                                        <container style="h1"><label>${uiLabelMap[titleProperty]} ${uiLabelMap.CommonFor} ${paymenGroup.paymentGroupName} [${paymentGroupId}]</label></container>
+                                        <label style="h1">${uiLabelMap[titleProperty]} ${uiLabelMap.CommonFor} ${paymenGroup.paymentGroupName} [${paymentGroupId}]</label>
                                     </widgets>
                                     <fail-widgets>
-                                        <container style="h1"><label>${uiLabelMap.AccountingNewPaymentGroup}</label></container>
+                                        <label style="h1">${uiLabelMap.AccountingNewPaymentGroup}</label>
                                     </fail-widgets>
                                 </section>
                                 <decorator-section-include name="body"/>
@@ -170,29 +192,6 @@ under the License.
                     <decorator-section name="body">
                         <section>
                             <widgets>
-                                <decorator-section-include name="body"/>
-                            </widgets>
-                        </section>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-    <screen name="CommonPartyDecorator">
-        <section>
-            <actions>
-                <set field="headerItem" value="companies"/>
-                <set field="organizationPartyId" from-field="parameters.organizationPartyId" global="true"/>
-            </actions>
-            <widgets>
-                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
-                        <section>
-                            <condition>
-                                <not><if-empty field="organizationPartyId"/></not>
-                            </condition>
-                            <widgets>
-                                <include-menu name="PartyTopTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
                                 <decorator-section-include name="body"/>
                             </widgets>
                         </section>

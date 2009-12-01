@@ -47,7 +47,7 @@ public class FlexibleStringExpander implements Serializable {
     public static final String module = FlexibleStringExpander.class.getName();
     public static final String openBracket = "${";
     public static final String closeBracket = "}";
-    protected static final UtilCache<String, FlexibleStringExpander> exprCache = new UtilCache<String, FlexibleStringExpander>("flexibleStringExpander.ExpressionCache");
+    protected static final UtilCache<String, FlexibleStringExpander> exprCache = UtilCache.createUtilCache("flexibleStringExpander.ExpressionCache");
     protected static final FlexibleStringExpander nullExpr = new FlexibleStringExpander(null);
     protected final String orig;
     protected final List<StrElem> strElems;
@@ -109,7 +109,8 @@ public class FlexibleStringExpander implements Serializable {
         if (locale == null) {
             locale = (Locale) context.get("locale");
             if (locale == null && context.containsKey("autoUserLogin")) {
-                locale = UtilMisc.ensureLocale(((Map) context.get("autoUserLogin")).get("lastLocale"));
+                Map<String, Object> autoUserLogin = UtilGenerics.cast(context.get("autoUserLogin"));
+                locale = UtilMisc.ensureLocale(autoUserLogin.get("lastLocale"));
             }
             if (locale == null) {
                 locale = Locale.getDefault();
@@ -118,7 +119,8 @@ public class FlexibleStringExpander implements Serializable {
         if (timeZone == null) {
             timeZone = (TimeZone) context.get("timeZone");
             if (timeZone == null && context.containsKey("autoUserLogin")) {
-                timeZone = UtilDateTime.toTimeZone((String)((Map) context.get("autoUserLogin")).get("lastTimeZone"));
+                Map<String, String> autoUserLogin = UtilGenerics.cast(context.get("autoUserLogin"));
+                timeZone = UtilDateTime.toTimeZone(autoUserLogin.get("lastTimeZone"));
             }
             if (timeZone == null) {
                 timeZone = TimeZone.getDefault();
@@ -141,7 +143,7 @@ public class FlexibleStringExpander implements Serializable {
      * @return A FlexibleStringExpander instance
      */
     public static FlexibleStringExpander getInstance(String original) {
-        if (original == null || original.length() == 0) {
+        if (UtilValidate.isEmpty(original)) {
             return nullExpr;
         }
         // Remove the next three lines to cache all expressions
@@ -203,7 +205,7 @@ public class FlexibleStringExpander implements Serializable {
      * @return a list of parsed string elements
      */
     protected static List<StrElem> getStrElems(String original) {
-        if (original == null || original.length() == 0) {
+        if (UtilValidate.isEmpty(original)) {
             return null;
         }
         int origLen = original.length();
@@ -312,7 +314,7 @@ public class FlexibleStringExpander implements Serializable {
 
     protected static class GroovyElem implements StrElem {
         protected final String originalString;
-        protected final Class parsedScript;
+        protected final Class<?> parsedScript;
         protected GroovyElem(String script) {
             this.originalString = script;
             this.parsedScript = GroovyUtil.groovyClassLoader.parseClass(script);

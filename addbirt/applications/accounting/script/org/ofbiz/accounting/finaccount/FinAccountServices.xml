@@ -891,12 +891,17 @@ under the License.
     </simple-method>
     <simple-method method-name="createPaymentAndFinAccountTrans" short-description="create new payment and associate with respective financial account in FinAccountTrans Entity.">
         <set-service-fields service-name="createPayment" map="parameters" to-map="createPaymentMap"/>
+        <if-not-empty field="parameters.paymentMethodId">
+            <entity-one entity-name="PaymentMethod" value-field="paymentMethod" auto-field-map="true"/>
+            <set field="createPaymentMap.paymentMethodTypeId" from-field="paymentMethod.paymentMethodTypeId"/>
+        </if-not-empty>
         <call-service service-name="createPayment" in-map-name="createPaymentMap">
             <result-to-field result-name="paymentId"/>
         </call-service>
-        <if-not-empty field="parameters.finAccountId">
+        <if-not-empty field="paymentMethod.finAccountId">
             <if-compare field="parameters.isDepositWithDrawPayment" operator="equals" value="Y">
                 <set-service-fields service-name="createFinAccountTrans" map="parameters" to-map="createFinAccountTransMap"/>
+                <set field="createFinAccountTransMap.finAccountId" from-field="paymentMethod.finAccountId"/>
                 <set field="createFinAccountTransMap.paymentId" from-field="paymentId"/>
                 <set field="createFinAccountTransMap.statusId" value="FINACT_TRNS_CREATED"/>
                 <set field="createFinAccountTransMap.partyId" from-field="parameters.partyIdFrom"/>
@@ -1037,5 +1042,35 @@ under the License.
             <order-by field-name="acctgTransEntrySeqId"/>
         </entity-condition>
         <field-to-result field="acctgTransAndEntries"/>
+    </simple-method>
+    
+    <simple-method method-name="getReconciliationClosingBalance" short-description="Get Reconciliation Closing Balance.">
+        <entity-one entity-name="GlReconciliation" value-field="glReconciliation"/>
+        <set field="reconciledBalance" from-field="glReconciliation.reconciledBalance" default-value="0" type="BigDecimal"/>
+        <set field="openingBalance" from-field="glReconciliation.openingBalance" default-value="0" type="BigDecimal"/>
+        <set field="closingBalance" value="${reconciledBalance + openingBalance}" type="BigDecimal"/>
+        <field-to-result field="closingBalance"/>
+    </simple-method>
+    
+    <simple-method method-name="autoFinAccountReconciliation" short-description="Auto Reconcile Financial(bank) Account Transactions">
+        <now-timestamp field="nowTimestamp"/>
+        <set field="reconciliationDayStart" value="${groovy: org.ofbiz.base.util.UtilDateTime.getDayStart(nowTimestamp)}" type="Timestamp"/>
+        <set field="reconciliationDayEnd" value="${groovy: org.ofbiz.base.util.UtilDateTime.getDayEnd(nowTimestamp)}" type="Timestamp"/>
+        <entity-condition entity-name="GlReconciliation" list="glReconciliation">
+            <condition-list combine="and">
+                <condition-expr field-name="reconciledDate" operator="greater-equals" from-field="reconciliationDayStart"/>
+                <condition-expr field-name="reconciledDate" operator="less-equals" from-field="reconciliationDayEnd"/>
+                <condition-expr field-name="statusId" operator="equals" value="GLREC_CREATED"/>
+            </condition-list>
+        </entity-condition>
+        <set field="glReconciliationIds" value="${groovy:org.ofbiz.entity.util.EntityUtil.getFieldListFromEntityList(glReconciliation, 'glReconciliationId', true);}" type="List"/>
+        <entity-condition entity-name="FinAccountTrans" list="finAccountTransList">
+            <condition-expr field-name="glReconciliationId" operator="in" from-field="glReconciliationIds"/>
+        </entity-condition>
+        <iterate list="finAccountTransList" entry="finAccountTrans">
+            <set field="reconcileFinAccountTransMap.finAccountTransId" from-field="finAccountTrans.finAccountTransId"/>
+            <set field="reconcileFinAccountTransMap.organizationPartyId" from-field="finAccountTrans.partyId"/>
+            <call-service service-name="reconcileFinAccountTrans" in-map-name="reconcileFinAccountTransMap"/>
+        </iterate>
     </simple-method>
 </simple-methods>

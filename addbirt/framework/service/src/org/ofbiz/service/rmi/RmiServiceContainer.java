@@ -29,6 +29,7 @@ import javax.naming.NamingException;
 import org.ofbiz.base.container.Container;
 import org.ofbiz.base.container.ContainerConfig;
 import org.ofbiz.base.container.ContainerException;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.service.GenericDispatcher;
@@ -66,14 +67,14 @@ public class RmiServiceContainer implements Container {
         ContainerConfig.Container.Property serverProp = cfg.getProperty("server-factory");
 
         // check the required lookup-name property
-        if (lookupNameProp == null || lookupNameProp.value == null || lookupNameProp.value.length() == 0) {
+        if (lookupNameProp == null || UtilValidate.isEmpty(lookupNameProp.value)) {
             throw new ContainerException("Invalid lookup-name defined in container configuration");
         } else {
             this.name = lookupNameProp.value;
         }
 
         // check the required delegator-name property
-        if (delegatorProp == null || delegatorProp.value == null || delegatorProp.value.length() == 0) {
+        if (delegatorProp == null || UtilValidate.isEmpty(delegatorProp.value)) {
             throw new ContainerException("Invalid delegator-name defined in container configuration");
         }
 
@@ -94,7 +95,7 @@ public class RmiServiceContainer implements Container {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
         // load the factories
-        if (clientProp != null && clientProp.value != null && clientProp.value.length() > 0) {
+        if (clientProp != null && UtilValidate.isNotEmpty(clientProp.value)) {
             try {
                 Class<?> c = loader.loadClass(clientProp.value);
                 csf = (RMIClientSocketFactory) c.newInstance();
@@ -102,7 +103,7 @@ public class RmiServiceContainer implements Container {
                 throw new ContainerException(e);
             }
         }
-        if (serverProp != null && serverProp.value != null && serverProp.value.length() > 0) {
+        if (serverProp != null && UtilValidate.isNotEmpty(serverProp.value)) {
             try {
                 Class<?> c = loader.loadClass(serverProp.value);
                 ssf = (RMIServerSocketFactory) c.newInstance();

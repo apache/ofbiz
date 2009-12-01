@@ -27,7 +27,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
@@ -84,7 +83,7 @@ public class WidgetWorker {
             localWriter.append(localRequestName);
         }
 
-        if (parameterList != null && parameterList.size() > 0) {
+        if (UtilValidate.isNotEmpty(parameterList)) {
             String localUrl = localWriter.toString();
             externalWriter.append(localUrl);
             boolean needsAmp = true;
@@ -295,6 +294,15 @@ public class WidgetWorker {
             this.name = element.getAttribute("param-name");
             this.value = UtilValidate.isNotEmpty(element.getAttribute("value")) ? FlexibleStringExpander.getInstance(element.getAttribute("value")) : null;
             this.fromField = UtilValidate.isNotEmpty(element.getAttribute("from-field")) ? FlexibleMapAccessor.getInstance(element.getAttribute("from-field")) : null;
+        }
+
+        public Parameter(String paramName, String paramValue, boolean isField) {
+            this.name = paramName;
+            if (isField) {
+                this.fromField = FlexibleMapAccessor.getInstance(paramValue);
+            } else {
+                this.value = FlexibleStringExpander.getInstance(paramValue);
+            }
         }
 
         public String getName() {

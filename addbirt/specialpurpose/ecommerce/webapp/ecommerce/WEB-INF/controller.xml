@@ -295,6 +295,10 @@ under the License.
         <response name="success" type="view" value="showcart"/>
         <response name="error" type="view" value="showcart"/>
     </request-map>
+    <request-map uri="UpdateCart">
+        <security https="false" auth="false"/>
+        <response name="success" type="view" value="UpdateCart"/>
+    </request-map>
 
     <request-map uri="setDesiredAlternateGwpProductId">
         <security https="false" auth="false"/>
@@ -1710,8 +1714,8 @@ under the License.
     <request-map uri="silentAddPromoCode">
         <security https="true" auth="false"/>
         <event type="jsonjava" path="org.ofbiz.order.shoppingcart.ShoppingCartEvents" invoke="addProductPromoCode"/>
-        <response name="success" type="request" value="getCartData"/>
-        <response name="error" type="request" value="getCartData"/>
+        <response name="success" type="none"/>
+        <response name="error" type="none"/>
     </request-map>
     <request-map uri="getCartData">
         <security https="true" auth="false"/>
@@ -1900,8 +1904,10 @@ under the License.
     <!-- Cart Views -->
     <view-map name="editShoppingList" type="screen" page="component://ecommerce/widget/ShoppingListScreens.xml#editShoppingList"/>
     <view-map name="showcart" type="screen" page="component://ecommerce/widget/CartScreens.xml#showcart"/>
+    <!--view-map name="showcart" type="screen" page="component://ecommerce/widget/CartScreens.xml#showcart" no-cache="true"/--><!-- to be used to avoid "conflicts" when someone use the same machine with different user logins -->
     <view-map name="showAllPromotions" type="screen" page="component://ecommerce/widget/CartScreens.xml#showAllPromotions"/>
     <view-map name="showPromotionDetails" type="screen" page="component://ecommerce/widget/CartScreens.xml#showPromotionDetails"/>
+    <view-map name="UpdateCart" type="screen" page="component://ecommerce/widget/CartScreens.xml#UpdateCart"/>
 
     <!-- Catalog Views -->
     <view-map name="quickadd" type="screen" page="component://ecommerce/widget/CatalogScreens.xml#quickadd"/>

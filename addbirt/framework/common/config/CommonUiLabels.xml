@@ -420,22 +420,6 @@
         <value xml:lang="zh">全部周</value>
         <value xml:lang="zh_CN">所有星期</value>
     </property>
-    <property key="CommonAllowSolicitation">
-        <value xml:lang="ar">السماح بالإستدعاءات</value>
-        <value xml:lang="de">(Erlaubt Werbung?)</value>
-        <value xml:lang="en">(allow solicitation?)</value>
-        <value xml:lang="es">(¿Permitir solicitud?)</value>
-        <value xml:lang="fr">Accepte les sollicitations</value>
-        <value xml:lang="hi_IN">(क्या याचना कर सकते हैं ?)</value>
-        <value xml:lang="it">(permetti sollecito?)</value>
-        <value xml:lang="nl">(stuur verkoopinfo?)</value>
-        <value xml:lang="pt">(permitir solicitação?)</value>
-        <value xml:lang="ro">(permiti solecitare?)</value>
-        <value xml:lang="ru">(допустимы обращения?)</value>
-        <value xml:lang="th">(ยอมรับการร้องขอหรือไม่)</value>
-        <value xml:lang="zh">（允许提示？）</value>
-        <value xml:lang="zh_CN">(可以联络)</value>
-    </property>
     <property key="CommonAlwaysInclude">
         <value xml:lang="de">Immer berücksichtigen</value>
         <value xml:lang="en">Always Include</value>
@@ -497,38 +481,6 @@
         <value xml:lang="th">ทุก ๆ อัน</value>
         <value xml:lang="zh">任何</value>
         <value xml:lang="zh_CN">任何</value>
-    </property>
-    <property key="CommonAnyOrderStatus">
-        <value xml:lang="ar">كل وضع للطلبيات</value>
-        <value xml:lang="de">Beliebiger Auftragsstatus</value>
-        <value xml:lang="en">Any Order Status</value>
-        <value xml:lang="es">Cualquier estado de orden</value>
-        <value xml:lang="fr">Tous statuts</value>
-        <value xml:lang="hi_IN">कोईभी आदेश स्थिति</value>
-        <value xml:lang="it">Qualsiasi stato ordine</value>
-        <value xml:lang="nl">Elke bestellingstatus</value>
-        <value xml:lang="pt">Qualquer Estado de Encomenda</value>
-        <value xml:lang="ro">Orice Stadiu Comanda</value>
-        <value xml:lang="ru">Любой статус заказа</value>
-        <value xml:lang="th">ทุก ๆ สถานะรายการสั่งซื้อ</value>
-        <value xml:lang="zh">任何订单状态</value>
-        <value xml:lang="zh_CN">任意订单状态</value>
-    </property>
-    <property key="CommonAnyOrderType">
-        <value xml:lang="ar">أي نوع للطلبيات</value>
-        <value xml:lang="de">Beliebiger Auftragstyp</value>
-        <value xml:lang="en">Any Order Type</value>
-        <value xml:lang="es">Cualquier tipo de orden</value>
-        <value xml:lang="fr">Tous types</value>
-        <value xml:lang="hi_IN">कोईभी आदेश के प्रकार</value>
-        <value xml:lang="it">Qualsiasi tipo ordine</value>
-        <value xml:lang="nl">Elk bestellingstype</value>
-        <value xml:lang="pt">Qualquer Tipo de Encomenda</value>
-        <value xml:lang="ro">Orice Tip de Comanda</value>
-        <value xml:lang="ru">Любой тип заказа</value>
-        <value xml:lang="th">ทุก ๆ ประเภทรายการสั่งซื้อ</value>
-        <value xml:lang="zh">任何订单类型</value>
-        <value xml:lang="zh_CN">任意订单类型</value>
     </property>
     <property key="CommonAnyReturnStatus">
         <value xml:lang="ar">أي وضع للرجوع</value>
@@ -3525,6 +3477,10 @@
         <value xml:lang="zh">明细</value>
         <value xml:lang="zh_CN">东西</value>
     </property>
+    <property key="CommonItemsPerPage">
+        <value xml:lang="en">Items per page</value>
+        <value xml:lang="it">Righe per pagina</value>
+    </property>
     <property key="CommonJanuary">
         <value xml:lang="ar">جانفي</value>
         <value xml:lang="de">Januar</value>
@@ -5036,13 +4992,6 @@
         <value xml:lang="zh">订单</value>
         <value xml:lang="zh_CN">订单</value>
     </property>
-    <property key="CommonOrdersStatus">
-        <value xml:lang="en">Orders Status</value>
-        <value xml:lang="fr">Statuts des commandes</value>
-        <value xml:lang="hi_IN">आदेशो की स्थिति</value>
-        <value xml:lang="it">Stati ordini</value>
-        <value xml:lang="zh">订单状态</value>
-    </property>
     <property key="CommonOther">
         <value xml:lang="ar">أخرى</value>
         <value xml:lang="de">Andere</value>
@@ -5310,6 +5259,9 @@
         <value xml:lang="th">บุคคล</value>
         <value xml:lang="zh">人员</value>
         <value xml:lang="zh_CN">人</value>
+    </property>
+    <property key="CommonPleaseEnterValidNumberInThisField">
+        <value xml:lang="en">Please enter a valid number in this field.</value>
     </property>
     <property key="CommonPortalCategoryPage">
         <value xml:lang="en">Category of portlet pages for application</value>
@@ -7916,7 +7868,7 @@
         <value xml:lang="es">Problema de validez</value>
         <value xml:lang="fr">Problème de validité</value>
         <value xml:lang="hi_IN">वैधता की समस्या</value>
-        <value xml:lang="it">Problema validità</value>
+        <value xml:lang="it">Problema di validità</value>
         <value xml:lang="nl">Test probleem</value>
         <value xml:lang="pt">Problema de Validade</value>
         <value xml:lang="ro">Problema Validitate</value>
@@ -8010,7 +7962,7 @@
         <value xml:lang="es">Tema visual</value>
         <value xml:lang="fr">Charte graphique</value>
         <value xml:lang="hi_IN">दृश्य शैली(Visual Theme)</value>
-        <value xml:lang="it">Temi visuali</value>
+        <value xml:lang="it">Tema grafico</value>
         <value xml:lang="zh">视觉风格</value>
     </property>
     <property key="CommonVisualThemeIdNotFound">
@@ -8042,7 +7994,7 @@
         <value xml:lang="es">No se han encontrado recursos de tema visual.</value>
         <value xml:lang="fr">Réf. de ressource de charte graphique inconnue.</value>
         <value xml:lang="hi_IN">दृश्य शैली संसाधन नहीं मिला|</value>
-        <value xml:lang="it">Risorse tema grafico non trovato.</value>
+        <value xml:lang="it">Risorse tema grafico non trovate.</value>
         <value xml:lang="zh">没有找到视觉风格资源。</value>
     </property>
     <property key="CommonVisualThemeSelected">
@@ -8058,7 +8010,7 @@
         <value xml:lang="es">Temas visuales</value>
         <value xml:lang="fr">Chartes graphiques</value>
         <value xml:lang="hi_IN">दृश्य शैलीयां(Visual Themes)</value>
-        <value xml:lang="it">Tema grafico</value>
+        <value xml:lang="it">Temi grafici</value>
         <value xml:lang="zh">视觉风格</value>
     </property>
     <property key="CommonVolume">
@@ -8380,7 +8332,7 @@
         <value xml:lang="es">Crear fuente de datos</value>
         <value xml:lang="fr">Nouvelle source de données</value>
         <value xml:lang="hi_IN">डेटा स्रोत बनाएँ</value>
-        <value xml:lang="it">Creare sorgente dati</value>
+        <value xml:lang="it">Nuova sorgente dati</value>
         <value xml:lang="nl">Aanmaken bron data</value>
         <value xml:lang="pt">Criar Origem de Dados</value>
         <value xml:lang="ro">Creare Sursa Date</value>
@@ -8428,7 +8380,7 @@
         <value xml:lang="es">No se encontró la fuente de datos con código</value>
         <value xml:lang="fr">Aucune source de données trouvée pour cette réf.</value>
         <value xml:lang="hi_IN">इस क्रमांक के साथ डेटा स्रोत नहीं मिला</value>
-        <value xml:lang="it">Nessun sorgente dati trovata con il codice</value>
+        <value xml:lang="it">Nessuna sorgente dati trovata con il codice</value>
         <value xml:lang="nl">Geen Brondata gevonden met Id</value>
         <value xml:lang="pt">Não foi Encontrada nenhuma Origem de Dados com ID</value>
         <value xml:lang="ro">Nici-o sursa Date cu codul Id Gasita </value>
@@ -8628,7 +8580,7 @@
         <value xml:lang="es">Crear</value>
         <value xml:lang="fr">Créer</value>
         <value xml:lang="hi_IN">बनाएँ</value>
-        <value xml:lang="it">Creare</value>
+        <value xml:lang="it">Crea</value>
         <value xml:lang="nl">Toevoegen</value>
         <value xml:lang="pt">Criar</value>
         <value xml:lang="ro">Creare</value>
@@ -8711,7 +8663,7 @@
         <value xml:lang="en">Current Recurrence Count</value>
         <value xml:lang="fr">Nombre de récurrences courant</value>
         <value xml:lang="hi_IN">वर्तमान पुनरावृत्ति गणना</value>
-        <value xml:lang="it">Conteggio attuale ricorrenze</value>
+        <value xml:lang="it">Numero di ricorrenze attuale</value>
         <value xml:lang="zh">当前并发计数</value>
     </property>
     <property key="FormFieldTitle_currentStatusId">
@@ -8868,7 +8820,7 @@
         <value xml:lang="en">Max Recurrence Count</value>
         <value xml:lang="fr">Nombre max de récurrences</value>
         <value xml:lang="hi_IN">अधिकतम पुनरावृत्ति गणना</value>
-        <value xml:lang="it">Conteggio massimo ricorrenze</value>
+        <value xml:lang="it">Numero massimo di ricorrenze</value>
         <value xml:lang="zh">最大并发数量</value>
     </property>
     <property key="FormFieldTitle_modifiedByUserLoginId">
@@ -9116,7 +9068,7 @@
         <value xml:lang="en">Handheld Facility</value>
         <value xml:lang="es">Gestión de Almacén PDA</value>
         <value xml:lang="fr">Gestion de stock sur PDA</value>
-        <value xml:lang="it">Gestione stabilimenti su handheld</value>
+        <value xml:lang="it">Gestione stabilimenti su PDA</value>
         <value xml:lang="th">คลังสินค้าขนาดเล็ก</value>
         <value xml:lang="zh">手持设备</value>
     </property>
@@ -9243,7 +9195,7 @@
         <value xml:lang="en">Geo Location of requested element</value>
         <value xml:lang="fr">Géolocalisation de l'élément demandé</value>
         <value xml:lang="hi_IN">अनुरोधित एलेमेन्ट का भू स्थान</value>
-        <value xml:lang="it">Localizzation geografica dell'elemento richiesto</value>
+        <value xml:lang="it">Posizione geografica dell'elemento richiesto</value>
         <value xml:lang="zh">请求的元素的地理位置</value>
     </property>
     <property key="PageTitleEditDataSource">
@@ -9490,8 +9442,16 @@
         <value xml:lang="zh">捷克语</value>
         <value xml:lang="zh_CN">捷克斯洛伐克语</value>
     </property>
+    <property key="da">
+        <value xml:lang="da">Dansk</value>
+        <value xml:lang="de">Dänisch</value>
+        <value xml:lang="en">Danish</value>
+        <value xml:lang="fr">Danois</value>
+        <value xml:lang="fy">Danysk</value>
+    </property>
     <property key="de">
         <value xml:lang="ar">ألمانية</value>
+        <value xml:lang="da">Tysk</value>
         <value xml:lang="de">Deutsch</value>
         <value xml:lang="en">German</value>
         <value xml:lang="es">Alemán</value>
@@ -9512,6 +9472,7 @@
         <value xml:lang="en">English</value>
         <value xml:lang="es">Inglés</value>
         <value xml:lang="fr">Anglais</value>
+        <value xml:lang="fy">Frisian</value>
         <value xml:lang="hi_IN">अंग्रेजी</value>
         <value xml:lang="it">Inglese</value>
         <value xml:lang="nl">Engels</value>
@@ -9569,6 +9530,13 @@
         <value xml:lang="th">ฝรั่งเศส</value>
         <value xml:lang="zh">法语</value>
         <value xml:lang="zh_CN">法语</value>
+    </property>
+    <property key="fy">
+        <value xml:lang="da">Frisisk</value>
+        <value xml:lang="de">Friesisch</value>
+        <value xml:lang="en">Frisian</value>
+        <value xml:lang="fr">Frison</value>
+        <value xml:lang="fy">Frysk</value>
     </property>
     <property key="gr">
         <value xml:lang="ar">يونانية</value>

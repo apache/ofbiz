@@ -156,7 +156,7 @@ public class CatalogWorker {
         // get it from the database
         if (prodCatalogId == null) {
             List<String> catalogIds = getCatalogIdsAvailable(request);
-            if (catalogIds != null && catalogIds.size() > 0) prodCatalogId = catalogIds.get(0);
+            if (UtilValidate.isNotEmpty(catalogIds)) prodCatalogId = catalogIds.get(0);
         }
 
         if (!fromSession) {
@@ -383,5 +383,19 @@ public class CatalogWorker {
         }
 
         return categoryIds;
+    }
+
+    public static String getCatalogTopEbayCategoryId(ServletRequest request, String prodCatalogId) {
+        if (prodCatalogId == null || prodCatalogId.length() <= 0) return null;
+
+        List<GenericValue> prodCatalogCategories = getProdCatalogCategories(request, prodCatalogId, "PCCT_EBAY_ROOT");
+
+        if (UtilValidate.isNotEmpty(prodCatalogCategories)) {
+            GenericValue prodCatalogCategory = EntityUtil.getFirst(prodCatalogCategories);
+
+            return prodCatalogCategory.getString("productCategoryId");
+        } else {
+            return null;
+        }
     }
 }

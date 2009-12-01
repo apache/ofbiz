@@ -51,6 +51,17 @@ under the License.
             <log level="info" message="Replacing passed payment method type [${parameters.paymentMethodTypeId}] with payment method type [${paymentMethod.paymentMethodTypeId}] for payment method [${parameters.paymentMethodId}]"/>
             <set field="parameters.paymentMethodTypeId" from-field="paymentMethod.paymentMethodTypeId"/>
         </if-not-empty>
+        <if-not-empty field="parameters.paymentPreferenceId">
+            <entity-one value-field="orderPaymentPreference" entity-name="OrderPaymentPreference">
+                <field-map field-name="orderPaymentPreferenceId" from-field="parameters.paymentPreferenceId"/>
+            </entity-one>
+            <if-empty field="parameters.paymentMethodId">
+                <set field="parameters.paymentMethodId" from-field="orderPaymentPreference.paymentMethodId"/>
+            </if-empty>
+            <if-empty field="parameters.paymentMethodTypeId">
+                <set field="parameters.paymentMethodTypeId" from-field="orderPaymentPreference.paymentMethodTypeId"/>
+            </if-empty>
+        </if-not-empty>
         <if-empty field="parameters.paymentMethodTypeId">
             <add-error>
                 <fail-property resource="AccountingUiLabels" property="AccountingPaymentMethodIdPaymentMethodTypeIdNullError"/>
@@ -466,13 +477,28 @@ under the License.
         <entity-and entity-name="PaymentGroupMember" list="paymentGroupMembers">
             <field-map field-name="paymentGroupId"/>
         </entity-and>
-        <call-service service-name="getPaymentGroupReconciliationId" in-map-name="parameters">
-            <result-to-field result-name="glReconciliationId"/>
-        </call-service>
+        <set field="isGlReconciliationId" value="${parameters.glReconciliationId == 'null'}" type="Boolean"/>
+        <if-compare field="isGlReconciliationId" operator="equals" value="true" type="Boolean">
+            <set-service-fields service-name="getPaymentGroupReconciliationId" map="parameters" to-map="getPaymentGroupReconciliationIdMap"/>
+            <set field="getPaymentGroupReconciliationIdMap.paymentGroupId"  from-field="paymentGroupId"/>
+            <call-service service-name="getPaymentGroupReconciliationId" in-map-name="getPaymentGroupReconciliationIdMap">
+                <result-to-field result-name="glReconciliationId"/>
+            </call-service>
+        <else>
+            <set field="glReconciliationId" from-field="parameters.glReconciliationId"/>    
+        </else>
+        </if-compare>
         <if-empty field="glReconciliationId">
             <iterate list="paymentGroupMembers" entry="paymentGroupMember">
                 <set-service-fields service-name="expirePaymentGroupMember" map="paymentGroupMember" to-map="expirePaymentGroupMemberMap"/>
                 <call-service service-name="expirePaymentGroupMember" in-map-name="expirePaymentGroupMemberMap"/>
+                <get-related-one relation-name="Payment" value-field="paymentGroupMember" to-value-field="payment"/>
+                <get-related-one relation-name="FinAccountTrans" value-field="payment" to-value-field="finAccountTrans"/>
+                <if-not-empty field="finAccountTrans">
+                    <set-service-fields service-name="setFinAccountTransStatus" map="finAccountTrans" to-map="setFinAccountTransStatusMap"/>
+                    <set field="setFinAccountTransStatusMap.statusId" value="FINACT_TRNS_CANCELED"/>
+                    <call-service service-name="setFinAccountTransStatus" in-map-name="setFinAccountTransStatusMap"/>
+                </if-not-empty>
             </iterate>
         <else>
             <add-error><fail-property resource="AccountingUiLabels" property="AccountingCancelBatchPaymentsError"/></add-error>
@@ -493,6 +519,9 @@ under the License.
         <clear-field field="invoices"/>
         <iterate-map map="partyInvoices" key="partyId" value="invoices">
             <set-service-fields service-name="createPaymentAndApplicationForParty" map="parameters" to-map="createPaymentAndApplicationForPartyMap"/>
+            <entity-one entity-name="PaymentMethod" value-field="paymentMethod" auto-field-map="true"/>
+            <set field="createPaymentAndApplicationForPartyMap.paymentMethodTypeId" from-field="paymentMethod.paymentMethodTypeId"/>
+            <set field="createPaymentAndApplicationForPartyMap.finAccountId" from-field="paymentMethod.finAccountId"/>
             <set field="createPaymentAndApplicationForPartyMap.partyId" from-field="partyId"/>
             <set field="createPaymentAndApplicationForPartyMap.invoices" from-field="invoices"/>
             <if-not-empty field="parameters.checkStartNumber">
@@ -546,6 +575,7 @@ under the License.
             <set field="createPaymentMap.statusId" value="PMNT_SENT"/>
             <set field="createPaymentMap.amount" type="BigDecimal" from-field="paymentAmount"/>
             <set field="createPaymentMap.paymentMethodTypeId" from-field="parameters.paymentMethodTypeId"/>
+            <set field="createPaymentMap.paymentMethodId" from-field="parameters.paymentMethodId"/>
             <set field="createPaymentMap.paymentRefNum" type="String" from-field="parameters.checkStartNumber"/>
             <call-service service-name="createPayment" in-map-name="createPaymentMap">
                 <result-to-field result-name="paymentId"/>
@@ -689,5 +719,14 @@ under the License.
             </call-service>            
         </else>
         </if-not-empty>
+    </simple-method>
+    
+    <simple-method method-name="massChangePaymentStatus" short-description="Service set status of Payments in bulk.">
+        <iterate list="parameters.paymentIds" entry="paymentId">
+            <set field="setPaymentStatusMap.paymentId" from-field="paymentId"/>
+            <set field="setPaymentStatusMap.statusId" from-field="parameters.statusId"/>
+            <call-service service-name="setPaymentStatus" in-map-name="setPaymentStatusMap"/>
+            <clear-field field="setPaymentStatusMap"/>
+        </iterate>
     </simple-method>
 </simple-methods>

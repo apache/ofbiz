@@ -57,18 +57,6 @@ public class UtilMisc {
         return throwable;
     }
 
-    public static <T> int compare(T obj1, T obj2) {
-        if (obj1 == null) {
-            if (obj2 == null) {
-                return 0;
-            } else {
-                return 1;
-            }
-        } else {
-            return ((Comparable<T>) obj1).compareTo(obj2);
-        }
-    }
-    
     public static <T> int compare(Comparable<T> obj1, T obj2) {
         if (obj1 == null) {
             if (obj2 == null) {
@@ -80,7 +68,20 @@ public class UtilMisc {
             return obj1.compareTo(obj2);
         }
     }
-    
+
+    public static <E> int compare(List<E> obj1, List<E> obj2) {
+        if (obj1 == obj2) {
+            return 0;
+        }
+        try {
+            if (obj1.size() == obj2.size() && obj1.containsAll(obj2) && obj2.containsAll(obj1)) {
+                return 0;
+            }
+
+        } catch (Exception e) {}
+        return 1;
+    }
+
     /**
      * Get an iterator from a collection, returning null if collection is null
      * @param col The collection to be turned in to an iterator
@@ -689,7 +690,7 @@ public class UtilMisc {
      * @return Locale The new Locale object or null if no valid locale can be interpreted
      */
     public static Locale parseLocale(String localeString) {
-        if (localeString == null || localeString.length() == 0) {
+        if (UtilValidate.isEmpty(localeString)) {
             return null;
         }
 
@@ -736,7 +737,7 @@ public class UtilMisc {
                 if (availableLocaleList == null) {
                     TreeMap<String, Locale> localeMap = new TreeMap<String, Locale>();
                     String localesString = UtilProperties.getPropertyValue("general", "locales.available");
-                    if (localesString != null && localesString.length() > 0) { // check if available locales need to be limited according general.properties file
+                    if (UtilValidate.isNotEmpty(localesString)) { // check if available locales need to be limited according general.properties file
                         int end = -1;
                         int start = 0;
                         for (int i=0; start < localesString.length(); i++) {

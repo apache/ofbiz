@@ -123,6 +123,8 @@ public class ModelScreenCondition implements Serializable {
             return new IfEmpty(modelScreen, conditionElement);
         } else if ("if-entity-permission".equals(conditionElement.getNodeName())) {
             return new IfEntityPermission(modelScreen, conditionElement);
+        } else if ("if-empty-section".equals(conditionElement.getNodeName())) {
+            return new IfEmptySection(modelScreen, conditionElement);
         } else {
             throw new IllegalArgumentException("Condition element not supported with name: " + conditionElement.getNodeName());
         }
@@ -313,7 +315,7 @@ public class ModelScreenCondition implements Serializable {
 
                 Authorization authz = (Authorization) context.get("authz");
                 Security security = (Security) context.get("security");
-                if (action != null && action.length() > 0) {
+                if (UtilValidate.isNotEmpty(action)) {
                     //Debug.logWarning("Deprecated method hasEntityPermission() was called; the action field should no longer be used", module);
                     // run hasEntityPermission
                     if (security.hasEntityPermission(permission, action, userLogin)) {
@@ -361,7 +363,7 @@ public class ModelScreenCondition implements Serializable {
             // always use an empty string by default
             if (fieldString == null) fieldString = "";
 
-            Class[] paramTypes = new Class[] {String.class};
+            Class<?>[] paramTypes = new Class[] {String.class};
             Object[] params = new Object[] {fieldString};
 
             Class<?> valClass;
@@ -560,7 +562,19 @@ public class ModelScreenCondition implements Serializable {
             return permissionChecker.runPermissionCheck(context);
         }
     }
+
+    public static class IfEmptySection extends ScreenCondition {
+        protected FlexibleStringExpander sectionExdr;
+
+        public IfEmptySection(ModelScreen modelScreen, Element condElement) {
+            super (modelScreen, condElement);
+            this.sectionExdr = FlexibleStringExpander.getInstance(condElement.getAttribute("section-name"));
+        }
+
+        @Override
+        public boolean eval(Map<String, Object> context) {
+            Map<String, Object> sectionsList = UtilGenerics.toMap(context.get("sections"));
+            return !sectionsList.containsKey(this.sectionExdr.expandString(context));
+        }
+    }
 }
-
-
-

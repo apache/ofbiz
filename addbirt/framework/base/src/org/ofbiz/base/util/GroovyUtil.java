@@ -42,7 +42,7 @@ public class GroovyUtil {
     public static final String module = GroovyUtil.class.getName();
 
     @SuppressWarnings("unchecked")
-    public static UtilCache<String, Class> parsedScripts = new UtilCache<String, Class>("script.GroovyLocationParsedCache", 0, 0, false);
+    public static UtilCache<String, Class> parsedScripts = UtilCache.createUtilCache("script.GroovyLocationParsedCache", 0, 0, false);
 
     public static GroovyClassLoader groovyClassLoader = new GroovyClassLoader();
 
@@ -105,7 +105,7 @@ public class GroovyUtil {
                 if (Debug.verboseOn()) Debug.logVerbose("Caching Groovy script: " + script, module);
                 parsedScripts.put(script, scriptClass);
             }
-            
+
             return InvokerHelper.createScript(scriptClass, getBinding(context)).run();
         } catch (CompilationFailedException e) {
             String errMsg = "Error loading Groovy script [" + script + "]: " + e.toString();
@@ -115,7 +115,7 @@ public class GroovyUtil {
             throw new GeneralException(errMsg, e);
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     public static Object runScriptAtLocation(String location, Map<String, Object> context) throws GeneralException {
         try {
@@ -126,7 +126,7 @@ public class GroovyUtil {
                     throw new GeneralException("Script not found at location [" + location + "]");
                 }
 
-                scriptClass = groovyClassLoader.parseClass(scriptUrl.openStream(), scriptUrl.getFile());
+                scriptClass = groovyClassLoader.parseClass(scriptUrl.openStream(), location);
                 if (Debug.verboseOn()) Debug.logVerbose("Caching Groovy script at: " + location, module);
                 parsedScripts.put(location, scriptClass);
             }
@@ -160,7 +160,7 @@ public class GroovyUtil {
              */
 
             /* NOTE DEJ20080527: this approach works but only caches script text, not the parsed script
-            public static UtilCache<String, String> sourceScripts = new UtilCache<String, String>("script.GroovyLocationSourceCache", 0, 0, false);
+            public static UtilCache<String, String> sourceScripts = UtilCache.createUtilCache("script.GroovyLocationSourceCache", 0, 0, false);
 
             public static GroovyShell emptyGroovyShell = new GroovyShell();
             String scriptString = sourceScripts.get(location);

@@ -34,12 +34,17 @@ under the License.
         <actions>
             <service service-name="performFind" result-map="result" result-map-list="listIt">
                 <field-map field-name="inputFields" from-field="parameters"/>
-                <field-map field-name="entityName" value="PaymentGroup"/>
+                <field-map field-name="entityName" value="PmtGrpMembrPaymentAndFinAcctTrans"/>
                 <field-map field-name="viewIndex" from-field="viewIndex"/>
                 <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="orderBy" value="effectiveDate DESC"/>
             </service>
         </actions>
         <row-actions>
+            <entity-one entity-name="PaymentGroup" value-field="paymentGroup">
+                <field-map field-name="paymentGroupId"/>
+            </entity-one>
+            <set field="paymentGroupTypeId" from-field="paymentGroup.paymentGroupTypeId"/>
             <entity-and entity-name="PaymentGroupMember" list="paymentGroupMembers" filter-by-date="true">
                 <field-map field-name="paymentGroupId"/>
             </entity-and>
@@ -50,7 +55,7 @@ under the License.
             </hyperlink>
         </field>
         <field name="paymentGroupTypeId" title="${uiLabelMap.FormFieldTitle_paymentGroupType}"><display-entity entity-name="PaymentGroupType"/></field>
-        <field name="paymentGroupName"><display/></field>
+        <field name="paymentGroupName"><display description="${paymentGroup.paymentGroupName}"/></field>
         <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" use-when="${paymentGroupTypeId == 'BATCH_PAYMENT'} @and ${groovy:org.ofbiz.base.util.UtilValidate.isNotEmpty(paymentGroupMembers)}">
             <hyperlink target="cancelPaymentGroup" description="${uiLabelMap.CommonCancel}" also-hidden="false">
                 <parameter param-name="paymentGroupId"/>
@@ -85,6 +90,8 @@ under the License.
                 </entity-options>
             </drop-down>
         </field>
+        <field use-when="finAccount!=null" name="finAccountName" title="${uiLabelMap.FormFieldTitle_finAccountName}"><display description="${finAccount.finAccountName}" type="text"></display></field>
+        <field use-when="finAccount!=null" name="ownerPartyId" title="${uiLabelMap.FormFieldTitle_ownerPartyId}"><display description="${finAccount.ownerPartyId}" type="text"></display></field>
         <field name="paymentGroupName" use-when="display==true"><display/></field>
         <field name="submitButton" use-when="paymentGroup==null" title="${uiLabelMap.CommonCreate}"><submit button-type="button"/></field>
         <field name="submitButton" use-when="paymentGroup!=null" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
@@ -92,12 +99,20 @@ under the License.
     </form>
     
     <!-- Payment Group Member -->
-    <form name="ListPaymentGroupMember" type="list" list-name="paymentGroupMembers" target="updatePaymentGroupMember">
+    <form name="ListPaymentGroupMember" type="list" list-name="paymentGroupMembers" target="updatePaymentGroupMember"
+            odd-row-style="alternate-row" default-table-style="basic-table hover-bar" header-row-style="header-row">
         <row-actions>
             <entity-one entity-name="Payment" value-field="payment"/>
             <set field="paymentTypeId" from-field="payment.paymentTypeId"/>
             <set field="partyIdFrom" from-field="payment.partyIdFrom"/>
             <set field="partyIdTo" from-field="payment.partyIdTo"/>
+            <set field="paymentMethodTypeId" from-field="payment.paymentMethodTypeId"/>
+            <entity-one entity-name="CreditCard" value-field="creditCard">
+                <field-map field-name="paymentMethodId" from-field="payment.paymentMethodId"/>
+            </entity-one>
+            <set field="cardType" from-field="creditCard.cardType"/>
+            <set field="amount" from-field="payment.amount" type="BigDecimal"/>
+            <set field="paymentRefNum" from-field="payment.paymentRefNum"/>
         </row-actions>
         <field name="paymentGroupId"><hidden/></field>
         <field name="paymentId">
@@ -105,6 +120,7 @@ under the License.
                 <parameter param-name="paymentId"/>
             </hyperlink>
         </field>
+        <field name="paymentRefNum" title="${uiLabelMap.AccountingReferenceNumber}"><display/></field>
         <field name="partyIdFrom" title="${uiLabelMap.AccountingFromParty}">
             <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${groupName} ${lastName} ${firstName}">
                 <sub-hyperlink target="/partymgr/control/viewprofile" target-type="inter-app" description="[${partyIdFrom}]" >
@@ -120,6 +136,13 @@ under the License.
             </display-entity>
         </field>
         <field name="paymentTypeId" title="${uiLabelMap.OrderPaymentType}"><display-entity entity-name="PaymentType" description="${description}"/></field>
+        <field name="paymentMethodTypeId" use-when="cardType!=null">
+            <display-entity entity-name="PaymentMethodType" description="${description} (${cardType})"/>
+        </field>
+        <field name="paymentMethodTypeId" use-when="cardType==null">
+            <display-entity entity-name="PaymentMethodType" description="${description}"/>
+        </field>
+        <field name="amount"><display currency="${payment.currencyUomId}" type="currency"/></field>
         <field name="fromDate"><display/></field>
         <field name="thruDate"><date-time/></field>
         <field name="deleteLink" title="" widget-style="buttontext">

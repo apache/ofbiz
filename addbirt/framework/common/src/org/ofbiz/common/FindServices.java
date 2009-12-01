@@ -40,6 +40,7 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityComparisonOperator;
@@ -219,6 +220,9 @@ public class FindServices {
                                   // If it is an "op" field, it will be "equals", "greaterThan", etc.
         EntityExpr cond = null;
         List<EntityCondition> tmpList = FastList.newInstance();
+        EntityExpr nullCond = null;
+        EntityCondition orCond = null;
+        List<EntityCondition> tmpOrList = null;
         String opString = null;
         String ignoreCase = null;
         int count = 0;
@@ -297,9 +301,22 @@ public class FindServices {
             if (ignoreCase != null && ignoreCase.equals("Y") && "java.lang.String".equals(fieldObject.getClass().getName())) {
                 cond = EntityCondition.makeCondition(EntityFunction.UPPER_FIELD(fieldName), (EntityComparisonOperator) fieldOp, EntityFunction.UPPER(((String)fieldValue).toUpperCase()));
             } else {
+                if (fieldObject.equals(GenericEntity.NULL_FIELD.toString())) {
+                    fieldObject = null;
+                }
                 cond = EntityCondition.makeCondition(fieldName, (EntityComparisonOperator) fieldOp, fieldObject);
             }
-            tmpList.add(cond);
+            
+            if (EntityOperator.NOT_EQUAL.equals(fieldOp) && fieldObject != null) {
+                tmpOrList = FastList.newInstance();
+                tmpOrList.add(cond);
+                nullCond = EntityCondition.makeCondition(fieldName, null);
+                tmpOrList.add(nullCond);
+                orCond = EntityCondition.makeCondition(tmpOrList, EntityOperator.OR);
+                tmpList.add(orCond);
+            } else {
+                tmpList.add(cond);
+            }
             count++;
 
             // Repeat above operations if there is a "range" - second value
@@ -682,7 +699,7 @@ public class FindServices {
         try {
             EntityListIterator it = (EntityListIterator) result.get("listIt");
             list = it.getPartialList(1, 1); // list starts at '1'
-            if (list != null && list.size() > 0) {
+            if (UtilValidate.isNotEmpty(list)) {
                 item = list.get(0);
             }
             it.close();

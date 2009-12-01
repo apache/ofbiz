@@ -22,6 +22,7 @@ under the License.
 <a href="EditProductInventoryItems?productId=${productId}&amp;showAllFacilities=Y" class="buttontext">${uiLabelMap.ProductShowAllFacilities}</a>
 </#if>
 <div class="screenlet">
+  <#if product?exists>
     <div class="screenlet-title-bar">
         <h3>${uiLabelMap.ProductInventorySummary}</h3>
     </div>
@@ -31,8 +32,10 @@ under the License.
                 <td><b>${uiLabelMap.ProductFacility}</b></td>
                 <td><b>${uiLabelMap.ProductAtp}</b></td>
                 <td><b>${uiLabelMap.ProductQoh}</b></td>
+                <#if isMarketingPackage == "true">
                 <td><b>${uiLabelMap.ProductMarketingPackageATP}</b></td>
                 <td><b>${uiLabelMap.ProductMarketingPackageQOH}</b></td>
+                </#if>
                 <td><b>${uiLabelMap.ProductIncomingShipments}</b></td>
                 <td><b>${uiLabelMap.ProductIncomingProductionRuns}</b></td>
                 <td><b>${uiLabelMap.ProductOutgoingProductionRuns}</b></td>
@@ -58,8 +61,10 @@ under the License.
                         <a href="/facility/control/ReceiveInventory?facilityId=${facilityId}&productId=${productId}&externLoginKey=${externalLoginKey}" class="buttontext">${uiLabelMap.ProductInventoryReceive}</a></td>
                         <td><#if totalAvailableToPromise?exists>${totalAvailableToPromise}<#else>&nbsp;</#if></td>
                         <td><#if totalQuantityOnHand?exists>${totalQuantityOnHand}<#else>&nbsp;</#if></td>
+                        <#if isMarketingPackage == "true">
                         <td><#if mktgPkgATP?exists>${mktgPkgATP}<#else>&nbsp;</#if></td>
                         <td><#if mktgPkgQOH?exists>${mktgPkgQOH}<#else>&nbsp;</#if></td>
+                        </#if>
                         <td>
                             <#if incomingShipmentAndItemList?has_content>
                                 <#list incomingShipmentAndItemList as incomingShipmentAndItem>
@@ -90,6 +95,7 @@ under the License.
                             </#if>
                         </td>
                     </tr>
+
                 </#if>
                 <#-- toggle the row color -->
                 <#if rowClass == "2">
@@ -100,4 +106,7 @@ under the License.
             </#list>
         </table>
     </div>
+  <#else>
+    <h2>${uiLabelMap.ProductProductNotFound} ${productId?if_exists}!</h2>
+  </#if>
 </div>

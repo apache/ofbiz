@@ -1323,6 +1323,9 @@
         <value xml:lang="en">Address Verification (AVS)</value>
         <value xml:lang="it">Verifica indirizzo (AVS)</value>
     </property>
+    <property key="OrderAddGiftCertificate">
+        <value xml:lang="en">Add Gift Certificate</value>
+    </property>
     <property key="OrderAdjustment">
         <value xml:lang="de">Anpassung</value>
         <value xml:lang="en">Adjustment</value>
@@ -1380,6 +1383,22 @@
         <value xml:lang="ru">Агент заказа</value>
         <value xml:lang="th">ตัวแทนจำหน่ายรายการสั่งซื้อสินค้าสินค้า</value>
         <value xml:lang="zh">订单代理人</value>
+    </property>
+    <property key="OrderAllowSolicitation">
+        <value xml:lang="ar">السماح بالإستدعاءات</value>
+        <value xml:lang="de">(Erlaubt Werbung?)</value>
+        <value xml:lang="en">(allow solicitation?)</value>
+        <value xml:lang="es">(¿Permitir solicitud?)</value>
+        <value xml:lang="fr">Accepte les sollicitations</value>
+        <value xml:lang="hi_IN">(क्या याचना कर सकते हैं ?)</value>
+        <value xml:lang="it">(permetti sollecito?)</value>
+        <value xml:lang="nl">(stuur verkoopinfo?)</value>
+        <value xml:lang="pt">(permitir solicitação?)</value>
+        <value xml:lang="ro">(permiti solecitare?)</value>
+        <value xml:lang="ru">(допустимы обращения?)</value>
+        <value xml:lang="th">(ยอมรับการร้องขอหรือไม่)</value>
+        <value xml:lang="zh">（允许提示？）</value>
+        <value xml:lang="zh_CN">(可以联络)</value>
     </property>
     <property key="OrderAllowSplit">
         <value xml:lang="cs">Povolení rozdělit</value>
@@ -1460,6 +1479,38 @@
         <value xml:lang="th">ไม่ระบุ</value>
         <value xml:lang="zh">匿名</value>
     </property>
+    <property key="OrderAnyOrderStatus">
+        <value xml:lang="ar">كل وضع للطلبيات</value>
+        <value xml:lang="de">Beliebiger Auftragsstatus</value>
+        <value xml:lang="en">Any Order Status</value>
+        <value xml:lang="es">Cualquier estado de orden</value>
+        <value xml:lang="fr">Tous statuts</value>
+        <value xml:lang="hi_IN">कोईभी आदेश स्थिति</value>
+        <value xml:lang="it">Qualsiasi stato ordine</value>
+        <value xml:lang="nl">Elke bestellingstatus</value>
+        <value xml:lang="pt">Qualquer Estado de Encomenda</value>
+        <value xml:lang="ro">Orice Stadiu Comanda</value>
+        <value xml:lang="ru">Любой статус заказа</value>
+        <value xml:lang="th">ทุก ๆ สถานะรายการสั่งซื้อ</value>
+        <value xml:lang="zh">任何订单状态</value>
+        <value xml:lang="zh_CN">任意订单状态</value>
+    </property>
+    <property key="OrderAnyOrderType">
+        <value xml:lang="ar">أي نوع للطلبيات</value>
+        <value xml:lang="de">Beliebiger Auftragstyp</value>
+        <value xml:lang="en">Any Order Type</value>
+        <value xml:lang="es">Cualquier tipo de orden</value>
+        <value xml:lang="fr">Tous types</value>
+        <value xml:lang="hi_IN">कोईभी आदेश के प्रकार</value>
+        <value xml:lang="it">Qualsiasi tipo ordine</value>
+        <value xml:lang="nl">Elk bestellingstype</value>
+        <value xml:lang="pt">Qualquer Tipo de Encomenda</value>
+        <value xml:lang="ro">Orice Tip de Comanda</value>
+        <value xml:lang="ru">Любой тип заказа</value>
+        <value xml:lang="th">ทุก ๆ ประเภทรายการสั่งซื้อ</value>
+        <value xml:lang="zh">任何订单类型</value>
+        <value xml:lang="zh_CN">任意订单类型</value>
+    </property>
     <property key="OrderApproveOrder">
         <value xml:lang="de">Auftrag bestätigen</value>
         <value xml:lang="en">Approve Order</value>
@@ -1509,6 +1560,9 @@
         <value xml:lang="ru">Утвержденные требования на продукцию</value>
         <value xml:lang="th">ปรับปรุงคำร้องสินค้า</value>
         <value xml:lang="zh">已批准的产品需求</value>
+    </property>
+    <property key="OrderAssociatedProducts">
+        <value xml:lang="en">Associated Products</value>
     </property>
     <property key="OrderAuthService">
         <value xml:lang="en">Auth Service</value>
@@ -1728,7 +1782,7 @@
         <value xml:lang="de">Auftrag annullieren</value>
         <value xml:lang="en">Cancel Order</value>
         <value xml:lang="es">Anular pedido</value>
-        <value xml:lang="fr">Annulation de commande</value>
+        <value xml:lang="fr">Annuler la commande</value>
         <value xml:lang="nl">Order annuleren</value>
         <value xml:lang="it">Annulla ordine</value>
         <value xml:lang="th">ยกเลิกรายการสั่งซื้อ</value>
@@ -3943,6 +3997,9 @@
         <value xml:lang="en">Mark Viewed</value>
         <value xml:lang="it">Marca come visionato</value>
     </property>
+    <property key="OrderMarketingPackageComposedBy">
+        <value xml:lang="en">Marketing Package Composed by:</value>
+    </property>
     <property key="OrderMethod">
         <value xml:lang="cs">Způsob</value>
         <value xml:lang="de">Methode</value>
@@ -4269,6 +4326,9 @@
         <value xml:lang="zh">无渠道</value>
         <value xml:lang="zh_CN">无渠道</value>
     </property>
+    <property key="OrderNoGiftCertificatesFound">
+        <value xml:lang="en">No Gift Certificates Found</value>
+    </property>
     <property key="OrderNoGiftWrap">
         <value xml:lang="de">Keine Geschenkverpackung</value>
         <value xml:lang="en">No Gift Wrap</value>
@@ -4371,6 +4431,9 @@
         <value xml:lang="ru">Платежных предпочтений ассоциированных с этим заказом нет.</value>
         <value xml:lang="th">ไม่มีสิทธิพิเศษที่เกี่ยวข้องกับการชำระเงินด้วยรายการสั่งซื้อสินค้านี้</value>
         <value xml:lang="zh">没有与这个订单关联的支付优先方式。</value>
+    </property>
+    <property key="OrderNoProductStoreFinAccountSettingsFound">
+        <value xml:lang="en">No Product Store FinAcccount Settings found</value>
     </property>
     <property key="OrderNoPurchaseOrderSpecified">
         <value xml:lang="de">Kein Beschaffungsauftrag angegeben.</value>
@@ -7233,6 +7296,12 @@
         <value xml:lang="en">Received Quantity History</value>
         <value xml:lang="it">Storia quantità ricevuta</value>
     </property>
+    <property key="OrderRecipientName">
+        <value xml:lang="en">Recipient's Name:</value>
+    </property>
+    <property key="OrderRecipientEmailAdd">
+        <value xml:lang="en">Recipient's Email:</value>
+    </property>
     <property key="OrderReference">
         <value xml:lang="de">Referenz</value>
         <value xml:lang="en">Reference</value>
@@ -8381,6 +8450,9 @@
         <value xml:lang="it">Importo selezionato</value>
         <value xml:lang="zh">选择数量</value>
     </property>
+    <property key="OrderSelectGiftAmount">
+        <value xml:lang="en">Select The Gift Amount</value>
+    </property>
     <property key="OrderSelectAShippingAddress">
         <value xml:lang="de">Wählen Sie eine Lieferadresse</value>
         <value xml:lang="en">Select A Shipping Address</value>
@@ -8657,6 +8729,9 @@
         <value xml:lang="th">ส่งอีเมล</value>
         <value xml:lang="zh">发送电子邮件</value>
         <value xml:lang="zh_CN">发送电子邮件</value>
+    </property>
+    <property key="OrderSenderName">
+        <value xml:lang="en">Sender's Name:</value>
     </property>
     <property key="OrderSendMeThisEveryMonth">
         <value xml:lang="de">Senden Sie mir dies jeden Monat</value>

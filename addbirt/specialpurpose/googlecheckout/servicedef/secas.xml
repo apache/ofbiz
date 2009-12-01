@@ -40,8 +40,8 @@ under the License.
      
     <!-- return related services -->
     <eca service="updateReturnHeader" event="commit" run-on-failure="false" run-on-error="false">
-        <condition field-name="statusId" operator="equals" value="RETURN_COMPLETED"/>
-        <condition field-name="currentStatusId" operator="not-equals" value="RETURN_COMPLETED"/>
+        <condition field-name="statusId" operator="equals" value="RETURN_RECEIVED"/>
+        <condition field-name="currentStatusId" operator="not-equals" value="RETURN_RECEIVED"/>
         <action service="sendGoogleReturnRequest" mode="sync"/>
     </eca>   
       
@@ -66,6 +66,12 @@ under the License.
         <action service="catchEditGoogleOrder" mode="sync" result-to-context="true" ignore-failure="false"/>
     </eca>
     <eca service="createOrderAdjustment" event="in-validate" run-on-failure="false">
+        <action service="catchEditGoogleOrder" mode="sync" result-to-context="true" ignore-failure="false"/>
+    </eca>
+    <eca service="updateOrderAdjustment" event="in-validate" run-on-failure="false">
+        <action service="catchEditGoogleOrder" mode="sync" result-to-context="true" ignore-failure="false"/>
+    </eca>
+    <eca service="deleteOrderAdjustment" event="in-validate" run-on-failure="false">
         <action service="catchEditGoogleOrder" mode="sync" result-to-context="true" ignore-failure="false"/>
     </eca>
  </service-eca>

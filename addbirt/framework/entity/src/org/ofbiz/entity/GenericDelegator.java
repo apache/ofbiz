@@ -29,6 +29,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -39,10 +41,10 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralRuntimeException;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilFormatOut;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
-import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.cache.Cache;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityConditionList;
@@ -102,7 +104,7 @@ public class GenericDelegator implements Delegator {
     protected Cache cache = null;
 
     /** keeps a list of field key sets used in the by and cache, a Set (of Sets of fieldNames) for each entityName */
-    protected Map andCacheFieldSets = FastMap.newInstance();
+    protected Map<?,?> andCacheFieldSets = FastMap.newInstance();
 
     protected DistributedCacheClear distributedCacheClear = null;
     protected EntityEcaHandler<?> entityEcaHandler = null;
@@ -116,9 +118,10 @@ public class GenericDelegator implements Delegator {
 
     private boolean testMode = false;
     private boolean testRollbackInProgress = false;
-    private List<TestOperation> testOperations = null;
+    private static final AtomicReferenceFieldUpdater<GenericDelegator, LinkedBlockingDeque> testOperationsUpdater = AtomicReferenceFieldUpdater.newUpdater(GenericDelegator.class, LinkedBlockingDeque.class, "testOperations");
+    private volatile LinkedBlockingDeque<TestOperation> testOperations = null;
     private enum OperationType {INSERT, UPDATE, DELETE};
-    
+
     private String originalDelegatorName = null;
 
     /** @deprecated Use Delegator delegator = DelegatorFactory.getDelegator(delegatorName);
@@ -246,7 +249,7 @@ public class GenericDelegator implements Delegator {
             if (Debug.infoOn()) Debug.logInfo("Delegator \"" + delegatorName + "\" initializing helper \"" +
                     helperName + "\" for entity group \"" + groupName + "\".", module);
             TreeSet<String> helpersDone = new TreeSet<String>();
-            if (helperName != null && helperName.length() > 0) {
+            if (UtilValidate.isNotEmpty(helperName)) {
                 // make sure each helper is only loaded once
                 if (helpersDone.contains(helperName)) {
                     if (Debug.infoOn()) Debug.logInfo("Helper \"" + helperName + "\" already initialized, not re-initializing.", module);
@@ -288,7 +291,7 @@ public class GenericDelegator implements Delegator {
             String distributedCacheClearClassName = getDelegatorInfo().distributedCacheClearClassName;
 
             try {
-                Class dccClass = loader.loadClass(distributedCacheClearClassName);
+                Class<?> dccClass = loader.loadClass(distributedCacheClearClassName);
                 this.distributedCacheClear = (DistributedCacheClear) dccClass.newInstance();
                 this.distributedCacheClear.setDelegator(this, getDelegatorInfo().distributedCacheClearUserLoginId);
             } catch (ClassNotFoundException e) {
@@ -318,8 +321,8 @@ public class GenericDelegator implements Delegator {
             String entityEcaHandlerClassName = getDelegatorInfo().entityEcaHandlerClassName;
 
             try {
-                Class eecahClass = loader.loadClass(entityEcaHandlerClassName);
-                this.entityEcaHandler = (EntityEcaHandler) eecahClass.newInstance();
+                Class<?> eecahClass = loader.loadClass(entityEcaHandlerClassName);
+                this.entityEcaHandler = UtilGenerics.cast(eecahClass.newInstance());
                 this.entityEcaHandler.setDelegator(this);
             } catch (ClassNotFoundException e) {
                 Debug.logWarning(e, "EntityEcaHandler class with name " + entityEcaHandlerClassName + " was not found, Entity ECA Rules will be disabled", module);
@@ -341,7 +344,7 @@ public class GenericDelegator implements Delegator {
     public String getDelegatorName() {
         return this.delegatorName;
     }
-    
+
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getOriginalDelegatorName()
      */
@@ -406,7 +409,7 @@ public class GenericDelegator implements Delegator {
         }
 
         Map<String, ModelEntity> entities = FastMap.newInstance();
-        if (entityNameSet == null || entityNameSet.size() == 0) {
+        if (UtilValidate.isEmpty(entityNameSet)) {
             return entities;
         }
 
@@ -461,7 +464,7 @@ public class GenericDelegator implements Delegator {
     public GenericHelper getEntityHelper(String entityName) throws GenericEntityException {
         String helperName = getEntityHelperName(entityName);
 
-        if (helperName != null && helperName.length() > 0) {
+        if (UtilValidate.isNotEmpty(helperName)) {
             return GenericHelperFactory.getHelper(helperName);
         } else {
             throw new GenericEntityException("There is no datasource (Helper) configured for the entity-group [" + this.getEntityGroupName(entityName) + "]; was trying to find datesource (helper) for entity [" + entityName + "]");
@@ -481,7 +484,7 @@ public class GenericDelegator implements Delegator {
     public ModelFieldType getEntityFieldType(ModelEntity entity, String type) throws GenericEntityException {
         return this.getModelFieldTypeReader(entity).getModelFieldType(type);
     }
-    
+
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getModelFieldTypeReader(org.ofbiz.entity.model.ModelEntity)
      */
@@ -2762,7 +2765,7 @@ public class GenericDelegator implements Delegator {
             String name = modelField.getName();
             String attr = element.getAttribute(name);
 
-            if (attr != null && attr.length() > 0) {
+            if (UtilValidate.isNotEmpty(attr)) {
                 value.setString(name, attr);
             } else {
                 // if no attribute try a subelement
@@ -2807,15 +2810,15 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#setEntityEcaHandler(org.ofbiz.entity.eca.EntityEcaHandler)
      */
-    public void setEntityEcaHandler(EntityEcaHandler entityEcaHandler) {
+    public <T> void setEntityEcaHandler(EntityEcaHandler<T> entityEcaHandler) {
         this.entityEcaHandler = entityEcaHandler;
     }
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getEntityEcaHandler()
      */
-    public EntityEcaHandler getEntityEcaHandler() {
-        return this.entityEcaHandler;
+    public <T> EntityEcaHandler<T> getEntityEcaHandler() {
+        return UtilGenerics.cast(this.entityEcaHandler);
     }
 
     /* (non-Javadoc)
@@ -2997,7 +3000,7 @@ public class GenericDelegator implements Delegator {
             if (field.getEncrypt()) {
                 Object obj = entity.get(field.getName());
                 if (obj != null) {
-                    if (obj instanceof String && UtilValidate.isEmpty((String) obj)) {
+                    if (obj instanceof String && UtilValidate.isEmpty(obj)) {
                         continue;
                     }
                     entity.dangerousSetNoCheckButFast(field, this.encryptFieldValue(entityName, obj));
@@ -3011,7 +3014,7 @@ public class GenericDelegator implements Delegator {
      */
     public Object encryptFieldValue(String entityName, Object fieldValue) throws EntityCryptoException {
         if (fieldValue != null) {
-            if (fieldValue instanceof String && UtilValidate.isEmpty((String) fieldValue)) {
+            if (fieldValue instanceof String && UtilValidate.isEmpty(fieldValue)) {
                 return fieldValue;
             }
             return this.crypto.encrypt(entityName, fieldValue);
@@ -3169,7 +3172,7 @@ public class GenericDelegator implements Delegator {
         newDelegator.crypto = this.crypto;
         // In case this delegator is in testMode give it a reference to
         // the rollback list
-        newDelegator.testOperations = this.testOperations;
+        testOperationsUpdater.set(newDelegator, this.testOperations);
         // not setting the sequencer so that we have unique sequences.
 
         return newDelegator;
@@ -3181,7 +3184,7 @@ public class GenericDelegator implements Delegator {
     public GenericDelegator cloneDelegator() {
         return this.cloneDelegator(this.delegatorName);
     }
-    
+
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#makeTestDelegator(java.lang.String)
      */
@@ -3195,12 +3198,12 @@ public class GenericDelegator implements Delegator {
     private void setTestMode(boolean testMode) {
         this.testMode = testMode;
         if (testMode) {
-            this.testOperations = FastList.newInstance();
+            testOperationsUpdater.set(this, new LinkedBlockingDeque());
         } else {
             this.testOperations.clear();
         }
     }
-    
+
     private void storeForTestRollback(TestOperation testOperation) {
         if (!this.testMode || this.testRollbackInProgress) {
             throw new IllegalStateException("An attempt was made to store a TestOperation during rollback or outside of test mode");
@@ -3217,25 +3220,23 @@ public class GenericDelegator implements Delegator {
         }
         this.testMode = false;
         this.testRollbackInProgress = true;
-        synchronized (testOperations) {
-            Debug.logInfo("Rolling back " + testOperations.size() + " entity operations", module);
-            ListIterator<TestOperation> iterator = this.testOperations.listIterator(this.testOperations.size());
-            while (iterator.hasPrevious()) {
-                TestOperation testOperation = iterator.previous();
-                try {
-                    if (testOperation.getOperation().equals(OperationType.INSERT)) {
-                        this.removeValue(testOperation.getValue());
-                    } else if (testOperation.getOperation().equals(OperationType.UPDATE)) {
-                        this.store(testOperation.getValue());
-                    } else if (testOperation.getOperation().equals(OperationType.DELETE)) {
-                        this.create(testOperation.getValue());
-                    }
-                } catch (GenericEntityException e) {
-                    Debug.logWarning(e.toString(), module);
+        Debug.logInfo("Rolling back " + testOperations.size() + " entity operations", module);
+        while (!this.testOperations.isEmpty()) {
+            TestOperation testOperation = this.testOperations.pollLast();
+            if (testOperation == null) break;
+            try {
+                if (testOperation.getOperation().equals(OperationType.INSERT)) {
+                    this.removeValue(testOperation.getValue());
+                } else if (testOperation.getOperation().equals(OperationType.UPDATE)) {
+                    this.store(testOperation.getValue());
+                } else if (testOperation.getOperation().equals(OperationType.DELETE)) {
+                    this.create(testOperation.getValue());
                 }
+            } catch (GenericEntityException e) {
+                Debug.logWarning(e.toString(), module);
             }
-            this.testOperations.clear();
         }
+        this.testOperations.clear();
         this.testRollbackInProgress = false;
         this.testMode = true;
     }

@@ -31,7 +31,7 @@ under the License.
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
+                    <decorator-section name="pre-body">
                         <section>
                             <condition>
                                 <if-service-permission service-name="acctgFinAcctPermissionCheck" main-action="VIEW"/>
@@ -47,9 +47,16 @@ under the License.
                                     </fail-widgets>
                                 </section>
                             </widgets>
-                            <fail-widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <not><if-service-permission service-name="acctgFinAcctPermissionCheck" main-action="VIEW"/></not>
+                            </condition>
+                            <widgets>
                                 <label style="h3" text="${uiLabelMap.AccountingViewPermissionError}"/>
-                            </fail-widgets>
+                            </widgets>
                         </section>
                         <decorator-section-include name="body"/>
                     </decorator-section>
@@ -127,7 +134,7 @@ under the License.
                                 </screenlet>
                             </widgets>
                             <fail-widgets>
-                                    <label style="h1" text="${uiLabelMap.AccountingCreateNewFinAccount}"></label>
+                                <label style="h1" text="${uiLabelMap.AccountingCreateNewFinAccount}"></label>
                                 <screenlet id="CreateFinAccountPanel" collapsible="true">
                                     <include-form name="EditFinAccount" location="component://accounting/widget/FinAccountForms.xml"/>
                                 </screenlet>
@@ -357,7 +364,6 @@ under the License.
                             <include-form name="EditDepositSlip" location="component://accounting/widget/FinAccountForms.xml"/>
                         </screenlet>
                         <screenlet title="${uiLabelMap.AccountingEditPaymentGroupMemberFor}">
-                            <include-form name="AddDepositSlipMember" location="component://accounting/widget/FinAccountForms.xml"/>
                             <include-form name="ListDepositSlipMember" location="component://accounting/widget/FinAccountForms.xml"/>
                         </screenlet>
                     </decorator-section>
@@ -575,24 +581,31 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="AccountingEditFinAccountReconciliations"/>
-                <set field="tabButtonItem" value="EditFinAccountReconciliations"/>
+                <set field="tabButtonItem" value="FindFinAccountReconciliations"/>
                 <set field="finAccountId" from-field="parameters.finAccountId"/>
                 <set field="glReconciliationId" from-field="parameters.glReconciliationId" default-value=""/>
-                <entity-one entity-name="FinAccount" value-field="finAccount"/>
-                <entity-and entity-name="GlReconciliation" list="glReconciliations">
-                    <field-map field-name="glAccountId" from-field="finAccount.postToGlAccountId"/>
-                    <order-by field-name="reconciledDate DESC"/>
-                </entity-and>
+                <set field="tabButtonItem2" value="${groovy:glReconciliationId==null?'NewFinAccountReconciliations':'EditFinAccountReconciliations'}"/>
                 <entity-one entity-name="FinAccount" value-field="finAccount"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonFinAccountDecorator" location="${parameters.finAccountDecoratorLocation}">
                     <decorator-section name="body">
-                        <label style="h1" text="${uiLabelMap.AccountingEditFinAccountReconciliations}"/>
-                        <screenlet id="FinAccountReconciliationPanel" collapsible="true">
-                            <include-form name="EditFinAccountReconciliation" location="component://accounting/widget/FinAccountForms.xml"/>
-                        </screenlet>
-                        <include-form name="ListFinAccountReconciliations" location="component://accounting/widget/FinAccountForms.xml"/>
+                        <include-menu name="FinAccountReconciliationsTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                        <section>
+                            <condition>
+                                <if-empty field="glReconciliationId"/>
+                            </condition>
+                            <widgets>
+                                <screenlet  id="AddFinAccountReconciliation" title="${uiLabelMap.AccountingAddFinAccountReconciliations}">
+                                    <include-form name="EditFinAccountReconciliation" location="component://accounting/widget/FinAccountForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                            <fail-widgets>
+                                <screenlet id="EditFinAccountReconciliation" title="${uiLabelMap.AccountingEditFinAccountReconciliations}">
+                                    <include-form name="EditFinAccountReconciliation" location="component://accounting/widget/FinAccountForms.xml"/>
+                                </screenlet>
+                            </fail-widgets>
+                        </section>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -601,10 +614,10 @@ under the License.
     <screen name="ViewGlReconciliationWithTransaction">
         <section>
             <actions>
+                <set field="tabButtonItem" value="FindFinAccountReconciliations"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/popup.js" global="true"/>
                 <set field="layoutSettings.styleSheets[+0]" value="/images/prototypejs/popup.css" global="true"/>
                 <set field="titleProperty" value="AccountingEditFinAccountReconciliations"/>
-                <set field="tabButtonItem" value="EditFinAccountReconciliations"/>
                 <set field="finAccountId" from-field="parameters.finAccountId"/>
                 <set field="glReconciliationId" from-field="parameters.glReconciliationId"/>
                 <entity-one entity-name="FinAccount" value-field="finAccount"/>
@@ -616,6 +629,7 @@ under the License.
                     </condition-list>
                     <order-by field-name="reconciledDate DESC"/>
                 </entity-condition>
+                <set field="previousGlReconciliation" from-field="glReconciliationList[0]"/>
                 <service service-name="getFinAccountTransListAndTotals" result-map="transactionTotalAmount"/>
                 <set field="finAccountTransList" from-field="transactionTotalAmount.finAccountTransList" type="List"/>
                 <set field="finAccountTransIds" value="${groovy:org.ofbiz.entity.util.EntityUtil.getFieldListFromEntityList(finAccountTransList, 'finAccountTransId', true);}" type="List"/>
@@ -627,6 +641,13 @@ under the License.
                 </entity-condition>
                 <service service-name="isGlReconciliationReconciled" result-map="reconciledMap"/>
                 <set field="isReconciled" from-field="reconciledMap.isReconciled"/>
+                <service service-name="getReconciliationClosingBalance" result-map="currentRecnciliationClosingBalance"/>
+                <set field="currentClosingBalance" from-field="currentRecnciliationClosingBalance.closingBalance"/>
+                <set field="previousGlReconciliationId" from-field="previousGlReconciliation.glReconciliationId" default-value="${glReconciliationId}"/>
+                <service service-name="getReconciliationClosingBalance" result-map="previousReconciliationClosingBalance">
+                    <field-map field-name="glReconciliationId" from-field="previousGlReconciliationId"/>
+                </service>
+                <set field="previousClosingBalance" from-field="previousReconciliationClosingBalance.closingBalance"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonFinAccountDecorator" location="${parameters.finAccountDecoratorLocation}">
@@ -635,6 +656,51 @@ under the License.
                         <platform-specific>
                             <html><html-template location="component://accounting/webapp/accounting/finaccounttrans/GlReconciledFinAccountTrans.ftl"/></html>
                         </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FindFinAccountReconciliations">
+        <section>
+            <actions>
+                <set field="tabButtonItem" value="FindFinAccountReconciliations"/>
+                <set field="titleProperty" value="PageTitleFindFinAccountReconciliations"/>
+                <set field="tabButtonItem2" value="Find"/>
+                <set field="finAccountId" from-field="parameters.finAccountId"/>
+                <set field="glReconciliationId" from-field="parameters.glReconciliationId" default-value=""/>
+                <entity-one entity-name="FinAccount" value-field="finAccount"/>
+                <entity-condition entity-name="FinAccountTrans" list="finAccountTransList">
+                    <condition-list>
+                        <condition-expr field-name="finAccountId" operator="equals" from-field="finAccountId"/>
+                        <condition-expr field-name="glReconciliationId" operator="not-equals" from-field="nullField" ignore-if-empty="true"/>
+                        <condition-expr field-name="glReconciliationId" operator="equals" from-field="glReconciliationId" ignore-if-empty="true"/>
+                    </condition-list>
+                </entity-condition>
+                <set field="glReconciliationIds" value="${groovy:org.ofbiz.entity.util.EntityUtil.getFieldListFromEntityList(finAccountTransList, 'glReconciliationId', true);}" type="List"/>
+                <entity-condition entity-name="GlReconciliation" list="glReconciliations">
+                    <condition-list>
+                        <condition-expr field-name="glReconciliationId" operator="in" from-field="glReconciliationIds"/>
+                        <condition-expr field-name="glAccountId" operator="equals" from-field="finAccount.postToGlAccountId" ignore-if-empty="true"/>
+                        <condition-expr field-name="glReconciliationName" operator="equals" from-field="parameters.glReconciliationName" ignore-if-empty="true"/>
+                        <condition-expr field-name="description" operator="equals" from-field="parameters.description" ignore-if-empty="true"/>
+                        <condition-expr field-name="statusId" operator="equals" from-field="parameters.statusId" ignore-if-empty="true"/>
+                        <condition-expr field-name="organizationPartyId" operator="equals" from-field="parameters.organizationPartyId" ignore-if-empty="true"/>
+                    </condition-list>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonFinAccountDecorator" location="${parameters.finAccountDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-menu name="FinAccountReconciliationsTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="search-options">
+                                <include-form name="FindBankReconciliation" location="component://accounting/widget/FinAccountForms.xml"/>
+                            </decorator-section> 
+                            <decorator-section name="search-results">
+                                <include-form name="ListFinAccountReconciliations" location="component://accounting/widget/FinAccountForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

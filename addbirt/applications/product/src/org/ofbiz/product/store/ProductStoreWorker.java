@@ -333,7 +333,7 @@ public class ProductStoreWorker {
                 // check the items excluded from shipping
                 String includeFreeShipping = method.getString("includeNoChargeItems");
                 if (includeFreeShipping != null && "N".equalsIgnoreCase(includeFreeShipping)) {
-                    if ((itemSizes == null || itemSizes.size() == 0) && orderTotal.compareTo(BigDecimal.ZERO) == 0) {
+                    if (UtilValidate.isEmpty(itemSizes) && orderTotal.compareTo(BigDecimal.ZERO) == 0) {
                         returnShippingMethods.remove(method);
                         //Debug.logInfo("Removed shipping method due to all items being exempt from shipping", module);
                         continue;
@@ -343,14 +343,14 @@ public class ProductStoreWorker {
                 // check the geos
                 String includeGeoId = method.getString("includeGeoId");
                 String excludeGeoId = method.getString("excludeGeoId");
-                if ((includeGeoId != null && includeGeoId.length() > 0) || (excludeGeoId != null && excludeGeoId.length() > 0)) {
+                if (UtilValidate.isNotEmpty(includeGeoId) || UtilValidate.isNotEmpty(excludeGeoId)) {
                     if (shippingAddress == null) {
                         returnShippingMethods.remove(method);
                         //Debug.logInfo("Removed shipping method due to empty shipping adresss (may not have been selected yet)", module);
                         continue;
                     }
                 }
-                if (includeGeoId != null && includeGeoId.length() > 0) {
+                if (UtilValidate.isNotEmpty(includeGeoId)) {
                     List<GenericValue> includeGeoGroup = GeoWorker.expandGeoGroup(includeGeoId, delegator);
                     if (!GeoWorker.containsGeo(includeGeoGroup, shippingAddress.getString("countryGeoId"), delegator) &&
                             !GeoWorker.containsGeo(includeGeoGroup, shippingAddress.getString("stateProvinceGeoId"), delegator) &&
@@ -361,7 +361,7 @@ public class ProductStoreWorker {
                         continue;
                     }
                 }
-                if (excludeGeoId != null && excludeGeoId.length() > 0) {
+                if (UtilValidate.isNotEmpty(excludeGeoId)) {
                     List<GenericValue> excludeGeoGroup = GeoWorker.expandGeoGroup(excludeGeoId, delegator);
                     if (GeoWorker.containsGeo(excludeGeoGroup, shippingAddress.getString("countryGeoId"), delegator) ||
                             GeoWorker.containsGeo(excludeGeoGroup, shippingAddress.getString("stateProvinceGeoId"), delegator) ||
@@ -376,7 +376,7 @@ public class ProductStoreWorker {
                 // check the features
                 String includeFeatures = method.getString("includeFeatureGroup");
                 String excludeFeatures = method.getString("excludeFeatureGroup");
-                if (includeFeatures != null && includeFeatures.length() > 0) {
+                if (UtilValidate.isNotEmpty(includeFeatures)) {
                     List<GenericValue> includedFeatures = null;
                     try {
                         includedFeatures = delegator.findByAndCache("ProductFeatureGroupAppl", UtilMisc.toMap("productFeatureGroupId", includeFeatures));
@@ -398,7 +398,7 @@ public class ProductStoreWorker {
                         }
                     }
                 }
-                if (excludeFeatures != null && excludeFeatures.length() > 0) {
+                if (UtilValidate.isNotEmpty(excludeFeatures)) {
                     List<GenericValue> excludedFeatures = null;
                     try {
                         excludedFeatures = delegator.findByAndCache("ProductFeatureGroupAppl", UtilMisc.toMap("productFeatureGroupId", excludeFeatures));
@@ -560,7 +560,7 @@ public class ProductStoreWorker {
             return -1;
         }
 
-        if (surveyResponse == null || surveyResponse.size() == 0) {
+        if (UtilValidate.isEmpty(surveyResponse)) {
             return 0;
         } else {
             return surveyResponse.size();

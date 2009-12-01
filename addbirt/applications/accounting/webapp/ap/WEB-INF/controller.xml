@@ -43,11 +43,6 @@ under the License.
         <security https="true" auth="true"/>
         <response name="success" type="view" value="NewPurchaseInvoice"/>
     </request-map>
-    <request-map uri="getInvoiceRunningTotal">
-        <event type="jsonservice" invoke="getInvoiceRunningTotal"/>
-        <response name="success" type="none"/>
-        <response name="error" type="none"/>
-    </request-map>
     <request-map uri="processMassCheckRun">
         <security https="true" auth="true"/>
         <event type="service" invoke="createPaymentAndPaymentGroupForInvoices"/>
@@ -98,6 +93,11 @@ under the License.
     <request-map uri="FindApPaymentGroups">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="FindApPaymentGroups"/>
+    </request-map>
+    <request-map uri="massChangeInvoiceStatus">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="massChangeInvoiceStatus"/>
+        <response name="success" type="view" value="FindPurchaseInvoices"/>
     </request-map>
 
     <!-- ================ Vendor requests ================ -->

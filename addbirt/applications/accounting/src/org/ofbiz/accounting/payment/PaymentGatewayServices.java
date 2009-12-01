@@ -355,7 +355,7 @@ public class PaymentGatewayServices {
                 GenericValue paymentSettings = getPaymentSettings(orh.getOrderHeader(), paymentPref, AUTH_SERVICE_TYPE, false);
                 if (paymentSettings != null) {
                     paymentConfig = paymentSettings.getString("paymentPropertiesPath");
-                    if (paymentConfig == null || paymentConfig.length() == 0) {
+                    if (UtilValidate.isEmpty(paymentConfig)) {
                         paymentConfig = "payment.properties";
                     }
                 }
@@ -908,7 +908,7 @@ public class PaymentGatewayServices {
             Debug.logWarning(errMsg, module);
             return ServiceUtil.returnError(errMsg);
         }
-        if (paymentConfig == null || paymentConfig.length() == 0) {
+        if (UtilValidate.isEmpty(paymentConfig)) {
             paymentConfig = "payment.properties";
         }
         GenericValue authTransaction = PaymentGatewayServices.getAuthTransaction(paymentPref);
@@ -1252,9 +1252,10 @@ public class PaymentGatewayServices {
             Iterator<GenericValue> payments = paymentPrefs.iterator();
             while (payments.hasNext()) {
                 // DEJ20060708: Do we really want to just log and ignore the errors like this? I've improved a few of these in a review today, but it is being done all over...
-                GenericValue paymentPref = (GenericValue) payments.next();
+                GenericValue paymentPref = payments.next();
                 GenericValue authTrans = getAuthTransaction(paymentPref);
                 if (authTrans == null) {
+                    Debug.logWarning("Authorized OrderPaymentPreference has no corresponding PaymentGatewayResponse, cannot capture payment: " + paymentPref, module);
                     continue;
                 }
 
@@ -1340,12 +1341,14 @@ public class PaymentGatewayServices {
             }
         }
 
-        if (amountToCapture.compareTo(ZERO) == 1) {
+        if (amountToCapture.compareTo(ZERO) > 0) {
             GenericValue productStore = orh.getProductStore();
             if (!UtilValidate.isEmpty(productStore)) {
                 boolean shipIfCaptureFails = UtilValidate.isEmpty(productStore.get("shipIfCaptureFails")) || "Y".equalsIgnoreCase(productStore.getString("shipIfCaptureFails"));
                 if (! shipIfCaptureFails) {
                     return ServiceUtil.returnError("Cannot ship order because credit card captures were unsuccessful");
+                } else {
+                    Debug.logWarning("Payment capture failed, shipping order anyway as per ProductStore setting (shipIfCaptureFails)", module);
                 }
             }
             Map<String, Object> result = ServiceUtil.returnSuccess();
@@ -1608,7 +1611,7 @@ public class PaymentGatewayServices {
             return null;
         }
 
-        if (paymentConfig == null || paymentConfig.length() == 0) {
+        if (UtilValidate.isEmpty(paymentConfig)) {
             paymentConfig = "payment.properties";
         }
 
@@ -3156,7 +3159,7 @@ public class PaymentGatewayServices {
         }
         Debug.logInfo("Running credit card verification [" + paymentMethodId + "] (" + amount + ") : " + productStorePaymentProperties + " : " + mode, module);
 
-        if (amount != null && amount.length() > 0) {
+        if (UtilValidate.isNotEmpty(amount)) {
             BigDecimal authAmount = new BigDecimal(amount);
             if (authAmount.compareTo(BigDecimal.ZERO) > 0) {
                 Map<String, Object> ccAuthContext = FastMap.newInstance();

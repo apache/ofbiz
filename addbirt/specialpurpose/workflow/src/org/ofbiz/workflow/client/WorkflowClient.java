@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.LocalDispatcher;
@@ -251,7 +252,7 @@ public class WorkflowClient {
      */
     public void complete(String workEffortId, String partyId, String roleTypeId, Timestamp fromDate, Map result) throws WfException {
         WfAssignment assign = WfFactory.getWfAssignment(delegator, workEffortId, partyId, roleTypeId, fromDate);
-        if (result != null && result.size() > 0)
+        if (UtilValidate.isNotEmpty(result))
             assign.setResult(result);
         assign.complete();
     }

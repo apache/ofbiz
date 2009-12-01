@@ -21,6 +21,7 @@ package org.ofbiz.workflow.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
@@ -43,7 +44,7 @@ public class ServiceCondition implements TransitionCondition {
     public Boolean evaluateCondition(Map context, Map attrs, String expression, DispatchContext dctx) throws EvaluationException {
         // get the service to call
         String serviceName = (String) attrs.get("serviceName");
-        if (serviceName == null || serviceName.length() == 0)
+        if (UtilValidate.isEmpty(serviceName))
             throw new EvaluationException("Invalid serviceName; be sure to set the serviceName ExtendedAttribute");
 
         // get the dispatcher

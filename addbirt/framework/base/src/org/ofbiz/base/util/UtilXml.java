@@ -45,6 +45,15 @@ import javax.xml.transform.stream.StreamSource;
 
 import javolution.util.FastList;
 
+import org.apache.xerces.parsers.DOMParser;
+import org.apache.xerces.xni.Augmentations;
+import org.apache.xerces.xni.NamespaceContext;
+import org.apache.xerces.xni.QName;
+import org.apache.xerces.xni.XMLAttributes;
+import org.apache.xerces.xni.XMLLocator;
+import org.apache.xerces.xni.XMLResourceIdentifier;
+import org.apache.xerces.xni.XMLString;
+import org.apache.xerces.xni.XNIException;
 import org.apache.xml.serialize.OutputFormat;
 import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.Document;
@@ -61,16 +70,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
-
-import org.apache.xerces.parsers.DOMParser;
-import org.apache.xerces.xni.Augmentations;
-import org.apache.xerces.xni.NamespaceContext;
-import org.apache.xerces.xni.QName;
-import org.apache.xerces.xni.XNIException;
-import org.apache.xerces.xni.XMLAttributes;
-import org.apache.xerces.xni.XMLLocator;
-import org.apache.xerces.xni.XMLResourceIdentifier;
-import org.apache.xerces.xni.XMLString;
 
 /**
  * Utilities methods to simplify dealing with JAXP & DOM XML parsing
@@ -266,7 +265,7 @@ public class UtilXml {
             return;
         }
         // OutputFormat defaults are: indent on, indent = 4, include XML declaration,
-        // charset = UTF-8, line width = 72 
+        // charset = UTF-8, line width = 72
         try {
             writeXmlDocument(node, os, "UTF-8", false, true, 4);
         } catch (TransformerException e) {
@@ -587,14 +586,14 @@ public class UtilXml {
         return newElement;
     }
 
-    /** Creates a child element with the given namespace supportive name and appends it to the element child node list. */    
+    /** Creates a child element with the given namespace supportive name and appends it to the element child node list. */
     public static Element addChildElementNSElement(Element element, String childElementName,
             Document document, String nameSpaceUrl) {
         Element newElement = document.createElementNS(nameSpaceUrl, childElementName);
-        element.appendChild(newElement);         
+        element.appendChild(newElement);
         return element;
     }
-    
+
     /** Creates a child element with the given namespace supportive name and appends it to the element child node list.
      *  Also creates a Text node with the given value and appends it to the new elements child node list.
      */
@@ -602,7 +601,7 @@ public class UtilXml {
             String childElementValue, Document document, String nameSpaceUrl) {
         Element newElement = document.createElementNS(nameSpaceUrl, childElementName);
         newElement.appendChild(document.createTextNode(childElementValue));
-        element.appendChild(newElement);         
+        element.appendChild(newElement);
         return element;
     }
 
@@ -822,7 +821,7 @@ public class UtilXml {
         Element childElement = firstChildElement(element, childElementName);
         String elementValue = elementValue(childElement);
 
-        if (elementValue == null || elementValue.length() == 0)
+        if (UtilValidate.isEmpty(elementValue))
             return defaultValue;
         else
             return elementValue;
@@ -866,27 +865,27 @@ public class UtilXml {
     }
 
     public static String checkEmpty(String string) {
-        if (string != null && string.length() > 0)
+        if (UtilValidate.isNotEmpty(string))
             return string;
         else
             return "";
     }
 
     public static String checkEmpty(String string1, String string2) {
-        if (string1 != null && string1.length() > 0)
+        if (UtilValidate.isNotEmpty(string1))
             return string1;
-        else if (string2 != null && string2.length() > 0)
+        else if (UtilValidate.isNotEmpty(string2))
             return string2;
         else
             return "";
     }
 
     public static String checkEmpty(String string1, String string2, String string3) {
-        if (string1 != null && string1.length() > 0)
+        if (UtilValidate.isNotEmpty(string1))
             return string1;
-        else if (string2 != null && string2.length() > 0)
+        else if (UtilValidate.isNotEmpty(string2))
             return string2;
-        else if (string3 != null && string3.length() > 0)
+        else if (UtilValidate.isNotEmpty(string3))
             return string3;
         else
             return "";

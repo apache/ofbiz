@@ -187,6 +187,7 @@ public class ProductServices {
     public static Map<String, Object> prodMakeFeatureTree(DispatchContext dctx, Map<String, ? extends Object> context) {
         // * String productId      -- Parent (virtual) product ID
         // * List featureOrder     -- Order of features
+        // * Boolean checkInventory-- To calculate available inventory.
         // * String productStoreId -- Product Store ID for Inventory
         String productStoreId = (String) context.get("productStoreId");
         Locale locale = (Locale) context.get("locale");
@@ -196,14 +197,14 @@ public class ProductServices {
         Map<String, Object> result = FastMap.newInstance();
         List<String> featureOrder = UtilMisc.makeListWritable(UtilGenerics.<String>checkCollection(context.get("featureOrder")));
 
-        if (featureOrder == null || featureOrder.size() == 0) {
+        if (UtilValidate.isEmpty(featureOrder)) {
             return ServiceUtil.returnError("Empty list of features passed");
         }
 
         List<GenericValue> variants = UtilGenerics.checkList(prodFindAllVariants(dctx, context).get("assocProducts"));
         List<String> virtualVariant = FastList.newInstance();
 
-        if (variants == null || variants.size() == 0) {
+        if (UtilValidate.isEmpty(variants)) {
             return ServiceUtil.returnSuccess();
         }
         List<String> items = FastList.newInstance();
@@ -251,11 +252,19 @@ public class ProductServices {
             }
 
             // next check inventory for each item: if inventory is not required or is available
+            Boolean checkInventory = (Boolean) context.get("checkInventory");
             try {
-                Map<String, Object> invReqResult = dispatcher.runSync("isStoreInventoryAvailableOrNotRequired", UtilMisc.<String, Object>toMap("productStoreId", productStoreId, "productId", productIdTo, "quantity", BigDecimal.ONE));
-                if (ServiceUtil.isError(invReqResult)) {
-                    return ServiceUtil.returnError("Error calling the isStoreInventoryRequired when building the variant product tree.", null, null, invReqResult);
-                } else if ("Y".equals((String) invReqResult.get("availableOrNotRequired"))) {
+                if (checkInventory) {
+                    Map<String, Object> invReqResult = dispatcher.runSync("isStoreInventoryAvailableOrNotRequired", UtilMisc.<String, Object>toMap("productStoreId", productStoreId, "productId", productIdTo, "quantity", BigDecimal.ONE));
+                    if (ServiceUtil.isError(invReqResult)) {
+                        return ServiceUtil.returnError("Error calling the isStoreInventoryRequired when building the variant product tree.", null, null, invReqResult);
+                    } else if ("Y".equals((String) invReqResult.get("availableOrNotRequired"))) {
+                        items.add(productIdTo);
+                        if (productTo.getString("isVirtual") != null && productTo.getString("isVirtual").equals("Y")) {
+                            virtualVariant.add(productIdTo);
+                        }
+                    }
+                } else {
                     items.add(productIdTo);
                     if (productTo.getString("isVirtual") != null && productTo.getString("isVirtual").equals("Y")) {
                         virtualVariant.add(productIdTo);
@@ -305,7 +314,7 @@ public class ProductServices {
             Debug.logError(e, module);
             return ServiceUtil.returnError(e.getMessage());
         }
-        if (tree == null || tree.size() == 0) {
+        if (UtilValidate.isEmpty(tree)) {
             result.put(ModelService.RESPONSE_MESSAGE, ModelService.RESPOND_ERROR);
             result.put(ModelService.ERROR_MESSAGE, UtilProperties.getMessage(resource,"productservices.feature_grouping_came_back_empty", locale));
         } else {
@@ -372,7 +381,7 @@ public class ProductServices {
         Locale locale = (Locale) context.get("locale");
         String errMsg = null;
 
-        if (productId == null || productId.length() == 0) {
+        if (UtilValidate.isEmpty(productId)) {
             errMsg = UtilProperties.getMessage(resource,"productservices.invalid_productId_passed", locale);
             result.put(ModelService.RESPONSE_MESSAGE, ModelService.RESPOND_ERROR);
             result.put(ModelService.ERROR_MESSAGE, errMsg);
@@ -809,7 +818,7 @@ public class ProductServices {
                 } else {
                     // is a GoodIdentification.idValue?
                     List<GenericValue> goodIdentificationList = delegator.findByAnd("GoodIdentification", UtilMisc.toMap("idValue", variantProductId));
-                    if (goodIdentificationList == null || goodIdentificationList.size() == 0) {
+                    if (UtilValidate.isEmpty(goodIdentificationList)) {
                         // whoops, nothing found... return error
                         return ServiceUtil.returnError("Error creating a virtual with variants: the ID [" + variantProductId + "] is not a valid Product.productId or a GoodIdentification.idValue");
                     }
@@ -943,7 +952,7 @@ public class ProductServices {
         String productContentTypeId = (String) context.get("productContentTypeId");
         ByteBuffer imageData = (ByteBuffer) context.get("uploadedFile");
 
-        if (UtilValidate.isNotEmpty((String) context.get("_uploadedFile_fileName"))) {
+        if (UtilValidate.isNotEmpty(context.get("_uploadedFile_fileName"))) {
             String imageFilenameFormat = UtilProperties.getPropertyValue("catalog", "image.filename.format");
             String imageServerPath = FlexibleStringExpander.expandString(UtilProperties.getPropertyValue("catalog", "image.server.path"), context);
             String imageUrlPrefix = UtilProperties.getPropertyValue("catalog", "image.url.prefix");

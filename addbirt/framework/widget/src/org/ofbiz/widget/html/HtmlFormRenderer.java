@@ -19,15 +19,11 @@
 package org.ofbiz.widget.html;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.sql.Timestamp;
-import com.ibm.icu.util.Calendar;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
 
 import javax.servlet.ServletContext;
@@ -50,6 +46,7 @@ import org.ofbiz.widget.form.FormStringRenderer;
 import org.ofbiz.widget.form.ModelForm;
 import org.ofbiz.widget.form.ModelFormField;
 import org.ofbiz.widget.form.ModelFormField.CheckField;
+import org.ofbiz.widget.form.ModelFormField.ContainerField;
 import org.ofbiz.widget.form.ModelFormField.DateFindField;
 import org.ofbiz.widget.form.ModelFormField.DateTimeField;
 import org.ofbiz.widget.form.ModelFormField.DisplayEntityField;
@@ -69,6 +66,8 @@ import org.ofbiz.widget.form.ModelFormField.SubmitField;
 import org.ofbiz.widget.form.ModelFormField.TextField;
 import org.ofbiz.widget.form.ModelFormField.TextFindField;
 import org.ofbiz.widget.form.ModelFormField.TextareaField;
+
+import com.ibm.icu.util.Calendar;
 
 /**
  * Widget Library - HTML Form Renderer implementation
@@ -1294,7 +1293,7 @@ public class HtmlFormRenderer extends HtmlWidgetRenderer implements FormStringRe
         // The 'action' attribute is mandatory in a form definition,
         // even if it is empty.
         writer.append(" action=\"");
-        if (targ != null && targ.length() > 0) {
+        if (UtilValidate.isNotEmpty(targ)) {
             //this.appendOfbizUrl(writer, "/" + targ);
             WidgetWorker.buildHyperlinkUrl(writer, targ, targetType, null, null, false, false, true, request, response, context);
         }
@@ -2881,6 +2880,14 @@ public class HtmlFormRenderer extends HtmlWidgetRenderer implements FormStringRe
         } else {
              writer.append(titleText);
         }
+    }
+    
+    public void renderContainerFindField(Appendable writer, Map<String, Object> context, ContainerField containerField) throws IOException {
+        String id = "";
+        if (UtilValidate.isNotEmpty(containerField.getId())) {
+            id = containerField.getId();
+        }
+        writer.append("<div id=\"" + id + "\"/>");
     }
 
     /** Create an ajaxXxxx JavaScript CSV string from a list of UpdateArea objects. See

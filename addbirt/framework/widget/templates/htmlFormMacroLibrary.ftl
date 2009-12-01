@@ -23,8 +23,8 @@ under the License.
     </#if>
 </#macro>
 
-<#macro renderDisplayField idName description class alert inPlaceEditorId="" inPlaceEditorUrl="" inPlaceEditorParams="">
-    <#if class?has_content || alert=="true">
+<#macro renderDisplayField idName description class alert inPlaceEditorUrl="" inPlaceEditorParams="">
+    <#if inPlaceEditorUrl?has_content || class?has_content || alert=="true">
         <span <#if idName?has_content>id="${idName}"</#if> <@renderClass class alert />><#t/>
     </#if>
     <#if description?has_content>
@@ -32,12 +32,12 @@ under the License.
     <#else>
         &nbsp;<#t/>
     </#if>
-    <#if class?has_content || alert=="true">
+    <#if inPlaceEditorUrl?has_content || class?has_content || alert=="true">
         </span><#lt/>
     </#if>
-    <#if inPlaceEditorId?has_content>
+    <#if inPlaceEditorUrl?has_content && idName?has_content>
         <script language="JavaScript" type="text/javascript"><#lt/>
-        ajaxInPlaceEditDisplayField('${inPlaceEditorId}', '${inPlaceEditorUrl}', ${inPlaceEditorParams});<#lt/>
+        ajaxInPlaceEditDisplayField('${idName}', '${inPlaceEditorUrl}', ${inPlaceEditorParams});<#lt/>
         </script><#lt/>
     </#if>
 </#macro>
@@ -123,7 +123,7 @@ ${formName}.<#if timeDropdownParamName?has_content>${timeDropdownParamName}</#if
 <#if ajaxEnabled>
 _description"<#if id?has_content> id="${id}_description"</#if><#if currentValue?has_content> value="${explicitDescription}"</#if>/><#rt/>
 <input type="hidden" name="${name}"<#if id?has_content> id="${id}"</#if><#if currentValue?has_content> value="${currentValue}"</#if>/><#rt/>
-<script language="JavaScript" type="text/javascript">var data = {${ajaxOptions}};ajaxAutoCompleteDropDown('<#if id?has_content>${id}_description</#if>','${id}',data,{autoSelect:${autoSelect},frequency:${frequency},minChars:${minChars},choices:${choices},partialSearch:${partialSearch},partialChars:${partialChars},ignoreCase:${ignoreCase},fullSearch:${fullSearch});</script>
+<script language="JavaScript" type="text/javascript">var data = {${ajaxOptions}};ajaxAutoCompleteDropDown('<#if id?has_content>${id}_description</#if>','${id}',data,{autoSelect:${autoSelect},frequency:${frequency},minChars:${minChars},choices:${choices},partialSearch:${partialSearch},partialChars:${partialChars},ignoreCase:${ignoreCase},fullSearch:${fullSearch}});</script>
 <#else>
 " <@renderClass className alert /><#if id?has_content> id="${id}"</#if><#if multiple?has_content> multiple="multiple"</#if><#if otherFieldSize gt 0> onchange="process_choice(this,document.${formName}.${otherFieldName})"</#if><#if event?has_content> ${event}="${action}"</#if><#if size?has_content> size="${size}"</#if>>
 <#if firstInList?has_content && currentValue?has_content && !multiple?has_content>
@@ -407,9 +407,10 @@ ${item.description}</div>
 </#if>
 </#macro>
 
-<#macro renderLookupField className alert name value size maxlength autocomplete descriptionFieldName formName lookupFieldFormName targetParameterIter imgSrc>
-<input type="text" <@renderClass className alert /><#if name?has_content> name="${name}"</#if><#if value?has_content> value="${value}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if><#if autocomplete?has_content> autocomplete="off"</#if>/><#rt/>
-<#if descriptionFieldName?has_content>
+<#macro renderLookupField className alert name value size maxlength id autocomplete descriptionFieldName formName lookupFieldFormName targetParameterIter imgSrc ajaxUrl ajaxEnabled>
+<div class="field-lookup"><ul>
+<li><input type="text" <@renderClass className alert /><#if name?has_content> name="${name}"</#if><#if value?has_content> value="${value}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if><#if id?has_content> id="${id}"</#if><#rt/><#if autocomplete?has_content> autocomplete="off"</#if>/><#rt/></li></li>
+<li><#if descriptionFieldName?has_content>
  <a href="javascript:call_fieldlookup3(document.${formName?html}.${name?html},'${descriptionFieldName}',<#rt/>
  <#else>
  <a href="javascript:call_fieldlookup2(document.${formName}.${name},<#rt/>
@@ -419,24 +420,35 @@ ${item.description}</div>
   ,document.${formName}.${item}.value<#rt>
  </#list>
 </#if>
-);"><#rt>
-<img src="${imgSrc}"width="15" height="14" border="0" alt="Lookup"/></a><#rt>
+);"></li><#rt>
+</ul></div>
+<#if ajaxEnabled?has_content && ajaxEnabled>
+    <script language="JavaScript" type="text/javascript">ajaxAutoCompleter('${ajaxUrl}');</script><#t/>
+</#if>
 </#macro>
-<#macro renderNextPrev paginateStyle paginateFirstStyle viewIndex highIndex listSize viewSize ajaxEnabled javaScriptEnabled ajaxFirstUrl firstUrl paginateFirstLabel paginatePreviousStyle ajaxPreviousUrl previousUrl paginatePreviousLabel pageLabel ajaxSelectUrl selectUrl commonDisplaying paginateNextStyle ajaxNextUrl nextUrl paginateNextLabel paginateLastStyle ajaxLastUrl lastUrl paginateLastLabel>
+<#macro renderNextPrev paginateStyle paginateFirstStyle viewIndex highIndex listSize viewSize ajaxEnabled javaScriptEnabled ajaxFirstUrl firstUrl paginateFirstLabel paginatePreviousStyle ajaxPreviousUrl previousUrl paginatePreviousLabel pageLabel ajaxSelectUrl selectUrl ajaxSelectSizeUrl selectSizeUrl commonDisplaying paginateNextStyle ajaxNextUrl nextUrl paginateNextLabel paginateLastStyle ajaxLastUrl lastUrl paginateLastLabel paginateViewSizeLabel>
+<#if listSize gt viewSize>
 <div class="${paginateStyle}">&nbsp; <ul>
-<li class="${paginateFirstStyle}<#if viewIndex gt 0>"><a href="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxFirstUrl}')<#else>${firstUrl}</#if>">${paginateFirstLabel}</a><#else>-disabled">${paginateFirstLabel}</#if></li>
-<li class="${paginatePreviousStyle}<#if viewIndex gt 0>"><a href="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxPreviousUrl}')<#else>${previousUrl}</#if>">${paginatePreviousLabel}</a><#else>-disabled">${paginatePreviousLabel}</#if></li>
+<li class="${paginateFirstStyle}<#if viewIndex gt 0>"><a href="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxFirstUrl}')<#else>${firstUrl}</#if>">${paginateFirstLabel}</a><#else>-disabled"><span>${paginateFirstLabel}</span></#if></li>
+<li class="${paginatePreviousStyle}<#if viewIndex gt 0>"><a href="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxPreviousUrl}')<#else>${previousUrl}</#if>">${paginatePreviousLabel}</a><#else>-disabled"><span>${paginatePreviousLabel}</span></#if></li>
 <#if listSize gt 0 && javaScriptEnabled><li>${pageLabel}<select name="page" size="1" onchange="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxSelectUrl}')<#else>location.href='${selectUrl}'+this.value;</#if>"><#rt/>
 <#assign x=listSize/viewSize?floor>
 <#if listSize gt (viewIndex*viewSize)><#assign x=x+1></#if>
 <#list 1..x as i>
 <#if i == (viewIndex+1)><option selected="selected" value="<#else><option value="</#if>${i-1}">${i}</option>
 </#list>
-</select></li><li>${commonDisplaying}</li>
-</#if>
-<li class="${paginateNextStyle}<#if highIndex lt listSize>"><a href="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxNextUrl}')<#else>${nextUrl}</#if>">${paginateNextLabel}</a><#else>-disabled">${paginateNextLabel}</#if></li>
-<li class="${paginateLastStyle}<#if highIndex lt listSize>"><a href="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxLastUrl}')<#else>${lastUrl}</#if>">${paginateLastLabel}</a><#else>-disabled">${paginateLastLabel}</#if></li>
+</select></li></#if>
+<li class="${paginateNextStyle}<#if highIndex lt listSize>"><a href="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxNextUrl}')<#else>${nextUrl}</#if>">${paginateNextLabel}</a><#else>-disabled"><span>${paginateNextLabel}</span></#if></li>
+<li class="${paginateLastStyle}<#if highIndex lt listSize>"><a href="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxLastUrl}')<#else>${lastUrl}</#if>">${paginateLastLabel}</a><#else>-disabled"><span>${paginateLastLabel}</span></#if></li>
+<#if javaScriptEnabled><li class="nav-pagesize"><select name="pageSize" size="1" onchange="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxSelectSizeUrl}')<#else>location.href='${selectSizeUrl}';</#if>"><#rt/>
+<#assign availPageSizes = [20, 30, 50, 100, 200]>
+<#list availPageSizes as ps>
+  <option <#if viewSize == ps>selected="selected" </#if> value="${ps}">${ps}</option>
+</#list>
+</select> ${paginateViewSizeLabel}</li></#if>
+<li>${commonDisplaying}</li>
 </ul></div><br/>
+</#if>
 </#macro>
 <#macro renderFileField className alert name value size maxlength autocomplete><input type="file" <@renderClass className alert /><#if name?has_content> name="${name}"</#if><#if value?has_content> value="${value}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if><#if autocomplete?has_content> autocomplete="off"</#if>/><#rt/></#macro>
 <#macro renderPasswordField className alert name value size maxlength id autocomplete><input type="password" <@renderClass className alert /><#if name?has_content> name="${name}"</#if><#if value?has_content> value="${value}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if><#if id?has_content> id="${id}"</#if><#if autocomplete?has_content> autocomplete="off"</#if>/></#macro>
@@ -448,11 +460,17 @@ ${item.description}</div>
 <#if rightText?has_content><td align="right"><#if rightStyle?has_content><div class="${rightStyle}"></#if>${rightText}<#if rightStyle?has_content></div></#if></td><#rt/></#if>
 </tr> </table>
 </#macro>
+<#macro renderContainerField id><div id="${id?if_exists}"/></#macro>
+
 <#macro renderFieldGroupOpen style id title collapsed collapsibleAreaId collapsible expandToolTip collapseToolTip>
-<#if style?has_content || id?has_content || title?has_content>
- <div class="fieldgroup<#if style?has_content> ${style}</#if>"<#if id?has_content> id="${id}"</#if>><div class="fieldgroup-title-bar"><table><tr><td class="collapse"><#rt/>
- <#if collapsible><ul><li class="<#if collapsed>collapsed"><a onclick="javascript:toggleCollapsiblePanel(this, '${collapsibleAreaId}', '${expandToolTip}', '${collapseToolTip}');"<#else>expanded"><a onclick="javascript:toggleCollapsiblePanel(this, '${collapsibleAreaId}', '${expandToolTip}', '${collapseToolTip}');"</#if>>&nbsp&nbsp&nbsp</a></li></ul></#if></td><td><#rt/>
- <#if title?has_content><div class="title">${title}</div></#if></td></tr></table></div><div id="${collapsibleAreaId}" class="fieldgroup-body" <#if collapsed && collapsible> style="display: none;"</#if>>
+<#if style?has_content || id?has_content || title?has_content><div class="fieldgroup<#if style?has_content> ${style}</#if>"<#if id?has_content> id="${id}"</#if>>
+<div class="fieldgroup-title-bar">
+ <#if collapsible><ul><li class="<#if collapsed>collapsed"><a onclick="javascript:toggleCollapsiblePanel(this, '${collapsibleAreaId}', '${expandToolTip}', '${collapseToolTip}');">
+   <#else>expanded"><a onclick="javascript:toggleCollapsiblePanel(this, '${collapsibleAreaId}', '${expandToolTip}', '${collapseToolTip}');"></#if>
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<#if title?has_content>${title}</#if></a></li></ul>
+ <#else><#if title?has_content>${title}</#if></#if><#rt/>
+</div>
+<div id="${collapsibleAreaId}" class="fieldgroup-body" <#if collapsed && collapsible> style="display: none;"</#if>>
 </#if>
 </#macro>
 <#macro renderFieldGroupClose style id title><#if style?has_content || id?has_content || title?has_content></div></div></#if></#macro>

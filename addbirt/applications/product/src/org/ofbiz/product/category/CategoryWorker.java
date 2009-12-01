@@ -412,11 +412,11 @@ public class CategoryWorker {
 
     public static boolean isProductInCategory(Delegator delegator, String productId, String productCategoryId) throws GenericEntityException {
         if (productCategoryId == null) return false;
-        if (productId == null || productId.length() == 0) return false;
+        if (UtilValidate.isEmpty(productId)) return false;
 
         List<GenericValue> productCategoryMembers = EntityUtil.filterByDate(delegator.findByAndCache("ProductCategoryMember",
                 UtilMisc.toMap("productCategoryId", productCategoryId, "productId", productId)), true);
-        if (productCategoryMembers == null || productCategoryMembers.size() == 0) {
+        if (UtilValidate.isEmpty(productCategoryMembers)) {
             //before giving up see if this is a variant product, and if so look up the virtual product and check it...
             GenericValue product = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", productId));
             List<GenericValue> productAssocs = ProductWorker.getVariantVirtualAssocs(product);

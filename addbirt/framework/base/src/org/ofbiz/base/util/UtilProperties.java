@@ -65,12 +65,12 @@ public class UtilProperties implements java.io.Serializable {
     /** An instance of the generic cache for storing the non-locale-specific properties.
      *  Each Properties instance is keyed by the resource String.
      */
-    protected static UtilCache<String, Properties> resourceCache = new UtilCache<String, Properties>("properties.UtilPropertiesResourceCache");
+    protected static UtilCache<String, Properties> resourceCache = UtilCache.createUtilCache("properties.UtilPropertiesResourceCache");
 
     /** An instance of the generic cache for storing the non-locale-specific properties.
      *  Each Properties instance is keyed by the file's URL.
      */
-    protected static UtilCache<String, Properties> urlCache = new UtilCache<String, Properties>("properties.UtilPropertiesUrlCache");
+    protected static UtilCache<String, Properties> urlCache = UtilCache.createUtilCache("properties.UtilPropertiesUrlCache");
 
     public static final Locale LOCALE_ROOT = new Locale("", "", "");
 
@@ -114,7 +114,7 @@ public class UtilProperties implements java.io.Serializable {
     public static String getPropertyValue(String resource, String name, String defaultValue) {
         String value = getPropertyValue(resource, name);
 
-        if (value == null || value.length() == 0)
+        if (UtilValidate.isEmpty(value))
             return defaultValue;
         else
             return value;
@@ -391,7 +391,6 @@ public class UtilProperties implements java.io.Serializable {
                      +"# Dynamically modified by OFBiz Framework (org.ofbiz.base.util : UtilProperties.setPropertyValue)\n"
                      +"# The comments have been removed, you may still find them on the OFBiz repository... \n"
                      +"#");
-                 
              }
 
              propFile.close();
@@ -402,7 +401,7 @@ public class UtilProperties implements java.io.Serializable {
          }
      }
 
-     /** Sets the specified value of the specified property name to the specified resource/properties in memory, does not persist it 
+     /** Sets the specified value of the specified property name to the specified resource/properties in memory, does not persist it
       * @param resource The name of the resource
       * @param name The name of the property in the resource
       * @param value The value of the property to set in memory */
@@ -454,7 +453,7 @@ public class UtilProperties implements java.io.Serializable {
     public static String getMessage(String resource, String name, Object[] arguments, Locale locale) {
         String value = getMessage(resource, name, locale);
 
-        if (value == null || value.length() == 0) {
+        if (UtilValidate.isEmpty(value)) {
             return "";
         } else {
             if (arguments != null && arguments.length > 0) {
@@ -472,10 +471,10 @@ public class UtilProperties implements java.io.Serializable {
      * @param arguments A List of Objects to insert into the message argument place holders
      * @return The value of the property in the properties file
      */
-    public static String getMessage(String resource, String name, List arguments, Locale locale) {
+    public static <E> String getMessage(String resource, String name, List<E> arguments, Locale locale) {
         String value = getMessage(resource, name, locale);
 
-        if (value == null || value.length() == 0) {
+        if (UtilValidate.isEmpty(value)) {
             return "";
         } else {
             if (UtilValidate.isNotEmpty(arguments)) {
@@ -500,7 +499,7 @@ public class UtilProperties implements java.io.Serializable {
     public static String getMessage(String resource, String name, Map<String, ? extends Object> context, Locale locale) {
         String value = getMessage(resource, name, locale);
 
-        if (value == null || value.length() == 0) {
+        if (UtilValidate.isEmpty(value)) {
             return "";
         } else {
             if (UtilValidate.isNotEmpty(context)) {
@@ -858,7 +857,7 @@ public class UtilProperties implements java.io.Serializable {
      * properties file format.
      */
     public static class UtilResourceBundle extends ResourceBundle {
-        protected static UtilCache<String, UtilResourceBundle> bundleCache = new UtilCache<String, UtilResourceBundle>("properties.UtilPropertiesBundleCache");
+        protected static UtilCache<String, UtilResourceBundle> bundleCache = UtilCache.createUtilCache("properties.UtilPropertiesBundleCache");
         protected Properties properties = null;
         protected Locale locale = null;
         protected int hashCode = hashCode();
@@ -944,12 +943,12 @@ public class UtilProperties implements java.io.Serializable {
         @Override
         public Enumeration<String> getKeys() {
             return new Enumeration<String>() {
-                Iterator i = properties.keySet().iterator();
+                Iterator<String> i = UtilGenerics.cast(properties.keySet().iterator());
                 public boolean hasMoreElements() {
                     return (i.hasNext());
                 }
                 public String nextElement() {
-                    return (String) i.next();
+                    return i.next();
                 }
             };
         }

@@ -37,6 +37,7 @@ under the License.
         <fileset dir="../base/lib/j2eespecs" includes="*.jar"/>
         <fileset dir="../base/lib/scripting" includes="*.jar"/>
         <fileset dir="../base/build/lib" includes="*.jar"/>
+        <fileset dir="../sql/build/lib" includes="*.jar"/>
     </path>
 
     <patternset id="src.exc.set">
@@ -50,6 +51,11 @@ under the License.
 
     <target name="classes" depends="prepare">
         <javac15/>
+    </target>
+
+    <target name="install-PG-JDBC" description="download the JDBC driver for PostgreSQL">
+        <get src="http://jdbc.postgresql.org/download/postgresql-8.4-701.jdbc4.jar"
+            dest="lib/jdbc/postgresql-8.4-701.jdbc4.jar" usetimestamp="true" />
     </target>
 
     <!-- ================================================================== -->

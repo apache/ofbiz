@@ -74,18 +74,18 @@ public class UtilCacheEvents {
             return "error";
         }
 
-        UtilCache utilCache = UtilCache.findCache(name);
+        UtilCache<?, ?> utilCache = UtilCache.findCache(name);
 
         if (utilCache != null) {
             Object key = null;
 
             if (utilCache.getMaxSize() > 0) {
                 try {
-                    key = utilCache.cacheLineTable.getKeyFromMemory(number);
+                    key = utilCache.getCacheLineTable().getKeyFromMemory(number);
                 } catch (Exception e) {}
             } else {
                 // no LRU, try looping through the keySet to see if we find the specified index...
-                Iterator ksIter = utilCache.cacheLineTable.keySet().iterator();
+                Iterator<?> ksIter = utilCache.getCacheLineTable().keySet().iterator();
                 int curNum = 0;
 
                 while (ksIter.hasNext()) {
@@ -139,7 +139,7 @@ public class UtilCacheEvents {
             request.setAttribute("_ERROR_MESSAGE_", errMsg);
             return "error";
         }
-        UtilCache utilCache = UtilCache.findCache(name);
+        UtilCache<?, ?> utilCache = UtilCache.findCache(name);
 
         if (utilCache != null) {
             utilCache.clear();
@@ -233,7 +233,7 @@ public class UtilCacheEvents {
             expireTime = Long.valueOf(expireTimeStr);
         } catch (Exception e) {}
 
-        UtilCache utilCache = UtilCache.findCache(name);
+        UtilCache<?, ?> utilCache = UtilCache.findCache(name);
 
         if (utilCache != null) {
             if (maxSize != null)

@@ -302,9 +302,11 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonFacilityDecorator" location="${parameters.commonFacilityDecoratorLocation}">
                     <decorator-section name="body">
-                        <platform-specific>
-                            <html><html-template location="component://product/webapp/facility/facility/FindFacilityLocation.ftl"/></html>
-                        </platform-specific>
+                        <screenlet title="${title}">
+                            <platform-specific>
+                                <html><html-template location="component://product/webapp/facility/facility/FindFacilityLocation.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -744,9 +746,11 @@ under the License.
                 <set field="facilityId" from-field="parameters.facilityId"/>
                 <set field="partyId" from-field="parameters.partyId"/>
                 <set field="roleTypeId" from-field="parameters.roleTypeId"/>
-                <set field="orderByList[]" value="partyId"/>
                 <entity-one entity-name="Facility" value-field="facility"/>
-                <get-related value-field="facility" relation-name="FacilityParty" list="facilityParties" order-by-list="orderByList"/>
+                <entity-and entity-name="FacilityParty" list="facilityParties" filter-by-date="true">
+                    <field-map field-name="facilityId"/>
+                    <order-by field-name="partyId"/>
+                </entity-and>
                 <property-map resource="ProductUiLabels" map-name="uiLabelMap"/>
                 <set field="title" value="${uiLabelMap.PageTitleEditFacilityParties}"/>
             </actions>
@@ -795,9 +799,16 @@ under the License.
                                         <parameter param-name="facilityId"/>
                                         <parameter param-name="externalLoginKey"/>
                                     </link>
-                                    <link target="EditContactMech" text="${uiLabelMap.ProductNewContactMech}" style="buttontext">
-                                        <parameter param-name="facilityId"/>
-                                    </link>
+                                    <section>
+                                        <condition>
+                                            <if-service-permission service-name="facilityGenericPermission" main-action="CREATE"/>
+                                        </condition>
+                                        <widgets>
+                                            <link target="EditContactMech" text="${uiLabelMap.ProductNewContactMech}" style="buttontext">
+                                                <parameter param-name="facilityId"/>
+                                            </link>
+                                        </widgets>
+                                    </section>
                                 </widgets>
                             </section>
                         </container>

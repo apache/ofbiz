@@ -296,7 +296,7 @@ public class AIMPaymentServices {
     private static Map<String, Object> processCard(Map<String, Object> request, Properties props) {
         Map<String, Object> result = FastMap.newInstance();
         String url = props.getProperty("url");
-        if (url == null || url.length() == 0) {
+        if (UtilValidate.isEmpty(url)) {
             return ServiceUtil.returnFailure("No payment.authorizedotnet.url found.");
         }
         if (isTestMode()) {
@@ -354,13 +354,13 @@ public class AIMPaymentServices {
         String login = getPaymentGatewayConfigValue(delegator, paymentGatewayConfigId, "userId", configStr, "payment.authorizedotnet.login");
         String password = getPaymentGatewayConfigValue(delegator, paymentGatewayConfigId, "pwd", configStr, "payment.authorizedotnet.password");
         String transDescription = getPaymentGatewayConfigValue(delegator, paymentGatewayConfigId, "transDescription", configStr, "payment.authorizedotnet.transdescription");
-        if (ver == null || ver.length() == 0) {
+        if (UtilValidate.isEmpty(ver)) {
             ver = "3.0";
         }
-        if (login == null || login.length() == 0) {
+        if (UtilValidate.isEmpty(login)) {
             Debug.logInfo("the login property in " + configStr + " is not configured.", module);
         }
-        if ((password == null || password.length() == 0) && !("3.1".equals(ver))) {
+        if (UtilValidate.isEmpty(password) && !("3.1".equals(ver))) {
             Debug.logInfo("The password property in " + configStr + " is not configured.", module);
         }
         if ("3.1".equals(ver)) {
@@ -399,7 +399,7 @@ public class AIMPaymentServices {
     private static void buildMerchantInfo(Map<String, Object> params, Properties props, Map<String, Object> AIMRequest) {
         AIMRequest.put("x_Login", props.getProperty("login"));
         String trankey = props.getProperty("trankey");
-        if (trankey != null && trankey.length() > 0) {
+        if (UtilValidate.isNotEmpty(trankey)) {
             AIMRequest.put("x_Tran_Key", props.getProperty("trankey"));
         }
         AIMRequest.put("x_Password",props.getProperty("password"));
@@ -557,7 +557,7 @@ public class AIMPaymentServices {
             results.put("processAmount", new BigDecimal(ar.getResponseField(AuthorizeResponse.AMOUNT)));
         } else {
             results.put("authCode", ar.getResponseCode());
-            results.put("processAmount", new BigDecimal("0.00"));
+            results.put("processAmount", BigDecimal.ZERO);
             results.put("authRefNum", AuthorizeResponse.ERROR);
         }
         Debug.logInfo("processAuthTransResult: " + results.toString(),module);
@@ -574,7 +574,7 @@ public class AIMPaymentServices {
             results.put("captureCode", ar.getResponseField(AuthorizeResponse.AUTHORIZATION_CODE));
             results.put("captureAmount", new BigDecimal(ar.getResponseField(AuthorizeResponse.AMOUNT)));
         } else {
-            results.put("captureAmount", new BigDecimal("0.00"));
+            results.put("captureAmount", BigDecimal.ZERO);
         }
         Debug.logInfo("processCaptureTransResult: " + results.toString(),module);
     }
@@ -591,7 +591,7 @@ public class AIMPaymentServices {
             results.put("refundCode", ar.getResponseField(AuthorizeResponse.AUTHORIZATION_CODE));
             results.put("refundAmount", new BigDecimal(ar.getResponseField(AuthorizeResponse.AMOUNT)));
         } else {
-            results.put("refundAmount", new BigDecimal("0.00"));
+            results.put("refundAmount", BigDecimal.ZERO);
         }
         Debug.logInfo("processRefundTransResult: " + results.toString(),module);
         return results;
@@ -609,7 +609,7 @@ public class AIMPaymentServices {
             results.put("releaseCode", ar.getResponseField(AuthorizeResponse.AUTHORIZATION_CODE));
             results.put("releaseAmount", new BigDecimal(ar.getResponseField(AuthorizeResponse.AMOUNT)));
         } else {
-            results.put("releaseAmount", new BigDecimal("0.00"));
+            results.put("releaseAmount", BigDecimal.ZERO);
         }
         Debug.logInfo("processReleaseTransResult: " + results.toString(),module);
         return results;
@@ -633,7 +633,7 @@ public class AIMPaymentServices {
             results.put("processAmount", new BigDecimal(ar.getResponseField(AuthorizeResponse.AMOUNT)));
         } else {
             results.put("authCode", ar.getResponseCode());
-            results.put("processAmount", new BigDecimal("0.00"));
+            results.put("processAmount", BigDecimal.ZERO);
             results.put("authRefNum", AuthorizeResponse.ERROR);
         }
         Debug.logInfo("processAuthTransResult: " + results.toString(),module);

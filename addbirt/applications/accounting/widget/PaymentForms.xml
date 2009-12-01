@@ -24,8 +24,8 @@ under the License.
     <form name="FindPayments" type="single" target="findPayments"
         header-row-style="header-row" default-table-style="basic-table">
         <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
-        <field name="paymentId"><text-find default-option="contains" ignore-case="true"/></field>
-        <field name="comments"><text-find default-option="contains" ignore-case="true"/></field>
+        <field name="paymentId"><text-find ignore-case="true"/></field>
+        <field name="comments"><text-find ignore-case="true"/></field>
         <field name="paymentTypeId" title="${uiLabelMap.AccountingPaymentType}" position="1">
             <drop-down allow-empty="true">
                 <entity-options description="${description}" entity-name="PaymentType">
@@ -44,7 +44,7 @@ under the License.
         <field position="1" name="partyIdFrom"><lookup target-form-name="LookupPartyName"/></field>
         <field position="2" name="partyIdTo"><lookup target-form-name="LookupPartyName"/></field>
         <field position="1" name="amount"><text/></field>
-        <field name="paymentRefNum"><text-find default-option="contains" ignore-case="true"/></field>
+        <field name="paymentRefNum"><text-find ignore-case="true"/></field>
         <field name="paymentGatewayResponseId"><text/></field>
         <field name="searchButton" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
@@ -53,7 +53,7 @@ under the License.
         <actions>
             <service service-name="performFind" result-map="result" result-map-list="listIt">
                 <field-map field-name="inputFields" from-field="parameters"/>
-                <field-map field-name="entityName" value="PaymentAndType"/>
+                <field-map field-name="entityName" value="PaymentAndTypeAndCreditCard"/>
                 <field-map field-name="orderBy" value="effectiveDate DESC"/>
                 <field-map field-name="viewIndex" from-field="viewIndex"/>
                 <field-map field-name="viewSize" from-field="viewSize"/>
@@ -100,39 +100,39 @@ under the License.
                 </condition-list>
                 <order-by field-name="description"/>
             </entity-condition>
+            <entity-one entity-name="PartyGroup" use-cache="true" value-field="partyGroup">
+                <field-map field-name="partyId" from-field="parameters.partyIdFrom"/>
+            </entity-one>
+            <set field="partyGroupName" from-field="partyGroup.groupName"/>
+            <set field="paymentPartyId" from-field="parameters.partyIdFrom" default-value="${defaultOrganizationPartyId}"/>
         </actions>
         <field name="statusId"><hidden value="PMNT_NOT_PAID"/></field>
         <field name="currencyUomId"><hidden value="${defaultOrganizationPartyCurrencyUomId}"/></field>
-        <field position="1" name="organizationPartyId" parameter-name="partyIdFrom">
+        <field position="1" name="organizationPartyId" parameter-name="partyIdFrom" event="onChange" action="javascript:(document.NewPaymentOut.action = 'newPayment'),(document.NewPaymentOut.submit())">
             <drop-down allow-empty="false" no-current-selected-key="${defaultOrganizationPartyId}">
+                <option key="${parameters.partyIdFrom}" description="${partyGroupName}"/>
                 <entity-options description="${groupName}" entity-name="PartyAcctgPrefAndGroup" key-field-name="partyId">
                     <entity-order-by field-name="groupName"/>
                 </entity-options>
             </drop-down>
         </field>
-        <field name="partyIdTo" position="2"><lookup target-form-name="LookupPartyName"/></field>
-        <field name="paymentTypeId" title="${uiLabelMap.AccountingPaymentType}" position="1">
+        <field name="paymentMethodId" id-name="paymentMethodId" position="2">
             <drop-down allow-empty="false">
-                <list-options list-name="paymentTypes" key-name="paymentTypeId" description="${description}"/>
+                <entity-options entity-name="PaymentMethod" description="${description}" filter-by-date="by-name">
+                     <entity-constraint name="partyId" operator="equals" value="${paymentPartyId}"/>
+                </entity-options>
             </drop-down>
         </field>
-        <field name="paymentMethodTypeId" position="2">
-            <drop-down allow-empty="true">
-                <entity-options entity-name="PaymentMethodType" description="${description}">
-                    <entity-order-by field-name="description"/>
-                </entity-options>
+        <field name="partyIdTo" position="1"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="paymentTypeId" title="${uiLabelMap.AccountingPaymentType}" position="2">
+            <drop-down allow-empty="false">
+                <list-options list-name="paymentTypes" key-name="paymentTypeId" description="${description}"/>
             </drop-down>
         </field>
         <field name="paymentRefNum" position="1"><text/></field>
         <field name="overrideGlAccountId" position="2"><lookup target-form-name="LookupGlAccount"/></field>
         <field name="amount" position="1"><text/></field>
         <field name="comments" position="2"><text size="70"/></field>
-        <field name="finAccountId">
-            <drop-down allow-empty="true">
-                <entity-options entity-name="FinAccount" description="${finAccountName} [${finAccountId}]" filter-by-date="true">
-                </entity-options>
-            </drop-down>
-        </field>
         <field name="isDepositWithDrawPayment"><hidden value="Y"/></field>
         <field name="finAccountTransTypeId"><hidden value="WITHDRAWAL"/></field>
         <field position="1" name="createButton" widget-style="smallSubmit">
@@ -417,7 +417,7 @@ under the License.
         <field name="paymentTypeId" position="1"><display-entity entity-name="PaymentType"/></field>
         <field name="paymentMethodTypeId" position="2"><display-entity entity-name="PaymentMethodType"/></field>
         <field name="statusId" title="${uiLabelMap.CommonStatus}" position="1"><display-entity entity-name="StatusItem"/></field>
-        <field name="paymentMethodId" position="2"><display-entity entity-name="PaymentMethod" description="${paymentMethodId}[${paymentMethodTypeId}]"/></field>
+        <field name="paymentMethodId" position="2"><display-entity entity-name="PaymentMethod" description="${description} [${paymentMethodId}]"/></field>
         <field name="partyIdFrom" title="${uiLabelMap.AccountingFromParty}" position="1">
             <hyperlink target="/partymgr/control/viewprofile" target-type="inter-app" description="${partyNameResultFrom.fullName} [${payment.partyIdFrom}]">
                 <parameter param-name="partyId" from-field="payment.partyIdFrom"/>
@@ -577,14 +577,14 @@ under the License.
     <form name="FinAccountTransAssociatedWithPayment" type="single" default-map-name="finAccountTrans" odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
         <field name="finAccountTransId" position="1"><display/></field>
         <field name="finAccountTransTypeId" title="${uiLabelMap.FormFieldTitle_finAccountTransType}" position="2"><display-entity entity-name="FinAccountTransType" description="${description}"/></field>
-        <field name="amount" position="3"><display type="currency" currency="${payment.currencyUomId}"/></field>
-        <field name="glReconciliationId" position="1">
+        <field name="amount" position="1"><display type="currency" currency="${payment.currencyUomId}"/></field>
+        <field name="glReconciliationId" position="2">
             <hyperlink target="ViewGlReconciliationWithTransaction" description="${finAccountTrans.glReconciliationId}">
                 <parameter param-name="glReconciliationId" from-field="finAccountTrans.glReconciliationId"/>
                 <parameter param-name="finAccountId" from-field="finAccountTrans.finAccountId"/>
             </hyperlink>
         </field>
-        <field name="transactionDate" position="2"><display/></field>
-        <field name="statusId"  position="3" title="${uiLabelMap.CommonStatus}"><display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId"/></field>
+        <field name="transactionDate" position="1"><display/></field>
+        <field name="statusId"  position="2" title="${uiLabelMap.CommonStatus}"><display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId"/></field>
     </form>
 </forms>

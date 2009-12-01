@@ -21,9 +21,8 @@ package org.ofbiz.widget.tree;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.parsers.ParserConfigurationException;
@@ -34,7 +33,6 @@ import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.service.LocalDispatcher;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -47,8 +45,8 @@ public class TreeFactory {
 
     public static final String module = TreeFactory.class.getName();
 
-    public static final UtilCache<String, Map<String, ModelTree>> treeLocationCache = new UtilCache<String, Map<String, ModelTree>>("widget.tree.locationResource", 0, 0, false);
-    public static final UtilCache<String, Map<String, ModelTree>> treeWebappCache = new UtilCache<String, Map<String, ModelTree>>("widget.tree.webappResource", 0, 0, false);
+    public static final UtilCache<String, Map<String, ModelTree>> treeLocationCache = UtilCache.createUtilCache("widget.tree.locationResource", 0, 0, false);
+    public static final UtilCache<String, Map<String, ModelTree>> treeWebappCache = UtilCache.createUtilCache("widget.tree.webappResource", 0, 0, false);
 
     public static ModelTree getTreeFromLocation(String resourceName, String treeName, Delegator delegator, LocalDispatcher dispatcher)
             throws IOException, SAXException, ParserConfigurationException {

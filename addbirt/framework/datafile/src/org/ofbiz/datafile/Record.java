@@ -27,12 +27,17 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
+
+import org.ofbiz.base.crypto.HashCrypt;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.common.login.LoginServices;
 
 /**
  * Record
  */
+@SuppressWarnings("serial")
 public class Record implements Serializable {
 
     /** Contains a map with field data by name */
@@ -197,7 +202,7 @@ public class Record implements Serializable {
            (long)(byteArray[0]&0xff);
     }
 
-    /** Sets the named field to the passed value, converting the value from a String to the corrent type using <code>Type.valueOf()</code>
+    /** Sets the named field to the passed value, converting the value from a String to the current type using <code>Type.valueOf()</code>
      * @param name The field name to set
      * @param value The String value to convert and set
      */
@@ -262,7 +267,12 @@ public class Record implements Serializable {
             set(name, Double.valueOf(number));
         } // standard types
         else if (fieldType.equals("java.lang.String") || fieldType.equals("String"))
-            set(name, value);
+            if (field.format.equals("EncryptedString")) {
+                String hashType = LoginServices.getHashType();
+                set(name, HashCrypt.getDigestHash(value, hashType));        	
+            } else {
+        	set(name, value);
+            }
         else if (fieldType.equals("NullTerminatedString")) {
             int terminate = value.indexOf(0x0);
             set(name, terminate>0?value.substring(0,terminate):value);
@@ -544,7 +554,7 @@ public class Record implements Serializable {
             String strVal = null;
 
             if (modelField.expression) {
-                if (modelField.refField != null && modelField.refField.length() > 0) {
+                if (UtilValidate.isNotEmpty(modelField.refField)) {
                     strVal = record.getString(modelField.refField);
                 }
                 if (strVal == null) {

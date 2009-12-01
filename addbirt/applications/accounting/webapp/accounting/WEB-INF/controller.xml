@@ -278,7 +278,11 @@ under the License.
         <response name="success" type="view" value="editInvoice"/>
         <response name="error" type="view" value="editInvoice"/>
     </request-map>
-
+    <request-map uri="getInvoiceRunningTotal">
+        <event type="jsonservice" invoke="getInvoiceRunningTotal"/>
+        <response name="success" type="none"/>
+        <response name="error" type="none"/>
+    </request-map>
      <!-- Request EditInvoiceItemType -->
     <request-map uri="editInvoiceItemType">
         <security https="true" auth="true"/>
@@ -496,6 +500,12 @@ under the License.
     <request-map uri="UpdatePaymentGatewayConfig">
         <security https="true" auth="true"/>
         <event type="service" invoke="updatePaymentGatewayConfig"/>
+        <response name="success" type="view" value="EditPaymentGatewayConfig"/>
+        <response name="error" type="view" value="EditPaymentGatewayConfig"/>
+    </request-map>
+    <request-map uri="UpdatePaymentGatewayConfigSagePay">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updatePaymentGatewayConfigSagePay"/>
         <response name="success" type="view" value="EditPaymentGatewayConfig"/>
         <response name="error" type="view" value="EditPaymentGatewayConfig"/>
     </request-map>
@@ -1302,21 +1312,21 @@ under the License.
     </request-map>
 
     <!--WorkEffort Agreements-->
-    <request-map uri="EditAgreementWorkEffortAppls">
+    <request-map uri="EditAgreementWorkEffortApplics">
         <security https="true" auth="true"/>
-        <response name="success" type="view" value="EditAgreementWorkEffortAppls"/>
+        <response name="success" type="view" value="EditAgreementWorkEffortApplics"/>
     </request-map>
-    <request-map uri="createAgreementWorkEffortAppl">
+    <request-map uri="createAgreementWorkEffortApplic">
         <security https="true" auth="true"/>
-        <event type="service" invoke="createAgreementWorkEffortAppl"/>
-        <response name="success" type="view" value="EditAgreementWorkEffortAppls"/>
-        <response name="error" type="view" value="EditAgreementWorkEffortAppls"/>
+        <event type="service" invoke="createAgreementWorkEffortApplic"/>
+        <response name="success" type="view" value="EditAgreementWorkEffortApplics"/>
+        <response name="error" type="view" value="EditAgreementWorkEffortApplics"/>
     </request-map>
-    <request-map uri="deleteAgreementWorkEffortAppl">
+    <request-map uri="deleteAgreementWorkEffortApplic">
         <security https="true" auth="true"/>
-        <event type="service" invoke="deleteAgreementWorkEffortAppl"/>
-        <response name="success" type="view" value="EditAgreementWorkEffortAppls"/>
-        <response name="error" type="view" value="EditAgreementWorkEffortAppls"/>
+        <event type="service" invoke="deleteAgreementWorkEffortApplic"/>
+        <response name="success" type="view" value="EditAgreementWorkEffortApplics"/>
+        <response name="error" type="view" value="EditAgreementWorkEffortApplics"/>
     </request-map>
 
     <!-- TaxAuthority Requests -->
@@ -1778,6 +1788,12 @@ under the License.
         <response name="success" type="view" value="FindGlAccountReconciliations"/>
         <response type="view" name="error"  value="FindGlAccountReconciliations"/>
     </request-map>
+    <request-map uri="cancelReconciliation">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="cancelBankReconciliation"/>
+        <response name="success" type="view" value="FindFinAccountReconciliations"/>
+        <response name="error" type="view" value="FindFinAccountReconciliations"/>
+    </request-map>
 
     <!-- ================ check requests ================= -->
     <request-map uri="listChecksToPrint">
@@ -1951,6 +1967,10 @@ under the License.
     <request-map uri="EditFinAccountReconciliations">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="EditFinAccountReconciliations"/>
+    </request-map>
+    <request-map uri="FindFinAccountReconciliations">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindFinAccountReconciliations"/>
     </request-map>
     <request-map uri="createGlReconciliation">
         <security https="true" auth="true"/>
@@ -2162,6 +2182,7 @@ under the License.
     <request-map uri="LookupAgreement"><security https="true" auth="true"/><response name="success" type="view" value="LookupAgreement"/></request-map>
     <request-map uri="LookupAgreementItem"><security auth="true" https="true"/><response name="success" type="view" value="LookupAgreementItem"/></request-map>
     <request-map uri="LookupPaymentGroupMember"><security auth="true" https="true"/><response name="success" type="view" value="LookupPaymentGroupMember"/></request-map>
+    <request-map uri="LookupGlReconciliation"><security auth="true" https="true"/><response name="success" type="view" value="LookupGlReconciliation"/></request-map>
 
 
     <request-map uri="viewprofile"><security https="true" auth="true"/><response name="success" type="view" value="viewprofile"/></request-map>
@@ -2175,6 +2196,11 @@ under the License.
     <request-map uri="printCheck.pdf">
         <!-- security https="true" auth="true"/ -->
         <response name="success" type="view" value="PrintCheckPDF"/>
+    </request-map>
+    
+    <request-map uri="PrintInvoices">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="PrintInvoices"/>
     </request-map>
 
     <!--Global GL Settings -->
@@ -2267,16 +2293,18 @@ under the License.
         <response name="error" type="view" value="ShowFixedAssetDepreciation"/>
     </request-map>
 
+    <!-- Commented out for now WIP 
     <request-map uri="taxAuthorityVATReport">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="taxAuthorityVATReport"/>
     </request-map>
-
+    Commented out for now WIP -->
+    
     <!-- GeoLocation-->
     <request-map uri="FixedAssetGeoLocation">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="FixedAssetGeoLocation"/>
-        <response name="error" type="view" value="EditFacility"/>
+        <response name="error" type="view" value="EditFixedAsset"/>
     </request-map>
 
     <request-map uri="AcctgTransEntriesSearchResultsCsv.csv">
@@ -2556,6 +2584,7 @@ under the License.
     <view-map name="BankReconciliation" type="screen" page="component://accounting/widget/FinAccountScreens.xml#BankReconciliation"/>
     <view-map name="EditFinAccountReconciliations" type="screen" page="component://accounting/widget/FinAccountScreens.xml#EditFinAccountReconciliations"/>
     <view-map name="ViewGlReconciliationWithTransaction" type="screen" page="component://accounting/widget/FinAccountScreens.xml#ViewGlReconciliationWithTransaction"/>
+    <view-map name="FindFinAccountReconciliations" type="screen" page="component://accounting/widget/FinAccountScreens.xml#FindFinAccountReconciliations"/>
 
     <!-- FixedAsset -->
     <view-map name="ListFixedAssets" type="screen" page="component://accounting/widget/FixedAssetScreens.xml#ListFixedAssets"/>
@@ -2611,7 +2640,7 @@ under the License.
     <view-map name="EditAgreementItemParty" type="screen" page="component://accounting/widget/AgreementScreens.xml#EditAgreementItemParty"/>
     <view-map name="ListAgreementGeographicalApplic" type="screen" page="component://accounting/widget/AgreementScreens.xml#ListAgreementGeographicalApplic"/>
     <view-map name="EditAgreementGeographicalApplic" type="screen" page="component://accounting/widget/AgreementScreens.xml#EditAgreementGeographicalApplic"/>
-    <view-map name="EditAgreementWorkEffortAppls" type="screen" page="component://accounting/widget/AgreementScreens.xml#EditAgreementWorkEffortAppls"/>
+    <view-map name="EditAgreementWorkEffortApplics" type="screen" page="component://accounting/widget/AgreementScreens.xml#EditAgreementWorkEffortApplics"/>
 
     <!-- TaxAuthority -->
     <view-map name="FindTaxAuthority" type="screen" page="component://accounting/widget/TaxAuthorityScreens.xml#FindTaxAuthority"/>
@@ -2689,20 +2718,30 @@ under the License.
     <view-map name="LookupAgreement" type="screen" page="component://accounting/widget/LookupScreens.xml#LookupAgreement"/>
     <view-map name="LookupAgreementItem" type="screen" page="component://accounting/widget/LookupScreens.xml#LookupAgreementItem"/>
     <view-map name="LookupPaymentGroupMember" type="screen" page="component://accounting/widget/LookupScreens.xml#LookupPaymentGroupMember"/>
+    <view-map name="LookupGlReconciliation" type="screen" page="component://accounting/widget/LookupScreens.xml#LookupGlReconciliation"/>
 
     <!-- PDFs  -->
     <view-map name="InvoicePDF" type="screenfop" page="component://accounting/widget/AccountingPrintScreens.xml#InvoicePDF" content-type="application/pdf" encoding="none"/>
     <view-map name="PrintCheckPDF" type="screenfop" page="component://accounting/widget/AccountingPrintScreens.xml#PrintCheckPDF" content-type="application/pdf" encoding="none"/>
+    <view-map name="PrintInvoices" type="screenfop" page="component://accounting/widget/AccountingPrintScreens.xml#PrintInvoices" content-type="application/pdf" encoding="none"/>
 
     <!-- Financial Summary Reports -->
     <view-map name="FinancialSummaryReportOptions" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#FinancialSummaryReportOptions"/>
     <view-map name="SalesInvoiceByProductCategorySummary" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#SalesInvoiceByProductCategorySummary"/>
     <view-map name="TrialBalance" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#TrialBalance"/>
+    <view-map name="TrialBalanceSearchResultsPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#TrialBalanceSearchResultsPdf" content-type="application/pdf" encoding="none"/>
+    <view-map name="TrialBalanceSearchResultsCsv" type="screencsv" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#TrialBalanceSearchResultsCsv" content-type="text/csv" encoding="none"/>
     <view-map name="IncomeStatement" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#IncomeStatement"/>
+    <view-map name="IncomeStatementListPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#IncomeStatementListPdf" content-type="application/pdf" encoding="none"/>
+    <view-map name="IncomeStatementListCsv" type="screencsv" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#IncomeStatementListCsv" content-type="text/csv" encoding="none"/>
     <view-map name="ComparativeIncomeStatement" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#ComparativeIncomeStatement"/>
     <view-map name="BalanceSheet" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#BalanceSheet"/>
+    <view-map name="BalanceSheetCsv" type="screencsv" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#BalanceSheetCsv" content-type="text/csv" encoding="none"/>
+    <view-map name="BalanceSheetPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#BalanceSheetPdf" content-type="application/pdf" encoding="none"/>
     <view-map name="ComparativeBalanceSheet" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#ComparativeBalanceSheet"/>
     <view-map name="TransactionTotals" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#TransactionTotals"/>
+    <view-map name="TransactionTotalsPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#TransactionTotalsPdf" content-type="application/pdf" encoding="none"/>
+    <view-map name="TransactionTotalsCsv" type="screencsv" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#TransactionTotalsCsv" content-type="text/csv" encoding="none"/>
     <view-map name="PaymentsDepositWithdraw" type="screen" page="component://accounting/widget/FinAccountScreens.xml#PaymentsDepositWithdraw"/>
     <view-map name="LookupCustomerName" type="screen" page="component://party/widget/partymgr/LookupScreens.xml#LookupCustomerName"/>
     <view-map name="NewDepositSlip" type="screen" page="component://accounting/widget/FinAccountScreens.xml#NewDepositSlip"/>
@@ -2721,10 +2760,10 @@ under the License.
     <!-- Agreements Views   -->
     <view-map name="EditAgreementRoles" type="screen" page="component://accounting/widget/AgreementScreens.xml#EditAgreementRoles"/>
 
-    <!-- TO BE REMOVED un-existing forms
+    <!-- Commented out for now WIP
     <view-map name="findTaxAuthorityVATReport" type="screen" page="component://accounting/widget/TaxAuthorityForms.xml#FindTaxAuthorityVATReport"/>
     <view-map name="taxAuthorityVATReport" type="screen" page="component://accounting/widget/TaxAuthorityForms.xml#TaxAuthorityVATReport"/>
-    -->
+    Commented out for now WIP-->
 
     <view-map name="FixedAssetGeoLocation" type="screen" page="component://accounting/widget/FixedAssetScreens.xml#FixedAssetGeoLocation"/>
     <view-map name="AcctgTransEntriesSearchResultsCsv" type="screencsv" page="component://accounting/widget/GlScreens.xml#AcctgTransEntriesSearchResultsCsv" content-type="text/csv" encoding="none"/>
@@ -2732,14 +2771,6 @@ under the License.
     <view-map name="AcctgTransSearchResultsCsv" type="screencsv" page="component://accounting/widget/GlScreens.xml#AcctgTransSearchResultsCsv" content-type="text/csv" encoding="none"/>
     <view-map name="AcctgTransSearchResultPdf" type="screenfop" page="component://accounting/widget/GlScreens.xml#AcctgTransSearchResultPdf" content-type="application/pdf" encoding="none"/>
 
-    <view-map name="TransactionTotalsPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#TransactionTotalsPdf" content-type="application/pdf" encoding="none"/>
-    <view-map name="TransactionTotalsCsv" type="screencsv" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#TransactionTotalsCsv" content-type="text/csv" encoding="none"/>
-    <view-map name="IncomeStatementListPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#IncomeStatementListPdf" content-type="application/pdf" encoding="none"/>
-    <view-map name="IncomeStatementListCsv" type="screencsv" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#IncomeStatementListCsv" content-type="text/csv" encoding="none"/>
-    <view-map name="BalanceSheetCsv" type="screencsv" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#BalanceSheetCsv" content-type="text/csv" encoding="none"/>
-    <view-map name="BalanceSheetPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#BalanceSheetPdf" content-type="application/pdf" encoding="none"/>
-    <view-map name="TrialBalanceSearchResultsPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#TrialBalanceSearchResultsPdf" content-type="application/pdf" encoding="none"/>
-    <view-map name="TrialBalanceSearchResultsCsv" type="screencsv" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#TrialBalanceSearchResultsCsv" content-type="text/csv" encoding="none"/>
     <view-map name="AcctgTransDetailReportPdf" type="screenfop" page="component://accounting/widget/GlScreens.xml#AcctgTransDetailReportPdf" content-type="application/pdf" encoding="none"/>
     <view-map name="GlAccountTrialBalance" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#GlAccountTrialBalance"/>
     <view-map name="GlAccountTrialBalanceReportPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#GlAccountTrialBalanceReportPdf" content-type="application/pdf" encoding="none"/>

@@ -134,7 +134,7 @@ public class StringUtil {
         if (mainString == null) {
             return null;
         }
-        if (oldString == null || oldString.length() == 0) {
+        if (UtilValidate.isEmpty(oldString)) {
             return mainString;
         }
         if (newString == null) {
@@ -387,7 +387,7 @@ public class StringUtil {
 
     /** Make sure the string starts with a forward slash but does not end with one; converts back-slashes to forward-slashes; if in String is null or empty, returns zero length string. */
     public static String cleanUpPathPrefix(String prefix) {
-        if (prefix == null || prefix.length() == 0) return "";
+        if (UtilValidate.isEmpty(prefix)) return "";
 
         StringBuilder cppBuff = new StringBuilder(prefix.replace('\\', '/'));
 
@@ -685,6 +685,28 @@ public class StringUtil {
         return new StringWrapper(theString);
     }
 
+    public static StringBuilder appendTo(StringBuilder sb, Iterable<? extends Appender<StringBuilder>> iterable, String prefix, String suffix, String sep) {
+        Iterator<? extends Appender<StringBuilder>> it = iterable.iterator();
+        while (it.hasNext()) {
+            if (prefix != null) sb.append(prefix);
+            it.next().appendTo(sb);
+            if (suffix != null) sb.append(suffix);
+            if (it.hasNext() && sep != null) sb.append(sep);
+        }
+        return sb;
+    }
+
+    public static StringBuilder append(StringBuilder sb, Iterable<? extends Object> iterable, String prefix, String suffix, String sep) {
+        Iterator<? extends Object> it = iterable.iterator();
+        while (it.hasNext()) {
+            if (prefix != null) sb.append(prefix);
+            sb.append(it.next());
+            if (suffix != null) sb.append(suffix);
+            if (it.hasNext() && sep != null) sb.append(sep);
+        }
+        return sb;
+    }
+
     /**
      * A super-lightweight object to wrap a String object. Mainly used with FTL templates
      * to avoid the general HTML auto-encoding that is now done through the Screen Widget.
@@ -725,7 +747,7 @@ public class StringUtil {
         protected static final ObjectFactory<HtmlEncodingMapWrapper<?>> mapStackFactory = new ObjectFactory<HtmlEncodingMapWrapper<?>>() {
             @Override
             protected HtmlEncodingMapWrapper<?> create() {
-                return new HtmlEncodingMapWrapper();
+                return new HtmlEncodingMapWrapper<Object>();
             }
         };
         public static <K> HtmlEncodingMapWrapper<K> getHtmlEncodingMapWrapper(Map<K, Object> mapToWrap, SimpleEncoder encoder) {

@@ -24,7 +24,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.io.InputStream;
 import java.io.IOException;
-import java.io.StringWriter; 
+import java.io.StringWriter;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
@@ -56,16 +56,15 @@ import javax.xml.transform.stream.StreamResult;
 public final class XslTransform {
 
     public static final String module = XslTransform.class.getName();
-    public static UtilCache<String, Templates> xslTemplatesCache = new UtilCache<String, Templates>("XsltTemplates", 0, 0);
+    public static UtilCache<String, Templates> xslTemplatesCache = UtilCache.createUtilCache("XsltTemplates", 0, 0);
 
     /**
-     * 
      * @param template the content or url of the xsl template
      * @param data the content or url of the xml data file
      * @param outWriter The Writer to render to
      * @throws TransformerException
      */
-    public static String renderTemplate(String template, String data) 
+    public static String renderTemplate(String template, String data)
     throws TransformerException {
 		String result = null;
     	TransformerFactory tfactory = TransformerFactory.newInstance();

@@ -79,7 +79,7 @@ under the License.
                   <tr id="cartItemDisplayRow_${cartLine_index}">
                     <td headers="orderItem"><img src="<@ofbizContentUrl>${requestAttributes.contentPathPrefix?if_exists}${smallImageUrl}</@ofbizContentUrl>" alt = "Product Image" /></td>
                     <td headers="description">${cartLine.getName()?if_exists}</td>
-                    <td headers="unitPrice">${cartLine.getDisplayPrice()}</td>
+                    <td headers="unitPrice" id="completedCartItemPrice_${cartLine_index}">${cartLine.getDisplayPrice()}</td>
                     <td headers="quantity"><span id="completedCartItemQty_${cartLine_index}">${cartLine.getQuantity()?string.number}</span></td>
                     <td headers="adjustment"><span id="completedCartItemAdjustment_${cartLine_index}"><@ofbizCurrency amount=cartLine.getOtherAdjustments() isoCode=shoppingCart.getCurrency() /></span></td>
                     <td headers="itemTotal" align="right"><span id="completedCartItemSubTotal_${cartLine_index}"><@ofbizCurrency amount=cartLine.getDisplayItemSubTotal() isoCode=shoppingCart.getCurrency() /></span></td>
@@ -161,6 +161,7 @@ under the License.
                               <input type="hidden" name="cartLineProductId" id="cartLineProductId_${cartLine_index}" value="${cartLine.getProductId()}" />
                               <input type="text" name="update${cartLine_index}" id="qty_${cartLine_index}" value="${cartLine.getQuantity()?string.number}" class="required validate-number" />
                               <span id="advice-required-qty_${cartLine_index}" style="display:none;" class="errorMessage"> (required)</span>
+                              <span id="advice-validate-number-qty_${cartLine_index}" style="display:none;" class="errorMessage"> (${uiLabelMap.CommonPleaseEnterValidNumberInThisField}) </span>
                             </#if>
                           </td>
                           <#if !cartLine.getIsPromo()>

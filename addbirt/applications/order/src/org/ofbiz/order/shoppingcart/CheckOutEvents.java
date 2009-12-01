@@ -62,7 +62,7 @@ public class CheckOutEvents {
         //Locale locale = UtilHttp.getLocale(request);
         String errMsg = null;
 
-        if (cart != null && cart.size() > 0) {
+        if (UtilValidate.isNotEmpty(cart)) {
             return "success";
         } else {
             errMsg = UtilProperties.getMessage(resource_error, "checkevents.cart_empty", (cart != null ? cart.getLocale() : Locale.getDefault()));
@@ -239,7 +239,7 @@ public class CheckOutEvents {
 
     public static String setCheckOutError(HttpServletRequest request, HttpServletResponse response) {
         String currentPage = request.getParameter("checkoutpage");
-        if (currentPage == null || currentPage.length() == 0) {
+        if (UtilValidate.isEmpty(currentPage)) {
             return "error";
         } else {
             return currentPage;
@@ -286,8 +286,6 @@ public class CheckOutEvents {
     public static Map getSelectedPaymentMethods(HttpServletRequest request) {
         ShoppingCart cart = (ShoppingCart) request.getSession().getAttribute("shoppingCart");
         //Locale locale = UtilHttp.getLocale(request);
-        String currencyFormat = UtilProperties.getPropertyValue("general.properties", "currency.decimal.format", "##0.00");
-        DecimalFormat formatter = new DecimalFormat(currencyFormat);
         Map selectedPaymentMethods = new HashMap();
         String[] paymentMethods = request.getParameterValues("checkOutPaymentId");
         String errMsg = null;
@@ -302,7 +300,7 @@ public class CheckOutEvents {
                 }
                 String amountStr = request.getParameter("amount_" + paymentMethods[i]);
                 BigDecimal amount = null;
-                if (amountStr != null && amountStr.length() > 0 && !"REMAINING".equals(amountStr)) {
+                if (UtilValidate.isNotEmpty(amountStr) && !"REMAINING".equals(amountStr)) {
                     try {
                         amount = new BigDecimal(amountStr);
                     } catch (NumberFormatException e) {
@@ -1015,7 +1013,7 @@ public class CheckOutEvents {
             } else if (currProcess.equals("payment")) {
                 List paymentMethodIds = cart.getPaymentMethodIds();
                 List paymentMethodTypeIds = cart.getPaymentMethodTypeIds();
-                if (requirePayment && (paymentMethodIds == null || paymentMethodIds.size() == 0) && (paymentMethodTypeIds == null || paymentMethodTypeIds.size() == 0)) {
+                if (requirePayment && UtilValidate.isEmpty(paymentMethodIds) && UtilValidate.isEmpty(paymentMethodTypeIds)) {
                     return "payment";
                 }
             } else if (currProcess.equals("addparty")) {
@@ -1046,7 +1044,7 @@ public class CheckOutEvents {
 
     public static String finalizeOrderEntryError(HttpServletRequest request, HttpServletResponse response) {
         String finalizePage = request.getParameter("finalizeMode");
-        if (finalizePage == null || finalizePage.length() == 0) {
+        if (UtilValidate.isEmpty(finalizePage)) {
             return "error";
         } else {
             return finalizePage;
@@ -1071,8 +1069,6 @@ public class CheckOutEvents {
         if (UtilValidate.isNotEmpty(billingAccountId)) {
             // parse the amount to a decimal
             if (UtilValidate.isNotEmpty(billingAccountAmount)) {
-                String currencyFormat = UtilProperties.getPropertyValue("general.properties", "currency.decimal.format", "##0.00");
-                DecimalFormat formatter = new DecimalFormat(currencyFormat);
                 try {
                     billingAccountAmt = new BigDecimal(billingAccountAmount);
                 } catch (NumberFormatException e) {

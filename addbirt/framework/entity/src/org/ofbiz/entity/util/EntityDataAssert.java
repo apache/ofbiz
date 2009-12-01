@@ -68,12 +68,11 @@ public class EntityDataAssert {
         return rowsChecked;
     }
 
-    public static void checkValueList(List valueList, Delegator delegator, List<Object> errorMessages) throws GenericEntityException {
+    public static void checkValueList(List<GenericValue> valueList, Delegator delegator, List<Object> errorMessages) throws GenericEntityException {
         if (valueList == null) return;
 
-        Iterator valueIter = valueList.iterator();
-        while (valueIter.hasNext()) {
-            GenericValue checkValue = (GenericValue) valueIter.next();
+        Iterator<GenericValue> valueIter = valueList.iterator();
+        for (GenericValue checkValue : valueList) {
             checkSingleValue(checkValue, delegator, errorMessages);
         }
     }

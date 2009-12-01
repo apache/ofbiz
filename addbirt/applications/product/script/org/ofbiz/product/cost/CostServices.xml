@@ -76,37 +76,22 @@ under the License.
 
     <!-- Services to get the product and tasks costs -->
     <simple-method method-name="getProductCost" short-description="Gets the product's costs (from CostComponent or ProductPrice)">
-        <set from-field="parameters.productId" field="costsAndMap.productId"/>
-        <set from-field="parameters.currencyUomId" field="costsAndMap.costUomId"/>
-        <!-- Route costs -->
-        <set value="${parameters.costComponentTypePrefix}_ROUTE_COST" field="costsAndMap.costComponentTypeId"/>
-        <find-by-and entity-name="CostComponent" map="costsAndMap" list="routeCosts"/>
-        <filter-list-by-date list="routeCosts"/>
-        <first-from-list list="routeCosts" entry="routeCost"/>
-        <!-- Labor costs -->
-        <set value="${parameters.costComponentTypePrefix}_LABOR_COST" field="costsAndMap.costComponentTypeId"/>
-        <find-by-and entity-name="CostComponent" map="costsAndMap" list="laborCosts"/>
-        <filter-list-by-date list="laborCosts"/>
-        <first-from-list list="laborCosts" entry="laborCost"/>
-        <!-- Materials costs -->
-        <set value="${parameters.costComponentTypePrefix}_MAT_COST" field="costsAndMap.costComponentTypeId"/>
-        <find-by-and entity-name="CostComponent" map="costsAndMap" list="materialsCosts"/>
-        <filter-list-by-date list="materialsCosts"/>
-        <first-from-list list="materialsCosts" entry="materialsCost"/>
-        <!-- Other costs -->
-        <set value="${parameters.costComponentTypePrefix}_OTHER_COST" field="costsAndMap.costComponentTypeId"/>
-        <find-by-and entity-name="CostComponent" map="costsAndMap" list="otherCosts"/>
-        <filter-list-by-date list="otherCosts"/>
-        <first-from-list list="otherCosts" entry="otherCost"/>
-
+        <entity-condition list="costComponents" entity-name="CostComponent" filter-by-date="true">
+            <condition-list>
+                <condition-expr field-name="productId" operator="equals" from-field="parameters.productId"/>
+                <condition-expr field-name="costUomId" operator="equals" from-field="parameters.currencyUomId"/>
+                <condition-expr field-name="costComponentTypeId" operator="like" value="${parameters.costComponentTypePrefix}_%"/>
+            </condition-list>
+        </entity-condition>
         <set field="productCost" value="0" type="BigDecimal"/>
-        <calculate field="productCost" decimal-scale="6">
-            <calcop field="laborCost.cost" operator="add">
-                <calcop field="materialsCost.cost" operator="get"/>
-                <calcop field="routeCost.cost" operator="get"/>
-                <calcop field="otherCost.cost" operator="get"/>
-            </calcop>
-        </calculate>
+        <iterate entry="costComponent" list="costComponents">
+            <calculate field="productCost" decimal-scale="6">
+                <calcop field="costComponent.cost" operator="add">
+                    <calcop field="productCost" operator="get"/>
+                </calcop>
+            </calculate>
+            <!--set field="productCost" value="${costComponent.cost + productCost}" type="BigDecimal"/-->
+        </iterate>
         <!-- if the cost is zero, and the product is a variant, get the cost of the virtual -->
         <if-compare field="productCost" operator="equals" value="0" type="BigDecimal">
             <entity-one entity-name="Product" value-field="product"/>
@@ -350,6 +335,11 @@ under the License.
                     <set field="totalCostsByType.${costType}" from-field="costAmount"/>
                 </else>
                 </if-not-empty>
+                <calculate field="totalTaskCost" decimal-scale="6">
+                    <calcop field="totalTaskCost" operator="add">
+                        <calcop field="costAmount" operator="get"/>
+                    </calcop>
+                </calculate>
             </iterate-map>
         </iterate>
 
@@ -415,7 +405,12 @@ under the License.
                 <set from-field="parameters.currencyUomId" field="callSvcMap.costUomId"/>
                 <set from-field="productCostAdjustment" field="callSvcMap.cost"/>
                 <call-service service-name="recreateCostComponent" in-map-name="callSvcMap"/>
-                <set field="totalCost" value="${totalCost + productCostAdjustment}" type="BigDecimal"/>
+                <!--set field="totalCost" value="${totalCost + productCostAdjustment}" type="BigDecimal"/-->
+                <calculate field="totalCost" decimal-scale="6">
+                    <calcop field="totalCost" operator="add">
+                        <calcop field="productCostAdjustment" operator="get"/>
+                    </calcop>
+                </calculate>
             </else>
             </if-empty>
         </iterate>
@@ -608,7 +603,12 @@ under the License.
         <call-service service-name="getProductCost" in-map-name="inputMap">
             <result-to-field result-name="productCost"/>
         </call-service>
-        <set field="productCostAdjustment" value="${parameters.baseCost * costComponentCalc.fixedCost}" type="BigDecimal"/>
+        <!--set field="productCostAdjustment" value="${parameters.baseCost * costComponentCalc.fixedCost}" type="BigDecimal"/-->
+        <calculate field="productCostAdjustment" type="BigDecimal" decimal-scale="6">
+            <calcop operator="multiply" field="costComponentCalc.fixedCost">
+                <calcop operator="get" field="parameters.baseCost"/>
+            </calcop>
+        </calculate>
         <field-to-result field="productCostAdjustment"/>
     </simple-method>
 </simple-methods>

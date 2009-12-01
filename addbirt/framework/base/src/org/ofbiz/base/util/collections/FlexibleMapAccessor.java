@@ -25,6 +25,7 @@ import javax.el.*;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.base.util.string.UelUtil;
@@ -37,7 +38,7 @@ import org.ofbiz.base.util.string.UelUtil;
 @SuppressWarnings("serial")
 public class FlexibleMapAccessor<T> implements Serializable {
     public static final String module = FlexibleMapAccessor.class.getName();
-    protected static final UtilCache<String, FlexibleMapAccessor<?>> fmaCache = new UtilCache<String, FlexibleMapAccessor<?>>("flexibleMapAccessor.ExpressionCache");
+    protected static final UtilCache<String, FlexibleMapAccessor<?>> fmaCache = UtilCache.createUtilCache("flexibleMapAccessor.ExpressionCache");
     @SuppressWarnings("unchecked")
     protected static final FlexibleMapAccessor nullFma = new FlexibleMapAccessor(null);
 
@@ -50,7 +51,7 @@ public class FlexibleMapAccessor<T> implements Serializable {
         this.original = name;
         FlexibleStringExpander fse = null;
         String bracketedOriginal = null;
-        if (name != null && name.length() > 0) {
+        if (UtilValidate.isNotEmpty(name)) {
             if (name.charAt(0) == '-') {
                 this.isAscending = false;
                 name = name.substring(1);
@@ -77,7 +78,7 @@ public class FlexibleMapAccessor<T> implements Serializable {
      */
     @SuppressWarnings("unchecked")
     public static <T> FlexibleMapAccessor<T> getInstance(String original) {
-        if (original == null || original.length() == 0 || "null".equals(original)) {
+        if (UtilValidate.isEmpty(original) || "null".equals(original)) {
             return nullFma;
         }
         FlexibleMapAccessor fma = fmaCache.get(original);

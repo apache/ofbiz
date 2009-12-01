@@ -127,7 +127,7 @@ public class ModelMenuItem {
 
         String positionStr = fieldElement.getAttribute("position");
         try {
-            if (positionStr != null && positionStr.length() > 0) {
+            if (UtilValidate.isNotEmpty(positionStr)) {
                 position = Integer.valueOf(positionStr);
             }
         } catch (Exception e) {
@@ -277,7 +277,15 @@ public class ModelMenuItem {
                         localItem.name =  portalPage.getString("portalPageId");
                         localItem.setTitle(portalPage.getString("portalPageName"));
                         localItem.link = new Link(this);
-                        localItem.link.setTarget("showPortalPage?portalPageId=" + portalPage.getString("portalPageId") + "&parentPortalPageId=" + parentPortalPageId);
+                        List<WidgetWorker.Parameter> linkParams = localItem.link.getParameterList();
+                        linkParams.add(new WidgetWorker.Parameter("portalPageId", portalPage.getString("portalPageId"), false));
+                        linkParams.add(new WidgetWorker.Parameter("parentPortalPageId", parentPortalPageId, false));
+                        if (link != null) {
+                            localItem.link.setTarget(link.targetExdr.getOriginal());
+                            linkParams.addAll(link.parameterList);
+                        } else {
+                            localItem.link.setTarget("showPortalPage");
+                        }
                         localItem.link.setText(portalPage.getString("portalPageName"));
                         menuStringRenderer.renderMenuItem(writer, context, localItem);
                     }

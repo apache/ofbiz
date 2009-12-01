@@ -20,19 +20,19 @@ package org.ofbiz.base.util;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Array;
-import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.util.*;
-import java.nio.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
 
-import org.w3c.dom.Node;
-
-import javolution.util.FastList;
 import javolution.util.FastMap;
-import javolution.util.FastSet;
+
+import org.ofbiz.base.conversion.ConversionException;
+import org.ofbiz.base.conversion.Converter;
+import org.ofbiz.base.conversion.Converters;
+import org.ofbiz.base.conversion.LocalizedConverter;
+import org.w3c.dom.Node;
 
 /**
  * Utilities for analyzing and converting Object types in Java
@@ -90,7 +90,7 @@ public class ObjectType {
                }
                className = "[" + prefix;
             } else {
-                Class arrayClass = loadClass(className.replace("[]", ""), loader);
+                Class<?> arrayClass = loadClass(className.replace("[]", ""), loader);
                 className = "[L" + arrayClass.getName().replace("[]", "") + ";";
             }
         }
@@ -182,7 +182,7 @@ public class ObjectType {
             sig[i] = parameters[i].getClass();
         }
         Class<?> c = loadClass(className);
-        Constructor con = c.getConstructor(sig);
+        Constructor<?> con = c.getConstructor(sig);
         Object o = con.newInstance(parameters);
 
         if (Debug.verboseOn()) Debug.logVerbose("Instantiated object: " + o.toString(), module);
@@ -445,7 +445,7 @@ public class ObjectType {
      * @return true if objectClass is a class or sub-class of, or implements typeClass
      */
     public static boolean instanceOf(Class<?> objectClass, Class<?> typeClass) {
-        if (typeClass.isInterface()) {
+        if (typeClass.isInterface() && !objectClass.isInterface()) {
             return interfaceOf(objectClass, typeClass);
         } else {
             return isOrSubOf(objectClass, typeClass);
@@ -469,6 +469,7 @@ public class ObjectType {
      * @return the converted value
      * @throws GeneralException
      */
+    @SuppressWarnings("unchecked")
     public static Object simpleTypeConvert(Object obj, String type, String format, TimeZone timeZone, Locale locale, boolean noTypeFail) throws GeneralException {
         if (obj == null) {
             return null;
@@ -479,540 +480,64 @@ public class ObjectType {
             type = type.substring(0, genericsStart);
         }
 
-        if (obj.getClass().getName().equals(type)) {
+        Class<?> sourceClass = obj.getClass();
+        Class<?> targetClass = null;
+        try {
+            targetClass = loadClass(type);
+        } catch (ClassNotFoundException e) {
+            Debug.logError(e, module);
             return obj;
         }
-        if ("PlainString".equals(type)) {
-            return obj.toString();
-        }
-        if ("Object".equals(type) || "java.lang.Object".equals(type)) {
+        if (sourceClass.equals(targetClass)) {
             return obj;
         }
-
-        if (timeZone == null) {
-            timeZone = TimeZone.getDefault();
+        Converter<Object,Object> converter = null;
+        try {
+            converter = (Converter<Object, Object>) Converters.getConverter(sourceClass, targetClass);
+        } catch (ClassNotFoundException e) {}
+        if (converter != null) {
+            LocalizedConverter<Object, Object> localizedConverter = null;
+            try {
+                localizedConverter = (LocalizedConverter) converter;
+            } catch (Exception e) {}
+            if (localizedConverter != null) {
+                if (timeZone == null) {
+                    timeZone = TimeZone.getDefault();
+                }
+                if (locale == null) {
+                    locale = Locale.getDefault();
+                }
+                try {
+                    return localizedConverter.convert(obj, locale, timeZone, format);
+                } catch (ConversionException e) {
+                    Debug.logError(e, module);
+                }
+            }
+            try {
+                return converter.convert(obj);
+            } catch (ConversionException e) {
+                Debug.logError(e, module);
+            }
         }
-
-        if (locale == null) {
-            locale = Locale.getDefault();
-        }
-
-        String fromType = null;
-
-        if ((type.equals("List") || type.equals("java.util.List")) && obj.getClass().isArray()) {
-            List<Object> newObj = FastList.newInstance();
-            int len = Array.getLength(obj);
-            for (int i = 0; i < len; i++) {
-                newObj.add(Array.get(obj, i));
-            }
-            return newObj;
-        } else if (obj instanceof java.lang.String) {
-            fromType = "String";
-            String str = (String) obj;
-            if ("String".equals(type) || "java.lang.String".equals(type)) {
-                return obj;
-            }
-            if (str.length() == 0) {
-                return null;
-            }
-
-            if ("Boolean".equals(type) || "java.lang.Boolean".equals(type)) {
-                str = StringUtil.removeSpaces(str);
-                return str.equalsIgnoreCase("TRUE") ? Boolean.TRUE : Boolean.FALSE;
-            } else if ("Locale".equals(type) || "java.util.Locale".equals(type)) {
-                Locale loc = UtilMisc.parseLocale(str);
-                if (loc != null) {
-                    return loc;
-                } else {
-                    throw new GeneralException("Could not convert " + str + " to " + type + ": ");
-                }
-            } else if ("TimeZone".equals(type) || "java.util.TimeZone".equals(type)) {
-                TimeZone tz = UtilDateTime.toTimeZone(str);
-                if (tz != null) {
-                    return tz;
-                } else {
-                    throw new GeneralException("Could not convert " + str + " to " + type + ": ");
-                }
-            } else if ("BigDecimal".equals(type) || "java.math.BigDecimal".equals(type)) {
-                str = StringUtil.removeSpaces(str);
-                try {
-                    NumberFormat nf = NumberFormat.getNumberInstance(locale);
-                    Number tempNum = nf.parse(str);
-                    return new BigDecimal(tempNum.toString());
-                } catch (ParseException e) {
-                    throw new GeneralException("Could not convert " + str + " to " + type + ": ", e);
-                }
-            } else if ("Double".equals(type) || "java.lang.Double".equals(type)) {
-                str = StringUtil.removeSpaces(str);
-                try {
-                    NumberFormat nf = NumberFormat.getNumberInstance(locale);
-                    Number tempNum = nf.parse(str);
-
-                    return Double.valueOf(tempNum.doubleValue());
-                } catch (ParseException e) {
-                    throw new GeneralException("Could not convert " + str + " to " + type + ": ", e);
-                }
-            } else if ("Float".equals(type) || "java.lang.Float".equals(type)) {
-                str = StringUtil.removeSpaces(str);
-                try {
-                    NumberFormat nf = NumberFormat.getNumberInstance(locale);
-                    Number tempNum = nf.parse(str);
-
-                    return Float.valueOf(tempNum.floatValue());
-                } catch (ParseException e) {
-                    throw new GeneralException("Could not convert " + str + " to " + type + ": ", e);
-                }
-            } else if ("Long".equals(type) || "java.lang.Long".equals(type)) {
-                str = StringUtil.removeSpaces(str);
-                try {
-                    NumberFormat nf = NumberFormat.getNumberInstance(locale);
-                    nf.setMaximumFractionDigits(0);
-                    Number tempNum = nf.parse(str);
-
-                    return Long.valueOf(tempNum.longValue());
-                } catch (ParseException e) {
-                    throw new GeneralException("Could not convert " + str + " to " + type + ": ", e);
-                }
-            } else if ("Integer".equals(type) || "java.lang.Integer".equals(type)) {
-                str = StringUtil.removeSpaces(str);
-                try {
-                    NumberFormat nf = NumberFormat.getNumberInstance(locale);
-                    nf.setMaximumFractionDigits(0);
-                    Number tempNum = nf.parse(str);
-
-                    return Integer.valueOf(tempNum.intValue());
-                } catch (ParseException e) {
-                    throw new GeneralException("Could not convert " + str + " to " + type + ": ", e);
-                }
-            } else if ("Date".equals(type) || "java.sql.Date".equals(type)) {
-                DateFormat df = null;
-                if (format == null || format.length() == 0) {
-                    df = UtilDateTime.toDateFormat(UtilDateTime.DATE_FORMAT, timeZone, locale);
-                } else {
-                    df = UtilDateTime.toDateFormat(format, timeZone, locale);
-                }
-                try {
-                    Date fieldDate = df.parse(str);
-                    return new java.sql.Date(fieldDate.getTime());
-                } catch (ParseException e1) {
-                    throw new GeneralException("Could not convert " + str + " to " + type + ": ", e1);
-                }
-            } else if ("Time".equals(type) || "java.sql.Time".equals(type)) {
-                DateFormat df = null;
-                if (format == null || format.length() == 0) {
-                    df = UtilDateTime.toTimeFormat(UtilDateTime.TIME_FORMAT, timeZone, locale);
-                } else {
-                    df = UtilDateTime.toTimeFormat(format, timeZone, locale);
-                }
-                try {
-                    Date fieldDate = df.parse(str);
-                    return new java.sql.Time(fieldDate.getTime());
-                } catch (ParseException e1) {
-                    throw new GeneralException("Could not convert " + str + " to " + type + ": ", e1);
-                }
-            } else if ("Timestamp".equals(type) || "java.sql.Timestamp".equals(type)) {
-                DateFormat df = null;
-                if (format == null || format.length() == 0) {
-                    df = UtilDateTime.toDateTimeFormat(UtilDateTime.DATE_TIME_FORMAT, timeZone, locale);
-                    // if time is missing add zeros
-                    if (str.length() > 0 && !str.contains(":")) {
-                        str = str + " 00:00:00.00";
-                    }
-                    // hack to mimic Timestamp.valueOf() method
-                    if (str.length() > 0 && !str.contains(".")) {
-                        str = str + ".0";
-                    } else {
-                        // DateFormat has a funny way of parsing milliseconds:
-                        // 00:00:00.2 parses to 00:00:00.002
-                        // so we'll add zeros to the end to get 00:00:00.200
-                        String[] timeSplit = str.split("[.]");
-                        if (timeSplit.length > 1 && timeSplit[1].length() < 3) {
-                            str = str + "000".substring(timeSplit[1].length());
-                        }
-                    }
-                } else {
-                    df = UtilDateTime.toDateTimeFormat(format, timeZone, locale);
-                }
-                try {
-                    Date fieldDate = df.parse(str);
-                    return new java.sql.Timestamp(fieldDate.getTime());
-                } catch (ParseException e1) {
-                    throw new GeneralException("Could not convert " + str + " to " + type + ": ", e1);
-                }
-            } else if ("List".equals(type) || "java.util.List".equals(type)) {
-                if (str.startsWith("[") && str.endsWith("]")) {
-                    return StringUtil.toList(str);
-                } else {
-                    List<String> tempList = FastList.newInstance();
-                    tempList.add(str);
-                    return tempList;
-                }
-            } else if ("Set".equals(type) || "java.util.Set".equals(type)) {
-                if (str.startsWith("[") && str.endsWith("]")) {
-                    return StringUtil.toSet(str);
-                } else {
-                    Set<String> tempSet = FastSet.newInstance();
-                    tempSet.add(str);
-                    return tempSet;
-                }
-            } else if (("Map".equals(type) || "java.util.Map".equals(type)) &&
-                    (str.startsWith("{") && str.endsWith("}"))) {
-                return StringUtil.toMap(str);
-            } else {
-                throw new GeneralException("Conversion from " + fromType + " to " + type + " not currently supported");
-            }
-        } else if (obj instanceof Double) {
-            fromType = "Double";
-            Double dbl = (Double) obj;
-
-            if ("String".equals(type) || "java.lang.String".equals(type)) {
-                NumberFormat nf = NumberFormat.getNumberInstance(locale);
-                return nf.format(dbl.doubleValue());
-            } else if ("BigDecimal".equals(type) || "java.math.BigDecimal".equals(type)) {
-                return new BigDecimal(dbl.doubleValue());
-            } else if ("Double".equals(type) || "java.lang.Double".equals(type)) {
-                return obj;
-            } else if ("Float".equals(type) || "java.lang.Float".equals(type)) {
-                return Float.valueOf(dbl.floatValue());
-            } else if ("Long".equals(type) || "java.lang.Long".equals(type)) {
-                return Long.valueOf(Math.round(dbl.doubleValue()));
-            } else if ("Integer".equals(type) || "java.lang.Integer".equals(type)) {
-                return Integer.valueOf((int) Math.round(dbl.doubleValue()));
-            } else if ("List".equals(type) || "java.util.List".equals(type)) {
-                List<Double> tempList = FastList.newInstance();
-                tempList.add(dbl);
-                return tempList;
-            } else if ("Set".equals(type) || "java.util.Set".equals(type)) {
-                Set<Double> tempSet = FastSet.newInstance();
-                tempSet.add(dbl);
-                return tempSet;
-            } else {
-                throw new GeneralException("Conversion from " + fromType + " to " + type + " not currently supported");
-            }
-        } else if (obj instanceof Float) {
-            fromType = "Float";
-            Float flt = (Float) obj;
-
-            if ("String".equals(type)) {
-                NumberFormat nf = NumberFormat.getNumberInstance(locale);
-                return nf.format(flt.doubleValue());
-            } else if ("BigDecimal".equals(type) || "java.math.BigDecimal".equals(type)) {
-                return new BigDecimal(flt.doubleValue());
-            } else if ("Double".equals(type)) {
-                return Double.valueOf(flt.doubleValue());
-            } else if ("Float".equals(type)) {
-                return obj;
-            } else if ("Long".equals(type)) {
-                return Long.valueOf(Math.round(flt.doubleValue()));
-            } else if ("Integer".equals(type)) {
-                return Integer.valueOf((int) Math.round(flt.doubleValue()));
-            } else if ("List".equals(type) || "java.util.List".equals(type)) {
-                List<Float> tempList = FastList.newInstance();
-                tempList.add(flt);
-                return tempList;
-            } else if ("Set".equals(type) || "java.util.Set".equals(type)) {
-                Set<Float> tempSet = FastSet.newInstance();
-                tempSet.add(flt);
-                return tempSet;
-            } else {
-                throw new GeneralException("Conversion from " + fromType + " to " + type + " not currently supported");
-            }
-        } else if (obj instanceof Long) {
-            fromType = "Long";
-            Long lng = (Long) obj;
-
-            if ("String".equals(type) || "java.lang.String".equals(type)) {
-                NumberFormat nf = NumberFormat.getNumberInstance(locale);
-                return nf.format(lng.longValue());
-            } else if ("BigDecimal".equals(type) || "java.math.BigDecimal".equals(type)) {
-                return BigDecimal.valueOf(lng.longValue());
-            } else if ("Double".equals(type) || "java.lang.Double".equals(type)) {
-                return Double.valueOf(lng.doubleValue());
-            } else if ("Float".equals(type) || "java.lang.Float".equals(type)) {
-                return Float.valueOf(lng.floatValue());
-            } else if ("Long".equals(type) || "java.lang.Long".equals(type)) {
-                return obj;
-            } else if ("Integer".equals(type) || "java.lang.Integer".equals(type)) {
-                return Integer.valueOf(lng.intValue());
-            } else if ("List".equals(type) || "java.util.List".equals(type)) {
-                List<Long> tempList = FastList.newInstance();
-                tempList.add(lng);
-                return tempList;
-            } else if ("Set".equals(type) || "java.util.Set".equals(type)) {
-                Set<Long> tempSet = FastSet.newInstance();
-                tempSet.add(lng);
-                return tempSet;
-            } else if ("Date".equals(type) || "java.util.Date".equals(type)) {
-                return new Date(lng.longValue());
-            } else if ("Timestamp".equals(type) || "java.sql.Timestamp".equals(type)) {
-                return new java.sql.Timestamp(lng.longValue());
-            } else {
-                throw new GeneralException("Conversion from " + fromType + " to " + type + " not currently supported");
-            }
-        } else if (obj instanceof Integer) {
-            fromType = "Integer";
-            Integer intgr = (Integer) obj;
-            if ("String".equals(type) || "java.lang.String".equals(type)) {
-                NumberFormat nf = NumberFormat.getNumberInstance(locale);
-                return nf.format(intgr.longValue());
-            } else if ("BigDecimal".equals(type) || "java.math.BigDecimal".equals(type)) {
-                return BigDecimal.valueOf(intgr.longValue());
-            } else if ("Double".equals(type) || "java.lang.Double".equals(type)) {
-                return Double.valueOf(intgr.doubleValue());
-            } else if ("Float".equals(type) || "java.lang.Float".equals(type)) {
-                return Float.valueOf(intgr.floatValue());
-            } else if ("Long".equals(type) || "java.lang.Long".equals(type)) {
-                return Long.valueOf(intgr.longValue());
-            } else if ("Integer".equals(type) || "java.lang.Integer".equals(type)) {
-                return obj;
-            } else if ("List".equals(type) || "java.util.List".equals(type)) {
-                List<Integer> tempList = FastList.newInstance();
-                tempList.add(intgr);
-                return tempList;
-            } else if ("Set".equals(type) || "java.util.Set".equals(type)) {
-                Set<Integer> tempSet = FastSet.newInstance();
-                tempSet.add(intgr);
-                return tempSet;
-            } else {
-                throw new GeneralException("Conversion from " + fromType + " to " + type + " not currently supported");
-            }
-        } else if (obj instanceof BigDecimal) {
-            fromType = "BigDecimal";
-            BigDecimal bigDec = (BigDecimal) obj;
-            if ("String".equals(type) || "java.lang.String".equals(type)) {
-                NumberFormat nf = NumberFormat.getNumberInstance(locale);
-                return nf.format(bigDec.doubleValue());
-            } else if ("BigDecimal".equals(type) || "java.math.BigDecimal".equals(type)) {
-                return obj;
-            } else if ("Double".equals(type) || "java.lang.Double".equals(type)) {
-                return Double.valueOf(bigDec.doubleValue());
-            } else if ("Float".equals(type) || "java.lang.Float".equals(type)) {
-                return Float.valueOf(bigDec.floatValue());
-            } else if ("Long".equals(type) || "java.lang.Long".equals(type)) {
-                return Long.valueOf(bigDec.longValue());
-            } else if ("Integer".equals(type) || "java.lang.Integer".equals(type)) {
-                return Integer.valueOf(bigDec.intValue());
-            } else if ("List".equals(type) || "java.util.List".equals(type)) {
-                List<BigDecimal> tempList = FastList.newInstance();
-                tempList.add(bigDec);
-                return tempList;
-            } else if ("Set".equals(type) || "java.util.Set".equals(type)) {
-                Set<BigDecimal> tempSet = FastSet.newInstance();
-                tempSet.add(bigDec);
-                return tempSet;
-            } else {
-                throw new GeneralException("Conversion from " + fromType + " to " + type + " not currently supported");
-            }
-        } else if (obj instanceof java.sql.Date) {
-            fromType = "Date";
-            java.sql.Date dte = (java.sql.Date) obj;
-            if ("String".equals(type) || "java.lang.String".equals(type)) {
-                DateFormat df = null;
-                if (format == null || format.length() == 0) {
-                    df = UtilDateTime.toDateFormat(UtilDateTime.DATE_FORMAT, timeZone, locale);
-                } else {
-                    df = UtilDateTime.toDateFormat(format, timeZone, locale);
-                }
-                return df.format(new java.util.Date(dte.getTime()));
-            } else if ("Date".equals(type) || "java.sql.Date".equals(type)) {
-                return obj;
-            } else if ("Time".equals(type) || "java.sql.Time".equals(type)) {
-                throw new GeneralException("Conversion from " + fromType + " to " + type + " not currently supported");
-            } else if ("Timestamp".equals(type) || "java.sql.Timestamp".equals(type)) {
-                return new java.sql.Timestamp(dte.getTime());
-            } else if ("List".equals(type) || "java.util.List".equals(type)) {
-                List<java.sql.Date> tempList = FastList.newInstance();
-                tempList.add(dte);
-                return tempList;
-            } else if ("Set".equals(type) || "java.util.Set".equals(type)) {
-                Set<java.sql.Date> tempSet = FastSet.newInstance();
-                tempSet.add(dte);
-                return tempSet;
-            } else if ("Long".equals(type) || "java.lang.Long".equals(type)) {
-                return Long.valueOf(dte.getTime());
-            } else {
-                throw new GeneralException("Conversion from " + fromType + " to " + type + " not currently supported");
-            }
-        } else if (obj instanceof java.sql.Time) {
-            fromType = "Time";
-            java.sql.Time tme = (java.sql.Time) obj;
-
-            if ("String".equals(type) || "java.lang.String".equals(type)) {
-                DateFormat df = null;
-                if (format == null || format.length() == 0) {
-                    df = UtilDateTime.toTimeFormat(UtilDateTime.TIME_FORMAT, timeZone, locale);
-                } else {
-                    df = UtilDateTime.toTimeFormat(format, timeZone, locale);
-                }
-                return df.format(new java.util.Date(tme.getTime()));
-            } else if ("Date".equals(type) || "java.sql.Date".equals(type)) {
-                throw new GeneralException("Conversion from " + fromType + " to " + type + " not currently supported");
-            } else if ("Time".equals(type) || "java.sql.Time".equals(type)) {
-                return obj;
-            } else if ("Timestamp".equals(type) || "java.sql.Timestamp".equals(type)) {
-                return new java.sql.Timestamp(tme.getTime());
-            } else if ("List".equals(type) || "java.util.List".equals(type)) {
-                List<java.sql.Time> tempList = FastList.newInstance();
-                tempList.add(tme);
-                return tempList;
-            } else if ("Set".equals(type) || "java.util.Set".equals(type)) {
-                Set<java.sql.Time> tempSet = FastSet.newInstance();
-                tempSet.add(tme);
-                return tempSet;
-            } else {
-                throw new GeneralException("Conversion from " + fromType + " to " + type + " not currently supported");
-            }
-        } else if (obj instanceof java.sql.Timestamp) {
-            fromType = "Timestamp";
-            java.sql.Timestamp tme = (java.sql.Timestamp) obj;
-
-            if ("String".equals(type) || "java.lang.String".equals(type)) {
-                DateFormat df = null;
-                if (format == null || format.length() == 0) {
-                    df = UtilDateTime.toDateTimeFormat(UtilDateTime.DATE_TIME_FORMAT, timeZone, locale);
-                } else {
-                    df = UtilDateTime.toDateTimeFormat(format, timeZone, locale);
-                }
-                return df.format(new java.util.Date(tme.getTime()));
-            } else if ("Date".equals(type) || "java.sql.Date".equals(type)) {
-                return new java.sql.Date(tme.getTime());
-            } else if ("Time".equals(type) || "java.sql.Time".equals(type)) {
-                return new java.sql.Time(tme.getTime());
-            } else if ("Timestamp".equals(type) || "java.sql.Timestamp".equals(type)) {
-                return obj;
-            } else if ("List".equals(type) || "java.util.List".equals(type)) {
-                List<java.sql.Timestamp> tempList = FastList.newInstance();
-                tempList.add(tme);
-                return tempList;
-            } else if ("Set".equals(type) || "java.util.Set".equals(type)) {
-                Set<java.sql.Timestamp> tempSet = FastSet.newInstance();
-                tempSet.add(tme);
-                return tempSet;
-            } else if ("Long".equals(type) || "java.lang.Long".equals(type)) {
-                return Long.valueOf(tme.getTime());
-            } else {
-                throw new GeneralException("Conversion from " + fromType + " to " + type + " not currently supported");
-            }
-        } else if (obj instanceof java.lang.Boolean) {
-            fromType = "Boolean";
-            Boolean bol = (Boolean) obj;
-            if ("Boolean".equals(type) || "java.lang.Boolean".equals(type)) {
-                return bol;
-            } else if ("String".equals(type) || "java.lang.String".equals(type)) {
-                return bol.toString();
-            } else if ("Integer".equals(type) || "java.lang.Integer".equals(type)) {
-                if (bol.booleanValue()) {
-                    return Integer.valueOf(1);
-                } else {
-                    return Integer.valueOf(0);
-                }
-            } else if ("List".equals(type) || "java.util.List".equals(type)) {
-                List<Boolean> tempList = FastList.newInstance();
-                tempList.add(bol);
-                return tempList;
-            } else if ("Set".equals(type) || "java.util.Set".equals(type)) {
-                Set<Boolean> tempSet = FastSet.newInstance();
-                tempSet.add(bol);
-                return tempSet;
-            } else {
-                throw new GeneralException("Conversion from " + fromType + " to " + type + " not currently supported");
-            }
-        } else if (obj instanceof java.util.Locale) {
-            fromType = "Locale";
-            Locale loc = (Locale) obj;
-            if ("Locale".equals(type) || "java.util.Locale".equals(type)) {
-                return loc;
-            } else if ("String".equals(type) || "java.lang.String".equals(type)) {
-                return loc.toString();
-            } else {
-                throw new GeneralException("Conversion from " + fromType + " to " + type + " not currently supported");
-            }
-        } else if (obj instanceof java.util.TimeZone) {
-            fromType = "TimeZone";
-            TimeZone tz = (TimeZone) obj;
-            if ("TimeZone".equals(type) || "java.util.TimeZone".equals(type)) {
-                return tz;
-            } else if ("String".equals(type) || "java.lang.String".equals(type)) {
-                return tz.getID();
-            } else {
-                throw new GeneralException("Conversion from " + fromType + " to " + type + " not currently supported");
-            }
-        } else if (obj.getClass().getName().equals("org.ofbiz.entity.GenericValue")) {
-            fromType = "GenericValue";
-            if ("GenericValue".equals(type) || "org.ofbiz.entity.GenericValue".equals(type)) {
-                return obj;
-            } else if ("Map".equals(type) || "java.util.Map".equals(type)) {
-                return obj;
-            } else if ("String".equals(type) || "java.lang.String".equals(type)) {
-                return obj.toString();
-            } else if ("List".equals(type) || "java.util.List".equals(type)) {
-                List<Object> tempList = FastList.newInstance();
-                tempList.add(obj);
-                return tempList;
-            } else if ("Set".equals(type) || "java.util.Set".equals(type)) {
-                Set<Object> tempSet = FastSet.newInstance();
-                tempSet.add(obj);
-                return tempSet;
-            } else {
-                throw new GeneralException("Conversion from " + fromType + " to " + type + " not currently supported");
-            }
-        } else if (obj instanceof java.util.Map) {
-            fromType = "Map";
-            Map map = (Map) obj;
-            if ("Map".equals(type) || "java.util.Map".equals(type)) {
-                return map;
-            } else if ("String".equals(type) || "java.lang.String".equals(type)) {
-                return map.toString();
-            } else if ("List".equals(type) || "java.util.List".equals(type)) {
-                List<Map> tempList = FastList.newInstance();
-                tempList.add(map);
-                return tempList;
-            } else if ("Set".equals(type) || "java.util.Set".equals(type)) {
-                Set<Map> tempSet = FastSet.newInstance();
-                tempSet.add(map);
-                return tempSet;
-            } else {
-                throw new GeneralException("Conversion from " + fromType + " to " + type + " not currently supported");
-            }
-        } else if (obj instanceof java.util.List) {
-            fromType = "List";
-            List list = (List) obj;
-            if ("List".equals(type) || "java.util.List".equals(type)) {
-                return list;
-            } else if ("String".equals(type) || "java.lang.String".equals(type)) {
-                return list.toString();
-            } else {
-                throw new GeneralException("Conversion from " + fromType + " to " + type + " not currently supported");
-            }
-        } else if (obj instanceof java.nio.Buffer) {
-            fromType = "Buffer";
-            Buffer buffer = (Buffer) obj;
-            if ("java.nio.ByteBuffer".equals(type)) {
-                return buffer;
-            } else {
-                throw new GeneralException("Conversion from " + fromType + " to " + type + " not currently supported");
-            }
-        } else if (obj instanceof Node) {
+        if (obj instanceof Node) {
             Node node = (Node) obj;
             String nodeValue =  node.getTextContent();
-            if ("String".equals(type) || "java.lang.String".equals(type)) {
+            if (targetClass.equals(String.class)) {
                 return nodeValue;
             } else {
                 return simpleTypeConvert(nodeValue, type, format, timeZone, locale, noTypeFail);
             }
+        }
+        // we can pretty much always do a conversion to a String, so do that here
+        if (targetClass.equals(String.class)) {
+            Debug.logWarning("No special conversion available for " + obj.getClass().getName() + " to String, returning object.toString().", module);
+            return obj.toString();
+        }
+        if (noTypeFail) {
+            throw new GeneralException("Conversion from " + obj.getClass().getName() + " to " + type + " not currently supported");
         } else {
-            // we can pretty much always do a conversion to a String, so do that here
-            if ("String".equals(type) || "java.lang.String".equals(type)) {
-                Debug.logWarning("No special conversion available for " + obj.getClass().getName() + " to String, returning object.toString().", module);
-                return obj.toString();
-            }
-
-            if (noTypeFail) {
-                throw new GeneralException("Conversion from " + obj.getClass().getName() + " to " + type + " not currently supported");
-            } else {
-                if (Debug.infoOn()) Debug.logInfo("No type conversion available for " + obj.getClass().getName() + " to " + type + ", returning original object.", module);
-                return obj;
-            }
+            if (Debug.infoOn()) Debug.logInfo("No type conversion available for " + obj.getClass().getName() + " to " + targetClass.getName() + ", returning original object.", module);
+            return obj;
         }
     }
 
@@ -1067,7 +592,7 @@ public class ObjectType {
 
         // have converted value 2, now before converting value 1 see if it is a Collection and we are doing a contains comparison
         if ("contains".equals(operator) && value1 instanceof Collection) {
-            Collection col1 = (Collection) value1;
+            Collection<?> col1 = (Collection<?>) value1;
             return col1.contains(convertedValue2) ? Boolean.TRUE : Boolean.FALSE;
         }
 
@@ -1115,9 +640,9 @@ public class ObjectType {
                 return Boolean.TRUE;
             if (convertedValue1 instanceof String && ((String) convertedValue1).length() == 0)
                 return Boolean.TRUE;
-            if (convertedValue1 instanceof List && ((List) convertedValue1).size() == 0)
+            if (convertedValue1 instanceof List && ((List<?>) convertedValue1).size() == 0)
                 return Boolean.TRUE;
-            if (convertedValue1 instanceof Map && ((Map) convertedValue1).size() == 0)
+            if (convertedValue1 instanceof Map && ((Map<?, ?>) convertedValue1).size() == 0)
                 return Boolean.TRUE;
             return Boolean.FALSE;
         } else if ("is-not-empty".equals(operator)) {
@@ -1125,9 +650,9 @@ public class ObjectType {
                 return Boolean.FALSE;
             if (convertedValue1 instanceof String && ((String) convertedValue1).length() == 0)
                 return Boolean.FALSE;
-            if (convertedValue1 instanceof List && ((List) convertedValue1).size() == 0)
+            if (convertedValue1 instanceof List && ((List<?>) convertedValue1).size() == 0)
                 return Boolean.FALSE;
-            if (convertedValue1 instanceof Map && ((Map) convertedValue1).size() == 0)
+            if (convertedValue1 instanceof Map && ((Map<?, ?>) convertedValue1).size() == 0)
                 return Boolean.FALSE;
             return Boolean.TRUE;
         }
@@ -1228,22 +753,22 @@ public class ObjectType {
         return Boolean.TRUE;
     }
 
+    @SuppressWarnings("unchecked")
     public static boolean isEmpty(Object value) {
         if (value == null) return true;
-
-        if (value instanceof String) {
-            if (((String) value).length() == 0) {
-                return true;
-            }
-        } else if (value instanceof Collection) {
-            if (((Collection) value).size() == 0) {
-                return true;
-            }
-        } else if (value instanceof Map) {
-            if (((Map) value).size() == 0) {
-                return true;
-            }
-        }
+        
+        if (value instanceof String) return UtilValidate.isEmpty((String) value);
+        if (value instanceof Collection) return UtilValidate.isEmpty((Collection<? extends Object>) value);
+        if (value instanceof Map) return UtilValidate.isEmpty((Map<? extends Object, ? extends Object>) value);
+        if (value instanceof CharSequence) return UtilValidate.isEmpty((CharSequence) value);
+        
+        // These types would flood the log
+        if (value instanceof Boolean) return false;        
+        if (value instanceof Integer) return false;        
+        if (value instanceof java.math.BigDecimal) return false;          
+        if (value instanceof java.sql.Timestamp) return false;        
+        
+        Debug.logWarning("In ObjectType.isEmpty(Object value) returning false for " + value.getClass() + " Object.", module);
         return false;
     }
 

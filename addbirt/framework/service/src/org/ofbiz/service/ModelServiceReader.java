@@ -430,7 +430,7 @@ public class ModelServiceReader implements Serializable {
             ModelPermission perm = new ModelPermission();
             perm.nameOrRole = element.getAttribute("permission").intern();
             perm.action = element.getAttribute("action").intern();
-            if (perm.action != null && perm.action.length() > 0) {
+            if (UtilValidate.isNotEmpty(perm.action)) {
                 perm.permissionType = ModelPermission.ENTITY_PERMISSION;
             } else {
                 perm.permissionType = ModelPermission.PERMISSION;
@@ -479,9 +479,9 @@ public class ModelServiceReader implements Serializable {
     protected void createAutoAttrDef(Element autoElement, ModelService service) {
         // get the entity name; first from the auto-attributes then from the service def
         String entityName = UtilXml.checkEmpty(autoElement.getAttribute("entity-name"));
-        if (entityName == null || entityName.length() == 0) {
+        if (UtilValidate.isEmpty(entityName)) {
             entityName = service.defaultEntityName;
-            if (entityName == null || entityName.length() == 0) {
+            if (UtilValidate.isEmpty(entityName)) {
                 Debug.logWarning("Auto-Attribute does not specify an entity-name; not default-entity on service definition", module);
             }
         }
@@ -639,6 +639,22 @@ public class ModelServiceReader implements Serializable {
         def.name = "userLogin";
         def.type = "org.ofbiz.entity.GenericValue";
         def.mode = "INOUT";
+        def.optional = true;
+        def.internal = true;
+        service.addParam(def);
+        // login.username
+        def = new ModelParam();
+        def.name = "login.username";
+        def.type = "String";
+        def.mode = "IN";
+        def.optional = true;
+        def.internal = true;
+        service.addParam(def);
+        // login.password
+        def = new ModelParam();
+        def.name = "login.password";
+        def.type = "String";
+        def.mode = "IN";
         def.optional = true;
         def.internal = true;
         service.addParam(def);

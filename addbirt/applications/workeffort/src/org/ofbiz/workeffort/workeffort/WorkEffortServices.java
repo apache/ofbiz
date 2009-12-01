@@ -308,7 +308,7 @@ public class WorkEffortServices {
 
             String statusId = (String) context.get("currentStatusId");
 
-            if (statusId != null && statusId.length() > 0) {
+            if (UtilValidate.isNotEmpty(statusId)) {
                 try {
                     currentStatus = delegator.findByPrimaryKeyCache("StatusItem", UtilMisc.toMap("statusId", statusId));
                 } catch (GenericEntityException e) {
@@ -324,7 +324,7 @@ public class WorkEffortServices {
                     Debug.logWarning(e, module);
                 }
             }
-            canView = (workEffortPartyAssignments != null && workEffortPartyAssignments.size() > 0) ? Boolean.TRUE : Boolean.FALSE;
+            canView = (UtilValidate.isNotEmpty(workEffortPartyAssignments)) ? Boolean.TRUE : Boolean.FALSE;
             if (!canView.booleanValue() && security.hasEntityPermission("WORKEFFORTMGR", "_VIEW", userLogin)) {
                 canView = Boolean.TRUE;
             }
@@ -637,9 +637,8 @@ public class WorkEffortServices {
                             for (DateRange periodRange : periodRanges) {
                                 if (periodRange.includesDate(occurrence)) {
                                     GenericValue cloneWorkEffort = (GenericValue) workEffort.clone();
-                                    Double durationMillis = workEffort.getDouble("estimatedMilliSeconds");
-                                    if (durationMillis != null) {
-                                        TimeDuration duration = TimeDuration.fromLong(durationMillis.longValue());
+                                    TimeDuration duration = TimeDuration.fromNumber(workEffort.getDouble("estimatedMilliSeconds"));
+                                    if (!duration.isZero()) {
                                         Calendar endCal = UtilDateTime.toCalendar(occurrence, timeZone, locale);
                                         Date endDate = duration.addToCalendar(endCal).getTime();
                                         cloneWorkEffort.set("estimatedStartDate", new Timestamp(occurrence.getTime()));
@@ -736,7 +735,6 @@ public class WorkEffortServices {
             findIncomingProductionRunsStatusConds.add(EntityCondition.makeCondition("currentStatusId", EntityOperator.EQUALS, "PRUN_SCHEDULED"));
             findIncomingProductionRunsStatusConds.add(EntityCondition.makeCondition("currentStatusId", EntityOperator.EQUALS, "PRUN_DOC_PRINTED"));
             findIncomingProductionRunsStatusConds.add(EntityCondition.makeCondition("currentStatusId", EntityOperator.EQUALS, "PRUN_RUNNING"));
-            findIncomingProductionRunsStatusConds.add(EntityCondition.makeCondition("currentStatusId", EntityOperator.EQUALS, "PRUN_COMPLETED"));
             findIncomingProductionRunsConds.add(EntityCondition.makeCondition(findIncomingProductionRunsStatusConds, EntityOperator.OR));
 
             EntityConditionList findIncomingProductionRunsCondition = EntityCondition.makeCondition(findIncomingProductionRunsConds, EntityOperator.AND);
@@ -952,12 +950,11 @@ public class WorkEffortServices {
                     try {
                         parameters.put("eventDateTime", eventDateTime);
                         processEventReminder(ctx, reminder, parameters);
-                        long repeatInterval = reminder.get("repeatInterval") == null ? 0 : reminder.getLong("repeatInterval").longValue();
-                        if ((repeatCount != 0 && currentCount + 1 >= repeatCount) || repeatInterval == 0) {
+                        TimeDuration duration = TimeDuration.fromNumber(reminder.getLong("repeatInterval"));
+                        if ((repeatCount != 0 && currentCount + 1 >= repeatCount) || duration.isZero()) {
                             reminder.remove();
                         } else {
                             cal.setTime(now);
-                            TimeDuration duration = TimeDuration.fromLong(repeatInterval);
                             duration.addToCalendar(cal);
                             reminderDateTime = cal.getTime();
                             reminder.set("currentCount", Long.valueOf(currentCount + 1));

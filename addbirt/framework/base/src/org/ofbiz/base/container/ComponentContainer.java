@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Iterator;
 import java.util.List;
 
 import org.ofbiz.base.component.AlreadyLoadedException;
@@ -241,7 +240,6 @@ public class ComponentContainer implements Container {
                     if (path.exists()) {
                         if (path.isDirectory()) {
                             // load all .jar and .zip files in this directory
-                            File files[] = path.listFiles();
                             for (File file: path.listFiles()) {
                                 String fileName = file.getName();
                                 if (fileName.endsWith(".jar") || fileName.endsWith(".zip")) {

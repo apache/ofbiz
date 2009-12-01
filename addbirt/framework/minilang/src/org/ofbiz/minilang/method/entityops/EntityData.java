@@ -86,7 +86,7 @@ public class EntityData extends MethodOperation {
         String delegatorName = this.delegatorNameExdr.expandString(methodContext.getEnvMap());
 
         Delegator delegator = methodContext.getDelegator();
-        if (delegatorName != null && delegatorName.length() > 0) {
+        if (UtilValidate.isNotEmpty(delegatorName)) {
             delegator = DelegatorFactory.getDelegator(delegatorName);
         }
 
@@ -128,7 +128,7 @@ public class EntityData extends MethodOperation {
                 } else {
                     reader = new EntitySaxReader(delegator);
                 }
-                long rowsChanged = reader.parse(dataUrl);
+                reader.parse(dataUrl);
             } catch (Exception e) {
                 String xmlError = "Error loading XML Resource \"" + dataUrl.toExternalForm() + "\"; Error was: " + e.getMessage();
                 messages.add(xmlError);

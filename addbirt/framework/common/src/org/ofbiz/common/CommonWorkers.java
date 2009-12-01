@@ -18,19 +18,21 @@
  *******************************************************************************/
 package org.ofbiz.common;
 
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.ListIterator;
 
 import javolution.util.FastList;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityConditionList;
 import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
 
@@ -45,23 +47,43 @@ public class CommonWorkers {
         List<GenericValue> geoList = FastList.newInstance();
         String defaultCountry = UtilProperties.getPropertyValue("general.properties", "country.geo.id.default");
         GenericValue defaultGeo = null;
-        if (defaultCountry != null && defaultCountry.length() > 0) {
+        if (UtilValidate.isNotEmpty(defaultCountry)) {
             try {
-                defaultGeo = delegator.findByPrimaryKeyCache("Geo", UtilMisc.toMap("geoId", defaultCountry));
+                defaultGeo = delegator.findOne("Geo", UtilMisc.toMap("geoId", defaultCountry), true);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Cannot lookup Geo", module);
             }
         }
+                
+        List<EntityExpr> exprs = UtilMisc.toList(EntityCondition.makeCondition("geoTypeId", EntityOperator.EQUALS, "COUNTRY"));
+        List<String> countriesAvailable = StringUtil.split(UtilProperties.getPropertyValue("general.properties", "countries.geo.id.available"), ",");              
+        if (UtilValidate.isNotEmpty(countriesAvailable)) {
+            // only available countries (we don't verify the list of geoId in countries.geo.id.available)
+            exprs.add(EntityCondition.makeCondition("geoId", EntityOperator.IN, countriesAvailable));
+        }
+        
+        List<GenericValue> countriesList = FastList.newInstance();
         try {
-            List<GenericValue> countryGeoList = delegator.findByAndCache("Geo", UtilMisc.toMap("geoTypeId", "COUNTRY"), UtilMisc.toList("geoName"));
-            if (defaultGeo != null) {
-                geoList.add(defaultGeo);
-                geoList.addAll(countryGeoList);
-            } else {
-                geoList = countryGeoList;
-            }
+            countriesList = delegator.findList("Geo", EntityCondition.makeCondition(exprs), null, UtilMisc.toList("geoName"), null, true);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Cannot lookup Geo", module);
+        }
+        if (defaultGeo != null) {
+            geoList.add(defaultGeo);
+            boolean removeDefaultGeo = UtilValidate.isEmpty(countriesList);
+            if (!removeDefaultGeo) {
+                for (GenericValue country  : countriesList) {
+                    if (country.get("geoId").equals(defaultGeo.get("geoId"))) {
+                        removeDefaultGeo = true;
+                    }
+                }
+            }
+            if (removeDefaultGeo) { 
+                countriesList.remove(0); // Remove default country to avoid double rows in drop-down, from 1st place to keep alphabetical order
+            }
+            geoList.addAll(countriesList);
+        } else {
+            geoList = countriesList;
         }
         return geoList;
     }
@@ -84,7 +106,7 @@ public class CommonWorkers {
      * Returns a list of regional geo associations.
      */
     public static List<GenericValue> getAssociatedStateList(Delegator delegator, String country) {
-        if (country == null || country.length() == 0) {
+        if (UtilValidate.isEmpty(country)) {
             // Load the system default country
             country = UtilProperties.getPropertyValue("general.properties", "country.geo.id.default");
         }
@@ -127,12 +149,12 @@ public class CommonWorkers {
         }
         if (childTypeValue != null) {
             if (parentType.equals(childTypeValue.getString(primaryKey))) return true;
-            
+
             if (childTypeValue.getString(parentTypeField) != null) {
                 if (parentType.equals(childTypeValue.getString(parentTypeField))) {
                     return true;
                 } else {
-                    hasParentType(delegator, entityName, primaryKey, childTypeValue.getString(parentTypeField), parentTypeField, parentType);
+                    return hasParentType(delegator, entityName, primaryKey, childTypeValue.getString(parentTypeField), parentTypeField, parentType);
                 }
             }
         }

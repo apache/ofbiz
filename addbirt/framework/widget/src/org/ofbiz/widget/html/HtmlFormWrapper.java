@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.collections.MapStack;
@@ -84,7 +85,7 @@ public class HtmlFormWrapper {
         context.put("timeZone", UtilHttp.getTimeZone(request));
 
         // if there was an error message, this is an error
-        if (UtilValidate.isNotEmpty((String) request.getAttribute("_ERROR_MESSAGE_"))) {
+        if (UtilValidate.isNotEmpty(request.getAttribute("_ERROR_MESSAGE_"))) {
             context.put("isError", Boolean.TRUE);
         } else {
             context.put("isError", Boolean.FALSE);
@@ -95,8 +96,8 @@ public class HtmlFormWrapper {
             context.put("isError", Boolean.TRUE);
         }
 
-        Map uiLabelMap = (Map) request.getAttribute("uiLabelMap");
-        if (uiLabelMap != null && uiLabelMap.size() > 0 && context.get("uiLabelMap") == null) {
+        Map<String, String> uiLabelMap = UtilGenerics.cast(request.getAttribute("uiLabelMap"));
+        if (UtilValidate.isNotEmpty(uiLabelMap) && context.get("uiLabelMap") == null) {
             Debug.logInfo("Got uiLabelMap: " + uiLabelMap, module);
             context.put("uiLabelMap", uiLabelMap);
         }

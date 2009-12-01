@@ -1045,6 +1045,7 @@ public class ProductionRunServices {
                     inMap.put("costComponentTypeId", "ACTUAL_ROUTE_COST");
                     inMap.put("costUomId", currencyUomId);
                     inMap.put("cost", fixedAssetCost);
+                    inMap.put("fixedAssetId", fixedAsset.get("fixedAssetId"));
                     dispatcher.runSync("createCostComponent", inMap);
                 }
             }
@@ -2392,6 +2393,12 @@ public class ProductionRunServices {
 
                     String productionRunId = (String)resultService.get("productionRunId");
                     result.put("productionRunId", productionRunId);
+                    
+                    try {
+                        delegator.create("WorkOrderItemFulfillment", UtilMisc.toMap("workEffortId", productionRunId, "orderId", orderId, "orderItemSeqId", orderItemSeqId));
+                    } catch (GenericEntityException e) {
+                       return ServiceUtil.returnError("Error creating a production run for marketing package for order [" + orderId + " " + orderItemSeqId + "]: " + e.getMessage());
+                   }
 
                     try {
                         serviceContext.clear();

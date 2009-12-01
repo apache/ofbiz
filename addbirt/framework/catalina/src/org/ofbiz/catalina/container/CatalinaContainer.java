@@ -25,19 +25,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.ofbiz.base.component.ComponentConfig;
-import org.ofbiz.base.container.ClassLoaderContainer;
-import org.ofbiz.base.container.Container;
-import org.ofbiz.base.container.ContainerConfig;
-import org.ofbiz.base.container.ContainerException;
-import org.ofbiz.base.container.ContainerConfig.Container.Property;
-import org.ofbiz.base.util.*;
-import org.ofbiz.entity.Delegator;
-import org.ofbiz.entity.DelegatorFactory;
+import javolution.util.FastList;
 
 import org.apache.catalina.Cluster;
 import org.apache.catalina.Context;
@@ -46,33 +39,42 @@ import org.apache.catalina.Host;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Manager;
 import org.apache.catalina.ServerFactory;
-import org.apache.catalina.ha.tcp.ReplicationValve;
-import org.apache.catalina.ha.tcp.SimpleTcpCluster;
-import org.apache.catalina.tribes.Channel;
-import org.apache.catalina.tribes.ChannelReceiver;
-import org.apache.catalina.tribes.group.GroupChannel;
-import org.apache.catalina.tribes.membership.McastService;
-import org.apache.catalina.tribes.transport.MultiPointSender;
-import org.apache.catalina.tribes.transport.ReplicationTransmitter;
-import org.apache.catalina.tribes.transport.nio.NioReceiver;
-
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.core.StandardEngine;
 import org.apache.catalina.core.StandardServer;
 import org.apache.catalina.core.StandardWrapper;
+import org.apache.catalina.ha.tcp.ReplicationValve;
+import org.apache.catalina.ha.tcp.SimpleTcpCluster;
 import org.apache.catalina.realm.MemoryRealm;
 import org.apache.catalina.session.StandardManager;
 import org.apache.catalina.startup.Embedded;
+import org.apache.catalina.tribes.group.GroupChannel;
+import org.apache.catalina.tribes.membership.McastService;
+import org.apache.catalina.tribes.transport.MultiPointSender;
+import org.apache.catalina.tribes.transport.ReplicationTransmitter;
+import org.apache.catalina.tribes.transport.nio.NioReceiver;
 import org.apache.catalina.util.ServerInfo;
 import org.apache.catalina.valves.AccessLogValve;
 import org.apache.catalina.valves.RequestDumperValve;
 import org.apache.coyote.ProtocolHandler;
 import org.apache.coyote.http11.Http11Protocol;
+import org.ofbiz.base.component.ComponentConfig;
+import org.ofbiz.base.container.ClassLoaderContainer;
+import org.ofbiz.base.container.Container;
+import org.ofbiz.base.container.ContainerConfig;
+import org.ofbiz.base.container.ContainerException;
+import org.ofbiz.base.container.ContainerConfig.Container.Property;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.SSLUtil;
+import org.ofbiz.base.util.UtilURL;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.DelegatorFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-import javolution.util.FastList;
 
 /*
  * --- Access Log Pattern Information - From Tomcat 5 AccessLogValve.java
@@ -193,7 +195,7 @@ public class CatalinaContainer implements Container {
 
         // create the engines
         List<ContainerConfig.Container.Property> engineProps = cc.getPropertiesWithValue("engine");
-        if (engineProps == null || engineProps.size() == 0) {
+        if (UtilValidate.isEmpty(engineProps)) {
             throw new ContainerException("Cannot load CatalinaContainer; no engines defined!");
         }
         for (ContainerConfig.Container.Property engineProp: engineProps) {
@@ -205,7 +207,7 @@ public class CatalinaContainer implements Container {
 
         // create the connectors
         List<ContainerConfig.Container.Property> connectorProps = cc.getPropertiesWithValue("connector");
-        if (connectorProps == null || connectorProps.size() == 0) {
+        if (UtilValidate.isEmpty(connectorProps)) {
             throw new ContainerException("Cannot load CatalinaContainer; no connectors defined!");
         }
         for (ContainerConfig.Container.Property connectorProp: connectorProps) {

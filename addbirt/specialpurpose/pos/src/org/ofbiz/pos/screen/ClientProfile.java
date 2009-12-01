@@ -43,7 +43,6 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.pos.PosTransaction;
-import org.ofbiz.pos.component.StatusBar;
 
 
 @SuppressWarnings("serial")
@@ -84,7 +83,6 @@ public class ClientProfile extends XPage implements ActionListener {
     private static final String END_SENTINEL = UtilProperties.getPropertyValue("parameters", "EndSentinel", "?");    
     private static Locale locale = Locale.getDefault();
     private String m_partyId = null;
-    protected StatusBar statusbar = null;    
 
     //TODO : make getter and setter for members (ie m_*) if needed (extern calls). For that in Eclipse use Source/Generate Getters and setters
 
@@ -141,7 +139,6 @@ public class ClientProfile extends XPage implements ActionListener {
         m_nameEdit.requestFocusInWindow();
         m_dialog.showDialog(this);
         if (!cancelled) {
-            m_trans.setPartyId(m_partyId);
             GenericValue  person = null;
             try {
                 person = m_trans.getSession().getDelegator().findByPrimaryKey("Person", UtilMisc.toMap("partyId", m_partyId));
@@ -151,12 +148,14 @@ public class ClientProfile extends XPage implements ActionListener {
             if (UtilValidate.isNotEmpty(person)) {
                 String cardId = person.getString("cardId");
                 if (UtilValidate.isNotEmpty(cardId)) {
+                    String partyId = m_trans.getPartyId();
+                    m_trans.setPartyId(m_partyId);
                     String result = m_trans.addProductPromoCode(cardId);
-                    statusbar = new StatusBar(m_pos);
                     if (UtilValidate.isEmpty(result)) {
-                        statusbar.printClient(person.getString("lastName"));
-                        statusbar.printPromoCode(cardId);
+                        m_pos.getPromoStatusBar().displayClient(person.getString("lastName"));
+                        m_pos.getPromoStatusBar().addPromoCode(cardId);
                     } else {
+                        m_trans.setPartyId(partyId);
                         m_pos.showDialog("dialog/error/exception", result);
                     }
                 }

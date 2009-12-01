@@ -34,7 +34,7 @@ import org.ofbiz.base.util.cache.UtilCache;
 public class JNDIContextFactory {
 
     public static final String module = JNDIContextFactory.class.getName();
-    static UtilCache<String, InitialContext> contexts = new UtilCache<String, InitialContext>("entity.JNDIContexts", 0, 0);
+    static UtilCache<String, InitialContext> contexts = UtilCache.createUtilCache("entity.JNDIContexts", 0, 0);
 
     /**
      * Return the initial context according to the entityengine.xml parameters that correspond to the given prefix
@@ -62,12 +62,12 @@ public class JNDIContextFactory {
 
                             h.put(Context.INITIAL_CONTEXT_FACTORY, jndiServerInfo.initialContextFactory);
                             h.put(Context.PROVIDER_URL, jndiServerInfo.contextProviderUrl);
-                            if (jndiServerInfo.urlPkgPrefixes != null && jndiServerInfo.urlPkgPrefixes.length() > 0)
+                            if (UtilValidate.isNotEmpty(jndiServerInfo.urlPkgPrefixes))
                                 h.put(Context.URL_PKG_PREFIXES, jndiServerInfo.urlPkgPrefixes);
 
-                            if (jndiServerInfo.securityPrincipal != null && jndiServerInfo.securityPrincipal.length() > 0)
+                            if (UtilValidate.isNotEmpty(jndiServerInfo.securityPrincipal))
                                 h.put(Context.SECURITY_PRINCIPAL, jndiServerInfo.securityPrincipal);
-                            if (jndiServerInfo.securityCredentials != null && jndiServerInfo.securityCredentials.length() > 0)
+                            if (UtilValidate.isNotEmpty(jndiServerInfo.securityCredentials))
                                 h.put(Context.SECURITY_CREDENTIALS, jndiServerInfo.securityCredentials);
 
                             ic = new InitialContext(h);

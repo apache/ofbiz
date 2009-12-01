@@ -41,7 +41,6 @@ import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilHttp;
-import org.ofbiz.base.util.UtilObject;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
@@ -314,7 +313,7 @@ public class CoreEvents {
         }
 
         // some conversions
-        if (serviceTime != null && serviceTime.length() > 0) {
+        if (UtilValidate.isNotEmpty(serviceTime)) {
             try {
                 Timestamp ts1 = Timestamp.valueOf(serviceTime);
                 startTime = ts1.getTime();
@@ -331,7 +330,7 @@ public class CoreEvents {
                 errorBuf.append("<li>" + errMsg);
             }
         }
-        if (serviceEndTime != null && serviceEndTime.length() > 0) {
+        if (UtilValidate.isNotEmpty(serviceEndTime)) {
             try {
                 Timestamp ts1 = Timestamp.valueOf(serviceEndTime);
                 endTime = ts1.getTime();
@@ -348,7 +347,7 @@ public class CoreEvents {
                 errorBuf.append("<li>" + errMsg);
             }
         }
-        if (serviceIntr != null && serviceIntr.length() > 0) {
+        if (UtilValidate.isNotEmpty(serviceIntr)) {
             try {
                 interval = Integer.parseInt(serviceIntr);
             } catch (NumberFormatException nfe) {
@@ -356,7 +355,7 @@ public class CoreEvents {
                 errorBuf.append("<li>" + errMsg);
             }
         }
-        if (serviceCnt != null && serviceCnt.length() > 0) {
+        if (UtilValidate.isNotEmpty(serviceCnt)) {
             try {
                 count = Integer.parseInt(serviceCnt);
             } catch (NumberFormatException nfe) {
@@ -364,7 +363,7 @@ public class CoreEvents {
                 errorBuf.append("<li>" + errMsg);
             }
         }
-        if (serviceFreq != null && serviceFreq.length() > 0) {
+        if (UtilValidate.isNotEmpty(serviceFreq)) {
             int parsedValue = 0;
 
             try {
@@ -383,7 +382,7 @@ public class CoreEvents {
                 }
             }
         }
-        if (retryCnt != null && retryCnt.length() > 0) {
+        if (UtilValidate.isNotEmpty(retryCnt)) {
             int parsedValue = -2;
 
             try {
