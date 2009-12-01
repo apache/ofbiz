@@ -645,7 +645,7 @@ under the License.
             <field field="equityGlAccountClass" type="GenericValue"/>
         </call-class-method>
 
-        <!-- Compute the total posted amount of the period -->
+        <!-- Compute the total posted amount of the period for expense/revenue/income accounts -->
         <entity-condition entity-name="AcctgTransAndEntries" list="acctgTransAndEntries">
             <condition-list combine="and">
                 <condition-expr field-name="organizationPartyId" operator="equals" from-field="customTimePeriod.organizationPartyId"/>
@@ -664,6 +664,8 @@ under the License.
             <order-by field-name="acctgTransEntrySeqId"/>
         </entity-condition>
         <set field="totalAmount" value="0.0" type="BigDecimal"/>
+        <set field="totalCreditAmount" value="0.0" type="BigDecimal"/>
+        <set field="totalDebitAmount" value="0.0" type="BigDecimal"/>
         <iterate list="acctgTransAndEntries" entry="acctgTransAndEntry">
             <get-related-one value-field="acctgTransAndEntry" relation-name="GlAccount" to-value-field="glAccount"/>
             <call-class-method class-name="org.ofbiz.accounting.util.UtilAccounting" method-name="isCreditAccount" ret-field="isCreditAccount">
@@ -678,32 +680,23 @@ under the License.
             <set field="amount" from-field="acctgTransAndEntry.amount"/>
             <if>
                 <condition>
-                    <or>
-                        <and>
-                            <if-compare field="acctgTransAndEntry.debitCreditFlag" operator="equals" value="D"/>
-                            <if-compare field="isCreditAccount" operator="equals" value="true" type="Boolean"/>
-                        </and>
-                        <and>
-                            <if-compare field="acctgTransAndEntry.debitCreditFlag" operator="equals" value="C"/>
-                            <if-compare field="isDebitAccount" operator="equals" value="true" type="Boolean"/>
-                        </and>
-                    </or>
+                    <if-compare field="acctgTransAndEntry.debitCreditFlag" operator="equals" value="D"/>
                 </condition>
                 <then>
-                    <calculate field="amount">
-                        <calcop field="amount" operator="negative"/>
+                    <calculate field="totalDebitAmount">
+                        <calcop field="totalDebitAmount" operator="add"><calcop field="amount" operator="get"/></calcop>
                     </calculate>
                 </then>
+                <else>
+                    <calculate field="totalCreditAmount">
+                        <calcop field="totalCreditAmount" operator="add"><calcop field="amount" operator="get"/></calcop>
+                    </calculate>
+                </else>
             </if>
-            <if-compare field="isExpenseAccount" operator="equals" value="true" type="Boolean">
-                <calculate field="amount">
-                    <calcop field="amount" operator="negative"/>
-                </calculate>
-            </if-compare>
-            <calculate field="totalAmount">
-                <calcop field="totalAmount" operator="add"><calcop field="amount" operator="get"/></calcop>
-            </calculate>
         </iterate>
+        <calculate field="totalAmount">
+            <calcop field="totalCreditAmount" operator="subtract"><calcop field="totalDebitAmount" operator="get"/></calcop>
+        </calculate>
         <set field="partyAccountingPreferencesCallMap.organizationPartyId" from-field="customTimePeriod.organizationPartyId"/>
         <call-service service-name="getPartyAccountingPreferences" in-map-name="partyAccountingPreferencesCallMap">
              <result-to-field result-name="partyAccountingPreference" field="partyAcctgPreference"/>
@@ -753,6 +746,8 @@ under the License.
             </call-service>
         </else>
         </if-not-empty>
+
+        <!-- The history records in the current time period are updated with the endingBalance field -->
         <entity-and entity-name="GlAccountHistory" list="glAccountHistories">
             <field-map field-name="organizationPartyId" from-field="customTimePeriod.organizationPartyId"/>
             <field-map field-name="customTimePeriodId" from-field="customTimePeriod.customTimePeriodId"/>
@@ -764,6 +759,8 @@ under the License.
             <set field="glAccountHistory.endingBalance" from-field="endingBalance"/>
             <store-value value-field="glAccountHistory"/>
         </iterate>
+
+        <!-- For all the accounts of class assets/liability/equity the endingBalance of the last time period's history is added to the one of the history of the period being closed -->
         <if-not-empty field="lastClosedTimePeriod">
             <entity-condition entity-name="GlAccountAndHistory" list="lastPeriodGlAccountAndHistories">
                 <condition-list combine="and">
@@ -803,7 +800,8 @@ under the License.
             </iterate>
         </if-not-empty>
 
-        <!-- Initialize the accounts for the new fiscal period -->
+        <!-- TODO: the usage of GlAccountOrganization.postedAmount is deprecated in place of GlAccountHistory; the next section will then be removed-->
+        <!-- Initialize the GlAccountOrganization.postedAmount for expense/revenue/income accounts for the new fiscal period -->
         <entity-condition entity-name="GlAccountOrganizationAndClass" list="glAccountOrganizationAndClassList">
             <condition-list combine="and">
                 <condition-expr field-name="organizationPartyId" operator="equals" from-field="customTimePeriod.organizationPartyId"/>
@@ -812,6 +810,7 @@ under the License.
                     <condition-expr field-name="glAccountClassId" operator="in" from-field="expenseAccountClassIds"/>
                     <condition-expr field-name="glAccountClassId" operator="in" from-field="revenueAccountClassIds"/>
                     <condition-expr field-name="glAccountClassId" operator="in" from-field="incomeAccountClassIds"/>
+                    <condition-expr field-name="glAccountId" operator="equals" from-field="profitLossAccount.glAccountId"/>
                 </condition-list>
             </condition-list>
         </entity-condition>
@@ -863,11 +862,6 @@ under the License.
                         </calculate>
                     </then>
                 </if>
-                <if-compare field="isExpenseAccount" operator="equals" value="true" type="Boolean">
-                    <calculate field="amount">
-                        <calcop field="amount" operator="negative"/>
-                    </calculate>
-                </if-compare>
                 <calculate field="newPostedBalance">
                     <calcop field="newPostedBalance" operator="add"><calcop field="amount" operator="get"/></calcop>
                 </calculate>
@@ -1058,7 +1052,7 @@ under the License.
         <set field="partyIds" value="${groovy:org.ofbiz.party.party.PartyWorker.getAssociatedPartyIdsByRelationshipType(delegator, organizationPartyId, 'GROUP_ROLLUP')}" type="List"/>
         <set field="partyIds[]" from-field="organizationPartyId"/>
         <set field="findLastClosedDateInMap.organizationPartyId" from-field="organizationPartyId"/>
-        <set field="findLastClosedDateInMap.findDate" from-field="parameters.thruDate"/>
+        <set field="findLastClosedDateInMap.findDate" from-field="parameters.thruDate" type="Date"/>
         <call-service service-name="findLastClosedDate" in-map-name="findLastClosedDateInMap">
             <result-to-field result-name="lastClosedDate"/>
             <result-to-field result-name="lastClosedTimePeriod"/>
@@ -1186,7 +1180,6 @@ under the License.
             </calculate>
         </iterate>
 
-        <!-- retrieve the last closed date for the same type of time period -->
         <set field="prepareIncomeStatementInMap.organizationPartyId" from-field="organizationPartyId"/>
         <set field="prepareIncomeStatementInMap.glFiscalTypeId" from-field="parameters.glFiscalTypeId"/>
         <set field="prepareIncomeStatementInMap.fromDate" from-field="lastClosedDate"/>
@@ -1644,6 +1637,7 @@ under the License.
         <!-- Set header fields (AcctgTrans) -->
         <set field="createAcctgTransAndEntriesInMap.glFiscalTypeId" value="ACTUAL"/>
         <set field="createAcctgTransAndEntriesInMap.acctgTransTypeId" value="INVENTORY"/>
+        <set field="createAcctgTransAndEntriesInMap.workEffortId" from-field="parameters.workEffortId"/>       
         <set field="createAcctgTransAndEntriesInMap.acctgTransEntries" from-field="acctgTransEntries"/>
         <call-service service-name="createAcctgTransAndEntries" in-map-name="createAcctgTransAndEntriesInMap">
             <result-to-field result-name="acctgTransId"/>
@@ -1660,7 +1654,7 @@ under the License.
         <entity-one entity-name="WorkEffort" value-field="workEffort">
             <field-map field-name="workEffortId" from-field="parameters.workEffortId"/>
         </entity-one>
-        <get-related-one value-field="workEffort" relation-name="Facility"  to-value-field="facility"/>
+        <get-related-one value-field="workEffort" relation-name="Facility" to-value-field="facility"/>
         <if-compare field="workEffort.workEffortTypeId" operator="equals" value="PROD_ORDER_TASK">
             <if-not-empty field="workEffort.workEffortParentId">
                 <entity-and entity-name="WorkEffortGoodStandard" list="workEffortGoodStandards">
@@ -1674,11 +1668,21 @@ under the License.
         <!-- Credit -->
         <make-value entity-name="AcctgTransEntry" value-field="creditEntry"/>
         <set field="creditEntry.debitCreditFlag" value="C"/>
-        <set field="creditEntry.glAccountTypeId" from-field="costComponentCalc.costGlAccountTypeId"/>
+        <if-not-empty field="costComponentCalc.costGlAccountTypeId">
+            <set field="creditEntry.glAccountTypeId" from-field="costComponentCalc.costGlAccountTypeId"/>
+            <else>
+                <if-not-empty field="costComponent.fixedAssetId">
+                    <!-- FIXME: 20091119 There is currently no way of determining what glAccountTypeId should be used when a 
+                                         CostComponent has been created based on a FixedAsset's FixedAssetStdCost records,
+                                         hard-coding as OPERATING_EXPENSE until that is resolved. -->
+                    <set field="creditEntry.glAccountTypeId" value="OPERATING_EXPENSE"/>
+                </if-not-empty>
+            </else>
+        </if-not-empty>
         <set field="creditEntry.organizationPartyId" from-field="facility.ownerPartyId"/>
         <set field="creditEntry.productId" from-field="workEffortGoodStandard.productId"/>
         <set field="creditEntry.origAmount" from-field="costComponent.cost"/>
-        <set field="creditEntry.origCurrencyUomId" from-field="facility.currencyUomId"/>
+        <set field="creditEntry.origCurrencyUomId" from-field="costComponent.costUomId"/>
         <set field="acctgTransEntries[]" from-field="creditEntry" type="Object"/>
         <!-- Debit -->
         <make-value entity-name="AcctgTransEntry" value-field="debitEntry"/>
@@ -1692,7 +1696,7 @@ under the License.
         <set field="debitEntry.organizationPartyId" from-field="facility.ownerPartyId"/>
         <set field="debitEntry.productId" from-field="workEffortGoodStandard.productId"/>
         <set field="debitEntry.origAmount" from-field="costComponent.cost"/>
-        <set field="debitEntry.origCurrencyUomId" from-field="facility.currencyUomId"/>
+        <set field="debitEntry.origCurrencyUomId" from-field="costComponent.costUomId"/>
         <set field="acctgTransEntries[]" from-field="debitEntry" type="Object"/>
         <!-- Set header fields (AcctgTrans) -->
         <set field="createAcctgTransAndEntriesInMap.glFiscalTypeId" value="ACTUAL"/>
@@ -1825,6 +1829,7 @@ under the License.
         <!-- Set header fields (AcctgTrans) -->
         <set field="createAcctgTransAndEntriesInMap.glFiscalTypeId" value="ACTUAL"/>
         <set field="createAcctgTransAndEntriesInMap.acctgTransTypeId" value="INVENTORY"/>
+        <set field="createAcctgTransAndEntriesInMap.workEffortId" from-field="parameters.workEffortId"/>
         <set field="createAcctgTransAndEntriesInMap.acctgTransEntries" from-field="acctgTransEntries"/>
         <call-service service-name="createAcctgTransAndEntries" in-map-name="createAcctgTransAndEntriesInMap">
             <result-to-field result-name="acctgTransId"/>
@@ -2128,7 +2133,7 @@ under the License.
             <iterate list="invoiceItems" entry="invoiceItem">
                 <!-- TODO: handle serialized inventory -->
                 <if-empty field="invoiceItem.quantity">
-                    <set field="invoiceItem.quantity" value="1"/>
+                    <set field="invoiceItem.quantity" type="BigDecimal" value="1"/>
                 </if-empty>
                 <calculate field="origAmount" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
                     <calcop operator="multiply">
@@ -2230,6 +2235,11 @@ under the License.
             <set field="creditEntry.debitCreditFlag" value="C"/>
             <!-- TODO -->
             <!--set field="creditEntry.glAccountTypeId" from-field=""/-->
+            <entity-one value-field="paymentMethodTypeGlAccount" entity-name="PaymentMethodTypeGlAccount">
+                <field-map field-name="paymentMethodTypeId" from-field="payment.paymentMethodTypeId"/>
+                <field-map field-name="organizationPartyId"/>
+            </entity-one>
+            <set field="creditEntry.glAccountId" from-field="paymentMethodTypeGlAccount.glAccountId"/>
             <set field="creditEntry.origAmount" from-field="payment.amount"/>
             <set field="creditEntry.origCurrencyUomId" from-field="payment.currencyUomId"/>
             <set field="creditEntry.organizationPartyId" from-field="payment.partyIdFrom"/>

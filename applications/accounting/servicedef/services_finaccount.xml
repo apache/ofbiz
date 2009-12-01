@@ -266,6 +266,12 @@ under the License.
             location="component://accounting/script/org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="reconcileWithdrawalFinAcctgTrans">
         <description>Reconcile Financial Accounting Financial Transactions</description>
         <attribute name="finAccountTrans" type="org.ofbiz.entity.GenericValue" mode="IN" optional="false"/>
+    </service>    
+    <service name="getReconciliationClosingBalance" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="getReconciliationClosingBalance">
+        <description>Service to Get Reconciliation closing balance.</description>
+        <attribute name="glReconciliationId" type="String" mode="IN" optional="false"/>
+        <attribute name="closingBalance" type="BigDecimal" mode="OUT" optional="false"/>
     </service>
 
     <!-- service credit account w/ transaction -->
@@ -470,9 +476,9 @@ under the License.
         <description>create new payment and associate with respective financial account in FinAccountTrans Entity.</description>
         <implements service="createPayment"/>
         <attribute name="isDepositWithDrawPayment" type="String" mode="IN" optional="true"/>
-        <attribute name="finAccountId" type="String" mode="IN" optional="true"/>
         <attribute name="finAccountTransTypeId" type="String" mode="IN" optional="false"/>
         <attribute name="paymentGroupTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="paymentMethodId" type="String" mode="IN" optional="true"/>
         <attribute name="paymentId" type="String" mode="OUT" optional="true"/>
     </service>
 
@@ -514,5 +520,10 @@ under the License.
         <description>Get associated acctgTransEntries with finAccountTrans</description>
         <attribute name="finAccountTransId" type="String" mode="IN" optional="false"/>
         <attribute name="acctgTransAndEntries" type="List" mode="OUT" optional="true"/>
+    </service>
+    
+    <service name="autoFinAccountReconciliation" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="autoFinAccountReconciliation" auth="true">
+        <description>Auto Reconciled FinAccountTrans entries</description>
     </service>
 </services>

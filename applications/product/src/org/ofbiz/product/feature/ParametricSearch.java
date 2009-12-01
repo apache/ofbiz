@@ -32,6 +32,7 @@ import javolution.util.FastSet;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -48,8 +49,8 @@ public class ParametricSearch {
     public static final int DEFAULT_PER_TYPE_MAX_SIZE = 1000;
 
     // DEJ20060427 not used right now, could be removed if that circumstance persists
-    //public static UtilCache featureAllCache = new UtilCache("custom.FeaturePerTypeAll", 0, 600000, true);
-    //public static UtilCache featureByCategoryCache = new UtilCache("custom.FeaturePerTypeByCategory", 0, 600000, true);
+    //public static UtilCache featureAllCache = UtilCache.createUtilCache("custom.FeaturePerTypeAll", 0, 600000, true);
+    //public static UtilCache featureByCategoryCache = UtilCache.createUtilCache("custom.FeaturePerTypeByCategory", 0, 600000, true);
 
     /** Gets all features associated with the specified category through:
      * ProductCategory -> ProductFeatureCategoryAppl -> ProductFeatureCategory -> ProductFeature.
@@ -167,7 +168,7 @@ public class ParametricSearch {
             if (parameterName.startsWith("pft_")) {
                 String productFeatureTypeId = parameterName.substring(4);
                 String productFeatureId = (String) entry.getValue();
-                if (productFeatureId != null && productFeatureId.length() > 0) {
+                if (UtilValidate.isNotEmpty(productFeatureId)) {
                     featureIdByType.put(productFeatureTypeId, productFeatureId);
                 }
             }
@@ -185,7 +186,7 @@ public class ParametricSearch {
             String parameterName = entry.getKey();
             if (parameterName.startsWith("SEARCH_FEAT")) {
                 String productFeatureId = (String) entry.getValue();
-                if (productFeatureId != null && productFeatureId.length() > 0) {
+                if (UtilValidate.isNotEmpty(productFeatureId)) {
                     featureIdList.add(productFeatureId);
                 }
             }
@@ -195,7 +196,7 @@ public class ParametricSearch {
     }
 
     public static String makeFeatureIdByTypeString(Map<String, String> featureIdByType) {
-        if (featureIdByType == null || featureIdByType.size() == 0) {
+        if (UtilValidate.isEmpty(featureIdByType)) {
             return "";
         }
 
@@ -227,7 +228,7 @@ public class ParametricSearch {
             String parameterName = entry.getKey();
             if (parameterName.startsWith("SEARCH_PROD_FEAT_CAT")) {
                 String productFeatureCategoryId = (String) entry.getValue();
-                if (productFeatureCategoryId != null && productFeatureCategoryId.length() > 0) {
+                if (UtilValidate.isNotEmpty(productFeatureCategoryId)) {
                    prodFeatureCategoryIdList.add(productFeatureCategoryId);
                 }
             }

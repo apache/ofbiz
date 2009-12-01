@@ -289,7 +289,7 @@ public class EbayOrderServices {
                 }
             }
         }
-        if (orderList == null || orderList.size() == 0) {
+        if (UtilValidate.isEmpty(orderList)) {
             Debug.logError("No orders found", module);
             return ServiceUtil.returnFailure(UtilProperties.getMessage(resource, "ordersImportFromEbay.noOrdersFound", locale));
         }
@@ -431,7 +431,7 @@ public class EbayOrderServices {
             
             if (ack != null && "Success".equals(ack)) {
                 List<? extends Element> orderArrays = UtilXml.childElementList(elemResponse, "OrderArray");
-                if (orderArrays != null && orderArrays.size() > 0) {
+                if (UtilValidate.isNotEmpty(orderArrays)) {
                     totalOrders = orderArrays.size();
                 }
                 if (totalOrders > 0) {
@@ -680,7 +680,7 @@ public class EbayOrderServices {
                                     getSellerTransactionsContainingOrderList.add(orderId);
                                 }
                             }                            
-                            if (containingOrders != null && containingOrders.size() > 0) {
+                            if (UtilValidate.isNotEmpty(containingOrders)) {
                                 continue;
                             }
                             
@@ -1026,7 +1026,7 @@ public class EbayOrderServices {
 
             // set the order date with the eBay created date
             Timestamp orderDate = UtilDateTime.nowTimestamp();
-            if (UtilValidate.isNotEmpty((String) context.get("createdDate"))) {
+            if (UtilValidate.isNotEmpty(context.get("createdDate"))) {
                 orderDate = UtilDateTime.toTimestamp((String) context.get("createdDate"));
             }
             cart.setOrderDate(orderDate);
@@ -1109,7 +1109,7 @@ public class EbayOrderServices {
                     List<GenericValue> shipInfo = PartyWorker.findMatchingPartyAndPostalAddress(delegator, shippingAddressCtx.get("shippingAddressStreet1").toString(), 
                             (UtilValidate.isEmpty(shippingAddressCtx.get("shippingAddressStreet2")) ? null : shippingAddressCtx.get("shippingAddressStreet2").toString()), shippingAddressCtx.get("city").toString(), shippingAddressCtx.get("stateProvinceGeoId").toString(), 
                             shippingAddressCtx.get("shippingAddressPostalCode").toString(), null, shippingAddressCtx.get("countryGeoId").toString(), firstName, null, lastName);
-                    if (shipInfo != null && shipInfo.size() > 0) {
+                    if (UtilValidate.isNotEmpty(shipInfo)) {
                         GenericValue first = EntityUtil.getFirst(shipInfo);
                         partyId = first.getString("partyId");
                         Debug.logInfo("Existing shipping address found for : (party: " + partyId + ")", module);
@@ -1118,7 +1118,7 @@ public class EbayOrderServices {
                 
                 // If matching party not found then try to find partyId from PartyAttribute entity.
                 GenericValue partyAttribute = null;
-                if (UtilValidate.isNotEmpty((String) context.get("eiasTokenBuyer"))) {
+                if (UtilValidate.isNotEmpty(context.get("eiasTokenBuyer"))) {
                     partyAttribute = EntityUtil.getFirst(delegator.findByAnd("PartyAttribute", UtilMisc.toMap("attrValue", (String) context.get("eiasTokenBuyer"))));
                     if (UtilValidate.isNotEmpty(partyAttribute)) {
                         partyId = (String) partyAttribute.get("partyId");
@@ -1151,7 +1151,10 @@ public class EbayOrderServices {
                 // create new party's contact information
                 if (UtilValidate.isEmpty(contactMechId)) {
                     Map buyerCtx = (Map) context.get("buyerCtx");
-                    String eiasTokenBuyer = (String) buyerCtx.get("eiasTokenBuyer");
+                    String eiasTokenBuyer = null;
+                    if (UtilValidate.isNotEmpty(buyerCtx)) {
+                        eiasTokenBuyer = (String) buyerCtx.get("eiasTokenBuyer");
+                    }    
                     Debug.logInfo("Creating new postal address for party: " + partyId, module);
                     contactMechId = EbayHelper.createAddress(dispatcher, partyId, userLogin, "SHIPPING_LOCATION", shippingAddressCtx);
                     if (UtilValidate.isEmpty(contactMechId)) {
@@ -1189,11 +1192,15 @@ public class EbayOrderServices {
                 Debug.logInfo("Creating order.", module);
                 Map<?, ?> orderCreate = checkout.createOrder(userLogin);
 
+                if ("error".equals(orderCreate.get("responseMessage"))) {
+                    List errorMessageList = (List)orderCreate.get("errorMessageList");
+                    return ServiceUtil.returnError(errorMessageList);
+                }
                 String orderId = (String) orderCreate.get("orderId");
                 Debug.logInfo("Created order with id: " + orderId, module);
                 
                 if (UtilValidate.isNotEmpty(orderId)) {
-                    String orderCreatedMsg = "Order created successfully with ID (" + orderId + ") & eBay Order ID associated with this order is (" + externalId + "). \n";
+                    String orderCreatedMsg = "Order created successfully with ID (" + orderId + ") & eBay Order ID associated with this order is (" + externalId + ").";
                     orderImportSuccessMessageList.add(orderCreatedMsg);
                 }
 
@@ -1223,7 +1230,7 @@ public class EbayOrderServices {
         Debug.logInfo("Checking for existing externalId: " + externalId, module);
         GenericValue orderHeader = null;
         List<GenericValue> orderHeaderList = delegator.findByAnd("OrderHeader", UtilMisc.toMap("externalId", externalId));
-        if (orderHeaderList != null && orderHeaderList.size() > 0) {
+        if (UtilValidate.isNotEmpty(orderHeaderList)) {
             orderHeader = EntityUtil.getFirst(orderHeaderList);
         }
         return orderHeader;

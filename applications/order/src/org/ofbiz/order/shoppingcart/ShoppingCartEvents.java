@@ -20,20 +20,21 @@ package org.ofbiz.order.shoppingcart;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.sql.Timestamp;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import javolution.util.FastMap;
-import java.sql.Timestamp;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import javolution.util.FastList;
+import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
@@ -400,7 +401,7 @@ public class ShoppingCartEvents {
         }
 
         // get the selected amount
-        String selectedAmountStr = "0.00";
+        String selectedAmountStr = null;
         if (paramMap.containsKey("ADD_AMOUNT")) {
             selectedAmountStr = (String) paramMap.remove("ADD_AMOUNT");
         } else if (paramMap.containsKey("add_amount")) {
@@ -409,13 +410,15 @@ public class ShoppingCartEvents {
 
         // parse the amount
         BigDecimal amount = null;
-        if (selectedAmountStr != null && selectedAmountStr.length() > 0) {
+        if (UtilValidate.isNotEmpty(selectedAmountStr)) {
             try {
                 amount = new BigDecimal(nf.parse(selectedAmountStr).doubleValue());
             } catch (Exception e) {
                 Debug.logWarning(e, "Problem parsing amount string: " + selectedAmountStr, module);
                 amount = null;
             }
+        } else {
+            amount = BigDecimal.ZERO;
         }
 
         // check for required amount
@@ -427,7 +430,7 @@ public class ShoppingCartEvents {
 
         // get the ship before date (handles both yyyy-mm-dd input and full timestamp)
         shipBeforeDateStr = (String) paramMap.remove("shipBeforeDate");
-        if (shipBeforeDateStr != null && shipBeforeDateStr.length() > 0) {
+        if (UtilValidate.isNotEmpty(shipBeforeDateStr)) {
             if (shipBeforeDateStr.length() == 10) shipBeforeDateStr += " 00:00:00.000";
             try {
                 shipBeforeDate = java.sql.Timestamp.valueOf(shipBeforeDateStr);
@@ -439,7 +442,7 @@ public class ShoppingCartEvents {
 
         // get the ship after date (handles both yyyy-mm-dd input and full timestamp)
         shipAfterDateStr = (String) paramMap.remove("shipAfterDate");
-        if (shipAfterDateStr != null && shipAfterDateStr.length() > 0) {
+        if (UtilValidate.isNotEmpty(shipAfterDateStr)) {
             if (shipAfterDateStr.length() == 10) shipAfterDateStr += " 00:00:00.000";
             try {
                 shipAfterDate = java.sql.Timestamp.valueOf(shipAfterDateStr);
@@ -653,7 +656,7 @@ public class ShoppingCartEvents {
         cart.setOrderPartyId(supplierPartyId);
         cart.setOrderId(orderId);
         String agreementId = request.getParameter("agreementId_o_0");
-        if (agreementId != null && agreementId.length() > 0) {
+        if (UtilValidate.isNotEmpty(agreementId)) {
             ShoppingCartHelper sch = new ShoppingCartHelper(delegator, dispatcher, cart);
             sch.selectAgreement(agreementId);
         }
@@ -1305,6 +1308,7 @@ public class ShoppingCartEvents {
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         HttpSession session = request.getSession();
         GenericValue userLogin = (GenericValue)session.getAttribute("userLogin");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
         String orderId = request.getParameter("orderId");
 
@@ -1320,7 +1324,49 @@ public class ShoppingCartEvents {
              }
 
             cart = (ShoppingCart) outMap.get("shoppingCart");
-            
+
+            cart.removeAdjustmentByType("SALES_TAX");
+            cart.removeAdjustmentByType("PROMOTION_ADJUSTMENT");
+            String shipGroupSeqId = null;
+            long groupIndex = cart.getShipInfoSize();
+            List orderAdjustmentList = new ArrayList();
+            List orderAdjustments = new ArrayList();
+            orderAdjustments = cart.getAdjustments();
+            try {
+                orderAdjustmentList = delegator.findList("OrderAdjustment", EntityCondition.makeCondition("orderId", EntityOperator.EQUALS, orderId), null, null, null, false);
+            } catch (Exception e) {
+                Debug.logError(e, module);
+            }
+            for (long itr = 1; itr <= groupIndex; itr++) {
+                shipGroupSeqId = UtilFormatOut.formatPaddedNumber(1, 5);
+                List<GenericValue> duplicateAdjustmentList = new ArrayList<GenericValue>();
+                for (GenericValue adjustment: (List<GenericValue>)orderAdjustmentList) {
+                    if ("PROMOTION_ADJUSTMENT".equals(adjustment.get("orderAdjustmentTypeId"))) { 
+                        cart.addAdjustment(adjustment);
+                    }
+                    if ("SALES_TAX".equals(adjustment.get("orderAdjustmentTypeId"))) {
+                        if (adjustment.get("description") != null 
+                                    && ((String)adjustment.get("description")).startsWith("Tax adjustment due")) {
+                                cart.addAdjustment(adjustment);
+                            }
+                        if ( adjustment.get("comments") != null 
+                                && ((String)adjustment.get("comments")).startsWith("Added manually by")) {
+                            cart.addAdjustment(adjustment);
+                        }
+                    }
+                }
+                for (GenericValue orderAdjustment: (List<GenericValue>)orderAdjustments) {
+                    if ("OrderAdjustment".equals(orderAdjustment.getEntityName())) {
+                        if (("SHIPPING_CHARGES".equals(orderAdjustment.get("orderAdjustmentTypeId"))) &&
+                                orderAdjustment.get("orderId").equals(orderId) &&
+                                orderAdjustment.get("shipGroupSeqId").equals(shipGroupSeqId) && orderAdjustment.get("comments") == null) {
+                            // Removing objects from list for old Shipping and Handling Charges Adjustment and Sales Tax Adjustment.
+                            duplicateAdjustmentList.add(orderAdjustment);
+                        }
+                    }
+                }
+                orderAdjustments.removeAll(duplicateAdjustmentList);
+            }
         } catch (GenericServiceException exc) {
             request.setAttribute("_ERROR_MESSAGE_", exc.getMessage());
             return "error";
@@ -1488,7 +1534,7 @@ public class ShoppingCartEvents {
         }
         String userLoginId = request.getParameter("userLoginId");
         if (partyId != null || userLoginId != null) {
-            if ((partyId == null || partyId.length() == 0) && userLoginId != null && userLoginId.length() > 0) {
+            if (UtilValidate.isEmpty(partyId) && UtilValidate.isNotEmpty(userLoginId)) {
                 GenericValue thisUserLogin = null;
                 try {
                     thisUserLogin = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", userLoginId));
@@ -1501,7 +1547,7 @@ public class ShoppingCartEvents {
                     partyId = userLoginId;
                 }
             }
-            if (partyId != null && partyId.length() > 0) {
+            if (UtilValidate.isNotEmpty(partyId)) {
                 GenericValue thisParty = null;
                 try {
                     thisParty = delegator.findByPrimaryKey("Party", UtilMisc.toMap("partyId", partyId));
@@ -1632,20 +1678,22 @@ public class ShoppingCartEvents {
                 }
 
                 // get the selected amount
-                String selectedAmountStr = "0.00";
+                String selectedAmountStr = null;
                 if (paramMap.containsKey("amount" + thisSuffix)) {
                     selectedAmountStr = (String) paramMap.remove("amount" + thisSuffix);
                 }
 
                 // parse the amount
                 BigDecimal amount = null;
-                if (selectedAmountStr != null && selectedAmountStr.length() > 0) {
+                if (UtilValidate.isNotEmpty(selectedAmountStr)) {
                     try {
                         amount = new BigDecimal(selectedAmountStr);
                     } catch (Exception e) {
                         Debug.logWarning(e, "Problem parsing amount string: " + selectedAmountStr, module);
                         amount = null;
                     }
+                } else {
+                    amount = BigDecimal.ZERO;
                 }
 
                 if (paramMap.containsKey("itemDesiredDeliveryDate" + thisSuffix)) {
@@ -1816,18 +1864,20 @@ public class ShoppingCartEvents {
                     Debug.logWarning(e, "Problems parsing quantity string: " + quantityStr, module);
                     quantity = BigDecimal.ZERO;
                 }
-                String selectedAmountStr = "0.00";
+                String selectedAmountStr = null;
                 if (paramMap.containsKey("amount" + thisSuffix)) {
                     selectedAmountStr = (String) paramMap.remove("amount" + thisSuffix);
                 }
                 BigDecimal amount = null;
-                if (selectedAmountStr != null && selectedAmountStr.length() > 0) {
+                if (UtilValidate.isNotEmpty(selectedAmountStr)) {
                     try {
                         amount = new BigDecimal(selectedAmountStr);
                     } catch (Exception e) {
                         Debug.logWarning(e, "Problem parsing amount string: " + selectedAmountStr, module);
                         amount = null;
                     }
+                } else {
+                    amount = BigDecimal.ZERO;
                 }
                 if (paramMap.containsKey("itemDesiredDeliveryDate" + thisSuffix)) {
                     itemDesiredDeliveryDateStr = (String) paramMap.remove("itemDesiredDeliveryDate" + thisSuffix);

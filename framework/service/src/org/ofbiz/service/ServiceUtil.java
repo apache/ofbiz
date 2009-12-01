@@ -163,7 +163,7 @@ public class ServiceUtil {
 
     /** A small routine used all over to improve code efficiency, make a result map with the message and the success response code */
     public static Map<String, Object> returnSuccess(List<String> successMessageList) {
-        Map result = returnMessage(ModelService.RESPOND_SUCCESS, null);
+        Map<String, Object> result = returnMessage(ModelService.RESPOND_SUCCESS, null);
         result.put(ModelService.SUCCESS_MESSAGE_LIST, successMessageList);
         return result;
     }
@@ -185,12 +185,12 @@ public class ServiceUtil {
     public static String getPartyIdCheckSecurity(GenericValue userLogin, Security security, Map<String, ? extends Object> context, Map<String, Object> result, String secEntity, String secOperation) {
         String partyId = (String) context.get("partyId");
         Locale locale = getLocale(context);
-        if (partyId == null || partyId.length() == 0) {
+        if (UtilValidate.isEmpty(partyId)) {
             partyId = userLogin.getString("partyId");
         }
 
         // partyId might be null, so check it
-        if (partyId == null || partyId.length() == 0) {
+        if (UtilValidate.isEmpty(partyId)) {
             result.put(ModelService.RESPONSE_MESSAGE, ModelService.RESPOND_ERROR);
             String errMsg = UtilProperties.getMessage(ServiceUtil.resource, "serviceUtil.party_id_missing", locale) + ".";
             result.put(ModelService.ERROR_MESSAGE, errMsg);

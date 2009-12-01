@@ -39,9 +39,8 @@ public class UtilFormatOut {
         }
     }
 
-    // ------------------- price format handlers -------------------
-    static DecimalFormat priceDecimalFormat = new DecimalFormat("#,##0.00");
-    static DecimalFormat priceNumberFormat = new DecimalFormat("##0.00");
+    // ------------------- price format handlers -------------------    
+    static DecimalFormat priceDecimalFormat = new DecimalFormat(UtilProperties.getPropertyValue("general.properties", "currency.decimal.format", "#,##0.00"));
 
     /** Formats a Double representing a price into a string
      * @param price The price Double to be formatted
@@ -383,7 +382,7 @@ public class UtilFormatOut {
      * @return <code>pre + base + post</code> if base String is not null or empty, otherwise an empty but non-null String.
      */
     public static String ifNotEmpty(String base, String pre, String post) {
-        if (base != null && base.length() > 0)
+        if (UtilValidate.isNotEmpty(base))
             return pre + base + post;
         else
             return "";
@@ -395,9 +394,9 @@ public class UtilFormatOut {
      * @return The first passed String if not empty, otherwise the second if not empty, otherwise an empty but non-null String
      */
     public static String checkEmpty(String string1, String string2) {
-        if (string1 != null && string1.length() > 0)
+        if (UtilValidate.isNotEmpty(string1))
             return string1;
-        else if (string2 != null && string2.length() > 0)
+        else if (UtilValidate.isNotEmpty(string2))
             return string2;
         else
             return "";
@@ -410,11 +409,11 @@ public class UtilFormatOut {
      * @return The first passed String if not empty, otherwise the second if not empty, otherwise the third if not empty, otherwise an empty but non-null String
      */
     public static String checkEmpty(String string1, String string2, String string3) {
-        if (string1 != null && string1.length() > 0)
+        if (UtilValidate.isNotEmpty(string1))
             return string1;
-        else if (string2 != null && string2.length() > 0)
+        else if (UtilValidate.isNotEmpty(string2))
             return string2;
-        else if (string3 != null && string3.length() > 0)
+        else if (UtilValidate.isNotEmpty(string3))
             return string3;
         else
             return "";

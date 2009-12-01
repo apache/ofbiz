@@ -60,8 +60,10 @@ under the License.
                       </#if>
                   </#if>
                   <#if postalAddress.geoPointId?has_content>
-                    <#assign popUptitle = contactMechPurposeType.get("description",locale) + uiLabelMap.CommonGeoLocation>
-                    <br/><a href="javascript:popUp('<@ofbizUrl>geoLocation?geoPointId=${postalAddress.geoPointId}</@ofbizUrl>', '${popUptitle}', '450', '550')" class="buttontext">${uiLabelMap.CommonGeoLocation}</a>
+                    <#if contactMechPurposeType?has_content>
+                      <#assign popUptitle = contactMechPurposeType.get("description",locale) + uiLabelMap.CommonGeoLocation>
+                    </#if>
+                    <br/><a href="javascript:popUp('<@ofbizUrl>geoLocation?geoPointId=${postalAddress.geoPointId}</@ofbizUrl>', '${popUptitle?if_exists}', '450', '550')" class="buttontext">${uiLabelMap.CommonGeoLocation}</a>
                   </#if>
               <#elseif "TELECOM_NUMBER" = contactMech.contactMechTypeId>
                   <#assign telecomNumber = contactMechMap.telecomNumber>
@@ -88,10 +90,10 @@ under the License.
             </td>
             <td class="button-col">
               &nbsp;
-              <#if security.hasEntityPermission("PARTYMGR", "_UPDATE", session)>
+              <#if security.hasEntityPermission("FACILITY", "_UPDATE", session)>
                 <a href='<@ofbizUrl>EditContactMech?facilityId=${facilityId}&contactMechId=${contactMech.contactMechId}</@ofbizUrl>'>${uiLabelMap.CommonUpdate}</a>
               </#if>
-              <#if security.hasEntityPermission("PARTYMGR", "_DELETE", session)>
+              <#if security.hasEntityPermission("FACILITY", "_DELETE", session)>
                 <form action="<@ofbizUrl>deleteContactMech/ViewContactMechs</@ofbizUrl>" name="deleteContactForm_${contactMechMap_index}" method="post">
                   <input type="hidden" name="facilityId" value="${facilityId?if_exists}"/>
                   <input type="hidden" name="contactMechId" value="${contactMech.contactMechId?if_exists}"/>

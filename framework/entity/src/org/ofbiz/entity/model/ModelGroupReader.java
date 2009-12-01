@@ -19,8 +19,6 @@
 package org.ofbiz.entity.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,6 +34,7 @@ import org.ofbiz.base.config.MainResourceHandler;
 import org.ofbiz.base.config.ResourceHandler;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilTimer;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.GenericEntityConfException;
@@ -53,7 +52,7 @@ import org.w3c.dom.Node;
 public class ModelGroupReader implements Serializable {
 
     public static final String module = ModelGroupReader.class.getName();
-    public static UtilCache<String, ModelGroupReader> readers = new UtilCache<String, ModelGroupReader>("entity.ModelGroupReader", 0, 0);
+    public static UtilCache<String, ModelGroupReader> readers = UtilCache.createUtilCache("entity.ModelGroupReader", 0, 0);
 
     private Map<String, String> groupCache = null;
     private Set<String> groupNames = null;
@@ -206,7 +205,7 @@ public class ModelGroupReader implements Serializable {
         Set<String> enames = FastSet.newInstance();
 
         if (groupName == null || groupName.length() <= 0) return enames;
-        if (gc == null || gc.size() == 0) return enames;
+        if (UtilValidate.isEmpty(gc)) return enames;
         for (Map.Entry<String, String> entry: gc.entrySet()) {
             if (groupName.equals(entry.getValue())) enames.add(entry.getKey());
         }

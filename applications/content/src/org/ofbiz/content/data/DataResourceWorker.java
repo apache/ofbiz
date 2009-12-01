@@ -293,8 +293,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
         String skipPermissionCheck = (String) context.get("skipPermissionCheck");
             if (Debug.infoOn()) Debug.logInfo("in callDataResourcePermissionCheckResult, skipPermissionCheck:" + skipPermissionCheck,"");
 
-        if (skipPermissionCheck == null
-            || skipPermissionCheck.length() == 0
+        if (UtilValidate.isEmpty(skipPermissionCheck)
             || (!skipPermissionCheck.equalsIgnoreCase("true") && !skipPermissionCheck.equalsIgnoreCase("granted"))) {
             GenericValue userLogin = (GenericValue) context.get("userLogin");
             Map<String, Object> serviceInMap = FastMap.newInstance();
@@ -306,7 +305,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
             // It is possible that permission to work with DataResources will be controlled
             // by an external Content entity.
             String ownerContentId = (String) context.get("ownerContentId");
-            if (ownerContentId != null && ownerContentId.length() > 0) {
+            if (UtilValidate.isNotEmpty(ownerContentId)) {
                 try {
                     GenericValue content = delegator.findByPrimaryKeyCache("Content", UtilMisc.toMap("contentId", ownerContentId));
                     if (content != null)

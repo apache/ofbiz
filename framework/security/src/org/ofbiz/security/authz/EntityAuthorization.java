@@ -29,7 +29,6 @@ import javolution.util.FastList;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -54,7 +53,7 @@ public class EntityAuthorization extends AbstractAuthorization {
         while (checking) {
             if (Debug.verboseOn()) Debug.logVerbose("Looking for auto-grant permissions for : " + checkString, module);
             List<String> autoGrant = getPermissionAutoGrant(checkString);
-            if (autoGrant != null && autoGrant.size() > 0) {
+            if (UtilValidate.isNotEmpty(autoGrant)) {
                 return autoGrant;
             }
             if (checkString.indexOf(":") > -1) {
@@ -184,7 +183,7 @@ public class EntityAuthorization extends AbstractAuthorization {
                 Debug.logWarning(e, module);
             }
             
-            if (values != null && values.size() > 0) {
+            if (UtilValidate.isNotEmpty(values)) {
                 for (GenericValue v : values) {
                     autoGrants.add(v.getString("grantPermission"));
                 }

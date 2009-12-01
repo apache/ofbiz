@@ -21,15 +21,12 @@ package org.ofbiz.webapp.view;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Properties;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilProperties;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -39,6 +36,9 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.io.VelocityWriter;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.util.SimplePool;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.UtilValidate;
 
 /**
  * VelocityViewHandler - Velocity Template Engine View Handler
@@ -95,7 +95,7 @@ public class VelocityViewHandler extends AbstractViewHandler {
             throw new ViewHandlerException("Velocity Template Engine has not been initialized");
         }
 
-        if (page == null || page.length() == 0) {
+        if (UtilValidate.isEmpty(page)) {
             throw new ViewHandlerException("Invalid template source");
         }
 

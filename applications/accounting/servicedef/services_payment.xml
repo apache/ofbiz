@@ -161,6 +161,7 @@ under the License.
             location="component://accounting/script/org/ofbiz/accounting/payment/PaymentServices.xml" invoke="cancelPaymentBatch" auth="true">
         <description>cancel payment batch</description>
         <attribute name="paymentGroupId" type="String" mode="IN" optional="false"/>
+        <attribute name="glReconciliationId" type="String" mode="IN" optional="true"/>
     </service>
     <service name="createPaymentAndPaymentGroupForInvoices" engine="simple"
             location="component://accounting/script/org/ofbiz/accounting/payment/PaymentServices.xml" invoke="createPaymentAndPaymentGroupForInvoices" auth="true">
@@ -168,8 +169,8 @@ under the License.
         <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
         <attribute name="checkStartNumber" type="Long" mode="IN" optional="true"/>
         <attribute name="invoiceIds" type="List" mode="IN" optional="false"/>
-        <attribute name="paymentMethodTypeId" type="String" mode="IN" optional="false"/>
-        <attribute name="finAccountId" type="String" mode="IN" optional="true"/>
+        <attribute name="paymentMethodTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="paymentMethodId" type="String" mode="IN" optional="false"/>
         <attribute name="paymentGroupId" type="String" mode="OUT" optional="true"/>
         <attribute name="errorMessage" type="String" optional="true" mode="OUT"/>
     </service>
@@ -179,7 +180,8 @@ under the License.
         <attribute name="organizationPartyId" type="String" mode="INOUT" optional="true"/>
         <attribute name="partyId" type="String" mode="IN" optional="false"/>
         <attribute name="invoices" type="List" mode="IN" optional="false"/>
-        <attribute name="paymentMethodTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="paymentMethodTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="paymentMethodId" type="String" mode="IN" optional="false"/>
         <attribute name="finAccountId" type="String" mode="INOUT" optional="true"/>
         <attribute name="checkStartNumber" type="Long" mode="IN" optional="true"/>
         <attribute name="paymentId" type="String" mode="OUT" optional="true"/>
@@ -223,5 +225,13 @@ under the License.
             location="component://accounting/script/org/ofbiz/accounting/payment/PaymentServices.xml" invoke="checkAndCreateBatchForValidPayments" auth="true">
         <description>Check the valid(unbatched) payment and create batch for same</description>
         <implements service="createPaymentGroupAndMember"/>
+    </service>
+    
+    <service name="massChangePaymentStatus" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/payment/PaymentServices.xml" invoke="massChangePaymentStatus" auth="true">
+        <description>Set status of Payments in bulk.</description>
+        <attribute name="paymentIds" type="List" mode="IN" optional="false"/>
+        <attribute name="statusId" type="String" mode="IN" optional="false"/>
+        <attribute name="errorMessage" type="String" optional="true" mode="OUT"/>
     </service>
 </services>

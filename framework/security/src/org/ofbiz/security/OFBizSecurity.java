@@ -29,7 +29,7 @@ import javolution.util.FastList;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.cache.UtilCache;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -131,9 +131,13 @@ public class OFBizSecurity implements Security {
      * @see org.ofbiz.security.Security#hasEntityPermission(java.lang.String, java.lang.String, javax.servlet.http.HttpSession)
      */
     public boolean hasEntityPermission(String entity, String action, HttpSession session) {
+        if (session == null) { 
+            return false;
+        }
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
-
-        if (userLogin == null) return false;
+        if (userLogin == null) {
+            return false;
+        }
         return hasEntityPermission(entity, action, userLogin);
     }
 
@@ -259,7 +263,7 @@ public class OFBizSecurity implements Security {
 
             // if we pass all tests
             //Debug.logInfo("Found (" + (roleTest == null ? 0 : roleTest.size()) + ") matches :: " + roleTest, module);
-            if (roleTest != null && roleTest.size() > 0) return true;
+            if (UtilValidate.isNotEmpty(roleTest)) return true;
         }
 
         return false;

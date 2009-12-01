@@ -19,11 +19,11 @@
 package org.ofbiz.webapp.stats;
 
 import java.net.InetAddress;
-import com.ibm.icu.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import javolution.util.FastList;
@@ -32,13 +32,15 @@ import javolution.util.FastMap;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.UtilObject;
 import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.model.ModelEntity;
+
+import com.ibm.icu.util.Calendar;
 
 /**
  * <p>Counts server hits and tracks statistics for request, events and views
@@ -97,16 +99,12 @@ public class ServerHitBin {
         advanceAllBins(toTime, serviceHistory);
     }
 
-    static void advanceAllBins(long toTime, Map binMap) {
-        Iterator entries = binMap.entrySet().iterator();
-
-        while (entries.hasNext()) {
-            Map.Entry entry = (Map.Entry) entries.next();
-
+    static void advanceAllBins(long toTime, Map<String, List<ServerHitBin>> binMap) {
+        for (Map.Entry<String, List<ServerHitBin>> entry  :binMap.entrySet()) {
             if (entry.getValue() != null) {
-                ServerHitBin bin = (ServerHitBin) entry.getValue();
-
-                bin.advanceBin(toTime);
+                for (ServerHitBin bin: entry.getValue()) {
+                    bin.advanceBin(toTime);                    
+                }
             }
         }
     }
@@ -611,7 +609,7 @@ public class ServerHitBin {
 
             String visitId = VisitHandler.getVisitId(request.getSession());
 
-            if (visitId == null || visitId.length() == 0) {
+            if (UtilValidate.isEmpty(visitId)) {
                 // no visit info stored, so don't store the ServerHit
                 Debug.logWarning("Could not find a visitId, so not storing ServerHit. This is probably a configuration error. If you turn of persistance of visits you should also turn off persistence of hits.", module);
                 return;

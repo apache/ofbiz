@@ -168,7 +168,7 @@ public class EntityDataLoadContainer implements Container {
                     Debug.log("-component=[name] .... only load from a specific component");
                     Debug.log("-delegator=[name] .... use the defined delegator (default-no-eca", module);
                     Debug.log("-group=[name] ........ override the entity group (org.ofbiz)", module);
-                    Debug.log("-file=[path] ......... load a single from from location", module);
+                    Debug.log("-file=[path] ......... load a single file from location, several files separated by commas.", module);
                     Debug.log("-createfks ........... create dummy (placeholder) FKs", module);
                     Debug.log("-maintainTxs ......... maintain timestamps in data file", module);
                     Debug.log("-inserts ............. use mostly inserts option", module);
@@ -200,13 +200,13 @@ public class EntityDataLoadContainer implements Container {
         String delegatorName = null;
         String entityGroupName = null;
 
-        if (delegatorNameProp == null || delegatorNameProp.value == null || delegatorNameProp.value.length() == 0) {
+        if (delegatorNameProp == null || UtilValidate.isEmpty(delegatorNameProp.value)) {
             throw new ContainerException("Invalid delegator-name defined in container configuration");
         } else {
             delegatorName = delegatorNameProp.value;
         }
 
-        if (entityGroupNameProp == null || entityGroupNameProp.value == null || entityGroupNameProp.value.length() == 0) {
+        if (entityGroupNameProp == null || UtilValidate.isEmpty(entityGroupNameProp.value)) {
             throw new ContainerException("Invalid entity-group-name defined in container configuration");
         } else {
             entityGroupName = entityGroupNameProp.value;

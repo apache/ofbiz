@@ -829,6 +829,7 @@ public class ShoppingCart implements Serializable {
             return null;
         }
         return (ShoppingCartItem) cartLines.get(index);
+        
     }
 
     public ShoppingCartItem findCartItem(String orderItemSeqId) {
@@ -2010,7 +2011,10 @@ public class ShoppingCart implements Serializable {
     }
 
     public void setItemShipGroupQty(int itemIndex, BigDecimal quantity, int idx) {
-        this.setItemShipGroupQty(this.findCartItem(itemIndex), itemIndex, quantity, idx);
+        ShoppingCartItem itemIdx = this.findCartItem(itemIndex);
+        if(itemIdx != null) {
+            this.setItemShipGroupQty(itemIdx, itemIndex, quantity, idx);
+        }
     }
 
     public void setItemShipGroupQty(ShoppingCartItem item, BigDecimal quantity, int idx) {
@@ -2027,16 +2031,19 @@ public class ShoppingCart implements Serializable {
             }
 
             // never set more than quantity ordered
-            if (quantity.compareTo(item.getQuantity()) > 0) {
-                quantity = item.getQuantity();
-            }
+            if (item != null) {
+                if (quantity.compareTo(item.getQuantity()) > 0) {
+                    quantity = item.getQuantity();
+                }
+            
 
-            // re-set the ship group's before and after dates based on the item's
-            csi.resetShipBeforeDateIfAfter(item.getShipBeforeDate());
-            csi.resetShipAfterDateIfBefore(item.getShipAfterDate());
-
-            CartShipInfo.CartShipItemInfo csii = csi.setItemInfo(item, quantity);
-            this.checkShipItemInfo(csi, csii);
+                // re-set the ship group's before and after dates based on the item's
+                csi.resetShipBeforeDateIfAfter(item.getShipBeforeDate());
+                csi.resetShipAfterDateIfBefore(item.getShipAfterDate());
+    
+                CartShipInfo.CartShipItemInfo csii = csi.setItemInfo(item, quantity);
+                this.checkShipItemInfo(csi, csii);
+            } 
         }
     }
 
@@ -3711,21 +3718,29 @@ public class ShoppingCart implements Serializable {
         while (itemIter.hasNext()) {
             ShoppingCartItem item = (ShoppingCartItem) itemIter.next();
             List responses = (List) item.getAttribute("surveyResponses");
+            GenericValue response = null;
             if (responses != null) {
                 Iterator ri = responses.iterator();
                 while (ri.hasNext()) {
                     String responseId = (String) ri.next();
-                    GenericValue response = null;
                     try {
                         response = this.getDelegator().findByPrimaryKey("SurveyResponse", UtilMisc.toMap("surveyResponseId", responseId));
                     } catch (GenericEntityException e) {
                         Debug.logError(e, "Unable to obtain SurveyResponse record for ID : " + responseId, module);
                     }
-                    if (response != null) {
-                        response.set("orderItemSeqId", item.getOrderItemSeqId());
-                        allInfos.add(response);
-                    }
                 }
+             // this case is executed when user selects "Create as new Order" for Gift cards
+             } else {
+                 String surveyResponseId = (String) item.getAttribute("surveyResponseId");
+                 try {
+                     response = this.getDelegator().findOne("SurveyResponse", UtilMisc.toMap("surveyResponseId", surveyResponseId), false);
+                 } catch (GenericEntityException e) {
+                     Debug.logError(e, "Unable to obtain SurveyResponse record for ID : " + surveyResponseId, module);
+                 }
+            }
+            if (response != null) {
+                response.set("orderItemSeqId", item.getOrderItemSeqId());
+                allInfos.add(response);
             }
         }
         return allInfos;
@@ -4502,18 +4517,14 @@ public class ShoppingCart implements Serializable {
         }
 
         public BigDecimal getTotalTax(ShoppingCart cart) {
-            BigDecimal taxTotal = ZERO;
-            for (int i = 0; i < shipTaxAdj.size(); i++) {
-                GenericValue v = (GenericValue) shipTaxAdj.get(i);
-                taxTotal = taxTotal.add(OrderReadHelper.calcOrderAdjustment(v, cart.getSubTotal()));
-            }
-
+            List<GenericValue> taxAdjustments = FastList.newInstance();
+            taxAdjustments.addAll(shipTaxAdj);
             Iterator iter = shipItemInfo.values().iterator();
-            while (iter.hasNext()) {
-                CartShipItemInfo info = (CartShipItemInfo) iter.next();
-                taxTotal = taxTotal.add(info.getItemTax(cart));
+            for (CartShipItemInfo info : shipItemInfo.values()) {
+                taxAdjustments.addAll(info.itemTaxAdj);
             }
-
+            Map<String, Object> taxByAuthority = OrderReadHelper.getOrderTaxByTaxAuthGeoAndParty(taxAdjustments);
+            BigDecimal taxTotal = (BigDecimal) taxByAuthority.get("taxGrandTotal");
             return taxTotal;
         }
 

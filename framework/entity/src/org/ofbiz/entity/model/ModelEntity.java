@@ -197,6 +197,7 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
             if (field != null) {
                 this.pks.add(field);
                 field.isPk = true;
+                field.isNotNull = true;
             } else {
                 Debug.logError("[ModelReader.createModelEntity] ERROR: Could not find field \"" +
                         pkElement.getAttribute("field") + "\" specified in a prim-key", module);
@@ -327,7 +328,7 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
 
     /** The table-name of the Entity including a Schema name if specified in the datasource config */
     public String getTableName(DatasourceInfo datasourceInfo) {
-        if (datasourceInfo != null && datasourceInfo.schemaName != null && datasourceInfo.schemaName.length() > 0) {
+        if (UtilValidate.isNotEmpty(datasourceInfo.schemaName)) {
             return datasourceInfo.schemaName + "." + this.tableName;
         } else {
             return this.tableName;
@@ -1419,16 +1420,16 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
         }
 
         // append relation elements
-        Iterator relIter = this.getRelationsIterator();
+        Iterator<ModelRelation> relIter = this.getRelationsIterator();
         while (relIter != null && relIter.hasNext()) {
-            ModelRelation rel = (ModelRelation) relIter.next();
+            ModelRelation rel = relIter.next();
 
         }
 
         // append index elements
-        Iterator idxIter = this.getIndexesIterator();
+        Iterator<ModelIndex> idxIter = this.getIndexesIterator();
         while (idxIter != null && idxIter.hasNext()) {
-            ModelIndex idx = (ModelIndex) idxIter.next();
+            ModelIndex idx = idxIter.next();
             root.appendChild(idx.toXmlElement(document));
 
         }

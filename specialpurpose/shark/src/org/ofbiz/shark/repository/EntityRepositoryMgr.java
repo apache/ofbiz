@@ -177,8 +177,8 @@ public class EntityRepositoryMgr implements RepositoryPersistenceManager {
 
     public boolean doesXPDLExist(RepositoryTransaction t, String xpdlId) throws RepositoryException {
         List xpdls = this.getXpdlValues(xpdlId, null, false);
-        Debug.log("Does XPDL [" + xpdlId + "] Exist - " + xpdls + "(" + (xpdls != null && xpdls.size() > 0 ? true : false) + ")", module);
-        return (xpdls != null && xpdls.size() > 0 ? true : false);
+        Debug.log("Does XPDL [" + xpdlId + "] Exist - " + xpdls + "(" + (UtilValidate.isNotEmpty(xpdls) ? true : false) + ")", module);
+        return (UtilValidate.isNotEmpty(xpdls) ? true : false);
     }
 
     public boolean doesXPDLExist(RepositoryTransaction t, String xpdlId, String xpdlVersion) throws RepositoryException {
@@ -308,7 +308,7 @@ public class EntityRepositoryMgr implements RepositoryPersistenceManager {
         EntityCondition cond = EntityCondition.makeCondition(exprList, EntityOperator.AND);
         List lookupList = null;
         try {
-            lookupList = delegator.findByCondition(org.ofbiz.shark.SharkConstants.WfRepository, cond, null, UtilMisc.toList("-xpdlVersion"));
+            lookupList = delegator.findList(org.ofbiz.shark.SharkConstants.WfRepository, cond, null, UtilMisc.toList("-xpdlVersion"), null, false);
         } catch (GenericEntityException e) {
             throw new RepositoryException(e);
         } finally {

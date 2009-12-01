@@ -179,7 +179,7 @@ public class ZipSalesServices {
                 } catch (DataFileException e) {
                     Debug.logError(e, module);
                 }
-                if (entry.get("stateCode") != null && entry.getString("stateCode").length() > 0) {
+                if (UtilValidate.isNotEmpty(entry.getString("stateCode"))) {
                     GenericValue newValue = delegator.makeValue("ZipSalesRuleLookup");
                     // PK fields
                     newValue.set("stateCode", entry.get("stateCode") != null ? entry.getString("stateCode").trim() : "_NA_");
@@ -229,7 +229,7 @@ public class ZipSalesServices {
 
         // check for a valid state/province geo
         String validStates = UtilProperties.getPropertyValue("zipsales.properties", "zipsales.valid.states");
-        if (validStates != null && validStates.length() > 0) {
+        if (UtilValidate.isNotEmpty(validStates)) {
             List stateSplit = StringUtil.split(validStates, "|");
             if (!stateSplit.contains(stateProvince)) {
                 Map result = ServiceUtil.returnSuccess();
@@ -272,7 +272,7 @@ public class ZipSalesServices {
 
         // lookup the records
         List zipLookup = delegator.findByAnd("ZipSalesTaxLookup", UtilMisc.toMap("zipCode", zipCode), UtilMisc.toList("-fromDate"));
-        if (zipLookup == null || zipLookup.size() == 0) {
+        if (UtilValidate.isEmpty(zipLookup)) {
             throw new GeneralException("The zip code entered is not valid.");
         }
 
@@ -377,7 +377,7 @@ public class ZipSalesServices {
                 } else {
                     // except if conditions are met
                     boolean qualify = false;
-                    if (condition != null && condition.length() > 0) {
+                    if (UtilValidate.isNotEmpty(condition)) {
                         char[] conditions = condition.toCharArray();
                         for (int i = 0; i < conditions.length; i++) {
                             switch (conditions[i]) {

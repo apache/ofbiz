@@ -300,7 +300,7 @@ public class ShipmentServices {
             }
             List<GenericValue> toGeoList = GeoWorker.expandGeoGroup(toGeo, delegator);
             // Make sure we have a valid GEOID.
-            if (toGeoList == null || toGeoList.size() == 0 ||
+            if (UtilValidate.isEmpty(toGeoList) ||
                     GeoWorker.containsGeo(toGeoList, shipAddress.getString("countryGeoId"), delegator) ||
                     GeoWorker.containsGeo(toGeoList, shipAddress.getString("stateProvinceGeoId"), delegator) ||
                     GeoWorker.containsGeo(toGeoList, shipAddress.getString("postalCodeGeoId"), delegator)) {
@@ -527,7 +527,7 @@ public class ShipmentServices {
             featurePrice = BigDecimal.ZERO;
         }
 
-        if (featureGroupId != null && featureGroupId.length() > 0 && shippableFeatureMap != null) {
+        if (UtilValidate.isNotEmpty(featureGroupId) && shippableFeatureMap != null) {
             for (Map.Entry<String, BigDecimal> entry: shippableFeatureMap.entrySet()) {
                 String featureId = entry.getKey();
                 BigDecimal quantity = entry.getValue();
@@ -620,7 +620,7 @@ public class ShipmentServices {
                 return ServiceUtil.returnError(e.getMessage());
             }
 
-            if (packages == null || packages.size() == 0) {
+            if (UtilValidate.isEmpty(packages)) {
                 return ServiceUtil.returnError("No packages are available for shipping!");
             }
 

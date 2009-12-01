@@ -51,8 +51,8 @@ public class ConfigXMLReader {
     public static final String module = ConfigXMLReader.class.getName();
     public static final String controllerXmlFileName = "/WEB-INF/controller.xml";
 
-    public static UtilCache<URL, ControllerConfig> controllerCache = new UtilCache<URL, ControllerConfig>("webapp.ControllerConfig");
-    public static UtilCache<String, List<ControllerConfig>> controllerSearchResultsCache = new UtilCache<String, List<ControllerConfig>>("webapp.ControllerSearchResults");
+    public static UtilCache<URL, ControllerConfig> controllerCache = UtilCache.createUtilCache("webapp.ControllerConfig");
+    public static UtilCache<String, List<ControllerConfig>> controllerSearchResultsCache = UtilCache.createUtilCache("webapp.ControllerSearchResults");
 
     public static URL getControllerConfigURL(ServletContext context) {
         try {
@@ -471,6 +471,7 @@ public class ConfigXMLReader {
         public String contentType;
         public String encoding;
         public String description;
+        public boolean noCache = false;
 
         public ViewMap(Element viewMapElement) {
             this.name = viewMapElement.getAttribute("name");
@@ -478,6 +479,7 @@ public class ConfigXMLReader {
             this.type = viewMapElement.getAttribute("type");
             this.info = viewMapElement.getAttribute("info");
             this.contentType = viewMapElement.getAttribute("content-type");
+            this.noCache = "true".equals(viewMapElement.getAttribute("no-cache"));
             this.encoding = viewMapElement.getAttribute("encoding");
             this.description = UtilXml.childElementValue(viewMapElement, "description");
             if (UtilValidate.isEmpty(this.page)) {

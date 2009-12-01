@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +35,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.ObjectType;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.collections.LRUMap;
+import org.ofbiz.base.util.collections.ReadOnlyMapEntry;
 
 @SuppressWarnings("serial")
 public class CacheLineTable<K, V> implements Serializable {
@@ -140,7 +142,7 @@ public class CacheLineTable<K, V> implements Serializable {
         return oldValue;
     }
 
-    public CacheLine<V> get(Object key) {
+    public synchronized CacheLine<V> get(Object key) {
         if (key == null) {
             if (Debug.verboseOn()) Debug.logVerbose("In CacheLineTable tried to get with null key, using NullObject" + this.cacheName, module);
         }
@@ -212,6 +214,35 @@ public class CacheLineTable<K, V> implements Serializable {
         return values;
     }
 
+    public synchronized Iterator<Map.Entry<K, ? extends CacheLine<V>>> iterator() {
+        // this is a list, instead of a set, as the fileTable or
+        // memoryTable has already deduped keys for us, and this ends up
+        // being faster, as the hashCode/equals calls don't need to happen
+        List<Map.Entry<K, ? extends CacheLine<V>>> list = FastList.newInstance();
+        if (fileTable != null) {
+            try {
+                jdbm.helper.FastIterator iter = fileTable.keys();
+                Object key = iter.next();
+                while (key != null) {
+                    CacheLine<V> value = (CacheLine<V>) fileTable.get(key);
+                    if (key instanceof ObjectType.NullObject) {
+                        key = null;
+                    }
+                    list.add(new ReadOnlyMapEntry<K, CacheLine<V>>((K) key, value));
+                    key = iter.next();
+                }
+            } catch (IOException e) {
+                Debug.logError(e, module);
+            }
+        } else {
+            list.addAll(memoryTable.entrySet());
+            if (isNullSet) {
+                list.add(new ReadOnlyMapEntry<K, CacheLine<V>>(null, nullValue));
+            }
+        }
+        return list.iterator();
+    }
+
     /**
      *
      * @return An unmodifiable Set for the keys for this cache; to remove while iterating call the remove method on this class.
@@ -256,7 +287,24 @@ public class CacheLineTable<K, V> implements Serializable {
         nullValue = null;
     }
 
-    public int size() {
+    public synchronized boolean isEmpty() {
+        if (fileTable != null) {
+            try {
+                return fileTable.keys().next() == null;
+            } catch (IOException e) {
+                Debug.logError(e, module);
+                return false;
+            }
+        } else {
+            if (isNullSet) {
+                return false;
+            } else {
+                return memoryTable.isEmpty();
+            }
+        }
+    }
+
+    public synchronized int size() {
         if (fileTable != null) {
             return this.keySet().size();
         } else {

@@ -23,26 +23,47 @@ under the License.
     <screen name="FindContacts">
         <section>
             <actions>
-                <set field="partyRelationshipTypeId" value="CONTACT_REL"/>
-                <set field="roleTypeId" value="CONTACT"/>
-                <set field="partyTypeId" value="PERSON"/>
+                <set field="titleProperty" value="MarketingFindContacts"/>
+                <set field="currentUrl" value="FindContacts"/>
                 <set field="headerItem" value="Contacts"/>
+                <set field="setContactDescription" value="${groovy:session.setAttribute(&quot;contactDescription&quot;,headerItem)}"/>
+                <set field="removeAccountDescription" value="${groovy:session.removeAttribute(&quot;accountDescription&quot;)}"/>
+                <set field="removeLeadDescription" value="${groovy:session.removeAttribute(&quot;leadDescription&quot;)}"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
-                            <actions>
-                                <service service-name="findParty" auto-field-map="true"/>
-                            </actions>
                             <widgets>
                                 <include-menu name="ContactSubTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
-                                <platform-specific>
-                                    <html>
-                                        <html-template location="component://marketing/webapp/sfa/party/findContactParty.ftl"/>
-                                        <html-template location="component://marketing/webapp/sfa/contact/ListContacts.ftl"/>
-                                    </html>
-                                </platform-specific>
+                                <container style="no-clear">
+                                    <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                        <decorator-section name="search-options">
+                                            <include-menu name="ContactFindTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
+                                            <include-form name="FindContacts" location="component://marketing/widget/sfa/forms/ContactForms.xml"/>
+                                        </decorator-section>
+                                        <decorator-section name="search-results">
+                                            <section>
+                                                <condition>
+                                                    <or>
+                                                        <if-empty field="parameters.all"/>
+                                                        <if-compare field="parameters.all" operator="equals" value="true"/>
+                                                    </or>
+                                                </condition>
+                                                <widgets>
+                                                    <!-- list all contacts -->
+                                                    <label style="h1" text="${uiLabelMap.SfaAllContacts}"/>
+                                                    <include-form name="ListContacts" location="component://marketing/widget/sfa/forms/ContactForms.xml"/>
+                                                </widgets>
+                                                <fail-widgets>
+                                                    <!-- list my contacts -->
+                                                    <label style="h1" text="${uiLabelMap.SfaMyContacts}"/>
+                                                    <include-form name="ListMyContacts" location="component://marketing/widget/sfa/forms/ContactForms.xml"/>
+                                                </fail-widgets>
+                                            </section>
+                                        </decorator-section>
+                                    </decorator-screen>
+                                </container>
                             </widgets>
                         </section>
                     </decorator-section>
@@ -58,7 +79,7 @@ under the License.
                 <property-to-field field="defaultCountryGeoId" resource="general" property="country.geo.id.default" default="USA"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonContactDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.CommonCreate} ${uiLabelMap.SfaContact}">
                             <include-form name="NewContact" location="component://marketing/widget/sfa/forms/ContactForms.xml"/>
@@ -77,10 +98,9 @@ under the License.
                 <script location="component://marketing/webapp/sfa/WEB-INF/action/MergeContacts.groovy"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonContactDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.SfaMergeContacts}">
-                            <label>&lt;br/&gt;</label>
                             <include-form name="MergeContacts" location="component://marketing/widget/sfa/forms/ContactForms.xml"/>
                         </screenlet>
                         <screenlet title="${uiLabelMap.SfaMergeContacts}">
@@ -111,7 +131,7 @@ under the License.
                 <set field="headerItem" value="Contacts"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonContactDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleCreateContactFromVCard}">
                             <container><label style="h3" text="${uiLabelMap.SfaAutoCreateContactByImportingVCard}"/></container>

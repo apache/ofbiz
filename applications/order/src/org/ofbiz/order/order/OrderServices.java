@@ -370,7 +370,7 @@ public class OrderServices {
             GenericValue orderItem = (GenericValue) orderItemIter.next();
             if ("RENTAL_ORDER_ITEM".equals(orderItem.getString("orderItemTypeId"))) {
                 // check to see if workefforts are available for this order type.
-                if (workEfforts == null || workEfforts.size() == 0)    {
+                if (UtilValidate.isEmpty(workEfforts))    {
                     String errMsg = "Work Efforts missing for ordertype RENTAL_ORDER_ITEM " + "Product: "  + orderItem.getString("productId");
                     Debug.logError(errMsg, module);
                     errorMessages.add(errMsg);
@@ -494,39 +494,39 @@ public class OrderServices {
             orderHeader.set("grandTotal", context.get("grandTotal"));
         }
 
-        if (UtilValidate.isNotEmpty((String) context.get("visitId"))) {
+        if (UtilValidate.isNotEmpty(context.get("visitId"))) {
             orderHeader.set("visitId", context.get("visitId"));
         }
 
-        if (UtilValidate.isNotEmpty((String) context.get("internalCode"))) {
+        if (UtilValidate.isNotEmpty(context.get("internalCode"))) {
             orderHeader.set("internalCode", context.get("internalCode"));
         }
 
-        if (UtilValidate.isNotEmpty((String) context.get("externalId"))) {
+        if (UtilValidate.isNotEmpty(context.get("externalId"))) {
             orderHeader.set("externalId", context.get("externalId"));
         }
 
-        if (UtilValidate.isNotEmpty((String) context.get("originFacilityId"))) {
+        if (UtilValidate.isNotEmpty(context.get("originFacilityId"))) {
             orderHeader.set("originFacilityId", context.get("originFacilityId"));
         }
 
-        if (UtilValidate.isNotEmpty((String) context.get("productStoreId"))) {
+        if (UtilValidate.isNotEmpty(context.get("productStoreId"))) {
             orderHeader.set("productStoreId", context.get("productStoreId"));
         }
 
-        if (UtilValidate.isNotEmpty((String) context.get("transactionId"))) {
+        if (UtilValidate.isNotEmpty(context.get("transactionId"))) {
             orderHeader.set("transactionId", context.get("transactionId"));
         }
 
-        if (UtilValidate.isNotEmpty((String) context.get("terminalId"))) {
+        if (UtilValidate.isNotEmpty(context.get("terminalId"))) {
             orderHeader.set("terminalId", context.get("terminalId"));
         }
 
-        if (UtilValidate.isNotEmpty((String) context.get("autoOrderShoppingListId"))) {
+        if (UtilValidate.isNotEmpty(context.get("autoOrderShoppingListId"))) {
             orderHeader.set("autoOrderShoppingListId", context.get("autoOrderShoppingListId"));
         }
 
-        if (UtilValidate.isNotEmpty((String) context.get("webSiteId"))) {
+        if (UtilValidate.isNotEmpty(context.get("webSiteId"))) {
             orderHeader.set("webSiteId", context.get("webSiteId"));
         }
 
@@ -799,10 +799,10 @@ public class OrderServices {
                 orderAdjustment.set("createdDate", UtilDateTime.nowTimestamp());
                 orderAdjustment.set("createdByUserLogin", userLogin.getString("userLoginId"));
 
-                if (orderAdjustment.get("orderItemSeqId") == null || orderAdjustment.getString("orderItemSeqId").length() == 0) {
+                if (UtilValidate.isEmpty(orderAdjustment.get("orderItemSeqId"))) {
                     orderAdjustment.set("orderItemSeqId", DataModelConstants.SEQ_ID_NA);
                 }
-                if (orderAdjustment.get("shipGroupSeqId") == null || orderAdjustment.getString("shipGroupSeqId").length() == 0) {
+                if (UtilValidate.isEmpty(orderAdjustment.get("shipGroupSeqId"))) {
                     orderAdjustment.set("shipGroupSeqId", DataModelConstants.SEQ_ID_NA);
                 }
                 toBeStored.add(orderAdjustment);
@@ -850,7 +850,7 @@ public class OrderServices {
                     }
                 } else if ("OrderAdjustment".equals(valueObj.getEntityName())) {
                     // shipping / tax adjustment(s)
-                    if (valueObj.get("orderItemSeqId") == null || valueObj.getString("orderItemSeqId").length() == 0) {
+                    if (UtilValidate.isEmpty(valueObj.get("orderItemSeqId"))) {
                         valueObj.set("orderItemSeqId", DataModelConstants.SEQ_ID_NA);
                     }
                     valueObj.set("orderAdjustmentId", delegator.getNextSeqId("OrderAdjustment"));
@@ -983,7 +983,7 @@ public class OrderServices {
         while (attributeRoleEntryIter.hasNext()) {
             Map.Entry attributeRoleEntry = (Map.Entry) attributeRoleEntryIter.next();
 
-            if (UtilValidate.isNotEmpty((String) context.get(attributeRoleEntry.getKey()))) {
+            if (UtilValidate.isNotEmpty(context.get(attributeRoleEntry.getKey()))) {
                 // make sure the party is in the role before adding
                 toBeStored.add(delegator.makeValue("PartyRole", UtilMisc.toMap("partyId", context.get(attributeRoleEntry.getKey()), "roleTypeId", attributeRoleEntry.getValue())));
                 toBeStored.add(delegator.makeValue("OrderRole", UtilMisc.toMap("orderId", orderId, "partyId", context.get(attributeRoleEntry.getKey()), "roleTypeId", attributeRoleEntry.getValue())));
@@ -1006,7 +1006,7 @@ public class OrderServices {
         }
 
         // find all parties in role VENDOR associated with WebSite OR ProductStore (where WebSite overrides, if specified), associated first valid with the Order
-        if (UtilValidate.isNotEmpty((String) context.get("productStoreId"))) {
+        if (UtilValidate.isNotEmpty(context.get("productStoreId"))) {
             try {
                 List productStoreRoles = delegator.findByAnd("ProductStoreRole", UtilMisc.toMap("roleTypeId", "VENDOR", "productStoreId", context.get("productStoreId")), UtilMisc.toList("-fromDate"));
                 productStoreRoles = EntityUtil.filterByDate(productStoreRoles, true);
@@ -1020,7 +1020,7 @@ public class OrderServices {
             }
 
         }
-        if (UtilValidate.isNotEmpty((String) context.get("webSiteId"))) {
+        if (UtilValidate.isNotEmpty(context.get("webSiteId"))) {
             try {
                 List webSiteRoles = delegator.findByAnd("WebSiteRole", UtilMisc.toMap("roleTypeId", "VENDOR", "webSiteId", context.get("webSiteId")), UtilMisc.toList("-fromDate"));
                 webSiteRoles = EntityUtil.filterByDate(webSiteRoles, true);
@@ -1655,7 +1655,7 @@ public class OrderServices {
 
                 Map shippingEstMap = ShippingEvents.getShipEstimate(dispatcher, delegator, orh, shipGroupSeqId);
                 BigDecimal shippingTotal = null;
-                if (orh.getValidOrderItems(shipGroupSeqId) == null || orh.getValidOrderItems(shipGroupSeqId).size() == 0) {
+                if (UtilValidate.isEmpty(orh.getValidOrderItems(shipGroupSeqId))) {
                     shippingTotal = ZERO;
                     Debug.log("No valid order items found - " + shippingTotal, module);
                 } else {
@@ -2716,7 +2716,7 @@ public class OrderServices {
 
             String noteId = (String) noteRes.get("noteId");
 
-            if (noteId == null || noteId.length() == 0) {
+            if (UtilValidate.isEmpty(noteId)) {
                 return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,"OrderProblemCreatingTheNoteNoNoteIdReturned", locale));
             }
 
@@ -2806,7 +2806,7 @@ public class OrderServices {
             Debug.logError(e, "Problem getting order headers", module);
         }
 
-        if (ordersToCheck == null || ordersToCheck.size() == 0) {
+        if (UtilValidate.isEmpty(ordersToCheck)) {
             Debug.logInfo("No orders to check, finished", module);
             return ServiceUtil.returnSuccess();
         }
@@ -3110,7 +3110,7 @@ public class OrderServices {
                     List allProductContent = product.getRelated("ProductContent");
 
                     // try looking up the parent product if the product has no content and is a variant
-                    if (((allProductContent == null) || allProductContent.size() == 0) && ("Y".equals(product.getString("isVariant")))) {
+                    if (UtilValidate.isEmpty(allProductContent) && ("Y".equals(product.getString("isVariant")))) {
                         GenericValue parentProduct = ProductWorker.getParentProduct(product.getString("productId"), delegator);
                         if (allProductContent == null) {
                             allProductContent = FastList.newInstance();
@@ -3191,30 +3191,21 @@ public class OrderServices {
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         String orderId = (String) context.get("orderId");
         Locale locale = (Locale) context.get("locale");
-
-        // need the order header
-        GenericValue orderHeader = null;
+        
+        OrderReadHelper orh = null;
         try {
-            orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
-        } catch (GenericEntityException e) {
+            orh = new OrderReadHelper(delegator, orderId);
+        } catch (IllegalArgumentException e) {
             Debug.logError(e, "ERROR: Unable to get OrderHeader for orderId : " + orderId, module);
             return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,"OrderErrorUnableToGetOrderHeaderForOrderId", UtilMisc.toMap("orderId",orderId), locale));
         }
 
-        // get all the items for the order
+        // get all the approved items for the order
         List<GenericValue> orderItems = null;
-        if (orderHeader != null) {
-            try {
-                orderItems = orderHeader.getRelated("OrderItem");
-            } catch (GenericEntityException e) {
-                Debug.logError(e, "ERROR: Unable to get OrderItem list for orderId : " + orderId, module);
-                return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,"OrderErrorUnableToGetOrderItemListForOrderId", UtilMisc.toMap("orderId",orderId), locale));
-            }
-        }
+        orderItems = orh.getOrderItemsByCondition(EntityCondition.makeCondition("statusId", "ITEM_APPROVED"));
 
         // find any service items
         List<GenericValue> serviceItems = FastList.newInstance();
-        Map<GenericValue, GenericValue> serviceProducts = FastMap.newInstance();
         if (UtilValidate.isNotEmpty(orderItems)) {
             for(GenericValue item : orderItems) {
                 GenericValue product = null;
@@ -3224,24 +3215,9 @@ public class OrderServices {
                     Debug.logError(e, "ERROR: Unable to get Product from OrderItem", module);
                 }
                 if (product != null) {
-                    GenericValue productType = null;
-                    try {
-                        productType = product.getRelatedOne("ProductType");
-                    } catch (GenericEntityException e) {
-                        Debug.logError(e, "ERROR: Unable to get ProductType from Product", module);
-                    }
-
-                    if (productType != null) {
-                        String productTypeId = productType.getString("productTypeId");
-
-                        // check for service goods
-                        if (productTypeId != null && "SERVICE".equalsIgnoreCase(productTypeId)) {
-                            // we only invoice APPROVED items
-                            if ("ITEM_APPROVED".equals(item.getString("statusId"))) {
-                                serviceItems.add(item);
-                                serviceProducts.put(item, product);
-                            }
-                        }
+                    // check for service goods
+                    if ("SERVICE".equals(product.get("productTypeId"))) {
+                        serviceItems.add(item);
                     }
                 }
             }
@@ -3249,19 +3225,22 @@ public class OrderServices {
 
         // now process the service items
         if (UtilValidate.isNotEmpty(serviceItems)) {
-            // single list with all invoice items
-            List<GenericValue> itemsToInvoice = FastList.newInstance();
-            itemsToInvoice.addAll(serviceItems);
-
+            // Make sure there is actually something needing invoicing because createInvoiceForOrder doesn't check
+            List<GenericValue> billItems = FastList.newInstance();
+            for (GenericValue item : serviceItems) {
+                BigDecimal orderQuantity = OrderReadHelper.getOrderItemQuantity(item);
+                BigDecimal invoiceQuantity = OrderReadHelper.getOrderItemInvoicedQuantity(item);
+                BigDecimal outstandingQuantity = orderQuantity.subtract(invoiceQuantity);
+                if (outstandingQuantity.compareTo(ZERO) > 0) {
+                    billItems.add(item);
+                }
+            }
             // do something tricky here: run as a different user that can actually create an invoice, post transaction, etc
             Map<String, Object> invoiceResult = null;
             try {
-                GenericValue permUserLogin = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
-                Map<String, Object> invoiceContext = UtilMisc.toMap("orderId", orderId, "billItems", itemsToInvoice, "userLogin", permUserLogin);
+                GenericValue permUserLogin = ServiceUtil.getUserLogin(dctx, context, "system");
+                Map<String, Object> invoiceContext = UtilMisc.toMap("orderId", orderId, "billItems", billItems, "userLogin", permUserLogin);
                 invoiceResult = dispatcher.runSync("createInvoiceForOrder", invoiceContext);
-            } catch (GenericEntityException e) {
-                Debug.logError(e, "ERROR: Unable to invoice service items", module);
-                return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,"OrderProblemWithInvoiceCreationServiceItems", locale));
             } catch (GenericServiceException e) {
                 Debug.logError(e, "ERROR: Unable to invoice service items", module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,"OrderProblemWithInvoiceCreationServiceItems", locale));
@@ -3271,35 +3250,16 @@ public class OrderServices {
             }
 
             // update the status of service goods to COMPLETED;
-            for(GenericValue item : itemsToInvoice) {
-                GenericValue productType = null;
-                GenericValue product = (GenericValue) serviceProducts.get(item);
-                boolean markComplete = false;
-                if (product != null) {
-                    try {
-                        productType = product.getRelatedOne("ProductType");
-                    } catch (GenericEntityException e) {
-                        Debug.logError(e, "ERROR: Unable to get ProductType from Product", module);
-                    }
-                    if (item != null && productType != null) {
-                        String productTypeId = productType.getString("productTypeId");
-                        if (productTypeId != null && "SERVICE".equalsIgnoreCase(productTypeId)) {
-                            markComplete = true;
-                        }
-                    }
-                }
-
-                if (markComplete) {
-                    Map<String, Object> statusCtx = FastMap.newInstance();
-                    statusCtx.put("orderId", item.getString("orderId"));
-                    statusCtx.put("orderItemSeqId", item.getString("orderItemSeqId"));
-                    statusCtx.put("statusId", "ITEM_COMPLETED");
-                    statusCtx.put("userLogin", userLogin);
-                    try {
-                        dispatcher.runSyncIgnore("changeOrderItemStatus", statusCtx);
-                    } catch (GenericServiceException e) {
-                        Debug.logError(e, "ERROR: Problem setting the status to COMPLETED : " + item, module);
-                    }
+            for(GenericValue item : serviceItems) {
+                Map<String, Object> statusCtx = FastMap.newInstance();
+                statusCtx.put("orderId", item.getString("orderId"));
+                statusCtx.put("orderItemSeqId", item.getString("orderItemSeqId"));
+                statusCtx.put("statusId", "ITEM_COMPLETED");
+                statusCtx.put("userLogin", userLogin);
+                try {
+                    dispatcher.runSyncIgnore("changeOrderItemStatus", statusCtx);
+                } catch (GenericServiceException e) {
+                    Debug.logError(e, "ERROR: Problem setting the status to COMPLETED : " + item, module);
                 }
             }
         }
@@ -3917,7 +3877,7 @@ public class OrderServices {
                 }
             } else if ("OrderAdjustment".equals(valueObj.getEntityName())) {
                 // shipping / tax adjustment(s)
-                if (valueObj.get("orderItemSeqId") == null || valueObj.getString("orderItemSeqId").length() == 0) {
+                if (UtilValidate.isEmpty(valueObj.get("orderItemSeqId"))) {
                     valueObj.set("orderItemSeqId", DataModelConstants.SEQ_ID_NA);
                 }
                 valueObj.set("orderAdjustmentId", delegator.getNextSeqId("OrderAdjustment"));

@@ -22,14 +22,14 @@ under the License.
     <import file="../macros.xml"/>
 
     <filelist id="framework-builds" dir="."
-        files="start/build.xml,base/build.xml,
+        files="start/build.xml,base/build.xml,sql/build.xml,
                entity/build.xml,geronimo/build.xml,
                catalina/build.xml,jetty/build.xml,
                security/build.xml,service/build.xml,entityext/build.xml,
                webslinger/build.xml,
-               bi/build.xml,datafile/build.xml,minilang/build.xml,
+               bi/build.xml,minilang/build.xml,
                webapp/build.xml,guiapp/build.xml,widget/build.xml,
-               common/build.xml,birt/build.xml,
+               common/build.xml,datafile/build.xml,birt/build.xml,
                testtools/build.xml,
                appserver/build.xml,webtools/build.xml,example/build.xml"/>
 
@@ -114,6 +114,12 @@ under the License.
 
     <target name="clean-catalina">
         <delete dir="../runtime/catalina/work"/>
+    </target>
+
+    <target name="clean-tempfiles">
+        <delete verbose="on">
+            <fileset dir="../runtime" includes="tempfiles/**/*"/>
+        </delete>
     </target>
 
     <target name="tests">

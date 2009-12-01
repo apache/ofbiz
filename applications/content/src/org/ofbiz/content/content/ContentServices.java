@@ -193,12 +193,12 @@ public class ContentServices {
         String fromDateStr = (String) context.get("fromDateStr");
         String thruDateStr = (String) context.get("thruDateStr");
         Timestamp fromDate = null;
-        if (fromDateStr != null && fromDateStr.length() > 0) {
+        if (UtilValidate.isNotEmpty(fromDateStr)) {
             fromDate = UtilDateTime.toTimestamp(fromDateStr);
         }
 
         Timestamp thruDate = null;
-        if (thruDateStr != null && thruDateStr.length() > 0) {
+        if (UtilValidate.isNotEmpty(thruDateStr)) {
             thruDate = UtilDateTime.toTimestamp(thruDateStr);
         }
 
@@ -549,7 +549,7 @@ public class ContentServices {
             Timestamp lastModifiedDate = UtilDateTime.nowTimestamp();
 
             // update status first to see if allowed
-            if (UtilValidate.isNotEmpty((String) context.get("statusId"))) {
+            if (UtilValidate.isNotEmpty(context.get("statusId"))) {
                 Map statusInMap = UtilMisc.toMap("contentId", context.get("contentId"), "statusId", context.get("statusId"),"userLogin", userLogin);
                 try {
                    dispatcher.runSync("setContentStatus", statusInMap);
@@ -1114,7 +1114,7 @@ public class ContentServices {
                 String key = (String)entry.getKey();
                 Object value = entry.getValue();
                 if (value instanceof String) {
-                    if (UtilValidate.isNotEmpty((String)value)) {
+                    if (UtilValidate.isNotEmpty(value)) {
                         mapFiltered.put(key, value);
                     }
                 } else if (value != null) {

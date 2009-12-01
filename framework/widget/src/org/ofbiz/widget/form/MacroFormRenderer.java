@@ -23,7 +23,6 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.sql.Timestamp;
-import com.ibm.icu.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -37,7 +36,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import javolution.util.FastList;
-import javolution.util.FastSet;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
@@ -53,6 +51,7 @@ import org.ofbiz.webapp.taglib.ContentUrlTag;
 import org.ofbiz.widget.ModelWidget;
 import org.ofbiz.widget.WidgetWorker;
 import org.ofbiz.widget.form.ModelFormField.CheckField;
+import org.ofbiz.widget.form.ModelFormField.ContainerField;
 import org.ofbiz.widget.form.ModelFormField.DateFindField;
 import org.ofbiz.widget.form.ModelFormField.DateTimeField;
 import org.ofbiz.widget.form.ModelFormField.DisplayEntityField;
@@ -73,6 +72,8 @@ import org.ofbiz.widget.form.ModelFormField.TextField;
 import org.ofbiz.widget.form.ModelFormField.TextFindField;
 import org.ofbiz.widget.form.ModelFormField.TextareaField;
 import org.ofbiz.widget.screen.ModelScreenWidget;
+
+import com.ibm.icu.util.Calendar;
 
 import freemarker.core.Environment;
 import freemarker.template.Template;
@@ -212,8 +213,6 @@ public class MacroFormRenderer implements FormStringRenderer {
                     }
                 }
             }
-            sr.append("\" inPlaceEditorId=\"");
-            sr.append(idName);
             sr.append("\" inPlaceEditorUrl=\"");
             sr.append(url);
             sr.append("\" inPlaceEditorParams=\"");
@@ -709,7 +708,7 @@ public class MacroFormRenderer implements FormStringRenderer {
 
         // if allow empty is true, add an empty option
         if (dropDownField.isAllowEmpty()) {
-            allowEmpty = "&nbsp;";
+            allowEmpty = "Y";
         }
 
         List<String> currentValueList = null;
@@ -765,7 +764,7 @@ public class MacroFormRenderer implements FormStringRenderer {
         // http://www.cs.tut.fi/~jkorpela/forms/combo.html
         if (otherFieldSize > 0) {
             fieldName = modelFormField.getParameterName(context);
-            Map dataMap = modelFormField.getMap(context);
+            Map<String, ? extends Object> dataMap = modelFormField.getMap(context);
             if (dataMap == null) {
                 dataMap = context;
             }
@@ -951,8 +950,9 @@ public class MacroFormRenderer implements FormStringRenderer {
             if (items.length() >1) {
                 items.append(",");
             }
-            items.append("{'value':'");
+            items.append("{'key':'");
             items.append(optionValue.getKey());
+            items.append("', 'description':'" + optionValue.getDescription());
             items.append("'}");
         }
         items.append("]");
@@ -965,9 +965,9 @@ public class MacroFormRenderer implements FormStringRenderer {
         sr.append(className);
         sr.append("\" alert=\"");
         sr.append(alert);
-        sr.append(" currentValue=\"");
+        sr.append("\" currentValue=\"");
         sr.append(currentValue);
-        sr.append("\" noCurrentSelectedKey=");
+        sr.append("\" noCurrentSelectedKey=\"");
         sr.append(noCurrentSelectedKey);
         sr.append("\" name=\"");
         sr.append(name);
@@ -1005,7 +1005,7 @@ public class MacroFormRenderer implements FormStringRenderer {
             }
         }
 
-        String formId = modelForm.getContainerId();
+        String formId = modelForm.getCurrentContainerId(context);
         List<ModelForm.UpdateArea> updateAreas = modelForm.getOnSubmitUpdateAreas();
         // This is here for backwards compatibility. Use on-event-update-area
         // elements instead.
@@ -1147,13 +1147,13 @@ public class MacroFormRenderer implements FormStringRenderer {
         String targetType = modelForm.getTargetType();
         String targ = modelForm.getTarget(context, targetType);
         StringBuilder linkUrl = new StringBuilder();
-        if (targ != null && targ.length() > 0) {
+        if (UtilValidate.isNotEmpty(targ)) {
             //this.appendOfbizUrl(writer, "/" + targ);
             WidgetWorker.buildHyperlinkUrl(linkUrl, targ, targetType, null, null, false, false, true, request, response, context);
         }
         String formType = modelForm.getType();
         String targetWindow = modelForm.getTargetWindow(context);
-        String containerId =  modelForm.getContainerId();
+        String containerId =  modelForm.getCurrentContainerId(context);
         String containerStyle =  modelForm.getContainerStyle();
         String autocomplete = "";
         String name = modelForm.getCurrentFormName(context);
@@ -1404,7 +1404,7 @@ public class MacroFormRenderer implements FormStringRenderer {
     }
 
     public void renderFormatItemRowCellOpen(Appendable writer, Map<String, Object> context, ModelForm modelForm, ModelFormField modelFormField, int positionSpan) throws IOException {
-        String areaStyle = modelFormField.getTitleAreaStyle();
+        String areaStyle = modelFormField.getWidgetAreaStyle();
         StringWriter sr = new StringWriter();
         sr.append("<@renderFormatItemRowCellOpen ");
         sr.append(" fieldName=\"");
@@ -1569,7 +1569,6 @@ public class MacroFormRenderer implements FormStringRenderer {
         String ignoreCase = UtilProperties.getMessage("conditional", "ignore_case", locale);
         boolean ignCase = textFindField.getIgnoreCase();
         boolean hideIgnoreCase = textFindField.getHideIgnoreCase();
-
         StringWriter sr = new StringWriter();
         sr.append("<@renderTextFindField ");
         sr.append(" name=\"");
@@ -1852,11 +1851,7 @@ public class MacroFormRenderer implements FormStringRenderer {
         }
         String size = Integer.toString(lookupField.getSize());
         Integer maxlength = lookupField.getMaxlength();
-
         String id = modelFormField.getIdName();
-        if (id == null) {
-            id = "";
-        }
 
         List<ModelForm.UpdateArea> updateAreas = modelFormField.getOnChangeUpdateAreas();
         boolean ajaxEnabled = updateAreas != null && this.javaScriptEnabled;
@@ -1904,6 +1899,8 @@ public class MacroFormRenderer implements FormStringRenderer {
         sr.append(size);
         sr.append("\" maxlength=\"");
         sr.append((maxlength != null? Integer.toString(maxlength): ""));
+        sr.append("\" id=\"");
+        sr.append(id);
         sr.append("\" autocomplete=\"");
         sr.append(autocomplete);
         sr.append("\" descriptionFieldName=\"");
@@ -1916,9 +1913,13 @@ public class MacroFormRenderer implements FormStringRenderer {
         sr.append(targetParameterIter.toString());
         sr.append(" imgSrc=\"");
         sr.append(imgSrc.toString());
-        sr.append("\" />");
+        sr.append("\" ajaxUrl=\"");
+        sr.append(ajaxUrl);
+        sr.append("\" ajaxEnabled=");
+        sr.append(Boolean.toString(ajaxEnabled));
+        sr.append(" />");
         executeMacro(sr.toString());
-
+        
         this.addAsterisks(writer, context, modelFormField);
 
         this.makeHyperlinkString(writer, lookupField.getSubHyperlink(), context);
@@ -1967,9 +1968,6 @@ public class MacroFormRenderer implements FormStringRenderer {
         int highIndex = modelForm.getHighIndex(context);
         int actualPageSize = modelForm.getActualPageSize(context);
 
-        // if this is all there seems to be (if listSize < 0, then size is unknown)
-        if (actualPageSize >= listSize && listSize >= 0) return;
-
         // needed for the "Page" and "rows" labels
         Map<String, String> uiLabelMap = UtilGenerics.checkMap(context.get("uiLabelMap"));
         String pageLabel = "";
@@ -2005,6 +2003,8 @@ public class MacroFormRenderer implements FormStringRenderer {
         // add viewIndex/viewSize parameters to request parameter String
         String urlPath = UtilHttp.removeQueryStringFromTarget(targetService);
         String prepLinkText = UtilHttp.getQueryStringFromTarget(targetService);
+        String prepLinkSizeText;
+
         if (prepLinkText == null) {
             prepLinkText = "";
         }
@@ -2016,6 +2016,7 @@ public class MacroFormRenderer implements FormStringRenderer {
         if (!UtilValidate.isEmpty(queryString) && !queryString.equals("null")) {
             prepLinkText += queryString + "&amp;";
         }
+        prepLinkSizeText = prepLinkText + viewSizeParam + "='+this.value+'" + "&amp;" + viewIndexParam + "=0";
         prepLinkText += viewSizeParam + "=" + viewSize + "&amp;" + viewIndexParam + "=";
         if (ajaxEnabled) {
             // Prepare params for prototype.js
@@ -2034,6 +2035,9 @@ public class MacroFormRenderer implements FormStringRenderer {
         String ajaxPreviousUrl = "";
         String selectUrl = "";
         String ajaxSelectUrl = "";
+        String paginateViewSizeLabel = modelForm.getPaginateViewSizeLabel(context);
+        String selectSizeUrl = "";
+        String ajaxSelectSizeUrl = "";
         String paginateNextStyle = modelForm.getPaginateNextStyle();
         String paginateNextLabel = modelForm.getPaginateNextLabel(context);
         String nextUrl = "";
@@ -2092,6 +2096,19 @@ public class MacroFormRenderer implements FormStringRenderer {
             }
         }
 
+        // Page size select dropdown
+        if (listSize > 0 && this.javaScriptEnabled) {
+            if (ajaxEnabled) {
+                ajaxSelectSizeUrl = createAjaxParamsFromUpdateAreas(updateAreas, prepLinkSizeText + anchor, context);
+            } else {
+                linkText = prepLinkSizeText;
+                if (linkText.startsWith("/")) {
+                    linkText = linkText.substring(1);
+                }
+                selectSizeUrl = rh.makeLink(this.request, this.response, urlPath + linkText);
+            }
+        }
+        
         StringWriter sr = new StringWriter();
         sr.append("<@renderNextPrev ");
         sr.append(" paginateStyle=\"");
@@ -2134,6 +2151,10 @@ public class MacroFormRenderer implements FormStringRenderer {
         sr.append(ajaxSelectUrl);
         sr.append("\" selectUrl=\"");
         sr.append(selectUrl);
+        sr.append("\" ajaxSelectSizeUrl=\"");
+        sr.append(ajaxSelectSizeUrl);
+        sr.append("\" selectSizeUrl=\"");
+        sr.append(selectSizeUrl);
         sr.append("\" commonDisplaying=\"");
         sr.append(commonDisplaying);
         sr.append("\" paginateNextStyle=\"");
@@ -2152,6 +2173,8 @@ public class MacroFormRenderer implements FormStringRenderer {
         sr.append(lastUrl);
         sr.append("\" paginateLastLabel=\"");
         sr.append(paginateLastLabel);
+        sr.append("\" paginateViewSizeLabel=\"");
+        sr.append(paginateViewSizeLabel);
         sr.append("\" />");
         executeMacro(sr.toString());
     }
@@ -2477,7 +2500,8 @@ public class MacroFormRenderer implements FormStringRenderer {
                 targetType="plain";
             }
             StringWriter sr = new StringWriter();
-            WidgetWorker.makeHyperlinkString(sr, modelFormField.getHeaderLinkStyle(), targetType, targetBuffer.toString(), null, titleText, null, modelFormField, this.request, this.response, null, null);
+            makeHyperlinkString(sr, modelFormField.getHeaderLinkStyle(), targetType, targetBuffer.toString(), null, titleText, "", modelFormField, this.request, this.response, context, "");
+            
             String title = sr.toString().replace("\"", "\'");            
             sr = new StringWriter();
             sr.append("<@renderHyperlinkTitle ");
@@ -2650,7 +2674,7 @@ public class MacroFormRenderer implements FormStringRenderer {
         }
         if (subHyperlink.shouldUse(context)) {
             writer.append(' ');
-            WidgetWorker.makeHyperlinkByType(writer, subHyperlink.getLinkType(), subHyperlink.getLinkStyle(), subHyperlink.getTargetType(), subHyperlink.getTarget(context),
+            makeHyperlinkByType(writer, subHyperlink.getLinkType(), subHyperlink.getLinkStyle(), subHyperlink.getTargetType(), subHyperlink.getTarget(context),
                     subHyperlink.getParameterList(), subHyperlink.getDescription(context), subHyperlink.getTargetWindow(context), subHyperlink.getConfirmation(context), subHyperlink.getModelFormField(),
                     this.request, this.response, context);
         }
@@ -2699,7 +2723,7 @@ public class MacroFormRenderer implements FormStringRenderer {
                 WidgetWorker.makeHiddenFormLinkAnchor(writer, linkStyle, description, confirmation , modelFormField, request, response, context);
             }
         } else {
-            WidgetWorker.makeHyperlinkString(writer, linkStyle, targetType, target, parameterList, description, confirmation , modelFormField, request, response, context, targetWindow);
+            makeHyperlinkString(writer, linkStyle, targetType, target, parameterList, description, confirmation , modelFormField, request, response, context, targetWindow);
         }
 
     }
@@ -2817,6 +2841,22 @@ public class MacroFormRenderer implements FormStringRenderer {
         sr.append(parameters.toString());
         sr.append(" targetWindow=\"");
         sr.append(targetWindow);
+        sr.append("\" />");
+        executeMacro(sr.toString());
+    }
+    
+    public void renderContainerFindField(Appendable writer,
+            Map<String, Object> context, ContainerField containerField)
+            throws IOException {
+        // TODO Auto-generated method stub
+        String id = "";
+        if (UtilValidate.isNotEmpty(containerField.getId())) {
+            id = containerField.getId();
+        }
+        StringWriter sr = new StringWriter();
+        sr.append("<@renderContainerField ");
+        sr.append("id=\"");
+        sr.append(id);
         sr.append("\" />");
         executeMacro(sr.toString());
     }

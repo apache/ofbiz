@@ -108,6 +108,7 @@ public class ModelForm extends ModelWidget {
     protected FlexibleStringExpander paginatePreviousLabel;
     protected FlexibleStringExpander paginateNextLabel;
     protected FlexibleStringExpander paginateLastLabel;
+    protected FlexibleStringExpander paginateViewSizeLabel;
     protected String paginateTargetAnchor;
     protected String paginateStyle;
     protected boolean separateColumns = false;
@@ -435,6 +436,9 @@ public class ModelForm extends ModelWidget {
         if (this.paginateLastLabel == null || formElement.hasAttribute("paginate-last-label")) {
             this.paginateLastLabel = FlexibleStringExpander.getInstance(formElement.getAttribute("paginate-last-label"));
         }
+        if (this.paginateViewSizeLabel == null || formElement.hasAttribute("paginate-viewsize-label")) {
+            this.paginateViewSizeLabel = FlexibleStringExpander.getInstance(formElement.getAttribute("paginate-viewsize-label"));
+        }
         if (this.paginateStyle == null || formElement.hasAttribute("paginate-style")) {
             setPaginateStyle(formElement.getAttribute("paginate-style"));
         }
@@ -675,7 +679,7 @@ public class ModelForm extends ModelWidget {
 
         for (ModelParam modelParam: modelService.getInModelParamList()) {
             // skip auto params that the service engine populates...
-            if ("userLogin".equals(modelParam.name) || "locale".equals(modelParam.name) || "timeZone".equals(modelParam.name)) {
+            if ("userLogin".equals(modelParam.name) || "locale".equals(modelParam.name) || "timeZone".equals(modelParam.name) || "login.username".equals(modelParam.name) || "login.password".equals(modelParam.name)) {
                 continue;
             }
             if (modelParam.formDisplay) {
@@ -1279,7 +1283,7 @@ public class ModelForm extends ModelWidget {
         return maxNumOfColumns;
     }
 
-    protected Object safeNext(Iterator iterator) {
+    protected <X> X safeNext(Iterator<X> iterator) {
         try {
             return iterator.next();
         } catch (NoSuchElementException e) {
@@ -1301,12 +1305,12 @@ public class ModelForm extends ModelWidget {
             return;
         }
         // if list is empty, do not render rows
-        Iterator iter = null;
+        Iterator<?> iter = null;
         if (obj instanceof Iterator) {
-            iter = (Iterator) obj;
+            iter = (Iterator<?>) obj;
             setPaginate(true);
         } else if (obj instanceof List) {
-            iter = ((List) obj).listIterator();
+            iter = ((List<?>) obj).listIterator();
             setPaginate(true);
         }
 
@@ -1366,12 +1370,12 @@ public class ModelForm extends ModelWidget {
             return;
         }
         // if list is empty, do not render rows
-        Iterator iter = null;
+        Iterator<?> iter = null;
         if (obj instanceof Iterator) {
-            iter = (Iterator) obj;
+            iter = (Iterator<?>) obj;
             setPaginate(true);
         } else if (obj instanceof List) {
-            iter = ((List) obj).listIterator();
+            iter = ((List<?>) obj).listIterator();
             setPaginate(true);
         }
 
@@ -1923,7 +1927,16 @@ public class ModelForm extends ModelWidget {
             return this.getName();
         }
     }
-
+    
+    public String getCurrentContainerId(Map<String, Object> context) {
+        Integer itemIndex = (Integer) context.get("itemIndex");
+        if (itemIndex != null && "list".equals(this.getType())) {
+            return this.getContainerId() + this.getItemIndexSeparator() + itemIndex.intValue();
+        } 
+        
+        return this.getContainerId();
+    }
+    
     public String getContainerStyle() {
         return this.containerStyle;
     }
@@ -2148,7 +2161,7 @@ public class ModelForm extends ModelWidget {
     public String getPaginateTarget(Map<String, Object> context) {
         String targ = this.paginateTarget.expandString(context);
         if (UtilValidate.isEmpty(targ)) {
-            Map parameters = (Map) context.get("parameters");
+            Map<String, ?> parameters = UtilGenerics.cast(context.get("parameters"));
             if (parameters != null && parameters.containsKey("targetRequestUri")) {
                 targ = (String) parameters.get("targetRequestUri");
             }
@@ -2179,7 +2192,7 @@ public class ModelForm extends ModelWidget {
 
             if (value == null) {
             // try parameters.VIEW_INDEX as that is an old OFBiz convention
-            Map parameters = (Map) context.get("parameters");
+            Map<String, Object> parameters = UtilGenerics.cast(context.get("parameters"));
             if (parameters != null) {
                 value = parameters.get("VIEW_INDEX" + "_" + getPaginatorNumber(context));
 
@@ -2220,7 +2233,7 @@ public class ModelForm extends ModelWidget {
 
             if (value == null) {
                 // try parameters.VIEW_SIZE as that is an old OFBiz convention
-                Map parameters = (Map) context.get("parameters");
+                Map<String, Object> parameters = UtilGenerics.cast(context.get("parameters"));
                 if (parameters != null) {
                     value = parameters.get("VIEW_SIZE" + "_" + getPaginatorNumber(context));
 
@@ -2274,6 +2287,15 @@ public class ModelForm extends ModelWidget {
         String field = this.paginateLastLabel.expandString(context);
         if (UtilValidate.isEmpty(field)) {
             field = UtilProperties.getMessage("CommonUiLabels", "CommonLast", locale);
+        }
+        return field;
+    }
+
+    public String getPaginateViewSizeLabel(Map<String, Object> context) {
+        Locale locale = (Locale)context.get("locale");
+        String field = this.paginateViewSizeLabel.expandString(context);
+        if (UtilValidate.isEmpty(field)) {
+            field = UtilProperties.getMessage("CommonUiLabels", "CommonItemsPerPage", locale);
         }
         return field;
     }
@@ -2443,7 +2465,7 @@ public class ModelForm extends ModelWidget {
                 listSize = 0;
             }
         } else if (entryList instanceof List) {
-            List items = (List) entryList;
+            List<?> items = (List<?>) entryList;
             listSize = items.size();
         }
 
@@ -2529,9 +2551,9 @@ public class ModelForm extends ModelWidget {
         try {
             value = (String)context.get(field);
             if (value == null) {
-                Map parameters = (Map) context.get("parameters");
+                Map<String, String> parameters = UtilGenerics.cast(context.get("parameters"));
                 if (parameters != null) {
-                    value = (String)parameters.get(field);
+                    value = parameters.get(field);
                 }
             }
         } catch (Exception e) {
@@ -2660,7 +2682,7 @@ public class ModelForm extends ModelWidget {
             String positionStr = element.getAttribute("default-position");
             int position = 1;
             try {
-                if (positionStr != null && positionStr.length() > 0) {
+                if (UtilValidate.isNotEmpty(positionStr)) {
                     position = Integer.valueOf(positionStr);
                 }
             } catch (Exception e) {
@@ -2684,7 +2706,7 @@ public class ModelForm extends ModelWidget {
             String positionStr = element.getAttribute("default-position");
             int position = 1;
             try {
-                if (positionStr != null && positionStr.length() > 0) {
+                if (UtilValidate.isNotEmpty(positionStr)) {
                     position = Integer.valueOf(positionStr);
                 }
             } catch (Exception e) {

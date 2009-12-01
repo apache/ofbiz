@@ -247,8 +247,15 @@ under the License.
     <ProductCategory categoryName="Toys &amp; Games"
         primaryParentCategoryId="GOOGLE_BASE" productCategoryId="GB_TYS_GMS" productCategoryTypeId="GOOGLE_BASE_CATEGORY"/>
 
+    <!--Catalog specific to eBay-->
+    <ProdCatalog prodCatalogId="eBayCatalog" catalogName="eBay Catalog" useQuickAdd="Y"/>
+    <ProductStoreCatalog productStoreId="9000" prodCatalogId="eBayCatalog" fromDate="2009-11-05 12:00:00.0" sequenceNum="4"/>
+
     <!-- Category specific to eBay -->
     <ProductCategory categoryName="15064" productCategoryId="eBay_Category" productCategoryTypeId="EBAY_CATEGORY"/>
+    <ProdCatalogCategory prodCatalogId="eBayCatalog" productCategoryId="eBay_Category" fromDate="2009-11-05 12:00:00.0" sequenceNum="1" prodCatalogCategoryTypeId="PCCT_EBAY_ROOT"/>
+    
+    <ProductCategory productCategoryId="eBay_ECom_Category" categoryName="15064" productCategoryTypeId="EBAY_CATEGORY"/>
 
     <ProdCatalogCategory prodCatalogId="GoogleCatalog" productCategoryId="GOOGLE_BASE" fromDate="2001-05-13 12:00:00.0"
         sequenceNum="1" prodCatalogCategoryTypeId="PCCT_BROWSE_ROOT"/>
@@ -350,7 +357,7 @@ under the License.
     <Product productId="GZ-BASKET" productTypeId="MARKETING_PKG_AUTO" productName="Gizmo Basket" internalName="Auto-Assembled Gizmo Basket"
         description="Auto-Assembled Gizmo Basket.  Automatically assembled each time it's ordered."
         longDescription="Auto-Assembled Gizmo Basket.  This item will be automatically assembled with production runs every time it's ordered, and the inventory counts for it are based on the quantity available and on hand for the component items."
-        taxable="Y" chargeShipping="Y" autoCreateKeywords="Y" isVirtual="N" isVariant="N"/>
+        taxable="Y" chargeShipping="Y" autoCreateKeywords="Y" isVirtual="N" isVariant="N" requireInventory="N"/>
     <ProductPrice productId="GZ-BASKET" productPricePurposeId="PURCHASE" productPriceTypeId="DEFAULT_PRICE" currencyUomId="USD" productStoreGroupId="_NA_" price="150" fromDate="2001-05-13 12:00:00.0"/>
     <ProductPrice productId="GZ-BASKET" productPricePurposeId="PURCHASE" productPriceTypeId="LIST_PRICE" currencyUomId="USD" productStoreGroupId="_NA_" price="165" fromDate="2001-05-13 12:00:00.0"/>
     <ProductAssoc productId="GZ-BASKET" productIdTo="GZ-1000" productAssocTypeId="MANUF_COMPONENT" quantity="1" fromDate="2001-05-13 12:00:00.0"/>
@@ -602,9 +609,9 @@ under the License.
     <ProductCategoryRollup fromDate="2001-05-13 12:00:00.0" parentProductCategoryId="GOOGLE_BASE" productCategoryId="GB_TYS_GMS"/>
     
     <!-- ProductCategoryMember record specific to eBay -->
-    <ProductCategoryMember productCategoryId="eBay_Category" productId="GZ-1000" fromDate="2009-07-28 12:15:00.0"/>
-    <ProductCategoryMember productCategoryId="eBay_Category" productId="GZ-1001" fromDate="2009-07-28 12:15:00.0"/>
-    <ProductCategoryMember productCategoryId="eBay_Category" productId="GZ-2644" fromDate="2009-07-28 12:15:00.0"/>
+    <ProductCategoryMember productCategoryId="eBay_ECom_Category" productId="GZ-1000" fromDate="2009-11-05 12:15:00.0"/>
+    <ProductCategoryMember productCategoryId="eBay_ECom_Category" productId="GZ-1001" fromDate="2009-11-05 12:15:00.0"/>
+    <ProductCategoryMember productCategoryId="eBay_ECom_Category" productId="GZ-2644" fromDate="2009-11-05 12:15:00.0"/>
     
     <ProductCategoryRollup fromDate="2001-05-13 12:00:00.0" parentProductCategoryId="CATALOG1" productCategoryId="100"/>
     <ProductCategoryRollup fromDate="2001-05-13 12:00:00.0" parentProductCategoryId="100" productCategoryId="101"/>
@@ -616,6 +623,9 @@ under the License.
     <ProductCategoryRollup fromDate="2001-05-13 12:00:00.0" parentProductCategoryId="201" productCategoryId="2012"/>
     <ProductCategoryRollup fromDate="2001-05-13 12:00:00.0" parentProductCategoryId="2011" productCategoryId="20111"/>
 
+    <!-- ProductCategoryRollup record specific to eBay -->
+    <ProductCategoryRollup parentProductCategoryId="eBay_Category" productCategoryId="eBay_ECom_Category" fromDate="2009-11-05 12:00:00.0"/>
+
     <!-- some default product facility settings -->
     <ProductFacility productId="GZ-2644" facilityId="WebStoreWarehouse" minimumStock="2" reorderQuantity="10" daysToShip="15"/>
     <ProductFacility productId="GZ-8544" facilityId="WebStoreWarehouse" minimumStock="20" reorderQuantity="50" daysToShip="1"/>
@@ -625,6 +635,9 @@ under the License.
     <ProductFacility productId="WG-9943-B4" facilityId="WebStoreWarehouse" minimumStock="2" reorderQuantity="10" daysToShip="1"/>
     <ProductFacility productId="WG-9943-S3" facilityId="WebStoreWarehouse" minimumStock="2" reorderQuantity="10" daysToShip="1"/>
     <ProductFacility productId="WG-9943-S4" facilityId="WebStoreWarehouse" minimumStock="2" reorderQuantity="10" daysToShip="1"/>
+    <ProductFacility productId="GZ-1000" facilityId="WebStoreWarehouse" minimumStock="2" reorderQuantity="10" daysToShip="1"/>
+    <ProductFacility productId="GZ-1001" facilityId="WebStoreWarehouse" minimumStock="2" reorderQuantity="10" daysToShip="1"/>
+    <ProductFacility productId="GZ-1004" facilityId="WebStoreWarehouse" minimumStock="2" reorderQuantity="10" daysToShip="1"/>
 
     <ProductFacilityLocation productId="GZ-2644" facilityId="WebStoreWarehouse" locationSeqId="TLTLTLUL01"/>
     <ProductFacilityLocation productId="GZ-2644" facilityId="WebStoreWarehouse" locationSeqId="TLTLTLLL01" minimumStock="2" moveQuantity="5"/>
@@ -634,6 +647,9 @@ under the License.
     <ProductFacilityLocation productId="WG-1111" facilityId="WebStoreWarehouse" locationSeqId="TLTLTLLL03" minimumStock="2" moveQuantity="5"/>
     <ProductFacilityLocation productId="WG-5569" facilityId="WebStoreWarehouse" locationSeqId="TLTLTLUL04"/>
     <ProductFacilityLocation productId="WG-5569" facilityId="WebStoreWarehouse" locationSeqId="TLTLTLLL04" minimumStock="5" moveQuantity="20"/>
+    <ProductFacilityLocation productId="GZ-1000" facilityId="WebStoreWarehouse" locationSeqId="TLTLTLUL01" minimumStock="5" moveQuantity="20"/>
+    <ProductFacilityLocation productId="GZ-1001" facilityId="WebStoreWarehouse" locationSeqId="TLTLTLLL02" minimumStock="5" moveQuantity="20"/>
+    <ProductFacilityLocation productId="GZ-1004" facilityId="WebStoreWarehouse" locationSeqId="TLTLTLLL04" minimumStock="5" moveQuantity="20"/>
 
     <!-- some default inventory quantities, things are a bit underutilized without these... -->
     <InventoryItem facilityId="WebStoreWarehouse" locationSeqId="TLTLTLUL01"
@@ -675,6 +691,14 @@ under the License.
     <InventoryItemDetail inventoryItemId="9023" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8"/>
     <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9024" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="GZ-1006-4" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
     <InventoryItemDetail inventoryItemId="9024" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8"/>
+    
+    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9026" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="GZ-1000" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
+    <InventoryItemDetail inventoryItemId="9026" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8"/>
+    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9027" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="GZ-1001" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
+    <InventoryItemDetail inventoryItemId="9027" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8"/>
+    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9028" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="GZ-1004" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
+    <InventoryItemDetail inventoryItemId="9028" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8"/>
+    
 
     <!-- Some additional test promotions -->
     <!-- GWP example on >$100 purchase -->
@@ -793,6 +817,7 @@ under the License.
     <ProductCategory productCategoryId="GC-100" productCategoryTypeId="CATALOG_CATEGORY"/>
     <ProductCategory productCategoryId="GC-101" productCategoryTypeId="CATALOG_CATEGORY"/>
     <ProductCategory productCategoryId="GC-102" productCategoryTypeId="CATALOG_CATEGORY"/>
+    <ProductCategory productCategoryId="GC-103" productCategoryTypeId="GIFT_CARD_CATEGORY"/>
 
     <Product productId="GC-002" productTypeId="DIGITAL_GOOD" primaryProductCategoryId="GC-102" internalName="Gift Card Reload" productName="Gift Card Reload" description="Add more money to your card!" requireAmount="Y" returnable="N" includeInPromotions="N" taxable="N" chargeShipping="N" isVirtual="N" isVariant="N" createdDate="2003-11-20 13:48:19.105" createdByUserLogin="admin" lastModifiedDate="2003-11-20 13:48:19.105" lastModifiedByUserLogin="admin"/>
     <Product productId="GC-001" productTypeId="DIGITAL_GOOD" primaryProductCategoryId="GC-101" internalName="Gift Card Activation" productName="Gift Card Activation" description="Give the perfect gift!" returnable="N" includeInPromotions="N" taxable="N" chargeShipping="N" isVirtual="Y" isVariant="N" createdDate="2003-11-20 13:48:19.105" createdByUserLogin="admin" lastModifiedDate="2003-11-20 13:48:19.105" lastModifiedByUserLogin="admin"/>
@@ -841,6 +866,10 @@ under the License.
     <ProductCategoryMember productCategoryId="GC-101" productId="GC-001-H25" fromDate="2001-05-13 12:00:00.0"/>
     <ProductCategoryMember productCategoryId="GC-101" productId="GC-001-H50" fromDate="2001-05-13 12:00:00.0"/>
     <ProductCategoryMember productCategoryId="GC-101" productId="GC-001-HO" fromDate="2001-05-13 12:00:00.0"/>
+    <ProductCategoryMember productCategoryId="GC-103" productId="GC-001-C10" fromDate="2001-05-13 12:00:00.0"/>
+    <ProductCategoryMember productCategoryId="GC-103" productId="GC-001-C25" fromDate="2001-05-13 12:00:00.0"/>
+    <ProductCategoryMember productCategoryId="GC-103" productId="GC-001-C50" fromDate="2001-05-13 12:00:00.0"/>
+    <ProductCategoryMember productCategoryId="GC-103" productId="GC-001-C100" fromDate="2001-05-13 12:00:00.0"/>
     <ProductCategoryMember productCategoryId="PROMOTIONS" productId="GC-001" fromDate="2001-05-13 12:00:00.0"/>
     <ProductCategoryMember productCategoryId="PROMOTIONS" productId="GC-002" fromDate="2001-05-13 12:00:00.0"/>
     <ProductCategoryMember productCategoryId="CATALOG1_SEARCH" productId="GC-001" fromDate="2001-05-13 12:00:00.0"/>

@@ -153,8 +153,6 @@ public class InvoiceServices {
         String orderId = (String) context.get("orderId");
         List<GenericValue> billItems = UtilGenerics.checkList(context.get("billItems"));
         String invoiceId = (String) context.get("invoiceId");
-        // FIXME: This variable is never read, what is its purpose?
-        boolean previousInvoiceFound = false;
 
         if (UtilValidate.isEmpty(billItems)) {
             Debug.logVerbose("No order items to invoice; not creating invoice; returning success", module);
@@ -165,28 +163,6 @@ public class InvoiceServices {
             GenericValue orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
             if (orderHeader == null) {
                 return ServiceUtil.returnError(UtilProperties.getMessage(resource,"AccountingNoOrderHeader",locale));
-            }
-
-            // get list of previous invoices for the order
-            List<GenericValue> billedItems = delegator.findByAnd("OrderItemBilling", UtilMisc.toMap("orderId", orderId));
-            if (billedItems.size() > 0) {
-                boolean nonDigitalInvoice = false;
-                Iterator<GenericValue> bii = billedItems.iterator();
-                while (bii.hasNext() && !nonDigitalInvoice) {
-                    GenericValue orderItemBilling = (GenericValue) bii.next();
-                    GenericValue invoiceItem = orderItemBilling.getRelatedOne("InvoiceItem");
-                    if (invoiceItem != null) {
-                        String invoiceItemType = invoiceItem.getString("invoiceItemTypeId");
-                        if (invoiceItemType != null) {
-                            if ("INV_FPROD_ITEM".equals(invoiceItemType) || "INV_PROD_FEATR_ITEM".equals(invoiceItemType)) {
-                                nonDigitalInvoice = true;
-                            }
-                        }
-                    }
-                }
-                if (nonDigitalInvoice) {
-                    previousInvoiceFound = true;
-                }
             }
 
             // figure out the invoice type
@@ -218,9 +194,6 @@ public class InvoiceServices {
             // get the billing parties
             String billToCustomerPartyId = orh.getBillToParty().getString("partyId");
             String billFromVendorPartyId = orh.getBillFromParty().getString("partyId");
-
-            // get some quantity totals
-            BigDecimal totalItemsInOrder = orh.getTotalOrderItemsQuantity();
 
             // get some price totals
             BigDecimal shippableAmount = orh.getShippableTotal(null);
@@ -401,7 +374,6 @@ public class InvoiceServices {
                 }
 
                 // get some quantities
-                BigDecimal orderedQuantity = orderItem.getBigDecimal("quantity");
                 BigDecimal billingQuantity = null;
                 if (itemIssuance != null) {
                     billingQuantity = itemIssuance.getBigDecimal("quantity");
@@ -413,9 +385,13 @@ public class InvoiceServices {
                 } else if (shipmentReceipt != null) {
                     billingQuantity = shipmentReceipt.getBigDecimal("quantityAccepted");
                 } else {
-                    billingQuantity = orderedQuantity;
+                    BigDecimal orderedQuantity = OrderReadHelper.getOrderItemQuantity(orderItem);
+                    BigDecimal invoicedQuantity = OrderReadHelper.getOrderItemInvoicedQuantity(orderItem);
+                    billingQuantity = orderedQuantity.subtract(invoicedQuantity);
+                    if (billingQuantity.compareTo(ZERO) < 0) {
+                        billingQuantity = ZERO;
+                    }
                 }
-                if (orderedQuantity == null) orderedQuantity = ZERO;
                 if (billingQuantity == null) billingQuantity = ZERO;
 
                 // check if shipping applies to this item.  Shipping is calculated for sales invoices, not purchase invoices.
@@ -869,7 +845,7 @@ public class InvoiceServices {
                 String invoiceItemSeqId = invoiceItem.getString("invoiceItemSeqId");
                 String invoiceId = invoiceItem.getString("invoiceId");
                 // Determine commission parties for this invoiceItem
-                if (productId != null && productId.length() > 0) {
+                if (UtilValidate.isNotEmpty(productId)) {
                     Map<String, Object> resultMap = null;
                     try {
                         resultMap = dispatcher.runSync("getCommissionForProduct", UtilMisc.<String, Object>toMap(
@@ -1754,7 +1730,7 @@ public class InvoiceServices {
                     billings = delegator.findByAnd("ReturnItemBilling", UtilMisc.toMap("returnId", returnId, "returnItemSeqId", returnItemSeqId));
                 }
                 // if there are billings, we have already billed the item, so skip it
-                if (billings != null && billings.size() > 0) continue;
+                if (UtilValidate.isNotEmpty(billings)) continue;
 
                 // get the List of items shipped to/from this returnId
                 List<GenericValue> billItems = itemsShippedGroupedByReturn.get(returnId);

@@ -74,7 +74,7 @@ under the License.
                 <set field="layoutSettings.javaScripts[+0]" value="/images/prototypejs/validation.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/ordermgr/images/js/order.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/ordermgr/images/js/OrderShippingInfo.js" global="true"/>
-                <set field="layoutSettings.javaScripts[]" value="/ecommerce/images/geoAutoCompleter.js" global="true"/>
+                <set field="layoutSettings.javaScripts[]" value="/ordermgr/images/js/geoAutoCompleter.js" global="true"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/order/OrderView.groovy"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/order/OrderViewWebSecure.groovy"/>
             </actions>
@@ -510,4 +510,28 @@ under the License.
         </section>
     </screen>
 
+    <screen name="ListPurchaseOrders">
+        <section>
+            <actions>
+                <set field="partyId" from-field="userLogin.partyId"/>
+                <set field="roleTypeId" value="SUPPLIER_AGENT"/>
+                <script location="component://common/webcommon/WEB-INF/actions/includes/retrievePortletAttributes.groovy"/>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <if-has-permission permission="ORDERMGR" action="_VIEW"/>
+                    </condition>
+                    <widgets>
+                        <screenlet title="${uiLabelMap.OrderPurchaseOrder}" navigation-form-name="ListPurchaseOrders" >
+                            <include-form name="ListPurchaseOrders" location="component://order/widget/ordermgr/OrderForms.xml"/>
+                        </screenlet>
+                    </widgets>
+                    <fail-widgets>
+                        <label style="h3" text="${uiLabelMap.OrderViewPermissionError}"/>
+                    </fail-widgets>
+                </section>
+            </widgets>
+        </section> 
+    </screen>
 </screens>

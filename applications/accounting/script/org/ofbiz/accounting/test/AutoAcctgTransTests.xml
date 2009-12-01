@@ -57,12 +57,15 @@ under the License.
             <field-map field-name="shipmentId"/>
         </entity-and>
         <first-from-list entry="acctgTrans" list="acctgTransList"/>
-        <get-related value-field="acctgTrans" relation-name="AcctgTransEntry" list="acctgTransEntries"/>
+        <get-related value-field="acctgTrans" relation-name="AcctgTransEntry" list="acctgTransEntryList"/>
         <set field="productFilter.productId" from-field="productId"/>
-        <filter-list-by-and list="acctgTransEntries" map="productFilter" to-list="acctgTransEntries"/>
+        <filter-list-by-and list="acctgTransEntryList" map="productFilter" to-list="acctgTransEntryList"/>
 
-        <assert><not><if-empty field="acctgTransEntries"/></not></assert>
-        <iterate list="acctgTransEntries" entry="acctgTransEntry">
+        <assert><not><if-empty field="acctgTransEntryList"/></not></assert>
+
+        <call-simple-method method-name="UtilCheckEntriesBalance"/>
+
+        <iterate list="acctgTransEntryList" entry="acctgTransEntry">
             <if-compare field="acctgTransEntry.debitCreditFlag" operator="equals" value="C">
                 <assert>
                     <if-compare field="acctgTransEntry.glAccountTypeId" operator="equals" value="UNINVOICED_SHIP_RCPT"/>
@@ -112,33 +115,20 @@ under the License.
         </entity-one>
         <get-related value-field="invoice" relation-name="AcctgTrans" list="acctgTransList"/>
         <first-from-list list="acctgTransList" entry="acctgTrans"/>
-        <get-related value-field="acctgTrans" relation-name="AcctgTransEntry" list="acctgTransEntries"/>
+        <get-related value-field="acctgTrans" relation-name="AcctgTransEntry" list="acctgTransEntryList"/>
 
-        <set field="debitTotal" type="BigDecimal" value="0.0"/>
-        <set field="creditTotal" type="BigDecimal" value="0.0"/>
+        <assert><not><if-empty field="acctgTransEntryList"/></not></assert>
 
-        <assert><not><if-empty field="acctgTransEntries"/></not></assert>
-        <iterate list="acctgTransEntries" entry="acctgTransEntry">
+        <call-simple-method method-name="UtilCheckEntriesBalance"/>
+
+        <iterate list="acctgTransEntryList" entry="acctgTransEntry">
             <if-compare field="acctgTransEntry.debitCreditFlag" operator="equals" value="C">
                 <assert>
                     <if-compare field="acctgTransEntry.glAccountTypeId" operator="equals" value="ACCOUNTS_PAYABLE"/>
                     <if-compare field="acctgTransEntry.glAccountId" operator="equals" value="210000"/>
                 </assert>
-                <calculate field="creditTotal">
-                    <calcop operator="add" field="acctgTransEntry.origAmount"/>
-                </calculate>
-            <else>
-                <if-compare field="acctgTransEntry.debitCreditFlag" operator="equals" value="D">
-                    <calculate field="debitTotal">
-                        <calcop operator="add" field="acctgTransEntry.origAmount"/>
-                    </calculate>
-                </if-compare>
-            </else>
             </if-compare>
         </iterate>
-        <assert>
-            <if-compare-field field="debitTotal" operator="equals" to-field="creditTotal" type="BigDecimal"/>
-        </assert>
         <check-errors/>
     </simple-method>
 
@@ -166,33 +156,28 @@ under the License.
         </entity-one>
         <get-related value-field="payment" relation-name="AcctgTrans" list="acctgTransList"/>
         <first-from-list list="acctgTransList" entry="acctgTrans"/>
-        <get-related value-field="acctgTrans" relation-name="AcctgTransEntry" list="acctgTransEntries"/>
+        <get-related value-field="acctgTrans" relation-name="AcctgTransEntry" list="acctgTransEntryList"/>
 
-        <set field="debitTotal" type="BigDecimal" value="0.0"/>
-        <set field="creditTotal" type="BigDecimal" value="0.0"/>
+        <assert><not><if-empty field="acctgTransEntryList"/></not></assert>
 
-        <assert><not><if-empty field="acctgTransEntries"/></not></assert>
-        <iterate list="acctgTransEntries" entry="acctgTransEntry">
+        <call-simple-method method-name="UtilCheckEntriesBalance"/>
+
+        <iterate list="acctgTransEntryList" entry="acctgTransEntry">
             <if-compare field="acctgTransEntry.debitCreditFlag" operator="equals" value="C">
             <!--<assert>
                     <if-compare field="acctgTransEntry.glAccountTypeId" operator="equals" value="GENERAL_CHECKING_ACCOUNT"/>
                     <if-compare field="acctgTransEntry.glAccountId" operator="equals" value="111100"/>
                 </assert>-->
-                <set field="creditTotal" from-field="acctgTransEntry.origAmount"/>
             <else>
                 <if-compare field="acctgTransEntry.debitCreditFlag" operator="equals" value="D">
                     <assert>
                         <if-compare field="acctgTransEntry.glAccountTypeId" operator="equals" value="ACCOUNTS_PAYABLE"/>
                         <if-compare field="acctgTransEntry.glAccountId" operator="equals" value="210000"/>
                     </assert>
-                    <set field="debitTotal" from-field="acctgTransEntry.origAmount"/>
                 </if-compare>
             </else>
             </if-compare>
         </iterate>
-        <assert>
-            <if-compare field="debitTotal" operator="equals" value="${creditTotal}"/>
-        </assert>
         <check-errors/>
     </simple-method>
 
@@ -216,7 +201,7 @@ under the License.
         <set field="shipGroupSeqId" value="00001"/>
         <set field="orderItemSeqId" value="00001"/>
         <set field="inventoryItemId" value="9001"/>
-        <set field="quantity" value="1" type="BigDecimal"/>
+        <set field="quantity" value="2" type="BigDecimal"/>
         <set field="productId" value="GZ-2644"/>
 
         <entity-one entity-name="UserLogin" value-field="userLogin" auto-field-map="false">
@@ -231,11 +216,17 @@ under the License.
         <set field="serviceCtx.quantity" from-field="quantity"/>
         <call-service service-name="issueOrderItemShipGrpInvResToShipment" in-map-name="serviceCtx"/>
 
-        <entity-condition entity-name="AcctgTransEntry" list="acctgTransEntryList">
-            <condition-expr field-name="productId" operator="equals" from-field="productId"/>
+        <entity-condition list="acctgTransList" entity-name="AcctgTrans">
+            <condition-expr field-name="shipmentId" from-field="shipmentId"/>
+            <order-by field-name="-postedDate"/>
         </entity-condition>
+        <first-from-list entry="acctgTrans" list="acctgTransList"/>
+        <get-related list="acctgTransEntryList" relation-name="AcctgTransEntry" value-field="acctgTrans"/>
 
         <assert><not><if-empty field="acctgTransEntryList"/></not></assert>
+
+        <call-simple-method method-name="UtilCheckEntriesBalance"/>
+
         <iterate list="acctgTransEntryList" entry="acctgTransEntry">
             <if-compare field="acctgTransEntry.debitCreditFlag" operator="equals" value="C">
                 <assert>
@@ -270,41 +261,69 @@ under the License.
               * Credit; in account=400000 - Account Type="SALES_ACCOUNT"
               * Debit; in  account=120000 - Account Type="ACCOUNTS_RECEIVABLE"
         -->
-
-        <set field="invoiceId" value="CI1"/>
-
+        <!-- Note: The above notes seem to assume that you are going to manually follow the preconditions above before running this test.
+                   Instead the test will now use order DEMO10090 which currently preconditions 1-4 fulfilled, and we'll then update the
+                   shipment to the packed status (precondition 4).  Additionally it doesn't seem to be necessary to set the invoice status
+                   to ready because the invoice is created in that state.
+        -->
+        
         <entity-one entity-name="UserLogin" value-field="userLogin">
             <field-map field-name="userLoginId" value="system"/>
         </entity-one>
-        <set field="serviceCtx.userLogin" from-field="userLogin"/>
-        <set field="serviceCtx.invoiceId" from-field="invoiceId"/>
-        <set field="serviceCtx.statusId" value="INVOICE_READY"/>
-        <call-service service-name="setInvoiceStatus" in-map-name="serviceCtx"/>
+
+        <set field="serviceCtx.userLogin"  from-field="userLogin"/>
+        <set field="serviceCtx.shipmentId" value="9998"/>
+        <set field="serviceCtx.statusId" value="SHIPMENT_PACKED"/>
+        <call-service service-name="updateShipment" in-map-name="serviceCtx"/>
+
+        <entity-condition list="shipmentItemBillings" entity-name="ShipmentItemBilling">
+            <condition-expr field-name="shipmentId" value="9998"/>
+            <order-by field-name="-createdStamp"/>
+        </entity-condition>
+        <first-from-list entry="shipmentItemBilling" list="shipmentItemBillings"/>
+        <set field="invoiceId" from-field="shipmentItemBilling.invoiceId"/>
 
         <entity-one entity-name="Invoice" value-field="invoice">
             <field-map field-name="invoiceId" from-field="invoiceId"/>
         </entity-one>
         <get-related value-field="invoice" relation-name="AcctgTrans" list="acctgTransList"/>
-        <first-from-list list="acctgTransList" entry="acctgTrans"/>
-        <get-related value-field="acctgTrans" relation-name="AcctgTransEntry" list="acctgTransEntries"/>
 
-        <assert><not><if-empty field="acctgTransEntries"/></not></assert>
-        <iterate entry="acctgTransEntry" list="acctgTransEntries">
-            <if-compare field="acctgTransEntry.debitCreditFlag" operator="equals" value="C">
-            <!--<assert>
-                    <if-compare field="acctgTransEntry.glAccountTypeId" operator="equals" value="SALES_ACCOUNT"/>
-                    <if-compare field="acctgTransEntry.glAccountId" operator="equals" value="400000"/>
-                </assert>-->
-            <else>
-                <if-compare field="acctgTransEntry.debitCreditFlag" operator="equals" value="D">
-                    <assert>
-                        <if-compare field="acctgTransEntry.glAccountTypeId" operator="equals" value="ACCOUNTS_RECEIVABLE"/>
-                        <if-compare field="acctgTransEntry.glAccountId" operator="equals" value="120000"/>
-                    </assert>
-                </if-compare>
-            </else>
-            </if-compare>
-        </iterate>
+        <!-- Check the invoice transaction -->
+        <set field="acctgTransFilter.acctgTransTypeId" value="SALES_INVOICE"/>
+        <filter-list-by-and to-list="salesAcctgTransList" list="acctgTransList" map="acctgTransFilter"/>
+        <first-from-list entry="salesAcctgTrans" list="salesAcctgTransList"/>
+        <get-related value-field="salesAcctgTrans" relation-name="AcctgTransEntry" list="acctgTransEntryList"/>
+
+        <assert><not><if-empty field="acctgTransEntryList"/></not></assert>
+
+        <call-simple-method method-name="UtilCheckEntriesBalance"/>
+
+        <set field="acctgTransEntryFilter.glAccountTypeId" value="ACCOUNTS_RECEIVABLE"/>
+        <set field="acctgTransEntryFilter.glAccountId" value="120000"/>
+        <filter-list-by-and list="acctgTransEntryList" to-list="accountsReceivableEntries" map="acctgTransEntryFilter"/>
+        <assert><not><if-empty field="accountsReceivableEntries"></if-empty></not></assert>
+
+        <clear-field field="acctgTransEntryFilter"/>
+        <set field="acctgTransEntryFilter.glAccountId" value="400000"/>
+        <filter-list-by-and list="acctgTransEntryList" to-list="salesAccountEntries" map="acctgTransEntryFilter"/>
+        <assert><not><if-empty field="salesAccountEntries"></if-empty></not></assert>
+
+        <!-- Check the payment transaction -->
+        <clear-field field="acctgTransEntryFilter"/>
+        <set field="acctgTransFilter.acctgTransTypeId" value="PAYMENT_APPL"/>
+        <filter-list-by-and to-list="paymentAcctgTransList" list="acctgTransList" map="acctgTransFilter"/>
+        <first-from-list entry="paymentAcctgTrans" list="paymentAcctgTransList"/>
+        <get-related value-field="paymentAcctgTrans" relation-name="AcctgTransEntry" list="acctgTransEntryList"/>
+
+        <assert><not><if-empty field="acctgTransEntryList"/></not></assert>
+
+        <call-simple-method method-name="UtilCheckEntriesBalance"/>
+
+        <set field="acctgTransEntryFilter.glAccountTypeId" value="ACCOUNTS_RECEIVABLE"/>
+        <set field="acctgTransEntryFilter.glAccountId" value="120000"/>
+        <filter-list-by-and list="acctgTransEntryList" to-list="accountsReceivableEntries" map="acctgTransEntryFilter"/>
+        <assert><not><if-empty field="accountsReceivableEntries"></if-empty></not></assert>
+
         <check-errors/>
     </simple-method>
 
@@ -321,48 +340,54 @@ under the License.
               * Debit; in glAccountId=112000 - glAccountTypeId="UNDEPOSITED_RECEIPTS"
         -->
 
-        <set field="paymentId" value="10000"/>
+        <!-- Creating a payment from scratch rather than using the demo data -->
+        
         <entity-one entity-name="UserLogin" value-field="userLogin">
             <field-map field-name="userLoginId" value="system"/>
         </entity-one>
         <set field="serviceCtx.userLogin" from-field="userLogin"/>
+
+        <!-- Find a customer -->
+        <entity-and list="customerRoles" entity-name="PartyRole">
+            <field-map field-name="roleTypeId" value="CUSTOMER"/>
+        </entity-and>
+        <first-from-list entry="customerRole" list="customerRoles"/>
+        <set field="serviceCtx.partyIdFrom" from-field="customerRole.partyId"/>
+        <set field="serviceCtx.amount" value="100.00" type="BigDecimal"/>
+        <set field="serviceCtx.partyIdTo" value="Company"/>
+        <set field="serviceCtx.paymentMethodTypeId" value="EFT_ACCOUNT"/>
+        <set field="serviceCtx.paymentTypeId" value="CUSTOMER_PAYMENT"/>
         <set field="serviceCtx.paymentId" from-field="paymentId"/>
         <set field="serviceCtx.statusId" value="PMNT_RECEIVED"/>
-        <call-service service-name="setPaymentStatus" in-map-name="serviceCtx"/>
+        <call-service service-name="createPayment" in-map-name="serviceCtx">
+            <result-to-field result-name="paymentId"/>
+        </call-service>
 
-        <entity-one entity-name="Payment" value-field="payment">
-            <field-map field-name="paymentId" from-field="paymentId"/>
-        </entity-one>
-        <get-related value-field="payment" relation-name="AcctgTrans" list="acctgTransList"/>
+        <entity-and list="acctgTransList" entity-name="AcctgTrans">
+            <field-map field-name="paymentId"/>
+            <field-map field-name="acctgTransTypeId" value="INCOMING_PAYMENT"/>
+        </entity-and>
         <first-from-list list="acctgTransList" entry="acctgTrans"/>
-        <get-related value-field="acctgTrans" relation-name="AcctgTransEntry" list="acctgTransEntries"/>
-        <set field="debitTotal" type="BigDecimal" value="0.0"/>
-        <set field="creditTotal" type="BigDecimal" value="0.0"/>
 
-        <assert><not><if-empty field="acctgTransEntries"/></not></assert>
-        <iterate entry="acctgTransEntry" list="acctgTransEntries">
+        <get-related value-field="acctgTrans" relation-name="AcctgTransEntry" list="acctgTransEntryList"/>
+
+        <assert><not><if-empty field="acctgTransEntryList"/></not></assert>
+
+        <call-simple-method method-name="UtilCheckEntriesBalance"/>
+
+        <iterate entry="acctgTransEntry" list="acctgTransEntryList">
             <if-compare field="acctgTransEntry.debitCreditFlag" operator="equals" value="C">
-            <!--<assert>
+               <assert>
                     <if-compare field="acctgTransEntry.glAccountTypeId" operator="equals" value="ACCOUNTS_RECEIVABLE"/>
                     <if-compare field="acctgTransEntry.glAccountId" operator="equals" value="120000"/>
-                </assert>-->
-                <calculate field="creditTotal">
-                    <calcop operator="add" field="acctgTransEntry.origAmount"/>
-                </calculate>
+                </assert>
             </if-compare>
             <if-compare field="acctgTransEntry.debitCreditFlag" operator="equals" value="D">
-            <!--<assert>
-                    <if-compare field="acctgTransEntry.glAccountTypeId" operator="equals" value="UNDEPOSITED_RECEIPTS"/>
-                    <if-compare field="acctgTransEntry.glAccountId" operator="equals" value="112000"/>
-                </assert>-->
-                <calculate field="debitTotal">
-                    <calcop operator="add" field="acctgTransEntry.origAmount"/>
-                </calculate>
+                <assert>
+                    <if-compare field="acctgTransEntry.glAccountId" operator="equals" value="111100"/>
+                </assert>
             </if-compare>
         </iterate>
-        <assert>
-            <if-compare field="debitTotal" operator="equals" value="creditTotal"/>
-        </assert>
         <check-errors/>
     </simple-method>
 
@@ -372,7 +397,7 @@ under the License.
                  productId = MAT_A_COST, quantity = 4, facilityId = Web Store Warehouse
                  productId = MAT_B_COST, quantity = 6, facilityId = Web Store Warehouse
              then new production run is created and then started for following product
-                 productId = PROD_COST, quantity = 2, facilityId = Web Store Warehouse
+                 productId = PROD_MANUF, quantity = 2, facilityId = Web Store Warehouse
 
             Post condition:- In entity "AcctgTransEntry" at least two entries will be created for MAT_A_COST
                  * Credit; in account 141000 - "RAW MATERIALS INVENTORY"; amount: 36$
@@ -381,7 +406,32 @@ under the License.
                  * Credit; in account 141000 - "RAW MATERIALS INVENTORY"; amount: 42$
                  * Debit; in account 142000 - "WORK IN PROGRESS INVENTORY"; amount: 42$ -->
 
-        <set field="workEffortId" value="10001"/>
+        <!-- Create a production run, TODO: move this to test data so we only have to do the issuance -->
+        <entity-one entity-name="UserLogin" value-field="userLogin">
+            <field-map field-name="userLoginId" value="system"/>
+        </entity-one>
+        <set field="serviceCtx.userLogin" from-field="userLogin"/>
+        <set field="serviceCtx.facilityId" value="WebStoreWarehouse"/>
+        <set field="serviceCtx.pRQuantity" value="2" type="BigDecimal"/>
+        <set field="serviceCtx.productId" value="PROD_MANUF"/>
+        <set field="serviceCtx.startDate" value="${date:nowTimestamp()}" type="Timestamp"/>
+        <set field="serviceCtx.workEffortName" value="ACCTG_TEST_PROD_RUN"/>
+        <call-service service-name="createProductionRun" in-map-name="serviceCtx">
+            <result-to-field result-name="productionRunId"/>
+        </call-service>
+    
+        <clear-field field="serviceCtx"/>
+        <set field="serviceCtx.userLogin" from-field="userLogin"/>
+        <set field="serviceCtx.productionRunId" from-field="productionRunId"/>
+        <set field="serviceCtx.statusId" value="PRUN_DOC_PRINTED"/>
+        <call-service service-name="changeProductionRunStatus" in-map-name="serviceCtx"/>
+
+        <entity-and list="prodTasks" entity-name="WorkEffort">
+            <field-map field-name="workEffortParentId" from-field="productionRunId"/>
+        </entity-and>
+        <first-from-list entry="taskWorkEffort" list="prodTasks"/>
+        <set field="workEffortId" from-field="taskWorkEffort.workEffortId"/>
+        <clear-field field="serviceCtx"/>
         <set field="serviceCtx.workEffortId" from-field="workEffortId"/>
         <entity-one entity-name="UserLogin" value-field="serviceCtx.userLogin">
             <field-map field-name="userLoginId" value="system"/>
@@ -389,14 +439,9 @@ under the License.
         <call-service service-name="issueProductionRunTask" in-map-name="serviceCtx"/>
 
         <entity-condition entity-name="WorkEffortAndInventoryAssign" list="workEffortAndInventoryAssigns">
-            <condition-list combine="and">
-                <condition-expr field-name="workEffortId" from-field="workEffortId"/>
-                <condition-list combine="or">
-                    <condition-expr field-name="productId" operator="equals" value="MAT_A_COST"/>
-                    <condition-expr field-name="productId" operator="equals" value="MAT_B_COST"/>
-                </condition-list>
-            </condition-list>
+            <condition-expr field-name="workEffortId" operator="equals" from-field="workEffortId"/>
         </entity-condition>
+
         <assert><not><if-empty field="workEffortAndInventoryAssigns"/></not></assert>
 
         <set field="totalIssuedQty_MAT_A_COST" value="0.0" type="BigDecimal"/>
@@ -425,9 +470,12 @@ under the License.
             <if-compare field="totalIssuedQty_MAT_A_COST" operator="equals" value="4.0" type="BigDecimal"/>
             <if-compare field="totalIssuedQty_MAT_B_COST" operator="equals" value="6.0" type="BigDecimal"/>
         </assert>
-        <entity-and entity-name="AcctgTrans" list="acctgTransList">
-            <field-map field-name="acctgTransTypeId" value="INVENTORY"/>
-        </entity-and>
+        <entity-condition entity-name="AcctgTrans" list="acctgTransList">
+            <condition-list combine="and">
+                <condition-expr field-name="acctgTransTypeId" operator="equals" value="INVENTORY"/>
+                <condition-expr field-name="workEffortId" operator="equals" from-field="workEffortId"/>
+            </condition-list>
+        </entity-condition>
         <assert><not><if-empty field="acctgTransList"/></not></assert>
 
         <iterate list="acctgTransList" entry="acctgTrans">
@@ -446,7 +494,7 @@ under the License.
                 <else>
                     <if-compare field="acctgTransEntry.debitCreditFlag" operator="equals" value="D">
                         <assert>
-                            <if-compare field="acctgTransEntry.productId" operator="equals" value="PROD_COST"/>
+                            <if-compare field="acctgTransEntry.productId" operator="equals" value="PROD_MANUF"/>
                             <if-compare field="acctgTransEntry.glAccountTypeId" operator="equals" value="WIP_INVENTORY"/>
                             <if-compare field="acctgTransEntry.glAccountId" operator="equals" value="142000"/>
                         </assert>
@@ -463,38 +511,56 @@ under the License.
                 (1) productId = MAT_A_COST, quantity = 4, facilityId = Web Store Warehouse
                 (2) productId = MAT_B_COST, quantity = 6, facilityId = Web Store Warehouse
              then new production run is created, issued components for following product
-                (1) productId = PROD_COST,  quantity = 2, facilityId = Web Store Warehouse
+                (1) productId = PROD_MANUF,  quantity = 2, facilityId = Web Store Warehouse
              Post condition: In entity "AcctgTransEntry" two entries will be created:
                     * Credit: in account 600000 - "EXPENSE"; amount: 250$
                     * Debit: in account 142000 - "WORK IN PROGRESS INVENTORY", amount: 250$  -->
 
-        <set field="productionRunId" value="10000"/>
-        <set field="workEffortId" value="10001"/>
+        <!-- Find the production run created in the last test -->
+        <entity-and list="productionRuns" entity-name="WorkEffort">
+            <field-map field-name="workEffortName" value="ACCTG_TEST_PROD_RUN"/>
+            <field-map field-name="workEffortTypeId" value="PROD_ORDER_HEADER"/>
+            <field-map field-name="workEffortPurposeTypeId" value="WEPT_PRODUCTION_RUN"/>
+        </entity-and>
+        <first-from-list entry="productionRun" list="productionRuns"/>
+        <set field="productionRunId" from-field="productionRun.workEffortId"/>
+
+        <entity-and list="prodTasks" entity-name="WorkEffort">
+            <field-map field-name="workEffortParentId" from-field="productionRunId"/>
+        </entity-and>
+        <first-from-list entry="taskWorkEffort" list="prodTasks"/>
+        <set field="workEffortId" from-field="taskWorkEffort.workEffortId"/>
+
         <set field="serviceCtx.productionRunId" from-field="productionRunId"/>
         <set field="serviceCtx.workEffortId" from-field="workEffortId"/>
+        <set field="serviceCtx.statusId" value="PRUN_RUNNING"/>
         <entity-one entity-name="UserLogin" value-field="serviceCtx.userLogin">
             <field-map field-name="userLoginId" value="system"/>
         </entity-one>
         <call-service service-name="changeProductionRunTaskStatus" in-map-name="serviceCtx"/>
+        <set field="serviceCtx.statusId" value="PRUN_COMPLETED"/>
+        <call-service service-name="changeProductionRunTaskStatus" in-map-name="serviceCtx"/>
 
-        <entity-one entity-name="WorkEffort" value-field="workEffort">
-            <field-map field-name="workEffortId" from-field="workEffortId"/>
-        </entity-one>
-        <get-related value-field="workEffort" relation-name="AcctgTrans" list="acctgTransList"/>
+        <entity-condition entity-name="AcctgTrans" list="acctgTransList">
+            <condition-list combine="and">
+                <condition-expr field-name="workEffortId" operator="equals" from-field="workEffortId"/>
+                <condition-expr field-name="acctgTransTypeId" operator="equals" value="MANUFACTURING"/>
+            </condition-list>
+        </entity-condition>
         <assert><not><if-empty field="acctgTransList"></if-empty></not></assert>
         <iterate list="acctgTransList" entry="acctgTrans">
             <get-related value-field="acctgTrans" relation-name="AcctgTransEntry" list="acctgTransEntryList"/>
             <iterate list="acctgTransEntryList" entry="acctgTransEntry">
                 <if-compare field="acctgTransEntry.debitCreditFlag" operator="equals" value="C">
                     <assert>
-                        <if-compare field="acctgTransEntry.productId" operator="equals" value="PROD_COST"/>
+                        <if-compare field="acctgTransEntry.productId" operator="equals" value="PROD_MANUF"/>
                         <if-compare field="acctgTransEntry.glAccountTypeId" operator="equals" value="OPERATING_EXPENSE"/>
                         <if-compare field="acctgTransEntry.glAccountId" operator="equals" value="600000"/>
                     </assert>
                 <else>
                     <if-compare field="acctgTransEntry.debitCreditFlag" operator="equals" value="D">
                         <assert>
-                            <if-compare field="acctgTransEntry.productId" operator="equals" value="PROD_COST"/>
+                            <if-compare field="acctgTransEntry.productId" operator="equals" value="PROD_MANUF"/>
                             <if-compare field="acctgTransEntry.glAccountTypeId" operator="equals" value="WIP_INVENTORY"/>
                             <if-compare field="acctgTransEntry.glAccountId" operator="equals" value="142000"/>
                         </assert>
@@ -514,10 +580,17 @@ under the License.
                  productId = PROD_COST, quantity = 2, facilityId = Web Store Warehouse
              then issue components and complete the product issuance and at last put 2 quantities into "Stock in" field
              Post condition: In entity "AcctgTransEntry" two entries will be created:
-                * Debit, in account 140000 - "INVENTORY"; amount: 328$
-                * Credit, in account 142000 - "WORK IN PROGRESS INVENTORY", amount: 328$ (36$ + 42$ + 250$) -->
+                * Debit, in account 140000 - "INVENTORY"; amount: 135.68$
+                * Credit, in account 142000 - "WORK IN PROGRESS INVENTORY", amount: 135.68$ (36$ + 42$ + 57.68$) -->
 
-        <set field="workEffortId" value="10000"/>
+        <entity-and list="productionRuns" entity-name="WorkEffort">
+            <field-map field-name="workEffortName" value="ACCTG_TEST_PROD_RUN"/>
+            <field-map field-name="workEffortTypeId" value="PROD_ORDER_HEADER"/>
+            <field-map field-name="workEffortPurposeTypeId" value="WEPT_PRODUCTION_RUN"/>
+        </entity-and>
+        <first-from-list entry="productionRun" list="productionRuns"/>
+
+        <set field="serviceCtx.workEffortId" from-field="productionRun.workEffortId"/>
         <set field="serviceCtx.workEffortId" from-field="workEffortId"/>
         <entity-one entity-name="UserLogin" value-field="serviceCtx.userLogin">
             <field-map field-name="userLoginId" value="system"/>
@@ -526,7 +599,7 @@ under the License.
 
         <!-- For credit entry -->
         <entity-and entity-name="AcctgTransEntry" list="acctgTransEntryList">
-            <field-map field-name="productId" value="PROD_COST"/>
+            <field-map field-name="productId" value="PROD_MANUF"/>
             <field-map field-name="glAccountTypeId" value="WIP_INVENTORY"/>
             <field-map field-name="glAccountId" value="142000"/>
             <order-by field-name="-createdStamp"/>
@@ -534,12 +607,12 @@ under the License.
         <first-from-list list="acctgTransEntryList" entry="acctgTransEntry"/>
         <assert>
             <if-compare field="acctgTransEntry.debitCreditFlag" operator="equals" value="C"/>
-            <if-compare field="acctgTransEntry.origAmount" operator="equals" value="328" type="BigDecimal"/>
+            <if-compare field="acctgTransEntry.origAmount" operator="equals" value="135.68" type="BigDecimal"/>
         </assert>
 
         <!-- For debit entry -->
         <entity-and entity-name="AcctgTransEntry" list="acctgTransEntryList">
-            <field-map field-name="productId" value="PROD_COST"/>
+            <field-map field-name="productId" value="PROD_MANUF"/>
             <field-map field-name="glAccountTypeId" value="INVENTORY_ACCOUNT"/>
             <field-map field-name="glAccountId" value="140000"/>
             <order-by field-name="-createdStamp"/>
@@ -547,8 +620,35 @@ under the License.
         <first-from-list list="acctgTransEntryList" entry="acctgTransEntry"/>
         <assert>
             <if-compare field="acctgTransEntry.debitCreditFlag" operator="equals" value="D"/>
-            <if-compare field="acctgTransEntry.origAmount" operator="equals" value="328" type="BigDecimal"/>
+            <if-compare field="acctgTransEntry.origAmount" operator="equals" value="135.68" type="BigDecimal"/>
         </assert>
         <check-errors/>
+    </simple-method>
+
+    <simple-method method-name="UtilCheckEntriesBalance" login-required="false"
+            short-description="Short util method that takes a list of AcctgTransEntry values (acctgTransEntryList) and checks that the debit and credit totals balance.">
+        <set field="debitTotal" type="BigDecimal" value="0.0"/>
+        <set field="creditTotal" type="BigDecimal" value="0.0"/>
+
+        <assert><not><if-empty field="acctgTransEntryList"/></not></assert>
+        <iterate list="acctgTransEntryList" entry="acctgTransEntry">
+            <if-compare field="acctgTransEntry.debitCreditFlag" operator="equals" value="C">
+                <calculate field="creditTotal">
+                    <calcop operator="get" field="creditTotal"/>
+                    <calcop operator="add" field="acctgTransEntry.origAmount"/>
+                </calculate>
+            <else>
+                <if-compare field="acctgTransEntry.debitCreditFlag" operator="equals" value="D">
+                    <calculate field="debitTotal">
+                        <calcop operator="get" field="debitTotal"/>
+                        <calcop operator="add" field="acctgTransEntry.origAmount"/>
+                    </calculate>
+                </if-compare>
+            </else>
+            </if-compare>
+        </iterate>
+        <assert>
+            <if-compare-field field="debitTotal" operator="equals" to-field="creditTotal" type="BigDecimal"/>
+        </assert>
     </simple-method>
 </simple-methods>

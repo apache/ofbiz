@@ -40,15 +40,15 @@ under the License.
     <entity-resource type="data" reader-name="seed" loader="main" location="data/UsTaxAccountGroups.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/AccountingSecurityData.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/AccountingPortletData.xml"/>
-    <entity-resource type="data" reader-name="seed-initial" loader="main" location="data/InvoiceScheduledServiceData.xml"/>
+    <entity-resource type="data" reader-name="seed-initial" loader="main" location="data/AccountingScheduledServiceData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoGeneralChartOfAccounts.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoOrganizationData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoGlSetupData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoFinAccountData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoTaxAuthority.xml"/>
-    <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoPaymentsInvoices.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoAcctgTransactionData.xml"/>
-    
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoPaymentsInvoices.xml"/>
+
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoAccountingUserData.xml"/>
 
     <!-- General Payment Service Definitions -->
@@ -68,6 +68,7 @@ under the License.
     <service-resource type="model" loader="main" location="servicedef/services_olap.xml"/>
 
     <!-- Payment Processor/Gateway Service Definitions -->
+    <service-resource type="model" loader="main" location="servicedef/services_sagepay.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_authorizedotnet.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_clearcommerce.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_cybersource.xml"/>

@@ -6641,6 +6641,9 @@
         <value xml:lang="th">การขนส่งโดยแท้จริง</value>
         <value xml:lang="zh">实际运输</value>
     </property>
+    <property key="ProductAddAdditionalImages">
+        <value xml:lang="en">Add Additional Images</value>
+    </property>
     <property key="ProductAddCatalogProdCat">
         <value xml:lang="de">Kategorie zu diesem Katalog hinzufügen (Kategorie und Typ auswählen, optionales Von Datum angeben)</value>
         <value xml:lang="en">Add a Category to this Catalog (select Category and Type, then enter optional From Date)</value>
@@ -11948,7 +11951,7 @@
         <value xml:lang="de">Eingehende Lieferungen</value>
         <value xml:lang="en">Incoming Shipments</value>
         <value xml:lang="es">Envíos entrantes</value>
-        <value xml:lang="fr">Expéditions entrantes</value>
+        <value xml:lang="fr">Expéditions à recevoir</value>
         <value xml:lang="it">Spedizioni in Arrivo</value>
         <value xml:lang="ro">Expediere in Sosire </value>
         <value xml:lang="ru">Входящие поставки</value>
@@ -15134,6 +15137,13 @@
         <value xml:lang="ru">Негабарит. место</value>
         <value xml:lang="th">หน่วยขนาดมากกว่า</value>
         <value xml:lang="zh">超大单位</value>
+    </property>
+    <property key="ProductOrdersStatus">
+        <value xml:lang="en">Orders Status</value>
+        <value xml:lang="fr">Statuts des commandes</value>
+        <value xml:lang="hi_IN">आदेशो की स्थिति</value>
+        <value xml:lang="it">Stati ordini</value>
+        <value xml:lang="zh">订单状态</value>
     </property>
     <property key="ProductPackItem">
         <value xml:lang="de">Position verpacken</value>
@@ -18573,7 +18583,7 @@
         <value xml:lang="de">Laden definieren für Webseite</value>
         <value xml:lang="en">Set store on WebSite</value>
         <value xml:lang="es">Fijar tienda en sitio web</value>
-        <value xml:lang="fr">Sociétés regroupées sur le site Web</value>
+        <value xml:lang="fr">Affecter un site Web au centre de profit</value>
         <value xml:lang="it">Imposta negozio sul Sito Web</value>
         <value xml:lang="ro">Setare Magazin in Situl Web</value>
         <value xml:lang="ru">Настроить магазин на Web сайт</value>

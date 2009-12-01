@@ -34,6 +34,7 @@ import javolution.util.FastMap;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilFormatOut;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilTimer;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
@@ -88,8 +89,11 @@ public class ModelViewEntity extends ModelEntity {
     /** A List of the Field objects for the View Entity, one for each GROUP BY field */
     protected List<ModelField> groupBys = FastList.newInstance();
 
+    /** List of field names to group by */
+    protected List<String> groupByFields = FastList.newInstance();
+
     protected Map<String, Map<String, ModelConversion>> conversions = FastMap.newInstance();
-    
+
     protected ViewEntityCondition viewEntityCondition = null;
 
     public ModelViewEntity(ModelReader reader, Element entityElement, UtilTimer utilTimer, ModelInfo def) {
@@ -130,7 +134,7 @@ public class ModelViewEntity extends ModelEntity {
 
         if (utilTimer != null) utilTimer.timerString("  createModelEntity: before relations");
         this.populateRelated(reader, entityElement);
-        
+
         Element entityConditionElement = UtilXml.firstChildElement(entityElement, "entity-condition");
         if (entityConditionElement != null) {
             this.viewEntityCondition = new ViewEntityCondition(this, null, entityConditionElement);
@@ -164,6 +168,8 @@ public class ModelViewEntity extends ModelEntity {
 
         // relations
         dynamicViewEntity.addAllRelationsToList(this.relations);
+
+        dynamicViewEntity.addAllGroupByFieldsToList(this.groupByFields);
 
         // finalize stuff
         // note that this doesn't result in a call to populateReverseLinks because a DynamicViewEntity should never be cached anyway, and will blow up when attempting to make the reverse links to the DynamicViewEntity
@@ -284,26 +290,26 @@ public class ModelViewEntity extends ModelEntity {
     public void addViewLink(ModelViewLink viewLink) {
         this.viewLinks.add(viewLink);
     }
-    
+
     public void populateViewEntityConditionInformation(ModelFieldTypeReader modelFieldTypeReader, List<EntityCondition> whereConditions, List<EntityCondition> havingConditions, List<String> orderByList, List<String> entityAliasStack) {
         if (entityAliasStack == null) {
             entityAliasStack = FastList.newInstance();
         }
-        
+
         if (this.viewEntityCondition != null) {
             EntityCondition whereCondition = this.viewEntityCondition.getWhereCondition(modelFieldTypeReader, entityAliasStack);
             if (whereCondition != null) {
                 whereConditions.add(whereCondition);
             }
         }
-        
+
         if (this.viewEntityCondition != null) {
             EntityCondition havingCondition = this.viewEntityCondition.getHavingCondition(modelFieldTypeReader, entityAliasStack);
             if (havingCondition != null) {
                 havingConditions.add(havingCondition);
             }
         }
-        
+
         // add the current one first so it overrides the lower level ones
         if (this.viewEntityCondition != null) {
             List<String> currentOrderByList = this.viewEntityCondition.getOrderByList();
@@ -311,7 +317,7 @@ public class ModelViewEntity extends ModelEntity {
                 orderByList.addAll(currentOrderByList);
             }
         }
-        
+
         for (Map.Entry<String, ModelEntity> memberEntityEntry: this.memberModelEntities.entrySet()) {
             if (memberEntityEntry.getValue() instanceof ModelViewEntity) {
                 ModelViewEntity memberViewEntity = (ModelViewEntity) memberEntityEntry.getValue();
@@ -430,7 +436,7 @@ public class ModelViewEntity extends ModelEntity {
             field.description = alias.description;
 
             // if this is a groupBy field, add it to the groupBys list
-            if (alias.groupBy) {
+            if (alias.groupBy || groupByFields.contains(alias.name)) {
                 this.groupBys.add(field);
             }
 
@@ -725,7 +731,7 @@ public class ModelViewEntity extends ModelEntity {
         }
     }
 
-    public static class ModelAliasAll implements Serializable {
+    public static class ModelAliasAll implements Serializable, Iterable<String> {
         protected String entityAlias = "";
         protected String prefix = "";
         protected Set<String> fieldsToExclude = null;
@@ -778,6 +784,10 @@ public class ModelViewEntity extends ModelEntity {
             } else {
                 return this.fieldsToExclude.contains(fieldName);
             }
+        }
+
+        public Iterator<String> iterator() {
+            return fieldsToExclude.iterator();
         }
     }
 
@@ -918,6 +928,10 @@ public class ModelViewEntity extends ModelEntity {
             this.complexAliasMembers.add(complexAliasMember);
         }
 
+        public void addAllComplexAliasMembers(List<ComplexAliasMember> complexAliasMembers) {
+            this.complexAliasMembers.addAll(complexAliasMembers);
+        }
+
         public void makeAliasColName(StringBuilder colNameBuffer, StringBuilder fieldTypeBuffer, ModelViewEntity modelViewEntity, ModelReader modelReader) {
             if (complexAliasMembers.size() == 0) {
                 return;
@@ -992,7 +1006,7 @@ public class ModelViewEntity extends ModelEntity {
         }
     }
 
-    public static class ModelViewLink implements Serializable {
+    public static class ModelViewLink implements Serializable, Iterable<ModelKeyMap> {
         protected String entityAlias = "";
         protected String relEntityAlias = "";
         protected boolean relOptional = false;
@@ -1055,6 +1069,10 @@ public class ModelViewEntity extends ModelEntity {
         }
 
         public Iterator<ModelKeyMap> getKeyMapsIterator() {
+            return this.keyMaps.iterator();
+        }
+
+        public Iterator<ModelKeyMap> iterator() {
             return this.keyMaps.iterator();
         }
 
@@ -1127,7 +1145,7 @@ public class ModelViewEntity extends ModelEntity {
             }
         }
     }
-    
+
     public static class ViewEntityCondition {
         protected ModelViewEntity modelViewEntity;
         protected ModelViewLink modelViewLink;
@@ -1150,7 +1168,7 @@ public class ModelViewEntity extends ModelEntity {
                     orderByList.add(orderByElement.getAttribute("field-name"));
                 }
             }
-            
+
             Element conditionExprElement = UtilXml.firstChildElement(element, "condition-expr");
             Element conditionListElement = UtilXml.firstChildElement(element, "condition-list");
             if (conditionExprElement != null) {
@@ -1164,11 +1182,11 @@ public class ModelViewEntity extends ModelEntity {
                 this.havingCondition = new ViewConditionList(this, havingConditionListElement);
             }
         }
-        
+
         public List<String> getOrderByList() {
             return this.orderByList;
         }
-        
+
         public EntityCondition getWhereCondition(ModelFieldTypeReader modelFieldTypeReader, List<String> entityAliasStack) {
             if (this.whereCondition != null) {
                 return this.whereCondition.createCondition(modelFieldTypeReader, entityAliasStack);
@@ -1176,7 +1194,7 @@ public class ModelViewEntity extends ModelEntity {
                 return null;
             }
         }
-        
+
         public EntityCondition getHavingCondition(ModelFieldTypeReader modelFieldTypeReader, List<String> entityAliasStack) {
             if (this.havingCondition != null) {
                 return this.havingCondition.createCondition(modelFieldTypeReader, entityAliasStack);
@@ -1189,7 +1207,7 @@ public class ModelViewEntity extends ModelEntity {
     public static interface ViewCondition extends Serializable {
         public EntityCondition createCondition(ModelFieldTypeReader modelFieldTypeReader, List<String> entityAliasStack);
     }
-    
+
     public static class ViewConditionExpr implements ViewCondition {
         protected ViewEntityCondition viewEntityCondition;
         protected String entityAlias;
@@ -1210,7 +1228,7 @@ public class ModelViewEntity extends ModelEntity {
             this.relFieldName = conditionExprElement.getAttribute("rel-field-name");
             this.value = conditionExprElement.getAttribute("value");
             this.ignoreCase = "true".equals(conditionExprElement.getAttribute("ignore-case"));
-            
+
             // if we are in a view-link, default to the entity-alias and rel-entity-alias there
             if (this.viewEntityCondition.modelViewLink != null) {
                 if (UtilValidate.isEmpty(this.entityAlias)) {
@@ -1221,9 +1239,9 @@ public class ModelViewEntity extends ModelEntity {
                 }
             }
         }
-        
+
         public EntityCondition createCondition(ModelFieldTypeReader modelFieldTypeReader, List<String> entityAliasStack) {
-            EntityOperator operator = EntityOperator.lookup(this.operator);
+            EntityOperator<?,?,?> operator = EntityOperator.lookup(this.operator);
             if (operator == null) {
                 throw new IllegalArgumentException("Could not find an entity operator for the name: " + this.operator);
             }
@@ -1241,7 +1259,7 @@ public class ModelViewEntity extends ModelEntity {
                     value = StringUtil.split((String) value, delim);
                 }
             }
-            
+
             if (this.viewEntityCondition.modelViewEntity.getField(fieldName) == null) {
                 throw new IllegalArgumentException("Error in Entity Find: could not find field [" + fieldName + "] in entity with name [" + this.viewEntityCondition.modelViewEntity.getEntityName() + "]");
             }
@@ -1254,7 +1272,7 @@ public class ModelViewEntity extends ModelEntity {
             }
 
             if (Debug.verboseOn()) Debug.logVerbose("Got value for fieldName [" + fieldName + "]: " + value, module);
-            
+
             EntityConditionValue lhs = EntityFieldValue.makeFieldValue(this.fieldName, this.entityAlias, entityAliasStack, this.viewEntityCondition.modelViewEntity);
             Object rhs = null;
             if (value != null) {
@@ -1262,27 +1280,27 @@ public class ModelViewEntity extends ModelEntity {
             } else {
                 rhs = EntityFieldValue.makeFieldValue(this.relFieldName, this.relEntityAlias, entityAliasStack, this.viewEntityCondition.modelViewEntity);
             }
-            
+
             if (operator.equals(EntityOperator.NOT_EQUAL) && value != null) {
                 // since some databases don't consider nulls in != comparisons, explicitly include them
                 // this makes more sense logically, but if anyone ever needs it to not behave this way we should add an "or-null" attribute that is true by default
                 if (ignoreCase) {
                     return EntityCondition.makeCondition(
-                            EntityCondition.makeCondition(EntityFunction.UPPER(lhs), (EntityComparisonOperator) operator, EntityFunction.UPPER(rhs)),
+                            EntityCondition.makeCondition(EntityFunction.UPPER(lhs), UtilGenerics.<EntityComparisonOperator<?,?>>cast(operator), EntityFunction.UPPER(rhs)),
                             EntityOperator.OR,
                             EntityCondition.makeCondition(lhs, EntityOperator.EQUALS, null));
                 } else {
                     return EntityCondition.makeCondition(
-                            EntityCondition.makeCondition(lhs, (EntityComparisonOperator) operator, rhs),
+                            EntityCondition.makeCondition(lhs, UtilGenerics.<EntityComparisonOperator<?,?>>cast(operator), rhs),
                             EntityOperator.OR,
                             EntityCondition.makeCondition(lhs, EntityOperator.EQUALS, null));
                 }
             } else {
                 if (ignoreCase) {
                     // use the stuff to upper case both sides
-                    return EntityCondition.makeCondition(EntityFunction.UPPER(lhs), (EntityComparisonOperator) operator, EntityFunction.UPPER(rhs));
+                    return EntityCondition.makeCondition(EntityFunction.UPPER(lhs), UtilGenerics.<EntityComparisonOperator<?,?>>cast(operator), EntityFunction.UPPER(rhs));
                 } else {
-                    return EntityCondition.makeCondition(lhs, (EntityComparisonOperator) operator, rhs);
+                    return EntityCondition.makeCondition(lhs, UtilGenerics.<EntityComparisonOperator<?,?>>cast(operator), rhs);
                 }
             }
         }
@@ -1326,12 +1344,12 @@ public class ModelViewEntity extends ModelEntity {
                 }
             }
 
-            EntityOperator operator = EntityOperator.lookup(this.combine);
+            EntityOperator<?,?,?> operator = EntityOperator.lookup(this.combine);
             if (operator == null) {
                 throw new IllegalArgumentException("Could not find an entity operator for the name: " + operator);
             }
 
-            return EntityCondition.makeCondition(entityConditionList, (EntityJoinOperator) operator);
+            return EntityCondition.makeCondition(entityConditionList, UtilGenerics.<EntityJoinOperator>cast(operator));
         }
     }
 }

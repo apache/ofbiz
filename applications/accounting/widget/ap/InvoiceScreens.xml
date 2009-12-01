@@ -25,20 +25,34 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="AccountingArPageTitleListReports"/>
-                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
                 <set field="tabButtonItem" value="viewReports"/>
-                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="10"/>
+                <set field="invoiceTypeId" value="PURCHASE_INVOICE"/>
+                <set field="organizationPartyId" from-field="organizationPartyId" default-value="${defaultOrganizationPartyId}"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/InvoiceReport.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonApReportDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <section>
-                            <widgets>
-                                <screenlet title="${uiLabelMap.AccountingReports}" navigation-form-name="ListReports">
+                        <screenlet title="${uiLabelMap.AccountingPastDueInvoices}: (${PastDueInvoicestotalAmount})" navigation-form-name="ListReports">
+                            <section>
+                                <actions>
+                                    <set field="invoices" from-field="PastDueInvoices"/>
+                                </actions>
+                                <widgets>
                                     <include-form name="ListReports" location="component://accounting/widget/ap/forms/InvoiceForms.xml"/>
-                                </screenlet>
-                            </widgets>
-                        </section>
+                                </widgets>
+                            </section>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.AccountingInvoicesDueSoon}: (${InvoicesDueSoonTotalAmount})" navigation-form-name="ListReports">
+                            <section>
+                                <actions>
+                                    <set field="invoices" from-field="InvoicesDueSoon"/>
+                                </actions>
+                                <widgets>
+                                    <include-form name="ListReports" location="component://accounting/widget/ap/forms/InvoiceForms.xml"/>
+                                </widgets>
+                            </section>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -94,12 +108,9 @@ under the License.
                     </condition-list>
                     <order-by field-name="partyIdFrom"/>
                 </entity-condition>
-                <entity-one entity-name="PaymentMethodType" value-field="paymentMethodType">
-                    <field-map field-name="paymentMethodTypeId" value="COMPANY_CHECK"></field-map>
-                </entity-one>
-                <entity-and entity-name="FinAccount" list="finAccounts">
-                    <field-map field-name="finAccountTypeId" value="BANK_ACCOUNT"/>
-                    <field-map field-name="statusId" value="FNACT_ACTIVE"/>
+                <set field="paymentPartyId" from-field="parameters.partyIdFrom" default-value="${parameters.organizationPartyId}"/>
+                <entity-and entity-name="PaymentMethod" list="paymentMethods">
+                    <field-map field-name="partyId" from-field="paymentPartyId"/>
                 </entity-and>
                 <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
             </actions>

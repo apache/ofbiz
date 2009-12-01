@@ -245,10 +245,10 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         }
         String imgStr = "";
         ModelScreenWidget.Image img = link.getImage();
-        if (img == null) {
-            StringBuilder sb = new StringBuilder();
-            renderImage(sb,context,img);
-            imgStr = sb.toString();
+        if (img != null) {
+            StringWriter sw = new StringWriter();
+            renderImage(sw, context, img);
+            imgStr = sw.toString();
         }
         StringWriter sr = new StringWriter();
         sr.append("<@renderLink ");
@@ -275,7 +275,7 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         sr.append("\" text=\"");
         sr.append(text);
         sr.append("\" imgStr=\"");
-        sr.append(imgStr);
+        sr.append(imgStr.replaceAll("\"", "\\\\\""));
         sr.append("\" />");
         executeMacro(sr.toString());
     }
@@ -335,7 +335,7 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         sr.append("\" urlString=\"");
         sr.append(urlString);
         sr.append("\" />");
-        executeMacro(sr.toString());
+        executeMacro(writer, sr.toString());
     }
 
     public void renderContentBegin(Appendable writer, Map<String, Object> context, ModelScreenWidget.Content content) throws IOException {
@@ -736,7 +736,7 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         if (actualPageSize >= listSize && listSize >= 0) return;
 
         // needed for the "Page" and "rows" labels
-        Map uiLabelMap = (Map) context.get("uiLabelMap");
+        Map<String, String> uiLabelMap = UtilGenerics.cast(context.get("uiLabelMap"));
         String ofLabel = "";
         if (uiLabelMap == null) {
             Debug.logWarning("Could not find uiLabelMap in context", module);

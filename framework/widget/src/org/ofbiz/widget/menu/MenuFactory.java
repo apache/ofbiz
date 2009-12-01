@@ -21,9 +21,8 @@ package org.ofbiz.widget.menu;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.parsers.ParserConfigurationException;
@@ -35,7 +34,6 @@ import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.service.LocalDispatcher;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -48,8 +46,8 @@ public class MenuFactory {
 
     public static final String module = MenuFactory.class.getName();
 
-    public static final UtilCache<String, Map<String, ModelMenu>> menuWebappCache = new UtilCache<String, Map<String, ModelMenu>>("widget.menu.webappResource", 0, 0, false);
-    public static final UtilCache<String, Map<String, ModelMenu>> menuLocationCache = new UtilCache<String, Map<String, ModelMenu>>("widget.menu.locationResource", 0, 0, false);
+    public static final UtilCache<String, Map<String, ModelMenu>> menuWebappCache = UtilCache.createUtilCache("widget.menu.webappResource", 0, 0, false);
+    public static final UtilCache<String, Map<String, ModelMenu>> menuLocationCache = UtilCache.createUtilCache("widget.menu.locationResource", 0, 0, false);
 
     public static ModelMenu getMenuFromWebappContext(String resourceName, String menuName, HttpServletRequest request)
             throws IOException, SAXException, ParserConfigurationException {
@@ -90,15 +88,12 @@ public class MenuFactory {
         if (menuFileDoc != null) {
             // read document and construct ModelMenu for each menu element
             Element rootElement = menuFileDoc.getDocumentElement();
-            List menuElements = UtilXml.childElementList(rootElement, "menu");
-            Iterator menuElementIter = menuElements.iterator();
-            while (menuElementIter.hasNext()) {
-                Element menuElement = (Element) menuElementIter.next();
+            for (Element menuElement: UtilXml.childElementList(rootElement, "menu")){
                 ModelMenu modelMenu = new ModelMenu(menuElement, delegator, dispatcher);
                 modelMenu.setMenuLocation(menuLocation);
-                modelMenuMap.put(modelMenu.getName(), modelMenu);
+                modelMenuMap.put(modelMenu.getName(), modelMenu);                
             }
-        }
+         }
         return modelMenuMap;
     }
 

@@ -237,7 +237,7 @@ public class OrderReturnServices {
         }
 
         // get the email setting and send the mail
-        if (productStoreId != null && productStoreId.length() > 0) {
+        if (UtilValidate.isNotEmpty(productStoreId)) {
             Map sendMap = FastMap.newInstance();
 
             GenericValue productStoreEmail = null;
@@ -410,7 +410,7 @@ public class OrderReturnServices {
                 Debug.logError(e, module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,"OrderErrorUnableToGetReturnItemInformation", locale));
             }
-            if (returnedItems == null || returnedItems.size() == 0) {
+            if (UtilValidate.isEmpty(returnedItems)) {
                 returnableQuantity = orderQty;
             } else {
                 BigDecimal returnedQty = BigDecimal.ZERO;
@@ -695,7 +695,7 @@ public class OrderReturnServices {
 
         BigDecimal adjustments = getReturnAdjustmentTotal(delegator, UtilMisc.toMap("returnId", returnId, "returnTypeId", "RTN_CREDIT"));
 
-        if (returnHeader != null && ((returnItems != null && returnItems.size() > 0) || adjustments.compareTo(ZERO) > 0)) {
+        if (returnHeader != null && (UtilValidate.isNotEmpty(returnItems) || adjustments.compareTo(ZERO) > 0)) {
             String finAccountId = returnHeader.getString("finAccountId");
             String billingAccountId = returnHeader.getString("billingAccountId");
             String fromPartyId = returnHeader.getString("fromPartyId");
@@ -1162,7 +1162,7 @@ public class OrderReturnServices {
 
         BigDecimal adjustments = getReturnAdjustmentTotal(delegator, UtilMisc.toMap("returnId", returnId, "returnTypeId", returnTypeId));
 
-        if (returnHeader != null && ((returnItems != null && returnItems.size() > 0) || adjustments.compareTo(ZERO) > 0)) {
+        if (returnHeader != null && (UtilValidate.isNotEmpty(returnItems) || adjustments.compareTo(ZERO) > 0)) {
             Map itemsByOrder = new HashMap();
             Map totalByOrder = new HashMap();
 

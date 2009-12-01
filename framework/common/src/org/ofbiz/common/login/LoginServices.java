@@ -23,7 +23,6 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.io.Serializable;
 
 import javax.transaction.Transaction;
 
@@ -36,6 +35,8 @@ import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.common.authentication.AuthHelper;
+import org.ofbiz.common.authentication.api.AuthenticatorException;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -48,13 +49,11 @@ import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.entity.util.EntityFindOptions;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.security.Security;
-import org.ofbiz.common.authentication.api.AuthenticatorException;
 import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceUtil;
-import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.webapp.control.LoginWorker;
-import org.ofbiz.common.authentication.AuthHelper;
 
 /**
  * <b>Title:</b> Login Services
@@ -237,8 +236,7 @@ public class LoginServices {
 
                             if (!isServiceAuth) {
                                 // get the UserLoginSession if this is not a service auth
-                                Map userLoginSessionMap = LoginWorker.getUserLoginSession(userLogin);
-                                GenericValue userLoginSession = null;
+                                Map<?, ?> userLoginSessionMap = LoginWorker.getUserLoginSession(userLogin);
 
                                 // return the UserLoginSession Map
                                 if (userLoginSessionMap != null) {
@@ -499,7 +497,7 @@ public class LoginServices {
 
         // security: don't create a user login if the specified partyId (if not empty) already exists
         // unless the logged in user has permission to do so (same partyId or PARTYMGR_CREATE)
-        if (partyId != null && partyId.length() > 0) {
+        if (UtilValidate.isNotEmpty(partyId)) {
             GenericValue party = null;
 
             try {
@@ -590,7 +588,7 @@ public class LoginServices {
         String userLoginId = (String) context.get("userLoginId");
         String errMsg = null;
 
-        if (userLoginId == null || userLoginId.length() == 0) {
+        if (UtilValidate.isEmpty(userLoginId)) {
             userLoginId = loggedInUserLogin.getString("userLoginId");
         }
 
@@ -726,7 +724,7 @@ public class LoginServices {
 
         // security: don't create a user login if the specified partyId (if not empty) already exists
         // unless the logged in user has permission to do so (same partyId or PARTYMGR_CREATE)
-        if (partyId != null && partyId.length() > 0) {
+        if (UtilValidate.isNotEmpty(partyId)) {
             //GenericValue party = null;
             //try {
             //    party = delegator.findByPrimaryKey("Party", UtilMisc.toMap("partyId", partyId));
@@ -826,7 +824,7 @@ public class LoginServices {
         String userLoginId = (String) context.get("userLoginId");
         String errMsg = null;
 
-        if (userLoginId == null || userLoginId.length() == 0) {
+        if (UtilValidate.isEmpty(userLoginId)) {
             userLoginId = loggedInUserLogin.getString("userLoginId");
         }
 
@@ -1000,7 +998,7 @@ public class LoginServices {
     public static String getHashType() {
         String hashType = UtilProperties.getPropertyValue("security.properties", "password.encrypt.hash.type");
 
-        if (hashType == null || hashType.length() == 0) {
+        if (UtilValidate.isEmpty(hashType)) {
             Debug.logWarning("Password encrypt hash type is not specified in security.properties, use SHA", module);
             hashType = "SHA";
         }

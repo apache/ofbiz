@@ -253,6 +253,7 @@ under the License.
                                 in case no previous view can be retrieved.</xs:documentation>
                         </xs:annotation>
                     </xs:enumeration>
+                    <xs:enumeration value="view-last-noparam"/>                            
                     <xs:enumeration value="view-home">
                         <xs:annotation>
                             <xs:documentation>Will use the view from the last saved 'home' position
@@ -338,5 +339,16 @@ under the License.
         <xs:attribute type="xs:string" name="info"/>
         <xs:attribute type="xs:string" name="content-type"/>
         <xs:attribute type="xs:string" name="encoding"/>
+        <xs:attribute name="no-cache" default="false">
+            <xs:annotation>
+                <xs:documentation>Send no-cache headers if set to true.</xs:documentation>
+            </xs:annotation>        
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>        
     </xs:attributeGroup>
 </xs:schema>

@@ -111,9 +111,9 @@ public class SimpleMethod {
     public static final String module = SimpleMethod.class.getName();
     public static final String err_resource = "MiniLangErrorUiLabels";
 
-    protected static UtilCache<String, Map<String, SimpleMethod>> simpleMethodsDirectCache = new UtilCache<String, Map<String, SimpleMethod>>("minilang.SimpleMethodsDirect", 0, 0);
-    protected static UtilCache<String, Map<String, SimpleMethod>> simpleMethodsResourceCache = new UtilCache<String, Map<String, SimpleMethod>>("minilang.SimpleMethodsResource", 0, 0);
-    protected static UtilCache<URL, Map<String, SimpleMethod>> simpleMethodsURLCache = new UtilCache<URL, Map<String, SimpleMethod>>("minilang.SimpleMethodsURL", 0, 0);
+    protected static UtilCache<String, Map<String, SimpleMethod>> simpleMethodsDirectCache = UtilCache.createUtilCache("minilang.SimpleMethodsDirect", 0, 0);
+    protected static UtilCache<String, Map<String, SimpleMethod>> simpleMethodsResourceCache = UtilCache.createUtilCache("minilang.SimpleMethodsResource", 0, 0);
+    protected static UtilCache<URL, Map<String, SimpleMethod>> simpleMethodsURLCache = UtilCache.createUtilCache("minilang.SimpleMethodsURL", 0, 0);
 
     // ----- Event Context Invokers -----
 
@@ -715,7 +715,7 @@ public class SimpleMethod {
             boolean forceError = false;
 
             String tempErrorMsg = (String) methodContext.getEnv(eventErrorMessageName);
-            if (errorMsg.length() > 0 || (tempErrorMsg != null && tempErrorMsg.length() > 0)) {
+            if (errorMsg.length() > 0 || UtilValidate.isNotEmpty(tempErrorMsg)) {
                 errorMsg += tempErrorMsg;
                 methodContext.getRequest().setAttribute("_ERROR_MESSAGE_", errorMsg);
                 forceError = true;
@@ -732,7 +732,7 @@ public class SimpleMethod {
             }
 
             String eventMsg = (String) methodContext.getEnv(eventEventMessageName);
-            if (eventMsg != null && eventMsg.length() > 0) {
+            if (UtilValidate.isNotEmpty(eventMsg)) {
                 methodContext.getRequest().setAttribute("_EVENT_MESSAGE_", eventMsg);
             }
             List<String> eventMsgList = UtilGenerics.checkList(methodContext.getEnv(eventEventMessageListName));
@@ -741,7 +741,7 @@ public class SimpleMethod {
             }
 
             response = (String) methodContext.getEnv(eventResponseCodeName);
-            if (response == null || response.length() == 0) {
+            if (UtilValidate.isEmpty(response)) {
                 if (forceError) {
                     //override response code, always use error code
                     Debug.logInfo("No response code string found, but error messages found so assuming error; returning code [" + defaultErrorCode + "]", module);
@@ -758,7 +758,7 @@ public class SimpleMethod {
             boolean forceError = false;
 
             String tempErrorMsg = (String) methodContext.getEnv(serviceErrorMessageName);
-            if (errorMsg.length() > 0 || (tempErrorMsg != null && tempErrorMsg.length() > 0)) {
+            if (errorMsg.length() > 0 || UtilValidate.isNotEmpty(tempErrorMsg)) {
                 errorMsg += tempErrorMsg;
                 methodContext.putResult(ModelService.ERROR_MESSAGE, errorMsg);
                 forceError = true;
@@ -785,7 +785,7 @@ public class SimpleMethod {
             }
 
             String successMsg = (String) methodContext.getEnv(serviceSuccessMessageName);
-            if (successMsg != null && successMsg.length() > 0) {
+            if (UtilValidate.isNotEmpty(successMsg)) {
                 methodContext.putResult(ModelService.SUCCESS_MESSAGE, successMsg);
             }
 
@@ -795,7 +795,7 @@ public class SimpleMethod {
             }
 
             response = (String) methodContext.getEnv(serviceResponseMessageName);
-            if (response == null || response.length() == 0) {
+            if (UtilValidate.isEmpty(response)) {
                 if (forceError) {
                     //override response code, always use error code
                     Debug.logVerbose("No response code string found, but error messages found so assuming error; returning code [" + defaultErrorCode + "]", module);
@@ -849,7 +849,7 @@ public class SimpleMethod {
                 String nodeName = curOperElem.getNodeName();
                 MethodOperation methodOp = null;
 
-                MethodOperation.Factory factory = methodOperationFactories.get(nodeName);
+                MethodOperation.Factory<MethodOperation> factory = methodOperationFactories.get(nodeName);
                 if (factory != null) {
                     methodOp = factory.createMethodOperation(curOperElem, simpleMethod);
                 } else if ("else".equals(nodeName)) {

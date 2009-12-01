@@ -862,8 +862,7 @@ under the License.
     <form name="ListSupplierProducts" type="list" target="updateSupplierProduct" title="" list-name="productSuppliers"
         odd-row-style="alternate-row" default-table-style="basic-table">
         <!--<auto-fields-service service-name="updateSupplierProduct"/>-->
-        <field name="partyId" title="${uiLabelMap.ProductSupplier}"
-            header-link="EditProductSuppliers?productId=${productId}&amp;orderBy=partyId" header-link-style="buttontext">
+        <field name="partyId" title="${uiLabelMap.ProductSupplier}">
             <display-entity entity-name="PartyNameView" also-hidden="true" description="${firstName} ${middleName} ${lastName} ${groupName}">
                 <sub-hyperlink target="/partymgr/control/viewprofile" target-type="inter-app" description="${partyId}" link-style="buttontext">
                     <parameter param-name="partyId"/>
@@ -871,22 +870,20 @@ under the License.
             </display-entity>
         </field>
         <field name="supplierProductId"><display/></field>
-        <field name="minimumOrderQuantity" title="${uiLabelMap.ProductMinimumOrderQuantity}"
-            header-link="EditProductSuppliers?productId=${productId}&amp;orderBy=minimumOrderQuantity" header-link-style="buttontext">
+        <field name="minimumOrderQuantity" title="${uiLabelMap.ProductMinimumOrderQuantity}">
             <display/>
         </field>
-        <field name="orderQtyIncrements" title="${uiLabelMap.ProductOrderQtyIncrements}"
-            header-link="EditProductSuppliers?productId=${productId}&amp;orderBy=orderQtyIncrements" header-link-style="buttontext">
+        <field name="orderQtyIncrements" title="${uiLabelMap.ProductOrderQtyIncrements}">
             <display/>
         </field>
-        <field name="supplierPrefOrderId" header-link="EditProductSuppliers?productId=${productId}&amp;orderBy=supplierPrefOrderId" header-link-style="buttontext">
+        <field name="supplierPrefOrderId">
             <display-entity entity-name="SupplierPrefOrder"/>
         </field>
         <field name="availableFromDate" title="${uiLabelMap.ProductAvailableFromDate}" red-when="after-now"><display/></field>
         <field name="availableThruDate" title="${uiLabelMap.ProductAvailableThruDate}" red-when="before-now"><display/></field>
         <field name="quantityUomId"><display-entity entity-name="Uom" key-field-name="uomId"/></field>
         <field name="supplierCommissionPerc"><display/></field>
-        <field name="lastPrice" header-link="EditProductSuppliers?productId=${productId}&amp;orderBy=lastPrice" header-link-style="buttontext">
+        <field name="lastPrice">
             <display type="currency" currency="${currencyUomId}"/>
         </field>
         <field name="editLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
@@ -1149,8 +1146,35 @@ under the License.
         </field>
     </form>
 
-    <form name="ListCostComponents" type="list" title="" list-name="costs"
+    <form name="FilterCostComponents" type="single" target="EditProductCosts" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="productId"><hidden value="${productId}"/></field>
+        <field name="costComponentTypePrefix">
+            <drop-down allow-empty="false">
+                <option key="EST_STD" description="${uiLabelMap.ProductEstimatedCosts}"/>
+            </drop-down>
+        </field>
+        <field name="costUomId" title="${uiLabelMap.CommonCurrency}">
+            <drop-down allow-empty="false" no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options entity-name="Uom" key-field-name="uomId" description="${description} [${uomId}]">
+                    <entity-constraint name="uomTypeId" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListCostComponents" type="list" title="" list-name="listIt"
         odd-row-style="alternate-row" default-table-style="basic-table" paginate-target="EditProductCosts">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="requestParameters"/>
+                <field-map field-name="entityName" value="CostComponent"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="orderBy" value="-fromDate"/>
+            </service>
+        </actions>
         <auto-fields-entity entity-name="CostComponent" default-field-type="display"/>
         <field name="cost">
             <display/>

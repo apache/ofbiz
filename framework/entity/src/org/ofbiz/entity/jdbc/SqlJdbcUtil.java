@@ -26,10 +26,10 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Clob;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -42,6 +42,8 @@ import javax.sql.rowset.serial.SerialClob;
 
 import javolution.util.FastMap;
 
+import org.ofbiz.base.conversion.Converter;
+import org.ofbiz.base.conversion.Converters;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.ObjectType;
 import org.ofbiz.base.util.UtilGenerics;
@@ -55,7 +57,6 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityConditionParam;
 import org.ofbiz.entity.condition.OrderByList;
 import org.ofbiz.entity.config.DatasourceInfo;
-import org.ofbiz.entity.datasource.GenericDAO;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;
 import org.ofbiz.entity.model.ModelFieldType;
@@ -68,7 +69,7 @@ import org.ofbiz.entity.model.ModelViewEntity;
  *
  */
 public class SqlJdbcUtil {
-    public static final String module = GenericDAO.class.getName();
+    public static final String module = SqlJdbcUtil.class.getName();
 
     public static final int CHAR_BUFFER_SIZE = 4096;
 
@@ -176,10 +177,10 @@ public class SqlJdbcUtil {
                     if (condBuffer.length() == 0) {
                         throw new GenericModelException("No view-link/join key-maps found for the " + viewLink.getEntityAlias() + " and the " + viewLink.getRelEntityAlias() + " member-entities of the " + modelViewEntity.getEntityName() + " view-entity.");
                     }
-                    
+
                     // TODO add expression from entity-condition on view-link
-                    
-                    
+
+
                     restOfStatement.append(condBuffer.toString());
 
                     // don't put ending parenthesis
@@ -230,18 +231,18 @@ public class SqlJdbcUtil {
     }
 
     /** Makes a WHERE clause String with "<col name>=?" if not null or "<col name> IS null" if null, all AND separated */
-    public static String makeWhereStringFromFields(List modelFields, Map<String, Object> fields, String operator) {
+    public static String makeWhereStringFromFields(List<ModelField> modelFields, Map<String, Object> fields, String operator) {
         return makeWhereStringFromFields(modelFields, fields, operator, null);
     }
 
     /** Makes a WHERE clause String with "<col name>=?" if not null or "<col name> IS null" if null, all AND separated */
-    public static String makeWhereStringFromFields(List modelFields, Map<String, Object> fields, String operator, List<EntityConditionParam> entityConditionParams) {
+    public static String makeWhereStringFromFields(List<ModelField> modelFields, Map<String, Object> fields, String operator, List<EntityConditionParam> entityConditionParams) {
         if (modelFields.size() < 1) {
             return "";
         }
 
         StringBuilder returnString = new StringBuilder();
-        Iterator iter = modelFields.iterator();
+        Iterator<ModelField> iter = modelFields.iterator();
         while (iter.hasNext()) {
             Object item = iter.next();
             Object name = null;
@@ -273,7 +274,7 @@ public class SqlJdbcUtil {
         return returnString.toString();
     }
 
-    public static String makeWhereClause(ModelEntity modelEntity, List modelFields, Map<String, Object> fields, String operator, String joinStyle) throws GenericEntityException {
+    public static String makeWhereClause(ModelEntity modelEntity, List<ModelField> modelFields, Map<String, Object> fields, String operator, String joinStyle) throws GenericEntityException {
         StringBuilder whereString = new StringBuilder("");
 
         if (UtilValidate.isNotEmpty(modelFields)) {
@@ -487,6 +488,7 @@ public class SqlJdbcUtil {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static void getValue(ResultSet rs, int ind, ModelField curField, GenericEntity entity, ModelFieldTypeReader modelFieldTypeReader) throws GenericEntityException {
         ModelFieldType mft = modelFieldTypeReader.getModelFieldType(curField.getType());
 
@@ -494,6 +496,51 @@ public class SqlJdbcUtil {
             throw new GenericModelException("definition fieldType " + curField.getType() + " not found, cannot getValue for field " +
                     entity.getEntityName() + "." + curField.getName() + ".");
         }
+
+        // ----- Try out the new converter code -----
+
+        Object sourceObject = null;
+        try {
+            sourceObject = rs.getObject(ind);
+            if (sourceObject == null) {
+                entity.dangerousSetNoCheckButFast(curField, null);
+                return;
+            }
+        } catch (SQLException e) {
+            throw new GenericEntityException(e);
+        }
+        Class<?> targetClass = mft.getJavaClass();
+        if (targetClass != null) {
+            Class<?> sourceClass = sourceObject.getClass();
+            if (targetClass.equals(sourceClass)) {
+                entity.dangerousSetNoCheckButFast(curField, sourceObject);
+                return;
+            }
+            Converter<Object, Object> converter = (Converter<Object, Object>) mft.getSqlToJavaConverter();
+            if (converter == null) {
+                if (mft.getSqlClass() == null) {
+                    mft.setSqlClass(sourceClass);
+                }
+                try {
+                    converter = (Converter<Object, Object>) Converters.getConverter(sourceClass, targetClass);
+                    mft.setSqlToJavaConverter(converter);
+                } catch (Exception e) {
+                    Debug.logError(e, module);
+                }
+            }
+            if (converter != null) {
+                try {
+                    entity.dangerousSetNoCheckButFast(curField, converter.convert(sourceObject));
+                    return;
+                } catch (Exception e) {
+                    Debug.logError(e, module);
+                }
+            }
+            Debug.logInfo("Unable to convert, falling back on switch statement", module);
+        }
+
+        // ------------------------------------------
+
         String fieldType = mft.getJavaType();
 
         try {
@@ -815,7 +862,7 @@ public class SqlJdbcUtil {
                 break;
 
             case 15:
-                sqlP.setValue((java.util.Collection) fieldValue);
+                sqlP.setValue(UtilGenerics.<Collection<?>>cast(fieldValue));
                 break;
             }
         } catch (GenericNotImplementedException e) {

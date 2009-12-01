@@ -63,6 +63,15 @@ ol, ul {
 list-style: none;
 }
 
+ol.numbers {
+	list-style: decimal; 
+    padding-left: 20px;
+}
+ul.dots {
+    list-style: circle; 
+    padding-left: 20px;
+}
+
 /* ===== Basic Element Styles ===== */
 
 a, a:visited {
@@ -525,7 +534,7 @@ margin-bottom: 0.5em;
 border-bottom: #999 solid 0.1em;
 /* using min-height as an alternative to clear: both; because that, in some browsers, will clear the top-level columns and not just in this div (Mozilla based, namely) */
 min-height: 6em;
-overflow: auto;
+overflow: visible;
 padding: 0.5em;
 position: relative;
 }
@@ -1883,36 +1892,16 @@ margin: 0;
 background: url(/images/cal.gif) no-repeat;
 }
 
-.field-lookup {
-background: url(/images/fieldlookup.gif) no-repeat;
+.field-lookup ul li {
+float: left;
 }
 
-.nav-first {
-/*
-background: url(/images/prev-year.gif) no-repeat left center;
-padding-left: 1.8em;
-*/
-}
-
-.nav-last {
-/*
-background: url(/images/next-year.gif) no-repeat right center;
-padding-right: 1.8em;
-*/
-}
-
-.nav-next {
-/*
-background: url(/images/next.gif) no-repeat right center;
-padding-right: 1.8em;
-*/
-}
-
-.nav-previous {
-/*
-background: url(/images/prev.gif) no-repeat left center;
-padding-left: 1.8em;
-*/
+.field-lookup ul li a{
+background: url(/images/fieldlookup.gif) no-repeat 0 0;
+display: block;
+margin: 3px 10px 0px 4px;
+width:16px;
+height:16px;
 }
 
 /* ================================= */
@@ -2065,21 +2054,23 @@ padding: 0.1em 0.5em 0.2em 0.5em;
 
 .fieldgroup-title-bar ul .collapsed,
 .fieldgroup-title-bar ul .collapsed:hover {
-background: url(/images/expand.gif) no-repeat center center;
+background: url(/images/expand.gif) no-repeat left center;
 min-height: 1.1em;
 min-width: 1.1em;
 }
 
 .fieldgroup-title-bar ul .expanded,
 .fieldgroup-title-bar ul .expanded:hover {
-background: url(/images/collapse.gif) no-repeat center center;
+background: url(/images/collapse.gif) no-repeat left center;
 min-height: 1.1em;
 min-width: 1.1em;
 }
 
-.fieldgroup-title-bar td.collapse {
-width: 1.1em;
-cursor: default;
+.fieldgroup-title-bar a {
+cursor:pointer;
+text-decoration:none;
+padding-left: 10px;
+color: #000000;
 }
 
 /* == Portlet configuration screenlet == */

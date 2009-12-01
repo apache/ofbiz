@@ -19,7 +19,6 @@
 package org.ofbiz.minilang.method.entityops;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
@@ -28,8 +27,8 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericEntity;
-import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.GenericValue;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.ContextAccessor;
 import org.ofbiz.minilang.method.MethodContext;
@@ -78,7 +77,7 @@ public class FindByPrimaryKey extends MethodOperation {
         boolean useCache = "true".equals(useCacheStr);
 
         Delegator delegator = methodContext.getDelegator();
-        if (delegatorName != null && delegatorName.length() > 0) {
+        if (UtilValidate.isNotEmpty(delegatorName)) {
             delegator = DelegatorFactory.getDelegator(delegatorName);
         }
 

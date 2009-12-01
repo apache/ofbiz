@@ -23,11 +23,12 @@ under the License.
      <screen name="FindLeads">
         <section>
             <actions>
-                <set field="partyRelationshipTypeId" value="LEAD_OWNER"/>
-                <set field="partyTypeId" value="ANY"/>
+                <set field="titleProperty" value="MarketingFindLeads"/>
                 <set field="currentUrl" value="FindLeads"/>
                 <set field="headerItem" value="Leads"/>
-                <service service-name="findParty" auto-field-map="true"/>
+                <set field="setLeadtDescription" value="${groovy:session.setAttribute(&quot;leadDescription&quot;,headerItem)}"/>
+                <set field="removeAccountDescription" value="${groovy:session.removeAttribute(&quot;accountDescription&quot;)}"/>
+                <set field="removeContactDescription" value="${groovy:session.removeAttribute(&quot;contactDescription&quot;)}"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
@@ -36,12 +37,32 @@ under the License.
                             <widgets>
                                 <include-menu name="LeadSubTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
                                 <container style="no-clear">
-                                    <platform-specific>
-                                        <html>
-                                            <html-template location="component://marketing/webapp/sfa/party/findSfaParty.ftl"/>
-                                            <html-template location="component://marketing/webapp/sfa/lead/ListLeads.ftl"/>
-                                        </html>
-                                    </platform-specific>
+                                    <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                        <decorator-section name="search-options">
+                                            <include-menu name="LeadFindTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
+                                            <include-form name="FindLeads" location="component://marketing/widget/sfa/forms/LeadForms.xml"/>
+                                        </decorator-section>
+                                        <decorator-section name="search-results">
+                                            <section>
+                                                <condition>
+                                                    <or>
+                                                        <if-empty field="parameters.all"/>
+                                                        <if-compare field="parameters.all" operator="equals" value="true"/>
+                                                    </or>
+                                                </condition>
+                                                <widgets>
+                                                    <!-- list all leads -->
+                                                    <label style="h1" text="${uiLabelMap.SfaAllLeads}"/>
+                                                    <include-form name="ListLeads" location="component://marketing/widget/sfa/forms/LeadForms.xml"/>
+                                                </widgets>
+                                                <fail-widgets>
+                                                    <!-- list my leads -->
+                                                    <label style="h1" text="${uiLabelMap.SfaMyLeads}"/>
+                                                    <include-form name="ListMyLeads" location="component://marketing/widget/sfa/forms/LeadForms.xml"/>
+                                                </fail-widgets>
+                                            </section>
+                                        </decorator-section>
+                                    </decorator-screen>
                                 </container>
                             </widgets>
                         </section>
@@ -59,7 +80,7 @@ under the License.
                 <property-to-field field="defaultCountryGeoId" resource="general" property="country.geo.id.default" default="USA"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonLeadDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.CommonCreate} ${uiLabelMap.SfaLead}">
                             <include-form name="createLead" location="component://marketing/widget/sfa/forms/LeadForms.xml"/>
@@ -77,11 +98,24 @@ under the License.
                 <set field="tabButtonItem" value="ConvertLead"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonLeadDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <screenlet title="${uiLabelMap.SfaConvertLead}">
-                            <include-form name="ConvertLead" location="component://marketing/widget/sfa/forms/LeadForms.xml"/>
-                        </screenlet>
+                        <section>
+                            <condition>
+                                <not><if-empty field="parameters.partyGroupId"/></not>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.SfaConvertLead}">
+                                    <include-form name="ConvertLead" location="component://marketing/widget/sfa/forms/LeadForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                            <fail-widgets>
+                                <label text="Please first add related company." style="h2"/>
+                                <screenlet title="${uiLabelMap.PageTitleAddRelatedCompany}" >
+                                    <include-form name="AddRelatedCompany" location="component://marketing/widget/sfa/forms/LeadForms.xml"/>
+                                </screenlet>
+                            </fail-widgets>
+                        </section>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -96,7 +130,7 @@ under the License.
                 <script location="component://marketing/webapp/sfa/WEB-INF/action/CloneLead.groovy"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonLeadDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.SfaCloneLead}">
                             <include-form name="createLead" location="component://marketing/widget/sfa/forms/LeadForms.xml"/>
@@ -111,13 +145,13 @@ under the License.
         <section>
             <actions>
                 <set field="headerItem" value="Leads"/>
+                <set field="tabButtonItem" value="MergeLeads"/>
                 <script location="component://marketing/webapp/sfa/WEB-INF/action/MergeContacts.groovy"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonLeadDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.SfaMergeLeads}">
-                            <label>&lt;br/&gt;</label>
                             <include-form name="MergeLeads" location="component://marketing/widget/sfa/forms/LeadForms.xml"/>
                         </screenlet>
                         <section>
@@ -146,35 +180,12 @@ under the License.
                 <set field="headerItem" value="Leads"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonLeadDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleCreateLeadFromVCard}">
                             <container><label style="h3" text="${uiLabelMap.SfaAutoCreateLeadByImportingVCard}"/></container>
-                            <label>&lt;br/&gt;</label>
                             <include-form  name="NewLeadFromVCard" location="component://marketing/widget/sfa/forms/LeadForms.xml"/>
                         </screenlet>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-
-    <screen name="AssignLeadToMe">
-        <section>
-            <actions>
-                <set field="titleProperty" value="PageTitleAssignLeadFromExisting" />
-                <set field="headerItem" value="Leads" />
-            </actions>
-            <widgets>
-                <decorator-screen name="CommonPartyDecorator"
-                    location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
-                        <container style="no-clear">
-                            <screenlet title="${uiLabelMap.PageTitleAssignLeadFromExisting}">
-                                <include-form name="AssignLeadToMe"
-                                    location="component://marketing/widget/sfa/forms/LeadForms.xml" />
-                            </screenlet>
-                        </container>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -194,6 +205,23 @@ under the License.
                     <include-form name="AddLeadPartyDataSource" location="component://marketing/widget/sfa/forms/LeadForms.xml"/>
                     <include-form name="ViewLeadPartyDataSources" location="component://marketing/widget/sfa/forms/LeadForms.xml"/>
                 </screenlet>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="AddRelatedCompany">
+        <section>
+            <actions>
+                <set field="headerItem" value="Leads"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonLeadDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleAddRelatedCompany}" >
+                            <include-form name="AddRelatedCompany" location="component://marketing/widget/sfa/forms/LeadForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
             </widgets>
         </section>
     </screen>

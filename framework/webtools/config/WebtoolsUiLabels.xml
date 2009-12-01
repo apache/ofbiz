@@ -603,7 +603,7 @@
     <property key="WebtoolsCheckAll">
         <value xml:lang="de">Alle auswählen</value>
         <value xml:lang="en">Check All</value>
-        <value xml:lang="fr">Tout vérifier</value>
+        <value xml:lang="fr">Sélectionner tout</value>
         <value xml:lang="it">Controlla tutti</value>
         <value xml:lang="th">ตรวจสอบทั้งหมด</value>
         <value xml:lang="zh">检查全部</value>
@@ -1194,6 +1194,9 @@
         <value xml:lang="th">แสดง Entity </value>
         <value xml:lang="zh">浏览实体 </value>
     </property>
+    <property key="WebtoolsEntityXMLRepresentation">
+        <value xml:lang="en">Entity XML Representation</value>
+    </property>
     <property key="WebtoolsEntityXMLTools">
         <value xml:lang="de">Entität XML Tools</value>
         <value xml:lang="en">Entity XML Tools</value>
@@ -1507,7 +1510,7 @@
     </property>
     <property key="WebtoolsImportExport">
         <value xml:lang="en">Import/Export</value>
-        <value xml:lang="it">Importazione/Esportazione</value>
+        <value xml:lang="it">Importazione / Esportazione</value>
     </property>
     <property key="WebtoolsImportFile">
         <value xml:lang="de">Datei importieren</value>
@@ -3381,7 +3384,7 @@
     <property key="WebtoolsUnCheckAll">
         <value xml:lang="de">Keine auswählen</value>
         <value xml:lang="en">Un-Check All</value>
-        <value xml:lang="fr">Tout désélectionner</value>
+        <value xml:lang="fr">Désélectionner tout</value>
         <value xml:lang="it">De-seleziona tutto</value>
         <value xml:lang="th">ยกเลิกการเช็คทั้งหมด</value>
         <value xml:lang="zh">全部不选</value>

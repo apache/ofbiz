@@ -26,6 +26,7 @@ import java.util.Map;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -218,7 +219,7 @@ public class WorkflowServices {
         String workEffortId = (String) context.get("workEffortId");
         Map appendContext = (Map) context.get("currentContext");
 
-        if (appendContext == null || appendContext.size() == 0) {
+        if (UtilValidate.isEmpty(appendContext)) {
             result.put(ModelService.RESPONSE_MESSAGE, ModelService.RESPOND_ERROR);
             result.put(ModelService.ERROR_MESSAGE, "The passed context is empty");
         }

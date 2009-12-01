@@ -215,11 +215,11 @@
         <value xml:lang="th">รหัสหน่วยวัดจำนวนเงิน</value>
         <value xml:lang="zh">实际金额货币单位标识</value>
     </property>
-    <property key="AccountingAddAgreementWorkEffortAppl">
+    <property key="AccountingAddAgreementWorkEffortApplic">
         <value xml:lang="de">Vereinbarung-Arbeitseinsatz hinzufügen</value>
-        <value xml:lang="en">Add Agreement Work Effort Appl</value>
+        <value xml:lang="en">Add Agreement Work Effort Applic</value>
         <value xml:lang="fr">Ajouter une application de tâche d'accord commercial</value>
-        <value xml:lang="hi_IN">अनुबंध कार्य प्रयास अनुप्रयोग(AgreementWorkEffortAppl) बनाएँ</value>
+        <value xml:lang="hi_IN">अनुबंध कार्य प्रयास अनुप्रयोग(AgreementWorkEffortApplic) बनाएँ</value>
         <value xml:lang="it">Aggiungi Applicazione Termine Impegno di Lavoro</value>
         <value xml:lang="nl">Voeg Werkinzettoepassing van overeenkomt toe</value>
         <value xml:lang="zh">添加协议人工服务用途</value>
@@ -647,16 +647,16 @@
         <value xml:lang="th">รหัสประเภทสัญญา</value>
         <value xml:lang="zh">合同类型标识</value>
     </property>
-    <property key="AccountingAgreementWorkEffortApplAlreadyExists">
-        <value xml:lang="en">Agreement Work Effort Appl Already Exists</value>
+    <property key="AccountingAgreementWorkEffortApplicAlreadyExists">
+        <value xml:lang="en">Agreement Work Effort Applic Already Exists</value>
         <value xml:lang="fr">Cette tâche d'application d'accord commercial existe déjà</value>
         <value xml:lang="hi_IN">अनुबंध - काम प्रयास का अनुप्रयोग पहले से ही मौजूद है</value>
         <value xml:lang="it">Applicazioni contratto impegno di labovo già esistente</value>
-        <value xml:lang="nl">Overeenkomst Work Effort Appl bestaat al</value>
+        <value xml:lang="nl">Overeenkomst Work Effort Applic bestaat al</value>
         <value xml:lang="zh">合同人工服务用途已存在</value>
     </property>
-    <property key="AccountingAgreementWorkEffortAppls">
-        <value xml:lang="en">Agreement Work Effort Appls</value>
+    <property key="AccountingAgreementWorkEffortApplics">
+        <value xml:lang="en">Agreement Work Effort Applics</value>
         <value xml:lang="fr">Applications de tâche d'accord commercial</value>
         <value xml:lang="hi_IN">अनुबंध- कार्य प्रयास अनुप्रयोग</value>
         <value xml:lang="it">Applicazioni Impegni di Lavoro</value>
@@ -2263,6 +2263,9 @@
         <value xml:lang="en">Create New Financial Account</value>
         <value xml:lang="hi_IN">नया  वित्तीय खाता बनाएँ</value>
     </property>
+    <property key="AccountingCreateNewFinAccountReconciliations">
+        <value xml:lang="en">Create New Financial Account Reconciliations</value>
+    </property>
     <property key="AccountingCreateNewGiftCard">
         <value xml:lang="de">Neuen Gutschein erstellen</value>
         <value xml:lang="en">Create New Gift Card</value>
@@ -2497,6 +2500,10 @@
         <value xml:lang="th">เกิดปัญหาในการตรวจสอบความถูกต้องของคุณ; กรุณาเช็คบัตรของคุณและรหัสส่วนตัวของคุณและทำอีกครั้ง</value>
         <value xml:lang="zh">检查你的余额时出现问题；请检查你的卡和密码，然后重试</value>
     </property>
+    <property key="AccountingCurrentBankReconciliation">
+        <value xml:lang="en">Current Bank Reconciliation</value>
+        <value xml:lang="hi_IN">वर्तमान बैन्क मिलाप</value>
+    </property>
     <property key="AccountingCurrentCustomTimePeriod">
         <value xml:lang="de">Aktueller spezifischer Zeitraum</value>
         <value xml:lang="en">Current Custom Time Period</value>
@@ -2505,10 +2512,6 @@
         <value xml:lang="it">Periodi di Tempo Personalizzati Attuale</value>
         <value xml:lang="th">ช่วงเวลาของลูกค้าในปัจจุบัน</value>
         <value xml:lang="zh">当前定制时间段</value>
-    </property>
-    <property key="AccountingCurrentGlReconciliation">
-        <value xml:lang="en">Current Gl Reconciliation</value>
-        <value xml:lang="hi_IN">वर्तमान प्रधान खाता-बही  मिलाप</value>
     </property>
     <property key="AccountingCustNr">
         <value xml:lang="ar">رقم الزبون</value>
@@ -2703,6 +2706,9 @@
     <property key="AccountingDepositSlip">
         <value xml:lang="en">Deposit Slip</value>
         <value xml:lang="hi_IN">जमा पर्ची</value>
+    </property>
+    <property key="AccountingDepositSlipId">
+        <value xml:lang="en">Deposit Slip Id</value>
     </property>
     <property key="AccountingDepositSlips">
         <value xml:lang="en">Deposit Slips</value>
@@ -3323,6 +3329,12 @@
     <property key="AccountingFindDepositSlip">
         <value xml:lang="en">Find Deposit Slips for Financial Account : ${finAccount.finAccountName} [${finAccountId}]</value>
         <value xml:lang="hi_IN">वित्तीय खाता ${finAccount.finAccountName} [${finAccountId}] के लिए जमा पर्चीयां ढूँढें</value>
+    </property>
+    <property key="AccountingFindFinAccountReconciliations">
+        <value xml:lang="en">Find Financial Account Reconciliations</value>
+    </property>
+    <property key="AccountingAddFinAccountReconciliations">
+        <value xml:lang="en">Add Financial Account Reconciliations for Financial Account : ${finAccount.finAccountName} [${finAccountId}]</value>
     </property>
     <property key="AccountingFindFixedAssets">
         <value xml:lang="de">Suche Anlagen</value>
@@ -5165,6 +5177,9 @@
         <value xml:lang="th">ใบกำกับการขาย</value>
         <value xml:lang="zh">销售发票</value>
     </property>
+    <property key="AccountingInvoicesDueSoon">
+        <value xml:lang="en">Invoices Due Soon</value>
+    </property>
     <property key="AccountingInvoiceStatus">
         <value xml:lang="ar">الوضعيات</value>
         <value xml:lang="de">Status</value>
@@ -5475,9 +5490,9 @@
         <value xml:lang="th">ผลรวมแถว</value>
         <value xml:lang="zh">总行数</value>
     </property>
-    <property key="AccountingListAgreementWorkEffortAppls">
+    <property key="AccountingListAgreementWorkEffortApplics">
         <value xml:lang="de">Zugewiesene Arbeitseinsätze zu Vereinbarungen auflisten</value>
-        <value xml:lang="en">List Agreement Work Effort Appls</value>
+        <value xml:lang="en">List Agreement Work Effort Applics</value>
         <value xml:lang="fr">Liste des applications d'accords commerciaux de service</value>
         <value xml:lang="hi_IN">अनुबंध- कार्य प्रयास अनुप्रयोग की सूची</value>
         <value xml:lang="it">Lista applicazioni contratto impegno di lavoro</value>
@@ -5559,6 +5574,9 @@
         <value xml:lang="it">Ricerca righe contratti</value>
         <value xml:lang="nl">Vind onderdelen overeenkomst</value>
         <value xml:lang="zh">查找合同条款</value>
+    </property>
+    <property key="AccountingLookupGlReconciliations">
+        <value xml:lang="en">Lookup Gl Reconciliations</value>
     </property>
     <property key="AccountingLookupInvoices">
         <value xml:lang="ar">إطلالة على  الفواتير</value>
@@ -7695,6 +7713,10 @@
         <value xml:lang="en">Payment status must be received or sent</value>
         <value xml:lang="hi_IN">भुगतान की स्थिति 'प्राप्त' या 'भेजा दिया' होना चाहिए</value>
     </property>
+    <property key="AccountingPaymentStatusToNotPaid">
+        <value xml:lang="en">Status to "Not Paid"</value>
+        <value xml:lang="hi_IN">भुगतान नहीं दिया</value>
+    </property>
     <property key="AccountingPermissionError">
         <value xml:lang="ar">لا رخصة لديكم لهذه العملية</value>
         <value xml:lang="de">Sie haben keine Berechtigung für diese Funktion.</value>
@@ -7717,6 +7739,9 @@
         <value xml:lang="it">Tu non hai il permesso di usare questa pagina (necessario PERIOD_MAINT)</value>
         <value xml:lang="th">คุณไม่ได้รับอนุญาตให้ใช้งานในหน้านี้ (PERIOD_MAINT ที่ต้องการ)</value>
         <value xml:lang="zh">你没有权限使用这个页面(需要PERIOD_MAINT)</value>
+    </property>
+    <property key="AccountingPastDueInvoices">
+        <value xml:lang="en">Past Due Invoices</value>
     </property>
     <property key="AccountingOrgPartyId">
         <value xml:lang="en">Org Party Id</value>
@@ -7867,6 +7892,11 @@
         <value xml:lang="th">Accounting Preferences</value>
         <value xml:lang="zh">团体财务的优先选择</value>
     </property>
+    <property key="AccountingPreviousBankReconciliation">
+        <value xml:lang="de">vorherige Kontenabstimmung</value>
+        <value xml:lang="en">Previous Bank Reconciliation</value>
+        <value xml:lang="hi_IN">पिछला बैन्क मिलाप</value>
+    </property>
     <property key="AccountingPrefixCard">
         <value xml:lang="de">Prefix auf der Karte</value>
         <value xml:lang="en">Prefix Card</value>
@@ -7879,11 +7909,6 @@
         <value xml:lang="ru">Префикс для карты</value>
         <value xml:lang="th">คำนำหน้าบัตร</value>
         <value xml:lang="zh">卡上前缀</value>
-    </property>
-    <property key="AccountingPreviousGlReconciliation">
-        <value xml:lang="de">vorherige Kontenabstimmung</value>
-        <value xml:lang="en">Previous Gl Reconciliation</value>
-        <value xml:lang="hi_IN">पिछला  प्रधान खाता-बही  मिलाप</value>
     </property>
     <property key="AccountingPrintAsCheck">
         <value xml:lang="ar">إطبع ك صك</value>
@@ -7929,6 +7954,9 @@
     <property key="AccountingPrintDepositSlip">
         <value xml:lang="en">Print Deposit Slip</value>
         <value xml:lang="hi_IN">जमा पर्ची प्रिंट करे</value>
+    </property>
+    <property key="AccountingPrintInvoices">
+        <value xml:lang="en">Print Invoices</value>
     </property>
     <property key="AccountingProblemChangingInvoiceStatusTo">
         <value xml:lang="ar">مشكل عند تغيير وضعية الفاتورة إلى  ${newStatus}</value>
@@ -8152,6 +8180,10 @@
         <value xml:lang="en">Reconciliation</value>
         <value xml:lang="hi_IN">मिलाप</value>
     </property>
+    <property key="AccountingReconciliationDate">
+        <value xml:lang="en">Reconciliation Date</value>
+        <value xml:lang="hi_IN">मिलाप दिनांक</value>
+    </property>
     <property key="AccountingReconciliationError">
         <value xml:lang="en">Can not Reconcile finAccountTrans [${finAccountTrans.finAccountTransId}], glReconciliationId not exist</value>
         <value xml:lang="hi_IN">finAccountTrans [${finAccountTrans.finAccountTransId}] का पुनर्मिलान नहीं कर सकते, glReconciliationId मौजूद नहीं है</value>
@@ -8260,6 +8292,10 @@
         <value xml:lang="de">Laufender Kontostand</value>
         <value xml:lang="en">Running Total</value>
         <value xml:lang="hi_IN">निरंतर कुल</value>
+    </property>
+    <property key="AccountingRunningTotalOutstanding">
+        <value xml:lang="en">Running Total (Outstanding)</value>
+        <value xml:lang="hi_IN">निरंतर कुल (बकाया राशि)</value>
     </property>
     <property key="AccountingSalesInvoiceToRevenue">
         <value xml:lang="de">Zuweisungen von Einkaufsrechnungsarten zu Ertragskonten</value>
@@ -8568,7 +8604,7 @@
         <value xml:lang="de">Rechnungsbetrag aufteilen</value>
         <value xml:lang="en">Split Payment</value>
         <value xml:lang="es">Dividir pago</value>
-        <value xml:lang="fr">Séparer le paiement</value>
+        <value xml:lang="fr">Diviser le paiement</value>
         <value xml:lang="hi_IN">फूट भुगतान</value>
         <value xml:lang="it">Suddividi il pagamento</value>
         <value xml:lang="ja">Split Payment</value>
@@ -8727,6 +8763,9 @@
     <property key="AccountingTotalAmountPercentageIsNotEqualOneHundred">
         <value xml:lang="en">Total amountPercentage is not equal 100.</value>
         <value xml:lang="hi_IN">कुल amountPercentage बराबर 100 नहीं है</value>
+    </property>
+    <property key="AccountingTotalCostCenterAmount">
+        <value xml:lang="en">Cost center amount percentage saved successfully</value>
     </property>
     <property key="AccountingTotalCommissionAmount">
         <value xml:lang="en">Total Commission Amount</value>
@@ -12602,8 +12641,8 @@
         <value xml:lang="th">แก้ไขสัญญาที่กำหนด</value>
         <value xml:lang="zh">编辑合同条件</value>
     </property>
-    <property key="PageTitleEditAgreementWorkEffortAppls">
-        <value xml:lang="en">Edit Agreement Work Effort Appls</value>
+    <property key="PageTitleEditAgreementWorkEffortApplics">
+        <value xml:lang="en">Edit Agreement Work Effort Applics</value>
         <value xml:lang="fr">Modifier les application d'accords commerciaux de service</value>
         <value xml:lang="hi_IN">अनुबंध-कार्य प्रयास अनुप्रयोग संपादित करें</value>
         <value xml:lang="it">Aggiorna Applicazioni Impegno di Lavoro</value>
@@ -13033,6 +13072,9 @@
     <property key="PageTitleFindFinAccountTrans">
         <value xml:lang="en">Find Transactions for Financial Account: ${finAccount.finAccountName} [${finAccountId}]</value>
         <value xml:lang="hi_IN">${finAccount.finAccountName} [${finAccountId}] वित्तीय खाते के लिए वित्तीय खाता गतिविधियाँ खोजें</value>
+    </property>
+    <property key="PageTitleFindFinAccountReconciliations">
+        <value xml:lang="en">Find Financial Account Reconciliations for Financial Account : ${finAccount.finAccountName} [${finAccountId}]</value>
     </property>
     <property key="PageTitleFindPaymentGatewayConfig">
         <value xml:lang="en">Find Payment Gateway Config</value>
@@ -13656,5 +13698,53 @@
     <property key="PageTitleBatchPayments">
         <value xml:lang="en">Batch Payments</value>
         <value xml:lang="hi_IN">भुगतान का बैच</value>
+    </property>
+    <property key="PageTitleUpdatePaymentGatewayConfigSagePay">
+        <value xml:lang="en">Update Payment Gateway Config SagePay</value>
+    </property>
+    <property key="AccountingSagePayVendor">
+        <value xml:lang="en">Vendor Name</value>
+    </property>
+    <property key="AccountingSagePayProductionHost">
+        <value xml:lang="en">Production Host</value>
+    </property>
+    <property key="AccountingSagePayTestingHost">
+        <value xml:lang="en">Testing Host</value>
+    </property>
+    <property key="AccountingSagePayMode">
+        <value xml:lang="en">Mode</value>
+    </property>            
+    <property key="AccountingSagePayProtocolVersion">
+        <value xml:lang="en">Protocol Version</value>
+    </property>    
+    <property key="AccountingSagePayAuthenticationTransType">
+        <value xml:lang="en">Authentication Type</value>
+    </property>
+    <property key="AccountingSagePayAuthenticationUrl">
+        <value xml:lang="en">Authentication Url</value>
+    </property>
+    <property key="AccountingSagePayAuthorisationTransType">
+        <value xml:lang="en">Authorisation Type</value>
+    </property>
+    <property key="AccountingSagePayAuthorisationUrl">
+        <value xml:lang="en">Authorisation Url</value>
+    </property>
+    <property key="AccountingSagePayReleaseTransType">
+        <value xml:lang="en">Release Type</value>
+    </property>
+    <property key="AccountingSagePayReleaseUrl">
+        <value xml:lang="en">Release Url</value>
+    </property>
+    <property key="AccountingSagePayVoidUrl">
+        <value xml:lang="en">Void Url</value>
+    </property>
+    <property key="AccountingSagePayRefundUrl">
+        <value xml:lang="en">Refund Url</value>
+    </property>
+    <property key="AccountingSagePayProduction">
+        <value xml:lang="en">Production</value>
+    </property>
+    <property key="AccountingSagePayTest">
+        <value xml:lang="en">Test</value>
     </property>
 </resource>

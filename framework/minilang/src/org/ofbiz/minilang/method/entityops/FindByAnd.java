@@ -22,13 +22,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityFieldMap;
-import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.ContextAccessor;
 import org.ofbiz.minilang.method.MethodContext;
@@ -87,7 +85,7 @@ public class FindByAnd extends MethodOperation {
         }
 
         Delegator delegator = methodContext.getDelegator();
-        if (delegatorName != null && delegatorName.length() > 0) {
+        if (UtilValidate.isNotEmpty(delegatorName)) {
             delegator = DelegatorFactory.getDelegator(delegatorName);
         }
 

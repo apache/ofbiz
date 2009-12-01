@@ -106,9 +106,18 @@ public class EntityConditionSubSelect extends EntityConditionValue {
         }
     }
 
+
     @Override
     public EntityConditionValue freeze() {
         return new EntityConditionSubSelect(localModelEntity, keyFieldName, (whereCond != null ? whereCond.freeze() : null), requireAll);
+    }
+
+    public String getKeyFieldName() {
+        return this.keyFieldName;
+    }
+
+    public ModelEntity getModelEntity() {
+        return this.localModelEntity;
     }
 
     @Override
@@ -118,7 +127,7 @@ public class EntityConditionSubSelect extends EntityConditionValue {
     }
 
     @Override
-    public Comparable getValue(Delegator delegator, Map<String, ? extends Object> map) {
+    public Comparable<?> getValue(Delegator delegator, Map<String, ? extends Object> map) {
         // do nothing for now
         return null;
     }

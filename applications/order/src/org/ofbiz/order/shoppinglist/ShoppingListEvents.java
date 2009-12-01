@@ -191,7 +191,7 @@ public class ShoppingListEvents {
             return "error";
         }
 
-        if (eventMessage != null && eventMessage.length() > 0) {
+        if (UtilValidate.isNotEmpty(eventMessage)) {
             request.setAttribute("_EVENT_MESSAGE_", eventMessage);
         }
 
@@ -240,7 +240,7 @@ public class ShoppingListEvents {
         }
 
         // no items; not an error; just mention that nothing was added
-        if (shoppingListItems == null || shoppingListItems.size() == 0) {
+        if (UtilValidate.isEmpty(shoppingListItems)) {
             errMsg = UtilProperties.getMessage(resource_error,"shoppinglistevents.no_items_added", cart.getLocale());
             return errMsg;
         }
