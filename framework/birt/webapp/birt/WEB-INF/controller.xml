@@ -55,10 +55,6 @@ under the License.
         <security https="true" auth="true"/>
         <response name="success" type="view" value="main"/>
     </request-map>
-    <request-map uri="Viewer">
-        <security https="true" auth="true"/>
-        <response name="success" type="view" value="Viewer"/>
-    </request-map>
     <request-map uri="Report">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="Report"/>
@@ -70,8 +66,8 @@ under the License.
     <request-map uri="sendBirtMail">
         <security https="true" auth="true"/>
         <event type="service" invoke="sendBirtMail"/>
-        <response name="success" type="view" value="BirtMail"/>
-        <response name="error" type="view" value="BirtMail"/>
+        <response name="success" type="view" value="Mail"/>
+        <response name="error" type="view" value="Mail"/>
     </request-map>
     <request-map uri="ViewHandler">
         <security https="true" auth="true"/>

@@ -232,10 +232,12 @@ under the License.
         <load-on-startup>1</load-on-startup>
     </servlet>
     <!-- Viewer Servlet, Supports SOAP -->
+    <!--
     <servlet>
         <servlet-name>ViewerServlet</servlet-name>
         <servlet-class>org.ofbiz.birt.report.servlet.BirtViewerServlet</servlet-class>
     </servlet>
+    -->
     <!-- Engine Servlet -->
     <servlet>
         <servlet-name>EngineServlet</servlet-name>
@@ -243,6 +245,7 @@ under the License.
     </servlet>
     <servlet-mapping><servlet-name>ControlServlet</servlet-name><url-pattern>/control/*</url-pattern></servlet-mapping>
     
+    <!--
     <servlet-mapping>
         <servlet-name>ViewerServlet</servlet-name>
         <url-pattern>/frameset</url-pattern>
@@ -252,6 +255,7 @@ under the License.
         <servlet-name>ViewerServlet</servlet-name>
         <url-pattern>/run</url-pattern>
     </servlet-mapping>
+    -->
     
     <servlet-mapping>
         <servlet-name>EngineServlet</servlet-name>

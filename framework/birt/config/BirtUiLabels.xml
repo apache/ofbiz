@@ -35,9 +35,6 @@
         <value xml:lang="en">Framework Eclipse BIRT</value>
         <value xml:lang="th">Framework Eclipse BIRT</value>
     </property>
-    <property key="BirtViewer">
-        <value xml:lang="en">HTML Paged</value>
-    </property>
     <property key="BirtReport">
         <value xml:lang="en">HTML</value>
     </property>
