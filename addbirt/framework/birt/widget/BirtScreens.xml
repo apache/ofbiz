@@ -23,31 +23,6 @@
         </section>
     </screen>
     
-    <screen name="Viewer">
-        <section>
-            <actions>
-                <set field="tabButtonItem" value="Viewer"/>
-            </actions>
-            <widgets>
-                <decorator-screen name="CommonBirtDecorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
-                        <section>
-                            <widgets>
-                                <screenlet title="Using viewer tag">
-                                    <platform-specific>
-                                        <html>
-                                            <html-template location="component://birt/webapp/birt/birt/viewer.ftl"/>
-                                        </html>
-                                    </platform-specific>
-                                </screenlet>
-                            </widgets>
-                        </section>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-    
     <screen name="Report">
         <section>
             <actions>
