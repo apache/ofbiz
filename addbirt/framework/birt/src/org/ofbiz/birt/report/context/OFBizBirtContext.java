@@ -26,15 +26,15 @@ import org.eclipse.birt.report.context.BirtContext;
 import org.eclipse.birt.report.context.ViewerAttributeBean;
 
 public class OFBizBirtContext extends BirtContext {
+    
+    public final static String module = OFBizBirtContext.class.getName();
 
     public OFBizBirtContext(HttpServletRequest request,
             HttpServletResponse response) {
         super(request, response);
-        // TODO Auto-generated constructor stub
     }
 
     protected void __init() {
-        // TODO Auto-generated method stub
         this.bean = (ViewerAttributeBean) request
                 .getAttribute( IBirtConstants.ATTRIBUTE_BEAN );
         if ( bean == null )
