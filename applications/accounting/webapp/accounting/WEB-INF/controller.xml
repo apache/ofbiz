@@ -24,7 +24,7 @@ under the License.
     <include location="component://commonext/webapp/WEB-INF/controller.xml"/>
     <description>Accounting Manager Module Site Configuration File</description>
     <owner>Copyright 2001-2009 The Apache Software Foundation</owner>
-
+	<handler name="birt" type="view" class="org.ofbiz.webapp.view.BirtViewHandler"/>
     <!-- Events to run on every request before security (chains exempt) -->
     <!--
     <preprocessor>
@@ -2485,6 +2485,21 @@ under the License.
         <response name="success" type="none"/>
         <response name="error" type="none"/>
     </request-map>
+    <!-- Reports -->
+    <request-map uri="paymentReport">
+    	<security https="true" auth="true"/>
+        <response name="success" type="view" value="paymentReport"/>
+    </request-map>
+    <request-map uri="paymentReportHtml">
+        <security https="true" auth="true"/>
+        <event type="groovy" path="component://accounting/webapp/accounting/WEB-INF/actions/payment/" invoke="PaymentReport.groovy"/>
+        <response name="success" type="view" value="ViewPaymentReportHtml"/>
+    </request-map>
+    <request-map uri="paymentReportPdf">
+        <security https="true" auth="true"/>
+        <event type="groovy" path="component://accounting/webapp/accounting/WEB-INF/actions/payment/" invoke="PaymentReport.groovy"/>
+        <response name="success" type="view" value="ViewPaymentReportPdf"/>
+    </request-map>
     <!-- end of request mappings -->
 
     <!-- View Mappings -->
@@ -2522,6 +2537,8 @@ under the License.
     <view-map name="PrintChecks" type="screenfop" page="component://accounting/widget/PaymentScreens.xml#PrintChecks" content-type="application/pdf" encoding="none"/>
     <view-map name="FindSalesInvoicesByDueDate" type="screen" page="component://accounting/widget/PaymentScreens.xml#FindSalesInvoicesByDueDate"/>
     <view-map name="FindPurchaseInvoicesByDueDate" type="screen" page="component://accounting/widget/PaymentScreens.xml#FindPurchaseInvoicesByDueDate"/>
+    <view-map name="paymentReport" type="screen" page="component://accounting/widget/PaymentScreens.xml#PaymentReport"/>
+    
 
     <!-- Payment Group -->
     <view-map name="FindPaymentGroup" type="screen" page="component://accounting/widget/PaymentGroupScreens.xml#FindPaymentGroup"/>
@@ -2785,5 +2802,7 @@ under the License.
     <view-map name="CostCentersReportPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#CostCentersReportPdf" content-type="application/pdf" encoding="none"/>
     <view-map name="ComparativeIncomeStatementsPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#ComparativeIncomeStatementsPdf" content-type="application/pdf" encoding="none"/>
     <view-map name="ComparativeIncomeStatementsCsv" type="screencsv" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#ComparativeIncomeStatementsCsv" content-type="text/csv" encoding="none"/>
+    <view-map name="ViewPaymentReportHtml" type="birt" page="component://accounting/webapp/accounting/payment/report/PaymentReport.rptdesign" content-type="text/html"/>
+    <view-map name="ViewPaymentReportPdf" type="birt" page="component://accounting/webapp/accounting/payment/report/PaymentReport.rptdesign" content-type="application/pdf"/>
     <!-- end of view mappings -->
 </site-conf>
