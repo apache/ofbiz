@@ -1654,6 +1654,17 @@ under the License.
         <response name="success" type="view" value="OrderPickSheetPDF"/>
         <response name="error" type="view" value="orderview"/>
     </request-map>
+        <request-map uri="OrderByReferrer.pdf"><security https="true" auth="true"/>
+        <response name="success" type="view" value="OrderByReferrerReport"/>
+    </request-map>
+    <request-map uri="OrdersByChannel.pdf"><security https="true" auth="true"/>
+    	<event type="groovy" path="component://order/webapp/ordermgr/WEB-INF/actions/reports/" invoke="OrderByChannel.groovy"/>
+        <response name="success" type="view" value="OrdersByChannelReport"/>
+    </request-map>
+    <request-map uri="OrderDiscountCode.pdf">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="SaleOrderDiscountCodeReport"/>
+    </request-map>
 
     <request-map uri="LookupProductCategory">
         <security auth="true" https="true"/>
@@ -1766,6 +1777,9 @@ under the License.
     <view-map name="OpenOrderItemsReport" type="screen" page="component://order/widget/ordermgr/ReportScreens.xml#OpenOrderItemsReport"/>
     <view-map name="PurchasesByOrganizationReport" type="screenfop" page="component://order/widget/ordermgr/ReportScreens.xml#PurchasesByOrganizationReport" content-type="application/pdf" encoding="none"/>
     <view-map name="SalesOrderReport" type="birt" page="component://birt/webapp/birt/report/SalesReport.rptdesign" content-type="application/pdf"/>
+    <view-map name="OrderByReferrerReport" type="birt" page="component://order/webapp/ordermgr/reports/OrderByReferrer.rptdesign" content-type="application/pdf"/>
+    <view-map name="OrdersByChannelReport" type="birt" page="component://order/webapp/ordermgr/reports/OrdersByChannel.rptdesign" content-type="application/pdf"/>
+    <view-map name="SaleOrderDiscountCodeReport" type="birt" page="component://order/webapp/ordermgr/reports/OrderDiscountCodeReport.rptdesign" content-type="application/pdf"/>
 
     <view-map name="FindRequirements" type="screen" page="component://order/widget/ordermgr/RequirementScreens.xml#FindRequirements"/>
     <view-map name="EditRequirement" type="screen" page="component://order/widget/ordermgr/RequirementScreens.xml#EditRequirement"/>

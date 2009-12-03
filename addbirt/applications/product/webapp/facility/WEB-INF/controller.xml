@@ -27,7 +27,7 @@ under the License.
 
     <handler name="service-multi" type="request" class="org.ofbiz.webapp.event.ServiceMultiEventHandler"/>
     <handler name="bsf" type="request" class="org.ofbiz.webapp.event.BsfEventHandler"/>
-
+    <handler name="birt" type="view" class="org.ofbiz.webapp.view.BirtViewHandler"/>
 
     <!-- Events to run on every request before security (chains exempt) -->
     <!--
@@ -155,6 +155,37 @@ under the License.
         <security https="true" auth="true"/>
         <response name="success" type="view" value="ViewFacilityInventoryByProductExport"/>
     </request-map>
+    <!-- BrainFood inventory report -->
+    <request-map uri="ViewBrainFoodFacilityInventory">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ViewBrainFoodFacilityInventory"/>
+    </request-map>
+    <request-map uri="RenderInventoryReportHtml">
+        <security https="true" auth="true"/>
+        <event type="groovy" path="component://product/webapp/facility/WEB-INF/actions/inventory/" invoke="InventoryItemReport.groovy"/>
+        <response name="success" type="view" value="RenderInventoryReportHtml"/>
+    </request-map>
+    <request-map uri="RenderInventoryReportPDF">
+        <security https="true" auth="true"/>
+        <event type="groovy" path="component://product/webapp/facility/WEB-INF/actions/inventory/" invoke="InventoryItemReport.groovy"/>
+        <response name="success" type="view" value="RenderInventoryReportPDF"/>
+    </request-map>
+    <request-map uri="RenderInventoryReportExcel">
+        <security https="true" auth="true"/>
+        <event type="groovy" path="component://product/webapp/facility/WEB-INF/actions/inventory/" invoke="InventoryItemReport.groovy"/>
+        <response name="success" type="view" value="RenderInventoryReportExcel"/>
+    </request-map>
+    <request-map uri="RenderInventoryReportMSWord">
+        <security https="true" auth="true"/>
+        <event type="groovy" path="component://product/webapp/facility/WEB-INF/actions/inventory/" invoke="InventoryItemReport.groovy"/>
+        <response name="success" type="view" value="RenderInventoryReportMSWord"/>
+    </request-map>
+    <request-map uri="RenderInventoryReportPPT">
+        <security https="true" auth="true"/>
+        <event type="groovy" path="component://product/webapp/facility/WEB-INF/actions/inventory/" invoke="InventoryItemReport.groovy"/>
+        <response name="success" type="view" value="RenderInventoryReportPPT"/>
+    </request-map>
+    <!-- End BrainFood-->
 
     <request-map uri="FindFacilityTransfers">
         <security https="true" auth="true"/>
@@ -1309,6 +1340,7 @@ under the License.
     <view-map name="ViewFacilityInventoryByProductSimple" type="screen" page="component://product/widget/facility/FacilityScreens.xml#ViewFacilityInventoryByProductSimple"/>
     <view-map name="ViewFacilityInventoryByProductReport" type="screenfop" page="component://product/widget/facility/FacilityScreens.xml#ViewFacilityInventoryByProductReport" content-type="application/pdf" encoding="none"/>
     <view-map name="ViewFacilityInventoryByProductExport" type="screenxml" page="component://product/widget/facility/FacilityScreens.xml#ViewFacilityInventoryByProductReport" content-type="text/xml"/>
+    <view-map name="ViewBrainFoodFacilityInventory" type="screen" page="component://product/widget/facility/FacilityScreens.xml#ViewBrainFoodFacilityInventory"/>
     <view-map name="EditFacilityGroups" type="screen" page="component://product/widget/facility/FacilityScreens.xml#EditFacilityGroups"/>
     <view-map name="EditFacilityParties" type="screen" page="component://product/widget/facility/FacilityScreens.xml#EditFacilityParties"/>
     <view-map name="ViewContactMechs" type="screen" page="component://product/widget/facility/FacilityScreens.xml#ViewContactMechs"/>
@@ -1393,4 +1425,11 @@ under the License.
     <view-map name="FindShipmentGatewayConfigTypes" page="component://product//widget/facility/ShipmentGatewayConfigScreens.xml#FindShipmentGatewayConfigTypes" type="screen"/>
     <view-map name="EditShipmentGatewayConfigType" page="component://product//widget/facility/ShipmentGatewayConfigScreens.xml#EditShipmentGatewayConfigType" type="screen"/>
     <!-- end of view mappings -->
+    
+    <!-- BrainFood view-mapping -->
+    <view-map name="RenderInventoryReportHtml" type="birt" page="component://product/webapp/facility/inventory/report/InventoryReport.rptdesign" content-type="text/html"/>
+    <view-map name="RenderInventoryReportPDF" type="birt" page="component://product/webapp/facility/inventory/report/InventoryReport.rptdesign" content-type="application/pdf"/>
+    <view-map name="RenderInventoryReportExcel" type="birt" page="component://product/webapp/facility/inventory/report/InventoryReport.rptdesign" content-type="application/vnd.ms-excel"/>
+    <view-map name="RenderInventoryReportMSWord" type="birt" page="component://product/webapp/facility/inventory/report/InventoryReport.rptdesign" content-type="application/vnd.ms-word"/>
+    <view-map name="RenderInventoryReportPPT" type="birt" page="component://product/webapp/facility/inventory/report/InventoryReport.rptdesign" content-type="application/vnd.ms-powerpoint"/>
 </site-conf>

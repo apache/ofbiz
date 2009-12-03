@@ -1436,5 +1436,31 @@ under the License.
             </widgets>
         </section>
     </screen>
+    
+    <screen name="ViewBrainFoodFacilityInventory">
+        <section>
+            <actions>
+                <set field="headerItem" value="reports"/>
+                <set field="facilityId" from-field="parameters.facilityId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <label style="h1" text="${uiLabelMap.ProductInventoryByProduct} ${uiLabelMap.CommonFor} ${facility.facilityName}"/>
+                        </container>
+                        <container>
+                            <link target="ViewFacilityInventoryByProductReport?${searchParameterString}" text="${uiLabelMap.CommonPrint}" style="buttontext"/>
+                            <link target="ViewFacilityInventoryByProductExport?${searchParameterString}" text="${uiLabelMap.CommonExport}" style="buttontext"/>
+                            <link target="ViewBrainFoodFacilityInventory?${searchParameterString}" text="BrainFood reports export" style="buttontext"/>
+                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleFindFacilityInventoryItemsByProduct}">
+                            <include-form name="ViewBrainFoodFacilityInventoryForm" location="component://product/widget/facility/FacilityForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
 
 </screens>
