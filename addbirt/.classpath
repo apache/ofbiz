@@ -132,11 +132,11 @@
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-cli-1.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-beanutils-1.7.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/scripting/antlr-2.7.6.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/scripting/asm-2.2.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/scripting/asm-analysis-2.2.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/scripting/asm-tree-2.2.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/scripting/asm-util-2.2.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/scripting/groovy-1.6.0.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/scripting/asm-3.2.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/scripting/asm-analysis-3.2.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/scripting/asm-tree-3.2.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/scripting/asm-util-3.2.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/scripting/groovy-1.7-rc-2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/jdom-1.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/jpim-0.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/freemarker-2.3.15.jar"/>
@@ -159,28 +159,45 @@
     <classpathentry kind="lib" path="framework/base/lib/antisamy-bin.1.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/fop-0.95.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/nekohtml.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/webslinger-base-invoker-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-cache-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-collections-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-collections-arrays-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-concurrent-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-junit-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-lang-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-logging-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-resolver-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-catalina-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-embryo-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-bsf-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-code-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-groovy-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-image-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-janino-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-servlet-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-template-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-velocity-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-wiki-20090630-3606-466aec2fb8ad.jar"/>
-    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-launcher-20090630-3606-466aec2fb8ad.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/webslinger-base-invoker-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-cache-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-collections-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-collections-arrays-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-concurrent-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-html-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-invoker-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-io-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-javacc-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-junit-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-lang-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-logging-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-resolver-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-util-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-base-xml-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-catalina-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-cgi-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-embryo-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-beanshell-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-bsf-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-code-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-commonsvfs-object-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-directory-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-freemarker-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-groovy-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-image-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-janino-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-jruby-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-jython-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-nutch-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-plan9-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-quercus-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-rhino-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-servlet-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-template-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-velocity-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-extension-wiki-20091211-3897-7ab22baea4b6.jar"/>
+    <classpathentry kind="lib" path="framework/webslinger/lib/webslinger-launcher-20091211-3897-7ab22baea4b6.jar"/>
     <classpathentry kind="lib" path="framework/testtools/lib/selenium-java-client-driver.jar"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>

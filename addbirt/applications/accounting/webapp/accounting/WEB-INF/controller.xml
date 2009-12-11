@@ -440,14 +440,14 @@ under the License.
         <security https="true" auth="true"/>
         <event type="service" invoke="cancelPaymentBatch"/>
         <response name="success" type="view" value="PaymentGroupOverview"/>
-        <response name="error" type="view" value="PaymentGroupOverview"/>
+        <response name="error" type="view" value="FindPaymentGroup"/>
     </request-map>
     
     <request-map uri="cancelCheckRunPayments">
         <security https="true" auth="true"/>
         <event type="service" invoke="cancelCheckRunPayments"/>
         <response name="success" type="view" value="PaymentGroupOverview"/>
-        <response name="error" type="view" value="PaymentGroupOverview"/>
+        <response name="error" type="view" value="FindPaymentGroup"/>
     </request-map>
     
     <request-map uri="DepositSlip.pdf">
@@ -2219,26 +2219,10 @@ under the License.
         <response name="success" type="view" value="ComparativeIncomeStatement"/>
         <response name="error" type="view" value="ComparativeIncomeStatement"/>
     </request-map>
-    <request-map uri="prepareIncomeStatement">
-        <security https="true" auth="true"/>
-        <event type="service" invoke="prepareIncomeStatement"/>
-        <response name="success" type="view" value="IncomeStatement"/>
-        <response name="error" type="view" value="IncomeStatement"/>
-    </request-map>
     <request-map uri="BalanceSheet"><security https="true" auth="true"/><response name="success" type="view" value="BalanceSheet"/></request-map>
-    <request-map uri="prepareBalanceSheet">
-        <security https="true" auth="true"/>
-        <event type="service" invoke="prepareBalanceSheet"/>
-        <response name="success" type="view" value="BalanceSheet"/>
-        <response name="error" type="view" value="BalanceSheet"/>
-    </request-map>
     <request-map uri="ComparativeBalanceSheet"><security https="true" auth="true"/><response name="success" type="view" value="ComparativeBalanceSheet"/></request-map>
-    <request-map uri="prepareComparativeBalanceSheet">
-        <security https="true" auth="true"/>
-        <event type="service" invoke="prepareComparativeBalanceSheet"/>
-        <response name="success" type="view" value="ComparativeBalanceSheet"/>
-        <response name="error" type="view" value="ComparativeBalanceSheet"/>
-    </request-map>
+    <request-map uri="ComparativeBalanceSheet.pdf"><security https="true" auth="true"/><response name="success" type="view" value="ComparativeBalanceSheetPdf"/></request-map>
+    <request-map uri="ComparativeBalanceSheet.csv"><security https="true" auth="true"/><response name="success" type="view" value="ComparativeBalanceSheetCsv"/></request-map>
     <request-map uri="TransactionTotals"><security https="true" auth="true"/><response name="success" type="view" value="TransactionTotals"/></request-map>
     <request-map uri="FindPaymentsForDepositOrWithdraw">
         <security https="true" auth="true"/>
@@ -2284,7 +2268,16 @@ under the License.
         <response name="success" type="view" value="InventoryValuationCsv"/>
         <response name="error" type="view" value="InventoryValuation"/>
     </request-map>
-  
+    <request-map uri="CashFlowStatement"><security https="true" auth="true"/><response name="success" type="view" value="CashFlowStatement"/></request-map>
+    <request-map uri="CashFlowStatementListPdf.pdf">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="CashFlowStatementListPdf"/>
+    </request-map>
+    <request-map uri="CashFlowStatementListCsv.csv">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="CashFlowStatementListCsv"/>
+    </request-map>
+    
     <!-- ================ Depreciation Calculation Report requests ================ -->
     <request-map uri="showFixedAssetDepreciation">
         <security https="true" auth="true"/>
@@ -2398,15 +2391,6 @@ under the License.
         <response name="success" type="view" value="CommissionRun"/>
     </request-map>
 
-    <request-map uri="MonthlyTrialBalance">
-        <security auth="true" https="true"/>
-        <response name="success" type="view" value="MonthlyTrialBalance"/>
-    </request-map>
-    <request-map uri="MonthlyTrialBalance.pdf">
-        <security auth="true" https="true"/>
-        <response name="success" type="view" value="MonthlyTrialBalancePdf"/>
-    </request-map>
-    
     <!--Add Tax Settings -->
     <request-map uri="addtax">
         <security auth="true" https="true"/>
@@ -2462,23 +2446,6 @@ under the License.
         <response name="success" type="view" value="CostCenters"/>
     </request-map>
 
-    <request-map uri="CostCenterReport">
-        <security https="true" auth="true"/>
-        <response name="success" type="view" value="CostCenterReport"/>
-    </request-map>
-
-    <request-map uri="getGlAcctgOrgWithPostedBalanceSplit">
-        <security https="true" auth="true"/>
-        <event type="service" invoke="getGlAcctgOrgWithPostedBalanceSplit"/>
-        <response name="success" type="view" value="CostCenterReport"/>
-        <response name="error" type="view" value="CostCenterReport"/>
-    </request-map>
-
-    <request-map uri="CostCentersReport.pdf">
-        <security auth="true" https="true"/>
-        <response name="success" type="view" value="CostCentersReportPdf"/>
-    </request-map>
-
     <request-map uri="createUpdateCostCenter">
         <security auth="true" https="true"/>
         <event type="jsonservice-multi"  invoke="createUpdateCostCenter"/>
@@ -2499,6 +2466,15 @@ under the License.
         <security https="true" auth="true"/>
         <event type="groovy" path="component://accounting/webapp/accounting/WEB-INF/actions/payment/" invoke="PaymentReport.groovy"/>
         <response name="success" type="view" value="ViewPaymentReportPdf"/>
+    </request-map>
+
+    <request-map uri="GlAccountBalanceByCostCenter">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="GlAccountBalanceByCostCenter"/>
+    </request-map>
+    <request-map uri="GlAccountBalanceByCostCenter.pdf">
+        <security auth="true" https="true"/>
+        <response name="success" type="view" value="GlAccountBalanceByCostCenterPdf"/>
     </request-map>
     <!-- end of request mappings -->
 
@@ -2752,10 +2728,14 @@ under the License.
     <view-map name="IncomeStatementListPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#IncomeStatementListPdf" content-type="application/pdf" encoding="none"/>
     <view-map name="IncomeStatementListCsv" type="screencsv" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#IncomeStatementListCsv" content-type="text/csv" encoding="none"/>
     <view-map name="ComparativeIncomeStatement" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#ComparativeIncomeStatement"/>
+    <view-map name="ComparativeIncomeStatementsPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#ComparativeIncomeStatementsPdf" content-type="application/pdf" encoding="none"/>
+    <view-map name="ComparativeIncomeStatementsCsv" type="screencsv" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#ComparativeIncomeStatementsCsv" content-type="text/csv" encoding="none"/>
     <view-map name="BalanceSheet" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#BalanceSheet"/>
     <view-map name="BalanceSheetCsv" type="screencsv" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#BalanceSheetCsv" content-type="text/csv" encoding="none"/>
     <view-map name="BalanceSheetPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#BalanceSheetPdf" content-type="application/pdf" encoding="none"/>
     <view-map name="ComparativeBalanceSheet" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#ComparativeBalanceSheet"/>
+    <view-map name="ComparativeBalanceSheetPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#ComparativeBalanceSheetPdf" content-type="application/pdf" encoding="none"/>
+    <view-map name="ComparativeBalanceSheetCsv" type="screencsv" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#ComparativeBalanceSheetCsv" content-type="text/csv" encoding="none"/>
     <view-map name="TransactionTotals" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#TransactionTotals"/>
     <view-map name="TransactionTotalsPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#TransactionTotalsPdf" content-type="application/pdf" encoding="none"/>
     <view-map name="TransactionTotalsCsv" type="screencsv" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#TransactionTotalsCsv" content-type="text/csv" encoding="none"/>
@@ -2765,6 +2745,9 @@ under the License.
     <view-map name="InventoryValuation" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#InventoryValuation"/>
     <view-map name="InventoryValuationPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#InventoryValuationPdf" content-type="application/pdf" encoding="none"/>
     <view-map name="InventoryValuationCsv" type="screencsv" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#InventoryValuationCsv" content-type="text/csv" encoding="none"/>
+    <view-map name="CashFlowStatement" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#CashFlowStatement"/>
+    <view-map name="CashFlowStatementListPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#CashFlowStatementListPdf" content-type="application/pdf" encoding="none"/>
+    <view-map name="CashFlowStatementListCsv" type="screencsv" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#CashFlowStatementListCsv" content-type="text/csv" encoding="none"/>
     <!-- Assignment Mappings -->
     <view-map name="EditPartyFixedAssetAssignments" type="screen" page="component://accounting/widget/FixedAssetScreens.xml#EditPartyFixedAssetAssignments"/>
 
@@ -2792,16 +2775,12 @@ under the License.
     <view-map name="GlAccountTrialBalance" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#GlAccountTrialBalance"/>
     <view-map name="GlAccountTrialBalanceReportPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#GlAccountTrialBalanceReportPdf" content-type="application/pdf" encoding="none"/>
     <view-map name="CommissionRun" type="screen" page="component://accounting/widget/ap/InvoiceScreens.xml#CommissionRun"/>
-    <view-map name="MonthlyTrialBalance" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#MonthlyTrialBalance"/>
-    <view-map name="MonthlyTrialBalancePdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#MonthlyTrialBalancePdf" content-type="application/pdf"/>
     <view-map name="EditGlAccountCategory" type="screen" page="component://accounting/widget/GlSetupScreens.xml#EditGlAccountCategory"/>
     <view-map name="FindGlAccountCategory" type="screen" page="component://accounting/widget/GlSetupScreens.xml#FindGlAccountCategory"/>
     <view-map name="EditGlAccountCategoryMember" type="screen" page="component://accounting/widget/GlSetupScreens.xml#EditGlAccountCategoryMember"/>
     <view-map name="CostCenters" type="screen" page="component://accounting/widget/GlobalGlAccountsScreens.xml#CostCenters"/>
-    <view-map name="CostCenterReport" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#CostCenterReport"/>
-    <view-map name="CostCentersReportPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#CostCentersReportPdf" content-type="application/pdf" encoding="none"/>
-    <view-map name="ComparativeIncomeStatementsPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#ComparativeIncomeStatementsPdf" content-type="application/pdf" encoding="none"/>
-    <view-map name="ComparativeIncomeStatementsCsv" type="screencsv" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#ComparativeIncomeStatementsCsv" content-type="text/csv" encoding="none"/>
+    <view-map name="GlAccountBalanceByCostCenter" type="screen" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#GlAccountBalanceByCostCenter"/>
+    <view-map name="GlAccountBalanceByCostCenterPdf" type="screenfop" page="component://accounting/widget/ReportFinancialSummaryScreens.xml#GlAccountBalanceByCostCenterPdf" content-type="application/pdf" encoding="none"/>
     <view-map name="ViewPaymentReportHtml" type="birt" page="component://accounting/webapp/accounting/payment/report/PaymentReport.rptdesign" content-type="text/html"/>
     <view-map name="ViewPaymentReportPdf" type="birt" page="component://accounting/webapp/accounting/payment/report/PaymentReport.rptdesign" content-type="application/pdf"/>
     <!-- end of view mappings -->

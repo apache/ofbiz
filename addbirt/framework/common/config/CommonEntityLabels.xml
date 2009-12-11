@@ -13776,7 +13776,8 @@
         <value xml:lang="th">เรียล กาตาร์</value>
         <value xml:lang="zh">卡塔尔里亚尔</value>
     </property>
-    <property key="Uom.description.RMB">
+    <!-- see https://issues.apache.org/jira/browse/OFBIZ-3246 -->
+    <!--property key="Uom.description.RMB">
         <value xml:lang="en">Chinese Renminbi Yuan</value>
         <value xml:lang="fr">Yuan Renmimbi chinois</value>
         <value xml:lang="it">Chinese Renminbi Yuan</value>
@@ -13785,7 +13786,7 @@
         <value xml:lang="ru">Китайский юань</value>
         <value xml:lang="th">หยวน จีนเหรินหมินปี้</value>
         <value xml:lang="zh">中国人民币元</value>
-    </property>
+    </property-->
     <property key="Uom.description.ROL">
         <value xml:lang="de">Leu Rumänien</value>
         <value xml:lang="en">Romanian Leu</value>
@@ -15067,5 +15068,20 @@
         <value xml:lang="ru">Вес</value>
         <value xml:lang="th">น้ำหนัก</value>
         <value xml:lang="zh">重量</value>
+    </property>
+    <property key="VisualTheme.description.BIZZNESS_TIME">
+        <value xml:lang="en">It's bizzness, it's bizzness time.  I couldn't have said it better myself. This theme gets down</value>
+    </property>
+    <property key="VisualTheme.description.BLUELIGHT">
+        <value xml:lang="en">BlueLight Theme: Breadcrumbs, drop-down menus and rounded corners</value>
+    </property>
+    <property key="VisualTheme.description.DROPPINGCRUMBS">
+        <value xml:lang="en">Dropping Crumbs: Includes a drop down menu embedded in the breadcrumbs bar</value>
+    </property>
+    <property key="VisualTheme.description.FLAT_GREY">
+        <value xml:lang="en">Flat Grey - Old OFBiz Standard Floating Layout</value>
+    </property>
+    <property key="VisualTheme.description.MULTIFLEX">
+        <value xml:lang="en">Alternative VisualTheme for Ecommerce</value>
     </property>
 </resource>
