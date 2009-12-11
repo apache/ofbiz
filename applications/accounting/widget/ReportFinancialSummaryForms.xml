@@ -79,10 +79,9 @@ under the License.
         <field name="submitButton" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
 
-    <form name="IncomeStatementParameters" type="single" header-row-style="header-row" default-table-style="basic-table">
-        <field name="isIncomeStatement"><hidden value="true"/></field>
+    <form name="TransactionSelectionForm" type="single" header-row-style="header-row" default-table-style="basic-table">
         <field name="selectedMonth" title="${uiLabelMap.CommonMonth}">
-            <drop-down>
+            <drop-down allow-empty="true">
                 <list-options list-name="monthList" key-name="value" description="${description}"/>
             </drop-down>
         </field>
@@ -98,45 +97,122 @@ under the License.
         <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit" tooltip="Please enter From and Thru date in fields above"><submit button-type="button"/></field>
     </form>
 
-    <form name="IncomeStatementList" type="list" list-name="glAccountIncomeList"
+    <form name="IncomeStatementRevenues" type="list" list-name="revenueAccountBalanceList"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
-        <row-actions>
-            <entity-one entity-name="GlAccount" value-field="glAccount">
-                <field-map field-name="glAccountId" from-field="glAccountId"/>
-            </entity-one>
-        </row-actions>
-        <field name="glAccountId" use-when="isPdf != true">
-            <hyperlink target="FindAcctgTransEntries" description="${glAccountId}">
+        <field name="accountCode">
+            <hyperlink target="FindAcctgTransEntries" description="${accountCode}">
                 <parameter param-name="glAccountId"/>
                 <parameter param-name="organizationPartyId"/>
             </hyperlink>
         </field>
-        <field name="glAccountId"  use-when="isPdf == true"><display description="${glAccountId}"/></field>
-        <field name="accountName"><display description="${glAccount.accountName}"/></field>
-        <field name="totalAmount"><display type="currency" currency="${currencyUomId}"/></field>
-        <field name="totalOfCurrentFiscalPeriod"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="accountName" title-area-style="tableheadwide"><display description="${accountName}"/></field>
+        <field name="balance" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
     </form>
-
-    <form name="ExpenseStatementList" type="list" list-name="glAccountExpenseList"
+    <form name="IncomeStatementExpenses" type="list" list-name="expenseAccountBalanceList"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
-        <row-actions>
-            <entity-one entity-name="GlAccount" value-field="glAccount">
-                <field-map field-name="glAccountId" from-field="glAccountId"/>
-            </entity-one>
-        </row-actions>
-        <field name="glAccountId" use-when="isPdf != true">
-            <hyperlink target="FindAcctgTransEntries" description="${glAccountId}">
+        <field name="accountCode">
+            <hyperlink target="FindAcctgTransEntries" description="${accountCode}">
                 <parameter param-name="glAccountId"/>
                 <parameter param-name="organizationPartyId"/>
             </hyperlink>
         </field>
-        <field name="glAccountId"  use-when="isPdf == true"><display description="${glAccountId}"/></field>
-        <field name="accountName"><display description="${glAccount.accountName}"/></field>
-        <field name="totalAmount"><display type="currency" currency="${currencyUomId}"/></field>
-        <field name="totalOfCurrentFiscalPeriod"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="accountName" title-area-style="tableheadwide"><display description="${accountName}"/></field>
+        <field name="balance" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
+    <form name="IncomeStatementIncome" type="list" list-name="incomeAccountBalanceList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="accountCode">
+            <hyperlink target="FindAcctgTransEntries" description="${accountCode}">
+                <parameter param-name="glAccountId"/>
+                <parameter param-name="organizationPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="accountName" title-area-style="tableheadwide"><display description="${accountName}"/></field>
+        <field name="balance" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
+    <form name="ComparativeIncomeStatementParameters" type="single" target="ComparativeIncomeStatement" header-row-style="header-row" default-table-style="basic-table">
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="period1FromDate" title="${uiLabelMap.FormFieldTitle_period1FromDate}" required-field="true" position="1"><date-time type="timestamp"/></field>
+        <field name="period2FromDate" title="${uiLabelMap.FormFieldTitle_period2FromDate}" required-field="true" position="2"><date-time type="timestamp"/></field>
+        <field name="period1ThruDate" title="${uiLabelMap.FormFieldTitle_period1ThruDate}" required-field="true" position="1"><date-time type="timestamp"/></field>
+        <field name="period2ThruDate" title="${uiLabelMap.FormFieldTitle_period2ThruDate}" required-field="true" position="2"><date-time type="timestamp"/></field>
+        <field name="period1GlFiscalTypeId" position="1">
+            <drop-down>
+                <entity-options entity-name="GlFiscalType" key-field-name="glFiscalTypeId" description="${description}">
+                    <entity-order-by field-name="glFiscalTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="period2GlFiscalTypeId" position="2">
+            <drop-down>
+                <entity-options entity-name="GlFiscalType" key-field-name="glFiscalTypeId" description="${description}">
+                    <entity-order-by field-name="glFiscalTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <!-- This is required to render the date range in the PDF: the two columns layout is not supported -->
+    <form name="ComparativeIncomeStatementParametersOneColumn" type="single" target="ComparativeIncomeStatement" header-row-style="header-row" default-table-style="basic-table">
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="period1FromDate" title="${uiLabelMap.FormFieldTitle_period1FromDate}" required-field="true"><date-time type="timestamp"/></field>
+        <field name="period1ThruDate" title="${uiLabelMap.FormFieldTitle_period1ThruDate}" required-field="true"><date-time type="timestamp"/></field>
+        <field name="period1GlFiscalTypeId">
+            <drop-down>
+                <entity-options entity-name="GlFiscalType" key-field-name="glFiscalTypeId" description="${description}">
+                    <entity-order-by field-name="glFiscalTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="period2FromDate" title="${uiLabelMap.FormFieldTitle_period2FromDate}" required-field="true"><date-time type="timestamp"/></field>
+        <field name="period2ThruDate" title="${uiLabelMap.FormFieldTitle_period2ThruDate}" required-field="true"><date-time type="timestamp"/></field>
+        <field name="period2GlFiscalTypeId">
+            <drop-down>
+                <entity-options entity-name="GlFiscalType" key-field-name="glFiscalTypeId" description="${description}">
+                    <entity-order-by field-name="glFiscalTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ComparativeIncomeStatementRevenues" type="list" list-name="revenueAccountBalanceList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="accountCode">
+            <hyperlink target="FindAcctgTransEntries" description="${accountCode}">
+                <parameter param-name="glAccountId"/>
+                <parameter param-name="organizationPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="accountName" title-area-style="tableheadwide"><display description="${accountName}"/></field>
+        <field name="balance1" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="balance2" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
+    <form name="ComparativeIncomeStatementExpenses" type="list" list-name="expenseAccountBalanceList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="accountCode">
+            <hyperlink target="FindAcctgTransEntries" description="${accountCode}">
+                <parameter param-name="glAccountId"/>
+                <parameter param-name="organizationPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="accountName" title-area-style="tableheadwide"><display description="${accountName}"/></field>
+        <field name="balance1" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="balance2" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
+    <form name="ComparativeIncomeStatementIncome" type="list" list-name="incomeAccountBalanceList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="accountCode">
+            <hyperlink target="FindAcctgTransEntries" description="${accountCode}">
+                <parameter param-name="glAccountId"/>
+                <parameter param-name="organizationPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="accountName" title-area-style="tableheadwide"><display description="${accountName}"/></field>
+        <field name="balance1" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="balance2" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
     </form>
 
-    <form name="BalanceSheetParameters" type="single" target="prepareBalanceSheet"
+    <form name="BalanceSheetParameters" type="single" target="BalanceSheet"
         header-row-style="header-row" default-table-style="basic-table">
         <field name="organizationPartyId"><hidden/></field>
         <field name="thruDate"><date-time default-value="${nowTimestamp}"/></field>
@@ -149,7 +225,70 @@ under the License.
         </field>
         <field name="submitButton" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
-    <form name="ComparativeBalanceSheetParameters" type="single" target="prepareComparativeBalanceSheet"
+    <form name="BalanceSheetAssets" type="list" list-name="assetAccountBalanceList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="accountCode">
+            <hyperlink target="FindAcctgTransEntries" description="${accountCode}">
+                <parameter param-name="glAccountId"/>
+                <parameter param-name="organizationPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="accountName" title-area-style="tableheadwide"><display description="${accountName}"/></field>
+        <field name="balance" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
+    <form name="BalanceSheetLiabilities" type="list" list-name="liabilityAccountBalanceList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="accountCode">
+            <hyperlink target="FindAcctgTransEntries" description="${accountCode}">
+                <parameter param-name="glAccountId"/>
+                <parameter param-name="organizationPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="accountName" title-area-style="tableheadwide"><display description="${accountName}"/></field>
+        <field name="balance" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
+    <form name="BalanceSheetEquities" type="list" list-name="equityAccountBalanceList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="accountCode">
+            <hyperlink target="FindAcctgTransEntries" description="${accountCode}">
+                <parameter param-name="glAccountId"/>
+                <parameter param-name="organizationPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="accountName" title-area-style="tableheadwide"><display description="${accountName}"/></field>
+        <field name="balance" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
+    <form name="BalanceTotals" type="list" list-name="balanceTotalList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <row-actions>
+            <set field="totalName" value="${groovy: uiLabelMap.get(totalName)}"/>
+        </row-actions>
+        <field name="totalName" title="${uiLabelMap.CommonTotal}" title-area-style="tableheadhuge"><display description="${totalName}"/></field>
+        <field name="balance" title="_" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
+    <form name="ComparativeBalanceSheetParameters" type="single" target="ComparativeBalanceSheet"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="period1ThruDate" position="1"><date-time/></field>
+        <field name="period2ThruDate" position="2"><date-time/></field>
+        <field name="period1GlFiscalTypeId" position="1">
+            <drop-down>
+                <entity-options entity-name="GlFiscalType" key-field-name="glFiscalTypeId" description="${description}">
+                    <entity-order-by field-name="glFiscalTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="period2GlFiscalTypeId" position="2">
+            <drop-down>
+                <entity-options entity-name="GlFiscalType" key-field-name="glFiscalTypeId" description="${description}">
+                    <entity-order-by field-name="glFiscalTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <!-- This is required to render the date range in the PDF: the two columns layout is not supported -->
+    <form name="ComparativeBalanceSheetParametersOneColumn" type="single" target="ComparativeBalanceSheet"
         header-row-style="header-row" default-table-style="basic-table">
         <field name="organizationPartyId"><hidden/></field>
         <field name="period1ThruDate"><date-time/></field>
@@ -170,54 +309,63 @@ under the License.
         </field>
         <field name="submitButton" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
+    <form name="ComparativeBalanceSheetAssets" type="list" list-name="assetAccountBalanceList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="accountCode">
+            <hyperlink target="FindAcctgTransEntries" description="${accountCode}">
+                <parameter param-name="glAccountId"/>
+                <parameter param-name="organizationPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="accountName" title-area-style="tableheadwide"><display description="${accountName}"/></field>
+        <field name="balance1" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="balance2" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
+    <form name="ComparativeBalanceSheetLiabilities" type="list" list-name="liabilityAccountBalanceList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="accountCode">
+            <hyperlink target="FindAcctgTransEntries" description="${accountCode}">
+                <parameter param-name="glAccountId"/>
+                <parameter param-name="organizationPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="accountName" title-area-style="tableheadwide"><display description="${accountName}"/></field>
+        <field name="balance1" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="balance2" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
+    <form name="ComparativeBalanceSheetEquities" type="list" list-name="equityAccountBalanceList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="accountCode">
+            <hyperlink target="FindAcctgTransEntries" description="${accountCode}">
+                <parameter param-name="glAccountId"/>
+                <parameter param-name="organizationPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="accountName" title-area-style="tableheadwide"><display description="${accountName}"/></field>
+        <field name="balance1" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="balance2" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
+    <form name="ComparativeBalanceTotals" type="list" list-name="balanceTotalList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <row-actions>
+            <set field="totalName" value="${groovy: uiLabelMap.get(totalName)}"/>
+        </row-actions>
+        <field name="totalName" title-area-style="tableheadwide"><display description="${totalName}"/></field>
+        <field name="balance1" title="Period1" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="balance2" title="Period2" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
 
-    <form name="BalanceSheetAssetList" type="list" list-name="assetBalancesList"
-        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
-        <row-actions>
-            <entity-one entity-name="GlAccount" value-field="glAccount">
-                <field-map field-name="glAccountId"/>
-            </entity-one>
-        </row-actions>
-        <field name="glAccountId" use-when="isPdf != true">
-            <hyperlink target="FindAcctgTransEntries" description="[${glAccountId}] [${glAccount.accountCode}] ${glAccount.accountName}">
-                <parameter param-name="glAccountId"/>
-                <parameter param-name="organizationPartyId"/>
-            </hyperlink>
+    <form name="SelectAcctReportPeriod" type="single" title="Select period for report">
+        <field name="fromDate"><date-time/></field>
+        <field name="thruDate"><date-time/></field>
+        <field name="glFiscalTypeId" title="${uiLabelMap.FormFieldTitle_glFiscalType}">
+            <drop-down>
+                <entity-options entity-name="GlFiscalType" description="${description}">
+                    <entity-order-by field-name="glFiscalTypeId"/>
+                </entity-options>
+            </drop-down>
         </field>
-        <field name="glAccountId" use-when="isPdf == true"><display description="[${glAccountId}] [${glAccount.accountCode}] ${glAccount.accountName}"/></field>
-        <field name="totalAmount" title-area-style="tableheadmedium" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
-    </form>
-    <form name="BalanceSheetLiabilityList" type="list" list-name="liabilityBalancesList"
-        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
-        <row-actions>
-            <entity-one entity-name="GlAccount" value-field="glAccount">
-                <field-map field-name="glAccountId"/>
-            </entity-one>
-        </row-actions>
-        <field name="glAccountId" use-when="isPdf != true">
-            <hyperlink target="FindAcctgTransEntries" description="[${glAccountId}] [${glAccount.accountCode}] ${glAccount.accountName}">
-                <parameter param-name="glAccountId"/>
-                <parameter param-name="organizationPartyId"/>
-            </hyperlink>
-        </field>
-        <field name="glAccountId" use-when="isPdf == true"><display description="[${glAccountId}] [${glAccount.accountCode}] ${glAccount.accountName}"/></field>
-        <field name="totalAmount" title-area-style="tableheadmedium" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
-    </form>
-    <form name="BalanceSheetEquityList" type="list" list-name="equityBalancesList"
-        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
-        <row-actions>
-            <entity-one entity-name="GlAccount" value-field="glAccount">
-                <field-map field-name="glAccountId"/>
-            </entity-one>
-        </row-actions>
-        <field name="glAccountId" use-when="isPdf != true">
-            <hyperlink target="FindAcctgTransEntries" description="[${glAccountId}] [${glAccount.accountCode}] ${glAccount.accountName}">
-                <parameter param-name="glAccountId"/>
-                <parameter param-name="organizationPartyId"/>
-            </hyperlink>
-        </field>
-        <field name="glAccountId" use-when="isPdf == true"><display description="[${glAccountId}] [${glAccount.accountCode}] ${glAccount.accountName}"/></field>
-        <field name="totalAmount" title-area-style="tableheadmedium" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="submitButton" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
 
     <form name="FindTransactionTotals" type="single" target="TransactionTotals" title="Find list of transaction totals"
@@ -225,62 +373,40 @@ under the License.
         <field name="organizationPartyId"><hidden/></field>
         <field name="fromDate"><date-time/></field>
         <field name="thruDate"><date-time/></field>
+        <field name="glFiscalTypeId" title="${uiLabelMap.FormFieldTitle_glFiscalType}">
+            <drop-down>
+                <entity-options entity-name="GlFiscalType" description="${description}">
+                    <entity-order-by field-name="glFiscalTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
         <field name="submitButton" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
-    <form name="PostedTransactionTotalList" type="list" list-name="postedTransTotalList"
+    <form name="PostedTransactionTotalList" type="list" list-name="postedTransactionTotals"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
-        <field name="glAccountId">
-            <hyperlink target="GlAccountNavigate" description="${glAccountId}">
+        <row-actions>
+            <set field="closingD" value="${openingD + D}" type="BigDecimal"/>
+            <set field="closingC" value="${openingC + C}" type="BigDecimal"/>
+        </row-actions>
+        <field name="accountCode">
+            <hyperlink target="FindAcctgTransEntries" description="${accountCode}">
                 <parameter param-name="glAccountId"/>
+                <parameter param-name="organizationPartyId"/>
             </hyperlink>
         </field>
-        <field name="accountName" entry-name="glAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountName}"/></field>
-        <field name="debit"><display type="currency" currency="${currencyUomId}"/></field>
-        <field name="credit"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="accountName" title-area-style="tableheadwide"><display description="${accountName}"/></field>
+        <field name="openingD" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="openingC" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="D" title="${uiLabelMap.AccountingDebitFlag}" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="C" title="${uiLabelMap.AccountingCreditFlag}" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="closingD" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="closingC" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
     </form>
-
-    <form name="UnpostedTransactionTotalList" type="list" list-name="unpostedTransTotalList"
-        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
-        <field name="glAccountId">
-            <hyperlink target="GlAccountNavigate" description="${glAccountId}">
-                <parameter param-name="glAccountId"/>
-            </hyperlink>
-        </field>
-        <field name="accountName" entry-name="glAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountName}"/></field>
-        <field name="debit"><display type="currency" currency="${currencyUomId}"/></field>
-        <field name="credit"><display type="currency" currency="${currencyUomId}"/></field>
+    <form name="UnpostedTransactionTotalList" type="list" list-name="unpostedTransactionTotals"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" extends="PostedTransactionTotalList">
     </form>
-    <form name="PostedAndUnpostedTransactionTotalList" type="list" list-name="postedAndUnpostedTransTotalList"
-        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
-        <field name="glAccountId">
-            <hyperlink target="GlAccountNavigate" description="${glAccountId}">
-                <parameter param-name="glAccountId"/>
-            </hyperlink>
-        </field>
-        <field name="accountName" entry-name="glAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountName}"/></field>
-        <field name="debit"><display type="currency" currency="${currencyUomId}"/></field>
-        <field name="credit"><display type="currency" currency="${currencyUomId}"/></field>
-    </form>
-
-    <form name="PostedTransactionTotalListCsv" type="list" list-name="postedTransTotalList" odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
-        <field name="glAccountId"><display/></field>
-        <field name="accountName" entry-name="glAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountName}"/></field>
-        <field name="debit"><display type="currency" currency="${currencyUomId}"/></field>
-        <field name="credit"><display type="currency" currency="${currencyUomId}"/></field>
-    </form>
-
-    <form name="UnpostedTransactionTotalListCsv" type="list" list-name="unpostedTransTotalList" odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
-        <field name="glAccountId"><display/></field>
-        <field name="accountName" entry-name="glAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountName}"/></field>
-        <field name="debit"><display type="currency" currency="${currencyUomId}"/></field>
-        <field name="credit"><display type="currency" currency="${currencyUomId}"/></field>
-    </form>
-
-    <form name="PostedAndUnpostedTransactionTotalListCsv" type="list" list-name="postedAndUnpostedTransTotalList" odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
-        <field name="glAccountId"><display/></field>
-        <field name="accountName" entry-name="glAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountName}"/></field>
-        <field name="debit"><display type="currency" currency="${currencyUomId}"/></field>
-        <field name="credit"><display type="currency" currency="${currencyUomId}"/></field>
+    <form name="PostedAndUnpostedTransactionTotalList" type="list" list-name="allTransactionTotals"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" extends="PostedTransactionTotalList">
     </form>
 
     <form name="IncomeStatementListCsv" type="list" list-name="glAccountIncomeList" view-size="99999">
@@ -361,83 +487,6 @@ under the License.
         </field>
         <field name="submitButton" widget-style="buttontext" action=""><submit button-type="text-link"/></field>
     </form>
-    <form name="MonthlyTrialBalance" type="single" target="MonthlyTrialBalance" title="Find list of monthly transaction totals"
-          header-row-style="header-row" default-table-style="basic-table">
-
-        <field name="organizationPartyId"><hidden/></field>
-        <field name="selectedMonth">
-            <drop-down>
-                <list-options list-name="monthList" key-name="value" description="${description}"/>
-            </drop-down>
-        </field>
-        <field name="posted">
-            <drop-down>
-                <option description="${uiLabelMap.CommonY}" key="Y"/>
-                <option description="${uiLabelMap.CommonN}" key="N"/>
-                <option description="${uiLabelMap.CommonAll}" key="All"/>
-            </drop-down>
-        </field>
-        <field name="submitButton" widget-style="smallSubmit"><submit button-type="button"/></field>
-    </form>
-    <form name="MonthlyPostedTransactionList" type="list" list-name="postedTransTotalList" paginate-target="MonthlyTrialBalance"
-            odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
-
-        <field name="isPosted" field-name="parameters.isPosted"><hidden/></field>
-        <field name="accountCode" title="${uiLabelMap.FormFieldTitle_accountCode}" entry-name="glAccountId">
-            <display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountCode}"/>
-        </field>
-        <field name="accountName" title="${uiLabelMap.FormFieldTitle_accountName}" entry-name="glAccountId">
-            <display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountName}"/>
-        </field>
-        <field name="openingBalanceCredit">
-            <display description="${openingBalanceCredit}" type="currency" currency="${currencyUomId}"/>
-        </field>
-        <field name="openingBalanceDebit">
-            <display description="${openingBalanceDebit}" type="currency" currency="${currencyUomId}"/>
-        </field>
-        <field name="monthAmountCredit">
-            <display description="${credit}" type="currency" currency="${currencyUomId}"/>
-        </field>
-        <field name="monthAmountDebit">
-            <display description="${debit}" type="currency" currency="${currencyUomId}"/>
-        </field>
-        <field name="closingBalanceCredit">
-            <display description="${openingBalanceCredit + credit}" type="currency" currency="${currencyUomId}"/>
-        </field>
-        <field name="closingBalanceDebit">
-            <display description="${openingBalanceDebit + debit}" type="currency" currency="${currencyUomId}"/>
-        </field>
-        <field name="yearToDateBalanceCredit">
-            <display description="${openingBalanceCredit + credit}" type="currency" currency="${currencyUomId}"/>
-        </field>
-        <field name="yearToDateBalanceDebit">
-            <display description="${openingBalanceDebit + debit}" type="currency" currency="${currencyUomId}"/>
-        </field>
-    </form>
-
-    <form name="MonthlyUnpostedTransactionList" type="list" list-name="unpostedTransTotalList" paginate-target="MonthlyTrialBalance"
-            odd-row-style="alternate-row" default-table-style="basic-table hover-bar" 
-            extends="MonthlyPostedTransactionList" extends-resource="component://accounting/widget/ReportFinancialSummaryForms.xml">
-        <field name="isPosted" field-name="parameters.isPosted"><hidden/></field>
-    </form>
-    
-    <form name="MonthlyPostedUnpostedTransactionList" type="list" list-name="postedAndUnpostedTransTotalList" paginate-target="MonthlyTrialBalance" 
-            odd-row-style="alternate-row" default-table-style="basic-table hover-bar"
-            extends="MonthlyPostedTransactionList" extends-resource="component://accounting/widget/ReportFinancialSummaryForms.xml">
-        <field name="isPosted" field-name="parameters.isPosted"><hidden/></field>
-    </form>
-
-    <form name="CostCenter" type="single" header-row-style="header-row" target="getGlAcctgOrgWithPostedBalanceSplit" default-table-style="basic-table">
-        <field name="organizationPartyId"><hidden/></field>
-        <field name="fromDate" required-field="false"><date-time type="timestamp"/></field>
-        <field name="thruDate" required-field="false"><date-time type="timestamp"/></field>
-        <field name="timePeriod" required-field="false">
-            <drop-down>
-                <list-options list-name="customTimePeriods" key-name="customTimePeriodId" description="${fromDate} - ${thruDate}"/>
-            </drop-down>
-        </field>
-        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit" tooltip="Please enter From and Thru date or select financial time period in fields above"><submit button-type="button"/></field>
-    </form>
 
     <form name="InventoryValuation" type="single" target="InventoryValuation" header-row-style="header-row" default-table-style="basic-table">
         <field name="facilityId" position="1">
@@ -484,52 +533,6 @@ under the License.
         <field name="totalInventoryCost" use-when="currencyUomId==null" title="${uiLabelMap.CommonTotalValue}"><display description="${uiLabelMap.ProductDifferentCurrencies}"/></field>
     </form>
 
-    <form name="ComparativeIncomeStatementParameters" type="single" header-row-style="header-row" default-table-style="basic-table">
-        <field name="period1FromDate" title="${uiLabelMap.FormFieldTitle_period1FromDate}" required-field="true" position="1"><date-time type="timestamp"/></field>
-        <field name="period1ThruDate" title="${uiLabelMap.FormFieldTitle_period1ThruDate}" required-field="true" position="2"><date-time type="timestamp"/></field>
-        <field name="period2FromDate" title="${uiLabelMap.FormFieldTitle_period2FromDate}" required-field="true" position="1"><date-time type="timestamp"/></field>
-        <field name="period2ThruDate" title="${uiLabelMap.FormFieldTitle_period2ThruDate}" required-field="true" position="2"><date-time type="timestamp"/></field>
-        <field name="glFiscalTypeId" title="${uiLabelMap.FormFieldTitle_glFiscalType}">
-            <drop-down>
-                <entity-options entity-name="GlFiscalType" description="${description}">
-                    <entity-order-by field-name="glFiscalTypeId"/>
-                </entity-options>
-            </drop-down>
-        </field>
-        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit" tooltip="Please enter From and Thru date in fields above"><submit button-type="button"/></field>
-    </form>
-    
-    <form name="ComparativeIncomeStatementList" type="list" list-name="glAccountIncomeList"
-            odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
-        <row-actions>
-            <entity-one entity-name="GlAccount" value-field="glAccount"/>
-        </row-actions>
-        <field name="glAccountId" title="${uiLabelMap.AccountingGlAccountId}">
-            <hyperlink target="FindAcctgTransEntries" description="${glAccountId}">
-                <parameter param-name="glAccountId"/>
-                <parameter param-name="organizationPartyId"/>
-            </hyperlink>
-        </field>
-        <field name="glAccountId"  use-when="isPdf == true"><display description="${glAccountId}"/></field>
-        <field name="accountName" title="${uiLabelMap.FormFieldTitle_accountName}"><display description="${glAccount.accountName}"/></field>
-        <field name="period1TotalAmount" title="${uiLabelMap.AccountingPeriod1TotalAmount}"><display type="currency" currency="${currencyUomId}"/></field>
-        <field name="period2TotalAmount" title="${uiLabelMap.AccountingPeriod1TotalAmount}"><display type="currency" currency="${currencyUomId}"/></field>
-    </form>
-
-    <form name="ComparativeExpenseStatementList" type="list" list-name="glAccountExpenseList" extends="ComparativeIncomeStatementList"/>
-
-    <form name="ComparativeIncomeStatementsCsv" type="list" list-name="glAccountIncomeList" view-size="99999">
-        <row-actions>
-            <entity-one entity-name="GlAccount" value-field="glAccount"/>
-        </row-actions>
-        <field name="glAccountId"><display description="${glAccountId}"/></field>
-        <field name="accountName" title="${uiLabelMap.FormFieldTitle_accountName}"><display description="${glAccount.accountName}"/></field>
-        <field name="period1TotalAmount" title="${uiLabelMap.AccountingPeriod1TotalAmount}"><display type="currency" currency="${currencyUomId}"/></field>
-        <field name="period2TotalAmount" title="${uiLabelMap.AccountingPeriod1TotalAmount}"><display type="currency" currency="${currencyUomId}"/></field>
-    </form>
-
-    <form name="ComparativeExpenseStatementsCsv" type="list" list-name="glAccountExpenseList" view-size="99999" extends="ComparativeIncomeStatementsCsv"/>
-
     <form name="TrialBalanceFinancialTimePeriodSelection" type="single" header-row-style="header-row" target="TrialBalance" default-table-style="basic-table">
         <field name="organizationPartyId"><hidden/></field>
         <field name="customTimePeriodId" required-field="true">
@@ -543,6 +546,7 @@ under the License.
         </field>
         <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
+
     <form name="TrialBalanceReport" type="list" list-name="glAccountAndHistories"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
         <actions>
@@ -560,17 +564,92 @@ under the License.
                 <order-by field-name="accountCode"/>
             </entity-condition>
         </actions>
-        <field name="glAccountId">
-            <hyperlink target="FindAcctgTransEntries" description="${glAccountId}">
+        <field name="accountCode">
+            <hyperlink target="FindAcctgTransEntries" description="${accountCode}">
                 <parameter param-name="glAccountId"/>
                 <parameter param-name="organizationPartyId"/>
             </hyperlink>
         </field>
-        <field name="accountCode"><display description="${accountCode}"/></field>
         <field name="accountName" title-area-style="tableheadwide"><display description="${accountName}"/></field>
         <field name="totalPostedDebits" title="${uiLabelMap.AccountingDebitFlag}" widget-style="tabletextright"><display description="${totalPostedDebits}" type="currency" currency="${currencyUomId}"/></field>
         <field name="totalPostedCredits" title="${uiLabelMap.AccountingCreditFlag}" widget-style="tabletextright"><display description="${totalPostedCredits}" type="currency" currency="${currencyUomId}"/></field>
         <field name="totalEndingBalance" title="${uiLabelMap.AccountingEndingBalance}" widget-style="tabletextright"><display description="${totalEndingBalance}" type="currency" currency="${currencyUomId}"/></field>
     </form>
 
+    <form name="CashFlowStatementParameters" type="single" header-row-style="header-row" default-table-style="basic-table">
+        <field name="selectedMonth" title="${uiLabelMap.CommonMonth}">
+            <drop-down allow-empty="true">
+                <list-options list-name="monthList" key-name="value" description="${description}"/>
+            </drop-down>
+        </field>
+        <field name="fromDate" required-field="false"><date-time type="timestamp"/></field>
+        <field name="thruDate" required-field="false"><date-time type="timestamp"/></field>
+        <field name="glFiscalTypeId" title="${uiLabelMap.FormFieldTitle_glFiscalType}">
+            <drop-down>
+                <entity-options entity-name="GlFiscalType" description="${description}">
+                    <entity-order-by field-name="glFiscalTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit" tooltip="Please enter From and Thru date in fields above"><submit button-type="button"/></field>
+    </form>
+
+    <!-- Cash Flow Statement -->
+    <form name="CashFlowStatementOpeningCashBalance" type="list" list-name="openingCashBalanceList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="accountCode">
+            <hyperlink target="FindAcctgTransEntries" description="${accountCode}">
+                <parameter param-name="glAccountId"/>
+                <parameter param-name="organizationPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="accountName" title-area-style="tableheadwide"><display description="${accountName}"/></field>
+        <field name="balance" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
+    <form name="CashFlowStatementPeriodCashBalance" type="list" list-name="periodCashBalanceList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="accountCode">
+            <hyperlink target="FindAcctgTransEntries" description="${accountCode}">
+                <parameter param-name="glAccountId"/>
+                <parameter param-name="organizationPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="accountName" title-area-style="tableheadwide"><display description="${accountName}"/></field>
+        <field name="D" widget-style="tabletextright" title="${uiLabelMap.AccountingTotalDebit_Receipts}"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="C" widget-style="tabletextright" title="${uiLabelMap.AccountingTotalCredit_Disbursement}"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="balance" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
+    <form name="CashFlowStatementClosingCashBalance" type="list" list-name="closingCashBalanceList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="accountCode">
+            <hyperlink target="FindAcctgTransEntries" description="${accountCode}">
+                <parameter param-name="glAccountId"/>
+                <parameter param-name="organizationPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="accountName" title-area-style="tableheadwide"><display description="${accountName}"/></field>
+        <field name="balance" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
+    <form name="CashFlowBalanceTotals" type="list" list-name="cashFlowBalanceTotalList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <row-actions>
+            <set field="totalName" value="${groovy: uiLabelMap.get(totalName)}"/>
+        </row-actions>
+        <field name="totalName" title="${uiLabelMap.CommonTotal}" title-area-style="tableheadhuge"><display description="${totalName}"/></field>
+        <field name="balance" title="_" widget-style="tabletextright"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
+    <form name="FindCashFlowTotals" type="single" target="TransactionTotals" title="Find list of cash flow totals"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="fromDate"><date-time/></field>
+        <field name="thruDate"><date-time/></field>
+        <field name="glFiscalTypeId" title="${uiLabelMap.FormFieldTitle_glFiscalType}">
+            <drop-down>
+                <entity-options entity-name="GlFiscalType" description="${description}">
+                    <entity-order-by field-name="glFiscalTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
 </forms>

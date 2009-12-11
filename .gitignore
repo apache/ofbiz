@@ -8,6 +8,7 @@ applications/party/build/
 applications/product/build/
 applications/securityext/build/
 applications/workeffort/build/
+bin/
 framework/appserver/build/
 framework/base/build/
 framework/bi/build/
@@ -44,7 +45,10 @@ specialpurpose/webpos/build/
 ofbiz.jar
 changelog
 runtime/svninfo.ftl
+runtime/test-list-build.xml
 runtime/logs/access_log.*
+runtime/logs/cobertura.dat
+runtime/logs/cobertura-report
 runtime/logs/*.log*
 runtime/logs/*.html*
 runtime/data/derby/*

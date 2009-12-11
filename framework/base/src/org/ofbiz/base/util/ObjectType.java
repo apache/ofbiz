@@ -763,12 +763,15 @@ public class ObjectType {
         if (value instanceof CharSequence) return UtilValidate.isEmpty((CharSequence) value);
         
         // These types would flood the log
+        // Number covers: BigDecimal, BigInteger, Byte, Double, Float, Integer, Long, Short
         if (value instanceof Boolean) return false;        
-        if (value instanceof Integer) return false;        
-        if (value instanceof java.math.BigDecimal) return false;          
+        if (value instanceof Number) return false;        
+        if (value instanceof Character) return false;        
         if (value instanceof java.sql.Timestamp) return false;        
         
-        Debug.logWarning("In ObjectType.isEmpty(Object value) returning false for " + value.getClass() + " Object.", module);
+        if (Debug.verboseOn()) {
+            Debug.logVerbose("In ObjectType.isEmpty(Object value) returning false for " + value.getClass() + " Object.", module);
+        }
         return false;
     }
 

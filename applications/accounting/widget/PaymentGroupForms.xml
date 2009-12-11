@@ -26,26 +26,16 @@ under the License.
         header-row-style="header-row" default-table-style="basic-table">
         <auto-fields-entity entity-name="PaymentGroup" default-field-type="find"/>
         <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
-        <field name="searchButton" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
 
-    <form name="ListPaymentGroup" type="list" separate-columns="true" default-entity-name="PaymentGroup" list-name="listIt" 
+    <form name="ListPaymentGroup" type="list" separate-columns="true" default-entity-name="PaymentGroup" list-name="paymentGroupList" 
         paginate-target="FindPaymentGroup" paginate="true" odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
-        <actions>
-            <service service-name="performFind" result-map="result" result-map-list="listIt">
-                <field-map field-name="inputFields" from-field="parameters"/>
-                <field-map field-name="entityName" value="PmtGrpMembrPaymentAndFinAcctTrans"/>
-                <field-map field-name="viewIndex" from-field="viewIndex"/>
-                <field-map field-name="viewSize" from-field="viewSize"/>
-                <field-map field-name="orderBy" value="effectiveDate DESC"/>
-            </service>
-        </actions>
         <row-actions>
-            <entity-one entity-name="PaymentGroup" value-field="paymentGroup">
-                <field-map field-name="paymentGroupId"/>
-            </entity-one>
-            <set field="paymentGroupTypeId" from-field="paymentGroup.paymentGroupTypeId"/>
             <entity-and entity-name="PaymentGroupMember" list="paymentGroupMembers" filter-by-date="true">
+                <field-map field-name="paymentGroupId"/>
+            </entity-and>
+            <entity-and entity-name="PmtGrpMembrPaymentAndFinAcctTrans" list="paymentGroupMemberAndTransList" filter-by-date="true">
                 <field-map field-name="paymentGroupId"/>
             </entity-and>
         </row-actions>
@@ -55,25 +45,38 @@ under the License.
             </hyperlink>
         </field>
         <field name="paymentGroupTypeId" title="${uiLabelMap.FormFieldTitle_paymentGroupType}"><display-entity entity-name="PaymentGroupType"/></field>
-        <field name="paymentGroupName"><display description="${paymentGroup.paymentGroupName}"/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" use-when="${paymentGroupTypeId == 'BATCH_PAYMENT'} @and ${groovy:org.ofbiz.base.util.UtilValidate.isNotEmpty(paymentGroupMembers)}">
+        <field name="paymentGroupName"><display description="${paymentGroupName}"/></field>
+        <field name="depositSlip" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" use-when="${paymentGroupTypeId == 'BATCH_PAYMENT'} @and ${groovy:org.ofbiz.base.util.UtilValidate.isNotEmpty(paymentGroupMembers)}">
+            <hyperlink target="DepositSlip.pdf" description="${uiLabelMap.AccountingInvoicePDF}" also-hidden="false">
+                <parameter param-name="paymentGroupId"/>
+            </hyperlink>
+        </field>
+        <field name="printCheck" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" use-when="${paymentGroupTypeId == 'CHECK_RUN'} @and ${groovy:org.ofbiz.base.util.UtilValidate.isNotEmpty(paymentGroupMembers)}">
+            <hyperlink target="printChecks.pdf" description="${uiLabelMap.AccountingInvoicePDF}" also-hidden="false">
+                <parameter param-name="paymentGroupId"/>
+            </hyperlink>
+        </field>
+        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" use-when="${paymentGroupTypeId == 'BATCH_PAYMENT'} @and ${paymentGroupMemberAndTransList[0].finAccountTransStatusId != 'FINACT_TRNS_APPROVED'} @and ${groovy:org.ofbiz.base.util.UtilValidate.isNotEmpty(paymentGroupMembers)}">
             <hyperlink target="cancelPaymentGroup" description="${uiLabelMap.CommonCancel}" also-hidden="false">
                 <parameter param-name="paymentGroupId"/>
             </hyperlink>
         </field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" use-when="${paymentGroupTypeId == 'CHECK_RUN'} @and ${groovy:org.ofbiz.base.util.UtilValidate.isNotEmpty(paymentGroupMembers)}">
+        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" use-when="${paymentGroupTypeId == 'CHECK_RUN'} @and ${paymentGroupMemberAndTransList[0].finAccountTransStatusId != 'FINACT_TRNS_APPROVED'} @and ${groovy:org.ofbiz.base.util.UtilValidate.isNotEmpty(paymentGroupMembers)}">
             <hyperlink target="cancelCheckRunPayments" description="${uiLabelMap.CommonCancel}" also-hidden="false">
-                <parameter param-name="paymentGroupId"/>
-            </hyperlink>
-        </field>
-        <field name="depositSlip" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" use-when="${groovy:org.ofbiz.base.util.UtilValidate.isNotEmpty(paymentGroupMembers)}">
-            <hyperlink target="DepositSlip.pdf" description="${uiLabelMap.AccountingInvoicePDF}" also-hidden="false">
                 <parameter param-name="paymentGroupId"/>
             </hyperlink>
         </field>
     </form>
     
     <form name="EditPaymentGroup" type="single" target="updatePaymentGroup" title="" default-map-name="paymentGroup">
+        <actions>
+            <entity-and entity-name="PmtGrpMembrPaymentAndFinAcctTrans" list="pmtGrpMembrPaymentAndFinAcctTransList">
+                <field-map field-name="paymentGroupId" from-field="paymentGroup.paymentGroupId"/>
+            </entity-and>
+            <entity-one entity-name="FinAccount" value-field="finAccount">
+                <field-map field-name="finAccountId" from-field="pmtGrpMembrPaymentAndFinAcctTransList[0].finAccountId"/>
+            </entity-one>            
+        </actions>
         <alt-target use-when="paymentGroup==null" target="createPaymentGroup"/>
         <auto-fields-service service-name="updatePaymentGroup"/>
         <field use-when="paymentGroup!=null" name="paymentGroupId" tooltip="${uiLabelMap.CommonNotModifRecreat}"><display/></field>

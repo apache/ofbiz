@@ -27,6 +27,9 @@ under the License.
         "head1":"font-size=\"12\" font-weight=\"bold\"",
         "head2":"font-weight=\"bold\"",
         "head3":"font-weight=\"bold\" font-style=\"italic\"",
+        "h1":"font-size=\"12\" font-weight=\"bold\"",
+        "h2":"font-weight=\"bold\"",
+        "h3":"font-weight=\"bold\" font-style=\"italic\"",
         "error":"color=\"red\""}/>
     <#assign foStyle = foStyles[style]?default("")/>
     ${foStyle?default("")}
@@ -59,7 +62,7 @@ under the License.
 <#macro renderImage></#macro>
 
 <#macro renderContentFrame></#macro>
-<#macro renderScreenletBegin id title collapsible collapsibleAreaId expandToolTip collapseToolTip fullUrlString padded menuString showMore collapsed javaScriptEnabled></#macro>
+<#macro renderScreenletBegin id title collapsible saveCollapsed collapsibleAreaId expandToolTip collapseToolTip fullUrlString padded menuString showMore collapsed javaScriptEnabled></#macro>
 <#macro renderScreenletSubWidget></#macro>
 <#macro renderScreenletEnd></#macro>
 

@@ -787,13 +787,13 @@ under the License.
                 <parameter param-name="organizationPartyId"/>
             </link>
         </menu-item>
-        <menu-item name="IncomeStatement" title="${uiLabelMap.AccountingIncomeStatement}">
-            <link target="IncomeStatement">
+        <menu-item name="TransactionTotals" title="${uiLabelMap.AccountingTransactionTotals}">
+            <link target="TransactionTotals">
                 <parameter param-name="organizationPartyId"/>
             </link>
         </menu-item>
-        <menu-item name="ComparativeIncomeStatement" title="${uiLabelMap.AccountingComparativeIncomeStatement}">
-            <link target="ComparativeIncomeStatement">
+        <menu-item name="IncomeStatement" title="${uiLabelMap.AccountingIncomeStatement}">
+            <link target="IncomeStatement">
                 <parameter param-name="organizationPartyId"/>
             </link>
         </menu-item>
@@ -802,13 +802,13 @@ under the License.
                 <parameter param-name="organizationPartyId"/>
             </link>
         </menu-item>
-        <menu-item name="ComparativeBalanceSheet" title="${uiLabelMap.AccountingComparativeBalanceSheet}">
-            <link target="ComparativeBalanceSheet">
+        <menu-item name="ComparativeIncomeStatement" title="${uiLabelMap.AccountingComparativeIncomeStatement}">
+            <link target="ComparativeIncomeStatement">
                 <parameter param-name="organizationPartyId"/>
             </link>
         </menu-item>
-        <menu-item name="TransactionTotals" title="${uiLabelMap.AccountingTransactionTotals}">
-            <link target="TransactionTotals">
+        <menu-item name="ComparativeBalanceSheet" title="${uiLabelMap.AccountingComparativeBalanceSheet}">
+            <link target="ComparativeBalanceSheet">
                 <parameter param-name="organizationPartyId"/>
             </link>
         </menu-item>
@@ -817,18 +817,18 @@ under the License.
                 <parameter param-name="organizationPartyId"/>
             </link>
         </menu-item>
-        <menu-item name="MonthlyTrialBalance" title="${uiLabelMap.AccountingMonthlyTrialBalance}">
-            <link target="MonthlyTrialBalance">
-                <parameter param-name="organizationPartyId"/>
-            </link>
-        </menu-item>
-        <menu-item name="CostCenterReport" title="${uiLabelMap.FormFieldTitle_costCenters}">
-            <link target="CostCenterReport">
-                <parameter param-name="organizationPartyId"/>
-            </link>
-        </menu-item>
         <menu-item name="InventoryValuation" title="${uiLabelMap.AccountingInventoryValuation}">
             <link target="InventoryValuation">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="GlAccountBalanceByCostCenter" title="${uiLabelMap.FormFieldTitle_costCenters}">
+            <link target="GlAccountBalanceByCostCenter">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="CashFlowStatement" title="${uiLabelMap.AccountingCashFlowStatement}">
+            <link target="CashFlowStatement">
                 <parameter param-name="organizationPartyId"/>
             </link>
         </menu-item>
@@ -1237,10 +1237,16 @@ under the License.
         </menu-item>
         <menu-item name="NewFinAccountReconciliations" title="${uiLabelMap.AccountingCreateNewFinAccountReconciliations}">
             <condition>
-                <or>
-                    <not><if-empty field="glReconciliationId"/></not>
-                    <if-compare field="tabButtonItem2" operator="equals" value="Find"/>
-                </or>
+                <and>
+                    <and>
+                        <if-compare field="finAccount.statusId" operator="not-equals" value="FNACT_MANFROZEN"/>
+                        <if-compare field="finAccount.statusId" operator="not-equals" value="FNACT_CANCELLED"/>                        
+                    </and>
+                    <or>
+                        <not><if-empty field="glReconciliationId"/></not>
+                        <if-compare field="tabButtonItem2" operator="equals" value="Find"/>
+                    </or>
+                </and>
             </condition>
             <link target="EditFinAccountReconciliations">
                 <parameter param-name="finAccountId"/>

@@ -250,7 +250,7 @@ public class ShoppingCartEvents {
         //Check for virtual products
         if (ProductWorker.isVirtual(delegator, productId)) {
 
-            if ("VV_FEATURETREE".equals(ProductWorker.getProductvirtualVariantMethod(delegator, productId))) {
+            if ("VV_FEATURETREE".equals(ProductWorker.getProductVirtualVariantMethod(delegator, productId))) {
                 // get the selected features.
                 List<String> selectedFeatures = new LinkedList<String>();
                 java.util.Enumeration paramNames = request.getParameterNames();
@@ -464,7 +464,8 @@ public class ShoppingCartEvents {
                 if (surveyResponseId != null) {
                     surveyResponses = UtilMisc.toList(surveyResponseId);
                 } else {
-                    Map surveyContext = UtilHttp.getParameterMap(request);
+                    String origParamMapId = UtilHttp.stashParameterMap(request);
+                    Map<String, Object> surveyContext = UtilMisc.<String, Object>toMap("_ORIG_PARAM_MAP_ID_", origParamMapId);
                     GenericValue userLogin = cart.getUserLogin();
                     String partyId = null;
                     if (userLogin != null) {
@@ -1184,12 +1185,26 @@ public class ShoppingCartEvents {
         String termDaysStr = request.getParameter("termDays");
         String textValue = request.getParameter("textValue");
 
+        GenericValue termType = null;
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
         BigDecimal termValue = null;
         Long termDays = null;
 
         if (UtilValidate.isEmpty(termTypeId)) {
             request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error, "OrderOrderTermTypeIsRequired", locale));
+            return "error";
+        }
+        
+        try {
+            termType = delegator.findOne("TermType", UtilMisc.toMap("termTypeId", termTypeId), false);
+        } catch (GenericEntityException gee) {
+            request.setAttribute("_ERROR_MESSAGE_", gee.getMessage());
+            return "error";
+        }
+        
+        if (("FIN_PAYMENT_TERM".equals(termTypeId) && UtilValidate.isEmpty(termDaysStr)) || (UtilValidate.isNotEmpty(termType) && "FIN_PAYMENT_TERM".equals(termType.get("parentTypeId")) && UtilValidate.isEmpty(termDaysStr))) {
+            request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error, "OrderOrderTermDaysIsRequired", locale));
             return "error";
         }
 

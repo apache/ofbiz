@@ -662,6 +662,8 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         sr.append(title);
         sr.append("\" collapsible=");
         sr.append(Boolean.toString(collapsible));
+        sr.append(" saveCollapsed=");
+        sr.append(Boolean.toString(screenlet.saveCollapsed()));
         sr.append(" collapsibleAreaId=\"");
         sr.append(collapsibleAreaId);
         sr.append("\" expandToolTip=\"");
@@ -721,8 +723,8 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
 
         // get the parametrized pagination index and size fields
         int paginatorNumber = modelForm.getPaginatorNumber(context);
-        String viewIndexParam = modelForm.getPaginateIndexField(context);
-        String viewSizeParam = modelForm.getPaginateSizeField(context);
+        String viewIndexParam = modelForm.getMultiPaginateIndexField(context);
+        String viewSizeParam = modelForm.getMultiPaginateSizeField(context);
 
         int viewIndex = modelForm.getViewIndex(context);
         int viewSize = modelForm.getViewSize(context);
