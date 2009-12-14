@@ -469,7 +469,7 @@ public class ManagerEvents {
         try {
             beganTransaction = TransactionUtil.begin();
         
-            Delegator delegator = pos.getSession().getDelegator();
+            GenericDelegator delegator = pos.getSession().getDelegator();
             List<EntityExpr> exprs = UtilMisc.toList(EntityCondition.makeCondition("originFacilityId", EntityOperator.EQUALS, trans.getFacilityId()),
                     EntityCondition.makeCondition("terminalId", EntityOperator.EQUALS, trans.getTerminalId()));
             EntityListIterator eli = null;
