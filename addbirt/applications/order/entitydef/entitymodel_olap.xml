@@ -38,14 +38,14 @@ under the License.
         <field name="productDimId" type="id-ne"></field>
         <field name="origCurrencyDimId" type="id-ne"></field>
         <field name="billToCustomerDimId" type="id-ne"></field> <!-- TODO: implement the dimension -->
-        
+
         <field name="quantity" type="fixed-point">
             <description>Quantity order. From OrderItem.quantity</description>
         </field>
         <field name="orderStatus" type="description"></field>
-		<field name="saleChannel" type="description"></field>
-		<field name="visitId" type="id-ne"></field>
-		<field name="initialReferrer" type="url"></field>
+        <field name="saleChannel" type="description"></field>
+        <field name="visitId" type="id-ne"></field>
+        <field name="initialReferrer" type="url"></field>
         <field name="productPromoCode" type="id"></field>
         <field name="extGrossAmount" type="currency-precise">
             <description>Extended gross amount: quantity item multiplied by the unit price.</description>
@@ -187,9 +187,9 @@ under the License.
             <exclude field="orderId"/>
             <exclude field="orderItemSeqId"/>
             <exclude field="orderStatus"/>
-	    	<exclude field="saleChannel"/>
-	    	<exclude field="visitId"/>
-	    	<exclude field="initialReferrer"/>
+            <exclude field="saleChannel"/>
+            <exclude field="visitId"/>
+            <exclude field="initialReferrer"/>
             <exclude field="productPromoCode"/>
         </alias-all>
         <alias entity-alias="SIIF" name="orderId" group-by="true">

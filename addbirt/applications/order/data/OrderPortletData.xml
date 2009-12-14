@@ -139,7 +139,7 @@
     <PortletPortletCategory portalPortletId="OrderByReferrer" portletCategoryId="REPORT"/>
     <PortalPagePortlet portalPageId="OrderReportPage" portalPortletId="OrderByReferrer" portletSeqId="00001" columnSeqId="00001" sequenceNum="6"/>
     
-	<PortalPortlet portalPortletId="OrderByChannel"
+    <PortalPortlet portalPortletId="OrderByChannel"
         portletName="Sale Orders by Channel"
         screenName="SaleOrdersByChannelReport"
         screenLocation="component://order/widget/ordermgr/ReportScreens.xml"

@@ -17,39 +17,39 @@
  * under the License.
  */
 
- import org.ofbiz.accounting.util.UtilAccounting
- import org.ofbiz.base.util.*;
- import org.ofbiz.entity.util.EntityUtil;
- import org.ofbiz.entity.condition.EntityCondition;
- import org.ofbiz.entity.condition.EntityOperator;
- import com.ibm.icu.util.Calendar;
- 
- birtParameters = [:];
- /*
- birtParameters.facilityId = request.getParameter("facilityId");
- birtParameters.productId = request.getParameter("productId");
- birtParameters.productTypeId = request.getParameter("productTypeId");
- birtParameters.searchInProductCategoryId = request.getParameter("searchInProductCategoryId");
- birtParameters.contentType = request.getParameter("contentType");
- birtParameters.productSupplierId = request.getParameter("productSupplierId");
- birtParameters.statusId = request.getParameter("statusId");
- birtParameters.productsSoldThruTimestamp = request.getParameter("productsSoldThruTimestamp");
- birtParameters.VIEW_SIZE = request.getParameter("VIEW_SIZE");
- birtParameters.monthsInPastLimit = request.getParameter("monthsInPastLimit");
- birtParameters.fromDateSellThrough = request.getParameter("fromDateSellThrough");
- birtParameters.thruDateSellThrough = request.getParameter("thruDateSellThrough");
- */
+import org.ofbiz.accounting.util.UtilAccounting
+import org.ofbiz.base.util.*;
+import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.condition.EntityOperator;
+import com.ibm.icu.util.Calendar;
 
- int lastIntMonth = Integer.parseInt(request.getParameter("lastIntMonth"));
- if (lastIntMonth == 0 ){
-	 fromOrderDate = null;
- }else{
-	 fromDateTime = UtilDateTime.getDayStart(UtilDateTime.toTimestamp(UtilDateTime.nowTimestamp()), (lastIntMonth*(-30)));
-	 fromOrderDate = UtilDateTime.toDateString(fromDateTime,"MMMM dd, yyyy")
-	 Debug.logInfo("====fromDate======="+fromOrderDate.toString(),"");
- }
+birtParameters = [:];
+/*
+birtParameters.facilityId = request.getParameter("facilityId");
+birtParameters.productId = request.getParameter("productId");
+birtParameters.productTypeId = request.getParameter("productTypeId");
+birtParameters.searchInProductCategoryId = request.getParameter("searchInProductCategoryId");
+birtParameters.contentType = request.getParameter("contentType");
+birtParameters.productSupplierId = request.getParameter("productSupplierId");
+birtParameters.statusId = request.getParameter("statusId");
+birtParameters.productsSoldThruTimestamp = request.getParameter("productsSoldThruTimestamp");
+birtParameters.VIEW_SIZE = request.getParameter("VIEW_SIZE");
+birtParameters.monthsInPastLimit = request.getParameter("monthsInPastLimit");
+birtParameters.fromDateSellThrough = request.getParameter("fromDateSellThrough");
+birtParameters.thruDateSellThrough = request.getParameter("thruDateSellThrough");
+*/
 
- birtParameters.facilityId = request.getParameter("facilityId");
- birtParameters.orderDateDateValue_fld0_op = fromOrderDate.toString();
- request.setAttribute("birtParameters", birtParameters);
- return "success";
+int lastIntMonth = Integer.parseInt(request.getParameter("lastIntMonth"));
+if (lastIntMonth == 0 ) {
+ fromOrderDate = null;
+} else {
+ fromDateTime = UtilDateTime.getDayStart(UtilDateTime.toTimestamp(UtilDateTime.nowTimestamp()), (lastIntMonth*(-30)));
+ fromOrderDate = UtilDateTime.toDateString(fromDateTime,"MMMM dd, yyyy")
+ Debug.logInfo("====fromDate======="+fromOrderDate.toString(),"");
+}
+
+birtParameters.facilityId = request.getParameter("facilityId");
+birtParameters.orderDateDateValue_fld0_op = fromOrderDate.toString();
+request.setAttribute("birtParameters", birtParameters);
+return "success";
