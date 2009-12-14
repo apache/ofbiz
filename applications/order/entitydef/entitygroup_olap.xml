@@ -30,7 +30,6 @@ under the License.
     <!-- Star Schemas                                              -->
     <!-- ========================================================= -->
     <entity-group group="org.ofbiz.olap" entity="SalesOrderItemStarSchema"/>
-    
 
 </entitygroup>
 

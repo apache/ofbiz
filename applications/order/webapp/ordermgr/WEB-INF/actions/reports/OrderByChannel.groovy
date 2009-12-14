@@ -20,9 +20,9 @@
 import org.ofbiz.base.util.*;
 
 birtParameters = [:];
-if(request.getParameter("saleChannel")){
+if (request.getParameter("saleChannel")) {
 	birtParameters.saleChannel = request.getParameter("saleChannel");
-}else{
+} else {
 	birtParameters.saleChannel = "null";
 }
 
