@@ -48,7 +48,7 @@ under the License.
             </widgets>
         </section>
     </screen>
-    
+
     <screen name="CommonPaymentDecorator">
         <section>
             <actions>

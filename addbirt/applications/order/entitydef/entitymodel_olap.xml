@@ -42,6 +42,7 @@ under the License.
         <field name="quantity" type="fixed-point">
             <description>Quantity order. From OrderItem.quantity</description>
         </field>
+
         <field name="orderStatus" type="description"></field>
         <field name="saleChannel" type="description"></field>
         <field name="visitId" type="id-ne"></field>

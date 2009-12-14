@@ -130,7 +130,7 @@
         description=""/>
     <PortletPortletCategory portalPortletId="SalesReport" portletCategoryId="REPORT"/>
     <PortalPagePortlet portalPageId="OrderReportPage" portalPortletId="SalesReport" portletSeqId="00001" columnSeqId="00002" sequenceNum="5"/>
-    
+
     <PortalPortlet portalPortletId="OrderByReferrer"
         portletName="Sale Orders By Referrer Report"
         screenName="SaleOrdersByReferrerReport"
@@ -138,7 +138,7 @@
         description=""/>
     <PortletPortletCategory portalPortletId="OrderByReferrer" portletCategoryId="REPORT"/>
     <PortalPagePortlet portalPageId="OrderReportPage" portalPortletId="OrderByReferrer" portletSeqId="00001" columnSeqId="00001" sequenceNum="6"/>
-    
+
     <PortalPortlet portalPortletId="OrderByChannel"
         portletName="Sale Orders by Channel"
         screenName="SaleOrdersByChannelReport"
