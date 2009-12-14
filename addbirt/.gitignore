@@ -1,3 +1,4 @@
+tools/build
 applications/accounting/build/
 applications/content/build/
 applications/humanres/build/
@@ -24,10 +25,12 @@ framework/jetty/build/
 framework/minilang/build/
 framework/security/build/
 framework/service/build/
+framework/sql/build/
 framework/start/build/
 framework/testtools/build/
 framework/webapp/build/
 framework/webslinger/build/
+framework/webslinger/websites/webslinger/Var/
 framework/webtools/build/
 framework/widget/build/
 specialpurpose/assetmaint/build/
@@ -42,6 +45,7 @@ specialpurpose/oagis/build/
 specialpurpose/pos/build/
 specialpurpose/projectmgr/build/
 specialpurpose/webpos/build/
+specialpurpose/shark/build/
 ofbiz.jar
 changelog
 runtime/svninfo.ftl
@@ -51,6 +55,7 @@ runtime/logs/cobertura.dat
 runtime/logs/cobertura-report
 runtime/logs/*.log*
 runtime/logs/*.html*
+runtime/logs/test-results/*
 runtime/data/derby/*
 runtime/catalina/work/*
 debian/EncryptPassword.class
