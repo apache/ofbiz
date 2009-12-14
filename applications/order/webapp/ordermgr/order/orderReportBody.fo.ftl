@@ -20,7 +20,7 @@ under the License.
     <#if orderHeader?has_content>
         <fo:table border-spacing="3pt">
 
-       <fo:table-column column-width="3.5in"/>
+       <fo:table-column column-width="4in"/>
        <fo:table-column column-width="1in"/>
        <fo:table-column column-width="1in"/>
        <fo:table-column column-width="1in"/>
@@ -28,9 +28,9 @@ under the License.
        <fo:table-header>
            <fo:table-row>
                <fo:table-cell><fo:block font-weight="bold">${uiLabelMap.OrderProduct}</fo:block></fo:table-cell>
-               <fo:table-cell text-align="center"><fo:block font-weight="bold">${uiLabelMap.OrderQuantity}</fo:block></fo:table-cell>
-               <fo:table-cell text-align="center"><fo:block font-weight="bold">${uiLabelMap.OrderUnitList}</fo:block></fo:table-cell>
-               <fo:table-cell text-align="center"><fo:block font-weight="bold">${uiLabelMap.OrderSubTotal}</fo:block></fo:table-cell>
+               <fo:table-cell text-align="right"><fo:block font-weight="bold">${uiLabelMap.OrderQuantity}</fo:block></fo:table-cell>
+               <fo:table-cell text-align="right"><fo:block font-weight="bold">${uiLabelMap.OrderUnitList}</fo:block></fo:table-cell>
+               <fo:table-cell text-align="right"><fo:block font-weight="bold">${uiLabelMap.OrderSubTotal}</fo:block></fo:table-cell>
            </fo:table-row>
        </fo:table-header>
 
@@ -63,7 +63,7 @@ under the License.
                        </fo:table-row>
                        <#if itemAdjustment != 0>
                        <fo:table-row>
-                        <fo:table-cell number-columns-spanned="2"><fo:block><fo:inline font-style="italic">${uiLabelMap.OrderAdjustments}</fo:inline>: <@ofbizCurrency amount=itemAdjustment isoCode=currencyUomId/></fo:block></fo:table-cell>
+                        <fo:table-cell number-columns-spanned="2"><fo:block text-indent="0.2in"><fo:inline font-style="italic">${uiLabelMap.OrderAdjustments}</fo:inline>: <@ofbizCurrency amount=itemAdjustment isoCode=currencyUomId/></fo:block></fo:table-cell>
                     </fo:table-row>
                     </#if>
            </#list>
