@@ -25,10 +25,13 @@ if (contactList) {
     ownerParty = contactList.getRelatedOne("OwnerParty");
     if (ownerParty) {
         contactMechs = ownerParty.getRelatedByAnd("PartyContactMechPurpose", [contactMechPurposeTypeId : "MARKETING_EMAIL"]);
-        if (!contactMechs || contactMechs.size() == 0) {
+        if (!contactMechs) {
             contactMechs = ownerParty.getRelatedByAnd("PartyContactMechPurpose", [contactMechPurposeTypeId : "PRIMARY_EMAIL"]);
         }
-        context.marketingEmail = contactMechs.get(0);
-        //context.contactMechIdFrom = context.marketingEmail.contactMechId;
+        
+        if (contactMechs) {
+            context.marketingEmail = contactMechs.get(0);
+            //context.contactMechIdFrom = context.marketingEmail.contactMechId;
+        }
     }
 }
