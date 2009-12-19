@@ -161,7 +161,7 @@
         <value xml:lang="de">FEHLER: Kontaktinformationen konnten nicht geändert werden (Lesen Zweck Problem): ${errMessage}.</value>
         <value xml:lang="en">ERROR: Could not change contact info (read purpose failure): ${errMessage}.</value>
         <value xml:lang="es">Error: No se puede cambiar la información de contacto: ${errMessage}.</value>
-        <value xml:lang="fr">ERREUR : Ne peut pas changer l'information de contact (échec à la lecture du but de contact) : $ {errMessage.</value>
+        <value xml:lang="fr">ERREUR : Ne peut pas changer l'information de contact (échec à la lecture du but de contact) : ${errMessage.</value>
         <value xml:lang="it">ERRORE: Non è possibile cambiare informazioni contatto (errore di lettura): ${errMessage}.</value>
         <value xml:lang="nl">Fout: Could not change contact info (read purpose failure): ${errMessage}.</value>
         <value xml:lang="ro">EROARE: Nu este posibila schmbarea de informatii contact (eroare de citire): ${errMessage}.</value>
@@ -457,7 +457,7 @@
         <value xml:lang="de">Akteur Rolle kann nicht erstellt werden (Lesefehler): ${errMessage}.</value>
         <value xml:lang="en">Could not create party role (read failure): ${errMessage}.</value>
         <value xml:lang="es">No se puede crear la relación(error de lectura): ${errMessage}</value>
-        <value xml:lang="fr">Impossible de créer le rôle de l'acteur (erreur de lecture) : $ {errMessage}.</value>
+        <value xml:lang="fr">Impossible de créer le rôle de l'acteur (erreur de lecture) : ${errMessage}.</value>
         <value xml:lang="it">Non è possibile creare ruolo soggetto (lettura fallita): ${errMessage}.</value>
         <value xml:lang="nl">Could not create party role (read failure): ${errMessage}.</value>
         <value xml:lang="ro">Nu este posibila crearea rolului Subiect (lectura falita): ${errMessage}.</value>
@@ -469,7 +469,7 @@
         <value xml:lang="de">Akteur Beziehung kann nicht erstellt werden (Schreibfehler): ${errMessage}.</value>
         <value xml:lang="en">Could not create party relationship (write failure): ${errMessage}.</value>
         <value xml:lang="es">No se puede crear la relación(error de escritura): ${errMessage}</value>
-        <value xml:lang="fr">Impossible de créer la relation à l'acteur (erreur d'écriture) : $ {errMessage}.</value>
+        <value xml:lang="fr">Impossible de créer la relation à l'acteur (erreur d'écriture) : ${errMessage}.</value>
         <value xml:lang="it">Non è possibile creare il rapporto soggetto (scrittura fallita): ${errMessage}.</value>
         <value xml:lang="nl">Could not create party relationship (write failure): ${errMessage}.</value>
         <value xml:lang="ro">Nu este posibila crearea relationarii Subiect (scriere falita): ${errMessage}.</value>
@@ -493,7 +493,7 @@
         <value xml:lang="de">Akteur Beziehung kann nicht aktualisiert werden (Lesefehler): ${errMessage}.</value>
         <value xml:lang="en">Could not update party relation (read failure): ${errMessage}.</value>
         <value xml:lang="es">No se puede actualizar las relaciones(error de lectura): ${errMessage}</value>
-        <value xml:lang="fr">Impossible de mettre à jour la relation de l'acteur (erreur de lecture) : $ {errMessage}.</value>
+        <value xml:lang="fr">Impossible de mettre à jour la relation de l'acteur (erreur de lecture) : ${errMessage}.</value>
         <value xml:lang="it">Non è possibile aggiornare il rapporto soggetto (lettura fallita): ${errMessage}.</value>
         <value xml:lang="nl">Could not update party relation (read failure): ${errMessage}.</value>
         <value xml:lang="ro">Nu este posibila Actualizarea relatiei Subiect (citare falita): ${errMessage}.</value>
@@ -505,7 +505,7 @@
         <value xml:lang="de">Akteur Beziehung kann nicht aktualisiert werden (Schreibfehler): ${errMessage}.</value>
         <value xml:lang="en">Could not update party relationship (write failure): ${errMessage}.</value>
         <value xml:lang="es">No se puede actualizar las relaciones(error de escritura): ${errMessage}</value>
-        <value xml:lang="fr">Impossible de mettre à jour la relation de l'acteur (erreur d'écriture) : $ {errMessage}.</value>
+        <value xml:lang="fr">Impossible de mettre à jour la relation de l'acteur (erreur d'écriture) : ${errMessage}.</value>
         <value xml:lang="it">Non è possibile aggiornare il rapporto soggetto (scrittura fallita): ${errMessage}.</value>
         <value xml:lang="nl">Could not update party relationship (write failure): ${errMessage}.</value>
         <value xml:lang="ro">Nu este posibila Actualizarea relatiei Subiect (scriere falita): ${errMessage}.</value>
@@ -668,7 +668,8 @@
         <value xml:lang="de">Akteur Entitäten können nicht geholt werden (Lesefehler): ${errMessage}.</value>
         <value xml:lang="en">Cannot get party entities (read failure): ${errMessage}.</value>
         <value xml:lang="es">No se pudo obtener la entidad participante: ${errMessage}</value>
-        <value xml:lang="fr">Ne peut pas obtenir des entités d'acteur (erreur de lecture) : $ {errMessage}.</value>
+        <value xml:lang="fr">Impossible d'obtenir des entités d'acteur (erreur de lecture) : ${errMessage}.</value>
+        <value xml:lang="hi_IN">पार्टी इकाईयाँ नहीं मिली (पड़ने में असफल): ${errMessage}|</value>
         <value xml:lang="it">Non possibile leggere l'entità Party (lettura fallita): ${errMessage}.</value>
         <value xml:lang="nl">Cannot get party entities (read failure): ${errMessage}.</value>
         <value xml:lang="ro">Nu este posibila citirea entitatii party entities (citerea falita): ${errMessage}.</value>
@@ -679,7 +680,7 @@
     <property key="partyservices.could_not_add_affiliate_info_write">
         <value xml:lang="en">Could not add affiliate info (write failure): ${errMessage}.</value>
         <value xml:lang="es">No se pudo agregar información del afiliado: ${errMessage}</value>
-        <value xml:lang="fr">Impossible d'ajouter l'information de filiale (erreur d'écriture) : $ {errMessage}.</value>
+        <value xml:lang="fr">Impossible d'ajouter l'information de filiale (erreur d'écriture) : ${errMessage}.</value>
         <value xml:lang="it">Non è possibile aggiungere informazione affiliato (scrittura fallita): ${errMessage}.</value>
         <value xml:lang="nl">Could not add affiliate info (write failure): ${errMessage}.</value>
         <value xml:lang="ro">Nu este posibila adaugarea informatiilor afiliat (scriere falita): ${errMessage}.</value>
@@ -725,7 +726,7 @@
     <property key="partyservices.could_not_update_affiliate_information_read">
         <value xml:lang="en">Could not update affiliate information (read failure): ${errMessage}.</value>
         <value xml:lang="es">No se pudo actualizar la información del afiliado: ${errMessage}</value>
-        <value xml:lang="fr">Impossible de mettre à jour l'information de filiale (erreur de lecture) : $ {errMessage}.</value>
+        <value xml:lang="fr">Impossible de mettre à jour l'information de filiale (erreur de lecture) : ${errMessage}.</value>
         <value xml:lang="it">Non è possibile aggiornare informazione affiliato (lettura fallita): ${errMessage}.</value>
         <value xml:lang="nl">Could not update affiliate information (read failure): ${errMessage}.</value>
         <value xml:lang="ro">Nu este posibila Actualizarea informaiilor afiliat (citare falita): ${errMessage}.</value>
@@ -736,7 +737,7 @@
     <property key="partyservices.could_not_update_affiliate_information_write">
         <value xml:lang="en">Could not update affiliate information (write failure): ${errMessage}.</value>
         <value xml:lang="es">No se pudo actualizar la información del afiliado: ${errMessage}</value>
-        <value xml:lang="fr">Impossible de mettre à jour l'information de filiale (erreur d'écriture) : $ {errMessage}.</value>
+        <value xml:lang="fr">Impossible de mettre à jour l'information de filiale (erreur d'écriture) : ${errMessage}.</value>
         <value xml:lang="it">Non è possibile aggiornare informazione affiliato (scrittura fallita): ${errMessage}.</value>
         <value xml:lang="nl">Could not update affiliate information (write failure): ${errMessage}.</value>
         <value xml:lang="ro">Nu este posibila Actualizarea informatiilor afiliat (scriere falita): ${errMessage}.</value>
@@ -760,7 +761,7 @@
         <value xml:lang="de">Kann Akteur oder Akteurgruppe nicht aktualisieren (Lesefehler): ${errMessage}.</value>
         <value xml:lang="en">Could not update party or party group information (read failure): ${errMessage}.</value>
         <value xml:lang="es">No se pudo actualizar la información del participante(error de lectura): ${errMessage}</value>
-        <value xml:lang="fr">Impossible de mettre à jour l'information d'acteur ou de groupe d'acteur (erreur de lecture) : $ {errMessage}.</value>
+        <value xml:lang="fr">Impossible de mettre à jour l'information d'acteur ou de groupe d'acteur (erreur de lecture) : ${errMessage}.</value>
         <value xml:lang="it">Non è possibile aggiornare informazione gruppo soggetto (lettura fallita): ${errMessage}.</value>
         <value xml:lang="nl">Could not update party or party group information (read failure): ${errMessage}.</value>
         <value xml:lang="ro">Nu este posibila Actualizarea informatiilor grup Subiect (citare falita): ${errMessage}.</value>
@@ -772,7 +773,7 @@
         <value xml:lang="de">Kann Akteur oder Akteurgruppe nicht aktualisieren (Schreibfehler): ${errMessage}.</value>
         <value xml:lang="en">Could not update party or party group information (write failure): ${errMessage}.</value>
         <value xml:lang="es">No se pudo actualizar la información del participante(error de escritura): ${errMessage}</value>
-        <value xml:lang="fr">Impossible de mettre à jour l'information d'acteur ou de groupe d'acteur (erreur d'écriture) : $ {errMessage}.</value>
+        <value xml:lang="fr">Impossible de mettre à jour l'information d'acteur ou de groupe d'acteur (erreur d'écriture) : ${errMessage}.</value>
         <value xml:lang="it">Non è possibile aggiornare soggetto o informazione gruppo soggetto (scrittura fallita): ${errMessage}.</value>
         <value xml:lang="nl">Could not update party or party group information (write failure): ${errMessage}.</value>
         <value xml:lang="ro">Nu este posibila Actualizarea Subiectului sau a informatiilor grup Subiect (scriere falita): ${errMessage}.</value>
@@ -784,7 +785,7 @@
         <value xml:lang="de">Datenbankfehler beim Hinzufügen der Akteurgruppe: ${errMessage}.</value>
         <value xml:lang="en">Data source error occurred while adding party group: ${errMessage}.</value>
         <value xml:lang="es">Error al crear grupo de participantes:  ${errMessage}</value>
-        <value xml:lang="fr">Une erreur de source de données s'est produite en ajoutant le groupe d'acteur : $ {errMessage}.</value>
+        <value xml:lang="fr">Une erreur de source de données s'est produite en ajoutant le groupe d'acteur : ${errMessage}.</value>
         <value xml:lang="it">Errore successo sorgente dati durante l'aggiunta del gruppo soggetto: ${errMessage}.</value>
         <value xml:lang="nl">Data source error occurred while adding party group: ${errMessage}.</value>
         <value xml:lang="ro">EROARE Sursa de Dati in timpul adaugarii grupului Subiect: ${errMessage}.</value>
