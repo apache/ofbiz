@@ -117,7 +117,7 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
 		}
 	}
 
-	public AccessController<?> getAccessController() {
-        return (AccessController<?>) this.getSecurity().getAccessController(this);
+	public AccessController getAccessController() {
+        return (AccessController) this.getSecurity().getAccessController(this);
 	}
 }

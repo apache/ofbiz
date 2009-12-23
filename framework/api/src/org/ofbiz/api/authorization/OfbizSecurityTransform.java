@@ -74,7 +74,7 @@ public class OfbizSecurityTransform implements TemplateDirectiveModel {
         String location = template.getName();
         ExecutionContext executionContext = (ExecutionContext) contextBean.getWrappedObject();
         executionContext.pushExecutionArtifact(new GenericExecutionArtifact(location, artifactId));
-        AccessController<?> accessController = executionContext.getAccessController();
+        AccessController accessController = executionContext.getAccessController();
         try {
             accessController.checkPermission(permission);
             body.render(env.getOut());

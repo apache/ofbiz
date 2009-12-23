@@ -48,7 +48,7 @@ public interface ExecutionContext {
      * 
      * @return An <code>AccessController</code> instance
      */
-    public AccessController<?> getAccessController();
+    public AccessController getAccessController();
 
     /** Returns the currency unit of measure.
      * 
@@ -57,7 +57,7 @@ public interface ExecutionContext {
     public String getCurrencyUom();
 
     /** Returns the current execution path. Artifacts in the path are separated
-     * with a slash.
+     * with a forward slash.
      * 
      * @return The current execution path
      */

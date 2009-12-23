@@ -368,7 +368,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
     public GenericValue create(GenericValue value, boolean doCacheClear) throws GenericEntityException {
     	this.executionContext.pushExecutionArtifact(value);
-    	AccessController<?> accessController = this.executionContext.getAccessController();
+    	AccessController accessController = this.executionContext.getAccessController();
         boolean beganTransaction = false;
         try {
         	accessController.checkPermission(Create);
@@ -522,7 +522,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
     public GenericValue createOrStore(GenericValue value, boolean doCacheClear) throws GenericEntityException {
     	this.executionContext.pushExecutionArtifact(value);
-    	AccessController<?> accessController = this.executionContext.getAccessController();
+    	AccessController accessController = this.executionContext.getAccessController();
         boolean beganTransaction = false;
         try {
             GenericValue checkValue = this.findOne(value.getEntityName(), value.getPrimaryKey(), false);
@@ -780,7 +780,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
         ecaRunner.evalRules(EntityEcaHandler.EV_RETURN, EntityEcaHandler.OP_FIND, dummyValue, false);
         this.executionContext.pushExecutionArtifact(modelEntity);
-        AccessController<?> accessController = this.executionContext.getAccessController();
+        AccessController accessController = this.executionContext.getAccessController();
         eli = accessController.applyFilters(eli);
         this.executionContext.popExecutionArtifact();
         return eli;
@@ -835,7 +835,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
             }
 
             this.decryptFields(results);
-            AccessController<GenericValue> accessController = (AccessController<GenericValue>) this.executionContext.getAccessController();
+            AccessController accessController = this.executionContext.getAccessController();
             results = accessController.applyFilters(results);
             return results;
         } catch (GenericEntityException e) {
@@ -904,7 +904,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
             }
 
             this.decryptFields(results);
-            AccessController<GenericValue> accessController = (AccessController<GenericValue>) this.executionContext.getAccessController();
+            AccessController accessController = this.executionContext.getAccessController();
             results = accessController.applyFilters(results);
             return results;
         } catch (GenericEntityException e) {
@@ -992,7 +992,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
             EntityListIterator eli = this.find(entityName, whereEntityCondition, havingEntityCondition, UtilMisc.toSet(fieldsToSelect), orderBy, findOptions);
             eli.setDelegator(this);
             this.executionContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.findByCondition", entityName));
-            AccessController<GenericValue> accessController = (AccessController<GenericValue>) this.executionContext.getAccessController();
+            AccessController accessController = this.executionContext.getAccessController();
             eli = accessController.applyFilters(eli);
             this.executionContext.popExecutionArtifact();
             List<GenericValue> list = eli.getCompleteList();
@@ -1241,7 +1241,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
             List<GenericValue> cacheList = this.delegatorData.cache.get(entityName, entityCondition, orderBy);
             if (cacheList != null) {
                 this.executionContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.findList", entityName));
-                AccessController<GenericValue> accessController = (AccessController<GenericValue>) this.executionContext.getAccessController();
+                AccessController accessController = this.executionContext.getAccessController();
                 cacheList = accessController.applyFilters(cacheList);
                 this.executionContext.popExecutionArtifact();
                 return cacheList;
@@ -1264,7 +1264,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
                 this.delegatorData.cache.put(entityName, entityCondition, orderBy, list);
             }
             this.executionContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.findList", entityName));
-            AccessController<GenericValue> accessController = (AccessController<GenericValue>) this.executionContext.getAccessController();
+            AccessController accessController = this.executionContext.getAccessController();
             list = accessController.applyFilters(list);
             this.executionContext.popExecutionArtifact();
             return list;
@@ -1313,7 +1313,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
         eli.setDelegator(this);
         // TODO: add decrypt fields
         this.executionContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.findListIteratorByCondition", modelViewEntity.getEntityName()));
-        AccessController<GenericValue> accessController = (AccessController<GenericValue>) this.executionContext.getAccessController();
+        AccessController accessController = this.executionContext.getAccessController();
         eli = accessController.applyFilters(eli);
         this.executionContext.popExecutionArtifact();
         return eli;
@@ -2183,7 +2183,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
     public int removeByCondition(String entityName, EntityCondition condition, boolean doCacheClear) throws GenericEntityException {
     	this.executionContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.removeByCondition", entityName));
-    	AccessController<?> accessController = this.executionContext.getAccessController();
+    	AccessController accessController = this.executionContext.getAccessController();
         boolean beganTransaction = false;
         try {
         	accessController.checkPermission(Delete);
@@ -2238,7 +2238,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
     public int removeByPrimaryKey(GenericPK primaryKey, boolean doCacheClear) throws GenericEntityException {
     	this.executionContext.pushExecutionArtifact(primaryKey);
-    	AccessController<?> accessController = this.executionContext.getAccessController();
+    	AccessController accessController = this.executionContext.getAccessController();
         boolean beganTransaction = false;
         try {
         	accessController.checkPermission(Delete);
@@ -2325,7 +2325,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
     public int removeValue(GenericValue value, boolean doCacheClear) throws GenericEntityException {
     	this.executionContext.pushExecutionArtifact(value);
-    	AccessController<?> accessController = this.executionContext.getAccessController();
+    	AccessController accessController = this.executionContext.getAccessController();
         // NOTE: this does not call the GenericDelegator.removeByPrimaryKey
         // method because it has more information to pass to the ECA rule hander
         boolean beganTransaction = false;
@@ -2553,7 +2553,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
     public int store(GenericValue value, boolean doCacheClear) throws GenericEntityException {
     	this.executionContext.pushExecutionArtifact(value);
-    	AccessController<?> accessController = this.executionContext.getAccessController();
+    	AccessController accessController = this.executionContext.getAccessController();
         boolean beganTransaction = false;
         try {
         	accessController.checkPermission(Update);
@@ -2717,7 +2717,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
     public int storeByCondition(String entityName, Map<String, ? extends Object> fieldsToSet, EntityCondition condition, boolean doCacheClear) throws GenericEntityException {
     	this.executionContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.storeByCondition", entityName));
-    	AccessController<?> accessController = this.executionContext.getAccessController();
+    	AccessController accessController = this.executionContext.getAccessController();
         boolean beganTransaction = false;
         try {
         	accessController.checkPermission(Update);
