@@ -29,17 +29,17 @@ import org.ofbiz.entity.util.EntityListIterator;
 /** An implementation of the <code>AccessController</code> interface
  * that allows unrestricted access.
  */
-public class NullAccessController<E> implements AccessController<E> {
+public class NullAccessController implements AccessController {
 
     public EntityListIterator applyFilters(EntityListIterator listIterator) {
         return listIterator;
     }
 
-    public List<E> applyFilters(List<E> list) {
+    public <E> List<E> applyFilters(List<E> list) {
         return list;
     }
 
-    public ListIterator<E> applyFilters(ListIterator<E> list) {
+    public <E> ListIterator<E> applyFilters(ListIterator<E> list) {
         return list;
     }
 

@@ -39,13 +39,13 @@ import org.ofbiz.service.ExecutionContext;
  * An implementation of the AuthorizationManager interface that uses the OFBiz database
  * for authorization data storage.
  */
-public class AuthorizationManagerImpl<E> extends OFBizSecurity implements AuthorizationManager {
+public class AuthorizationManagerImpl extends OFBizSecurity implements AuthorizationManager {
 
     // Right now this class implements permission checking only.
 
     public static final String module = AuthorizationManagerImpl.class.getName();
     protected static final UtilCache<String, PathNode> userPermCache = new UtilCache<String, PathNode>("authorization.UserPermissions");
-    public static final AccessController<?> nullAccessController = new NullAccessController();
+    public static final AccessController nullAccessController = new NullAccessController();
     protected static boolean underConstruction = false;
 
     public AuthorizationManagerImpl() {
@@ -127,8 +127,7 @@ public class AuthorizationManagerImpl<E> extends OFBizSecurity implements Author
         userPermCache.remove(userLogin.getString("userLogin"));
     }
 
-	@SuppressWarnings("unchecked")
-    public AccessController<?> getAccessController(org.ofbiz.api.context.ExecutionContext executionContext) throws AccessControlException {
+    public AccessController getAccessController(org.ofbiz.api.context.ExecutionContext executionContext) throws AccessControlException {
         String userLoginId = ((ExecutionContext) executionContext).getUserLogin().getString("userLoginId");
         PathNode node = userPermCache.get(userLoginId);
         if (node == null) {

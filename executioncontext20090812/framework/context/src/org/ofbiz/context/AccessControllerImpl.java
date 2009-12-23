@@ -36,7 +36,7 @@ import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
 
 /** An implementation of the <code>AccessController</code> interface. */
-public class AccessControllerImpl<E> implements AccessController<E> {
+public class AccessControllerImpl implements AccessController {
 
     public static final String module = AccessControllerImpl.class.getName();
 
@@ -75,14 +75,14 @@ public class AccessControllerImpl<E> implements AccessController<E> {
                 "@" + this.executionContext.getExecutionPath() + "[" + permission + "]");
     }
 
-    public List<E> applyFilters(List<E> list) {
+    public <E> List<E> applyFilters(List<E> list) {
         if (this.permission.getFilterNames().size() > 0) {
             return new SecurityAwareList<E>(list, this.permission.getFilterNames(), this.executionContext);
         }
         return list;
     }
 
-    public ListIterator<E> applyFilters(ListIterator<E> listIterator) {
+    public <E> ListIterator<E> applyFilters(ListIterator<E> listIterator) {
         if (this.permission.getFilterNames().size() > 0) {
             return new SecurityAwareListIterator<E>(listIterator, this.permission.getFilterNames(), this.executionContext);
         }

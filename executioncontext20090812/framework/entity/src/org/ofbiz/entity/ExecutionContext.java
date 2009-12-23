@@ -24,7 +24,7 @@ package org.ofbiz.entity;
  */
 public interface ExecutionContext extends org.ofbiz.api.context.ExecutionContext {
 
-    public AccessController<?> getAccessController();
+    public AccessController getAccessController();
 
 	/** Returns the current <code>GenericDelegator</code> instance.
 	 * 
@@ -38,9 +38,9 @@ public interface ExecutionContext extends org.ofbiz.api.context.ExecutionContext
 	 */
 	public GenericValue getUserLogin();
 
-	/** Sets the current <code>GenericDelegator</code> instance.
+	/** Sets the current <code>Delegator</code> instance.
 	 * 
-	 * @param delegator The new <code>GenericDelegator</code> instance
+	 * @param delegator The new <code>Delegator</code> instance
 	 */
 	public void setDelegator(GenericDelegator delegator);
 

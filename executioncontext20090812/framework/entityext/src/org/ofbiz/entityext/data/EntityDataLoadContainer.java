@@ -477,7 +477,7 @@ public class EntityDataLoadContainer implements Container {
     // TODO: Find an implementation-agnostic way to do this
     protected static class LoaderExecutionContext extends ExecutionContextImpl {
         @Override
-        public AccessController<?> getAccessController() {
+        public AccessController getAccessController() {
             return AuthorizationManagerImpl.nullAccessController;
         }
     }

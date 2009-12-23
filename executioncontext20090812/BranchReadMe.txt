@@ -73,9 +73,9 @@ will be rendered.
 2009-08-28: Permissions checking has been implemented. The code has
 a few bugs, and there are places where the ExecutionContext isn't being
 passed along, so OFBiz won't run with the AuthorizationManager enabled.
-Consequently, the AuthorizationManager is disabled by default. It still
-"pretends" to check permissions, but it always grants access. You can
-enable it with a property in api.properties.
+Consequently, the AuthorizationManager is disabled by default. When it
+is disabled, it still "pretends" to check permissions, but it always
+grants access. You can enable it with a property in api.properties.
 
 When a user first logs in, all of their permissions are gathered from the
 security entities and are used to assemble a tree-like Java structure.
@@ -84,3 +84,10 @@ a permission object (OFBizPermission) uses the supplied artifact ID to traverse
 the tree, accumulating permissions along the way. This is how permission
 inheritance is achieved. The permission object is then queried if the user
 has the requested permission and the result is returned to the artifact.
+
+---------------------------------------------------------------------
+
+2009-12-23: This branch will not be synchronized with the trunk from now on.
+I tried to do a merge from the trunk and there were too many conflicts to
+resolve. When the time comes to implement the security-aware artifacts in
+the trunk, the handful of affected classes can be ported over manually.

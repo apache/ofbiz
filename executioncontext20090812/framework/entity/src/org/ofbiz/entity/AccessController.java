@@ -26,7 +26,7 @@ import org.ofbiz.entity.util.EntityListIterator;
  * the <code>applyFilters</code> method can be overridden to handle
  * <code>EntityListIterator</code>.
  */
-public interface AccessController<E> extends org.ofbiz.api.authorization.AccessController<E> {
+public interface AccessController extends org.ofbiz.api.authorization.AccessController {
 
     /** Applies permission filters to an <code>EntityListIterator</code>. The
      * returned <code>EntityListIterator</code> is security-aware, so methods
