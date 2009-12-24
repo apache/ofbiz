@@ -37,6 +37,7 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import static org.ofbiz.api.authorization.BasicPermissions.*;
+import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.api.context.GenericExecutionArtifact;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralRuntimeException;
@@ -781,9 +782,9 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
         ecaRunner.evalRules(EntityEcaHandler.EV_RETURN, EntityEcaHandler.OP_FIND, dummyValue, false);
         this.executionContext.pushExecutionArtifact(modelEntity);
         AccessController accessController = this.executionContext.getAccessController();
-        eli = accessController.applyFilters(eli);
+        ListIterator<GenericValue> li = accessController.applyFilters((ListIterator<GenericValue>) eli);
         this.executionContext.popExecutionArtifact();
-        return eli;
+        return (EntityListIterator) li;
     }
 
     public List<GenericValue> findAll(String entityName) throws GenericEntityException {
@@ -993,7 +994,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
             eli.setDelegator(this);
             this.executionContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.findByCondition", entityName));
             AccessController accessController = this.executionContext.getAccessController();
-            eli = accessController.applyFilters(eli);
+            eli = (EntityListIterator) accessController.applyFilters((ListIterator<GenericValue>) eli);
             this.executionContext.popExecutionArtifact();
             List<GenericValue> list = eli.getCompleteList();
             eli.close();
@@ -1314,7 +1315,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
         // TODO: add decrypt fields
         this.executionContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.findListIteratorByCondition", modelViewEntity.getEntityName()));
         AccessController accessController = this.executionContext.getAccessController();
-        eli = accessController.applyFilters(eli);
+        eli = (EntityListIterator) accessController.applyFilters((ListIterator<GenericValue>) eli);
         this.executionContext.popExecutionArtifact();
         return eli;
     }

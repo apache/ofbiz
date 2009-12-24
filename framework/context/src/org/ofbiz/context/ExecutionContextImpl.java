@@ -22,17 +22,17 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.ofbiz.api.authorization.AccessController;
+import org.ofbiz.api.authorization.AuthorizationManager;
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.entity.AccessController;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.security.AuthorizationManager;
 import org.ofbiz.security.SecurityFactory;
+import org.ofbiz.service.ExecutionContext;
 import org.ofbiz.service.GenericDispatcher;
 import org.ofbiz.service.LocalDispatcher;
-import org.ofbiz.service.ExecutionContext;
 
 /** An implementation of the <code>ExecutionContext</code> interface. */
 public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContextImpl implements ExecutionContext {
@@ -42,6 +42,10 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
     protected LocalDispatcher dispatcher = null;
     protected AuthorizationManager security = null;
     protected GenericValue userLogin = null;
+
+	public AccessController getAccessController() {
+        return (AccessController) this.getSecurity().getAccessController(this);
+	}
 
 	public GenericDelegator getDelegator() {
 		if (this.delegator == null) {
@@ -92,6 +96,15 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
 		this.setUserLogin((GenericValue) params.get("userLogin"));
 	}
 
+    @Override
+    public void reset() {
+        super.reset();
+        this.delegator = null;
+        this.dispatcher = null;
+        this.security = null;
+        this.userLogin = null;
+    }
+
 	public void setDelegator(GenericDelegator delegator) {
 		if (delegator != null) {
 			delegator.setExecutionContext(this);
@@ -117,7 +130,4 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
 		}
 	}
 
-	public AccessController getAccessController() {
-        return (AccessController) this.getSecurity().getAccessController(this);
-	}
 }

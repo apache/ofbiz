@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import org.ofbiz.api.authorization.AccessController;
+import org.ofbiz.api.authorization.AuthorizationManager;
 
 /** ExecutionContext interface. The <code>ExecutionContext</code> is a container
  * for frequently used objects, plus it keeps track of the program's
@@ -83,6 +84,12 @@ public interface ExecutionContext {
      */
     public Object getProperty(String key);
 
+    /** Returns the current <code>AuthorizationManager</code> instance.
+     * 
+     * @return The current <code>AuthorizationManager</code> instance
+     */
+    public AuthorizationManager getSecurity();
+
     /** Returns the current <code>TimeZone</code>.
      * 
      * @return The current <code>TimeZone</code>
@@ -97,6 +104,13 @@ public interface ExecutionContext {
      * @param artifact
      */
     public void pushExecutionArtifact(ExecutionArtifact artifact);
+
+    /**
+     * Resets this <code>ExecutionContext</code> to its default
+     * state. This method is called when an <code>ExecutionContext</code>
+     * instance is about to be reused.
+     */
+    public void reset();
 
     /** Sets the currency unit of measure.
      * 
@@ -119,6 +133,12 @@ public interface ExecutionContext {
      * @return the previous value associated with specified key, or null  if there was no mapping for key
      */
     public Object setProperty(String key, Object value);
+
+    /** Sets the current <code>AuthorizationManager</code> instance.
+     * 
+     * @param security The new <code>AuthorizationManager</code> instance
+     */
+    public void setSecurity(AuthorizationManager security);
 
     /** Sets the current <code>TimeZone</code>.
      * 

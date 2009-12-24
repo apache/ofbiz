@@ -26,7 +26,7 @@ import java.util.Map;
 
 import javolution.util.FastMap;
 
-import org.ofbiz.entity.AccessController;
+import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.entity.util.EntityListIterator;
