@@ -18,33 +18,9 @@
  *******************************************************************************/
 package org.ofbiz.security;
 
-import java.security.Permission;
-
 /**
  * AuthorizationManager interface.
  */
 public interface AuthorizationManager extends org.ofbiz.api.authorization.AuthorizationManager, Security {
-
-	// User methods
-	public void createUser(String userLoginId, String password);
-	public void updateUser(String userLoginId, String password);
-	public void deleteUser(String userLoginId);
-
-	// User Group methods
-	public String createUserGroup(String description);
-	public void updateUserGroup(String userGroupId, String description);
-	public void deleteUserGroup(String userGroupId);
-
-	// User Group Assignment methods
-	public void assignUserToGroup(String userLoginId, String userGroupId);
-	public void deleteUserFromGroup(String userLoginId, String userGroupId);
-	public void assignGroupToGroup(String childGroupId, String parentGroupId);
-	public void deleteGroupFromGroup(String childGroupId, String parentGroupId);
-
-	// Permission Assignment methods
-	public void assignUserPermission(String userLoginId, String artifactId, Permission permission);
-	public void deleteUserPermission(String userLoginId, String artifactId, Permission permission);
-	public void assignGroupPermission(String userGroupId, String artifactId, Permission permission);
-	public void deleteGroupPermission(String userGroupId, String artifactId, Permission permission);
 
 }

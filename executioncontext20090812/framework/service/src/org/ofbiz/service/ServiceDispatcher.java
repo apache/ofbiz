@@ -30,6 +30,7 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.api.authorization.AccessController;
+import org.ofbiz.security.AuthorizationManager;
 import org.ofbiz.api.context.ExecutionContextFactory;
 import org.ofbiz.api.context.GenericParametersArtifact;
 import org.ofbiz.base.config.GenericConfigException;
@@ -46,7 +47,6 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.transaction.DebugXaResource;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
-import org.ofbiz.security.AuthorizationManager;
 import org.ofbiz.security.Security;
 import org.ofbiz.security.SecurityConfigurationException;
 import org.ofbiz.security.SecurityFactory;

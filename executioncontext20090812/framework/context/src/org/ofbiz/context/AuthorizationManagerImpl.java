@@ -22,8 +22,8 @@ import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.List;
 
+import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.api.authorization.BasicPermissions;
-import org.ofbiz.entity.AccessController;
 import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -150,7 +150,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
 	    underConstruction = true;
         // Set up the ExecutionContext for unrestricted access to security-aware artifacts
 	    ExecutionContext localContext = (ExecutionContext) executionContext;
-        AuthorizationManager originalSecurity = localContext.getSecurity();
+        AuthorizationManager originalSecurity = (AuthorizationManager) localContext.getSecurity();
         localContext.setSecurity(new NullAuthorizationManager());
 	    String userLoginId = executionContext.getUserLogin().getString("userLoginId");
 	    GenericDelegator delegator = executionContext.getDelegator();

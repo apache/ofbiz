@@ -23,7 +23,7 @@ import java.security.Permission;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.ofbiz.entity.AccessController;
+import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.entity.util.EntityListIterator;
 
 /** An implementation of the <code>AccessController</code> interface

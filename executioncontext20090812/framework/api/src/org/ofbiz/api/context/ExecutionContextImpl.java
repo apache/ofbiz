@@ -119,6 +119,14 @@ public abstract class ExecutionContextImpl implements ExecutionContext {
 		}
 	}
 
+    public void reset() {
+        this.artifactStack.clear();
+        this.currencyUom = "";
+        this.locale = Locale.getDefault();
+        this.properties.clear();
+        this.timeZone = TimeZone.getDefault();
+    }
+
     public void setCurrencyUom(String currencyUom) {
         if (currencyUom != null) {
             this.currencyUom = currencyUom;

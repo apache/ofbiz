@@ -27,7 +27,7 @@ import org.ofbiz.service.LocalDispatcher;
  * ExecutionContext Interface. This interface extends the ExecutionContext
  * interface defined in the <code>security</code> component.
  */
-public interface ExecutionContext extends org.ofbiz.security.ExecutionContext {
+public interface ExecutionContext extends org.ofbiz.entity.ExecutionContext {
 
 	/** Returns the current <code>LocalDispatcher</code> instance.
 	 * 
