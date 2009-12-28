@@ -59,7 +59,7 @@ import org.ofbiz.entity.model.ModelField;
 import org.ofbiz.entity.model.ModelReader;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.service.DispatchContext;
-import org.ofbiz.service.ExecutionContext;
+import org.ofbiz.service.ThreadContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ModelParam;
 import org.ofbiz.service.ModelService;
@@ -591,10 +591,9 @@ public class ModelFormField implements ExecutionArtifact {
     }
 
     public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
-        ExecutionContext executionContext = (ExecutionContext) context.get("executionContext");
-        executionContext.pushExecutionArtifact(this);
+        ThreadContext.pushExecutionArtifact(this);
         this.fieldInfo.renderFieldString(writer, context, formStringRenderer);
-        executionContext.popExecutionArtifact();
+        ThreadContext.popExecutionArtifact();
     }
 
     public List<UpdateArea> getOnChangeUpdateAreas() {

@@ -33,8 +33,6 @@ import javax.servlet.http.HttpSession;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.ofbiz.api.context.ExecutionContext;
-import org.ofbiz.api.context.ExecutionContextFactory;
 import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
@@ -484,11 +482,6 @@ public abstract class ModelScreenAction implements Serializable {
                 if (this.fieldMap != null) {
                     EntityFinderUtil.expandFieldMapToContext(this.fieldMap, context, serviceContext);
                 }
-                ExecutionContext executionContext = (ExecutionContext) context.get("executionContext");
-                if (executionContext != null) {
-                    serviceContext.put("executionContext", executionContext);
-                }
-
                 Map<String, Object> result = this.modelScreen.getDispatcher(context).runSync(serviceNameExpanded, serviceContext);
 
                 if (!this.resultMapNameAcsr.isEmpty()) {

@@ -18,9 +18,6 @@
  */
 package org.ofbiz.service;
 
-import java.util.Map;
-
-import org.ofbiz.security.SecurityConfigurationException;
 import org.ofbiz.service.LocalDispatcher;
 
 /**
@@ -34,14 +31,6 @@ public interface ExecutionContext extends org.ofbiz.entity.ExecutionContext {
 	 * @return The current <code>LocalDispatcher</code> instance
 	 */
 	public LocalDispatcher getDispatcher();
-
-	/** Initializes this ExecutionContext with artifacts found in
-	 * <code>params</code>.
-	 * 
-	 * @param params
-	 * @throws SecurityConfigurationException 
-	 */
-	public void initializeContext(Map<String, ? extends Object> params);
 
 	/** Sets the current <code>LocalDispatcher</code> instance.
 	 * 

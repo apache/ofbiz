@@ -16,11 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.security;
+package org.ofbiz.service;
 
-/**
- * AuthorizationManager interface.
+
+/** A convenience class for accessing the current thread's <code>ExecutionContext</code>.
+ * @see {@link org.ofbiz.service.ExecutionContext} 
  */
-public interface AuthorizationManager extends org.ofbiz.api.authorization.AuthorizationManager, Security {
+public class ThreadContext extends org.ofbiz.entity.ThreadContext {
+
+    protected static final String module = ThreadContext.class.getName();
+
+    public static LocalDispatcher getDispatcher() {
+        return getExecutionContext().getDispatcher();
+    }
+
+    protected static ExecutionContext getExecutionContext() {
+        return (ExecutionContext) executionContext.get();
+    }
+
+    public static void setDispatcher(LocalDispatcher dispatcher) {
+        getExecutionContext().setDispatcher(dispatcher);
+    }
 
 }

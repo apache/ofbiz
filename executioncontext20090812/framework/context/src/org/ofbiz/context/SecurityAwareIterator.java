@@ -25,7 +25,7 @@ import java.util.Map;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.service.ExecutionContext;
+import org.ofbiz.service.ThreadContext;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.ModelService;
@@ -45,13 +45,11 @@ public class SecurityAwareIterator<E> implements Iterator<E> {
     public static final String module = SecurityAwareIterator.class.getName();
     protected final Iterator<E> iterator;
     protected final Set<String> serviceNameList;
-    protected final ExecutionContext executionContext;
     protected E nextValue = null;
 
-    public SecurityAwareIterator(Iterator<E> iterator, Set<String> serviceNameList, ExecutionContext executionContext) {
+    public SecurityAwareIterator(Iterator<E> iterator, Set<String> serviceNameList) {
         this.iterator = iterator;
         this.serviceNameList = serviceNameList;
-        this.executionContext = executionContext;
         getNext();
     }
 
@@ -89,14 +87,14 @@ public class SecurityAwareIterator<E> implements Iterator<E> {
     }
 
     protected boolean hasPermission(E value) {
-        if (this.executionContext.getUserLogin() == null) {
+        if (ThreadContext.getUserLogin() == null) {
             // This is here for development purposes
             return true;
         }
         try {
-            LocalDispatcher dispatcher = this.executionContext.getDispatcher();
+            LocalDispatcher dispatcher = ThreadContext.getDispatcher();
             DispatchContext ctx = dispatcher.getDispatchContext();
-            Map<String, ? extends Object> params = this.executionContext.getParameters();
+            Map<String, ? extends Object> params = ThreadContext.getParameters();
             for (String serviceName : this.serviceNameList) {
                 ModelService modelService = ctx.getModelService(serviceName);
                 Map<String, Object> context = FastMap.newInstance();
@@ -104,13 +102,13 @@ public class SecurityAwareIterator<E> implements Iterator<E> {
                     context.putAll(params);
                 }
                 if (!context.containsKey("userLogin")) {
-                    context.put("userLogin", this.executionContext.getUserLogin());
+                    context.put("userLogin", ThreadContext.getUserLogin());
                 }
                 if (!context.containsKey("locale")) {
-                    context.put("locale", this.executionContext.getLocale());
+                    context.put("locale", ThreadContext.getLocale());
                 }
                 if (!context.containsKey("timeZone")) {
-                    context.put("timeZone", this.executionContext.getTimeZone());
+                    context.put("timeZone", ThreadContext.getTimeZone());
                 }
                 context.put("candidateObject", value);
                 context = modelService.makeValid(context, ModelService.IN_PARAM);

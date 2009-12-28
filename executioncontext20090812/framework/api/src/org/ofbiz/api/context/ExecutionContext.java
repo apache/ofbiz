@@ -25,6 +25,7 @@ import java.util.TimeZone;
 import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.api.authorization.AuthorizationManager;
 
+
 /** ExecutionContext interface. The <code>ExecutionContext</code> is a container
  * for frequently used objects, plus it keeps track of the program's
  * execution path. <p>As an object container, the <code>ExecutionContext</code>
@@ -95,6 +96,13 @@ public interface ExecutionContext {
      * @return The current <code>TimeZone</code>
      */
     public TimeZone getTimeZone();
+
+    /** Initializes this ExecutionContext with artifacts found in
+     * <code>params</code>.
+     * 
+     * @param params
+     */
+    public void initializeContext(Map<String, ? extends Object> params);
 
     /** Pop an <code>ExecutionArtifact</code> off the stack. */
     public void popExecutionArtifact();

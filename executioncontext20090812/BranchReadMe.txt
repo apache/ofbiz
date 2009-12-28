@@ -33,8 +33,7 @@ org.ofbiz.api.authorization.AuthorizationManager
 
 org.ofbiz.api.context.ExecutionContext
   org.ofbiz.entity.ExecutionContext
-    org.ofbiz.security.ExecutionContext
-      org.ofbiz.service.ExecutionContext
+    org.ofbiz.service.ExecutionContext
 
 When the cross-dependency issues are solved, all of the extended
 interfaces will be consolidated into one.
@@ -91,3 +90,13 @@ has the requested permission and the result is returned to the artifact.
 I tried to do a merge from the trunk and there were too many conflicts to
 resolve. When the time comes to implement the security-aware artifacts in
 the trunk, the handful of affected classes can be ported over manually.
+
+---------------------------------------------------------------------
+
+2009-12-28: Major rewrite. I created a utility class of static methods
+(ThreadContext) to make using the ExecutionContext easier. Instead of
+trying to pass an ExecutionContext instance throughout the framework,
+you can use the ThreadContext static methods instead. The ThreadContext
+class keeps an ExecutionContext instance per thread. We just need to
+make sure all OFBiz entrance vectors call the reset() method, and
+then initialize the ExecutionContext to the desired values.

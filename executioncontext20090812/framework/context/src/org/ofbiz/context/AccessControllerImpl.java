@@ -31,7 +31,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.service.DispatchContext;
-import org.ofbiz.service.ExecutionContext;
+import org.ofbiz.service.ThreadContext;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
 
@@ -40,30 +40,31 @@ public class AccessControllerImpl implements AccessController {
 
     public static final String module = AccessControllerImpl.class.getName();
 
-    protected final ExecutionContext executionContext;
     protected final OFBizPermission permission;
     protected final PathNode node;
     // Temporary - will be removed later
     protected boolean verbose = false;
     protected boolean disabled = false;
 
-    protected AccessControllerImpl(ExecutionContext executionContext, PathNode node) {
-        this.executionContext = executionContext;
+    protected AccessControllerImpl(PathNode node) {
         this.node = node;
-        this.permission = new OFBizPermission(executionContext.getUserLogin().getString("userLoginId"));
+        this.permission = new OFBizPermission(ThreadContext.getUserLogin().getString("userLoginId"));
         this.verbose = "true".equals(UtilProperties.getPropertyValue("api.properties", "authorizationManager.verbose"));
         this.disabled = "true".equals(UtilProperties.getPropertyValue("api.properties", "authorizationManager.disabled"));
     }
 
     public void checkPermission(Permission permission) throws AccessControlException {
         if (this.verbose) {
-            Debug.logInfo("Checking permission: " + this.executionContext.getExecutionPath() + "[" + permission + "]", module);
+            Debug.logInfo("Checking permission: " + ThreadContext.getExecutionPath() + "[" + permission + "]", module);
         }
         this.permission.reset();
-        this.node.getPermissions(this.executionContext.getExecutionPath(), this.permission);
+        this.node.getPermissions(ThreadContext.getExecutionPath(), this.permission);
         if (this.verbose) {
-            Debug.logInfo("Found permission(s): " + this.executionContext.getUserLogin().getString("userLoginId") +
-                    "@" + this.executionContext.getExecutionPath() + "[" + this.permission + "]", module);
+            Debug.logInfo("Found permission(s): " + ThreadContext.getUserLogin().getString("userLoginId") +
+                    "@" + ThreadContext.getExecutionPath() + "[" + this.permission + "]", module);
+/*            if ("NOT_LOGGED_IN".equals(ThreadContext.getUserLogin().getString("userLoginId"))) {
+                Debug.logInfo(new Exception(), module);
+            } */
         }
         if (this.disabled) {
             return;
@@ -71,20 +72,20 @@ public class AccessControllerImpl implements AccessController {
         if (this.permission.implies(permission) && this.hasServicePermission()) {
             return;
         }
-        throw new AccessControlException(this.executionContext.getUserLogin().getString("userLoginId") +
-                "@" + this.executionContext.getExecutionPath() + "[" + permission + "]");
+        throw new AccessControlException(ThreadContext.getUserLogin().getString("userLoginId") +
+                "@" + ThreadContext.getExecutionPath() + "[" + permission + "]");
     }
 
     public <E> List<E> applyFilters(List<E> list) {
         if (this.permission.getFilterNames().size() > 0) {
-            return new SecurityAwareList<E>(list, this.permission.getFilterNames(), this.executionContext);
+            return new SecurityAwareList<E>(list, this.permission.getFilterNames());
         }
         return list;
     }
 
     public <E> ListIterator<E> applyFilters(ListIterator<E> listIterator) {
         if (this.permission.getFilterNames().size() > 0) {
-            return new SecurityAwareListIterator<E>(listIterator, this.permission.getFilterNames(), this.executionContext);
+            return new SecurityAwareListIterator<E>(listIterator, this.permission.getFilterNames());
         }
         return listIterator;
     }
@@ -102,9 +103,9 @@ public class AccessControllerImpl implements AccessController {
             if (this.permission.getServiceNames().size() == 0) {
                 return true;
             }
-            LocalDispatcher dispatcher = this.executionContext.getDispatcher();
+            LocalDispatcher dispatcher = ThreadContext.getDispatcher();
             DispatchContext ctx = dispatcher.getDispatchContext();
-            Map<String, ? extends Object> params = this.executionContext.getParameters();
+            Map<String, ? extends Object> params = ThreadContext.getParameters();
             for (String serviceName : this.permission.getServiceNames()) {
                 ModelService modelService = ctx.getModelService(serviceName);
                 Map<String, Object> context = FastMap.newInstance();
@@ -112,13 +113,13 @@ public class AccessControllerImpl implements AccessController {
                     context.putAll(params);
                 }
                 if (!context.containsKey("userLogin")) {
-                    context.put("userLogin", this.executionContext.getUserLogin());
+                    context.put("userLogin", ThreadContext.getUserLogin());
                 }
                 if (!context.containsKey("locale")) {
-                    context.put("locale", this.executionContext.getLocale());
+                    context.put("locale", ThreadContext.getLocale());
                 }
                 if (!context.containsKey("timeZone")) {
-                    context.put("timeZone", this.executionContext.getTimeZone());
+                    context.put("timeZone", ThreadContext.getTimeZone());
                 }
                 context = modelService.makeValid(context, ModelService.IN_PARAM);
                 Map<String, Object> result = dispatcher.runSync(serviceName, context);

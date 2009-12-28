@@ -48,10 +48,10 @@ import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilObject;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.service.ThreadContext;
 import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.service.ExecutionContext;
 import org.ofbiz.webapp.event.EventFactory;
 import org.ofbiz.webapp.event.EventHandler;
 import org.ofbiz.webapp.event.EventHandlerException;
@@ -145,9 +145,8 @@ public class RequestHandler {
             throw new RequestHandlerException(requestMissingErrorMessage);
         }
 
-        ExecutionContext executionContext = (ExecutionContext) request.getAttribute("executionContext");
-        Locale locale = executionContext.getLocale();
-        executionContext.pushExecutionArtifact(new GenericParametersArtifact(UtilHttp.getFullRequestUrl(request).toString(), cname, UtilHttp.getParameterMap(request)));
+        Locale locale = ThreadContext.getLocale();
+        ThreadContext.pushExecutionArtifact(new GenericParametersArtifact(UtilHttp.getFullRequestUrl(request).toString(), cname, UtilHttp.getParameterMap(request)));
         
         String eventReturn = null;
         boolean interruptRequest = false;
@@ -280,7 +279,7 @@ public class RequestHandler {
                 if (visit != null) {
                     for (ConfigXMLReader.Event event: controllerConfig.firstVisitEventList.values()) {
                         try {
-                            executionContext.pushExecutionArtifact(new GenericExecutionArtifact(event.path, event.invoke));
+                            ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(event.path, event.invoke));
                             String returnString = this.runEvent(request, response, event, null, "firstvisit");
                             if (returnString != null && !returnString.equalsIgnoreCase("success")) {
                                 throw new EventHandlerException("First-Visit event did not return 'success'.");
@@ -290,7 +289,7 @@ public class RequestHandler {
                         } catch (EventHandlerException e) {
                             Debug.logError(e, module);
                         } finally {
-                            executionContext.popExecutionArtifact();
+                            ThreadContext.popExecutionArtifact();
                         }
                     }
                 }
@@ -299,7 +298,7 @@ public class RequestHandler {
             // Invoke the pre-processor (but NOT in a chain)
             for (ConfigXMLReader.Event event: controllerConfig.preprocessorEventList.values()) {
                 try {
-                    executionContext.pushExecutionArtifact(new GenericExecutionArtifact(event.path, event.invoke));
+                    ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(event.path, event.invoke));
                     String returnString = this.runEvent(request, response, event, null, "preprocessor");
                     if (returnString != null && !returnString.equalsIgnoreCase("success")) {
                         if (!returnString.contains(":_protect_:")) {
@@ -325,7 +324,7 @@ public class RequestHandler {
                 } catch (EventHandlerException e) {
                     Debug.logError(e, module);
                 } finally {
-                    executionContext.popExecutionArtifact();
+                    ThreadContext.popExecutionArtifact();
                 }
             }
         }
@@ -334,7 +333,7 @@ public class RequestHandler {
         // Warning: this could cause problems if more then one event attempts to return a response.
         if (interruptRequest) {
             if (Debug.infoOn()) Debug.logInfo("[Pre-Processor Interrupted Request, not running: [" + requestMap.uri + "], sessionId=" + UtilHttp.getSessionId(request), module);
-            executionContext.popExecutionArtifact();
+            ThreadContext.popExecutionArtifact();
             return;
         }
 
@@ -351,12 +350,12 @@ public class RequestHandler {
             String checkLoginReturnString = null;
 
             try {
-                executionContext.pushExecutionArtifact(new GenericExecutionArtifact(checkLoginEvent.path, checkLoginEvent.invoke));
+                ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(checkLoginEvent.path, checkLoginEvent.invoke));
                 checkLoginReturnString = this.runEvent(request, response, checkLoginEvent, null, "security-auth");
             } catch (EventHandlerException e) {
                 throw new RequestHandlerException(e.getMessage(), e);
             } finally {
-                executionContext.popExecutionArtifact();
+                ThreadContext.popExecutionArtifact();
             }
             if (!"success".equalsIgnoreCase(checkLoginReturnString)) {
                 // previous URL already saved by event, so just do as the return says...
@@ -387,7 +386,7 @@ public class RequestHandler {
                     long eventStartTime = System.currentTimeMillis();
 
                     // run the request event
-                    executionContext.pushExecutionArtifact(new GenericExecutionArtifact(requestMap.event.path, requestMap.event.invoke));
+                    ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(requestMap.event.path, requestMap.event.invoke));
                     eventReturn = this.runEvent(request, response, requestMap.event, requestMap, "request");
 
                     // save the server hit for the request event
@@ -410,7 +409,7 @@ public class RequestHandler {
                         throw new RequestHandlerException("Error calling event and no error response was specified", e);
                     }
                 } finally {
-                    executionContext.popExecutionArtifact();
+                    ThreadContext.popExecutionArtifact();
                 }
             }
         }
@@ -489,7 +488,7 @@ public class RequestHandler {
                 // the old/uglier way: doRequest(request, response, previousRequest, userLogin, delegator);
 
                 // this is needed as the request handled will be taking care of the view, etc
-                executionContext.popExecutionArtifact();
+                ThreadContext.popExecutionArtifact();
                 return;
             }
         }
@@ -538,7 +537,7 @@ public class RequestHandler {
             // first invoke the post-processor events.
             for (ConfigXMLReader.Event event: controllerConfig.postprocessorEventList.values()) {
                 try {
-                    executionContext.pushExecutionArtifact(new GenericExecutionArtifact(event.path, event.invoke));
+                    ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(event.path, event.invoke));
                     String returnString = this.runEvent(request, response, event, requestMap, "postprocessor");
                     if (returnString != null && !returnString.equalsIgnoreCase("success")) {
                         throw new EventHandlerException("Post-Processor event did not return 'success'.");
@@ -546,7 +545,7 @@ public class RequestHandler {
                 } catch (EventHandlerException e) {
                     Debug.logError(e, module);
                 } finally {
-                    executionContext.popExecutionArtifact();
+                    ThreadContext.popExecutionArtifact();
                 }
             }
 
@@ -624,7 +623,7 @@ public class RequestHandler {
                 if (Debug.verboseOn()) Debug.logVerbose("[RequestHandler.doRequest]: Response is handled by the event." + " sessionId=" + UtilHttp.getSessionId(request), module);
             }
         }
-        executionContext.popExecutionArtifact();
+        ThreadContext.popExecutionArtifact();
     }
 
     /** Find the event handler and invoke an event. */
@@ -1090,10 +1089,9 @@ public class RequestHandler {
     }
 
     public void runAfterLoginEvents(HttpServletRequest request, HttpServletResponse response) {
-        ExecutionContext executionContext = (ExecutionContext) request.getAttribute("executionContext");
         for (ConfigXMLReader.Event event: getControllerConfig().afterLoginEventList.values()) {
             try {
-                executionContext.pushExecutionArtifact(new GenericExecutionArtifact(event.path, event.invoke));
+                ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(event.path, event.invoke));
                 String returnString = this.runEvent(request, response, event, null, "after-login");
                 if (returnString != null && !returnString.equalsIgnoreCase("success")) {
                     throw new EventHandlerException("Pre-Processor event did not return 'success'.");
@@ -1101,16 +1099,15 @@ public class RequestHandler {
             } catch (EventHandlerException e) {
                 Debug.logError(e, module);
             } finally {
-                executionContext.popExecutionArtifact();
+                ThreadContext.popExecutionArtifact();
             }
         }
     }
 
     public void runBeforeLogoutEvents(HttpServletRequest request, HttpServletResponse response) {
-        ExecutionContext executionContext = (ExecutionContext) request.getAttribute("executionContext");
         for (ConfigXMLReader.Event event: getControllerConfig().beforeLogoutEventList.values()) {
             try {
-                executionContext.pushExecutionArtifact(new GenericExecutionArtifact(event.path, event.invoke));
+                ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(event.path, event.invoke));
                 String returnString = this.runEvent(request, response, event, null, "before-logout");
                 if (returnString != null && !returnString.equalsIgnoreCase("success")) {
                     throw new EventHandlerException("Pre-Processor event did not return 'success'.");
@@ -1118,7 +1115,7 @@ public class RequestHandler {
             } catch (EventHandlerException e) {
                 Debug.logError(e, module);
             } finally {
-                executionContext.popExecutionArtifact();
+                ThreadContext.popExecutionArtifact();
             }
         }
     }

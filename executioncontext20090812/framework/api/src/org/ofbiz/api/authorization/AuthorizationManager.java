@@ -21,15 +21,13 @@ package org.ofbiz.api.authorization;
 import java.security.AccessControlException;
 import java.security.Permission;
 
-import org.ofbiz.api.context.ExecutionContext;
-
 /**
  * AuthorizationManager interface.
  */
 public interface AuthorizationManager {
 
 	// Get the access controller for an artifact/user combination
-	public AccessController getAccessController (ExecutionContext executionContext) throws AccessControlException;
+	public AccessController getAccessController () throws AccessControlException;
 
 	// User methods
     public void createUser(String userLoginId, String password);

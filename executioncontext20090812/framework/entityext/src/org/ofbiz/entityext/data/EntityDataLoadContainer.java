@@ -28,7 +28,9 @@ import java.io.File;
 
 import javolution.util.FastList;
 
-import org.ofbiz.api.authorization.AccessController;
+import org.ofbiz.api.authorization.AuthorizationManager;
+import org.ofbiz.api.authorization.NullAuthorizationManager;
+import org.ofbiz.api.context.GenericExecutionArtifact;
 import org.ofbiz.base.container.Container;
 import org.ofbiz.base.container.ContainerConfig;
 import org.ofbiz.base.container.ContainerException;
@@ -36,8 +38,6 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilURL;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.context.AuthorizationManagerImpl;
-import org.ofbiz.context.ExecutionContextImpl;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntityException;
@@ -45,6 +45,7 @@ import org.ofbiz.entity.jdbc.DatabaseUtil;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.util.EntityDataLoader;
 import org.ofbiz.service.ServiceDispatcher;
+import org.ofbiz.service.ThreadContext;
 
 
 /**
@@ -228,7 +229,7 @@ public class EntityDataLoadContainer implements Container {
 
         String delegatorNameToUse = overrideDelegator != null ? overrideDelegator : delegatorName;
         String groupNameToUse = overrideGroup != null ? overrideGroup : entityGroupName;
-        GenericDelegator delegator = DelegatorFactory.getGenericDelegator(delegatorNameToUse, new LoaderExecutionContext());
+        GenericDelegator delegator = DelegatorFactory.getGenericDelegator(delegatorNameToUse);
         if (delegator == null) {
             throw new ContainerException("Invalid delegator name!");
         }
@@ -246,73 +247,42 @@ public class EntityDataLoadContainer implements Container {
         } catch (GenericEntityException e) {
             throw new ContainerException(e.getMessage(), e);
         }        
-        TreeSet<String> modelEntityNames = new TreeSet<String>(modelEntities.keySet());    
-        
-        // check for drop index/fks
-        if (dropConstraints) {                   
-            List<String> messages = FastList.newInstance();
-            
-            Debug.logImportant("Dropping foreign key indcies...", module);
-            for (String entityName : modelEntityNames) {
-                ModelEntity modelEntity = modelEntities.get(entityName);
-                if (modelEntity != null) {
-                    dbUtil.deleteForeignKeyIndices(modelEntity, messages);
-                }
-            }
-            
-            Debug.logImportant("Dropping declared indices...", module);
-            for (String entityName : modelEntityNames) {
-                ModelEntity modelEntity = modelEntities.get(entityName);
-                if (modelEntity != null) {
-                    dbUtil.deleteDeclaredIndices(modelEntity, messages);
-                }
-            }
-            
-            Debug.logImportant("Dropping foreign keys...", module);
-            for (String entityName : modelEntityNames) {
-                ModelEntity modelEntity = modelEntities.get(entityName);
-                if (modelEntity != null) {
-                    dbUtil.deleteForeignKeys(modelEntity, modelEntities, messages);
-                }
-            }
-            
-            if (messages.size() > 0) {
-                if (Debug.infoOn()) {
-                    for (String message : messages) {
-                        Debug.logInfo(message, module);
+        TreeSet<String> modelEntityNames = new TreeSet<String>(modelEntities.keySet());
+
+        // Set up the execution context
+        AuthorizationManager oldAuthorizationManager = ThreadContext.getSecurity();
+        ThreadContext.setSecurity(new NullAuthorizationManager());
+        ThreadContext.setDelegator(delegator);
+        ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(module, "EntityDataLoad"));
+        try {
+            // check for drop index/fks
+            if (dropConstraints) {                   
+                List<String> messages = FastList.newInstance();
+
+                Debug.logImportant("Dropping foreign key indcies...", module);
+                for (String entityName : modelEntityNames) {
+                    ModelEntity modelEntity = modelEntities.get(entityName);
+                    if (modelEntity != null) {
+                        dbUtil.deleteForeignKeyIndices(modelEntity, messages);
                     }
                 }
-            }
-        }
-        
-        // drop pks
-        if (dropPks) {
-            List<String> messages = FastList.newInstance();
-            Debug.logImportant("Dropping primary keys...", module);
-            for (String entityName : modelEntityNames) {
-                ModelEntity modelEntity = modelEntities.get(entityName); 
-                if (modelEntity != null) {
-                    dbUtil.deletePrimaryKey(modelEntity, messages);
-                }
-            }
-            
-            if (messages.size() > 0) {
-                if (Debug.infoOn()) {
-                    for (String message : messages) {
-                        Debug.logInfo(message, module);
+
+                Debug.logImportant("Dropping declared indices...", module);
+                for (String entityName : modelEntityNames) {
+                    ModelEntity modelEntity = modelEntities.get(entityName);
+                    if (modelEntity != null) {
+                        dbUtil.deleteDeclaredIndices(modelEntity, messages);
                     }
                 }
-            }
-        }
-        
-        // repair columns
-        if (repairColumns) {
-            List<String> fieldsToRepair = FastList.newInstance();
-            List<String> messages = FastList.newInstance();
-            dbUtil.checkDb(modelEntities, fieldsToRepair, messages, false, false, false, false);
-            if (fieldsToRepair.size() > 0) {
-                messages = FastList.newInstance();
-                dbUtil.repairColumnSizeChanges(modelEntities, fieldsToRepair, messages);
+
+                Debug.logImportant("Dropping foreign keys...", module);
+                for (String entityName : modelEntityNames) {
+                    ModelEntity modelEntity = modelEntities.get(entityName);
+                    if (modelEntity != null) {
+                        dbUtil.deleteForeignKeys(modelEntity, modelEntities, messages);
+                    }
+                }
+
                 if (messages.size() > 0) {
                     if (Debug.infoOn()) {
                         for (String message : messages) {
@@ -321,150 +291,190 @@ public class EntityDataLoadContainer implements Container {
                     }
                 }
             }
-        }
-        
-        // get the reader name URLs first
-        List<URL> urlList = null;
-        if (readerNames != null) {
-            urlList = EntityDataLoader.getUrlList(helperName, component, readerNames);
-        } else if (!"none".equalsIgnoreCase(this.readers)) {
-            urlList = EntityDataLoader.getUrlList(helperName, component);
-        }
 
-        // need a list if it is empty
-        if (urlList == null) {
-            urlList = FastList.newInstance();
-        }
+            // drop pks
+            if (dropPks) {
+                List<String> messages = FastList.newInstance();
+                Debug.logImportant("Dropping primary keys...", module);
+                for (String entityName : modelEntityNames) {
+                    ModelEntity modelEntity = modelEntities.get(entityName); 
+                    if (modelEntity != null) {
+                        dbUtil.deletePrimaryKey(modelEntity, messages);
+                    }
+                }
 
-        // add in the defined extra files
-        for (String fileName: this.files) {
-            URL fileUrl = UtilURL.fromResource((String) fileName);
-            if (fileUrl != null) {
-                urlList.add(fileUrl);
+                if (messages.size() > 0) {
+                    if (Debug.infoOn()) {
+                        for (String message : messages) {
+                            Debug.logInfo(message, module);
+                        }
+                    }
+                }
             }
-        }
 
-        // next check for a directory of files
-        if (this.directory != null) {
-            File dir = new File(this.directory);
-            if (dir.exists() && dir.isDirectory() && dir.canRead()) {
-                File[] fileArray = dir.listFiles();
-                if (fileArray != null && fileArray.length > 0) {
-                    for (File file: fileArray) {
-                        if (file.getName().toLowerCase().endsWith(".xml")) {
-                            try {
-                                urlList.add(file.toURI().toURL());
-                            } catch (MalformedURLException e) {
-                                Debug.logError(e, "Unable to load file (" + file.getName() + "); not a valid URL.", module);
+            // repair columns
+            if (repairColumns) {
+                List<String> fieldsToRepair = FastList.newInstance();
+                List<String> messages = FastList.newInstance();
+                dbUtil.checkDb(modelEntities, fieldsToRepair, messages, false, false, false, false);
+                if (fieldsToRepair.size() > 0) {
+                    messages = FastList.newInstance();
+                    dbUtil.repairColumnSizeChanges(modelEntities, fieldsToRepair, messages);
+                    if (messages.size() > 0) {
+                        if (Debug.infoOn()) {
+                            for (String message : messages) {
+                                Debug.logInfo(message, module);
                             }
                         }
                     }
                 }
             }
-        }
 
-        // process the list of files
-        NumberFormat changedFormat = NumberFormat.getIntegerInstance();
-        changedFormat.setMinimumIntegerDigits(5);
-        changedFormat.setGroupingUsed(false);
-
-        List<Object> errorMessages = FastList.newInstance();
-        List<String> infoMessages = FastList.newInstance();
-        int totalRowsChanged = 0;
-        if (UtilValidate.isNotEmpty(urlList)) {
-            Debug.logImportant("=-=-=-=-=-=-= Doing a data load with the following files:", module);
-            for (URL dataUrl: urlList) {
-                Debug.logImportant(dataUrl.toExternalForm(), module);
+            // get the reader name URLs first
+            List<URL> urlList = null;
+            if (readerNames != null) {
+                urlList = EntityDataLoader.getUrlList(helperName, component, readerNames);
+            } else if (!"none".equalsIgnoreCase(this.readers)) {
+                urlList = EntityDataLoader.getUrlList(helperName, component);
             }
 
-            Debug.logImportant("=-=-=-=-=-=-= Starting the data load...", module);
+            // need a list if it is empty
+            if (urlList == null) {
+                urlList = FastList.newInstance();
+            }
 
-            for (URL dataUrl: urlList) {
-                try {
-                    int rowsChanged = EntityDataLoader.loadData(dataUrl, helperName, delegator, errorMessages, txTimeout, useDummyFks, maintainTxs, tryInserts);
-                    totalRowsChanged += rowsChanged;
-                    infoMessages.add(changedFormat.format(rowsChanged) + " of " + changedFormat.format(totalRowsChanged) + " from " + dataUrl.toExternalForm());
-                } catch (GenericEntityException e) {
-                    Debug.logError(e, "Error loading data file: " + dataUrl.toExternalForm(), module);
+            // add in the defined extra files
+            for (String fileName: this.files) {
+                URL fileUrl = UtilURL.fromResource((String) fileName);
+                if (fileUrl != null) {
+                    urlList.add(fileUrl);
                 }
             }
-        } else {
-            Debug.logImportant("=-=-=-=-=-=-= No data load files found.", module);
-        }
 
-        if (infoMessages.size() > 0) {
-            Debug.logImportant("=-=-=-=-=-=-= Here is a summary of the data load:", module);
-            for (String message: infoMessages) {
-              Debug.logImportant(message, module);
-            }
-        }
-
-        if (errorMessages.size() > 0) {
-            Debug.logImportant("The following errors occured in the data load:", module);
-            for (Object message: errorMessages) {
-              Debug.logImportant(message.toString(), module);
-            }
-        }
-
-        Debug.logImportant("=-=-=-=-=-=-= Finished the data load with " + totalRowsChanged + " rows changed.", module);
-
-        // create primary keys
-        if (createPks) {
-            List<String> messages = FastList.newInstance();
-            
-            Debug.logImportant("Creating primary keys...", module);
-            for (String entityName : modelEntityNames) {
-                ModelEntity modelEntity = modelEntities.get(entityName);
-                if (modelEntity != null) {
-                    dbUtil.createPrimaryKey(modelEntity, messages);
-                }
-            }
-            if (messages.size() > 0) {
-                if (Debug.infoOn()) {
-                    for (String message : messages) {
-                        Debug.logInfo(message, module);
+            // next check for a directory of files
+            if (this.directory != null) {
+                File dir = new File(this.directory);
+                if (dir.exists() && dir.isDirectory() && dir.canRead()) {
+                    File[] fileArray = dir.listFiles();
+                    if (fileArray != null && fileArray.length > 0) {
+                        for (File file: fileArray) {
+                            if (file.getName().toLowerCase().endsWith(".xml")) {
+                                try {
+                                    urlList.add(file.toURI().toURL());
+                                } catch (MalformedURLException e) {
+                                    Debug.logError(e, "Unable to load file (" + file.getName() + "); not a valid URL.", module);
+                                }
+                            }
+                        }
                     }
                 }
             }
-        }
-        
-        // create constraints
-        if (createConstraints) {                   
-            List<String> messages = FastList.newInstance();
-            
-            Debug.logImportant("Creating foreign keys...", module);
-            for (String entityName : modelEntityNames) {
-                ModelEntity modelEntity = modelEntities.get(entityName);
-                if (modelEntity != null) {
-                    dbUtil.createForeignKeys(modelEntity, modelEntities, messages);
+
+            // process the list of files
+            NumberFormat changedFormat = NumberFormat.getIntegerInstance();
+            changedFormat.setMinimumIntegerDigits(5);
+            changedFormat.setGroupingUsed(false);
+
+            List<Object> errorMessages = FastList.newInstance();
+            List<String> infoMessages = FastList.newInstance();
+            int totalRowsChanged = 0;
+            if (UtilValidate.isNotEmpty(urlList)) {
+                Debug.logImportant("=-=-=-=-=-=-= Doing a data load with the following files:", module);
+                for (URL dataUrl: urlList) {
+                    Debug.logImportant(dataUrl.toExternalForm(), module);
+                }
+
+                Debug.logImportant("=-=-=-=-=-=-= Starting the data load...", module);
+
+                for (URL dataUrl: urlList) {
+                    try {
+                        int rowsChanged = EntityDataLoader.loadData(dataUrl, helperName, delegator, errorMessages, txTimeout, useDummyFks, maintainTxs, tryInserts);
+                        totalRowsChanged += rowsChanged;
+                        infoMessages.add(changedFormat.format(rowsChanged) + " of " + changedFormat.format(totalRowsChanged) + " from " + dataUrl.toExternalForm());
+                    } catch (GenericEntityException e) {
+                        Debug.logError(e, "Error loading data file: " + dataUrl.toExternalForm(), module);
+                    }
+                }
+            } else {
+                Debug.logImportant("=-=-=-=-=-=-= No data load files found.", module);
+            }
+
+            if (infoMessages.size() > 0) {
+                Debug.logImportant("=-=-=-=-=-=-= Here is a summary of the data load:", module);
+                for (String message: infoMessages) {
+                    Debug.logImportant(message, module);
                 }
             }
-            
-            Debug.logImportant("Creating foreign key indcies...", module);
-            for (String entityName : modelEntityNames) {
-                ModelEntity modelEntity = modelEntities.get(entityName);
-                if (modelEntity != null) {
-                    dbUtil.createForeignKeyIndices(modelEntity, messages);
+
+            if (errorMessages.size() > 0) {
+                Debug.logImportant("The following errors occured in the data load:", module);
+                for (Object message: errorMessages) {
+                    Debug.logImportant(message.toString(), module);
                 }
             }
-            
-            Debug.logImportant("Creating declared indices...", module);
-            for (String entityName : modelEntityNames) {
-                ModelEntity modelEntity = modelEntities.get(entityName);
-                if (modelEntity != null) {
-                    dbUtil.createDeclaredIndices(modelEntity, messages);
+
+            Debug.logImportant("=-=-=-=-=-=-= Finished the data load with " + totalRowsChanged + " rows changed.", module);
+
+            // create primary keys
+            if (createPks) {
+                List<String> messages = FastList.newInstance();
+
+                Debug.logImportant("Creating primary keys...", module);
+                for (String entityName : modelEntityNames) {
+                    ModelEntity modelEntity = modelEntities.get(entityName);
+                    if (modelEntity != null) {
+                        dbUtil.createPrimaryKey(modelEntity, messages);
+                    }
                 }
-            }
-                                    
-            if (messages.size() > 0) {
-                if (Debug.infoOn()) {
-                    for (String message : messages) {
-                        Debug.logInfo(message, module);
+                if (messages.size() > 0) {
+                    if (Debug.infoOn()) {
+                        for (String message : messages) {
+                            Debug.logInfo(message, module);
+                        }
                     }
                 }
             }
+
+            // create constraints
+            if (createConstraints) {                   
+                List<String> messages = FastList.newInstance();
+
+                Debug.logImportant("Creating foreign keys...", module);
+                for (String entityName : modelEntityNames) {
+                    ModelEntity modelEntity = modelEntities.get(entityName);
+                    if (modelEntity != null) {
+                        dbUtil.createForeignKeys(modelEntity, modelEntities, messages);
+                    }
+                }
+
+                Debug.logImportant("Creating foreign key indcies...", module);
+                for (String entityName : modelEntityNames) {
+                    ModelEntity modelEntity = modelEntities.get(entityName);
+                    if (modelEntity != null) {
+                        dbUtil.createForeignKeyIndices(modelEntity, messages);
+                    }
+                }
+
+                Debug.logImportant("Creating declared indices...", module);
+                for (String entityName : modelEntityNames) {
+                    ModelEntity modelEntity = modelEntities.get(entityName);
+                    if (modelEntity != null) {
+                        dbUtil.createDeclaredIndices(modelEntity, messages);
+                    }
+                }
+
+                if (messages.size() > 0) {
+                    if (Debug.infoOn()) {
+                        for (String message : messages) {
+                            Debug.logInfo(message, module);
+                        }
+                    }
+                }
+            }
+        } finally {
+            ThreadContext.popExecutionArtifact();
+            ThreadContext.setSecurity(oldAuthorizationManager);
         }
-        
         return true;
     }
 
@@ -472,13 +482,5 @@ public class EntityDataLoadContainer implements Container {
      * @see org.ofbiz.base.container.Container#stop()
      */
     public void stop() throws ContainerException {
-    }
-
-    // TODO: Find an implementation-agnostic way to do this
-    protected static class LoaderExecutionContext extends ExecutionContextImpl {
-        @Override
-        public AccessController getAccessController() {
-            return AuthorizationManagerImpl.nullAccessController;
-        }
     }
 }

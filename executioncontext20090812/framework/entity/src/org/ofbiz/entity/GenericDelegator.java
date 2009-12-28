@@ -1104,8 +1104,6 @@ public interface GenericDelegator {
 
     public void setEntityEcaHandler(EntityEcaHandler<?> entityEcaHandler);
 
-    public void setExecutionContext(ExecutionContext executionContext);
-
     public void setLocale(Locale locale);
 
     /** Look at existing values for a sub-entity with a sequenced secondary ID, and get the highest plus 1 */

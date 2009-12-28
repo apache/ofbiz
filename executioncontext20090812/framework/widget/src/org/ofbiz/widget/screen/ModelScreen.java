@@ -39,7 +39,7 @@ import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.transaction.TransactionUtil;
-import org.ofbiz.service.ExecutionContext;
+import org.ofbiz.service.ThreadContext;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.webapp.control.ConfigXMLReader;
 import org.ofbiz.widget.ModelWidget;
@@ -350,9 +350,8 @@ public class ModelScreen extends ModelWidget implements Serializable, ExecutionA
      *   use the same screen definitions for many types of screen UIs
      */
     public void renderScreenString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws ScreenRenderException {
-        ExecutionContext executionContext = (ExecutionContext) context.get("executionContext");
-        executionContext.pushExecutionArtifact(this);
-    	AccessController accessController = executionContext.getAccessController();
+        ThreadContext.pushExecutionArtifact(this);
+    	AccessController accessController = ThreadContext.getAccessController();
     	accessController.checkPermission(View);
         // make sure the "null" object is in there for entity ops
         context.put("null", GenericEntity.NULL_FIELD);
@@ -428,7 +427,7 @@ public class ModelScreen extends ModelWidget implements Serializable, ExecutionA
             // after rolling back, rethrow the exception
             throw new ScreenRenderException(errMsg, e);
         } finally {
-            executionContext.popExecutionArtifact();
+            ThreadContext.popExecutionArtifact();
             // only commit the transaction if we started one... this will throw an exception if it fails
             try {
                 TransactionUtil.commit(beganTransaction);

@@ -61,7 +61,7 @@ import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.security.Security;
 import org.ofbiz.security.authz.Authorization;
-import org.ofbiz.service.ExecutionContext;
+import org.ofbiz.service.ThreadContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
@@ -367,12 +367,9 @@ public class LoginWorker {
                 password = request.getParameter("newPassword");
             }
         }
-        ExecutionContext executionContext = (ExecutionContext) request.getAttribute("executionContext");
-
         try {
             result = dispatcher.runSync("userLogin", UtilMisc.toMap("login.username", username,
-                    "login.password", password, "visitId", visitId, "locale", UtilHttp.getLocale(request),
-                    "executionContext", executionContext));
+                    "login.password", password, "visitId", visitId, "locale", UtilHttp.getLocale(request)));
         } catch (GenericServiceException e) {
             Debug.logError(e, "Error calling userLogin service", module);
             Map<String, String> messageMap = UtilMisc.toMap("errorMessage", e.getMessage());
@@ -383,7 +380,7 @@ public class LoginWorker {
 
         if (ModelService.RESPOND_SUCCESS.equals(result.get(ModelService.RESPONSE_MESSAGE))) {
             GenericValue userLogin = (GenericValue) result.get("userLogin");
-            executionContext.setUserLogin(userLogin);
+            ThreadContext.setUserLogin(userLogin);
             Map<String, Object> userLoginSession = checkMap(result.get("userLoginSession"), String.class, Object.class);
             if (userLogin != null && "Y".equals(userLogin.getString("requirePasswordChange"))) {
                 return "requirePasswordChange";
@@ -395,7 +392,7 @@ public class LoginWorker {
             try {
                 result = dispatcher.runSync("setUserPreference", UtilMisc.toMap("userPrefTypeId", "javaScriptEnabled",
                         "userPrefGroupTypeId", "GLOBAL_PREFERENCES", "userPrefValue", javaScriptEnabled,
-                        "userLogin", userLogin, "executionContext", executionContext));
+                        "userLogin", userLogin));
             } catch (GenericServiceException e) {
                 Debug.logError(e, "Error setting user preference", module);
             }
