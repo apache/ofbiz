@@ -30,8 +30,6 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.api.authorization.AccessController;
-import org.ofbiz.security.AuthorizationManager;
-import org.ofbiz.api.context.ExecutionContextFactory;
 import org.ofbiz.api.context.GenericParametersArtifact;
 import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.util.Debug;
@@ -82,7 +80,7 @@ public class ServiceDispatcher {
     protected GenericDelegator delegator = null;
     protected GenericEngineFactory factory = null;
     protected Authorization authz = null;
-    protected AuthorizationManager security = null;
+    protected Security security = null;
     protected Map<String, DispatchContext> localContext = null;
     protected Map<String, List<GenericServiceCallback>> callbacks = null;
     protected JobManager jm = null;
@@ -113,11 +111,12 @@ public class ServiceDispatcher {
             if (!this.delegator.getOriginalDelegatorName().equals(delegatorName)) {
             	delegatorName = this.delegator.getOriginalDelegatorName();
             }
-            ExecutionContext executionContext = (ExecutionContext) ExecutionContextFactory.getInstance();
-            GenericDelegator newDelegator = DelegatorFactory.getGenericDelegator(delegatorName, executionContext);
+            ThreadContext.reset();
+            GenericDelegator newDelegator = DelegatorFactory.getGenericDelegator(delegatorName);
+            ThreadContext.setDelegator(newDelegator);
             GenericValue userLogin = newDelegator.makeValue("UserLogin");
             userLogin.set("userLoginId", "system");
-            executionContext.setUserLogin(userLogin);
+            ThreadContext.setUserLogin(userLogin);
             this.jm = JobManager.getInstance(newDelegator, enableJM);
         } catch (Exception e) {
             Debug.logWarning(e.getMessage(), module);
@@ -303,21 +302,11 @@ public class ServiceDispatcher {
         // for isolated transactions
         Transaction parentTransaction = null;
 
-        ExecutionContext executionContext = (ExecutionContext) context.get("executionContext");
-        if (executionContext == null) {
-            try {
-                executionContext = (ExecutionContext) ExecutionContextFactory.getInstance();
-			} catch (Exception e) {
-				throw new GenericServiceException(e);
-			}
-            context.put("executionContext", executionContext);
-        }
         GenericDelegator newDelegator = DelegatorFactory.getGenericDelegator(this.delegator.getDelegatorName());
-        executionContext.setDelegator(newDelegator);
-        executionContext.setDispatcher(ctx.getDispatcher());
-        executionContext.setSecurity(this.security);
-        executionContext.initializeContext(context);
-        executionContext.pushExecutionArtifact(new GenericParametersArtifact(modelService, context));
+        ThreadContext.setDelegator(newDelegator);
+        ThreadContext.setDispatcher(ctx.getDispatcher());
+        ThreadContext.initializeContext(context);
+        ThreadContext.pushExecutionArtifact(new GenericParametersArtifact(modelService, context));
         // start the transaction
         boolean beganTrans = false;
         try {
@@ -329,7 +318,7 @@ public class ServiceDispatcher {
                 }
             }
             if (!permissionService) {
-            	AccessController accessController = executionContext.getAccessController();
+            	AccessController accessController = ThreadContext.getAccessController();
             	accessController.checkPermission(Access);
             }
             //Debug.logInfo("=========================== " + modelService.name + " 1 tx status =" + TransactionUtil.getStatusString() + ", modelService.requireNewTransaction=" + modelService.requireNewTransaction + ", modelService.useTransaction=" + modelService.useTransaction + ", TransactionUtil.isTransactionInPlace()=" + TransactionUtil.isTransactionInPlace(), module);
@@ -594,7 +583,7 @@ public class ServiceDispatcher {
             Debug.logError(te, "Problems with the transaction", module);
             throw new GenericServiceException("Problems with the transaction.", te.getNested());
         } finally {
-            executionContext.popExecutionArtifact();
+            ThreadContext.popExecutionArtifact();
             // release the semaphore lock
             if (lock != null) {
                 lock.release();

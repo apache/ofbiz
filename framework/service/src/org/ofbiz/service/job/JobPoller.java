@@ -24,7 +24,10 @@ import java.util.Map;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.api.context.GenericExecutionArtifact;
+import org.ofbiz.service.ThreadContext;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.api.authorization.NullAuthorizationManager;
 import org.ofbiz.service.config.ServiceConfigUtil;
 
 /**
@@ -84,6 +87,8 @@ public class JobPoller implements Runnable {
             java.lang.Thread.sleep(30000);
         } catch (InterruptedException e) {
         }
+        ThreadContext.setSecurity(new NullAuthorizationManager());
+        ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact("ofbiz/framework/service/job", "JobPoller"));
         while (isRunning) {
             try {
                 // grab a list of jobs to run.
@@ -103,6 +108,7 @@ public class JobPoller implements Runnable {
                 stop();
             }
         }
+        ThreadContext.popExecutionArtifact();
     }
 
     /**

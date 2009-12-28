@@ -21,8 +21,6 @@ package org.ofbiz.context;
 import java.util.ListIterator;
 import java.util.Set;
 
-import org.ofbiz.service.ExecutionContext;
-
 /**
  * SecurityAwareListIterator class.  This class decorates a <code>
  * ListIterator</code> instance and filters a list of
@@ -40,8 +38,8 @@ public class SecurityAwareListIterator<E> extends SecurityAwareIterator<E> imple
     protected E previousValue = null;
     protected int index = 0;
 
-    public SecurityAwareListIterator(ListIterator<E> iterator, Set<String> serviceNameList, ExecutionContext executionContext) {
-        super(iterator, serviceNameList, executionContext);
+    public SecurityAwareListIterator(ListIterator<E> iterator, Set<String> serviceNameList) {
+        super(iterator, serviceNameList);
         this.listIterator = iterator;
     }
 

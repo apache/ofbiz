@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
-import org.ofbiz.service.ExecutionContext;
-
 /**
  * SecurityAwareList class.
  */
@@ -34,23 +32,21 @@ public class SecurityAwareList<E> extends ArrayList<E> implements List<E> {
 
 	protected final static String module = SecurityAwareList.class.getName();
     protected final Set<String> serviceNameList;
-    protected final ExecutionContext executionContext;
 
-	public SecurityAwareList(List<E> valueList, Set<String> serviceNameList, ExecutionContext executionContext) {
+	public SecurityAwareList(List<E> valueList, Set<String> serviceNameList) {
 		super(valueList.size());
 		this.addAll(valueList);
 		this.trimToSize();
 		this.serviceNameList = serviceNameList;
-		this.executionContext = executionContext;
 	}
 
 	@Override
     public Iterator<E> iterator() {
-        return new SecurityAwareIterator<E>(super.iterator(), this.serviceNameList, this.executionContext);
+        return new SecurityAwareIterator<E>(super.iterator(), this.serviceNameList);
     }
 
     @Override
     public ListIterator<E> listIterator() {
-        return new SecurityAwareListIterator<E>(super.listIterator(), this.serviceNameList, this.executionContext);
+        return new SecurityAwareListIterator<E>(super.listIterator(), this.serviceNameList);
     }
 }

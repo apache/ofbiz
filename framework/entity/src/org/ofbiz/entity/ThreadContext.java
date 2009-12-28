@@ -16,32 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.context;
+package org.ofbiz.entity;
 
-import java.security.AccessControlException;
-import java.security.Permission;
-import java.util.List;
-import java.util.ListIterator;
-
-import org.ofbiz.api.authorization.AccessController;
-import org.ofbiz.entity.util.EntityListIterator;
-
-/** An implementation of the <code>AccessController</code> interface
- * that allows unrestricted access.
+/** A convenience class for accessing the current thread's <code>ExecutionContext</code>.
+ * @see {@link org.ofbiz.entity.ExecutionContext} 
  */
-public class NullAccessController implements AccessController {
+public class ThreadContext extends org.ofbiz.api.context.ThreadContext {
 
-    public EntityListIterator applyFilters(EntityListIterator listIterator) {
-        return listIterator;
+    protected static final String module = ThreadContext.class.getName();
+
+    public static GenericDelegator getDelegator() {
+        return getExecutionContext().getDelegator();
     }
 
-    public <E> List<E> applyFilters(List<E> list) {
-        return list;
+    protected static ExecutionContext getExecutionContext() {
+        return (ExecutionContext) executionContext.get();
     }
 
-    public <E> ListIterator<E> applyFilters(ListIterator<E> list) {
-        return list;
+    public static GenericValue getUserLogin() {
+        return getExecutionContext().getUserLogin();
     }
 
-    public void checkPermission(Permission permission) throws AccessControlException {}
+    public static void setDelegator(GenericDelegator delegator) {
+        getExecutionContext().setDelegator(delegator);
+    }
+
+    public static void setUserLogin(GenericValue userLogin) {
+        getExecutionContext().setUserLogin(userLogin);
+    }
 }

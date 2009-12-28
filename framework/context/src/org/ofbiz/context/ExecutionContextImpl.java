@@ -25,11 +25,11 @@ import java.util.TimeZone;
 import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.api.authorization.AuthorizationManager;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.security.SecurityFactory;
 import org.ofbiz.service.ExecutionContext;
 import org.ofbiz.service.GenericDispatcher;
 import org.ofbiz.service.LocalDispatcher;
@@ -44,12 +44,12 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
     protected GenericValue userLogin = null;
 
 	public AccessController getAccessController() {
-        return (AccessController) this.getSecurity().getAccessController(this);
+        return (AccessController) this.getSecurity().getAccessController();
 	}
 
 	public GenericDelegator getDelegator() {
 		if (this.delegator == null) {
-			this.delegator = DelegatorFactory.getGenericDelegator("default", this);
+			this.delegator = DelegatorFactory.getGenericDelegator("default");
 		}
 		return this.delegator;
 	}
@@ -62,13 +62,16 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
 	}
 
 	public AuthorizationManager getSecurity() {
-		if (this.security == null) {
+	    if (this.security == null) {
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            String className = UtilProperties.getPropertyValue("api.properties", "authorizationManager.class");
             try {
-				this.security = SecurityFactory.getInstance(this.getDelegator());
-			} catch (Exception e) {
-			}
-		}
-		return this.security;
+                this.security = (AuthorizationManager) loader.loadClass(className).newInstance();
+            } catch (Exception e) {
+                Debug.logError(e, module);
+            }
+	    }
+	    return this.security;
 	}
 
 	public GenericValue getUserLogin() {
@@ -107,7 +110,6 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
 
 	public void setDelegator(GenericDelegator delegator) {
 		if (delegator != null) {
-			delegator.setExecutionContext(this);
 			this.delegator = delegator;
 		}
 	}

@@ -27,7 +27,6 @@ import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityListIterator;
-import org.ofbiz.service.ExecutionContext;
 
 /**
  * SecurityAwareEli class.  This class decorates an <code>
@@ -45,8 +44,8 @@ public class SecurityAwareEli extends SecurityAwareListIterator<GenericValue> im
     protected final EntityListIterator listIterator;
     protected GenericValue previousValue = null;
 
-    public SecurityAwareEli(EntityListIterator iterator, Set<String> serviceNameList, ExecutionContext executionContext) {
-        super(iterator, serviceNameList, executionContext);
+    public SecurityAwareEli(EntityListIterator iterator, Set<String> serviceNameList) {
+        super(iterator, serviceNameList);
         this.listIterator = iterator;
     }
 

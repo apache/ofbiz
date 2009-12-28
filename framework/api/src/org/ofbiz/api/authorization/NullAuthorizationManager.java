@@ -16,18 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.context;
+package org.ofbiz.api.authorization;
 
 import java.security.AccessControlException;
 import java.security.Permission;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
-import javax.servlet.http.HttpSession;
-
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericValue;
-import org.ofbiz.security.AuthorizationManager;
+import org.ofbiz.api.context.ThreadContext;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilProperties;
 
 /** An implementation of <code>AuthorizationManager</code> that allows
  * unrestricted access to all security-aware artifacts. This class
@@ -47,7 +45,10 @@ import org.ofbiz.security.AuthorizationManager;
  * </ul></p>
  * 
  */
-public class NullAuthorizationManager<E> implements AuthorizationManager {
+public class NullAuthorizationManager implements AuthorizationManager {
+
+    protected static final String module = NullAuthorizationManager.class.getName();
+    protected static final AccessController nullAccessController = new NullAccessController();
 
     public void assignGroupPermission(String userGroupId, String artifactId,
             Permission permission) {
@@ -96,67 +97,36 @@ public class NullAuthorizationManager<E> implements AuthorizationManager {
     public void updateUserGroup(String userGroupId, String description) {
     }
 
-    public org.ofbiz.api.authorization.AccessController getAccessController(
-            org.ofbiz.api.context.ExecutionContext executionContext)
-            throws AccessControlException {
-        return AuthorizationManagerImpl.nullAccessController;
+    public AccessController getAccessController() throws AccessControlException {
+        return nullAccessController;
     }
 
-    public void clearUserData(GenericValue userLogin) {
+    /** An implementation of the <code>AccessController</code> interface
+     * that allows unrestricted access.
+     */
+    protected static class NullAccessController implements AccessController {
+
+        // Temporary - will be removed later
+        protected boolean verbose = false;
+        protected NullAccessController() {
+            this.verbose = "true".equals(UtilProperties.getPropertyValue("api.properties", "authorizationManager.verbose"));
+        }
+
+        public <E> List<E> applyFilters(List<E> list) {
+            return list;
+        }
+
+        public <E> ListIterator<E> applyFilters(ListIterator<E> list) {
+            return list;
+        }
+
+        public void checkPermission(Permission permission) throws AccessControlException {
+            if (this.verbose) {
+                Debug.logInfo("Checking permission: " + ThreadContext.getExecutionPath() + "[" + permission + "]", module);
+                Debug.logInfo("Found permission(s): " + 
+                        "system@" + ThreadContext.getExecutionPath() + "[admin=true]", module);
+            }
+        }
     }
 
-    public Iterator<GenericValue> findUserLoginSecurityGroupByUserLoginId(
-            String userLoginId) {
-        return null;
-    }
-
-    public GenericDelegator getDelegator() {
-        return null;
-    }
-
-    public boolean hasEntityPermission(String entity, String action,
-            HttpSession session) {
-        return true;
-    }
-
-    public boolean hasEntityPermission(String entity, String action,
-            GenericValue userLogin) {
-        return true;
-    }
-
-    public boolean hasPermission(String permission, HttpSession session) {
-        return true;
-    }
-
-    public boolean hasPermission(String permission, GenericValue userLogin) {
-        return true;
-    }
-
-    public boolean hasRolePermission(String application, String action,
-            String primaryKey, String role, HttpSession session) {
-        return true;
-    }
-
-    public boolean hasRolePermission(String application, String action,
-            String primaryKey, String role, GenericValue userLogin) {
-        return true;
-    }
-
-    public boolean hasRolePermission(String application, String action,
-            String primaryKey, List<String> roles, GenericValue userLogin) {
-        return true;
-    }
-
-    public boolean hasRolePermission(String application, String action,
-            String primaryKey, List<String> roles, HttpSession session) {
-        return true;
-    }
-
-    public boolean securityGroupPermissionExists(String groupId,
-            String permission) {
-        return true;
-    }
-
-    public void setDelegator(GenericDelegator delegator) {
-    }
 }

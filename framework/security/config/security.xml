@@ -20,7 +20,7 @@ under the License.
 
 <security-config>
     <!-- This is the default implementation and uses the OFBizSecurity implementation as its default -->
-    <security name="default"/>
+    <security name="default" class="org.ofbiz.context.AuthorizationManagerImpl"/>
 
     <!-- This is an example custom implementation and uses the class name specified as security implementation -->
     <!--

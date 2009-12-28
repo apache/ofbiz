@@ -31,7 +31,6 @@ import java.util.regex.PatternSyntaxException;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.ofbiz.api.context.ExecutionContext;
 import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
@@ -353,11 +352,6 @@ public abstract class ModelFormAction {
                 if (this.fieldMap != null) {
                     EntityFinderUtil.expandFieldMapToContext(this.fieldMap, context, serviceContext);
                 }
-                ExecutionContext executionContext = (ExecutionContext) context.get("executionContext");
-                if (executionContext != null) {
-                    serviceContext.put("executionContext", executionContext);
-                }
-
                 Map<String, Object> result = this.modelForm.getDispatcher(context).runSync(serviceNameExpanded, serviceContext);
 
                 if (!this.resultMapNameAcsr.isEmpty()) {

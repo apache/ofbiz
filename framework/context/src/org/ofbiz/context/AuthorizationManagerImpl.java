@@ -24,16 +24,17 @@ import java.util.List;
 
 import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.api.authorization.BasicPermissions;
+import org.ofbiz.api.authorization.AuthorizationManager;
+import org.ofbiz.api.authorization.NullAuthorizationManager;
 import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.base.util.Debug;
+//import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.cache.UtilCache;
-import org.ofbiz.security.AuthorizationManager;
 import org.ofbiz.security.OFBizSecurity;
-import org.ofbiz.service.ExecutionContext;
+import org.ofbiz.service.ThreadContext;
 
 /**
  * An implementation of the AuthorizationManager interface that uses the OFBiz database
@@ -45,7 +46,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
 
     public static final String module = AuthorizationManagerImpl.class.getName();
     protected static final UtilCache<String, PathNode> userPermCache = new UtilCache<String, PathNode>("authorization.UserPermissions");
-    public static final AccessController nullAccessController = new NullAccessController();
+    protected static final AuthorizationManager nullAuthorizationManager = new NullAuthorizationManager();
     protected static boolean underConstruction = false;
 
     public AuthorizationManagerImpl() {
@@ -127,33 +128,31 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
         userPermCache.remove(userLogin.getString("userLogin"));
     }
 
-    public AccessController getAccessController(org.ofbiz.api.context.ExecutionContext executionContext) throws AccessControlException {
-        String userLoginId = ((ExecutionContext) executionContext).getUserLogin().getString("userLoginId");
+    public AccessController getAccessController() throws AccessControlException {
+        String userLoginId = ThreadContext.getUserLogin().getString("userLoginId");
         PathNode node = userPermCache.get(userLoginId);
         if (node == null) {
             synchronized (userPermCache) {
                 if (underConstruction) {
-                    return nullAccessController;
+                    return nullAuthorizationManager.getAccessController();
                 }
                 node = userPermCache.get(userLoginId);
                 if (node == null) {
-                    node = getUserPermissionsNode((ExecutionContext) executionContext);
+                    node = getUserPermissionsNode();
                     userPermCache.put(userLoginId, node);
                 }
             }
         }
-        return new AccessControllerImpl((ExecutionContext) executionContext, node);
+        return new AccessControllerImpl(node);
 	}
 
-	@SuppressWarnings("unchecked")
-    protected static PathNode getUserPermissionsNode(ExecutionContext executionContext) throws AccessControlException {
+    protected static PathNode getUserPermissionsNode() throws AccessControlException {
 	    underConstruction = true;
         // Set up the ExecutionContext for unrestricted access to security-aware artifacts
-	    ExecutionContext localContext = (ExecutionContext) executionContext;
-        AuthorizationManager originalSecurity = (AuthorizationManager) localContext.getSecurity();
-        localContext.setSecurity(new NullAuthorizationManager());
-	    String userLoginId = executionContext.getUserLogin().getString("userLoginId");
-	    GenericDelegator delegator = executionContext.getDelegator();
+        AuthorizationManager originalSecurity = (AuthorizationManager) ThreadContext.getSecurity();
+        ThreadContext.setSecurity(nullAuthorizationManager);
+	    String userLoginId = ThreadContext.getUserLogin().getString("userLoginId");
+	    GenericDelegator delegator = ThreadContext.getDelegator();
 	    PathNode node = new PathNode();
 	    try {
 	        // Process group membership permissions first
@@ -167,7 +166,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
 	    } catch (GenericEntityException e) {
 	        throw new AccessControlException(e.getMessage());
 	    } finally {
-	        localContext.setSecurity(originalSecurity);
+	        ThreadContext.setSecurity(originalSecurity);
             underConstruction = false;
 	    }
 	    return node;

@@ -23,7 +23,7 @@ import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.Map;
 
-import org.ofbiz.api.context.ExecutionContext;
+import org.ofbiz.api.context.ThreadContext;
 import org.ofbiz.api.context.GenericExecutionArtifact;
 import org.ofbiz.base.util.Debug;
 
@@ -72,13 +72,12 @@ public class OfbizSecurityTransform implements TemplateDirectiveModel {
         }
         Template template = env.getTemplate();
         String location = template.getName();
-        ExecutionContext executionContext = (ExecutionContext) contextBean.getWrappedObject();
-        executionContext.pushExecutionArtifact(new GenericExecutionArtifact(location, artifactId));
-        AccessController accessController = executionContext.getAccessController();
+        ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(location, artifactId));
+        AccessController accessController = ThreadContext.getAccessController();
         try {
             accessController.checkPermission(permission);
             body.render(env.getOut());
         } catch (AccessControlException e) {}
-        executionContext.popExecutionArtifact();
+        ThreadContext.popExecutionArtifact();
     }
 }

@@ -56,8 +56,6 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.api.context.ExecutionArtifact;
-import org.ofbiz.api.context.ExecutionContext;
-import org.ofbiz.api.context.ExecutionContextFactory;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.ObjectType;
@@ -862,23 +860,6 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
             }
         }
 
-        // Copy/create ExecutionContext
-        ExecutionContext executionContext = null;
-        if (source.containsKey("executionContext")) {
-        	executionContext = (ExecutionContext) source.get("executionContext");
-        } else {
-        	try {
-				executionContext = ExecutionContextFactory.getInstance();
-	        	executionContext.setLocale(locale);
-	        	executionContext.setTimeZone(timeZone);
-			} catch (Exception e) {
-				Debug.logError(e, "Error while getting ExecutionContext: ", module);
-			}
-        }
-        if (executionContext != null) {
-            target.put("executionContext", executionContext);
-        }
-        
         for (ModelParam param: contextParamList) {
             //boolean internalParam = param.internal;
 

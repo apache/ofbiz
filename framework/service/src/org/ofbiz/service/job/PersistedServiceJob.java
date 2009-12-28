@@ -28,7 +28,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import javolution.util.FastMap;
 
-import org.ofbiz.api.context.ExecutionContextFactory;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
@@ -45,10 +44,9 @@ import org.ofbiz.entity.condition.EntityFieldMap;
 import org.ofbiz.entity.serialize.SerializeException;
 import org.ofbiz.entity.serialize.XmlSerializer;
 import org.ofbiz.service.DispatchContext;
-import org.ofbiz.service.ExecutionContext;
 import org.ofbiz.service.GenericRequester;
-import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ServiceUtil;
+import org.ofbiz.service.ThreadContext;
 import org.ofbiz.service.calendar.RecurrenceInfo;
 import org.ofbiz.service.config.ServiceConfigUtil;
 import org.xml.sax.SAXException;
@@ -306,15 +304,11 @@ public class PersistedServiceJob extends GenericServiceJob {
             if (!UtilValidate.isEmpty(jobObj.get("runAsUser"))) {
                 context.put("userLogin", ServiceUtil.getUserLogin(dctx, context, jobObj.getString("runAsUser")));
             }
-            ExecutionContext executionContext = (ExecutionContext) context.get("executionContext");
-            if (executionContext == null) {
-                executionContext = (ExecutionContext) ExecutionContextFactory.getInstance();
-                context.put("executionContext", executionContext);
-            }
+            ThreadContext.reset();
             GenericDelegator newDelegator = DelegatorFactory.getGenericDelegator(this.delegator.getDelegatorName());
-            executionContext.setDelegator(newDelegator);
-            executionContext.setDispatcher(this.dctx.getDispatcher());
-            executionContext.initializeContext(context);
+            ThreadContext.setDelegator(newDelegator);
+            ThreadContext.setDispatcher(this.dctx.getDispatcher());
+            ThreadContext.initializeContext(context);
         } catch (GenericEntityException e) {
             Debug.logError(e, "PersistedServiceJob.getContext(): Entity Exception", module);
         } catch (SerializeException e) {

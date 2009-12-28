@@ -31,7 +31,7 @@ import java.util.Enumeration;
 
 import org.apache.bsf.BSFManager;
 
-import org.ofbiz.api.context.ExecutionContextFactory;
+import org.ofbiz.service.ThreadContext;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilJ2eeCompat;
@@ -42,9 +42,8 @@ import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
-import org.ofbiz.security.AuthorizationManager;
+import org.ofbiz.api.authorization.AuthorizationManager;
 import org.ofbiz.security.authz.Authorization;
-import org.ofbiz.service.ExecutionContext;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.webapp.stats.ServerHitBin;
 import org.ofbiz.webapp.stats.VisitHandler;
@@ -141,23 +140,16 @@ public class ControlServlet extends HttpServlet {
         if (Debug.verboseOn())
             Debug.logVerbose("Control Path: " + request.getAttribute("_CONTROL_PATH_"), module);
 
-        // Set up the ExecutionContext
-        ExecutionContext executionContext = null;
-		try {
-			executionContext = (ExecutionContext) ExecutionContextFactory.getInstance();
-		} catch (Exception e) {
-			throw new ServletException(e);
-		}
-        executionContext.setLocale(UtilHttp.getLocale(request));
-        executionContext.setUserLogin(userLogin);
-        request.setAttribute("executionContext", executionContext);
+        ThreadContext.reset();
+        ThreadContext.setLocale(UtilHttp.getLocale(request));
+        ThreadContext.setUserLogin(userLogin);
         
         // for convenience, and necessity with event handlers, make security and delegator available in the request:
         // try to get it from the session first so that we can have a delegator/dispatcher/security for a certain user if desired
         GenericDelegator delegator = null;
         String delegatorName = (String) session.getAttribute("delegatorName");
         if (UtilValidate.isNotEmpty(delegatorName)) {
-            delegator = DelegatorFactory.getGenericDelegator(delegatorName, executionContext);
+            delegator = DelegatorFactory.getGenericDelegator(delegatorName);
         }
         if (delegator == null) {
             delegator = (GenericDelegator) getServletContext().getAttribute("delegator");
@@ -168,7 +160,7 @@ public class ControlServlet extends HttpServlet {
         	request.setAttribute("delegator", delegator);
         	// always put this in the session too so that session events can use the delegator
         	session.setAttribute("delegatorName", delegator.getDelegatorName());
-        	executionContext.setDelegator(delegator);
+        	ThreadContext.setDelegator(delegator);
         }
 
         LocalDispatcher dispatcher = (LocalDispatcher) session.getAttribute("dispatcher");
@@ -179,7 +171,7 @@ public class ControlServlet extends HttpServlet {
             Debug.logError("[ControlServlet] ERROR: dispatcher not found in ServletContext", module);
         } else {
             request.setAttribute("dispatcher", dispatcher);
-            executionContext.setDispatcher(dispatcher);
+            ThreadContext.setDispatcher(dispatcher);
         }
 
         Authorization authz = (Authorization) session.getAttribute("authz");
@@ -199,7 +191,7 @@ public class ControlServlet extends HttpServlet {
             Debug.logError("[ControlServlet] ERROR: security not found in ServletContext", module);
         } else {
             request.setAttribute("security", security);
-            executionContext.setSecurity(security);
+            ThreadContext.setSecurity(security);
         }
 
         request.setAttribute("_REQUEST_HANDLER_", requestHandler);

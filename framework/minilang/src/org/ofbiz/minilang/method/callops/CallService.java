@@ -25,7 +25,6 @@ import java.util.Map;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.ofbiz.api.context.ExecutionContext;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
@@ -229,14 +228,6 @@ public class CallService extends MethodOperation {
         if (locale != null) {
             inMap.put("locale", locale);
         }
-        ExecutionContext executionContext = (ExecutionContext) methodContext.getParameter("executionContext");
-        if (executionContext == null) {
-            executionContext = (ExecutionContext) methodContext.getEnv("executionContext");
-        }
-        if (executionContext != null) {
-            inMap.put("executionContext", executionContext);
-        }
-
         try {
             if (UtilValidate.isEmpty(this.requireNewTransactionStr) && this.transactionTimeout < 0) {
                 result = methodContext.getDispatcher().runSync(serviceName, inMap);

@@ -50,8 +50,8 @@ public class SecurityFactory {
      * @param delegator the generic delegator
      * @return instance of security implementation (default: OFBizSecurity)
      */
-    public static AuthorizationManager getInstance(GenericDelegator delegator) throws SecurityConfigurationException {
-    	AuthorizationManager security = null;
+    public static Security getInstance(GenericDelegator delegator) throws SecurityConfigurationException {
+        Security security = null;
 
         // Make securityName a singleton
         if (securityName == null) {
@@ -65,7 +65,7 @@ public class SecurityFactory {
             try {
                 ClassLoader loader = Thread.currentThread().getContextClassLoader();
                 Class<?> c = loader.loadClass(getSecurityClass(securityName));
-                security = (AuthorizationManager) c.newInstance();
+                security = (Security) c.newInstance();
                 security.setDelegator(delegator);
             } catch (ClassNotFoundException cnf) {
                 throw new SecurityConfigurationException("Cannot load security implementation class", cnf);
@@ -112,7 +112,7 @@ public class SecurityFactory {
         if (securityInfo == null) {
             SecurityConfigUtil.SecurityInfo _securityInfo = SecurityConfigUtil.getSecurityInfo(securityName);
 
-            // Make sure, that the security context name is defined and present
+            // Make sure, that the security conetxt name is defined and present
             if (_securityInfo == null) {
                 throw new SecurityConfigurationException("ERROR: no security definition was found with the name " + securityName + " in security.xml");
             }
@@ -121,10 +121,7 @@ public class SecurityFactory {
 
         // This is the default implementation and uses org.ofbiz.security.OFBizSecurity
         if (UtilValidate.isEmpty(securityInfo.className)) {
-        	className = UtilProperties.getPropertyValue("api.properties", "authorizationManager.class");
-        	if (UtilValidate.isEmpty(className)) {
-        		className = DEFAULT_SECURITY;
-        	}
+            className = DEFAULT_SECURITY;
         } else {
             // Use a customized security
             className = securityInfo.className;

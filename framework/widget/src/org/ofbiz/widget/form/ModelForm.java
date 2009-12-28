@@ -57,7 +57,7 @@ import org.ofbiz.entity.model.ModelField;
 import org.ofbiz.entity.model.ModelReader;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.service.DispatchContext;
-import org.ofbiz.service.ExecutionContext;
+import org.ofbiz.service.ThreadContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelParam;
@@ -785,9 +785,8 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
      *   use the same form definitions for many types of form UIs
      */
     public void renderFormString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
-        ExecutionContext executionContext = (ExecutionContext) context.get("executionContext");
-        executionContext.pushExecutionArtifact(this);
-    	AccessController accessController = executionContext.getAccessController();
+        ThreadContext.pushExecutionArtifact(this);
+    	AccessController accessController = ThreadContext.getAccessController();
     	accessController.checkPermission(View);
         //  increment the paginator
         this.incrementPaginatorNumber(context);
@@ -837,7 +836,7 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
                 throw new IllegalArgumentException("The form type " + this.getType() + " is not supported for form with name " + this.getName());
             }
         }
-        executionContext.popExecutionArtifact();
+       ThreadContext.popExecutionArtifact();
     }
 
     public void renderSingleFormString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer, int positions) throws IOException {
