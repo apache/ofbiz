@@ -33,9 +33,6 @@ under the License.
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
-                            <condition>
-                                <if-has-permission permission="EXAMPLE" action="_VIEW"/>
-                            </condition>
                             <widgets>
                                 <!--  Uncomment this section to see the ExecutionContext in action
                                 <container style="button-bar"><label text="Execution path for this screen: ${executionContext}"/></container>
@@ -53,9 +50,6 @@ under the License.
                                     </decorator-section>
                                 </decorator-screen>
                             </widgets>
-                            <fail-widgets>
-                                <label style="h3">${uiLabelMap.ExampleViewPermissionError}</label>
-                            </fail-widgets>
                         </section>
                     </decorator-section>
                 </decorator-screen>

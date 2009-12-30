@@ -33,9 +33,6 @@ under the License.
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
-                            <condition>
-                                <if-has-permission permission="EXAMPLE" action="_VIEW"/>
-                            </condition>
                             <widgets>
                                 <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                                     <decorator-section name="menu-bar">
@@ -49,9 +46,6 @@ under the License.
                                     </decorator-section>
                                 </decorator-screen>
                             </widgets>
-                            <fail-widgets>
-                                <label style="h3">${uiLabelMap.ExampleViewPermissionError}</label>
-                            </fail-widgets>
                         </section>
                     </decorator-section>
                 </decorator-screen>
@@ -97,9 +91,6 @@ under the License.
 
     <screen name="LookupExampleFeature">
         <section>
-            <condition>
-                <if-has-permission permission="EXAMPLE" action="_VIEW"/>
-            </condition>
             <actions>
                 <property-map resource="ExampleUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="title" value="${uiLabelMap.PageTitleLookupExampleFeature}"/>
@@ -107,7 +98,6 @@ under the License.
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="10"/>
             </actions>
-
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
