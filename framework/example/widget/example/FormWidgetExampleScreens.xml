@@ -30,9 +30,6 @@ under the License.
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
-                            <condition>
-                                <if-has-permission permission="EXAMPLE" action="_VIEW"/>
-                            </condition>
                             <widgets>
                                 <container style="h1"><label>${uiLabelMap.PageTitleFormWidgetExamples}</label></container>
                                 <container style="screenlet-body">
@@ -70,9 +67,6 @@ under the License.
                                     <include-form name="FOPFontsExampleForm" location="component://example/widget/example/FormWidgetExampleForms.xml"/>
                                 </container>
                             </widgets>
-                            <fail-widgets>
-                                <label style="h3">${uiLabelMap.ExampleViewPermissionError}</label>
-                            </fail-widgets>
                         </section>
                     </decorator-section>
                 </decorator-screen>

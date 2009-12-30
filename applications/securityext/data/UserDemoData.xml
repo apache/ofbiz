@@ -96,4 +96,5 @@ under the License.
     <UserToUserGroupRel userLoginId="ltdadmin1" groupId="OFBIZ_USERS"/>
     <UserToUserGroupRel userLoginId="bizadmin" groupId="OFBIZ_USERS"/>
 
+    <UserToArtifactPermRel userLoginId="admin" artifactPath="ofbiz" permissionValue="admin=true"/>
 </entity-engine-xml>

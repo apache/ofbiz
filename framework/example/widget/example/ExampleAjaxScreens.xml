@@ -33,9 +33,6 @@ under the License.
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
-                            <condition>
-                                <if-has-permission permission="EXAMPLE" action="_VIEW"/>
-                            </condition>
                             <widgets>
                                 <container style="h1"><label>${uiLabelMap[titleProperty]}</label></container>
                                 <section>
@@ -55,9 +52,6 @@ under the License.
                                     <include-screen name="CreateExampleFormOnly"/>
                                 </container>
                             </widgets>
-                            <fail-widgets>
-                                <label style="h3">${uiLabelMap.ExampleViewPermissionError}</label>
-                            </fail-widgets>
                         </section>
                     </decorator-section>
                 </decorator-screen>
@@ -67,9 +61,6 @@ under the License.
 
     <screen name="ListExampleFormOnly">
         <section>
-            <condition>
-                <if-has-permission permission="EXAMPLE" action="_VIEW"/>
-            </condition>
             <actions>
                 <!-- NOTE: these are needed because this may be run as a top level screen and would have no decorator -->
                 <property-map resource="ExampleUiLabels" map-name="uiLabelMap" global="true"/>
@@ -83,9 +74,6 @@ under the License.
 
     <screen name="CreateExampleFormOnly">
         <section>
-            <condition>
-                <if-has-permission permission="EXAMPLE" action="_VIEW"/>
-            </condition>
             <actions>
                 <!-- these are only needed so that when bsh evaluates use-when attributes these will exist and not cause an error -->
                 <property-map resource="ExampleUiLabels" map-name="uiLabelMap" global="true"/>
