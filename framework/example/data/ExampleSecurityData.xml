@@ -38,9 +38,11 @@ under the License.
     <!-- Data needed to get users logged in -->
     <ArtifactPath artifactPath="ofbiz/example/getUserPreferenceGroup" description="Example Application - getUserPreferenceGroup service"/>
     <ArtifactPath artifactPath="ofbiz/example/login" description="Example Application - Login screen"/>
+    <ArtifactPath artifactPath="ofbiz/example/ServerHit" description="Example Application - Server hit"/>
     <UserToArtifactPermRel userLoginId="NOT_LOGGED_IN" artifactPath="ofbiz/example/getUserPreferenceGroup" permissionValue="access=true"/>
     <UserToArtifactPermRel userLoginId="NOT_LOGGED_IN" artifactPath="ofbiz/example/login" permissionValue="access=true"/>
     <UserToArtifactPermRel userLoginId="NOT_LOGGED_IN" artifactPath="ofbiz/example/login" permissionValue="view=true"/>
+    <UserToArtifactPermRel userLoginId="NOT_LOGGED_IN" artifactPath="ofbiz/example/ServerHit" permissionValue="create=true"/>
 
     <!-- Data needed for the transition to security-aware artifacts. As each webapp
          is converted over to the new security design, the corresponding admin

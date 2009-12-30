@@ -93,10 +93,10 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
 	public void initializeContext(Map<String, ? extends Object> params) {
 		this.setDelegator((GenericDelegator) params.get("delegator"));
 		this.setDispatcher((LocalDispatcher) params.get("dispatcher"));
-		this.setLocale((Locale) params.get("locale")); 
 		this.setSecurity((AuthorizationManager) params.get("security"));
-		this.setTimeZone((TimeZone) params.get("timeZone"));
 		this.setUserLogin((GenericValue) params.get("userLogin"));
+        this.setLocale((Locale) params.get("locale")); 
+        this.setTimeZone((TimeZone) params.get("timeZone"));
 	}
 
     @Override
@@ -108,7 +108,17 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
         this.userLogin = null;
     }
 
-	public void setDelegator(GenericDelegator delegator) {
+    protected void resetUserPreferences() {
+        if (this.userLogin != null) {
+            this.setLocale(userLogin.getString("lastLocale"));
+            this.setLocale(userLogin.getString("lastTimeZone"));
+        } else {
+            this.locale = Locale.getDefault();
+            this.timeZone = TimeZone.getDefault();
+        }
+    }
+
+    public void setDelegator(GenericDelegator delegator) {
 		if (delegator != null) {
 			this.delegator = delegator;
 		}
@@ -127,9 +137,14 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
 	}
 
 	public void setUserLogin(GenericValue userLogin) {
-		if (userLogin != null) {
-			this.userLogin = userLogin;
-		}
+	    if (userLogin != null) {
+	        this.userLogin = userLogin;
+	        this.resetUserPreferences();
+	    }
 	}
 
+    public void clearUserData() {
+        this.userLogin = null;
+        this.resetUserPreferences();
+    }
 }

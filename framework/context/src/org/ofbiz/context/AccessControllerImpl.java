@@ -62,9 +62,6 @@ public class AccessControllerImpl implements AccessController {
         if (this.verbose) {
             Debug.logInfo("Found permission(s): " + ThreadContext.getUserLogin().getString("userLoginId") +
                     "@" + ThreadContext.getExecutionPath() + "[" + this.permission + "]", module);
-/*            if ("NOT_LOGGED_IN".equals(ThreadContext.getUserLogin().getString("userLoginId"))) {
-                Debug.logInfo(new Exception(), module);
-            } */
         }
         if (this.disabled) {
             return;
@@ -84,16 +81,12 @@ public class AccessControllerImpl implements AccessController {
     }
 
     public <E> ListIterator<E> applyFilters(ListIterator<E> listIterator) {
+        if (listIterator instanceof EntityListIterator) {
+            // Decorating the EntityListIterator breaks a lot of code.
+            return listIterator;
+        }
         if (this.permission.getFilterNames().size() > 0) {
             return new SecurityAwareListIterator<E>(listIterator, this.permission.getFilterNames());
-        }
-        return listIterator;
-    }
-
-    public EntityListIterator applyFilters(EntityListIterator listIterator) {
-        if (this.permission.getFilterNames().size() > 0) {
-            // Commented out for now - causes problems with list pagination in UI
-            //                return new SecurityAwareEli(listIterator, this.serviceNameList, this.executionContext);
         }
         return listIterator;
     }

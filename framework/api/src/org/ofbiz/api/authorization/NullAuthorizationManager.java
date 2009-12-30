@@ -102,7 +102,7 @@ public class NullAuthorizationManager implements AuthorizationManager {
     }
 
     /** An implementation of the <code>AccessController</code> interface
-     * that allows unrestricted access.
+     * that allows unrestricted access to all security-aware artifacts.
      */
     protected static class NullAccessController implements AccessController {
 
@@ -124,7 +124,7 @@ public class NullAuthorizationManager implements AuthorizationManager {
             if (this.verbose) {
                 Debug.logInfo("Checking permission: " + ThreadContext.getExecutionPath() + "[" + permission + "]", module);
                 Debug.logInfo("Found permission(s): " + 
-                        "system@" + ThreadContext.getExecutionPath() + "[admin=true]", module);
+                        "null-access-controller@" + ThreadContext.getExecutionPath() + "[admin=true]", module);
             }
         }
     }
