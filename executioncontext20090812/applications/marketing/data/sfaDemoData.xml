@@ -42,7 +42,7 @@
     <UserLogin userLoginId="DemoLeadOwner" currentPassword="{SHA}47ca69ebb4bdc9ae0adec130880165d2cc05db1a" partyId="DemoLeadOwner" enabled="Y"/>
     <!-- FIXME: Establish SecurityGroup for SFA. This user should have access only to SFA -->
     <UserLoginSecurityGroup groupId="FULLADMIN" userLoginId="DemoLeadOwner" fromDate="2001-05-13 00:00:00.000"/>
-    <UserToUserGroupRelationship userLoginId="DemoLeadOwner" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoLeadOwner" groupId="OFBIZ_USERS"/>
 
     <Party partyId="DemoLeadOwner1" partyTypeId="PERSON" statusId="PARTY_ENABLED"/>
     <Person partyId="DemoLeadOwner1" firstName="Demo" lastName="LeadOwner1"/>
@@ -52,7 +52,7 @@
     <UserLogin userLoginId="DemoLeadOwner1" currentPassword="{SHA}47ca69ebb4bdc9ae0adec130880165d2cc05db1a" partyId="DemoLeadOwner1" enabled="Y"/>
     <!-- FIXME: Establish SecurityGroup for SFA. This user should have access only to SFA -->
     <UserLoginSecurityGroup groupId="FULLADMIN" userLoginId="DemoLeadOwner1" fromDate="2001-05-13 00:00:00.000"/>
-    <UserToUserGroupRelationship userLoginId="DemoLeadOwner1" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoLeadOwner1" groupId="OFBIZ_USERS"/>
 
     <!-- Demo Leads -->
     <Party partyId="sfa102" partyTypeId="PARTY_GROUP" statusId="PARTY_ENABLED"/>

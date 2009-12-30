@@ -60,9 +60,9 @@
          is converted over to the new security design, the corresponding admin
          permission should be removed. -->
 
-    <UserGroupToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/bi" permissionValue="admin=true"/>
-    <UserGroupToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/images" permissionValue="admin=true"/>
-    <UserGroupToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/tempfiles" permissionValue="admin=true"/>
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/bi" permissionValue="admin=true"/>
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/images" permissionValue="admin=true"/>
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/tempfiles" permissionValue="admin=true"/>
 
 
 </entity-engine-xml>

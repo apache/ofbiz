@@ -34,7 +34,7 @@ under the License.
     <PartyRole partyId="admin" roleTypeId="APPROVER"/>
     <UserLogin userLoginId="approver" partyId="approver"/>
     <UserLoginSecurityGroup groupId="COMPDOCADMIN" userLoginId="approver" fromDate="2006-01-01 12:00:00.0"/>
-    <UserToUserGroupRelationship userLoginId="approver" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="approver" groupId="OFBIZ_USERS"/>
 
 
     <DataResource dataResourceId="DR1103b" dataResourceTypeId="OFBIZ_FILE_BIN" objectInfo="/applications/content/data/pdftest2.pdf" mimeTypeId="application/pdf" dataResourceName="Personal Profile"/>

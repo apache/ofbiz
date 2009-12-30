@@ -87,13 +87,13 @@ under the License.
     <UserLoginSecurityGroup groupId="VIEWADMIN" userLoginId="ltdadmin1" fromDate="2001-01-01 12:00:00.0"/>
     <UserLoginSecurityGroup groupId="BIZADMIN" userLoginId="bizadmin" fromDate="2001-01-01 12:00:00.0"/>
 
-    <UserToUserGroupRelationship userLoginId="anonymous" groupId="OFBIZ_USERS"/>
-    <UserToUserGroupRelationship userLoginId="system" groupId="OFBIZ_USERS"/>
-    <UserToUserGroupRelationship userLoginId="admin" groupId="OFBIZ_USERS"/>
-    <UserToUserGroupRelationship userLoginId="flexadmin" groupId="OFBIZ_USERS"/>
-    <UserToUserGroupRelationship userLoginId="demoadmin" groupId="OFBIZ_USERS"/>
-    <UserToUserGroupRelationship userLoginId="ltdadmin" groupId="OFBIZ_USERS"/>
-    <UserToUserGroupRelationship userLoginId="ltdadmin1" groupId="OFBIZ_USERS"/>
-    <UserToUserGroupRelationship userLoginId="bizadmin" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="anonymous" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="system" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="admin" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="flexadmin" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="demoadmin" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="ltdadmin" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="ltdadmin1" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="bizadmin" groupId="OFBIZ_USERS"/>
 
 </entity-engine-xml>

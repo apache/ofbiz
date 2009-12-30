@@ -32,10 +32,10 @@ under the License.
     
     <UserLogin userLoginId="demoapprover" currentPassword="{SHA}47ca69ebb4bdc9ae0adec130880165d2cc05db1a" requirePasswordChange="N" partyId="DemoApprover"/>
     <UserLoginSecurityGroup groupId="HUMANRES_APPROVER" userLoginId="demoapprover" fromDate="2001-01-01 12:00:00.0"/>
-    <UserToUserGroupRelationship userLoginId="demoapprover" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="demoapprover" groupId="OFBIZ_USERS"/>
 
     <UserLogin userLoginId="demoemployee" currentPassword="{SHA}47ca69ebb4bdc9ae0adec130880165d2cc05db1a" requirePasswordChange="N" partyId="DemoEmployee"/>
     <UserLoginSecurityGroup groupId="HUMANRES_EMPLOYEE" userLoginId="demoemployee" fromDate="2001-01-01 12:00:00.0"/>
-    <UserToUserGroupRelationship userLoginId="demoemployee" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="demoemployee" groupId="OFBIZ_USERS"/>
 
 </entity-engine-xml>

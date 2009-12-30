@@ -27,11 +27,11 @@ under the License.
     <UserLogin userLoginId="DemoCustomer" currentPassword="{SHA}47ca69ebb4bdc9ae0adec130880165d2cc05db1a" passwordHint=""/>
     <UserLogin userLoginId="supplier" partyId="externaluser" currentPassword="{SHA}47ca69ebb4bdc9ae0adec130880165d2cc05db1a" passwordHint=""/>
     <UserLoginSecurityGroup groupId="ORDERSUPPLIER_LTD" userLoginId="supplier" fromDate="2001-01-01 12:00:00.0"/>
-    <UserToUserGroupRelationship userLoginId="DemoBuyer" groupId="OFBIZ_USERS"/>
-    <UserToUserGroupRelationship userLoginId="DemoRepAll" groupId="OFBIZ_USERS"/>
-    <UserToUserGroupRelationship userLoginId="DemoRepStore" groupId="OFBIZ_USERS"/>
-    <UserToUserGroupRelationship userLoginId="DemoCustCompany" groupId="OFBIZ_USERS"/>
-    <UserToUserGroupRelationship userLoginId="DemoCustAgent" groupId="OFBIZ_USERS"/>
-    <UserToUserGroupRelationship userLoginId="DemoCustomer" groupId="OFBIZ_USERS"/>
-    <UserToUserGroupRelationship userLoginId="supplier" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoBuyer" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoRepAll" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoRepStore" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoCustCompany" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoCustAgent" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoCustomer" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="supplier" groupId="OFBIZ_USERS"/>
 </entity-engine-xml>

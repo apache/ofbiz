@@ -281,7 +281,7 @@ under the License.
       </relation>
     </entity>
 
-    <entity entity-name="UserToUserGroupRelationship"
+    <entity entity-name="UserToUserGroupRel"
             package-name="org.ofbiz.security.artifactsecurity"
             default-resource-name="SecurityEntityLabels"
             title="Security Component - User-To-User Group Relationship Entity">
@@ -337,7 +337,7 @@ under the License.
       </relation>
     </entity>
 
-    <entity entity-name="UserGroupToArtifactPermRel"
+    <entity entity-name="UserGrpToArtifactPermRel"
             package-name="org.ofbiz.security.artifactsecurity"
             default-resource-name="SecurityEntityLabels"
             title="Security Component - User Group-To-Artifact Permission Relationship Entity">

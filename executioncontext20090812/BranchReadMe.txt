@@ -100,3 +100,10 @@ you can use the ThreadContext static methods instead. The ThreadContext
 class keeps an ExecutionContext instance per thread. We just need to
 make sure all OFBiz entrance vectors call the reset() method, and
 then initialize the ExecutionContext to the desired values.
+
+---------------------------------------------------------------------
+
+2009-12-29: The Authorization Manager is mostly working. Filtering
+EntityListIterator values is not implemented due to architectural
+problems. The Authorization Manager is still disabled by default
+because the demo data load will not work with it enabled.

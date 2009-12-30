@@ -28,9 +28,6 @@ import java.io.File;
 
 import javolution.util.FastList;
 
-import org.ofbiz.api.authorization.AuthorizationManager;
-import org.ofbiz.api.authorization.NullAuthorizationManager;
-import org.ofbiz.api.context.GenericExecutionArtifact;
 import org.ofbiz.base.container.Container;
 import org.ofbiz.base.container.ContainerConfig;
 import org.ofbiz.base.container.ContainerException;
@@ -250,10 +247,9 @@ public class EntityDataLoadContainer implements Container {
         TreeSet<String> modelEntityNames = new TreeSet<String>(modelEntities.keySet());
 
         // Set up the execution context
-        AuthorizationManager oldAuthorizationManager = ThreadContext.getSecurity();
-        ThreadContext.setSecurity(new NullAuthorizationManager());
+        ThreadContext.runUnprotected();
         ThreadContext.setDelegator(delegator);
-        ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(module, "EntityDataLoad"));
+        ThreadContext.pushExecutionArtifact(module, "EntityDataLoad");
         try {
             // check for drop index/fks
             if (dropConstraints) {                   
@@ -473,7 +469,7 @@ public class EntityDataLoadContainer implements Container {
             }
         } finally {
             ThreadContext.popExecutionArtifact();
-            ThreadContext.setSecurity(oldAuthorizationManager);
+            ThreadContext.endRunUnprotected();
         }
         return true;
     }

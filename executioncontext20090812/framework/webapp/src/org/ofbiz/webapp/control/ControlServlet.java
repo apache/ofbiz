@@ -42,7 +42,6 @@ import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
-import org.ofbiz.api.context.GenericExecutionArtifact;
 import org.ofbiz.api.authorization.AuthorizationManager;
 import org.ofbiz.security.authz.Authorization;
 import org.ofbiz.service.LocalDispatcher;
@@ -312,7 +311,7 @@ public class ControlServlet extends HttpServlet {
             Debug.logError("Error in ControlServlet output where response isCommitted and there is no session (probably because of a logout); not saving ServerHit/Bin information because there is no session and as the response isCommitted we can't get a new one. The output was successful, but we just can't save ServerHit/Bin info.", module);
         } else {
             try {
-                ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(module, webappName));
+                ThreadContext.pushExecutionArtifact(module, webappName);
                 UtilHttp.setInitialRequestInfo(request);
                 VisitHandler.getVisitor(request, response);
                 if (requestHandler.trackStats(request)) {

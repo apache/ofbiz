@@ -24,7 +24,6 @@ import java.security.Permission;
 import java.util.Map;
 
 import org.ofbiz.api.context.ThreadContext;
-import org.ofbiz.api.context.GenericExecutionArtifact;
 import org.ofbiz.base.util.Debug;
 
 import freemarker.core.Environment;
@@ -72,7 +71,7 @@ public class OfbizSecurityTransform implements TemplateDirectiveModel {
         }
         Template template = env.getTemplate();
         String location = template.getName();
-        ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(location, artifactId));
+        ThreadContext.pushExecutionArtifact(location, artifactId);
         AccessController accessController = ThreadContext.getAccessController();
         try {
             accessController.checkPermission(permission);

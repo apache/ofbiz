@@ -30,7 +30,6 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.api.authorization.AccessController;
-import org.ofbiz.api.context.GenericParametersArtifact;
 import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
@@ -306,7 +305,7 @@ public class ServiceDispatcher {
         ThreadContext.setDelegator(newDelegator);
         ThreadContext.setDispatcher(ctx.getDispatcher());
         ThreadContext.initializeContext(context);
-        ThreadContext.pushExecutionArtifact(new GenericParametersArtifact(modelService, context));
+        ThreadContext.pushExecutionArtifact(modelService, context);
         // start the transaction
         boolean beganTrans = false;
         try {

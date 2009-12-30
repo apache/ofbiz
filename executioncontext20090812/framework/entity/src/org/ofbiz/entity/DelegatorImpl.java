@@ -38,7 +38,6 @@ import javolution.util.FastMap;
 
 import static org.ofbiz.api.authorization.BasicPermissions.*;
 import org.ofbiz.api.authorization.AccessController;
-import org.ofbiz.api.context.GenericExecutionArtifact;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralRuntimeException;
 import org.ofbiz.base.util.UtilDateTime;
@@ -989,7 +988,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
             EntityListIterator eli = this.find(entityName, whereEntityCondition, havingEntityCondition, UtilMisc.toSet(fieldsToSelect), orderBy, findOptions);
             eli.setDelegator(this);
-            ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.findByCondition", entityName));
+            ThreadContext.pushExecutionArtifact("GenericDelegator.findByCondition", entityName);
             AccessController accessController = ThreadContext.getAccessController();
             eli = (EntityListIterator) accessController.applyFilters((ListIterator<GenericValue>) eli);
             ThreadContext.popExecutionArtifact();
@@ -1238,7 +1237,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
 
             List<GenericValue> cacheList = this.delegatorData.cache.get(entityName, entityCondition, orderBy);
             if (cacheList != null) {
-                ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.findList", entityName));
+                ThreadContext.pushExecutionArtifact("GenericDelegator.findList", entityName);
                 AccessController accessController = ThreadContext.getAccessController();
                 cacheList = accessController.applyFilters(cacheList);
                 ThreadContext.popExecutionArtifact();
@@ -1261,7 +1260,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
                 ecaRunner.evalRules(EntityEcaHandler.EV_CACHE_PUT, EntityEcaHandler.OP_FIND, dummyValue, false);
                 this.delegatorData.cache.put(entityName, entityCondition, orderBy, list);
             }
-            ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.findList", entityName));
+            ThreadContext.pushExecutionArtifact("GenericDelegator.findList", entityName);
             AccessController accessController = ThreadContext.getAccessController();
             list = accessController.applyFilters(list);
             ThreadContext.popExecutionArtifact();
@@ -1310,7 +1309,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
         EntityListIterator eli = helper.findListIteratorByCondition(modelViewEntity, whereEntityCondition, havingEntityCondition, fieldsToSelect, orderBy, findOptions);
         eli.setDelegator(this);
         // TODO: add decrypt fields
-        ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.findListIteratorByCondition", modelViewEntity.getEntityName()));
+        ThreadContext.pushExecutionArtifact("GenericDelegator.findListIteratorByCondition", modelViewEntity.getEntityName());
         AccessController accessController = ThreadContext.getAccessController();
         eli = (EntityListIterator) accessController.applyFilters((ListIterator<GenericValue>) eli);
         ThreadContext.popExecutionArtifact();
@@ -1843,7 +1842,12 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
             this.delegatorData.initialized = true;
         }
         // setup the crypto class
-        this.delegatorData.crypto = new EntityCrypto(this);
+        ThreadContext.runUnprotected();
+        try {
+            this.delegatorData.crypto = new EntityCrypto(this);
+        } finally {
+            ThreadContext.endRunUnprotected();
+        }
 
         // time to do some tricks with manual class loading that resolves
         // circular dependencies, like calling services...
@@ -2180,7 +2184,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
     }
 
     public int removeByCondition(String entityName, EntityCondition condition, boolean doCacheClear) throws GenericEntityException {
-    	ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.removeByCondition", entityName));
+    	ThreadContext.pushExecutionArtifact("GenericDelegator.removeByCondition", entityName);
     	AccessController accessController = ThreadContext.getAccessController();
         boolean beganTransaction = false;
         try {
@@ -2714,7 +2718,7 @@ public class DelegatorImpl implements Cloneable, GenericDelegator {
     }
 
     public int storeByCondition(String entityName, Map<String, ? extends Object> fieldsToSet, EntityCondition condition, boolean doCacheClear) throws GenericEntityException {
-    	ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact("GenericDelegator.storeByCondition", entityName));
+    	ThreadContext.pushExecutionArtifact("GenericDelegator.storeByCondition", entityName);
     	AccessController accessController = ThreadContext.getAccessController();
         boolean beganTransaction = false;
         try {
