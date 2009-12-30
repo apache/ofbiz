@@ -100,6 +100,6 @@ under the License.
          is converted over to the new security design, the corresponding admin
          permission should be removed. -->
 
-    <UserGroupToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/catalog" permissionValue="admin=true"/>
-    <UserGroupToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/facility" permissionValue="admin=true"/>
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/catalog" permissionValue="admin=true"/>
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/facility" permissionValue="admin=true"/>
 </entity-engine-xml>

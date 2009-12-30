@@ -152,12 +152,11 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
             underConstruction = true;
             node = new PathNode();
             // Set up the ExecutionContext for unrestricted access to security-aware artifacts
-            AuthorizationManager originalSecurity = (AuthorizationManager) ThreadContext.getSecurity();
-            ThreadContext.setSecurity(nullAuthorizationManager);
+            ThreadContext.runUnprotected();
             GenericDelegator delegator = ThreadContext.getDelegator();
             try {
                 // Process group membership permissions first
-                List<GenericValue> groupMemberships = delegator.findList("UserToUserGroupRelationship", EntityCondition.makeCondition(UtilMisc.toMap("userLoginId", userLoginId)), null, null, null, false);
+                List<GenericValue> groupMemberships = delegator.findList("UserToUserGroupRel", EntityCondition.makeCondition(UtilMisc.toMap("userLoginId", userLoginId)), null, null, null, false);
                 for (GenericValue userGroup : groupMemberships) {
                     processGroupPermissions(userGroup.getString("groupId"), node, delegator);
                 }
@@ -168,7 +167,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
             } catch (GenericEntityException e) {
                 throw new AccessControlException(e.getMessage());
             } finally {
-                ThreadContext.setSecurity(originalSecurity);
+                ThreadContext.endRunUnprotected();
                 underConstruction = false;
             }
         }
@@ -183,7 +182,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
                 processGroupPermissions(parentGroup.getString("fromGroupId"), node, delegator);
             }
             // Process this group's permissions
-            List<GenericValue> permissionValues = delegator.findList("UserGroupToArtifactPermRel", EntityCondition.makeCondition(UtilMisc.toMap("groupId", groupId)), null, null, null, false);
+            List<GenericValue> permissionValues = delegator.findList("UserGrpToArtifactPermRel", EntityCondition.makeCondition(UtilMisc.toMap("groupId", groupId)), null, null, null, false);
             setPermissions(groupId, node, permissionValues);
         } catch (GenericEntityException e) {
             throw new AccessControlException(e.getMessage());

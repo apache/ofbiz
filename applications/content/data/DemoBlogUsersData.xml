@@ -25,7 +25,7 @@ under the License.
     <PartyRole partyId="BLOGUSER_ADMIN" roleTypeId="CONTENT_ADMIN"/>
     <ContentRole partyId="BLOGUSER_ADMIN" roleTypeId="CONTENT_ADMIN" contentId="BLOGROOT" fromDate="2004-03-27 09:37:40.989"/>
     <UserLoginSecurityGroup userLoginId="blog_admin" groupId="FULLADMIN" fromDate="2004-09-15 00:00:00.000"/>
-    <UserToUserGroupRelationship userLoginId="blog_admin" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="blog_admin" groupId="OFBIZ_USERS"/>
 
     <Party partyId="BLOGUSER_EDITOR" partyTypeId="PERSON" createdDate="2004-03-27 09:37:40.989" createdByUserLogin="admin" lastModifiedDate="2004-03-27 09:37:40.989" lastModifiedByUserLogin="admin"/>
     <Person partyId="BLOGUSER_EDITOR" lastName="Blog" firstName="Editor"/>
@@ -33,19 +33,19 @@ under the License.
     <PartyRole partyId="BLOGUSER_EDITOR" roleTypeId="CONTENT_ADMIN"/>
     <ContentRole partyId="BLOGUSER_EDITOR" roleTypeId="CONTENT_ADMIN" contentId="BLOGROOT" fromDate="2004-03-27 09:37:40.989"/>
     <UserLoginSecurityGroup userLoginId="blog_editor" groupId="FULLADMIN"  fromDate="2004-09-15 00:00:00.000"/>
-    <UserToUserGroupRelationship userLoginId="blog_editor" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="blog_editor" groupId="OFBIZ_USERS"/>
 
     <Party partyId="BLOGUSER_USER" partyTypeId="PERSON" createdDate="2004-03-27 09:37:40.989" createdByUserLogin="admin" lastModifiedDate="2004-03-27 09:37:40.989" lastModifiedByUserLogin="admin"/>
     <Person partyId="BLOGUSER_USER" lastName="Blog" firstName="User"/>
     <UserLogin userLoginId="blog_user" partyId="BLOGUSER_USER" currentPassword="{SHA}47ca69ebb4bdc9ae0adec130880165d2cc05db1a"/>
     <PartyRole partyId="BLOGUSER_USER" roleTypeId="CONTENT_ADMIN"/>
     <PartyRole partyId="BLOGUSER_USER" roleTypeId="CONTENT_AUTHOR"/>
-    <UserToUserGroupRelationship userLoginId="blog_user" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="blog_user" groupId="OFBIZ_USERS"/>
 
     <Party partyId="BLOGUSER_GUEST" partyTypeId="PERSON" createdDate="2004-10-20 09:37:40.989" createdByUserLogin="admin" lastModifiedDate="2004-10-20 09:37:40.989" lastModifiedByUserLogin="admin"/>
     <Person partyId="BLOGUSER_GUEST" lastName="Blog" firstName="Guest"/>
     <UserLogin userLoginId="blog_guest" partyId="BLOGUSER_GUEST" currentPassword="{SHA}47ca69ebb4bdc9ae0adec130880165d2cc05db1a"/>
-    <UserToUserGroupRelationship userLoginId="blog_guest" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="blog_guest" groupId="OFBIZ_USERS"/>
 
     <Party partyId="AUTHOR_BIGAL" partyTypeId="PERSON" createdDate="2004-03-27 09:37:40.989" createdByUserLogin="admin" lastModifiedDate="2004-03-27 09:37:40.989" lastModifiedByUserLogin="admin"/>
     <Person partyId="AUTHOR_BIGAL" lastName="Al" firstName="Big"/>
@@ -54,7 +54,7 @@ under the License.
     <ContentRole partyId="AUTHOR_BIGAL" roleTypeId="CONTENT_AUTHOR" contentId="BLOGROOTBIGAL" fromDate="2004-03-27 09:37:40.989"/>
     <ContentPurpose contentId="BLOGROOTBIGAL" contentPurposeTypeId="ARTICLE"/>
     <UserLoginSecurityGroup userLoginId="bigal" groupId="CONTENT_USER"  fromDate="2004-09-15 00:00:00.000"/>
-    <UserToUserGroupRelationship userLoginId="bigal" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="bigal" groupId="OFBIZ_USERS"/>
     <!-- Updating BLOGROOTBIGAL with bigal as creator so that he will be found as "owner" for subrecords.
          This is used in a screen permission test.
          -->
@@ -90,7 +90,7 @@ under the License.
     <ContentRole partyId="AUTHOR_MADMAX" roleTypeId="CONTENT_AUTHOR" contentId="BLOGROOTMADMAX" fromDate="2004-03-27 09:37:40.989"/>
     <ContentPurpose contentId="BLOGROOTMADMAX" contentPurposeTypeId="ARTICLE"/>
     <UserLoginSecurityGroup userLoginId="madmax" groupId="CONTENT_USER"  fromDate="2004-09-15 00:00:00.000"/>
-    <UserToUserGroupRelationship userLoginId="madmax" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="madmax" groupId="OFBIZ_USERS"/>
     <!-- Updating biBLOGROOTMADMAXgal with madmax as creator so that he will be found as "owner" for subrecords.
          This is used in a screen permission test.
          -->

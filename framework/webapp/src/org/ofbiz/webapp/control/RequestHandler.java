@@ -36,8 +36,6 @@ import javax.servlet.http.HttpSession;
 
 import javolution.util.FastMap;
 
-import org.ofbiz.api.context.GenericExecutionArtifact;
-import org.ofbiz.api.context.GenericParametersArtifact;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.SSLUtil;
 import org.ofbiz.base.util.StringUtil;
@@ -146,7 +144,7 @@ public class RequestHandler {
         }
 
         Locale locale = ThreadContext.getLocale();
-        ThreadContext.pushExecutionArtifact(new GenericParametersArtifact(UtilHttp.getFullRequestUrl(request).toString(), cname, UtilHttp.getParameterMap(request)));
+        ThreadContext.pushExecutionArtifact(UtilHttp.getFullRequestUrl(request).toString(), cname, UtilHttp.getParameterMap(request));
         
         String eventReturn = null;
         boolean interruptRequest = false;
@@ -279,7 +277,7 @@ public class RequestHandler {
                 if (visit != null) {
                     for (ConfigXMLReader.Event event: controllerConfig.firstVisitEventList.values()) {
                         try {
-                            ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(event.path, event.invoke));
+                            ThreadContext.pushExecutionArtifact(event.path, event.invoke);
                             String returnString = this.runEvent(request, response, event, null, "firstvisit");
                             if (returnString != null && !returnString.equalsIgnoreCase("success")) {
                                 throw new EventHandlerException("First-Visit event did not return 'success'.");
@@ -298,7 +296,7 @@ public class RequestHandler {
             // Invoke the pre-processor (but NOT in a chain)
             for (ConfigXMLReader.Event event: controllerConfig.preprocessorEventList.values()) {
                 try {
-                    ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(event.path, event.invoke));
+                    ThreadContext.pushExecutionArtifact(event.path, event.invoke);
                     String returnString = this.runEvent(request, response, event, null, "preprocessor");
                     if (returnString != null && !returnString.equalsIgnoreCase("success")) {
                         if (!returnString.contains(":_protect_:")) {
@@ -350,7 +348,7 @@ public class RequestHandler {
             String checkLoginReturnString = null;
 
             try {
-                ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(checkLoginEvent.path, checkLoginEvent.invoke));
+                ThreadContext.pushExecutionArtifact(checkLoginEvent.path, checkLoginEvent.invoke);
                 checkLoginReturnString = this.runEvent(request, response, checkLoginEvent, null, "security-auth");
             } catch (EventHandlerException e) {
                 throw new RequestHandlerException(e.getMessage(), e);
@@ -386,7 +384,7 @@ public class RequestHandler {
                     long eventStartTime = System.currentTimeMillis();
 
                     // run the request event
-                    ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(requestMap.event.path, requestMap.event.invoke));
+                    ThreadContext.pushExecutionArtifact(requestMap.event.path, requestMap.event.invoke);
                     eventReturn = this.runEvent(request, response, requestMap.event, requestMap, "request");
 
                     // save the server hit for the request event
@@ -537,7 +535,7 @@ public class RequestHandler {
             // first invoke the post-processor events.
             for (ConfigXMLReader.Event event: controllerConfig.postprocessorEventList.values()) {
                 try {
-                    ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(event.path, event.invoke));
+                    ThreadContext.pushExecutionArtifact(event.path, event.invoke);
                     String returnString = this.runEvent(request, response, event, requestMap, "postprocessor");
                     if (returnString != null && !returnString.equalsIgnoreCase("success")) {
                         throw new EventHandlerException("Post-Processor event did not return 'success'.");
@@ -1091,7 +1089,7 @@ public class RequestHandler {
     public void runAfterLoginEvents(HttpServletRequest request, HttpServletResponse response) {
         for (ConfigXMLReader.Event event: getControllerConfig().afterLoginEventList.values()) {
             try {
-                ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(event.path, event.invoke));
+                ThreadContext.pushExecutionArtifact(event.path, event.invoke);
                 String returnString = this.runEvent(request, response, event, null, "after-login");
                 if (returnString != null && !returnString.equalsIgnoreCase("success")) {
                     throw new EventHandlerException("Pre-Processor event did not return 'success'.");
@@ -1107,7 +1105,7 @@ public class RequestHandler {
     public void runBeforeLogoutEvents(HttpServletRequest request, HttpServletResponse response) {
         for (ConfigXMLReader.Event event: getControllerConfig().beforeLogoutEventList.values()) {
             try {
-                ThreadContext.pushExecutionArtifact(new GenericExecutionArtifact(event.path, event.invoke));
+                ThreadContext.pushExecutionArtifact(event.path, event.invoke);
                 String returnString = this.runEvent(request, response, event, null, "before-logout");
                 if (returnString != null && !returnString.equalsIgnoreCase("success")) {
                     throw new EventHandlerException("Pre-Processor event did not return 'success'.");

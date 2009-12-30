@@ -23,8 +23,8 @@
     <UserLogin userLoginId="2" partyId="ltdadmin" currentPassword="a54bed37c5b3b28ee30760b5c8d1bbd735ef10cf" passwordHint="The Number Two, Yeah, Literally"/>
     <UserLoginSecurityGroup groupId="POSCLERK" userLoginId="1" fromDate="2001-01-01 12:00:00.0"/>
     <UserLoginSecurityGroup groupId="POSCLERK" userLoginId="2" fromDate="2001-01-01 12:00:00.0"/>
-    <UserToUserGroupRelationship userLoginId="1" groupId="OFBIZ_USERS"/>
-    <UserToUserGroupRelationship userLoginId="2" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="1" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="2" groupId="OFBIZ_USERS"/>
     <Facility facilityId="MyRetailStore" ownerPartyId="Company" facilityTypeId="RETAIL_STORE" facilityName="My Retail Store" description="Example Retail (POS) Store"/>
     <ContactMech contactMechId="9300" contactMechTypeId="POSTAL_ADDRESS"/>
     <ContactMech contactMechId="9301" contactMechTypeId="TELECOM_NUMBER"/>
