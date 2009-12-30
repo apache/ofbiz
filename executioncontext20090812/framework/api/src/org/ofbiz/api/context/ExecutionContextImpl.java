@@ -139,6 +139,14 @@ public abstract class ExecutionContextImpl implements ExecutionContext {
         }
     }
 
+    protected void setLocale(String locale) {
+        if (locale != null) {
+            this.locale = new Locale(locale);
+        } else {
+            this.locale = Locale.getDefault();
+        }
+    }
+
     public Object setProperty(String key, Object value) {
         return this.properties.put(key, value);
     }
@@ -146,6 +154,14 @@ public abstract class ExecutionContextImpl implements ExecutionContext {
     public void setTimeZone(TimeZone timeZone) {
         if (timeZone != null) {
             this.timeZone = timeZone;
+        }
+    }
+
+    protected void setTimeZone(String timeZone) {
+        if (timeZone != null) {
+            this.timeZone = TimeZone.getTimeZone(timeZone);
+        } else {
+            this.timeZone = TimeZone.getDefault();
         }
     }
 

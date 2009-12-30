@@ -30,6 +30,11 @@ public interface ExecutionContext extends org.ofbiz.api.context.ExecutionContext
 	 */
 	public GenericDelegator getDelegator();
 
+	/** Clears all user data kept in the <code>ExecutionContext</code>.
+	 * This method is typically called when the user logs out.
+	 */
+	public void clearUserData();
+
 	/** Returns the current userLogin <code>GenericValue</code>.
 	 * 
 	 * @return The current userLogin <code>GenericValue</code>

@@ -25,6 +25,10 @@ public class ThreadContext extends org.ofbiz.api.context.ThreadContext {
 
     protected static final String module = ThreadContext.class.getName();
 
+    public static void clearUserData() {
+        getExecutionContext().clearUserData();
+    }
+
     public static GenericDelegator getDelegator() {
         return getExecutionContext().getDelegator();
     }

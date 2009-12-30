@@ -380,7 +380,6 @@ public class LoginWorker {
 
         if (ModelService.RESPOND_SUCCESS.equals(result.get(ModelService.RESPONSE_MESSAGE))) {
             GenericValue userLogin = (GenericValue) result.get("userLogin");
-            ThreadContext.setUserLogin(userLogin);
             Map<String, Object> userLoginSession = checkMap(result.get("userLoginSession"), String.class, Object.class);
             if (userLogin != null && "Y".equals(userLogin.getString("requirePasswordChange"))) {
                 return "requirePasswordChange";
@@ -494,10 +493,6 @@ public class LoginWorker {
         GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
         Security security = (Security) request.getAttribute("security");
 
-        if (security != null && userLogin != null) {
-            security.clearUserData(userLogin);
-        }
-
         // set the logged out flag
         LoginWorker.setLoggedOut(userLogin.getString("userLoginId"), delegator);
 
@@ -515,6 +510,12 @@ public class LoginWorker {
         if (currCatalog != null) session.setAttribute("CURRENT_CATALOG_ID", currCatalog);
         if (delegatorName != null) session.setAttribute("delegatorName", delegatorName);
         // DON'T save the cart, causes too many problems: if (shoppingCart != null) session.setAttribute("shoppingCart", new WebShoppingCart(shoppingCart, session));
+
+        // Must be done last
+        if (security != null && userLogin != null) {
+            security.clearUserData(userLogin);
+        }
+        ThreadContext.clearUserData();
     }
 
     public static String autoLoginSet(HttpServletRequest request, HttpServletResponse response) {

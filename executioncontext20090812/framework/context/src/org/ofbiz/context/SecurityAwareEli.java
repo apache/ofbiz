@@ -38,7 +38,7 @@ import org.ofbiz.entity.util.EntityListIterator;
  * return <code>hasPermission = true</code> if the user is granted access
  * to the <code>candidateObject</code>.</p>
  */
-public class SecurityAwareEli extends SecurityAwareListIterator<GenericValue> implements EntityListIterator {
+public class SecurityAwareEli extends SecurityAwareListIterator<GenericValue> {
 
     public static final String module = SecurityAwareEli.class.getName();
     protected final EntityListIterator listIterator;
