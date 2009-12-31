@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
+    <description>Common ControlServlet Configuration File</description>
+    <owner>Copyright 2001-2009 The Apache Software Foundation</owner>
+
+    <errorpage>/error/error.jsp</errorpage>
+
+    <!-- event handlers -->
+    <handler name="java" type="request" class="org.ofbiz.webapp.event.JavaEventHandler"/>
+    <handler name="soap" type="request" class="org.ofbiz.webapp.event.SOAPEventHandler"/>
+    <handler name="xmlrpc" type="request" class="org.ofbiz.webapp.event.XmlRpcEventHandler"/>
+    <handler name="service" type="request" class="org.ofbiz.webapp.event.ServiceEventHandler"/>
+    <handler name="service-multi" type="request" class="org.ofbiz.webapp.event.ServiceMultiEventHandler"/>
+    <handler name="service-stream" type="request" class="org.ofbiz.webapp.event.ServiceStreamHandler"/>
+    <handler name="simple" type="request" class="org.ofbiz.webapp.event.SimpleEventHandler"/>
+    <handler name="groovy" type="request" class="org.ofbiz.webapp.event.GroovyEventHandler"/>
+    <handler name="rome" type="request" class="org.ofbiz.webapp.event.RomeEventHandler"/>
+    <!-- These event handlers have been deprecated, if you need to send json responses then chain
+         the json request from this controller after calling your event
+    <handler name="jsonservice" type="request" class="org.ofbiz.webapp.event.JSONServiceEventHandler"/>
+    <handler name="jsonservice-multi" type="request" class="org.ofbiz.webapp.event.JSONServiceMultiEventHandler"/>
+    <handler name="jsonsimple" type="request" class="org.ofbiz.webapp.event.JSONSimpleEventHandler"/>
+    <handler name="jsonjava" type="request" class="org.ofbiz.webapp.event.JSONJavaEventHandler"/>
+     -->
+
+    <!-- view handlers -->
+    <handler name="screen" type="view" class="org.ofbiz.widget.screen.MacroScreenViewHandler"/>
+    <handler name="screenxml" type="view" class="org.ofbiz.widget.screen.MacroScreenViewHandler"/>
+    <handler name="screentext" type="view" class="org.ofbiz.widget.screen.MacroScreenViewHandler"/>
+    <handler name="screencsv" type="view" class="org.ofbiz.widget.screen.MacroScreenViewHandler"/>
+    <!--handler name="screen" type="view" class="org.ofbiz.widget.screen.ScreenWidgetViewHandler"/>
+    <handler name="screenxml" type="view" class="org.ofbiz.widget.screen.ScreenXmlViewHandler"/>
+    <handler name="screentext" type="view" class="org.ofbiz.widget.screen.ScreenTextViewHandler"/-->
+    <handler name="screenfop" type="view" class="org.ofbiz.widget.screen.ScreenFopViewHandler"/>
+    <handler name="jsp" type="view" class="org.ofbiz.webapp.view.JspViewHandler"/>
+    <handler name="ftl" type="view" class="org.ofbiz.webapp.ftl.FreeMarkerViewHandler"/>
+    <handler name="http" type="view" class="org.ofbiz.webapp.view.HttpViewHandler"/>
+    <handler name="birt" type="view" class="org.ofbiz.birt.webapp.view.BirtViewHandler"/>
+
+    <preprocessor>
+        <!-- Events to run on every request before security (chains exempt) -->
+        <event name="check509CertLogin" type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="check509CertLogin"/>
+        <event name="checkRequestHeaderLogin" type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="checkRequestHeaderLogin"/>
+        <event name="checkServletRequestRemoteUserLogin" type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="checkServletRequestRemoteUserLogin"/>
+        <event name="checkExternalLoginKey" type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="checkExternalLoginKey"/>
+        <event name="checkProtectedView" type="java" path="org.ofbiz.webapp.control.ProtectViewWorker" invoke="checkProtectedView"/>
+    </preprocessor>
+    <postprocessor>
+        <!-- Events to run on every request after all other processing (chains exempt) -->
+    </postprocessor>
+
+    <!-- Security Mappings -->
+    <request-map uri="checkLogin" edit="false">
+        <description>Verify a user is logged in.</description>
+        <security https="true" auth="false"/>
+        <event type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="checkLogin"/>
+        <response name="success" type="view" value="main"/>
+        <response name="error" type="view" value="login"/>
+    </request-map>
+    <request-map uri="login">
+        <security https="true" auth="false"/>
+        <event type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="login"/>
+        <response name="success" type="view" value="main"/>
+        <response name="requirePasswordChange" type="view" value="requirePasswordChange"/>
+        <response name="error" type="view" value="login"/>
+    </request-map>
+    <request-map uri="logout">
+        <security https="true" auth="true"/>
+        <event type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="logout"/>
+        <response name="success" type="request-redirect" value="main"/>
+        <response name="error" type="view" value="main"/>
+    </request-map>
+    <request-map uri="forgotPassword">
+        <security https="true" auth="false"/>
+        <event type="java" path="org.ofbiz.securityext.login.LoginEvents" invoke="forgotPassword"/>
+        <response name="success" type="view" value="forgotPassword"/>
+        <response name="error" type="view" value="forgotPassword"/>
+    </request-map>
+
+    <!-- Common Mappings used for locales and timezones -->
+    <request-map uri="LookupLocales"><security https="true" auth="false"/><response name="success" type="view" value="LookupLocales" save-last-view="true"/></request-map>
+    <request-map uri="setSessionLocale">
+        <security https="true" auth="false"/>
+        <event type="java" path="org.ofbiz.common.CommonEvents" invoke="setSessionLocale"/>
+        <response name="success" type="view-last" value="main"/>
+        <response name="error" type="request" value="main"/>
+    </request-map>
+    <request-map uri="LookupTimezones"><security https="true" auth="false"/><response name="success" type="view" value="LookupTimezones" save-last-view="true"/></request-map>
+    <request-map uri="setSessionTimeZone">
+        <security https="true" auth="false"/>
+        <event type="java" path="org.ofbiz.common.CommonEvents" invoke="setSessionTimeZone"/>
+        <response name="success" type="view-last" value="main"/>
+        <response name="error" type="request" value="main"/>
+    </request-map>
+
+    <!-- User preference mapping -->
+    <request-map uri="setUserPreference">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="setUserPreference"/>
+        <response name="success" type="view-last" value="main"/>
+        <response name="error" type="request" value="main"/>
+    </request-map>
+
+    <request-map uri="ajaxSetUserPreference">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="setUserPreference"/>
+        <response name="success" type="none"/>
+    </request-map>
+
+    <request-map uri="ajaxAutocompleteOptions">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ajaxAutocompleteOptions"/>
+    </request-map>
+
+    <!-- Online help system mapping -->
+    <request-map uri="help">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="help"/>
+    </request-map>
+
+    <!-- Visual theme mapping -->
+    <request-map uri="LookupVisualThemes">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="LookupVisualThemes"/>
+    </request-map>
+
+    <request-map uri="main">
+        <response name="success" type="view" value="main"/>
+    </request-map>
+
+    <request-map uri="viewBlocked">
+        <response name="success" type="view" value="viewBlocked"/>
+    </request-map>
+
+    <request-map uri="geoLocation">
+        <response name="success" type="view" value="geoLocation"/>
+    </request-map>
+
+    <request-map uri="LookupTimeDuration">
+        <response name="success" type="view" value="LookupTimeDuration"/>
+    </request-map>
+
+    <!-- home/last/current mappings -->
+    <request-map uri="backHome">
+        <security https="true" auth="true"/>
+        <response name="success" type="view-home"/>
+    </request-map>
+    <request-map uri="backLast">
+        <security https="true" auth="true"/>
+        <response name="success" type="view-last"/>
+    </request-map>
+
+    <!-- Common json reponse events, chain these after events to send json reponses -->
+    <!-- Standard json response, uses all compatible request attributes -->
+    <request-map uri="json">
+        <security direct-request="false"/>
+        <event type="java" path="org.ofbiz.common.CommonEvents" invoke="jsonResponseFromRequestAttributes"/>
+        <response name="success" type="none"/>
+    </request-map>
+
+    <!-- View Mappings -->
+    <view-map name="error" page="/error/error.jsp"/>
+    <view-map name="main" type="none"/>
+    <view-map name="login" type="screen" page="component://common/widget/CommonScreens.xml#login"/>
+    <view-map name="requirePasswordChange" type="screen" page="component://common/widget/CommonScreens.xml#requirePasswordChange"/>
+    <view-map name="forgotPassword" type="screen" page="component://common/widget/CommonScreens.xml#forgotPassword"/>
+    <view-map name="EventMessages" type="screen" page="component://common/widget/CommonScreens.xml#EventMessages"/>
+
+    <view-map name="LookupLocales" type="screen" page="component://common/widget/LookupScreens.xml#LookupLocales"/>
+    <view-map name="LookupTimeDuration" type="screen" page="component://common/widget/LookupScreens.xml#TimeDuration"/>
+    <view-map name="LookupTimezones" type="screen" page="component://common/widget/LookupScreens.xml#LookupTimezones"/>
+    <view-map name="LookupVisualThemes" type="screen" page="component://common/widget/LookupScreens.xml#LookupVisualThemes"/>
+
+    <view-map name="ajaxAutocompleteOptions" type="screen" page="component://common/widget/CommonScreens.xml#ajaxAutocompleteOptions"/>
+
+    <view-map name="help" type="screen" page="component://common/widget/CommonScreens.xml#help"/>
+    <view-map name="geoLocation" type="screen" page="component://common/widget/CommonScreens.xml#geoLocation"/>
+
+    <view-map name="viewBlocked" type="screen" page="component://common/widget/CommonScreens.xml#viewBlocked"/>
+</site-conf>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<project name="Ant - Macros">
+ <dirname property="ofbiz.home.dir" file="${ant.file.Ant - Macros}"/>
+ <macrodef name="iterate">
+  <attribute name="filelist" default="subdirs"/>
+  <attribute name="target" default=""/>
+  <attribute name="inheritall" default="false"/>
+  <sequential>
+   <subant target="@{target}" inheritall="@{inheritall}">
+    <filelist refid="@{filelist}"/>
+   </subant>
+  </sequential>
+ </macrodef>
+
+ <path id="src-path">
+  <dirset dir=".">
+   <patternset refid="src-dirs"/>
+  </dirset>
+ </path>
+ <patternset id="src-dirs"/>
+ <patternset id="src.inc.set">
+  <include name="**/*.java"/>
+ </patternset>
+ <patternset id="src.exc.set"/>
+
+ <path id="groovy.class.path">
+  <fileset dir="${ofbiz.home.dir}/framework/base/lib/scripting/" includes="*.jar"/>
+  <pathelement location="${ofbiz.home.dir}/framework/base/lib/ant/ant-apache-bsf-1.7.1.jar"/>
+ </path>
+ <path id="ant.lib.class.path">
+  <pathelement location="${ofbiz.home.dir}/framework/base/lib/ant/ant-nodeps-1.7.1.jar"/>
+ </path>
+ <path id="junit.class.path">
+  <fileset dir="${ofbiz.home.dir}/framework/base/lib/scripting/" includes="*.jar"/>
+  <pathelement location="${ofbiz.home.dir}/framework/base/lib/ant/ant-apache-bsf-1.7.1.jar"/>
+ </path>
+ <path id="local.class.path"/>
+
+ <presetdef name="default-javac">
+  <javac debug="on" deprecation="on" destdir="${build.dir}/classes" srcdir="${src.dir}" classpathref="local.class.path">
+   <patternset refid="src.inc.set"/>
+   <patternset refid="src.exc.set"/>
+  </javac>
+ </presetdef>
+
+ <presetdef name="javac16">
+  <default-javac compiler="javac1.6" target="1.6" source="1.6" encoding="UTF-8" sourcepathref="src-path">
+   <!--
+   <compilerarg value="-Xlint:unchecked"/>
+   -->
+  </default-javac>
+ </presetdef>
+
+ <presetdef name="default-javadoc">
+  <javadoc classpathref="local.class.path"
+           destdir="${build.dir}/javadocs"
+           Windowtitle="Open for Business - ${desc}">
+   <link href="http://java.sun.com/javase/6/docs/api/" offline="true" packagelistLoc="${ofbiz.home.dir}/tools/api-java16"/>
+  </javadoc>
+ </presetdef>
+
+ <taskdef name="javacc" classname="org.apache.tools.ant.taskdefs.optional.javacc.JavaCC" classpath="${ofbiz.home.dir}/framework/base/lib/ant/ant-nodeps-1.7.1.jar"/>
+ <taskdef name="jjtree" classname="org.apache.tools.ant.taskdefs.optional.javacc.JJTree" classpath="${ofbiz.home.dir}/framework/base/lib/ant/ant-nodeps-1.7.1.jar"/>
+ <macrodef name="ofbiz-javacc">
+  <attribute name="dir"/>
+  <attribute name="file"/>
+  <attribute name="prefix" default=""/>
+  <sequential>
+   <if>
+    <not>
+     <uptodate
+      srcfile="@{prefix}src/@{dir}/@{file}.jj"
+      targetfile="@{prefix}build/gen-src/javacc/@{dir}/@{file}.java"/>
+    </not>
+    <commands>
+     <delete dir="@{prefix}build/gen-src/javacc/@{dir}"/>
+     <mkdir dir="@{prefix}build/gen-src/javacc/@{dir}"/>
+     <javacc target="@{prefix}src/@{dir}/@{file}.jj"
+      javacchome="${ofbiz.home.dir}/framework/base/lib/javacc"
+      outputdirectory="@{prefix}build/gen-src/javacc/@{dir}"/>
+     <delete dir="@{prefix}build/classes/@{dir}"/>
+    </commands>
+   </if>
+  </sequential>
+ </macrodef>
+
+ <macrodef name="ofbiz-jjtree">
+  <attribute name="dir"/>
+  <attribute name="file"/>
+  <attribute name="prefix" default=""/>
+  <sequential>
+   <if>
+    <not>
+     <uptodate
+      srcfile="@{prefix}src/@{dir}/@{file}.jjt"
+      targetfile="@{prefix}build/gen-src/jjtree/@{dir}/@{file}.jj"/>
+    </not>
+    <commands>
+     <delete dir="@{prefix}build/gen-src/jjtree/@{dir}"/>
+     <mkdir dir="@{prefix}build/gen-src/jjtree/@{dir}"/>
+     <jjtree target="@{prefix}src/@{dir}/@{file}.jjt"
+      javacchome="${ofbiz.home.dir}/framework/base/lib/javacc"
+      outputdirectory="@{prefix}build/gen-src/jjtree/@{dir}"/>
+    </commands>
+   </if>
+   <if>
+    <not>
+     <uptodate
+      srcfile="@{prefix}build/gen-src/jjtree/@{dir}/@{file}.jj"
+      targetfile="@{prefix}build/gen-src/javacc/@{dir}/@{file}.java"/>
+    </not>
+    <commands>
+     <delete dir="@{prefix}build/gen-src/javacc/@{dir}"/>
+     <mkdir dir="@{prefix}build/gen-src/javacc/@{dir}"/>
+     <javacc target="@{prefix}build/gen-src/jjtree/@{dir}/@{file}.jj"
+      javacchome="${ofbiz.home.dir}/framework/base/lib/javacc"
+      outputdirectory="@{prefix}build/gen-src/javacc/@{dir}"/>
+     <delete dir="@{prefix}build/classes/@{dir}"/>
+    </commands>
+   </if>
+  </sequential>
+ </macrodef>
+</project>

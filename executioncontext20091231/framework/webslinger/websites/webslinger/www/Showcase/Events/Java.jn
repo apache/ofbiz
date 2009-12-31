@@ -1,0 +1,4 @@
+webslinger.getResponse().getWriter().println("java start");
+webslinger.merge("Middle");
+webslinger.getResponse().getWriter().println("java end");
+return null;

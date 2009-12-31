@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<project name="OFBiz - Start" default="jar" basedir=".">
+    <import file="../../common.xml"/>
+
+    <!-- ================================================================== -->
+    <!-- Initialization of all property settings                            -->
+    <!-- ================================================================== -->
+
+    <property name="desc" value="Start API"/>
+    <property name="name" value="ofbiz-base"/>
+
+    <!-- ================================================================== -->
+    <!-- Compilation of the source files                                    -->
+    <!-- ================================================================== -->
+
+    <target name="classes" depends="prepare">
+        <!-- compile start -->
+    <javac16 destdir="${build.dir}/classes" srcdir="${src.dir}"/>
+    </target>
+
+    <target name="jar" depends="classes">
+        <jar jarfile="${build.dir}/lib/ofbiz.jar" manifest="${src.dir}/org/ofbiz/base/start/Start.mf">
+            <fileset dir="${build.dir}/classes"/>
+            <fileset dir="${src.dir}">
+                <include name="**/*.properties"/>
+                <include name="META-INF/**"/>
+            </fileset>
+            <!-- now add the NOTICE and LICENSE files to allow the jar file to be distributed alone -->
+            <zipfileset dir="${ofbiz.home.dir}" prefix="META-INF" includes="NOTICE,LICENSE"/>
+        </jar>
+        <!-- copy the ofbiz.jar file -->
+        <copy todir="${basedir}/../..">
+            <fileset dir="${build.dir}/lib" includes="ofbiz.jar"/>
+        </copy>
+    </target>
+</project>

@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<project name="Ant - Common">
+    <dirname property="Ant - Common.dir" file="${ant.file.Ant - Common}"/>
+    <import file="${Ant - Common.dir}/macros.xml"/>
+
+    <property environment="env"/>
+    <property name="src.dir" value="src"/>
+    <property name="dtd.dir" value="dtd"/>
+    <property name="lib.dir" value="lib"/>
+    <property name="build.dir" value="build"/>
+
+    <path id="test.class.path">
+        <path refid="local.class.path"/>
+        <pathelement location="config"/>
+    </path>
+    <filelist id="test.classes"/>
+
+    <!-- ================================================================== -->
+    <!-- Removes all created files and directories                          -->
+    <!-- ================================================================== -->
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- Makes sure the needed directory structure is in place              -->
+    <!-- ================================================================== -->
+
+    <target name="prepare" depends="init">
+        <mkdir dir="${build.dir}/classes"/>
+        <mkdir dir="${build.dir}/lib"/>
+        <taskdef name="if" classname="org.ofbiz.tools.ant.IfTask" classpath="${ofbiz.home.dir}/tools/build/classes"/>
+    </target>
+
+    <target name="prepare-docs" depends="init">
+        <mkdir dir="${build.dir}/javadocs"/>
+    </target>
+
+    <target name="init"/>
+
+    <available property="_src-available" file="${src.dir}"/>
+    <fileset id="_src-extra-set" dir="." excludes="**"/>
+
+    <target name="_src-available" if="_src-available">
+        <fileset id="_src-extra-set" dir="${src.dir}">
+            <include name="**/*.properties"/>
+            <include name="**/*.groovy"/>
+            <include name="**/*.xml"/>
+            <include name="**/*.bsh"/>
+            <include name="**/*.logic"/>
+            <include name="**/*.js"/>
+            <include name="**/*.js"/>
+            <include name="**/*.jacl"/>
+            <include name="**/*.py"/>
+            <include name="META-INF/**"/>
+        </fileset>
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- Compilation of the source files                                    -->
+    <!-- ================================================================== -->
+
+    <target name="classes" depends="prepare">
+        <javac16/>
+    </target>
+
+    <target name="jar" depends="classes,_src-available">
+        <jar jarfile="${build.dir}/lib/${name}.jar">
+            <fileset dir="${build.dir}/classes"/>
+            <fileset refid="_src-extra-set"/>
+            <!-- now add the NOTICE and LICENSE files to allow the jar file to be distributed alone -->
+            <zipfileset dir="${ofbiz.home.dir}" prefix="META-INF" includes="NOTICE,LICENSE"/>
+        </jar>
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- Build JavaDoc                                                      -->
+    <!-- ================================================================== -->
+
+    <target name="docs" depends="prepare-docs">
+        <default-javadoc>
+            <fileset dir="${src.dir}">
+                <patternset refid="src.inc.set"/>
+                <patternset refid="src.exc.set"/>
+            </fileset>
+        </default-javadoc>
+    </target>
+
+    <target name="tests" depends="jar">
+        <mkdir dir="${build.dir}/test-results"/>
+        <junit>
+            <classpath>
+                <path refid="junit.class.path"/>
+                <path refid="test.class.path"/>
+                <pathelement location="${build.dir}/lib/${name}.jar"/>
+            </classpath>
+            <sysproperty key="ofbiz.home" value="${ofbiz.home.dir}"/>
+            <formatter usefile="false" type="plain"/>
+            <batchtest>
+                <filelist refid="test.classes"/>
+            </batchtest>
+        </junit>
+    </target>
+
+    <target name="tests-cobertura" depends="jar">
+        <mkdir dir="${build.dir}/cobertura-lib"/>
+        <taskdef resource="tasks.properties">
+            <classpath>
+                <fileset dir="${ofbiz.home.dir}/framework/base/lib">
+                    <include name="cobertura-1.9.3.jar" />
+                    <include name="log4j-1.2.15.jar" />
+                </fileset>
+                <fileset dir="${ofbiz.home.dir}/framework/base/lib/scripting">
+                    <include name="asm-3.2.jar" />
+                    <include name="asm-tree-3.2.jar" />
+                    <include name="jakarta-oro-2.0.8.jar" />
+                </fileset>
+            </classpath>
+        </taskdef>
+        <cobertura-instrument datafile="${build.dir}/test-results/cobertura.dat" todir="${build.dir}/cobertura-lib">
+            <fileset dir="${build.dir}/lib">
+                <include name="*.jar"/>
+            </fileset>
+        </cobertura-instrument>
+        <mkdir dir="${build.dir}/test-results"/>
+        <junit fork="yes" haltonerror="yes">
+            <classpath>
+                <path refid="junit.class.path"/>
+                <path refid="test.class.path"/>
+                <pathelement location="${build.dir}/cobertura-lib/${name}.jar"/>
+            </classpath>
+            <sysproperty key="net.sourceforge.cobertura.datafile" file="${build.dir}/test-results/cobertura.dat" />
+            <sysproperty key="ofbiz.home" value="${ofbiz.home.dir}"/>
+            <formatter usefile="false" type="plain"/>
+            <batchtest>
+                <filelist refid="test.classes"/>
+            </batchtest>
+        </junit>
+        <delete dir="${build.dir}/test-results/cobertura-report"/>
+        <mkdir dir="${build.dir}/test-results/cobertura-report"/>
+        <cobertura-report datafile="${build.dir}/test-results/cobertura.dat" destdir="${build.dir}/test-results/cobertura-report">
+            <dirset dir=".">
+                <patternset refid="src-dirs"/>
+                <include name="src"/>
+            </dirset>
+
+            <include name="**/*.java"/>
+        </cobertura-report>
+    </target>
+
+    <target name="all" depends="jar,docs"/>
+</project>

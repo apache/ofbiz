@@ -1,0 +1,648 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+    <simple-method method-name="createPartyContactMech" short-description="Create a PartyContactMech">
+        <make-value entity-name="PartyContactMech" value-field="newValue"/>
+        <make-value entity-name="PartyContactMech" value-field="newPartyContactMech"/><!-- DEJ20061016: is this really needed? doesn't seem to be used... -->
+        <if-empty field="parameters.partyId">
+            <set field="parameters.partyId" from-field="userLogin.partyId"/>
+        </if-empty>
+
+        <!-- check if the contact mech infostring is already existing if so, do not create a new one-->
+        <entity-and list="partyAndContactMechs" entity-name="PartyAndContactMech" filter-by-date="true">
+            <field-map field-name="partyId" from-field="parameters.partyId"/>
+        </entity-and>
+        <iterate entry="partyAndContactMech" list="partyAndContactMechs">
+            <entity-one entity-name="ContactMechType" value-field="contactMechType">
+                <field-map field-name="contactMechTypeId" from-field="partyAndContactMech.contactMechTypeId"/>
+            </entity-one>
+            <if>
+                <condition>
+                    <and>
+                        <if-compare operator="equals" value="N" field="contactMechType.hasTable"/>
+                        <if-compare operator="equals" value="${partyAndContactMech.infoString}" field="parameters.infoString"/>
+                    </and>
+                </condition>
+                <then>
+                     <log level="info" message="ContactMechId: ${partyAndContactMech.contactMechId} already exists with value: ${partyAndContactMech.infoString} for party: ${parameters.partyId} and ContactMechTypeId: ${partyAndContactMech.contactMechTypeId}"/>
+                    <field-to-result field="partyAndContactMech.contactMechId" result-name="contactMechId"/>
+                    <return response-code="success"/>
+                </then>
+            </if>
+        </iterate>
+
+        <if-empty field="parameters.contactMechId">
+            <set-service-fields service-name="createContactMech" map="parameters" to-map="createContactMechMap"/>
+            <call-service service-name="createContactMech" in-map-name="createContactMechMap">
+                <result-to-field result-name="contactMechId" field="newValue.contactMechId"/>
+            </call-service>
+            <log level="info" message="ContactMech created"/>
+            <log level="info" message="Creating a PartyContactMech with id: ${newValue.contactMechId}"/>
+            <else>
+                <set field="newValue.contactMechId" from-field="parameters.contactMechId"/>
+                <log level="info" message="Creating a PartyContactMech with id: ${parameters.contactMechId}"/>
+            </else>
+        </if-empty>
+        <set field="newValue.partyId" from-field="parameters.partyId"/>
+        <field-to-result field="newValue.contactMechId" result-name="contactMechId"/>
+        <field-to-request field="newValue.contactMechId" request-name="contactMechId"/>
+        <set-nonpk-fields map="parameters" value-field="newValue"/>
+        <now-timestamp field="newValue.fromDate"/>
+        <create-value value-field="newValue"/>
+    </simple-method>
+
+    <simple-method method-name="updatePartyContactMech" short-description="Update a PartyContactMech">
+        <make-value entity-name="PartyContactMech" value-field="newPartyContactMech"/>
+        <if-empty field="parameters.partyId">
+            <set field="parameters.partyId" from-field="userLogin.partyId"/>
+        </if-empty>
+
+        <!-- Find old value -->
+        <make-value entity-name="PartyContactMech" value-field="partyContactMechMap"/>
+        <set-pk-fields value-field="partyContactMechMap" map="parameters"/>
+        <find-by-and entity-name="PartyContactMech" list="partyContactMechs" map="partyContactMechMap"/>
+        <filter-list-by-date list="partyContactMechs" to-list="validPartyContactMechs"/>
+        <first-from-list entry="partyContactMech" list="validPartyContactMechs"/>
+        <if-empty field="partyContactMech">
+            <add-error><fail-property resource="PartyUiLabels" property="PartyCannotUpdateContactBecauseNotWithSpecifiedParty"/></add-error>
+        </if-empty>
+
+        <check-errors/>
+
+        <clone-value value-field="partyContactMech" new-value-field="newPartyContactMech"/>
+
+        <!-- If we already have a new contactMechId don't update ContactMech -->
+        <if-empty field="parameters.newContactMechId">
+            <set-service-fields service-name="updateContactMech" map="parameters" to-map="updateContactMechMap"/>
+            <call-service service-name="updateContactMech" in-map-name="updateContactMechMap">
+                <default-message resource="PartyUiLabels" property="PartyContactMechanismSuccessfullyUpdated"/>
+                <result-to-field result-name="contactMechId" field="newPartyContactMech.contactMechId"/>
+            </call-service>
+            <else>
+                <set field="newPartyContactMech.contactMechId" from-field="parameters.newContactMechId"/>
+                <log level="info" message="Using supplied new contact mech id: ${newPartyContactMech.contactMechId}"/>
+            </else>
+        </if-empty>
+
+        <set-nonpk-fields value-field="newPartyContactMech" map="parameters"/>
+        <now-timestamp field="newPartyContactMech.fromDate"/>
+        <now-timestamp field="partyContactMech.thruDate"/>
+
+        <store-value value-field="partyContactMech"/>
+        <create-value value-field="newPartyContactMech"/>
+
+        <if-compare-field to-field="newPartyContactMech.contactMechId" field="parameters.contactMechId" operator="not-equals">
+            <get-related value-field="partyContactMech" relation-name="PartyContactMechPurpose" list="partyContactMechPurposes"/>
+            <filter-list-by-date list="partyContactMechPurposes"/>
+            <iterate entry="partyContactMechPurposeOld" list="partyContactMechPurposes">
+                <clone-value value-field="partyContactMechPurposeOld" new-value-field="partyContactMechPurpose"/>
+                <now-timestamp field="partyContactMechPurposeOld.thruDate"/>
+                <store-value value-field="partyContactMechPurposeOld"/>
+
+                <set field="partyContactMechPurpose.contactMechId" from-field="newPartyContactMech.contactMechId"/>
+                <set field="purposeMap.partyId" from-field="partyContactMechPurpose.partyId"/>
+                <set field="purposeMap.contactMechPurposeTypeId" from-field="partyContactMechPurpose.contactMechPurposeTypeId"/>
+                <set field="purposeMap.contactMechId" from-field="partyContactMechPurpose.contactMechId"/>
+                <find-by-and entity-name="PartyContactMechPurpose" list="purposeResult" map="purposeMap"/>
+
+                <if-empty field="purposeResult">
+                    <create-value value-field="partyContactMechPurpose"/>
+                </if-empty>
+            </iterate>
+        </if-compare-field>
+
+        <log level="info" message="Setting id to result: ${newPartyContactMech.contactMechId}"/>
+        <field-to-result field="newPartyContactMech.contactMechId" result-name="contactMechId"/>
+        <field-to-request field="newPartyContactMech.contactMechId" request-name="contactMechId"/>
+    </simple-method>
+
+    <simple-method method-name="deletePartyContactMech" short-description="Delete a PartyContactMech">
+        <make-value entity-name="PartyContactMech" value-field="newPartyContactMech"/>
+        <if-empty field="parameters.partyId">
+            <set field="parameters.partyId" from-field="userLogin.partyId"/>
+        </if-empty>
+
+        <make-value entity-name="PartyContactMech" value-field="partyContactMechMap"/>
+        <set-pk-fields value-field="partyContactMechMap" map="parameters"/>
+        <find-by-and entity-name="PartyContactMech" list="partyContactMechs" map="partyContactMechMap"/>
+        <filter-list-by-date list="partyContactMechs" to-list="validPartyContactMechs"/>
+        <first-from-list entry="partyContactMech" list="validPartyContactMechs"/>
+        <if-empty field="partyContactMech">
+            <add-error>
+                <fail-property resource="PartyUiLabels" property="PartyContactMechNotFoundCannotDelete"/>
+            </add-error>
+            <return/>
+        </if-empty>
+        <now-timestamp field="partyContactMech.thruDate"/>
+        <store-value value-field="partyContactMech"/>
+    </simple-method>
+
+    <simple-method method-name="createPartyPostalAddress" short-description="Create a PostalAddress for party">
+        <if-empty field="parameters.partyId">
+            <set field="parameters.partyId" from-field="userLogin.partyId"/>
+        </if-empty>
+
+        <set-service-fields service-name="createPostalAddress" map="parameters" to-map="createPostalAddressMap"/>
+        <call-service in-map-name="createPostalAddressMap" service-name="createPostalAddress">
+            <default-message resource="PartyUiLabels" property="PartyPostalAddressSuccessfullyCreated"/>
+            <result-to-field result-name="contactMechId" field="newPartyContactMech.contactMechId"/>
+        </call-service>
+
+        <check-errors/>
+        <set-service-fields service-name="createPartyContactMech" map="parameters" to-map="createPartyContactMechMap"/>
+        <set field="createPartyContactMechMap.contactMechId" from-field="newPartyContactMech.contactMechId"/>
+        <set field="createPartyContactMechMap.contactMechTypeId" value="POSTAL_ADDRESS"/>
+
+        <call-service service-name="createPartyContactMech" in-map-name="createPartyContactMechMap" break-on-error="true">
+            <default-message resource="PartyUiLabels" property="PartyPostalAddressSuccessfullyCreated"/>
+        </call-service>
+        <field-to-request field="newPartyContactMech.contactMechId" request-name="contactMechId"/>
+        <field-to-result field="newPartyContactMech.contactMechId" result-name="contactMechId"/>
+    </simple-method>
+
+    <simple-method method-name="updatePartyPostalAddress" short-description="Update a PostalAddress for party">
+        <make-value entity-name="PartyContactMech" value-field="newPartyContactMech"/>
+        <if-empty field="parameters.partyId">
+            <set field="parameters.partyId" from-field="userLogin.partyId"/>
+        </if-empty>
+
+        <set-service-fields service-name="updatePostalAddress" map="parameters" to-map="updatePostalAddressMap"/>
+        <call-service in-map-name="updatePostalAddressMap" service-name="updatePostalAddress">
+            <default-message resource="PartyUiLabels" property="PartyPostalAddressSuccessfullyUpdated"/>
+            <result-to-field result-name="contactMechId" field="newPartyContactMech.contactMechId"/>
+        </call-service>
+
+        <set-service-fields service-name="updatePartyContactMech" map="parameters" to-map="updatePartyContactMechMap"/>
+        <set field="updatePartyContactMechMap.newContactMechId" from-field="newPartyContactMech.contactMechId"/>
+        <set field="updatePartyContactMechMap.contactMechTypeId" value="POSTAL_ADDRESS"/>
+        <log level="info" message="Copied id to updatePartyContactMechMap: ${updatePartyContactMechMap.newContactMechId}"/>
+        <call-service service-name="updatePartyContactMech" in-map-name="updatePartyContactMechMap">
+            <default-message resource="PartyUiLabels" property="PartyPostalAddressSuccessfullyUpdated"/>
+        </call-service>
+        <field-to-request field="newPartyContactMech.contactMechId" request-name="contactMechId"/>
+        <field-to-result field="newPartyContactMech.contactMechId" result-name="contactMechId"/>
+    </simple-method>
+
+    <simple-method method-name="createPartyTelecomNumber" short-description="Create a TelecomNumber for party">
+        <if-empty field="parameters.partyId">
+            <set field="parameters.partyId" from-field="userLogin.partyId"/>
+        </if-empty>
+
+        <log level="info" message="Creating telecom number"/>
+        <set-service-fields service-name="createTelecomNumber" map="parameters" to-map="createTelecomNumberMap"/>
+        <call-service in-map-name="createTelecomNumberMap" service-name="createTelecomNumber">
+            <default-message resource="PartyUiLabels" property="PartyTelecomNumberSuccessfullyCreated"/>
+            <result-to-field result-name="contactMechId" field="newPartyContactMech.contactMechId"/>
+        </call-service>
+
+        <set-service-fields service-name="createPartyContactMech" map="parameters" to-map="createPartyContactMechMap"/>
+        <set field="createPartyContactMechMap.contactMechId" from-field="newPartyContactMech.contactMechId"/>
+        <set field="createPartyContactMechMap.contactMechTypeId" value="TELECOM_NUMBER"/>
+        <log level="info" message="Copied id to createPartyContactMechMap: ${createPartyContactMechMap.contactMechId}"/>
+
+        <call-service service-name="createPartyContactMech" in-map-name="createPartyContactMechMap" break-on-error="true">
+            <default-message resource="PartyUiLabels" property="PartyTelecomNumberSuccessfullyCreated"/>
+        </call-service>
+        <field-to-request field="newPartyContactMech.contactMechId" request-name="contactMechId"/>
+        <field-to-result field="newPartyContactMech.contactMechId" result-name="contactMechId"/>
+    </simple-method>
+
+    <simple-method method-name="updatePartyTelecomNumber" short-description="Update a TelecomNumber for party">
+        <make-value entity-name="PartyContactMech" value-field="newPartyContactMech"/>
+        <if-empty field="parameters.partyId">
+            <set field="parameters.partyId" from-field="userLogin.partyId"/>
+        </if-empty>
+
+        <set-service-fields service-name="updateTelecomNumber" map="parameters" to-map="updateTelecomNumberMap"/>
+        <call-service service-name="updateTelecomNumber" in-map-name="updateTelecomNumberMap">
+            <default-message resource="PartyUiLabels" property="PartyTelecomNumberSuccessfullyUpdated"/>
+            <result-to-field result-name="contactMechId" field="newPartyContactMech.contactMechId"/>
+        </call-service>
+
+        <set-service-fields service-name="updatePartyContactMech" map="parameters" to-map="updatePartyContactMechMap"/>
+        <set field="updatePartyContactMechMap.newContactMechId" from-field="newPartyContactMech.contactMechId"/>
+        <set field="updatePartyContactMechMap.contactMechTypeId" value="TELECOM_NUMBER"/>
+        <log level="info" message="Copied id to updatePartyContactMechMap: ${updatePartyContactMechMap.newContactMechId}"/>
+
+        <call-service in-map-name="updatePartyContactMechMap" service-name="updatePartyContactMech">
+            <default-message resource="PartyUiLabels" property="PartyTelecomNumberSuccessfullyUpdated"/>
+        </call-service>
+        <log level="info" message="Setting result id: ${newPartyContactMech.contactMechId}"/>
+        <field-to-request field="newPartyContactMech.contactMechId" request-name="contactMechId"/>
+        <field-to-result field="newPartyContactMech.contactMechId" result-name="contactMechId"/>
+    </simple-method>
+
+    <simple-method method-name="createPartyEmailAddress" short-description="Create an email address for party">
+        <if-empty field="parameters.partyId">
+            <set field="parameters.partyId" from-field="userLogin.partyId"/>
+        </if-empty>
+
+        <if-validate-method field="parameters.emailAddress" method="isEmail">
+            <else><add-error><fail-property resource="PartyUiLabels" property="PartyEmailAddressNotFormattedCorrectly"/></add-error></else>
+        </if-validate-method>
+        <check-errors/>
+        
+        <!-- if e-mail address already exists simply return -->
+        <entity-condition list="partyAndContactMechs" entity-name="PartyAndContactMech">
+            <condition-list combine="and">
+                <condition-expr field-name="partyId" from-field="parameters.partyId"/>
+                <condition-expr field-name="infoString" from-field="parameters.emailAddress" ignore-case="true"/>
+            </condition-list>
+        </entity-condition>
+        <filter-list-by-date list="partyAndContactMechs"/>
+        <if-not-empty field="partyAndContactMechs">
+            <log level="info" message="E-mail address: ${parameters.emailAddress} already exists, did not add again.."/>
+            <first-from-list entry="existsPartyAndContactMech" list="partyAndContactMechs"/>
+            <field-to-result field="existsPartyAndContactMech.contactMechId" result-name="contactMechId"/>
+            <field-to-request field="existsPartyAndContactMech.contactMechId" request-name="contactMechId"/>
+            <return/>
+        </if-not-empty>
+
+        <set-service-fields service-name="createPartyContactMech" map="parameters" to-map="createPartyContactMechMap"/>
+        <set field="createPartyContactMechMap.infoString" from-field="parameters.emailAddress"/>
+        <set field="createPartyContactMechMap.contactMechTypeId" value="EMAIL_ADDRESS"/>
+        <call-service service-name="createPartyContactMech" in-map-name="createPartyContactMechMap">
+            <default-message resource="PartyUiLabels" property="PartyEmailAddressSuccessfullyCreated"/>
+            <result-to-result result-name="contactMechId"/>
+            <result-to-request result-name="contactMechId"/>
+        </call-service>
+    </simple-method>
+
+    <simple-method method-name="updatePartyEmailAddress" short-description="Update an email address for party">
+        <if-empty field="parameters.partyId">
+            <set field="parameters.partyId" from-field="userLogin.partyId"/>
+        </if-empty>
+
+        <if-validate-method field="parameters.emailAddress" method="isEmail">
+            <else><add-error><fail-property resource="PartyUiLabels" property="PartyEmailAddressNotFormattedCorrectly"/></add-error></else>
+        </if-validate-method>
+        <check-errors/>
+
+        <set-service-fields service-name="updatePartyContactMech" map="parameters" to-map="updatePartyContactMechMap"/>
+        <set field="updatePartyContactMechMap.infoString" from-field="parameters.emailAddress"/>
+        <set field="updatePartyContactMechMap.contactMechTypeId" value="EMAIL_ADDRESS"/>
+        <call-service service-name="updatePartyContactMech" in-map-name="updatePartyContactMechMap">
+            <default-message resource="PartyUiLabels" property="PartyEmailAddressSuccessfullyUpdated"/>
+            <result-to-result result-name="contactMechId"/>
+            <result-to-request result-name="contactMechId"/>
+        </call-service>
+        <field-to-result field="parameters.contactMechId" result-name="oldContactMechId"/>
+    </simple-method>
+
+    <simple-method method-name="findPartyFromEmailAddress" short-description="Find partyId from email address">
+        <set field="input.filterByDate" value="Y"/>
+        <set field="input.inputFields.infoString" from-field="parameters.address"/>
+        <if-empty field="parameters.caseInsensitive">
+            <call-bsh><![CDATA[
+                String caseInsensitiveEmail = org.ofbiz.base.util.UtilProperties.getPropertyValue("general.properties", "mail.address.caseInsensitive", "N");
+                parameters.put("caseInsensitive", caseInsensitiveEmail);
+            ]]></call-bsh>
+        </if-empty>
+        <set field="input.inputFields.infoString_ic" from-field="parameters.caseInsensitive"/>
+        <log level="info" message="findPartyFromEmailAddress with case insensitive search: ${parameters.caseInsensitive}"/>
+
+        <if-empty field="parameters.fromDate">
+            <set field="input.filterByDate" value="Y"/>
+            <else>
+                <set field="input.filterByDateValue" from-field="parameters.fromDate"/>
+            </else>
+        </if-empty>
+
+        <!-- try primary email address -->
+        <set field="input.inputFields.contactMechPurposeTypeId" value="PRIMARY_EMAIL"/>
+        <set field="input.entityName" value="PartyContactDetailByPurpose"/>
+        <call-service service-name="performFindItem" in-map-name="input">
+            <results-to-map map-name="results"/>
+        </call-service>
+
+        <!-- any other email address -->
+        <if-empty field="results.item">
+            <set field="input.entityName" value="PartyAndContactMech"/>
+            <clear-field field="input.inputFields.contactMechPurposeTypeId"/>
+            <call-service service-name="performFindItem" in-map-name="input">
+                <results-to-map map-name="results"/>
+            </call-service>
+        </if-empty>
+
+        <if-not-empty field="results.item">
+            <field-to-result field="results.item.partyId" result-name="partyId"/>
+            <field-to-result field="results.item.contactMechId" result-name="contactMechId"/>
+        </if-not-empty>
+
+    </simple-method>
+
+    <simple-method method-name="findPartyFromTelephone" short-description="Find partyId from the telephone number">
+
+        <entity-and entity-name="PartyAndContactMech" list="contactMechs" filter-by-date="true">
+            <field-map field-name="contactMechTypeId" value="TELECOM_NUMBER"/>
+        </entity-and>
+
+        <set field="dash" value="-"/>
+        <set field="emptyString" value=""/>
+        <set field="inputTelno" value="${str:replaceAll(parameters.telno, dash, emptyString)}"/>
+        <iterate entry="contactMech" list="contactMechs">
+            <set field="telno" value="${str:replace(contactMech.tnContactNumber, dash, emptyString)}"/>
+            <if-compare-field field="inputTelno" operator="equals" to-field="telno">
+                <set field="partyId" from-field="contactMech.partyId"/>
+            </if-compare-field>
+            <set field="telno" value="${contactMech.tnAreaCode}${telno}"/>
+            <if-compare-field field="inputTelno" operator="equals" to-field="telno">
+                <set field="partyId" from-field="contactMech.partyId"/>
+            </if-compare-field>
+            <set field="telno" value="${contactMech.tnCountryCode}${telno}"/>
+            <if-compare-field field="inputTelno" operator="equals" to-field="telno">
+                <set field="partyId" from-field="contactMech.partyId"/>
+            </if-compare-field>
+            <set field="telno" value="+${telno}"/>
+            <if-compare-field field="inputTelno" operator="equals" to-field="telno">
+                <set field="partyId" from-field="contactMech.partyId"/>
+            </if-compare-field>
+        </iterate>
+        <if-not-empty field="partyId">
+            <field-to-result field="partyId"/>
+            <field-to-result field="contactMech.contactMechId" result-name="contactMechId"/>
+        </if-not-empty>
+    </simple-method>
+
+    <simple-method method-name="findPartyFromTelephoneComplete" short-description="Find partyId from the telephone number">
+
+        <entity-and entity-name="PartyAndContactMech" list="contactMechs" filter-by-date="true">
+            <field-map field-name="contactMechTypeId" value="TELECOM_NUMBER"/>
+        </entity-and>
+
+        <set field="dash" value="-"/>
+        <set field="emptyString" value=""/>
+        <set field="inputTelno" from-field="parameters.telno"/>
+        <iterate entry="contactMech" list="contactMechs">
+            <set field="telno" from-field="contactMech.tnContactNumber"/>
+            <!--set field="telno" value="${str:replace(contactMech.tnContactNumber, dash, emptyString)}"/-->
+            <if-compare-field field="inputTelno" operator="equals" to-field="telno">
+                <set field="partyId" from-field="contactMech.partyId"/>
+            </if-compare-field>
+            <set field="telno" value="${contactMech.tnAreaCode}${telno}"/>
+            <if-compare-field field="inputTelno" operator="equals" to-field="telno">
+                <set field="partyId" from-field="contactMech.partyId"/>
+            </if-compare-field>
+            <set field="telno" value="${contactMech.tnCountryCode}${telno}"/>
+            <if-compare-field field="inputTelno" operator="equals" to-field="telno">
+                <set field="partyId" from-field="contactMech.partyId"/>
+            </if-compare-field>
+            <set field="telno" value="+${telno}"/>
+            <if-compare-field field="inputTelno" operator="equals" to-field="telno">
+                <set field="partyId" from-field="contactMech.partyId"/>
+            </if-compare-field>
+        </iterate>
+        <if-not-empty field="partyId">
+            <field-to-result field="partyId"/>
+            <field-to-result field="contactMech.contactMechId" result-name="contactMechId"/>
+        </if-not-empty>
+    </simple-method>
+
+    <simple-method method-name="createPostalAddressAndPurposes" short-description="Create postal address, purposes and set them defaults" login-required="false">
+        <call-service service-name="createPartyPostalAddress" in-map-name="parameters">
+            <result-to-field result-name="contactMechId" field="parameters.contactMechId"/>
+            <result-to-result result-name="contactMechId"/>
+        </call-service>
+        <if>
+            <condition>
+                <or>
+                    <not><if-empty field="parameters.setShippingPurpose"/></not>
+                    <not><if-empty field="parameters.setBillingPurpose"/></not>
+                </or>
+            </condition>
+            <then>
+                <set-service-fields service-name="createPartyContactMechPurpose" map="parameters" to-map="serviceContext"/>
+                <set field="serviceContext.partyId" from-field="userLogin.partyId"/>
+                <if-compare field="parameters.setShippingPurpose" operator="equals" value="Y">
+                    <entity-and entity-name="PartyContactMechPurpose" list="pcmpList" filter-by-date="true">
+                        <field-map field-name="partyId" from-field="userLogin.partyId"/>
+                        <field-map field-name="contactMechPurposeTypeId" value="SHIPPING_LOCATION"/>
+                    </entity-and>
+                    <if-not-empty field="pcmpList">
+                        <first-from-list entry="pcmp" list="pcmpList"/>
+                        <set-service-fields service-name="deletePartyContactMechPurposeIfExists" map="pcmp" to-map="serviceInMap"/>
+                        <call-service service-name="deletePartyContactMechPurposeIfExists" in-map-name="serviceInMap"/>
+                        <clear-field field="serviceInMap"/>
+                    </if-not-empty>
+                    <set field="serviceContext.contactMechPurposeTypeId" value="SHIPPING_LOCATION"/>
+                    <call-service service-name="createPartyContactMechPurpose" in-map-name="serviceContext"/>
+
+                    <set-service-fields service-name="setPartyProfileDefaults" map="parameters" to-map="partyProfileDefaultsCtx"/>
+                    <set field="partyProfileDefaultsCtx.defaultShipAddr" from-field="parameters.contactMechId"/>
+                    <set field="partyProfileDefaultsCtx.partyId" from-field="userLogin.partyId"/>
+                    <call-service service-name="setPartyProfileDefaults" in-map-name="partyProfileDefaultsCtx"/>
+                </if-compare>
+                <if-compare field="parameters.setBillingPurpose" operator="equals" value="Y">
+                    <entity-and entity-name="PartyContactMechPurpose" list="pcmpList" filter-by-date="true">
+                        <field-map field-name="partyId" from-field="userLogin.partyId"/>
+                        <field-map field-name="contactMechPurposeTypeId" value="BILLING_LOCATION"/>
+                    </entity-and>
+                    <if-not-empty field="pcmpList">
+                        <first-from-list entry="pcmp" list="pcmpList"/>
+                        <set-service-fields service-name="deletePartyContactMechPurposeIfExists" map="pcmp" to-map="serviceInMap"/>
+                        <call-service service-name="deletePartyContactMechPurposeIfExists" in-map-name="serviceInMap"/>
+                    </if-not-empty>
+                    <set field="serviceContext.contactMechPurposeTypeId" value="BILLING_LOCATION"/>
+                    <call-service service-name="createPartyContactMechPurpose" in-map-name="serviceContext"/>
+
+                    <set-service-fields service-name="setPartyProfileDefaults" map="parameters" to-map="partyProfileDefaultsCtx"/>
+                    <set field="partyProfileDefaultsCtx.defaultBillAddr" from-field="parameters.contactMechId"/>
+                    <set field="partyProfileDefaultsCtx.partyId" from-field="userLogin.partyId"/>
+                    <call-service service-name="setPartyProfileDefaults" in-map-name="partyProfileDefaultsCtx"/>
+                </if-compare>
+            </then>
+        </if>
+    </simple-method>
+
+    <simple-method method-name="updatePostalAddressAndPurposes" short-description="Update postal address, purposes and set them defaults" login-required="false">
+        <entity-one entity-name="PartyProfileDefault" value-field="partyProfileDefault">
+            <field-map field-name="partyId" from-field="userLogin.partyId"/>
+            <field-map field-name="productStoreId" from-field="parameters.productStoreId"/>
+        </entity-one>
+        <if>
+            <condition>
+                <or>
+                    <if-compare-field field="parameters.contactMechId" operator="equals" to-field="partyProfileDefault.defaultBillAddr"/>
+                    <if-compare-field field="parameters.contactMechId" operator="equals" to-field="partyProfileDefault.defaultShipAddr"/>
+                </or>
+            </condition>
+            <then>
+                <if-compare-field field="partyProfileDefault.defaultBillAddr" operator="not-equals" to-field="partyProfileDefault.defaultShipAddr">
+                    <call-service service-name="updatePartyPostalAddress" in-map-name="parameters">
+                        <result-to-field result-name="contactMechId" field="parameters.contactMechId"/>
+                        <result-to-result result-name="contactMechId"/>
+                    </call-service>
+                <else>
+                    <set-service-fields service-name="updatePostalAddress" map="parameters" to-map="updatePostalAddressMap"/>
+                    <call-service service-name="updatePostalAddress" in-map-name="updatePostalAddressMap">
+                        <default-message resource="PartyUiLabels" property="PartyPostalAddressSuccessfullyUpdated"/>
+                        <result-to-field result-name="contactMechId" field="parameters.newContactMechId"/>
+                        <result-to-result result-name="contactMechId"/>
+                    </call-service>
+
+                    <if-compare-field field="parameters.contactMechId" operator="not-equals" to-field="parameters.newContactMechId">
+                        <set-service-fields service-name="createPartyContactMech" map="parameters" to-map="createPartyContactMechMap"/>
+                        <set field="createPartyContactMechMap.contactMechId" from-field="parameters.newContactMechId"/>
+                        <set field="createPartyContactMechMap.contactMechTypeId" value="POSTAL_ADDRESS"/>
+                        <call-service service-name="createPartyContactMech" in-map-name="createPartyContactMechMap" break-on-error="true">
+                            <default-message resource="PartyUiLabels" property="PartyPostalAddressSuccessfullyCreated"/>
+                        </call-service>
+                    </if-compare-field>
+                    <set field="parameters.contactMechId" from-field="parameters.newContactMechId"/>
+                </else>
+                </if-compare-field>
+            </then>
+            <else>
+                <call-service service-name="updatePartyPostalAddress" in-map-name="parameters">
+                    <result-to-field result-name="contactMechId" field="parameters.contactMechId"/>
+                    <result-to-result result-name="contactMechId"/>
+                </call-service>
+            </else>
+        </if>
+        <!-- Setting the purposes -->
+        <if>
+            <condition>
+                <or>
+                    <not><if-empty field="parameters.setShippingPurpose"/></not>
+                    <not><if-empty field="parameters.setBillingPurpose"/></not>
+                </or>
+            </condition>
+            <then>
+                <if-compare field="parameters.setShippingPurpose" operator="equals" value="Y">
+                    <entity-and entity-name="PartyContactMechPurpose" list="pcmpShipList" filter-by-date="true">
+                        <field-map field-name="partyId" from-field="userLogin.partyId"/>
+                        <field-map field-name="contactMechId" from-field="parameters.contactMechId"/>
+                        <field-map field-name="contactMechPurposeTypeId" value="SHIPPING_LOCATION"/>
+                    </entity-and>
+                    <!-- If purpose is not exists then create -->
+                    <if-empty field="pcmpShipList">
+                        <set-service-fields service-name="createPartyContactMechPurpose" map="parameters" to-map="serviceContext"/>
+                        <set field="serviceContext.partyId" from-field="userLogin.partyId"/>
+
+                        <entity-and entity-name="PartyContactMechPurpose" list="pcmpList" filter-by-date="true">
+                            <field-map field-name="partyId" from-field="userLogin.partyId"/>
+                            <field-map field-name="contactMechPurposeTypeId" value="SHIPPING_LOCATION"/>
+                        </entity-and>
+                        <if-not-empty field="pcmpList">
+                            <first-from-list list="pcmpList" entry="pcmp"/>
+                            <set-service-fields service-name="deletePartyContactMechPurposeIfExists" map="pcmp" to-map="serviceInMap"/>
+                            <call-service service-name="deletePartyContactMechPurposeIfExists" in-map-name="serviceInMap"/>
+                            <clear-field field="serviceInMap"/>
+                        </if-not-empty>
+                        <set field="serviceContext.contactMechPurposeTypeId" value="SHIPPING_LOCATION"/>
+                        <call-service service-name="createPartyContactMechPurpose" in-map-name="serviceContext"/>
+                        <clear-field field="pcmpList"/>
+                        <clear-field field="serviceContext"/>
+                    </if-empty>
+
+                    <set-service-fields service-name="setPartyProfileDefaults" map="parameters" to-map="partyProfileDefaultsCtx"/>
+                    <set field="partyProfileDefaultsCtx.defaultShipAddr" from-field="parameters.contactMechId"/>
+                    <set field="partyProfileDefaultsCtx.partyId" from-field="userLogin.partyId"/>
+                    <call-service service-name="setPartyProfileDefaults" in-map-name="partyProfileDefaultsCtx"/>
+                </if-compare>
+                <if-compare field="parameters.setBillingPurpose" operator="equals" value="Y">
+                    <entity-and entity-name="PartyContactMechPurpose" list="pcmpBillList" filter-by-date="true">
+                        <field-map field-name="partyId" from-field="userLogin.partyId"/>
+                        <field-map field-name="contactMechId" from-field="parameters.contactMechId"/>
+                        <field-map field-name="contactMechPurposeTypeId" value="BILLING_LOCATION"/>
+                    </entity-and>
+                    <!-- If purpose is not exists then create -->
+                    <if-empty field="pcmpBillList">
+                        <set-service-fields service-name="createPartyContactMechPurpose" map="parameters" to-map="serviceContext"/>
+                        <set field="serviceContext.partyId" from-field="userLogin.partyId"/>
+
+                        <entity-and entity-name="PartyContactMechPurpose" list="pcmpList" filter-by-date="true">
+                            <field-map field-name="partyId" from-field="userLogin.partyId"/>
+                            <field-map field-name="contactMechPurposeTypeId" value="BILLING_LOCATION"/>
+                        </entity-and>
+                        <if-not-empty field="pcmpList">
+                            <first-from-list list="pcmpList" entry="pcmp"/>
+                            <set-service-fields service-name="deletePartyContactMechPurposeIfExists" map="pcmp" to-map="serviceInMap"/>
+                            <call-service service-name="deletePartyContactMechPurposeIfExists" in-map-name="serviceInMap"/>
+                        </if-not-empty>
+                        <set field="serviceContext.contactMechPurposeTypeId" value="BILLING_LOCATION"/>
+                        <call-service service-name="createPartyContactMechPurpose" in-map-name="serviceContext"/>
+                    </if-empty>
+
+                    <set-service-fields service-name="setPartyProfileDefaults" map="parameters" to-map="partyProfileDefaultsCtx"/>
+                    <set field="partyProfileDefaultsCtx.defaultBillAddr" from-field="parameters.contactMechId"/>
+                    <set field="partyProfileDefaultsCtx.partyId" from-field="userLogin.partyId"/>
+                    <call-service service-name="setPartyProfileDefaults" in-map-name="partyProfileDefaultsCtx"/>
+                </if-compare>
+            </then>
+        </if>
+    </simple-method>
+
+    <simple-method method-name="updateContactMechAndPurposes" short-description="Update postal address, telecom number and purposes">
+        <set-service-fields service-name="updatePostalAddressAndPurposes" map="parameters" to-map="updatePostalAddressAndPurposesCtx"/>
+        <call-service service-name="updatePostalAddressAndPurposes" in-map-name="updatePostalAddressAndPurposesCtx">
+            <result-to-result result-name="contactMechId"/>
+        </call-service>
+
+        <if-not-empty field="parameters.phoneContactMechId">
+            <set-service-fields service-name="updatePartyTelecomNumber" map="parameters" to-map="updatePartyTelecomNumberCtx"/>
+            <set field="updatePartyTelecomNumberCtx.contactMechId" from-field="parameters.phoneContactMechId"/>
+            <call-service service-name="updatePartyTelecomNumber" in-map-name="updatePartyTelecomNumberCtx"/>
+        </if-not-empty>
+    </simple-method>
+
+    <simple-method method-name="createUpdatePartyEmailAddress" short-description="Create and update email address" login-required="false">
+        <if-empty field="parameters.contactMechId">
+            <set-service-fields service-name="createPartyEmailAddress" map="parameters" to-map="emailAddressContext"/>
+            <if-empty field="parameters.partyId">
+                <set field="emailAddressContext.partyId" from-field="userLogin.partyId"/>
+            </if-empty>
+            <call-service service-name="createPartyEmailAddress" in-map-name="emailAddressContext">
+                <result-to-field result-name="contactMechId" field="contactMechId"/>
+            </call-service>
+            <log level="info" message="Email Contact Created emailContactMechId is ${contactMechId}"></log>
+        <else>
+            <set-service-fields service-name="updatePartyEmailAddress" map="parameters" to-map="emailAddressContext"/>
+            <call-service service-name="updatePartyEmailAddress" in-map-name="emailAddressContext">
+                <result-to-field result-name="contactMechId" field="contactMechId"/>
+            </call-service>
+            <log level="info" message="Email Contact updated emailContactMechId is ${contactMechId}"></log>
+        </else>
+        </if-empty>
+        <entity-one entity-name="ContactMech" value-field="contactMech"/>
+        <field-to-result field="contactMech.infoString" result-name="emailAddress"/>
+        <field-to-result field="contactMechId"/>
+    </simple-method>
+
+    <simple-method method-name="createUpdatePartyTelecomNumber" short-description="Create and update phone number" login-required="false">
+        <if-empty field="parameters.contactMechId">
+            <set-service-fields service-name="createPartyTelecomNumber" map="parameters" to-map="phoneContext"/>
+            <call-service service-name="createPartyTelecomNumber" in-map-name="phoneContext">
+                <result-to-field result-name="contactMechId" field="contactMechId"/>
+            </call-service>
+            <log level="info" message="Phone Contact created phoneContactMechId is ${contactMechId}"/>
+        <else>
+            <set-service-fields service-name="createPartyTelecomNumber" map="parameters" to-map="phoneContext"/>
+            <call-service service-name="updatePartyTelecomNumber" in-map-name="phoneContext">
+                <result-to-field result-name="contactMechId" field="contactMechId"/>
+            </call-service>
+            <log level="info" message="Phone Contact updated phoneContactMechId is ${contactMechId}"/>
+        </else>
+        </if-empty>
+        <field-to-result field="contactMechId"/>
+    </simple-method>
+</simple-methods>
