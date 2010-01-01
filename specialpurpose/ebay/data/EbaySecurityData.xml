@@ -28,4 +28,12 @@ under the License.
     <SecurityGroupPermission groupId="VIEWADMIN" permissionId="EBAY_VIEW"/>
     <SecurityGroupPermission groupId="BIZADMIN" permissionId="EBAY_VIEW"/>
 
+    <ArtifactPath artifactPath="ofbiz/ebay" description="eBay Application"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/ebay" permissionValue="admin=true"/>
+
 </entity-engine-xml>

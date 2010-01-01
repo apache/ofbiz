@@ -33,4 +33,13 @@ under the License.
     <VisualThemeResource visualThemeId="DROPPINGCRUMBS" resourceTypeEnumId="VT_NAV_CLOSE_TMPLT" resourceValue="component://droppingcrumbs/includes/appbarClose.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="DROPPINGCRUMBS" resourceTypeEnumId="VT_MSG_TMPLT_LOC" resourceValue="component://common/webcommon/includes/messages.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="DROPPINGCRUMBS" resourceTypeEnumId="VT_SCREENSHOT" resourceValue="/droppingcrumbs/screenshot.jpg" sequenceId="01"/>
+
+    <ArtifactPath artifactPath="ofbiz/droppingcrumbs" description="Dropping Crumbs Visual Theme"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/droppingcrumbs" permissionValue="admin=true"/>
+
 </entity-engine-xml>

@@ -47,4 +47,13 @@ under the License.
     <SecurityPermission description="Send to the Control Applet." permissionId="SEND_CONTROL_APPLET"/>
     <SecurityGroupPermission groupId="FULLADMIN" permissionId="SEND_CONTROL_APPLET"/>
     <SecurityGroupPermission groupId="FLEXADMIN" permissionId="SEND_CONTROL_APPLET"/>
+
+    <ArtifactPath artifactPath="ofbiz/content" description="Content Manager Application"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/content" permissionValue="admin=true"/>
+
 </entity-engine-xml>

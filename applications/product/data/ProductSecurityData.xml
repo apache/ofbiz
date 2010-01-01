@@ -92,4 +92,15 @@ under the License.
     <SecurityGroupPermission groupId="FLEXADMIN" permissionId="FACILITY_VIEW"/>
     <SecurityGroupPermission groupId="VIEWADMIN" permissionId="FACILITY_VIEW"/>
     <SecurityGroupPermission groupId="BIZADMIN" permissionId="FACILITY_ADMIN"/>
+
+    <ArtifactPath artifactPath="ofbiz/catalog" description="Catalog Manager Application"/>
+    <ArtifactPath artifactPath="ofbiz/facility" description="Facility Manager Application"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/catalog" permissionValue="admin=true"/>
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/facility" permissionValue="admin=true"/>
+
 </entity-engine-xml>

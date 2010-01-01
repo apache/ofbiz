@@ -80,4 +80,13 @@ under the License.
     <SecurityGroupPermission groupId="MYPORTAL_CUSTOMER" permissionId="WORKEFFORTMGR_ROLE_DELETE"/>
     <SecurityGroupPermission groupId="MYPORTAL_CUSTOMER" permissionId="ORDERMGR_CRQ_CREATE"/>
     <SecurityGroupPermission groupId="MYPORTAL_CUSTOMER" permissionId="ORDERMGR_CRQ_UPDATE"/>
+
+    <ArtifactPath artifactPath="ofbiz/myportal" description="MyPortal Application"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/myportal" permissionValue="admin=true"/>
+
 </entity-engine-xml>

@@ -53,4 +53,12 @@ under the License.
     <SecurityGroupPermission groupId="PROJECTUSER" permissionId="PROJECTMGR_ROLE_TIMESHEET_CREATE"/>
     <SecurityGroupPermission groupId="PROJECTUSER" permissionId="PROJECTMGR_ROLE_TIMESHEET_UPDATE"/>
 
+    <ArtifactPath artifactPath="ofbiz/projectmgr" description="Project Manager Application"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/projectmgr" permissionValue="admin=true"/>
+
 </entity-engine-xml>

@@ -32,4 +32,13 @@ under the License.
     <SecurityGroupPermission groupId="FLEXADMIN" permissionId="MANUFACTURING_VIEW"/>
     <SecurityGroupPermission groupId="VIEWADMIN" permissionId="MANUFACTURING_VIEW"/>
     <SecurityGroupPermission groupId="BIZADMIN" permissionId="MANUFACTURING_ADMIN"/>
+
+    <ArtifactPath artifactPath="ofbiz/manufacturing" description="Manufacturing Application"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/manufacturing" permissionValue="admin=true"/>
+
 </entity-engine-xml>

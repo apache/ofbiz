@@ -25,6 +25,7 @@ import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericRequester;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
+import org.ofbiz.service.ThreadContext;
 
 /**
  * Generic Service Job - A generic async-service Job.
@@ -61,13 +62,22 @@ public class GenericServiceJob extends AbstractJob {
      */
     @Override
     public void exec() throws InvalidJobException {
-        init();
-
+        ThreadContext.reset();
+        try {
+            ThreadContext.runUnprotected();
+            ThreadContext.pushExecutionArtifact(module, "ServiceJob");
+            init();
+        } finally {
+            ThreadContext.endRunUnprotected();
+        }
         // no transaction is necessary since runSync handles this
         try {
+            ThreadContext.setDispatcher(this.dctx.getDispatcher());
+            Map<String, Object> serviceCtx = getContext();
+            ThreadContext.initializeContext(serviceCtx);
             // get the dispatcher and invoke the service via runSync -- will run all ECAs
             LocalDispatcher dispatcher = dctx.getDispatcher();
-            Map<String, Object> result = dispatcher.runSync(getServiceName(), getContext());
+            Map<String, Object> result = dispatcher.runSync(getServiceName(), serviceCtx);
 
             // check for a failure
             boolean isError = ModelService.RESPOND_ERROR.equals(result.get(ModelService.RESPONSE_MESSAGE));
@@ -88,6 +98,8 @@ public class GenericServiceJob extends AbstractJob {
 
             // call the failed method
             this.failed(t);
+        } finally {
+            ThreadContext.popExecutionArtifact();
         }
 
         // call the finish method

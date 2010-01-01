@@ -53,6 +53,7 @@ import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceUtil;
+import org.ofbiz.service.ThreadContext;
 import org.ofbiz.webapp.control.LoginWorker;
 
 /**
@@ -233,6 +234,7 @@ public class LoginServices {
                             }
 
                             successfulLogin = "Y";
+                            ThreadContext.setUserLogin(userLogin);
 
                             if (!isServiceAuth) {
                                 // get the UserLoginSession if this is not a service auth
@@ -410,6 +412,7 @@ public class LoginServices {
                         userLogin.set("userLoginId", username);
                         userLogin.set("enabled", "Y");
                         userLogin.set("hasLoggedOut", "N");
+                        ThreadContext.setUserLogin(userLogin);
                         result.put("userLogin", userLogin);
                         result.put(ModelService.RESPONSE_MESSAGE, ModelService.RESPOND_SUCCESS);
                         //TODO: more than this is needed to support 100% external authentication

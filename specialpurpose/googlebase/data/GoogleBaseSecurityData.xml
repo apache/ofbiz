@@ -28,4 +28,12 @@ under the License.
     <SecurityGroupPermission groupId="VIEWADMIN" permissionId="GOOGLEBASE_VIEW"/>
     <SecurityGroupPermission groupId="BIZADMIN" permissionId="GOOGLEBASE_VIEW"/>
 
+    <ArtifactPath artifactPath="ofbiz/googlebase" description="Google Base Application"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/googlebase" permissionValue="admin=true"/>
+
 </entity-engine-xml>

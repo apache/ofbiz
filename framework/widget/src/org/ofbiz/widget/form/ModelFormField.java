@@ -33,6 +33,7 @@ import java.util.TimeZone;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.api.context.ExecutionArtifact;
 import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
@@ -62,6 +63,7 @@ import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ModelParam;
 import org.ofbiz.service.ModelService;
+import org.ofbiz.service.ThreadContext;
 import org.ofbiz.widget.WidgetWorker;
 import org.ofbiz.widget.form.ModelForm.UpdateArea;
 import org.w3c.dom.Element;
@@ -72,7 +74,7 @@ import bsh.Interpreter;
 /**
  * Widget Library - Form model class
  */
-public class ModelFormField {
+public class ModelFormField implements ExecutionArtifact {
 
     public static final String module = ModelFormField.class.getName();
 
@@ -592,7 +594,12 @@ public class ModelFormField {
     }
 
     public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
-        this.fieldInfo.renderFieldString(writer, context, formStringRenderer);
+        try {
+            ThreadContext.pushExecutionArtifact(this);
+            this.fieldInfo.renderFieldString(writer, context, formStringRenderer);
+        } finally {
+            ThreadContext.popExecutionArtifact();
+        }
     }
 
     public List<UpdateArea> getOnChangeUpdateAreas() {
@@ -818,6 +825,10 @@ public class ModelFormField {
 
     public String getName() {
         return name;
+    }
+
+    public String getLocation() {
+        return this.modelForm.getLocation() + "#" + this.name;
     }
 
     /**

@@ -48,4 +48,15 @@ under the License.
     <SecurityGroupPermission groupId="WORKEFFORT_USER" permissionId="WORKEFFORTMGR_ROLE_UPDATE"/>
     <SecurityGroupPermission groupId="WORKEFFORT_USER" permissionId="WORKEFFORTMGR_ROLE_DELETE"/>
 
+    <ArtifactPath artifactPath="ofbiz/workeffort" description="Work Effort Application"/>
+    <ArtifactPath artifactPath="ofbiz/ical" description="iCalendar Public URL"/>
+    <UserToArtifactPermRel userLoginId="NOT_LOGGED_IN" artifactPath="ofbiz/ical" permissionValue="view=true"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/workeffort" permissionValue="admin=true"/>
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/ical" permissionValue="admin=true"/>
+
 </entity-engine-xml>
