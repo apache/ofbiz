@@ -29,4 +29,13 @@ under the License.
     <VisualThemeResource visualThemeId="MULTIFLEX" resourceTypeEnumId="VT_HDR_TMPLT_LOC" resourceValue="component://multiflex/includes/header.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="MULTIFLEX" resourceTypeEnumId="VT_FTR_TMPLT_LOC" resourceValue="component://multiflex/includes/footer.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="MULTIFLEX" resourceTypeEnumId="VT_SCREENSHOT" resourceValue="/multiflex/screenshot.jpg" sequenceId="01"/>
+
+    <ArtifactPath artifactPath="ofbiz/multiflex" description="Multiflex Visual Theme"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/multiflex" permissionValue="admin=true"/>
+
 </entity-engine-xml>

@@ -66,7 +66,8 @@ public class AuthorizationFactory {
         synchronized (AuthorizationFactory.class) {
             try {
                 ClassLoader loader = Thread.currentThread().getContextClassLoader();
-                Class c = loader.loadClass(getAuthorizationClass(securityName));
+//                Class c = loader.loadClass(getAuthorizationClass(securityName));
+                Class c = loader.loadClass(DEFAULT_AUTHORIZATION);
                 security = (Authorization) c.newInstance();
                 security.setDelegator(delegator);
             } catch (ClassNotFoundException cnf) {

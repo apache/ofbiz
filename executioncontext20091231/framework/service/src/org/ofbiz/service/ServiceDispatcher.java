@@ -18,6 +18,8 @@
  *******************************************************************************/
 package org.ofbiz.service;
 
+import static org.ofbiz.api.authorization.BasicPermissions.Access;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -296,6 +298,18 @@ public class ServiceDispatcher {
         // start the transaction
         boolean beganTrans = false;
         try {
+            ThreadContext.initializeContext(context);
+            ThreadContext.pushExecutionArtifact(modelService, context);
+            boolean permissionService = false;
+            for (ModelServiceIface iface: modelService.implServices) {
+                if ("permissionInterface".equals(iface.getService())) {
+                    permissionService = true;
+                    break;
+                }
+            }
+            if (!permissionService) {
+                ThreadContext.getAccessController().checkPermission(Access);
+            }
             //Debug.logInfo("=========================== " + modelService.name + " 1 tx status =" + TransactionUtil.getStatusString() + ", modelService.requireNewTransaction=" + modelService.requireNewTransaction + ", modelService.useTransaction=" + modelService.useTransaction + ", TransactionUtil.isTransactionInPlace()=" + TransactionUtil.isTransactionInPlace(), module);
             if (modelService.useTransaction) {
                 if (TransactionUtil.isTransactionInPlace()) {
@@ -561,6 +575,7 @@ public class ServiceDispatcher {
             Debug.logError(te, "Problems with the transaction", module);
             throw new GenericServiceException("Problems with the transaction.", te.getNested());
         } finally {
+            ThreadContext.popExecutionArtifact();
             // release the semaphore lock
             if (lock != null) {
                 lock.release();

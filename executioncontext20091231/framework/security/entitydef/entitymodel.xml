@@ -247,4 +247,115 @@ under the License.
       <prim-key field="viewNameId"/>
       <prim-key field="userLoginId"/>
     </entity>
+
+  <!-- ========================================================= -->
+  <!-- org.ofbiz.security.artifactsecurity -->
+  <!-- ========================================================= -->
+
+    <entity entity-name="UserGroup"
+            package-name="org.ofbiz.security.artifactsecurity"
+            default-resource-name="SecurityEntityLabels"
+            title="Security Component - User Group Entity">
+      <field name="groupId" type="id-ne"/>
+      <field name="description" type="description"/>
+      <prim-key field="groupId"/>
+    </entity>
+
+    <entity entity-name="UserGroupRelationship"
+            package-name="org.ofbiz.security.artifactsecurity"
+            default-resource-name="SecurityEntityLabels"
+            title="Security Component - User Group-To-User Group Relationship Entity">
+      <field name="fromGroupId" type="id-ne">
+          <description>The parent user group</description>
+      </field>
+      <field name="toGroupId" type="id-ne">
+          <description>The child user group</description>
+      </field>
+      <prim-key field="fromGroupId"/>
+      <prim-key field="toGroupId"/>
+      <relation type="one" fk-name="UGR_FROM_GROUP" rel-entity-name="UserGroup">
+        <key-map field-name="fromGroupId" rel-field-name="groupId"/>
+      </relation>
+      <relation type="one" fk-name="UGR_TO_GROUP" rel-entity-name="UserGroup">
+        <key-map field-name="toGroupId" rel-field-name="groupId"/>
+      </relation>
+    </entity>
+
+    <entity entity-name="UserToUserGroupRel"
+            package-name="org.ofbiz.security.artifactsecurity"
+            default-resource-name="SecurityEntityLabels"
+            title="Security Component - User-To-User Group Relationship Entity">
+      <field name="groupId" type="id-ne"/>
+      <field name="userLoginId" type="id-vlong-ne"/>
+      <prim-key field="groupId"/>
+      <prim-key field="userLoginId"/>
+      <relation type="one" fk-name="UTUGR_GROUP" rel-entity-name="UserGroup">
+        <key-map field-name="groupId"/>
+      </relation>
+      <relation type="one" fk-name="UTUGR_USER_LOGIN" rel-entity-name="UserLogin">
+        <key-map field-name="userLoginId"/>
+      </relation>
+    </entity>
+
+    <entity entity-name="ArtifactPermission"
+            package-name="org.ofbiz.security.artifactsecurity"
+            title="Security Component - Artifact Permission Entity">
+      <field name="permissionValue" type="id-long-ne">
+          <description>The permission value: create=true, service=checkPermission, filter=someFilter</description>
+      </field>
+      <field name="description" type="description"/>
+      <prim-key field="permissionValue"/>
+    </entity>
+
+    <entity entity-name="ArtifactPath"
+            package-name="org.ofbiz.security.artifactsecurity"
+            default-resource-name="SecurityEntityLabels"
+            title="Security Component - Artifact Path Entity">
+      <field name="artifactPath" type="id-vlong-ne"/>
+      <field name="description" type="description"/>
+      <prim-key field="artifactPath"/>
+    </entity>
+
+    <entity entity-name="UserToArtifactPermRel"
+            package-name="org.ofbiz.security.artifactsecurity"
+            default-resource-name="SecurityEntityLabels"
+            title="Security Component - User-To-Artifact Permission Relationship Entity">
+      <field name="userLoginId" type="id-vlong-ne"/>
+      <field name="artifactPath" type="id-vlong-ne"/>
+      <field name="permissionValue" type="id-long-ne"/>
+      <prim-key field="userLoginId"/>
+      <prim-key field="artifactPath"/>
+      <prim-key field="permissionValue"/>
+      <relation type="one" fk-name="UAP_USER_LOGIN" rel-entity-name="UserLogin">
+        <key-map field-name="userLoginId"/>
+      </relation>
+      <relation type="one" fk-name="UAP_ARTFCT_PATH" rel-entity-name="ArtifactPath">
+        <key-map field-name="artifactPath"/>
+      </relation>
+      <relation type="one" fk-name="UAP_ARTFCT_PERM" rel-entity-name="ArtifactPermission">
+        <key-map field-name="permissionValue"/>
+      </relation>
+    </entity>
+
+    <entity entity-name="UserGrpToArtifactPermRel"
+            package-name="org.ofbiz.security.artifactsecurity"
+            default-resource-name="SecurityEntityLabels"
+            title="Security Component - User Group-To-Artifact Permission Relationship Entity">
+      <field name="groupId" type="id-ne"/>
+      <field name="artifactPath" type="id-vlong-ne"/>
+      <field name="permissionValue" type="id-long-ne"/>
+      <prim-key field="groupId"/>
+      <prim-key field="artifactPath"/>
+      <prim-key field="permissionValue"/>
+      <relation type="one" fk-name="UGAP_USER_GROUP" rel-entity-name="UserGroup">
+        <key-map field-name="groupId"/>
+      </relation>
+      <relation type="one" fk-name="UGAP_ARTFCT_PATH" rel-entity-name="ArtifactPath">
+        <key-map field-name="artifactPath"/>
+      </relation>
+      <relation type="one" fk-name="UGAP_ARTFCT_PERM" rel-entity-name="ArtifactPermission">
+        <key-map field-name="permissionValue"/>
+      </relation>
+    </entity>
+
 </entitymodel>

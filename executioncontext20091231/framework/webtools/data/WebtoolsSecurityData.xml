@@ -94,4 +94,13 @@ under the License.
     <SecurityGroupPermission groupId="FLEXADMIN" permissionId="UTIL_DEBUG_VIEW"/>
     <SecurityGroupPermission groupId="VIEWADMIN" permissionId="UTIL_CACHE_VIEW"/>
     <SecurityGroupPermission groupId="VIEWADMIN" permissionId="UTIL_DEBUG_VIEW"/>
+
+    <ArtifactPath artifactPath="ofbiz/webtools" description="Webtools Application"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/webtools" permissionValue="admin=true"/>
+
 </entity-engine-xml>

@@ -42,6 +42,7 @@ import org.ofbiz.entity.jdbc.DatabaseUtil;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.util.EntityDataLoader;
 import org.ofbiz.service.ServiceDispatcher;
+import org.ofbiz.service.ThreadContext;
 
 
 /**
@@ -376,15 +377,24 @@ public class EntityDataLoadContainer implements Container {
             }
 
             Debug.logImportant("=-=-=-=-=-=-= Starting the data load...", module);
-
-            for (URL dataUrl: urlList) {
-                try {
-                    int rowsChanged = EntityDataLoader.loadData(dataUrl, helperName, delegator, errorMessages, txTimeout, useDummyFks, maintainTxs, tryInserts);
-                    totalRowsChanged += rowsChanged;
-                    infoMessages.add(changedFormat.format(rowsChanged) + " of " + changedFormat.format(totalRowsChanged) + " from " + dataUrl.toExternalForm());
-                } catch (GenericEntityException e) {
-                    Debug.logError(e, "Error loading data file: " + dataUrl.toExternalForm(), module);
+            try {
+                // Set up the execution context
+                ThreadContext.runUnprotected();
+                ThreadContext.setDelegator(delegator);
+                ThreadContext.pushExecutionArtifact(module, "EntityDataLoad");
+                for (URL dataUrl: urlList) {
+                    try {
+                        int rowsChanged = EntityDataLoader.loadData(dataUrl, helperName, delegator, errorMessages, txTimeout, useDummyFks, maintainTxs, tryInserts);
+                        totalRowsChanged += rowsChanged;
+                        infoMessages.add(changedFormat.format(rowsChanged) + " of " + changedFormat.format(totalRowsChanged) + " from " + dataUrl.toExternalForm());
+                    } catch (GenericEntityException e) {
+                        Debug.logError(e, "Error loading data file: " + dataUrl.toExternalForm(), module);
+                    }
                 }
+            } finally {
+                ThreadContext.popExecutionArtifact();
+                ThreadContext.endRunUnprotected();
+
             }
         } else {
             Debug.logImportant("=-=-=-=-=-=-= No data load files found.", module);

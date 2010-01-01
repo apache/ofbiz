@@ -18,6 +18,8 @@
  *******************************************************************************/
 package org.ofbiz.widget.screen;
 
+import static org.ofbiz.api.authorization.BasicPermissions.View;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
@@ -26,6 +28,8 @@ import java.util.Set;
 
 import javolution.util.FastSet;
 
+import org.ofbiz.api.authorization.AccessController;
+import org.ofbiz.api.context.ExecutionArtifact;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilGenerics;
@@ -37,6 +41,7 @@ import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ThreadContext;
 import org.ofbiz.webapp.control.ConfigXMLReader;
 import org.ofbiz.widget.ModelWidget;
 import org.w3c.dom.Element;
@@ -45,7 +50,7 @@ import org.w3c.dom.Element;
  * Widget Library - Screen model class
  */
 @SuppressWarnings("serial")
-public class ModelScreen extends ModelWidget implements Serializable {
+public class ModelScreen extends ModelWidget implements Serializable, ExecutionArtifact {
 
     public static final String module = ModelScreen.class.getName();
 
@@ -79,6 +84,10 @@ public class ModelScreen extends ModelWidget implements Serializable {
 
     public String getSourceLocation() {
         return sourceLocation;
+    }
+
+    public String getLocation() {
+        return this.sourceLocation + "#" + this.name;
     }
 
     public Set<String> getAllServiceNamesUsed() {
@@ -354,32 +363,34 @@ public class ModelScreen extends ModelWidget implements Serializable {
         // wrap the whole screen rendering in a transaction, should improve performance in querying and such
         Map<String, String> parameters = UtilGenerics.cast(context.get("parameters"));
         boolean beganTransaction = false;
-        int transactionTimeout = -1;
-        if (parameters != null) {
-            String transactionTimeoutPar = parameters.get("TRANSACTION_TIMEOUT");
-            if (transactionTimeoutPar != null) {
-                try {
-                    transactionTimeout = Integer.parseInt(transactionTimeoutPar);
-                } catch (NumberFormatException nfe) {
-                    String msg = "TRANSACTION_TIMEOUT parameter for screen [" + this.sourceLocation + "#" + this.name + "] is invalid and it will be ignored: " + nfe.toString();
-                    Debug.logWarning(msg, module);
-                }
-            }
-        }
-
-        if (transactionTimeout < 0 && !transactionTimeoutExdr.isEmpty()) {
-            // no TRANSACTION_TIMEOUT parameter, check screen attribute
-            String transactionTimeoutStr = transactionTimeoutExdr.expandString(context);
-            if (UtilValidate.isNotEmpty(transactionTimeoutStr)) {
-                try {
-                    transactionTimeout = Integer.parseInt(transactionTimeoutStr);
-                } catch (NumberFormatException e) {
-                    Debug.logWarning(e, "Could not parse transaction-timeout value, original=[" + transactionTimeoutExdr + "], expanded=[" + transactionTimeoutStr + "]", module);
-                }
-            }
-        }
-
         try {
+            ThreadContext.pushExecutionArtifact(this);
+            ThreadContext.getAccessController().checkPermission(View);
+            int transactionTimeout = -1;
+            if (parameters != null) {
+                String transactionTimeoutPar = parameters.get("TRANSACTION_TIMEOUT");
+                if (transactionTimeoutPar != null) {
+                    try {
+                        transactionTimeout = Integer.parseInt(transactionTimeoutPar);
+                    } catch (NumberFormatException nfe) {
+                        String msg = "TRANSACTION_TIMEOUT parameter for screen [" + this.sourceLocation + "#" + this.name + "] is invalid and it will be ignored: " + nfe.toString();
+                        Debug.logWarning(msg, module);
+                    }
+                }
+            }
+
+            if (transactionTimeout < 0 && !transactionTimeoutExdr.isEmpty()) {
+                // no TRANSACTION_TIMEOUT parameter, check screen attribute
+                String transactionTimeoutStr = transactionTimeoutExdr.expandString(context);
+                if (UtilValidate.isNotEmpty(transactionTimeoutStr)) {
+                    try {
+                        transactionTimeout = Integer.parseInt(transactionTimeoutStr);
+                    } catch (NumberFormatException e) {
+                        Debug.logWarning(e, "Could not parse transaction-timeout value, original=[" + transactionTimeoutExdr + "], expanded=[" + transactionTimeoutStr + "]", module);
+                    }
+                }
+            }
+
             // If transaction timeout is not present (i.e. is equal to -1), the default transaction timeout is used
             // If transaction timeout is present, use it to start the transaction
             // If transaction timeout is set to zero, no transaction is started
@@ -420,6 +431,7 @@ public class ModelScreen extends ModelWidget implements Serializable {
             // after rolling back, rethrow the exception
             throw new ScreenRenderException(errMsg, e);
         } finally {
+            ThreadContext.popExecutionArtifact();
             // only commit the transaction if we started one... this will throw an exception if it fails
             try {
                 TransactionUtil.commit(beganTransaction);

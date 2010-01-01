@@ -31,6 +31,7 @@ import java.util.Enumeration;
 
 import org.apache.bsf.BSFManager;
 
+import org.ofbiz.api.authorization.AuthorizationManager;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
@@ -46,6 +47,7 @@ import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.security.Security;
 import org.ofbiz.security.authz.Authorization;
 import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ThreadContext;
 import org.ofbiz.webapp.stats.ServerHitBin;
 import org.ofbiz.webapp.stats.VisitHandler;
 
@@ -149,6 +151,10 @@ public class ControlServlet extends HttpServlet {
         if (Debug.verboseOn())
             Debug.logVerbose("Control Path: " + request.getAttribute("_CONTROL_PATH_"), module);
 
+        ThreadContext.reset();
+        ThreadContext.setLocale(UtilHttp.getLocale(request));
+        ThreadContext.setUserLogin(userLogin);
+        
         // for convenience, and necessity with event handlers, make security and delegator available in the request:
         // try to get it from the session first so that we can have a delegator/dispatcher/security for a certain user if desired
         Delegator delegator = null;
@@ -165,6 +171,7 @@ public class ControlServlet extends HttpServlet {
             request.setAttribute("delegator", delegator);
             // always put this in the session too so that session events can use the delegator
             session.setAttribute("delegatorName", delegator.getDelegatorName());
+            ThreadContext.setDelegator(delegator);
         }
 
         LocalDispatcher dispatcher = (LocalDispatcher) session.getAttribute("dispatcher");
@@ -173,6 +180,8 @@ public class ControlServlet extends HttpServlet {
         }
         if (dispatcher == null) {
             Debug.logError("[ControlServlet] ERROR: dispatcher not found in ServletContext", module);
+        } else {
+            ThreadContext.setDispatcher(dispatcher);
         }
         request.setAttribute("dispatcher", dispatcher);
 
@@ -185,12 +194,14 @@ public class ControlServlet extends HttpServlet {
         }
         request.setAttribute("authz", authz); // maybe we should also add the value to 'security'
         
-        Security security = (Security) session.getAttribute("security");
+        AuthorizationManager security = (AuthorizationManager) session.getAttribute("security");
         if (security == null) {
-            security = (Security) getServletContext().getAttribute("security");
+            security = (AuthorizationManager) getServletContext().getAttribute("security");
         }
         if (security == null) {
             Debug.logError("[ControlServlet] ERROR: security not found in ServletContext", module);
+        } else {
+            ThreadContext.setSecurity(security);
         }
         request.setAttribute("security", security);
 
@@ -309,6 +320,7 @@ public class ControlServlet extends HttpServlet {
             Debug.logError("Error in ControlServlet output where response isCommitted and there is no session (probably because of a logout); not saving ServerHit/Bin information because there is no session and as the response isCommitted we can't get a new one. The output was successful, but we just can't save ServerHit/Bin info.", module);
         } else {
             try {
+                ThreadContext.pushExecutionArtifact(module, webappName);
                 UtilHttp.setInitialRequestInfo(request);
                 VisitHandler.getVisitor(request, response);
                 if (requestHandler.trackStats(request)) {
@@ -316,6 +328,8 @@ public class ControlServlet extends HttpServlet {
                 }
             } catch (Throwable t) {
                 Debug.logError(t, "Error in ControlServlet saving ServerHit/Bin information; the output was successful, but can't save this tracking information. The error was: " + t.toString(), module);
+            } finally {
+                ThreadContext.popExecutionArtifact();
             }
         }
         if (Debug.timingOn()) timer.timerString("[" + rname + "] Request Done", module);

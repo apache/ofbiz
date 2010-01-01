@@ -27,4 +27,12 @@ under the License.
     <SecurityGroupPermission groupId="VIEWADMIN" permissionId="OAGIS_VIEW"/>
     <SecurityGroupPermission groupId="BIZADMIN" permissionId="OAGIS_VIEW"/>
 
+    <ArtifactPath artifactPath="ofbiz/oagis" description="OAGIS Application"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/oagis" permissionValue="admin=true"/>
+
 </entity-engine-xml>

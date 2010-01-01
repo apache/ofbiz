@@ -235,4 +235,7 @@ under the License.
     <ProductPrice productId="dropShip3" productPricePurposeId="PURCHASE" productPriceTypeId="DEFAULT_PRICE" currencyUomId="USD" productStoreGroupId="_NA_" fromDate="2001-05-13 12:00:00.0" price="14.99" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>
     <SupplierProduct productId="dropShip3" partyId="EuroSupplier" availableFromDate="2007-01-01 14:51:52.627" minimumOrderQuantity="0.0" lastPrice="11.0" currencyUomId="USD" supplierProductName="Drop ship product from Euro supplier" supplierProductId="dropShip3-DS" canDropShip="Y" supplierCommissionPerc="20.0" lastUpdatedStamp="2007-05-05 14:53:35.248" lastUpdatedTxStamp="2007-05-05 14:53:35.15" createdStamp="2007-05-05 14:53:35.248" createdTxStamp="2007-05-05 14:53:35.15"/>
 
+    <UserToUserGroupRel userLoginId="DemoSupplier" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="BigSupplier" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="EuroSupplier" groupId="OFBIZ_USERS"/>
 </entity-engine-xml>

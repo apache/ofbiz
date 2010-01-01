@@ -30,4 +30,13 @@ under the License.
     <SecurityGroupPermission groupId="FLEXADMIN" permissionId="HUMANRES_VIEW"/>
     <SecurityGroupPermission groupId="VIEWADMIN" permissionId="HUMANRES_VIEW"/>
     <SecurityGroupPermission groupId="BIZADMIN" permissionId="HUMANRES_ADMIN"/>
+
+    <ArtifactPath artifactPath="ofbiz/humanres" description="Human Resources Application"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/humanres" permissionValue="admin=true"/>
+
 </entity-engine-xml>

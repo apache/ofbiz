@@ -110,6 +110,8 @@
         productCategoryId="" titleTransferEnumId="" minItemPrice="25.00" minPurchase="0.00" taxShipping="N" taxPercentage="1" taxPromotions="N"
         fromDate="2008-12-03 00:00:00.001" thruDate="" description="1% OFB _NA_ Tax"/>
 
+    <UserToUserGroupRel userLoginId="1" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="2" groupId="OFBIZ_USERS"/>
 </entity-engine-xml>
 
 

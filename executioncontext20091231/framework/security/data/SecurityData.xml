@@ -57,4 +57,22 @@ under the License.
     <UserLoginSecurityGroup groupId="FULLADMIN" userLoginId="system" fromDate="2001-01-01 12:00:00.0"/>
     <!-- Anonymous UserLogin is referenced by services in various components -->
     <UserLogin userLoginId="anonymous" enabled="N"/>
+
+    <!-- Data needed to bootstrap the security-aware artifacts -->
+
+    <UserLogin userLoginId="NOT_LOGGED_IN" enabled="N" isSystem="N"/>
+    <UserGroup groupId="OFBIZ_USERS" description="All OFBiz users"/>
+    <ArtifactPath artifactPath="ofbiz" description="The artifact path root"/>
+    <ArtifactPermission permissionValue="access=true" description="Access granted"/>
+    <ArtifactPermission permissionValue="admin=true" description="Admin access granted"/>
+    <ArtifactPermission permissionValue="create=true" description="Create access granted"/>
+    <ArtifactPermission permissionValue="create=false" description="Create access denied"/>
+    <ArtifactPermission permissionValue="delete=true" description="Delete access granted"/>
+    <ArtifactPermission permissionValue="delete=false" description="Delete access denied"/>
+    <ArtifactPermission permissionValue="update=true" description="Update access granted"/>
+    <ArtifactPermission permissionValue="update=false" description="Update access denied"/>
+    <ArtifactPermission permissionValue="view=true" description="View access granted"/>
+    <ArtifactPermission permissionValue="view=false" description="View access denied"/>
+    <UserToArtifactPermRel userLoginId="system" artifactPath="ofbiz" permissionValue="admin=true"/>
+
 </entity-engine-xml>

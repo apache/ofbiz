@@ -178,4 +178,12 @@ under the License.
     <WorkEffort workEffortId="9202" workEffortTypeId="TASK" currentStatusId="PTS_CREATED" lastStatusUpdate="2007-12-14 16:45:21.831" workEffortParentId="9201" scopeEnumId="WES_PRIVATE" workEffortName="task1" estimatedStartDate="2007-12-03 00:00:00.0" estimatedCompletionDate="2007-12-05 00:00:00.0" revisionNumber="1"/>
     <WorkEffortSkillStandard workEffortId="9202" skillTypeId="9000" estimatedDuration="16.0"/>
 
+    <UserToUserGroupRel userLoginId="DemoEmployee" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoEmployee1" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoEmployee2" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoEmployee3" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoCustomer1" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoCustomer2" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoCustomer3" groupId="OFBIZ_USERS"/>
+
 </entity-engine-xml>

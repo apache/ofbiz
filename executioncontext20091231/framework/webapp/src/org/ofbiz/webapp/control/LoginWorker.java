@@ -65,6 +65,7 @@ import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceUtil;
+import org.ofbiz.service.ThreadContext;
 import org.ofbiz.webapp.stats.VisitHandler;
 
 /**
@@ -485,11 +486,6 @@ public class LoginWorker {
         HttpSession session = request.getSession();
 
         Delegator delegator = (Delegator) request.getAttribute("delegator");
-        Security security = (Security) request.getAttribute("security");
-
-        if (security != null && userLogin != null) {
-            security.clearUserData(userLogin);
-        }
 
         // set the logged out flag
         LoginWorker.setLoggedOut(userLogin.getString("userLoginId"), delegator);
@@ -508,6 +504,13 @@ public class LoginWorker {
         if (currCatalog != null) session.setAttribute("CURRENT_CATALOG_ID", currCatalog);
         if (delegatorName != null) session.setAttribute("delegatorName", delegatorName);
         // DON'T save the cart, causes too many problems: if (shoppingCart != null) session.setAttribute("shoppingCart", new WebShoppingCart(shoppingCart, session));
+
+        // Must be done last
+        Security security = (Security) request.getAttribute("security");
+        if (security != null && userLogin != null) {
+            security.clearUserData(userLogin);
+        }
+        ThreadContext.clearUserData();
     }
 
     public static String autoLoginSet(HttpServletRequest request, HttpServletResponse response) {

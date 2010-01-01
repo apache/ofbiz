@@ -130,4 +130,16 @@ under the License.
     <SecurityGroupPermission groupId="ACCTG_FUNCTNL_ADMIN" permissionId="ACCOUNTING_UPDATE"/>
     <SecurityGroupPermission groupId="ACCTG_FUNCTNL_ADMIN" permissionId="ACCOUNTING_VIEW"/>
 
+    <ArtifactPath artifactPath="ofbiz/accounting" description="Accounting Application"/>
+    <ArtifactPath artifactPath="ofbiz/ap" description="Accounts Payable Application"/>
+    <ArtifactPath artifactPath="ofbiz/ar" description="Accounts Receivable Application"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/accounting" permissionValue="admin=true"/>
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/ap" permissionValue="admin=true"/>
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/ar" permissionValue="admin=true"/>
+
 </entity-engine-xml>

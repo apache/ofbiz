@@ -32,4 +32,13 @@ under the License.
     <VisualThemeResource visualThemeId="BIZZNESS_TIME" resourceTypeEnumId="VT_NAV_TMPLT_LOC" resourceValue="component://bizznesstime/includes/appbar.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="BIZZNESS_TIME" resourceTypeEnumId="VT_MSG_TMPLT_LOC" resourceValue="component://bizznesstime/includes/messages.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="BIZZNESS_TIME" resourceTypeEnumId="VT_SCREENSHOT" resourceValue="/bizznesstime/screenshot.jpg" sequenceId="01"/>
+
+    <ArtifactPath artifactPath="ofbiz/bizznesstime" description="Bizzness Time Visual Theme"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/bizznesstime" permissionValue="admin=true"/>
+
 </entity-engine-xml>

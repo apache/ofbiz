@@ -203,5 +203,15 @@ under the License.
     <ContentAssoc contentId="CMSS_PPOINT" contentIdTo="PUBLIC_DOCS" contentAssocTypeId="SUB_CONTENT" fromDate="2001-01-01 00:00:00"/>
     <ContentAssoc contentId="CMSS_PPOINT" contentIdTo="APACHE_OFBIZ_HTML" contentAssocTypeId="SUB_CONTENT" fromDate="2001-01-01 00:00:00" mapKey="documents"/>
     <ContentAssoc contentId="CMSS_PPOINT" contentIdTo="APACHE_OFBIZ_PDF" contentAssocTypeId="SUB_CONTENT" fromDate="2001-01-01 00:00:00" mapKey="documents"/>
+
+    <ArtifactPath artifactPath="ofbiz/cmssite" description="CMS Demo Site"/>
+    <ArtifactPath artifactPath="ofbiz/ofbizsite" description="CMS OFBiz Demo Site"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/cmssite" permissionValue="admin=true"/>
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/ofbizsite" permissionValue="admin=true"/>
     
 </entity-engine-xml>

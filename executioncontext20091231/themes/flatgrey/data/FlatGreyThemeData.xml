@@ -32,4 +32,13 @@ under the License.
     <VisualThemeResource visualThemeId="FLAT_GREY" resourceTypeEnumId="VT_FTR_TMPLT_LOC" resourceValue="component://flatgrey/includes/footer.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="FLAT_GREY" resourceTypeEnumId="VT_NAV_TMPLT_LOC" resourceValue="component://flatgrey/includes/appbar.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="FLAT_GREY" resourceTypeEnumId="VT_SCREENSHOT" resourceValue="/flatgrey/screenshot.gif" sequenceId="01"/>
+
+    <ArtifactPath artifactPath="ofbiz/flatgrey" description="Flat Grey Visual Theme"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/flatgrey" permissionValue="admin=true"/>
+
 </entity-engine-xml>

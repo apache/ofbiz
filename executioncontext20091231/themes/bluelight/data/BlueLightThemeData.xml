@@ -33,4 +33,13 @@ under the License.
     <VisualThemeResource visualThemeId="BLUELIGHT" resourceTypeEnumId="VT_NAV_CLOSE_TMPLT" resourceValue="component://bluelight/includes/appbarClose.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="BLUELIGHT" resourceTypeEnumId="VT_MSG_TMPLT_LOC" resourceValue="component://bluelight/includes/messages.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="BLUELIGHT" resourceTypeEnumId="VT_SCREENSHOT" resourceValue="/bluelight/screenshot.jpg" sequenceId="01"/>
+
+    <ArtifactPath artifactPath="ofbiz/bluelight" description="Bluelight Visual Theme"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/bluelight" permissionValue="admin=true"/>
+
 </entity-engine-xml>

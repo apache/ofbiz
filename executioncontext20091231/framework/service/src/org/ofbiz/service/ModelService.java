@@ -59,6 +59,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.api.context.ExecutionArtifact;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.ObjectType;
@@ -81,7 +82,7 @@ import com.ibm.wsdl.extensions.soap.SOAPOperationImpl;
  * Generic Service Model Class
  */
 @SuppressWarnings("serial")
-public class ModelService extends AbstractMap<String, Object> implements Serializable {
+public class ModelService extends AbstractMap<String, Object> implements Serializable, ExecutionArtifact {
     private static final Field[] MODEL_SERVICE_FIELDS;
     private static final Map<String, Field> MODEL_SERVICE_FIELD_MAP = FastMap.newInstance();
     static {
@@ -250,6 +251,13 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         return null;
     }
 
+    public String getLocation() {
+        return this.definitionLocation;
+    }
+
+    public String getName() {
+        return this.name;
+    }
     private final class ModelServiceMapEntry implements Map.Entry<String, Object> {
         private final Field field;
 

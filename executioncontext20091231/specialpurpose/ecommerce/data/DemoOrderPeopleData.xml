@@ -198,4 +198,14 @@ under the License.
     <PaymentMethod paymentMethodId="FRENCHCUSTOMER" paymentMethodTypeId="CREDIT_CARD" partyId="FrenchCustomer" fromDate="2009-01-09 00:00:00.000"/>
     <CreditCard paymentMethodId="FRENCHCUSTOMER" cardType="Visa" cardNumber="4111111111111111" expireDate="02/2020" companyNameOnCard=""
         titleOnCard="" firstNameOnCard="FRENCH" middleNameOnCard="" lastNameOnCard="CUSTOMER" suffixOnCard="" contactMechId="FRENCHCUSTOMER"/>
+
+    <UserToUserGroupRel userLoginId="DemoBuyer" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoRepAll" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoRepStore" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoCustCompany" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoCustAgent" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="DemoCustomer" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="EuroCustomer" groupId="OFBIZ_USERS"/>
+    <UserToUserGroupRel userLoginId="FrenchCustomer" groupId="OFBIZ_USERS"/>
+
 </entity-engine-xml>

@@ -18,6 +18,8 @@
  *******************************************************************************/
 package org.ofbiz.widget.form;
 
+import static org.ofbiz.api.authorization.BasicPermissions.View;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,6 +36,7 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 import javolution.util.FastSet;
 
+import org.ofbiz.api.context.ExecutionArtifact;
 import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
@@ -57,6 +60,7 @@ import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelParam;
 import org.ofbiz.service.ModelService;
+import org.ofbiz.service.ThreadContext;
 import org.ofbiz.webapp.control.ConfigXMLReader;
 import org.ofbiz.widget.ModelWidget;
 import org.w3c.dom.Element;
@@ -68,7 +72,7 @@ import bsh.Interpreter;
  * Widget Library - Form model class
  */
 @SuppressWarnings("serial")
-public class ModelForm extends ModelWidget {
+public class ModelForm extends ModelWidget implements ExecutionArtifact {
 
     public static final String module = ModelForm.class.getName();
     public static final String DEFAULT_FORM_RESULT_LIST_NAME = "defaultFormResultList";
@@ -787,61 +791,67 @@ public class ModelForm extends ModelWidget {
      *   use the same form definitions for many types of form UIs
      */
     public void renderFormString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
-        //  increment the paginator, only for list and multi forms
-        if ("list".equals(this.type) || "multi".equals(this.type)) {
-            this.incrementPaginatorNumber(context);
-        }
-        
-        //if pagination is disabled, update the defualt view size
-        if (!getPaginate(context)) {
-            setDefaultViewSize(this.MAX_PAGE_SIZE);
-        }
-        
-        // Populate the viewSize and viewIndex so they are available for use during form actions
-        context.put("viewIndex", this.getViewIndex(context));
-        context.put("viewSize", this.getViewSize(context));
-
-        runFormActions(context);
-
-        setWidgetBoundaryComments(context);
-
-        // if this is a list form, don't useRequestParameters
-        if ("list".equals(this.type) || "multi".equals(this.type)) {
-            context.put("useRequestParameters", Boolean.FALSE);
-        }
-
-        // find the highest position number to get the max positions used
-        int positions = 1;
-        for (ModelFormField modelFormField: this.fieldList) {
-            int curPos = modelFormField.getPosition();
-            if (curPos > positions) {
-                positions = curPos;
+        try {
+            ThreadContext.pushExecutionArtifact(this);
+            ThreadContext.getAccessController().checkPermission(View);
+            //  increment the paginator, only for list and multi forms
+            if ("list".equals(this.type) || "multi".equals(this.type)) {
+                this.incrementPaginatorNumber(context);
             }
-            ModelFormField.FieldInfo currentFieldInfo = modelFormField.getFieldInfo();
-            if (currentFieldInfo != null) {
-                ModelFormField fieldInfoFormField = currentFieldInfo.getModelFormField();
-                if (fieldInfoFormField != null) {
-                    fieldInfoFormField.setModelForm(this);
+
+            //if pagination is disabled, update the defualt view size
+            if (!getPaginate(context)) {
+                setDefaultViewSize(this.MAX_PAGE_SIZE);
+            }
+
+            // Populate the viewSize and viewIndex so they are available for use during form actions
+            context.put("viewIndex", this.getViewIndex(context));
+            context.put("viewSize", this.getViewSize(context));
+
+            runFormActions(context);
+
+            setWidgetBoundaryComments(context);
+
+            // if this is a list form, don't useRequestParameters
+            if ("list".equals(this.type) || "multi".equals(this.type)) {
+                context.put("useRequestParameters", Boolean.FALSE);
+            }
+
+            // find the highest position number to get the max positions used
+            int positions = 1;
+            for (ModelFormField modelFormField: this.fieldList) {
+                int curPos = modelFormField.getPosition();
+                if (curPos > positions) {
+                    positions = curPos;
                 }
-            } else {
-                throw new IllegalArgumentException("Error rendering form, a field has no FieldInfo, ie no sub-element for the type of field for field named: " + modelFormField.getName());
+                ModelFormField.FieldInfo currentFieldInfo = modelFormField.getFieldInfo();
+                if (currentFieldInfo != null) {
+                    ModelFormField fieldInfoFormField = currentFieldInfo.getModelFormField();
+                    if (fieldInfoFormField != null) {
+                        fieldInfoFormField.setModelForm(this);
+                    }
+                } else {
+                    throw new IllegalArgumentException("Error rendering form, a field has no FieldInfo, ie no sub-element for the type of field for field named: " + modelFormField.getName());
+                }
             }
-       }
 
-        if ("single".equals(this.type)) {
-            this.renderSingleFormString(writer, context, formStringRenderer, positions);
-        } else if ("list".equals(this.type)) {
-            this.renderListFormString(writer, context, formStringRenderer, positions);
-        } else if ("multi".equals(this.type)) {
-            this.renderMultiFormString(writer, context, formStringRenderer, positions);
-        } else if ("upload".equals(this.type)) {
-            this.renderSingleFormString(writer, context, formStringRenderer, positions);
-        } else {
-            if (UtilValidate.isEmpty(this.getType())) {
-                throw new IllegalArgumentException("The form 'type' tag is missing or empty on the form with the name " + this.getName());
+            if ("single".equals(this.type)) {
+                this.renderSingleFormString(writer, context, formStringRenderer, positions);
+            } else if ("list".equals(this.type)) {
+                this.renderListFormString(writer, context, formStringRenderer, positions);
+            } else if ("multi".equals(this.type)) {
+                this.renderMultiFormString(writer, context, formStringRenderer, positions);
+            } else if ("upload".equals(this.type)) {
+                this.renderSingleFormString(writer, context, formStringRenderer, positions);
             } else {
-                throw new IllegalArgumentException("The form type " + this.getType() + " is not supported for form with name " + this.getName());
+                if (UtilValidate.isEmpty(this.getType())) {
+                    throw new IllegalArgumentException("The form 'type' tag is missing or empty on the form with the name " + this.getName());
+                } else {
+                    throw new IllegalArgumentException("The form type " + this.getType() + " is not supported for form with name " + this.getName());
+                }
             }
+        } finally {
+            ThreadContext.popExecutionArtifact();
         }
     }
 
@@ -1872,6 +1882,10 @@ public class ModelForm extends ModelWidget {
     @Override
     public String getName() {
         return this.name;
+    }
+
+    public String getLocation() {
+        return this.formLocation;
     }
 
     public String getCurrentFormName(Map<String, Object> context) {

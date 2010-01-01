@@ -18,6 +18,10 @@
  */
 package org.ofbiz.entity;
 
+import static org.ofbiz.api.authorization.BasicPermissions.Create;
+import static org.ofbiz.api.authorization.BasicPermissions.Delete;
+import static org.ofbiz.api.authorization.BasicPermissions.Update;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
@@ -37,6 +41,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralRuntimeException;
 import org.ofbiz.base.util.UtilDateTime;
@@ -278,7 +283,12 @@ public class GenericDelegator implements Delegator {
         GenericDelegator.delegatorCache.put(delegatorName, this);
 
         // setup the crypto class
-        this.crypto = new EntityCrypto(this);
+        try {
+            ThreadContext.runUnprotected();
+            this.crypto = new EntityCrypto(this);
+        } finally {
+            ThreadContext.endRunUnprotected();
+        }
 
         //time to do some tricks with manual class loading that resolves circular dependencies, like calling services...
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -785,6 +795,8 @@ public class GenericDelegator implements Delegator {
     public GenericValue create(GenericValue value, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
         try {
+            ThreadContext.pushExecutionArtifact(value);
+            ThreadContext.getAccessController().checkPermission(Create);
             if (alwaysUseTransaction) {
                 beganTransaction = TransactionUtil.begin();
             }
@@ -839,6 +851,7 @@ public class GenericDelegator implements Delegator {
             // after rolling back, rethrow the exception
             throw e;
         } finally {
+            ThreadContext.popExecutionArtifact();
             // only commit the transaction if we started one... this will throw an exception if it fails
             TransactionUtil.commit(beganTransaction);
         }
@@ -848,6 +861,8 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#createOrStore(org.ofbiz.entity.GenericValue, boolean)
      */
     public GenericValue createOrStore(GenericValue value, boolean doCacheClear) throws GenericEntityException {
+        ThreadContext.pushExecutionArtifact(value);
+        AccessController accessController = ThreadContext.getAccessController();
         boolean beganTransaction = false;
         try {
             if (alwaysUseTransaction) {
@@ -856,8 +871,10 @@ public class GenericDelegator implements Delegator {
 
             GenericValue checkValue = this.findOne(value.getEntityName(), value.getPrimaryKey(), false);
             if (checkValue != null) {
+                accessController.checkPermission(Update);
                 this.store(value, doCacheClear);
             } else {
+                accessController.checkPermission(Create);
                 this.create(value, doCacheClear);
             }
             if (value.lockEnabled()) {
@@ -877,6 +894,7 @@ public class GenericDelegator implements Delegator {
             // after rolling back, rethrow the exception
             throw e;
         } finally {
+            ThreadContext.popExecutionArtifact();
             // only commit the transaction if we started one... this will throw an exception if it fails
             TransactionUtil.commit(beganTransaction);
         }
@@ -932,6 +950,8 @@ public class GenericDelegator implements Delegator {
     public int removeByPrimaryKey(GenericPK primaryKey, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
         try {
+            ThreadContext.pushExecutionArtifact(primaryKey);
+            ThreadContext.getAccessController().checkPermission(Delete);
             if (alwaysUseTransaction) {
                 beganTransaction = TransactionUtil.begin();
             }
@@ -980,6 +1000,7 @@ public class GenericDelegator implements Delegator {
             // after rolling back, rethrow the exception
             throw e;
         } finally {
+            ThreadContext.popExecutionArtifact();
             // only commit the transaction if we started one... this will throw an exception if it fails
             TransactionUtil.commit(beganTransaction);
         }
@@ -999,6 +1020,8 @@ public class GenericDelegator implements Delegator {
         // NOTE: this does not call the GenericDelegator.removeByPrimaryKey method because it has more information to pass to the ECA rule hander
         boolean beganTransaction = false;
         try {
+            ThreadContext.pushExecutionArtifact(value);
+            ThreadContext.getAccessController().checkPermission(Delete);
             if (alwaysUseTransaction) {
                 beganTransaction = TransactionUtil.begin();
             }
@@ -1095,6 +1118,8 @@ public class GenericDelegator implements Delegator {
     public int removeByCondition(String entityName, EntityCondition condition, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
         try {
+            ThreadContext.pushExecutionArtifact("GenericDelegator.removeByCondition", entityName);
+            ThreadContext.getAccessController().checkPermission(Delete);
             if (alwaysUseTransaction) {
                 beganTransaction = TransactionUtil.begin();
             }
@@ -1132,6 +1157,7 @@ public class GenericDelegator implements Delegator {
             // after rolling back, rethrow the exception
             throw e;
         } finally {
+            ThreadContext.popExecutionArtifact();
             // only commit the transaction if we started one... this will throw an exception if it fails
             TransactionUtil.commit(beganTransaction);
         }
@@ -1206,6 +1232,8 @@ public class GenericDelegator implements Delegator {
     public int storeByCondition(String entityName, Map<String, ? extends Object> fieldsToSet, EntityCondition condition, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
         try {
+            ThreadContext.pushExecutionArtifact("GenericDelegator.storeByCondition", entityName);
+            ThreadContext.getAccessController().checkPermission(Update);
             if (alwaysUseTransaction) {
                 beganTransaction = TransactionUtil.begin();
             }
@@ -1243,6 +1271,7 @@ public class GenericDelegator implements Delegator {
             // after rolling back, rethrow the exception
             throw e;
         } finally {
+            ThreadContext.popExecutionArtifact();
             // only commit the transaction if we started one... this will throw an exception if it fails
             TransactionUtil.commit(beganTransaction);
         }
@@ -1261,6 +1290,8 @@ public class GenericDelegator implements Delegator {
     public int store(GenericValue value, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
         try {
+            ThreadContext.pushExecutionArtifact(value);
+            ThreadContext.getAccessController().checkPermission(Update);
             if (alwaysUseTransaction) {
                 beganTransaction = TransactionUtil.begin();
             }
@@ -1314,6 +1345,7 @@ public class GenericDelegator implements Delegator {
             // after rolling back, rethrow the exception
             throw e;
         } finally {
+            ThreadContext.popExecutionArtifact();
             // only commit the transaction if we started one... this will throw an exception if it fails
             TransactionUtil.commit(beganTransaction);
         }
@@ -1703,7 +1735,7 @@ public class GenericDelegator implements Delegator {
             }
 
             this.decryptFields(results);
-            return results;
+            return ThreadContext.getAccessController().applyFilters(results);
         } catch (GenericEntityException e) {
             String errMsg = "Failure in findAllByPrimaryKeys operation, rolling back transaction";
             Debug.logError(e, errMsg, module);
@@ -1770,7 +1802,7 @@ public class GenericDelegator implements Delegator {
             }
 
             this.decryptFields(results);
-            return results;
+            return ThreadContext.getAccessController().applyFilters(results);
         } catch (GenericEntityException e) {
             String errMsg = "Failure in findAllByPrimaryKeysCache operation, rolling back transaction";
             Debug.logError(e, errMsg, module);
@@ -2116,7 +2148,10 @@ public class GenericDelegator implements Delegator {
         eli.setDelegator(this);
 
         ecaRunner.evalRules(EntityEcaHandler.EV_RETURN, EntityEcaHandler.OP_FIND, dummyValue, false);
-        return eli;
+        ThreadContext.pushExecutionArtifact(modelEntity);
+        ListIterator<GenericValue> li = ThreadContext.getAccessController().applyFilters((ListIterator<GenericValue>) eli);
+        ThreadContext.popExecutionArtifact();
+        return (EntityListIterator) li;
     }
 
     /* (non-Javadoc)
@@ -2136,6 +2171,9 @@ public class GenericDelegator implements Delegator {
 
             List<GenericValue> cacheList = this.cache.get(entityName, entityCondition, orderBy);
             if (cacheList != null) {
+                ThreadContext.pushExecutionArtifact("GenericDelegator.findList", entityName);
+                cacheList = ThreadContext.getAccessController().applyFilters(cacheList);
+                ThreadContext.popExecutionArtifact();
                 return cacheList;
             }
         }
@@ -2155,6 +2193,9 @@ public class GenericDelegator implements Delegator {
                 ecaRunner.evalRules(EntityEcaHandler.EV_CACHE_PUT, EntityEcaHandler.OP_FIND, dummyValue, false);
                 this.cache.put(entityName, entityCondition, orderBy, list);
             }
+            ThreadContext.pushExecutionArtifact("GenericDelegator.findList", entityName);
+            list = ThreadContext.getAccessController().applyFilters(list);
+            ThreadContext.popExecutionArtifact();
             return list;
         } catch (GenericEntityException e) {
             String errMsg = "Failure in findByCondition operation for entity [" + entityName + "]: " + e.toString() + ". Rolling back transaction.";
@@ -2198,6 +2239,9 @@ public class GenericDelegator implements Delegator {
                 havingEntityCondition, fieldsToSelect, orderBy, findOptions);
         eli.setDelegator(this);
         //TODO: add decrypt fields
+        ThreadContext.pushExecutionArtifact("GenericDelegator.findListIteratorByCondition", modelViewEntity.getEntityName());
+        eli = (EntityListIterator) ThreadContext.getAccessController().applyFilters(eli);
+        ThreadContext.popExecutionArtifact();
         return eli;
     }
 

@@ -52,6 +52,7 @@ import org.ofbiz.security.authz.Authorization;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ThreadContext;
 import org.ofbiz.webapp.control.LoginWorker;
 import org.ofbiz.widget.cache.GenericWidgetOutput;
 import org.ofbiz.widget.cache.ScreenCache;
@@ -210,6 +211,8 @@ public class ScreenRenderer {
 
         // set up the user's time zone
         context.put("timeZone", UtilHttp.getTimeZone(request));
+
+        ThreadContext.initializeContext(context);
 
         // ========== setup values that are specific to OFBiz webapps
 

@@ -34,4 +34,15 @@ under the License.
     <SecurityGroupPermission groupId="ASSETMAINTTECH" permissionId="ASSETMAINT_UPDATE"/>
 
     <SecurityGroupPermission groupId="FULLADMIN" permissionId="ASSETMAINT_ADMIN"/>
+
+    <ArtifactPath artifactPath="ofbiz/assetmaint" description="Asset Maintenance Application"/>
+    <ArtifactPath artifactPath="ofbiz/ismgr" description="IS Manager Application"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/assetmaint" permissionValue="admin=true"/>
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/ismgr" permissionValue="admin=true"/>
+
 </entity-engine-xml>

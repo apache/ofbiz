@@ -30,4 +30,15 @@ under the License.
     <VisualThemeResource visualThemeId="EC_DEFAULT" resourceTypeEnumId="VT_HDR_TMPLT_LOC" resourceValue="component://ecommerce/webapp/ecommerce/includes/header.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="EC_DEFAULT" resourceTypeEnumId="VT_FTR_TMPLT_LOC" resourceValue="component://ecommerce/webapp/ecommerce/includes/footer.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="EC_DEFAULT" resourceTypeEnumId="VT_SCREENSHOT" resourceValue="/images/ecdefaulttheme.jpg" sequenceId="01"/>
+
+    <ArtifactPath artifactPath="ofbiz/ecommerce" description="eCommerce Application"/>
+    <ArtifactPath artifactPath="ofbiz/ecomclone" description="Cloned eCommerce Application"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/ecommerce" permissionValue="admin=true"/>
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/ecomclone" permissionValue="admin=true"/>
+
 </entity-engine-xml>

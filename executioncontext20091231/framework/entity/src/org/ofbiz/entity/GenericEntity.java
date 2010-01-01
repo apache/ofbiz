@@ -38,6 +38,7 @@ import javolution.lang.Reusable;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.api.context.ExecutionArtifact;
 import org.ofbiz.base.crypto.HashCrypt;
 import org.ofbiz.base.util.Base64;
 import org.ofbiz.base.util.Debug;
@@ -67,7 +68,8 @@ import org.w3c.dom.Element;
  * <code>Observer</code>.
  *
  */
-public class GenericEntity extends Observable implements Map<String, Object>, LocalizedMap<Object>, Serializable, Comparable<GenericEntity>, Cloneable, Reusable {
+@SuppressWarnings("serial")
+public class GenericEntity extends Observable implements Map<String, Object>, LocalizedMap<Object>, Serializable, Comparable<GenericEntity>, Cloneable, Reusable, ExecutionArtifact {
 
     public static final String module = GenericEntity.class.getName();
     public static final GenericEntity NULL_ENTITY = new NullGenericEntity();
@@ -202,6 +204,14 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         this.internalDelegator = value.internalDelegator;
     }
 
+    public String getLocation() {
+        return this.modelEntity.getLocation();
+    }
+
+    public String getName() {
+        return this.entityName;
+    }
+
     public void reset() {
         // from GenericEntity
         this.delegatorName = null;
@@ -284,7 +294,6 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
     /** Get the GenericDelegator instance that created this value object and that is responsible for it.
      *@return GenericDelegator object
      */
-    @SuppressWarnings("deprecation")
     public Delegator getDelegator() {
         if (internalDelegator == null) {
             if (delegatorName == null) delegatorName = "default";

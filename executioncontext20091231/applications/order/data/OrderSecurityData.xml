@@ -146,4 +146,13 @@ under the License.
     <SecurityGroupPermission groupId="ORDERENTRY_ALL" permissionId="ORDERMGR_SEND_CONFIRMATION"/>
     <SecurityGroupPermission groupId="ORDERENTRY_ALL" permissionId="OFBTOOLS_VIEW"/>
     <SecurityGroupPermission groupId="ORDERENTRY_ALL" permissionId="ORDERMGR_CRQ_CREATE"/>
+
+    <ArtifactPath artifactPath="ofbiz/order" description="Order Application"/>
+
+    <!-- Data needed for the transition to security-aware artifacts. As each webapp
+         is converted over to the new security design, the corresponding admin
+         permission should be removed. -->
+
+    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/order" permissionValue="admin=true"/>
+
 </entity-engine-xml>

@@ -33,6 +33,7 @@ import java.util.TimeZone;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.api.context.ExecutionArtifact;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.ObjectType;
@@ -56,7 +57,7 @@ import org.w3c.dom.Element;
  *
  */
 @SuppressWarnings("serial")
-public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, Serializable {
+public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, Serializable, ExecutionArtifact {
 
     public static final String module = ModelEntity.class.getName();
 
@@ -309,6 +310,10 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
 
     /** The entity-name of the Entity */
     public String getEntityName() {
+        return this.entityName;
+    }
+
+    public String getName() {
         return this.entityName;
     }
 

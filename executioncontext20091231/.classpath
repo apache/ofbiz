@@ -180,11 +180,13 @@
     <classpathentry kind="src" path="applications/product/src" excluding="ShipmentScaleApplet.java"/>
     <classpathentry kind="src" path="applications/securityext/src" excluding="org/ofbiz/securityext/thirdparty/truition/TruitionCoReg.java"/>
     <classpathentry kind="src" path="applications/workeffort/src"/>
+    <classpathentry kind="src" path="framework/api/src"/>
     <classpathentry kind="src" path="framework/appserver/src"/>
     <classpathentry kind="src" path="framework/base/src" excluding="org/ofbiz/base/config/CoberturaInstrumenter.java"/>
     <classpathentry kind="src" path="framework/bi/src"/>
     <classpathentry kind="src" path="framework/catalina/src"/>
     <classpathentry kind="src" path="framework/common/src"/>
+    <classpathentry kind="src" path="framework/context/src"/>
     <classpathentry kind="src" path="framework/datafile/src"/>
     <classpathentry kind="src" path="framework/entity/src" excluding="org/ofbiz/entity/connection/XaPoolConnectionFactory.java"/>
     <classpathentry kind="src" path="framework/entityext/src"/>
