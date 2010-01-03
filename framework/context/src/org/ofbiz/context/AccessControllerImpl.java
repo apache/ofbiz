@@ -58,7 +58,7 @@ public class AccessControllerImpl implements AccessController {
             Debug.logInfo("Checking permission: " + ThreadContext.getExecutionPath() + "[" + permission + "]", module);
         }
         this.permission.reset();
-        this.node.getPermissions(ThreadContext.getExecutionPath(), this.permission);
+        this.node.getPermissions(new ArtifactPath(ThreadContext.getExecutionPath()), this.permission);
         if (this.verbose) {
             Debug.logInfo("Found permission(s): " + ThreadContext.getUserLogin().getString("userLoginId") +
                     "@" + ThreadContext.getExecutionPath() + "[" + this.permission + "]", module);
