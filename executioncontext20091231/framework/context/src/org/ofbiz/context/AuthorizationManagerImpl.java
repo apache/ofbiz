@@ -21,14 +21,10 @@ package org.ofbiz.context;
 import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.List;
-import java.util.Map;
-
-import javolution.util.FastMap;
 
 import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.api.authorization.BasicPermissions;
 import org.ofbiz.api.authorization.AuthorizationManager;
-import org.ofbiz.api.authorization.NullAuthorizationManager;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -40,7 +36,7 @@ import org.ofbiz.security.OFBizSecurity;
 import org.ofbiz.service.ThreadContext;
 
 /**
- * An implementation of the AuthorizationManager interface that uses the OFBiz database
+ * An implementation of the AuthorizationManager interface that uses the Entity Engine
  * for authorization data storage.
  */
 public class AuthorizationManagerImpl extends OFBizSecurity implements AuthorizationManager {
@@ -48,10 +44,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
     // Right now this class implements permission checking only.
 
     public static final String module = AuthorizationManagerImpl.class.getName();
-//    protected static final UtilCache<String, PathNode> userPermCache = UtilCache.createUtilCache("authorization.UserPermissions");
-    protected static final Map<String, PathNode> userPermCache = FastMap.newInstance();
-    protected static final AuthorizationManager nullAuthorizationManager = new NullAuthorizationManager();
-    protected static boolean underConstruction = false;
+    protected static final UtilCache<String, AccessController> userPermCache = UtilCache.createUtilCache("authorization.UserPermissions");
 
     public AuthorizationManagerImpl() {
     }
@@ -134,31 +127,19 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
 
     public AccessController getAccessController() throws AccessControlException {
         String userLoginId = ThreadContext.getUserLogin().getString("userLoginId");
-        PathNode node = getUserPermissionsNode(userLoginId);
-        if (node == null) {
-            // During object construction, artifacts will be used that will ultimately
-            // call this method. In order for object construction to succeed, we need
-            // to allow unrestricted access to all artifacts.
-            return nullAuthorizationManager.getAccessController();
-        }
-        return new AccessControllerImpl(getUserPermissionsNode(userLoginId));
+        return getAccessController(userLoginId);
 	}
 
-    protected static PathNode getUserPermissionsNode(String userLoginId) throws AccessControlException {
-        if (underConstruction) {
-            return null;
-        }
-        PathNode node = userPermCache.get(userLoginId);
-        if (node != null) {
-            return node;
+    protected static AccessController getAccessController(String userLoginId) throws AccessControlException {
+        AccessController accessController = userPermCache.get(userLoginId);
+        if (accessController != null) {
+            return accessController;
         }
         synchronized (userPermCache) {
-            underConstruction = true;
-            node = new PathNode();
-            // Set up the ExecutionContext for unrestricted access to security-aware artifacts
-            ThreadContext.runUnprotected();
-            Delegator delegator = ThreadContext.getDelegator();
             try {
+                ThreadContext.runUnprotected();
+                Delegator delegator = ThreadContext.getDelegator();
+                PathNode node = new PathNode();
                 // Process group membership permissions first
                 List<GenericValue> groupMemberships = delegator.findList("UserToUserGroupRel", EntityCondition.makeCondition(UtilMisc.toMap("userLoginId", userLoginId)), null, null, null, false);
                 for (GenericValue userGroup : groupMemberships) {
@@ -167,15 +148,15 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
                 // Process user permissions last
                 List<GenericValue> permissionValues = delegator.findList("UserToArtifactPermRel", EntityCondition.makeCondition(UtilMisc.toMap("userLoginId", userLoginId)), null, null, null, false);
                 setPermissions(userLoginId, node, permissionValues);
-                userPermCache.put(userLoginId, node);
+                accessController = new AccessControllerImpl(node);
+                userPermCache.put(userLoginId, accessController);
             } catch (GenericEntityException e) {
                 throw new AccessControlException(e.getMessage());
             } finally {
                 ThreadContext.endRunUnprotected();
-                underConstruction = false;
             }
         }
-	    return node;
+	    return accessController;
 	}
 
     protected static void processGroupPermissions(String groupId, PathNode node, Delegator delegator) throws AccessControlException {
@@ -199,9 +180,9 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
             OFBizPermission target = new OFBizPermission(id + "@" + artifactPath);
             String[] pair = value.getString("permissionValue").split("=");
             if ("filter".equalsIgnoreCase(pair[0])) {
-                target.filters.add(pair[1]);
+                target.addFilter(pair[1]);
             } else if ("service".equalsIgnoreCase(pair[0])) {
-                target.services.add(pair[1]);
+                target.addService(pair[1]);
             } else {
                 Permission permission = BasicPermissions.ConversionMap.get(pair[0].toUpperCase());
                 if (permission != null) {
@@ -214,7 +195,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
                     throw new AccessControlException("Invalid permission: " + pair[0]);
                 }
             }
-            node.setPermissions(artifactPath, target);
+            node.setPermissions(new ArtifactPath(artifactPath), target);
         }
     }
 

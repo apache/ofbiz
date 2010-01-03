@@ -31,6 +31,8 @@ import org.ofbiz.api.authorization.PermissionsUnion;
  * <p>This class enforces the security-aware artifact permission
  * checking rules:<br>
  * <ul>
+ * <li>If the permissions list contains the admin permission,
+ * then access is granted</li>
  * <li>If the permissions list contains the specified permission,
  * then access is granted</li>
  * <li>If services are specified, and all services return
@@ -53,6 +55,14 @@ public class OFBizPermission extends Permission {
         super(name);
         this.includePermissions = new PermissionsUnion(name);
         this.excludePermissions = new PermissionsUnion(name);
+    }
+
+    public void addFilter(String filter) {
+        this.filters.add(filter);
+    }
+
+    public void addService(String service) {
+        this.services.add(service);
     }
 
     @Override

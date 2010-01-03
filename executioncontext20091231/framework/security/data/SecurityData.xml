@@ -62,7 +62,12 @@ under the License.
 
     <UserLogin userLoginId="NOT_LOGGED_IN" enabled="N" isSystem="N"/>
     <UserGroup groupId="OFBIZ_USERS" description="All OFBiz users"/>
+
     <ArtifactPath artifactPath="ofbiz" description="The artifact path root"/>
+    <ArtifactPath artifactPath="ofbiz/?/getUserPreferenceGroup" description="All Applications - getUserPreferenceGroup service"/>
+    <ArtifactPath artifactPath="ofbiz/?/login" description="All Applications - Login screen"/>
+    <ArtifactPath artifactPath="ofbiz/?/ServerHit" description="All Applications - Server hit"/>
+
     <ArtifactPermission permissionValue="access=true" description="Access granted"/>
     <ArtifactPermission permissionValue="admin=true" description="Admin access granted"/>
     <ArtifactPermission permissionValue="create=true" description="Create access granted"/>
@@ -73,6 +78,11 @@ under the License.
     <ArtifactPermission permissionValue="update=false" description="Update access denied"/>
     <ArtifactPermission permissionValue="view=true" description="View access granted"/>
     <ArtifactPermission permissionValue="view=false" description="View access denied"/>
+
     <UserToArtifactPermRel userLoginId="system" artifactPath="ofbiz" permissionValue="admin=true"/>
+    <UserToArtifactPermRel userLoginId="NOT_LOGGED_IN" artifactPath="ofbiz/?/getUserPreferenceGroup" permissionValue="access=true"/>
+    <UserToArtifactPermRel userLoginId="NOT_LOGGED_IN" artifactPath="ofbiz/?/login" permissionValue="access=true"/>
+    <UserToArtifactPermRel userLoginId="NOT_LOGGED_IN" artifactPath="ofbiz/?/login" permissionValue="view=true"/>
+    <UserToArtifactPermRel userLoginId="NOT_LOGGED_IN" artifactPath="ofbiz/?/ServerHit" permissionValue="create=true"/>
 
 </entity-engine-xml>

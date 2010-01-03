@@ -28,74 +28,16 @@ import javolution.util.FastMap;
  */
 public class PathNode {
 
+    public static final String PLACEHOLDER_CHARACTER = "?";
     protected String nodeName = null;
     protected OFBizPermission permission = null;
     protected Map<String, PathNode> childNodes = null;
+    protected boolean handlePlaceholder = false;
 
     public PathNode() {}
 
     protected PathNode(String nodeName) {
         this.nodeName = nodeName;
-    }
-
-    public void setPermissions(String artifactPath, OFBizPermission permission) {
-        int pos = artifactPath.indexOf("/");
-        if (pos == -1) {
-            if (this.permission == null) {
-                this.permission = permission;
-            } else {
-                this.permission.accumulatePermissions(permission);
-            }
-            if (this.nodeName == null) {
-                this.nodeName = artifactPath;
-            }
-            return;
-        }
-        String thisNodeName = artifactPath.substring(0, pos);
-        if (this.nodeName == null) {
-            this.nodeName = thisNodeName;
-        }
-        artifactPath = artifactPath.substring(pos + 1);
-        String nextNodeName = artifactPath;
-        pos = artifactPath.indexOf("/");
-        if (pos != -1) {
-            nextNodeName = artifactPath.substring(0, pos);
-        }
-        String key = nextNodeName.toUpperCase();
-        if (this.childNodes == null) {
-            this.childNodes = FastMap.newInstance();
-        }
-        PathNode node = this.childNodes.get(key);
-        if (node == null) {
-            node = new PathNode(nextNodeName);
-            this.childNodes.put(key, node);
-        }
-        node.setPermissions(artifactPath, permission);
-    }
-
-    public void getPermissions(String artifactPath, OFBizPermission permission) {
-        permission.accumulatePermissions(this.permission);
-        int pos = artifactPath.indexOf("/");
-        if (pos != -1 && this.childNodes != null) {
-            artifactPath = artifactPath.substring(pos + 1);
-            String nextNodeName = artifactPath;
-            pos = artifactPath.indexOf("/");
-            if (pos != -1) {
-                nextNodeName = artifactPath.substring(0, pos);
-            }
-            PathNode node = this.childNodes.get(nextNodeName.toUpperCase());
-            if (node != null) {
-                node.getPermissions(artifactPath, permission);
-            }
-        }
-    }
-
-    @Override
-    public String toString() {
-        FastList<PathNode> currentPath = FastList.newInstance();
-        StringBuilder result = new StringBuilder();
-        buildNodeString(currentPath, result);
-        return result.toString();
     }
 
     protected void buildNodeString(FastList<PathNode> currentPath, StringBuilder result) {
@@ -117,5 +59,59 @@ public class PathNode {
             }
         }
         currentPath.removeLast();
+    }
+
+    public void getPermissions(ArtifactPath artifactPath, OFBizPermission permission) {
+        permission.accumulatePermissions(this.permission);
+        if (artifactPath.hasMoreElements() && this.childNodes != null) {
+            String nextNodeName = artifactPath.getNextPathElement();
+            if (this.handlePlaceholder) {
+                if (!artifactPath.hasMoreElements()) {
+                    return;
+                }
+                nextNodeName = artifactPath.getNextPathElement();
+            }
+            PathNode node = this.childNodes.get(nextNodeName.toUpperCase());
+            if (node != null) {
+                node.getPermissions(artifactPath, permission);
+            }
+        }
+    }
+
+    public void setPermissions(ArtifactPath artifactPath, OFBizPermission permission) {
+        if (this.nodeName == null) {
+            this.nodeName = artifactPath.getCurrentPathElement();
+        }
+        if (!artifactPath.hasMoreElements()) {
+            if (this.permission == null) {
+                this.permission = permission;
+            } else {
+                this.permission.accumulatePermissions(permission);
+            }
+            return;
+        }
+        String nextNodeName = artifactPath.getNextPathElement();
+        if (PLACEHOLDER_CHARACTER.equals(nextNodeName)) {
+            this.handlePlaceholder = true;
+            nextNodeName = artifactPath.getNextPathElement();
+        }
+        String key = nextNodeName.toUpperCase();
+        if (this.childNodes == null) {
+            this.childNodes = FastMap.newInstance();
+        }
+        PathNode node = this.childNodes.get(key);
+        if (node == null) {
+            node = new PathNode(nextNodeName);
+            this.childNodes.put(key, node);
+        }
+        node.setPermissions(artifactPath, permission);
+    }
+
+    @Override
+    public String toString() {
+        FastList<PathNode> currentPath = FastList.newInstance();
+        StringBuilder result = new StringBuilder();
+        buildNodeString(currentPath, result);
+        return result.toString();
     }
 }
