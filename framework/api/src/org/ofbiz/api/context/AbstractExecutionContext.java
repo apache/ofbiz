@@ -29,9 +29,9 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilProperties;
 
 /** Implementation of the ExecutionContext interface. */
-public abstract class ExecutionContextImpl implements ExecutionContext {
+public abstract class AbstractExecutionContext implements ExecutionContext {
 
-    public static final String module = ExecutionContextImpl.class.getName();
+    public static final String module = AbstractExecutionContext.class.getName();
 
     protected final FastList<ExecutionArtifact> artifactStack = FastList.newInstance();
 	protected String currencyUom = null;
@@ -41,12 +41,12 @@ public abstract class ExecutionContextImpl implements ExecutionContext {
 	// Temporary - will be removed later
 	protected boolean verbose = false;
 
-	protected ExecutionContextImpl() {
+	protected AbstractExecutionContext() {
 	    this.properties = FastMap.newInstance();
 	    this.verbose = "true".equals(UtilProperties.getPropertyValue("api.properties", "executionContext.verbose"));
 	}
 	
-    protected ExecutionContextImpl(Map<String, Object> properties) {
+    protected AbstractExecutionContext(Map<String, Object> properties) {
         this.properties = properties;
         this.verbose = "true".equals(UtilProperties.getPropertyValue("api.properties", "executionContext.verbose"));
     }

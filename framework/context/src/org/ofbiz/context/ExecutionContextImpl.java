@@ -35,7 +35,7 @@ import org.ofbiz.service.GenericDispatcher;
 import org.ofbiz.service.LocalDispatcher;
 
 /** An implementation of the <code>ExecutionContext</code> interface. */
-public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContextImpl implements ExecutionContext {
+public class ExecutionContextImpl extends org.ofbiz.api.context.AbstractExecutionContext implements ExecutionContext {
 
     public static final String module = ExecutionContextImpl.class.getName();
     protected Delegator delegator = null;
@@ -65,6 +65,9 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.ExecutionContext
 	    if (this.security == null) {
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
             String className = UtilProperties.getPropertyValue("api.properties", "authorizationManager.class");
+    	    if (this.verbose) {
+    	    	Debug.logInfo("Loading Authorization Manager " + className, module);
+    	    }
             try {
                 this.security = (AuthorizationManager) loader.loadClass(className).newInstance();
             } catch (Exception e) {
