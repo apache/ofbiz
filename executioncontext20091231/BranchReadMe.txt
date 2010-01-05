@@ -66,7 +66,7 @@ problems.
 
 ---------------------------------------------------
 
-2010-05-03: Artifact paths now support substitution ("?")
+2010-01-05: Artifact paths now support substitution ("?")
 and wildcard ("*") path elements.
 This solves an issue that was discussed during the design - how
 to grant access to a particular artifact regardless of the
