@@ -51,6 +51,9 @@ public class AccessControllerImpl implements AccessController {
         this.permission = new OFBizPermission(ThreadContext.getUserLogin().getString("userLoginId"));
         this.verbose = "true".equals(UtilProperties.getPropertyValue("api.properties", "authorizationManager.verbose"));
         this.disabled = "true".equals(UtilProperties.getPropertyValue("api.properties", "authorizationManager.disabled"));
+        if (this.verbose) {
+            Debug.logInfo("Permissions for " + ThreadContext.getUserLogin().getString("userLoginId") + ": \n" + this.node, module);
+        }
     }
 
     public void checkPermission(Permission permission) throws AccessControlException {

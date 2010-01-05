@@ -18,32 +18,63 @@
  *******************************************************************************/
 package org.ofbiz.context;
 
-import java.util.Arrays;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /** Artifact path class. */
-public class ArtifactPath {
+public class ArtifactPath implements Cloneable, Iterator<String> {
 
+    public static final ArtifactPath PATH_ROOT = new ArtifactPath("ofbiz");
     public static final String ELEMENT_SEPARATOR = "/";
-    protected String currentPathElement = null;
-    protected Iterator<String> pathIterator;
+
+    protected int currentIndex = 0;
+    protected final String[] pathElementArray;
 
     public ArtifactPath(String artifactPath) {
-        String[] strArray = artifactPath.split(ELEMENT_SEPARATOR);
-        this.currentPathElement = strArray[0];
-        this.pathIterator = Arrays.asList(strArray).iterator();
+        this.pathElementArray = artifactPath.split(ELEMENT_SEPARATOR);
+    }
+    
+    public ArtifactPath(String[] pathElementArray) {
+        this.pathElementArray = pathElementArray;
+    }
+
+    @Override
+    public ArtifactPath clone() {
+        ArtifactPath newPath = new ArtifactPath(this.pathElementArray);
+        newPath.currentIndex = this.currentIndex;
+        return newPath;
+    }
+
+    public String getCurrentPath() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = this.currentIndex; i < this.pathElementArray.length; i++) {
+            if (i != this.currentIndex) {
+                sb.append(ELEMENT_SEPARATOR);
+            }
+            sb.append(this.pathElementArray[i]);
+        }
+        return sb.toString();
     }
 
     public String getCurrentPathElement() {
-        return this.currentPathElement;
+        return this.pathElementArray[this.currentIndex];
     }
 
-    public String getNextPathElement() {
-        this.currentPathElement = this.pathIterator.next();
-        return this.currentPathElement;
+    @Override
+    public boolean hasNext() {
+        return this.currentIndex + 1 < this.pathElementArray.length;
     }
 
-    public boolean hasMoreElements() {
-        return this.pathIterator.hasNext();
+    @Override
+    public String next() {
+        if (!this.hasNext()) {
+            throw new NoSuchElementException();
+        }
+        return this.pathElementArray[++this.currentIndex];
+    }
+
+    @Override
+    public void remove() {
+        throw new UnsupportedOperationException();
     }
 }

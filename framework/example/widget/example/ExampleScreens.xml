@@ -31,11 +31,6 @@ under the License.
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <section>
-                            <condition>
-                                <if-has-permission permission="EXAMPLE" action="_VIEW"/>
-                            </condition>
-                            <widgets>
                                 <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                                     <decorator-section name="menu-bar">
                                         <container style="button-bar"><link target="EditExample" text="${uiLabelMap.ExampleNewExample}" style="buttontext"/></container>
@@ -47,11 +42,6 @@ under the License.
                                         <include-form name="ListExamples" location="component://example/widget/example/ExampleForms.xml"/>
                                     </decorator-section>
                                 </decorator-screen>
-                            </widgets>
-                            <fail-widgets>
-                                <label style="h3">${uiLabelMap.ExampleViewPermissionError}</label>
-                            </fail-widgets>
-                        </section>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

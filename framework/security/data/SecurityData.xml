@@ -85,4 +85,8 @@ under the License.
     <UserToArtifactPermRel userLoginId="NOT_LOGGED_IN" artifactPath="ofbiz/?/login" permissionValue="view=true"/>
     <UserToArtifactPermRel userLoginId="NOT_LOGGED_IN" artifactPath="ofbiz/?/ServerHit" permissionValue="create=true"/>
 
+    <!-- Data needed to demonstrate the security-aware artifacts. This is temporary -
+    it will not be included in the project. -->
+    <UserLogin userLoginId="artifact-user" enabled="Y" isSystem="N" currentPassword="{SHA}47ca69ebb4bdc9ae0adec130880165d2cc05db1a" passwordHint=""/>
+
 </entity-engine-xml>
