@@ -139,7 +139,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
             try {
                 ThreadContext.runUnprotected();
                 Delegator delegator = ThreadContext.getDelegator();
-                PathNode node = new PathNode();
+                PathNode node = PathNode.getInstance(ArtifactPath.PATH_ROOT);
                 // Process group membership permissions first
                 List<GenericValue> groupMemberships = delegator.findList("UserToUserGroupRel", EntityCondition.makeCondition(UtilMisc.toMap("userLoginId", userLoginId)), null, null, null, false);
                 for (GenericValue userGroup : groupMemberships) {

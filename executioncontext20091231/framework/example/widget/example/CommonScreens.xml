@@ -82,10 +82,7 @@ under the License.
                     <decorator-section name="pre-body">
                         <section>
                             <condition>
-                                <and>
-                                    <if-has-permission permission="EXAMPLE" action="_VIEW"/>
-                                    <not><if-empty field="example"/></not>
-                                </and>
+                                <not><if-empty field="example"/></not>
                             </condition>
                             <widgets>
                                 <include-menu name="EditExample" location="component://example/widget/example/ExampleMenus.xml"/>
@@ -94,10 +91,6 @@ under the License.
                     </decorator-section>
                     <decorator-section name="body">
                         <section>
-                            <!-- do check for EXAMPLE, _VIEW permission -->
-                            <condition>
-                                <if-has-permission permission="EXAMPLE" action="_VIEW"/>
-                            </condition>
                             <widgets>
                                 <section>
                                     <condition>
@@ -124,9 +117,6 @@ under the License.
                                 </section>
                                 <decorator-section-include name="body"/>
                             </widgets>
-                            <fail-widgets>
-                                <label style="h3">${uiLabelMap.ExampleViewPermissionError}</label>
-                            </fail-widgets>
                         </section>
                     </decorator-section>
                 </decorator-screen>
@@ -146,10 +136,7 @@ under the License.
                     <decorator-section name="pre-body">
                         <section>
                             <condition>
-                                <and>
-                                    <if-has-permission permission="EXAMPLE" action="_VIEW"/>
-                                    <not><if-empty field="exampleFeature"/></not>
-                                </and>
+                                <not><if-empty field="exampleFeature"/></not>
                             </condition>
                             <widgets>
                                 <include-menu name="EditExampleFeature" location="component://example/widget/example/ExampleMenus.xml"/>
@@ -158,10 +145,6 @@ under the License.
                     </decorator-section>
                     <decorator-section name="body">
                         <section>
-                            <!-- do check for EXAMPLE, _VIEW permission -->
-                            <condition>
-                                <if-has-permission permission="EXAMPLE" action="_VIEW"/>
-                            </condition>
                             <widgets>
                                 <section>
                                     <condition>
@@ -181,9 +164,6 @@ under the License.
                                 </section>
                                 <decorator-section-include name="body"/>
                             </widgets>
-                            <fail-widgets>
-                                <label style="h3">${uiLabelMap.ExampleViewPermissionError}</label>
-                            </fail-widgets>
                         </section>
                     </decorator-section>
                 </decorator-screen>

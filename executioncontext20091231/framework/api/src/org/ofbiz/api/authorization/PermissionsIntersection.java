@@ -19,6 +19,7 @@
 package org.ofbiz.api.authorization;
 
 import java.security.Permission;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -34,6 +35,10 @@ public class PermissionsIntersection extends PermissionsSet {
 	public PermissionsIntersection(String listName, List<Permission> permissionsList) {
 		super(listName, permissionsList);
 	}
+
+    public PermissionsIntersection(String listName, Permission... permissions) {
+        super(listName, Arrays.asList(permissions));
+    }
 
 	/** Returns <code>true</code> if all of the contained permissions
 	 * return <code>true</code>.

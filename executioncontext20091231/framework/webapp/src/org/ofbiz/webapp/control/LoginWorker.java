@@ -21,6 +21,7 @@ package org.ofbiz.webapp.control;
 import static org.ofbiz.base.util.UtilGenerics.checkMap;
 
 import java.math.BigInteger;
+import java.security.AccessControlException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import javax.transaction.Transaction;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import static org.ofbiz.api.authorization.BasicPermissions.Access;
 import org.ofbiz.base.component.ComponentConfig;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
@@ -853,6 +855,10 @@ public class LoginWorker {
     }
 
     protected static boolean hasBasePermission(GenericValue userLogin, HttpServletRequest request) {
+        try {
+            ThreadContext.getAccessController().checkPermission(Access);
+            return true;
+        } catch (AccessControlException e) {}
         ServletContext context = (ServletContext) request.getAttribute("servletContext");
         Authorization authz = (Authorization) request.getAttribute("authz");
         Security security = (Security) request.getAttribute("security");

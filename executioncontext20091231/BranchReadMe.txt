@@ -63,3 +63,20 @@ will be rendered.
 The Authorization Manager is mostly working. Filtering
 EntityListIterator values is not implemented due to architectural
 problems.
+
+---------------------------------------------------
+
+2010-05-03: Artifact paths now support substitution ("?")
+and wildcard ("*") path elements.
+This solves an issue that was discussed during the design - how
+to grant access to a particular artifact regardless of the
+execution path. You can see examples of their use in
+framework/security/data/SecurityData.xml and
+framework/example/data/ExampleSecurityData.xml.
+
+The Example component has been converted to the new
+security design.
+
+The Execution Context seems to fulfill all needs so far, and it
+works pretty well, so its API could be considered stable at
+this time.

@@ -19,27 +19,16 @@ under the License.
 -->
 <entity-engine-xml>
     <!-- Example security -->
-    <SecurityPermission description="View operations in the Example Management Screens." permissionId="EXAMPLE_VIEW"/>
-    <SecurityPermission description="Create operations in the Example Management Screens." permissionId="EXAMPLE_CREATE"/>
-    <SecurityPermission description="Update operations in the Example Management Screens." permissionId="EXAMPLE_UPDATE"/>
-    <SecurityPermission description="Delete operations in the Example Management Screens." permissionId="EXAMPLE_DELETE"/>
-    <SecurityPermission description="ALL operations in the Example Management Screens." permissionId="EXAMPLE_ADMIN"/>
-    <SecurityGroupPermission groupId="FULLADMIN" permissionId="EXAMPLE_ADMIN"/>
-    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="EXAMPLE_CREATE"/>
-    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="EXAMPLE_DELETE"/>
-    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="EXAMPLE_UPDATE"/>
-    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="EXAMPLE_VIEW"/>
-    <SecurityGroupPermission groupId="VIEWADMIN" permissionId="EXAMPLE_VIEW"/>
-    <SecurityGroupPermission groupId="BIZADMIN" permissionId="EXAMPLE_ADMIN"/>
-
     <ArtifactPath artifactPath="ofbiz/example" description="Example Application"/>
     <ArtifactPath artifactPath="ofbiz/exampleext" description="Extended Example Application"/>
 
-    <!-- Data needed for the transition to security-aware artifacts. As each webapp
-         is converted over to the new security design, the corresponding admin
-         permission should be removed. -->
-
-<!--     <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/example" permissionValue="admin=true"/> -->
-    <UserGrpToArtifactPermRel groupId="OFBIZ_USERS" artifactPath="ofbiz/exampleext" permissionValue="admin=true"/>
+    <!-- Data needed to demonstrate the security-aware artifacts. This is temporary -
+    it will not be included in the project. -->
+    <UserToArtifactPermRel userLoginId="artifact-user" artifactPath="ofbiz/example" permissionValue="access=true"/>
+    <UserToArtifactPermRel userLoginId="artifact-user" artifactPath="ofbiz/example" permissionValue="view=true"/>
+    <UserToArtifactPermRel userLoginId="artifact-user" artifactPath="ofbiz/example" permissionValue="create=true"/>
+    <UserToArtifactPermRel userLoginId="artifact-user" artifactPath="ofbiz/example" permissionValue="update=true"/>
+    <ArtifactPath artifactPath="ofbiz/example/*/anotherDate" description="Example Application - 'anotherDate' field"/>
+    <UserToArtifactPermRel userLoginId="artifact-user" artifactPath="ofbiz/example/*/anotherDate" permissionValue="view=false"/>
 
 </entity-engine-xml>
