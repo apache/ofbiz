@@ -111,13 +111,16 @@ public class TemporalExpressions implements Serializable {
         }
 
         public Calendar next(Calendar cal) {
+            Calendar result = null;
             for (TemporalExpression expression : this.expressionSet) {
                 Calendar next = expression.next(cal);
                 if (next != null && includesDate(next)) {
-                    return next;
+                    if (result == null || next.before(result)) {
+                        result = next;
+                    }
                 }
             }
-            return null;
+            return result;
         }
 
         public void accept(TemporalExpressionVisitor visitor) {
