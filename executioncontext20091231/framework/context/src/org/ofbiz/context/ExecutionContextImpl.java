@@ -51,43 +51,61 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.AbstractExecutio
     protected AuthorizationManager security = null;
     protected GenericValue userLogin = null;
 
-	public AccessController getAccessController() {
-        return (AccessController) this.getSecurity().getAccessController();
-	}
+    @Override
+    public void clearUserData() {
+        this.userLogin = null;
+        this.resetUserPreferences();
+    }
 
-	public Delegator getDelegator() {
-		if (this.delegator == null) {
-			this.delegator = DelegatorFactory.getDelegator("default");
-		}
-		return this.delegator;
-	}
+    @Override
+    public void endRunUnprotected() {
+        if (!this.managerList.isEmpty()) {
+            this.setSecurity(this.managerList.removeLast());
+        }
+    }
 
-	public LocalDispatcher getDispatcher() {
-		if (this.dispatcher == null) {
-	        this.dispatcher = GenericDispatcher.getLocalDispatcher("ExecutionContext", this.getDelegator());
-		}
-		return this.dispatcher;
-	}
+    @Override
+    public AccessController getAccessController() {
+        return this.getSecurity().getAccessController();
+    }
 
-	public AuthorizationManager getSecurity() {
-	    if (this.security == null) {
+    @Override
+    public Delegator getDelegator() {
+        if (this.delegator == null) {
+            this.delegator = DelegatorFactory.getDelegator("default");
+        }
+        return this.delegator;
+    }
+
+    @Override
+    public LocalDispatcher getDispatcher() {
+        if (this.dispatcher == null) {
+            this.dispatcher = GenericDispatcher.getLocalDispatcher("ExecutionContext", this.getDelegator());
+        }
+        return this.dispatcher;
+    }
+
+    @Override
+    public AuthorizationManager getSecurity() {
+        if (this.security == null) {
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
             String className = UtilProperties.getPropertyValue("api.properties", "authorizationManager.class");
-    	    if (this.verbose) {
-    	    	Debug.logInfo("Loading Authorization Manager " + className, module);
-    	    }
+            if (this.verbose) {
+                Debug.logInfo("Loading Authorization Manager " + className, module);
+            }
             try {
                 this.security = (AuthorizationManager) loader.loadClass(className).newInstance();
             } catch (Exception e) {
                 Debug.logError(e, module);
             }
-	    }
-	    return this.security;
-	}
+        }
+        return this.security;
+    }
 
-	public GenericValue getUserLogin() {
-	    if (this.userLogin == null) {
-	        Delegator localDelegator = this.getDelegator();
+    @Override
+    public GenericValue getUserLogin() {
+        if (this.userLogin == null) {
+            Delegator localDelegator = this.getDelegator();
             try {
                 this.userLogin = localDelegator.findOne("UserLogin", false, "userLoginId", "NOT_LOGGED_IN");
             } catch (GenericEntityException e) {
@@ -97,18 +115,19 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.AbstractExecutio
                 this.userLogin = localDelegator.makeValue("UserLogin");
                 this.userLogin.set("userLoginId", "NOT_LOGGED_IN");
             }
-	    }
-		return this.userLogin;
-	}
+        }
+        return this.userLogin;
+    }
 
-	public void initializeContext(Map<String, ? extends Object> params) {
-		this.setDelegator((Delegator) params.get("delegator"));
-		this.setDispatcher((LocalDispatcher) params.get("dispatcher"));
-		this.setSecurity((AuthorizationManager) params.get("security"));
-		this.setUserLogin((GenericValue) params.get("userLogin"));
-        this.setLocale((Locale) params.get("locale")); 
+    @Override
+    public void initializeContext(Map<String, ? extends Object> params) {
+        this.setDelegator((Delegator) params.get("delegator"));
+        this.setDispatcher((LocalDispatcher) params.get("dispatcher"));
+        this.setSecurity((AuthorizationManager) params.get("security"));
+        this.setUserLogin((GenericValue) params.get("userLogin"));
+        this.setLocale((Locale) params.get("locale"));
         this.setTimeZone((TimeZone) params.get("timeZone"));
-	}
+    }
 
     @Override
     public void reset() {
@@ -130,46 +149,38 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.AbstractExecutio
         }
     }
 
-    public void setDelegator(Delegator delegator) {
-		if (delegator != null) {
-			this.delegator = delegator;
-		}
-	}
-
-	public void setDispatcher(LocalDispatcher dispatcher) {
-		if (dispatcher != null) {
-			this.dispatcher = dispatcher;
-		}
-	}
-
-	public void setSecurity(AuthorizationManager security) {
-		if (security != null) {
-			this.security = security;
-		}
-	}
-
-	public void setUserLogin(GenericValue userLogin) {
-	    if (userLogin != null) {
-	        this.userLogin = userLogin;
-	        this.resetUserPreferences();
-	    }
-	}
-
-    public void clearUserData() {
-        this.userLogin = null;
-        this.resetUserPreferences();
-    }
-
-    @Override
-    public void endRunUnprotected() {
-        if (!this.managerList.isEmpty()) {
-            this.setSecurity(this.managerList.removeLast());
-        }
-    }
-
     @Override
     public void runUnprotected() {
         this.managerList.addLast(getSecurity());
         this.setSecurity(nullAuthorizationManager);
+    }
+
+    @Override
+    public void setDelegator(Delegator delegator) {
+        if (delegator != null) {
+            this.delegator = delegator;
+        }
+    }
+
+    @Override
+    public void setDispatcher(LocalDispatcher dispatcher) {
+        if (dispatcher != null) {
+            this.dispatcher = dispatcher;
+        }
+    }
+
+    @Override
+    public void setSecurity(AuthorizationManager security) {
+        if (security != null) {
+            this.security = security;
+        }
+    }
+
+    @Override
+    public void setUserLogin(GenericValue userLogin) {
+        if (userLogin != null) {
+            this.userLogin = userLogin;
+            this.resetUserPreferences();
+        }
     }
 }
