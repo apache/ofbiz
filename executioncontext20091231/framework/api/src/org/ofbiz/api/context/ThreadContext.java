@@ -24,7 +24,6 @@ import java.util.TimeZone;
 
 import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.api.authorization.AuthorizationManager;
-import org.ofbiz.api.authorization.NullAuthorizationManager;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilProperties;
 
@@ -34,7 +33,6 @@ import org.ofbiz.base.util.UtilProperties;
 public class ThreadContext {
 
     protected static final String module = ThreadContext.class.getName();
-    protected static final AuthorizationManager nullAuthorizationManager = new NullAuthorizationManager();
 
     protected static final ThreadLocal<ExecutionContext> executionContext = new ThreadLocal<ExecutionContext>() {
         protected synchronized ExecutionContext initialValue() {
@@ -50,19 +48,8 @@ public class ThreadContext {
         }
     };
 
-    /** Used by <code>runUnprotected</code> and <code>endRunUnprotected</code>
-     * to save/restore the original <code>AuthorizationManager</code> instance.
-     */
-    protected static final ThreadLocal<AuthorizationManager> authManager = new ThreadLocal<AuthorizationManager>() {
-        protected synchronized AuthorizationManager initialValue() {return null;};
-    };
-
     public static void endRunUnprotected() {
-        AuthorizationManager savedAuthorizationManager = authManager.get();
-        if (savedAuthorizationManager != null) {
-            setSecurity(savedAuthorizationManager);
-            authManager.set(null);
-        }
+        executionContext.get().endRunUnprotected();
     }
 
     public static AccessController getAccessController() {
@@ -126,8 +113,7 @@ public class ThreadContext {
     }
 
     public static void runUnprotected() {
-        authManager.set(getSecurity());
-        setSecurity(nullAuthorizationManager);
+        executionContext.get().runUnprotected();
     }
 
     public static void setCurrencyUom(String currencyUom) {
