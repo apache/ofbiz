@@ -87,8 +87,6 @@ under the License.
     <UserLoginSecurityGroup groupId="BIZADMIN" userLoginId="bizadmin" fromDate="2001-01-01 12:00:00.0"/>
 
     <UserToUserGroupRel userLoginId="anonymous" groupId="OFBIZ_USERS"/>
-    <UserToUserGroupRel userLoginId="system" groupId="OFBIZ_USERS"/>
-    <UserToUserGroupRel userLoginId="admin" groupId="OFBIZ_USERS"/>
     <UserToUserGroupRel userLoginId="flexadmin" groupId="OFBIZ_USERS"/>
     <UserToUserGroupRel userLoginId="demoadmin" groupId="OFBIZ_USERS"/>
     <UserToUserGroupRel userLoginId="ltdadmin" groupId="OFBIZ_USERS"/>
@@ -96,5 +94,6 @@ under the License.
     <UserToUserGroupRel userLoginId="bizadmin" groupId="OFBIZ_USERS"/>
 
     <UserToArtifactPermRel userLoginId="admin" artifactPath="ofbiz" permissionValue="admin=true"/>
+    <UserToArtifactPermRel userLoginId="system" artifactPath="ofbiz" permissionValue="admin=true"/>
 
 </entity-engine-xml>

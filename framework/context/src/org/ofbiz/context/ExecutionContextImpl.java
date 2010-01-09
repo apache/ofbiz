@@ -22,8 +22,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import javolution.util.FastList;
+
 import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.api.authorization.AuthorizationManager;
+import org.ofbiz.api.authorization.NullAuthorizationManager;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.entity.DelegatorFactory;
@@ -38,6 +41,11 @@ import org.ofbiz.service.LocalDispatcher;
 public class ExecutionContextImpl extends org.ofbiz.api.context.AbstractExecutionContext implements ExecutionContext {
 
     public static final String module = ExecutionContextImpl.class.getName();
+    protected static final AuthorizationManager nullAuthorizationManager = new NullAuthorizationManager();
+    /** Used by <code>runUnprotected</code> and <code>endRunUnprotected</code>
+     * to save/restore the original <code>AuthorizationManager</code> instance.
+     */
+    protected final FastList<AuthorizationManager> managerList = FastList.newInstance();
     protected Delegator delegator = null;
     protected LocalDispatcher dispatcher = null;
     protected AuthorizationManager security = null;
@@ -105,6 +113,7 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.AbstractExecutio
     @Override
     public void reset() {
         super.reset();
+        this.managerList.clear();
         this.delegator = null;
         this.dispatcher = null;
         this.security = null;
@@ -149,5 +158,18 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.AbstractExecutio
     public void clearUserData() {
         this.userLogin = null;
         this.resetUserPreferences();
+    }
+
+    @Override
+    public void endRunUnprotected() {
+        if (!this.managerList.isEmpty()) {
+            this.setSecurity(this.managerList.removeLast());
+        }
+    }
+
+    @Override
+    public void runUnprotected() {
+        this.managerList.addLast(getSecurity());
+        this.setSecurity(nullAuthorizationManager);
     }
 }

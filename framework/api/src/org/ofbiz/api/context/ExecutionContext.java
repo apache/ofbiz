@@ -45,6 +45,12 @@ import org.ofbiz.api.authorization.AuthorizationManager;
  */
 public interface ExecutionContext {
 
+    /**
+     * Restores the <code>AuthorizationManager</code> instance that was in use
+     * before the last <code>runUnprotected</code> method call.
+     */
+    public void endRunUnprotected();
+
     /** Returns an <code>AccessController</code> instance for this
      * user login and execution path combination.
      * 
@@ -119,6 +125,12 @@ public interface ExecutionContext {
      * instance is about to be reused.
      */
     public void reset();
+
+    /**
+     * Replaces the current <code>AuthorizationManager</code> instance
+     * with one that allows unrestricted use of all artifacts.
+     */
+    public void runUnprotected();
 
     /** Sets the currency unit of measure.
      * 
