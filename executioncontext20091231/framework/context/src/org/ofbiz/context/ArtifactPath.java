@@ -21,14 +21,19 @@ package org.ofbiz.context;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import javolution.text.TextBuilder;
+import javolution.util.FastList;
+
 /** Artifact path class. */
-public class ArtifactPath implements Cloneable, Iterator<String> {
+public class ArtifactPath implements Iterator<String> {
 
     public static final ArtifactPath PATH_ROOT = new ArtifactPath("ofbiz");
     public static final String ELEMENT_SEPARATOR = "/";
 
     protected int currentIndex = 0;
     protected final String[] pathElementArray;
+    protected FastList<Integer> stack = null;
+    protected final TextBuilder stringBuilder = TextBuilder.newInstance();
 
     public ArtifactPath(String artifactPath) {
         this.pathElementArray = artifactPath.split(ELEMENT_SEPARATOR);
@@ -38,22 +43,18 @@ public class ArtifactPath implements Cloneable, Iterator<String> {
         this.pathElementArray = pathElementArray;
     }
 
-    @Override
-    public ArtifactPath clone() {
-        ArtifactPath newPath = new ArtifactPath(this.pathElementArray);
-        newPath.currentIndex = this.currentIndex;
-        return newPath;
-    }
-
     public String getCurrentPath() {
-        StringBuilder sb = new StringBuilder();
+        if (this.pathElementArray.length == 1 || !this.hasNext()) {
+            return this.pathElementArray[this.currentIndex];
+        }
+        this.stringBuilder.clear();
         for (int i = this.currentIndex; i < this.pathElementArray.length; i++) {
             if (i != this.currentIndex) {
-                sb.append(ELEMENT_SEPARATOR);
+                stringBuilder.append(ELEMENT_SEPARATOR);
             }
-            sb.append(this.pathElementArray[i]);
+            stringBuilder.append(this.pathElementArray[i]);
         }
-        return sb.toString();
+        return stringBuilder.toString();
     }
 
     public String getCurrentPathElement() {
@@ -76,5 +77,18 @@ public class ArtifactPath implements Cloneable, Iterator<String> {
     @Override
     public void remove() {
         throw new UnsupportedOperationException();
+    }
+
+    public void restoreState() {
+        if (this.stack == null) {
+            this.stack = FastList.newInstance();
+        }
+        this.stack.addLast(this.currentIndex);
+    }
+
+    public void saveState() {
+        if (this.stack != null && !this.stack.isEmpty()) {
+            this.currentIndex = this.stack.removeLast();
+        }
     }
 }

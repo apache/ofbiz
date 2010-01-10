@@ -41,18 +41,18 @@ public class AccessControllerImpl implements AccessController {
     public static final String module = AccessControllerImpl.class.getName();
 
     protected final OFBizPermission permission;
-    protected final PathNode node;
+    protected final PermissionsGatherer permissionsGatherer;
     // Temporary - will be removed later
     protected boolean verbose = false;
     protected boolean disabled = false;
 
     protected AccessControllerImpl(PathNode node) {
-        this.node = node;
+        this.permissionsGatherer = new PermissionsGatherer(node);
         this.permission = new OFBizPermission(ThreadContext.getUserLogin().getString("userLoginId"));
         this.verbose = "true".equals(UtilProperties.getPropertyValue("api.properties", "authorizationManager.verbose"));
         this.disabled = "true".equals(UtilProperties.getPropertyValue("api.properties", "authorizationManager.disabled"));
         if (this.verbose) {
-            Debug.logInfo("Permissions for " + ThreadContext.getUserLogin().getString("userLoginId") + ": \n" + this.node, module);
+            Debug.logInfo("Permissions for " + ThreadContext.getUserLogin().getString("userLoginId") + ": \n" + node, module);
         }
     }
 
@@ -61,7 +61,7 @@ public class AccessControllerImpl implements AccessController {
             Debug.logInfo("Checking permission: " + ThreadContext.getExecutionPath() + "[" + permission + "]", module);
         }
         this.permission.reset();
-        this.node.getPermissions(new ArtifactPath(ThreadContext.getExecutionPath()), this.permission);
+        this.permissionsGatherer.gatherPermissions(new ArtifactPath(ThreadContext.getExecutionPath()), this.permission);
         if (this.verbose) {
             Debug.logInfo("Found permission(s): " + ThreadContext.getUserLogin().getString("userLoginId") +
                     "@" + ThreadContext.getExecutionPath() + "[" + this.permission + "]", module);
