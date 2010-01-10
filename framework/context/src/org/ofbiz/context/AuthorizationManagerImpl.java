@@ -90,9 +90,10 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
     }
 
     protected static void setPermissions(String id, PathNode node, List<GenericValue> permissionValues) throws AuthorizationManagerException {
+        PermissionTreeBuilder builder = new PermissionTreeBuilder();
         for (GenericValue value : permissionValues) {
-            String artifactPath = value.getString("artifactPath");
-            OFBizPermission target = new OFBizPermission(id + "@" + artifactPath);
+            String artifactPathString = value.getString("artifactPath");
+            OFBizPermission target = new OFBizPermission(id + "@" + artifactPathString);
             String[] pair = value.getString("permissionValue").split("=");
             if ("filter".equalsIgnoreCase(pair[0])) {
                 target.addFilter(pair[1]);
@@ -110,7 +111,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
                     throw new AuthorizationManagerException("Invalid permission: " + pair[0]);
                 }
             }
-            node.setPermissions(new ArtifactPath(artifactPath), target);
+            builder.buildPermissionTree(node, new ArtifactPath(artifactPathString), target);
         }
     }
 
