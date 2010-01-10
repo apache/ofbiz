@@ -79,14 +79,14 @@ public class ArtifactPath implements Iterator<String> {
         throw new UnsupportedOperationException();
     }
 
-    public void restoreState() {
+    public void saveState() {
         if (this.stack == null) {
             this.stack = FastList.newInstance();
         }
         this.stack.addLast(this.currentIndex);
     }
 
-    public void saveState() {
+    public void restoreState() {
         if (this.stack != null && !this.stack.isEmpty()) {
             this.currentIndex = this.stack.removeLast();
         }
