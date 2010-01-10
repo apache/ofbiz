@@ -26,6 +26,7 @@ import javolution.util.FastList;
 
 import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.api.authorization.AuthorizationManager;
+import org.ofbiz.api.authorization.AuthorizationManagerException;
 import org.ofbiz.api.authorization.NullAuthorizationManager;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilProperties;
@@ -41,7 +42,8 @@ import org.ofbiz.service.LocalDispatcher;
 public class ExecutionContextImpl extends org.ofbiz.api.context.AbstractExecutionContext implements ExecutionContext {
 
     public static final String module = ExecutionContextImpl.class.getName();
-    protected static final AuthorizationManager nullAuthorizationManager = new NullAuthorizationManager();
+    protected static final AccessController accessDeniedController = new AccessDeniedController();
+    protected static final AuthorizationManager unrestrictedAuthorizationManager = new NullAuthorizationManager(new AccessGrantedController());
     /** Used by <code>runUnprotected</code> and <code>endRunUnprotected</code>
      * to save/restore the original <code>AuthorizationManager</code> instance.
      */
@@ -66,7 +68,12 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.AbstractExecutio
 
     @Override
     public AccessController getAccessController() {
-        return this.getSecurity().getAccessController();
+        try {
+            return this.getSecurity().getAccessController();
+        } catch (AuthorizationManagerException e) {
+            Debug.logError(e, module);
+        }
+        return accessDeniedController;
     }
 
     @Override
@@ -152,7 +159,7 @@ public class ExecutionContextImpl extends org.ofbiz.api.context.AbstractExecutio
     @Override
     public void runUnprotected() {
         this.managerList.addLast(getSecurity());
-        this.setSecurity(nullAuthorizationManager);
+        this.setSecurity(unrestrictedAuthorizationManager);
     }
 
     @Override

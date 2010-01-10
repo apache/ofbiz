@@ -20,36 +20,17 @@ package org.ofbiz.api.authorization;
 
 import java.security.AccessControlException;
 import java.security.Permission;
-import java.util.List;
-import java.util.ListIterator;
 
-import org.ofbiz.api.context.ThreadContext;
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilProperties;
-
-/** An implementation of <code>AuthorizationManager</code> that allows
- * unrestricted access to all security-aware artifacts. This class
- * is intended to be used in situations where user permissions are
- * not available or accessible (the initial data load for example).
- * <p>Extreme care should be taken when using this class so that
- * security holes are not introduced. A recommended strategy is:<br><br>
- * <ul>
- * <li>Save the current <code>AuthorizationManager</code> instance in
- * a local variable - using <code>ExecutionContext.getSecurity()</code>.</li>
- * <li>Call <code>ExecutionContext.setSecurity(...)</code> with a
- * <code>NullAuthorizationManager</code> instance.</li>
- * <li>Perform the unrestricted tasks.</li>
- * <li>Restore the original <code>AuthorizationManager</code> by
- * calling <code>ExecutionContext.setSecurity(...)</code> with the
- * saved <code>AuthorizationManager</code> instance.</li>
- * </ul></p>
- * 
- */
 public class NullAuthorizationManager implements AuthorizationManager {
 
-    protected static final String module = NullAuthorizationManager.class.getName();
-    protected static final AccessController nullAccessController = new NullAccessController();
+    public static final String module = NullAuthorizationManager.class.getName();
 
+    protected final AccessController accessController;
+    
+    public NullAuthorizationManager(AccessController accessController) {
+        this.accessController = accessController;
+    }
+    
     public void assignGroupPermission(String userGroupId, String artifactId,
             Permission permission) {
     }
@@ -98,35 +79,6 @@ public class NullAuthorizationManager implements AuthorizationManager {
     }
 
     public AccessController getAccessController() throws AccessControlException {
-        return nullAccessController;
+        return this.accessController;
     }
-
-    /** An implementation of the <code>AccessController</code> interface
-     * that allows unrestricted access to all security-aware artifacts.
-     */
-    protected static class NullAccessController implements AccessController {
-
-        // Temporary - will be removed later
-        protected boolean verbose = false;
-        protected NullAccessController() {
-            this.verbose = "true".equals(UtilProperties.getPropertyValue("api.properties", "authorizationManager.verbose"));
-        }
-
-        public <E> List<E> applyFilters(List<E> list) {
-            return list;
-        }
-
-        public <E> ListIterator<E> applyFilters(ListIterator<E> list) {
-            return list;
-        }
-
-        public void checkPermission(Permission permission) throws AccessControlException {
-            if (this.verbose) {
-                Debug.logInfo("Checking permission: " + ThreadContext.getExecutionPath() + "[" + permission + "]", module);
-                Debug.logInfo("Found permission(s): " + 
-                        "null-access-controller@" + ThreadContext.getExecutionPath() + "[admin=true]", module);
-            }
-        }
-    }
-
 }
