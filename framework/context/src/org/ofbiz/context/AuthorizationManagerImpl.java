@@ -18,11 +18,11 @@
  *******************************************************************************/
 package org.ofbiz.context;
 
-import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.List;
 
 import org.ofbiz.api.authorization.AccessController;
+import org.ofbiz.api.authorization.AuthorizationManagerException;
 import org.ofbiz.api.authorization.BasicPermissions;
 import org.ofbiz.api.authorization.AuthorizationManager;
 import org.ofbiz.entity.Delegator;
@@ -46,91 +46,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
     public static final String module = AuthorizationManagerImpl.class.getName();
     protected static final UtilCache<String, AccessController> userPermCache = UtilCache.createUtilCache("authorization.UserPermissions");
 
-    public AuthorizationManagerImpl() {
-    }
-
-	public void assignGroupPermission(String userGroupId, String artifactId, Permission permission) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void assignGroupToGroup(String childGroupId, String parentGroupId) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void assignUserPermission(String userLoginId, String artifactId, Permission permission) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void assignUserToGroup(String userLoginId, String userGroupId) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void createUser(String userLoginId, String password) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public String createUserGroup(String description) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public void deleteGroupFromGroup(String childGroupId, String parentGroupId) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void deleteGroupPermission(String userGroupId, String artifactId, Permission permission) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void deleteUser(String userLoginId) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void deleteUserFromGroup(String userLoginId, String userGroupId) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void deleteUserGroup(String userGroupId) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void deleteUserPermission(String userLoginId, String artifactId, Permission permission) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void updateUser(String userLoginId, String password) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void updateUserGroup(String userGroupId, String description) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-    public void clearUserData(GenericValue userLogin) {
-        super.clearUserData(userLogin);
-        userPermCache.remove(userLogin.getString("userLogin"));
-    }
-
-    public AccessController getAccessController() throws AccessControlException {
-        String userLoginId = ThreadContext.getUserLogin().getString("userLoginId");
-        return getAccessController(userLoginId);
-	}
-
-    protected static AccessController getAccessController(String userLoginId) throws AccessControlException {
+    protected static AccessController getAccessController(String userLoginId) throws AuthorizationManagerException {
         AccessController accessController = userPermCache.get(userLoginId);
         if (accessController != null) {
             return accessController;
@@ -151,15 +67,14 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
                 accessController = new AccessControllerImpl(node);
                 userPermCache.put(userLoginId, accessController);
             } catch (GenericEntityException e) {
-                throw new AccessControlException(e.getMessage());
+                throw new AuthorizationManagerException(e);
             } finally {
                 ThreadContext.endRunUnprotected();
             }
         }
 	    return accessController;
 	}
-
-    protected static void processGroupPermissions(String groupId, PathNode node, Delegator delegator) throws AccessControlException {
+	protected static void processGroupPermissions(String groupId, PathNode node, Delegator delegator) throws AuthorizationManagerException {
         try {
             // Process this group's memberships first
             List<GenericValue> parentGroups = delegator.findList("UserGroupRelationship", EntityCondition.makeCondition(UtilMisc.toMap("toGroupId", groupId)), null, null, null, false);
@@ -170,11 +85,11 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
             List<GenericValue> permissionValues = delegator.findList("UserGrpToArtifactPermRel", EntityCondition.makeCondition(UtilMisc.toMap("groupId", groupId)), null, null, null, false);
             setPermissions(groupId, node, permissionValues);
         } catch (GenericEntityException e) {
-            throw new AccessControlException(e.getMessage());
+            throw new AuthorizationManagerException(e.getMessage());
         }
     }
 
-    protected static void setPermissions(String id, PathNode node, List<GenericValue> permissionValues) {
+    protected static void setPermissions(String id, PathNode node, List<GenericValue> permissionValues) throws AuthorizationManagerException {
         for (GenericValue value : permissionValues) {
             String artifactPath = value.getString("artifactPath");
             OFBizPermission target = new OFBizPermission(id + "@" + artifactPath);
@@ -192,11 +107,98 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
                         target.excludePermissions.getPermissionsSet().add(permission);
                     }
                 } else {
-                    throw new AccessControlException("Invalid permission: " + pair[0]);
+                    throw new AuthorizationManagerException("Invalid permission: " + pair[0]);
                 }
             }
             node.setPermissions(new ArtifactPath(artifactPath), target);
         }
     }
 
+    public AuthorizationManagerImpl() {
+    }
+
+    @Override
+    public void assignGroupPermission(String userGroupId, String artifactId, Permission permission) throws AuthorizationManagerException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void assignGroupToGroup(String childGroupId, String parentGroupId) throws AuthorizationManagerException {
+        // TODO Auto-generated method stub
+        
+    }
+    @Override
+    public void assignUserPermission(String userLoginId, String artifactId, Permission permission) throws AuthorizationManagerException {
+        // TODO Auto-generated method stub
+        
+    }
+    @Override
+    public void assignUserToGroup(String userLoginId, String userGroupId) throws AuthorizationManagerException {
+        // TODO Auto-generated method stub
+        
+    }
+    @Override
+    public void clearUserData(GenericValue userLogin) {
+        super.clearUserData(userLogin);
+        userPermCache.remove(userLogin.getString("userLogin"));
+    }
+    @Override
+    public void createUser(String userLoginId, String password) throws AuthorizationManagerException {
+        // TODO Auto-generated method stub
+        
+    }
+    @Override
+    public String createUserGroup(String description) throws AuthorizationManagerException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    @Override
+    public void deleteGroupFromGroup(String childGroupId, String parentGroupId) throws AuthorizationManagerException {
+        // TODO Auto-generated method stub
+        
+    }
+    @Override
+    public void deleteGroupPermission(String userGroupId, String artifactId, Permission permission) throws AuthorizationManagerException {
+        // TODO Auto-generated method stub
+        
+    }
+    @Override
+    public void deleteUser(String userLoginId) throws AuthorizationManagerException {
+        // TODO Auto-generated method stub
+        
+    }
+    @Override
+    public void deleteUserFromGroup(String userLoginId, String userGroupId) throws AuthorizationManagerException {
+        // TODO Auto-generated method stub
+        
+    }
+    @Override
+    public void deleteUserGroup(String userGroupId) throws AuthorizationManagerException {
+        // TODO Auto-generated method stub
+        
+    }
+    @Override
+    public void deleteUserPermission(String userLoginId, String artifactId, Permission permission) throws AuthorizationManagerException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public AccessController getAccessController() throws AuthorizationManagerException {
+        String userLoginId = ThreadContext.getUserLogin().getString("userLoginId");
+        return getAccessController(userLoginId);
+	}
+
+    @Override
+    public void updateUser(String userLoginId, String password) throws AuthorizationManagerException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void updateUserGroup(String userGroupId, String description) throws AuthorizationManagerException {
+        // TODO Auto-generated method stub
+        
+    }
 }
