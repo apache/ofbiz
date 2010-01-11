@@ -64,6 +64,10 @@ public class ThreadContext {
         return executionContext.get().getExecutionPath();
     }
 
+    public static String[] getExecutionPathAsArray() {
+        return executionContext.get().getExecutionPathAsArray();
+    }
+
     public static Locale getLocale() {
         return executionContext.get().getLocale();
     }

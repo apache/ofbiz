@@ -32,6 +32,8 @@ import org.ofbiz.base.util.UtilProperties;
 public abstract class AbstractExecutionContext implements ExecutionContext {
 
     public static final String module = AbstractExecutionContext.class.getName();
+    public static final String PATH_ROOT_NODE_NAME = "ofbiz";
+    public static final String PATH_ELEMENT_SEPARATOR = "/";
 
     protected final FastList<ExecutionArtifact> artifactStack = FastList.newInstance();
 	protected String currencyUom = null;
@@ -66,13 +68,24 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
     }
 
 	public String getExecutionPath() {
-		StringBuilder sb = new StringBuilder("ofbiz");
+		StringBuilder sb = new StringBuilder(PATH_ROOT_NODE_NAME);
 		for (ExecutionArtifact artifact : this.artifactStack) {
-			sb.append("/");
+			sb.append(PATH_ELEMENT_SEPARATOR);
 			sb.append(artifact.getName() == null ? "null" : artifact.getName());
 		}
 		return sb.toString();
 	}
+
+    public String[] getExecutionPathAsArray() {
+        String[] strArray = new String[this.artifactStack.size() + 1];
+        strArray[0] = PATH_ROOT_NODE_NAME;
+        int index = 1;
+        for (ExecutionArtifact artifact : this.artifactStack) {
+            strArray[index] = artifact.getName();
+            index++;
+        }
+        return strArray;
+    }
 
 	public Locale getLocale() {
         return this.locale;

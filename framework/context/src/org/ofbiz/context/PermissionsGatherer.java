@@ -18,74 +18,24 @@
  *******************************************************************************/
 package org.ofbiz.context;
 
-import java.util.Map;
-
 import org.ofbiz.context.PathNode.BranchNode;
-import org.ofbiz.context.PathNode.SubstitutionNode;
-import org.ofbiz.context.PathNode.WildCardNode;
 
-public class PermissionsGatherer implements PathNodeVisitor {
-    protected ArtifactPath artifactPath;
-    protected final PathNode node;
-    protected OFBizPermission permission;
+public class PermissionsGatherer extends TreeWalker {
+    protected final OFBizPermission permission;
 
-    public PermissionsGatherer(PathNode node) {
-        this.node = node;
-    }
-
-    public void gatherPermissions(ArtifactPath artifactPath, OFBizPermission permission) {
-        this.artifactPath = artifactPath;
+    public PermissionsGatherer(PathNode node, OFBizPermission permission) {
+        super(node);
         this.permission = permission;
-        this.node.accept(this);
     }
 
-    protected void getChildNodePermissions(PathNode node, String key) {
-        if (node.childNodes != null) {
-            PathNode childNode = node.childNodes.get(key.toUpperCase());
-            if (childNode != null) {
-                childNode.accept(this);
-            }
-        }
+    public void gatherPermissions(ArtifactPath artifactPath) {
+        this.permission.reset();
+        super.walkTree(artifactPath);
     }
 
     @Override
     public void visit(BranchNode node) {
         this.permission.accumulatePermissions(node.permission);
-        if (this.artifactPath.hasNext()) {
-            String key = this.artifactPath.next();
-            if (node.substitutionNode != null) {
-                this.artifactPath.saveState();
-                node.substitutionNode.accept(this);
-                this.artifactPath.restoreState();
-            }
-            if (node.wildCardNode != null) {
-                this.artifactPath.saveState();
-                node.wildCardNode.accept(this);
-                this.artifactPath.restoreState();
-            }
-            this.getChildNodePermissions(node, key);
-        }
+        super.visit(node);
     }
-
-    @Override
-    public void visit(SubstitutionNode node) {
-        if (this.artifactPath.hasNext()) {
-            this.getChildNodePermissions(node, this.artifactPath.next());
-        }
-    }
-
-    @Override
-    public void visit(WildCardNode node) {
-        if (this.artifactPath.hasNext() && node.childNodes != null) {
-            this.artifactPath.next();
-            String currentPath = this.artifactPath.getCurrentPath().toUpperCase();
-            for (Map.Entry<String, PathNode> entry : node.childNodes.entrySet()) {
-                if (currentPath.endsWith(entry.getKey())) {
-                    entry.getValue().accept(this);
-                    return;
-                }
-            }
-        }
-    }
-
 }

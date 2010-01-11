@@ -64,12 +64,20 @@ public interface ExecutionContext {
      */
     public String getCurrencyUom();
 
-    /** Returns the current execution path. Artifacts in the path are separated
+    /** Returns the current execution path. Artifact names are separated
      * with a forward slash.
      * 
      * @return The current execution path
      */
     public String getExecutionPath();
+
+    /** Returns the current execution path as an array of strings.
+     * Each array element contains an Artifact name, with the
+     * first element containing the path root.
+     * 
+     * @return The current execution path as an array
+     */
+    public String[] getExecutionPathAsArray();
 
     /** Returns the current <code>Locale</code>.
      * 
