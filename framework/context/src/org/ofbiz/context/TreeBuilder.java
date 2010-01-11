@@ -84,8 +84,7 @@ public class TreeBuilder implements PathNodeVisitor {
     @Override
     public void visit(WildCardNode node) {
         if (this.artifactPath.hasNext()) {
-            this.artifactPath.next();
-            this.addChildNode(node, this.artifactPath.getCurrentPath());
+            this.addChildNode(node, this.artifactPath.next());
         }
     }
 }

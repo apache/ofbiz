@@ -1,6 +1,38 @@
 ExecutionContext and Security-Aware Artifacts Notes
 ---------------------------------------------------
 
+2010-01-11: The ExecutionContext implementation is fairly complete.
+
+The security-aware artifacts implementation is mostly complete
+(the AuthorizationManager CRUD methods are not written and the
+EntityListIterator is not security-aware), but its use
+in the branch is still proof-of-concept. In other words, the
+design is implemented and working, but very little of the project uses it.
+
+Some examples: The screen renderer doesn't catch the security exceptions,
+so when a user is denied access to an artifact they get the JSP error page.
+Also, the main navigation doesn't display the Example component tab because
+the Freemarker template is still checking the old-style permissions.
+
+---------------------------------------------------
+
+2010-01-05: Artifact paths now support substitution ("?")
+and wildcard ("*") path elements.
+This solves an issue that was discussed during the design - how
+to grant access to a particular artifact regardless of the
+execution path. You can see examples of their use in
+framework/security/data/SecurityData.xml and
+framework/example/data/ExampleSecurityData.xml.
+
+The Example component has been converted to the new
+security design.
+
+The Execution Context seems to fulfill all needs so far, and it
+works pretty well, so its API could be considered stable at
+this time.
+
+---------------------------------------------------
+
 2009-12-31: I put this text file in the branch as a means
 of keeping anyone who is interested updated on the progress
 of the branch.
@@ -64,19 +96,3 @@ The Authorization Manager is mostly working. Filtering
 EntityListIterator values is not implemented due to architectural
 problems.
 
----------------------------------------------------
-
-2010-01-05: Artifact paths now support substitution ("?")
-and wildcard ("*") path elements.
-This solves an issue that was discussed during the design - how
-to grant access to a particular artifact regardless of the
-execution path. You can see examples of their use in
-framework/security/data/SecurityData.xml and
-framework/example/data/ExampleSecurityData.xml.
-
-The Example component has been converted to the new
-security design.
-
-The Execution Context seems to fulfill all needs so far, and it
-works pretty well, so its API could be considered stable at
-this time.
