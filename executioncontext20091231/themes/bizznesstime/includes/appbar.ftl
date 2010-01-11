@@ -28,7 +28,7 @@ under the License.
             <div id="header-nav" class="clearfix" style="display:none">
                 <ul>
                 <li><h4>${uiLabelMap.CommonPrimaryApps}</h4></li>
-                    <#list displayApps as display>
+            <#list displayApps as display>
               <#assign thisApp = display.getContextRoot()>
               <#assign permission = true>
               <#assign selected = false>
@@ -39,6 +39,9 @@ under the License.
                   <#assign permission = false>
                 </#if>
               </#list>
+              <@ofbizSecurity permission="view" artifactId=thisApp>
+                <#assign permission = true>
+              </@ofbizSecurity>
               <#if permission == true>
                 <#if thisApp == contextPath || contextPath + "/" == thisApp>
                   <#assign selected = true>

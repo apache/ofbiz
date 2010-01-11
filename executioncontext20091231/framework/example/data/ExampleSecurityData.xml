@@ -30,5 +30,9 @@ under the License.
     <UserToArtifactPermRel userLoginId="artifact-user" artifactPath="ofbiz/example" permissionValue="update=true"/>
     <ArtifactPath artifactPath="ofbiz/example/*/anotherDate" description="Example Application - 'anotherDate' field"/>
     <UserToArtifactPermRel userLoginId="artifact-user" artifactPath="ofbiz/example/*/anotherDate" permissionValue="view=false"/>
+    <ArtifactPath artifactPath="ofbiz/example/*/appbar"/>
+    <ArtifactPath artifactPath="ofbiz/example/*/appbar/example"/>
+    <UserToArtifactPermRel userLoginId="artifact-user" artifactPath="ofbiz/example/*/appbar" permissionValue="view=false"/>
+    <UserToArtifactPermRel userLoginId="artifact-user" artifactPath="ofbiz/example/*/appbar/example" permissionValue="view=true"/>
 
 </entity-engine-xml>

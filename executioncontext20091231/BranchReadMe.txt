@@ -9,10 +9,8 @@ EntityListIterator is not security-aware), but its use
 in the branch is still proof-of-concept. In other words, the
 design is implemented and working, but very little of the project uses it.
 
-Some examples: The screen renderer doesn't catch the security exceptions,
+Example: The screen renderer doesn't catch the security exceptions,
 so when a user is denied access to an artifact they get the JSP error page.
-Also, the main navigation doesn't display the Example component tab because
-the Freemarker template is still checking the old-style permissions.
 
 ---------------------------------------------------
 
