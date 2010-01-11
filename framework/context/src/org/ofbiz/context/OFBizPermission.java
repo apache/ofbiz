@@ -135,7 +135,11 @@ public class OFBizPermission extends Permission {
         StringBuilder sb = new StringBuilder();
         sb.append(this.includePermissions);
         sb.append(" ");
-        sb.append(this.excludePermissions);
+        if (this.excludePermissions.getPermissionsSet().size() > 0) {
+            sb.append("!(");
+            sb.append(this.excludePermissions);
+            sb.append(")");
+        }
         for (String filter : this.filters) {
             sb.append(" filter=");
             sb.append(filter);

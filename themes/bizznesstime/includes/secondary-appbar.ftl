@@ -38,6 +38,9 @@ under the License.
           <#assign permission = false>
         </#if>
       </#list>
+      <@ofbizSecurity permission="view" artifactId=thisApp>
+        <#assign permission = true>
+      </@ofbizSecurity>
       <#if permission == true>
         <#if thisApp == contextPath || contextPath + "/" == thisApp>
           <#assign selected = true>

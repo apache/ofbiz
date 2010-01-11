@@ -71,20 +71,31 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
 		StringBuilder sb = new StringBuilder(PATH_ROOT_NODE_NAME);
 		for (ExecutionArtifact artifact : this.artifactStack) {
 			sb.append(PATH_ELEMENT_SEPARATOR);
-			sb.append(artifact.getName() == null ? "null" : artifact.getName());
+			sb.append(artifact.getName());
 		}
 		return sb.toString();
 	}
 
     public String[] getExecutionPathAsArray() {
-        String[] strArray = new String[this.artifactStack.size() + 1];
-        strArray[0] = PATH_ROOT_NODE_NAME;
-        int index = 1;
+        FastList<String> elementList = FastList.newInstance();
+        elementList.add(PATH_ROOT_NODE_NAME);
         for (ExecutionArtifact artifact : this.artifactStack) {
-            strArray[index] = artifact.getName();
-            index++;
+            String artifactName = artifact.getName();
+            if (artifactName.contains(PATH_ELEMENT_SEPARATOR)) {
+                String[] strArray = artifactName.split(PATH_ELEMENT_SEPARATOR);
+                for (int i = 0; i < strArray.length; i++) {
+                    elementList.add(strArray[i]);
+                }
+            } else {
+                elementList.add(artifactName);
+            }
         }
-        return strArray;
+        String[] elementArray = new String[elementList.size()];
+        int index = 0;
+        for (String artifactName : elementList) {
+            elementArray[index++] = artifactName;
+        }
+        return elementArray;
     }
 
 	public Locale getLocale() {
