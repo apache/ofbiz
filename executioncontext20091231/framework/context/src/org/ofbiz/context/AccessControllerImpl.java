@@ -31,9 +31,9 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.service.DispatchContext;
-import org.ofbiz.service.ThreadContext;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
+import org.ofbiz.service.ThreadContext;
 
 /** An implementation of the <code>AccessController</code> interface. */
 public class AccessControllerImpl implements AccessController {
@@ -47,33 +47,13 @@ public class AccessControllerImpl implements AccessController {
     protected boolean disabled = false;
 
     protected AccessControllerImpl(PathNode node) {
-        this.permissionsGatherer = new PermissionsGatherer(node);
         this.permission = new OFBizPermission(ThreadContext.getUserLogin().getString("userLoginId"));
+        this.permissionsGatherer = new PermissionsGatherer(node, this.permission);
         this.verbose = "true".equals(UtilProperties.getPropertyValue("api.properties", "authorizationManager.verbose"));
         this.disabled = "true".equals(UtilProperties.getPropertyValue("api.properties", "authorizationManager.disabled"));
         if (this.verbose) {
             Debug.logInfo("Permissions for " + ThreadContext.getUserLogin().getString("userLoginId") + ": \n" + node, module);
         }
-    }
-
-    public void checkPermission(Permission permission) throws AccessControlException {
-        if (this.verbose) {
-            Debug.logInfo("Checking permission: " + ThreadContext.getExecutionPath() + "[" + permission + "]", module);
-        }
-        this.permission.reset();
-        this.permissionsGatherer.gatherPermissions(new ArtifactPath(ThreadContext.getExecutionPath()), this.permission);
-        if (this.verbose) {
-            Debug.logInfo("Found permission(s): " + ThreadContext.getUserLogin().getString("userLoginId") +
-                    "@" + ThreadContext.getExecutionPath() + "[" + this.permission + "]", module);
-        }
-        if (this.disabled) {
-            return;
-        }
-        if (this.permission.implies(permission) && this.hasServicePermission()) {
-            return;
-        }
-        throw new AccessControlException(ThreadContext.getUserLogin().getString("userLoginId") +
-                "@" + ThreadContext.getExecutionPath() + "[" + permission + "]");
     }
 
     public <E> List<E> applyFilters(List<E> list) {
@@ -92,6 +72,25 @@ public class AccessControllerImpl implements AccessController {
             return new SecurityAwareListIterator<E>(listIterator, this.permission.getFilterNames());
         }
         return listIterator;
+    }
+
+    public void checkPermission(Permission permission) throws AccessControlException {
+        if (this.verbose) {
+            Debug.logInfo("Checking permission: " + ThreadContext.getExecutionPath() + "[" + permission + "]", module);
+        }
+        this.permissionsGatherer.gatherPermissions(new ArtifactPath(ThreadContext.getExecutionPathAsArray()));
+        if (this.verbose) {
+            Debug.logInfo("Found permission(s): " + ThreadContext.getUserLogin().getString("userLoginId") +
+                    "@" + ThreadContext.getExecutionPath() + "[" + this.permission + "]", module);
+        }
+        if (this.disabled) {
+            return;
+        }
+        if (this.permission.implies(permission) && this.hasServicePermission()) {
+            return;
+        }
+        throw new AccessControlException(ThreadContext.getUserLogin().getString("userLoginId") +
+                "@" + ThreadContext.getExecutionPath() + "[" + permission + "]");
     }
 
     protected boolean hasServicePermission() {

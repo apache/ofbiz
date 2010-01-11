@@ -18,34 +18,19 @@
  *******************************************************************************/
 package org.ofbiz.context;
 
-import javolution.util.FastMap;
-
 import org.ofbiz.context.PathNode.BranchNode;
-import org.ofbiz.context.PathNode.SubstitutionNode;
-import org.ofbiz.context.PathNode.WildCardNode;
 
-public class PermissionTreeBuilder implements PathNodeVisitor {
+public class PermissionTreeBuilder extends TreeBuilder {
 
-    protected ArtifactPath artifactPath;
     protected OFBizPermission permission;
 
-    public void buildPermissionTree(PathNode node, ArtifactPath artifactPath, OFBizPermission permission) {
-        this.artifactPath = artifactPath;
-        this.permission = permission;
-        node.accept(this);
+    public PermissionTreeBuilder(PathNode node) {
+        super(node);
     }
 
-    protected void setChildNodePermissions(PathNode node, String key) {
-        if (node.childNodes == null) {
-            node.childNodes = FastMap.newInstance();
-        }
-        key = key.toUpperCase();
-        PathNode childNode = node.childNodes.get(key);
-        if (childNode == null) {
-            childNode = PathNode.getInstance(this.artifactPath);
-            node.childNodes.put(key, childNode);
-        }
-        childNode.accept(this);
+    public void build(ArtifactPath artifactPath, OFBizPermission permission) {
+        this.permission = permission;
+        super.build(artifactPath);
     }
 
     @Override
@@ -58,36 +43,6 @@ public class PermissionTreeBuilder implements PathNodeVisitor {
             }
             return;
         }
-        String key = this.artifactPath.next();
-        if (PathNode.SUBSTITUTION_CHARACTER.equals(key)) {
-            if (node.substitutionNode == null) {
-                node.substitutionNode = new SubstitutionNode();
-            }
-            node.substitutionNode.accept(this);
-            return;
-        }
-        if (PathNode.WILDCARD_CHARACTER.equals(key)) {
-            if (node.wildCardNode == null) {
-                node.wildCardNode = new WildCardNode();
-            }
-            node.wildCardNode.accept(this);
-            return;
-        }
-        this.setChildNodePermissions(node, key);
-    }
-
-    @Override
-    public void visit(SubstitutionNode node) {
-        if (this.artifactPath.hasNext()) {
-            this.setChildNodePermissions(node, this.artifactPath.next());
-        }
-    }
-
-    @Override
-    public void visit(WildCardNode node) {
-        if (this.artifactPath.hasNext()) {
-            this.artifactPath.next();
-            this.setChildNodePermissions(node, this.artifactPath.getCurrentPath());
-        }
+        super.visit(node);
     }
 }

@@ -18,18 +18,21 @@
  *******************************************************************************/
 package org.ofbiz.context;
 
+import java.security.AccessControlException;
 import java.security.Permission;
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.api.authorization.AuthorizationManagerException;
 import org.ofbiz.api.authorization.BasicPermissions;
 import org.ofbiz.api.authorization.AuthorizationManager;
+import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
-//import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.security.OFBizSecurity;
@@ -74,6 +77,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
         }
 	    return accessController;
 	}
+
 	protected static void processGroupPermissions(String groupId, PathNode node, Delegator delegator) throws AuthorizationManagerException {
         try {
             // Process this group's memberships first
@@ -90,7 +94,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
     }
 
     protected static void setPermissions(String id, PathNode node, List<GenericValue> permissionValues) throws AuthorizationManagerException {
-        PermissionTreeBuilder builder = new PermissionTreeBuilder();
+        PermissionTreeBuilder builder = new PermissionTreeBuilder(node);
         for (GenericValue value : permissionValues) {
             String artifactPathString = value.getString("artifactPath");
             OFBizPermission target = new OFBizPermission(id + "@" + artifactPathString);
@@ -111,7 +115,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
                     throw new AuthorizationManagerException("Invalid permission: " + pair[0]);
                 }
             }
-            builder.buildPermissionTree(node, new ArtifactPath(artifactPathString), target);
+            builder.build(new ArtifactPath(artifactPathString), target);
         }
     }
 

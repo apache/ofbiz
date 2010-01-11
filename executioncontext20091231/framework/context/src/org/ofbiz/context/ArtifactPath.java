@@ -24,11 +24,12 @@ import java.util.NoSuchElementException;
 import javolution.text.TextBuilder;
 import javolution.util.FastList;
 
+import org.ofbiz.api.context.AbstractExecutionContext;
+
 /** Artifact path class. */
 public class ArtifactPath implements Iterator<String> {
 
-    public static final ArtifactPath PATH_ROOT = new ArtifactPath("ofbiz");
-    public static final String ELEMENT_SEPARATOR = "/";
+    public static final ArtifactPath PATH_ROOT = new ArtifactPath(AbstractExecutionContext.PATH_ROOT_NODE_NAME);
 
     protected int currentIndex = 0;
     protected final String[] pathElementArray;
@@ -36,7 +37,7 @@ public class ArtifactPath implements Iterator<String> {
     protected final TextBuilder stringBuilder = TextBuilder.newInstance();
 
     public ArtifactPath(String artifactPath) {
-        this.pathElementArray = artifactPath.split(ELEMENT_SEPARATOR);
+        this.pathElementArray = artifactPath.split(AbstractExecutionContext.PATH_ELEMENT_SEPARATOR);
     }
     
     public ArtifactPath(String[] pathElementArray) {
@@ -50,7 +51,7 @@ public class ArtifactPath implements Iterator<String> {
         this.stringBuilder.clear();
         for (int i = this.currentIndex; i < this.pathElementArray.length; i++) {
             if (i != this.currentIndex) {
-                stringBuilder.append(ELEMENT_SEPARATOR);
+                stringBuilder.append(AbstractExecutionContext.PATH_ELEMENT_SEPARATOR);
             }
             stringBuilder.append(this.pathElementArray[i]);
         }

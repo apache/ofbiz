@@ -61,8 +61,7 @@ public class TreeStringBuilder implements PathNodeVisitor {
             }
             this.stringBuilder.append("[");
             this.stringBuilder.append(node.permission);
-            this.stringBuilder.append("]");
-            this.stringBuilder.append("\n");
+            this.stringBuilder.append("]\n");
         }
         if (node.substitutionNode != null) {
             node.substitutionNode.accept(this);
