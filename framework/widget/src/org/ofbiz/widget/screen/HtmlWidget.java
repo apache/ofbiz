@@ -19,13 +19,13 @@
 package org.ofbiz.widget.screen;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import javolution.util.FastMap;
 
+import org.ofbiz.api.context.ThreadContext;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.StringUtil;
@@ -44,7 +44,6 @@ import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.StringModel;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
@@ -188,41 +187,37 @@ public class HtmlWidget extends ModelScreenWidget {
          */
 
         if (location.endsWith(".ftl")) {
-            try {
-                Map<String, ? extends Object> parameters = UtilGenerics.checkMap(context.get("parameters"));
-                boolean insertWidgetBoundaryComments = ModelWidget.widgetBoundaryCommentsEnabled(parameters);
-                if (insertWidgetBoundaryComments) {
+            Map<String, ? extends Object> parameters = UtilGenerics.checkMap(context.get("parameters"));
+            Template template = null;
+            boolean insertWidgetBoundaryComments = ModelWidget.widgetBoundaryCommentsEnabled(parameters);
+            if (insertWidgetBoundaryComments) {
+                try {
                     writer.append(HtmlWidgetRenderer.formatBoundaryComment("Begin", "Template", location));
+                    if (location.endsWith(".fo.ftl")) { // FOP can't render correctly escaped characters
+                        template = FreeMarkerWorker.getTemplate(location);
+                    } else {
+                        template = FreeMarkerWorker.getTemplate(location, specialTemplateCache, specialConfig);
+                    }
+                } catch (Exception e) {
+                    String errMsg = "Error rendering included template at location [" + location + "]: ";
+                    Debug.logError(e, errMsg, module);
+                    writeError(writer, errMsg + e.toString());
+                    return;
                 }
-
-                //FreeMarkerWorker.renderTemplateAtLocation(location, context, writer);
-                Template template = null;
-                if (location.endsWith(".fo.ftl")) { // FOP can't render correctly escaped characters
-                    template = FreeMarkerWorker.getTemplate(location);
-                } else {
-                    template = FreeMarkerWorker.getTemplate(location, specialTemplateCache, specialConfig);
-                }
+            }
+            try {
+                String artifactName = template.getName().replace("component://", "").replace(".ftl", "");
+                ThreadContext.pushExecutionArtifact(location, artifactName);
                 FreeMarkerWorker.renderTemplate(template, context, writer);
-
                 if (insertWidgetBoundaryComments) {
                     writer.append(HtmlWidgetRenderer.formatBoundaryComment("End", "Template", location));
                 }
-            } catch (IllegalArgumentException e) {
-                String errMsg = "Error rendering included template at location [" + location + "]: " + e.toString();
+            } catch (Exception e) {
+                String errMsg = "Error rendering included template at location [" + location + "]: ";
                 Debug.logError(e, errMsg, module);
-                writeError(writer, errMsg);
-            } catch (MalformedURLException e) {
-                String errMsg = "Error rendering included template at location [" + location + "]: " + e.toString();
-                Debug.logError(e, errMsg, module);
-                writeError(writer, errMsg);
-            } catch (TemplateException e) {
-                String errMsg = "Error rendering included template at location [" + location + "]: " + e.toString();
-                Debug.logError(e, errMsg, module);
-                writeError(writer, errMsg);
-            } catch (IOException e) {
-                String errMsg = "Error rendering included template at location [" + location + "]: " + e.toString();
-                Debug.logError(e, errMsg, module);
-                writeError(writer, errMsg);
+                writeError(writer, errMsg + e.toString());
+            } finally {
+                ThreadContext.popExecutionArtifact();
             }
         } else {
             throw new IllegalArgumentException("Rendering not yet supported for the template at location: " + location);

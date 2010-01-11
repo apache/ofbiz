@@ -19,7 +19,6 @@
 package org.ofbiz.api.authorization;
 
 import java.io.IOException;
-import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.Map;
 
@@ -27,13 +26,12 @@ import org.ofbiz.api.context.ThreadContext;
 import org.ofbiz.base.util.Debug;
 
 import freemarker.core.Environment;
-import freemarker.ext.beans.BeanModel;
+import freemarker.ext.beans.StringModel;
 import freemarker.template.SimpleScalar;
-import freemarker.template.Template;
 import freemarker.template.TemplateDirectiveBody;
+import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
-import freemarker.template.TemplateDirectiveModel;
 
 /**
  * OfbizSecurityTransform - Security-aware Freemarker transform.
@@ -47,36 +45,47 @@ public class OfbizSecurityTransform implements TemplateDirectiveModel {
         if (body == null) {
             return;
         }
-        SimpleScalar obj = (SimpleScalar) params.get("artifactId");
-        if (obj == null) {
+        String artifactId = toString(params.get("artifactId"));
+        if (artifactId == null) {
             Debug.logError("artifactId parameter not found, unable to execute transform", module);
             return;
         }
-        String artifactId = obj.getAsString();
-        obj = (SimpleScalar) params.get("permission");
-        if (obj == null) {
+        String permStr = toString(params.get("permission"));
+        if (permStr == null) {
             Debug.logError("permission parameter not found, unable to execute transform", module);
             return;
         }
-        String permStr = obj.getAsString();
         Permission permission = BasicPermissions.ConversionMap.get(permStr.toUpperCase());
         if (permission == null) {
             Debug.logError("Unknown permission \"" + permStr + "\", unable to execute transform", module);
             return;
         }
-        BeanModel contextBean = (BeanModel)env.getVariable("executionContext");
-        if (contextBean == null) {
-            Debug.logError("ExecutionContext not found, unable to execute transform", module);
-            return;
-        }
-        Template template = env.getTemplate();
-        String location = template.getName();
-        ThreadContext.pushExecutionArtifact(location, artifactId);
-        AccessController accessController = ThreadContext.getAccessController();
         try {
-            accessController.checkPermission(permission);
+            ThreadContext.pushExecutionArtifact(module, artifactId);
+            ThreadContext.getAccessController().checkPermission(permission);
             body.render(env.getOut());
-        } catch (AccessControlException e) {}
-        ThreadContext.popExecutionArtifact();
+        } catch (Exception e) {
+        } finally {
+            ThreadContext.popExecutionArtifact();
+        }
+    }
+
+    protected static String toString(Object freeMarkerObject) {
+        String result = null;
+        if (freeMarkerObject != null) {
+            try {
+                StringModel modelObj = (StringModel) freeMarkerObject;
+                result = modelObj.getAsString();
+            } catch (Exception e) {
+                try {
+                    SimpleScalar scalarObj = (SimpleScalar) freeMarkerObject;
+                    result = scalarObj.getAsString();
+                } catch (Exception e2) {}
+            }
+            if (result != null) {
+                result = result.replace("&#47;", "");
+            }
+        }
+        return result;
     }
 }
