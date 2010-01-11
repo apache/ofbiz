@@ -18,8 +18,6 @@
  *******************************************************************************/
 package org.ofbiz.context;
 
-import java.util.Map;
-
 import org.ofbiz.context.PathNode.BranchNode;
 import org.ofbiz.context.PathNode.SubstitutionNode;
 import org.ofbiz.context.PathNode.WildCardNode;
@@ -59,12 +57,12 @@ public class TreeWalker implements PathNodeVisitor {
 
     @Override
     public void visit(WildCardNode node) {
-        if (this.artifactPath.hasNext() && node.childNodes != null) {
-            this.artifactPath.next();
-            String currentPath = this.artifactPath.getCurrentPath().toUpperCase();
-            for (Map.Entry<String, PathNode> entry : node.childNodes.entrySet()) {
-                if (currentPath.endsWith(entry.getKey())) {
-                    entry.getValue().accept(this);
+        if (node.childNodes != null) {
+            while (this.artifactPath.hasNext()) {
+                String key = this.artifactPath.next().toUpperCase();
+                PathNode childNode = node.childNodes.get(key);
+                if (childNode != null) {
+                    childNode.accept(this);
                     return;
                 }
             }
