@@ -18,23 +18,20 @@
  *******************************************************************************/
 package org.ofbiz.context;
 
-import java.security.AccessControlException;
 import java.security.Permission;
-import java.sql.Timestamp;
 import java.util.List;
 
 import org.ofbiz.api.authorization.AccessController;
+import org.ofbiz.api.authorization.AuthorizationManager;
 import org.ofbiz.api.authorization.AuthorizationManagerException;
 import org.ofbiz.api.authorization.BasicPermissions;
-import org.ofbiz.api.authorization.AuthorizationManager;
-import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.api.context.ArtifactPath;
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.security.OFBizSecurity;
 import org.ofbiz.service.ThreadContext;
 

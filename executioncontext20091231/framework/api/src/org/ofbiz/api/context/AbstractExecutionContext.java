@@ -32,8 +32,6 @@ import org.ofbiz.base.util.UtilProperties;
 public abstract class AbstractExecutionContext implements ExecutionContext {
 
     public static final String module = AbstractExecutionContext.class.getName();
-    public static final String PATH_ROOT_NODE_NAME = "ofbiz";
-    public static final String PATH_ELEMENT_SEPARATOR = "/";
 
     protected final FastList<ExecutionArtifact> artifactStack = FastList.newInstance();
 	protected String currencyUom = null;
@@ -68,9 +66,9 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
     }
 
 	public String getExecutionPath() {
-		StringBuilder sb = new StringBuilder(PATH_ROOT_NODE_NAME);
+		StringBuilder sb = new StringBuilder(ArtifactPath.PATH_ROOT_NODE_NAME);
 		for (ExecutionArtifact artifact : this.artifactStack) {
-			sb.append(PATH_ELEMENT_SEPARATOR);
+			sb.append(ArtifactPath.PATH_ELEMENT_SEPARATOR);
 			sb.append(artifact.getName());
 		}
 		return sb.toString();
@@ -78,11 +76,11 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
 
     public String[] getExecutionPathAsArray() {
         FastList<String> elementList = FastList.newInstance();
-        elementList.add(PATH_ROOT_NODE_NAME);
+        elementList.add(ArtifactPath.PATH_ROOT_NODE_NAME);
         for (ExecutionArtifact artifact : this.artifactStack) {
             String artifactName = artifact.getName();
-            if (artifactName.contains(PATH_ELEMENT_SEPARATOR)) {
-                String[] strArray = artifactName.split(PATH_ELEMENT_SEPARATOR);
+            if (artifactName.contains(ArtifactPath.PATH_ELEMENT_SEPARATOR)) {
+                String[] strArray = artifactName.split(ArtifactPath.PATH_ELEMENT_SEPARATOR);
                 for (int i = 0; i < strArray.length; i++) {
                     elementList.add(strArray[i]);
                 }

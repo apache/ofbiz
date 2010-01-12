@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.context;
+package org.ofbiz.api.context;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -24,12 +24,12 @@ import java.util.NoSuchElementException;
 import javolution.text.TextBuilder;
 import javolution.util.FastList;
 
-import org.ofbiz.api.context.AbstractExecutionContext;
-
 /** Artifact path class. */
 public class ArtifactPath implements Iterator<String> {
 
-    public static final ArtifactPath PATH_ROOT = new ArtifactPath(AbstractExecutionContext.PATH_ROOT_NODE_NAME);
+    public static final String PATH_ROOT_NODE_NAME = "ofbiz";
+    public static final String PATH_ELEMENT_SEPARATOR = "/";
+    public static final ArtifactPath PATH_ROOT = new ArtifactPath(PATH_ROOT_NODE_NAME);
 
     protected int currentIndex = 0;
     protected final String[] pathElementArray;
@@ -37,7 +37,7 @@ public class ArtifactPath implements Iterator<String> {
     protected final TextBuilder stringBuilder = TextBuilder.newInstance();
 
     public ArtifactPath(String artifactPath) {
-        this.pathElementArray = artifactPath.split(AbstractExecutionContext.PATH_ELEMENT_SEPARATOR);
+        this.pathElementArray = artifactPath.split(PATH_ELEMENT_SEPARATOR);
     }
 
     public ArtifactPath(String[] pathElementArray) {
@@ -59,7 +59,7 @@ public class ArtifactPath implements Iterator<String> {
         this.stringBuilder.clear();
         for (int i = index; i < this.pathElementArray.length; i++) {
             if (i != index) {
-                stringBuilder.append(AbstractExecutionContext.PATH_ELEMENT_SEPARATOR);
+                stringBuilder.append(PATH_ELEMENT_SEPARATOR);
             }
             stringBuilder.append(this.pathElementArray[i]);
         }
