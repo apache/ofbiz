@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.ofbiz.api.authorization.AccessController;
+import org.ofbiz.api.context.ArtifactPath;
 import org.ofbiz.api.context.ThreadContext;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilProperties;
@@ -41,19 +42,27 @@ public class AccessGrantedController implements AccessController {
         this.verbose = "true".equals(UtilProperties.getPropertyValue("api.properties", "authorizationManager.verbose"));
     }
 
+    @Override
     public <E> List<E> applyFilters(List<E> list) {
         return list;
     }
 
+    @Override
     public <E> ListIterator<E> applyFilters(ListIterator<E> list) {
         return list;
     }
 
+    @Override
     public void checkPermission(Permission permission) throws AccessControlException {
+        checkPermission(permission, new ArtifactPath(ThreadContext.getExecutionPathAsArray()));
+    }
+
+    @Override
+    public void checkPermission(Permission permission, ArtifactPath artifactPath) throws AccessControlException {
         if (this.verbose) {
-            Debug.logInfo("Checking permission: " + ThreadContext.getExecutionPath() + "[" + permission + "]", module);
+            Debug.logInfo("Checking permission: " + artifactPath + "[" + permission + "]", module);
             Debug.logInfo("Found permission(s): " + 
-                    "access-granted-controller@" + ThreadContext.getExecutionPath() + "[admin=true]", module);
+                    "access-granted-controller@" + artifactPath + "[admin=true]", module);
         }
     }
 }

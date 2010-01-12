@@ -27,6 +27,7 @@ import java.util.Map;
 import javolution.util.FastMap;
 
 import org.ofbiz.api.authorization.AccessController;
+import org.ofbiz.api.context.ArtifactPath;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.entity.util.EntityListIterator;
@@ -75,22 +76,7 @@ public class AccessControllerImpl implements AccessController {
     }
 
     public void checkPermission(Permission permission) throws AccessControlException {
-        if (this.verbose) {
-            Debug.logInfo("Checking permission: " + ThreadContext.getExecutionPath() + "[" + permission + "]", module);
-        }
-        this.permissionsGatherer.gatherPermissions(new ArtifactPath(ThreadContext.getExecutionPathAsArray()));
-        if (this.verbose) {
-            Debug.logInfo("Found permission(s): " + ThreadContext.getUserLogin().getString("userLoginId") +
-                    "@" + ThreadContext.getExecutionPath() + "[" + this.permission + "]", module);
-        }
-        if (this.disabled) {
-            return;
-        }
-        if (this.permission.implies(permission) && this.hasServicePermission()) {
-            return;
-        }
-        throw new AccessControlException(ThreadContext.getUserLogin().getString("userLoginId") +
-                "@" + ThreadContext.getExecutionPath() + "[" + permission + "]");
+        checkPermission(permission, new ArtifactPath(ThreadContext.getExecutionPathAsArray()));
     }
 
     protected boolean hasServicePermission() {
@@ -127,5 +113,25 @@ public class AccessControllerImpl implements AccessController {
             Debug.logError(e, module);
         }
         return true;
+    }
+
+    @Override
+    public void checkPermission(Permission permission, ArtifactPath artifactPath) throws AccessControlException {
+        if (this.verbose) {
+            Debug.logInfo("Checking permission: " + artifactPath + "[" + permission + "]", module);
+        }
+        this.permissionsGatherer.gatherPermissions(artifactPath);
+        if (this.verbose) {
+            Debug.logInfo("Found permission(s): " + ThreadContext.getUserLogin().getString("userLoginId") +
+                    "@" + artifactPath + "[" + this.permission + "]", module);
+        }
+        if (this.disabled) {
+            return;
+        }
+        if (this.permission.implies(permission) && this.hasServicePermission()) {
+            return;
+        }
+        throw new AccessControlException(ThreadContext.getUserLogin().getString("userLoginId") +
+                "@" + artifactPath + "[" + permission + "]");
     }
 }
