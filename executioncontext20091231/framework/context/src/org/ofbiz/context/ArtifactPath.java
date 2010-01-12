@@ -39,27 +39,31 @@ public class ArtifactPath implements Iterator<String> {
     public ArtifactPath(String artifactPath) {
         this.pathElementArray = artifactPath.split(AbstractExecutionContext.PATH_ELEMENT_SEPARATOR);
     }
-    
+
     public ArtifactPath(String[] pathElementArray) {
         this.pathElementArray = pathElementArray;
     }
-
+    
     public String getCurrentPath() {
         if (this.pathElementArray.length == 1 || !this.hasNext()) {
             return this.pathElementArray[this.currentIndex];
         }
+        return getPathAsString(this.currentIndex);
+    }
+
+    public String getCurrentPathElement() {
+        return this.pathElementArray[this.currentIndex];
+    }
+
+    protected String getPathAsString(int index) {
         this.stringBuilder.clear();
-        for (int i = this.currentIndex; i < this.pathElementArray.length; i++) {
-            if (i != this.currentIndex) {
+        for (int i = index; i < this.pathElementArray.length; i++) {
+            if (i != index) {
                 stringBuilder.append(AbstractExecutionContext.PATH_ELEMENT_SEPARATOR);
             }
             stringBuilder.append(this.pathElementArray[i]);
         }
         return stringBuilder.toString();
-    }
-
-    public String getCurrentPathElement() {
-        return this.pathElementArray[this.currentIndex];
     }
 
     @Override
@@ -80,6 +84,12 @@ public class ArtifactPath implements Iterator<String> {
         throw new UnsupportedOperationException();
     }
 
+    public void restoreState() {
+        if (this.stack != null && !this.stack.isEmpty()) {
+            this.currentIndex = this.stack.removeLast();
+        }
+    }
+
     public void saveState() {
         if (this.stack == null) {
             this.stack = FastList.newInstance();
@@ -87,9 +97,8 @@ public class ArtifactPath implements Iterator<String> {
         this.stack.addLast(this.currentIndex);
     }
 
-    public void restoreState() {
-        if (this.stack != null && !this.stack.isEmpty()) {
-            this.currentIndex = this.stack.removeLast();
-        }
+    @Override
+    public String toString() {
+        return getPathAsString(0);
     }
 }
