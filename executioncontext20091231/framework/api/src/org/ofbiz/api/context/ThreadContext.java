@@ -24,8 +24,6 @@ import java.util.TimeZone;
 
 import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.api.authorization.AuthorizationManager;
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilProperties;
 
 /** A convenience class for accessing the current thread's <code>ExecutionContext</code>.
  * @see {@link org.ofbiz.service.ExecutionContext} 
@@ -36,15 +34,7 @@ public class ThreadContext {
 
     protected static final ThreadLocal<ExecutionContext> executionContext = new ThreadLocal<ExecutionContext>() {
         protected synchronized ExecutionContext initialValue() {
-            ExecutionContext result = null;
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            String className = UtilProperties.getPropertyValue("api.properties", "executionContext.class");
-            try {
-                result = (ExecutionContext) loader.loadClass(className).newInstance();
-            } catch (Exception e) {
-                Debug.logError(e, module);
-            }
-            return result;
+            return ExecutionContextFactory.getInstance();
         }
     };
 
