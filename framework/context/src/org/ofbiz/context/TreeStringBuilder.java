@@ -36,7 +36,7 @@ public class TreeStringBuilder implements PathNodeVisitor {
         this.node = node;
     }
 
-    protected void buildNodeString(PathNode node) {
+    protected void buildChildNodeString(PathNode node) {
         if (node.childNodes != null) {
             Collection<PathNode> childNodes = node.childNodes.values();
             for (PathNode childNode : childNodes) {
@@ -63,27 +63,27 @@ public class TreeStringBuilder implements PathNodeVisitor {
             this.stringBuilder.append(node.permission);
             this.stringBuilder.append("]\n");
         }
-        if (node.substitutionNode != null) {
-            node.substitutionNode.accept(this);
-        }
         if (node.wildCardNode != null) {
             node.wildCardNode.accept(this);
         }
-        this.buildNodeString(node);
+        if (node.substitutionNode != null) {
+            node.substitutionNode.accept(this);
+        }
+        this.buildChildNodeString(node);
         this.currentPath.removeLast();
     }
 
     @Override
     public void visit(SubstitutionNode node) {
         this.currentPath.addLast(node);
-        this.buildNodeString(node);
+        this.buildChildNodeString(node);
         this.currentPath.removeLast();
     }
 
     @Override
     public void visit(WildCardNode node) {
         this.currentPath.addLast(node);
-        this.buildNodeString(node);
+        this.buildChildNodeString(node);
         this.currentPath.removeLast();
     }
 

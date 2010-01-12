@@ -34,14 +34,14 @@ public class TreeWalker implements PathNodeVisitor {
     public void visit(BranchNode node) {
         if (this.artifactPath.hasNext()) {
             String key = this.artifactPath.next();
-            if (node.substitutionNode != null) {
-                this.artifactPath.saveState();
-                node.substitutionNode.accept(this);
-                this.artifactPath.restoreState();
-            }
             if (node.wildCardNode != null) {
                 this.artifactPath.saveState();
                 node.wildCardNode.accept(this);
+                this.artifactPath.restoreState();
+            }
+            if (node.substitutionNode != null) {
+                this.artifactPath.saveState();
+                node.substitutionNode.accept(this);
                 this.artifactPath.restoreState();
             }
             this.visitChildNode(node, key);
