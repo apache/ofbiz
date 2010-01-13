@@ -55,12 +55,16 @@ public class ThreadContext {
         return executionContext.get().getCurrencyUom();
     }
 
-    public static String getExecutionPath() {
+    public static ArtifactPath getExecutionPath() {
         return executionContext.get().getExecutionPath();
     }
 
     public static String[] getExecutionPathAsArray() {
         return executionContext.get().getExecutionPathAsArray();
+    }
+
+    public static String getExecutionPathAsString() {
+        return executionContext.get().getExecutionPathAsString();
     }
 
     public static Locale getLocale() {

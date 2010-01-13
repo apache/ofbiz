@@ -65,13 +65,8 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
         return this.currencyUom;
     }
 
-	public String getExecutionPath() {
-		StringBuilder sb = new StringBuilder(ArtifactPath.PATH_ROOT_NODE_NAME);
-		for (ExecutionArtifact artifact : this.artifactStack) {
-			sb.append(ArtifactPath.PATH_ELEMENT_SEPARATOR);
-			sb.append(artifact.getName());
-		}
-		return sb.toString();
+	public ArtifactPath getExecutionPath() {
+	    return new ArtifactPath(getExecutionPathAsArray());
 	}
 
     public String[] getExecutionPathAsArray() {
@@ -94,6 +89,15 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
             elementArray[index++] = artifactName;
         }
         return elementArray;
+    }
+
+    public String getExecutionPathAsString() {
+        StringBuilder sb = new StringBuilder(ArtifactPath.PATH_ROOT_NODE_NAME);
+        for (ExecutionArtifact artifact : this.artifactStack) {
+            sb.append(ArtifactPath.PATH_ELEMENT_SEPARATOR);
+            sb.append(artifact.getName());
+        }
+        return sb.toString();
     }
 
 	public Locale getLocale() {
@@ -176,12 +180,6 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
         return this.properties.put(key, value);
     }
 
-    public void setTimeZone(TimeZone timeZone) {
-        if (timeZone != null) {
-            this.timeZone = timeZone;
-        }
-    }
-
     protected void setTimeZone(String timeZone) {
         if (timeZone != null) {
             this.timeZone = TimeZone.getTimeZone(timeZone);
@@ -190,8 +188,14 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
         }
     }
 
+    public void setTimeZone(TimeZone timeZone) {
+        if (timeZone != null) {
+            this.timeZone = timeZone;
+        }
+    }
+
     @Override
 	public String toString() {
-		return this.getExecutionPath();
+		return this.getExecutionPathAsString();
 	}
 }

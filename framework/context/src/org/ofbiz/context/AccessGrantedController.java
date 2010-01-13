@@ -54,7 +54,7 @@ public class AccessGrantedController implements AccessController {
 
     @Override
     public void checkPermission(Permission permission) throws AccessControlException {
-        checkPermission(permission, new ArtifactPath(ThreadContext.getExecutionPathAsArray()));
+        checkPermission(permission, ThreadContext.getExecutionPath());
     }
 
     @Override

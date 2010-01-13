@@ -122,7 +122,7 @@ public class AccessControllerImpl implements AccessController {
         }
         OFBizPermission permission = new OFBizPermission("applyFilters");
         PermissionsGatherer permissionsGatherer = new PermissionsGatherer(this.node, permission);
-        permissionsGatherer.gatherPermissions(new ArtifactPath(ThreadContext.getExecutionPathAsArray()));
+        permissionsGatherer.gatherPermissions(ThreadContext.getExecutionPath());
         if (permission.getFilterNames().size() > 0) {
             return new SecurityAwareListIterator<E>(listIterator, permission.getFilterNames());
         }
@@ -130,7 +130,7 @@ public class AccessControllerImpl implements AccessController {
     }
 
     public void checkPermission(Permission permission) throws AccessControlException {
-        checkPermission(permission, new ArtifactPath(ThreadContext.getExecutionPathAsArray()));
+        checkPermission(permission, ThreadContext.getExecutionPath());
     }
 
     @Override
