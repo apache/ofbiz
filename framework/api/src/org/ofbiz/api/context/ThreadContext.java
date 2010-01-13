@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.api.context;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -37,6 +38,10 @@ public class ThreadContext {
             return ExecutionContextFactory.getInstance();
         }
     };
+
+    public static <E> List<E> applyFilters(List<E> list) {
+        return executionContext.get().getAccessController().applyFilters(list);
+    }
 
     public static void endRunUnprotected() {
         executionContext.get().endRunUnprotected();

@@ -21,8 +21,8 @@ under the License.
 <#if (externalLoginKey)?exists><#assign externalKeyParam = "?externalLoginKey=" + requestAttributes.externalLoginKey?if_exists></#if>
 <#assign ofbizServerName = application.getAttribute("_serverId")?default("default-server")>
 <#assign contextPath = request.getContextPath()>
-<#assign displayApps = Static["org.ofbiz.base.component.ComponentConfig"].getAppBarWebInfos(ofbizServerName, "main")>
-<#assign displaySecondaryApps = Static["org.ofbiz.base.component.ComponentConfig"].getAppBarWebInfos(ofbizServerName, "secondary")>
+<#assign displayApps = Static["org.ofbiz.context.ContextUtil"].getAppBarWebInfos(ofbizServerName, "main")>
+<#assign displaySecondaryApps = Static["org.ofbiz.context.ContextUtil"].getAppBarWebInfos(ofbizServerName, "secondary")>
 
 <#assign appModelMenu = Static["org.ofbiz.widget.menu.MenuFactory"].getMenuFromLocation(applicationMenuLocation,applicationMenuName,delegator,dispatcher)>
 <#if appModelMenu.getModelMenuItemByName(headerItem)?exists>
@@ -41,16 +41,7 @@ under the License.
             <#-- Primary Applications -->
             <#list displayApps as display>
               <#assign thisApp = display.getContextRoot()>
-              <#assign permission = true>
               <#assign selected = false>
-              <#assign permissions = display.getBasePermission()>
-              <#list permissions as perm>
-                <#if (perm != "NONE" && !security.hasEntityPermission(perm, "_VIEW", session) && !authz.hasPermission(session, perm, requestParameters))>
-                  <#-- User must have ALL permissions in the base-permission list -->
-                  <#assign permission = false>
-                </#if>
-              </#list>
-              <#if permission == true>
                 <#if thisApp == contextPath || contextPath + "/" == thisApp>
                   <#assign selected = true>
                 </#if>
@@ -66,23 +57,13 @@ under the License.
                 <#else>
                     <li <#if selected>class="selected"</#if>><a href="${thisURL + externalKeyParam}" <#if uiLabelMap?exists> title="${uiLabelMap[display.description]}">${uiLabelMap[display.title]}<#else> title="${display.description}">${display.title}</#if></a></li>
                 </#if>
-              </#if>
             </#list>
            </ul></li>
            <li><ul class="secondary">
             <#-- Secondary Applications -->
             <#list displaySecondaryApps as display>
               <#assign thisApp = display.getContextRoot()>
-              <#assign permission = true>
               <#assign selected = false>
-              <#assign permissions = display.getBasePermission()>
-              <#list permissions as perm>
-                <#if (perm != "NONE" && !security.hasEntityPermission(perm, "_VIEW", session) && !authz.hasPermission(session, perm, requestParameters))>
-                  <#-- User must have ALL permissions in the base-permission list -->
-                  <#assign permission = false>
-                </#if>
-              </#list>
-              <#if permission == true>
                 <#if thisApp == contextPath || contextPath + "/" == thisApp>
                   <#assign selected = true>
                 </#if>
@@ -98,7 +79,6 @@ under the License.
                 <#else>
                     <li <#if selected>class="selected"</#if>><a href="${thisURL + externalKeyParam}" <#if uiLabelMap?exists> title="${uiLabelMap[display.description]}">${uiLabelMap[display.title]}<#else> title="${display.description}">${display.title}</#if></a></li>
                 </#if>
-              </#if>
             </#list>
             </ul>
           </li>
