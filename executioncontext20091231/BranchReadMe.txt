@@ -6,6 +6,12 @@ security design. I created a new class - ContextUtil.java -
 to hold utility methods. Those methods can be moved to
 other components when the branch is merged into the trunk.
 
+An interesting side-effect of the new security design is
+its ability to expose security holes in the trunk. Log in
+as admin, go to Party Manager and click on the Find button.
+The exception that is thrown exposes a flaw in the
+findparty.ftl file.
+
 ---------------------------------------------------
 
 2010-01-11: The ExecutionContext implementation is fairly complete.
