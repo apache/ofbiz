@@ -1,6 +1,13 @@
 ExecutionContext and Security-Aware Artifacts Notes
 ---------------------------------------------------
 
+2010-01-13: The main navigation is controlled by the new
+security design. I created a new class - ContextUtil.java -
+to hold utility methods. Those methods can be moved to
+other components when the branch is merged into the trunk.
+
+---------------------------------------------------
+
 2010-01-11: The ExecutionContext implementation is fairly complete.
 
 The security-aware artifacts implementation is mostly complete

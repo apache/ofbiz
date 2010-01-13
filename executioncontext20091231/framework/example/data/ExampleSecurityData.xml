@@ -18,21 +18,25 @@ specific language governing permissions and limitations
 under the License.
 -->
 <entity-engine-xml>
+
     <!-- Example security -->
     <ArtifactPath artifactPath="ofbiz/example" description="Example Application"/>
     <ArtifactPath artifactPath="ofbiz/exampleext" description="Extended Example Application"/>
+    <UserGroup groupId="EXAMPLE_USERS" description="Example Application Users"/>
+    <UserGrpToArtifactPermRel groupId="EXAMPLE_USERS" artifactPath="ofbiz/example" permissionValue="access=true"/>
+    <UserGrpToArtifactPermRel groupId="EXAMPLE_USERS" artifactPath="ofbiz/example" permissionValue="view=true"/>
+    <UserGrpToArtifactPermRel groupId="EXAMPLE_USERS" artifactPath="ofbiz/example" permissionValue="create=true"/>
+    <UserGrpToArtifactPermRel groupId="EXAMPLE_USERS" artifactPath="ofbiz/example" permissionValue="update=true"/>
 
     <!-- Data needed to demonstrate the security-aware artifacts. This is temporary -
     it will not be included in the project. -->
-    <UserToArtifactPermRel userLoginId="artifact-user" artifactPath="ofbiz/example" permissionValue="access=true"/>
-    <UserToArtifactPermRel userLoginId="artifact-user" artifactPath="ofbiz/example" permissionValue="view=true"/>
-    <UserToArtifactPermRel userLoginId="artifact-user" artifactPath="ofbiz/example" permissionValue="create=true"/>
-    <UserToArtifactPermRel userLoginId="artifact-user" artifactPath="ofbiz/example" permissionValue="update=true"/>
+
+    <UserToUserGroupRel userLoginId="artifact-user" groupId="EXAMPLE_USERS"/>
     <ArtifactPath artifactPath="ofbiz/example/*/anotherDate" description="Example Application - 'anotherDate' field"/>
     <UserToArtifactPermRel userLoginId="artifact-user" artifactPath="ofbiz/example/*/anotherDate" permissionValue="view=false"/>
-    <ArtifactPath artifactPath="ofbiz/example/*/appbar"/>
-    <ArtifactPath artifactPath="ofbiz/example/*/appbar/example"/>
-    <UserToArtifactPermRel userLoginId="artifact-user" artifactPath="ofbiz/example/*/appbar" permissionValue="view=false"/>
-    <UserToArtifactPermRel userLoginId="artifact-user" artifactPath="ofbiz/example/*/appbar/example" permissionValue="view=true"/>
+
+    <!-- artifact-user is a member of the EXAMPLE_USERS group, so the user inherits all
+    of the permissions assigned to that group. In addition, artifact-user is assigned
+    a permission value that denies access to the 'anotherDate' field. -->
 
 </entity-engine-xml>

@@ -20,7 +20,7 @@ under the License.
 <#if (externalLoginKey)?exists><#assign externalKeyParam = "?externalLoginKey=" + requestAttributes.externalLoginKey?if_exists></#if>
 <#assign ofbizServerName = application.getAttribute("_serverId")?default("default-server")>
 <#assign contextPath = request.getContextPath()>
-<#assign displayApps = Static["org.ofbiz.base.component.ComponentConfig"].getAppBarWebInfos(ofbizServerName, "main")>
+<#assign displayApps = Static["org.ofbiz.context.ContextUtil"].getAppBarWebInfos(ofbizServerName, "main")>
 
 <#assign showBreadcrumbs = true>
 
