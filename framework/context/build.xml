@@ -61,7 +61,7 @@ under the License.
     <!-- ================================================================== -->
 
     <target name="docs" depends="prepare-docs">
-        <javadoc packagenames="org.ofbiz.base.*"
+        <javadoc packagenames="org.ofbiz.context.*"
                  classpathref="local.class.path"
                  destdir="${build.dir}/javadocs"
                  Windowtitle="Open for Business - Execution Context">
