@@ -61,8 +61,7 @@ public class AccessGrantedController implements AccessController {
     public void checkPermission(Permission permission, ArtifactPath artifactPath) throws AccessControlException {
         if (this.verbose) {
             Debug.logInfo("Checking permission: " + artifactPath + "[" + permission + "]", module);
-            Debug.logInfo("Found permission(s): " +
-                    "access-granted-controller@" + artifactPath + "[admin=true]", module);
+            Debug.logInfo("Found permission(s): " + "access-granted-controller@" + artifactPath + "[admin=true]", module);
         }
     }
 }

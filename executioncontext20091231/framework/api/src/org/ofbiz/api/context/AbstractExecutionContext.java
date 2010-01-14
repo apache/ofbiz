@@ -130,18 +130,14 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
         }
         ExecutionArtifact artifact = this.artifactStack.removeLast();
         if (this.verbose) {
-            Debug.logInfo("Popping artifact [" + artifact.getClass().getName() +
-                    "] location = " + artifact.getLocation() +
-                    ", name = " + artifact.getName(), module);
+            Debug.logInfo("Popping artifact [" + artifact.getClass().getName() + "] location = " + artifact.getLocation() + ", name = " + artifact.getName(), module);
         }
     }
 
     public void pushExecutionArtifact(ExecutionArtifact artifact) {
         this.artifactStack.addLast(artifact);
         if (this.verbose) {
-            Debug.logInfo("Pushing artifact [" + artifact.getClass().getName() +
-                    "] location = " + artifact.getLocation() +
-                    ", name = " + artifact.getName(), module);
+            Debug.logInfo("Pushing artifact [" + artifact.getClass().getName() + "] location = " + artifact.getLocation() + ", name = " + artifact.getName(), module);
         }
     }
 

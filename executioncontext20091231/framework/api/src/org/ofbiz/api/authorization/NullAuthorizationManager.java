@@ -31,15 +31,13 @@ public class NullAuthorizationManager implements AuthorizationManager {
         this.accessController = accessController;
     }
 
-    public void assignGroupPermission(String userGroupId, String artifactId,
-            Permission permission) {
+    public void assignGroupPermission(String userGroupId, String artifactId, Permission permission) {
     }
 
     public void assignGroupToGroup(String childGroupId, String parentGroupId) {
     }
 
-    public void assignUserPermission(String userLoginId, String artifactId,
-            Permission permission) {
+    public void assignUserPermission(String userLoginId, String artifactId, Permission permission) {
     }
 
     public void assignUserToGroup(String userLoginId, String userGroupId) {
@@ -55,8 +53,7 @@ public class NullAuthorizationManager implements AuthorizationManager {
     public void deleteGroupFromGroup(String childGroupId, String parentGroupId) {
     }
 
-    public void deleteGroupPermission(String userGroupId, String artifactId,
-            Permission permission) {
+    public void deleteGroupPermission(String userGroupId, String artifactId, Permission permission) {
     }
 
     public void deleteUser(String userLoginId) {
@@ -68,8 +65,7 @@ public class NullAuthorizationManager implements AuthorizationManager {
     public void deleteUserGroup(String userGroupId) {
     }
 
-    public void deleteUserPermission(String userLoginId, String artifactId,
-            Permission permission) {
+    public void deleteUserPermission(String userLoginId, String artifactId, Permission permission) {
     }
 
     public void updateUser(String userLoginId, String password) {

@@ -64,8 +64,7 @@ public class AccessDeniedController implements AccessController {
     public void checkPermission(Permission permission, ArtifactPath artifactPath) throws AccessControlException {
         if (this.verbose) {
             Debug.logInfo("Checking permission: " + artifactPath + "[" + permission + "]", module);
-            Debug.logInfo("Found permission(s): " +
-                    "access-denied-controller@" + artifactPath + "[]", module);
+            Debug.logInfo("Found permission(s): " + "access-denied-controller@" + artifactPath + "[]", module);
         }
         throw new AccessControlException(null, permission);
     }
