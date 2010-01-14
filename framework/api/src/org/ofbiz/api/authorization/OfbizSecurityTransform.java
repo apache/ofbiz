@@ -19,6 +19,7 @@
 package org.ofbiz.api.authorization;
 
 import java.io.IOException;
+import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.Map;
 
@@ -64,7 +65,7 @@ public class OfbizSecurityTransform implements TemplateDirectiveModel {
             ThreadContext.pushExecutionArtifact(module, artifactId);
             ThreadContext.getAccessController().checkPermission(permission);
             body.render(env.getOut());
-        } catch (Exception e) {
+        } catch (AccessControlException e) {
         } finally {
             ThreadContext.popExecutionArtifact();
         }

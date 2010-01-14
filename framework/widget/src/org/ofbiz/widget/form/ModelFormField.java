@@ -20,6 +20,7 @@ package org.ofbiz.widget.form;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.security.AccessControlException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.HashMap;
@@ -601,7 +602,7 @@ public class ModelFormField implements ExecutionArtifact {
             ThreadContext.pushExecutionArtifact(this);
             ThreadContext.getAccessController().checkPermission(View);
             this.fieldInfo.renderFieldString(writer, context, formStringRenderer);
-        } catch (Exception e) {
+        } catch (AccessControlException e) {
         } finally {
             ThreadContext.popExecutionArtifact();
         }
