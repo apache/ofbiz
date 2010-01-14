@@ -31,7 +31,7 @@ import org.ofbiz.api.authorization.AuthorizationManager;
  */
 public class ThreadContext {
 
-    protected static final String module = ThreadContext.class.getName();
+    public static final String module = ThreadContext.class.getName();
 
     protected static final ThreadLocal<ExecutionContext> executionContext = new ThreadLocal<ExecutionContext>() {
         protected synchronized ExecutionContext initialValue() {
