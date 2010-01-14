@@ -39,7 +39,7 @@ public class ArtifactPath implements Iterator<String> {
         this.pathElementArray = artifactPath.split(PATH_ELEMENT_SEPARATOR);
     }
 
-    public ArtifactPath(String[] pathElementArray) {
+    public ArtifactPath(String... pathElementArray) {
         this.pathElementArray = pathElementArray;
     }
 
