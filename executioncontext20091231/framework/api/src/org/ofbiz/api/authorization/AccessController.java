@@ -41,7 +41,7 @@ public interface AccessController  {
      * @param permission The permission to check
      * @throws AccessControlException
      */
-    public void checkPermission(Permission permission) throws AccessControlException;
+    void checkPermission(Permission permission) throws AccessControlException;
 
     /** Returns silently if the user has been granted <code>permission</code>
      * access for the specified artifact, throws <code>AccessControlException</code>
@@ -53,7 +53,7 @@ public interface AccessController  {
      * @param permission The permission to check
      * @throws AccessControlException
      */
-    public void checkPermission(Permission permission, ArtifactPath artifactPath) throws AccessControlException;
+    void checkPermission(Permission permission, ArtifactPath artifactPath) throws AccessControlException;
 
     /** Applies permission filters to a <code>List</code>. The
      * returned <code>List</code> is security-aware, so methods
@@ -65,7 +65,7 @@ public interface AccessController  {
      * were specified for the current artifact, or the original
      * <code>List</code> otherwise
      */
-    public <E> List<E> applyFilters(List<E> list);
+    <E> List<E> applyFilters(List<E> list);
 
     /** Applies permission filters to a <code>ListIterator</code>. The
      * returned <code>ListIterator</code> is security-aware, so methods
@@ -77,6 +77,6 @@ public interface AccessController  {
      * were specified for the current artifact, or the original
      * <code>ListIterator</code> otherwise
      */
-    public <E> ListIterator<E> applyFilters(ListIterator<E> list);
+    <E> ListIterator<E> applyFilters(ListIterator<E> list);
 
 }

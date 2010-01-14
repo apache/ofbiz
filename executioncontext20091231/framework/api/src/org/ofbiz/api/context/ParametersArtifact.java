@@ -43,6 +43,6 @@ public interface ParametersArtifact extends ExecutionArtifact {
      *
      * @return The parameters associated with this artifact
      */
-    public Map<String, ? extends Object> getParameters();
+    Map<String, ? extends Object> getParameters();
 
 }

@@ -23,7 +23,7 @@ import org.ofbiz.context.PathNode.SubstitutionNode;
 import org.ofbiz.context.PathNode.WildCardNode;
 
 public interface PathNodeVisitor {
-    public void visit(BranchNode node);
-    public void visit(SubstitutionNode node);
-    public void visit(WildCardNode node);
+    void visit(BranchNode node);
+    void visit(SubstitutionNode node);
+    void visit(WildCardNode node);
 }
