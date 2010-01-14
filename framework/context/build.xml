@@ -30,7 +30,6 @@ under the License.
 
     <path id="local.class.path">
         <fileset dir="../api/build/lib" includes="*.jar"/>
-        <fileset dir="${lib.dir}" includes="*.jar"/>
         <fileset dir="../base/lib" includes="*.jar"/>
         <fileset dir="../base/lib/commons" includes="*.jar"/>
         <fileset dir="../base/lib/j2eespecs" includes="*.jar"/>
