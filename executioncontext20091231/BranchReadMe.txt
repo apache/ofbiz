@@ -12,6 +12,11 @@ as admin, go to Party Manager and click on the Find button.
 The exception that is thrown exposes a flaw in the
 findparty.ftl file.
 
+I added security audit capability. This was not in the
+design document, but it was simple to implement and might be
+useful. An artifact can be flagged as audited. Any denied
+attempts to use the artifact will be logged.
+
 ---------------------------------------------------
 
 2010-01-11: The ExecutionContext implementation is fairly complete.

@@ -44,6 +44,10 @@ public class AccessControllerImpl implements AccessController {
 
     public static final String module = AccessControllerImpl.class.getName();
 
+    protected static boolean securityAuditEnabled() {
+        return "true".equals(UtilProperties.getPropertyValue("api.properties", "securityAudit.enabled"));
+    }
+
     /**
      * The root node of the current user's permission tree.
      */
@@ -150,6 +154,9 @@ public class AccessControllerImpl implements AccessController {
         }
         if (gatheredPermissions.implies(permission) && this.hasServicePermission(gatheredPermissions)) {
             return;
+        }
+        if (securityAuditEnabled()) {
+            AuthorizationManagerImpl.logIncident(permission);
         }
         throw new AccessControlException(ThreadContext.getUserLogin().getString("userLoginId") +
                 "@" + artifactPath + "[" + permission + "]");
