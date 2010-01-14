@@ -57,6 +57,23 @@ public class OFBizPermission extends Permission {
         this.excludePermissions = new PermissionsUnion(name);
     }
 
+    public void accumulatePermissions(OFBizPermission permission) {
+        if (permission == null || this.adminPermission != null) {
+            return;
+        }
+        if (permission.includePermissions.getPermissionsSet().contains(Admin)) {
+            this.reset();
+            this.adminPermission = Admin;
+            return;
+        }
+        this.includePermissions.getPermissionsSet().removeAll(permission.excludePermissions.getPermissionsSet());
+        this.excludePermissions.getPermissionsSet().removeAll(permission.includePermissions.getPermissionsSet());
+        this.includePermissions.getPermissionsSet().addAll(permission.includePermissions.getPermissionsSet());
+        this.excludePermissions.getPermissionsSet().addAll(permission.excludePermissions.getPermissionsSet());
+        this.filters.addAll(permission.filters);
+        this.services.addAll(permission.services);
+    }
+
     public void addFilter(String filter) {
         this.filters.add(filter);
     }
@@ -73,13 +90,21 @@ public class OFBizPermission extends Permission {
         try {
             OFBizPermission that = (OFBizPermission) obj;
             return this.getName().equals(that.getName());
-        } catch (Exception e) {}
+        } catch (ClassCastException e) {}
         return false;
     }
 
     @Override
     public String getActions() {
         return null;
+    }
+
+    public Set<String> getFilterNames() {
+        return this.filters;
+    }
+
+    public Set<String> getServiceNames() {
+        return this.services;
     }
 
     @Override
@@ -95,28 +120,8 @@ public class OFBizPermission extends Permission {
         return this.includePermissions.implies(permission) && !this.excludePermissions.implies(permission);
     }
 
-    public Set<String> getFilterNames() {
-        return this.filters;
-    }
-
-    public Set<String> getServiceNames() {
-        return this.services;
-    }
-
-    public void accumulatePermissions(OFBizPermission permission) {
-        if (permission == null || this.adminPermission != null) {
-            return;
-        }
-        if (permission.includePermissions.getPermissionsSet().contains(Admin)) {
-            this.adminPermission = Admin;
-            return;
-        }
-        this.includePermissions.getPermissionsSet().removeAll(permission.excludePermissions.getPermissionsSet());
-        this.excludePermissions.getPermissionsSet().removeAll(permission.includePermissions.getPermissionsSet());
-        this.includePermissions.getPermissionsSet().addAll(permission.includePermissions.getPermissionsSet());
-        this.excludePermissions.getPermissionsSet().addAll(permission.excludePermissions.getPermissionsSet());
-        this.filters.addAll(permission.filters);
-        this.services.addAll(permission.services);
+    public boolean isAdmin() {
+        return this.adminPermission != null;
     }
 
     public void reset() {

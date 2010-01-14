@@ -83,7 +83,7 @@ public class AccessControllerImpl implements AccessController {
     public <E> List<E> applyFilters(List<E> list) {
         OFBizPermission permission = new OFBizPermission("applyFilters");
         PermissionsGatherer permissionsGatherer = new PermissionsGatherer(this.node, permission);
-        permissionsGatherer.gatherPermissions(new ArtifactPath(ThreadContext.getExecutionPathAsArray()));
+        permissionsGatherer.gatherPermissions(ThreadContext.getExecutionPath());
         if (permission.getFilterNames().size() > 0) {
             try {
                 LocalDispatcher dispatcher = ThreadContext.getDispatcher();
@@ -164,7 +164,7 @@ public class AccessControllerImpl implements AccessController {
 
     protected boolean hasServicePermission(OFBizPermission permission) {
         try {
-            if (permission.getServiceNames().size() == 0) {
+            if (permission.getServiceNames().size() == 0 || permission.isAdmin()) {
                 return true;
             }
             LocalDispatcher dispatcher = ThreadContext.getDispatcher();
