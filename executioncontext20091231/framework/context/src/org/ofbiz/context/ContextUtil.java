@@ -20,6 +20,7 @@ package org.ofbiz.context;
 
 import static org.ofbiz.api.authorization.BasicPermissions.Access;
 
+import java.security.AccessControlException;
 import java.util.List;
 
 import javolution.util.FastList;
@@ -48,7 +49,9 @@ public class ContextUtil {
             try {
                 accessController.checkPermission(Access, artifactPath);
                 resultList.add(webAppInfo);
-            } catch (Exception e) {}
+            } catch (AccessControlException e) {
+                // This exception is expected - do nothing
+            }
             artifactPath.restoreState();
         }
         return resultList;
