@@ -146,8 +146,7 @@ public class AccessControllerImpl implements AccessController {
         PermissionsGatherer permissionsGatherer = new PermissionsGatherer(this.node, gatheredPermissions);
         permissionsGatherer.gatherPermissions(artifactPath);
         if (this.verbose) {
-            Debug.logInfo("Found permission(s): " + ThreadContext.getUserLogin().getString("userLoginId") +
-                    "@" + artifactPath + "[" + gatheredPermissions + "]", module);
+            Debug.logInfo("Found permission(s): " + ThreadContext.getUserLogin().getString("userLoginId") + "@" + artifactPath + "[" + gatheredPermissions + "]", module);
         }
         if (this.disabled) {
             return;
@@ -158,8 +157,7 @@ public class AccessControllerImpl implements AccessController {
         if (securityAuditEnabled()) {
             AuthorizationManagerImpl.logIncident(permission);
         }
-        throw new AccessControlException(ThreadContext.getUserLogin().getString("userLoginId") +
-                "@" + artifactPath + "[" + permission + "]");
+        throw new AccessControlException(ThreadContext.getUserLogin().getString("userLoginId") + "@" + artifactPath + "[" + permission + "]");
     }
 
     protected boolean hasServicePermission(OFBizPermission permission) {
