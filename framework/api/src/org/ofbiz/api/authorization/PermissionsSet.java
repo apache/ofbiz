@@ -30,50 +30,50 @@ import javolution.util.FastSet;
 @SuppressWarnings("serial")
 public abstract class PermissionsSet extends BasicPermission {
 
-	protected final Set<Permission> permissionsSet = FastSet.newInstance();
+    protected final Set<Permission> permissionsSet = FastSet.newInstance();
 
-	public PermissionsSet(String setName) {
-		super(setName);
-	}
+    public PermissionsSet(String setName) {
+        super(setName);
+    }
 
     public PermissionsSet(String setName, List<Permission> permissionsList) {
         super(setName);
         this.permissionsSet.addAll(permissionsList);
     }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
-			return true;
-		}
-		try {
-		    PermissionsSet that = (PermissionsSet) obj;
-			return this.permissionsSet.equals(that.permissionsSet);
-		} catch (Exception e) {}
-		return false;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        try {
+            PermissionsSet that = (PermissionsSet) obj;
+            return this.permissionsSet.equals(that.permissionsSet);
+        } catch (Exception e) {}
+        return false;
+    }
 
-	@Override
-	public String getActions() {
-		return null;
-	}
+    @Override
+    public String getActions() {
+        return null;
+    }
 
-	@Override
-	public int hashCode() {
-		return permissionsSet.hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return permissionsSet.hashCode();
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		for (Permission perm : this.permissionsSet) {
-			sb.append(perm);
-			sb.append(" ");
-		}
-		return sb.toString().trim();
-	}
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Permission perm : this.permissionsSet) {
+            sb.append(perm);
+            sb.append(" ");
+        }
+        return sb.toString().trim();
+    }
 
-	public Set<Permission> getPermissionsSet() {
+    public Set<Permission> getPermissionsSet() {
         return this.permissionsSet;
     }
 }

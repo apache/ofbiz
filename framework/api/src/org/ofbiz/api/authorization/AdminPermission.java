@@ -26,43 +26,43 @@ import java.security.Permission;
 @SuppressWarnings("serial")
 public class AdminPermission extends BasicPermission {
 
-	public AdminPermission() {
-		super("admin=true");
-	}
+    public AdminPermission() {
+        super("admin=true");
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
-			return true;
-		}
-		try {
-		    AdminPermission that = (AdminPermission) obj;
-			return this.permissionString.equals(that.permissionString);
-		} catch (Exception e) {}
-		return false;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        try {
+            AdminPermission that = (AdminPermission) obj;
+            return this.permissionString.equals(that.permissionString);
+        } catch (Exception e) {}
+        return false;
+    }
 
-	@Override
-	public String getActions() {
-		return null;
-	}
+    @Override
+    public String getActions() {
+        return null;
+    }
 
-	@Override
-	public int hashCode() {
-		return this.permissionString.hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return this.permissionString.hashCode();
+    }
 
-	/** Returns <code>true</code> - the admin permission has
-	 * no restrictions.
-	 * 
-	 */
-	@Override
-	public boolean implies(Permission permission) {
-		return true;
-	}
+    /** Returns <code>true</code> - the admin permission has
+     * no restrictions.
+     * 
+     */
+    @Override
+    public boolean implies(Permission permission) {
+        return true;
+    }
 
-	@Override
-	public String toString() {
-		return this.permissionString;
-	}
+    @Override
+    public String toString() {
+        return this.permissionString;
+    }
 }

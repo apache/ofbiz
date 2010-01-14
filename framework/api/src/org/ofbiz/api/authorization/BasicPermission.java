@@ -26,60 +26,60 @@ import java.security.Permission;
 @SuppressWarnings("serial")
 public class BasicPermission extends Permission {
 
-	protected final String permissionString;
+    protected final String permissionString;
 
-	public BasicPermission(String permissionString) {
-		super(permissionString);
-		this.permissionString = permissionString;
-	}
+    public BasicPermission(String permissionString) {
+        super(permissionString);
+        this.permissionString = permissionString;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
-			return true;
-		}
-		try {
-		    BasicPermission that = (BasicPermission) obj;
-			return this.permissionString.equals(that.permissionString);
-		} catch (Exception e) {}
-		return false;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        try {
+            BasicPermission that = (BasicPermission) obj;
+            return this.permissionString.equals(that.permissionString);
+        } catch (Exception e) {}
+        return false;
+    }
 
-	@Override
-	public String getActions() {
-		return null;
-	}
+    @Override
+    public String getActions() {
+        return null;
+    }
 
-	@Override
-	public int hashCode() {
-		return this.permissionString.hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return this.permissionString.hashCode();
+    }
 
-	@Override
-	public boolean implies(Permission permission) {
-		try {
-			PermissionsUnion permissionsUnion = (PermissionsUnion) permission;
-			for (Permission perm : permissionsUnion.getPermissionsSet()) {
-				if (this.implies(perm)) {
-					return true;
-				}
-			}
-			return false;
-		} catch (Exception e) {}
-		try {
-			PermissionsIntersection permissionsIntersection = (PermissionsIntersection) permission;
-			for (Permission perm : permissionsIntersection.getPermissionsSet()) {
-				if (!this.implies(perm)) {
-					return false;
-				}
-			}
-			return true;
-		} catch (Exception e) {}
-		return this.equals(permission);
-	}
+    @Override
+    public boolean implies(Permission permission) {
+        try {
+            PermissionsUnion permissionsUnion = (PermissionsUnion) permission;
+            for (Permission perm : permissionsUnion.getPermissionsSet()) {
+                if (this.implies(perm)) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (Exception e) {}
+        try {
+            PermissionsIntersection permissionsIntersection = (PermissionsIntersection) permission;
+            for (Permission perm : permissionsIntersection.getPermissionsSet()) {
+                if (!this.implies(perm)) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (Exception e) {}
+        return this.equals(permission);
+    }
 
-	@Override
-	public String toString() {
-		return this.permissionString;
-	}
+    @Override
+    public String toString() {
+        return this.permissionString;
+    }
 }

@@ -28,46 +28,46 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class PermissionsIntersection extends PermissionsSet {
 
-	public PermissionsIntersection(String listName) {
-		super(listName);
-	}
+    public PermissionsIntersection(String listName) {
+        super(listName);
+    }
 
-	public PermissionsIntersection(String listName, List<Permission> permissionsList) {
-		super(listName, permissionsList);
-	}
+    public PermissionsIntersection(String listName, List<Permission> permissionsList) {
+        super(listName, permissionsList);
+    }
 
     public PermissionsIntersection(String listName, Permission... permissions) {
         super(listName, Arrays.asList(permissions));
     }
 
-	/** Returns <code>true</code> if all of the contained permissions
-	 * return <code>true</code>.
-	 */
-	@Override
-	public boolean implies(Permission permission) {
-		try {
-			PermissionsUnion permissionsUnion = (PermissionsUnion) permission;
-			for (Permission perm : permissionsUnion.getPermissionsSet()) {
-				if (this.implies(perm)) {
-					return true;
-				}
-			}
-			return false;
-		} catch (Exception e) {}
-		try {
-			PermissionsIntersection permissionsIntersection = (PermissionsIntersection) permission;
-			for (Permission perm : permissionsIntersection.getPermissionsSet()) {
-				if (!this.implies(perm)) {
-					return false;
-				}
-			}
-			return true;
-		} catch (Exception e) {}
-		for (Permission perm : this.permissionsSet) {
-			if (!perm.implies(permission)) {
-				return false;
-			}
-		}
-		return true;
-	}
+    /** Returns <code>true</code> if all of the contained permissions
+     * return <code>true</code>.
+     */
+    @Override
+    public boolean implies(Permission permission) {
+        try {
+            PermissionsUnion permissionsUnion = (PermissionsUnion) permission;
+            for (Permission perm : permissionsUnion.getPermissionsSet()) {
+                if (this.implies(perm)) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (Exception e) {}
+        try {
+            PermissionsIntersection permissionsIntersection = (PermissionsIntersection) permission;
+            for (Permission perm : permissionsIntersection.getPermissionsSet()) {
+                if (!this.implies(perm)) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (Exception e) {}
+        for (Permission perm : this.permissionsSet) {
+            if (!perm.implies(permission)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

@@ -22,25 +22,25 @@ import java.util.Map;
 
 /** A basic implementation of the ParametersArtifact interface. */
 public class GenericParametersArtifact extends GenericExecutionArtifact implements ParametersArtifact {
-	
-	protected final Map<String, ? extends Object> parameters;
+    
+    protected final Map<String, ? extends Object> parameters;
 
-	public GenericParametersArtifact(String location, String name, Map<String, ? extends Object> parameters) {
-		super(location, name);
-		this.parameters = parameters;
-	}
+    public GenericParametersArtifact(String location, String name, Map<String, ? extends Object> parameters) {
+        super(location, name);
+        this.parameters = parameters;
+    }
 
-	public GenericParametersArtifact(ExecutionArtifact artifact, Map<String, ? extends Object> parameters) {
-		super(artifact.getLocation(), artifact.getName());
-		this.parameters = parameters;
-	}
+    public GenericParametersArtifact(ExecutionArtifact artifact, Map<String, ? extends Object> parameters) {
+        super(artifact.getLocation(), artifact.getName());
+        this.parameters = parameters;
+    }
 
-	public Map<String, ? extends Object> getParameters() {
-		return this.parameters;
-	}
+    public Map<String, ? extends Object> getParameters() {
+        return this.parameters;
+    }
 
-	@Override
-	public String toString() {
-		return "GenericParametersArtifact: location = " + this.location + ", name = " + this.name;
-	}
+    @Override
+    public String toString() {
+        return "GenericParametersArtifact: location = " + this.location + ", name = " + this.name;
+    }
 }

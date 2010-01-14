@@ -25,7 +25,7 @@ import java.security.Permission;
  */
 public interface AuthorizationManager {
 
-	public void assignGroupPermission(String userGroupId, String artifactId, Permission permission) throws AuthorizationManagerException;
+    public void assignGroupPermission(String userGroupId, String artifactId, Permission permission) throws AuthorizationManagerException;
 
     public void assignGroupToGroup(String childGroupId, String parentGroupId) throws AuthorizationManagerException;
 
