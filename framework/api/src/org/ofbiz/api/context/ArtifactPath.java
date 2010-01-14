@@ -56,7 +56,6 @@ public class ArtifactPath implements Iterator<String> {
 
     protected String getPathAsString(int index) {
         TextBuilder stringBuilder = TextBuilder.newInstance();
-        stringBuilder.clear();
         for (int i = index; i < this.pathElementArray.length; i++) {
             if (i != index) {
                 stringBuilder.append(PATH_ELEMENT_SEPARATOR);
