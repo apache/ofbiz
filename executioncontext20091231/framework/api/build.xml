@@ -57,7 +57,7 @@ under the License.
     <!-- ================================================================== -->
 
     <target name="docs" depends="prepare-docs">
-        <javadoc packagenames="org.ofbiz.base.*"
+        <javadoc packagenames="org.ofbiz.api.*"
                  classpathref="local.class.path"
                  destdir="${build.dir}/javadocs"
                  Windowtitle="Open for Business - Framework API">
