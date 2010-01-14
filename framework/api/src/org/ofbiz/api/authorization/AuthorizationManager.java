@@ -25,33 +25,33 @@ import java.security.Permission;
  */
 public interface AuthorizationManager {
 
-    public void assignGroupPermission(String userGroupId, String artifactId, Permission permission) throws AuthorizationManagerException;
+    void assignGroupPermission(String userGroupId, String artifactId, Permission permission) throws AuthorizationManagerException;
 
-    public void assignGroupToGroup(String childGroupId, String parentGroupId) throws AuthorizationManagerException;
+    void assignGroupToGroup(String childGroupId, String parentGroupId) throws AuthorizationManagerException;
 
-    public void assignUserPermission(String userLoginId, String artifactId, Permission permission) throws AuthorizationManagerException;
+    void assignUserPermission(String userLoginId, String artifactId, Permission permission) throws AuthorizationManagerException;
 
-    public void assignUserToGroup(String userLoginId, String userGroupId) throws AuthorizationManagerException;
+    void assignUserToGroup(String userLoginId, String userGroupId) throws AuthorizationManagerException;
 
-    public void createUser(String userLoginId, String password) throws AuthorizationManagerException;
+    void createUser(String userLoginId, String password) throws AuthorizationManagerException;
 
-    public String createUserGroup(String description) throws AuthorizationManagerException;
+    String createUserGroup(String description) throws AuthorizationManagerException;
 
-    public void deleteGroupFromGroup(String childGroupId, String parentGroupId) throws AuthorizationManagerException;
+    void deleteGroupFromGroup(String childGroupId, String parentGroupId) throws AuthorizationManagerException;
 
-    public void deleteGroupPermission(String userGroupId, String artifactId, Permission permission) throws AuthorizationManagerException;
+    void deleteGroupPermission(String userGroupId, String artifactId, Permission permission) throws AuthorizationManagerException;
 
-    public void deleteUser(String userLoginId) throws AuthorizationManagerException;
+    void deleteUser(String userLoginId) throws AuthorizationManagerException;
 
-    public void deleteUserFromGroup(String userLoginId, String userGroupId) throws AuthorizationManagerException;
+    void deleteUserFromGroup(String userLoginId, String userGroupId) throws AuthorizationManagerException;
 
-    public void deleteUserGroup(String userGroupId) throws AuthorizationManagerException;
+    void deleteUserGroup(String userGroupId) throws AuthorizationManagerException;
 
-    public void deleteUserPermission(String userLoginId, String artifactId, Permission permission) throws AuthorizationManagerException;
+    void deleteUserPermission(String userLoginId, String artifactId, Permission permission) throws AuthorizationManagerException;
 
-    public AccessController getAccessController() throws AuthorizationManagerException;
+    AccessController getAccessController() throws AuthorizationManagerException;
 
-    public void updateUser(String userLoginId, String password) throws AuthorizationManagerException;
+    void updateUser(String userLoginId, String password) throws AuthorizationManagerException;
 
-    public void updateUserGroup(String userGroupId, String description) throws AuthorizationManagerException;
+    void updateUserGroup(String userGroupId, String description) throws AuthorizationManagerException;
 }
