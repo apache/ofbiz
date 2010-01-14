@@ -54,7 +54,7 @@ public class AdminPermission extends BasicPermission {
 
     /** Returns <code>true</code> - the admin permission has
      * no restrictions.
-     * 
+     *
      */
     @Override
     public boolean implies(Permission permission) {

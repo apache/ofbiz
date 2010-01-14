@@ -27,7 +27,7 @@ import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.api.authorization.AuthorizationManager;
 
 /** A convenience class for accessing the current thread's <code>ExecutionContext</code>.
- * @see {@link org.ofbiz.service.ExecutionContext} 
+ * @see {@link org.ofbiz.service.ExecutionContext}
  */
 public class ThreadContext {
 

@@ -32,7 +32,7 @@ import org.ofbiz.base.component.ComponentConfig;
 import org.ofbiz.base.component.ComponentConfig.WebappInfo;
 
 /**
- * ExecutionContext utility methods. 
+ * ExecutionContext utility methods.
  *
  */
 public class ContextUtil {

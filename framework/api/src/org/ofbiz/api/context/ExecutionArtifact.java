@@ -26,14 +26,14 @@ public interface ExecutionArtifact {
 
     /**
      * Returns the location of this artifact.
-     * 
+     *
      * @return Location of this artifact
      */
     public String getLocation();
 
     /**
      * Returns the name of this artifact.
-     * 
+     *
      * @return Name of this artifact
      */
     public String getName();

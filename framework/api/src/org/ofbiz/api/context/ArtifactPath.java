@@ -43,7 +43,7 @@ public class ArtifactPath implements Iterator<String> {
     public ArtifactPath(String[] pathElementArray) {
         this.pathElementArray = pathElementArray;
     }
-    
+
     public String getCurrentPath() {
         if (this.pathElementArray.length == 1 || !this.hasNext()) {
             return this.pathElementArray[this.currentIndex];

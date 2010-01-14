@@ -150,23 +150,23 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
     @Override
     public void assignGroupPermission(String userGroupId, String artifactId, Permission permission) throws AuthorizationManagerException {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void assignGroupToGroup(String childGroupId, String parentGroupId) throws AuthorizationManagerException {
         // TODO Auto-generated method stub
-        
+
     }
     @Override
     public void assignUserPermission(String userLoginId, String artifactId, Permission permission) throws AuthorizationManagerException {
         // TODO Auto-generated method stub
-        
+
     }
     @Override
     public void assignUserToGroup(String userLoginId, String userGroupId) throws AuthorizationManagerException {
         // TODO Auto-generated method stub
-        
+
     }
     @Override
     public void clearUserData(GenericValue userLogin) {
@@ -176,7 +176,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
     @Override
     public void createUser(String userLoginId, String password) throws AuthorizationManagerException {
         // TODO Auto-generated method stub
-        
+
     }
     @Override
     public String createUserGroup(String description) throws AuthorizationManagerException {
@@ -186,32 +186,32 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
     @Override
     public void deleteGroupFromGroup(String childGroupId, String parentGroupId) throws AuthorizationManagerException {
         // TODO Auto-generated method stub
-        
+
     }
     @Override
     public void deleteGroupPermission(String userGroupId, String artifactId, Permission permission) throws AuthorizationManagerException {
         // TODO Auto-generated method stub
-        
+
     }
     @Override
     public void deleteUser(String userLoginId) throws AuthorizationManagerException {
         // TODO Auto-generated method stub
-        
+
     }
     @Override
     public void deleteUserFromGroup(String userLoginId, String userGroupId) throws AuthorizationManagerException {
         // TODO Auto-generated method stub
-        
+
     }
     @Override
     public void deleteUserGroup(String userGroupId) throws AuthorizationManagerException {
         // TODO Auto-generated method stub
-        
+
     }
     @Override
     public void deleteUserPermission(String userLoginId, String artifactId, Permission permission) throws AuthorizationManagerException {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -223,12 +223,12 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
     @Override
     public void updateUser(String userLoginId, String password) throws AuthorizationManagerException {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void updateUserGroup(String userGroupId, String description) throws AuthorizationManagerException {
         // TODO Auto-generated method stub
-        
+
     }
 }

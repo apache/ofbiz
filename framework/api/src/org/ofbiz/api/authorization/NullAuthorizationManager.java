@@ -26,11 +26,11 @@ public class NullAuthorizationManager implements AuthorizationManager {
     public static final String module = NullAuthorizationManager.class.getName();
 
     protected final AccessController accessController;
-    
+
     public NullAuthorizationManager(AccessController accessController) {
         this.accessController = accessController;
     }
-    
+
     public void assignGroupPermission(String userGroupId, String artifactId,
             Permission permission) {
     }
