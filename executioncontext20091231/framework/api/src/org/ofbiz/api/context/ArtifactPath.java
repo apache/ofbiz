@@ -29,12 +29,11 @@ public class ArtifactPath implements Iterator<String> {
 
     public static final String PATH_ROOT_NODE_NAME = "ofbiz";
     public static final String PATH_ELEMENT_SEPARATOR = "/";
-    public static final ArtifactPath PATH_ROOT = new ArtifactPath(PATH_ROOT_NODE_NAME);
+    public static final ArtifactPath PATH_ROOT = new PathRoot();
 
     protected int currentIndex = 0;
     protected final String[] pathElementArray;
     protected FastList<Integer> stack = null;
-    protected final TextBuilder stringBuilder = TextBuilder.newInstance();
 
     public ArtifactPath(String artifactPath) {
         this.pathElementArray = artifactPath.split(PATH_ELEMENT_SEPARATOR);
@@ -56,7 +55,8 @@ public class ArtifactPath implements Iterator<String> {
     }
 
     protected String getPathAsString(int index) {
-        this.stringBuilder.clear();
+        TextBuilder stringBuilder = TextBuilder.newInstance();
+        stringBuilder.clear();
         for (int i = index; i < this.pathElementArray.length; i++) {
             if (i != index) {
                 stringBuilder.append(PATH_ELEMENT_SEPARATOR);
@@ -100,5 +100,37 @@ public class ArtifactPath implements Iterator<String> {
     @Override
     public String toString() {
         return getPathAsString(0);
+    }
+
+    protected static class PathRoot extends ArtifactPath {
+        PathRoot() {
+            super(new String[]{PATH_ROOT_NODE_NAME});
+        }
+
+        @Override
+        public String getCurrentPath() {
+            return PATH_ROOT_NODE_NAME;
+        }
+
+        @Override
+        public String getCurrentPathElement() {
+            return PATH_ROOT_NODE_NAME;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public String next() {
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public void restoreState() {}
+
+        @Override
+        public void saveState() {}
     }
 }
