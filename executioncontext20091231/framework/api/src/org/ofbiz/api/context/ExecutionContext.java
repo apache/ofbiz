@@ -53,26 +53,26 @@ public interface ExecutionContext {
 
     /** Returns an <code>AccessController</code> instance for this
      * user login and execution path combination.
-     * 
+     *
      * @return An <code>AccessController</code> instance
      */
     public AccessController getAccessController();
 
     /** Returns the currency unit of measure.
-     * 
+     *
      * @return The ISO currency code
      */
     public String getCurrencyUom();
 
     /** Returns the current execution path.
-     * 
+     *
      * @return The current execution path
      */
     public ArtifactPath getExecutionPath();
 
     /** Returns the current execution path as a <code>String</code>.
      * Path elements are separated with a forward slash.
-     * 
+     *
      * @return The current execution path
      */
     public String getExecutionPathAsString();
@@ -80,46 +80,46 @@ public interface ExecutionContext {
     /** Returns the current execution path as an array of strings.
      * Each array element contains an Artifact name, with the
      * first element containing the path root.
-     * 
+     *
      * @return The current execution path as an array
      */
     public String[] getExecutionPathAsArray();
 
     /** Returns the current <code>Locale</code>.
-     * 
+     *
      * @return The current <code>Locale</code>
      */
     public Locale getLocale();
 
     /**
      * Returns the parameters associated with this context.
-     * 
+     *
      * @return The parameters associated with this context
      */
     public Map<String, ? extends Object> getParameters();
 
     /** Returns the specified property.
-     * 
+     *
      * @param key property whose associated value is to be returned
-     * @return the specified property, or null if the property doesn't exist 
+     * @return the specified property, or null if the property doesn't exist
      */
     public Object getProperty(String key);
 
     /** Returns the current <code>AuthorizationManager</code> instance.
-     * 
+     *
      * @return The current <code>AuthorizationManager</code> instance
      */
     public AuthorizationManager getSecurity();
 
     /** Returns the current <code>TimeZone</code>.
-     * 
+     *
      * @return The current <code>TimeZone</code>
      */
     public TimeZone getTimeZone();
 
     /** Initializes this ExecutionContext with artifacts found in
      * <code>params</code>.
-     * 
+     *
      * @param params
      */
     public void initializeContext(Map<String, ? extends Object> params);
@@ -128,7 +128,7 @@ public interface ExecutionContext {
     public void popExecutionArtifact();
 
     /** Push an <code>ExecutionArtifact</code> on the stack.
-     * 
+     *
      * @param artifact
      */
     public void pushExecutionArtifact(ExecutionArtifact artifact);
@@ -147,13 +147,13 @@ public interface ExecutionContext {
     public void runUnprotected();
 
     /** Sets the currency unit of measure.
-     * 
+     *
      * @param currencyUom The ISO currency code
      */
     public void setCurrencyUom(String currencyUom);
 
     /** Sets the current <code>Locale</code>.
-     * 
+     *
      * @param locale The current <code>Locale</code>
      */
     public void setLocale(Locale locale);
@@ -161,7 +161,7 @@ public interface ExecutionContext {
     /** Associates the specified value with the specified key.
      * If the context contained a previous property for this key,
      * then the old value is replaced by the specified value.
-     * 
+     *
      * @param key the key with which the specified value is to be associated
      * @param value the value to be associated with the specified key
      * @return the previous value associated with specified key, or null  if there was no mapping for key
@@ -169,13 +169,13 @@ public interface ExecutionContext {
     public Object setProperty(String key, Object value);
 
     /** Sets the current <code>AuthorizationManager</code> instance.
-     * 
+     *
      * @param security The new <code>AuthorizationManager</code> instance
      */
     public void setSecurity(AuthorizationManager security);
 
     /** Sets the current <code>TimeZone</code>.
-     * 
+     *
      * @param timeZone The current <code>TimeZone</code>
      */
     public void setTimeZone(TimeZone timeZone);

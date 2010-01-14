@@ -22,7 +22,7 @@ import java.util.Map;
 
 /** A basic implementation of the ParametersArtifact interface. */
 public class GenericParametersArtifact extends GenericExecutionArtifact implements ParametersArtifact {
-    
+
     protected final Map<String, ? extends Object> parameters;
 
     public GenericParametersArtifact(String location, String name, Map<String, ? extends Object> parameters) {

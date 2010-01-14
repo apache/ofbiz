@@ -68,13 +68,13 @@ public class AccessControllerImpl implements AccessController {
     /** Applies permission filters to a <code>List</code>. The
      * returned <code>List</code> will contain only the objects
      * the user has permission to access.
-     * 
+     *
      * <p>This implementation invokes the specified service
      * with the list as a parameter called <code>candidateList</code>.
      * The service must return a <code>List</code> called
      * <code>candidateList</code>. The service returns only
      * those list elements the user is permitted to access.</p>
-     * 
+     *
      * @param list The <code>List</code> to apply filters to
      * @return A security-aware <code>List</code> if filters
      * were specified for the current artifact, or the original

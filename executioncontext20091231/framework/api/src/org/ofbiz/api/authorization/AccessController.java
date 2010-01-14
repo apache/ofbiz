@@ -37,7 +37,7 @@ public interface AccessController  {
      * method with the desired permission. If access is granted the
      * method returns, otherwise it throws an unchecked exception.
      * Higher level code can catch the exception and handle it accordingly.</p>
-     * 
+     *
      * @param permission The permission to check
      * @throws AccessControlException
      */
@@ -49,7 +49,7 @@ public interface AccessController  {
      * than the current one needs to be checked. If access is granted the
      * method returns, otherwise it throws an unchecked exception.
      * Higher level code can catch the exception and handle it accordingly.</p>
-     * 
+     *
      * @param permission The permission to check
      * @throws AccessControlException
      */
@@ -59,7 +59,7 @@ public interface AccessController  {
      * returned <code>List</code> is security-aware, so methods
      * that return an <code>Object</code> will return only the
      * objects the user has permission to access.
-     * 
+     *
      * @param list The <code>List</code> to apply filters to
      * @return A security-aware <code>List</code> if filters
      * were specified for the current artifact, or the original
@@ -71,7 +71,7 @@ public interface AccessController  {
      * returned <code>ListIterator</code> is security-aware, so methods
      * that return an <code>Object</code> will return only the
      * objects the user has permission to access.
-     * 
+     *
      * @param list The <code>ListIterator</code> to apply filters to
      * @return A security-aware <code>ListIterator</code> if filters
      * were specified for the current artifact, or the original

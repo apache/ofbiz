@@ -45,7 +45,7 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
         this.properties = FastMap.newInstance();
         this.verbose = "true".equals(UtilProperties.getPropertyValue("api.properties", "executionContext.verbose"));
     }
-    
+
     protected AbstractExecutionContext(Map<String, Object> properties) {
         this.properties = properties;
         this.verbose = "true".equals(UtilProperties.getPropertyValue("api.properties", "executionContext.verbose"));
@@ -131,7 +131,7 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
         ExecutionArtifact artifact = this.artifactStack.removeLast();
         if (this.verbose) {
             Debug.logInfo("Popping artifact [" + artifact.getClass().getName() +
-                    "] location = " + artifact.getLocation() + 
+                    "] location = " + artifact.getLocation() +
                     ", name = " + artifact.getName(), module);
         }
     }
@@ -140,7 +140,7 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
         this.artifactStack.addLast(artifact);
         if (this.verbose) {
             Debug.logInfo("Pushing artifact [" + artifact.getClass().getName() +
-                    "] location = " + artifact.getLocation() + 
+                    "] location = " + artifact.getLocation() +
                     ", name = " + artifact.getName(), module);
         }
     }

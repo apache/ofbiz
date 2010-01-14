@@ -37,10 +37,10 @@ import java.util.Map;
  * starting at the top of the stack, and return that instance.</p>
  */
 public interface ParametersArtifact extends ExecutionArtifact {
-    
+
     /**
      * Returns the parameters associated with this artifact.
-     * 
+     *
      * @return The parameters associated with this artifact
      */
     public Map<String, ? extends Object> getParameters();
