@@ -30,7 +30,7 @@ import java.util.Set;
 @SuppressWarnings("serial")
 public class SecurityAwareList<E> extends ArrayList<E> implements List<E> {
 
-    protected final static String module = SecurityAwareList.class.getName();
+    public final static String module = SecurityAwareList.class.getName();
     protected final Set<String> serviceNameList;
 
     public SecurityAwareList(List<E> valueList, Set<String> serviceNameList) {

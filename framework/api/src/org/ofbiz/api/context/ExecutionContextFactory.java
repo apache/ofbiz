@@ -25,7 +25,7 @@ import org.ofbiz.base.util.UtilProperties;
  */
 public class ExecutionContextFactory {
 
-    protected static final String module = ExecutionContextFactory.class.getName();
+    public static final String module = ExecutionContextFactory.class.getName();
 
     public static ExecutionContext getInstance() {
         ExecutionContext result = null;
