@@ -25,11 +25,11 @@ package org.ofbiz.api.authorization;
 @SuppressWarnings("serial")
 public class AuthorizationManagerException extends Exception {
     public AuthorizationManagerException() {
-    super();
+        super();
     }
 
     public AuthorizationManagerException(String message) {
-    super(message);
+        super(message);
     }
 
     public AuthorizationManagerException(String message, Throwable cause) {

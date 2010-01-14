@@ -28,13 +28,13 @@ import javolution.util.FastMap;
  */
 public class BasicPermissions {
 
-	public static final Permission Access = new BasicPermission("access=true");
-	public static final Permission Admin = new AdminPermission();
-	public static final Permission Create = new BasicPermission("create=true");
-	public static final Permission Delete = new BasicPermission("delete=true");
-	public static final Permission Update = new BasicPermission("update=true");
-	public static final Permission View = new BasicPermission("view=true");
-	public static final Map<String, Permission> ConversionMap = createConversionMap();
+    public static final Permission Access = new BasicPermission("access=true");
+    public static final Permission Admin = new AdminPermission();
+    public static final Permission Create = new BasicPermission("create=true");
+    public static final Permission Delete = new BasicPermission("delete=true");
+    public static final Permission Update = new BasicPermission("update=true");
+    public static final Permission View = new BasicPermission("view=true");
+    public static final Map<String, Permission> ConversionMap = createConversionMap();
 
     protected static Map<String, Permission> createConversionMap() {
         Map<String, Permission> conversionMap = FastMap.newInstance();

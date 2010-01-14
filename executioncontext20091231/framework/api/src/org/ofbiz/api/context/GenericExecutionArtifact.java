@@ -20,25 +20,25 @@ package org.ofbiz.api.context;
 
 /** A basic implementation of the <code>ExecutionArtifact</code> interface. */
 public class GenericExecutionArtifact implements ExecutionArtifact {
-	
-	protected final String location;
-	protected final String name;
+    
+    protected final String location;
+    protected final String name;
 
-	public GenericExecutionArtifact(String location, String name) {
-		this.location = location;
-		this.name = name;
-	}
+    public GenericExecutionArtifact(String location, String name) {
+        this.location = location;
+        this.name = name;
+    }
 
-	public String getLocation() {
-		return this.location;
-	}
+    public String getLocation() {
+        return this.location;
+    }
 
-	public String getName() {
-		return this.name;
-	}
+    public String getName() {
+        return this.name;
+    }
 
-	@Override
-	public String toString() {
-		return "GenericExecutionArtifact: location = " + this.location + ", name = " + this.name;
-	}
+    @Override
+    public String toString() {
+        return "GenericExecutionArtifact: location = " + this.location + ", name = " + this.name;
+    }
 }

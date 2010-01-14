@@ -31,28 +31,28 @@ import org.ofbiz.api.context.ArtifactPath;
  */
 public interface AccessController  {
 
-	/** Returns silently if the user has been granted <code>permission</code>
-	 * access for the current artifact, throws <code>AccessControlException</code>
-	 * otherwise.<p>Security-aware artifacts call this
+    /** Returns silently if the user has been granted <code>permission</code>
+     * access for the current artifact, throws <code>AccessControlException</code>
+     * otherwise.<p>Security-aware artifacts call this
      * method with the desired permission. If access is granted the
      * method returns, otherwise it throws an unchecked exception.
      * Higher level code can catch the exception and handle it accordingly.</p>
-	 * 
-	 * @param permission The permission to check
-	 * @throws AccessControlException
-	 */
+     * 
+     * @param permission The permission to check
+     * @throws AccessControlException
+     */
     public void checkPermission(Permission permission) throws AccessControlException;
 
-	/** Returns silently if the user has been granted <code>permission</code>
-	 * access for the specified artifact, throws <code>AccessControlException</code>
-	 * otherwise.<p>Client code can call this method when an artifact other
-	 * than the current one needs to be checked. If access is granted the
+    /** Returns silently if the user has been granted <code>permission</code>
+     * access for the specified artifact, throws <code>AccessControlException</code>
+     * otherwise.<p>Client code can call this method when an artifact other
+     * than the current one needs to be checked. If access is granted the
      * method returns, otherwise it throws an unchecked exception.
      * Higher level code can catch the exception and handle it accordingly.</p>
-	 * 
-	 * @param permission The permission to check
-	 * @throws AccessControlException
-	 */
+     * 
+     * @param permission The permission to check
+     * @throws AccessControlException
+     */
     public void checkPermission(Permission permission, ArtifactPath artifactPath) throws AccessControlException;
 
     /** Applies permission filters to a <code>List</code>. The
@@ -77,6 +77,6 @@ public interface AccessController  {
      * were specified for the current artifact, or the original
      * <code>ListIterator</code> otherwise
      */
-	public <E> ListIterator<E> applyFilters(ListIterator<E> list);
+    public <E> ListIterator<E> applyFilters(ListIterator<E> list);
 
 }

@@ -76,8 +76,8 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
                 ThreadContext.endRunUnprotected();
             }
         }
-	    return accessController;
-	}
+        return accessController;
+    }
 
     public static void logIncident(Permission permission) throws AccessControlException {
         try {
@@ -103,7 +103,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
         }
     }
 
-	protected static void processGroupPermissions(String groupId, PathNode node, Delegator delegator) throws AuthorizationManagerException {
+    protected static void processGroupPermissions(String groupId, PathNode node, Delegator delegator) throws AuthorizationManagerException {
         try {
             // Process this group's memberships first
             List<GenericValue> parentGroups = delegator.findList("UserGroupRelationship", EntityCondition.makeCondition(UtilMisc.toMap("toGroupId", groupId)), null, null, null, false);
@@ -218,7 +218,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
     public AccessController getAccessController() throws AuthorizationManagerException {
         String userLoginId = ThreadContext.getUserLogin().getString("userLoginId");
         return getAccessController(userLoginId);
-	}
+    }
 
     @Override
     public void updateUser(String userLoginId, String password) throws AuthorizationManagerException {

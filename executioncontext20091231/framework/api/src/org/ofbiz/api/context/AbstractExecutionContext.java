@@ -34,18 +34,18 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
     public static final String module = AbstractExecutionContext.class.getName();
 
     protected final FastList<ExecutionArtifact> artifactStack = FastList.newInstance();
-	protected String currencyUom = null;
-	protected Locale locale = Locale.getDefault();
-	protected TimeZone timeZone = TimeZone.getDefault();
-	protected final Map<String, Object> properties;
-	// Temporary - will be removed later
-	protected boolean verbose = false;
+    protected String currencyUom = null;
+    protected Locale locale = Locale.getDefault();
+    protected TimeZone timeZone = TimeZone.getDefault();
+    protected final Map<String, Object> properties;
+    // Temporary - will be removed later
+    protected boolean verbose = false;
 
-	protected AbstractExecutionContext() {
-	    this.properties = FastMap.newInstance();
-	    this.verbose = "true".equals(UtilProperties.getPropertyValue("api.properties", "executionContext.verbose"));
-	}
-	
+    protected AbstractExecutionContext() {
+        this.properties = FastMap.newInstance();
+        this.verbose = "true".equals(UtilProperties.getPropertyValue("api.properties", "executionContext.verbose"));
+    }
+    
     protected AbstractExecutionContext(Map<String, Object> properties) {
         this.properties = properties;
         this.verbose = "true".equals(UtilProperties.getPropertyValue("api.properties", "executionContext.verbose"));
@@ -65,9 +65,9 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
         return this.currencyUom;
     }
 
-	public ArtifactPath getExecutionPath() {
-	    return new ArtifactPath(getExecutionPathAsArray());
-	}
+    public ArtifactPath getExecutionPath() {
+        return new ArtifactPath(getExecutionPathAsArray());
+    }
 
     public String[] getExecutionPathAsArray() {
         FastList<String> elementList = FastList.newInstance();
@@ -100,21 +100,21 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
         return sb.toString();
     }
 
-	public Locale getLocale() {
+    public Locale getLocale() {
         return this.locale;
     }
 
     public Map<String, ? extends Object> getParameters() {
-    	for (int i = this.artifactStack.size() - 1; i >= 0; i--) {
-    		try {
-    			ParametersArtifact artifact = (ParametersArtifact) this.artifactStack.get(i);
-    			return artifact.getParameters();
-    		} catch (Exception e) {}
-    	}
-		return null;
-	}
+        for (int i = this.artifactStack.size() - 1; i >= 0; i--) {
+            try {
+                ParametersArtifact artifact = (ParametersArtifact) this.artifactStack.get(i);
+                return artifact.getParameters();
+            } catch (Exception e) {}
+        }
+        return null;
+    }
 
-	public Object getProperty(String key) {
+    public Object getProperty(String key) {
         return this.properties.get(key);
     }
 
@@ -123,27 +123,27 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
     }
 
     public void popExecutionArtifact() {
-    	if (this.artifactStack.size() == 0) {
-    		// This check is temporary - it will be removed when implementation is complete
-    		Debug.logError(new Exception("Attempt to pop an empty stack"), module);
-    		return;
-    	}
-	    ExecutionArtifact artifact = this.artifactStack.removeLast();
-	    if (this.verbose) {
-	    	Debug.logInfo("Popping artifact [" + artifact.getClass().getName() +
-	    			"] location = " + artifact.getLocation() + 
-	    			", name = " + artifact.getName(), module);
-	    }
-	}
+        if (this.artifactStack.size() == 0) {
+            // This check is temporary - it will be removed when implementation is complete
+            Debug.logError(new Exception("Attempt to pop an empty stack"), module);
+            return;
+        }
+        ExecutionArtifact artifact = this.artifactStack.removeLast();
+        if (this.verbose) {
+            Debug.logInfo("Popping artifact [" + artifact.getClass().getName() +
+                    "] location = " + artifact.getLocation() + 
+                    ", name = " + artifact.getName(), module);
+        }
+    }
 
     public void pushExecutionArtifact(ExecutionArtifact artifact) {
-		this.artifactStack.addLast(artifact);
-		if (this.verbose) {
-			Debug.logInfo("Pushing artifact [" + artifact.getClass().getName() +
-					"] location = " + artifact.getLocation() + 
-					", name = " + artifact.getName(), module);
-		}
-	}
+        this.artifactStack.addLast(artifact);
+        if (this.verbose) {
+            Debug.logInfo("Pushing artifact [" + artifact.getClass().getName() +
+                    "] location = " + artifact.getLocation() + 
+                    ", name = " + artifact.getName(), module);
+        }
+    }
 
     public void reset() {
         if (this.verbose) {
@@ -195,7 +195,7 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
     }
 
     @Override
-	public String toString() {
-		return this.getExecutionPathAsString();
-	}
+    public String toString() {
+        return this.getExecutionPathAsString();
+    }
 }

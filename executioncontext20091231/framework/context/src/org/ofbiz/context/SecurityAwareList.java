@@ -30,17 +30,17 @@ import java.util.Set;
 @SuppressWarnings("serial")
 public class SecurityAwareList<E> extends ArrayList<E> implements List<E> {
 
-	protected final static String module = SecurityAwareList.class.getName();
+    protected final static String module = SecurityAwareList.class.getName();
     protected final Set<String> serviceNameList;
 
-	public SecurityAwareList(List<E> valueList, Set<String> serviceNameList) {
-		super(valueList.size());
-		this.addAll(valueList);
-		this.trimToSize();
-		this.serviceNameList = serviceNameList;
-	}
+    public SecurityAwareList(List<E> valueList, Set<String> serviceNameList) {
+        super(valueList.size());
+        this.addAll(valueList);
+        this.trimToSize();
+        this.serviceNameList = serviceNameList;
+    }
 
-	@Override
+    @Override
     public Iterator<E> iterator() {
         return new SecurityAwareIterator<E>(super.iterator(), this.serviceNameList);
     }
