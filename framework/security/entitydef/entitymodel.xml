@@ -358,4 +358,28 @@ under the License.
       </relation>
     </entity>
 
+    <entity entity-name="AuditedArtifact"
+            package-name="org.ofbiz.security.artifactsecurity"
+            default-resource-name="SecurityEntityLabels"
+            title="Security Component - Audited Artifact Entity">
+      <field name="artifactPath" type="id-vlong-ne"/>
+      <field name="fromDate" type="date-time"></field>
+      <field name="thruDate" type="date-time"></field>
+      <!-- Maybe add a temporal expression ID field so audits can be scheduled -->
+      <prim-key field="artifactPath"/>
+    </entity>
+
+    <entity entity-name="SecurityAuditLog"
+            package-name="org.ofbiz.security.artifactsecurity"
+            default-resource-name="SecurityEntityLabels"
+            title="Security Component - Security Audit Log Entity">
+      <field name="userLoginId" type="id-vlong-ne"></field>
+      <field name="artifactPath" type="id-vlong-ne"/>
+      <field name="incidentDate" type="date-time"></field>
+      <field name="requestedAccess" type="description"/>
+      <prim-key field="userLoginId"/>
+      <prim-key field="artifactPath"/>
+      <prim-key field="incidentDate"/>
+    </entity>
+
 </entitymodel>

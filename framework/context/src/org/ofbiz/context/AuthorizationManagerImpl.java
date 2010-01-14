@@ -18,7 +18,9 @@
  *******************************************************************************/
 package org.ofbiz.context;
 
+import java.security.AccessControlException;
 import java.security.Permission;
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.ofbiz.api.authorization.AccessController;
@@ -26,12 +28,14 @@ import org.ofbiz.api.authorization.AuthorizationManager;
 import org.ofbiz.api.authorization.AuthorizationManagerException;
 import org.ofbiz.api.authorization.BasicPermissions;
 import org.ofbiz.api.context.ArtifactPath;
+import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.security.OFBizSecurity;
 import org.ofbiz.service.ThreadContext;
 
@@ -74,6 +78,30 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
         }
 	    return accessController;
 	}
+
+    public static void logIncident(Permission permission) throws AccessControlException {
+        try {
+            ThreadContext.runUnprotected();
+            PathNode node = PathNode.getInstance(ArtifactPath.PATH_ROOT);
+            TreeBuilder builder = new TreeBuilder(node);
+            Delegator delegator = ThreadContext.getDelegator();
+            List<GenericValue> auditedArtifacts = EntityUtil.filterByDate(delegator.findList("AuditedArtifact", null, null, null, null, true));
+            for (GenericValue auditedArtifact : auditedArtifacts) {
+                builder.build(new ArtifactPath(auditedArtifact.getString("artifactPath")));
+            }
+            AuditedArtifactFinder finder = new AuditedArtifactFinder(node);
+            if (finder.find(ThreadContext.getExecutionPath())) {
+                Timestamp currentTime = new Timestamp(System.currentTimeMillis());
+                String userLoginId = ThreadContext.getUserLogin().getString("userLoginId");
+                GenericValue auditValue = delegator.makeValidValue("SecurityAuditLog", UtilMisc.toMap("userLoginId", userLoginId, "artifactPath", ThreadContext.getExecutionPathAsString(), "incidentDate", currentTime, "requestedAccess", permission.toString()));
+                auditValue.create();
+            }
+        } catch (GenericEntityException e) {
+            throw new AccessControlException(e.getMessage());
+        } finally {
+            ThreadContext.endRunUnprotected();
+        }
+    }
 
 	protected static void processGroupPermissions(String groupId, PathNode node, Delegator delegator) throws AuthorizationManagerException {
         try {
