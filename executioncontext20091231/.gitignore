@@ -10,12 +10,14 @@ applications/product/build/
 applications/securityext/build/
 applications/workeffort/build/
 bin/
+framework/api/build/
 framework/appserver/build/
 framework/base/build/
 framework/bi/build/
 framework/birt/build/
 framework/catalina/build/
 framework/common/build/
+framework/context/build/
 framework/datafile/build/
 framework/entity/build/
 framework/entityext/build/
