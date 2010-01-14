@@ -83,12 +83,7 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
                 elementList.add(artifactName);
             }
         }
-        String[] elementArray = new String[elementList.size()];
-        int index = 0;
-        for (String artifactName : elementList) {
-            elementArray[index++] = artifactName;
-        }
-        return elementArray;
+        return elementList.toArray(new String[elementList.size()]);
     }
 
     public String getExecutionPathAsString() {
