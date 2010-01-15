@@ -794,8 +794,8 @@ public class GenericDelegator implements Delegator {
      */
     public GenericValue create(GenericValue value, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
+        ThreadContext.pushExecutionArtifact(value);
         try {
-            ThreadContext.pushExecutionArtifact(value);
             ThreadContext.getAccessController().checkPermission(Create);
             if (alwaysUseTransaction) {
                 beganTransaction = TransactionUtil.begin();
@@ -949,8 +949,8 @@ public class GenericDelegator implements Delegator {
      */
     public int removeByPrimaryKey(GenericPK primaryKey, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
+        ThreadContext.pushExecutionArtifact(primaryKey);
         try {
-            ThreadContext.pushExecutionArtifact(primaryKey);
             ThreadContext.getAccessController().checkPermission(Delete);
             if (alwaysUseTransaction) {
                 beganTransaction = TransactionUtil.begin();
@@ -1019,8 +1019,8 @@ public class GenericDelegator implements Delegator {
     public int removeValue(GenericValue value, boolean doCacheClear) throws GenericEntityException {
         // NOTE: this does not call the GenericDelegator.removeByPrimaryKey method because it has more information to pass to the ECA rule hander
         boolean beganTransaction = false;
+        ThreadContext.pushExecutionArtifact(value);
         try {
-            ThreadContext.pushExecutionArtifact(value);
             ThreadContext.getAccessController().checkPermission(Delete);
             if (alwaysUseTransaction) {
                 beganTransaction = TransactionUtil.begin();
@@ -1117,8 +1117,8 @@ public class GenericDelegator implements Delegator {
      */
     public int removeByCondition(String entityName, EntityCondition condition, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
+        ThreadContext.pushExecutionArtifact("GenericDelegator.removeByCondition", entityName);
         try {
-            ThreadContext.pushExecutionArtifact("GenericDelegator.removeByCondition", entityName);
             ThreadContext.getAccessController().checkPermission(Delete);
             if (alwaysUseTransaction) {
                 beganTransaction = TransactionUtil.begin();
@@ -1231,8 +1231,8 @@ public class GenericDelegator implements Delegator {
      */
     public int storeByCondition(String entityName, Map<String, ? extends Object> fieldsToSet, EntityCondition condition, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
+        ThreadContext.pushExecutionArtifact("GenericDelegator.storeByCondition", entityName);
         try {
-            ThreadContext.pushExecutionArtifact("GenericDelegator.storeByCondition", entityName);
             ThreadContext.getAccessController().checkPermission(Update);
             if (alwaysUseTransaction) {
                 beganTransaction = TransactionUtil.begin();
@@ -1289,8 +1289,8 @@ public class GenericDelegator implements Delegator {
      */
     public int store(GenericValue value, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
+        ThreadContext.pushExecutionArtifact(value);
         try {
-            ThreadContext.pushExecutionArtifact(value);
             ThreadContext.getAccessController().checkPermission(Update);
             if (alwaysUseTransaction) {
                 beganTransaction = TransactionUtil.begin();

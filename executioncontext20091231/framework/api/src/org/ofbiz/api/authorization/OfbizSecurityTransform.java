@@ -61,8 +61,8 @@ public class OfbizSecurityTransform implements TemplateDirectiveModel {
             Debug.logError("Unknown permission \"" + permStr + "\", unable to execute transform", module);
             return;
         }
+        ThreadContext.pushExecutionArtifact(module, artifactId);
         try {
-            ThreadContext.pushExecutionArtifact(module, artifactId);
             ThreadContext.getAccessController().checkPermission(permission);
             body.render(env.getOut());
         } catch (AccessControlException e) {

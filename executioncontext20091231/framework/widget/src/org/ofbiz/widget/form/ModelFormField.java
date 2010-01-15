@@ -596,10 +596,10 @@ public class ModelFormField implements ExecutionArtifact {
     }
 
     public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
+        ThreadContext.pushExecutionArtifact(this);
         try {
             // Permissions should be checked by renderers, this is here
             // for demonstration only
-            ThreadContext.pushExecutionArtifact(this);
             ThreadContext.getAccessController().checkPermission(View);
             this.fieldInfo.renderFieldString(writer, context, formStringRenderer);
         } catch (AccessControlException e) {

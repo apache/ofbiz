@@ -297,9 +297,9 @@ public class ServiceDispatcher {
 
         // start the transaction
         boolean beganTrans = false;
+        ThreadContext.initializeContext(context);
+        ThreadContext.pushExecutionArtifact(modelService, context);
         try {
-            ThreadContext.initializeContext(context);
-            ThreadContext.pushExecutionArtifact(modelService, context);
             boolean permissionService = false;
             for (ModelServiceIface iface: modelService.implServices) {
                 if ("permissionInterface".equals(iface.getService())) {

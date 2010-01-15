@@ -205,9 +205,9 @@ public class HtmlWidget extends ModelScreenWidget {
                     return;
                 }
             }
+            String artifactName = template.getName().replace("component://", "").replace(".ftl", "");
+            ThreadContext.pushExecutionArtifact(location, artifactName);
             try {
-                String artifactName = template.getName().replace("component://", "").replace(".ftl", "");
-                ThreadContext.pushExecutionArtifact(location, artifactName);
                 FreeMarkerWorker.renderTemplate(template, context, writer);
                 if (insertWidgetBoundaryComments) {
                     writer.append(HtmlWidgetRenderer.formatBoundaryComment("End", "Template", location));
