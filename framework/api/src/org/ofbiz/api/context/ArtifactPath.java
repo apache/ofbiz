@@ -33,7 +33,7 @@ public class ArtifactPath implements Iterator<String> {
 
     protected int currentIndex = 0;
     protected final String[] pathElementArray;
-    protected FastList<Integer> stack = null;
+    protected FastList<Integer> stack = FastList.newInstance();
 
     public ArtifactPath(String artifactPath) {
         this.pathElementArray = artifactPath.split(PATH_ELEMENT_SEPARATOR);
@@ -84,15 +84,12 @@ public class ArtifactPath implements Iterator<String> {
     }
 
     public void restoreState() {
-        if (this.stack != null && !this.stack.isEmpty()) {
+        if (!this.stack.isEmpty()) {
             this.currentIndex = this.stack.removeLast();
         }
     }
 
     public void saveState() {
-        if (this.stack == null) {
-            this.stack = FastList.newInstance();
-        }
         this.stack.addLast(this.currentIndex);
     }
 

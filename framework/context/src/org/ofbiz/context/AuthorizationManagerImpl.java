@@ -22,6 +22,9 @@ import java.security.AccessControlException;
 import java.security.Permission;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
+
+import javolution.util.FastMap;
 
 import org.ofbiz.api.authorization.AccessController;
 import org.ofbiz.api.authorization.AuthorizationManager;
@@ -48,17 +51,24 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
     // Right now this class implements permission checking only.
 
     public static final String module = AuthorizationManagerImpl.class.getName();
-    protected static final UtilCache<String, AccessController> userPermCache = UtilCache.createUtilCache("authorization.UserPermissions");
+    protected static final UtilCache<String, Map<String, AccessController>> userPermCache = UtilCache.createUtilCache("authorization.UserPermissions");
 
     protected static AccessController getAccessController(String userLoginId) throws AuthorizationManagerException {
-        AccessController accessController = userPermCache.get(userLoginId);
+        Delegator delegator = ThreadContext.getDelegator();
+        Map<String, AccessController> controllerMap = userPermCache.get(delegator.getDelegatorName());
+        if (controllerMap == null) {
+            synchronized (userPermCache) {
+                controllerMap = FastMap.newInstance();
+                userPermCache.put(delegator.getDelegatorName(), controllerMap);
+            }
+        }
+        AccessController accessController = controllerMap.get(userLoginId);
         if (accessController != null) {
             return accessController;
         }
-        synchronized (userPermCache) {
+        synchronized (controllerMap) {
+            ThreadContext.runUnprotected();
             try {
-                ThreadContext.runUnprotected();
-                Delegator delegator = ThreadContext.getDelegator();
                 PathNode node = PathNode.getInstance(ArtifactPath.PATH_ROOT);
                 // Process group membership permissions first
                 List<GenericValue> groupMemberships = delegator.findList("UserToUserGroupRel", EntityCondition.makeCondition(UtilMisc.toMap("userLoginId", userLoginId)), null, null, null, false);
@@ -69,7 +79,7 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
                 List<GenericValue> permissionValues = delegator.findList("UserToArtifactPermRel", EntityCondition.makeCondition(UtilMisc.toMap("userLoginId", userLoginId)), null, null, null, false);
                 setPermissions(userLoginId, node, permissionValues);
                 accessController = new AccessControllerImpl(node);
-                userPermCache.put(userLoginId, accessController);
+                controllerMap.put(userLoginId, accessController);
             } catch (GenericEntityException e) {
                 throw new AuthorizationManagerException(e);
             } finally {
@@ -80,8 +90,8 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
     }
 
     public static void logIncident(Permission permission) throws AccessControlException {
+        ThreadContext.runUnprotected();
         try {
-            ThreadContext.runUnprotected();
             PathNode node = PathNode.getInstance(ArtifactPath.PATH_ROOT);
             TreeBuilder builder = new TreeBuilder(node);
             Delegator delegator = ThreadContext.getDelegator();

@@ -41,7 +41,7 @@ public class BasicPermission extends Permission {
         try {
             BasicPermission that = (BasicPermission) obj;
             return this.permissionString.equals(that.permissionString);
-        } catch (Exception e) {}
+        } catch (ClassCastException e) {}
         return false;
     }
 

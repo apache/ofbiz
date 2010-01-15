@@ -49,7 +49,7 @@ public abstract class PermissionsSet extends BasicPermission {
         try {
             PermissionsSet that = (PermissionsSet) obj;
             return this.permissionsSet.equals(that.permissionsSet);
-        } catch (Exception e) {}
+        } catch (ClassCastException e) {}
         return false;
     }
 
