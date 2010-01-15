@@ -77,7 +77,7 @@ public class OfbizSecurityTransform implements TemplateDirectiveModel {
             try {
                 StringModel modelObj = (StringModel) freeMarkerObject;
                 result = modelObj.getAsString();
-            } catch (Exception e) {
+            } catch (ClassCastException e) {
                 try {
                     SimpleScalar scalarObj = (SimpleScalar) freeMarkerObject;
                     result = scalarObj.getAsString();

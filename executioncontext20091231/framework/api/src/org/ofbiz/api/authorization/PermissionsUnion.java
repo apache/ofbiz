@@ -53,7 +53,7 @@ public class PermissionsUnion extends PermissionsSet {
                 }
             }
             return false;
-        } catch (Exception e) {}
+        } catch (ClassCastException e) {}
         try {
             PermissionsIntersection permissionsIntersection = (PermissionsIntersection) permission;
             for (Permission perm : permissionsIntersection.getPermissionsSet()) {
@@ -62,7 +62,7 @@ public class PermissionsUnion extends PermissionsSet {
                 }
             }
             return true;
-        } catch (Exception e) {}
+        } catch (ClassCastException e) {}
         for (Permission perm : this.permissionsSet) {
             if (perm.implies(permission)) {
                 return true;

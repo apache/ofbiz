@@ -38,7 +38,7 @@ public class AdminPermission extends BasicPermission {
         try {
             AdminPermission that = (AdminPermission) obj;
             return this.permissionString.equals(that.permissionString);
-        } catch (Exception e) {}
+        } catch (ClassCastException e) {}
         return false;
     }
 
