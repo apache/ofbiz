@@ -40,7 +40,7 @@ public class GenericExecutionArtifact implements ExecutionArtifact {
     }
 
     @Override
-    public void run() {}
+    public void run() throws Throwable {}
 
     @Override
     public String toString() {

@@ -115,6 +115,10 @@ public class ThreadContext {
         executionContext.get().reset();
     }
 
+    public void runExecutionArtifact(ExecutionArtifact artifact) throws Throwable {
+        executionContext.get().runExecutionArtifact(artifact);
+    }
+
     public static void runUnprotected() {
         executionContext.get().runUnprotected();
     }

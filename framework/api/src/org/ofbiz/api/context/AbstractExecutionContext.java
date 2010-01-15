@@ -147,12 +147,10 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
         this.timeZone = TimeZone.getDefault();
     }
 
-    public void runExecutionArtifact(ExecutionArtifact artifact) {
+    public void runExecutionArtifact(ExecutionArtifact artifact) throws Throwable {
         pushExecutionArtifact(artifact);
         try {
             artifact.run();
-        } catch (Throwable t) {
-            Debug.logError(t, module);
         } finally {
             popExecutionArtifact();
         }
