@@ -145,7 +145,7 @@ public interface ExecutionContext {
      *
      * @param artifact
      */
-    void runExecutionArtifact(ExecutionArtifact artifact);
+    void runExecutionArtifact(ExecutionArtifact artifact) throws Throwable;
 
      /**
      * Replaces the current <code>AuthorizationManager</code> instance

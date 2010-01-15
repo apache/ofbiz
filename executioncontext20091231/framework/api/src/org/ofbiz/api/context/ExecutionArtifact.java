@@ -41,5 +41,5 @@ public interface ExecutionArtifact {
     /**
      * Run this artifact's protected code.
      */
-    void run();
+    void run() throws Throwable;
 }
