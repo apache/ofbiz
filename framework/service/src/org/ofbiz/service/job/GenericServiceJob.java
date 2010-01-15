@@ -63,14 +63,16 @@ public class GenericServiceJob extends AbstractJob {
     @Override
     public void exec() throws InvalidJobException {
         ThreadContext.reset();
+        ThreadContext.runUnprotected();
+        ThreadContext.pushExecutionArtifact(module, "ServiceJob");
         try {
-            ThreadContext.runUnprotected();
-            ThreadContext.pushExecutionArtifact(module, "ServiceJob");
             init();
         } finally {
+            ThreadContext.popExecutionArtifact();
             ThreadContext.endRunUnprotected();
         }
         // no transaction is necessary since runSync handles this
+        ThreadContext.pushExecutionArtifact(module, "ServiceJob");
         try {
             ThreadContext.setDispatcher(this.dctx.getDispatcher());
             Map<String, Object> serviceCtx = getContext();
@@ -100,6 +102,7 @@ public class GenericServiceJob extends AbstractJob {
             this.failed(t);
         } finally {
             ThreadContext.popExecutionArtifact();
+            ThreadContext.endRunUnprotected();
         }
 
         // call the finish method

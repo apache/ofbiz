@@ -791,8 +791,8 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
      *   use the same form definitions for many types of form UIs
      */
     public void renderFormString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
+        ThreadContext.pushExecutionArtifact(this);
         try {
-            ThreadContext.pushExecutionArtifact(this);
             ThreadContext.getAccessController().checkPermission(View);
             //  increment the paginator, only for list and multi forms
             if ("list".equals(this.type) || "multi".equals(this.type)) {

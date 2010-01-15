@@ -377,11 +377,11 @@ public class EntityDataLoadContainer implements Container {
             }
 
             Debug.logImportant("=-=-=-=-=-=-= Starting the data load...", module);
+            ThreadContext.pushExecutionArtifact(module, "EntityDataLoad");
+            ThreadContext.runUnprotected();
             try {
                 // Set up the execution context
-                ThreadContext.runUnprotected();
                 ThreadContext.setDelegator(delegator);
-                ThreadContext.pushExecutionArtifact(module, "EntityDataLoad");
                 for (URL dataUrl: urlList) {
                     try {
                         int rowsChanged = EntityDataLoader.loadData(dataUrl, helperName, delegator, errorMessages, txTimeout, useDummyFks, maintainTxs, tryInserts);

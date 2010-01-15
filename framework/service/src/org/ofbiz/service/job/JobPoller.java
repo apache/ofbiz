@@ -87,26 +87,30 @@ public class JobPoller implements Runnable {
         }
         ThreadContext.runUnprotected();
         ThreadContext.pushExecutionArtifact(module, "JobPoller");
-        while (isRunning) {
-            try {
-                // grab a list of jobs to run.
-                List<Job> pollList = jm.poll();
-                //Debug.logInfo("Received poll list from JobManager [" + pollList.size() + "]", module);
+        try {
+            while (isRunning) {
+                try {
+                    // grab a list of jobs to run.
+                    List<Job> pollList = jm.poll();
+                    //Debug.logInfo("Received poll list from JobManager [" + pollList.size() + "]", module);
 
-                for (Job job : pollList) {
-                    if (job.isValid()) {
-                        queueNow(job);
-                        //Debug.logInfo("Job [" + job.getJobId() + "] is queued", module);
+                    for (Job job : pollList) {
+                        if (job.isValid()) {
+                            queueNow(job);
+                            //Debug.logInfo("Job [" + job.getJobId() + "] is queued", module);
+                        }
                     }
+                    // NOTE: using sleep instead of wait for stricter locking
+                    java.lang.Thread.sleep(pollWaitTime());
+                } catch (InterruptedException e) {
+                    Debug.logError(e, module);
+                    stop();
                 }
-                // NOTE: using sleep instead of wait for stricter locking
-                java.lang.Thread.sleep(pollWaitTime());
-            } catch (InterruptedException e) {
-                Debug.logError(e, module);
-                stop();
             }
+        } finally {
+            ThreadContext.popExecutionArtifact();
+            ThreadContext.endRunUnprotected();
         }
-        ThreadContext.popExecutionArtifact();
     }
 
     /**

@@ -319,8 +319,8 @@ public class ControlServlet extends HttpServlet {
             // without a session we can't log the hit, etc; so just do nothing; this should NOT happen much!
             Debug.logError("Error in ControlServlet output where response isCommitted and there is no session (probably because of a logout); not saving ServerHit/Bin information because there is no session and as the response isCommitted we can't get a new one. The output was successful, but we just can't save ServerHit/Bin info.", module);
         } else {
+            ThreadContext.pushExecutionArtifact(module, webappName);
             try {
-                ThreadContext.pushExecutionArtifact(module, webappName);
                 UtilHttp.setInitialRequestInfo(request);
                 VisitHandler.getVisitor(request, response);
                 if (requestHandler.trackStats(request)) {
