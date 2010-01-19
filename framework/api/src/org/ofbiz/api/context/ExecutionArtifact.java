@@ -37,9 +37,4 @@ public interface ExecutionArtifact {
      * @return Name of this artifact
      */
     String getName();
-
-    /**
-     * Run this artifact's protected code.
-     */
-    void run() throws Throwable;
 }

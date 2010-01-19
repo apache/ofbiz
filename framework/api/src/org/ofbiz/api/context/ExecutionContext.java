@@ -140,18 +140,9 @@ public interface ExecutionContext {
      */
     void reset();
 
-    /** Run an <code>ExecutionArtifact</code>'s protected code.
-     * 
-     *
-     * @param artifact
-     */
-    void runExecutionArtifact(ExecutionArtifact artifact) throws Throwable;
-
-     /**
+    /**
      * Replaces the current <code>AuthorizationManager</code> instance
      * with one that allows unrestricted use of all artifacts.
-     *
-     * @param artifact
      */
     void runUnprotected();
 

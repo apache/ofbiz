@@ -147,15 +147,6 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
         this.timeZone = TimeZone.getDefault();
     }
 
-    public void runExecutionArtifact(ExecutionArtifact artifact) throws Throwable {
-        pushExecutionArtifact(artifact);
-        try {
-            artifact.run();
-        } finally {
-            popExecutionArtifact();
-        }
-    }
-
     public void setCurrencyUom(String currencyUom) {
         if (currencyUom != null) {
             this.currencyUom = currencyUom;

@@ -29,18 +29,13 @@ public class GenericExecutionArtifact implements ExecutionArtifact {
         this.name = name;
     }
 
-    @Override
     public String getLocation() {
         return this.location;
     }
 
-    @Override
     public String getName() {
         return this.name;
     }
-
-    @Override
-    public void run() throws Throwable {}
 
     @Override
     public String toString() {
