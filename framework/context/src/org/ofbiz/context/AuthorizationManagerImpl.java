@@ -181,7 +181,13 @@ public class AuthorizationManagerImpl extends OFBizSecurity implements Authoriza
     @Override
     public void clearUserData(GenericValue userLogin) {
         super.clearUserData(userLogin);
-        userPermCache.remove(userLogin.getString("userLogin"));
+        Delegator delegator = ThreadContext.getDelegator();
+        Map<String, AccessController> controllerMap = userPermCache.get(delegator.getDelegatorName());
+        if (controllerMap != null) {
+            synchronized (controllerMap) {
+                controllerMap.remove(userLogin.getString("userLogin"));
+            }
+        }
     }
     @Override
     public void createUser(String userLoginId, String password) throws AuthorizationManagerException {
