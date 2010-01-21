@@ -1,6 +1,22 @@
 ExecutionContext and Security-Aware Artifacts Notes
 ---------------------------------------------------
 
+2010-01-20: Security-aware artifact TODOs:
+
+1. Add security checking at the entity field level.
+Right now security checking is done only at the entity level.
+
+2. Improve the ArtifactPath class design. Right now the
+class exposes too much of its implementation, and the
+ContextUtil class exploits that. Client code should not
+know that the path is stored as an array.
+
+3. Encapsulate the
+Push Artifact->Run Protected Process->Pop Artifact
+code into a single method.
+
+---------------------------------------------------
+
 2010-01-13: The main navigation is controlled by the new
 security design. I created a new class - ContextUtil.java -
 to hold utility methods. Those methods can be moved to
