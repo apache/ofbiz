@@ -109,10 +109,16 @@
         <value xml:lang="fr">Fréquence</value>
         <value xml:lang="it">Frequenza</value>
     </property>
+    <property key="TemporalExpression_HOUR_RANGE">
+        <value xml:lang="en">Hour Range</value>
+    </property>
     <property key="TemporalExpression_INTERSECTION">
         <value xml:lang="en">Intersection</value>
         <value xml:lang="fr">Intersection</value>
         <value xml:lang="it">Intersezione</value>
+    </property>
+    <property key="TemporalExpression_MINUTE_RANGE">
+        <value xml:lang="en">Minute Range</value>
     </property>
     <property key="TemporalExpression_MONTH_RANGE">
         <value xml:lang="en">Month Range</value>
@@ -120,7 +126,7 @@
         <value xml:lang="it">Intervallo di mese</value>
     </property>
     <property key="TemporalExpression_TIME_OF_DAY_RANGE">
-        <value xml:lang="en">Time Of Day Range</value>
+        <value xml:lang="en">Time Of Day Range (deprecated)</value>
         <value xml:lang="fr">Intervalle entre 2 heures d'un jour</value>
         <value xml:lang="it">Ora nel giorno dell'intervallo</value>
     </property>
