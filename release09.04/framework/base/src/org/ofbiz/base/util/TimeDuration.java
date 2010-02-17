@@ -27,6 +27,13 @@ public class TimeDuration implements Serializable {
     /** A <code>TimeDuration</code> instance that represents a zero time duration. */
     public static final TimeDuration ZeroTimeDuration = new NullDuration();
 
+    private static long computeDeltaMillis(long start, long end) {
+        if (start < 0) {
+            return end + (-start);
+        }
+        return end - start;
+    }
+
     protected int millis = 0;
     protected int seconds = 0;
     protected int minutes = 0;
@@ -76,7 +83,7 @@ public class TimeDuration implements Serializable {
             return this.years == that.years && this.months == that.months && this.days == that.days
             && this.hours == that.hours && this.minutes == that.minutes && this.seconds == that.seconds
             && this.millis == that.millis;
-        } catch (Exception e) {}
+        } catch (ClassCastException e) {}
         return false;
     }
 
@@ -151,7 +158,7 @@ public class TimeDuration implements Serializable {
 
         // this will be used to speed up time comparisons
         long targetMillis = calEnd.getTimeInMillis();
-        long deltaMillis = targetMillis - calStart.getTimeInMillis();
+        long deltaMillis = computeDeltaMillis(calStart.getTimeInMillis(), targetMillis);
 
         // shortcut for equal dates
         if (deltaMillis == 0) {
@@ -162,33 +169,33 @@ public class TimeDuration implements Serializable {
         long yearMillis = 86400000 * calStart.getMinimum(Calendar.DAY_OF_YEAR);
         float units = deltaMillis / yearMillis;
         this.years = advanceCalendar(calStart, calEnd, (int) units, Calendar.YEAR);
-        deltaMillis = targetMillis - calStart.getTimeInMillis();
+        deltaMillis = computeDeltaMillis(calStart.getTimeInMillis(), targetMillis);
 
         // compute elapsed months
         long monthMillis = 86400000 * calStart.getMinimum(Calendar.DAY_OF_MONTH);
         units = deltaMillis / monthMillis;
         this.months = advanceCalendar(calStart, calEnd, (int) units, Calendar.MONTH);
-        deltaMillis = targetMillis - calStart.getTimeInMillis();
+        deltaMillis = computeDeltaMillis(calStart.getTimeInMillis(), targetMillis);
 
         // compute elapsed days
         units = deltaMillis / 86400000;
         this.days = advanceCalendar(calStart, calEnd, (int) units, Calendar.DAY_OF_MONTH);
-        deltaMillis = targetMillis - calStart.getTimeInMillis();
+        deltaMillis = computeDeltaMillis(calStart.getTimeInMillis(), targetMillis);
 
         // compute elapsed hours
         units = deltaMillis / 3600000;
         this.hours = advanceCalendar(calStart, calEnd, (int) units, Calendar.HOUR);
-        deltaMillis = targetMillis - calStart.getTimeInMillis();
+        deltaMillis = computeDeltaMillis(calStart.getTimeInMillis(), targetMillis);
 
         // compute elapsed minutes
         units = deltaMillis / 60000;
         this.minutes = advanceCalendar(calStart, calEnd, (int) units, Calendar.MINUTE);
-        deltaMillis = targetMillis - calStart.getTimeInMillis();
+        deltaMillis = computeDeltaMillis(calStart.getTimeInMillis(), targetMillis);
 
         // compute elapsed seconds
         units = deltaMillis / 1000;
         this.seconds = advanceCalendar(calStart, calEnd, (int) units, Calendar.SECOND);
-        deltaMillis = targetMillis - calStart.getTimeInMillis();
+        deltaMillis = computeDeltaMillis(calStart.getTimeInMillis(), targetMillis);
 
         this.millis = (int) deltaMillis;
         if (isNegative) {
@@ -198,10 +205,14 @@ public class TimeDuration implements Serializable {
 
     protected int advanceCalendar(Calendar start, Calendar end, int units, int type) {
         if (units >= 1) {
-            start.add(type, units);
-            while (start.after(end)) {
-                start.add(type, -1);
+            Calendar tmp = (Calendar) start.clone();
+            tmp.add(type, units);
+            while (tmp.after(end)) {
+                tmp.add(type, -1);
                 units--;
+            }
+            if (units != 0) {
+                start.add(type, units);
             }
         }
         return units;
