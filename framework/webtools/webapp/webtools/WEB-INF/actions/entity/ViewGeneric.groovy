@@ -115,6 +115,8 @@ if (value != null) {
             fieldValue = UtilFormatOut.safeToString((Double)value.get(field.getName()));
         } else if (type.getJavaType().indexOf("Float") >= 0) {
             fieldValue = UtilFormatOut.safeToString((Float)value.get(field.getName()));
+        } else if (type.getJavaType().indexOf("BigDecimal") >= 0) {
+            fieldValue = UtilFormatOut.safeToString((BigDecimal)value.get(field.getName()));
         } else if (type.getJavaType().indexOf("String") >= 0) {
             fieldValue = UtilFormatOut.checkNull((String)value.get(field.getName()));
         }
@@ -271,6 +273,9 @@ for (int fnum = 0; fnum < entity.getNopksSize();fnum++) {
     } else if (type.getJavaType().indexOf("Float") >= 0) {
         fieldValue = (value != null && useValue) ? UtilFormatOut.safeToString((Float)value.get(field.getName())):UtilFormatOut.checkNull(parameters.get(field.getName()));
         fieldType = "Float";
+    } else if (type.getJavaType().indexOf("BigDecimal") >= 0) {
+        fieldValue = (value != null && useValue) ? UtilFormatOut.safeToString((BigDecimal)value.get(field.getName())):UtilFormatOut.checkNull(parameters.get(field.getName()));
+        fieldType = "BigDecimal";
     } else if (type.getJavaType().indexOf("String") >= 0) {
         if (type.stringLength() <= 80) {
             fieldValue = (value != null && useValue) ? UtilFormatOut.checkNull((String)value.get(field.getName())):UtilFormatOut.checkNull(parameters.get(field.getName()));
