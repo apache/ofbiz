@@ -32,6 +32,7 @@ import java.util.Enumeration;
 import org.apache.bsf.BSFManager;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilJ2eeCompat;
 import org.ofbiz.base.util.UtilTimer;
@@ -202,11 +203,13 @@ public class ControlServlet extends HttpServlet {
         } catch (RequestHandlerException e) {
             Throwable throwable = e.getNested() != null ? e.getNested() : e;
             Debug.logError(throwable, "Error in request handler: ", module);
-            request.setAttribute("_ERROR_MESSAGE_", throwable.toString());
+            StringUtil.HtmlEncoder encoder = new StringUtil.HtmlEncoder();
+            request.setAttribute("_ERROR_MESSAGE_", encoder.encode(throwable.toString()));
             errorPage = requestHandler.getDefaultErrorPage(request);
         } catch (Exception e) {
             Debug.logError(e, "Error in request handler: ", module);
-            request.setAttribute("_ERROR_MESSAGE_", e.toString());
+            StringUtil.HtmlEncoder encoder = new StringUtil.HtmlEncoder();
+            request.setAttribute("_ERROR_MESSAGE_", encoder.encode(e.toString()));
             errorPage = requestHandler.getDefaultErrorPage(request);
         }
 
