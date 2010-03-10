@@ -47,7 +47,7 @@ public class DelegatorFactoryImpl extends DelegatorFactory {
                     if (delegator != null) {
                         GenericDelegator.delegatorCache.put(delegatorName, delegator);
                     } else {
-                        Debug.logError("Could not create delegator with name " + delegatorName + ", constructor failed (got null value) not sure why/how.", module);
+                        Debug.logError("Could not create delegator with name " + delegatorName + ", constructor failed (got null value).", module);
                     }
                 }
             }
