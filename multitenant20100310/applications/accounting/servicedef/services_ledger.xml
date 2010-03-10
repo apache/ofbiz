@@ -1,0 +1,673 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Accounting Services</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <!-- ========= General Ledger Services ========= -->
+
+    <!-- GlAccount & Related -->
+    <service name="createGlAccount" default-entity-name="GlAccount" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createGlAccount" auth="true">
+        <description>Create a GlAccount record</description>
+        <permission-service service-name="basicGeneralLedgerPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="glAccountTypeId" optional="false"/>
+        <override name="glAccountClassId" optional="false"/>
+        <override name="glResourceTypeId" optional="false"/>
+        <override name="accountName" optional="false"/>
+    </service>
+    <service name="updateGlAccount" default-entity-name="GlAccount" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="updateGlAccount" auth="true">
+        <description>Update a GlAccount record</description>
+        <permission-service service-name="basicGeneralLedgerPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteGlAccount" default-entity-name="GlAccount" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="deleteGlAccount" auth="true">
+        <description>Delete a GlAccount record</description>
+        <permission-service service-name="basicGeneralLedgerPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="createGlAccountOrganization" default-entity-name="GlAccountOrganization" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createGlAccountOrganization" auth="true">
+        <description>Create a GlAccount record</description>
+        <permission-service service-name="basicGeneralLedgerPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateGlAccountOrganization" default-entity-name="GlAccountOrganization" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="updateGlAccountOrganization" auth="true">
+        <description>Update a GlAccount record</description>
+        <permission-service service-name="basicGeneralLedgerPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteGlAccountOrganization" default-entity-name="GlAccountOrganization" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="deleteGlAccountOrganization" auth="true">
+        <description>Delete a GlAccount record</description>
+        <permission-service service-name="basicGeneralLedgerPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- GlJournal -->
+    <service name="quickCreateAcctgTransAndEntries" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="quickCreateAcctgTransAndEntries" auth="true">
+        <description>Creates an AcctgTrans and two offsetting AcctgTransEntry records</description>
+        <auto-attributes mode="IN" entity-name="AcctgTrans" include="nonpk" optional="true"/>
+        <auto-attributes mode="IN" entity-name="AcctgTransEntry" include="nonpk" optional="true">
+            <exclude field-name="debitCreditFlag"/>
+            <exclude field-name="glAccountId"/>
+        </auto-attributes>
+        <attribute name="debitGlAccountId" type="String" mode="IN" optional="false"/>
+        <attribute name="creditGlAccountId" type="String" mode="IN" optional="false"/>
+        <attribute name="acctgTransId" type="String" mode="OUT" optional="false"/>
+        <override name="amount" optional="false"/>
+    </service>
+
+    <service name="calculateGlJournalTrialBalance" default-entity-name="GlJournal" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="calculateGlJournalTrialBalance" auth="true">
+        <description>Calculate Trial Balance for a GlJournal</description>
+        <permission-service service-name="basicGeneralLedgerPermissionCheck" main-action="VIEW"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <attribute name="debitTotal" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="creditTotal" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="debitCreditDifference" type="BigDecimal" mode="OUT" optional="false"/>
+    </service>
+    <service name="postGlJournal" default-entity-name="GlJournal" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="postGlJournal" auth="true">
+        <description>Post a GlJournal</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="createGlJournal" default-entity-name="GlJournal" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createGlJournal" auth="true">
+        <description>Create a GlJournal record</description>
+        <permission-service service-name="basicGeneralLedgerPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true">
+            <exclude field-name="isPosted"/>
+            <exclude field-name="postedDate"/>
+        </auto-attributes>
+        <override name="organizationPartyId" optional="false"/>
+    </service>
+    <service name="updateGlJournal" default-entity-name="GlJournal" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="updateGlJournal" auth="true">
+        <description>Update a GlJournal record</description>
+        <permission-service service-name="basicGeneralLedgerPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true">
+            <exclude field-name="isPosted"/>
+            <exclude field-name="postedDate"/>
+        </auto-attributes>
+    </service>
+    <service name="deleteGlJournal" default-entity-name="GlJournal" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="deleteGlJournal" auth="true">
+        <description>Delete a GlJournal record</description>
+        <permission-service service-name="basicGeneralLedgerPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- GlReconciliation & Related -->
+    <service name="createGlReconciliation" default-entity-name="GlReconciliation" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createGlReconciliation" auth="true">
+        <description>Create a GlReconciliation record</description>
+        <permission-service service-name="basicGeneralLedgerPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true">
+            <exclude field-name="createdByUserLogin"/>
+            <exclude field-name="lastModifiedByUserLogin"/>
+        </auto-attributes>
+        <override name="glReconciliationName" optional="false"/>
+    </service>
+    <service name="updateGlReconciliation" default-entity-name="GlReconciliation" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="updateGlReconciliation" auth="true">
+        <description>Update a GlReconciliation record</description>
+        <permission-service service-name="basicGeneralLedgerPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true">
+            <exclude field-name="createdByUserLogin"/>
+            <exclude field-name="lastModifiedByUserLogin"/>
+        </auto-attributes>
+    </service>
+    <service name="deleteGlReconciliation" default-entity-name="GlReconciliation" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="deleteGlReconciliation" auth="true">
+        <description>Delete a GlReconciliation record</description>
+        <permission-service service-name="basicGeneralLedgerPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="createGlReconciliationEntry" default-entity-name="GlReconciliationEntry" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createGlReconciliationEntry" auth="true">
+        <description>Add an Entry to a GlReconciliation</description>
+        <permission-service service-name="basicGeneralLedgerPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="false"/>
+        <attribute name="statusId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="updateGlReconciliationEntry" default-entity-name="GlReconciliationEntry" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="updateGlReconciliationEntry" auth="true">
+        <description>Update an Entry to a GlReconciliation record</description>
+        <permission-service service-name="basicGeneralLedgerPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="false"/>
+    </service>
+    <service name="deleteGlReconciliationEntry" default-entity-name="GlReconciliationEntry" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="deleteGlReconciliationEntry" auth="true">
+        <description>Remove an Entry from a GlReconciliation</description>
+        <permission-service service-name="basicGeneralLedgerPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+        <!-- AcctgTrans & Related -->
+    <service name="completeAcctgTransEntries" default-entity-name="AcctgTrans" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="completeAcctgTransEntries" auth="true">
+        <description>Completes, if possible, the AcctgTransEntries using the mappings defined in the gl setup</description>
+        <permission-service service-name="acctgTransactionPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="interfaceAcctgTrans" default-entity-name="AcctgTrans" engine="interface" location="" invoke="">
+        <auto-attributes include="nonpk" mode="IN" optional="true">
+            <exclude field-name="isPosted"/>
+            <exclude field-name="postedDate"/>
+            <exclude field-name="createdByUserLogin"/>
+            <exclude field-name="lastModifiedByUserLogin"/>
+        </auto-attributes>
+        <override name="acctgTransTypeId" optional="false"/>
+        <override name="transactionDate" optional="false"/>
+        <override name="glFiscalTypeId" optional="false"/>
+    </service>
+    <service name="createAcctgTrans" default-entity-name="AcctgTrans" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/AcctgTransServices.xml" invoke="createAcctgTrans" auth="true">
+        <description>Create a AcctgTrans record.  isPosted is forced to "N"</description>
+        <permission-service service-name="acctgTransactionPermissionCheck" main-action="CREATE"/>
+        <implements service="interfaceAcctgTrans"/>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+    </service>
+    <service name="updateAcctgTrans" default-entity-name="AcctgTrans" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/AcctgTransServices.xml" invoke="updateAcctgTrans" auth="true">
+        <description>Update a AcctgTrans record</description>
+        <permission-service service-name="acctgTransactionPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteAcctgTrans" default-entity-name="AcctgTrans" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/AcctgTransServices.xml" invoke="deleteAcctgTrans" auth="true">
+        <description>Delete a AcctgTrans record</description>
+        <permission-service service-name="acctgTransactionPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="interfaceAcctgTransEntry" default-entity-name="AcctgTransEntry" engine="interface" location="" invoke="">
+        <auto-attributes include="nonpk" mode="IN" optional="true">
+            <exclude field-name="reconcileStatusId"/>
+        </auto-attributes>
+        <override name="organizationPartyId" optional="false"/>
+        <override name="debitCreditFlag" optional="false"/>
+        <!--
+        <override name="glAccountId" optional="false"/>
+        <override name="amount" optional="false"/>
+        -->
+    </service>
+    <service name="createAcctgTransEntry" default-entity-name="AcctgTransEntry" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/AcctgTransServices.xml" invoke="createAcctgTransEntry" auth="true">
+        <description>Add an Entry to a AcctgTrans.  Will use baseCurrencyUomId in PartyAcctgPreference if no currencyUomId is in parameters.</description>
+        <permission-service service-name="acctgTransactionPermissionCheck" main-action="CREATE"/>
+        <implements service="interfaceAcctgTransEntry"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <attribute name="purposeEnumId" mode="IN" type="String" optional="true"></attribute>
+        <override name="acctgTransEntrySeqId" mode="OUT"/>
+    </service>
+    <service name="updateAcctgTransEntry" default-entity-name="AcctgTransEntry" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/AcctgTransServices.xml" invoke="updateAcctgTransEntry" auth="true">
+        <description>Update an Entry to a AcctgTrans record</description>
+        <permission-service service-name="acctgTransactionPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteAcctgTransEntry" default-entity-name="AcctgTransEntry" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/AcctgTransServices.xml" invoke="deleteAcctgTransEntry" auth="true">
+        <description>Remove an Entry from a AcctgTrans</description>
+        <permission-service service-name="acctgTransactionPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- ====== Services for posting business transactions (invoices, payments, inventory adjustments, etc.) to the General Ledger ======= -->
+    <service name="createAcctgTransAndEntries" engine="simple"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createAcctgTransAndEntries" default-entity-name="AcctgTrans">
+        <description>
+            Takes a list of AcctgTransEntry entries, verifies that the list of entries are valid (GL account and organizationParty exist),
+            and then creates an AcctgTrans entry and stores all the AcctgTransEntries with the acctgTransId.  Note that this does not actually
+            check that the debits and credits balance out.  The idea is that unbalanced transactions can be created here, but they will need
+            to be created before they are actually posted, and a later posting service will actually check that the transaction is balanced.
+        </description>
+        <permission-service service-name="acctgTransactionPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="acctgTransEntries" type="java.util.List" mode="IN" optional="false"/>
+        <override name="acctgTransId" type="String" mode="OUT"/>
+    </service>
+    <service name="calculateAcctgTransTrialBalance" default-entity-name="AcctgTrans" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/AcctgTransServices.xml" invoke="calculateAcctgTransTrialBalance" auth="true">
+        <description>Calculate Trial Balance for a AcctgTrans</description>
+        <permission-service service-name="acctgTransactionPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <attribute name="debitTotal" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="creditTotal" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="debitCreditDifference" type="BigDecimal" mode="OUT" optional="false"/>
+    </service>
+    <service name="postAcctgTrans" default-entity-name="AcctgTrans" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/AcctgTransServices.xml" invoke="postAcctgTrans" auth="true"
+            transaction-timeout="600">
+        <description>Post a AcctgTrans and related entries.  This will make sure that the time period is not closed and that
+         the sum of the debits and credits are equal.
+        </description>
+        <permission-service service-name="acctgTransactionPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <attribute name="verifyOnly" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="closeFinancialTimePeriod" default-entity-name="CustomTimePeriod" engine="simple"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="closeFinancialTimePeriod" auth="true">
+        <description>Close a financial time period</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Financial Reports -->
+    <service name="prepareIncomeStatement" engine="simple"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="prepareIncomeStatement" auth="true">
+        <description>Prepare the data for the Income Statement</description>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
+        <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="glFiscalTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="totalNetIncome" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="glAccountTotalsMap" type="Map" mode="OUT" optional="true"/>
+    </service>
+
+    <!-- Miscellaneous Ledger-related services -->
+    <service name="getGlAccountFromAccountType" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="getGlAccountFromAccountType" auth="true">
+        <description>Look up a GlAccountId first in ProductGlAccount by productId and productGlAccountTypeId, if not found,
+            then in organizationPartyId and glAccountTypeId </description>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
+        <attribute name="glAccountTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="acctgTransTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="debitCreditFlag" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="roleTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="productId" type="String" mode="IN" optional="true"/>
+        <attribute name="paymentId" type="String" mode="IN" optional="true"/>
+        <attribute name="invoiceId" type="String" mode="IN" optional="true"/>
+        <attribute name="fixedAssetId" type="String" mode="IN" optional="true"/>
+        <attribute name="glAccountId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="getInventoryItemOwner" default-entity-name="InventoryItem" engine="simple"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="getInventoryItemOwner" auth="true">
+        <description>get an ownerPartyId from inventoryItemId </description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <attribute name="ownerPartyId" type="String" mode="OUT" optional="false"/>
+    </service>
+
+    <!-- Services for the automatic creation of accounting transactions based on business transactions
+         Typically, these services are triggered by SECAs -->
+    <service name="createAcctgTransForSalesShipmentIssuance" engine="simple"  auth="true"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createAcctgTransForSalesShipmentIssuance">
+        <description>Create an accounting transaction for a sales shipment issuance (D: INVENTORY_ACCOUNT, C: COGS_ACCOUNT)</description>
+        <attribute name="itemIssuanceId" type="String" mode="IN" optional="false"/>
+        <attribute name="acctgTransId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="createAcctgTransForCanceledSalesShipmentIssuance" engine="simple"  auth="true"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createAcctgTransForCanceledSalesShipmentIssuance">
+        <description>Create an accounting transaction for a canceled sales shipment issuance (D: INVENTORY_ACCOUNT, C: COGS_ACCOUNT)</description>
+        <attribute name="itemIssuanceId" type="String" mode="IN" optional="false"/>
+        <attribute name="canceledQuantity" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="acctgTransId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="createAcctgTransForInventoryItemCostChange" engine="simple" auth="true"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createAcctgTransForInventoryItemCostChange">
+        <description>Create accounting transaction when item cost is changed (D: INV_ADJ_VAL, C: INVENTORY_ACCOUNT)</description>
+        <attribute name="inventoryItemId" type="String" mode="IN" optional="false"/>
+        <attribute name="inventoryItemDetailSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="acctgTransId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="createAcctgTransForShipmentReceipt" engine="simple"  auth="true"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createAcctgTransForShipmentReceipt">
+        <description>Create an accounting transactions for a shipment receipt (D: INVENTORY_ACCOUNT, C: UNINVOICED_SHIP_RCPT or COGS_ACCOUNT for returns)</description>
+        <attribute name="receiptId" type="String" mode="IN" optional="false"/>
+        <attribute name="acctgTransId" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <!-- FinAccountTypeGlAccount Services -->
+    <service name="createFinAccountTypeGlAccount" default-entity-name="FinAccountTypeGlAccount" engine="simple"
+                location="component://accounting/script/org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="createFinAccountTypeGlAccount" auth="true">
+        <description>Create a FinAccountTypeGlAccount</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="false"/>
+    </service>
+    <service name="updateFinAccountTypeGlAccount" default-entity-name="FinAccountTypeGlAccount" engine="simple"
+                location="component://accounting/script/org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="updateFinAccountTypeGlAccount" auth="true">
+        <description>Update a FinAccountTypeGlAccount</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="false"/>
+    </service>
+    <service name="deleteFinAccountTypeGlAccount" default-entity-name="FinAccountTypeGlAccount" engine="simple"
+                location="component://accounting/script/org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="deleteFinAccountTypeGlAccount" auth="true">
+        <description>Delete a FinAccountTypeGlAccount</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- VarianceReasonGlAccount Services -->
+    <service name="createVarianceReasonGlAccount" default-entity-name="VarianceReasonGlAccount" engine="simple"
+                location="component://accounting/script/org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="createVarianceReasonGlAccount" auth="true">
+        <description>create a Variance Reason Gl Account</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="false"/>
+    </service>
+    <service name="updateVarianceReasonGlAccount" default-entity-name="VarianceReasonGlAccount" engine="simple"
+                location="component://accounting/script/org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="updateVarianceReasonGlAccount" auth="true">
+        <description>Update a Variance Reason Gl Account</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="false"/>
+    </service>
+    <service name="deleteVarianceReasonGlAccount" default-entity-name="VarianceReasonGlAccount" engine="simple"
+                location="component://accounting/script/org/ofbiz/accounting/finaccount/FinAccountServices.xml" invoke="deleteVarianceReasonGlAccount" auth="true">
+        <description>delete a Variance Reason Gl Account</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Permission services -->
+    <service name="basicGeneralLedgerPermissionCheck" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/permissions/PermissionServices.xml" invoke="basePermissionCheck">
+        <description>Basic General Ledger Permission Checking Logic</description>
+        <implements service="permissionInterface"/>
+    </service>
+    <service name="acctgTransactionPermissionCheck" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/permissions/PermissionServices.xml" invoke="acctgTransactionPermissionCheck">
+        <description>Basic General Ledger Permission Checking Logic</description>
+        <implements service="permissionInterface"/>
+    </service>
+    <service name="createAcctgTransForWorkEffortIssuance" engine="simple" auth="true"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createAcctgTransForWorkEffortIssuance">
+        <description>Create an accounting transaction for inventory that is issued to a work effort (Type: INVENTORY D: RAWMAT_INVENTORY, C: WIP_INVENTORY)</description>
+        <attribute name="workEffortId" type="String" mode="IN" optional="false"/>
+        <attribute name="inventoryItemId" type="String" mode="IN" optional="false"/>
+        <attribute name="acctgTransId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <!-- Service for the automatic creation of AcctgTransForPhysicalInventoryVariance, triggered by SECAs -->
+    <service name="createAcctgTransForPhysicalInventoryVariance" engine="simple"
+                location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createAcctgTransForPhysicalInventoryVariance">
+        <description>Create an AcctgEntry for Physical Inventory variance</description>
+        <attribute name="physicalInventoryId" type="String" mode="IN" optional="false"/>
+        <attribute name="acctgTransId" type="String" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="createAcctgTransForWorkEffortInventoryProduced" engine="simple" auth="true"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createAcctgTransForWorkEffortInventoryProduced">
+        <description>Create an accounting transaction for inventory that is produced by a work effort (Type: INVENTORY D: RAWMAT_INVENTORY, C: WIP_INVENTORY)</description>
+        <attribute name="workEffortId" type="String" mode="IN" optional="false"/>
+        <attribute name="inventoryItemId" type="String" mode="IN" optional="false"/>
+        <attribute name="acctgTransId" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <!--Accounting transaction for cost record related to work effort-->
+    <service name="createAcctgTransForWorkEffortCost" engine="simple" auth="true"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createAcctgTransForWorkEffortCost">
+        <description>Create an accounting transaction for cost record created for a work effort</description>
+        <attribute name="workEffortId" type="String" mode="IN" optional="false"/>
+        <attribute name="costComponentId" type="String" mode="IN" optional="false"/>
+        <attribute name="acctgTransId" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <!-- AcctgTrans For Inventory Item Owner Change Services -->
+    <service name="createAcctgTransForInventoryItemOwnerChange" engine="simple"  auth="true"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createAcctgTransForInventoryItemOwnerChange">
+        <description>Create an accounting transactions for Inventory Item Owner Change (D: INVENTORY_ACCOUNT(old Owner) INVENTORY_ACCOUNT(new Owner), C: INVENTORY_XFER_IN(oldOwner) INVENTORY_XFER_OUT(new Owner))</description>
+        <attribute name="inventoryItemId" type="String" mode="IN" optional="false"/>
+        <attribute name="oldOwnerPartyId" type="String" mode="IN" optional="false"/>
+        <attribute name="acctgTransId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <!--AcctgTrans For Incoming Payment Service-->
+    <service name="createAcctgTransAndEntriesForIncomingPayment" engine="simple" auth="true"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createAcctgTransAndEntriesForIncomingPayment">
+        <description>Create an accounting transaction for an incoming payment</description>
+        <attribute name="paymentId" type="String" mode="IN" optional="false"/>
+        <attribute name="acctgTransId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <!-- An automatic GL Acct transaction service triggered when inventory is issued for fixed asset maintenance-->
+    <service name="createAcctgTransForFixedAssetMaintIssuance" engine="simple" auth="true"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createAcctgTransForFixedAssetMaintIssuance">
+        <description>Create an accounting transaction for inventory that is issued for fixed asset maintenance (Type: INVENTORY D: INVENTORY_ACCOUNT, C: FIXED_ASSET_MAINT)</description>
+        <attribute name="itemIssuanceId" type="String" mode="IN" optional="false"/>
+        <attribute name="acctgTransId" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <!-- An automatic GL Posting for Purchase Invoice-->
+    <service name="createAcctgTransForPurchaseInvoice" engine="simple" auth="true"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createAcctgTransForPurchaseInvoice">
+        <description>Create an accounting transaction for a purchase invoice</description>
+        <attribute name="invoiceId" type="String" mode="IN" optional="false"/>
+        <attribute name="acctgTransId" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <!-- An automatic GL Posting for Sales Invoice-->
+    <service name="createAcctgTransForSalesInvoice" engine="simple" auth="true"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createAcctgTransForSalesInvoice">
+        <description>Create an accounting transaction for a sales invoice</description>
+        <attribute name="invoiceId" type="String" mode="IN" optional="false"/>
+        <attribute name="acctgTransId" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <!--An automatic GL posting service for outgoing payments-->
+    <service name="createAcctgTransAndEntriesForOutgoingPayment" engine="simple" auth="true"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createAcctgTransAndEntriesForOutgoingPayment">
+        <description>Create an accounting transaction for an outgoing payment</description>
+        <attribute name="paymentId" type="String" mode="IN" optional="false"/>
+        <attribute name="acctgTransId" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <!--A service to clone an existing accounting transaction and its entries (AcctgTrans and AcctgTransEntry) -->
+    <service name="copyAcctgTransAndEntries" engine="simple"  auth="true"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="copyAcctgTransAndEntries">
+        <description>Create an Acctg Trans And Entry(Duplicate or revert)</description>
+        <attribute name="fromAcctgTransId" type="String" mode="IN" optional="false"/>
+        <attribute name="revert" type="String" mode="IN" optional="true"/>
+        <attribute name="acctgTransId" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="createAcctgTransAndEntriesForPaymentApplication" engine="simple" auth="true"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createAcctgTransAndEntriesForPaymentApplication">
+        <description>Create an accounting transaction for a payment application</description>
+        <attribute name="paymentApplicationId" type="String" mode="IN" optional="false"/>
+        <attribute name="acctgTransId" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <!-- Party GlAccount services -->
+    <service name="createPartyGlAccount" default-entity-name="PartyGlAccount" engine="simple"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createPartyGlAccount" auth="true">
+        <description>Associate a party to a General Ledger Account</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <attribute name="glAccountId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="updatePartyGlAccount" default-entity-name="PartyGlAccount" engine="simple"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="updatePartyGlAccount" auth="true">
+        <description>Update an existing General Ledger Account of a Party</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <attribute name="glAccountId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="deletePartyGlAccount" default-entity-name="PartyGlAccount" engine="simple"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="deletePartyGlAccount" auth="true">
+        <description>Delete an existing General Ledger Account of a Party</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- CustomTimePeriod Services -->
+    <service name="findCustomTimePeriods" engine="simple"
+        location="component://accounting/script/org/ofbiz/accounting/period/PeriodServices.xml" invoke="findCustomTimePeriods" auth="true">
+        <description>Find CustomTimePeriod records, returns both general ones and those for the organizationPartyId passed</description>
+        <attribute name="findDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="true"/>
+        <attribute name="excludeNoOrganizationPeriods" type="String" mode="IN" optional="true"/>
+        <attribute name="onlyIncludePeriodTypeIdList" type="List" mode="IN" optional="true"/>
+        <attribute name="customTimePeriodList" type="List" mode="OUT" optional="true"/>
+    </service>
+    <service name="findLastClosedDate" engine="java"
+        location="org.ofbiz.accounting.period.PeriodServices" invoke="findLastClosedDate" auth="true">
+        <description>Find the last date before findDate whose TimePeriod is marked isClosed="Y" for organizationPartyId and periodTypeId combination.
+            If none are found, ie, no closed CustomTimePeriod exists, then return the earliest date available for any
+            CustomTimePeriod of the organizationPartyId and periodTypeId.
+            If no findDate is given, then use the current moment (nowTimestamp).
+        </description>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="true"/>
+        <attribute name="findDate" type="java.sql.Date" mode="IN" optional="true"/>
+        <attribute name="periodTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="lastClosedDate" type="Timestamp" mode="OUT" optional="true"/>
+        <attribute name="lastClosedTimePeriod" type="org.ofbiz.entity.GenericValue" mode="OUT" optional="true"/>
+    </service>
+    <service name="getPreviousTimePeriod" engine="simple" invoke="getPreviousTimePeriod"
+        location="component://accounting/script/org/ofbiz/accounting/period/PeriodServices.xml" auth="true">
+        <description>Return previous year with respect to the given year and if none found then return null.</description>
+        <attribute name="customTimePeriodId" mode="IN" type="String"/>
+        <attribute name="previousTimePeriod" mode="OUT" type="Map" optional="true"/>
+    </service>
+    <service name="getAcctgTransEntriesAndTransTotal" engine="simple" invoke="getAcctgTransEntriesAndTransTotal" 
+        location="component://accounting/script/org/ofbiz/accounting/ledger/AcctgTransServices.xml" auth="true">
+        <description>Given AcctgTransAndEntire and Calculate acctg trans total for specific time period.</description>
+        <attribute name="customTimePeriodStartDate" mode="IN" type="Timestamp"/>
+        <attribute name="customTimePeriodEndDate" mode="IN" type="Timestamp"/>
+        <attribute name="organizationPartyId" mode="IN" type="String"/>
+        <attribute name="isPosted" mode="IN" type="String" optional="true"/>
+        <attribute name="glAccountId" mode="IN" type="String"/>
+        <attribute name="acctgTransAndEntries" type="List" mode="OUT"/>
+        <attribute name="debitTotal" type="BigDecimal" mode="OUT"/>
+        <attribute name="creditTotal" type="BigDecimal" mode="OUT"/>
+        <attribute name="debitCreditDifference" type="BigDecimal" mode="OUT"/>
+    </service>
+    <service name="calculateGlAccountTrialBalance" default-entity-name="GlAccount" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/AcctgTransServices.xml" invoke="calculateGlAccountTrialBalance" auth="true">
+        <description>Calculate Trial Balance for a GlAccount</description>
+        <attribute name="glAccountId" mode="IN" type="String"/>
+        <attribute name="isPosted" mode="IN" type="String" optional="true"/>
+        <attribute name="fromDate" mode="IN" type="Timestamp"/>
+        <attribute name="thruDate" mode="IN" type="Timestamp"/>
+        <attribute name="openingBalanceDebit" type="BigDecimal" mode="OUT"/>
+        <attribute name="openingBalanceCredit" type="BigDecimal" mode="OUT"/>
+        <attribute name="debitCreditDifference" type="BigDecimal" mode="OUT"/>
+    </service>
+    
+    <service name="revertAcctgTransOnCancelInvoice" engine="simple" 
+            location="component://accounting/script/org/ofbiz/accounting/ledger/AcctgTransServices.xml" invoke="revertAcctgTransOnCancelInvoice" auth="true">
+        <description>Reverting Accounting Transaction And Entries on Canceling an Invoice</description>
+        <attribute name="invoiceId" mode="IN" type="String" optional="false"/>
+    </service>
+    <service name="revertAcctgTransOnRemovePaymentApplications" engine="simple"
+           location="component://accounting/script/org/ofbiz/accounting/ledger/AcctgTransServices.xml" invoke="revertAcctgTransOnRemovePaymentApplications" auth="true">
+        <description>Create Reverse Accounting Transaction and Entries on removing PaymentApplication records.</description>
+        <attribute name="paymentApplicationId" mode="IN" type="String" optional="false"/>       
+    </service>
+
+    <service name="createGlAccountCategory" engine="entity-auto" default-entity-name="GlAccountCategory" invoke="create" auth="true">
+        <description>Create GL Account Category</description>
+        <auto-attributes mode="OUT" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateGlAccountCategory" engine="entity-auto" default-entity-name="GlAccountCategory" invoke="update" auth="true">
+        <description>Update GL Account Category</description>
+        <auto-attributes mode="IN" include="pk" optional="false" />
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="createGlAccountCategoryMember" engine="entity-auto" default-entity-name="GlAccountCategoryMember" invoke="create" auth="true">
+        <description>Create GL Account Category Member</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="deleteGlAccountCategoryMember" engine="entity-auto" default-entity-name="GlAccountCategoryMember" invoke="delete" auth="true">
+        <description>Delete GL Account Category Member</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="updateGlAccountCategoryMember" engine="simple" default-entity-name="GlAccountCategoryMember"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="updateGlAccountCategoryMember" auth="true">
+        <description>Update GL Account Category Member</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+
+    <service name="createGlAcctCatMemFromCostCenters" default-entity-name="GlAccountCategoryMember" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createGlAcctCatMemFromCostCenters" auth="true">
+        <description>Create GlAccountCategoryMember from CostCenters</description>
+        <attribute name="glAccountId" mode="IN" type="String"/>
+        <attribute name="glAccountCategoryId" mode="IN" type="String"/>
+        <attribute name="amountPercentage" mode="IN" type="BigDecimal" optional="true"/>
+        <attribute name="totalAmountPercentage" mode="IN" type="BigDecimal" optional="true"/>
+    </service>
+
+    <service name="getGlAcctgOrgWithPostedBalanceSplit" engine="simple"
+        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="getGlAcctgOrgWithPostedBalanceSplit" auth="true">
+        <description>Posted amounts split by cost center from GlAccountOrganization</description>
+        <attribute name="organizationPartyId" type="String" mode="IN"/>
+        <attribute name="fromDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="timePeriod" type="String" mode="IN" optional="true"/>
+        <attribute name="glAcctgOrgAndCostCenterList" mode="OUT"  type="List" optional="true"/>
+    </service>
+
+    <service name="getGlAcctgAndAmountPercentage" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="getGlAcctgAndAmountPercentage" auth="false">
+        <description>Get amount percentage and glAccount for cost center</description>
+        <attribute name="organizationPartyId" mode="IN" type="String"/>
+        <attribute name="glAcctgAndAmountPercentageList" mode="OUT"  type="List" optional="true"/>
+        <attribute name="glAccountCategories" mode="OUT"  type="List" optional="true"/>
+    </service>
+
+    <service name="getInventoryValuationList" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="getInventoryValuationList" auth="true">
+        <description>Inventory Valuation List</description>
+        <attribute name="productId" type="String" mode="IN" optional="true"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="true"/>
+        <attribute name="productCategoryId" type="String" mode="IN" optional="true"/>
+        <attribute name="cogsMethodId" type="String" mode="IN" optional="true"/>
+        <attribute name="fromDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="inventoryValuationList" type="List" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="setGlReconciliationStatus" engine="simple"
+            location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="setGlReconciliationStatus">
+        <description>Set Gl Reconciliation status</description>
+        <attribute name="glReconciliationId" type="String" mode="IN" optional="false"/>
+        <attribute name="statusId" type="String" mode="IN" optional="false"/>
+        <attribute name="oldStatusId" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="createUpdateCostCenter" engine="java" auth="true" invoke="createUpdateCostCenter" 
+        location="org.ofbiz.accounting.ledger.GeneralLedgerServices">
+        <description>Create Update CostCenters</description>
+        <attribute name="glAccountId" mode="IN" type="String"/>
+        <attribute name="amountPercentageMap" type="Map" string-map-prefix="amp_" mode="IN" optional="true"/>
+    </service>
+</services>

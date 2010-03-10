@@ -1,0 +1,1188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+
+<site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
+    <include location="component://common/webcommon/WEB-INF/common-controller.xml"/>
+    <include location="component://party/webapp/partymgr/WEB-INF/controller.xml"/>
+    <description>Human Resources Manager Module Site Configuration File</description>
+    <owner>Copyright 2001-2009 The Apache Software Foundation</owner>
+
+    <!-- view handlers -->
+    <handler name="service-multi" type="request" class="org.ofbiz.webapp.event.ServiceMultiEventHandler"/>
+    <handler name="screenxml" type="view" class="org.ofbiz.widget.screen.ScreenXmlViewHandler"/>
+
+    <!-- Events to run on every request before security (chains exempt) -->
+    <!--
+    <preprocessor>
+    </preprocessor>
+    -->
+    <!-- Events to run on every request after all other processing (chains exempt) -->
+    <!--
+    <postprocessor>
+        <event name="test" type="java" path="org.ofbiz.webapp.event.TestEvent" invoke="test"/>
+    </postprocessor>
+    -->
+
+    <!-- Request Mappings -->
+    <request-map uri="view">
+        <security https="true" auth="false"/>
+        <response name="success" type="request" value="main"/>
+    </request-map>
+    <request-map uri="authview">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="main"/>
+    </request-map>
+
+    <request-map uri="changeDelegator">
+        <event type="java" path="org.ofbiz.webapp.event.CoreEvents" invoke="changeDelegator"/>
+        <response name="success" type="view" value="main"/>
+        <response name="error" type="view" value="error"/>
+    </request-map>
+
+    <request-map uri="main">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="main"/>
+    </request-map>
+
+
+    <!-- ================HumanResource==================================== -->
+    <!-- ================Party Ability Group==================================== -->
+    <request-map uri="FindPartyQuals">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindPartyQuals"/>
+    </request-map>
+    <request-map uri="NewPartyQual">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="NewPartyQual"/>
+    </request-map>
+    <request-map uri="createPartyQual">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createPartyQual"/>
+        <response name="success" type="view" value="NewPartyQual"/>
+    </request-map>
+    <request-map uri="updatePartyQual">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updatePartyQual"/>
+        <response name="success" type="view" value="FindPartyQuals"/>
+    </request-map>
+    <request-map uri="deletePartyQual">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deletePartyQual"/>
+        <response name="success" type="view" value="FindPartyQuals"/>
+    </request-map>
+    <request-map uri="FindPartyResumes">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindPartyResumes"/>
+    </request-map>
+    <request-map uri="EditPartyResume">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditPartyResume"/>
+    </request-map>
+    <request-map uri="createPartyResume">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createPartyResume"/>
+        <response name="success" type="view" value="EditPartyResume"/>
+    </request-map>
+    <request-map uri="updatePartyResume">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updatePartyResume"/>
+        <response name="success" type="view" value="EditPartyResume"/>
+    </request-map>
+    <request-map uri="deletePartyResume">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deletePartyResume"/>
+        <response name="success" type="view" value="FindPartyResumes"/>
+    </request-map>
+    <request-map uri="FindPartySkills">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindPartySkills"/>
+    </request-map>
+    <request-map uri="NewPartySkill">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="NewPartySkill"/>
+    </request-map>
+    <request-map uri="createPartySkill">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createPartySkill"/>
+        <response name="success" type="view" value="FindPartySkills"/>
+        <response name="error" type="view" value="NewPartySkill"/>
+    </request-map>
+    <request-map uri="updatePartySkill">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updatePartySkill"/>
+        <response name="success" type="view" value="FindPartySkills"/>
+        <response name="error" type="view" value="FindPartySkills"/>
+    </request-map>
+    <request-map uri="deletePartySkill">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deletePartySkill"/>
+        <response name="success" type="view" value="FindPartySkills"/>
+    </request-map>
+    <request-map uri="FindPerfReviews">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindPerfReviews"/>
+    </request-map>
+    <request-map uri="EditPerfReview">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditPerfReviews"/>
+    </request-map>
+    <request-map uri="createPerfReview">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createPerfReview"/>
+        <response name="success" type="view" value="EditPerfReviews"/>
+    </request-map>
+    <request-map uri="updatePerfReview">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updatePerfReview"/>
+        <response name="success" type="view" value="EditPerfReviews"/>
+    </request-map>
+    <request-map uri="deletePerfReview">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deletePerfReview"/>
+        <response name="success" type="view" value="EditPerfReviews"/>
+    </request-map>
+    <request-map uri="EditPerfReviewItems">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditPerfReviewItems"/>
+    </request-map>
+    <request-map uri="createPerfReviewItem">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createPerfReviewItem"/>
+        <response name="success" type="view" value="EditPerfReviewItems"/>
+    </request-map>
+    <request-map uri="updatePerfReviewItem">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updatePerfReviewItem"/>
+        <response name="success" type="view" value="EditPerfReviewItems"/>
+    </request-map>
+    <request-map uri="deletePerfReviewItem">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deletePerfReviewItem"/>
+        <response name="success" type="view" value="EditPerfReviewItems"/>
+    </request-map>
+    <request-map uri="EditPerformanceNotes">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditPerformanceNotes"/>
+    </request-map>
+    <request-map uri="createPerformanceNote">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createPerformanceNote"/>
+        <response name="success" type="view" value="EditPerformanceNotes"/>
+        <response name="error" type="view" value="EditPerformanceNotes"/>
+    </request-map>
+    <!-- ================Employment Group==================================== -->
+    <request-map uri="FindEmployments">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindEmployments"/>
+    </request-map>
+    <request-map uri="EditEmployment">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmployment"/>
+    </request-map>
+    <request-map uri="ListEmployments">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ListEmployments"/>
+    </request-map>
+    <request-map uri="createEmployment">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createEmployment"/>
+        <response name="success" type="view" value="EditEmployment"/>
+    </request-map>
+    <request-map uri="updateEmployment">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateEmployment"/>
+        <response name="success" type="view" value="EditEmployment"/>
+    </request-map>
+    <request-map uri="deleteEmployment">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteEmployment"/>
+        <response name="success" type="view" value="FindEmployments"/>
+    </request-map>
+    <request-map uri="FindEmploymentApps">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindEmploymentApps"/>
+    </request-map>
+    <request-map uri="NewEmploymentApp">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="NewEmploymentApp"/>
+    </request-map>
+    <request-map uri="createEmploymentApp">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createEmploymentApp"/>
+        <response name="success" type="view" value="FindEmploymentApps"/>
+    </request-map>
+    <request-map uri="updateEmploymentApp">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updateEmploymentApp"/>
+        <response name="success" type="request" value="FindEmploymentApps"/>
+        <response name="error" type="view" value="FindEmploymentApps"/>
+    </request-map>
+    <request-map uri="deleteEmploymentApp">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteEmploymentApp"/>
+        <response name="success" type="view" value="FindEmploymentApps"/>
+    </request-map>
+    <request-map uri="ListPayHistories">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ListPayHistories"/>
+    </request-map>
+    <request-map uri="updatePayHistory">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updatePayHistory"/>
+        <response name="success" type="view" value="ListPayHistories"/>
+    </request-map>
+    <request-map uri="deletePayHistory">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deletePayHistory"/>
+        <response name="success" type="view" value="ListPayHistories"/>
+    </request-map>
+    <request-map uri="findPartyBenefits">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditPartyBenefits"/>
+    </request-map>
+    <request-map uri="EditPartyBenefits">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditPartyBenefits"/>
+    </request-map>
+    <request-map uri="createPartyBenefit">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createPartyBenefit"/>
+        <response name="success" type="view" value="EditPartyBenefits"/>
+    </request-map>
+    <request-map uri="updatePartyBenefit">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updatePartyBenefit"/>
+        <response name="success" type="view" value="EditPartyBenefits"/>
+    </request-map>
+    <request-map uri="deletePartyBenefit">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deletePartyBenefit"/>
+        <response name="success" type="view" value="EditPartyBenefits"/>
+    </request-map>
+    <request-map uri="findPayRollPreferences">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditPayrollPreferences"/>
+    </request-map>
+    <request-map uri="EditPayrollPreferences">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditPayrollPreferences"/>
+    </request-map>
+    <request-map uri="createPayrollPreference">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createPayrollPreference"/>
+        <response name="success" type="view" value="EditPayrollPreferences"/>
+    </request-map>
+    <request-map uri="updatePayrollPreference">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updatePayrollPreference"/>
+        <response name="success" type="view" value="EditPayrollPreferences"/>
+    </request-map>
+    <request-map uri="deletePayrollPreference">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deletePayrollPreference"/>
+        <response name="success" type="view" value="EditPayrollPreferences"/>
+    </request-map>
+    <request-map uri="FindPayGrades">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindPayGrades"/>
+    </request-map>
+    <request-map uri="EditPayGrade">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditPayGrade"/>
+    </request-map>
+    <request-map uri="createPayGrade">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createPayGrade"/>
+        <response name="success" type="view" value="EditPayGrade"/>
+        <response name="error" type="view" value="EditPayGrade"/>
+    </request-map>
+    <request-map uri="updatePayGrade">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updatePayGrade"/>
+        <response name="success" type="view" value="EditPayGrade"/>
+        <response name="error" type="view" value="EditPayGrade"/>
+    </request-map>
+    <request-map uri="deletePayGrade">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deletePayGrade"/>
+        <response name="success" type="view" value="FindPayGrades"/>
+        <response name="error" type="view" value="FindPayGrades"/>
+    </request-map>
+    <request-map uri="EditSalarySteps">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditSalarySteps"/>
+    </request-map>
+    <request-map uri="createSalaryStep">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createSalaryStep"/>
+        <response name="success" type="view" value="EditSalarySteps"/>
+    </request-map>
+    <request-map uri="updateSalaryStep">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updateSalaryStep"/>
+        <response name="success" type="view" value="EditSalarySteps"/>
+    </request-map>
+    <request-map uri="deleteSalaryStep">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteSalaryStep"/>
+        <response name="success" type="view" value="EditSalarySteps"/>
+    </request-map>
+    <request-map uri="EditTerminationReasons">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditTerminationReasons"/>
+    </request-map>
+    <request-map uri="createTerminationReason">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createTerminationReason"/>
+        <response name="success" type="view" value="EditTerminationReasons"/>
+    </request-map>
+    <request-map uri="updateTerminationReason">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updateTerminationReason"/>
+        <response name="success" type="view" value="EditTerminationReasons"/>
+    </request-map>
+    <request-map uri="deleteTerminationReason">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteTerminationReason"/>
+        <response name="success" type="view" value="EditTerminationReasons"/>
+    </request-map>
+    <request-map uri="FindUnemploymentClaim">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditUnemploymentClaims"/>
+    </request-map>
+    <request-map uri="EditUnemploymentClaims">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditUnemploymentClaims"/>
+    </request-map>
+    <request-map uri="createUnemploymentClaim">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createUnemploymentClaim"/>
+        <response name="success" type="view" value="EditUnemploymentClaims"/>
+    </request-map>
+    <request-map uri="updateUnemploymentClaim">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updateUnemploymentClaim"/>
+        <response name="success" type="view" value="EditUnemploymentClaims"/>
+    </request-map>
+    <request-map uri="deleteUnemploymentClaim">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteUnemploymentClaim"/>
+        <response name="success" type="view" value="EditUnemploymentClaims"/>
+    </request-map>
+    <request-map uri="FindEmplLeaves">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindEmplLeaves"/>
+    </request-map>
+    <request-map uri="EditEmplLeave">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmplLeave"/>
+    </request-map>
+    <request-map uri="deleteEmplLeave">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteEmplLeave"/>
+        <response name="success" type="view" value="FindEmplLeaves"/>
+        <response name="error" type="view" value="FindEmplLeaves"/>
+    </request-map>
+    <request-map uri="EditEmplLeaveTypes">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmplLeaveTypes"/>
+    </request-map>
+    <request-map uri="createEmplLeaveType">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createEmplLeaveType"/>
+        <response name="success" type="view" value="EditEmplLeaveTypes"/>
+        <response name="error" type="view" value="EditEmplLeaveTypes"/>
+    </request-map>
+    <request-map uri="updateEmplLeaveType">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updateEmplLeaveType"/>
+        <response name="success" type="view" value="EditEmplLeaveTypes"/>
+        <response name="error" type="view" value="EditEmplLeaveTypes"/>
+    </request-map>
+    <request-map uri="deleteEmplLeaveType">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteEmplLeaveType"/>
+        <response name="success" type="view" value="EditEmplLeaveTypes"/>
+        <response name="error" type="view" value="EditEmplLeaveTypes"/>
+    </request-map>
+   <!-- ================Employee Position Group==================================== -->
+    <request-map uri="FindEmplPositions">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindEmplPositions"/>
+    </request-map>
+    <request-map uri="EditEmplPosition">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmplPosition"/>
+    </request-map>
+    <request-map uri="ListEmplPositions">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ListEmplPositions"/>
+    </request-map>
+    <request-map uri="createEmplPosition">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createEmplPosition"/>
+        <response name="success" type="view" value="EditEmplPosition"/>
+        <response name="error" type="view" value="EditEmplPosition"/>
+    </request-map>
+    <request-map uri="updateEmplPosition">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateEmplPosition"/>
+        <response name="success" type="view" value="EditEmplPosition"/>
+    </request-map>
+    <request-map uri="deleteEmplPosition">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteEmplPosition"/>
+        <response name="success" type="view" value="FindEmplPositions"/>
+    </request-map>
+    <request-map uri="EditEmplPositionFulfillments">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmplPositionFulfillments"/>
+    </request-map>
+    <request-map uri="createEmplPositionFulfillment">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createEmplPositionFulfillment"/>
+        <response name="success" type="view" value="EditEmplPositionFulfillments"/>
+    </request-map>
+    <request-map uri="updateEmplPositionFulfillment">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateEmplPositionFulfillment"/>
+        <response name="success" type="view" value="EditEmplPositionFulfillments"/>
+    </request-map>
+    <request-map uri="deleteEmplPositionFulfillment">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteEmplPositionFulfillment"/>
+        <response name="success" type="view" value="EditEmplPositionFulfillments"/>
+    </request-map>
+    <request-map uri="EditEmplPositionResponsibilities">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmplPositionResponsibilities"/>
+    </request-map>
+    <request-map uri="createEmplPositionResponsibility">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createEmplPositionResponsibility"/>
+        <response name="success" type="view" value="EditEmplPositionResponsibilities"/>
+    </request-map>
+    <request-map uri="updateEmplPositionResponsibility">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updateEmplPositionResponsibility"/>
+        <response name="success" type="view" value="EditEmplPositionResponsibilities"/>
+    </request-map>
+    <request-map uri="deleteEmplPositionResponsibility">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteEmplPositionResponsibility"/>
+        <response name="success" type="view" value="EditEmplPositionResponsibilities"/>
+    </request-map>
+    <request-map uri="EditEmplPositionReportingStructs">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmplPositionReportingStructs"/>
+    </request-map>
+    <request-map uri="createEmplPositionReportingStruct">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createEmplPositionReportingStruct"/>
+        <response name="success" type="view" value="EditEmplPositionReportingStructs"/>
+        <response name="error" type="view" value="EditEmplPositionReportingStructs"/>
+    </request-map>
+    <request-map uri="updateEmplPositionReportingStruct">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateEmplPositionReportingStruct"/>
+        <response name="success" type="view" value="EditEmplPositionReportingStructs"/>
+        <response name="error" type="view" value="EditEmplPositionReportingStructs"/>
+    </request-map>
+    <request-map uri="deleteEmplPositionReportingStruct">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteEmplPositionReportingStruct"/>
+        <response name="success" type="view" value="EditEmplPositionReportingStructs"/>
+        <response name="error" type="view" value="EditEmplPositionReportingStructs"/>
+    </request-map>
+    <request-map uri="findValidResponsibilities">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ListValidResponsibilities"/>
+    </request-map>
+    <request-map uri="EditValidResponsibility">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditValidResponsibility"/>
+    </request-map>
+    <request-map uri="createValidResponsibility">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createValidResponsibility"/>
+        <response name="success" type="view" value="EditValidResponsibility"/>
+    </request-map>
+    <request-map uri="updateValidResponsibility">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateValidResponsibility"/>
+        <response name="success" type="view" value="EditValidResponsibility"/>
+    </request-map>
+    <request-map uri="deleteValidResponsibility">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteValidResponsibility"/>
+        <response name="success" type="view" value="ListValidResponsibilities"/>
+    </request-map>
+    <request-map uri="EmployeeProfile">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EmployeeProfile" save-home-view="true"/>
+    </request-map>
+    <request-map uri="findSkillTypes">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditSkillTypes"/>
+    </request-map>
+    <request-map uri="EditSkillTypes">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditSkillTypes"/>
+    </request-map>
+    <request-map uri="createSkillType">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createSkillType"/>
+        <response name="success" type="view" value="EditSkillTypes"/>
+    </request-map>
+    <request-map uri="updateSkillType">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updateSkillType"/>
+        <response name="success" type="view" value="EditSkillTypes"/>
+    </request-map>
+    <request-map uri="deleteSkillType">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteSkillType"/>
+        <response name="success" type="view" value="EditSkillTypes"/>
+    </request-map>
+    <!--====================Employee Requests==================-->
+    <request-map uri="findEmployees">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindEmployee"/>
+    </request-map>
+    <request-map uri="NewEmployee">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="NewEmployee"/>
+    </request-map>
+    <request-map uri="createEmployee">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createEmployee"/>
+        <response name="success" type="request" value="EmployeeProfile"/>
+        <response name="error" type="view" value="NewEmployee"/>
+    </request-map>
+    <request-map uri="EditEmployeeSkills">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmployeeSkills"/>
+    </request-map>
+    <request-map uri="createEmployeeSkill">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createPartySkill"/>
+        <response name="success" type="view" value="EditEmployeeSkills"/>
+        <response name="error" type="view" value="EditEmployeeSkills"/>
+    </request-map>
+    <request-map uri="updateEmployeeSkill">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updatePartySkill"/>
+        <response name="success" type="view" value="EditEmployeeSkills"/>
+        <response name="error" type="view" value="EditEmployeeSkills"/>
+    </request-map>
+    <request-map uri="deleteEmployeeSkill">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deletePartySkill"/>
+        <response name="success" type="view" value="EditEmployeeSkills"/>
+        <response name="error" type="view" value="EditEmployeeSkills"/>
+    </request-map>
+    <request-map uri="EditEmployeeQuals">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmployeeQuals"/>
+    </request-map>
+    <request-map uri="createEmployeeQualification">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createPartyQual"/>
+        <response name="success" type="view" value="EditEmployeeQuals"/>
+        <response name="error" type="view" value="EditEmployeeQuals"/>
+    </request-map>
+    <request-map uri="updateEmployeeQualification">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updatePartyQual"/>
+        <response name="success" type="view" value="EditEmployeeQuals"/>
+        <response name="error" type="view" value="EditEmployeeQuals"/>
+    </request-map>
+    <request-map uri="deleteEmployeeQualification">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deletePartyQual"/>
+        <response name="success" type="view" value="EditEmployeeQuals"/>
+        <response name="error" type="view" value="EditEmployeeQuals"/>
+    </request-map>
+    <request-map uri="EditEmployeeTrainings">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmployeeTrainings"/>
+    </request-map>
+    <request-map uri="EditEmployeeResumes">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmployeeResumes"/>
+    </request-map>
+    <request-map uri="EditEmployeePerformanceNotes">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmployeePerformanceNotes"/>
+    </request-map>
+    <request-map uri="EditEmployeeLeaves">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmployeeLeaves"/>
+    </request-map>
+    <request-map uri="createEmplLeave">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createEmplLeave"/>
+        <response name="success" type="view" value="EditEmployeeLeaves"/>
+        <response name="error" type="view" value="EditEmployeeLeaves"/>
+    </request-map>
+    <request-map uri="updateEmplLeave">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateEmplLeave"/>
+        <response name="success" type="view" value="EditEmployeeLeaves"/>
+        <response name="error" type="view" value="EditEmployeeLeaves"/>
+    </request-map>
+
+    <!-- ===================Responsibility Request============== -->
+    <request-map uri="EditResponsibilityTypes">
+        <security https="true" auth="true"/>
+        <response  name="success" type="view" value="EditResponsibilityTypes"/>
+    </request-map>
+    <request-map uri="createResponsibilityType">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createResponsibilityType"/>
+        <response name="success" type="view" value="EditResponsibilityTypes"/>
+        <response name="error" type="view" value="EditResponsibilityTypes"/>
+    </request-map>
+    <request-map uri="updateResponsibilityType">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updateResponsibilityType"/>
+        <response name="success" type="view" value="EditResponsibilityTypes"/>
+        <response name="error" type="view" value="EditResponsibilityTypes"/>
+    </request-map>
+    <request-map uri="deleteResponsibilityType">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteResponsibilityType"/>
+        <response name="success" type="view" value="EditResponsibilityTypes"/>
+        <response name="error" type="view" value="EditResponsibilityTypes"/>
+    </request-map>
+    <!-- =================EmplPosition View Request============ -->
+    <request-map uri="emplPositionView">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EmplPositionView"/>
+    </request-map>
+    <request-map uri="globalHRSettings">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditSkillTypes"/>
+    </request-map>
+    <request-map uri="EditTerminationTypes">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditTerminationTypes"/>
+    </request-map>
+    <request-map uri="EditTerminationTypes">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditTerminationTypes"/>
+    </request-map>
+    <request-map uri="createTerminationType">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createTerminationType"/>
+        <response name="success" type="view" value="EditTerminationTypes"/>
+    </request-map>
+    <request-map uri="updateTerminationType">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updateTerminationType"/>
+        <response name="success" type="view" value="EditTerminationTypes"/>
+    </request-map>
+    <request-map uri="deleteTerminationType">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteTerminationType"/>
+        <response name="success" type="view" value="EditTerminationTypes"/>
+    </request-map>
+    <request-map uri="FindEmplPositionTypes">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindEmplPositionTypes"/>
+    </request-map>
+    <request-map uri="EditEmplPositionTypes">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmplPositionTypes"/>
+    </request-map>
+    <request-map uri="createEmplPositionType">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createEmplPositionType"/>
+        <response name="success" type="view" value="EditEmplPositionTypes"/>
+    </request-map>
+    <request-map uri="updateEmplPositionType">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateEmplPositionType"/>
+        <response name="success" type="view" value="EditEmplPositionTypes"/>
+    </request-map>
+    <request-map uri="deleteEmplPositionType">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteEmplPositionType"/>
+        <response name="success" type="view" value="FindEmplPositionTypes"/>
+    </request-map>
+    <request-map uri="EditEmplPositionTypeRates">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmplPositionTypeRates"/>
+    </request-map>
+    <request-map uri="updateEmplPositionTypeRate">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateEmplPositionTypeRate"/>
+        <response name="success" type="view" value="EditEmplPositionTypeRates"/>
+    </request-map>
+    <request-map uri="deleteEmplPositionTypeRate">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteEmplPositionTypeRate"/>
+        <response name="success" type="view" value="EditEmplPositionTypeRates"/>
+    </request-map>
+    <request-map uri="EditAgreementEmploymentAppls">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditAgreementEmploymentAppls"/>
+    </request-map>
+    <request-map uri="createAgreementEmploymentAppl">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createAgreementEmploymentAppl"/>
+        <response name="success" type="view" value="EditAgreementEmploymentAppls"/>
+        <response name="error" type="view" value="EditAgreementEmploymentAppls"/>
+    </request-map>
+    <request-map uri="updateAgreementEmploymentAppl">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updateAgreementEmploymentAppl"/>
+        <response name="success" type="view" value="EditAgreementEmploymentAppls"/>
+    </request-map>
+    <request-map uri="deleteAgreementEmploymentAppl">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteAgreementEmploymentAppl"/>
+        <response name="success" type="view" value="EditAgreementEmploymentAppls"/>
+    </request-map>
+    <!--====================Extended Requests===================================-->
+    <request-map uri="EditPartySkillsExt">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditPartySkills"/>
+    </request-map>
+    <request-map uri="EditPartyResumes">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditPartyResumes"/>
+    </request-map>
+    <request-map uri="EditPartyResumesExt">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditPartyResumes"/>
+    </request-map>
+    <request-map uri="EditEmployeeEmploymentApps">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmployeeEmploymentApps"/>
+    </request-map>
+    <request-map uri="EditEmploymentAppsExt">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmploymentApps"/>
+    </request-map>
+    <request-map uri="createPartySkillExt">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createPartySkill"/>
+        <response name="success" type="view" value="EditPartySkills"/>
+        <response name="error" type="view" value="EditPartySkills"/>
+    </request-map>
+    <request-map uri="updatePartySkillExt">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updatePartySkill"/>
+        <response name="success" type="view" value="EditPartySkills"/>
+        <response name="error" type="view" value="EditPartySkills"/>
+    </request-map>
+    <request-map uri="createPartyQualExt">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createPartyQual"/>
+        <response name="success" type="view" value="EditPartyQuals"/>
+        <response name="error" type="view" value="EditPartyQuals"/>
+    </request-map>
+    <request-map uri="updatePartyQualExt">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updatePartyQual"/>
+        <response name="success" type="view" value="EditPartyQuals"/>
+        <response name="error" type="view" value="EditPartyQuals"/>
+    </request-map>
+    <request-map uri="createEmploymentAppExt">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createEmploymentApp"/>
+        <response name="success" type="view" value="EditEmploymentApps"/>
+        <response name="error" type="view" value="EditEmploymentApps"/>
+    </request-map>
+    <request-map uri="updateEmploymentAppExt">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updateEmploymentApp"/>
+        <response name="success" type="request" value="EditEmploymentApps"/>
+        <response name="error" type="view" value="EditEmploymentApps"/>
+    </request-map>
+    <request-map uri="createEmplLeaveExt">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createEmplLeave"/>
+        <response name="success" type="view" value="EditEmplLeave"/>
+        <response name="error" type="view" value="EditEmplLeave"/>
+    </request-map>
+    <request-map uri="updateEmplLeaveExt">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateEmplLeave"/>
+        <response name="success" type="view" value="EditEmplLeave"/>
+        <response name="error" type="view" value="EditEmplLeave"/>
+    </request-map>
+
+    <!--====================Recruitment Requests===================================-->
+    <request-map uri="FindJobRequisitions">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindJobRequisitions"/>
+    </request-map>
+    <request-map uri="EditJobRequisition">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditJobRequisition"/>
+    </request-map>
+    <request-map uri="createJobRequisition">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createJobRequisition"/>
+        <response name="success" type="view" value="EditJobRequisition"/>
+        <response name="error" type="view" value="EditJobRequisition"/>
+    </request-map>
+    <request-map uri="updateJobRequisition">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateJobRequisition"/>
+        <response name="success" type="request" value="EditJobRequisition"/>
+        <response name="error" type="view" value="EditJobRequisition"/>
+    </request-map>
+    <request-map uri="deleteJobRequisition">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteJobRequisition"/>
+        <response name="success" type="view" value="FindJobRequisitions"/>
+    </request-map>
+    <request-map uri="FindInternalJobPosting">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindInternalJobPosting"/>
+    </request-map>
+    <request-map uri="EditInternalJobPosting">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditInternalJobPosting"/>
+    </request-map>
+    <request-map uri="createInternalJobPosting">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createInternalJobPosting"/>
+        <response name="success" type="view"  value="EditInternalJobPosting"/>
+        <response name="error" type="view"  value="EditInternalJobPosting"/>
+    </request-map>
+    <request-map uri="updateInternalJobPosting">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateInternalJobPosting"/>
+        <response name="success" type="view"  value="EditInternalJobPosting"/>
+        <response name="error" type="view"  value="EditInternalJobPosting"/>
+    </request-map>
+    <request-map uri="deleteInternalJobPosting">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteInternalJobPosting"/>
+        <response name="success" type="view" value="FindInternalJobPosting"/>
+    </request-map>
+    <request-map uri="FindJobInterview">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindJobInterview"/>
+    </request-map>
+    <request-map uri="EditJobInterview">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditJobInterview"/>
+    </request-map>
+    <request-map uri="createJobInterview">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createJobInterview"/>
+        <response name="success" type="view" value="EditJobInterview"/>
+        <response name="error" type="view" value="EditJobInterview"/>
+    </request-map>
+    <request-map uri="updateJobInterview">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateJobInterview"/>
+        <response name="success" type="request" value="EditJobInterview"/>
+    </request-map>
+    <request-map uri="deleteJobInterview">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteJobInterview"/>
+        <response name="success" type="view" value="FindJobInterview"/>
+    </request-map>
+    <request-map uri="FindApprovals">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindApprovals"/>
+    </request-map>
+    <request-map uri="EditApprovalStatus">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditApprovalStatus"/>
+    </request-map>
+    <request-map uri="updateApprovalStatus">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateApprovalStatus"/>
+        <response name="success" type="view" value="EditApprovalStatus"/>
+        <response name="error" type="view" value="EditApprovalStatus"/>
+    </request-map>
+    <request-map uri="FindRelocation">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindRelocation"/>
+    </request-map>
+    <request-map uri="EditJobInterviewType">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditJobInterviewType"/>
+    </request-map>
+    <request-map uri="createJobInterviewType">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createJobInterviewType"/>
+        <response name="success" type="view" value="EditJobInterviewType"/>
+    </request-map>
+    <request-map uri="updateJobInterviewType">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updateJobInterviewType"/>
+        <response name="success" type="request" value="EditJobInterviewType"/>
+    </request-map>
+    <request-map uri="deleteJobInterviewType">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteJobInterviewType"/>
+        <response name="success" type="request" value="EditJobInterviewType"/>
+    </request-map>
+    <!--====================Trainings Requests===================================-->
+    <request-map uri="TrainingCalendar">
+        <security auth="true" https="true"/>
+        <response name="success" type="view" value="TrainingCalendar"/>
+    </request-map>
+    <request-map uri="createTrainingCalendar">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createWorkEffortAndPartyAssign"/>
+        <response name="success" type="view" value="TrainingCalendar"/>
+        <response name="error" type="view" value="TrainingCalendar"/>
+    </request-map>
+    <request-map uri="updateTrainingCalendar">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateWorkEffort"/>
+        <response name="success" type="view-home" value="TrainingCalendar"/>
+        <response name="error" type="view" value="TrainingCalendar"/>
+    </request-map>
+    <request-map uri="EditWorkEffort">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="TrainingCalendar"/>
+    </request-map>
+    <request-map uri="createTrainingTypes">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createTrainingTypes"/>
+        <response name="success" type="view" value="EditTrainingTypes"/>
+        <response name="error" type="view" value="EditTrainingTypes"/>
+    </request-map>
+    <request-map uri="EditTrainingTypes">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditTrainingTypes"/>
+    </request-map>
+    <request-map uri="updateTrainingTypes">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updateTrainingTypes"/>
+        <response name="success" type="view" value="EditTrainingTypes"/>
+        <response name="error" type="view" value="EditTrainingTypes"/>
+    </request-map>
+    <request-map uri="deleteTrainingTypes">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteTrainingTypes"/>
+        <response name="success" type="view" value="EditTrainingTypes"/>
+        <response name="error" type="view" value="EditTrainingTypes"/>
+    </request-map>
+    <request-map uri="FindTrainingStatus">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindTrainingStatus"/>
+    </request-map>
+    <request-map uri="updateTrainingStatus">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateTrainingStatus"/>
+        <response name="success" type="view" value="EditTrainingApprovals"/>
+        <response name="error" type="view" value="EditTrainingApprovals"/>
+    </request-map>
+    <request-map uri="FindTrainingApprovals">
+        <security auth="true" https="true"/>
+        <response name="success" type="view" value="FindTrainingApprovals"/>
+    </request-map>
+    <request-map uri="EditTrainingApprovals">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditTrainingApprovals"/>
+    </request-map>
+    <request-map uri="applyTraining">
+        <security auth="true" https="true"/>
+        <event type="service" invoke="applyTraining"/>
+        <response name="success" type="view" value="FindTrainingStatus"/>
+        <response name="error" type="view" value="TrainingCalendar"/>
+    </request-map>
+    <request-map uri="assignTraining">
+        <security auth="true" https="true"/>
+        <event type="service" invoke="assignTraining"/>
+        <response name="success" type="view" value="FindTrainingApprovals"/>
+        <response name="error" type="view" value="TrainingCalendar"/>
+    </request-map>
+    <request-map uri="LookupTraining">
+        <security auth="true" https="true"/>
+        <response name="success" type="view" value="LookupTraining"/>
+    </request-map>
+    <request-map uri="EditEmplLeaveReasonTypes">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmplLeaveReasonTypes"/>
+    </request-map>
+    <request-map uri="createEmplLeaveReasonType">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createEmplLeaveReasonType"/>
+        <response name="success" type="view" value="EditEmplLeaveReasonTypes"/>
+        <response name="error" type="view" value="EditEmplLeaveReasonTypes"/>
+    </request-map>
+    <request-map uri="updateEmplLeaveReasonType">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updateEmplLeaveReasonType"/>
+        <response name="success" type="view" value="EditEmplLeaveReasonTypes"/>
+        <response name="error" type="view" value="EditEmplLeaveReasonTypes"/>
+    </request-map>
+    <request-map uri="deleteEmplLeaveReasonType">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteEmplLeaveReasonType"/>
+        <response name="success" type="view" value="EditEmplLeaveReasonTypes"/>
+        <response name="error" type="view" value="EditEmplLeaveReasonTypes"/>
+    </request-map>
+    <request-map uri="FindLeaveApprovals">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindLeaveApprovals"/>
+    </request-map>
+    <request-map uri="EditEmplLeaveStatus">
+       <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEmplLeaveStatus"/>
+    </request-map>
+    <request-map uri="updateEmplLeaveStatus">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateEmplLeaveStatus"/>
+        <response name="success" type="view" value="EditEmplLeaveStatus"/>
+        <response name="error" type="view" value="EditEmplLeaveStatus"/>
+    </request-map>
+    <!-- ===================Lookup Request===================== -->
+    <request-map uri="LookupPartyName"><security auth="true" https="true"/><response name="success" type="view" value="LookupPartyName"/></request-map>
+    <request-map uri="LookupPayment"><security auth="true" https="true"/><response name="success" type="view" value="LookupPayment"/></request-map>
+    <request-map uri="LookupBudget"><security auth="true" https="true"/><response name="success" type="view" value="LookupBudget"/></request-map>
+    <request-map uri="LookupBudgetItem"><security auth="true" https="true"/><response name="success" type="view" value="LookupBudgetItem"/></request-map>
+    <request-map uri="LookupEmplPosition"><security auth="true" https="true"/><response name="success" type="view" value="LookupEmplPosition"/></request-map>
+    <request-map uri="LookupTerminationReason"><security auth="true" https="true"/><response name="success" type="view" value="LookupTerminationReason"/></request-map>
+    <request-map uri="LookupSalaryStep"><security auth="true" https="true"/><response name="success" type="view" value="LookupSalaryStep"/></request-map>
+    <request-map uri="LookupPayGrade"><security auth="true" https="true"/><response name="success" type="view" value="LookupPayGrade"/></request-map>
+    <request-map uri="LookupPayRollPreference"><security auth="true" https="true"/><response name="success" type="view" value="LookupPayRollPreference"/></request-map>
+    <request-map uri="LookupUnemploymentClaim"><security auth="true" https="true"/><response name="success" type="view" value="LookupUnemploymentClaim"/></request-map>
+    <request-map uri="LookupAgreementEmploymentAppl"><security auth="true" https="true"/><response name="success" type="view" value="LookupAgreementEmploymentAppl"/></request-map>
+    <request-map uri="LookupPerfReview"><security auth="true" https="true"/><response name="success" type="view" value="LookupPerfReview"/></request-map>
+    <request-map uri="LookupPartyResume"><security auth="true" https="true"/><response name="success" type="view" value="LookupPartyResume"/></request-map>
+    <request-map uri="LookupEmploymentApp"><security auth="true" https="true"/><response name="success" type="view" value="LookupEmploymentApp"/></request-map>
+    <request-map uri="LookupAgreement"><security auth="true" https="true"/><response name="success" type="view" value="LookupAgreement"/></request-map>
+    <request-map uri="LookupJobRequisition"><security auth="true" https="true"/><response name="success" type="view" value="LookupJobRequisition"/></request-map>
+
+    <view-map name="LookupPartyName" type="screen" page="component://party/widget/partymgr/LookupScreens.xml#LookupPartyName"/>
+    <view-map name="LookupPayment"  type="screen" page="component://accounting/widget/LookupScreens.xml#LookupPayment"/>
+    <view-map name="LookupBudget"  type="screen" page="component://humanres/widget/LookupScreens.xml#LookupBudget"/>
+    <view-map name="LookupBudgetItem"  type="screen" page="component://humanres/widget/LookupScreens.xml#LookupBudgetItem"/>
+    <view-map name="LookupEmplPosition"  type="screen" page="component://humanres/widget/LookupScreens.xml#LookupEmplPosition"/>
+    <view-map name="LookupTerminationReason"  type="screen" page="component://humanres/widget/LookupScreens.xml#LookupTerminationReason"/>
+    <view-map name="LookupSalaryStep"  type="screen" page="component://humanres/widget/LookupScreens.xml#LookupSalaryStep"/>
+    <view-map name="LookupPayGrade"  type="screen" page="component://humanres/widget/LookupScreens.xml#LookupPayGrade"/>
+    <view-map name="LookupPayRollPreference" type="screen" page="component://humanres/widget/LookupScreens.xml#LookupPayRollPreference"/>
+    <view-map name="LookupUnemploymentClaim" type="screen" page="component://humanres/widget/LookupScreens.xml#LookupUnemploymentClaim"/>
+    <view-map name="LookupAgreementEmploymentAppl" type="screen" page="component://humanres/widget/LookupScreens.xml#LookupAgreementEmploymentAppl"/>
+    <view-map name="LookupPerfReview" type="screen" page="component://humanres/widget/LookupScreens.xml#LookupPerfReview"/>
+    <view-map name="LookupPartyResume" type="screen" page="component://humanres/widget/LookupScreens.xml#LookupPartyResume"/>
+    <view-map name="LookupEmploymentApp" type="screen" page="component://humanres/widget/LookupScreens.xml#LookupEmploymentApp"/>
+    <view-map name="LookupAgreement" type="screen" page="component://accounting/widget/LookupScreens.xml#LookupAgreement"/>
+    <view-map name="LookupJobRequisition" type="screen" page="component://humanres/widget/LookupScreens.xml#LookupJobRequisition"/>
+
+    <view-map name="main" type="screen" page="component://humanres/widget/CommonScreens.xml#Main"/>
+
+    <view-map name="FindEmployments" type="screen" page="component://humanres/widget/EmploymentScreens.xml#FindEmployments"/>
+    <view-map name="EditEmployment" type="screen" page="component://humanres/widget/EmploymentScreens.xml#EditEmployment"/>
+    <view-map name="ListEmployments" type="screen" page="component://humanres/widget/EmploymentScreens.xml#ListEmployments"/>
+    <view-map name="EditPartyBenefits" type="screen" page="component://humanres/widget/EmploymentScreens.xml#EditPartyBenefits"/>
+    <view-map name="EditPayrollPreferences" type="screen" page="component://humanres/widget/EmploymentScreens.xml#EditPayrollPreferences"/>
+    <view-map name="ListPayHistories" type="screen" page="component://humanres/widget/EmploymentScreens.xml#ListPayHistories"/>
+    <view-map name="EditSalarySteps" type="screen" page="component://humanres/widget/PayGradeScreens.xml#EditSalarySteps"/>
+    <view-map name="EditUnemploymentClaims" type="screen" page="component://humanres/widget/EmploymentScreens.xml#EditUnemploymentClaims"/>
+    <view-map name="EditAgreementEmploymentAppls" type="screen" page="component://humanres/widget/EmploymentScreens.xml#EditAgreementEmploymentAppls"/>
+
+    <view-map name="FindEmployee" type="screen" page="component://humanres/widget/EmployeeScreens.xml#FindEmployee"/>
+    <view-map name="NewEmployee" type="screen" page="component://humanres/widget/EmployeeScreens.xml#NewEmployee"/>
+    <view-map name="EmployeeProfile" type="screen" page="component://humanres/widget/EmployeeScreens.xml#EmployeeProfile"/>
+    <view-map name="EditEmployeeSkills" type="screen" page="component://humanres/widget/EmployeeScreens.xml#EditEmployeeSkills"/>
+    <view-map name="EditEmployeeTrainings" type="screen" page="component://humanres/widget/EmployeeScreens.xml#EditEmployeeTrainings"/>
+    <view-map name="EditEmployeeQuals" type="screen" page="component://humanres/widget/EmployeeScreens.xml#EditEmployeeQuals"/>
+    <view-map name="EditEmployeeEmploymentApps" type="screen" page="component://humanres/widget/EmployeeScreens.xml#EditEmployeeEmploymentApps"/>
+    <view-map name="EditEmployeeResumes" type="screen" page="component://humanres/widget/EmployeeScreens.xml#EditEmployeeResumes"/>
+    <view-map name="EditEmployeePerformanceNotes" type="screen" page="component://humanres/widget/EmployeeScreens.xml#EditEmployeePerformanceNotes"/>
+    <view-map name="EditEmployeeLeaves" type="screen" page="component://humanres/widget/EmployeeScreens.xml#EditEmployeeLeaves"/>
+
+    <view-map name="FindEmplPositions" type="screen" page="component://humanres/widget/EmplPositionScreens.xml#FindEmplPositions"/>
+    <view-map name="EditEmplPosition" type="screen" page="component://humanres/widget/EmplPositionScreens.xml#EditEmplPosition"/>
+    <view-map name="ListEmplPositions" type="screen" page="component://humanres/widget/EmplPositionScreens.xml#ListEmplPositionsParty"/>
+    <view-map name="EditEmplPositionFulfillments" type="screen" page="component://humanres/widget/EmplPositionScreens.xml#EditEmplPositionFulfillments"/>
+    <view-map name="EditEmplPositionResponsibilities" type="screen" page="component://humanres/widget/EmplPositionScreens.xml#EditEmplPositionResponsibilities"/>
+    <view-map name="EditEmplPositionReportingStructs" type="screen" page="component://humanres/widget/EmplPositionScreens.xml#EditEmplPositionReportingStructs"/>
+    <view-map name="ListValidResponsibilities" type="screen" page="component://humanres/widget/EmplPositionScreens.xml#ListValidResponsibilities"/>
+    <view-map name="EditValidResponsibility" type="screen" page="component://humanres/widget/EmplPositionScreens.xml#EditValidResponsibility"/>
+    <view-map name="viewprofile" type="screen" page="component://party/widget/partymgr/PartyScreens.xml#viewprofile"/>
+    <view-map name="EmplPositionView" type="screen" page="component://humanres/widget/EmplPositionScreens.xml#EmplPositionView"/>
+
+    <view-map name="FindPartySkills" type="screen" page="component://humanres/widget/PartySkillScreens.xml#FindPartySkills"/>
+    <view-map name="NewPartySkill" type="screen" page="component://humanres/widget/PartySkillScreens.xml#NewPartySkill"/>
+
+    <view-map name="FindPartyQuals" type="screen" page="component://humanres/widget/PartyQualScreens.xml#FindPartyQuals"/>
+    <view-map name="NewPartyQual" type="screen" page="component://humanres/widget/PartyQualScreens.xml#NewPartyQual"/>
+    <view-map name="EditPartyQuals" type="screen" page="component://humanres/widget/PartyQualScreens.xml#EditPartyQuals"/>
+
+    <view-map name="FindEmploymentApps" type="screen" page="component://humanres/widget/EmploymentAppScreens.xml#FindEmploymentApps"/>
+    <view-map name="NewEmploymentApp" type="screen" page="component://humanres/widget/EmploymentAppScreens.xml#NewEmploymentApp"/>
+
+    <view-map name="FindPartyResumes" type="screen" page="component://humanres/widget/PartyResumeScreens.xml#FindPartyResumes"/>
+    <view-map name="EditPartyResume" type="screen" page="component://humanres/widget/PartyResumeScreens.xml#EditPartyResume"/>
+
+    <view-map name="FindPayGrades" type="screen" page="component://humanres/widget/PayGradeScreens.xml#FindPayGrades"/>
+    <view-map name="EditPayGrade" type="screen" page="component://humanres/widget/PayGradeScreens.xml#EditPayGrade"/>
+
+    <view-map name="FindPerfReviews" type="screen" page="component://humanres/widget/PerfReviewScreens.xml#FindPerfReviews"/>
+    <view-map name="EditPerfReviews" type="screen" page="component://humanres/widget/PerfReviewScreens.xml#EditPerfReviews"/>
+    <view-map name="EditPerfReviewItems" type="screen" page="component://humanres/widget/PerfReviewScreens.xml#EditPerfReviewItems"/>
+
+    <view-map name="EditPerformanceNotes" type="screen" page="component://humanres/widget/EmploymentScreens.xml#EditPerformanceNotes"/>
+    <view-map name="EditSkillTypes" type="screen" page="component://humanres/widget/GlobalHRSettingScreens.xml#EditSkillTypes"/>
+    <view-map name="FindEmplPositionTypes" type="screen" page="component://humanres/widget/GlobalHRSettingScreens.xml#FindEmplPositionTypes"/>
+    <view-map name="EditEmplPositionTypes" type="screen" page="component://humanres/widget/GlobalHRSettingScreens.xml#EditEmplPositionTypes"/>
+    <view-map name="EditEmplPositionTypeRates" type="screen" page="component://humanres/widget/GlobalHRSettingScreens.xml#EditEmplPositionTypeRates"/>
+    <view-map name="EditResponsibilityTypes" type="screen" page="component://humanres/widget/GlobalHRSettingScreens.xml#EditResponsibilityTypes"/>
+    <view-map name="EditTerminationTypes" type="screen" page="component://humanres/widget/GlobalHRSettingScreens.xml#EditTerminationTypes"/>
+    <view-map name="EditTerminationReasons" type="screen" page="component://humanres/widget/GlobalHRSettingScreens.xml#EditTerminationReasons"/>
+    <view-map name="EditTrainingTypes" type="screen" page="component://humanres/widget/GlobalHRSettingScreens.xml#EditTrainingTypes"/>
+    
+    <view-map name="EditPartyResumes" type="screen" page="component://party/widget/partymgr/PartyScreens.xml#EditPartyResumes"/>
+    <view-map name="EditEmploymentApps" type="screen" page="component://humanres/widget/EmploymentAppScreens.xml#EditEmploymentApps"/>
+
+    <view-map name="FindEmplLeaves" type="screen" page="component://humanres/widget/EmplLeaveScreens.xml#FindEmplLeaves"/>
+    <view-map name="EditEmplLeave" type="screen" page="component://humanres/widget/EmplLeaveScreens.xml#EditEmplLeave"/>
+    <view-map name="EditEmplLeaveTypes" type="screen" page="component://humanres/widget/GlobalHRSettingScreens.xml#EditEmplLeaveTypes"/>
+    <view-map name="EditEmplLeaveReasonTypes" type="screen" page="component://humanres/widget/GlobalHRSettingScreens.xml#EditEmplLeaveReasonTypes"/>
+    <view-map name="FindLeaveApprovals" type="screen" page="component://humanres/widget/EmplLeaveScreens.xml#FindLeaveApprovals"/>
+    <view-map name="EditEmplLeaveStatus" type="screen" page="component://humanres/widget/EmplLeaveScreens.xml#EditEmplLeaveStatus"/>
+    
+    <!-- ==================Recruitment View Map===================== -->
+    <view-map name="FindJobRequisitions" type="screen" page="component://humanres/widget/RecruitmentScreens.xml#FindJobRequisitions"/>
+    <view-map name="EditJobRequisition" type="screen" page="component://humanres/widget/RecruitmentScreens.xml#EditJobRequisition"/>
+    <view-map name="FindInternalJobPosting" type="screen" page="component://humanres/widget/RecruitmentScreens.xml#FindInternalJobPosting"/>
+    <view-map name="EditInternalJobPosting" type="screen" page="component://humanres/widget/RecruitmentScreens.xml#EditInternalJobPosting"/>
+    <view-map name="FindJobInterview" type="screen" page="component://humanres/widget/RecruitmentScreens.xml#FindJobInterview"/>
+    <view-map name="EditJobInterview" type="screen" page="component://humanres/widget/RecruitmentScreens.xml#EditJobInterview"/>
+    <view-map name="FindApprovals" type="screen" page="component://humanres/widget/RecruitmentScreens.xml#FindApprovals"/>
+    <view-map name="EditApprovalStatus" type="screen" page="component://humanres/widget/RecruitmentScreens.xml#EditApprovalStatus"/>    
+    <view-map name="FindRelocation" type="screen" page="component://humanres/widget/RecruitmentScreens.xml#FindRelocation"/>
+    <view-map name="EditJobInterviewType" type="screen" page="component://humanres/widget/GlobalHRSettingScreens.xml#EditJobInterviewType"/>
+    
+    <!-- ==================Trainings View Map===================== -->
+    <view-map name="TrainingCalendar" type="screen" page="component://humanres/widget/PersonTrainingScreens.xml#TrainingCalendarWithDecorator"/>
+    <view-map name="FindTrainingStatus" type="screen" page="component://humanres/widget/PersonTrainingScreens.xml#FindTrainingStatus"/>
+    <view-map name="FindTrainingApprovals" type="screen" page="component://humanres/widget/PersonTrainingScreens.xml#FindTrainingApprovals"/>
+    <view-map name="EditTrainingApprovals" type="screen" page="component://humanres/widget/PersonTrainingScreens.xml#EditTrainingApprovals"/>
+    <view-map name="LookupTraining" type="screen" page="component://humanres/widget/LookupScreens.xml#LookupTraining"/>
+</site-conf>
