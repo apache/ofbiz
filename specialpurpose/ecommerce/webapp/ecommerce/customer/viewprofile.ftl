@@ -503,22 +503,40 @@ under the License.
               <td width="15%"><div class="tabletext">${emailAddress.infoString?if_exists}</div></td>
               <td width="5">&nbsp;</td>
               <td width="20%" nowrap>
-              <#if (contactListParty.statusId?if_exists == "CLPT_ACCEPTED")>
-                <a href="<@ofbizUrl>updateContactListParty?partyId=${party.partyId}&amp;contactListId=${contactListParty.contactListId}&amp;fromDate=${contactListParty.fromDate}&amp;statusId=CLPT_REJECTED</@ofbizUrl>" class="buttontext">${uiLabelMap.EcommerceUnsubscribe}</a>
-              <#elseif (contactListParty.statusId?if_exists == "CLPT_PENDING")>
-                <form method="post" action="<@ofbizUrl>updateContactListParty</@ofbizUrl>" name="clistAcceptForm${contactListParty_index}">
-                  <input type="hidden" name="partyId" value="${party.partyId}"/>
-                  <input type="hidden" name="contactListId" value="${contactListParty.contactListId}"/>
-                  <input type="hidden" name="fromDate" value="${contactListParty.fromDate}"/>
-                  <input type="hidden" name="statusId" value="CLPT_ACCEPTED"/>
-                  <input type="text" size="10" name="optInVerifyCode" value="" class="inputBox"/>
-                  <input type="submit" value="${uiLabelMap.EcommerceVerifySubscription}" class="smallSubmit"/>
-                </form>
-              <#elseif (contactListParty.statusId?if_exists == "CLPT_REJECTED")>
-                <a href="<@ofbizUrl>updateContactListParty?partyId=${party.partyId}&amp;contactListId=${contactListParty.contactListId}&amp;fromDate=${contactListParty.fromDate}&amp;statusId=CLPT_PENDING</@ofbizUrl>" class="buttontext">${uiLabelMap.EcommerceSubscribe}</a>
-              </#if>
-              </td>
-            </tr>
+          <#if (contactListParty.statusId?if_exists == "CLPT_ACCEPTED")>            
+            <form method="post" action="<@ofbizUrl>updateContactListParty</@ofbizUrl>" name="clistRejectForm${contactListParty_index}">
+            <div>
+              <input type="hidden" name="partyId" value="${party.partyId}"/>
+              <input type="hidden" name="contactListId" value="${contactListParty.contactListId}"/>
+              <input type="hidden" name="fromDate" value="${contactListParty.fromDate}"/>
+              <input type="hidden" name="statusId" value="CLPT_REJECTED"/>
+              <input type="submit" value="${uiLabelMap.EcommerceUnsubscribe}" class="smallSubmit"/>
+              </div>
+            </form>
+          <#elseif (contactListParty.statusId?if_exists == "CLPT_PENDING")>
+            <form method="post" action="<@ofbizUrl>updateContactListParty</@ofbizUrl>" name="clistAcceptForm${contactListParty_index}">
+            <div>
+              <input type="hidden" name="partyId" value="${party.partyId}"/>
+              <input type="hidden" name="contactListId" value="${contactListParty.contactListId}"/>
+              <input type="hidden" name="fromDate" value="${contactListParty.fromDate}"/>
+              <input type="hidden" name="statusId" value="CLPT_ACCEPTED"/>
+              <input type="text" size="10" name="optInVerifyCode" value="" class="inputBox"/>
+              <input type="submit" value="${uiLabelMap.EcommerceVerifySubscription}" class="smallSubmit"/>
+              </div>
+            </form>
+          <#elseif (contactListParty.statusId?if_exists == "CLPT_REJECTED")>
+            <form method="post" action="<@ofbizUrl>updateContactListParty</@ofbizUrl>" name="clistPendForm${contactListParty_index}">
+            <div>
+              <input type="hidden" name="partyId" value="${party.partyId}"/>
+              <input type="hidden" name="contactListId" value="${contactListParty.contactListId}"/>
+              <input type="hidden" name="fromDate" value="${contactListParty.fromDate}"/>
+              <input type="hidden" name="statusId" value="CLPT_PENDING"/>
+              <input type="submit" value="${uiLabelMap.EcommerceSubscribe}" class="smallSubmit"/>
+              </div>
+            </form>
+          </#if>
+          </td>
+          </tr>
           </#list>
         </table>
         <hr/>
