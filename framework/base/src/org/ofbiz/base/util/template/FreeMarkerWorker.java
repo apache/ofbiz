@@ -630,8 +630,6 @@ public class FreeMarkerWorker {
      *
      */
     static class OFBizTemplateExceptionHandler implements TemplateExceptionHandler {
-
-        @Override
         public void handleTemplateException(TemplateException te, Environment env, Writer out) throws TemplateException {
             StringWriter tempWriter = new StringWriter();
             PrintWriter pw = new PrintWriter(tempWriter, true);
