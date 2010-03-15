@@ -80,7 +80,7 @@ under the License.
         <field name="entityGroupName" type="name"/>
         <field name="jdbcUri" type="long-varchar"/>
         <field name="jdbcUsername" type="long-varchar"/>
-        <field name="jdbcPassword" type="long-varchar"/>
+        <field name="jdbcPassword" type="long-varchar" encrypt="true"/>
         <prim-key field="tenantId"/>
         <prim-key field="entityGroupName"/>
         <relation type="one" fk-name="TNTDTSRC_TNT" rel-entity-name="Tenant">
