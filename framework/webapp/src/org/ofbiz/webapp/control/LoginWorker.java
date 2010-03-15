@@ -337,6 +337,8 @@ public class LoginWorker {
             }
             
             if (delegatorNameHashIndex == -1 || (currentDelegatorTenantId != null && !tenantId.equals(currentDelegatorTenantId))) {
+                /* don't require this, allow a user to authenticate inside the tenant as long as the userLoginId and 
+                 * password match what is in that tenant's database; instead just set things up below 
                 try {
                     List<GenericValue> tenantUserLoginList = delegator.findList("TenantUserLogin", EntityCondition.makeCondition(EntityOperator.AND, "tenantId", tenantId, "userLoginId", username), null, null, null, false);
                     if (tenantUserLoginList != null && tenantUserLoginList.size() > 0) {
@@ -363,6 +365,19 @@ public class LoginWorker {
                     request.setAttribute("_ERROR_MESSAGE_", errMsg);
                     return "error";
                 }
+                */
+
+                ServletContext servletContext = session.getServletContext();
+                
+                // make that tenant active, setup a new delegator and a new dispatcher
+                String delegatorName = delegator.getDelegatorName() + "#" + tenantId;
+                
+                // after this line the delegator is replaced with the new per-tenant delegator
+                delegator = DelegatorFactory.getDelegator(delegatorName);
+                dispatcher = ContextFilter.makeWebappDispatcher(servletContext, delegator);
+                
+                // NOTE: these will be local for now and set in the request and session later, after we've verified that the user
+                setupNewDelegatorEtc = true;
             }
         }
         

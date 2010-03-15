@@ -231,6 +231,8 @@ public class GenericDelegator implements Delegator {
             GenericValue tenant = baseDelegator.findOne("Tenant", true, "tenantId", this.delegatorTenantId);
             if (tenant == null) {
                 throw new GenericEntityException("No Tenant record found for delegator [" + this.delegatorFullName + "] with tenantId [" + this.delegatorTenantId + "]");
+            } else if ("Y".equals(tenant.getString("disabled"))) {
+                throw new GenericEntityException("No Tenant record found for delegator [" + this.delegatorFullName + "] with tenantId [" + this.delegatorTenantId + "]");
             }
         }
         
