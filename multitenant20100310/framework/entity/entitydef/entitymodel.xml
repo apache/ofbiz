@@ -35,7 +35,7 @@ under the License.
     <!--  - org.ofbiz.entity.audit -->
     <!--  - org.ofbiz.entity.crypto -->
     <!--  - org.ofbiz.entity.sequence -->
-    <!-- org.ofbiz.entity.tenant -->
+    <!--  - org.ofbiz.entity.tenant -->
     <!-- ========================================================= -->
 
     <entity entity-name="EntityAuditLog" package-name="org.ofbiz.entity.audit" title="Entity Audit Log">
@@ -68,6 +68,7 @@ under the License.
     <entity entity-name="Tenant" package-name="org.ofbiz.entity.tenant">
         <field name="tenantId" type="id-ne"/>
         <field name="tenantName" type="name"/>
+        <field name="disabled" type="indicator"><description>Disabled if 'Y', defaults to 'N' (not disabled).</description></field>
         <prim-key field="tenantId"/>
     </entity>
     <entity entity-name="TenantDataSource" package-name="org.ofbiz.entity.tenant">
@@ -86,18 +87,20 @@ under the License.
             <key-map field-name="tenantId"/>
         </relation>
     </entity>
+    <!-- may be no reason for this entity, user is authenticated inside the tenant and this would only be useful to 
+    get a list of tenants per user
     <entity entity-name="TenantUserLogin" package-name="org.ofbiz.entity.tenant">
         <field name="tenantId" type="id-ne"/>
         <field name="userLoginId" type="name"/>
         <field name="fromDate" type="date-time"/>
         <field name="thruDate" type="date-time"/>
-        <field name="isManager" type="indicator"/>
         <prim-key field="tenantId"/>
         <prim-key field="userLoginId"/>
         <prim-key field="fromDate"/>
         <relation type="one" fk-name="TNTUSRLGN_TNT" rel-entity-name="Tenant">
             <key-map field-name="tenantId"/>
         </relation>
-        <!-- NOTE: there is no FK to the UserLogin entity, which is in a higher-level component, and would normally be in a separate database -->
+        <!- - NOTE: there is no FK to the UserLogin entity, which is in a higher-level component, and would normally be in a separate database - ->
     </entity>
+    -->
 </entitymodel>
