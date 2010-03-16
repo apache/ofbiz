@@ -80,7 +80,14 @@ under the License.
         <field name="entityGroupName" type="name"/>
         <field name="jdbcUri" type="long-varchar"/>
         <field name="jdbcUsername" type="long-varchar"/>
-        <field name="jdbcPassword" type="long-varchar" encrypt="true"/>
+        <field name="jdbcPassword" type="long-varchar">
+            <!-- This field should probably be encrypted, but the encrypt=true attribute will not work in this case
+            because different tenants will have different sets of encryption keys because the EntityKeyStore table is
+            in the per-tenant database an not in the shared tenant control database, which causes different keys to
+            be used for those logged in under different tenants, causing decryption errors unless you do all 
+            TenantDataSource maintenance from only one tenant (or the non-tenant master db). Removing that for now 
+            until this issue is resolved, possibly by moving the EntityKeyStore entity into the tenant database. -->
+        </field>
         <prim-key field="tenantId"/>
         <prim-key field="entityGroupName"/>
         <relation type="one" fk-name="TNTDTSRC_TNT" rel-entity-name="Tenant">
