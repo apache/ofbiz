@@ -85,8 +85,19 @@ under the License.
             because different tenants will have different sets of encryption keys because the EntityKeyStore table is
             in the per-tenant database an not in the shared tenant control database, which causes different keys to
             be used for those logged in under different tenants, causing decryption errors unless you do all 
-            TenantDataSource maintenance from only one tenant (or the non-tenant master db). Removing that for now 
-            until this issue is resolved, possibly by moving the EntityKeyStore entity into the tenant database. -->
+            TenantDataSource maintenance from only one tenant (or the non-tenant master db).
+            
+            The problem is that each tenant has their own encryption keys, and that is they way it should be since 
+            having easy access to the encryption keys that other tenants are using would be bad, and not having access 
+            to your own encryption keys would also be bad. Because of that we can't move the EntityKeyStore entity 
+            into the tenant control database. If we encrypt this with the keys from one tenant then no one logged in 
+            with another tenant database will be able to decrypt it, so we can't use the keys in the per-tenant 
+            databases for this.
+            
+            Technically we don't have to encrypt the JDBC password, it often isn't encrypted in the configuration 
+            files anyway. But it would be nice to encrypt it to protect other databases anyway, even if they are 
+            probably on the same box and in the same database server instance.
+            -->
         </field>
         <prim-key field="tenantId"/>
         <prim-key field="entityGroupName"/>
