@@ -175,7 +175,11 @@ public class ModelGroupReader implements Serializable {
         if (gc != null) {
             String groupName = gc.get(entityName);
             if (groupName == null) {
-                groupName = EntityConfigUtil.getDelegatorInfo(delegatorBaseName).defaultGroupName;
+                DelegatorInfo delegatorInfo = EntityConfigUtil.getDelegatorInfo(delegatorBaseName);
+                if (delegatorInfo == null) {
+                    throw new RuntimeException("Could not find DelegatorInfo for delegatorBaseName [" + delegatorBaseName + "]");
+                }
+                groupName = delegatorInfo.defaultGroupName;
             }
             return groupName;
         } else {
