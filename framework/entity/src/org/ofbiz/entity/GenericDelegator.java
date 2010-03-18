@@ -3245,6 +3245,9 @@ public class GenericDelegator implements Delegator {
         newDelegator.modelReader = this.modelReader;
         newDelegator.modelGroupReader = this.modelGroupReader;
         newDelegator.setDelegatorNames(UtilValidate.isNotEmpty(delegatorFullName) ? delegatorFullName : this.delegatorFullName);
+        // set the delegatorBaseName to be the same so that configuration settings all work the same as the current 
+        //   delegator, allowing the new delegatorFullName to not match a delegator name in the entityengine.xml file
+        newDelegator.delegatorBaseName = this.delegatorBaseName;
         newDelegator.delegatorInfo = this.delegatorInfo;
         newDelegator.cache = this.cache;
         newDelegator.andCacheFieldSets = this.andCacheFieldSets;
