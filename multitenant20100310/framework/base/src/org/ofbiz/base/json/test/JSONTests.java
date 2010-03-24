@@ -19,8 +19,10 @@
 package org.ofbiz.base.json.test;
 
 import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,8 +33,11 @@ import org.ofbiz.base.json.JSONWriter;
 import org.ofbiz.base.json.ParseException;
 import org.ofbiz.base.json.Token;
 import org.ofbiz.base.json.TokenMgrError;
+import org.ofbiz.base.lang.SourceMonitor;
 import org.ofbiz.base.test.GenericTestCaseBase;
+import org.ofbiz.base.util.IndentingWriter;
 
+@SourceMonitor("Adam Heath")
 public class JSONTests extends GenericTestCaseBase {
     public JSONTests(String name) {
         super(name);
@@ -58,6 +63,7 @@ public class JSONTests extends GenericTestCaseBase {
         } else {
             jsonWriter = new JSONWriter(writer);
         };
+        assertTrue("writer is IndentingWriter", jsonWriter.getWriter() instanceof IndentingWriter);
         jsonWriter.write(object);
         return writer.toString();
     }
@@ -102,6 +108,54 @@ public class JSONTests extends GenericTestCaseBase {
     protected void assertResolveJSON(String type, Object obj, String json) throws Exception {
         assertEquals("write " + type, json, getJSON(obj, true));
         assertEquals("parse " + type, obj, parseJSON(json, true));
+    }
+
+    public void testClose() throws Exception {
+        JSONWriter writer = new JSONWriter(new OutputStreamWriter(new ByteArrayOutputStream()));
+        writer.close();
+        IOException caught = null;
+        try {
+            writer.write("");
+        } catch (IOException e) {
+            caught = e;
+        } finally {
+            assertNotNull("write after close", caught);
+        }
+    }
+
+    public void testString() throws Exception {
+        StringBuilder wanted = new StringBuilder();
+        StringBuilder json = new StringBuilder().append('"');
+        for (int i = 0; i < 5120; i++) {
+            wanted.append((char) i);
+            if (i == '\b') {
+                json.append("\\b");
+            } else if (i == '\f') {
+                json.append("\\f");
+            } else if (i == '\t') {
+                json.append("\\t");
+            } else if (i == '\n') {
+                json.append("\\n");
+            } else if (i == '\r') {
+                json.append("\\r");
+            } else if (i == '"') {
+                json.append("\\\"");
+            } else if (i == '\\') {
+                json.append("\\\\");
+            } else if (i == '/') {
+                json.append("\\/");
+            } else if (i < 32 || i >= 256) {
+                json.append("\\u");
+                if (i < 16) json.append('0');
+                if (i < 256) json.append('0');
+                if (i < 4096) json.append('0');
+                json.append(Integer.toString(i, 16));
+            } else {
+                json.append((char) i);
+            }
+        }
+        json.append('"');
+        assertSimpleJSON("string", wanted.toString(), json.toString());
     }
 
     public void testParseBasicTypes() throws Exception {
@@ -187,53 +241,34 @@ public class JSONTests extends GenericTestCaseBase {
 
     public void testParseErrors() throws Exception {
         for (char c = 1; c < 1024; c++) {
-            switch (c) {
-                case '[':
-                    doParseExceptionTest("[:", JSONConstants.KEY_SEP);
-                    break;
-                case ']':
-                    doParseExceptionTest("]", JSONConstants.ARRAY_END);
-                    break;
-                case '{':
-                    doParseExceptionTest("{:", JSONConstants.KEY_SEP);
-                    break;
-                case '}':
-                    doParseExceptionTest("}", JSONConstants.OBJECT_END);
-                    break;
-                case ':':
-                    doParseExceptionTest(":", JSONConstants.KEY_SEP);
-                    break;
-                case ',':
-                    doParseExceptionTest(",", JSONConstants.ITEM_SEP);
-                    break;
-                case '"':
-                    doParseExceptionTest("\"", JSONConstants.EOF);
-                    break;
-                case 't':
-                    doParseExceptionTest("true:", JSONConstants.KEY_SEP);
-                    break;
-                case 'f':
-                    doParseExceptionTest("false:", JSONConstants.KEY_SEP);
-                    break;
-                case 'n':
-                    doParseExceptionTest("null:", JSONConstants.KEY_SEP);
-                    break;
-                case '-':   // numbers
-                case '.':
-                case '0': case '1': case '2': case '3': case '4':
-                case '5': case '6': case '7': case '8': case '9':
-                    break;
-                case '\t':
-                    doWhitespaceExceptionTest(Character.toString(c), 8);
-                    break;
-                case '\n':
-                case '\r':
-                case ' ':
-                    doWhitespaceExceptionTest(Character.toString(c), 1);
-                    break;
-                default:
-                    doTokenMgrErrorTest(c);
-                    break;
+            if (c == '\t') {
+                doWhitespaceExceptionTest(Character.toString(c), 8);
+            } else if (c == '\n' || c == '\r' || c == ' ') {
+                doWhitespaceExceptionTest(Character.toString(c), 1);
+            } else if (c == '"') {
+                doParseExceptionTest("\"", JSONConstants.EOF);
+            } else if (c == ',') {
+                doParseExceptionTest(",", JSONConstants.ITEM_SEP);
+            } else if (c == '-' || c == '.' || (c >= '0' && c <= '9')) {
+                // numbers
+            } else if (c == ':') {
+                doParseExceptionTest(":", JSONConstants.KEY_SEP);
+            } else if (c == '[') {
+                doParseExceptionTest("[:", JSONConstants.KEY_SEP);
+            } else if (c == ']') {
+                doParseExceptionTest("]", JSONConstants.ARRAY_END);
+            } else if (c == 't') {
+                doParseExceptionTest("true:", JSONConstants.KEY_SEP);
+            } else if (c == 'f') {
+                doParseExceptionTest("false:", JSONConstants.KEY_SEP);
+            } else if (c == 'n') {
+                doParseExceptionTest("null:", JSONConstants.KEY_SEP);
+            } else if (c == '{') {
+                doParseExceptionTest("{:", JSONConstants.KEY_SEP);
+            } else if (c == '}') {
+                doParseExceptionTest("}", JSONConstants.OBJECT_END);
+            } else {
+                doTokenMgrErrorTest(c);
             }
         }
     }
@@ -285,5 +320,13 @@ public class JSONTests extends GenericTestCaseBase {
 
     public void testResolve() throws Exception {
         assertResolveJSON("url", new URL("http://ofbiz.apache.org"), "resolve(\"java.net.URL:http:\\/\\/ofbiz.apache.org\")");
+        IOException caught = null;
+        try {
+            getJSON(new URL("http://ofbiz.apache.org"), false);
+        } catch (IOException e) {
+            caught = e;
+        } finally {
+            assertNotNull("url not allowed", caught);
+        }
     }
 }

@@ -55,7 +55,7 @@ under the License.
                       <#if productId?exists>
                         ${orderItem.productId?default("N/A")} - ${orderItem.itemDescription?if_exists}
                         <#if (product.salesDiscontinuationDate)?exists && Static["org.ofbiz.base.util.UtilDateTime"].nowTimestamp().after(product.salesDiscontinuationDate)>
-                          <br/><span style="color: red;">${uiLabelMap.OrderItemDiscontinued}: ${product.salesDiscontinuationDate}</span>
+                          <br /><span style="color: red;">${uiLabelMap.OrderItemDiscontinued}: ${product.salesDiscontinuationDate}</span>
                         </#if>
                       <#elseif orderItemType?exists>
                         ${orderItemType.description} - ${orderItem.itemDescription?if_exists}
@@ -129,8 +129,8 @@ under the License.
                   <#-- now show status details per line item -->
                   <#assign currentItemStatus = orderItem.getRelatedOne("StatusItem")>
                   <td colspan="1" valign="top">
-                    <div class="screenlet order-item-status-list"><div class="screenlet-body">
-                    <div><span class="label">${uiLabelMap.CommonCurrent}</span>&nbsp;${currentItemStatus.get("description",locale)?default(currentItemStatus.statusId)}</div>
+                    <div class="screenlet order-item-status-list<#if currentItemStatus.statusCode?has_content> ${currentItemStatus.statusCode}</#if>"><div class="screenlet-body">
+                    <div class="current-status"><span class="label">${uiLabelMap.CommonCurrent}</span>&nbsp;${currentItemStatus.get("description",locale)?default(currentItemStatus.statusId)}</div>
                     <#assign orderItemStatuses = orderReadHelper.getOrderItemStatuses(orderItem)>
                     <#list orderItemStatuses as orderItemStatus>
                       <#assign loopStatusItem = orderItemStatus.getRelatedOne("StatusItem")>
@@ -597,7 +597,7 @@ under the License.
 
             </#list>
           </#if>
-          <tr><td colspan="7"><hr/></td></tr>
+          <tr><td colspan="7"><hr /></td></tr>
           <#list orderHeaderAdjustments as orderHeaderAdjustment>
             <#assign adjustmentType = orderHeaderAdjustment.getRelatedOne("OrderAdjustmentType")>
             <#assign adjustmentAmount = Static["org.ofbiz.order.order.OrderReadHelper"].calcOrderAdjustment(orderHeaderAdjustment, orderSubTotal)>
@@ -615,7 +615,7 @@ under the License.
           </#list>
 
           <#-- subtotal -->
-          <tr><td colspan="1"></td><td colspan="6"><hr/></td></tr>
+          <tr><td colspan="1"></td><td colspan="6"><hr /></td></tr>
           <tr>
             <td align="right" colspan="5"><div><span class="label">${uiLabelMap.OrderItemsSubTotal}</span></div></td>
             <td align="right" nowrap="nowrap"><div><@ofbizCurrency amount=orderSubTotal isoCode=currencyUomId/></div></td>

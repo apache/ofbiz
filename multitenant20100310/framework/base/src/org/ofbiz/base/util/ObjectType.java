@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.base.util;
 
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -32,6 +33,7 @@ import org.ofbiz.base.conversion.ConversionException;
 import org.ofbiz.base.conversion.Converter;
 import org.ofbiz.base.conversion.Converters;
 import org.ofbiz.base.conversion.LocalizedConverter;
+import org.ofbiz.base.lang.SourceMonitor;
 import org.w3c.dom.Node;
 
 /**
@@ -469,6 +471,7 @@ public class ObjectType {
      * @return the converted value
      * @throws GeneralException
      */
+    @SourceMonitor("Adam Heath")
     @SuppressWarnings("unchecked")
     public static Object simpleTypeConvert(Object obj, String type, String format, TimeZone timeZone, Locale locale, boolean noTypeFail) throws GeneralException {
         if (obj == null) {
@@ -516,7 +519,7 @@ public class ObjectType {
             LocalizedConverter<Object, Object> localizedConverter = null;
             try {
                 localizedConverter = (LocalizedConverter) converter;
-            } catch (Exception e) {}
+            } catch (ClassCastException e) {}
             if (localizedConverter != null) {
                 if (timeZone == null) {
                     timeZone = TimeZone.getDefault();
@@ -783,12 +786,17 @@ public class ObjectType {
         return false;
     }
 
-    public static final class NullObject {
+    public static final class NullObject implements Serializable {
         public NullObject() { }
 
         @Override
         public String toString() {
             return "ObjectType.NullObject";
+        }
+
+        @Override
+        public int hashCode() {
+            return toString().hashCode();
         }
 
         @Override

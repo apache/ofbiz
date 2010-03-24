@@ -43,11 +43,6 @@
                 <parameter param-name="productStoreId" value="${parameters.productStoreId}"/>
             </link>
         </menu-item>
-        <menu-item name="blockItemOutOfStock" title="${uiLabelMap.EbayBlockItemOutOfStock}">
-            <link target="blockItemOutOfStock">
-                <parameter param-name="productStoreId" value="${parameters.productStoreId}"/>
-            </link>
-        </menu-item>
         <menu-item name="exportProductListing" title="Export Product Listing">
             <link target="exportProductListing">
                 <parameter param-name="productStoreId" value="${parameters.productStoreId}"/>
@@ -66,13 +61,33 @@
                 <parameter param-name="productStoreId" value="${parameters.productStoreId}"/>
             </link>
         </menu-item>
+        <menu-item name="activeListing" title="${uiLabelMap.EbayOpenListings}">
+            <link target="activeListing">
+                <parameter param-name="productStoreId" value="${parameters.productStoreId}"/>
+            </link>
+        </menu-item>
         <menu-item name="soldListing" title="${uiLabelMap.EbaySold}">
             <link target="soldListing">
                 <parameter param-name="productStoreId" value="${parameters.productStoreId}"/>
             </link>
         </menu-item>
+        <menu-item name="unsoldListing" title="${uiLabelMap.EbayUnsold}">
+            <link target="unsoldListing">
+                <parameter param-name="productStoreId" value="${parameters.productStoreId}"/>
+            </link>
+        </menu-item>
+        <menu-item name="waitingToShipping" title="${uiLabelMap.EbayWaitingToShipping}">
+            <link target="waitingToShipping">
+                <parameter param-name="productStoreId" value="${parameters.productStoreId}"/>
+            </link>
+        </menu-item>
         <menu-item name="automationPreferences" title="Automation Preferences">
             <link target="automationPreferences">
+                <parameter param-name="productStoreId" value="${parameters.productStoreId}"/>
+            </link>
+        </menu-item>
+        <menu-item name="ordersImported" title="Orders Imported">
+            <link target="ordersImported">
                 <parameter param-name="productStoreId" value="${parameters.productStoreId}"/>
             </link>
         </menu-item>

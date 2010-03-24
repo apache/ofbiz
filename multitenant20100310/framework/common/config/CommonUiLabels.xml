@@ -8448,7 +8448,7 @@
         <value xml:lang="es">Crear tipo de fuente de datos</value>
         <value xml:lang="fr">Nouveau type de source de données</value>
         <value xml:lang="hi_IN">डेटा स्रोत प्रकार बनाएँ</value>
-        <value xml:lang="it">Creare tipo sorgente dati</value>
+        <value xml:lang="it">Nuovo tipo sorgente dati</value>
         <value xml:lang="nl">Aanmaken Brontype</value>
         <value xml:lang="pt">Criar Tipo de Origem de Dados</value>
         <value xml:lang="ro">Creare Tip Sursa Date</value>
@@ -8519,6 +8519,9 @@
         <value xml:lang="ru">Финансы</value>
         <value xml:lang="th">การเงิน</value>
         <value xml:lang="zh">财务</value>
+    </property>
+    <property key="FormFieldTitle_acceptButton">
+        <value xml:lang="en">Accept</value>
     </property>
     <property key="FormFieldTitle_addButton">
         <value xml:lang="ar">إضافة</value>

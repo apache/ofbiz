@@ -95,9 +95,6 @@ public class GenericDelegator implements Delegator {
     /** This flag is only here for lower level technical testing, it shouldn't be user configurable (or at least I don't think so yet); when true all operations without a transaction will be wrapped in one; seems to be necessary for some (all?) XA aware connection pools, and should improve overall stability and consistency */
     public static final boolean alwaysUseTransaction = true;
 
-    /** the delegatorCache will now be a HashMap, allowing reload of definitions,
-     * but the delegator will always be the same object for the given name */
-    public static Map<String, GenericDelegator> delegatorCache = FastMap.newInstance();
     protected String delegatorBaseName = null;
     protected String delegatorFullName = null;
     protected String delegatorTenantId = null;
@@ -286,9 +283,6 @@ public class GenericDelegator implements Delegator {
         }
 
         // NOTE: doing some things before the ECAs and such to make sure it is in place just in case it is used in a service engine startup thing or something
-        // put the delegator in the master Map by its name
-        // TODO: we should find a better way to do this since putting the delegator in the cache before it is completely setup may cause errors with multiple threads
-        GenericDelegator.delegatorCache.put(delegatorFullName, this);
 
         // setup the crypto class; this also after the delegator is in the cache otherwise we get infinite recursion
         this.crypto = new EntityCrypto(this);
@@ -319,9 +313,6 @@ public class GenericDelegator implements Delegator {
         } else {
             Debug.logInfo("Distributed Cache Clear System disabled for delegator [" + delegatorFullName + "]", module);
         }
-
-        // setup the Entity ECA Handler
-        initEntityEcaHandler();
     }
     
     protected void setDelegatorNames(String delegatorFullName) {
@@ -339,7 +330,10 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#initEntityEcaHandler()
      */
-    public void initEntityEcaHandler() {
+    public synchronized void initEntityEcaHandler() {
+        if (!getDelegatorInfo().useEntityEca || this.entityEcaHandler != null) {
+            return;
+        }
         if (getDelegatorInfo().useEntityEca) {
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
             // initialize the entity eca handler
@@ -619,9 +613,7 @@ public class GenericDelegator implements Delegator {
         if (entity == null) {
             throw new IllegalArgumentException("[GenericDelegator.makeValue] could not find entity for entityName: " + entityName);
         }
-        GenericValue value = GenericValue.create(entity, fields);
-        value.setDelegator(this);
-        return value;
+        return GenericValue.create(this, entity, fields);
     }
 
     /* (non-Javadoc)
@@ -632,9 +624,7 @@ public class GenericDelegator implements Delegator {
         if (entity == null) {
             throw new IllegalArgumentException("[GenericDelegator.makeValue] could not find entity for entityName: " + entityName);
         }
-        GenericValue value = GenericValue.create(entity, singlePkValue);
-        value.setDelegator(this);
-        return value;
+        return GenericValue.create(this, entity, singlePkValue);
     }
 
     /* (non-Javadoc)
@@ -653,9 +643,9 @@ public class GenericDelegator implements Delegator {
             throw new IllegalArgumentException("[GenericDelegator.makeValidValue] could not find entity for entityName: " + entityName);
         }
         GenericValue value = GenericValue.create(entity);
+        value.setDelegator(this);
         value.setPKFields(fields, true);
         value.setNonPKFields(fields, true);
-        value.setDelegator(this);
         return value;
     }
 
@@ -681,10 +671,7 @@ public class GenericDelegator implements Delegator {
         if (entity == null) {
             throw new IllegalArgumentException("[GenericDelegator.makePK] could not find entity for entityName: " + entityName);
         }
-        GenericPK pk = GenericPK.create(entity, fields);
-
-        pk.setDelegator(this);
-        return pk;
+        return GenericPK.create(this, entity, fields);
     }
 
     /* (non-Javadoc)
@@ -695,10 +682,7 @@ public class GenericDelegator implements Delegator {
         if (entity == null) {
             throw new IllegalArgumentException("[GenericDelegator.makePKSingle] could not find entity for entityName: " + entityName);
         }
-        GenericPK pk = GenericPK.create(entity, singlePkValue);
-
-        pk.setDelegator(this);
-        return pk;
+        return GenericPK.create(this, entity, singlePkValue);
     }
 
     /* (non-Javadoc)
@@ -734,7 +718,7 @@ public class GenericDelegator implements Delegator {
             return null;
         }
         ModelEntity entity = this.getModelReader().getModelEntity(entityName);
-        GenericValue genericValue = GenericValue.create(entity, fields);
+        GenericValue genericValue = GenericValue.create(this, entity, fields);
 
         return this.create(genericValue, true);
     }
@@ -747,7 +731,7 @@ public class GenericDelegator implements Delegator {
             return null;
         }
         ModelEntity entity = this.getModelReader().getModelEntity(entityName);
-        GenericValue genericValue = GenericValue.create(entity, singlePkValue);
+        GenericValue genericValue = GenericValue.create(this, entity, singlePkValue);
 
         return this.create(genericValue, true);
     }
@@ -1456,8 +1440,7 @@ public class GenericDelegator implements Delegator {
                 } else {
                     // don't send fields that are the same, and if no fields have changed, update nothing
                     ModelEntity modelEntity = value.getModelEntity();
-                    GenericValue toStore = GenericValue.create(modelEntity, (Map<String, ? extends Object>) value.getPrimaryKey());
-                    toStore.setDelegator(this);
+                    GenericValue toStore = GenericValue.create(this, modelEntity, (Map<String, ? extends Object>) value.getPrimaryKey());
                     boolean atLeastOneField = false;
                     Iterator<ModelField> nonPksIter = modelEntity.getNopksIterator();
                     while (nonPksIter.hasNext()) {
@@ -2479,9 +2462,7 @@ public class GenericDelegator implements Delegator {
             fields.put(keyMap.getRelFieldName(), value.get(keyMap.getFieldName()));
         }
 
-        GenericPK dummyPK = GenericPK.create(relatedEntity, fields);
-        dummyPK.setDelegator(this);
-        return dummyPK;
+        return GenericPK.create(this, relatedEntity, fields);
     }
 
     /* (non-Javadoc)
@@ -2603,8 +2584,7 @@ public class GenericDelegator implements Delegator {
         //if never cached, then don't bother clearing
         if (entity.getNeverCache()) return;
 
-        GenericValue dummyValue = GenericValue.create(entity, fields);
-        dummyValue.setDelegator(this);
+        GenericValue dummyValue = GenericValue.create(this, entity, fields);
         this.clearCacheLineFlexible(dummyValue);
     }
 

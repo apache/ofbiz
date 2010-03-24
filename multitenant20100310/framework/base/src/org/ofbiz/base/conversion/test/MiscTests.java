@@ -33,13 +33,16 @@ import javolution.util.FastMap;
 
 import org.ofbiz.base.concurrent.TTLObject;
 import org.ofbiz.base.conversion.Converter;
+import org.ofbiz.base.conversion.ConverterLoader;
 import org.ofbiz.base.conversion.Converters;
 import org.ofbiz.base.conversion.JSONResult;
+import org.ofbiz.base.lang.SourceMonitor;
 import org.ofbiz.base.test.GenericTestCaseBase;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.collections.LRUMap;
 
+@SourceMonitor("Adam Heath")
 public class MiscTests extends GenericTestCaseBase {
 
     public MiscTests(String name) {
@@ -50,6 +53,20 @@ public class MiscTests extends GenericTestCaseBase {
         Converter<S, T> converter = Converters.getConverter(sourceClass, targetClass);
         assertTrue(label + " can convert", converter.canConvert(sourceClass, targetClass));
         assertEquals(label, wanted, converter.convert(UtilGenerics.<S>cast(source)).getResult());
+    }
+
+    public void testStaticHelperClass() throws Exception {
+        assertStaticHelperClass(Converters.class);
+    }
+
+    public static class ConverterLoaderImpl implements ConverterLoader {
+        public void loadConverters() {
+            throw new RuntimeException();
+        }
+    }
+
+    public void testLoadContainedConvertersIgnoresException() {
+        Converters.loadContainedConverters(MiscTests.class);
     }
 
     public void testExtendsImplements() throws Exception {
@@ -76,7 +93,7 @@ public class MiscTests extends GenericTestCaseBase {
         Converter<S, ? super S> converter = Converters.getConverter(sourceClass, targetClass);
         Object result = converter.convert(UtilGenerics.<S>cast(wanted));
         assertEquals("pass thru convert", wanted, result);
-        assertTrue("pass thru exact equals", wanted == result);
+        assertSame("pass thru exact equals", wanted, result);
         assertTrue("pass thru can convert wanted", converter.canConvert(wanted.getClass(), targetClass));
         assertTrue("pass thru can convert source", converter.canConvert(sourceClass, targetClass));
         assertEquals("pass thru source class", wanted.getClass(), converter.getSourceClass());

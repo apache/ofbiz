@@ -22,8 +22,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import org.ofbiz.base.concurrent.TTLObject;
+import org.ofbiz.base.lang.SourceMonitor;
 import org.ofbiz.base.test.GenericTestCaseBase;
 
+@SourceMonitor("Adam Heath")
 public class AsyncTTLObjectTest extends TTLObjectTest {
     public AsyncTTLObjectTest(String name) {
         super(name, false);
@@ -69,6 +71,16 @@ public class AsyncTTLObjectTest extends TTLObjectTest {
         assertGetObject("Refreshed with old data", "b", 3, 0, 100000000);
         Thread.sleep(350);
         assertGetObject("Refreshed with old data", "4", 5, 0, 100000000);
+        object.set("5");
+        assertGetObject("set new data", "5", 5, 0, 100000000);
+        TTLObject.pulseAll();
+        sleepTime = 200;
+        loadData = "c";
+        object.set("5");
+        object.refresh();
+        assertGetObject("refresh after set", "5", 5, 0, 100000000);
+        Thread.sleep(300);
+        assertGetObject("refresh after set", "c", 6, 0, 100000000);
     }
 
     public void testSet() throws Exception {

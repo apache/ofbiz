@@ -40,6 +40,16 @@ under the License.
   </#if>
 </#if>
 
+<#if parameters.portalPageId?exists>
+    <#assign findMap = Static["org.ofbiz.base.util.UtilMisc"].toMap("portalPageId", parameters.portalPageId)>
+    <#assign portalPage = delegator.findByPrimaryKeyCache("PortalPage", findMap)>
+    <#if portalPage?exists>
+      <div class="breadcrumbs-sep">
+        ${portalPage.portalPageName?if_exists}
+      </div>
+    </#if>
+</#if>
+
 <div id="control-area">
   <ul id="preferences-menu">
     <#if userLogin?exists>
@@ -63,7 +73,7 @@ under the License.
     </#if>
     <#if webSiteId?exists && requestAttributes._CURRENT_VIEW_?exists>
       <#include "component://common/webcommon/includes/helplink.ftl" />
-      <li><a class="help-link <#if pageAvail?has_content> alert</#if>" href="javascript:lookup_popup2('showHelp?helpTopic=${helpTopic}&amp;portalPageId=${parameters.portalPageId?if_exists}','help' ,500,500);" title=${uiLabelMap.CommonHelp}></a></li>
+      <li><a class="help-link <#if pageAvail?has_content> alert</#if>" href="javascript:lookup_popup2('showHelp?helpTopic=${helpTopic}&amp;portalPageId=${parameters.portalPageId?if_exists}','help' ,500,500);" title="${uiLabelMap.CommonHelp}"></a></li>
     </#if>
     <#if userLogin?exists>
       <li><a href="<@ofbizUrl>logout</@ofbizUrl>">${uiLabelMap.CommonLogout}</a></li>
@@ -89,7 +99,9 @@ under the License.
 <div class="clear">
 </div>
 
-<script>
+<#if userLogin?exists>
+<script type="text/javascript">
   var mainmenu = new DropDownMenu($('main-navigation'));
   var appmenu = new DropDownMenu($('app-navigation'));
 </script>
+</#if>
