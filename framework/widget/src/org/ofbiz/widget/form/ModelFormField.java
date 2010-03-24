@@ -1367,7 +1367,7 @@ public class ModelFormField {
     }
 
     public boolean isSortField() {
-        return this.sortField != null ? this.sortField.booleanValue() : false;
+        return this.sortField != null && this.sortField.booleanValue();
     }
 
     /**
@@ -2075,11 +2075,11 @@ public class ModelFormField {
             return alsoHidden;
         }
         public String getType(){
-        	return this.type;
+            return this.type;
         }
 
         public String getImageLocation(){
-        	return this.imageLocation;
+            return this.imageLocation;
         }
 
         public String getDescription(Map<String, Object> context) {
@@ -2251,6 +2251,7 @@ public class ModelFormField {
         protected String image;
         protected FlexibleStringExpander target;
         protected FlexibleStringExpander description;
+        protected FlexibleStringExpander alternate;
         protected FlexibleStringExpander targetWindowExdr;
         protected List<WidgetWorker.Parameter> parameterList = FastList.newInstance();
 
@@ -2272,6 +2273,7 @@ public class ModelFormField {
             super(element, modelFormField);
 
             this.setDescription(element.getAttribute("description"));
+            this.setAlternate(element.getAttribute("alternate"));
             this.setTarget(element.getAttribute("target"));
             this.alsoHidden = !"false".equals(element.getAttribute("also-hidden"));
             this.linkType = element.getAttribute("link-type");
@@ -2337,6 +2339,10 @@ public class ModelFormField {
             return this.description.expandString(context);
         }
 
+        public String getAlternate(Map<String, Object> context) {
+            return this.alternate.expandString(context);
+        }
+
         public String getTarget(Map<String, Object> context) {
             return this.target.expandString(context);
         }
@@ -2368,6 +2374,13 @@ public class ModelFormField {
          */
         public void setDescription(String string) {
             this.description = FlexibleStringExpander.getInstance(string);
+        }
+
+        /**
+         * @param string
+         */
+        public void setAlternate(String string) {
+            this.alternate = FlexibleStringExpander.getInstance(string);
         }
 
         /**
@@ -3620,8 +3633,8 @@ public class ModelFormField {
         protected FlexibleStringExpander defaultValue;
         protected FlexibleStringExpander value;
         protected SubHyperlink subHyperlink;
-        protected String description;
-        protected String alternate;
+        protected FlexibleStringExpander description;
+        protected FlexibleStringExpander alternate;
 
         protected ImageField() {
             super();
@@ -3730,20 +3743,28 @@ public class ModelFormField {
             this.value = FlexibleStringExpander.getInstance(string);
         }
 
-        public String getDescription() {
-                return this.description;
+        public String getDescription(Map<String, Object> context) {
+            if (this.description != null && !this.description.isEmpty()) {
+                return this.description.expandString(context);
+            } else {
+                return "";
+            }
         }
 
-        public void setDescription(String string) {
-            this.description = string;
+        public void setDescription(String description) {
+            this.description = FlexibleStringExpander.getInstance(description);
         }
 
-        public String getAlternate() {
-            return this.alternate;
+        public String getAlternate(Map<String, Object> context) {
+            if (this.alternate != null && !this.alternate.isEmpty()) {
+                return this.alternate.expandString(context);
+            } else {
+                return "";
+            }
         }
 
-        public void setAlternate(String string) {
-            this.alternate = string;
+        public void setAlternate(String alternate) {
+            this.alternate = FlexibleStringExpander.getInstance(alternate);
         }
 
     }

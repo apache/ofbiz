@@ -25,21 +25,30 @@ under the License.
        <section>
            <actions>
                <set field="titleProperty" value="MarketingContactListFindContactLists"/>
+               <set field="headerItem" value="ContactList"/>
+               <set field="tabButtonItem" value="ContactList"/>               
                <set field="contactListTabButtonItem" value="ContactList"/>
                <set field="labelTitleProperty" value="PageTitleFindContactLists"/>
                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="/marketing/control/FindContactList"/>
            </actions>
            <widgets>
-               <decorator-screen name="CommonContactListDecorator" location="${parameters.mainDecoratorLocation}">
+               <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                    <decorator-section name="body">
-                        <screenlet title="${uiLabelMap.MarketingContactListFindContactLists}">
-                            <container>
-                                <link  text="${uiLabelMap.MarketingContactListCreate}" target="EditContactList" style="buttontext">
-                                    <parameter param-name="DONE_PAGE" from-field="donePage"/>
-                                </link>
-                            </container>
-                            <include-form name="FindContactLists" location="component://marketing/widget/ContactListForms.xml"/>
-                        </screenlet>
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="menu-bar">
+                                <container style="button-bar">
+                                    <link  text="${uiLabelMap.MarketingContactListCreate}" target="EditContactList" style="buttontext create">
+                                        <parameter param-name="DONE_PAGE" from-field="donePage"/>
+                                    </link>
+                                </container>
+                            </decorator-section>
+                            <decorator-section name="search-options">
+                                <include-form name="FindContactLists" location="component://marketing/widget/ContactListForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="ListContactLists" location="component://marketing/widget/ContactListForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
                    </decorator-section>
                </decorator-screen>
            </widgets>
@@ -66,8 +75,8 @@ under the License.
                             </condition>
                             <widgets>
                                 <screenlet title="${uiLabelMap.PageTitleEditContactList}">
-                                    <container>
-                                        <link  text="${uiLabelMap.MarketingContactListCreate}" target="EditContactList" style="buttontext">
+                                    <container style="button-bar">
+                                        <link  text="${uiLabelMap.MarketingContactListCreate}" target="EditContactList" style="buttontext create">
                                             <parameter param-name="DONE_PAGE" from-field="donePage"/>
                                         </link>
                                     </container>
@@ -143,8 +152,8 @@ under the License.
                 <decorator-screen name="CommonContactListDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditContactListParty}">
-                            <container>
-                                <link  text="${uiLabelMap.MarketingContactListPartyCreate}" target="EditContactListParty">
+                            <container style="button-bar">
+                                <link  text="${uiLabelMap.MarketingContactListPartyCreate}" target="EditContactListParty" style="buttontext create">
                                     <parameter param-name="contactListId"/>
                                     <parameter param-name="DONE_PAGE" from-field="donePage"/>
                                 </link>
@@ -209,15 +218,22 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonContactListDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <screenlet title="${uiLabelMap.PageTitleFindContactListParty}">
-                            <container>
-                                <link  text="${uiLabelMap.MarketingContactListPartyCreate}" target="EditContactListParty">
-                                    <parameter param-name="contactListId"/>
-                                    <parameter param-name="DONE_PAGE" from-field="donePage"/>
-                                </link>
-                            </container>
-                            <include-form name="FindContactListParties" location="component://marketing/widget/ContactListForms.xml"/>
-                        </screenlet>
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="menu-bar">
+                                <container style="button-bar">
+                                    <link  text="${uiLabelMap.MarketingContactListPartyCreate}" target="EditContactListParty" style="buttontext create">
+                                        <parameter param-name="contactListId"/>
+                                        <parameter param-name="DONE_PAGE" from-field="donePage"/>
+                                    </link>
+                                </container>
+                            </decorator-section>
+                            <decorator-section name="search-options">
+                                <include-form name="FindContactListParties" location="component://marketing/widget/ContactListForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="ListContactListParties" location="component://marketing/widget/ContactListForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
                    </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -252,8 +268,8 @@ under the License.
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditContactList}">
                             <include-menu location="component://marketing/widget/ContactListMenus.xml" name="ContactListCommBar"/>
-                            <container>
-                                <link  text="${uiLabelMap.MarketingContactListCommEventCreate}" target="EditContactListCommEvent">
+                            <container style="button-bar">
+                                <link  text="${uiLabelMap.MarketingContactListCommEventCreate}" target="EditContactListCommEvent" style="buttontext create">
                                     <parameter param-name="contactListId"/>
                                     <parameter param-name="DONE_PAGE" from-field="donePage"/>
                                 </link>
@@ -310,8 +326,8 @@ under the License.
                 <decorator-screen name="CommonContactListDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleFindContactListCommEvents}">
-                            <container>
-                                <link  text="${uiLabelMap.MarketingContactListCommEventCreate}" target="EditContactListCommEvent">
+                            <container style="button-bar">
+                                <link  text="${uiLabelMap.MarketingContactListCommEventCreate}" target="EditContactListCommEvent" style="buttontext create">
                                     <parameter param-name="contactListId"/>
                                     <parameter param-name="DONE_PAGE" from-field="donePage"/>
                                 </link>

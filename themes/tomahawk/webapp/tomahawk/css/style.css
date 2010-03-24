@@ -331,7 +331,6 @@ border-bottom: #999999 solid 0.1em;
 border-top: #f7e893 solid 0.1em;
 border-left: #f7e893 solid 0.1em;
 border-right: #999999 solid 0.1em;
-background-color: #262626;
 background-image: url(../images/button_whitegray.jpg);
 background-repeat:repeat-x;
 font-weight: bold;
@@ -1043,7 +1042,7 @@ background: url(../images/collapse.png) no-repeat right;
 
 ul#preferences-menu li a.help-link {
 display:block;
-height: 18px;
+height: 16px;
 width:19px;
 margin:0 0 -5px 0;
 background: url(../images/help.png) no-repeat;
@@ -1419,10 +1418,6 @@ font-weight: bold;
 float: right;
 }
 
-.button-bar ul a,.tabContainer ul a {
-display: block;
-}
-
 .button-bar ul a,.button-bar a {
 background-image:url(../images/tab_normal1.png);
 color:#000000;
@@ -1552,6 +1547,10 @@ margin: 0px;
 margin: 0 2px 0 2px;
 float:left;
 padding:0;
+}
+
+.tab-bar ul a {
+display: block;
 }
 
 .tab-bar ul a,.tab-bar ul a:visited {
@@ -2112,19 +2111,19 @@ z-index: 999;
 }
 
 .calendar_date_select thead th {
-	font-weight: bold;
-	background-image: url(../images/bkgd_header.gif);
-	background-color: #CCC;
-	_border-top: 1px solid #fdeb71;
-	_border-bottom: 1px solid #d68a12;
-	color: white !important;
+    font-weight: bold;
+    background-image: url(../images/bkgd_header.gif);
+    background-color: #CCC;
+    _border-top: 1px solid #fdeb71;
+    _border-bottom: 1px solid #d68a12;
+    color: white !important;
 }
 
 .calendar_date_select .cds_buttons {
-	text-align: center;
-	padding: 5px 0px;
-	background-image: url(../images/header_top_bg.gif);
-	background-color: #CCC;
+    text-align: center;
+    padding: 5px 0px;
+    background-image: url(../images/header_top_bg.gif);
+    background-color: #CCC;
 }
 
 .calendar_date_select .cds_footer {
@@ -2197,13 +2196,13 @@ font-size: 9px;
 }
 
 .calendar_date_select td {
-	font-size: 12px;
-	width: 24px;
-	height: 21px;
-	text-align: center;
-	vertical-align: middle;
-	background-color: #FFF;
-	color:#333;
+    font-size: 12px;
+    width: 24px;
+    height: 21px;
+    text-align: center;
+    vertical-align: middle;
+    background-color: #FFF;
+    color:#333;
 }
 
 .calendar_date_select td.weekend {
@@ -2234,7 +2233,7 @@ background-color: #ea9f27;
 }
 
 .calendar_date_select td:hover {
-	background-color: #FD8500;
+    background-color: #FD8500;
 }
 
 .calendar_date_select td.today {
@@ -2259,10 +2258,10 @@ padding: 5px 0 5px 10px;
 }
 
 .fieldgroup-body {
-	border-top:#999 solid thin;
-	border-bottom:#F5F5F5 solid thin;
-	background-color:#CCC;
-	padding:0.6em;
+    border-top:#999 solid thin;
+    border-bottom:#F5F5F5 solid thin;
+    background-color:#CCC;
+    padding:0.6em;
 }
 
 
@@ -2460,15 +2459,35 @@ background-color:#D4D0C8;
 }
 
 .basic-table.order-items tr td {
-	vertical-align:top;
+    vertical-align:top;
 }
 .order-items .order-item-description {
-	display:inline;
-	font-size:145%;
+    display:inline;
+    font-size:145%;
 }
 .basic-table.order-items .screenlet-body {
-	background-color:#dfdfdf;
+    background-color:#dfdfdf;
 }
 .basic-table.order-items .alternate-row .screenlet-body {
-	background-color:#bfbfbf;
+    background-color:#bfbfbf;
+}
+
+.order-info .current-status {
+font-size:145%;
+padding:10px;
+}
+.order-item-status-list .current-status {
+font-size:145%;
+}
+.order-info .APPROVED, .order-list .APPROVED {
+background-color:#a9b996;
+}
+.order-info .REJECTED, .order-list .REJECTED {
+background-color:#b29898;
+}
+.order-item-status-list.APPROVED .screenlet-body, .alternate-row .order-item-status-list.APPROVED .screenlet-body {
+background-color:#a9b996;
+}
+.order-item-status-list.REJECTED .screenlet-body, .alternate-row .order-item-status-list.REJECTED .screenlet-body {
+background-color:#b29898;
 }

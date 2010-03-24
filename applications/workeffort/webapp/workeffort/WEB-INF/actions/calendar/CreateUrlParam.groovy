@@ -21,20 +21,37 @@ facilityId = parameters.facilityId;
 fixedAssetId = parameters.fixedAssetId;
 partyId = parameters.partyId;
 workEffortTypeId = parameters.workEffortTypeId;
- 
-urlParam = null;
+calendarType = parameters.calendarType;
+
+urlParam = "";
 if (facilityId) {
     urlParam = "facilityId=" + facilityId;
 }
 if (fixedAssetId) {
-    urlParam = "fixedAssetId=" + fixedAssetId;
+    if (urlParam) {
+        urlParam = urlParam + "&";
+    }
+    urlParam = urlParam + "fixedAssetId=" + fixedAssetId;
 }
 if (partyId) {
-    urlParam = "partyId=" + partyId;
+    if (urlParam) {
+        urlParam = urlParam + "&";
+    }
+    urlParam = urlParam + "partyId=" + partyId;
 }
 
 if (workEffortTypeId) {
-    urlParam = "workEffortTypeId=" + workEffortTypeId;
+    if (urlParam) {
+        urlParam = urlParam + "&";
+    }
+    urlParam = urlParam + "workEffortTypeId=" + workEffortTypeId;
+}
+
+if (calendarType) {
+    if (urlParam) {
+        urlParam = urlParam + "&";
+    }
+    urlParam = urlParam + "calendarType=" + calendarType;
 }
 
 if (urlParam) {

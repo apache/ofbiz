@@ -48,7 +48,7 @@ public class SubscriptionServices {
 
     public static final String module = SubscriptionServices.class.getName();
 
-    public static Map<String, Object> processExtendSubscription(DispatchContext dctx, Map<String, ? extends Object> context) throws GenericServiceException{
+    public static Map<String, Object> processExtendSubscription(DispatchContext dctx, Map<String, ? extends Object> context) {
         Delegator delegator = dctx.getDelegator();
         LocalDispatcher dispatcher = dctx.getDispatcher();
         Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
@@ -119,8 +119,7 @@ public class SubscriptionServices {
             calendar.add(times[0], (useTime.intValue() * times[1]));
         } else {
             Debug.logWarning("Don't know anything about useTimeUomId [" + useTimeUomId + "], defaulting to month", module);
-            // FIXME: times[] can only be null here
-            //calendar.add(Calendar.MONTH, (useTime.intValue() * times[1]));
+            calendar.add(Calendar.MONTH, useTime);
         }
 
         thruDate = new Timestamp(calendar.getTimeInMillis());
@@ -237,7 +236,7 @@ public class SubscriptionServices {
                 String msg = "No OrderRole found for orderId:" + orderId;
                 return ServiceUtil.returnFailure(msg);
             }
-            orderHeader = delegator.findByPrimaryKeyCache("OrderHeader", UtilMisc.toMap("orderId", orderId));
+            orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
             if (orderHeader == null) {
                 String msg = "No OrderHeader found for orderId:" + orderId;
                 return ServiceUtil.returnError(msg);

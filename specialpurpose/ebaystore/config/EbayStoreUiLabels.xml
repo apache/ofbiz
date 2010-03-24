@@ -190,6 +190,9 @@
         <value xml:lang="en">Buy It Now price</value>
         <value xml:lang="th">ราคาสุทธิ</value>
     </property>
+    <property key="FormFieldTitle_webSiteUrl">
+        <value xml:lang="en">Website Url</value>
+    </property>
     <property key="eBayOnlineAuction">
         <value xml:lang="en">Online Auction</value>
     </property>
@@ -274,5 +277,41 @@
     </property>
     <property key="EbayAutoSendItemDispatchEmail">
         <value xml:lang="en">Automatic send item dispatched notification email</value>
+    </property>
+    <property key="EbayContinueListing">
+        <value xml:lang="en">Countinue</value>
+    </property>
+    <property key="EbayChangeCategory">
+        <value xml:lang="en">Change</value>
+    </property>
+    <property key="EbayStoreCategory">
+        <value xml:lang="en">eBay Store Category</value>
+    </property>
+    <property key="EbaySet">
+        <value xml:lang="en">Set</value>
+    </property>
+    <property key="EbayUnsold">
+        <value xml:lang="en">unsold</value>
+    </property>
+    <property key="EbayActive">
+        <value xml:lang="en">Active</value>
+    </property>
+    <property key="EbayAutoRelistingItems">
+        <value xml:lang="en">Auto Relisting Items</value>
+    </property>
+    <property key="EbayAutoRelistingItemsDescription">
+        <value xml:lang="en">Auto Relisting Items when they are end item.</value>
+    </property>
+    <property key="EbayWaitingToShipping">
+        <value xml:lang="en">Waiting to shipping</value>
+    </property>
+    <property key="EbayListOrderImported">
+        <value xml:lang="en">List Orders Imported</value>
+    </property>
+    <property key="EbayNoOrderImported">
+        <value xml:lang="en">No orders imported found</value>
+    </property>
+    <property key="EbayOpenListings">
+        <value xml:lang="en">Open Listings</value>
     </property>
 </resource>

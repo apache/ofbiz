@@ -29,8 +29,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.ofbiz.base.concurrent.ExecutionPool;
 import org.ofbiz.base.concurrent.TTLObject;
+import org.ofbiz.base.lang.SourceMonitor;
 import org.ofbiz.base.test.GenericTestCaseBase;
 
+@SourceMonitor("Adam Heath")
 public abstract class TTLObjectTest extends GenericTestCaseBase {
     static {
         TTLObject.setDefaultTTLForClass(TTLObjectTestTTLObject.class, 100);
@@ -113,10 +115,8 @@ public abstract class TTLObjectTest extends GenericTestCaseBase {
                     Thread.sleep(10);
                     if (checkSerial(serial)) break;
                 }
-                Thrower thrower;
-                do {
-                    thrower = (Thrower) throwException.get();
-                } while (!throwException.compareAndSet(thrower, null));
+                Thrower thrower = throwException.get();
+                throwException.compareAndSet(thrower, null);
                 if (thrower != null) {
                     thrower.throwException();
                 }

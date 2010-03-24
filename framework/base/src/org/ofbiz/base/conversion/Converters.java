@@ -25,23 +25,19 @@ import java.util.ServiceLoader;
 import javolution.util.FastMap;
 import javolution.util.FastSet;
 
+import org.ofbiz.base.lang.SourceMonitor;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.ObjectType;
 import org.ofbiz.base.util.UtilGenerics;
 
 /** A <code>Converter</code> factory and repository. */
+@SourceMonitor("Adam Heath")
 public class Converters {
     protected static final String module = Converters.class.getName();
     protected static final String DELIMITER = "->";
     protected static final FastMap<String, Converter<?, ?>> converterMap = FastMap.newInstance();
     protected static final FastSet<ConverterCreator> creators = FastSet.newInstance();
     protected static final FastSet<String> noConversions = FastSet.newInstance();
-    /** Null converter used when the source and target java object
-     * types are the same. The <code>convert</code> method returns the
-     * source object.
-     *
-     */
-    public static final Converter<Object, Object> nullConverter = new NullConverter();
 
     static {
         converterMap.setShared(true);
@@ -178,49 +174,10 @@ OUTER:
             sb.append("<null>");
         }
         sb.append(DELIMITER);
-        if (targetClass != null) {
-            sb.append(targetClass.getName());
-        } else {
-            sb.append("<null>");
-        }
+        sb.append(targetClass.getName());
         String key = sb.toString();
         if (converterMap.putIfAbsent(key, converter) == null) {
-            if (Debug.verboseOn()) {
-                Debug.logVerbose("Registered converter " + converter.getClass().getName(), module);
-            }
-        }
-    }
-
-    /** Null converter used when the source and target java object
-     * types are the same. The <code>convert</code> method returns the
-     * source object.
-     *
-     */
-    protected static class NullConverter implements Converter<Object, Object> {
-        public NullConverter() {
-        }
-
-        public boolean canConvert(Class<?> sourceClass, Class<?> targetClass) {
-            if (sourceClass.getName().equals(targetClass.getName()) || "java.lang.Object".equals(targetClass.getName())) {
-                return true;
-            }
-            return ObjectType.instanceOf(sourceClass, targetClass);
-        }
-
-        public Object convert(Object obj) throws ConversionException {
-            return obj;
-        }
-
-        public Object convert(Class<? extends Object> targetClass, Object obj) throws ConversionException {
-            return obj;
-        }
-
-        public Class<?> getSourceClass() {
-            return Object.class;
-        }
-
-        public Class<?> getTargetClass() {
-            return Object.class;
+            Debug.logVerbose("Registered converter " + converter.getClass().getName(), module);
         }
     }
 
@@ -229,7 +186,7 @@ OUTER:
         }
 
         public <S, T> Converter<S, T> createConverter(Class<S> sourceClass, Class<T> targetClass) {
-            if (sourceClass == targetClass || targetClass == Object.class || ObjectType.instanceOf(sourceClass, targetClass)) {
+            if (ObjectType.instanceOf(sourceClass, targetClass)) {
                 return new PassThruConverter<S, T>(sourceClass, targetClass);
             } else {
                 return null;

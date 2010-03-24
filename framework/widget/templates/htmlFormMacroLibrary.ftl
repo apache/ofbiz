@@ -32,7 +32,7 @@ under the License.
         </#if>
         
         <#if description?has_content>
-            ${description?replace("\n", "<br/>")}<#t/>
+            ${description?replace("\n", "<br />")}<#t/>
         <#else>
             &nbsp;<#t/>
         </#if>
@@ -417,7 +417,7 @@ ${item.description}</div>
 <#if titleStyle?has_content>
 </span><#rt/>
 </#if>
-<br/><#rt/>
+<br /><#rt/>
 <input type="text" <@renderClass className alert /><#if name?has_content> name="${name}_fld1_value"</#if><#if value2?has_content> value="${value2}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if><#if autocomplete?has_content> autocomplete="off"</#if>/><#rt/>
 <#if titleStyle?has_content>
  <span class="${titleStyle}" ><#rt/>
@@ -431,7 +431,7 @@ ${item.description}</div>
 </#if>
 </#macro>
 
-<#macro renderLookupField className="" alert="" name="" value="" size="20" maxlength="20" id="" event="" action="" disabled="" autocomplete="" descriptionFieldName="" formName="" lookupFieldFormName="" targetParameterIter="" imgSrc="" ajaxUrl="" ajaxEnabled="" lookupPresentation="" lookupWidth="20" lookupHeight="20" lookupPosition="20" fadeBackground="">
+<#macro renderLookupField className="" alert="" name="" value="" size="20" maxlength="20" id="" event="" action="" disabled="" autocomplete="" descriptionFieldName="" formName="" lookupFieldFormName="" targetParameterIter="" imgSrc="" ajaxUrl="" ajaxEnabled="" lookupPresentation="" lookupWidth="20" lookupHeight="20" lookupPosition="20" fadeBackground="" clearText="">
 <div class="field-lookup"><ul>
 <#if size?has_content && size="0"><li><input type="hidden" <#if name?has_content> name="${name}"/></#if></li><#else><li><input type="text" <@renderClass className alert /><#if name?has_content> name="${name}"</#if><#if value?has_content> value="${value}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if><#if id?has_content> id="${id}"</#if><#rt/><#if disabled?has_content && disabled> disabled="disabled"</#if><#rt/><#if event?has_content && action?has_content> ${event}="${action}"</#if><#rt/><#if autocomplete?has_content> autocomplete="off"</#if>/><#rt/></li></#if>
 <li><#if lookupPresentation?has_content && descriptionFieldName?has_content && lookupPresentation == "layer">
@@ -451,6 +451,7 @@ ${item.description}</div>
 );">
 <#if ajaxEnabled?has_content && ajaxEnabled><span id="${id}_indicator" style="display: none" class="indicator"><img /></span></#if>
 </a></li><#rt>
+<#if disabled?has_content && disabled><li><a id="${id}_clear" style="background:none;margin-left:-6px;margin-right:15px;" class="clearField" href="javascript:void();" onclick="javascript:document.${formName}.${name}.value='';<#if descriptionFieldName?has_content>document.${formName}.${descriptionFieldName}.value='';</#if>">${clearText}</a></li></#if>
 </ul></div>
 <#if ajaxEnabled?has_content && ajaxEnabled>
     <script language="JavaScript" type="text/javascript">ajaxAutoCompleter('${ajaxUrl}');</script><#t/>
@@ -478,7 +479,7 @@ ${item.description}</div>
 </#list>
 </select> ${paginateViewSizeLabel}</li></#if>
 <li class="nav-displaying">${commonDisplaying}</li>
-</ul></div><br/>
+</ul></div><br />
 </#if>
 </#macro>
 
@@ -510,7 +511,7 @@ ${item.description}</div>
 
 <#macro renderFieldGroupClose style id title><#if style?has_content || id?has_content || title?has_content></div></div></#if></#macro>
 
-<#macro renderHyperlinkTitle name title showSelectAll="N"><#if title?has_content>${title}<br/></#if><#if showSelectAll="Y"><input type="checkbox" name="selectAll" value="Y" onclick="javascript:toggleAll(this, '${name}');"/></#if></#macro>
+<#macro renderHyperlinkTitle name title showSelectAll="N"><#if title?has_content>${title}<br /></#if><#if showSelectAll="Y"><input type="checkbox" name="selectAll" value="Y" onclick="javascript:toggleAll(this, '${name}');"/></#if></#macro>
 <#macro renderSortField style title linkUrl ajaxEnabled><a<#if style?has_content> class="${style}"</#if> href="<#if ajaxEnabled?has_content && ajaxEnabled>javascript:ajaxUpdateAreas('${linkUrl}')<#else>${linkUrl}</#if>">${title}</a></#macro>
 <#macro formatBoundaryComment boundaryType widgetType widgetName><!-- ${boundaryType}  ${widgetType}  ${widgetName} --></#macro>
 
@@ -526,4 +527,4 @@ ${item.description}</div>
 
 <#macro makeHiddenFormLinkForm actionUrl name parameters targetWindow><form method="post" action="${actionUrl}" <#if targetWindow?has_content>target="${targetWindow}"</#if> onsubmit="javascript:submitFormDisableSubmits(this)" name="${name}"><#list parameters as parameter><input name="${parameter.name}" value="${parameter.value}" type="hidden"/></#list></form></#macro>
 <#macro makeHiddenFormLinkAnchor linkStyle hiddenFormName event action imgSrc description confirmation><a <#if linkStyle?has_content>class="${linkStyle}"</#if> href="javascript:document.${hiddenFormName}.submit()"<#if action?has_content && event?has_content> ${event}="${action}"</#if><#if confirmation?has_content> onclick="return confirm('${confirmation?js_string}')"</#if>><#if imgSrc?has_content><img src="${imgSrc}"/></#if>${description}</a></#macro>
-<#macro makeHyperlinkString linkStyle hiddenFormName event action imgSrc linkUrl targetWindow description confirmation><a <#if linkStyle?has_content>class="${linkStyle}"</#if> href="${linkUrl}"<#if targetWindow?has_content> target="${targetWindow}"</#if><#if action?has_content && event?has_content> ${event}="${action}"</#if><#if confirmation?has_content> onclick="return confirm('${confirmation?js_string}')"</#if>><#if imgSrc?has_content><img src="${imgSrc}"/></#if>${description}</a></#macro>
+<#macro makeHyperlinkString linkStyle hiddenFormName event action imgSrc alternate linkUrl targetWindow description confirmation><a <#if linkStyle?has_content>class="${linkStyle}"</#if> href="${linkUrl}"<#if targetWindow?has_content> target="${targetWindow}"</#if><#if action?has_content && event?has_content> ${event}="${action}"</#if><#if confirmation?has_content> onclick="return confirm('${confirmation?js_string}')"</#if>><#if imgSrc?has_content><img src="${imgSrc}" alt="${alternate}"/></#if>${description}</a></#macro>

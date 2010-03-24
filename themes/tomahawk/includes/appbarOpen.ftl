@@ -25,10 +25,14 @@ under the License.
 <#assign displaySecondaryApps = Static["org.ofbiz.base.component.ComponentConfig"].getAppBarWebInfos(ofbizServerName, "secondary")>
 
 <#assign appModelMenu = Static["org.ofbiz.widget.menu.MenuFactory"].getMenuFromLocation(applicationMenuLocation,applicationMenuName,delegator,dispatcher)>
-<#if appModelMenu.getModelMenuItemByName(headerItem)?exists>
+<#if appModelMenu.getModelMenuItemByName(headerItem)?exists && !parameters.portalPageId?exists>
   <#if headerItem!="main">
     <#assign show_last_menu = true>
   </#if>
+</#if>
+
+<#if parameters.portalPageId?exists && !appModelMenu.getModelMenuItemByName(headerItem)?exists>
+  <#assign show_last_menu = true>
 </#if>
 
 <div class="tabbar">
@@ -88,11 +92,8 @@ under the License.
                 <#if thisApp != "/">
                   <#assign thisURL = StringUtil.wrapString(thisURL) + "/control/main">
                 </#if>
-                <#-- Show OFBiz Setup component menu bar when the system not have an organization -->
-                <#if thisApp.equals("/ofbizsetup")>
-                    <#if PartyAcctgPrefAndGroupList.size() == 0>
-                        <li><a href="${thisURL + externalKeyParam}"<#if uiLabelMap?exists> title="${uiLabelMap[display.description]}">${uiLabelMap[display.title]}<#else> title="${display.description}">${display.title}</#if></a></li>
-                    </#if>
+                <#if layoutSettings.suppressTab?exists && display.name == layoutSettings.suppressTab>
+                  <!-- do not display this component-->
                 <#else>
                     <li<#if selected> class="selected"</#if>><a href="${thisURL + externalKeyParam}"<#if uiLabelMap?exists> title="${uiLabelMap[display.description]}">${uiLabelMap[display.title]}<#else> title="${display.description}">${display.title}</#if></a></li>
                 </#if>

@@ -25,10 +25,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.ofbiz.base.lang.SourceMonitor;
 import org.ofbiz.base.util.IndentingWriter;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilIO;
 
+@SourceMonitor("Adam Heath")
 public class JSONWriter {
     private final IndentingWriter writer;
     private final FallbackHandler fallbackHandler;
@@ -43,11 +45,11 @@ public class JSONWriter {
     }
 
     public JSONWriter(Writer writer) {
-        this(writer instanceof IndentingWriter ? (IndentingWriter) writer : new IndentingWriter(writer));
+        this(IndentingWriter.makeIndentingWriter(writer));
     }
 
     public JSONWriter(Writer writer, FallbackHandler fallbackHandler) {
-        this(writer instanceof IndentingWriter ? (IndentingWriter) writer : new IndentingWriter(writer), fallbackHandler);
+        this(IndentingWriter.makeIndentingWriter(writer), fallbackHandler);
     }
 
     public IndentingWriter getWriter() {
@@ -108,13 +110,13 @@ public class JSONWriter {
                 case '\r':  writer.write("\\r"); continue;
                 case '\t':  writer.write("\\t"); continue;
             }
-            if (32 <= c && c >= 256) {
+            if (c >= 32 && c < 256) {
+                writer.write(c);
+            } else {
                 writer.write("\\u");
                 String n = Integer.toString((int) c, 16);
                 for (int j = 4 - n.length(); j > 0; j--) writer.write('0');
                 writer.write(n);
-            } else {
-                writer.write(c);
             }
         }
         writer.write('"');

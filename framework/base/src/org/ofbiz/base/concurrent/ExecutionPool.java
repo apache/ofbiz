@@ -27,6 +27,9 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import org.ofbiz.base.lang.SourceMonitor;
+
+@SourceMonitor("Adam Heath")
 public final class ExecutionPool {
     protected static class ExecutionPoolThreadFactory implements ThreadFactory {
         private final String namePrefix;
@@ -78,12 +81,14 @@ public final class ExecutionPool {
         delayQueue.remove(pulse);
     }
 
-    public static void pulseAll() {
+    public static void pulseAll(Class<? extends Pulse> match) {
         Iterator<Pulse> it = delayQueue.iterator();
         while (it.hasNext()) {
             Pulse pulse = it.next();
-            it.remove();
-            pulse.run();
+            if (match.isInstance(pulse)) {
+                it.remove();
+                pulse.run();
+            }
         }
     }
 
@@ -113,18 +118,24 @@ public final class ExecutionPool {
     }
 
     public static abstract class Pulse implements Delayed, Runnable {
-        protected final long expireTime;
+        protected final long expireTimeNanos;
+        protected final long loadTimeNanos;
 
-        protected Pulse(long delayInMillis) {
-            expireTime = System.nanoTime() + TimeUnit.NANOSECONDS.convert(delayInMillis, TimeUnit.MILLISECONDS);
+        protected Pulse(long delayNanos) {
+            this(System.nanoTime(), delayNanos);
+        }
+
+        protected Pulse(long loadTimeNanos, long delayNanos) {
+            this.loadTimeNanos = loadTimeNanos;
+            expireTimeNanos = loadTimeNanos + delayNanos;
         }
 
         public final long getDelay(TimeUnit unit) {
-            return unit.convert(expireTime - System.nanoTime(), TimeUnit.NANOSECONDS);
+            return unit.convert(expireTimeNanos - System.nanoTime(), TimeUnit.NANOSECONDS);
         }
 
         public final int compareTo(Delayed other) {
-            long r = (expireTime - ((Pulse) other).expireTime);
+            long r = (expireTimeNanos - ((Pulse) other).expireTimeNanos);
             if (r < 0) return -1;
             if (r > 0) return 1;
             return 0;
