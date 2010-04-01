@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.api.context;
 
+import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -51,8 +52,8 @@ public class ThreadContext {
         return executionContext.get().getAccessController();
     }
 
-    public static String getCurrencyUom() {
-        return executionContext.get().getCurrencyUom();
+    public static Currency getCurrency() {
+        return executionContext.get().getCurrency();
     }
 
     public static ArtifactPath getExecutionPath() {
@@ -119,8 +120,8 @@ public class ThreadContext {
         executionContext.get().runUnprotected();
     }
 
-    public static void setCurrencyUom(String currencyUom) {
-        executionContext.get().setCurrencyUom(currencyUom);
+    public static void setCurrency(Currency currency) {
+        executionContext.get().setCurrency(currency);
     }
 
     public static void setLocale(Locale locale) {
