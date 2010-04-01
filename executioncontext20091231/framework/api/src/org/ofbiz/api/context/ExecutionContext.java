@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.api.context;
 
+import java.util.Currency;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -58,11 +59,11 @@ public interface ExecutionContext {
      */
     AccessController getAccessController();
 
-    /** Returns the currency unit of measure.
+    /** Returns the current currency.
      *
-     * @return The ISO currency code
+     * @return The current currency
      */
-    String getCurrencyUom();
+    Currency getCurrency();
 
     /** Returns the current execution path.
      *
@@ -146,11 +147,11 @@ public interface ExecutionContext {
      */
     void runUnprotected();
 
-    /** Sets the currency unit of measure.
+    /** Sets the current currency.
      *
-     * @param currencyUom The ISO currency code
+     * @param currency The current currency
      */
-    void setCurrencyUom(String currencyUom);
+    void setCurrency(Currency currency);
 
     /** Sets the current <code>Locale</code>.
      *

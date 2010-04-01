@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.api.context;
 
+import java.util.Currency;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -34,7 +35,7 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
     public static final String module = AbstractExecutionContext.class.getName();
 
     protected final FastList<ExecutionArtifact> artifactStack = FastList.newInstance();
-    protected String currencyUom = null;
+    protected Currency currency = null;
     protected Locale locale = Locale.getDefault();
     protected TimeZone timeZone = TimeZone.getDefault();
     protected final Map<String, Object> properties;
@@ -61,8 +62,16 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
         super.finalize();
     }
 
-    public String getCurrencyUom() {
-        return this.currencyUom;
+    public Currency getCurrency() {
+        if (this.currency == null) {
+            this.currency = getDefaultCurrency();
+        }
+        return this.currency;
+    }
+
+    protected Currency getDefaultCurrency() {
+        String currencyCode = UtilProperties.getPropertyValue("general", "currency.uom.id.default");
+        return Currency.getInstance(currencyCode);
     }
 
     public ArtifactPath getExecutionPath() {
@@ -141,15 +150,15 @@ public abstract class AbstractExecutionContext implements ExecutionContext {
             Debug.logInfo("Resetting ExecutionContext", module);
         }
         this.artifactStack.clear();
-        this.currencyUom = "";
+        this.currency = getDefaultCurrency();
         this.locale = Locale.getDefault();
         this.properties.clear();
         this.timeZone = TimeZone.getDefault();
     }
 
-    public void setCurrencyUom(String currencyUom) {
-        if (currencyUom != null) {
-            this.currencyUom = currencyUom;
+    public void setCurrency(Currency currency) {
+        if (currency != null) {
+            this.currency = currency;
         }
     }
 
