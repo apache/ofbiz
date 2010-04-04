@@ -70,30 +70,25 @@ public class GenericDAO {
 
     public static final String module = GenericDAO.class.getName();
 
-    protected static Map<String, GenericDAO> genericDAOs = FastMap.newInstance();
-    protected String helperName;
-    protected ModelFieldTypeReader modelFieldTypeReader = null;
-    protected DatasourceInfo datasourceInfo;
+    private static final FastMap<String, GenericDAO> genericDAOs = FastMap.newInstance();
+    private final GenericHelperInfo helperInfo;
+    private final ModelFieldTypeReader modelFieldTypeReader;
+    private final DatasourceInfo datasourceInfo;
 
-    public static GenericDAO getGenericDAO(String helperName) {
-        GenericDAO newGenericDAO = (GenericDAO) genericDAOs.get(helperName);
+    public static GenericDAO getGenericDAO(GenericHelperInfo helperInfo) {
+        GenericDAO newGenericDAO = genericDAOs.get(helperInfo.getHelperFullName());
 
-        if (newGenericDAO == null) { // don't want to block here
-            synchronized (GenericDAO.class) {
-                newGenericDAO = (GenericDAO) genericDAOs.get(helperName);
-                if (newGenericDAO == null) {
-                    newGenericDAO = new GenericDAO(helperName);
-                    genericDAOs.put(helperName, newGenericDAO);
-                }
-            }
+        if (newGenericDAO == null) {
+            genericDAOs.putIfAbsent(helperInfo.getHelperFullName(), new GenericDAO(helperInfo));
+            newGenericDAO = genericDAOs.get(helperInfo.getHelperFullName());
         }
         return newGenericDAO;
     }
 
-    public GenericDAO(String helperName) {
-        this.helperName = helperName;
-        this.modelFieldTypeReader = ModelFieldTypeReader.getModelFieldTypeReader(helperName);
-        this.datasourceInfo = EntityConfigUtil.getDatasourceInfo(helperName);
+    public GenericDAO(GenericHelperInfo helperInfo) {
+        this.helperInfo = helperInfo;
+        this.modelFieldTypeReader = ModelFieldTypeReader.getModelFieldTypeReader(helperInfo.getHelperBaseName());
+        this.datasourceInfo = EntityConfigUtil.getDatasourceInfo(helperInfo.getHelperBaseName());
     }
 
     private void addFieldIfMissing(List<ModelField> fieldsToSave, String fieldName, ModelEntity modelEntity) {
@@ -113,7 +108,7 @@ public class GenericDAO {
             throw new GenericModelException("Could not find ModelEntity record for entityName: " + entity.getEntityName());
         }
 
-        SQLProcessor sqlP = new SQLProcessor(helperName);
+        SQLProcessor sqlP = new SQLProcessor(helperInfo);
 
         try {
             return singleInsert(entity, modelEntity, modelEntity.getFieldsUnmodifiable(), sqlP);
@@ -214,7 +209,7 @@ public class GenericDAO {
     }
 
     private int customUpdate(GenericEntity entity, ModelEntity modelEntity, List<ModelField> fieldsToSave) throws GenericEntityException {
-        SQLProcessor sqlP = new SQLProcessor(helperName);
+        SQLProcessor sqlP = new SQLProcessor(helperInfo);
         try {
             return singleUpdate(entity, modelEntity, fieldsToSave, sqlP);
         } catch (GenericEntityException e) {
@@ -290,7 +285,7 @@ public class GenericDAO {
     }
 
     public int updateByCondition(ModelEntity modelEntity, Map<String, ? extends Object> fieldsToSet, EntityCondition condition) throws GenericEntityException {
-        SQLProcessor sqlP = new SQLProcessor(helperName);
+        SQLProcessor sqlP = new SQLProcessor(helperInfo);
 
         try {
             return updateByCondition(modelEntity, fieldsToSet, condition, sqlP);
@@ -487,7 +482,7 @@ public class GenericDAO {
     /* ====================================================================== */
 
     public void select(GenericEntity entity) throws GenericEntityException {
-        SQLProcessor sqlP = new SQLProcessor(helperName);
+        SQLProcessor sqlP = new SQLProcessor(helperInfo);
 
         try {
             select(entity, sqlP);
@@ -587,7 +582,7 @@ public class GenericDAO {
         sqlBuffer.append(SqlJdbcUtil.makeFromClause(modelEntity, datasourceInfo));
         sqlBuffer.append(SqlJdbcUtil.makeWhereClause(modelEntity, modelEntity.getPkFieldsUnmodifiable(), entity, "AND", datasourceInfo.joinStyle));
 
-        SQLProcessor sqlP = new SQLProcessor(helperName);
+        SQLProcessor sqlP = new SQLProcessor(helperInfo);
 
         try {
             sqlP.prepareStatement(sqlBuffer.toString(), true, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -733,7 +728,7 @@ public class GenericDAO {
         // make the final SQL String
         String sql = sqlBuffer.toString();
 
-        SQLProcessor sqlP = new SQLProcessor(helperName);
+        SQLProcessor sqlP = new SQLProcessor(helperInfo);
         sqlP.prepareStatement(sql, findOptions.getSpecifyTypeAndConcur(), findOptions.getResultSetType(),
                 findOptions.getResultSetConcurrency(), findOptions.getFetchSize(), findOptions.getMaxRows());
 
@@ -861,7 +856,7 @@ public class GenericDAO {
 
     public List<GenericValue> selectByMultiRelation(GenericValue value, ModelRelation modelRelationOne, ModelEntity modelEntityOne,
         ModelRelation modelRelationTwo, ModelEntity modelEntityTwo, List<String> orderBy) throws GenericEntityException {
-        SQLProcessor sqlP = new SQLProcessor(helperName);
+        SQLProcessor sqlP = new SQLProcessor(helperInfo);
 
         // get the tables names
         String atable = modelEntityOne.getTableName(datasourceInfo);
@@ -969,6 +964,10 @@ public class GenericDAO {
     }
 
     public long selectCountByCondition(ModelEntity modelEntity, EntityCondition whereEntityCondition, EntityCondition havingEntityCondition, EntityFindOptions findOptions) throws GenericEntityException {
+        return selectCountByCondition(modelEntity, whereEntityCondition, havingEntityCondition, null, findOptions);
+    }
+
+    public long selectCountByCondition(ModelEntity modelEntity, EntityCondition whereEntityCondition, EntityCondition havingEntityCondition, List<ModelField> selectFields, EntityFindOptions findOptions) throws GenericEntityException {
         if (modelEntity == null) {
             return 0;
         }
@@ -1007,7 +1006,27 @@ public class GenericDAO {
         }
 
         if (findOptions.getDistinct()) {
-            sqlBuffer.append("DISTINCT COUNT(*) ");
+            // old style, not sensitive to selecting limited columns: sqlBuffer.append("DISTINCT COUNT(*) ");
+            /* DEJ20100304: the code below was causing problems so the line above may be used instead, but hopefully this is fixed now 
+             * may need varying SQL for different databases, and also in view-entities in some cases it seems to 
+             * cause the "COUNT(DISTINCT " to appear twice, causing an attempt to try to count a count (function="count-distinct", distinct=true in find options)
+             */
+            if (selectFields != null && selectFields.size() > 0) {
+                ModelField firstSelectField = selectFields.get(0);
+                ModelViewEntity.ModelAlias firstModelAlias = modelViewEntity != null ? modelViewEntity.getAlias(firstSelectField.getName()) : null;
+                if (firstModelAlias != null && UtilValidate.isNotEmpty(firstModelAlias.getFunction())) {
+                    // if the field has a function already we don't want to count just it, would be meaningless
+                    sqlBuffer.append("COUNT(DISTINCT *) ");
+                } else {
+                    sqlBuffer.append("COUNT(DISTINCT ");
+                    // this only seems to support a single column, which is not desirable but seems a lot better than no columns or in certain cases all columns
+                    sqlBuffer.append(firstSelectField.getColName());
+                    // sqlBuffer.append(modelEntity.colNameString(selectFields, ", ", "", datasourceInfo.aliasViews));
+                    sqlBuffer.append(")");
+                }
+            } else {
+                sqlBuffer.append("COUNT(DISTINCT *) ");
+            }
         } else {
             // NOTE DEJ20080701 Changed from COUNT(*) to COUNT(1) to improve performance, and should get the same results at least when there is no DISTINCT
             sqlBuffer.append("COUNT(1) ");
@@ -1058,7 +1077,7 @@ public class GenericDAO {
         String sql = sqlBuffer.toString();
         if (Debug.verboseOn()) Debug.logVerbose("Count select sql: " + sql, module);
 
-        SQLProcessor sqlP = new SQLProcessor(helperName);
+        SQLProcessor sqlP = new SQLProcessor(helperInfo);
         sqlP.prepareStatement(sql, findOptions.getSpecifyTypeAndConcur(), findOptions.getResultSetType(),
                 findOptions.getResultSetConcurrency(), findOptions.getFetchSize(), findOptions.getMaxRows());
         if (verboseOn) {
@@ -1100,7 +1119,7 @@ public class GenericDAO {
     /* ====================================================================== */
 
     public int delete(GenericEntity entity) throws GenericEntityException {
-        SQLProcessor sqlP = new SQLProcessor(helperName);
+        SQLProcessor sqlP = new SQLProcessor(helperInfo);
 
         try {
             return delete(entity, sqlP);
@@ -1137,7 +1156,7 @@ public class GenericDAO {
     }
 
     public int deleteByCondition(ModelEntity modelEntity, EntityCondition condition) throws GenericEntityException {
-        SQLProcessor sqlP = new SQLProcessor(helperName);
+        SQLProcessor sqlP = new SQLProcessor(helperInfo);
 
         try {
             return deleteByCondition(modelEntity, condition, sqlP);
@@ -1175,13 +1194,13 @@ public class GenericDAO {
     /* ====================================================================== */
 
     public void checkDb(Map<String, ModelEntity> modelEntities, List<String> messages, boolean addMissing) {
-        DatabaseUtil dbUtil = new DatabaseUtil(this.helperName);
+        DatabaseUtil dbUtil = new DatabaseUtil(this.helperInfo);
         dbUtil.checkDb(modelEntities, messages, addMissing);
     }
 
     /** Creates a list of ModelEntity objects based on meta data from the database */
     public List<ModelEntity> induceModelFromDb(Collection<String> messages) {
-        DatabaseUtil dbUtil = new DatabaseUtil(this.helperName);
+        DatabaseUtil dbUtil = new DatabaseUtil(this.helperInfo);
         return dbUtil.induceModelFromDb(messages);
     }
 }

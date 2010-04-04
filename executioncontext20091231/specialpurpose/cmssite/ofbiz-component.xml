@@ -24,12 +24,7 @@ under the License.
     <resource-loader name="main" type="component"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/CmsSiteDemoData.xml"/>
 
-    <webapp name="cmssite"
-        title="CMS Site"
-        menu-name="secondary"
-        server="default-server"
-        location="webapp/cmssite"
-        mount-point="/cmssite"
-        app-bar-display="true"/>
+    <webapp name="cmssite" title="CMS Site" menu-name="secondary" app-bar-display="false"
+        server="default-server" location="webapp/cmssite" mount-point="/cmssite"/>
 </ofbiz-component>
 

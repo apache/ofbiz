@@ -540,6 +540,7 @@ under the License.
             title="Content Purpose Entity">
       <field name="contentId" type="id-ne"></field>
       <field name="contentPurposeTypeId" type="id-ne"></field>
+      <field name="sequenceNum" type="numeric"></field>
       <prim-key field="contentId"/>
       <prim-key field="contentPurposeTypeId"/>
       <relation type="one" fk-name="CONTENT_PRP" rel-entity-name="Content">
@@ -1542,6 +1543,7 @@ under the License.
     </view-entity>
     <entity entity-name="WebSiteContentType"
         package-name="org.ofbiz.content.website"
+        default-resource-name="ContentEntityLabels"
         title="Web Site Content Type">
         <field name="webSiteContentTypeId" type="id-ne"></field>
         <field name="description" type="description"></field>
@@ -1618,4 +1620,22 @@ under the License.
             <key-map field-name="webSiteId"/>
         </relation>
     </entity>
+    <view-entity entity-name="ContentAssocAndContentPurpose"
+            package-name="org.ofbiz.content.compdoc"
+            title="ContentAssoc and ContentPurpose View Entity">
+        <member-entity entity-alias="CNTA" entity-name="ContentAssoc"/>
+        <member-entity entity-alias="CNTP" entity-name="ContentPurpose"/>
+        <alias entity-alias="CNTA" name="contentId"/>
+        <alias entity-alias="CNTA" name="contentIdTo"/>
+        <alias entity-alias="CNTA" name="contentAssocTypeId"/>
+        <alias entity-alias="CNTA" name="fromDate"/>
+        <alias entity-alias="CNTA" name="thruDate"/>
+        <alias entity-alias="CNTA" name="dataSourceId"/>
+        <alias entity-alias="CNTA" name="mapKey"/>
+        <alias entity-alias="CNTP" name="contentPurposeTypeId"/>
+        <alias entity-alias="CNTP" name="sequenceNum"/>
+        <view-link entity-alias="CNTA" rel-entity-alias="CNTP">
+            <key-map field-name="contentIdTo" rel-field-name="contentId"/>
+        </view-link>
+    </view-entity>
 </entitymodel>

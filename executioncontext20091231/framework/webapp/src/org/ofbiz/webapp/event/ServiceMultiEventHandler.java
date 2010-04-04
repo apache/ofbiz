@@ -161,7 +161,7 @@ public class ServiceMultiEventHandler implements EventHandler {
         //  event should be wrapped in a transaction
         String requestUri = RequestHandler.getRequestUri(request.getPathInfo());
         ConfigXMLReader.ControllerConfig controllerConfig = ConfigXMLReader.getControllerConfig(ConfigXMLReader.getControllerConfigURL(servletContext));
-        boolean eventGlobalTransaction = controllerConfig.requestMapMap.get(requestUri).event.globalTransaction;
+        boolean eventGlobalTransaction = controllerConfig.getRequestMapMap().get(requestUri).event.globalTransaction;
 
         Set<String> urlOnlyParameterNames = UtilHttp.getUrlOnlyParameterMap(request).keySet();
 
@@ -355,7 +355,7 @@ public class ServiceMultiEventHandler implements EventHandler {
                         if (resultKey != null && !ModelService.RESPONSE_MESSAGE.equals(resultKey) && !ModelService.ERROR_MESSAGE.equals(resultKey) &&
                                 !ModelService.ERROR_MESSAGE_LIST.equals(resultKey) && !ModelService.ERROR_MESSAGE_MAP.equals(resultKey) &&
                                 !ModelService.SUCCESS_MESSAGE.equals(resultKey) && !ModelService.SUCCESS_MESSAGE_LIST.equals(resultKey)) {
-                            //set the result to request w/ and w/o a suffix to handle both cases: to have the result in each iteration and to prevent its overriding  
+                            //set the result to request w/ and w/o a suffix to handle both cases: to have the result in each iteration and to prevent its overriding
                             request.setAttribute(resultKey + curSuffix, resultValue);
                             request.setAttribute(resultKey, resultValue);
                         }

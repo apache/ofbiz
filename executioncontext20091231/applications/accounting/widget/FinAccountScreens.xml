@@ -127,9 +127,11 @@ under the License.
                                 <not><if-empty field="finAccountId"/></not>
                             </condition>
                             <widgets>
+                                <container style="button-bar">
+                                    <link target="EditFinAccount" text="${uiLabelMap.AccountingCreateNewFinAccount}" style="buttontext create"/>
+                                </container>
                                 <label style="h1" text="${uiLabelMap.AccountingEditFinAccount}"></label>
                                 <screenlet id="EditFinAccountPanel" collapsible="true">
-                                    <link target="EditFinAccount" text="${uiLabelMap.AccountingCreateNewFinAccount}" style="buttontext"/>
                                     <include-form name="EditFinAccount" location="component://accounting/widget/FinAccountForms.xml"/>
                                 </screenlet>
                             </widgets>
@@ -269,18 +271,7 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonFinAccountDecorator" location="${parameters.finAccountDecoratorLocation}">
                     <decorator-section name="body">
-                        <section>
-                            <actions>
-                                <entity-one entity-name="PortalPage" value-field="portalPage"/>
-                                <get-related value-field="portalPage" relation-name="PortalPageColumn" list="portalPageColumns"/>
-                                <entity-and entity-name="PortalPagePortletView" list="portalPagePortlets">
-                                    <field-map field-name="portalPageId" from-field="portalPage.portalPageId"/>
-                                </entity-and>
-                            </actions>
-                            <widgets>
-                                <platform-specific><html><html-template location="component://common/webcommon/portal/showPortalPage.ftl"/></html></platform-specific>
-                            </widgets>
-                        </section>
+                        <include-screen name="PortalPageScreen" location="component://common/widget/CommonScreens.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

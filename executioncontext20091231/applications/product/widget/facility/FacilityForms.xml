@@ -40,7 +40,7 @@ under the License.
             <display-entity entity-name="FacilityType" description="${description}"/>
         </field>
         <field name="ownerPartyId" title="${uiLabelMap.ProductFacilityOwner}"><display/></field>
-        <field name="squareFootage" title="${uiLabelMap.ProductSqFt}"><display/></field>
+        <field name="FacilitySize" title="${uiLabelMap.ProductFacilitySize}"><display/></field>
         <field name="description"><display/></field>
         <on-event-update-area event-type="paginate" area-id="search-results" area-target="FacilitySearchResults"/>
     </form>
@@ -884,4 +884,78 @@ under the License.
         <field name="report" title="Export Report" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
 
+    <!--Facility Content-->
+    <form name="AddFacilityContent" type="upload" focus-field-name="contentId" 
+        header-row-style="header-row" default-table-style="basic-table" target="createFacilityContent?facilityId=${facilityId}">
+        <field name="facilityId"><hidden/></field>
+        <field name="contentId" title="${uiLabelMap.FormFieldTitle_existContentId}">
+            <lookup target-form-name="LookupContent"/>
+        </field>
+        <field name="contentTypeId" title="${uiLabelMap.FormFieldTitle_contentTypeId}">
+            <drop-down allow-empty="false" no-current-selected-key="DOCUMENT">
+                <entity-options description="${description}" entity-name="ContentType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+            <drop-down allow-empty="false" no-current-selected-key="CTNT_AVAILABLE">
+                <entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" value="CONTENT_STATUS"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="dataResourceName" title="${uiLabelMap.CommonUpload}"><file/></field>
+        <field name="contentIdFrom" title="${uiLabelMap.ContentCompDocParentContentId}"><lookup target-form-name="LookupContent"/></field>
+        <field name="createButton"><submit button-type="button"/></field>
+    </form>
+    
+    <form name="ListFacilityContent" type="list" list-name="facilityContentDetails" 
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="facilityId"><hidden/></field>
+        <field name="contentId" title="${uiLabelMap.CommonView}">
+            <hyperlink target="/content/control/ViewSimpleContent" description="[${contentId}]" target-type="inter-app">
+                <parameter param-name="contentId"/>
+            </hyperlink>
+        </field>
+        <field name="contentName"><display/></field>
+        <field name="mimeTypeId"><display/></field>
+        <field name="contentTypeId" title="${uiLabelMap.FormFieldTitle_contentTypeId}"><display-entity entity-name="ContentType" also-hidden="false"/></field>
+        <field name="fromDate"><display/></field>
+        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+           <hyperlink also-hidden="false" description="${uiLabelMap.CommonDelete}" target="deleteFacilityContent">
+                <parameter param-name="facilityId"/>
+                <parameter param-name="contentId"/>
+                <parameter param-name="fromDate"/>
+           </hyperlink>
+        </field>   
+    </form>
+
+    <form name="EditFacilityGeoPoint" type="single" target="createUpdateFacilityGeoPoint" default-map-name="geoPoint"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <field name="facilityId"><hidden value="${facilityId}"/></field>
+        <field name="geoPointId"><hidden/></field>
+        <field name="dataSourceId">
+            <drop-down allow-empty="false">
+                <entity-options description="${description}" entity-name="DataSource">
+                    <entity-constraint name="dataSourceTypeId" value="GEOPOINT_SUPPLIER"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="latitude"><text/></field>
+        <field name="longitude"><text/></field>
+        <field name="elevation"><text/></field>
+        <field name="elevationUomId">
+            <drop-down allow-empty="false">
+                <entity-options description="${description}" entity-name="Uom" key-field-name="uomId">
+                    <entity-constraint name="uomTypeId" value="LENGTH_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="information"><text size="50" maxlength="60"/></field>
+        <field name="selectButton" title="${uiLabelMap.CommonSubmit}"><submit button-type="button"/></field>
+    </form>
 </forms>

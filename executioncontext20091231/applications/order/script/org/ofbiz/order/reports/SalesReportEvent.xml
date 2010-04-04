@@ -22,65 +22,25 @@
     xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
 
     <simple-method method-name="getOrder" short-description="Get Orders" login-required="false">
-        <log level="always" message="===================CheckfromDate : ${fromDate}"/>
-        <log level="always" message="===================CheckthruDate : ${thruDate}"/>
         <if-not-empty field="fromDate">
             <entity-condition entity-name="SalesOrderItemStarSchema" list="starschemas">
                 <condition-list combine="and">
                     <condition-expr field-name="orderDateYearMonthDay" operator="greater-equals" from-field="fromDate"/>
                     <condition-expr field-name="orderDateYearMonthDay" operator="less" from-field="thruDate"/>
                     <condition-list combine="or">
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_AU_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_CA_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_IE_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_SG_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_UK_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_US_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_DE_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_ES_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_FR_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_IT_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_AU_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_CA_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_IE_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_SG_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_UK_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_US_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_DE_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_ES_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_FR_SALES_CHANNEL"/>
-                        <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_IT_SALES_CHANNEL"/>
+                        <condition-expr field-name="productStoreId" operator="equals" value="B2CStore"/>
+                        <condition-expr field-name="productStoreId" operator="equals" value="B2BStore"/>
                     </condition-list>
                 </condition-list>
             </entity-condition>
-            <log level="always" message="===================starschemas : ${starschemas}"/>
         </if-not-empty>
         <if-empty field="fromDate">
             <entity-condition list="starschemas" entity-name="SalesOrderItemStarSchema">
                 <condition-list combine="or">
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_AU_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_CA_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_IE_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_SG_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_UK_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_US_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_DE_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_ES_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_FR_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="VV_IT_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_AU_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_CA_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_IE_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_SG_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_UK_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_US_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_DE_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_ES_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_FR_SALES_CHANNEL"/>
-                    <condition-expr field-name="salesChannelEnumId" operator="equals" value="B2B_IT_SALES_CHANNEL"/>
+                    <condition-expr field-name="productStoreId" operator="equals" value="B2CStore"/>
+                    <condition-expr field-name="productStoreId" operator="equals" value="B2BStore"/>
                 </condition-list>
             </entity-condition>
-            <log level="always" message="===================starschemas : ${starschemas}"/>
         </if-empty>
     </simple-method>
     

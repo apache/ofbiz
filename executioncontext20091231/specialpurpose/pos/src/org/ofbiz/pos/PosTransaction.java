@@ -39,6 +39,7 @@ import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.Log4jLoggerWriter;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilFormatOut;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilNumber;
 import org.ofbiz.base.util.UtilProperties;
@@ -129,8 +130,8 @@ public class PosTransaction implements Serializable {
         this.productStoreId = (String) session.getAttribute("productStoreId");
         this.facilityId = (String) session.getAttribute("facilityId");
         this.currency = (String) session.getAttribute("currency");
-//        this.locale = (Locale) session.getAttribute("locale"); This is legacy code and may come (demo) from ProductStore.defaultLocaleString defined in demoRetail and is incompatible with how localisation is handled in the POS 
-        this.locale = Locale.getDefault(); 
+//        this.locale = (Locale) session.getAttribute("locale"); This is legacy code and may come (demo) from ProductStore.defaultLocaleString defined in demoRetail and is incompatible with how localisation is handled in the POS
+        this.locale = Locale.getDefault();
 
         this.cart = new ShoppingCart(session.getDelegator(), productStoreId, locale, currency);
         this.ch = new CheckOutHelper(session.getDispatcher(), session.getDelegator(), cart);
@@ -168,11 +169,11 @@ public class PosTransaction implements Serializable {
     public String getUserId() {
         return session.getUserId();
     }
-    
+
     public String getPartyId() {
         return partyId;
     }
-    
+
     public void setPartyId(String partyId) {
         this.partyId = partyId;
         this.cart.setPlacingCustomerPartyId(partyId);
@@ -182,7 +183,7 @@ public class PosTransaction implements Serializable {
             Debug.logError(e, module);
         }
     }
-    
+
     public int getDrawerNumber() {
         return drawerIdx + 1;
     }
@@ -403,13 +404,14 @@ public class PosTransaction implements Serializable {
                 payInfo.put("cardNumber", cardStr);  // masked cardNumber
 
             } else if ("GIFT_CARD".equals(paymentMethodTypeId)) {
-                 @SuppressWarnings("unused") 
-                GenericValue gc = null; 
+                /*
+                GenericValue gc = null;
                 try {
                     gc = infValue.getRelatedOne("GiftCard"); //FIXME is this really useful ? (Maybe later...)
                 } catch (GenericEntityException e) {
                     Debug.logError(e, module);
                 }
+                */
             }
         }
 
@@ -865,7 +867,7 @@ public class PosTransaction implements Serializable {
         output.print(UtilProperties.getMessage(resource, "PosProcessing", locale));
         Map<String, Object> payRes = null;
         try {
-            payRes = (Map<String, Object>) ch.processPayment(ProductStoreWorker.getProductStore(productStoreId, session.getDelegator()), session.getUserLogin(), true);
+            payRes = ch.processPayment(ProductStoreWorker.getProductStore(productStoreId, session.getDelegator()), session.getUserLogin(), true);
         } catch (GeneralException e) {
             Debug.logError(e, module);
             throw e;
@@ -997,7 +999,7 @@ public class PosTransaction implements Serializable {
             BigDecimal total = cart.getGrandTotal();
             List<GenericValue> adjustments = cart.getAdjustments();
             BigDecimal itemsAdjustmentsAmount = BigDecimal.ZERO;
-            
+
             Iterator<?> i = cart.iterator();
             while (i.hasNext()) {
                 ShoppingCartItem item = (ShoppingCartItem) i.next();
@@ -1237,7 +1239,7 @@ public class PosTransaction implements Serializable {
         } else{
             Integer orderListSize = (Integer) svcRes.get("orderListSize");
             if (orderListSize > 0) {
-               List<GenericValue> orderList = (List<GenericValue>) svcRes.get("orderList");
+               List<GenericValue> orderList = UtilGenerics.checkList(svcRes.get("orderList"), GenericValue.class);
                return orderList;
             }
         }
@@ -1330,7 +1332,7 @@ public class PosTransaction implements Serializable {
 
     public boolean restoreOrder(String orderId, PosScreen pos, boolean append) {
         trace("Restore an order");
-        Delegator delegator = session.getDelegator();
+
         LocalDispatcher dispatcher = session.getDispatcher();
 
         Map<String, Object> svcCtx = FastMap.newInstance();
@@ -1402,11 +1404,6 @@ public class PosTransaction implements Serializable {
             pos.showDialog("dialog/error/exception", UtilProperties.getMessage("OrderErrorUiLabels", "OrderUnableToCreateNewShoppingList", locale));
             return;
         }
-        Delegator delegator = this.session.getDelegator();
-        LocalDispatcher dispatcher = session.getDispatcher();
-        GenericValue userLogin = session.getUserLogin();
-        String shoppingListId = null;
-
         if (!UtilValidate.isEmpty(shoppingListName)) {
             // attach the party ID to the cart
             cart.setOrderPartyId(partyId);
@@ -1477,7 +1474,7 @@ public class PosTransaction implements Serializable {
         }
 
         try {
-            ShoppingListEvents.addBulkFromCart(delegator, dispatcher, cart, userLogin, shoppingListId, selectedCartItems, true, true);
+            ShoppingListEvents.addBulkFromCart(delegator, dispatcher, cart, userLogin, shoppingListId, null, selectedCartItems, true, true);
         } catch (IllegalArgumentException e) {
             Debug.logError(e, "Problem while creating new ShoppingList", module);
             pos.showDialog("dialog/error/exception", UtilProperties.getMessage("OrderErrorUiLabels", "OrderUnableToCreateNewShoppingList", locale));
@@ -1492,7 +1489,6 @@ public class PosTransaction implements Serializable {
         return result;
     }
 
-    // TODO, I really wonder if there is not a better way to do this (DynamicView excluded because of the contactMechId collisions between phone and email)!
     private List<Map<String, String>> searchContactMechs(Delegator delegator, PosScreen pos, List<Map<String, String>> partyList, String valueToCompare, String contactMechType) {
         ListIterator<Map<String, String>>  partyListIt = partyList.listIterator();
         while(partyListIt.hasNext()) {
@@ -1511,7 +1507,7 @@ public class PosTransaction implements Serializable {
                     keyType = "contactMech";
                     key = "infoString";
                 }
-                Map<String, Object> keyTypeMap = (Map<String, Object>) partyContactMechValueMap.get(keyType);
+                Map<String, Object> keyTypeMap = UtilGenerics.checkMap(partyContactMechValueMap.get(keyType));
                 String keyTypeValue = ((String) keyTypeMap.get(key)).trim();
                 if (valueToCompare.equals(keyTypeValue) || UtilValidate.isEmpty(valueToCompare)) {
                     if (nb == 1) {
@@ -1552,19 +1548,19 @@ public class PosTransaction implements Serializable {
 
         if (UtilValidate.isNotEmpty(email)) {
             // ContactMech (email)
-            dynamicView.addMemberEntity("PM", "PartyContactMechPurpose");            
+            dynamicView.addMemberEntity("PM", "PartyContactMechPurpose");
             dynamicView.addAlias("PM", "contactMechId");
-            dynamicView.addAlias("PM", "contactMechPurposeTypeId");            
+            dynamicView.addAlias("PM", "contactMechPurposeTypeId");
             dynamicView.addAlias("PM", "thruDate");
             dynamicView.addMemberEntity("CM", "ContactMech");
-            dynamicView.addAlias("CM", "infoString");            
+            dynamicView.addAlias("CM", "infoString");
             dynamicView.addViewLink("PT", "PM", Boolean.FALSE, ModelKeyMap.makeKeyMapList("partyId"));
             dynamicView.addViewLink("PM", "CM", Boolean.FALSE, ModelKeyMap.makeKeyMapList("contactMechId"));
         } else if (UtilValidate.isNotEmpty(phone)) {
-            dynamicView.addMemberEntity("PM", "PartyContactMechPurpose");            
+            dynamicView.addMemberEntity("PM", "PartyContactMechPurpose");
             dynamicView.addAlias("PM", "contactMechId");
             dynamicView.addAlias("PM", "thruDate");
-            dynamicView.addAlias("PM", "contactMechPurposeTypeId");            
+            dynamicView.addAlias("PM", "contactMechPurposeTypeId");
             dynamicView.addMemberEntity("TN", "TelecomNumber");
             dynamicView.addAlias("TN", "contactNumber");
             dynamicView.addViewLink("PT", "PM", Boolean.FALSE, ModelKeyMap.makeKeyMapList("partyId"));
@@ -1597,7 +1593,7 @@ public class PosTransaction implements Serializable {
                 } else {
                     // andExprs.add(EntityCondition.makeCondition("lastName", EntityOperator.LIKE, "%"+name+"%")); // Less restrictive
                      andExprs.add(EntityCondition.makeCondition(EntityFunction.UPPER_FIELD("lastName"), EntityOperator.LIKE, EntityFunction.UPPER("%"+name+"%"))); // Even less restrictive
-                }                
+                }
             }
             if (UtilValidate.isNotEmpty(card)) {
                 andExprs.add(EntityCondition.makeCondition("cardId", EntityOperator.EQUALS, card));
@@ -1611,7 +1607,7 @@ public class PosTransaction implements Serializable {
                 andExprs.add(EntityCondition.makeCondition("contactMechPurposeTypeId", EntityOperator.EQUALS, "PHONE_HOME"));
                 andExprs.add(EntityCondition.makeCondition("thruDate", EntityOperator.EQUALS, null));
             }
- 
+
             mainCond = EntityCondition.makeCondition(andExprs, EntityOperator.AND);
             orderBy.add("lastName");
 
@@ -1672,18 +1668,18 @@ public class PosTransaction implements Serializable {
                     } else { // both empty
                         partyMap.put("infoString", "");
                         partyMap.put("contactNumber", "");
-                        
+
                     }
                     resultList.add(partyMap);
                 }
-                
+
                 if (UtilValidate.isNotEmpty(email)) {
                     resultList = searchContactMechs(delegator, pos, resultList, phone, "TELECOM_NUMBER");
                 } else if (UtilValidate.isNotEmpty(phone)) {
                     resultList = searchContactMechs(delegator, pos, resultList, "", "EMAIL_ADDRESS"); // "" is more clear than email which is by definition here is empty
                 } else { // both empty
                     resultList = searchContactMechs(delegator, pos, resultList, "", "TELECOM_NUMBER"); // "" is more clear than phone which is by definition here is empty
-                    resultList = searchContactMechs(delegator, pos, resultList, "", "EMAIL_ADDRESS"); 
+                    resultList = searchContactMechs(delegator, pos, resultList, "", "EMAIL_ADDRESS");
                 }
             } else {
             resultList = FastList.newInstance();
@@ -1698,7 +1694,7 @@ public class PosTransaction implements Serializable {
         // we suppose only one phone number (should be ok anyway because of the contactMechPurposeTypeId == "PHONE_HOME")
         LocalDispatcher dispatcher = session.getDispatcher();
         GenericValue userLogin = session.getUserLogin();
-        GenericValue partyUserLogin = null;        
+        GenericValue partyUserLogin = null;
         String result = null;
 
         Map<String, Object> svcCtx = FastMap.newInstance();
@@ -1745,12 +1741,12 @@ public class PosTransaction implements Serializable {
                 if (ServiceUtil.isError(svcRes)) {
                     pos.showDialog("dialog/error/exception", ServiceUtil.getErrorMessage(svcRes));
                     return result;
-                }                    
+                }
                 partyId = (String) svcRes.get("partyId");
                 partyUserLogin = userLogin;
             }
 
-            if (UtilValidate.isNotEmpty(email)) {            
+            if (UtilValidate.isNotEmpty(email)) {
                 // createPartyEmailAddress
                 trace("createPartyEmailAddress");
                 svcCtx.clear();
@@ -1773,7 +1769,7 @@ public class PosTransaction implements Serializable {
 
             if (UtilValidate.isNotEmpty(phone)) {
                 if (phone.length() < 5 ) {
-                    pos.showDialog("dialog/error/exception", UtilProperties.getMessage(PosTransaction.resource, "PosPhoneField5Required", locale));                    
+                    pos.showDialog("dialog/error/exception", UtilProperties.getMessage(PosTransaction.resource, "PosPhoneField5Required", locale));
                 } else {
                     // createPartyTelecomNumber
                     trace("createPartyTelecomNumber");
@@ -1795,9 +1791,9 @@ public class PosTransaction implements Serializable {
                     }
                 }
             }
-            
+
             result = partyId;
-            
+
         // Update
         } else if (UtilValidate.isNotEmpty(partyId)){
             trace("Update a client profile");
@@ -1810,7 +1806,7 @@ public class PosTransaction implements Serializable {
                 pos.showDialog("dialog/error/exception", e.getMessage());
                 return null;
             }
-            
+
             Boolean newLogin = true;
             try {
                 List<GenericValue>  userLogins = session.getDelegator().findByAnd("UserLogin", UtilMisc.toMap("partyId", partyId));
@@ -1833,7 +1829,7 @@ public class PosTransaction implements Serializable {
                 svcCtx.put("lastName", name);
                 if (UtilValidate.isNotEmpty(card)) {
                     svcCtx.put("cardId", card);
-                }                                  
+                }
                 try {
                     // updatePerson
                     trace("updatePerson");
@@ -1849,7 +1845,7 @@ public class PosTransaction implements Serializable {
                 }
             }
 
-            
+
             if (UtilValidate.isNotEmpty(phone)) {
                 // Create or update phone
                 if (phone.length() < 5 ) {
@@ -1859,11 +1855,11 @@ public class PosTransaction implements Serializable {
                     String contactMechId = null;
                     svcCtx.clear();
                     svcCtx.put("partyId", partyId);
-                    svcCtx.put("thruDate", null); // last one            
+                    svcCtx.put("thruDate", null); // last one
                     try {
                         List<GenericValue>  PartyTelecomNumbers = session.getDelegator().findByAnd("PartyAndTelecomNumber", svcCtx);
                         if (UtilValidate.isNotEmpty(PartyTelecomNumbers)) {
-                            GenericValue PartyTelecomNumber = PartyTelecomNumbers.get(0); // There is  only one phone number (contactMechPurposeTypeId == "PHONE_HOME")                
+                            GenericValue PartyTelecomNumber = PartyTelecomNumbers.get(0); // There is  only one phone number (contactMechPurposeTypeId == "PHONE_HOME")
                             contactNumber = PartyTelecomNumber.getString("contactNumber");
                             contactMechId = PartyTelecomNumber.getString("contactMechId");
                         }
@@ -1871,7 +1867,7 @@ public class PosTransaction implements Serializable {
                         Debug.logError(e, module);
                         pos.showDialog("dialog/error/exception", e.getMessage());
                         return null;
-                    }                        
+                    }
 
                     // Create or update phone
                     trace("createUpdatePartyTelecomNumber");
@@ -1893,7 +1889,7 @@ public class PosTransaction implements Serializable {
                         pos.showDialog("dialog/error/exception", ServiceUtil.getErrorMessage(svcRes));
                         return null;
                     }
-                    
+
                     // Handle login aspect where phone is taken as pwd
                     if (UtilValidate.isNotEmpty(contactNumber) && !phone.equals(contactNumber)) {
                         if (!newLogin) { // to create a new login we need also an email address
@@ -1904,42 +1900,42 @@ public class PosTransaction implements Serializable {
                             try {
                                 passwordAcceptEncryptedAndPlain = UtilProperties.getPropertyValue("security.properties", "password.accept.encrypted.and.plain");
                                 UtilProperties.setPropertyValueInMemory("security.properties", "password.accept.encrypted.and.plain", "true");
-                                svcRes = dispatcher.runSync("updatePassword", 
+                                svcRes = dispatcher.runSync("updatePassword",
                                         UtilMisc.toMap("userLogin", userLogin,
-                                        "userLoginId", userLogin.getString("userLoginId"), 
-                                        "currentPassword", userLogin.getString("currentPassword"), 
-                                        "newPassword", phone, 
-                                        "newPasswordVerify", phone));            
+                                        "userLoginId", userLogin.getString("userLoginId"),
+                                        "currentPassword", userLogin.getString("currentPassword"),
+                                        "newPassword", phone,
+                                        "newPasswordVerify", phone));
                             } catch (GenericServiceException e) {
                                 Debug.logError(e, "Error calling updatePassword service", module);
                                 pos.showDialog("dialog/error/exception", e.getMessage());
-                                UtilProperties.setPropertyValueInMemory("security.properties", "password.accept.encrypted.and.plain", passwordAcceptEncryptedAndPlain);                                
+                                UtilProperties.setPropertyValueInMemory("security.properties", "password.accept.encrypted.and.plain", passwordAcceptEncryptedAndPlain);
                                 return null;
                             } finally {
                                 // Put back passwordAcceptEncryptedAndPlain value in memory
                                 UtilProperties.setPropertyValueInMemory("security.properties", "password.accept.encrypted.and.plain", passwordAcceptEncryptedAndPlain);
-                            }                            
+                            }
                             if (ServiceUtil.isError(svcRes)) {
                                 pos.showDialog("dialog/error/exception", ServiceUtil.getErrorMessage(svcRes));
                                 return null;
                             }
-                        }                        
+                        }
                     }
                 }
             }
 
             if (UtilValidate.isNotEmpty(email)) {
-            // Update email             
+            // Update email
                 svcCtx.clear();
                 svcCtx.put("partyId", partyId);
-                svcCtx.put("thruDate", null); // last one            
-                svcCtx.put("contactMechTypeId", "EMAIL_ADDRESS");            
+                svcCtx.put("thruDate", null); // last one
+                svcCtx.put("contactMechTypeId", "EMAIL_ADDRESS");
                 String contactMechId = null;
                 String infoString = null;
                 try {
                     List<GenericValue>  PartyEmails = session.getDelegator().findByAnd("PartyAndContactMech", svcCtx);
                     if (UtilValidate.isNotEmpty(PartyEmails)) {
-                        GenericValue PartyEmail = PartyEmails.get(0); // There is  only one email address (contactMechPurposeTypeId == "PRIMARY_EMAIL")                
+                        GenericValue PartyEmail = PartyEmails.get(0); // There is  only one email address (contactMechPurposeTypeId == "PRIMARY_EMAIL")
                         contactMechId = PartyEmail.getString("contactMechId");
                         infoString = PartyEmail.getString("infoString");
                     }
@@ -1950,7 +1946,7 @@ public class PosTransaction implements Serializable {
                 }
 
                 svcCtx.remove("thruDate");
-                svcCtx.remove("contactMechTypeId");                            
+                svcCtx.remove("contactMechTypeId");
                 svcCtx.put("userLogin", userLogin);
                 svcCtx.put("emailAddress", email);
                 svcCtx.put("contactMechPurposeTypeId", "PRIMARY_EMAIL");
@@ -1959,7 +1955,7 @@ public class PosTransaction implements Serializable {
                 }
                 if (UtilValidate.isNotEmpty(infoString) && !email.equals(infoString)
                         || UtilValidate.isEmpty(infoString)) {
-                    // Create or update email 
+                    // Create or update email
                     trace("createUpdatePartyEmailAddress");
                     try {
                         svcRes = dispatcher.runSync("createUpdatePartyEmailAddress", svcCtx);
@@ -1991,14 +1987,14 @@ public class PosTransaction implements Serializable {
                     }
                 } else if (newLogin && UtilValidate.isNotEmpty(phone)) {
                     // createUserLogin
-                    trace("createUserLogin");                        
+                    trace("createUserLogin");
                     try {
-                        svcRes = dispatcher.runSync("createUserLogin", 
+                        svcRes = dispatcher.runSync("createUserLogin",
                                 UtilMisc.toMap("userLogin", userLogin,
-                                        "userLoginId", email, 
-                                        "currentPassword", phone, 
+                                        "userLoginId", email,
+                                        "currentPassword", phone,
                                         "currentPasswordVerify", phone,
-                                        "partyId", partyId));            
+                                        "partyId", partyId));
                     } catch (GenericServiceException e) {
                         Debug.logError(e, "Error calling updatePassword service", module);
                         pos.showDialog("dialog/error/exception", e.getMessage());
@@ -2012,7 +2008,7 @@ public class PosTransaction implements Serializable {
             }
         } else {
             pos.showDialog("dialog/error/exception", UtilProperties.getMessage(resource, "PosNoClientProfile", locale));
-            return null;            
+            return null;
         }
         return null;
     }

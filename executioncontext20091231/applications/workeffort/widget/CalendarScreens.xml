@@ -30,6 +30,14 @@ under the License.
                 <set field="parentTypeId" from-field="parameters.parentTypeId" default-value="EVENT"/><!-- workeffortTypeId parent to ad events --> 
             </actions>
             <widgets>
+                <include-screen name="CalendarOnly"/>
+            </widgets>
+        </section>
+    </screen>
+            
+    <screen name="CalendarOnly">
+        <section>
+            <widgets>
                 <section>
                     <condition>
                         <if-compare field="parameters.period" operator="equals" value="day"/>
@@ -115,15 +123,18 @@ under the License.
         </section>
     </screen>
 
-    <screen name="CalendarWithDecorator">
+    <screen name="CalendarWithDecorator"><!-- used within the workeffort component to be able to add and show any workeffort type -->
         <section>
             <actions>
+                <script location="component://common/webcommon/WEB-INF/actions/includes/retrievePortletAttributes.groovy"/>
+                <set field="parameters.period" from-field="parameters.period" default-value="${initialView}"/>
+                <script location="component://workeffort/webapp/workeffort/WEB-INF/actions/calendar/CreateUrlParam.groovy"/>
                 <set field="titleProperty" value="WorkEffortCalendar"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonCalendarDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <include-screen name="Calendar"/>
+                        <include-screen name="CalendarOnly"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -212,6 +223,19 @@ under the License.
             </widgets>
         </section>
     </screen>
-    
-    
+    <screen name="calendarEventContent">
+        <section>
+            <actions>
+                <set field="periodType" value="${groovy: request.getAttribute('periodType');}"/>
+                <set field="workEffortId" value="${groovy: request.getAttribute('workEffortId');}"/>
+                <entity-one entity-name="WorkEffort" value-field="workEffort"/>
+                <get-related-one value-field="workEffort" relation-name="ParentWorkEffort" to-value-field="parentWorkEffort"/>
+                <get-related value-field="workEffort" relation-name="WorkOrderItemFulfillment" list="workOrderItemFulfillments"/>
+                <get-related value-field="parentWorkEffort" relation-name="WorkOrderItemFulfillment" list="parentWorkOrderItemFulfillments"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://workeffort/webapp/workeffort/calendar/calendarEventContent.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
 </screens>

@@ -21,6 +21,7 @@ package org.ofbiz.party.party;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -32,25 +33,28 @@ import org.ofbiz.entity.util.EntityTypeUtil;
 public class PartyTypeHelper {
 
     public static final String module = PartyTypeHelper.class.getName();
-    
+
     /** Check if a related party is of the right party type (PERSON or PARTY_GROUP)
      *@param delegator needed Delegator
-     *@param partyId a a valid Party Id string 
+     *@param partyId a a valid Party Id string
      *@param checkedPartyType a string in {PERSON, PARTY_GROUP}
      *@return Boolean, false in case of error
-     */    
-    public static Boolean checkPartyType(Delegator delegator, String partyId, String checkedPartyType) {    
+     */
+    public static Boolean checkPartyType(Delegator delegator, String partyId, String checkedPartyType) {
         GenericValue party = null;
         GenericValue partyType = null;
-        GenericValue checkedTypeOfParty = null; 
+        GenericValue checkedTypeOfParty = null;
         try {
             party = delegator.findOne("Party", UtilMisc.toMap("partyId", partyId), false);
-            partyType = party.getRelatedOneCache("PartyType");
-            checkedTypeOfParty = delegator.findOne("PartyType", UtilMisc.toMap("partyTypeId", checkedPartyType), true);
+            if (UtilValidate.isNotEmpty(party)) {
+                partyType = party.getRelatedOneCache("PartyType");
+                checkedTypeOfParty = delegator.findOne("PartyType", UtilMisc.toMap("partyTypeId", checkedPartyType), true);
+            } else {
+                return false;
+            }
         } catch (GenericEntityException e) {
             Debug.logWarning(e, module);
-            return false;
-        }    
+        }
         return EntityTypeUtil.isType(partyType, checkedTypeOfParty);
-    }    
+    }
 }

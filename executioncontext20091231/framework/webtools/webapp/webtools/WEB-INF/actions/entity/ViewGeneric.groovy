@@ -65,8 +65,9 @@ context.put("hasDeletePermission" , hasDeletePermission);
 boolean useValue = true;
 String curFindString = "entityName=" + entityName;
 GenericPK findByPK = delegator.makePK(entityName);
-for(int fnum = 0; fnum < entity.getPksSize(); fnum++) {
-    ModelField field = entity.getPk(fnum);
+Iterator pkIterator = entity.getPksIterator();
+while (pkIterator.hasNext()) {
+    ModelField field = pkIterator.next();
     ModelFieldType type = delegator.getEntityFieldType(entity, field.getType());
     String fval = parameters.get(field.getName());
     if (UtilValidate.isNotEmpty(fval)) {
@@ -92,10 +93,11 @@ if (value == null) {
 
 if (value != null) {
     List fieldList = FastList.newInstance();
-    for (int fnum = 0; fnum < entity.getFieldsSize(); fnum++) {
+    Iterator fieldIterator = entity.getFieldsIterator();
+    while (fieldIterator.hasNext()) {
         Map mapField = FastMap.newInstance();
 
-        ModelField field = entity.getField(fnum);
+        ModelField field = fieldIterator.next();
         ModelFieldType type = delegator.getEntityFieldType(entity, field.getType());
 
         String fieldValue = "";
@@ -116,6 +118,8 @@ if (value != null) {
             fieldValue = UtilFormatOut.safeToString((Double)value.get(field.getName()));
         } else if (type.getJavaType().indexOf("Float") >= 0) {
             fieldValue = UtilFormatOut.safeToString((Float)value.get(field.getName()));
+        } else if (type.getJavaType().indexOf("BigDecimal") >= 0) {
+            fieldValue = UtilFormatOut.safeToString((BigDecimal)value.get(field.getName()));
         } else if (type.getJavaType().indexOf("String") >= 0) {
             fieldValue = UtilFormatOut.checkNull((String)value.get(field.getName()));
         }
@@ -143,10 +147,11 @@ if ((session.getAttribute("_ERROR_MESSAGE_") != null || request.getAttribute("_E
 context.put("useValue", useValue);
 
 List newFieldPkList = FastList.newInstance();
-for (int fnum = 0; fnum < entity.getPksSize();fnum++) {
+pkIterator = entity.getPksIterator();
+while (pkIterator.hasNext()) {
     Map mapField = FastMap.newInstance();
 
-    ModelField field = entity.getPk(fnum);
+    ModelField field = pkIterator.next();
     ModelFieldType type = delegator.getEntityFieldType(entity, field.getType());
 
     String fieldValue = "";
@@ -219,10 +224,11 @@ for (int fnum = 0; fnum < entity.getPksSize();fnum++) {
 context.put("newFieldPkList", newFieldPkList);
 
 List newFieldNoPkList = FastList.newInstance();
-for (int fnum = 0; fnum < entity.getNopksSize();fnum++) {
+Iterator noPkIterator = entity.getNopksIterator();
+while (noPkIterator.hasNext()) {
     Map mapField = FastMap.newInstance();
 
-    ModelField field = entity.getNopk(fnum);
+    ModelField field = noPkIterator.next();
     ModelFieldType type = delegator.getEntityFieldType(entity, field.getType());
 
     String fieldValue = "";
@@ -272,6 +278,9 @@ for (int fnum = 0; fnum < entity.getNopksSize();fnum++) {
     } else if (type.getJavaType().indexOf("Float") >= 0) {
         fieldValue = (value != null && useValue) ? UtilFormatOut.safeToString((Float)value.get(field.getName())):UtilFormatOut.checkNull(parameters.get(field.getName()));
         fieldType = "Float";
+    } else if (type.getJavaType().indexOf("BigDecimal") >= 0) {
+        fieldValue = (value != null && useValue) ? UtilFormatOut.safeToString((BigDecimal)value.get(field.getName())):UtilFormatOut.checkNull(parameters.get(field.getName()));
+        fieldType = "BigDecimal";
     } else if (type.getJavaType().indexOf("String") >= 0) {
         if (type.stringLength() <= 80) {
             fieldValue = (value != null && useValue) ? UtilFormatOut.checkNull((String)value.get(field.getName())):UtilFormatOut.checkNull(parameters.get(field.getName()));
@@ -323,9 +332,10 @@ for (int relIndex = 0; relIndex < entity.getRelationsSize(); relIndex++) {
                 }
 
                 List relatedFieldsList = FastList.newInstance();
-                for (int fnum = 0; fnum < relatedEntity.getFieldsSize(); fnum++) {
+                Iterator relFieldIterator = relatedEntity.getFieldsIterator();
+                while (relFieldIterator.hasNext()) {
                     Map mapRelatedFields = FastMap.newInstance();
-                    ModelField field = relatedEntity.getField(fnum);
+                    ModelField field = relFieldIterator.next();
                     ModelFieldType type = delegator.getEntityFieldType(entity, field.getType());
 
                     String fieldValue = "";

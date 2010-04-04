@@ -21,14 +21,14 @@ under the License.
     <screen name="CommonOrderEntryDecorator">
         <section>
             <actions>
-                <set field="leftbarScreenName" value="leftbar"/>
-                <set field="leftbarScreenLocation" value="component://order/widget/ordermgr/OrderEntryCommonScreens.xml"/>
-                <set field="MainColumnStyle" value="leftonly"/>
                 <set field="headerItem" value="orderentry"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="left-column">
+                        <include-screen name="leftbar"/>
+                    </decorator-section>                    
                     <decorator-section name="body">
                         <section>
                             <widgets>
@@ -46,14 +46,14 @@ under the License.
     <screen name="CommonOrderCatalogDecorator">
         <section>
             <actions>
-                <set field="leftbarScreenName" value="leftbarCatalog"/>
-                <set field="leftbarScreenLocation" value="component://order/widget/ordermgr/OrderEntryCommonScreens.xml"/>
-                <set field="MainColumnStyle" value="leftonly"/>
                 <set field="headerItem" value="orderentry"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="left-column">
+                        <include-screen name="leftbarCatalog"/>
+                    </decorator-section>                    
                     <decorator-section name="body">
                         <section>
                             <widgets>
@@ -76,26 +76,22 @@ under the License.
     <screen name="leftbar">
         <section>
             <widgets>
-                <container style="left">
-                    <include-screen name="orderHeaderInfo" location="component://order/widget/ordermgr/OrderEntryCartScreens.xml"/>
-                    <include-screen name="orderShortcuts" location="component://order/widget/ordermgr/OrderEntryCartScreens.xml"/>
-                    <include-screen name="choosecatalog" location="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml"/>
-                    <include-screen name="keywordsearchbox" location="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml"/>
-                    <include-screen name="sidedeepcategory" location="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml"/>
-                    <include-screen name="compareproductslist" location="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml"/>
-                </container>
+                <include-screen name="orderHeaderInfo" location="component://order/widget/ordermgr/OrderEntryCartScreens.xml"/>
+                <include-screen name="orderShortcuts" location="component://order/widget/ordermgr/OrderEntryCartScreens.xml"/>
+                <include-screen name="choosecatalog" location="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml"/>
+                <include-screen name="keywordsearchbox" location="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml"/>
+                <include-screen name="sidedeepcategory" location="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml"/>
+                <include-screen name="compareproductslist" location="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml"/>
             </widgets>
         </section>
     </screen>
     <screen name="leftbarCatalog">
         <section>
             <widgets>
-                <container style="left">
-                    <include-screen name="orderHeaderInfo" location="component://order/widget/ordermgr/OrderEntryCartScreens.xml"/>
-                    <include-screen name="minicart" location="component://order/widget/ordermgr/OrderEntryCartScreens.xml"/>
-                    <include-screen name="sidedeepcategory" location="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml"/>
-                    <include-screen name="compareproductslist" location="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml"/>
-                </container>
+                <include-screen name="orderHeaderInfo" location="component://order/widget/ordermgr/OrderEntryCartScreens.xml"/>
+                <include-screen name="minicart" location="component://order/widget/ordermgr/OrderEntryCartScreens.xml"/>
+                <include-screen name="sidedeepcategory" location="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml"/>
+                <include-screen name="compareproductslist" location="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml"/>
             </widgets>
         </section>
     </screen>

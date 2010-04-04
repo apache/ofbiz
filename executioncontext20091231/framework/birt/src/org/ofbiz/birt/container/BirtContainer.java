@@ -19,7 +19,6 @@
 package org.ofbiz.birt.container;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -38,23 +37,22 @@ import org.ofbiz.base.container.ContainerConfig;
 import org.ofbiz.base.container.ContainerException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.FileUtil;
-import org.ofbiz.base.util.UtilObject;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
-import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.service.GenericDispatcher;
 import org.ofbiz.service.LocalDispatcher;
 
 public class BirtContainer implements Container {
-    
+
     public static final String module = BirtContainer.class.getName();
-    
+
     public final static String CONFIG_FILE = "birt.properties";
-    
+
     protected EngineConfig config;
     protected String configFile;
-    
+
     private static IReportEngine engine;
     private static String delegatorGroupHelperName;
     private static String delegatorName;
@@ -64,7 +62,6 @@ public class BirtContainer implements Container {
 
     public void init(String[] args, String configFile)
             throws ContainerException {
-        // TODO Auto-generated method stub
         this.configFile = configFile;
     }
 
@@ -72,10 +69,8 @@ public class BirtContainer implements Container {
      * start container
      */
     public boolean start() throws ContainerException {
-        // TODO Auto-generated method stub
-        
         Debug.logInfo("Start birt container", module);
-        
+
         // make sure the subclass sets the config name
         if (this.getContainerConfigName() == null) {
             throw new ContainerException("Unknown container config name");
@@ -87,44 +82,40 @@ public class BirtContainer implements Container {
         }
 
         config = new EngineConfig();
-        
+
         // set osgi config
         Map<String, String> osgiConfig = FastMap.newInstance();
         osgiConfig.put("osgi.configuration.area", new File(System.getProperty("ofbiz.home"), "runtime" + File.separator + "tempfiles").getPath());
         config.setOSGiConfig(osgiConfig);
-        
-        HashMap context = config.getAppContext();
-        
+
+        HashMap<String, Object> context = UtilGenerics.cast(config.getAppContext());
+
         // set delegator, dispatcher and security objects to report
-        
+
         delegatorGroupHelperName = ContainerConfig.getPropertyValue(cc, "delegator-group-helper-name", "org.ofbiz");
-        
+
         // get the delegator
         delegatorName = ContainerConfig.getPropertyValue(cc, "delegator-name", "default");
-        try {
-              delegator = UtilObject.getObjectFromFactory(DelegatorFactory.class, delegatorName);
-        } catch (ClassNotFoundException e) {
-            Debug.logError(e, module);
-        }
-        
+        delegator = DelegatorFactory.getDelegator(delegatorName);
+
         // get the dispatcher
         dispatcher = GenericDispatcher.getLocalDispatcher(dispatcherName, delegator);
-        
+
         context.put("delegator", delegator);
         context.put("dispatcher", dispatcher);
-        
+
         // set classloader for engine
         context.put(EngineConstants.APPCONTEXT_CLASSLOADER_KEY, BirtContainer.class.getClassLoader());
         context.put(EngineConstants.WEBAPP_CLASSPATH_KEY, BirtContainer.class.getClassLoader());
-        
+
         // set log config to show all level in console
         config.setLogConfig(null, Level.ALL);
-        
+
         // set engine home
         String reportEnginePath = FileUtil.getFile("component://birt/lib/platform").getPath();
         config.setEngineHome(reportEnginePath);
         config.setBIRTHome(reportEnginePath);
-        
+
         // set OSGi arguments specific in properties
         String argumentsString = UtilProperties.getPropertyValue(BirtContainer.CONFIG_FILE, "birt.osgi.arguments");
         config.setOSGiArguments(argumentsString.split(","));
@@ -132,7 +123,7 @@ public class BirtContainer implements Container {
         // set platform file context
         config.setPlatformContext(new PlatformFileContext(config));
         config.setAppContext(context);
-        
+
         // startup platform
         try {
             Debug.logInfo("Startup birt platform", module);
@@ -162,28 +153,26 @@ public class BirtContainer implements Container {
         Debug.logInfo("BIRT supported formats: " + formatList, module);
         return false;
     }
-    
+
     public void stop() throws ContainerException {
-        // TODO Auto-generated method stub
-        
     }
-    
+
     public String getContainerConfigName() {
         return "birt-container";
     }
-    
-    public static IReportEngine getReportEngine() throws GenericEntityException, SQLException {
+
+    public static IReportEngine getReportEngine() {
         return engine;
     }
-    
+
     public static String getDelegatorGroupHelperName() {
         return delegatorGroupHelperName;
     }
-    
+
     public static String getDelegatorName() {
         return delegatorName;
     }
-    
+
     public static String getDispatcherName() {
         return dispatcherName;
     }
@@ -191,7 +180,7 @@ public class BirtContainer implements Container {
     public static Delegator getDelegator() {
         return delegator;
     }
-    
+
     public static LocalDispatcher getDispatcher() {
         return dispatcher;
     }

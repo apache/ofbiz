@@ -105,7 +105,7 @@ under the License.
         </field>
         <field name="lastModifiedDate"><display/></field>
         <!--field name="statusId"><hidden value="CRQ_REJECTED"/></field-->
-        <field name="reject">
+        <field name="rejectButton">
             <hyperlink target="setCustRequestStatus" description="${uiLabelMap.FormFieldTitle_rejectButton}">
                 <parameter param-name="custRequestId"/>
                 <parameter param-name="statusId" value="CRQ_REJECTED"/>
@@ -568,7 +568,9 @@ under the License.
         </field>
         <field name="contentTypeId">
             <drop-down allow-empty="false" no-current-selected-key="DOCUMENT">
-                <entity-options description="${description}" entity-name="ContentType"/>
+                <entity-options description="${description}" entity-name="ContentType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
             </drop-down>
         </field>
         <field name="statusId" use-when="contentId==void">

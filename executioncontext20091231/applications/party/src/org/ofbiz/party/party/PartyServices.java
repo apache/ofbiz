@@ -112,7 +112,7 @@ public class PartyServices {
         String description = (String) context.get("description");
 
         // if specified partyId starts with a number, return an error
-        if (UtilValidate.isNotEmpty(partyId) && Character.isDigit(partyId.charAt(0))) {
+        if (UtilValidate.isNotEmpty(partyId) && partyId.matches("\\d+")) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "party.id_is_digit", locale));
         }
 
@@ -181,7 +181,7 @@ public class PartyServices {
         person = delegator.makeValue("Person", UtilMisc.toMap("partyId", partyId));
         person.setNonPKFields(context);
         toBeStored.add(person);
-        
+
         try {
             delegator.storeAll(toBeStored);
         } catch (GenericEntityException e) {
@@ -287,7 +287,7 @@ public class PartyServices {
         if (person == null || party == null) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "person.update.not_found", locale));
         }
-        
+
         // update status by separate service
         String oldStatusId = party.getString("statusId");
         if (party.get("statusId") == null) { // old records
@@ -298,7 +298,7 @@ public class PartyServices {
         party.setNonPKFields(context);
 
         party.set("statusId", oldStatusId);
-        
+
         try {
             person.store();
             party.store();
@@ -306,7 +306,7 @@ public class PartyServices {
             Debug.logWarning(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "person.update.write_failure", new Object[] { e.getMessage() }, locale));
         }
-        
+
         if (UtilValidate.isNotEmpty(context.get("statusId")) && !context.get("statusId").equals(oldStatusId)) {
             try {
                 dispatcher.runSync("setPartyStatus", UtilMisc.toMap("partyId", partyId, "statusId", context.get("statusId"), "userLogin", context.get("userLogin")));
@@ -348,7 +348,7 @@ public class PartyServices {
             }
         } else {
             // if specified partyId starts with a number, return an error
-            if (Character.isDigit(partyId.charAt(0))) {
+            if (partyId.matches("\\d+")) {
                 errMsg = UtilProperties.getMessage(resource,"partyservices.could_not_create_party_ID_digit", locale);
                 return ServiceUtil.returnError(errMsg);
             }
@@ -415,7 +415,7 @@ public class PartyServices {
             partyGroup = delegator.makeValue("PartyGroup", UtilMisc.toMap("partyId", partyId));
             partyGroup.setNonPKFields(context);
             partyGroup.create();
-            
+
         } catch (GenericEntityException e) {
             Debug.logWarning(e, module);
             Map<String, String> messageMap = UtilMisc.toMap("errMessage", e.getMessage());
@@ -464,7 +464,7 @@ public class PartyServices {
             return ServiceUtil.returnError(errMsg);
         }
 
-        
+
         // update status by separate service
         String oldStatusId = party.getString("statusId");
         partyGroup.setNonPKFields(context);
@@ -481,7 +481,7 @@ public class PartyServices {
             return ServiceUtil.returnError(errMsg);
         }
 
-        if (!context.get("statusId").equals(oldStatusId)) {
+        if (UtilValidate.isNotEmpty(context.get("statusId")) && !context.get("statusId").equals(oldStatusId)) {
             try {
                 dispatcher.runSync("setPartyStatus", UtilMisc.toMap("partyId", partyId, "statusId", context.get("statusId"), "userLogin", context.get("userLogin")));
             } catch (GenericServiceException e) {
@@ -511,7 +511,7 @@ public class PartyServices {
         String partyId = getPartyId(context);
 
         // if specified partyId starts with a number, return an error
-        if (Character.isDigit(partyId.charAt(0))) {
+        if (UtilValidate.isNotEmpty(partyId) && partyId.matches("\\d+")) {
             errMsg = UtilProperties.getMessage(resource,"partyservices.cannot_create_affiliate_digit", locale);
             return ServiceUtil.returnError(errMsg);
         }
@@ -785,7 +785,7 @@ public class PartyServices {
 
         try {
             EntityExpr ee = EntityCondition.makeCondition(EntityFunction.UPPER_FIELD("userLoginId"), EntityOperator.LIKE, EntityFunction.UPPER("%" + userLoginId.toUpperCase() + "%"));
-            Collection<GenericValue> ulc = delegator.findList("PartyAndUserLogin", ee, null, UtilMisc.toList("userloginId"), null, false);
+            Collection<GenericValue> ulc = delegator.findList("PartyAndUserLogin", ee, null, UtilMisc.toList("userLoginId"), null, false);
 
             if (Debug.verboseOn()) Debug.logVerbose("Collection: " + ulc, module);
             if (Debug.infoOn()) Debug.logInfo("PartyFromUserLogin number found: " + ulc.size(), module);
@@ -1735,8 +1735,8 @@ public class PartyServices {
         }
         return partyId;
     }
-    
-    
+
+
     /**
      * Finds partyId(s) corresponding to a party reference, partyId or a GoodIdentification idValue
      * @param dctx

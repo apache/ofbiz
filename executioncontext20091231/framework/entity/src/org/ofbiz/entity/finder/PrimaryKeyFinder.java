@@ -41,6 +41,7 @@ import org.w3c.dom.Element;
  * Uses the delegator to find entity values by a condition
  *
  */
+@SuppressWarnings("serial")
 public class PrimaryKeyFinder extends Finder {
     public static final String module = PrimaryKeyFinder.class.getName();
 
@@ -99,9 +100,9 @@ public class PrimaryKeyFinder extends Finder {
         if (autoFieldMap) {
             GenericValue tempVal = delegator.makeValue(modelEntity.getEntityName());
 
-            // try a map called "parameters", try it first so values from here are overriden by values in the main context
+            // try a map called "parameters", try it first so values from here are overridden by values in the main context
             Object parametersObj = context.get("parameters");
-            if (parametersObj != null && parametersObj instanceof Map) {
+            if (parametersObj != null && parametersObj instanceof Map<?, ?>) {
                 tempVal.setAllFields(UtilGenerics.checkMap(parametersObj), true, null, Boolean.TRUE);
             }
 
@@ -113,7 +114,13 @@ public class PrimaryKeyFinder extends Finder {
         EntityFinderUtil.expandFieldMapToContext(fieldMap, context, entityContext);
         //Debug.logInfo("PrimaryKeyFinder: entityContext=" + entityContext, module);
         // then convert the types...
+        
+        // need the timeZone and locale for conversion, so add here and remove after
+        entityContext.put("locale", context.get("locale"));
+        entityContext.put("timeZone", context.get("timeZone"));
         modelEntity.convertFieldMapInPlace(entityContext, delegator);
+        entityContext.remove("locale");
+        entityContext.remove("timeZone");
 
         // get the list of fieldsToSelect from selectFieldExpanderList
         Set<String> fieldsToSelect = EntityFinderUtil.makeFieldsToSelect(selectFieldExpanderList, context);

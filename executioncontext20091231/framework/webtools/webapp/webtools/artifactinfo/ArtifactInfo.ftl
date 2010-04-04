@@ -83,10 +83,10 @@ under the License.
     </#if>
 
     <#if artifactInfo.getType() == "entity">
-        <div><a href="<@ofbizUrl>FindGeneric?entityName=${artifactInfo.modelEntity.getEntityName()}&find=true&VIEW_SIZE=50&VIEW_INDEX=0</@ofbizUrl>">All Entity Data</a></div>
+        <div><a href="<@ofbizUrl>FindGeneric?entityName=${artifactInfo.modelEntity.getEntityName()}&amp;find=true&amp;VIEW_SIZE=50&amp;VIEW_INDEX=0</@ofbizUrl>">All Entity Data</a></div>
         <h2>Entity Fields</h2>
         <table>
-        <#list artifactInfo.modelEntity.getFieldsCopy() as modelField>
+        <#list artifactInfo.modelEntity.getFieldsUnmodifiable() as modelField>
             <tr><td>${modelField.getName()}<#if modelField.getIsPk()>*</#if></td><td>${modelField.getType()}</td><td>${modelField.getDescription()?if_exists}</td></tr>
         </#list>
         </table>
@@ -133,9 +133,10 @@ under the License.
         <div>&nbsp;Impl Location: <a href="${artifactInfo.getImplementationLocationURL()?if_exists}">${artifactInfo.getImplementationLocationURL()?if_exists}</a></div>
         <h2>Service Parameters</h2>
         <table>
-            <tr><td>Name</td><td>Type</td><td>Optional</td><td>Mode</td></tr>
-        <#list artifactInfo.modelService.getModelParamList() as modelParam>
-            <tr><td>${modelParam.getName()}</td><td>${modelParam.getType()}</td><td><#if modelParam.isOptional()>optional<#else/>required</#if></td><td>${modelParam.getMode()}</td></tr>
+            <tr><td>Name</td><td>Type</td><td>Optional</td><td>Mode</td><td>Entity.field</td></tr>
+        <#list artifactInfo.modelService.getAllParamNames() as paramName>
+            <#assign modelParam = artifactInfo.modelService.getParam(paramName)/>
+            <tr><td>${modelParam.getName()}<#if modelParam.getInternal()> (internal)</#if></td><td>${modelParam.getType()}</td><td><#if modelParam.isOptional()>optional<#else/>required</#if></td><td>${modelParam.getMode()}</td><td>${modelParam.getEntityName()?if_exists}.${modelParam.getFieldName()?if_exists}</td></tr>
         </#list>
         </table>
 

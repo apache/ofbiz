@@ -226,6 +226,7 @@ under the License.
           If filterOutCanceledEvents is set to Boolean(true) then workEfforts with currentStatusId=EVENT_CANCELLED will not be returned.
           To limit the events to a particular partyId, specify the partyId.  To limit the events to a set of partyIds, specify a Collection of partyIds.
         </description>
+        <attribute name="calendarType" type="String" mode="IN" optional="true"/>
         <attribute name="partyId" type="String" mode="IN" optional="true"/>
         <attribute name="partyIds" type="java.util.Collection" mode="IN" optional="true"/>
         <attribute name="facilityId" type="String" mode="IN" optional="true"/>
@@ -308,7 +309,7 @@ under the License.
             location="component://workeffort/script/org/ofbiz/workeffort/workeffort/WorkEffortSimpleServices.xml" invoke="createWorkEffortGoodStandard">
         <description>
             Create a WorkEffort - Product Assoc, for linking WorkEffort to In or Out  Product,
-            for routing it's the link between Manafactured Product with its routings
+            for routing it's the link between Manufactured Product with its routings
         </description>
         <permission-service service-name="workEffortGenericPermission" main-action="UPDATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
@@ -319,7 +320,7 @@ under the License.
             location="component://workeffort/script/org/ofbiz/workeffort/workeffort/WorkEffortSimpleServices.xml" invoke="updateWorkEffortGoodStandard">
         <description>
             Update a WorkEffort - Product Assoc, for linking WorkEffort to In or Out  Product,
-            for routing it's the link between Manafactured Product with its routings
+            for routing it's the link between Manufactured Product with its routings
         </description>
         <permission-service service-name="workEffortGenericPermission" main-action="UPDATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
@@ -328,7 +329,7 @@ under the License.
     <service name="removeWorkEffortGoodStandard" engine="simple" default-entity-name="WorkEffortGoodStandard"
             location="component://workeffort/script/org/ofbiz/workeffort/workeffort/WorkEffortSimpleServices.xml" invoke="removeWorkEffortGoodStandard">
         <description>Remove a WorkEffort - Product Assoc, for linking WorkEffort to In or Out  Product,
-            for routing it's the link between Manafactured Product with its routings
+            for routing it's the link between Manufactured Product with its routings
         </description>
         <auto-attributes include="pk" mode="IN" optional="false"/>
     </service>
@@ -521,7 +522,7 @@ under the License.
         location="component://workeffort/script/org/ofbiz/workeffort/workeffort/WorkEffortSimpleServices.xml"
         invoke="deleteWorkEffortContent"
         default-entity-name="WorkEffortContent" auth="true">
-        <description>Update a Work Effort Content</description>
+        <description>Delete a Work Effort Content</description>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
     </service>

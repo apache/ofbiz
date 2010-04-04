@@ -76,8 +76,8 @@ public class ProductStoreWorker {
 
     public static String getProductStoreId(ServletRequest request) {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
-        HttpSession session = httpRequest.getSession();
-        if (session.getAttribute("productStoreId") != null) {
+        HttpSession session = httpRequest.getSession(false);
+        if (session != null && session.getAttribute("productStoreId") != null) {
             return (String) session.getAttribute("productStoreId");
         } else {
             GenericValue webSite = CatalogWorker.getWebSite(request);
@@ -513,7 +513,7 @@ public class ProductStoreWorker {
                     try {
                         categoryMembers = delegator.findByAnd("ProductCategoryMember", UtilMisc.toMap("productCategoryId", surveyAppl.get("productCategoryId")));
                     } catch (GenericEntityException e) {
-                        Debug.logError(e, "Unable to get ProductCategoryMemebr records for survey application : " + surveyAppl, module);
+                        Debug.logError(e, "Unable to get ProductCategoryMember records for survey application : " + surveyAppl, module);
                     }
                     if (categoryMembers != null) {
                         for (GenericValue member: categoryMembers) {
@@ -674,13 +674,7 @@ public class ProductStoreWorker {
                 return false;
             }
 
-            try {
-                isInventoryAvailable = ProductWorker.isProductInventoryAvailableByFacility(productConfig, inventoryFacilityId, quantity, dispatcher);
-            } catch (GenericServiceException e) {
-                Debug.logWarning(e, "Error invoking isProductInventoryAvailableByFacility in isCatalogInventoryAvailable", module);
-                return false;
-            }
-            return isInventoryAvailable;
+            return ProductWorker.isProductInventoryAvailableByFacility(productConfig, inventoryFacilityId, quantity, dispatcher);
 
         } else {
             GenericValue product = productConfig.getProduct();
@@ -695,14 +689,9 @@ public class ProductStoreWorker {
 
             if (UtilValidate.isNotEmpty(productFacilities)) {
                 for (GenericValue pfValue: productFacilities) {
-                    try {
-                        isInventoryAvailable = ProductWorker.isProductInventoryAvailableByFacility(productConfig, pfValue.getString("facilityId"), quantity, dispatcher);
-                        if (isInventoryAvailable == true) {
-                            return isInventoryAvailable;
-                        }
-                    } catch (GenericServiceException e) {
-                        Debug.logWarning(e, "Error invoking isProductInventoryAvailableByFacility in isCatalogInventoryAvailable", module);
-                        return false;
+                    isInventoryAvailable = ProductWorker.isProductInventoryAvailableByFacility(productConfig, pfValue.getString("facilityId"), quantity, dispatcher);
+                    if (isInventoryAvailable == true) {
+                        return isInventoryAvailable;
                     }
                 }
             }

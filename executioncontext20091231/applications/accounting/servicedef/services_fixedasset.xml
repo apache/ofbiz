@@ -241,14 +241,30 @@ under the License.
         <auto-attributes include="pk" mode="IN" optional="false"/>
     </service>
 
-    <!-- Fixed Asset Permission Services -->
-    <service name="fixedAssetPermissionCheck" engine="simple"
-            location="component://accounting/script/org/ofbiz/accounting/permissions/PermissionServices.xml" invoke="basePermissionCheck">
-        <description>Fixed Asset Permission Checking Logic</description>
-        <implements service="permissionInterface"/>
-    </service>
-
     <!-- Fixed Asset Depreciation Services -->
+    <service name="createFixedAssetDepMethod" default-entity-name="FixedAssetDepMethod" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Fixed Asset Depreciation Method</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFixedAssetDepMethod" default-entity-name="FixedAssetDepMethod" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a Fixed Asset Depreciation Method</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="updateFixedAssetDepMethod" default-entity-name="FixedAssetDepMethod" engine="entity-auto" invoke="update" auth="true">
+        <description>Create a Fixed Asset Depreciation Method</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="checkUpdateFixedAssetDepreciation" default-entity-name="AcctgTrans" engine="simple"
+              location="component://accounting/script/org/ofbiz/accounting/fixedasset/FixedAssetServices.xml" invoke="checkUpdateFixedAssetDepreciation" auth="true">
+        <description>If the accounting transaction is a depreciation transaction for a fixed asset, update the depreciation amount in the FixedAsset entity.</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
     <service name="fixedAssetDepCalcInterface" engine="interface">
         <description>Interface to describe base parameters for Depreciation Calculation Services</description>
         <attribute name="expEndOfLifeYear" type="Integer" mode="IN" optional="false"/>
@@ -258,6 +274,9 @@ under the License.
         <attribute name="usageYears" type="Integer" mode="IN" optional="false"/>
         <attribute name="assetDepreciationTillDate" type="List" mode="OUT" optional="false"/>
         <attribute name="assetNBVAfterDepreciation" type="List" mode="OUT" optional="false"/>
+        <attribute name="assetDepreciationInfoList" type="List" mode="OUT" optional="false"/>
+        <attribute name="nextDepreciationAmount" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="plannedPastDepreciationTotal" type="BigDecimal" mode="OUT" optional="false"/>
     </service>
     <service name="straightLineDepreciation" engine="simple" default-entity-name="FixedAsset"
                 location="component://accounting/script/org/ofbiz/accounting/fixedasset/FixedAssetServices.xml" invoke="straightLineDepreciation" auth="true">
@@ -275,8 +294,25 @@ under the License.
                 location="component://accounting/script/org/ofbiz/accounting/fixedasset/FixedAssetServices.xml" invoke="calculateFixedAssetDepreciation" auth="true">
         <description>Select the depreciation method according to the entry in FixedAssetDepMethod</description>
         <attribute name="fixedAssetId" type="String" mode="IN"/>
-        <attribute name="assetDepreciationTillDate" type="List" mode="OUT" optional="false"/>
-        <attribute name="assetNBVAfterDepreciation" type="List" mode="OUT" optional="false"/>
+        <attribute name="assetDepreciationTillDate" type="List" mode="OUT" optional="true"/>
+        <attribute name="assetNBVAfterDepreciation" type="List" mode="OUT" optional="true"/>
+        <attribute name="assetDepreciationInfoList" type="List" mode="OUT" optional="true"/>
+        <attribute name="nextDepreciationAmount" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="plannedPastDepreciationTotal" type="BigDecimal" mode="OUT" optional="true"/>
+    </service>
+    <service name="createFixedAssetTypeGlAccount" engine="simple" default-entity-name="FixedAssetTypeGlAccount"
+                location="component://accounting/script/org/ofbiz/accounting/fixedasset/FixedAssetServices.xml" invoke="createFixedAssetTypeGlAccount" auth="true">
+        <description>Create a Fixed Asset Type Gl Account Mapping</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="fixedAssetTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="fixedAssetId" type="String" mode="IN" optional="true"/>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="deleteFixedAssetTypeGlAccount" default-entity-name="FixedAssetTypeGlAccount" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a Fixed Asset Type Gl Account Mapping</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
     </service>
 
     <!-- FixedAssetGeoPoint services -->

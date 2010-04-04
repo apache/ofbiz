@@ -19,7 +19,10 @@ under the License.
 
 <div id="serialized-inventory-summary" class="screenlet">
     <div class="screenlet-title-bar">
-        <h3>${uiLabelMap.ProductSerializedInventorySummary}</h3>
+      <ul>
+        <li class="h3">${uiLabelMap.ProductSerializedInventorySummary}</li>
+      </ul>
+      <br class="clear" />
     </div>
     <div class="screenlet-body">
         <table id="serialized-inventory" class="basic-table" cellspacing="0" cellpadding="2">
@@ -37,7 +40,7 @@ under the License.
                 <#list inventoryItemList as inventoryItem>
                     <#assign product = inventoryItem.getRelatedOne('Product')?if_exists>
                     <tr>
-                        <td><a href="/facility/control/EditInventoryItem?inventoryItemId=${inventoryItem.inventoryItemId}&externalLoginKey=${requestAttributes.externalLoginKey?if_exists}" class="linktext">${inventoryItem.inventoryItemId}</a></td>
+                        <td><a href="/facility/control/EditInventoryItem?inventoryItemId=${inventoryItem.inventoryItemId}&amp;externalLoginKey=${requestAttributes.externalLoginKey?if_exists}" class="linktext">${inventoryItem.inventoryItemId}</a></td>
                         <td>
                             <#if product?has_content>
                                 <#if product.isVariant?default('N') == 'Y'>
@@ -45,7 +48,7 @@ under the License.
                                 </#if>
                                 <#if product?has_content>
                                     <#assign productName = Static['org.ofbiz.product.product.ProductContentWrapper'].getProductContentAsText(product, 'PRODUCT_NAME', request)?if_exists>
-                                    <a href="/catalog/control/EditProduct?productId=${product.productId}&externalLoginKey=${requestAttributes.externalLoginKey?if_exists}">${productName?default(product.productId)}</a>
+                                    <a href="/catalog/control/EditProduct?productId=${product.productId}&amp;externalLoginKey=${requestAttributes.externalLoginKey?if_exists}">${productName?default(product.productId)}</a>
                                 </#if>
                             </#if>
                         </td>

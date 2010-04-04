@@ -718,11 +718,12 @@ under the License.
             <set field="type" value="PHONE_SHIPPING"/><field-to-list field="type" list="types"/>
             <set field="type" value="PHONE_SHIP_ORIG"/><field-to-list field="type" list="types"/>
             <else>
-                <set field="type" from-field="parameters.contactMechPurposeTypeId"/><field-to-list field="type" list="types"/>
+                <set field="type" from-field="parameters.contactMechPurposeTypeId"/>
+                <field-to-list field="type" list="types"/>
             </else>
         </if-empty>
         <set field="findMap.contactMechTypeId" value="TELECOM_NUMBER"/>
-        <find-by-and entity-name="PartyContactDetailByPurpose" map="findMap" list="telephoneAll1"></find-by-and>
+        <find-by-and entity-name="PartyContactDetailByPurpose" map="findMap" list="telephoneAll1"/>
         <filter-list-by-date list="telephoneAll1" to-list="telephoneAll2" from-field-name="purposeFromDate" thru-field-name="purposeThruDate"/>
         <filter-list-by-date list="telephoneAll2" to-list="telephoneAll3"/>
         <if-not-empty field="telephoneAll3">
@@ -753,7 +754,7 @@ under the License.
                 <find-by-and entity-name="PartyAndContactMech" map="findMap" list="telephoneAll1"/>
                 <filter-list-by-date list="telephoneAll1" to-list="telephoneAll2"/>
                 <first-from-list entry="telephone" list="telephoneAll2"/>
-                <field-to-result field="telephone.contactMechId" result-name="contactMechId"/>                
+                <field-to-result field="telephone.contactMechId" result-name="contactMechId"/>
                 <if-not-empty field="telephone.tnCountryCode">
                     <field-to-result field="telephone.tnCountryCode" result-name="countryCode"/>
                 </if-not-empty>
@@ -954,12 +955,14 @@ under the License.
     <simple-method method-name="sendCreatePartyEmailNotification" short-description="Notification email on party creation" login-required="false">
         <map-to-map map="parameters" to-map="bodyParameters"/>
         <set field="emailType" value="PARTY_REGIS_CONFIRM"/>
-        <entity-condition entity-name="ProductStoreEmailSetting" list="productStoreEmailSettings">
-            <condition-list>
-                <condition-expr field-name="emailType" operator="equals" from-field="emailType"/>
-            </condition-list>
-        </entity-condition>
-        <first-from-list entry="storeEmail" list="productStoreEmailSettings"/>
+        <set field="productStoreId" from-field="parameters.productStoreId" />
+        <if-empty field="productStoreId">
+            <log level="warning" message="No productStoreId specified."/>
+        </if-empty>
+        <entity-one entity-name="ProductStoreEmailSetting" value-field="storeEmail">
+            <field-map field-name="emailType"/>
+            <field-map field-name="productStoreId"/>
+        </entity-one>
         <entity-and list="webSites" entity-name="WebSite">
             <field-map field-name="productStoreId" from-field="storeEmail.productStoreId"/>
         </entity-and>
@@ -985,12 +988,14 @@ under the License.
     <!-- send personal information update email notification -->
     <simple-method method-name="sendUpdatePersonalInfoEmailNotification" short-description="Send the Notification email on personal information updation" login-required="false">
         <map-to-map map="parameters" to-map="bodyParameters"/>
-        <entity-condition entity-name="ProductStoreEmailSetting" list="productStoreEmailSettings">
-            <condition-list>
-                <condition-expr field-name="emailType" operator="equals" value="UPD_PRSNL_INF_CNFRM"/>
-            </condition-list>
-        </entity-condition>
-        <first-from-list entry="storeEmail" list="productStoreEmailSettings"/>
+        <set field="productStoreId" from-field="parameters.productStoreId" />
+        <if-empty field="productStoreId">
+            <log level="warning" message="No productStoreId specified."/>
+        </if-empty>
+        <entity-one entity-name="ProductStoreEmailSetting" value-field="storeEmail">
+            <field-map field-name="emailType" value="UPD_PRSNL_INF_CNFRM"/>
+            <field-map field-name="productStoreId"/>
+        </entity-one>
         <entity-and list="webSites" entity-name="WebSite">
             <field-map field-name="productStoreId" from-field="storeEmail.productStoreId"/>
         </entity-and>
@@ -1067,16 +1072,16 @@ under the License.
                 processor-name="person" in-map-name="parameters" out-map-name="personMap"/>
         <check-errors/>
         <set field="partyId" from-field="parameters.partyId"/>
+        <entity-one entity-name="Party" value-field="party"/>
+        <set field="personContext.partyId" from-field="partyId"/>
         <set-service-fields service-name="createPerson" map="personMap" to-map="personContext"/>
-        <if-empty field="partyId">
+        <if-empty field="party">
             <call-service service-name="createPerson" in-map-name="personContext">
                 <result-to-field result-name="partyId" field="partyId"/>
             </call-service>
-        <else><!-- If partyId already exists. -->
-            <set field="personContext.partyId" from-field="partyId"/>
+        <else><!-- If party object already exist, update the person record. -->
             <set field="personContext.userLogin" from-field="parameters.userLogin"/>
             <call-service service-name="updatePerson" in-map-name="personContext"/>
-            <log level="info" message="Party Updated partyId is ${partyId}"/>
         </else>
         </if-empty>
         <field-to-result field="partyId"/>

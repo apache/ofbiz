@@ -21,7 +21,9 @@ under the License.
         <h3>${uiLabelMap.ProductEditFeaturesForFeatureCategory} "${(curProductFeatureCategory.description)?if_exists}"</h3>
     </div>
     <div class="screenlet-body">
-        <a href="<@ofbizUrl>CreateFeature?productFeatureCategoryId=${productFeatureCategoryId?if_exists}</@ofbizUrl>" class="buttontext">${uiLabelMap.ProductCreateNewFeature}</a>
+        <div class="button-bar">
+          <a href="<@ofbizUrl>CreateFeature?productFeatureCategoryId=${productFeatureCategoryId?if_exists}</@ofbizUrl>" class="buttontext create">${uiLabelMap.ProductCreateNewFeature}</a>
+        </div>
         <br>
         <form action="<@ofbizUrl>QuickAddProductFeatures</@ofbizUrl>" method="post">
           <div>
@@ -32,7 +34,7 @@ under the License.
           </div>
           <input type="hidden" name="productFeatureCategoryId" value="${productFeatureCategoryId}">
         </form>
-        <br/>
+        <br />
     </div>
 </div>
 <div class="screenlet">
@@ -62,7 +64,7 @@ under the License.
                 </tr>
             </table>
         </#if>
-        <br/>
+        <br />
         <table cellspacing="0" class="basic-table">
             <form method='POST' action='<@ofbizUrl>UpdateProductFeatureInCategory</@ofbizUrl>' name="selectAllForm">
             <input type="hidden" name="_useRowSubmit" value="Y">

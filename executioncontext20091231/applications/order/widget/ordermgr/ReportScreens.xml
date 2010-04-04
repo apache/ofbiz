@@ -24,24 +24,16 @@ under the License.
     <screen name="OrderPurchaseReportOptions">
         <section>
             <actions>
-            	<set field="headerItem" value="reports"/>
-                <entity-one value-field="portalPage" entity-name="PortalPage">
-                    <field-map field-name="portalPageId" value="OrderReportPage"/>
-                </entity-one>
-                <entity-and entity-name="PortalPageColumn" list="portalPageColumns">
-                    <field-map field-name="portalPageId" value="OrderReportPage"/>
-                    <order-by field-name="columnSeqId"/>
-                </entity-and>
-                <entity-and entity-name="PortalPagePortletView" list="portalPagePortlets">
-                    <field-map field-name="portalPageId" value="OrderReportPage"/>
-                    <order-by field-name="columnSeqId"/>
-                    <order-by field-name="sequenceNum"/>
-                </entity-and>
+
+                <set field="titleProperty" value="OrderReports"/>
+                <set field="headerItem" value="reports"/>
+
+                <set field="parameters.portalPageId" value="OrderReportPage"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <platform-specific><html><html-template location="component://common/webcommon/portal/showPortalPage.ftl"/></html></platform-specific>
+                        <include-screen name="PortalPageScreen" location="component://common/widget/CommonScreens.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -108,6 +100,26 @@ under the License.
             </widgets>
         </section>
     </screen>
+
+    <screen name="NetBeforeOverheadReport">
+        <section>
+            <widgets>
+                <screenlet title="Net Before Overhead Report">
+                    <include-form name="NetBeforeOverheadReport" location="component://order/widget/ordermgr/ReportForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ProductDemandReport">
+        <section>
+            <widgets>
+                <screenlet title="Product Demand Report">
+                    <include-form name="ProductDemandReport" location="component://order/widget/ordermgr/ReportForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen> 
 
     <screen name="OrderPurchaseReportPayment">
         <section>
@@ -295,14 +307,14 @@ under the License.
     
     <screen name="SalesOrderReport">
         <section>
-  <!--          <actions>
+            <actions>
                 <entity-condition entity-name="SalesOrderItemStarSchema" list="SalesReportList">
                     <condition-list combine="and">
                         <condition-expr field-name="orderDate" operator="greater-equals" from-field="parameters.fromOrderDate" ignore-if-null="true"/>
                         <condition-expr field-name="orderDate" operator="less" from-field="parameters.thruOrderDate" ignore-if-null="true"/>
                     </condition-list>
                 </entity-condition>
-                </actions>-->
+            </actions>
             <widgets>
                 <platform-specific>
                     <xml><html-template location="component://order/webapp/ordermgr/reports/SalesReport.rptdesign"/></xml>
@@ -310,6 +322,27 @@ under the License.
             </widgets>
         </section>
     </screen>
+
+    <screen name="NetBeforeOverheadOrderReport">
+        <section>
+            <widgets>
+                <platform-specific>
+                    <xml><html-template location="component://order/webapp/ordermgr/reports/NetBeforeOverheadReport.rptdesign"/></xml>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ProductDemandOrderReport ">
+        <section>
+            <widgets>
+                <platform-specific>
+                    <xml><html-template location="component://order/webapp/ordermgr/reports/ProductDemandReport.rptdesign"/></xml>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    
     <!-- Sale Order By Referrer -->
     <screen name="SaleOrdersByReferrerReport">
         <section>

@@ -25,6 +25,7 @@
             <actions>
                 <set field="titleProperty" value="HumanResFindEmplLeave"/>
                 <set field="headerItem" value="Leave"/>
+                <set field="tabButtonItem" value="EmployeeLeave"/>
                 <set field="partyId" from-field="parameters.partyId"/>
                 <set field="leaveTypeId" from-field="parameters.leaveTypeId"/>
                 <set field="fromDate" from-field="parameters.fromDate"/>
@@ -50,7 +51,7 @@
                                         <section>
                                             <widgets>
                                                 <container style="button-bar">
-                                                    <link target="EditEmplLeave" text="${uiLabelMap.HumanResNewLeave}" style="buttontext"/>
+                                                    <link target="EditEmplLeave" text="${uiLabelMap.HumanResNewLeave}" style="buttontext create"/>
                                                 </container>
                                             </widgets>
                                         </section>
@@ -115,7 +116,7 @@
             <actions>
                 <set field="titleProperty" value="HumanResEditEmplLeave"/>
                 <set field="headerItem" value="Leave"/>
-                <set field="tabButtonItem" value="EditEmplLeaves"/>
+                <set field="tabButtonItem" value="EmployeeLeave"/>
                 <set field="partyId" from-field="parameters.partyId"/>
                 <set field="leaveTypeId" from-field="parameters.leaveTypeId"/>
                 <set field="fromDate" from-field="parameters.fromDate"/>

@@ -19,9 +19,6 @@
 
 package org.ofbiz.testtools.seleniumxml;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -30,7 +27,6 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -41,10 +37,11 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import javolution.util.FastMap;
 import junit.framework.Assert;
 
-import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -53,7 +50,7 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
-import org.ofbiz.testtools.seleniumxml.util.TestUtils;
+import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilProperties;
@@ -63,6 +60,8 @@ import org.ofbiz.testtools.seleniumxml.DataLoop;
 import org.ofbiz.testtools.seleniumxml.GroovyRunner;
 import org.ofbiz.testtools.seleniumxml.JythonRunner;
 import org.ofbiz.testtools.seleniumxml.RemoteRequest;
+import org.ofbiz.testtools.seleniumxml.TestCaseException;
+import org.ofbiz.testtools.seleniumxml.util.TestUtils;
 
 import com.thoughtworks.selenium.DefaultSelenium;
 import com.thoughtworks.selenium.SeleniumException;
@@ -81,7 +80,8 @@ public class SeleniumXml {
     private String username;
     private String password;
     private String testCaseDirectory;
-
+    private String imagePath = null;
+    
     public static void main(String[] args) throws JDOMException, IOException, TestCaseException{
         if(args.length == 0) {
             System.out.println("Please include a path for the selenium XML test file.");
@@ -145,9 +145,9 @@ public class SeleniumXml {
             }
         }catch(JDOMException jdome){
              System.out.println(jdome.getMessage());
-         }catch(IOException ioe){
+        }catch(IOException ioe){
              System.out.println("Error message : "+ioe.getMessage());
-         }finally{
+        }finally{
              return "success";
          }
     }
@@ -226,7 +226,7 @@ public class SeleniumXml {
 
     public void runCommands() throws TestCaseException {
         Element root = this.doc.getRootElement();
-        List<Element> nodes = root.getChildren();
+        List<Element> nodes = UtilGenerics.cast(root.getChildren());
         runCommands(nodes);
     }
 
@@ -320,8 +320,12 @@ public class SeleniumXml {
                 selectWindow(elem);
             }  else if("assertConfirmation" == thisName) {
                 assertConfirmation(elem);
+            }  else if("captureEntirePageScreenshot" == thisName) {
+                captureEntirePageScreenshotCmd(elem);
             } else if("runScript" == thisName) {
                 runScript(elem);
+            } else if("closeBrowser" == thisName) {
+                sel.stop();
             } else {
                 logger.info("Undefined command calling by reflection for command: " + thisName);
                 callByReflection(elem);
@@ -502,11 +506,11 @@ public class SeleniumXml {
     public void ifCmd(Element elem) throws TestCaseException {
         String isRun = replaceParam(elem.getAttributeValue("condition"));
         if (isRun != null && !isRun.equals("") && Boolean.valueOf(isRun)) {
-            List <Element> children = elem.getChildren();
+            List <Element> children = UtilGenerics.cast(elem.getChildren());
             this.runCommands(children);
         }else{
             Element child = elem.getChild("else");
-            List <Element> children = child.getChildren();
+            List <Element> children = UtilGenerics.cast(child.getChildren());
             this.runCommands(children);
         }
     }
@@ -514,7 +518,7 @@ public class SeleniumXml {
     public void partialRunDependency(Element elem) throws TestCaseException {
         String isRun = replaceParam(elem.getAttributeValue("isRun"));
         if (isRun != null && Boolean.valueOf(isRun)) {
-            List <Element> children = elem.getChildren();
+            List <Element> children = UtilGenerics.cast(elem.getChildren());
             this.runCommands(children);
         }
     }
@@ -683,6 +687,29 @@ public class SeleniumXml {
         logger.debug("assertConfirmation: " + replaceParam(elem.getAttributeValue("value")));
         this.sel.waitForCondition("selenium.isConfirmationPresent();", "1000");
         this.sel.getConfirmation();
+    }
+
+    /**
+     * @param elem
+     * Will save a browser's screenshot in runtime/logs
+     * Need to be called with captureEntirePageScreenshot and the name of the test case
+     * example :
+     *     <captureEntirePageScreenshot value="CommEventCreateOpportunity"/>
+     */
+    private void captureEntirePageScreenshotCmd(Element elem) {
+        Long now = UtilDateTime.nowTimestamp().getTime();
+        String imageName = replaceParam(elem.getAttributeValue("value")) + "-" + now.toString();
+        logger.debug("captureEntirePageScreenshot: " + imageName);
+        imagePath = "runtime/logs/" + imageName + ".png";
+        try {
+            String base64Screenshot = sel.captureEntirePageScreenshotToString(""); 
+            byte[] decodedScreenshot = Base64.decodeBase64(base64Screenshot.getBytes());
+            FileOutputStream fos = new FileOutputStream(new File(imagePath));
+            fos.write(decodedScreenshot);
+            fos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -949,11 +976,11 @@ public class SeleniumXml {
 
         //First initialize with property values
         if(props != null ) { //Get setup params from property value
-
             serverHost = props.getProperty("serverHost", "localhost");
             serverPort = props.getProperty("proxyPort", "4444");
             browser = props.getProperty("browser", "*iexplore");
             startUrl = props.getProperty("startUrl", "http://localhost:8080");
+            imagePath = props.getProperty("imagePath", "runtime/logs/");
         }
         //Second over ride properties if defined in the "setup" element
         Element elem = this.doc.getRootElement().getChild("setup");
@@ -976,6 +1003,7 @@ public class SeleniumXml {
         logger.info("setup: serverPort=" + serverPort);
         logger.info("setup: browser=" + browser);
         logger.info("setup: startUrl=" + startUrl);
+        logger.info("setup: imagePath=" + imagePath);
         this.sel = new DefaultSelenium(serverHost, Integer.parseInt(serverPort), browser, startUrl);
         this.sel.start();
     }

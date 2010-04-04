@@ -31,12 +31,12 @@ under the License.
     <br class="clear"/>
   </div>
   <div class="screenlet-body">
-    <br/>
+    <br />
     <p>
         <b>${uiLabelMap.WebtoolsCacheName}</b> ${cacheName?if_exists} (${now})
         <b>${uiLabelMap.WebtoolsSizeTotal}</b> ${totalSize} ${uiLabelMap.WebtoolsBytes}
     </p>
-    <br/>
+    <br />
 
     <@displayButtonBar/>
 
@@ -53,11 +53,11 @@ under the License.
                 <#list cacheElementsList as cacheElement>
                     <tr<#if alt_row> class="alternate-row"</#if>>
                         <td>${cacheElement.elementKey?if_exists}</td>
-                        <td nowrap="nowrap">${cacheElement.expireTime?if_exists}</td>
+                        <td nowrap="nowrap">${cacheElement.expireTimeMillis?if_exists}</td>
                         <td>${cacheElement.lineSize?if_exists}</td>
                         <td class="button-col">
                             <#if hasUtilCacheEdit>
-                                <a href="<@ofbizUrl>FindUtilCacheElementsRemoveElement?UTIL_CACHE_NAME=${cacheName?if_exists}&UTIL_CACHE_ELEMENT_NUMBER=${cacheElement.keyNum?if_exists}</@ofbizUrl>">${uiLabelMap.CommonRemove}</a>
+                                <a href="<@ofbizUrl>FindUtilCacheElementsRemoveElement?UTIL_CACHE_NAME=${cacheName?if_exists}&amp;UTIL_CACHE_ELEMENT_NUMBER=${cacheElement.keyNum?if_exists}</@ofbizUrl>">${uiLabelMap.CommonRemove}</a>
                             </#if>
                         </td>
                     </tr>

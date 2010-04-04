@@ -15,20 +15,22 @@
     <classpathentry kind="lib" path="framework/base/lib/avalon-util-exception-1.0.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/barcode4j-fop-ext-complete-2.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/batik-all-1.7.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/clhm-20100316.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/hamcrest-all-1.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/fop-0.95.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/freemarker-2.3.15.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/httpclient-4.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/httpcore-4.0.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/httpunit.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/ical4j-1.0-beta5.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/ical4j-1.0-rc2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/icu4j-4_2_1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/jakarta-regexp-1.5.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/javolution-5.2.3.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/javolution-5.4.3.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/jcip-annotations-1.0.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/jdbm-1.0.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/jdbm-1.0-SNAPSHOT.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/jdom-1.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/jpim-0.1.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/juel-2.1.1.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/juel-2.2.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/junit.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/junitperf.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/log4j-1.2.15.jar"/>
@@ -44,16 +46,18 @@
     <classpathentry kind="lib" path="framework/base/lib/xml-apis-2.9.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/xml-apis-ext-1.3.04.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/xmlgraphics-commons-1.3.1.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/xstream-1.3.1.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/xpp3_min-1.1.4c.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-beanutils-1.7.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-cli-1.0.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/commons/commons-codec-1.3.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/commons/commons-codec-1.4.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-collections-3.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-digester-1.8.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-discovery-0.4.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-el-1.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-fileupload-1.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-io-1.3.1.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/commons/commons-lang-2.3.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/commons/commons-lang-2.4.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-logging-1.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-modeler-2.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-net-1.4.1.jar"/>
@@ -83,6 +87,23 @@
     <classpathentry kind="lib" path="framework/base/lib/scripting/groovy-1.7-rc-2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/scripting/jakarta-oro-2.0.8.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/scripting/jython-nooro.jar"/>
+    <classpathentry kind="lib" path="framework/birt/lib/chartengineapi.jar"/>
+    <classpathentry kind="lib" path="framework/birt/lib/chartitemapi.jar"/>
+    <classpathentry kind="lib" path="framework/birt/lib/coreapi.jar"/>
+    <classpathentry kind="lib" path="framework/birt/lib/crosstabcoreapi.jar"/>
+    <classpathentry kind="lib" path="framework/birt/lib/dataadapterapi.jar"/>
+    <classpathentry kind="lib" path="framework/birt/lib/dataaggregationapi.jar"/>
+    <classpathentry kind="lib" path="framework/birt/lib/dataextraction.jar"/>
+    <classpathentry kind="lib" path="framework/birt/lib/dteapi.jar"/>
+    <classpathentry kind="lib" path="framework/birt/lib/emitterconfig.jar"/>
+    <classpathentry kind="lib" path="framework/birt/lib/engineapi.jar"/>
+    <classpathentry kind="lib" path="framework/birt/lib/jaxrpc.jar"/>
+    <classpathentry kind="lib" path="framework/birt/lib/modelapi.jar"/>
+    <classpathentry kind="lib" path="framework/birt/lib/modelodaapi.jar"/>
+    <classpathentry kind="lib" path="framework/birt/lib/odadesignapi.jar"/>
+    <classpathentry kind="lib" path="framework/birt/lib/saaj.jar"/>
+    <classpathentry kind="lib" path="framework/birt/lib/scriptapi.jar"/>
+    <classpathentry kind="lib" path="framework/birt/lib/viewservlets.jar"/>
     <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.16-catalina.jar"/>
     <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.16-catalina-ha.jar"/>
     <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.16-catalina-tribes.jar"/>
@@ -171,6 +192,10 @@
     <classpathentry kind="lib" path="specialpurpose/pos/lib/jcl.jar"/>
     <classpathentry kind="lib" path="specialpurpose/pos/lib/jpos18-controls.jar"/>
     <classpathentry kind="lib" path="specialpurpose/pos/lib/looks-2.0.2.jar"/>
+    <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/attributes.jar"/>
+    <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/ebaycalls.jar"/>
+    <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/ebaysdkcore.jar"/>
+    <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/helper.jar"/>
     <classpathentry kind="src" path="applications/accounting/src" excluding="org/ofbiz/accounting/thirdparty/cybersource/**|org/ofbiz/accounting/thirdparty/verisign/**|org/ofbiz/accounting/thirdparty/worldpay/**|org/ofbiz/accounting/thirdparty/paypal/PayPalServices.java|org/ofbiz/accounting/thirdparty/orbital/**"/>
     <classpathentry kind="src" path="applications/content/src" excluding="org/ofbiz/content/openoffice/|org/ofbiz/content/report/"/>
     <classpathentry kind="src" path="applications/manufacturing/src"/>
@@ -182,8 +207,10 @@
     <classpathentry kind="src" path="applications/workeffort/src"/>
     <classpathentry kind="src" path="framework/api/src"/>
     <classpathentry kind="src" path="framework/appserver/src"/>
+    <classpathentry kind="src" path="framework/base/build/gen-src/javacc"/>
     <classpathentry kind="src" path="framework/base/src" excluding="org/ofbiz/base/config/CoberturaInstrumenter.java"/>
     <classpathentry kind="src" path="framework/bi/src"/>
+    <classpathentry kind="src" path="framework/birt/src"/>
     <classpathentry kind="src" path="framework/catalina/src"/>
     <classpathentry kind="src" path="framework/common/src"/>
     <classpathentry kind="src" path="framework/context/src"/>
@@ -207,6 +234,7 @@
     <classpathentry kind="src" path="framework/widget/src"/>
     <classpathentry kind="src" path="specialpurpose/assetmaint/src"/>
     <classpathentry kind="src" path="specialpurpose/ebay/src"/>
+    <classpathentry kind="src" path="specialpurpose/ebaystore/src"/>
     <classpathentry kind="src" path="specialpurpose/ecommerce/src"/>
     <classpathentry kind="src" path="specialpurpose/googlebase/src"/>
     <classpathentry kind="src" path="specialpurpose/googlecheckout/src"/>

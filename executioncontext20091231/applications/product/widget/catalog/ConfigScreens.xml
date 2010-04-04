@@ -53,8 +53,8 @@ under the License.
                                         <container>
                                             <label style="h1">${uiLabelMap[labelTitleProperty]} ${uiLabelMap.CommonFor}: ${configItem.configItemName} [${uiLabelMap.CommonId}:${configItemId}]  ${${extraFunctionName}}</label>
                                         </container>
-                                        <container>
-                                            <link target="EditProductConfigItem" text="[${uiLabelMap.CommonNew} ${uiLabelMap.ProductConfigItem}]" style="buttontext"/>
+                                        <container style="button-bar">
+                                            <link target="EditProductConfigItem" text="[${uiLabelMap.CommonNew} ${uiLabelMap.ProductConfigItem}]" style="buttontext create"/>
                                         </container>
                                     </widgets>
                                 </section>
@@ -78,13 +78,19 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonConfigDecorator">
                     <decorator-section name="body">
-                        <screenlet title="${uiLabelMap.PageTitleFindConfigItems}">
-                            <link target="EditProductConfigItem" text="${uiLabelMap.CommonCreateNew}" style="buttontext"/>
-                            <include-form location="component://product/widget/catalog/ConfigForms.xml" name="FindProductConfigItemsFrom"/>
-                        </screenlet>
-                        <screenlet title="${uiLabelMap.PageTitleFindConfigItems}">
-                            <include-form location="component://product/widget/catalog/ConfigForms.xml" name="FindProductConfigItems"/>
-                        </screenlet>
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="menu-bar">
+                                <container style="button-bar">
+                                    <link target="EditProductConfigItem" text="${uiLabelMap.CommonCreateNew}" style="buttontext create"/>
+                                </container>
+                            </decorator-section>
+                            <decorator-section name="search-options">
+                                <include-form location="component://product/widget/catalog/ConfigForms.xml" name="FindProductConfigItemsFrom"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form location="component://product/widget/catalog/ConfigForms.xml" name="FindProductConfigItems"/>
+                            </decorator-section>
+                        </decorator-screen>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

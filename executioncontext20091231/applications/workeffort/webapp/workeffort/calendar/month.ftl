@@ -44,14 +44,37 @@ height: auto;
     <#if indexMod7 = 0>
       <tr>
         <td class="label">
-          <a href='<@ofbizUrl>${parameters._LAST_VIEW_NAME_}?period=week&start=${period.start.time?string("#")}${urlParam?if_exists}${addlParam?if_exists}</@ofbizUrl>'>${uiLabelMap.CommonWeek} ${period.start?date?string("w")}</a>
+          <a href='<@ofbizUrl>${parameters._LAST_VIEW_NAME_}?period=week&amp;start=${period.start.time?string("#")}${urlParam?if_exists}${addlParam?if_exists}</@ofbizUrl>'>${uiLabelMap.CommonWeek} ${period.start?date?string("w")}</a>
         </td>
     </#if>
     <td<#if currentPeriod> class="current-period"<#else><#if (period.calendarEntries?size > 0)> class="active-period"</#if></#if>>
-      <span class="h1"><a href='<@ofbizUrl>${parameters._LAST_VIEW_NAME_}?period=day&start=${period.start.time?string("#")}${urlParam?if_exists}${addlParam?if_exists}</@ofbizUrl>'>${period.start?date?string("d")?cap_first}</a></span>
-      <a class="add-new" href='<@ofbizUrl>${parameters._LAST_VIEW_NAME_}?period=month&form=edit&start=${parameters.start?if_exists}&parentTypeId=${parentTypeId?if_exists}&currentStatusId=CAL_TENTATIVE&estimatedStartDate=${period.start?string("yyyy-MM-dd HH:mm:ss")}&estimatedCompletionDate=${period.end?string("yyyy-MM-dd HH:mm:ss")}${urlParam?if_exists}${addlParam?if_exists}</@ofbizUrl>'>${uiLabelMap.CommonAddNew}</a>
+      <span class="h1"><a href='<@ofbizUrl>${parameters._LAST_VIEW_NAME_}?period=day&amp;start=${period.start.time?string("#")}${urlParam?if_exists}${addlParam?if_exists}</@ofbizUrl>'>${period.start?date?string("d")?cap_first}</a></span>
+      <a class="add-new" href='<@ofbizUrl>${parameters._LAST_VIEW_NAME_}?period=month&amp;form=edit&amp;start=${parameters.start?if_exists}&amp;parentTypeId=${parentTypeId?if_exists}&amp;currentStatusId=CAL_TENTATIVE&amp;estimatedStartDate=${period.start?string("yyyy-MM-dd HH:mm:ss")}&amp;estimatedCompletionDate=${period.end?string("yyyy-MM-dd HH:mm:ss")}${urlParam?if_exists}${addlParam?if_exists}</@ofbizUrl>'>${uiLabelMap.CommonAddNew}</a>
       <br class="clear"/>
-      
+
+      <#assign maxNumberOfPersons = 0/>
+      <#assign maxNumberOfEvents = 0/>
+      <#assign ranges = period.calendarEntriesByDateRange.keySet()/>
+      <#list ranges as range>
+          <#assign eventsInRange = period.calendarEntriesByDateRange.get(range)/>
+          <#assign numberOfPersons = 0/>
+          <#list eventsInRange as eventInRange>
+              <#assign numberOfPersons = numberOfPersons + eventInRange.workEffort.reservPersons?default(0)/>
+          </#list>
+          <#if (numberOfPersons > maxNumberOfPersons)>
+              <#assign maxNumberOfPersons = numberOfPersons/>
+          </#if>
+          <#if (eventsInRange.size() > maxNumberOfEvents)>
+              <#assign maxNumberOfEvents = eventsInRange.size()/>
+          </#if>
+      </#list>
+      <#if (maxNumberOfEvents > 0)>
+          ${uiLabelMap.WorkEffortMaxNumberOfEvents}: ${maxNumberOfEvents}<br/>
+      </#if>
+      <#if (maxNumberOfPersons > 0)>
+          ${uiLabelMap.WorkEffortMaxNumberOfPersons}: ${maxNumberOfPersons}<br/>
+      </#if>
+      <#if parameters.hideEvents?default("") != "Y">
       <#list period.calendarEntries as calEntry>
         <#if calEntry.workEffort.actualStartDate?exists>
             <#assign startDate = calEntry.workEffort.actualStartDate>
@@ -71,7 +94,7 @@ height: auto;
         <#if !completionDate?has_content && calEntry.workEffort.estimatedMilliSeconds?has_content>
             <#assign completionDate =  calEntry.workEffort.estimatedStartDate + calEntry.workEffort.estimatedMilliSeconds>
         </#if>    
-        <hr/>
+        <hr />
         <#if (startDate.compareTo(period.start) <= 0 && completionDate?has_content && completionDate.compareTo(period.end) >= 0)>
           ${uiLabelMap.CommonAllDay}
         <#elseif startDate.before(period.start) && completionDate?has_content>
@@ -83,18 +106,21 @@ height: auto;
         <#else>
           ${startDate?time?string.short}-${completionDate?time?string.short}
         </#if>
-        <br/>
-        <a href="<@ofbizUrl>${parameters._LAST_VIEW_NAME_}?form=edit&parentTypeId=${parentTypeId?if_exists}&period=month&start=${parameters.start?if_exists}&workEffortId=${calEntry.workEffort.workEffortId}${urlParam?if_exists}${addlParam?if_exists}</@ofbizUrl>" class="event">${calEntry.workEffort.workEffortName?default("Undefined")}</a>&nbsp;${calEntry.eventStatus?default("&nbsp;")}
-        <br/>
+        <br />
+        ${setRequestAttribute("periodType", "month")}
+        ${setRequestAttribute("workEffortId", calEntry.workEffort.workEffortId)}
+        ${screens.render("component://workeffort/widget/CalendarScreens.xml#calendarEventContent")}
+        <br />
       </#list>
+      </#if>
     </td>
 
 <#--
     <td valign="top">
       <table width="100%" cellspacing="0" cellpadding="0" border="0">
         <tr>
-          <td nowrap class="monthdaynumber"><a href='<@ofbizUrl>day?start=${period.start.time?string("#")}<#if eventsParam?has_content>&${eventsParam}</#if>${addlParam?if_exists}</@ofbizUrl>' class="monthdaynumber">${period.start?date?string("d")?cap_first}</a></td>
-          <td align="right"><a href='<@ofbizUrl>EditWorkEffort?workEffortTypeId=EVENT&currentStatusId=CAL_TENTATIVE&estimatedStartDate=${period.start?string("yyyy-MM-dd HH:mm:ss")}&estimatedCompletionDate=${period.end?string("yyyy-MM-dd HH:mm:ss")}${addlParam?if_exists}</@ofbizUrl>' class="add">${uiLabelMap.CommonAddNew}</a>&nbsp;&nbsp;</td>
+          <td nowrap="nowrap" class="monthdaynumber"><a href='<@ofbizUrl>day?start=${period.start.time?string("#")}<#if eventsParam?has_content>&amp;${eventsParam}</#if>${addlParam?if_exists}</@ofbizUrl>' class="monthdaynumber">${period.start?date?string("d")?cap_first}</a></td>
+          <td align="right"><a href='<@ofbizUrl>EditWorkEffort?workEffortTypeId=EVENT&amp;currentStatusId=CAL_TENTATIVE&amp;estimatedStartDate=${period.start?string("yyyy-MM-dd HH:mm:ss")}&amp;estimatedCompletionDate=${period.end?string("yyyy-MM-dd HH:mm:ss")}${addlParam?if_exists}</@ofbizUrl>' class="add">${uiLabelMap.CommonAddNew}</a>&nbsp;&nbsp;</td>
         </tr>
       </table>
       <#list period.calendarEntries as calEntry>
@@ -110,7 +136,7 @@ height: auto;
             <#else>
               ${calEntry.workEffort.estimatedStartDate?time?string.short}-${calEntry.workEffort.estimatedCompletionDate?time?string.short}
             </#if>
-            <br/>
+            <br />
             <a href="<@ofbizUrl>WorkEffortSummary?workEffortId=${calEntry.workEffort.workEffortId}${addlParam?if_exists}</@ofbizUrl>" class="event">${calEntry.workEffort.workEffortName?default("Undefined")}</a>&nbsp;
           </td>
         </tr>

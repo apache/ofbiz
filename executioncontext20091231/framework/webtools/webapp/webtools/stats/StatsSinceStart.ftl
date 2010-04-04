@@ -21,8 +21,10 @@ under the License.
       <div class="h3">${uiLabelMap.WebtoolsStatsMainPageTitle}</div>
     </div>
     <div class="screenlet-body">
-      <div class="button-bar"><a href="<@ofbizUrl>StatsSinceStart?clear=true</@ofbizUrl>" class="smallSubmit">${uiLabelMap.WebtoolsStatsClearSince}</a>
-      <a href="<@ofbizUrl>StatsSinceStart</@ofbizUrl>" class="smallSubmit">${uiLabelMap.WebtoolsStatsReloadPage}</a></div>
+      <div class="button-bar">
+        <a href="<@ofbizUrl>StatsSinceStart?clear=true</@ofbizUrl>" class="buttontext">${uiLabelMap.WebtoolsStatsClearSince}</a>
+        <a href="<@ofbizUrl>StatsSinceStart</@ofbizUrl>" class="buttontext refresh">${uiLabelMap.WebtoolsStatsReloadPage}</a>
+      </div>
       <p><span class="label">${uiLabelMap.WebtoolsStatsCurrentTime}</span> ${nowTimestamp}</p>
     </div>
 </div>
@@ -63,7 +65,7 @@ under the License.
             <td>${requestRow.avgTime}</td>
             <td>${requestRow.maxTime}</td>
             <td>${requestRow.hitsPerMin}</td>
-            <td class="button-col"><a href="<@ofbizUrl>StatBinsHistory?statsId=${requestRow.requestId}&type=${requestRow.requestType}</@ofbizUrl>">${uiLabelMap.WebtoolsStatsViewBins}</a></td>
+            <td class="button-col"><a href="<@ofbizUrl>StatBinsHistory?statsId=${requestRow.requestId}&amp;type=${requestRow.requestType}</@ofbizUrl>">${uiLabelMap.WebtoolsStatsViewBins}</a></td>
           </tr>
           <#if rowNum == "2">
             <#assign rowNum = "1">
@@ -77,7 +79,7 @@ under the License.
       <div class="screenlet-body">${uiLabelMap.WebtoolsStatsNoRequests}</div>
     </#if>
   </div>
-  <br/>
+  <br />
   <#-- Event Table -->
   <div id="event-statistics" class="screenlet">
     <div class="screenlet-title-bar">
@@ -114,7 +116,7 @@ under the License.
             <td>${requestRow.avgTime}</td>
             <td>${requestRow.maxTime}</td>
             <td>${requestRow.hitsPerMin}</td>
-            <td class="button-col"><a href="<@ofbizUrl>StatBinsHistory?statsId=${requestRow.requestId}&type=${requestRow.requestType}</@ofbizUrl>">${uiLabelMap.WebtoolsStatsViewBins}</a></td>
+            <td class="button-col"><a href="<@ofbizUrl>StatBinsHistory?statsId=${requestRow.requestId}&amp;type=${requestRow.requestType}</@ofbizUrl>">${uiLabelMap.WebtoolsStatsViewBins}</a></td>
           </tr>
           <#if rowNum == "2">
             <#assign rowNum = "1">
@@ -165,7 +167,7 @@ under the License.
             <td>${requestRow.avgTime}</td>
             <td>${requestRow.maxTime}</td>
             <td>${requestRow.hitsPerMin}</td>
-            <td class="button-col"><a href="<@ofbizUrl>StatBinsHistory?statsId=${requestRow.requestId}&type=${requestRow.requestType}</@ofbizUrl>">${uiLabelMap.WebtoolsStatsViewBins}</a></td>
+            <td class="button-col"><a href="<@ofbizUrl>StatBinsHistory?statsId=${requestRow.requestId}&amp;type=${requestRow.requestType}</@ofbizUrl>">${uiLabelMap.WebtoolsStatsViewBins}</a></td>
           </tr>
           <#if rowNum == "2">
             <#assign rowNum = "1">

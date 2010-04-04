@@ -105,10 +105,9 @@ under the License.
                                 <if-empty field="workEffort"/>
                             </condition>
                             <widgets>
-                                <container style="h1">
-                                    <label text="${uiLabelMap.PageTitleAddWorkEffort}"/>
-                                </container>
-                                <include-form name="EditWorkEffort" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                                <screenlet title="${uiLabelMap.PageTitleAddWorkEffort}">
+                                    <include-form name="EditWorkEffort" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                                </screenlet>
                             </widgets>
                             <fail-widgets>
                                 <container style="button-bar">
@@ -116,7 +115,9 @@ under the License.
                                         <parameter param-name="DONE_PAGE" from-field="donePage"/>
                                     </link>
                                 </container>
-                                <include-form name="EditWorkEffort" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                                <screenlet>
+                                    <include-form name="EditWorkEffort" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                                </screenlet>
                             </fail-widgets>
                         </section>
                         <screenlet title="${uiLabelMap.WorkEffortDuplicateWorkEffort}">
@@ -778,6 +779,16 @@ under the License.
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <not><if-empty field="workEffort"/></not>
+                            </condition>
+                            <widgets>
+                                <include-menu name="ICalendarTabBar" location="component://workeffort/widget/WorkEffortMenus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
                     <decorator-section name="body">
                         <section>
                             <condition>
@@ -787,14 +798,6 @@ under the License.
                                 </or>
                             </condition>
                             <widgets>
-                                <section>
-                                    <condition>
-                                        <not><if-empty field="workEffort"/></not>
-                                    </condition>
-                                    <widgets>
-                                        <include-menu name="ICalendarTabBar" location="component://workeffort/widget/WorkEffortMenus.xml"/>
-                                    </widgets>
-                                </section>
                                 <container style="h1">
                                     <label text="${title}"/>
                                 </container>

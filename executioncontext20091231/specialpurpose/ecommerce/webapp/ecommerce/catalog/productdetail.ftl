@@ -262,6 +262,22 @@ ${virtualJavaScript?if_exists}
 //]]>
  </script>
 
+<#macro showUnavailableVarients>
+  <#if unavailableVariants?exists>
+    <ul>
+      <#list unavailableVariants as prod>
+        <#assign features = prod.getRelated("ProductFeatureAppl")/>
+        <li>
+          <#list features as feature>
+            <em>${feature.getRelatedOne("ProductFeature").description}</em><#if feature_has_next>, </#if>
+          </#list>
+          <span>${uiLabelMap.ProductItemOutOfStock}</span>
+        </li>
+      </#list>
+    </ul>
+  </#if>
+</#macro>
+
 <div id="productdetail">
 <#assign productAdditionalImage1 = productContentWrapper.get("ADDITIONAL_IMAGE_1")?if_exists />
 <#assign productAdditionalImage2 = productContentWrapper.get("ADDITIONAL_IMAGE_2")?if_exists />
@@ -496,21 +512,13 @@ ${virtualJavaScript?if_exists}
             </div>
           <#else>
             <input type="hidden" name="add_product_id" value="NULL"/>
-            <div><strong>${uiLabelMap.ProductItemOutOfStock}.</strong></div>
             <#assign inStock = false />
           </#if>
          </#if>
         <#else>
           <input type="hidden" name="add_product_id" value="${product.productId}" />
-          <#assign isStoreInventoryNotAvailable = !(Static["org.ofbiz.product.store.ProductStoreWorker"].isStoreInventoryAvailable(request, product, 1.0)) />
-          <#assign isStoreInventoryRequired = Static["org.ofbiz.product.store.ProductStoreWorker"].isStoreInventoryRequired(request, product) />
-          <#if isStoreInventoryNotAvailable>
-            <#if isStoreInventoryRequired>
-              <div><strong>${uiLabelMap.ProductItemOutOfStock}.</strong></div>
-              <#assign inStock = false />
-            <#else>
-              <div><strong>${product.inventoryMessage?if_exists}</strong></div>
-            </#if>
+          <#if (availableInventory?exists) && (availableInventory <= 0)>
+            <#assign inStock = false />
           </#if>
         </#if>
         <#-- check to see if introductionDate hasnt passed yet -->
@@ -538,15 +546,24 @@ ${virtualJavaScript?if_exists}
                 <label>End Date(yyyy-mm-dd)</label><input type="text" size="10" name="reservEnd"/><a href="javascript:call_cal_notime(document.addform.reservEnd, '${nowTimestamp.toString().substring(0,10)}');"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" alt="Calendar" alt="" /></a>
               </div>
               <div>
-                <#--td nowrap align="right">Number<br/>of days</td><td><input type="textt" size="4" name="reservLength"/></td></tr><tr><td>&nbsp;</td><td align="right" nowrap>&nbsp;</td-->
+                <#--td nowrap align="right">Number<br />of days</td><td><input type="textt" size="4" name="reservLength"/></td></tr><tr><td>&nbsp;</td><td align="right" nowrap>&nbsp;</td-->
                 Number of persons<input type="text" size="4" name="reservPersons" value="2"/>
                 Number of rooms<input type="text" size="5" name="quantity" value="1"/>
               </div>
             <#else>
-                <input type="text" size="5" name="quantity" value="1"<#if product.isVirtual?if_exists?upper_case == "Y"> disabled="disabled"</#if> />
+              <span><input name="quantity" id="quantity" value="1" size="4" maxLength="4" type="text" <#if product.isVirtual!?upper_case == "Y">disabled="disabled"</#if> /></span><a href="javascript:addItem()" id="addToCart" name="addToCart" class="buttontext">${uiLabelMap.OrderAddToCart}</a>
+              <@showUnavailableVarients/>
             </#if>
-            <#-- This calls addItem() so that variants of virtual products cant be added before distinguishing features are selected, it should not be changed to additemSubmit() -->
-            <a href="javascript:addItem()" class="buttontext"><span style="white-space: nowrap;">${uiLabelMap.OrderAddToCart}</span></a>&nbsp;
+            <#else>
+              <#if productStore?exists>
+                <#if productStore.requireInventory?exists && productStore.requireInventory == "N">
+                  <span><input name="quantity" id="quantity" value="1" size="4" maxLength="4" type="text" <#if product.isVirtual!?upper_case == "Y">disabled="disabled"</#if> /></span><a href="javascript:addItem()" id="addToCart" name="addToCart" class="buttontext">${uiLabelMap.OrderAddToCart}</a>
+                  <@showUnavailableVarients/>
+                <#else>
+                  <span><input name="quantity" id="quantity" value="1" size="4" maxLength="4" type="text" disabled="disabled" /></span><a href="javascript:void(0);" disabled="disabled" class="buttontext">${uiLabelMap.OrderAddToCart}</a><br />
+                  <span>${uiLabelMap.ProductItemOutOfStock}<#if product.inventoryMessage?exists>&mdash; ${product.inventoryMessage}</#if></span>
+                </#if>
+              </#if>
           </#if>
         </#if>
         </fieldset>

@@ -257,8 +257,8 @@ function createUpdateCustomerAndShippingAddress() {
                 // Process Shipping data response.
                 $('shipToPartyId').value = data.partyId;
                 $('billToPartyId').value = data.partyId;
-                $('shipToContactMechId').value = data.shipToContactMechId;
-                $('shipToPhoneContactMechId').value = data.shipToPhoneContactMechId;
+                $('shipToContactMechId').value = data.contactMechId;
+                $('shipToPhoneContactMechId').value = data.phoneContactMechId;
                 $('emailContactMechId').value = data.emailContactMechId;
                 //$('completedShippingMethod').update(data.shippingDescription);
                 updateShippingSummary();
@@ -275,7 +275,7 @@ function getShipOptions() {
     var shipOptions = null;
     var optionList = [];
     if ($F('shipMethod') == "" || $F('shipMethod') == null) {
-	    new Ajax.Request('getShipOptions', {
+        new Ajax.Request('getShipOptions', {
             asynchronous: false,
             onSuccess: function(transport) {
                 var data = transport.responseText.evalJSON(true);
@@ -367,9 +367,9 @@ function processBillingAndPayment() {
             } else {
                 Effect.Fade('billingFormServerError');
                 isBillStepValidate = true;
-                $('billToContactMechId').value = data.billToContactMechId;
+                $('billToContactMechId').value = data.contactMechId;
                 $('paymentMethodId').value = data.paymentMethodId;
-                $('billToPhoneContactMechId').value = data.billToPhoneContactMechId;
+                $('billToPhoneContactMechId').value = data.phoneContactMechId;
                 updateBillingSummary();
                 result = true;
             }
@@ -586,7 +586,7 @@ function updateShippingSummary() {
 }
 
 function updateBillingSummary() {
-	var fullName = $F('firstNameOnCard') + " " +$F('lastNameOnCard');
+    var fullName = $F('firstNameOnCard') + " " +$F('lastNameOnCard');
     $('completedBillToAttn').update("Attn: " + fullName);
     var extension = "";
     if ($F('billToExtension')) {

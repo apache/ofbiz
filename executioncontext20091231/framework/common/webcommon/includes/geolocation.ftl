@@ -19,7 +19,7 @@ under the License.
 <#if geoChart?has_content>
     <#if geoChart.dataSourceId?has_content>
       <#if geoChart.dataSourceId == "GEOPT_GOOGLE">
-        <div id="<#if geoChart.id?has_content>${geoChart.id}<#else>map_canvas</#if>" style="border:1px solid #979797; background-color:#e5e3df; width:${geoChart.width}px; height:${geoChart.height}px; margin:2em auto;">
+        <div id="<#if geoChart.id?has_content>${geoChart.id}<#else>map_canvas</#if>" style="border:1px solid #979797; background-color:#e5e3df; width:${geoChart.width}; height:${geoChart.height}; margin:2em auto;">
           <div style="padding:1em; color:gray;">${uiLabelMap.CommonLoading}</div>
         </div>
         <#assign defaultUrl = "https." + request.getServerName()>
@@ -31,12 +31,39 @@ under the License.
             <#if geoChart.center?has_content>
               map.setCenter(new GLatLng(${geoChart.center.lat?c}, ${geoChart.center.lon?c}), ${geoChart.center.zoom});
             <#else>
-              map.setCenter(new GLatLng(37.4419, -122.1419), 12);
+              <#if geoChart.points?has_content>
+                var latlng = [
+                <#list geoChart.points as point>
+                  new GLatLng(${point.lat?c}, ${point.lon?c})<#if point_has_next>,</#if>
+                </#list>
+                ];
+                var latlngbounds = new GLatLngBounds();
+                for (var i = 0; i < latlng.length; i++) {
+                  latlngbounds.extend(latlng[i]);
+                }
+                map.setCenter(latlngbounds.getCenter(), map.getBoundsZoomLevel(latlngbounds) - 1);//reduce bounds zoom level to see all markers
+              <#else>
+                //map.setCenter(new GLatLng(37.4419, -122.1419), 12);
+                map.setCenter(new GLatLng(0, 0), 1);
+              </#if>
             </#if>
-            map.setUIToDefault();
-            <#list geoChart.points as point>
-              map.addOverlay(new GMarker(new GLatLng(${point.lat?c}, ${point.lon?c})));
-            </#list>
+            <#if geoChart.controlUI?has_content && geoChart.controlUI == "small">
+              map.addControl(new GSmallMapControl());
+            <#else>
+              map.setUIToDefault();
+            </#if>
+            <#if geoChart.points?has_content>
+                <#list geoChart.points as point>
+                  var marker_${point_index} = new GMarker(new GLatLng(${point.lat?c}, ${point.lon?c}));
+                  map.addOverlay(marker_${point_index});
+                  //map.addOverlay(new GMarker(new GLatLng(${point.lat?c}, ${point.lon?c})));
+                  <#if point.link?has_content>
+                      GEvent.addListener(marker_${point_index}, "click", function() {
+                          marker_${point_index}.openInfoWindowHtml("<div style=\"width:210px; padding-right:10px;\"><a href=${point.link.url}>${point.link.label}</a></div>");
+                      });
+                  </#if>
+                </#list>
+            </#if>
           }
         </script>
       <#elseif  geoChart.dataSourceId == "GEOPT_YAHOO">

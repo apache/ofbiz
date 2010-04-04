@@ -137,7 +137,7 @@ public class ScreenRenderer {
         }
         return "";
     }
-    
+
     public void setRenderFormUniqueSeq (int renderFormSeqNumber) {
         this.renderFormSeqNumber = renderFormSeqNumber;
     }
@@ -246,7 +246,7 @@ public class ScreenRenderer {
         TaglibFactory JspTaglibs = new TaglibFactory(servletContext);
         context.put("JspTaglibs", JspTaglibs);
         context.put("requestParameters",  UtilHttp.getParameterMap(request));
-        
+
         ServletContextHashModel ftlServletContext = (ServletContextHashModel) request.getAttribute("ftlServletContext");
         context.put("Application", ftlServletContext);
         context.put("Request", context.get("requestAttributes"));
@@ -316,7 +316,7 @@ public class ScreenRenderer {
     }
 
     public void populateContextForService(DispatchContext dctx, Map<String, Object> serviceContext) {
-        this.populateBasicContext(serviceContext, dctx.getDelegator(), dctx.getDispatcher(), dctx.getAuthorization(), 
+        this.populateBasicContext(serviceContext, dctx.getDelegator(), dctx.getDispatcher(), dctx.getAuthorization(),
                 dctx.getSecurity(), (Locale) serviceContext.get("locale"), (GenericValue) serviceContext.get("userLogin"));
     }
 }

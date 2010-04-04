@@ -38,6 +38,7 @@ import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.collections.MapStack;
@@ -54,14 +55,14 @@ import org.ofbiz.widget.screen.ScreenRenderer;
 import org.xml.sax.SAXException;
 
 public class BirtEmailServices {
-    
+
     public static final String module = BirtEmailServices.class.getName();
-    
+
     protected static final HtmlScreenRenderer htmlScreenRenderer = new HtmlScreenRenderer();
-    
+
     /**
      * send birt mail
-     * 
+     *
      * @param ctx
      * @param context
      * @return
@@ -75,9 +76,9 @@ public class BirtEmailServices {
         String birtReportLocation = (String) serviceContext.remove("birtReportLocation");
         String attachmentName = (String) serviceContext.remove("attachmentName");
         Locale locale = (Locale) serviceContext.get("locale");
-        Map bodyParameters = (Map) serviceContext.remove("bodyParameters");
+        Map<String, Object> bodyParameters = UtilGenerics.cast(serviceContext.remove("bodyParameters"));
         Locale birtLocale = (Locale) serviceContext.remove(BirtWorker.BIRT_LOCALE);
-        Map birtParameters = (Map) serviceContext.remove(BirtWorker.BIRT_PARAMETERS);
+        Map<String, Object> birtParameters = UtilGenerics.cast(serviceContext.remove(BirtWorker.BIRT_PARAMETERS));
         String birtImageDirectory = (String) serviceContext.remove(BirtWorker.BIRT_IMAGE_DIRECTORY);
         String birtContentType = (String) serviceContext.remove(BirtWorker.BIRT_CONTENT_TYPE);
         if (bodyParameters == null) {
@@ -99,7 +100,7 @@ public class BirtEmailServices {
         }
         StringWriter bodyWriter = new StringWriter();
 
-        MapStack screenContext = MapStack.create();
+        MapStack<String> screenContext = MapStack.create();
         screenContext.put("locale", locale);
         ScreenRenderer screens = new ScreenRenderer(bodyWriter, screenContext, htmlScreenRenderer);
         screens.populateContextForService(ctx, bodyParameters);
@@ -126,9 +127,9 @@ public class BirtEmailServices {
                 return ServiceUtil.returnError(errMsg);
             }
         }
-        
+
         boolean isMultiPart = false;
-        
+
         // check if attachment screen location passed in
         if (UtilValidate.isNotEmpty(birtReportLocation)) {
             isMultiPart = true;
@@ -136,8 +137,8 @@ public class BirtEmailServices {
             try {
                 // create the output stream for the generation
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                
-                Map birtContext = FastMap.newInstance();
+
+                Map<String, Object> birtContext = FastMap.newInstance();
                 if (birtLocale == null) {
                     birtLocale = locale;
                 }
@@ -161,7 +162,7 @@ public class BirtEmailServices {
                 baos.close();
 
                 // store in the list of maps for sendmail....
-                List bodyParts = FastList.newInstance();
+                List<Map<String, ? extends Object>> bodyParts = FastList.newInstance();
                 if (bodyText != null) {
                     bodyText = FlexibleStringExpander.expandString(bodyText, screenContext,  locale);
                     bodyParts.add(UtilMisc.toMap("content", bodyText, "type", "text/html"));
@@ -217,7 +218,7 @@ public class BirtEmailServices {
                 serviceContext.put("contentType", "text/html");
             }
         }
-        
+
         // also expand the subject at this point, just in case it has the FlexibleStringExpander syntax in it...
         String subject = (String) serviceContext.remove("subject");
         subject = FlexibleStringExpander.expandString(subject, screenContext, locale);
@@ -226,7 +227,7 @@ public class BirtEmailServices {
 
         if (Debug.verboseOn()) Debug.logVerbose("sendMailFromScreen sendMail context: " + serviceContext, module);
 
-        Map result = ServiceUtil.returnSuccess();
+        Map<String, Object> result = ServiceUtil.returnSuccess();
         try {
             if (isMultiPart) {
                 dispatcher.runSync("sendMailMultiPart", serviceContext);
@@ -237,7 +238,7 @@ public class BirtEmailServices {
             String errMsg = "Error send email :" + e.toString();
             Debug.logError(e, errMsg, module);
             return ServiceUtil.returnError(errMsg);
-        } 
+        }
         result.put("body", bodyWriter.toString());
         return result;
     }

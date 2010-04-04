@@ -992,7 +992,9 @@ under the License.
         <field name="defaultInventoryItemTypeId" type="id"></field>
         <field name="facilityName" type="name"></field>
         <field name="primaryFacilityGroupId" type="id"></field>
-        <field name="squareFootage" type="numeric"></field>
+        <field name="oldSquareFootage" type="numeric" col-name="SQUARE_FOOTAGE"></field>
+        <field name="facilitySize" type="fixed-point"></field>
+        <field name="facilitySizeUomId" type="id"></field>
         <field name="productStoreId" type="id"></field>
         <field name="defaultDaysToShip" type="numeric"><description>In the absence of a product specific days to ship in ProductFacility, this will be used</description></field>
         <field name="openedDate" type="date-time"></field>
@@ -1033,6 +1035,9 @@ under the License.
         <relation type="one" fk-name="FACILITY_GEOPT" rel-entity-name="GeoPoint">
           <key-map field-name="geoPointId"/>
         </relation>
+      <relation type="one" fk-name="FACILITY_SUOM" title="FacilitySize" rel-entity-name="Uom">
+        <key-map field-name="facilitySizeUomId" rel-field-name="uomId"/>
+      </relation>      
     </entity>
     <view-entity entity-name="FacilityAndContactMech" package-name="org.ofbiz.product.facility" title="Facility and Contact Mech View Entity">
         <member-entity entity-alias="FA" entity-name="Facility"/>
@@ -1299,6 +1304,36 @@ under the License.
             <key-map field-name="roleTypeId"/>
         </relation>
     </entity>
+    <entity entity-name="FacilityContent" package-name="org.ofbiz.product.facility" title="Facility Content Entity">
+        <field name="facilityId" type="id-ne"></field>
+        <field name="contentId" type="id-ne"></field>
+        <field name="fromDate" type="date-time"></field>
+        <field name="thruDate" type="date-time"></field>
+        <prim-key field="facilityId"/>
+        <prim-key field="contentId"/>
+        <prim-key field="fromDate"/>
+        <relation type="one" fk-name="FAC_CNT_FAC" rel-entity-name="Facility">
+            <key-map field-name="facilityId"/>
+        </relation>
+        <relation type="one" fk-name="FAC_CNT_CNT" rel-entity-name="Content">
+            <key-map field-name="contentId"/>
+        </relation>
+    </entity>      
+    <view-entity entity-name="FacilityContentDetail" package-name="org.ofbiz.product.facility" title="Facility Content Detail View Entity">
+        <member-entity entity-alias="FCT" entity-name="FacilityContent"/>
+        <member-entity entity-alias="CNT" entity-name="Content"/>
+        <alias-all entity-alias="FCT"/>
+        <alias-all entity-alias="CNT"/>
+        <view-link entity-alias="FCT" rel-entity-alias="CNT">
+            <key-map field-name="contentId"/>
+        </view-link>
+        <relation type="one-nofk" rel-entity-name="DataResource">
+            <key-map field-name="dataResourceId"/>
+        </relation>
+        <relation type="one-nofk" rel-entity-name="ContentType">
+            <key-map field-name="contentTypeId"/>
+        </relation>
+    </view-entity>
     <entity entity-name="FacilityType" package-name="org.ofbiz.product.facility" default-resource-name="ProductEntityLabels"
         title="Facility Type Entity">
         <field name="facilityTypeId" type="id-ne"></field>
@@ -1809,6 +1844,7 @@ under the License.
       <field name="comments" type="comment"></field>
       <field name="quantityOnHandTotal" type="fixed-point"></field>
       <field name="availableToPromiseTotal" type="fixed-point"></field>
+      <field name="accountingQuantityTotal" type="fixed-point"></field>
       <field name="oldQuantityOnHand" col-name="QUANTITY_ON_HAND" type="fixed-point"></field>
       <field name="oldAvailableToPromise" col-name="AVAILABLE_TO_PROMISE" type="fixed-point"></field>
       <field name="serialNumber" type="value"></field>
@@ -1941,6 +1977,7 @@ under the License.
       <field name="effectiveDate" type="date-time"></field>
       <field name="quantityOnHandDiff" type="fixed-point"></field>
       <field name="availableToPromiseDiff" type="fixed-point"></field>
+      <field name="accountingQuantityDiff" type="fixed-point"></field>
       <field name="unitCost" type="fixed-point"></field>
       <field name="orderId" type="id"></field>
       <field name="orderItemSeqId" type="id"></field>
@@ -2007,18 +2044,24 @@ under the License.
       <alias entity-alias="IID" name="inventoryItemId" group-by="true"/>
       <alias entity-alias="IID" name="availableToPromiseTotal" field="availableToPromiseDiff" function="sum"/>
       <alias entity-alias="IID" name="quantityOnHandTotal" field="quantityOnHandDiff" function="sum"/>
+      <alias entity-alias="IID" name="accountingQuantityTotal" field="accountingQuantityDiff" function="sum"/>
     </view-entity>
     <view-entity entity-name="InventoryItemDetailForSum" package-name="org.ofbiz.product.inventory"
         title="Inventory Item  And Inventory Item Detail for Summation View Entity">
         <member-entity entity-alias="II" entity-name="InventoryItem"/>
         <member-entity entity-alias="IID" entity-name="InventoryItemDetail"/>
         <alias entity-alias="IID" name="quantityOnHandSum" field="quantityOnHandDiff" function="sum"/>
+        <alias entity-alias="IID" name="accountingQuantitySum" field="accountingQuantityDiff" function="sum"/>
         <alias entity-alias="II" name="inventoryItemTypeId" group-by="true"></alias>
         <alias entity-alias="II" name="facilityId" group-by="true"></alias>
         <alias entity-alias="II" name="productId" group-by="true"></alias>
+        <alias entity-alias="II" name="unitCost" group-by="true"></alias>
+        <alias entity-alias="II" name="currencyUomId" group-by="true"></alias>
         <alias entity-alias="IID" name="effectiveDate"><description>For query only, not in fields to select.</description></alias>
         <alias entity-alias="IID" name="orderId"><description>For query only, not in fields to select.</description></alias>
+        <alias entity-alias="II" name="ownerPartyId"><description>For query only, not in fields to select.</description></alias>
         <alias entity-alias="IID" name="quantityOnHandDiff"><description>For query only, not in fields to select.</description></alias>
+        <alias entity-alias="IID" name="accountingQuantityDiff"><description>For query only, not in fields to select.</description></alias>
         <view-link entity-alias="II" rel-entity-alias="IID">
             <key-map field-name="inventoryItemId"/>
         </view-link>
@@ -4677,5 +4720,66 @@ under the License.
       <field name="supplierRatingTypeId" type="id-ne"></field>
       <field name="description" type="description"></field>
       <prim-key field="supplierRatingTypeId"/>
+    </entity>
+    
+    <entity entity-name="WebAnalyticsConfig"
+            package-name="org.ofbiz.product.catalog"
+            title="Web Analytics Configuration">
+        <field name="productStoreId" type="id-ne"></field> 
+        <field name="webAnalyticsTypeId" type="id-ne"></field>
+        <field name="webSiteId" type="id"></field>
+        <field name="webAnalyticsCode" type="value"></field>
+        <field name="isEnabled" type="indicator"></field>
+        <field name="description" type="description"></field>
+        <field name="contentId" type="id"></field>
+        <prim-key field="productStoreId"/>
+        <prim-key field="webAnalyticsTypeId"/>      
+        <relation type="one" fk-name="WANA_PROD_STORE" rel-entity-name="ProductStore">
+            <key-map field-name="productStoreId"/>
+        </relation>
+        <relation type="one" fk-name="WANA_TYPE" rel-entity-name="WebAnalyticsType">
+          <key-map field-name="webAnalyticsTypeId"/>
+        </relation>
+        <relation type="one" fk-name="WANA_WEBSITE" rel-entity-name="WebSite">
+            <key-map field-name="webSiteId"/>
+        </relation>
+        <relation type="one-nofk" fk-name="WANA_CNT_CNT" rel-entity-name="Content">
+            <key-map field-name="contentId"/>
+        </relation>
+    </entity>
+
+    <entity entity-name="WebAnalyticsType" package-name="org.ofbiz.product.catalog"
+        title="Web Analytics Type Entity">
+        <field name="webAnalyticsTypeId" type="id-ne"></field>
+        <field name="parentTypeId" type="id"></field>
+        <field name="hasTable" type="indicator"></field>
+        <field name="description" type="description"></field>
+        <prim-key field="webAnalyticsTypeId"/>
+        <relation type="one" fk-name="WANA_TYP_PARENT" title="Parent" rel-entity-name="WebAnalyticsType">
+            <key-map field-name="parentTypeId" rel-field-name="webAnalyticsTypeId"/>
+        </relation>
+    </entity>
+
+    <entity entity-name="ProductPromoContent"
+            package-name="org.ofbiz.product.promo"
+            title="Product Promo Content Entity">
+      <field name="productPromoId" type="id-ne"/>
+      <field name="contentId" type="id-ne"/>
+      <field name="productPromoContentTypeId" type="id-ne"/>
+      <field name="fromDate" type="date-time"/>
+      <field name="thruDate" type="date-time"/>
+      <prim-key field="productPromoId"/>
+      <prim-key field="contentId"/>
+      <prim-key field="productPromoContentTypeId"/>
+      <prim-key field="fromDate"/>
+      <relation type="one" fk-name="PRODPR_CNT_PROD_PR" rel-entity-name="ProductPromo">
+        <key-map field-name="productPromoId"/>
+      </relation>
+      <relation type="one" fk-name="PRODPR_CNT_CNT" rel-entity-name="Content">
+        <key-map field-name="contentId"/>
+      </relation>
+      <relation type="one" fk-name="PRODPR_CNT_TYPE" rel-entity-name="ProductContentType">
+        <key-map field-name="productPromoContentTypeId" rel-field-name="productContentTypeId"/>
+      </relation>
     </entity>
 </entitymodel>

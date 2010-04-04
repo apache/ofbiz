@@ -71,7 +71,7 @@ if (phases) {
                 EntityCondition.makeCondition("currentStatusId", EntityOperator.NOT_EQUAL, "PTS_CANCELLED"),
                 EntityCondition.makeCondition("workEffortParentId", EntityOperator.EQUALS, phase.phaseId)
                 ], EntityOperator.AND);
-        tasks = delegator.findList("WorkEffort", cond, null, ["workEffortName"], null, false);
+        tasks = delegator.findList("WorkEffort", cond, null, ["sequenceNum","workEffortName"], null, false);
         if (tasks) {
             tasks.each { task ->
                 resultTaskInfo = dispatcher.runSync("getProjectTask", [userLogin : userLogin , taskId : task.workEffortId]);
@@ -109,7 +109,7 @@ if (phases) {
                 }
                 taskInfo.estimatedStartDate = UtilDateTime.toDateString(taskInfo.estimatedStartDate, "MM/dd/yyyy");
                 taskInfo.estimatedCompletionDate = UtilDateTime.toDateString(taskInfo.estimatedCompletionDate, "MM/dd/yyyy");
-                taskInfo.workEffortTypeId = "TASK";
+                taskInfo.workEffortTypeId = task.workEffortTypeId;
                 if (security.hasEntityPermission("PROJECTMGR", "_READ", session) || security.hasEntityPermission("PROJECTMGR", "_ADMIN", session)) {
                     taskInfo.url = "/projectmgr/control/taskView?workEffortId="+task.workEffortId;
                 } else {

@@ -330,6 +330,7 @@ public class ProductionRunServices {
                 serviceContext.put("currentStatusId","PRUN_CREATED");
                 serviceContext.put("workEffortParentId", productionRunId);
                 serviceContext.put("facilityId", facilityId);
+                serviceContext.put("reservPersons", routingTask.get("reservPersons"));
                 serviceContext.put("estimatedStartDate",startDate);
                 serviceContext.put("estimatedCompletionDate",endDate);
                 serviceContext.put("estimatedSetupMillis", routingTask.get("estimatedSetupMillis"));
@@ -538,7 +539,7 @@ public class ProductionRunServices {
         }
 
         // PRUN_CREATED --> PRUN_SCHEDULED
-        if (currentStatusId.equals("PRUN_CREATED") && (statusId != null && statusId.equals("PRUN_SCHEDULED"))) {
+        if ("PRUN_CREATED".equals(currentStatusId) && "PRUN_SCHEDULED".equals(statusId)) {
             // change the production run status to PRUN_SCHEDULED
             Map serviceContext = new HashMap();
             serviceContext.clear();
@@ -552,7 +553,7 @@ public class ProductionRunServices {
                 Debug.logError(e, "Problem calling the updateWorkEffort service", module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingProductionRunStatusNotChanged", locale));
             }
-            // change the production run tasks status to PRUN_CLOSED
+            // change the production run tasks status to PRUN_SCHEDULED
             Iterator tasks = productionRun.getProductionRunRoutingTasks().iterator();
             while (tasks.hasNext()) {
                 GenericValue task = (GenericValue)tasks.next();
@@ -573,7 +574,7 @@ public class ProductionRunServices {
             return result;
         }
 
-        // PRUN_CREATED or PRON_SCHEDULED --> PRUN_DOC_PRINTED
+        // PRUN_CREATED or PRUN_SCHEDULED --> PRUN_DOC_PRINTED
         if ((currentStatusId.equals("PRUN_CREATED") || currentStatusId.equals("PRUN_SCHEDULED")) && (statusId == null || statusId.equals("PRUN_DOC_PRINTED"))) {
             // change only the production run (header) status to PRUN_DOC_PRINTED
             Map serviceContext = new HashMap();
@@ -587,6 +588,22 @@ public class ProductionRunServices {
             } catch (GenericServiceException e) {
                 Debug.logError(e, "Problem calling the updateWorkEffort service", module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingProductionRunStatusNotChanged", locale));
+            }
+            // change the production run tasks status to PRUN_DOC_PRINTED
+            Iterator tasks = productionRun.getProductionRunRoutingTasks().iterator();
+            while (tasks.hasNext()) {
+                GenericValue task = (GenericValue)tasks.next();
+                serviceContext.clear();
+                serviceContext.put("workEffortId", task.getString("workEffortId"));
+                serviceContext.put("currentStatusId", "PRUN_DOC_PRINTED");
+                serviceContext.put("userLogin", userLogin);
+                resultService = null;
+                try {
+                    resultService = dispatcher.runSync("updateWorkEffort", serviceContext);
+                } catch (GenericServiceException e) {
+                    Debug.logError(e, "Problem calling the updateWorkEffort service", module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingProductionRunStatusNotChanged", locale));
+                }
             }
             result.put("newStatusId", "PRUN_DOC_PRINTED");
             result.put(ModelService.SUCCESS_MESSAGE, UtilProperties.getMessage(resource, "ManufacturingProductionRunStatusChanged",UtilMisc.toMap("newStatusId", "PRUN_DOC_PRINTED"), locale));
@@ -743,9 +760,9 @@ public class ProductionRunServices {
             return result;
         }
 
-        // PRUN_CREATED or PRUN_SCHEDULED --> PRUN_RUNNING
+        // PRUN_CREATED or PRUN_SCHEDULED or PRUN_DOC_PRINTED --> PRUN_RUNNING
         // this should be called only when the first task is started
-        if ((currentStatusId.equals("PRUN_CREATED") || currentStatusId.equals("PRUN_SCHEDULED")) && (statusId == null || statusId.equals("PRUN_RUNNING"))) {
+        if ((currentStatusId.equals("PRUN_CREATED") || currentStatusId.equals("PRUN_SCHEDULED") || currentStatusId.equals("PRUN_DOC_PRINTED")) && (statusId == null || statusId.equals("PRUN_RUNNING"))) {
             // change the production run task status to PRUN_RUNNING
             // if necessary change the production run (header) status to PRUN_RUNNING
             if (!allPrecTaskCompletedOrRunning) {
@@ -896,13 +913,14 @@ public class ProductionRunServices {
                         } else {
                             Map costMethodResult = dispatcher.runSync(customMethod.getString("customMethodName"), UtilMisc.toMap("productCostComponentCalc", productCostComponentCalc,
                                                                                                                                  "costComponentCalc", costComponentCalc,
-                                                                                                                                 "costComponentTypePrefix", "ACTUAL", 
+                                                                                                                                 "costComponentTypePrefix", "ACTUAL",
                                                                                                                                  "baseCost", totalCost,
                                                                                                                                  "currencyUomId", (String)partyAccountingPreference.get("baseCurrencyUomId"),
                                                                                                                                  "userLogin", userLogin));
                             BigDecimal productCostAdjustment = (BigDecimal)costMethodResult.get("productCostAdjustment");
                             totalCost = totalCost.add(productCostAdjustment);
                             Map inMap = UtilMisc.toMap("userLogin", userLogin, "workEffortId", productionRunId);
+                            inMap.put("costComponentCalcId", costComponentCalc.getString("costComponentCalcId"));
                             inMap.put("costComponentTypeId", "ACTUAL_" + productCostComponentCalc.getString("costComponentTypeId"));
                             inMap.put("costUomId", (String)partyAccountingPreference.get("baseCurrencyUomId"));
                             inMap.put("cost", productCostAdjustment);
@@ -969,9 +987,12 @@ public class ProductionRunServices {
             List tasks = delegator.findByAnd("WorkEffort", UtilMisc.toMap("workEffortParentId", workEffortId), UtilMisc.toList("workEffortId"));
             Iterator tasksIt = tasks.iterator();
             BigDecimal totalCost = ZERO;
+            Map outputMap = dispatcher.runSync("getWorkEffortCosts", UtilMisc.<String, Object>toMap("userLogin", userLogin, "workEffortId", workEffortId));
+            BigDecimal productionRunHeaderCost = (BigDecimal)outputMap.get("totalCost");
+            totalCost = totalCost.add(productionRunHeaderCost);
             while (tasksIt.hasNext()) {
                 GenericValue task = (GenericValue)tasksIt.next();
-                Map outputMap = dispatcher.runSync("getWorkEffortCosts", UtilMisc.<String, Object>toMap("userLogin", userLogin, "workEffortId", task.getString("workEffortId")));
+                outputMap = dispatcher.runSync("getWorkEffortCosts", UtilMisc.<String, Object>toMap("userLogin", userLogin, "workEffortId", task.getString("workEffortId")));
                 BigDecimal taskCost = (BigDecimal)outputMap.get("totalCost");
                 totalCost = totalCost.add(taskCost);
             }
@@ -1573,7 +1594,7 @@ public class ProductionRunServices {
                 GenericValue lot = delegator.findByPrimaryKey("Lot", UtilMisc.toMap("lotId", lotId));
                 if (lot == null) {
                     if (createLotIfNeeded.booleanValue()) {
-                        lot = delegator.makeValue("Lot", UtilMisc.toMap("lotId", lotId, "creationDate", UtilDateTime.nowDate()));
+                        lot = delegator.makeValue("Lot", UtilMisc.toMap("lotId", lotId, "creationDate", UtilDateTime.nowTimestamp()));
                         lot.create();
                     } else {
                         return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingLotNotExists", locale));
@@ -2280,7 +2301,7 @@ public class ProductionRunServices {
                     BigDecimal totalQuantity = (BigDecimal)components.get(componentProductId);
                     componentQuantity = totalQuantity.add(componentQuantity);
                 }
-                
+
                 // check if a bom exists
                 List bomList = null;
                 try {
@@ -2309,7 +2330,7 @@ public class ProductionRunServices {
                     } catch (GenericEntityException e) {
                         return ServiceUtil.returnError("try to create workeffort assoc");
                     }
-                    
+
                 } else {
                     components.put(componentProductId, componentQuantity);
                 }
@@ -2441,7 +2462,7 @@ public class ProductionRunServices {
 
                     String productionRunId = (String)resultService.get("productionRunId");
                     result.put("productionRunId", productionRunId);
-                    
+
                     try {
                         delegator.create("WorkOrderItemFulfillment", UtilMisc.toMap("workEffortId", productionRunId, "orderId", orderId, "orderItemSeqId", orderItemSeqId));
                     } catch (GenericEntityException e) {
@@ -2528,6 +2549,7 @@ public class ProductionRunServices {
                 return ServiceUtil.returnError("Error reading the OrderItems: " + gee.getMessage());
             }
         }
+        ArrayList productionRuns = new ArrayList();
         for (int i = 0; i < orderItems.size(); i++) {
             GenericValue orderItem = (GenericValue)orderItems.get(i);
             if (orderItem.get("productId") == null) {
@@ -2559,12 +2581,11 @@ public class ProductionRunServices {
                 tree.setRootQuantity(quantity);
                 tree.setRootAmount(amount);
                 tree.print(components);
-                tree.createManufacturingOrders(null, fromDate, null, null, null, orderId, orderItem.getString("orderItemSeqId"), shipmentId, userLogin);
+                productionRuns.add(tree.createManufacturingOrders(null, fromDate, null, null, null, orderId, orderItem.getString("orderItemSeqId"), shipmentId, userLogin));
             } catch (GenericEntityException gee) {
                 return ServiceUtil.returnError("Error creating bill of materials tree: " + gee.getMessage());
             }
         }
-        ArrayList productionRuns = new ArrayList();
         result.put("productionRuns" , productionRuns);
         return result;
     }
@@ -2710,7 +2731,9 @@ public class ProductionRunServices {
         for (int i = 0; i < tasks.size(); i++) {
             oneTask = (GenericValue)tasks.get(i);
             taskId = oneTask.getString("workEffortId");
-            if ("PRUN_CREATED".equals(oneTask.getString("currentStatusId"))) {
+            if ("PRUN_CREATED".equals(oneTask.getString("currentStatusId")) ||
+                    "PRUN_SCHEDULED".equals(oneTask.getString("currentStatusId")) ||
+                    "PRUN_DOC_PRINTED".equals(oneTask.getString("currentStatusId"))) {
                 try {
                     Map serviceContext = UtilMisc.toMap("productionRunId", productionRunId, "workEffortId", taskId);
                     serviceContext.put("statusId", "PRUN_RUNNING");

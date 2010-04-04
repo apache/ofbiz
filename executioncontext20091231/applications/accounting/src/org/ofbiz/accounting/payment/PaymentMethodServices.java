@@ -143,18 +143,18 @@ public class PaymentMethodServices {
         context.put("cardNumber", StringUtil.removeSpaces((String) context.get("cardNumber")));
         if (!UtilValidate.isCardMatch((String) context.get("cardType"), (String) context.get("cardNumber"))) {
             messages.add(
-                UtilProperties.getMessage(resource, "AccountingCreditCardNumberInvalid", 
+                UtilProperties.getMessage(resource, "AccountingCreditCardNumberInvalid",
                     UtilMisc.toMap("cardNumber", (String) context.get("cardNumber"),
                                    "cardType", (String) context.get("cardType"),
                                    "validCardType", UtilValidate.getCardType((String) context.get("cardNumber"))), locale));
         }
-            
+
         if (!UtilValidate.isDateAfterToday((String) context.get("expireDate"))) {
             messages.add(
-                UtilProperties.getMessage(resource, "AccountingCreditCardExpireDateBeforeToday", 
+                UtilProperties.getMessage(resource, "AccountingCreditCardExpireDateBeforeToday",
                     UtilMisc.toMap("expireDate", (String) context.get("expireDate")), locale));
         }
-        
+
         if (messages.size() > 0) {
             return ServiceUtil.returnError(messages);
         }
@@ -304,20 +304,20 @@ public class PaymentMethodServices {
         }
         context.put("cardNumber", updatedCardNumber);
 
-        if (!UtilValidate.isCardMatch((String) context.get("cardType"), (String) context.get("cardNumber"))) {            
+        if (!UtilValidate.isCardMatch((String) context.get("cardType"), (String) context.get("cardNumber"))) {
             messages.add(
-                UtilProperties.getMessage(resource, "AccountingCreditCardNumberInvalid", 
+                UtilProperties.getMessage(resource, "AccountingCreditCardNumberInvalid",
                     UtilMisc.toMap("cardNumber", (String) context.get("cardNumber"),
                                    "cardType", (String) context.get("cardType"),
                                    "validCardType", UtilValidate.getCardType((String) context.get("cardNumber"))), locale));
         }
-        
-        if (!UtilValidate.isDateAfterToday((String) context.get("expireDate"))) {            
+
+        if (!UtilValidate.isDateAfterToday((String) context.get("expireDate"))) {
             messages.add(
-                UtilProperties.getMessage(resource, "AccountingCreditCardExpireDateBeforeToday", 
+                UtilProperties.getMessage(resource, "AccountingCreditCardExpireDateBeforeToday",
                     UtilMisc.toMap("expireDate", (String) context.get("expireDate")), locale));
         }
-        
+
         if (messages.size() > 0) {
             return ServiceUtil.returnError(messages);
         }
@@ -330,7 +330,7 @@ public class PaymentMethodServices {
         String newPmId = null;
         try {
             newPmId = delegator.getNextSeqId("PaymentMethod");
-        } catch (IllegalArgumentException e) { 
+        } catch (IllegalArgumentException e) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "AccountingCreditCardUpdateIdGenerationFailure", locale));
 
         }
@@ -412,7 +412,7 @@ public class PaymentMethodServices {
             result.put("oldPaymentMethodId", paymentMethodId);
             result.put(ModelService.RESPONSE_MESSAGE, ModelService.RESPOND_SUCCESS);
             if (contactMechId == null || !contactMechId.equals("_NEW_")) {
-                result.put(ModelService.SUCCESS_MESSAGE, "No changes made, not updating credit card");
+                result.put(ModelService.SUCCESS_MESSAGE, UtilProperties.getMessage(resource, "AccountingNoChangesMadeNotUpdatingCreditCard", locale));
             }
 
             return result;
@@ -524,6 +524,7 @@ public class PaymentMethodServices {
         Delegator delegator = ctx.getDelegator();
         Security security = ctx.getSecurity();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
         Timestamp now = UtilDateTime.nowTimestamp();
 
@@ -627,7 +628,7 @@ public class PaymentMethodServices {
             result.put("paymentMethodId", paymentMethodId);
             result.put("oldPaymentMethodId", paymentMethodId);
             result.put(ModelService.RESPONSE_MESSAGE, ModelService.RESPOND_SUCCESS);
-            result.put(ModelService.SUCCESS_MESSAGE, "No changes made, not updating EFT Account");
+            result.put(ModelService.SUCCESS_MESSAGE, UtilProperties.getMessage(resource, "AccountingNoChangesMadeNotUpdatingEftAccount", locale));
 
             return result;
         }
@@ -742,6 +743,7 @@ public class PaymentMethodServices {
         Delegator delegator = ctx.getDelegator();
         Security security = ctx.getSecurity();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
         Timestamp now = UtilDateTime.nowTimestamp();
 
@@ -851,7 +853,7 @@ public class PaymentMethodServices {
             result.put("paymentMethodId", paymentMethodId);
             result.put("oldPaymentMethodId", paymentMethodId);
             result.put(ModelService.RESPONSE_MESSAGE, ModelService.RESPOND_SUCCESS);
-            result.put(ModelService.SUCCESS_MESSAGE, "No changes made, not updating EFT Account");
+            result.put(ModelService.SUCCESS_MESSAGE, UtilProperties.getMessage(resource, "AccountingNoChangesMadeNotUpdatingEftAccount", locale));
 
             return result;
         }

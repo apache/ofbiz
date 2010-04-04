@@ -32,8 +32,8 @@ under the License.
     <#if (nowTimestamp >= period.start) && (nowTimestamp <= period.end)><#assign currentPeriod = true/></#if>
   <tr<#if currentPeriod> class="current-period"<#else><#if (period.calendarEntries?size > 0)> class="active-period"</#if></#if>>
     <td class="label">
-      ${period.start?time?string.short}<br/>
-      <a href="<@ofbizUrl>${parameters._LAST_VIEW_NAME_}?period=day&form=edit&parentTypeId=${parentTypeId?if_exists}&start=${parameters.start?if_exists}&currentStatusId=CAL_TENTATIVE&estimatedStartDate=${period.start?string("yyyy-MM-dd HH:mm:ss")}&estimatedCompletionDate=${period.end?string("yyyy-MM-dd HH:mm:ss")}${urlParam?if_exists}${addlParam?if_exists}</@ofbizUrl>">${uiLabelMap.CommonAddNew}</a>
+      ${period.start?time?string.short}<br />
+      <a href="<@ofbizUrl>${parameters._LAST_VIEW_NAME_}?period=day&amp;form=edit&amp;parentTypeId=${parentTypeId?if_exists}&amp;start=${parameters.start?if_exists}&amp;currentStatusId=CAL_TENTATIVE&amp;estimatedStartDate=${period.start?string("yyyy-MM-dd HH:mm:ss")}&amp;estimatedCompletionDate=${period.end?string("yyyy-MM-dd HH:mm:ss")}${urlParam?if_exists}${addlParam?if_exists}</@ofbizUrl>">${uiLabelMap.CommonAddNew}</a>
     </td>
       <#list period.calendarEntries as calEntry>
         <#if calEntry.workEffort.actualStartDate?exists>
@@ -68,7 +68,11 @@ under the License.
     <#else>
       ${startDate?time?string.short}-${completionDate?time?string.short}
     </#if>
-    <br/><a href="<@ofbizUrl>${parameters._LAST_VIEW_NAME_}?form=edit&period=day&start=${parameters.start?if_exists}&workEffortId=${calEntry.workEffort.workEffortId}${urlParam?if_exists}${addlParam?if_exists}</@ofbizUrl>">${calEntry.workEffort.workEffortName?default("Undefined")}</a>&nbsp;</td>
+    <br />
+    ${setRequestAttribute("periodType", "day")}
+    ${setRequestAttribute("workEffortId", calEntry.workEffort.workEffortId)}
+    ${screens.render("component://workeffort/widget/CalendarScreens.xml#calendarEventContent")}
+    </td>
     </#if>
     </#list>
     <#if (period.calendarEntries?size < maxConcurrentEntries)>

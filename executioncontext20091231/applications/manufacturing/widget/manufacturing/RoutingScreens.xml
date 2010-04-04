@@ -114,8 +114,8 @@ under the License.
                             <widgets>
                                 <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                                     <decorator-section name="menu-bar">
-                                        <container>
-                                            <link target="EditRouting" text="${uiLabelMap.ManufacturingNewRouting}" style="buttontext"/>
+                                        <container style="button-bar">
+                                            <link target="EditRouting" text="${uiLabelMap.ManufacturingNewRouting}" style="buttontext create"/>
                                         </container>
                                     </decorator-section>
                                     <decorator-section name="search-options">
@@ -146,8 +146,8 @@ under the License.
                 <decorator-screen name="CommonRoutingDecorator">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditRouting}">
-                            <container>
-                                <link target="EditRouting" text="${uiLabelMap.ManufacturingNewRouting}" style="buttontext"/>
+                            <container style="button-bar">
+                                <link target="EditRouting" text="${uiLabelMap.ManufacturingNewRouting}" style="buttontext create"/>
                             </container>
                             <include-form name="EditRouting" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
                         </screenlet>
@@ -173,8 +173,8 @@ under the License.
                             <widgets>
                                 <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                                     <decorator-section name="menu-bar">
-                                        <container>
-                                            <link target="EditRoutingTask" text="${uiLabelMap.ManufacturingNewRoutingTask}" style="buttontext"/>
+                                        <container style="button-bar">
+                                            <link target="EditRoutingTask" text="${uiLabelMap.ManufacturingNewRoutingTask}" style="buttontext create"/>
                                         </container>
                                     </decorator-section>
                                     <decorator-section name="search-options">
@@ -205,8 +205,8 @@ under the License.
                 <decorator-screen name="CommonRoutingTaskDecorator">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditRoutingTask}">
-                            <container>
-                                <link target="EditRoutingTask" text="${uiLabelMap.ManufacturingNewRoutingTask}" style="buttontext"/>
+                            <container style="button-bar">
+                                <link target="EditRoutingTask" text="${uiLabelMap.ManufacturingNewRoutingTask}" style="buttontext create"/>
                             </container>
                             <include-form name="EditRoutingTask" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
                         </screenlet>

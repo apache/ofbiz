@@ -20,10 +20,17 @@ package org.ofbiz.base.conversion;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.sql.Blob;
 import java.sql.Clob;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.UUID;
+import java.util.regex.Pattern;
 
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 
 /** Miscellaneous Converter classes. */
@@ -73,6 +80,34 @@ public class MiscConverters implements ConverterLoader {
         }
     }
 
+    public static class ByteBufferToByteArray extends AbstractConverter<ByteBuffer, byte[]> {
+        public ByteBufferToByteArray() {
+            super(ByteBuffer.class, byte[].class);
+        }
+
+        public byte[] convert(ByteBuffer obj) throws ConversionException {
+            try {
+                return obj.hasArray() ? obj.array() : null;
+            } catch (Exception e) {
+                throw new ConversionException(e);
+            }
+        }
+    }
+
+    public static class ByteArrayToByteBuffer extends AbstractConverter<byte[], ByteBuffer> {
+        public ByteArrayToByteBuffer() {
+            super(byte[].class, ByteBuffer.class);
+        }
+
+        public ByteBuffer convert(byte[] obj) throws ConversionException {
+            try {
+                return ByteBuffer.wrap(obj);
+            } catch (Exception e) {
+                throw new ConversionException(e);
+            }
+        }
+    }
+
     public static class ClobToString extends AbstractConverter<Clob, String> {
         public ClobToString() {
             super(Clob.class, String.class);
@@ -99,6 +134,68 @@ public class MiscConverters implements ConverterLoader {
                 }
             }
             return strBuf.toString();
+        }
+    }
+
+    public static class EnumToString extends AbstractConverter<Enum, String> {
+        public EnumToString() {
+            super(Enum.class, String.class);
+        }
+
+        public boolean canConvert(Class<?> sourceClass, Class<?> targetClass) {
+            return Enum.class.isAssignableFrom(sourceClass) && String.class.isAssignableFrom(targetClass);
+        }
+
+        public String convert(Enum obj) throws ConversionException {
+            return obj.name();
+        }
+
+        public String convert(Class<? extends String> targetClass, Enum obj) throws ConversionException {
+            return convert(obj);
+        }
+
+        public Class<? super Enum> getSourceClass() {
+            return null;
+        }
+    }
+
+    public static class StringToEnumConverterCreator implements ConverterCreator, ConverterLoader {
+        public void loadConverters() {
+            Converters.registerCreator(this);
+        }
+
+        public <S, T> Converter<S, T> createConverter(Class<S> sourceClass, Class<T> targetClass) {
+            if (String.class == sourceClass && Enum.class.isAssignableFrom(targetClass)) {
+                return UtilGenerics.cast(new StringToEnum());
+            } else {
+                return null;
+            }
+        }
+
+        private <E extends Enum<E>> StringToEnum<E> createConverter(Class<Enum<E>> targetClass) {
+            return new StringToEnum<E>();
+        }
+    }
+
+    private static class StringToEnum<E extends Enum<E>> extends AbstractConverter<String, E> {
+        public StringToEnum() {
+            super(String.class, Enum.class);
+        }
+
+        public boolean canConvert(Class<?> sourceClass, Class<?> targetClass) {
+            return String.class.isAssignableFrom(sourceClass) && Enum.class.isAssignableFrom(targetClass);
+        }
+
+        public E convert(String obj) throws ConversionException {
+            throw new UnsupportedOperationException();
+        }
+
+        public E convert(Class<? extends E> targetClass, String obj) throws ConversionException {
+            return Enum.valueOf(UtilGenerics.<Class<E>>cast(targetClass), obj);
+        }
+
+        public Class<? super Enum> getTargetClass() {
+            return null;
         }
     }
 
@@ -138,6 +235,117 @@ public class MiscConverters implements ConverterLoader {
             } else {
                 throw new ConversionException("Could not convert " + obj + " to Locale: ");
             }
+        }
+    }
+
+    public static class DecimalFormatToString extends AbstractConverter<DecimalFormat, String> {
+        public DecimalFormatToString() {
+            super(DecimalFormat.class, String.class);
+        }
+
+        public String convert(DecimalFormat obj) throws ConversionException {
+            return obj.toPattern();
+        }
+    }
+
+    public static class StringToDecimalFormat extends AbstractConverter<String, DecimalFormat> {
+        public StringToDecimalFormat() {
+            super(String.class, DecimalFormat.class);
+        }
+
+        public DecimalFormat convert(String obj) throws ConversionException {
+            return new DecimalFormat(obj);
+        }
+    }
+
+    public static class SimpleDateFormatToString extends AbstractConverter<SimpleDateFormat, String> {
+        public SimpleDateFormatToString() {
+            super(SimpleDateFormat.class, String.class);
+        }
+
+        public String convert(SimpleDateFormat obj) throws ConversionException {
+            return obj.toPattern();
+        }
+    }
+
+    public static class StringToSimpleDateFormat extends AbstractConverter<String, SimpleDateFormat> {
+        public StringToSimpleDateFormat() {
+            super(String.class, SimpleDateFormat.class);
+        }
+
+        public SimpleDateFormat convert(String obj) throws ConversionException {
+            return new SimpleDateFormat(obj);
+        }
+    }
+
+    public static class CharsetToString extends AbstractConverter<Charset, String> {
+        public CharsetToString() {
+            super(Charset.class, String.class);
+        }
+
+        public String convert(Charset obj) throws ConversionException {
+            return obj.name();
+        }
+    }
+
+    public static class StringToCharset extends AbstractConverter<String, Charset> {
+        public StringToCharset() {
+            super(String.class, Charset.class);
+        }
+
+        public Charset convert(String obj) throws ConversionException {
+            return Charset.forName(obj);
+        }
+    }
+
+    public static class UUIDToString extends AbstractConverter<UUID, String> {
+        public UUIDToString() {
+            super(UUID.class, String.class);
+        }
+
+        public String convert(UUID obj) throws ConversionException {
+            return obj.toString();
+        }
+    }
+
+    public static class StringToUUID extends AbstractConverter<String, UUID> {
+        public StringToUUID() {
+            super(String.class, UUID.class);
+        }
+
+        public UUID convert(String obj) throws ConversionException {
+            return UUID.fromString(obj);
+        }
+    }
+
+    public static class RegexPatternToString extends AbstractConverter<Pattern, String> {
+        public RegexPatternToString() {
+            super(Pattern.class, String.class);
+        }
+
+        public String convert(Pattern obj) throws ConversionException {
+            return obj.toString();
+        }
+    }
+
+    public static class StringToRegexPattern extends AbstractConverter<String, Pattern> {
+        public StringToRegexPattern() {
+            super(String.class, Pattern.class);
+        }
+
+        public Pattern convert(String obj) throws ConversionException {
+            return Pattern.compile(obj);
+        }
+    }
+
+    public static class NotAConverter_Helper {
+        protected NotAConverter_Helper() {
+            throw new Error("Should not be loaded");
+        }
+    }
+
+    public static class NotAConverter {
+        public NotAConverter() {
         }
     }
 

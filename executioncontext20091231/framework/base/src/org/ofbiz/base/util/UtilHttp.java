@@ -268,7 +268,7 @@ public class UtilHttp {
             if (val instanceof java.sql.Timestamp) {
                 val = val.toString();
             }
-            if (val instanceof String || val instanceof Number || val instanceof Map || val instanceof List) {
+            if (val instanceof String || val instanceof Number || val instanceof Map || val instanceof List || val instanceof Boolean) {
                 if (Debug.verboseOn()) Debug.logVerbose("Adding attribute to JSON output: " + key, module);
                 returnMap.put(key, val);
             }
@@ -1204,7 +1204,7 @@ public class UtilHttp {
             if (date == null || date.length() < 10) return null;
             if (UtilValidate.isEmpty(hour)) return null;
             if (UtilValidate.isEmpty(minutes)) return null;
-            boolean isTwelveHour = UtilValidate.isEmpty(ampm);
+            boolean isTwelveHour = UtilValidate.isNotEmpty(ampm);
 
             // create the timestamp from the data
             try {
@@ -1349,5 +1349,20 @@ public class UtilHttp {
                 }
             }
         }
+    }
+
+    /**
+     * Returns a unique Id for the current request
+     * @param request An HttpServletRequest to get the name info from
+     * @return String
+     */
+    public static String getNextUniqueId(HttpServletRequest request) {
+        Integer uniqueIdNumber= (Integer)request.getAttribute("UNIQUE_ID");
+        if (uniqueIdNumber == null) {
+            uniqueIdNumber = Integer.valueOf(1);
+        }
+
+        request.setAttribute("UNIQUE_ID", Integer.valueOf(uniqueIdNumber.intValue() + 1));
+        return "autoId_" + uniqueIdNumber;
     }
 }

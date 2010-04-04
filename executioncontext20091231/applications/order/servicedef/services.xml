@@ -42,6 +42,7 @@ under the License.
         <attribute name="note" type="String" mode="IN" optional="true"/>
         <attribute name="temporaryAnonymousUserLogin" type="org.ofbiz.entity.GenericValue" mode="IN" optional="true"/>
         <attribute name="messageWrapper" type="org.ofbiz.service.mail.MimeMessageWrapper" mode="OUT" optional="true"/>
+        <attribute name="orderId" type="String" mode="OUT" optional="true"/>
         <attribute name="subject" type="String" mode="OUT" optional="true"/>
     </service>
     <service name="sendOrderConfirmation" engine="java" require-new-transaction="true" max-retry="3"
@@ -440,7 +441,7 @@ under the License.
             location="org.ofbiz.order.order.OrderServices" invoke="createOrderNote" auth="true">
         <description>Create a note item and associate with a order header</description>
         <attribute name="orderId" type="String" mode="IN"/>
-        <attribute name="note" type="String" mode="IN"/>
+        <attribute name="note" type="String" mode="IN" allow-html="safe"/>
         <attribute name="internalNote" type="String" mode="IN"/>
         <attribute name="noteName" type="String" mode="IN" optional="true"/>
     </service>
@@ -866,6 +867,7 @@ under the License.
         location="org.ofbiz.order.test.OrderTestServices" invoke="createTestSalesOrderSingle">
         <description>Bulk create test sales orders. Note that default-values depend on demo data in ecommerce/data.</description>
         <attribute name="productCategoryId" type="String" mode="IN" optional="true" default-value="100"/>
+        <attribute name="productId" type="String" mode="IN" optional="true"/>
         <attribute name="productStoreId" type="String" mode="IN" optional="true" default-value="9000"/>
         <attribute name="currencyUomId" type="String" mode="IN" optional="true" default-value="USD"/>
         <attribute name="partyId" type="String" mode="IN" optional="true" default-value="DemoCustomer"/>
@@ -971,6 +973,7 @@ under the License.
         <attribute name="unitCost" mode="IN" type="String" optional="true"/>
         <attribute name="itemPriceMap" type="Map" mode="IN" string-map-prefix="ipm_" optional="true"/>
         <attribute name="overridePriceMap" type="Map" mode="IN" string-map-prefix="opm_" optional="true"/>
+        <attribute name="orderCurrencyUnitPrice" type="String" mode="IN" optional="true"/>
    </service>
 
     <service name="cancelAllBackOrders" engine="simple"

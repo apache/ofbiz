@@ -26,7 +26,7 @@ under the License.
         <br class="clear"/>
     </div>
     <div class="screenlet-body">
-       <table class="basic-table" cellspacing='0'>
+       <table class="order-items basic-table" cellspacing='0'>
           <tr valign="bottom" class="header-row">
             <td width="30%">${uiLabelMap.ProductProduct}</td>
             <td width="33%">${uiLabelMap.CommonStatus}</td>
@@ -39,25 +39,23 @@ under the License.
           <#if !orderItemList?has_content>
             <tr><td colspan="7"><font color="red">${uiLabelMap.checkhelper_sales_order_lines_lookup_failed}</font></td></tr>
           <#else>
+            <#assign itemClass = "2">
             <#list orderItemList as orderItem>
               <#assign orderItemContentWrapper = Static["org.ofbiz.order.order.OrderContentWrapper"].makeOrderContentWrapper(orderItem, request)>
               <#assign orderItemShipGrpInvResList = orderReadHelper.getOrderItemShipGrpInvResList(orderItem)>
               <#if orderHeader.orderTypeId == "SALES_ORDER"><#assign pickedQty = orderReadHelper.getItemPickedQuantityBd(orderItem)></#if>
-              <tr>
+              <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                 <#assign orderItemType = orderItem.getRelatedOne("OrderItemType")?if_exists>
                 <#assign productId = orderItem.productId?if_exists>
                 <#if productId?exists && productId == "shoppingcart.CommentLine">
                   <td colspan="7" valign="top" class="label"> &gt;&gt; ${orderItem.itemDescription}</td>
                 <#else>
-                  <td valign="top">
-                    <#if productId?has_content>
-                      <#assign product = orderItem.getRelatedOneCache("Product")>
-                    </#if>
-                    <div>
+                  <td colspan="7">
+                    <div class="order-item-description">
                       <#if productId?exists>
                         ${orderItem.productId?default("N/A")} - ${orderItem.itemDescription?if_exists}
                         <#if (product.salesDiscontinuationDate)?exists && Static["org.ofbiz.base.util.UtilDateTime"].nowTimestamp().after(product.salesDiscontinuationDate)>
-                          <br/><span style="color: red;">${uiLabelMap.OrderItemDiscontinued}: ${product.salesDiscontinuationDate}</span>
+                          <br /><span style="color: red;">${uiLabelMap.OrderItemDiscontinued}: ${product.salesDiscontinuationDate}</span>
                         </#if>
                       <#elseif orderItemType?exists>
                         ${orderItemType.description} - ${orderItem.itemDescription?if_exists}
@@ -65,14 +63,25 @@ under the License.
                         ${orderItem.itemDescription?if_exists}
                       </#if>
                     </div>
-                    <#if productId?exists>
-                      <div style="margin-top: 15px; margin-left: 10px;">
+                      <div style="float:right;">
                         <a href="/catalog/control/EditProduct?productId=${productId}" class="buttontext" target="_blank">${uiLabelMap.ProductCatalog}</a>
                         <a href="/ecommerce/control/product?product_id=${productId}" class="buttontext" target="_blank">${uiLabelMap.OrderEcommerce}</a>
                         <#if orderItemContentWrapper.get("IMAGE_URL")?has_content>
                           <a href="<@ofbizUrl>viewimage?orderId=${orderId}&amp;orderItemSeqId=${orderItem.orderItemSeqId}&amp;orderContentTypeId=IMAGE_URL</@ofbizUrl>" target="_orderImage" class="buttontext">${uiLabelMap.OrderViewImage}</a>
                         </#if>
                       </div>
+                  </td>
+                </#if>
+              </tr>
+              <tr<#if itemClass == "1"> class="alternate-row"</#if>>
+                <#if productId?exists && productId == "shoppingcart.CommentLine">
+                  <td colspan="7" valign="top" class="label"> &gt;&gt; ${orderItem.itemDescription}</td>
+                <#else>
+                  <td valign="top">
+                    <#if productId?has_content>
+                      <#assign product = orderItem.getRelatedOneCache("Product")>
+                    </#if>
+                    <#if productId?exists>
 
                       <#-- INVENTORY -->
                       <#if (orderHeader.statusId != "ORDER_COMPLETED") && availableToPromiseMap?exists && quantityOnHandMap?exists && availableToPromiseMap.get(productId)?exists && quantityOnHandMap.get(productId)?exists>
@@ -86,7 +95,7 @@ under the License.
                       <#assign inProductionQuantity = productionProductQuantityMap.get(productId)?default(0)>
                       <#assign unplannedQuantity = requiredQuantity - qohQuantity - inProductionQuantity - onOrderQuantity - mktgPkgQOH>
                       <#if unplannedQuantity < 0><#assign unplannedQuantity = 0></#if>
-                        <div style="margin-top: 15px; margin-left: 20px;">
+                        <div class="screenlet order-item-inventory"><div class="screenlet-body">
                             <table cellspacing="0" cellpadding="0" border="0">
                               <tr><td style="text-align: right; padding-bottom: 10px;">
                                   <a class="buttontext" href="/catalog/control/EditProductInventoryItems?productId=${productId}&amp;showAllFacilities=Y&amp;externalLoginKey=${externalLoginKey}" target="_blank">${uiLabelMap.ProductInventory}</a>
@@ -112,7 +121,7 @@ under the License.
                               <tr><td>${uiLabelMap.OrderUnplanned}</td>
                                 <td style="padding-left: 15px; text-align: left;">${unplannedQuantity}</td></tr>
                             </table>
-                        </div>
+                        </div></div>
                       </#if>
                     </#if>
                   </td>
@@ -120,14 +129,16 @@ under the License.
                   <#-- now show status details per line item -->
                   <#assign currentItemStatus = orderItem.getRelatedOne("StatusItem")>
                   <td colspan="1" valign="top">
-                    <div><span class="label">${uiLabelMap.CommonCurrent}</span>&nbsp;${currentItemStatus.get("description",locale)?default(currentItemStatus.statusId)}</div>
+                    <div class="screenlet order-item-status-list<#if currentItemStatus.statusCode?has_content> ${currentItemStatus.statusCode}</#if>"><div class="screenlet-body">
+                    <div class="current-status"><span class="label">${uiLabelMap.CommonCurrent}</span>&nbsp;${currentItemStatus.get("description",locale)?default(currentItemStatus.statusId)}</div>
                     <#assign orderItemStatuses = orderReadHelper.getOrderItemStatuses(orderItem)>
                     <#list orderItemStatuses as orderItemStatus>
                       <#assign loopStatusItem = orderItemStatus.getRelatedOne("StatusItem")>
                       <div>
-                        ${orderItemStatus.statusDatetime.toString()}&nbsp;&nbsp;${loopStatusItem.get("description",locale)?default(orderItemStatus.statusId)}
+                        ${(orderItemStatus.statusDatetime.toString())?if_exists}&nbsp;&nbsp;${loopStatusItem.get("description",locale)?default(orderItemStatus.statusId)}
                       </div>
                     </#list>
+                    </div></div>
                     <#assign returns = orderItem.getRelated("ReturnItem")?if_exists>
                     <#if returns?has_content>
                       <#list returns as returnItem>
@@ -142,7 +153,7 @@ under the License.
                   </td>
                   <#-- QUANTITY -->
                   <td align="right" valign="top" nowrap="nowrap">
-                    <table>
+                    <div class="screenlet order-item-quantity"><div class="screenlet-body"><table>
                       <tr valign="top">
                         <#assign shippedQuantity = orderReadHelper.getItemShippedQuantity(orderItem)>
                         <#assign shipmentReceipts = delegator.findByAnd("ShipmentReceipt", {"orderId" : orderHeader.getString("orderId"), "orderItemSeqId" : orderItem.orderItemSeqId})/>
@@ -221,7 +232,7 @@ under the License.
                           <td>${returnQuantityMap.get(orderItem.orderItemSeqId)?default(0)}</td>
                         </td>
                       </tr>
-                    </table>
+                    </table></div></div>
                   </td>
 
                   <td align="right" valign="top" nowrap="nowrap">
@@ -246,7 +257,7 @@ under the License.
               <#if workOrderItemFulfillments?has_content>
                   <#list workOrderItemFulfillments as workOrderItemFulfillment>
                       <#assign workEffort = workOrderItemFulfillment.getRelatedOneCache("WorkEffort")>
-                      <tr>
+                      <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                         <td>&nbsp;</td>
                         <td colspan="6">
                           <div>
@@ -276,7 +287,7 @@ under the License.
                   <#assign linkedOrderItemValue = linkedOrderItem.getRelatedOne("ToOrderItem")>
                   <#assign linkedOrderItemValueStatus = linkedOrderItemValue.getRelatedOne("StatusItem")>
                   <#assign description = linkedOrderItem.getRelatedOne("OrderItemAssocType").getString("description")/>
-                  <tr>
+                  <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                     <td>&nbsp;</td>
                     <td colspan="6">
                       <div>
@@ -294,7 +305,7 @@ under the License.
                   <#assign linkedOrderItemValue = linkedOrderItem.getRelatedOne("FromOrderItem")>
                   <#assign linkedOrderItemValueStatus = linkedOrderItemValue.getRelatedOne("StatusItem")>
                   <#assign description = linkedOrderItem.getRelatedOne("OrderItemAssocType").getString("description")/>
-                  <tr>
+                  <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                     <td>&nbsp;</td>
                     <td colspan="6">
                       <div>
@@ -311,7 +322,7 @@ under the License.
 
               <#if linkedRequirements?has_content>
                 <#list linkedRequirements as linkedRequirement>
-                  <tr>
+                <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                     <td>&nbsp;</td>
                     <td colspan="6">
                       <div>
@@ -327,7 +338,7 @@ under the License.
               <#assign linkedQuote = orderItem.getRelatedOneCache("QuoteItem")?if_exists>
 
               <#if linkedQuote?has_content>
-                <tr>
+                <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                   <td>&nbsp;</td>
                   <td colspan="6">
                     <div>
@@ -343,7 +354,7 @@ under the License.
               <#if orderItemAdjustments?exists && orderItemAdjustments?has_content>
                 <#list orderItemAdjustments as orderItemAdjustment>
                   <#assign adjustmentType = orderItemAdjustment.getRelatedOneCache("OrderAdjustmentType")>
-                  <tr>
+                  <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                     <td align="right" colspan="2">
                       <div>
                         <span class="label">${uiLabelMap.OrderAdjustment}</span>&nbsp;${adjustmentType.get("description",locale)}
@@ -382,9 +393,9 @@ under the License.
               <#-- now show price info per line item -->
               <#assign orderItemPriceInfos = orderReadHelper.getOrderItemPriceInfos(orderItem)>
               <#if orderItemPriceInfos?exists && orderItemPriceInfos?has_content>
-                <tr><td colspan="7">&nbsp;</td></tr>
+                <tr<#if itemClass == "1"> class="alternate-row"</#if>><td colspan="7">&nbsp;</td></tr>
                 <#list orderItemPriceInfos as orderItemPriceInfo>
-                  <tr>
+                  <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                     <td align="right" colspan="2">
                       <div><span class="label">${uiLabelMap.ProductPriceRuleNameId}</span>&nbsp;[${orderItemPriceInfo.productPriceRuleId?if_exists}:${orderItemPriceInfo.productPriceActionSeqId?if_exists}] ${orderItemPriceInfo.description?if_exists}</div>
                     </td>
@@ -403,7 +414,7 @@ under the License.
               <#assign orderItemSurveyResponses = Static["org.ofbiz.order.order.OrderReadHelper"].getOrderItemSurveyResponse(orderItem)>
               <#if orderItemSurveyResponses?exists && orderItemSurveyResponses?has_content>
                 <#list orderItemSurveyResponses as survey>
-                  <tr>
+                  <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                     <td align="right" colspan="2">
                       <div>
                         <span class="label">${uiLabelMap.CommonSurveys}</span>&nbsp;
@@ -417,7 +428,7 @@ under the License.
 
               <#-- display the ship estimated/before/after dates -->
               <#if orderItem.estimatedShipDate?exists>
-                <tr>
+                <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                   <td align="right" colspan="2">
                     <div><span class="label">${uiLabelMap.OrderEstimatedShipDate}</span>&nbsp;${orderItem.estimatedShipDate?string.short}</div>
                   </td>
@@ -425,7 +436,7 @@ under the License.
                 </tr>
               </#if>
               <#if orderItem.estimatedDeliveryDate?exists>
-              <tr>
+              <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                 <td align="right" colspan="2">
                   <div><span class="label">${uiLabelMap.OrderOrderQuoteEstimatedDeliveryDate}</span>&nbsp;${orderItem.estimatedDeliveryDate?string.short}</div>
                 </td>
@@ -433,7 +444,7 @@ under the License.
               </tr>
               </#if>
               <#if orderItem.shipAfterDate?exists>
-              <tr>
+              <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                 <td align="right" colspan="2">
                   <div><span class="label">${uiLabelMap.OrderShipAfterDate}</span>&nbsp;${orderItem.shipAfterDate?string.short}</div>
                 </td>
@@ -441,7 +452,7 @@ under the License.
               </tr>
               </#if>
               <#if orderItem.shipBeforeDate?exists>
-              <tr>
+              <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                 <td align="right" colspan="2">
                   <div><span class="label">${uiLabelMap.OrderShipBeforeDate}</span>&nbsp;${orderItem.shipBeforeDate?string.short}</div>
                 </td>
@@ -455,7 +466,7 @@ under the License.
                 <#list orderItemShipGroupAssocs as shipGroupAssoc>
                   <#assign shipGroup = shipGroupAssoc.getRelatedOne("OrderItemShipGroup")>
                   <#assign shipGroupAddress = shipGroup.getRelatedOne("PostalAddress")?if_exists>
-                  <tr>
+                  <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                     <td align="right" colspan="2">
                       <div><span class="label">${uiLabelMap.OrderShipGroup}</span>&nbsp;[${shipGroup.shipGroupSeqId}] ${shipGroupAddress.address1?default("${uiLabelMap.OrderNotShipped}")}</div>
                     </td>
@@ -470,7 +481,7 @@ under the License.
               <#-- now show inventory reservation info per line item -->
               <#if orderItemShipGrpInvResList?exists && orderItemShipGrpInvResList?has_content>
                 <#list orderItemShipGrpInvResList as orderItemShipGrpInvRes>
-                  <tr>
+                  <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                     <td align="right" colspan="2">
                       <div>
                           <span class="label">${uiLabelMap.FacilityInventory}</span>&nbsp;
@@ -497,7 +508,7 @@ under the License.
               <#assign orderShipments = orderItem.getRelated("OrderShipment")?if_exists>
               <#if orderShipments?has_content>
                 <#list orderShipments as orderShipment>
-                  <tr>
+                  <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                     <td align="right" colspan="2">
                       <div><span class="label">${uiLabelMap.OrderPlannedInShipment}</span>&nbsp;<a target="facility" href="/facility/control/ViewShipment?shipmentId=${orderShipment.shipmentId}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">${orderShipment.shipmentId}</a>: ${orderShipment.shipmentItemSeqId}</div>
                     </td>
@@ -513,7 +524,7 @@ under the License.
               <#assign itemIssuances = itemIssuancesPerItem.get(orderItem.get("orderItemSeqId"))?if_exists>
               <#if itemIssuances?has_content>
                 <#list itemIssuances as itemIssuance>
-                  <tr>
+                  <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                     <td align="right" colspan="2">
                       <div>
                         <#if itemIssuance.shipmentId?has_content>
@@ -535,7 +546,7 @@ under the License.
               <#-- now show item issuances (inventory item) per line item -->
               <#if itemIssuances?has_content>
                 <#list itemIssuances as itemIssuance>
-                  <tr>
+                  <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                     <td align="right" colspan="2">
                       <div>
                         <#if itemIssuance.inventoryItemId?has_content>
@@ -559,7 +570,7 @@ under the License.
               <#assign shipmentReceipts = orderItem.getRelated("ShipmentReceipt")?if_exists>
               <#if shipmentReceipts?has_content>
                 <#list shipmentReceipts as shipmentReceipt>
-                  <tr>
+                  <tr<#if itemClass == "1"> class="alternate-row"</#if>>
                     <td align="right" colspan="2">
                       <div>
                         <#if shipmentReceipt.shipmentId?has_content>
@@ -578,10 +589,15 @@ under the License.
                   </tr>
                 </#list>
               </#if>
+            <#if itemClass == "2">
+                <#assign itemClass = "1">
+            <#else>
+                <#assign itemClass = "2">
+            </#if>
 
             </#list>
           </#if>
-          <tr><td colspan="7"><hr/></td></tr>
+          <tr><td colspan="7"><hr /></td></tr>
           <#list orderHeaderAdjustments as orderHeaderAdjustment>
             <#assign adjustmentType = orderHeaderAdjustment.getRelatedOne("OrderAdjustmentType")>
             <#assign adjustmentAmount = Static["org.ofbiz.order.order.OrderReadHelper"].calcOrderAdjustment(orderHeaderAdjustment, orderSubTotal)>
@@ -599,7 +615,7 @@ under the License.
           </#list>
 
           <#-- subtotal -->
-          <tr><td colspan="1"></td><td colspan="6"><hr/></td></tr>
+          <tr><td colspan="1"></td><td colspan="6"><hr /></td></tr>
           <tr>
             <td align="right" colspan="5"><div><span class="label">${uiLabelMap.OrderItemsSubTotal}</span></div></td>
             <td align="right" nowrap="nowrap"><div><@ofbizCurrency amount=orderSubTotal isoCode=currencyUomId/></div></td>

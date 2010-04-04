@@ -57,7 +57,7 @@ import paypal.payflow.SDKProperties;
 public class PayflowPro {
 
     public static final String module = PayflowPro.class.getName();
-    
+
     /**
      * Authorize credit card payment service. Service wrapper around PayFlow Pro API.
      * @param dctx Service Engine DispatchContext.
@@ -88,7 +88,7 @@ public class PayflowPro {
             isPayPal = true;
         }
 
-        Map<String, String> data = FastMap.newInstance(); 
+        Map<String, String> data = FastMap.newInstance();
 
         boolean isReAuth = false;
         if (isPayPal) {
@@ -144,9 +144,8 @@ public class PayflowPro {
 
             // gather the address info
             if (ps != null) {
-                String street = ps.getString(UtilValidate.isNotEmpty(ps.getString("address2")) ? " " + ps.getString("address2") : "");
-
-                data.put("STREET", street);
+                String street = ps.getString("address1") + ((UtilValidate.isNotEmpty(ps.getString("address2"))) ? " " + ps.getString("address2") : "");
+                data.put("STREET"+"["+street.length()+"]", street);
                 data.put("ZIP", ps.getString("postalCode"));
             }
         }
@@ -155,7 +154,7 @@ public class PayflowPro {
         data.put("AMT", processAmount.toString());
 
         PayflowAPI pfp = init(delegator, paymentGatewayConfigId, configString, context);
-        
+
         // get the base params
         StringBuilder params = makeBaseParams(delegator, paymentGatewayConfigId, configString);
 
@@ -178,7 +177,7 @@ public class PayflowPro {
             // Attach the avs info returned in doExpressCheckout and stored in PayPalPaymentMethod
             resp += "&AVSADDR=" + payPalPaymentMethod.getString("avsAddr") + "&AVSZIP=" + payPalPaymentMethod.getString("avsZip");
         }
-        
+
         // check the response
         Map<String, Object> result = ServiceUtil.returnSuccess();
         parseAuthResponse(delegator, paymentGatewayConfigId, resp, result, configString, isReAuth, isPayPal);
@@ -411,8 +410,8 @@ public class PayflowPro {
         result.put("refundAmount", amount);
         return result;
     }
-    
-    
+
+
     public static Map<String, Object> setExpressCheckout(DispatchContext dctx, Map<String, ? extends Object> context) {
         Delegator delegator = dctx.getDelegator();
         ShoppingCart cart = (ShoppingCart) context.get("cart");
@@ -420,7 +419,7 @@ public class PayflowPro {
         GenericValue payPalPaymentSetting = ProductStoreWorker.getProductStorePaymentSetting(delegator, cart.getProductStoreId(), "EXT_PAYPAL", null, true);
         String paymentGatewayConfigId = payPalPaymentSetting.getString("paymentGatewayConfigId");
         String configString = "payment.properties";
-        
+
         if (cart == null || cart.items().size() <= 0) {
             return ServiceUtil.returnError(UtilProperties.getMessage("AccountingErrorUiLabels", "AccountingPayPalShoppingCartIsEmpty", locale));
         }
@@ -436,7 +435,7 @@ public class PayflowPro {
         }
         data.put("RETURNURL", getPaymentGatewayConfigValue(delegator, paymentGatewayConfigId, "returnUrl", configString, "payment.verisign.returnUrl"));
         data.put("CANCELURL", getPaymentGatewayConfigValue(delegator, paymentGatewayConfigId, "cancelReturnUrl", configString, "payment.verisign.cancelReturnUrl"));
-        
+
         try {
             addCartDetails(data, cart);
         } catch (GenericEntityException e) {
@@ -523,7 +522,7 @@ public class PayflowPro {
             parameterMap.put("SHIPTOCOUNTRY", StringUtils.left(countryGeo.getString("geoCode"), 2));
         }
     }
-    
+
     public static Map<String, Object> getExpressCheckout(DispatchContext dctx, Map<String, Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
         Delegator delegator = dctx.getDelegator();
@@ -564,7 +563,7 @@ public class PayflowPro {
             Debug.logError("A problem occurred while requesting the checkout details from paypal: Result = " + responseMap.get("RESULT") + ", Message = " + responseMap.get("RESPMSG"), module);
             return ServiceUtil.returnError(UtilProperties.getMessage("AccountingErrorUiLabels", "AccountingPayPalCommunicationError", locale));
         }
-        
+
         Map<String, Object> inMap = FastMap.newInstance();
         inMap.put("userLogin", cart.getUserLogin());
         inMap.put("partyId", cart.getOrderPartyId());
@@ -584,10 +583,10 @@ public class PayflowPro {
             return ServiceUtil.returnError(e.getMessage());
         }
         String paymentMethodId = (String) outMap.get("paymentMethodId");
-        
+
         cart.clearPayments();
         cart.addPaymentAmount(paymentMethodId, cart.getGrandTotal(), true);
-        
+
         return ServiceUtil.returnSuccess();
 
     }
@@ -719,7 +718,7 @@ public class PayflowPro {
             Debug.logError(e, "Unable to parse response code; not a number!", module);
         }
 
-        
+
         result.put("authRefNum", parameters.get("PNREF"));
 
         if (codeInt == 0 && avsCheckOkay && cvv2CheckOkay) {
@@ -730,6 +729,10 @@ public class PayflowPro {
             Debug.logWarning("In PayflowPro failing authorization; respCode/RESULT=" + respCode + ", avsCheckOkay=" + avsCheckOkay + ", cvv2CheckOkay=" + cvv2CheckOkay + "; AUTHCODE=" + parameters.get("AUTHCODE"), module);
             result.put("authResult", Boolean.FALSE);
             result.put("authRefNum", respCode);
+        } else if (codeInt == 0) {
+            Debug.logWarning("In PayflowPro approved, but invalid flags; respCode/RESULT=" + respCode + ", avsCheckOkay=" + avsCheckOkay + ", cvv2CheckOkay=" + cvv2CheckOkay + "; AUTHCODE=" + parameters.get("AUTHCODE"), module);
+            result.put("authResult", Boolean.TRUE);
+            result.put("authCode", parameters.get("AUTHCODE"));
         } else {
             // other error
             Debug.logWarning("In PayflowPro failing authorization; respCode/RESULT=" + respCode + ", avsCheckOkay=" + avsCheckOkay + ", cvv2CheckOkay=" + cvv2CheckOkay + "; AUTHCODE=" + parameters.get("AUTHCODE"), module);
@@ -754,7 +757,7 @@ public class PayflowPro {
 
     private static void parseCaptureResponse(String resp, Map<String, Object> result) {
         Map<String, String> parameters = parseResponse(resp);
-        
+
         String respCode = (String) parameters.get("RESULT");
         int codeInt = -999; // custom response code -- not from payflow docs
         try {
@@ -782,7 +785,7 @@ public class PayflowPro {
 
     private static void parseVoidResponse(String resp, Map<String, Object> result) {
         Map<String, String> parameters = parseResponse(resp);
-        
+
         String respCode = (String) parameters.get("RESULT");
         int codeInt = -999; // custom response code -- not from payflow docs
         try {
@@ -810,7 +813,7 @@ public class PayflowPro {
 
     private static void parseRefundResponse(String resp, Map<String, Object> result) {
         Map<String, String> parameters = parseResponse(resp);
-        
+
         String respCode = (String) parameters.get("RESULT");
         int codeInt = -999; // custom response code -- not from payflow docs
         try {
@@ -896,7 +899,7 @@ public class PayflowPro {
         Integer loggingLevel = Integer.decode(getPaymentGatewayConfigValue(delegator, paymentGatewayConfigId, "loggingLevel", resource, "payment.verisign.loggingLevel", "6"));
         Integer maxLogFileSize = Integer.decode(getPaymentGatewayConfigValue(delegator, paymentGatewayConfigId, "maxLogFileSize", resource, "payment.verisign.maxLogFileSize", "1000000"));
         boolean stackTraceOn = "Y".equalsIgnoreCase(getPaymentGatewayConfigValue(delegator, paymentGatewayConfigId, "stackTraceOn", resource, "payment.verisign.stackTraceOn", "N"));
-        
+
         PayflowAPI pfp = new PayflowAPI(hostAddress, hostPort.intValue(), timeout.intValue(), proxyAddress,
                 proxyPort.intValue(), proxyLogon, proxyPassword);
         SDKProperties.setLogFileName(logFileName);
@@ -905,7 +908,7 @@ public class PayflowPro {
         SDKProperties.setStackTraceOn(stackTraceOn);
         return pfp;
     }
-    
+
     private static String getPaymentGatewayConfigValue(Delegator delegator, String paymentGatewayConfigId, String paymentGatewayConfigParameterName,
                                                        String resource, String parameterName) {
         String returnValue = "";
@@ -929,7 +932,7 @@ public class PayflowPro {
         }
         return returnValue;
     }
-    
+
     private static String getPaymentGatewayConfigValue(Delegator delegator, String paymentGatewayConfigId, String paymentGatewayConfigParameterName,
                                                        String resource, String parameterName, String defaultValue) {
         String returnValue = getPaymentGatewayConfigValue(delegator, paymentGatewayConfigId, paymentGatewayConfigParameterName, resource, parameterName);
@@ -938,11 +941,11 @@ public class PayflowPro {
         }
         return returnValue;
     }
-    
+
     private static boolean comparePaymentGatewayConfigValue(Delegator delegator, String paymentGatewayConfigId, String paymentGatewayConfigParameterName,
                                                         String resource, String parameterName, String compareValue) {
         boolean returnValue = false;
-        
+
         String value = getPaymentGatewayConfigValue(delegator, paymentGatewayConfigId, paymentGatewayConfigParameterName, resource, parameterName, compareValue);
         if (UtilValidate.isNotEmpty(value)) {
             returnValue = value.trim().equalsIgnoreCase(compareValue);

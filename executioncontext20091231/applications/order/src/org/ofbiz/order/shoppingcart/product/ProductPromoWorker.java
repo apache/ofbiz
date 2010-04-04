@@ -842,11 +842,11 @@ public class ProductPromoWorker {
             if (UtilValidate.isNotEmpty(condValue)) {
                 BigDecimal amountNeeded = new BigDecimal(condValue);
                 BigDecimal amountAvailable = BigDecimal.ZERO;
-    
+
                 // Debug.logInfo("Doing Amount Not Counted Cond with Value: " + amountNeeded, module);
-    
+
                 Set productIds = ProductPromoWorker.getPromoRuleCondProductIds(productPromoCond, delegator, nowTimestamp);
-    
+
                 List lineOrderedByBasePriceList = cart.getLineListOrderedByBasePrice(false);
                 Iterator lineOrderedByBasePriceIter = lineOrderedByBasePriceList.iterator();
                 while (lineOrderedByBasePriceIter.hasNext()) {
@@ -857,14 +857,14 @@ public class ProductPromoWorker {
                     if (!cartItem.getIsPromo() &&
                             (productIds.contains(cartItem.getProductId()) || (parentProductId != null && productIds.contains(parentProductId))) &&
                             (product == null || !"N".equals(product.getString("includeInPromotions")))) {
-    
+
                         // just count the entire sub-total of the item
                         amountAvailable = amountAvailable.add(cartItem.getItemSubTotal());
                     }
                 }
-    
+
                 // Debug.logInfo("Doing Amount Not Counted Cond with Value after finding applicable cart lines: " + amountNeeded, module);
-    
+
                 compareBase = Integer.valueOf(amountAvailable.compareTo(amountNeeded));
             }
         } else if ("PPIP_PRODUCT_QUANT".equals(inputParamEnumId)) {
@@ -985,14 +985,14 @@ public class ProductPromoWorker {
                     compareBase = Integer.valueOf(0);
                 } else {
                     // look for PartyRelationship with partyRelationshipTypeId=GROUP_ROLLUP, the partyIdTo is the group member, so the partyIdFrom is the groupPartyId
-                    List partyRelationshipList = delegator.findByAndCache("PartyRelationship", UtilMisc.toMap("partyIdFrom", groupPartyId, "partyIdTo", partyId, "partyRelationshipTypeId", "GROUP_ROLLUP"));
+                    List<GenericValue> partyRelationshipList = delegator.findByAndCache("PartyRelationship", UtilMisc.toMap("partyIdFrom", groupPartyId, "partyIdTo", partyId, "partyRelationshipTypeId", "GROUP_ROLLUP"));
                     // and from/thru date within range
                     partyRelationshipList = EntityUtil.filterByDate(partyRelationshipList, true);
-                    // then 0 (equals), otherwise 1 (not equals)
+
                     if (UtilValidate.isNotEmpty(partyRelationshipList)) {
                         compareBase = Integer.valueOf(0);
                     } else {
-                        compareBase = Integer.valueOf(1);
+                        compareBase = Integer.valueOf(checkConditionPartyHierarchy(delegator, nowTimestamp, groupPartyId, partyId));
                     }
                 }
             }
@@ -1002,7 +1002,7 @@ public class ProductPromoWorker {
             } else {
                 String partyClassificationGroupId = condValue;
                 // find any PartyClassification
-                List partyClassificationList = delegator.findByAndCache("PartyClassification", UtilMisc.toMap("partyId", partyId, "partyClassificationGroupId", partyClassificationGroupId));
+                List<GenericValue> partyClassificationList = delegator.findByAndCache("PartyClassification", UtilMisc.toMap("partyId", partyId, "partyClassificationGroupId", partyClassificationGroupId));
                 // and from/thru date within range
                 partyClassificationList = EntityUtil.filterByDate(partyClassificationList, true);
                 // then 0 (equals), otherwise 1 (not equals)
@@ -1136,7 +1136,7 @@ public class ProductPromoWorker {
                     } catch (RecurrenceInfoException e) {
                         Debug.logError(e, module);
                     }
-    
+
                     // check the current recurrence
                     if (recurrence != null) {
                         if (recurrence.isValidCurrent()) {
@@ -1179,6 +1179,21 @@ public class ProductPromoWorker {
         }
         // default to not meeting the condition
         return false;
+    }
+
+    private static int checkConditionPartyHierarchy(Delegator delegator, Timestamp nowTimestamp, String groupPartyId, String partyId) throws GenericEntityException{
+        List<GenericValue> partyRelationshipList = delegator.findByAndCache("PartyRelationship", UtilMisc.toMap("partyIdTo", partyId, "partyRelationshipTypeId", "GROUP_ROLLUP"));
+        partyRelationshipList = EntityUtil.filterByDate(partyRelationshipList, nowTimestamp, null, null, true);
+        for (GenericValue genericValue : partyRelationshipList) {
+            String partyIdFrom = (String)genericValue.get("partyIdFrom");
+            if (partyIdFrom.equals(groupPartyId)) {
+                return 0;
+            }
+            if (0 == checkConditionPartyHierarchy(delegator, nowTimestamp, groupPartyId, partyIdFrom)) {
+                return 0;
+            }
+        }        
+        return 1;
     }
 
     public static class ActionResultInfo {

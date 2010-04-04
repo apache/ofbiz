@@ -36,7 +36,7 @@
                         </section>
                     </decorator-section>
                     <decorator-section name="left-column">
-                        <include-screen name="leftbar"/>
+                        <include-screen name="leftbar" location="component://product/widget/catalog/CommonScreens.xml"/>
                     </decorator-section>                    
                     <decorator-section name="body">
                         <section>
@@ -104,7 +104,9 @@
                             <widgets>
                                 <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                                     <decorator-section name="menu-bar">
-                                        <container><link target="EditFeatureType" text="${uiLabelMap.ProductNewFeatureType}" style="buttontext"/></container>
+                                        <container style="button-bar">
+                                            <link target="EditFeatureType" text="${uiLabelMap.ProductNewFeatureType}" style="buttontext create"/>
+                                        </container>
                                     </decorator-section>
                                     <decorator-section name="search-options">
                                         <include-form name="FindFeatureType" location="component://product/widget/catalog/FeatureForms.xml"/>
@@ -154,7 +156,9 @@
                             <widgets>
                                 <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                                     <decorator-section name="menu-bar">
-                                        <container><link target="EditFeatureInterAction" text="${uiLabelMap.PageTitleAddFeatureInterAction}" style="buttontext"/></container>
+                                        <container style="button-bar">
+                                            <link target="EditFeatureInterAction" text="${uiLabelMap.ProductNewFeatureInterAction}" style="buttontext create"/>
+                                        </container>
                                     </decorator-section>
                                     <decorator-section name="search-options">
                                         <include-form name="FindFeatureInterAction" location="component://product/widget/catalog/FeatureForms.xml"/>
@@ -229,7 +233,9 @@
                             <widgets>
                                 <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                                     <decorator-section name="menu-bar">
-                                        <container><link target="CreateProductFeature" text="${uiLabelMap.CommonCreateNew}" style="buttontext"/></container>
+                                        <container style="button-bar">
+                                            <link target="CreateProductFeature" text="${uiLabelMap.ProductNewFeatureCategory}" style="buttontext create"/>
+                                        </container>
                                     </decorator-section>
                                     <decorator-section name="search-options">
                                         <include-form name="FindProductFeature" location="component://product/widget/catalog/FeatureForms.xml"/>

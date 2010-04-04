@@ -109,9 +109,9 @@ under the License.
             <span id="prefBtn">
                 <a href="#" class="contracted">${uiLabelMap.CommonPreferences}</a>
                 <div id="preferences" style="display:none">
-                    <a href="<@ofbizUrl>LookupLocales</@ofbizUrl>" id="language">${uiLabelMap.CommonLanguageTitle} - ${locale.getDisplayName(locale)}</a>
-                    <a href="<@ofbizUrl>LookupTimezones</@ofbizUrl>" id="timezone">${nowTimestamp?datetime?string.short} - ${timeZone.getDisplayName(timeZone.useDaylightTime(), Static["java.util.TimeZone"].LONG, locale)}</a>
-                    <a href="<@ofbizUrl>LookupVisualThemes</@ofbizUrl>" id="theme">${uiLabelMap.CommonVisualThemes}</a>
+                    <a href="<@ofbizUrl>ListLocales</@ofbizUrl>" id="language">${uiLabelMap.CommonLanguageTitle} - ${locale.getDisplayName(locale)}</a>
+                    <a href="<@ofbizUrl>ListTimezones</@ofbizUrl>" id="timezone">${nowTimestamp?datetime?string.short} - ${timeZone.getDisplayName(timeZone.useDaylightTime(), Static["java.util.TimeZone"].LONG, locale)}</a>
+                    <a href="<@ofbizUrl>ListVisualThemes</@ofbizUrl>" id="theme">${uiLabelMap.CommonVisualThemes}</a>
                 </div>
             </span>
             <span>
@@ -126,11 +126,7 @@ under the License.
             <span><a href="<@ofbizUrl>logout</@ofbizUrl>">${uiLabelMap.CommonLogout}</a></span>
             <#if webSiteId?exists && requestAttributes._CURRENT_VIEW_?exists>
               <#include "component://common/webcommon/includes/helplink.ftl" />
-              <#if helpContent?has_content ||  helpTopic == "navigateHelp" || (parameters.portalPageId?exists && helpTopic == "MYPORTAL_showPortalP")>
-                <span><a href="javascript:lookup_popup2('showHelp?helpTopic=${helpTopic}&amp;portalPageId=${parameters.portalPageId?if_exists}','help' ,500,500);">${uiLabelMap.CommonHelp}</a></span>
-              <#else>
-                <span><a href="${helpUrlPrefix}${helpUrlTopic}${helpUrlSuffix}" target="_blank">${uiLabelMap.CommonHelp}</a></span>
-              </#if>
+              <span><a href="javascript:lookup_popup2('showHelp?helpTopic=${helpTopic}&amp;portalPageId=${parameters.portalPageId?if_exists}','help' ,500,500);">${uiLabelMap.CommonHelp}</a></span>
            </#if>
         </div>
     </div>

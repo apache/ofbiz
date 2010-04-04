@@ -32,9 +32,7 @@ under the License.
                 <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
-                <property-map resource="ProjectMgrUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="HumanResUiLabels" map-name="uiLabelMap" global="true"/>
-                <property-map resource="PartyHelpUrls" map-name="helpUrlsMap" global="true"/>
 
                 <set field="layoutSettings.companyName" from-field="uiLabelMap.PartyCompanyName" global="true"/>
                 <set field="layoutSettings.companySubtitle" from-field="uiLabelMap.PartyCompanySubtitle" global="true"/>
@@ -65,7 +63,6 @@ under the License.
                 <entity-one entity-name="Party" value-field="party"/>
                 <entity-one entity-name="Person" value-field="lookupPerson"/>
                 <entity-one entity-name="PartyGroup" value-field="lookupGroup"/>
-                <property-map resource="WebPosUiLabels" map-name="uiLabelMap" global="true"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
@@ -73,7 +70,7 @@ under the License.
                         <section>
                             <condition>
                                 <and>
-                                    <if-has-permission permission="PARTYMGR" action="_VIEW"/>
+                                    <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
                                     <not><if-empty field="party"/></not>
                                 </and>
                             </condition>
@@ -86,7 +83,7 @@ under the License.
                         <section>
                             <!-- do check for PARTYMGR, _VIEW permission -->
                             <condition>
-                                <if-has-permission permission="PARTYMGR" action="_VIEW"/>
+                                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
                             </condition>
                             <widgets>
                                 <section>
@@ -154,8 +151,8 @@ under the License.
                                     <label style="h1" text="${uiLabelMap[labelTitleProperty]} [${groupId}]"/>
                                 </container>
                                 <container style="button-bar">
-                                    <link target="EditSecurityGroup" style="smallSubmit" text="${uiLabelMap.PartyNewSecurityGroup}"/>
-                                    <link target="EditCertIssuerProvisions" style="smallSubmit" text="${uiLabelMap.PartyCertIssuers}"/>
+                                    <link target="EditSecurityGroup" style="buttontext create" text="${uiLabelMap.PartyNewSecurityGroup}"/>
+                                    <link target="EditCertIssuerProvisions" style="buttontext" text="${uiLabelMap.PartyCertIssuers}"/>
                                 </container>
 
                                 <decorator-section-include name="body"/>
@@ -177,7 +174,7 @@ under the License.
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
+                    <decorator-section name="pre-body">
                         <section>
                             <condition>
                                 <if-has-permission action="_VIEW" permission="PARTYMGR"/>
@@ -185,6 +182,15 @@ under the License.
                             <widgets>
                                 <include-menu location="component://party/widget/partymgr/PartyMenus.xml" name="CommEventTabBar"/>
                                 <include-menu location="component://party/widget/partymgr/PartyMenus.xml" name="CommSubTabBar"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission action="_VIEW" permission="PARTYMGR"/>
+                            </condition>
+                            <widgets>
                                 <decorator-section-include name="body"/>
                             </widgets>
                             <fail-widgets>
@@ -221,11 +227,3 @@ under the License.
         </section>
     </screen>
 </screens>
-
-
-
-
-
-
-
-

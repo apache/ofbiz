@@ -41,7 +41,7 @@ under the License.
 
 <#macro renderField text><#if text?exists>${text}</#if></#macro>
 
-<#macro renderDisplayField idName description class alert inPlaceEditorId="" inPlaceEditorUrl="" inPlaceEditorParams="">
+<#macro renderDisplayField type imageLocation idName description class alert inPlaceEditorId="" inPlaceEditorUrl="" inPlaceEditorParams="">
 <@makeBlock class description />
 </#macro>
 <#macro renderHyperlinkField></#macro>
@@ -50,7 +50,7 @@ under the License.
 
 <#macro renderTextareaField name className alert cols rows id readonly value visualEdtiorEnalble buttons><@makeBlock className value /></#macro>
 
-<#macro renderDateTimeField name className alert title value size maxlength id dateType shortDateInput timeDropdownParamName defaultDateTimeString calGif localizedIconTitle timeDropdown timeHourName classString hour1 hour2 timeMinutesName minutes isTwelveHour ampmName amSelected pmSelected compositeType formName><@makeBlock className value /></#macro>
+<#macro renderDateTimeField name className alert title value size maxlength id dateType shortDateInput timeDropdownParamName defaultDateTimeString localizedIconTitle timeDropdown timeHourName classString hour1 hour2 timeMinutesName minutes isTwelveHour ampmName amSelected pmSelected compositeType formName><@makeBlock className value /></#macro>
 
 <#macro renderDropDownField name className alert id multiple formName otherFieldName event action size firstInList currentValue explicitDescription allowEmpty options fieldName otherFieldName otherValue otherFieldSize dDFCurrent ajaxEnabled noCurrentSelectedKey ajaxOptions frequency minChars choices autoSelect partialSearch partialChars ignoreCase fullSearch>
 <#if currentValue?has_content && firstInList?has_content>
@@ -122,19 +122,19 @@ under the License.
 <@makeBlock className value />
 </#macro>
 
-<#macro renderLookupField className alert name value size maxlength id event action disabled autocomplete descriptionFieldName formName lookupFieldFormName targetParameterIter imgSrc ajaxUrl ajaxEnabled></#macro>
+<#macro renderLookupField className alert name value size maxlength id event action disabled autocomplete descriptionFieldName formName fieldFormName targetParameterIter imgSrc ajaxUrl ajaxEnabled presentation width height position fadeBackground></#macro>
 <#macro renderNextPrev paginateStyle paginateFirstStyle viewIndex highIndex listSize viewSize ajaxEnabled javaScriptEnabled ajaxFirstUrl firstUrl paginateFirstLabel paginatePreviousStyle ajaxPreviousUrl previousUrl paginatePreviousLabel pageLabel ajaxSelectUrl selectUrl ajaxSelectSizeUrl selectSizeUrl commonDisplaying paginateNextStyle ajaxNextUrl nextUrl paginateNextLabel paginateLastStyle ajaxLastUrl lastUrl paginateLastLabel paginateViewSizeLabel></#macro>
 <#macro renderFileField className alert name value size maxlength autocomplete><@makeBlock className value /></#macro>
 <#macro renderPasswordField className alert name value size maxlength id autocomplete><@makeBlock className "" /></#macro>
-<#macro renderImageField value border width height event action><@makeBlock "" "" /></#macro>
+<#macro renderImageField value description alternate border width height event action><@makeBlock "" "" /></#macro>
 <#macro renderBanner style leftStyle rightStyle leftText text rightText><@makeBlock "" "" /></#macro>
 <#macro renderFieldGroupOpen style id title collapsed collapsibleAreaId collapsible expandToolTip collapseToolTip></#macro>
 <#macro renderFieldGroupClose style id title></#macro>
 
 <#macro renderHyperlinkTitle name title showSelectAll="N"></#macro>
-<#macro renderSortField style title linkUrl ajaxEnabled></#macro>
+<#macro renderSortField style title linkUrl ajaxEnabled><@renderFieldTitle style title /></#macro>
 <#macro formatBoundaryComment boundaryType widgetType widgetName></#macro>
 <#macro makeHiddenFormLinkAnchor linkStyle hiddenFormName event action imgSrc description><@renderField description /></#macro>
-<#macro makeHyperlinkString linkStyle hiddenFormName event action imgSrc linkUrl targetWindow description confirmation><@makeBlock linkStyle description /></#macro>
+<#macro makeHyperlinkString linkStyle hiddenFormName event action imgSrc title alternate linkUrl targetWindow description confirmation><@makeBlock linkStyle description /></#macro>
 <#macro renderTooltip tooltip tooltipStyle></#macro>
 <#macro renderAsterisks requiredField requiredStyle></#macro>

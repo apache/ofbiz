@@ -24,16 +24,16 @@ under the License.
     <br class="clear"/>
   </div>
   <div class="screenlet-body">
-    <br/>
+    <br />
     <p>${uiLabelMap.WebtoolsDataFileMessage1}.</p>
-    <br/>
+    <br />
     <#if security.hasPermission("DATAFILE_MAINT", session)>
       <form method="post" action="<@ofbizUrl>viewdatafile</@ofbizUrl>">
         <table class="basic-table" cellspacing="0">
           <tr>
             <td class="label">${uiLabelMap.WebtoolsDataDefinitionFileName}</td>
-            <td><input name="DEFINITION_LOCATION" type="text" size="60" value="${parameters.DEFINITION_LOCATION?if_exists}"></td>
-            <td><span class="label">${uiLabelMap.WebtoolsDataIsUrl}</span><input type="checkbox" name="DEFINITION_IS_URL"<#if parameters.DEFINITION_IS_URL?has_content> checked="checked"</#if>></td>
+            <td><input name="DEFINITION_LOCATION" type="text" size="60" value="${parameters.DEFINITION_LOCATION?if_exists}" /></td>
+            <td><span class="label">${uiLabelMap.WebtoolsDataIsUrl}</span><input type="checkbox" name="DEFINITION_IS_URL"<#if parameters.DEFINITION_IS_URL?has_content> checked="checked"</#if> /></td>
           </tr>
           <tr>
             <td class="label">${uiLabelMap.WebtoolsDataDefinitionName}</td>
@@ -47,15 +47,15 @@ under the License.
                   </#list>
                 </select>
               <#else>
-                <input name="DEFINITION_NAME" type="text" size="30" value="${definitionName?if_exists}">
+                <input name="DEFINITION_NAME" type="text" size="30" value="${definitionName?if_exists}" />
               </#if>
             </td>
             <td>&nbsp;</td>
           </tr>
           <tr>
             <td class="label">${uiLabelMap.WebtoolsDataFileName}</td>
-            <td><input name="DATAFILE_LOCATION" type="text" size="60" value="${parameters.DATAFILE_LOCATION?if_exists}"></td>
-            <td><span class="label">${uiLabelMap.WebtoolsDataIsUrl}</span><input type="checkbox" name="DATAFILE_IS_URL"<#if parameters.DATAFILE_IS_URL?has_content> checked="checked"</#if>></td>
+            <td><input name="DATAFILE_LOCATION" type="text" size="60" value="${parameters.DATAFILE_LOCATION?if_exists}" /></td>
+            <td><span class="label">${uiLabelMap.WebtoolsDataIsUrl}</span><input type="checkbox" name="DATAFILE_IS_URL"<#if parameters.DATAFILE_IS_URL?has_content> checked="checked"</#if> /></td>
           </tr>
           <tr>
             <td class="label">${uiLabelMap.WebtoolsDataSaveToFile}</td>
@@ -64,19 +64,19 @@ under the License.
           </tr>
           <tr>
             <td class="label">${uiLabelMap.WebtoolsDataSaveToXml}</td>
-            <td><input name="ENTITYXML_FILE_SAVE" type="text" size="60" value="${parameters.ENTITYXML_FILE_SAVE?if_exists}"></td>
+            <td><input name="ENTITYXML_FILE_SAVE" type="text" size="60" value="${parameters.ENTITYXML_FILE_SAVE?if_exists}" /></td>
             <td>&nbsp;</td>
           </tr>
           <tr>
             <td>&nbsp;</td>
-            <td><input type="submit" value="${uiLabelMap.CommonRun}"></td>
+            <td><input type="submit" value="${uiLabelMap.CommonRun}" /></td>
             <td>&nbsp;</td>
           </tr>
         </table>
       </form>
 
       <#if messages?has_content>
-        <hr/>
+        <hr />
         <h1>${uiLabelMap.CommonFollowingOccurred}:</h1>
         <div>
           <#list messages as message>
@@ -92,7 +92,7 @@ under the License.
           <#-- if record is different than the last displayed, make a new table and header row -->
           <#if !modelRecord.name.equals(lastRecordName)>
             <#if lastRecordName != null>
-              </table><br/>
+              </table><br />
             </#if>
             <table class="basic-table hover-bar" cellspacing="0">
               <tr>
@@ -130,7 +130,7 @@ under the License.
     </#macro>
 
       <#if dataFile?has_content && modelDataFile?has_content && (!parameters.ENTITYXML_FILE_SAVE?has_content || parameters.ENTITYXML_FILE_SAVE.length() == 0) && (parameters.DATAFILE_SAVE == null || parameters.DATAFILE_SAVE.length() == 0)>
-        <hr/>
+        <hr />
         <table class="basic-table" cellspacing="0">
           <tr class="header-row">
             <td>Name</td>
@@ -153,7 +153,7 @@ under the License.
             <td colspan="">${modelDataFile.description}</td>
           </tr>
         </table>
-        <br/>
+        <br />
         <@displayrecords records = dataFile.getRecords()/>
       </#if>
     <#else>

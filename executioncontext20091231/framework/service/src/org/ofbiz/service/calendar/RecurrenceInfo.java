@@ -365,7 +365,7 @@ public class RecurrenceInfo {
             return this.info.isValidCurrent(cal.getTimeInMillis());
         }
         @Override
-        public Calendar next(Calendar cal) {
+        public Calendar next(Calendar cal, ExpressionContext context) {
             long result = this.info.next(cal.getTimeInMillis());
             if (result == 0) {
                 return null;
@@ -376,5 +376,9 @@ public class RecurrenceInfo {
         }
         @Override
         public void accept(TemporalExpressionVisitor visitor) {}
+        @Override
+        public boolean isSubstitutionCandidate(Calendar cal, TemporalExpression expressionToTest) {
+            return false;
+        }
     }
 }

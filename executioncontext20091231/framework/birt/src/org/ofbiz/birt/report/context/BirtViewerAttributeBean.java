@@ -19,28 +19,25 @@
 package org.ofbiz.birt.report.context;
 
 import java.net.URL;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.eclipse.birt.report.IBirtConstants;
 import org.eclipse.birt.report.context.ViewerAttributeBean;
 import org.eclipse.birt.report.exception.ViewerException;
-import org.eclipse.birt.report.resource.BirtResources;
 import org.eclipse.birt.report.resource.ResourceConstants;
-import org.eclipse.birt.report.utility.BirtUtility;
 import org.eclipse.birt.report.utility.DataUtil;
 import org.eclipse.birt.report.utility.ParameterAccessor;
 import org.ofbiz.base.location.FlexibleLocation;
 
 public class BirtViewerAttributeBean extends ViewerAttributeBean {
-    
+
     public final static String module = BirtViewerAttributeBean.class.getName();
 
     public BirtViewerAttributeBean(HttpServletRequest request) {
         super(request);
     }
-    
+
+    @Override
     protected void __init( HttpServletRequest request ) throws Exception
     {
         String reportParam = DataUtil.trimString( ParameterAccessor.getParameter( request, ParameterAccessor.PARAM_REPORT ));
@@ -63,7 +60,7 @@ public class BirtViewerAttributeBean extends ViewerAttributeBean {
         if ( this.reportDesignHandle == null )
             throw new ViewerException(
                     ResourceConstants.GENERAL_EXCEPTION_NO_REPORT_DESIGN );
-        
+
         // Initialize report parameters.
         __initParameters( request );
     }

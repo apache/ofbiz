@@ -111,6 +111,13 @@ public class LoginServices {
             errMsg = UtilProperties.getMessage(resource,"loginservices.password_missing", locale);
         } else {
 
+            if ("true".equalsIgnoreCase(UtilProperties.getPropertyValue("security.properties", "username.lowercase"))) {
+                username = username.toLowerCase();
+            }
+            if ("true".equalsIgnoreCase(UtilProperties.getPropertyValue("security.properties", "password.lowercase"))) {
+                password = password.toLowerCase();
+            }
+
             boolean repeat = true;
             // starts at zero but it incremented at the beggining so in the first pass passNumber will be 1
             int passNumber = 0;
@@ -385,16 +392,16 @@ public class LoginServices {
                         errMsg = UtilProperties.getMessage(resource,"loginservices.account_for_user_login_id_disabled",messageMap ,locale);
                         if (disabledDateTime != null) {
                             messageMap = UtilMisc.<String, Object>toMap("disabledDateTime", disabledDateTime);
-                            errMsg += UtilProperties.getMessage(resource,"loginservices.since_datetime",messageMap ,locale);
+                            errMsg += " " + UtilProperties.getMessage(resource,"loginservices.since_datetime",messageMap ,locale);
                         } else {
                             errMsg += ".";
                         }
 
                         if (loginDisableMinutes > 0 && reEnableTime != null) {
                             messageMap = UtilMisc.<String, Object>toMap("reEnableTime", reEnableTime);
-                            errMsg += UtilProperties.getMessage(resource,"loginservices.will_be_reenabled",messageMap ,locale);
+                            errMsg += " " + UtilProperties.getMessage(resource,"loginservices.will_be_reenabled",messageMap ,locale);
                         } else {
-                            errMsg += UtilProperties.getMessage(resource,"loginservices.not_scheduled_to_be_reenabled",locale);
+                            errMsg += " " + UtilProperties.getMessage(resource,"loginservices.not_scheduled_to_be_reenabled",locale);
                         }
                     }
                 } else {

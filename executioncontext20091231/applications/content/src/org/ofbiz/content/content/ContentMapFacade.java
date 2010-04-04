@@ -71,6 +71,7 @@ public class ContentMapFacade implements Map {
     protected final boolean cache;
     protected boolean allowRender = true;
     protected boolean isDecorated = false;
+    protected ContentMapFacade decoratedContent = null;
 
     // internal objects
     private String sortOrder="-fromDate";
@@ -180,7 +181,7 @@ public class ContentMapFacade implements Map {
         Debug.logWarning("This method [entrySet()] is not implemented in ContentMapFacade", module);
         return null;
     }
-    
+
     public void setSortOrder(Object obj) {
         if (!(obj instanceof String)) {
             Debug.logWarning("sortOrder parameters must be a string", module);
@@ -205,8 +206,12 @@ public class ContentMapFacade implements Map {
         }
         this.statusFilter=(String) obj;
         this.subContent.setStatusFilter(obj);
-    }        
-    
+    }
+
+    public void setDecoratedContent(ContentMapFacade decoratedContent) {
+        this.decoratedContent = decoratedContent;
+    }
+
     // implemented get method
     public Object get(Object obj) {
         if (!(obj instanceof String)) {
@@ -264,9 +269,9 @@ public class ContentMapFacade implements Map {
                 }
 
                 if (cache) {
-                		subs = delegator.findByAndCache("ContentAssocViewTo", expressions, UtilMisc.toList(this.sortOrder));
+                    subs = delegator.findByAndCache("ContentAssocViewTo", expressions, UtilMisc.toList(this.sortOrder));
                 } else {
-                		subs = delegator.findByAnd("ContentAssocViewTo", expressions, UtilMisc.toList(this.sortOrder));
+                    subs = delegator.findByAnd("ContentAssocViewTo", expressions, UtilMisc.toList(this.sortOrder));
                 }
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
@@ -305,6 +310,9 @@ public class ContentMapFacade implements Map {
         // TODO: change to use the MapStack instead of a cloned Map
         Map renderCtx = FastMap.newInstance();
         renderCtx.putAll(context);
+        if (this.decoratedContent != null) {
+            renderCtx.put("decoratedContent", decoratedContent);
+        }
 
         if (this.isDecorated) {
             renderCtx.put("_IS_DECORATED_", Boolean.TRUE);
@@ -412,8 +420,8 @@ public class ContentMapFacade implements Map {
     }
 
     class SubContent extends AbstractInfo {
-    	private String sortOrder="-fromDate";
-    	private String statusFilter="";
+        private String sortOrder="-fromDate";
+        private String statusFilter="";
         @Override
         public Object get(Object key) {
             if (!(key instanceof String)) {
@@ -465,7 +473,7 @@ public class ContentMapFacade implements Map {
                 return;
             }
             this.statusFilter=(String) obj;
-        }  
+        }
     }
 
     class MetaData extends AbstractInfo {

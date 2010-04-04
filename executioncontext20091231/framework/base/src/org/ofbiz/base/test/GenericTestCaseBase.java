@@ -1,6 +1,25 @@
+/*******************************************************************************
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *******************************************************************************/
 package org.ofbiz.base.test;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -8,9 +27,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import junit.framework.TestCase;
 
@@ -19,6 +41,75 @@ import junit.framework.TestCase;
 public abstract class GenericTestCaseBase extends TestCase {
     protected GenericTestCaseBase(String name) {
         super(name);
+    }
+
+    public static void useAllMemory() throws Exception {
+        LinkedList<long[]> dummy = new LinkedList<long[]>();
+        try {
+            do {
+                dummy.add(new long[1048576]);
+            } while (true);
+        } catch (OutOfMemoryError e) {
+            System.gc();
+            Thread.sleep(100);
+        }
+    }
+
+    public static void assertStaticHelperClass(Class<?> clz) throws Exception {
+        Constructor<?>[] constructors = clz.getDeclaredConstructors();
+        assertEquals(clz.getName() + " constructor count", 1, constructors.length);
+        assertEquals(clz.getName() + " private declared constructor", 1 << Constructor.DECLARED, constructors[0].getModifiers() & ~(1 << Constructor.PUBLIC) & (1 << Constructor.DECLARED));
+        constructors[0].setAccessible(true);
+        constructors[0].newInstance();
+    }
+
+    public static void assertComparison(String label, int wanted, int result) {
+        if (wanted == 0) {
+            assertEquals(label, wanted, result);
+        } else {
+            assertEquals(label, wanted, result / Math.abs(result));
+        }
+    }
+
+    public static <V, E extends Exception> void assertFuture(String label, Future<V> future, V wanted, boolean interruptable, Class<E> thrownClass, String thrownMessage) {
+        try {
+            assertEquals(label + ": future return", wanted, future.get());
+        } catch (InterruptedException e) {
+            assertTrue(label + ": expected interruption", interruptable);
+        } catch (ExecutionException e) {
+            assertNotNull(label + ": expecting an exception", thrownClass);
+            Throwable caught = e.getCause();
+            assertNotNull(label + ": captured exception", caught);
+            assertEquals(label + ": correct thrown class", thrownClass, caught.getClass());
+            if (thrownMessage != null) {
+                assertEquals(label + ": exception message", thrownMessage, caught.getMessage());
+            }
+        }
+    }
+
+    public static <T> void assertNotEquals(Object wanted, Object got) {
+        assertNotEquals(null, wanted, got);
+    }
+
+    public static <T> void assertNotEquals(String msg, Object wanted, Object got) {
+        if (wanted == null) {
+            if (got != null) {
+                return;
+            }
+            failEquals(msg, wanted, got);
+        } else if (wanted.equals(got)) {
+            failEquals(msg, wanted, got);
+        }
+    }
+
+    private static void failEquals(String msg, Object wanted, Object got) {
+        StringBuilder sb = new StringBuilder();
+        if (msg != null) {
+            sb.append(msg).append(' ');
+        }
+        sb.append(" expected value: ").append(wanted);
+        sb.append(" actual value: ").append(got);
+        fail(sb.toString());
     }
 
     public static <T> void assertEquals(List<T> wanted, Object got) {
@@ -47,7 +138,6 @@ public abstract class GenericTestCaseBase extends TestCase {
     }
 
     public static <T> void assertEquals(Collection<T> wanted, Object got) {
-        System.err.println("a");
         assertEquals(null, wanted, got);
     }
 
@@ -62,7 +152,6 @@ public abstract class GenericTestCaseBase extends TestCase {
         // Need to check the reverse, wanted may not implement equals,
         // which is the case for HashMap.values()
         if (got.equals(wanted)) return;
-        System.err.println("b:" + wanted.getClass());
         msg = msg == null ? "" : msg + ' ';
         assertNotNull(msg + "expected a value", got);
         List<T> list = new ArrayList<T>(wanted);
@@ -188,11 +277,10 @@ OUTER:
             assertEquals(msg, (Map<?, ?>) wanted, got);
         } else if (wanted == null) {
             TestCase.assertEquals(msg, wanted, got);
-        } else if (wanted instanceof Collection) {
-            System.err.println("c");
-            assertEquals(msg, (Collection<?>) wanted, got);
         } else if (wanted instanceof Set) {
             assertEquals(msg, (Set<?>) wanted, got);
+        } else if (wanted instanceof Collection) {
+            assertEquals(msg, (Collection<?>) wanted, got);
         } else if (wanted.getClass().isArray()) {
             if (got == null) {
                 TestCase.assertEquals(msg, wanted, got);
@@ -208,31 +296,31 @@ OUTER:
         }
     }
 
-    protected static <T> List<T> list(T value) {
+    public static <T> List<T> list(T value) {
         ArrayList<T> list = new ArrayList<T>(1);
         list.add(value);
         return list;
     }
 
-    protected static <T> List<T> list(T... list) {
+    public static <T> List<T> list(T... list) {
         return Arrays.asList(list);
     }
 
-    protected static <T> Set<T> set(T value) {
+    public static <T> Set<T> set(T value) {
         HashSet<T> set = new HashSet<T>(1);
         set.add(value);
         return set;
     }
 
-    protected static <T> Set<T> set(T... list) {
+    public static <T> Set<T> set(T... list) {
         return new HashSet<T>(Arrays.asList(list));
     }
 
-    protected static <T> Set<T> set(Iterable<T> iterable) {
+    public static <T> Set<T> set(Iterable<T> iterable) {
         return set(iterable.iterator());
     }
 
-    protected static <T> Set<T> set(Iterator<T> it) {
+    public static <T> Set<T> set(Iterator<T> it) {
         HashSet<T> set = new HashSet<T>();
         while (it.hasNext()) {
             T item = it.next();
@@ -242,7 +330,7 @@ OUTER:
     }
 
     @SuppressWarnings("unchecked")
-    protected static <K, V> Map<K, V> map(Object... list) {
+    public static <K, V> Map<K, V> map(Object... list) {
         assertEquals("list has even number of elements", 0, list.length % 2);
         Map<K, V> map = new LinkedHashMap<K, V>();
         for (int i = 0; i < list.length; i += 2) {

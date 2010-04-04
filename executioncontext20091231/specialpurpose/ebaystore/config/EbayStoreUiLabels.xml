@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <property key="EbayStoreApplication">
+        <value xml:lang="en">eBay Store</value>
+    </property>
+    <property key="EbayCompanyName">
+        <value xml:lang="en">OFBiz</value>
+        <value xml:lang="fr">OFBiz</value>
+        <value xml:lang="it">OFBiz</value>
+        <value xml:lang="th">OFBiz</value>
+    </property>
+    <property key="EbayStoreAccount">
+        <value xml:lang="en">eBay Account</value>
+        <value xml:lang="th">ส่งออกหมวดหมู่สินค้าเข้าคลังสินค้าในอีเบย์</value>
+    </property>
+    <property key="EbayExportAllCategoryToEbayStore">
+        <value xml:lang="en">Export categories to eBay store</value>
+        <value xml:lang="th">ส่งออกหมวดหมู่สินค้าเข้าคลังสินค้าในอีเบย์</value>
+    </property>
+    <property key="EbayExportToEbayStore">
+        <value xml:lang="en">Export To eBay Store</value>
+        <value xml:lang="th">การส่งออกไปยังคลังสินค้าอีเบย์</value>
+    </property>
+     <property key="EbaySellingManager">
+        <value xml:lang="en">Selling Manager</value>
+    </property>
+    <property key="EbayStore">
+        <value xml:lang="en">Ebay Store</value>
+        <value xml:lang="th">คลังสินค้าอีเบย์</value>
+    </property>
+    <property key="EbayStores">
+        <value xml:lang="en">Ebay Stores</value>
+        <value xml:lang="th">รายชื่อคลังสินค้าอีเบย์</value>
+    </property>
+    <property key="EbayStoreSetting">
+        <value xml:lang="en">Ebay Store Setting</value>
+        <value xml:lang="th">รายชื่อคลังสินค้าอีเบย์</value>
+    </property>
+    <property key="EbayStoreLoadSuccess">
+        <value xml:lang="en">Load Ebay Store success.</value>
+        <value xml:lang="th">โหลดข้อมูลคลังสินค้าอีเบย์เรียบร้อย</value>
+    </property>
+    <property key="EbayStoreSaveSuccess">
+        <value xml:lang="en">Save ebay setting success.</value>
+        <value xml:lang="th">บันทึกข้อมูลคลังสินค้าอีเบย์เรียบร้อย</value>
+    </property>
+    <property key="EbayStoreStoreName">
+        <value xml:lang="en">Store Name</value>
+        <value xml:lang="th">ชื่อร้านค้า</value>
+    </property>
+    <property key="EbayStoreStoreDesc">
+        <value xml:lang="en">Store Description</value>
+        <value xml:lang="th">รายละเอียดร้านค้า</value>
+    </property>
+    <property key="EbayStoreStoreURL">
+        <value xml:lang="en">Store URL</value>
+        <value xml:lang="th">URL</value>
+    </property>
+    <property key="EbayStoreStoreLogoURL">
+        <value xml:lang="en">Logo URL</value>
+        <value xml:lang="th">โลโก url</value>
+    </property>
+    <property key="EbayStoreStoreAdvancedTheme">
+        <value xml:lang="en">Store Advanced Theme</value>
+        <value xml:lang="th">Theme สำเร็จรูป</value>
+    </property>
+    <property key="EbayStoreStoreAdvancedThemeColor">
+        <value xml:lang="en">Store Advanced Theme Color</value>
+        <value xml:lang="th">เลือกสีของ Theme</value>
+    </property>
+    <property key="EbayStoreStoreBasicTheme">
+        <value xml:lang="en">Store Basic Theme</value>
+        <value xml:lang="th">ธีมแบบธรรมดา</value>
+    </property>
+    <property key="EbayStoreStoreColorTheme">
+        <value xml:lang="en">Change Color</value>
+        <value xml:lang="th">เปลี่ยนสี</value>
+    </property>
+    <property key="EbayStoreStorePrimaryColor">
+        <value xml:lang="en">Primary color</value>
+        <value xml:lang="th">สีหลัก</value>
+    </property>
+    <property key="EbayStoreStoreSecondColor">
+        <value xml:lang="en">Secondary color</value>
+        <value xml:lang="th">สีรอง</value>
+    </property>
+    <property key="EbayStoreStoreAccentColor">
+        <value xml:lang="en">Accent color</value>
+        <value xml:lang="th">Accent color</value>
+    </property>
+    <property key="EbayStoreStoreChangeFont">
+        <value xml:lang="en">Change Fonts</value>
+        <value xml:lang="th">เปลี่ยนตัวอักษร</value>
+    </property>
+    <property key="EbayStoreStoreSectionTitle">
+        <value xml:lang="en">Section title</value>
+        <value xml:lang="th">ส่วนของ title</value>
+    </property>
+    <property key="EbayStoreStoreHeaderDisplay">
+        <value xml:lang="en">Store Header Display</value>
+        <value xml:lang="th">Store header</value>
+    </property>
+    <property key="EbayStoreStoreHeaderStyle">
+        <value xml:lang="en">Store Header Style</value>
+        <value xml:lang="th">Store header Style</value>
+    </property>
+    <property key="EbayStoreStoreItemListDesplay">
+        <value xml:lang="en">Store Item List Display</value>
+        <value xml:lang="th"></value>
+    </property>
+    <property key="EbayStoreStoreItemSortOrder">
+        <value xml:lang="en">Store Item Sort Order</value>
+        <value xml:lang="th"></value>
+    </property>
+    <property key="EbayStoreStoreMerchDisplay">
+        <value xml:lang="en">Store Merch Display</value>
+        <value xml:lang="th"></value>
+    </property>
+    <property key="EbayStoreStoreSubscriptionLevel">
+        <value xml:lang="en">Store Subscription Level</value>
+        <value xml:lang="th"></value>
+    </property>
+    <property key="EbayPersonalInformation">
+        <value xml:lang="en">Personal Information</value>
+    </property>
+    <property key="EbayAccountInformation">
+        <value xml:lang="en">Account Information</value>
+    </property>
+    <property key="EbayUserPreference">
+        <value xml:lang="en">User Preference</value>
+    </property>
+    <property key="EbayAutomationRelistItems">
+        <value xml:lang="en">Automation Re-list Items</value>
+    </property>
+    <property key="EbayAutomatiionDisputeItems">
+        <value xml:lang="en">Automation Dispute Items</value>
+    </property>
+    <property key="EbayBoughtLeaveFeedback">
+        <value xml:lang="en">Bought</value>
+    </property>
+    <property key="EbayFeedback">
+        <value xml:lang="en">Feedback</value>
+        <value xml:lang="th">ผลตอบรับ</value>
+    </property>
+    <property key="EbayFeedbackStore">
+        <value xml:lang="en">Feedback Store</value>
+    </property>
+    <property key="EbayLeaveFeedback">
+        <value xml:lang="en">Leave Feedback</value>
+    </property>
+    <property key="EbaySold">
+        <value xml:lang="en">Sold</value>
+    </property>
+    <property key="EbayBlockItemOutOfStock">
+        <value xml:lang="en">Block items out of stock</value>
+    </property>
+    <!-- ebay inventory -->
+    <property key="EbayReserveProductFrom">
+        <value xml:lang="en">Reserve Product From</value>
+    </property>
+    <property key="EbayReserveProductInventory">
+        <value xml:lang="en">Reserve Product Inventory</value>
+    </property>
+    <property key="EbayUpdateInventory">
+        <value xml:lang="en">Update To Ebay Inventory</value>
+    </property>
+    <property key="EbayUpdateInventoryStatus">
+        <value xml:lang="en">Update Inventory Status</value>
+    </property>
+    <property key="FormFieldTitle_buyItNowPrice">
+        <value xml:lang="en">Buy It Now price</value>
+        <value xml:lang="th">ราคาสุทธิ</value>
+    </property>
+    <property key="FormFieldTitle_webSiteUrl">
+        <value xml:lang="en">Website Url</value>
+    </property>
+    <property key="eBayOnlineAuction">
+        <value xml:lang="en">Online Auction</value>
+    </property>
+    <property key="eBayFixedPrice">
+        <value xml:lang="en">Fixed Price</value>
+    </property>
+    <property key="EbayStoreOpenUnpaidItemDispute">
+        <value xml:lang="en">Open unpaid item dispute</value>
+    </property>
+    <property key="requireEbayInventory">
+        <value xml:lang="en">Require eBay Inventory</value>
+    </property>
+    <!-- Selling Manager preferences -->
+    <property key="EbayAutomationDispute">
+        <value xml:lang="en">Automation Dispute</value>
+    </property>
+    <property key="EbayDisputeCheckoutNotComplete">
+        <value xml:lang="en">Create Dispute if checkout has not been completed</value>
+    </property>
+    <property key="EbayDisputeNotPay">
+        <value xml:lang="en">Create Dispute if checkout has been completed but no payment has been received</value>
+    </property>
+    <property key="EbayAfter">
+        <value xml:lang="en">After</value>
+    </property>
+    <property key="EbayReason">
+        <value xml:lang="en">Reason</value>
+    </property>
+    <property key="EbayExplanation">
+        <value xml:lang="en">Explanation</value>
+    </property>
+    <property key="EbayAddSecondChanceOffer">
+        <value xml:lang="en">Add Second Chance Offer</value>
+    </property>
+    <property key="EbayIsAutoPositiveFeedback">
+        <value xml:lang="en">Automatically leave the positive feedback</value>
+    </property>
+    <property key="EbaySituations">
+        <value xml:lang="en">Situations</value>
+    </property>
+    <property key="EbayTxtPaymentReceive">
+        <value xml:lang="en">Buyer has paid for this item.</value>
+    </property>
+    <property key="EbayTxtPaymentReceiveAndPositive">
+        <value xml:lang="en">Buyer has paid for this item and left me positive feedback. </value>
+    </property>
+    <property key="EbayTxtAutoPositiveFeedbackBuyer">
+        <value xml:lang="en">Automated Positive Feedback for Buyers</value>
+    </property>
+    <property key="EbayIsAutoFeedbackReminder">
+        <value xml:lang="en">Automatically send a Feedback Reminder email</value>
+    </property>
+    <property key="EbayIsAutoFeedbackReminderTooltip">
+        <value xml:lang="en">Automatically send a Feedback Reminder email if feedback has not been received</value>
+    </property>
+    <property key="EbayIsSendCopyEmailToSeller">
+        <value xml:lang="en">Copy and Send to Seller</value>
+    </property>
+    <property key="EbayIsSendCopyEmailTooltip">
+        <value xml:lang="en">How many days after shipping you want this email sent?</value>
+    </property>
+    <property key="EbayIsAutoSendEmail">
+        <value xml:lang="en">Automatically send email</value>
+    </property>
+    <property key="EbayAutoPaymentReceviedEmail">
+        <value xml:lang="en">Automatically send email when payment has been received</value>
+    </property>
+    <property key="EbayEditEmailTemplate">
+        <value xml:lang="en">Edit Email Template</value>
+    </property>
+    <property key="EbayIncludePayNowButtonAndAcceptPaymentMethods">
+        <value xml:lang="en">Include the Pay Now button and accepted payment methods</value>
+    </property>
+    <property key="EbayIncludeMyDefaultCrossPromotionInThisEmail">
+        <value xml:lang="en">Include my default cross-promotion in this email</value>
+    </property>
+    <property key="EbayAutoSendWinBuyerEmail">
+        <value xml:lang="en">Automatic send notification email to winning buyer on auction items</value>
+    </property>
+    <property key="EbayCombineOrderSetting">
+        <value xml:lang="en">Combine Orders Setting</value>
+    </property>
+    <property key="EbayAutoSendItemDispatchEmail">
+        <value xml:lang="en">Automatic send item dispatched notification email</value>
+    </property>
+    <property key="EbayContinueListing">
+        <value xml:lang="en">Countinue</value>
+    </property>
+    <property key="EbayChangeCategory">
+        <value xml:lang="en">Change</value>
+    </property>
+    <property key="EbayStoreCategory">
+        <value xml:lang="en">eBay Store Category</value>
+    </property>
+    <property key="EbaySet">
+        <value xml:lang="en">Set</value>
+    </property>
+    <property key="EbayUnsold">
+        <value xml:lang="en">unsold</value>
+    </property>
+    <property key="EbayActive">
+        <value xml:lang="en">Active</value>
+    </property>
+    <property key="EbayAutoRelistingItems">
+        <value xml:lang="en">Auto Relisting Items</value>
+    </property>
+    <property key="EbayAutoRelistingItemsDescription">
+        <value xml:lang="en">Auto Relisting Items when they are end item.</value>
+    </property>
+    <property key="EbayWaitingToShipping">
+        <value xml:lang="en">Waiting to shipping</value>
+    </property>
+    <property key="EbayListOrderImported">
+        <value xml:lang="en">List Orders Imported</value>
+    </property>
+    <property key="EbayNoOrderImported">
+        <value xml:lang="en">No orders imported found</value>
+    </property>
+    <property key="EbayOpenListings">
+        <value xml:lang="en">Open Listings</value>
+    </property>
+    <property key="EbayErrorMessageList">
+        <value xml:lang="en">Error Messages List</value>
+    </property>
+</resource>

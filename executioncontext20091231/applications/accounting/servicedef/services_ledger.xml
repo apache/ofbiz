@@ -306,28 +306,6 @@ under the License.
         <attribute name="totalNetIncome" type="BigDecimal" mode="OUT" optional="false"/>
         <attribute name="glAccountTotalsMap" type="Map" mode="OUT" optional="true"/>
     </service>
-    <service name="prepareBalanceSheet" engine="simple"
-        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="prepareBalanceSheet" auth="true">
-        <description>Prepare the data for the Balance Sheet</description>
-        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
-        <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
-        <attribute name="glFiscalTypeId" type="String" mode="IN" optional="false"/>
-        <attribute name="assetBalancesList" type="List" mode="OUT" optional="true"/>
-        <attribute name="liabilityBalancesList" type="List" mode="OUT" optional="true"/>
-        <attribute name="equityBalancesList" type="List" mode="OUT" optional="true"/>
-    </service>
-    <service name="prepareComparativeBalanceSheet" engine="simple"
-        location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="prepareComparativeBalanceSheet" auth="true">
-        <description>Prepare the data for the Balance Sheet</description>
-        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
-        <attribute name="period1ThruDate" type="Timestamp" mode="IN" optional="false"/>
-        <attribute name="period1GlFiscalTypeId" type="String" mode="IN" optional="false"/>
-        <attribute name="period2ThruDate" type="Timestamp" mode="IN" optional="false"/>
-        <attribute name="period2GlFiscalTypeId" type="String" mode="IN" optional="false"/>
-        <attribute name="assetBalancesList" type="List" mode="OUT" optional="true"/>
-        <attribute name="liabilityBalancesList" type="List" mode="OUT" optional="true"/>
-        <attribute name="equityBalancesList" type="List" mode="OUT" optional="true"/>
-    </service>
 
     <!-- Miscellaneous Ledger-related services -->
     <service name="getGlAccountFromAccountType" engine="simple"
@@ -343,6 +321,7 @@ under the License.
         <attribute name="productId" type="String" mode="IN" optional="true"/>
         <attribute name="paymentId" type="String" mode="IN" optional="true"/>
         <attribute name="invoiceId" type="String" mode="IN" optional="true"/>
+        <attribute name="fixedAssetId" type="String" mode="IN" optional="true"/>
         <attribute name="glAccountId" type="String" mode="OUT" optional="true"/>
     </service>
     <service name="getInventoryItemOwner" default-entity-name="InventoryItem" engine="simple"
@@ -419,17 +398,6 @@ under the License.
         <auto-attributes include="pk" mode="IN" optional="false"/>
     </service>
 
-    <!-- Permission services -->
-    <service name="basicGeneralLedgerPermissionCheck" engine="simple"
-            location="component://accounting/script/org/ofbiz/accounting/permissions/PermissionServices.xml" invoke="basePermissionCheck">
-        <description>Basic General Ledger Permission Checking Logic</description>
-        <implements service="permissionInterface"/>
-    </service>
-    <service name="acctgTransactionPermissionCheck" engine="simple"
-            location="component://accounting/script/org/ofbiz/accounting/permissions/PermissionServices.xml" invoke="acctgTransactionPermissionCheck">
-        <description>Basic General Ledger Permission Checking Logic</description>
-        <implements service="permissionInterface"/>
-    </service>
     <service name="createAcctgTransForWorkEffortIssuance" engine="simple" auth="true"
         location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createAcctgTransForWorkEffortIssuance">
         <description>Create an accounting transaction for inventory that is issued to a work effort (Type: INVENTORY D: RAWMAT_INVENTORY, C: WIP_INVENTORY)</description>

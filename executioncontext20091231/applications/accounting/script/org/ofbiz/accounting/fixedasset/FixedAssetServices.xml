@@ -560,35 +560,114 @@ under the License.
         <set field="purchaseCost" from-field="parameters.purchaseCost"/>
         <set field="salvageValue" from-field="parameters.salvageValue"/>
         <call-object-method obj-field="parameters.usageYears" method-name="intValue" ret-field="intUsageYears"/>
-        <if-not-empty field="parameters.fixedAssetId">
-            <set field="depreciation" value="0.0" type="BigDecimal"/>
-            <!--FORMULA :  depreciation = (purchaseCost - salvageValue) / (expectedEndOfLife - dateAcquired) -->
-            <calculate field="depreciation" decimal-scale="2">
-                <calcop operator="divide">
-                    <calcop operator="subtract">
-                        <calcop operator="get" field="purchaseCost"/>
-                        <calcop operator="get" field="salvageValue"/>
-                    </calcop>
+
+        <!-- Past depreciation based on standard formula -->
+        <set field="depreciationTotal" value="0.0" type="BigDecimal"/>
+        <if>
+            <condition>
+                <and>
+                    <if-compare field="intUsageYears" operator="greater" value="0.0" type="BigDecimal"/>
+                    <not><if-empty field="parameters.fixedAssetId"/></not>
+                </and>
+            </condition>
+            <then>
+                <set field="depreciation" value="0.0" type="BigDecimal"/>
+                <!--FORMULA :  depreciation = (purchaseCost - salvageValue) / (expectedEndOfLife - dateAcquired) -->
+                <calculate field="numberOfYears">
                     <calcop operator="subtract">
                         <calcop operator="get" field="expEndOfLifeYear"/>
                         <calcop operator="get" field="assetAcquiredYear"/>
                     </calcop>
-                </calcop>
-            </calculate>
-            <loop count="${intUsageYears}">
-                <calculate field="purchaseCost">
-                    <calcop operator="subtract">
-                        <calcop operator="get" field="purchaseCost"/>
-                        <calcop operator="get" field="depreciation"/>
-                    </calcop>
                 </calculate>
-                <field-to-list list="assetDepreciationTillDate" field="depreciation"/>
-                <field-to-list list="assetNBVAfterDepreciation" field="purchaseCost"/>
-            </loop>
-        </if-not-empty>
+                <if-compare field="numberOfYears" operator="greater" value="0.0" type="BigDecimal">
+                    <calculate field="depreciation" decimal-scale="2">
+                        <calcop operator="divide">
+                            <calcop operator="subtract">
+                                <calcop operator="get" field="purchaseCost"/>
+                                <calcop operator="get" field="salvageValue"/>
+                            </calcop>
+                            <calcop operator="get" field="numberOfYears"/>
+                        </calcop>
+                    </calculate>
+                </if-compare>
+                <set field="depreciationYear" from-field="assetAcquiredYear" type="BigDecimal"/>
+                <loop count="${intUsageYears}">
+                    <calculate field="purchaseCost">
+                        <calcop operator="subtract">
+                            <calcop operator="get" field="purchaseCost"/>
+                            <calcop operator="get" field="depreciation"/>
+                        </calcop>
+                    </calculate>
+                    <calculate field="depreciationTotal">
+                        <calcop operator="add">
+                            <calcop operator="get" field="depreciationTotal"/>
+                            <calcop operator="get" field="depreciation"/>
+                        </calcop>
+                    </calculate>
+                    <field-to-list list="assetDepreciationTillDate" field="depreciation"/>
+                    <field-to-list list="assetNBVAfterDepreciation" field="purchaseCost"/>
+                    <clear-field field="assetDepreciationInfo"/>
+                    <set field="assetDepreciationInfo.year" from-field="depreciationYear"/>
+                    <set field="assetDepreciationInfo.depreciation" from-field="depreciation"/>
+                    <set field="assetDepreciationInfo.depreciationTotal" from-field="depreciationTotal"/>
+                    <set field="assetDepreciationInfo.nbv" from-field="purchaseCost"/>
+                    <field-to-list list="assetDepreciationInfoList" field="assetDepreciationInfo"/>
+                    <calculate field="depreciationYear">
+                        <calcop operator="add">
+                           <calcop operator="get" field="depreciationYear"/>
+                           <number value="1"/>
+                        </calcop>
+                    </calculate>
+                </loop>
+            </then>
+        </if>
+        <if-empty field="assetDepreciationTillDate">
+            <set field="depreciation" value="0.0" type="BigDecimal"/>
+            <field-to-list list="assetDepreciationTillDate" field="depreciation"/>
+            <field-to-list list="assetNBVAfterDepreciation" field="purchaseCost"/>
+            <set field="assetDepreciationInfo.year" from-field="assetAcquiredYear"/>
+            <set field="assetDepreciationInfo.depreciation" from-field="depreciation"/>
+            <set field="assetDepreciationInfo.depreciationTotal" from-field="depreciationTotal"/>
+            <set field="assetDepreciationInfo.nbv" from-field="purchaseCost"/>
+            <field-to-list list="assetDepreciationInfoList" field="assetDepreciationInfo"/>
+        </if-empty>
         <log level="info" message="Using straight line formula depreciation calculated for fixedAsset (${parameters.fixedAssetId}) is ${depreciation}"/>
         <field-to-result field="assetDepreciationTillDate"/>
         <field-to-result field="assetNBVAfterDepreciation"/>
+        <field-to-result field="assetDepreciationInfoList"/>
+
+        <!-- Next depreciation based on actual depreciation history -->
+        <set field="nextDepreciationAmount" value="0.0" type="BigDecimal"/>
+        <if>
+            <condition>
+                <not><if-empty field="parameters.fixedAssetId"/></not>
+            </condition>
+            <then>
+                <entity-one entity-name="FixedAsset" value-field="fixedAsset"/>
+                <!--FORMULA :  depreciation = (purchaseCost - salvageValue - pastDepreciations) / remainingYears -->
+                <calculate field="remainingYears">
+                    <calcop operator="subtract">
+                        <calcop operator="get" field="expEndOfLifeYear"/>
+                        <calcop operator="get" field="assetAcquiredYear"/>
+                        <calcop operator="get" field="intUsageYears"/>
+                    </calcop>
+                </calculate>
+                <if-compare field="remainingYears" operator="greater" value="0.0" type="BigDecimal">
+                    <calculate field="nextDepreciationAmount" decimal-scale="2">
+                        <calcop operator="divide">
+                            <calcop operator="subtract">
+                                <calcop operator="get" field="fixedAsset.purchaseCost"/>
+                                <calcop operator="get" field="salvageValue"/>
+                                <calcop operator="get" field="fixedAsset.depreciation"/>
+                            </calcop>
+                            <calcop operator="get" field="remainingYears"/>
+                        </calcop>
+                    </calculate>
+                </if-compare>
+            </then>
+        </if>
+        <field-to-result field="nextDepreciationAmount"/>
+        <field-to-result field="depreciationTotal" result-name="plannedPastDepreciationTotal"/>
     </simple-method>
 
     <simple-method method-name="doubleDecliningBalanceDepreciation" short-description="Calculate double declining balance depreciation to Fixed Asset">
@@ -597,44 +676,125 @@ under the License.
         <set field="purchaseCost" from-field="parameters.purchaseCost"/>
         <set field="salvageValue" from-field="parameters.salvageValue"/>
         <call-object-method obj-field="parameters.usageYears" method-name="intValue" ret-field="intUsageYears"/>
-        <if-not-empty field="parameters.fixedAssetId">
-            <loop count="${intUsageYears}">
-                <set field="depreciation" value="0.0" type="BigDecimal"/>
-                <!--FORMULA : depreciation = (NBV - salvageValue) * 2 / (expectedEndOfLife - dateAcquired) -->
-                <calculate field="depreciation" decimal-scale="2">
-                    <calcop operator="multiply">
-                        <calcop operator="divide">
-                           <calcop operator="subtract">
-                                <calcop operator="get" field="purchaseCost"/>
-                                <calcop operator="get" field="salvageValue"/>
+        <!-- Next depreciation based on actual depreciation history -->
+        <set field="nextDepreciationAmount" value="0.0" type="BigDecimal"/>
+        <if>
+            <condition>
+                <not><if-empty field="parameters.fixedAssetId"/></not>
+            </condition>
+            <then>
+                <entity-one entity-name="FixedAsset" value-field="fixedAsset"/>
+                <!--FORMULA :  depreciation = 2 * (purchaseCost - salvageValue - pastDepreciations) / remainingYears -->
+                <calculate field="remainingYears">
+                    <calcop operator="subtract">
+                        <calcop operator="get" field="expEndOfLifeYear"/>
+                        <calcop operator="get" field="assetAcquiredYear"/>
+                        <calcop operator="get" field="intUsageYears"/>
+                    </calcop>
+                </calculate>
+                <if-compare field="remainingYears" operator="greater" value="0.0" type="BigDecimal">
+                    <calculate field="nextDepreciationAmount" decimal-scale="2">
+                        <calcop operator="multiply">
+                            <calcop operator="divide">
+                                <calcop operator="subtract">
+                                    <calcop operator="get" field="fixedAsset.purchaseCost"/>
+                                    <calcop operator="get" field="salvageValue"/>
+                                    <calcop operator="get" field="fixedAsset.depreciation"/>
+                                </calcop>
+                                <calcop operator="get" field="remainingYears"/>
                             </calcop>
-                            <calcop operator="subtract">
-                                <calcop operator="get" field="expEndOfLifeYear"/>
-                                <calcop operator="get" field="assetAcquiredYear"/>
-                            </calcop>
+                            <number value="2"/>
                         </calcop>
-                        <number value="2"/>
-                    </calcop>
-                </calculate>
-                <calculate field="assetAcquiredYear">
-                    <calcop operator="add">
-                       <calcop operator="get" field="assetAcquiredYear"/>
-                       <number value="1"/>
-                    </calcop>
-                </calculate>
-                <calculate field="purchaseCost">
-                   <calcop operator="subtract">
-                       <calcop operator="get" field="purchaseCost"/>
-                       <calcop operator="get" field="depreciation"/>
-                    </calcop>
-                </calculate>
-                <field-to-list list="assetDepreciationTillDate" field="depreciation"/>
-                <field-to-list list="assetNBVAfterDepreciation" field="purchaseCost"/>
-            </loop>
-        </if-not-empty>
+                    </calculate>
+                </if-compare>
+            </then>
+        </if>
+        <field-to-result field="nextDepreciationAmount"/>
+
+        <!-- Past depreciation based on standard formula -->
+        <set field="depreciationTotal" value="0.0" type="BigDecimal"/>
+        <if>
+            <condition>
+                <and>
+                    <if-compare field="intUsageYears" operator="greater" value="0.0" type="BigDecimal"/>
+                    <not><if-empty field="parameters.fixedAssetId"/></not>
+                </and>
+            </condition>
+            <then>
+                <set field="depreciationYear" from-field="assetAcquiredYear" type="BigDecimal"/>
+                <loop count="${intUsageYears}">
+                    <set field="depreciation" value="0.0" type="BigDecimal"/>
+                    <!--FORMULA : depreciation = (NBV - salvageValue) * 2 / (expectedEndOfLife - dateAcquired) -->
+                    <calculate field="numberOfYears">
+                        <calcop operator="subtract">
+                            <calcop operator="get" field="expEndOfLifeYear"/>
+                            <calcop operator="get" field="assetAcquiredYear"/>
+                        </calcop>
+                    </calculate>
+                    <if-compare field="numberOfYears" operator="greater" value="0.0" type="BigDecimal">
+                        <calculate field="depreciation" decimal-scale="2">
+                            <calcop operator="multiply">
+                                <calcop operator="divide">
+                                   <calcop operator="subtract">
+                                        <calcop operator="get" field="purchaseCost"/>
+                                        <calcop operator="get" field="salvageValue"/>
+                                    </calcop>
+                                    <calcop operator="get" field="numberOfYears"/>
+                                </calcop>
+                                <number value="2"/>
+                            </calcop>
+                        </calculate>
+                    </if-compare>
+                    <calculate field="assetAcquiredYear">
+                        <calcop operator="add">
+                           <calcop operator="get" field="assetAcquiredYear"/>
+                           <number value="1"/>
+                        </calcop>
+                    </calculate>
+                    <calculate field="purchaseCost">
+                       <calcop operator="subtract">
+                           <calcop operator="get" field="purchaseCost"/>
+                           <calcop operator="get" field="depreciation"/>
+                        </calcop>
+                    </calculate>
+                    <calculate field="depreciationTotal">
+                        <calcop operator="add">
+                            <calcop operator="get" field="depreciationTotal"/>
+                            <calcop operator="get" field="depreciation"/>
+                        </calcop>
+                    </calculate>
+                    <field-to-list list="assetDepreciationTillDate" field="depreciation"/>
+                    <field-to-list list="assetNBVAfterDepreciation" field="purchaseCost"/>
+                    <clear-field field="assetDepreciationInfo"/>
+                    <set field="assetDepreciationInfo.year" from-field="depreciationYear"/>
+                    <set field="assetDepreciationInfo.depreciation" from-field="depreciation"/>
+                    <set field="assetDepreciationInfo.depreciationTotal" from-field="depreciationTotal"/>
+                    <set field="assetDepreciationInfo.nbv" from-field="purchaseCost"/>
+                    <field-to-list list="assetDepreciationInfoList" field="assetDepreciationInfo"/>
+                    <calculate field="depreciationYear">
+                        <calcop operator="add">
+                           <calcop operator="get" field="depreciationYear"/>
+                           <number value="1"/>
+                        </calcop>
+                    </calculate>
+                </loop>
+            </then>
+        </if>
+        <if-empty field="assetDepreciationTillDate">
+            <set field="depreciation" value="0.0" type="BigDecimal"/>
+            <field-to-list list="assetDepreciationTillDate" field="depreciation"/>
+            <field-to-list list="assetNBVAfterDepreciation" field="purchaseCost"/>
+            <set field="assetDepreciationInfo.year" from-field="assetAcquiredYear"/>
+            <set field="assetDepreciationInfo.depreciation" from-field="depreciation"/>
+            <set field="assetDepreciationInfo.depreciationTotal" from-field="depreciationTotal"/>
+            <set field="assetDepreciationInfo.nbv" from-field="purchaseCost"/>
+            <field-to-list list="assetDepreciationInfoList" field="assetDepreciationInfo"/>
+        </if-empty>
         <log level="info" message="Using double decline formula depreciation calculated for fixedAsset (${parameters.fixedAssetId}) is ${assetDepreciationTillDate}"/>
         <field-to-result field="assetDepreciationTillDate"/>
         <field-to-result field="assetNBVAfterDepreciation"/>
+        <field-to-result field="assetDepreciationInfoList"/>
+        <field-to-result field="depreciationTotal" result-name="plannedPastDepreciationTotal"/>
     </simple-method>
 
     <simple-method method-name="calculateFixedAssetDepreciation" short-description="Service to calculate the yearly depreciation from dateAcquired year to current financial year">
@@ -655,8 +815,8 @@ under the License.
                 <field field="endIndex" type="int"/>
             </call-object-method>
         <else>
-            <add-error><fail-property resource="AccountingUiLabels" property="AccountingExpEndOfLifeIsEmpty"/></add-error>
-            <check-errors/>
+            <property-to-field resource="AccountingUiLabels" property="AccountingExpEndOfLifeIsEmpty" field="successMessageList[]"/>
+            <return/>
         </else>
         </if-not-empty>
 
@@ -669,8 +829,8 @@ under the License.
                 <field field="endIndex" type="int"/>
             </call-object-method>
         <else>
-            <add-error><fail-property resource="AccountingUiLabels" property="AccountingDateAcquiredIsEmpty"/></add-error>
-            <check-errors/>
+            <property-to-field resource="AccountingUiLabels" property="AccountingDateAcquiredIsEmpty" field="successMessageList[]"/>
+            <return/>
         </else>
         </if-not-empty>
 
@@ -715,15 +875,92 @@ under the License.
             <call-service service-name="${customMethod.customMethodName}" in-map-name="serviceInMap">
                 <result-to-field result-name="assetDepreciationTillDate"/>
                 <result-to-field result-name="assetNBVAfterDepreciation"/>
+                <result-to-field result-name="assetDepreciationInfoList"/>
+                <result-to-field result-name="nextDepreciationAmount"/>
+                <result-to-field result-name="plannedPastDepreciationTotal"/>
             </call-service>
             <log level="info" message="Asset's depreciation calculated till date are ${assetDepreciationTillDate}"/>
             <log level="info" message="Asset's Net Book Values (NBV) from acquired date after deducting depreciation are ${assetNBVAfterDepreciation}"/>
             <field-to-result field="assetDepreciationTillDate"/>
             <field-to-result field="assetNBVAfterDepreciation"/>
+            <field-to-result field="assetDepreciationInfoList"/>
+            <field-to-result field="nextDepreciationAmount"/>
+            <field-to-result field="plannedPastDepreciationTotal"/>
         <else>
-            <add-error><fail-property resource="AccountingUiLabels" property="AccountingFixedAssetDepreciationMethodNotFound"/></add-error>
-            <check-errors/>
+            <property-to-field resource="AccountingUiLabels" property="AccountingFixedAssetDepreciationMethodNotFound" field="successMessageList[]"/>
+            <return/>
         </else>
         </if-not-empty>
     </simple-method>
+
+    <simple-method method-name="checkUpdateFixedAssetDepreciation" login-required="true"
+        short-description="If the accounting transaction is a depreciation transaction for a fixed asset, update the depreciation amount in the FixedAsset entity.">
+        <entity-one entity-name="AcctgTrans" value-field="acctgTrans"/>
+        <if>
+            <condition>
+                <and>
+                    <if-compare field="acctgTrans.acctgTransTypeId" operator="equals" value="DEPRECIATION"/>
+                    <not><if-empty field="acctgTrans.fixedAssetId"/></not>
+                </and>
+            </condition>
+            <then>
+                <get-related-one relation-name="FixedAsset" value-field="acctgTrans" to-value-field="fixedAsset"/>
+                <set field="creditCondition.debitCreditFlag" value="C"/>
+                <get-related relation-name="AcctgTransEntry" value-field="acctgTrans" list="creditTransactions" map="creditCondition"/>
+                <set field="depreciation" value="0.0" type="BigDecimal"/>
+                <iterate list="creditTransactions" entry="creditTransaction">
+                    <if-empty field="fixedAsset.purchaseCostUomId">
+                        <log level="warning" message="Found empty purchaseCostUomId for FixedAsset [${fixedAsset.fixedAssetId}]: setting it to ${creditTransaction.currencyUomId} to match the one used in the gl."/>
+                        <set field="fixedAsset.purchaseCostUomId" from-field="creditTransaction.currencyUomId"/>
+                        <store-value value-field="fixedAsset"/>
+                    </if-empty>
+                    <if-compare-field field="fixedAsset.purchaseCostUomId" operator="equals" to-field="creditTransaction.currencyUomId">
+                        <calculate field="depreciation">
+                            <calcop operator="add">
+                                <calcop operator="get" field="depreciation"/>
+                                <calcop operator="get" field="creditTransaction.amount"/>
+                            </calcop>
+                        </calculate>
+                        <else>
+                            <if-compare-field field="fixedAsset.purchaseCostUomId" operator="equals" to-field="creditTransaction.origCurrencyUomId">
+                                <calculate field="depreciation">
+                                    <calcop operator="add">
+                                        <calcop operator="get" field="depreciation"/>
+                                        <calcop operator="get" field="creditTransaction.origAmount"/>
+                                    </calcop>
+                                </calculate>
+                                <else>
+                                    <log level="warning" message="Found an accounting transaction for depreciation of FixedAsset [${fixedAsset.fixedAssetId}] with a cuurency that doesn't match the currency used in the fixed asset: the depreciation total in the fixed asset will not be updated."/>
+                                    <return/>
+                                </else>
+                            </if-compare-field>
+                        </else>
+                    </if-compare-field>
+                </iterate>
+                <set field="depreciationTotal" from-field="fixedAsset.depreciation" default-value="0.0" type="BigDecimal"/>
+                <calculate field="depreciationTotal">
+                    <calcop operator="add">
+                        <calcop operator="get" field="depreciation"/>
+                        <calcop operator="get" field="depreciationTotal"/>
+                    </calcop>
+                </calculate>
+                <set field="fixedAsset.depreciation" from-field="depreciationTotal"/>
+                <store-value value-field="fixedAsset"/>
+            </then>
+        </if>
+    </simple-method>
+
+    <simple-method method-name="createFixedAssetTypeGlAccount" short-description="Create a Fixed Asset Type Gl Account Mapping">
+        <make-value entity-name="FixedAssetTypeGlAccount" value-field="newEntity"/>
+        <set-pk-fields value-field="newEntity" map="parameters"/>
+        <set-nonpk-fields value-field="newEntity" map="parameters"/>
+        <if-empty field="newEntity.fixedAssetId">
+            <set field="newEntity.fixedAssetId" from-field="_NA_"/>
+        </if-empty>
+        <if-empty field="newEntity.fixedAssetTypeId">
+            <set field="newEntity.fixedAssetTypeId" from-field="_NA_"/>
+        </if-empty>
+        <create-value value-field="newEntity"/>
+    </simple-method>
+
 </simple-methods>

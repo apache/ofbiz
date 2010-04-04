@@ -159,7 +159,7 @@ public class LoginEvents {
 
         Map<String, String> messageMap = UtilMisc.toMap("passwordHint", passwordHint);
         errMsg = UtilProperties.getMessage(resource, "loginevents.password_hint_is", messageMap, UtilHttp.getLocale(request));
-        request.setAttribute("_ERROR_MESSAGE_", errMsg);
+        request.setAttribute("_EVENT_MESSAGE_", errMsg);
         return "success";
     }
 
@@ -284,6 +284,7 @@ public class LoginEvents {
         bodyParameters.put("password", UtilFormatOut.checkNull(passwordToSend));
         bodyParameters.put("locale", UtilHttp.getLocale(request));
         bodyParameters.put("userLogin", supposedUserLogin);
+        bodyParameters.put("productStoreId", productStoreId);
 
         Map<String, Object> serviceContext = FastMap.newInstance();
         serviceContext.put("bodyScreenUri", bodyScreenLocation);

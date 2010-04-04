@@ -257,6 +257,9 @@ under the License.
     <ProductContentType description="Add To Cart Label" hasTable="N" parentTypeId="" productContentTypeId="ADDTOCART_LABEL"/>
     <ProductContentType description="Add To Cart Image" hasTable="N" parentTypeId="" productContentTypeId="ADDTOCART_IMAGE"/>
     <ProductContentType description="Short Sales Pitch" hasTable="N" parentTypeId="" productContentTypeId="SHORT_SALES_PITCH"/>
+    <ProductContentType description="Installation" hasTable="N" parentTypeId="DIGITAL_DOWNLOAD" productContentTypeId="INSTALLATION"/>
+    <ProductContentType description="Specification" hasTable="N" parentTypeId="DIGITAL_DOWNLOAD" productContentTypeId="SPECIFICATION"/>
+    <ProductContentType description="Warranty" hasTable="N" parentTypeId="DIGITAL_DOWNLOAD" productContentTypeId="WARRANTY"/>
 
     <ProdConfItemContentType description="Image" hasTable="N" parentTypeId="" confItemContentTypeId="IMAGE_URL"/>
     <ProdConfItemContentType description="Description" hasTable="N" parentTypeId="" confItemContentTypeId="DESCRIPTION"/>
@@ -321,48 +324,6 @@ under the License.
     <ProductFeatureType description="Warranty" hasTable="N" parentTypeId="" productFeatureTypeId="WARRANTY"/>
     <ProductFeatureType description="Model Year" hasTable="N" parentTypeId="" productFeatureTypeId="MODEL_YEAR"/>
     <ProductFeatureType description="Year Made" hasTable="N" parentTypeId="" productFeatureTypeId="YEAR_MADE"/>
-
-    <ProductFeatureCategory productFeatureCategoryId="1000" description="Hazmat Features"/>
-    <ProductFeature productFeatureId="1000" productFeatureCategoryId="1000" productFeatureTypeId="HAZMAT" description="Hazmat" idCode="Y"/>
-    <ProductFeature productFeatureId="1001" productFeatureCategoryId="1000" productFeatureTypeId="HAZMAT" description="Non-Hazmat" idCode="N"/>
-
-    <ProductFeatureCategory productFeatureCategoryId="1001" description="Model Year Features"/>
-    <ProductFeature productFeatureId="Y1990" description="1990" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y1991" description="1991" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y1992" description="1992" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y1993" description="1993" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y1994" description="1994" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y1995" description="1995" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y1996" description="1996" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y1997" description="1997" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y1998" description="1998" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y1999" description="1999" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y2000" description="2000" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y2001" description="2001" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y2002" description="2002" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y2003" description="2003" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y2004" description="2004" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y2005" description="2005" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y2006" description="2006" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y2007" description="2007" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y2008" description="2008" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y2009" description="2009" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-    <ProductFeature productFeatureId="Y2010" description="2010" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
-
-    <ProductFeatureCategory productFeatureCategoryId="1002" description="Equipment Class Features"/>
-    <ProductFeature productFeatureId="EC_BOAT" description="Boat" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
-    <ProductFeature productFeatureId="EC_FORKLIFT" description="Forklift" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
-    <ProductFeature productFeatureId="EC_DIGGER" description="Digger" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
-    <ProductFeature productFeatureId="EC_MANLIFT" description="Manlift" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
-    <ProductFeature productFeatureId="EC_SERVICE_BODY" description="Service Body" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
-    <ProductFeature productFeatureId="EC_TRACTOR" description="Tractor" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
-    <ProductFeature productFeatureId="EC_PASSENGER" description="Passenger Vehicle" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
-    <ProductFeature productFeatureId="EC_COMPRESSOR" description="Compressor" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
-    <ProductFeature productFeatureId="EC_TRENCHER" description="Trencher" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
-    <ProductFeature productFeatureId="EC_PULLER" description="Puller" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
-    <ProductFeature productFeatureId="EC_MOBILE" description="Mobile" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
-    <ProductFeature productFeatureId="EC_TANKER" description="Tanker" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
-    <ProductFeature productFeatureId="EC_REEL_STAND" description="Reel Stand" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
 
     <ProductMeterType description="Speedometer" productMeterTypeId="SPEEDOMETER"/>
     <ProductMeterType description="Tachometer" productMeterTypeId="TACHOMETER"/>
@@ -461,6 +422,7 @@ under the License.
     <ProductPriceType description="Competitive Price" productPriceTypeId="COMPETITIVE_PRICE"/>
     <ProductPriceType description="Wholesale Price" productPriceTypeId="WHOLESALE_PRICE"/>
     <ProductPriceType description="Special Promo Price" productPriceTypeId="SPECIAL_PROMO_PRICE"/>
+    <ProductPriceType description="Box Price" productPriceTypeId="BOX_PRICE"/>
 
     <ProductPricePurpose description="Purchase/Initial" productPricePurposeId="PURCHASE"/>
     <ProductPricePurpose description="Recurring Charge" productPricePurposeId="RECURRING_CHARGE"/>
@@ -595,5 +557,9 @@ under the License.
 
     <WebSite webSiteId="PRODCATALOG" siteName="Catalog Manager" visualThemeSetId="BACKOFFICE"/>
     <WebSite webSiteId="FACILITY" siteName="Facility Manager" visualThemeSetId="BACKOFFICE"/>
+
+    <WebAnalyticsType description="Web Analytics" hasTable="N" parentTypeId="" webAnalyticsTypeId="WEB_ANALYTICS"/>
+    <WebAnalyticsType webAnalyticsTypeId="GOOGLE_ANALYTICS" parentTypeId="WEB_ANALYTICS" hasTable="N" description="Google Analytics"/>    
+    <WebAnalyticsType webAnalyticsTypeId="BING_ANALYTICS" parentTypeId="WEB_ANALYTICS" hasTable="N" description="Bing Analytics"/>
 
 </entity-engine-xml>

@@ -28,7 +28,7 @@
         <menu-item name="classification" title="${uiLabelMap.PartyClassifications}"><link target="showclassgroups"/></menu-item>
         <menu-item name="security" title="${uiLabelMap.CommonSecurity}">
             <condition>
-                <if-has-permission permission="PARTYMGR" action="_VIEW"/>
+                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
             </condition>
             <link target="FindSecurityGroup"/>
         </menu-item>
@@ -150,7 +150,7 @@
         </menu-item>
         <menu-item name="FinancialHistory" title="${uiLabelMap.PartyFinancialHistory}">
             <condition>
-                <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
+                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
             </condition>
             <link target="PartyFinancialHistory">
                 <parameter param-name="partyId"/>
@@ -161,12 +161,16 @@
                 <parameter param-name="partyId"/>
             </link>
         </menu-item>
+        <menu-item name="productStoreRoles" title="${uiLabelMap.ProductProductStoreRoles}">
+            <link target="ViewProductStoreRoles">
+                <parameter param-name="partyId"/>
+            </link>
+        </menu-item>
     </menu>
-    <menu name="ProfileSubTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
-        menu-container-style="button-bar button-style-2">
+    <menu name="ProfileSubTabBar" extends="CommonButtonBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
         <menu-item name="createNew" title="${uiLabelMap.AccountingBillingAccount}" >
             <condition>
-                <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
+                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
             </condition>
             <link target="/accounting/control/FindBillingAccount" url-mode="inter-app">
                 <parameter param-name="partyId"/>
@@ -174,7 +178,7 @@
         </menu-item>
         <menu-item name="finAccounts" title="${uiLabelMap.AccountingFinAccounts}">
             <condition>
-                <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
+                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
             </condition>
             <link target="/accounting/control/FindFinAccount" url-mode="inter-app">
                 <parameter param-name="ownerPartyId" from-field="partyId"/>
@@ -533,7 +537,6 @@
     </menu>
     <menu name="CommEventTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
         <menu-item name="Find" title="${uiLabelMap.CommonFind}">
-            <condition><if-compare field="tabButtonItem" operator="not-equals" value="Find"/></condition>
             <link target="FindCommunicationEvents"/>
         </menu-item>
         <menu-item name="OverView" title="${uiLabelMap.CommonOverview}">
@@ -583,6 +586,9 @@
         <menu-item name="ListUnknownPartyComms" title="${uiLabelMap.PartyEmailFromUnknownParties}">
             <link target="listUnknownPartyComms"/>
         </menu-item>
+        <menu-item name="FindCommunicationByOrder" title="${uiLabelMap.PartyFindCommunicationsByOrder}">
+            <link target="FindCommunicationByOrder"/>
+        </menu-item>
         <menu-item name="UpdateCommOrders" title="${uiLabelMap.OrderOrders}">
             <condition><not><if-empty field="communicationEvent"/></not></condition>
             <link target="UpdateCommOrders">
@@ -618,9 +624,8 @@
         </menu-item>
     </menu>
 
-    <menu name="CommSubTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
-        menu-container-style="button-bar button-style-2 no-clear">
-        <menu-item name="new" title="${uiLabelMap.PartyNewCommunication}">
+    <menu name="CommSubTabBar" extends="CommonButtonBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="new" title="${uiLabelMap.PartyNewCommunication}" widget-style="buttontext create">
             <link target="EditCommunicationEvent"/>
         </menu-item>
         <menu-item name="reply" title="${uiLabelMap.PartyReply}">

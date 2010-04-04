@@ -29,6 +29,7 @@ import javax.transaction.Transaction;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.datasource.GenericHelperInfo;
 import org.ofbiz.entity.jdbc.ConnectionFactory;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;
@@ -43,20 +44,19 @@ public class SequenceUtil {
 
     public static final String module = SequenceUtil.class.getName();
 
-    Map<String, SequenceBank> sequences = new Hashtable<String, SequenceBank>();
-    String helperName;
-    ModelEntity seqEntity;
-    String tableName;
-    String nameColName;
-    String idColName;
+    private final Map<String, SequenceBank> sequences = new Hashtable<String, SequenceBank>();
+    private final GenericHelperInfo helperInfo;
+    private final long bankSize;
+    private final String tableName;
+    private final String nameColName;
+    private final String idColName;
 
-    public SequenceUtil(String helperName, ModelEntity seqEntity, String nameFieldName, String idFieldName) {
-        this.helperName = helperName;
-        this.seqEntity = seqEntity;
+    public SequenceUtil(GenericHelperInfo helperInfo, ModelEntity seqEntity, String nameFieldName, String idFieldName) {
+        this.helperInfo = helperInfo;
         if (seqEntity == null) {
             throw new IllegalArgumentException("The sequence model entity was null but is required.");
         }
-        this.tableName = seqEntity.getTableName(helperName);
+        this.tableName = seqEntity.getTableName(helperInfo.getHelperBaseName());
 
         ModelField nameField = seqEntity.getField(nameFieldName);
 
@@ -71,6 +71,11 @@ public class SequenceUtil {
             throw new IllegalArgumentException("Could not find the field definition for the sequence id field " + idFieldName);
         }
         this.idColName = idField.getColName();
+        long bankSize = SequenceBank.defaultBankSize;
+        if (seqEntity.getSequenceBankSize() != null) {
+            bankSize = seqEntity.getSequenceBankSize().longValue();
+        }
+        this.bankSize = bankSize;
     }
 
     public Long getNextSeqId(String seqName, long staggerMax, ModelEntity seqModelEntity) {
@@ -95,7 +100,7 @@ public class SequenceUtil {
             synchronized(this) {
                 bank = sequences.get(seqName);
                 if (bank == null) {
-                    bank = new SequenceBank(seqName, seqModelEntity, this);
+                    bank = new SequenceBank(seqName);
                     sequences.put(seqName, bank);
                 }
             }
@@ -104,30 +109,26 @@ public class SequenceUtil {
         return bank;
     }
 
-    class SequenceBank {
+    private class SequenceBank {
         public static final long defaultBankSize = 10;
         public static final long maxBankSize = 5000;
         public static final long startSeqId = 10000;
-        public static final int minWaitMillis = 5;
-        public static final int maxWaitMillis = 50;
+        public static final long minWaitMillis = 5;
+        public static final long maxWaitMillis = 50;
         public static final int maxTries = 5;
 
-        long curSeqId;
-        long maxSeqId;
-        String seqName;
-        SequenceUtil parentUtil;
-        ModelEntity seqModelEntity;
+        private long curSeqId;
+        private long maxSeqId;
+        private final String seqName;
 
-        public SequenceBank(String seqName, ModelEntity seqModelEntity, SequenceUtil parentUtil) {
+        private SequenceBank(String seqName) {
             this.seqName = seqName;
-            this.parentUtil = parentUtil;
-            this.seqModelEntity = seqModelEntity;
             curSeqId = 0;
             maxSeqId = 0;
-            fillBank(1, seqModelEntity);
+            fillBank(1);
         }
 
-        public synchronized Long getNextSeqId(long staggerMax) {
+        private synchronized Long getNextSeqId(long staggerMax) {
             long stagger = 1;
             if (staggerMax > 1) {
                 stagger = Math.round(Math.random() * staggerMax);
@@ -139,7 +140,7 @@ public class SequenceUtil {
                 curSeqId += stagger;
                 return retSeqId;
             } else {
-                fillBank(stagger, this.seqModelEntity);
+                fillBank(stagger);
                 if ((curSeqId + stagger) <= maxSeqId) {
                     Long retSeqId = Long.valueOf(curSeqId);
                     curSeqId += stagger;
@@ -151,21 +152,18 @@ public class SequenceUtil {
             }
         }
 
-        public void refresh(long staggerMax) {
+        private void refresh(long staggerMax) {
             this.curSeqId = this.maxSeqId;
-            this.fillBank(staggerMax, this.seqModelEntity);
+            this.fillBank(staggerMax);
         }
 
-        protected synchronized void fillBank(long stagger, ModelEntity seqModelEntity) {
+        private synchronized void fillBank(long stagger) {
             //Debug.logWarning("[SequenceUtil.SequenceBank.fillBank] Starting fillBank Thread Name is: " + Thread.currentThread().getName() + ":" + Thread.currentThread().toString(), module);
 
             // no need to get a new bank, SeqIds available
             if ((curSeqId + stagger) <= maxSeqId) return;
 
-            long bankSize = defaultBankSize;
-            if (seqModelEntity != null && seqModelEntity.getSequenceBankSize() != null) {
-                bankSize = seqModelEntity.getSequenceBankSize().longValue();
-            }
+            long bankSize = SequenceUtil.this.bankSize;
             if (stagger > 1) {
                 // NOTE: could use staggerMax for this, but if that is done it would be easier to guess a valid next id without a brute force attack
                 bankSize = stagger * defaultBankSize;
@@ -201,7 +199,7 @@ public class SequenceUtil {
                             ResultSet rs = null;
 
                             try {
-                                connection = ConnectionFactory.getConnection(parentUtil.helperName);
+                                connection = ConnectionFactory.getConnection(SequenceUtil.this.helperInfo);
                             } catch (SQLException sqle) {
                                 Debug.logWarning("[SequenceUtil.SequenceBank.fillBank]: Unable to esablish a connection with the database... Error was:" + sqle.toString(), module);
                                 throw sqle;
@@ -221,34 +219,34 @@ public class SequenceUtil {
 
                                 stmt = connection.createStatement();
 
-                                sql = "SELECT " + parentUtil.idColName + " FROM " + parentUtil.tableName + " WHERE " + parentUtil.nameColName + "='" + this.seqName + "'";
+                                sql = "SELECT " + SequenceUtil.this.idColName + " FROM " + SequenceUtil.this.tableName + " WHERE " + SequenceUtil.this.nameColName + "='" + this.seqName + "'";
                                 rs = stmt.executeQuery(sql);
                                 boolean gotVal1 = false;
                                 if (rs.next()) {
-                                    val1 = rs.getLong(parentUtil.idColName);
+                                    val1 = rs.getLong(SequenceUtil.this.idColName);
                                     gotVal1 = true;
                                 }
                                 rs.close();
 
                                 if (!gotVal1) {
                                     Debug.logWarning("[SequenceUtil.SequenceBank.fillBank] first select failed: will try to add new row, result set was empty for sequence [" + seqName + "] \nUsed SQL: " + sql + " \n Thread Name is: " + Thread.currentThread().getName() + ":" + Thread.currentThread().toString(), module);
-                                    sql = "INSERT INTO " + parentUtil.tableName + " (" + parentUtil.nameColName + ", " + parentUtil.idColName + ") VALUES ('" + this.seqName + "', " + startSeqId + ")";
+                                    sql = "INSERT INTO " + SequenceUtil.this.tableName + " (" + SequenceUtil.this.nameColName + ", " + SequenceUtil.this.idColName + ") VALUES ('" + this.seqName + "', " + startSeqId + ")";
                                     if (stmt.executeUpdate(sql) <= 0) {
                                         throw new GenericEntityException("No rows changed when trying insert new sequence row with this SQL: " + sql);
                                     }
                                     continue;
                                 }
 
-                                sql = "UPDATE " + parentUtil.tableName + " SET " + parentUtil.idColName + "=" + parentUtil.idColName + "+" + bankSize + " WHERE " + parentUtil.nameColName + "='" + this.seqName + "'";
+                                sql = "UPDATE " + SequenceUtil.this.tableName + " SET " + SequenceUtil.this.idColName + "=" + SequenceUtil.this.idColName + "+" + bankSize + " WHERE " + SequenceUtil.this.nameColName + "='" + this.seqName + "'";
                                 if (stmt.executeUpdate(sql) <= 0) {
                                     throw new GenericEntityException("[SequenceUtil.SequenceBank.fillBank] update failed, no rows changes for seqName: " + seqName);
                                 }
 
-                                sql = "SELECT " + parentUtil.idColName + " FROM " + parentUtil.tableName + " WHERE " + parentUtil.nameColName + "='" + this.seqName + "'";
+                                sql = "SELECT " + SequenceUtil.this.idColName + " FROM " + SequenceUtil.this.tableName + " WHERE " + SequenceUtil.this.nameColName + "='" + this.seqName + "'";
                                 rs = stmt.executeQuery(sql);
                                 boolean gotVal2 = false;
                                 if (rs.next()) {
-                                    val2 = rs.getLong(parentUtil.idColName);
+                                    val2 = rs.getLong(SequenceUtil.this.idColName);
                                     gotVal2 = true;
                                 }
 
@@ -318,7 +316,7 @@ public class SequenceUtil {
                     }
 
                     // collision happened, wait a bounded random amount of time then continue
-                    int waitTime = (new Double(Math.random() * (maxWaitMillis - minWaitMillis))).intValue() + minWaitMillis;
+                    long waitTime = (long) (Math.random() * (maxWaitMillis - minWaitMillis) + minWaitMillis);
 
                     Debug.logWarning("[SequenceUtil.SequenceBank.fillBank] Collision found for seqName [" + seqName + "], val1=" + val1 + ", val2=" + val2 + ", val1+bankSize=" + (val1 + bankSize) + ", bankSize=" + bankSize + ", waitTime=" + waitTime, module);
 

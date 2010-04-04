@@ -23,9 +23,7 @@ under the License.
     <screen name="LookupPayment">
         <section>
             <condition>
-                <or>
-                    <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
-                </or>
+                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
             </condition>
             <actions>
                 <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
@@ -33,6 +31,8 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="Payment"/>
+                <set field="searchFields" value="[paymentId, partyIdFrom, partyIdTo, currencyUomId]"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
@@ -49,9 +49,7 @@ under the License.
     <screen name="LookupInvoice">
         <section>
             <condition>
-                <or>
-                    <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
-                </or>
+                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
             </condition>
             <actions>
                 <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
@@ -59,6 +57,8 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="Invoice"/>
+                <set field="searchFields" value="[invoiceId, partyIdFrom, partyId, description, currencyUomId]"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
@@ -83,6 +83,8 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="FixedAsset"/>
+                <set field="searchFields" value="[fixedAssetId, fixedAssetName]"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
@@ -100,17 +102,16 @@ under the License.
     <screen name="LookupBillingAccount">
         <section>
             <condition>
-                <or>
-                    <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
-                </or>
+                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
             </condition>
             <actions>
                 <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
-
                 <set field="title" value="${uiLabelMap.PageTitleLookupBillingAccount}"/>
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="BillingAccount"/>
+                <set field="searchFields" value="[billingAccountId, description, externalAccountId, accountCurrencyUomId]"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
@@ -128,9 +129,7 @@ under the License.
     <screen name="LookupGlAccount">
         <section>
             <condition>
-                <or>
-                    <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
-                </or>
+                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
             </condition>
             <actions>
                 <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
@@ -138,6 +137,8 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="GlAccount"/>
+                <set field="searchFields" value="[glAccountId, accountName, glAccountTypeId, glAccountClassId]"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
@@ -155,7 +156,7 @@ under the License.
     <screen name="LookupAgreement">
         <section>
             <condition>
-                <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
+                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
             </condition>
             <actions>
                 <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
@@ -163,6 +164,8 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="Agreement"/>
+                <set field="searchFields" value="[agreementId, productId, description]"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
@@ -180,7 +183,7 @@ under the License.
     <screen name="LookupAgreementItem">
         <section>
             <condition>
-                <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
+                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
             </condition>
             <actions>
                 <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
@@ -188,6 +191,8 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="AgreementItem"/>
+                <set field="searchFields" value="[agreementItemSeqId, agreementId, currencyUomId]"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
@@ -205,7 +210,7 @@ under the License.
     <screen name="LookupPaymentGroupMember">
         <section>
             <condition>
-                <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
+                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
             </condition>
             <actions>
                 <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
@@ -213,6 +218,8 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="PaymentGroupMember"/>
+                <set field="searchFields" value="[paymentGroupId, paymentId, sequenceNum]"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
@@ -230,15 +237,15 @@ under the License.
     <screen name="LookupGlReconciliation">
         <section>
             <condition>
-                <or>
-                    <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
-                </or>
+                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
             </condition>
             <actions>
                 <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="title" value="${uiLabelMap.AccountingLookupGlReconciliations}"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="GlReconciliation"/>
+                <set field="searchFields" value="[glReconciliationId, glReconciliationName, description]"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">

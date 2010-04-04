@@ -112,10 +112,11 @@ under the License.
     <!-- Global decorator for General Screens/Pages -->
     <screen name="GlobalDecorator">
         <section>
-            <actions>                
+            <actions>
                 <!-- The default (global) java scripts -->
                 <set field="layoutSettings.javaScripts[+0]" value="/images/prototypejs/scriptaculous.js" global="true"/>
                 <set field="layoutSettings.javaScripts[+0]" value="/images/prototypejs/prototype.js" global="true"/>
+                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/resize.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/selectall.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/fieldlookup.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/calendarDateSelect/calendar_date_select.js" global="true"/>
@@ -123,7 +124,7 @@ under the License.
                 <set field="layoutSettings.javaScripts[]" value="/images/calendarDateSelect/locale/${initialLocale}.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/GooglemapMarkers.js" global="true"/>
                 <set field="layoutSettings.commonHeaderImageLinkUrl" from-field="layoutSettings.commonHeaderImageLinkUrl" default-value="main" global="true"/>
-                <set field="visualThemeId" from-field="userPreferences.VISUAL_THEME" default-value="BIZZNESS_TIME" global="true"/>
+                <set field="visualThemeId" from-field="userPreferences.VISUAL_THEME" global="true"/>
                 <service service-name="getVisualThemeResources">
                     <field-map field-name="visualThemeId"/>
                     <field-map field-name="themeResources" from-field="layoutSettings"/>
@@ -135,8 +136,6 @@ under the License.
                 <set field="appbarOpenTemplateLocation" from-field="layoutSettings.VT_NAV_OPEN_TMPLT[0]"/>
                 <set field="appbarCloseTemplateLocation" from-field="layoutSettings.VT_NAV_CLOSE_TMPLT[0]"/>
                 <set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC[0]"/>
-                <property-map resource="CommonHelpUrls" map-name="helpUrlsMap" global="true"/>
-                <script location="component://commonext/script/changeOrgPartyId.groovy"/>
             </actions>
             <widgets>
                 <!-- render header -->
@@ -162,27 +161,24 @@ under the License.
                     </condition>
                     <widgets>
                         <section>
-                            <condition>
-                                <if-empty field="applicationMenuName"/>
-                            </condition>
+                            <condition><not><if-empty field="appheaderTemplate"/></not></condition>
                             <widgets>
                                 <platform-specific><html><html-template location="${appheaderTemplate}"/></html></platform-specific>
                             </widgets>
                             <fail-widgets>
                                 <section>
-                                    <condition>
-                                        <not><if-empty field="parameters.applicationTitle"/></not>
-                                    </condition>
-                                    <widgets>
-                                        <label style="apptitle">${parameters.applicationTitle}</label>
-                                    </widgets>
+                                    <condition><not><if-empty field="parameters.applicationTitle"/></not></condition>
+                                    <widgets><label style="apptitle">${parameters.applicationTitle}</label></widgets>
                                 </section>
-                                <include-menu name="${applicationMenuName}" location="${applicationMenuLocation}"/>
+                                <section>
+                                    <condition><not><if-empty field="applicationMenuLocation"/></not></condition>
+                                    <widgets><include-menu name="${applicationMenuName}" location="${applicationMenuLocation}"/></widgets>
+                                </section>
                             </fail-widgets>
                         </section>
                     </widgets>
                     <fail-widgets>
-                        <include-menu name="CommonAppBarMenu" location="component://common/widget/CommonMenus.xml"/>
+                        <!-- better to just not include this, the CommonAppBarMenu doesn't show anything by default if the user isn't logged in, causing a funny empty menu: <include-menu name="CommonAppBarMenu" location="component://common/widget/CommonMenus.xml"/> -->
                     </fail-widgets>
                 </section>
 
@@ -237,14 +233,20 @@ under the License.
                         <set field="userPreferences" from-field="prefResult.userPrefMap" global="true"/>
         
                         <property-map resource="general" map-name="generalProperties" global="true"/>
-                        <set field="visualThemeId" from-field="userPreferences.VISUAL_THEME" default-value="BIZZNESS_TIME" global="true"/>
+                        <set field="visualThemeId" from-field="userPreferences.VISUAL_THEME" global="true"/>
                         <service service-name="getVisualThemeResources">
                             <field-map field-name="visualThemeId"/>
                             <field-map field-name="themeResources" from-field="layoutSettings"/>
                         </service>
                         <set field="layoutSettings" from-field="themeResources" default-value="${layoutSettings}" global="true"/>
                         <set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC[0]" default-value="component://common/webcommon/includes/messages.ftl"/>
-                    </actions>    
+                        <property-to-field  field="defaultCurrencyUomId" property="currency.uom.id.default" resource="general"/>
+                        <set field="defaultOrganizationPartyId" from-field="userPreferences.ORGANIZATION_PARTY" global="true"/>
+                        <entity-one entity-name="PartyAcctgPrefAndGroup" value-field="orgParty">
+                            <field-map field-name="partyId" from-field="defaultOrganizationPartyId"/>
+                        </entity-one>
+                        <set field="defaultOrganizationPartyCurrencyUomId" from-field="orgParty.baseCurrencyUomId" default-value="${defaultCurrencyUomId}" global="true"/>
+                    </actions>
                     <widgets>
                         <platform-specific><html><html-template location="component://common/webcommon/includes/lookup.ftl"/></html></platform-specific>
                         <platform-specific><html><html-template location="${messagesTemplateLocation}"/></html></platform-specific>
@@ -279,7 +281,70 @@ under the License.
                         <script location="component://common/webcommon/WEB-INF/actions/includes/FindAutocompleteOptions.groovy"/>
                     </actions>
                     <widgets>
-                        <platform-specific><html><html-template location="component://common/webcommon/includes/ajaxAutocompleteOptions.ftl"/></html></platform-specific>                
+                        <platform-specific><html><html-template location="component://common/webcommon/includes/ajaxAutocompleteOptions.ftl"/></html></platform-specific>
+                    </widgets>
+                </section>
+            </fail-widgets>
+        </section>
+    </screen>
+
+    <!-- Global decorator for Lookup layer pop-up windows -->
+    <screen name="LookupLayerPopupDecorator">
+        <section>
+            <condition>
+                <if-empty field="parameters.ajaxLookup"/>
+            </condition>
+            <widgets>
+                <section>
+                    <actions>
+                        <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                        <service service-name="getUserPreferenceGroup" result-map="prefResult">
+                            <field-map field-name="userPrefGroupTypeId" value="GLOBAL_PREFERENCES"/>
+                        </service>
+                        <set field="userPreferences" from-field="prefResult.userPrefMap" global="true"/>
+        
+                        <property-map resource="general" map-name="generalProperties" global="true"/>
+                        <set field="visualThemeId" from-field="userPreferences.VISUAL_THEME" global="true"/>
+                        <service service-name="getVisualThemeResources">
+                            <field-map field-name="visualThemeId"/>
+                            <field-map field-name="themeResources" from-field="layoutSettings"/>
+                        </service>
+                        <set field="layoutSettings" from-field="themeResources" default-value="${layoutSettings}" global="true"/>
+                        <set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC[0]" default-value="component://common/webcommon/includes/messages.ftl"/>
+                    </actions>
+                    <widgets>
+                        <platform-specific><html><html-template location="${messagesTemplateLocation}"/></html></platform-specific>
+                        <section>
+                            <condition>
+                                <not><if-empty-section section-name="body"/></not>
+                            </condition>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <screenlet title="${title}" id="findScreenlet" collapsible="false" padded="false">
+                                    <container id="search-options">
+                                        <decorator-section-include name="search-options"/>
+                                    </container>
+                                </screenlet>
+                                <screenlet>
+                                    <container id="search-results">
+                                        <decorator-section-include name="search-results"/>
+                                    </container>
+                                </screenlet>
+                            </fail-widgets>
+                        </section>
+                    </widgets>
+                </section>
+            </widgets>
+            <fail-widgets>
+                <section>
+                    <actions>
+                        <property-to-field resource="widget" property="widget.autocompleter.defaultViewSize" field="autocompleterViewSize"/>
+                        <script location="component://common/webcommon/WEB-INF/actions/includes/FindAutocompleteOptions.groovy"/>
+                    </actions>
+                    <widgets>
+                        <platform-specific><html><html-template location="component://common/webcommon/includes/ajaxAutocompleteOptions.ftl"/></html></platform-specific>
                     </widgets>
                 </section>
             </fail-widgets>
@@ -404,7 +469,7 @@ under the License.
     <screen name="forgotPassword">
         <section>
             <widgets>
-                <decorator-screen name="login-decorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <platform-specific>
                             <html><html-template location="component://common/webcommon/forgotPassword.ftl"/></html>
@@ -497,6 +562,23 @@ under the License.
             <widgets>
                 <platform-specific>
                     <html><html-template location="component://common/webcommon/includes/geolocation.ftl"/></html>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="PortalPageScreen">
+        <section>
+            <actions>
+                <entity-one entity-name="PortalPage" value-field="portalPage"/>
+                <get-related value-field="portalPage" relation-name="PortalPageColumn" list="portalPageColumns"/>
+                <entity-and entity-name="PortalPagePortletView" list="portalPagePortlets">
+                    <field-map field-name="portalPageId" from-field="portalPage.portalPageId"/>
+                </entity-and>            
+            </actions>
+            <widgets>
+                <platform-specific>
+                    <html><html-template location="component://common/webcommon/portal/showPortalPage.ftl"/></html>
                 </platform-specific>
             </widgets>
         </section>

@@ -179,6 +179,7 @@ under the License.
         <attribute name="phaseId" type="String" mode="OUT" optional="true"/>
         <attribute name="phaseName" type="String" mode="OUT" optional="true"/>
         <attribute name="taskName" type="String" mode="OUT" optional="true"/>
+        <attribute name="taskWbsId" type="String" mode="OUT" optional="true"/>
     </service>
 
     <service name="getProjectPhaseList" engine="simple"
@@ -226,7 +227,20 @@ under the License.
         <attribute name="taskParties" type="List" mode="OUT" optional="true"/>
     </service>
 
-    <service name="updateTaskAssigment" default-entity-name="WorkEffortPartyAssignment" engine="simple"
+    <service name="updateTaskAndRelatedInfo" default-entity-name="WorkEffort" engine="simple"
+            location="component://projectmgr/script/org/ofbiz/project/ProjectServices.xml" invoke="updateTaskAndRelatedInfo">
+        <description>Update a task and related info</description>
+        <permission-service service-name="projectMgrPermission" main-action="VIEW"/>
+        <implements service="interfaceWorkEffort"/>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <attribute name="communicationEventId" type="String" mode="IN" optional="true"/>
+        <attribute name="reason" type="String" mode="IN" optional="true"/>
+        <!-- optional related data -->
+        <attribute name="skillTypeId" mode="IN" type="String" optional="true"/>
+        <attribute name="estimatedDuration" mode="IN" type="Double" optional="true"/>
+    </service>
+ 
+     <service name="updateTaskAssigment" default-entity-name="WorkEffortPartyAssignment" engine="simple"
         location="component://projectmgr/script/org/ofbiz/project/ProjectServices.xml" invoke="updateTaskAssigment">
         <description>Update a WorkEffortPartyAssignment Entity, including set enddate and create new</description>
         <permission-service service-name="projectMgrPermission" main-action="UPDATE"/>

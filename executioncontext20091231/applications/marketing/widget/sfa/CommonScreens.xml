@@ -38,9 +38,6 @@ under the License.
                 <set field="applicationMenuName" value="SfaAppBar" global="true"/>
                 <set field="applicationMenuLocation" value="component://marketing/widget/sfa/SfaMenus.xml" global="true"/>
                 <set field="applicationTitle" value="${uiLabelMap.SfaManagerApplication}" global="true"/>
-                <set field="leftbarScreenName" value="leftbar"/>
-                <set field="leftbarScreenLocation" value="component://marketing/widget/sfa/CommonScreens.xml"/>
-                <set field="MainColumnStyle" value="leftonly-larger"/>
                 <set field="parameters.parentPortalPageId" from-field="parameters.parentPortalPageId" default-value="SFA" global="true"/>
                 <script location="component://common/webcommon/WEB-INF/actions/includes/GetParentPortalPageId.groovy"/>
             </actions>
@@ -64,23 +61,7 @@ under the License.
                         <include-screen name="leftbar"/>
                     </decorator-section>                    
                     <decorator-section name="body">
-                        <section>
-                            <actions>
-                                <entity-one entity-name="PortalPage" value-field="portalPage"/>
-                                <entity-and entity-name="PortalPageColumn" list="portalPageColumns">
-                                    <field-map field-name="portalPageId" from-field="parameters.portalPageId"/>
-                                    <order-by field-name="columnSeqId"/>
-                                </entity-and>
-                                <entity-and entity-name="PortalPagePortletView" list="portalPagePortlets">
-                                    <field-map field-name="portalPageId" from-field="portalPage.portalPageId"/>
-                                    <order-by field-name="columnSeqId"/>
-                                    <order-by field-name="sequenceNum"/>
-                                </entity-and>
-                            </actions>
-                            <widgets>
-                                <platform-specific><html><html-template location="component://common/webcommon/portal/showPortalPage.ftl"/></html></platform-specific>
-                            </widgets>
-                        </section>
+                        <include-screen name="PortalPageScreen" location="component://common/widget/CommonScreens.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -182,7 +163,7 @@ under the License.
                         <section>
                             <!-- do check for PARTYMGR, _VIEW permission -->
                             <condition>
-                                <if-has-permission permission="PARTYMGR" action="_VIEW"/>
+                                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
                             </condition>
                             <widgets>
                                 <section>

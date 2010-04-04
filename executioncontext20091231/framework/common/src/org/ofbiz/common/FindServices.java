@@ -66,11 +66,10 @@ public class FindServices {
 
     public static final String module = FindServices.class.getName();
 
-    public static Map<String, EntityOperator> entityOperators;
+    public static Map<String, EntityComparisonOperator<?, ?>> entityOperators;
 
     static {
         entityOperators = FastMap.newInstance();
-        entityOperators.put("and", EntityOperator.AND);
         entityOperators.put("between", EntityOperator.BETWEEN);
         entityOperators.put("equals", EntityOperator.EQUALS);
         entityOperators.put("greaterThan", EntityOperator.GREATER_THAN);
@@ -79,9 +78,9 @@ public class FindServices {
         entityOperators.put("lessThan", EntityOperator.LESS_THAN);
         entityOperators.put("lessThanEqualTo", EntityOperator.LESS_THAN_EQUAL_TO);
         entityOperators.put("like", EntityOperator.LIKE);
+        entityOperators.put("notLike", EntityOperator.NOT_LIKE);
         entityOperators.put("not", EntityOperator.NOT);
         entityOperators.put("notEqual", EntityOperator.NOT_EQUAL);
-        entityOperators.put("or", EntityOperator.OR);
     }
 
     public FindServices() {}
@@ -214,7 +213,7 @@ public class FindServices {
     public static List<EntityCondition> createCondition(ModelEntity modelEntity, Map<String, Map<String, Map<String, Object>>> normalizedFields, Map<String, Object> queryStringMap, Map<String, List<Object[]>> origValueMap, Delegator delegator, Map<String, ?> context) {
         Map<String, Map<String, Object>> subMap = null;
         Map<String, Object> subMap2 = null;
-        EntityOperator fieldOp = null;
+        EntityComparisonOperator<?, ?> fieldOp = null;
         Object fieldValue = null; // If it is a "value" field, it will be the value to be used in the query.
                                   // If it is an "op" field, it will be "equals", "greaterThan", etc.
         EntityExpr cond = null;
@@ -240,6 +239,8 @@ public class FindServices {
             if (opString != null) {
                 if (opString.equals("contains")) {
                     fieldOp = EntityOperator.LIKE;
+                } else if (opString.equals("not-contains")) {
+                    fieldOp = EntityOperator.NOT_LIKE;
                 } else if (opString.equals("empty")) {
                     fieldOp = EntityOperator.EQUALS;
                 } else {
@@ -253,10 +254,13 @@ public class FindServices {
             if (fieldValue == null) {
                 continue;
             }
-
+            
             if (opString != null) {
                 if (opString.equals("contains")) {
                     fieldOp = EntityOperator.LIKE;
+                    fieldValue = "%" + fieldValue + "%";
+                } else if ("not-contains".equals(opString) || "notContains".equals(opString)) {
+                    fieldOp = EntityOperator.NOT_LIKE;
                     fieldValue = "%" + fieldValue + "%";
                 } else if (opString.equals("empty")) {
                     fieldOp = EntityOperator.EQUALS;
@@ -264,6 +268,9 @@ public class FindServices {
                     ignoreCase = null;
                 } else if (opString.equals("like")) {
                     fieldOp = EntityOperator.LIKE;
+                    fieldValue = fieldValue + "%";
+                } else if ("not-like".equals(opString) || "notLike".equals(opString)) {
+                    fieldOp = EntityOperator.NOT_LIKE;
                     fieldValue = fieldValue + "%";
                 } else if (opString.equals("greaterThanFromDayStart")) {
                     fieldValue = dayStart((String) fieldValue, 0);
@@ -298,14 +305,14 @@ public class FindServices {
             }
 
             if (ignoreCase != null && ignoreCase.equals("Y") && "java.lang.String".equals(fieldObject.getClass().getName())) {
-                cond = EntityCondition.makeCondition(EntityFunction.UPPER_FIELD(fieldName), (EntityComparisonOperator) fieldOp, EntityFunction.UPPER(((String)fieldValue).toUpperCase()));
+                cond = EntityCondition.makeCondition(EntityFunction.UPPER_FIELD(fieldName), fieldOp, EntityFunction.UPPER(((String)fieldValue).toUpperCase()));
             } else {
                 if (fieldObject.equals(GenericEntity.NULL_FIELD.toString())) {
                     fieldObject = null;
                 }
-                cond = EntityCondition.makeCondition(fieldName, (EntityComparisonOperator) fieldOp, fieldObject);
+                cond = EntityCondition.makeCondition(fieldName, fieldOp, fieldObject);
             }
-            
+
             if (EntityOperator.NOT_EQUAL.equals(fieldOp) && fieldObject != null) {
                 tmpOrList = FastList.newInstance();
                 tmpOrList.add(cond);
@@ -328,6 +335,8 @@ public class FindServices {
             if (opString != null) {
                 if (opString.equals("contains")) {
                     fieldOp = EntityOperator.LIKE;
+                } else if ("not-contains".equals(opString) || "notContains".equals(opString)) {
+                    fieldOp = EntityOperator.LIKE;
                 } else if (opString.equals("empty")) {
                     fieldOp = EntityOperator.EQUALS;
                 } else {
@@ -341,9 +350,9 @@ public class FindServices {
             if (fieldValue == null) {
                 continue;
             }
-            if (opString.equals("like")) {
+            if ("like".equals(opString) || "not-like".equals(opString) || "notLike".equals(opString)) {
                 fieldValue = fieldValue + "%";
-            } else if (opString.equals("contains")) {
+            } else if ("contains".equals(opString) || "not-contains".equals(opString) || "notContains".equals(opString)) {
                 fieldValue = fieldValue + "%" + fieldValue + "%";
             } else if (opString.equals("empty")) {
                 fieldOp = EntityOperator.EQUALS;
@@ -357,7 +366,7 @@ public class FindServices {
             }
             // String rhs = fieldValue.toString();
             fieldObject = modelEntity.convertFieldValue(modelField, fieldValue, delegator, context);
-            cond = EntityCondition.makeCondition(fieldName, (EntityComparisonOperator) fieldOp, fieldObject);
+            cond = EntityCondition.makeCondition(fieldName, fieldOp, fieldObject);
             tmpList.add(cond);
 
             // add to queryStringMap
@@ -386,10 +395,10 @@ public class FindServices {
     public static Map<String, Object> performFindList(DispatchContext dctx, Map<String, Object> context) {
         Integer viewSize = (Integer) context.get("viewSize");
         if (viewSize == null) viewSize = Integer.valueOf(20);       // default
-		context.put("viewSize", viewSize);
+        context.put("viewSize", viewSize);
         Integer viewIndex = (Integer) context.get("viewIndex");
         if (viewIndex == null)  viewIndex = Integer.valueOf(0);  // default
-		context.put("viewIndex", viewIndex);
+        context.put("viewIndex", viewIndex);
 
         Map<String, Object> result = performFind(dctx,context);
 
@@ -451,9 +460,9 @@ public class FindServices {
 
         Map<String, Object> prepareResult = null;
         try {
-            prepareResult = dispatcher.runSync("prepareFind", UtilMisc.toMap("entityName", entityName, "orderBy", orderBy, 
+            prepareResult = dispatcher.runSync("prepareFind", UtilMisc.toMap("entityName", entityName, "orderBy", orderBy,
                                                "inputFields", inputFields, "filterByDate", filterByDate,
-                                               "filterByDateValue", filterByDateValue, "userLogin", userLogin, 
+                                               "filterByDateValue", filterByDateValue, "userLogin", userLogin,
                                                "locale", context.get("locale"), "timeZone", context.get("timeZone")));
         } catch (GenericServiceException gse) {
             return ServiceUtil.returnError("Error preparing conditions: " + gse.getMessage());
@@ -463,9 +472,9 @@ public class FindServices {
 
         Map<String, Object> executeResult = null;
         try {
-            executeResult = dispatcher.runSync("executeFind", UtilMisc.toMap("entityName", entityName, "orderByList", orderByList, 
-                                                                             "fieldList", fieldList, "entityConditionList", exprList, 
-                                                                             "noConditionFind", noConditionFind, "distinct", distinct, 
+            executeResult = dispatcher.runSync("executeFind", UtilMisc.toMap("entityName", entityName, "orderByList", orderByList,
+                                                                             "fieldList", fieldList, "entityConditionList", exprList,
+                                                                             "noConditionFind", noConditionFind, "distinct", distinct,
                                                                              "locale", context.get("locale"), "timeZone", context.get("timeZone"),
                                                                              "maxRows", maxRows));
         } catch (GenericServiceException gse) {

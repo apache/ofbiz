@@ -97,7 +97,7 @@ under the License.
     <!-- ================================================================== -->
 
     <target name="docs" depends="prepare-docs">
-        <default-javadoc>
+        <default-javadoc sourcepathref="src-path">
             <fileset dir="${src.dir}">
                 <patternset refid="src.inc.set"/>
                 <patternset refid="src.exc.set"/>
@@ -105,20 +105,28 @@ under the License.
         </default-javadoc>
     </target>
 
+    <macrodef name="run-junit">
+        <attribute name="build.jar" default="${build.dir}/lib/${name}.jar"/>
+        <sequential>
+            <mkdir dir="${build.dir}/test-results"/>
+            <junit fork="on" haltonfailure="on" forkmode="once" showoutput="on" printsummary="off">
+                <classpath>
+                    <path refid="junit.class.path"/>
+                    <path refid="test.class.path"/>
+                    <pathelement location="@{build.jar}"/>
+                </classpath>
+                <sysproperty key="net.sourceforge.cobertura.datafile" file="${build.dir}/test-results/cobertura.dat" />
+                <sysproperty key="ofbiz.home" value="${ofbiz.home.dir}"/>
+                <formatter usefile="false" type="plain"/>
+                <batchtest>
+                    <filelist refid="test.classes"/>
+                </batchtest>
+            </junit>
+        </sequential>
+    </macrodef>
+
     <target name="tests" depends="jar">
-        <mkdir dir="${build.dir}/test-results"/>
-        <junit>
-            <classpath>
-                <path refid="junit.class.path"/>
-                <path refid="test.class.path"/>
-                <pathelement location="${build.dir}/lib/${name}.jar"/>
-            </classpath>
-            <sysproperty key="ofbiz.home" value="${ofbiz.home.dir}"/>
-            <formatter usefile="false" type="plain"/>
-            <batchtest>
-                <filelist refid="test.classes"/>
-            </batchtest>
-        </junit>
+        <run-junit/>
     </target>
 
     <target name="tests-cobertura" depends="jar">
@@ -136,25 +144,13 @@ under the License.
                 </fileset>
             </classpath>
         </taskdef>
+        <delete file="${build.dir}/test-results/cobertura.dat"/>
         <cobertura-instrument datafile="${build.dir}/test-results/cobertura.dat" todir="${build.dir}/cobertura-lib">
             <fileset dir="${build.dir}/lib">
                 <include name="*.jar"/>
             </fileset>
         </cobertura-instrument>
-        <mkdir dir="${build.dir}/test-results"/>
-        <junit fork="yes" haltonerror="yes">
-            <classpath>
-                <path refid="junit.class.path"/>
-                <path refid="test.class.path"/>
-                <pathelement location="${build.dir}/cobertura-lib/${name}.jar"/>
-            </classpath>
-            <sysproperty key="net.sourceforge.cobertura.datafile" file="${build.dir}/test-results/cobertura.dat" />
-            <sysproperty key="ofbiz.home" value="${ofbiz.home.dir}"/>
-            <formatter usefile="false" type="plain"/>
-            <batchtest>
-                <filelist refid="test.classes"/>
-            </batchtest>
-        </junit>
+        <run-junit build.jar="${build.dir}/cobertura-lib/${name}.jar"/>
         <delete dir="${build.dir}/test-results/cobertura-report"/>
         <mkdir dir="${build.dir}/test-results/cobertura-report"/>
         <cobertura-report datafile="${build.dir}/test-results/cobertura.dat" destdir="${build.dir}/test-results/cobertura-report">
