@@ -26,11 +26,11 @@ import java.util.Map;
 
 import javolution.util.FastMap;
 
-import org.ofbiz.api.authorization.AccessController;
-import org.ofbiz.api.authorization.AuthorizationManager;
-import org.ofbiz.api.authorization.AuthorizationManagerException;
-import org.ofbiz.api.authorization.BasicPermissions;
-import org.ofbiz.api.context.ArtifactPath;
+import org.ofbiz.base.authorization.AccessController;
+import org.ofbiz.base.authorization.AuthorizationManager;
+import org.ofbiz.base.authorization.AuthorizationManagerException;
+import org.ofbiz.base.authorization.BasicPermissions;
+import org.ofbiz.base.context.ArtifactPath;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.cache.UtilCache;

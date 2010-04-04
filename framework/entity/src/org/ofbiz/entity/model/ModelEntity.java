@@ -33,7 +33,7 @@ import java.util.TimeZone;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.ofbiz.api.context.ExecutionArtifact;
+import org.ofbiz.base.context.ExecutionArtifact;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.ObjectType;

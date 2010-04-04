@@ -31,7 +31,7 @@ import java.util.Enumeration;
 
 import org.apache.bsf.BSFManager;
 
-import org.ofbiz.api.authorization.AuthorizationManager;
+import org.ofbiz.base.authorization.AuthorizationManager;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;

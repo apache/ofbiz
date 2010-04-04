@@ -39,7 +39,7 @@ import javax.transaction.Transaction;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import static org.ofbiz.api.authorization.BasicPermissions.Access;
+import static org.ofbiz.base.authorization.BasicPermissions.Access;
 import org.ofbiz.base.component.ComponentConfig;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;

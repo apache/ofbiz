@@ -18,9 +18,9 @@
  */
 package org.ofbiz.entity;
 
-import static org.ofbiz.api.authorization.BasicPermissions.Create;
-import static org.ofbiz.api.authorization.BasicPermissions.Delete;
-import static org.ofbiz.api.authorization.BasicPermissions.Update;
+import static org.ofbiz.base.authorization.BasicPermissions.Create;
+import static org.ofbiz.base.authorization.BasicPermissions.Delete;
+import static org.ofbiz.base.authorization.BasicPermissions.Update;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -41,7 +41,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.ofbiz.api.authorization.AccessController;
+import org.ofbiz.base.authorization.AccessController;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralRuntimeException;
 import org.ofbiz.base.util.UtilDateTime;

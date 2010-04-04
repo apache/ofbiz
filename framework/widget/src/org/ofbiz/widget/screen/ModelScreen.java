@@ -18,7 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.widget.screen;
 
-import static org.ofbiz.api.authorization.BasicPermissions.View;
+import static org.ofbiz.base.authorization.BasicPermissions.View;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -28,8 +28,8 @@ import java.util.Set;
 
 import javolution.util.FastSet;
 
-import org.ofbiz.api.authorization.AccessController;
-import org.ofbiz.api.context.ExecutionArtifact;
+import org.ofbiz.base.authorization.AccessController;
+import org.ofbiz.base.context.ExecutionArtifact;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilGenerics;

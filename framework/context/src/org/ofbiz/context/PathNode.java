@@ -20,7 +20,7 @@ package org.ofbiz.context;
 
 import java.util.Map;
 
-import org.ofbiz.api.context.ArtifactPath;
+import org.ofbiz.base.context.ArtifactPath;
 
 /** A node in a permissions tree. */
 public abstract class PathNode {

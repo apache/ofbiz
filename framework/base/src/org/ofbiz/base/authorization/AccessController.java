@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.api.authorization;
+package org.ofbiz.base.authorization;
 
 import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.ofbiz.api.context.ArtifactPath;
+import org.ofbiz.base.context.ArtifactPath;
 
 /** AccessController interface. This interface is intended to
  * separate the permissions-checking logic from the artifacts

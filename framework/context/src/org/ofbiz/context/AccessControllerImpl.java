@@ -26,8 +26,8 @@ import java.util.Map;
 
 import javolution.util.FastMap;
 
-import org.ofbiz.api.authorization.AccessController;
-import org.ofbiz.api.context.ArtifactPath;
+import org.ofbiz.base.authorization.AccessController;
+import org.ofbiz.base.context.ArtifactPath;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilProperties;

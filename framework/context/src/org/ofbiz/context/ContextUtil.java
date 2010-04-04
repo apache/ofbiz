@@ -18,16 +18,16 @@
  *******************************************************************************/
 package org.ofbiz.context;
 
-import static org.ofbiz.api.authorization.BasicPermissions.Access;
+import static org.ofbiz.base.authorization.BasicPermissions.Access;
 
 import java.security.AccessControlException;
 import java.util.List;
 
 import javolution.util.FastList;
 
-import org.ofbiz.api.authorization.AccessController;
-import org.ofbiz.api.context.ArtifactPath;
-import org.ofbiz.api.context.ThreadContext;
+import org.ofbiz.base.authorization.AccessController;
+import org.ofbiz.base.context.ArtifactPath;
+import org.ofbiz.base.context.ThreadContext;
 import org.ofbiz.base.component.ComponentConfig;
 import org.ofbiz.base.component.ComponentConfig.WebappInfo;
 

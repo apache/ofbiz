@@ -90,7 +90,7 @@ the interface and add their methods. It's not pretty, but it works.
 
 This is where you can find the interfaces:
 
-org.ofbiz.api.context.ExecutionContext
+org.ofbiz.base.context.ExecutionContext
   org.ofbiz.entity.ExecutionContext
     org.ofbiz.service.ExecutionContext
 

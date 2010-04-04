@@ -16,27 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.api.authorization;
+package org.ofbiz.base.context;
 
-
-/**
- * AuthorizationManagerException class.
+/** ExecutionArtifact interface. Artifacts in the program's execution
+ * path (services, screen widgets, form widgets, entities) should implement
+ * this interface.
  */
-@SuppressWarnings("serial")
-public class AuthorizationManagerException extends Exception {
-    public AuthorizationManagerException() {
-        super();
-    }
+public interface ExecutionArtifact {
 
-    public AuthorizationManagerException(String message) {
-        super(message);
-    }
+    /**
+     * Returns the location of this artifact.
+     *
+     * @return Location of this artifact
+     */
+    String getLocation();
 
-    public AuthorizationManagerException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public AuthorizationManagerException(Throwable cause) {
-        super(cause);
-    }
+    /**
+     * Returns the name of this artifact.
+     *
+     * @return Name of this artifact
+     */
+    String getName();
 }

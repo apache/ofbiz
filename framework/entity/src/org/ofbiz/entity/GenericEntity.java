@@ -38,7 +38,7 @@ import javolution.lang.Reusable;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.ofbiz.api.context.ExecutionArtifact;
+import org.ofbiz.base.context.ExecutionArtifact;
 import org.ofbiz.base.crypto.HashCrypt;
 import org.ofbiz.base.util.Base64;
 import org.ofbiz.base.util.Debug;

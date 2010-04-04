@@ -18,7 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.context;
 
-import org.ofbiz.api.context.ArtifactPath;
+import org.ofbiz.base.context.ArtifactPath;
 import org.ofbiz.context.PathNode.BranchNode;
 
 public class PermissionsGatherer extends TreeWalker {

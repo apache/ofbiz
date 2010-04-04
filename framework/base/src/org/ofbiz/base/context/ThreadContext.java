@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.api.context;
+package org.ofbiz.base.context;
 
 import java.util.Currency;
 import java.util.List;
@@ -24,8 +24,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.ofbiz.api.authorization.AccessController;
-import org.ofbiz.api.authorization.AuthorizationManager;
+import org.ofbiz.base.authorization.AccessController;
+import org.ofbiz.base.authorization.AuthorizationManager;
 
 /** A convenience class for accessing the current thread's <code>ExecutionContext</code>.
  * @see {@link org.ofbiz.service.ExecutionContext}

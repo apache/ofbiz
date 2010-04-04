@@ -16,26 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.api.context;
+package org.ofbiz.base.context;
 
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilProperties;
+/** A basic implementation of the <code>ExecutionArtifact</code> interface. */
+public class GenericExecutionArtifact implements ExecutionArtifact {
 
-/** An <code>ExecutionContext</code> factory.
- */
-public class ExecutionContextFactory {
+    protected final String location;
+    protected final String name;
 
-    public static final String module = ExecutionContextFactory.class.getName();
+    public GenericExecutionArtifact(String location, String name) {
+        this.location = location;
+        this.name = name;
+    }
 
-    public static ExecutionContext getInstance() {
-        ExecutionContext result = null;
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        String className = UtilProperties.getPropertyValue("api.properties", "executionContext.class");
-        try {
-            result = (ExecutionContext) loader.loadClass(className).newInstance();
-        } catch (Exception e) {
-            Debug.logError(e, module);
-        }
-        return result;
+    public String getLocation() {
+        return this.location;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public String toString() {
+        return "GenericExecutionArtifact: location = " + this.location + ", name = " + this.name;
     }
 }

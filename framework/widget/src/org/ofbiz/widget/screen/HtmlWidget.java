@@ -25,7 +25,7 @@ import java.util.Map;
 
 import javolution.util.FastMap;
 
-import org.ofbiz.api.context.ThreadContext;
+import org.ofbiz.base.context.ThreadContext;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.StringUtil;

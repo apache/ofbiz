@@ -16,29 +16,53 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.api.context;
+package org.ofbiz.base.authorization;
 
-/** A basic implementation of the <code>ExecutionArtifact</code> interface. */
-public class GenericExecutionArtifact implements ExecutionArtifact {
+import java.security.Permission;
 
-    protected final String location;
-    protected final String name;
+/**
+ * Admin permission class. Extends BasicPermission.
+ */
+@SuppressWarnings("serial")
+public class AdminPermission extends BasicPermission {
 
-    public GenericExecutionArtifact(String location, String name) {
-        this.location = location;
-        this.name = name;
+    public AdminPermission() {
+        super("admin=true");
     }
 
-    public String getLocation() {
-        return this.location;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        try {
+            AdminPermission that = (AdminPermission) obj;
+            return this.permissionString.equals(that.permissionString);
+        } catch (ClassCastException e) {}
+        return false;
     }
 
-    public String getName() {
-        return this.name;
+    @Override
+    public String getActions() {
+        return null;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.permissionString.hashCode();
+    }
+
+    /** Returns <code>true</code> - the admin permission has
+     * no restrictions.
+     *
+     */
+    @Override
+    public boolean implies(Permission permission) {
+        return true;
     }
 
     @Override
     public String toString() {
-        return "GenericExecutionArtifact: location = " + this.location + ", name = " + this.name;
+        return this.permissionString;
     }
 }

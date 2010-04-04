@@ -24,10 +24,10 @@ import java.util.TimeZone;
 
 import javolution.util.FastList;
 
-import org.ofbiz.api.authorization.AccessController;
-import org.ofbiz.api.authorization.AuthorizationManager;
-import org.ofbiz.api.authorization.AuthorizationManagerException;
-import org.ofbiz.api.authorization.NullAuthorizationManager;
+import org.ofbiz.base.authorization.AccessController;
+import org.ofbiz.base.authorization.AuthorizationManager;
+import org.ofbiz.base.authorization.AuthorizationManagerException;
+import org.ofbiz.base.authorization.NullAuthorizationManager;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.entity.DelegatorFactory;
@@ -39,7 +39,7 @@ import org.ofbiz.service.GenericDispatcher;
 import org.ofbiz.service.LocalDispatcher;
 
 /** An implementation of the <code>ExecutionContext</code> interface. */
-public class ExecutionContextImpl extends org.ofbiz.api.context.AbstractExecutionContext implements ExecutionContext {
+public class ExecutionContextImpl extends org.ofbiz.base.context.AbstractExecutionContext implements ExecutionContext {
 
     public static final String module = ExecutionContextImpl.class.getName();
     protected static final AccessController accessDeniedController = new AccessDeniedController();

@@ -18,7 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.widget.form;
 
-import static org.ofbiz.api.authorization.BasicPermissions.View;
+import static org.ofbiz.base.authorization.BasicPermissions.View;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 import javolution.util.FastSet;
 
-import org.ofbiz.api.context.ExecutionArtifact;
+import org.ofbiz.base.context.ExecutionArtifact;
 import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;

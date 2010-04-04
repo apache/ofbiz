@@ -18,14 +18,14 @@
  *******************************************************************************/
 package org.ofbiz.context;
 
-import static org.ofbiz.api.authorization.BasicPermissions.*;
+import static org.ofbiz.base.authorization.BasicPermissions.*;
 
 import java.security.Permission;
 import java.util.Set;
 
 import javolution.util.FastSet;
 
-import org.ofbiz.api.authorization.PermissionsUnion;
+import org.ofbiz.base.authorization.PermissionsUnion;
 
 /** OFBizPermission class.
  * <p>This class enforces the security-aware artifact permission
