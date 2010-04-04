@@ -182,7 +182,7 @@ public class ContentWorker implements org.ofbiz.widget.ContentWorkerInterface {
     public static void renderContentAsText(LocalDispatcher dispatcher, Delegator delegator, GenericValue content, Appendable out,
             Map<String,Object>templateContext, Locale locale, String mimeTypeId, boolean cache) throws GeneralException, IOException {
         // if the content has a service attached run the service
-        
+
         String serviceName = content.getString("serviceName");
         if (dispatcher != null && UtilValidate.isNotEmpty(serviceName)) {
             DispatchContext dctx = dispatcher.getDispatchContext();
@@ -219,9 +219,19 @@ public class ContentWorker implements org.ofbiz.widget.ContentWorkerInterface {
 
         // create the content facade
         ContentMapFacade facade = new ContentMapFacade(dispatcher, content, templateContext, locale, mimeTypeId, cache);
+        // If this content is decorating something then tell the facade about it in order to maintain the chain of decoration
+        ContentMapFacade decoratedContent = (ContentMapFacade) templateContext.get("decoratedContent");
+        if (decoratedContent != null) {
+            facade.setDecoratedContent(decoratedContent);
+        }
 
         // look for a content decorator
         String contentDecoratorId = content.getString("decoratorContentId");
+        // Check that the decoratorContent is not the same as the current content
+        if (contentId.equals(contentDecoratorId)) {
+            Debug.logError("[" + contentId + "] decoratorContentId is the same as contentId, ignoring.", module);
+            contentDecoratorId = null;
+        }
         // check to see if the decorator has already been run
         boolean isDecorated = Boolean.TRUE.equals(templateContext.get("_IS_DECORATED_"));
         if (!isDecorated && UtilValidate.isNotEmpty(contentDecoratorId)) {
@@ -239,6 +249,7 @@ public class ContentWorker implements org.ofbiz.widget.ContentWorkerInterface {
 
             // render the decorator
             ContentMapFacade decFacade = new ContentMapFacade(dispatcher, decorator, templateContext, locale, mimeTypeId, cache);
+            decFacade.setDecoratedContent(facade);
             facade.setIsDecorated(true);
             templateContext.put("decoratedContent", facade); // decorated content
             templateContext.put("thisContent", decFacade); // decorator content

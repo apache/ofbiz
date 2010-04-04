@@ -23,8 +23,10 @@ import java.util.Locale;
 import java.util.Map;
 import javax.el.PropertyNotFoundException;
 
+import org.ofbiz.base.lang.SourceMonitored;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilObject;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
@@ -35,6 +37,7 @@ import org.ofbiz.base.util.string.UelUtil;
  * accessing sub-map values and the "[]" (square bracket) syntax for accessing
  * list elements. See individual Map operations for more information.
  */
+@SourceMonitored
 @SuppressWarnings("serial")
 public class FlexibleMapAccessor<T> implements Serializable {
     public static final String module = FlexibleMapAccessor.class.getName();
@@ -84,11 +87,8 @@ public class FlexibleMapAccessor<T> implements Serializable {
         FlexibleMapAccessor fma = fmaCache.get(original);
         if (fma == null) {
             synchronized (fmaCache) {
+                fmaCache.put(original, new FlexibleMapAccessor(original));
                 fma = fmaCache.get(original);
-                if (fma == null) {
-                    fma = new FlexibleMapAccessor(original);
-                    fmaCache.put(original, fma);
-                }
             }
         }
         return fma;
@@ -103,7 +103,7 @@ public class FlexibleMapAccessor<T> implements Serializable {
     }
 
     public boolean isEmpty() {
-         return this.original == null || this.original.length() == 0;
+         return this.original == null;
     }
 
     /** Given the name based information in this accessor, get the value from the passed in Map.
@@ -213,10 +213,7 @@ public class FlexibleMapAccessor<T> implements Serializable {
         }
         try {
             FlexibleMapAccessor that = (FlexibleMapAccessor) obj;
-            if (this.original == null && that.original == null) {
-                return true;
-            }
-            return this.original.equals(that.original);
+            return UtilObject.equalsHelper(this.original, that.original);
         } catch (Exception e) {}
         return false;
     }

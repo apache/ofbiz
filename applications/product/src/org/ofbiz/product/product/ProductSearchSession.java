@@ -828,6 +828,12 @@ public class ProductSearchSession {
             } else if (sortOrder.startsWith("SPP:")) {
                 String priceTypeId = sortOrder.substring("SPP:".length());
                 searchSetSortOrder(new ProductSearch.SortProductPrice(priceTypeId, ascending), session);
+            } else if (sortOrder.startsWith("SortProductFeature:")) {
+                String featureId = sortOrder.substring("SortProductFeature:".length());
+                searchSetSortOrder(new ProductSearch.SortProductFeature(featureId, ascending), session);
+            } else if (sortOrder.startsWith("SPFT:")) {
+                String priceTypeId = sortOrder.substring("SPFT:".length());
+                searchSetSortOrder(new ProductSearch.SortProductPrice(priceTypeId, ascending), session);
             }
         }
 
@@ -888,7 +894,7 @@ public class ProductSearchSession {
         Map<String, Object> requestParams = UtilHttp.getParameterMap(request);
         String noConditionFind = (String) requestParams.get("noConditionFind");
         if (UtilValidate.isEmpty(noConditionFind)) {
-            noConditionFind = UtilProperties.getPropertyValue("widget", "widget.defaultNoConditionFind"); 
+            noConditionFind = UtilProperties.getPropertyValue("widget", "widget.defaultNoConditionFind");
         }
         // if noConditionFind to Y then find without conditions otherwise search according to constraints.
         if ("Y".equals(noConditionFind) || UtilValidate.isNotEmpty(productSearchConstraintList)) {
@@ -1151,6 +1157,10 @@ public class ProductSearchSession {
                 ProductSearch.SortProductPrice spp = (ProductSearch.SortProductPrice) resultSortOrder;
                 searchParamString.append("&amp;S_O=SPP:");
                 searchParamString.append(spp.productPriceTypeId);
+            } else if (resultSortOrder instanceof ProductSearch.SortProductFeature) {
+                ProductSearch.SortProductFeature spf = (ProductSearch.SortProductFeature) resultSortOrder;
+                searchParamString.append("&amp;S_O=SPFT:");
+                searchParamString.append(spf.productFeatureTypeId);
             }
             searchParamString.append("&amp;S_A=");
             searchParamString.append(resultSortOrder.isAscending() ? "Y" : "N");
@@ -1158,7 +1168,7 @@ public class ProductSearchSession {
 
         return searchParamString.toString();
     }
-    
+
     /**
      * This method returns a list of productId counts grouped by productFeatureId's of input productFeatureTypeId,
      * the constraint being applied on current ProductSearchConstraint list in session.
@@ -1169,7 +1179,7 @@ public class ProductSearchSession {
      */
     public static List<Map<String, String>> listCountByFeatureForType(String productFeatureTypeId, HttpSession session, Delegator delegator) {
         String visitId = VisitHandler.getVisitId(session);
-        
+
         ProductSearchContext productSearchContext = new ProductSearchContext(delegator, visitId);
         List<ProductSearchConstraint> productSearchConstraintList = ProductSearchOptions.getConstraintList(session);
         if (UtilValidate.isNotEmpty(productSearchConstraintList)) {
@@ -1177,11 +1187,11 @@ public class ProductSearchSession {
         }
         productSearchContext.finishKeywordConstraints();
         productSearchContext.finishCategoryAndFeatureConstraints();
-        
+
         DynamicViewEntity dynamicViewEntity = productSearchContext.dynamicViewEntity;
         List<EntityCondition> entityConditionList = productSearchContext.entityConditionList;
         List<String> fieldsToSelect = FastList.newInstance();
-        
+
         dynamicViewEntity.addMemberEntity("PFAC", "ProductFeatureAppl");
         dynamicViewEntity.addAlias("PFAC", "pfacProductFeatureId", "productFeatureId", null, null, Boolean.TRUE, null);
         dynamicViewEntity.addAlias("PFAC", "pfacFromDate", "fromDate", null, null, null, null);
@@ -1192,7 +1202,7 @@ public class ProductSearchSession {
         fieldsToSelect.add("featureCount");
         entityConditionList.add(EntityCondition.makeCondition(EntityCondition.makeCondition("pfacThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("pfacThruDate", EntityOperator.GREATER_THAN, UtilDateTime.nowTimestamp())));
         entityConditionList.add(EntityCondition.makeCondition("pfacFromDate", EntityOperator.LESS_THAN, UtilDateTime.nowTimestamp()));
-        
+
         dynamicViewEntity.addMemberEntity("PFC", "ProductFeature");
         dynamicViewEntity.addAlias("PFC", "pfcProductFeatureTypeId", "productFeatureTypeId", null, null, Boolean.TRUE, null);
         dynamicViewEntity.addAlias("PFC", "pfcDescription", "description", null, null, Boolean.TRUE, null);
@@ -1200,12 +1210,12 @@ public class ProductSearchSession {
         fieldsToSelect.add("pfcDescription");
         fieldsToSelect.add("pfcProductFeatureTypeId");
         entityConditionList.add(EntityCondition.makeCondition("pfcProductFeatureTypeId", EntityOperator.EQUALS, productFeatureTypeId));
-        
+
         EntityCondition whereCondition = EntityCondition.makeCondition(entityConditionList, EntityOperator.AND);
-        
+
         EntityFindOptions efo = new EntityFindOptions();
         efo.setResultSetType(EntityFindOptions.TYPE_SCROLL_INSENSITIVE);
-        
+
         EntityListIterator eli = null;
         try {
             eli = delegator.findListIteratorByCondition(dynamicViewEntity, whereCondition, null, fieldsToSelect, productSearchContext.orderByList, efo);
@@ -1213,13 +1223,13 @@ public class ProductSearchSession {
             Debug.logError(e, "Error in product search", module);
             return null;
         }
-        
+
         List<Map<String, String>> featureCountList = FastList.newInstance();
         GenericValue searchResult = null;
         while ((searchResult = (GenericValue) eli.next()) != null) {
             featureCountList.add(UtilMisc.toMap("productFeatureId", (String) searchResult.get("pfacProductFeatureId"), "productFeatureTypeId", (String) searchResult.get("pfcProductFeatureTypeId"), "description", (String) searchResult.get("pfcDescription"), "featureCount", Long.toString((Long) searchResult.get("featureCount"))));
         }
-        
+
         if (eli != null) {
             try {
                 eli.close();
@@ -1229,7 +1239,7 @@ public class ProductSearchSession {
         }
         return featureCountList;
     }
-    
+
     public static int getCategoryCostraintIndex(HttpSession session) {
         int index = 0;
         List<ProductSearchConstraint> productSearchConstraintList = ProductSearchOptions.getConstraintList(session);
@@ -1240,9 +1250,9 @@ public class ProductSearchSession {
         }
         return index;
     }
-    
+
     /**
-     * This method returns count of products within a given price range, the constraint being 
+     * This method returns count of products within a given price range, the constraint being
      * applied on current ProductSearchConstraint list in session.
      * @param priceLow The low price.
      * @param priceHigh The high price.
@@ -1252,7 +1262,7 @@ public class ProductSearchSession {
      */
     public static long getCountForListPriceRange(BigDecimal priceLow, BigDecimal priceHigh, HttpSession session, Delegator delegator) {
         String visitId = VisitHandler.getVisitId(session);
-        
+
         ProductSearchContext productSearchContext = new ProductSearchContext(delegator, visitId);
         List<ProductSearchConstraint> productSearchConstraintList = ProductSearchOptions.getConstraintList(session);
         if (UtilValidate.isNotEmpty(productSearchConstraintList)) {
@@ -1260,11 +1270,11 @@ public class ProductSearchSession {
         }
         productSearchContext.finishKeywordConstraints();
         productSearchContext.finishCategoryAndFeatureConstraints();
-        
+
         DynamicViewEntity dynamicViewEntity = productSearchContext.dynamicViewEntity;
         List<EntityCondition> entityConditionList = productSearchContext.entityConditionList;
         List<String> fieldsToSelect = FastList.newInstance();
-        
+
         dynamicViewEntity.addMemberEntity("PPC", "ProductPrice");
         dynamicViewEntity.addAlias("PPC", "ppcProductPriceTypeId", "productPriceTypeId", null, null, null, null);
         dynamicViewEntity.addAlias("PPC", "ppcFromDate", "fromDate", null, null, null, null);
@@ -1278,12 +1288,12 @@ public class ProductSearchSession {
         entityConditionList.add(EntityCondition.makeCondition("ppcPrice", EntityOperator.GREATER_THAN_EQUAL_TO, priceLow));
         entityConditionList.add(EntityCondition.makeCondition("ppcPrice", EntityOperator.LESS_THAN_EQUAL_TO, priceHigh));
         entityConditionList.add(EntityCondition.makeCondition("ppcProductPriceTypeId", EntityOperator.EQUALS, "LIST_PRICE"));
-        
+
         EntityCondition whereCondition = EntityCondition.makeCondition(entityConditionList, EntityOperator.AND);
-        
+
         EntityFindOptions efo = new EntityFindOptions();
         efo.setResultSetType(EntityFindOptions.TYPE_SCROLL_INSENSITIVE);
-        
+
         EntityListIterator eli = null;
         try {
             eli = delegator.findListIteratorByCondition(dynamicViewEntity, whereCondition, null, fieldsToSelect, productSearchContext.orderByList, efo);
@@ -1291,13 +1301,13 @@ public class ProductSearchSession {
             Debug.logError(e, "Error in product search", module);
             return 0;
         }
-        
+
         GenericValue searchResult = null;
         Long priceRangeCount = Long.valueOf(0);
         while ((searchResult = (GenericValue) eli.next()) != null) {
             priceRangeCount = searchResult.getLong("priceRangeCount");
         }
-        
+
         if (eli != null) {
             try {
                 eli.close();
@@ -1307,9 +1317,9 @@ public class ProductSearchSession {
         }
         return priceRangeCount;
     }
-    
+
     /**
-     * This method returns count of products in a given category (including all sub categories), the constraint being 
+     * This method returns count of products in a given category (including all sub categories), the constraint being
      * applied on current ProductSearchConstraint list in session.
      * @param productCategoryId productCategoryId for which the count should be returned.
      * @param session Current session.
@@ -1318,7 +1328,7 @@ public class ProductSearchSession {
      */
     public static long getCountForProductCategory(String productCategoryId, HttpSession session, Delegator delegator) {
         String visitId = VisitHandler.getVisitId(session);
-        
+
         ProductSearchContext productSearchContext = new ProductSearchContext(delegator, visitId);
         List<ProductSearchConstraint> productSearchConstraintList = ProductSearchOptions.getConstraintList(session);
         if (UtilValidate.isNotEmpty(productSearchConstraintList)) {
@@ -1326,11 +1336,11 @@ public class ProductSearchSession {
         }
         productSearchContext.finishKeywordConstraints();
         productSearchContext.finishCategoryAndFeatureConstraints();
-        
+
         DynamicViewEntity dynamicViewEntity = productSearchContext.dynamicViewEntity;
         List<EntityCondition> entityConditionList = productSearchContext.entityConditionList;
         List<String> fieldsToSelect = FastList.newInstance();
-        
+
         dynamicViewEntity.addMemberEntity("PCMC", "ProductCategoryMember");
         dynamicViewEntity.addAlias("PCMC", "pcmcProductCategoryId", "productCategoryId", null, null, null, null);
         dynamicViewEntity.addAlias("PCMC", "pcmcFromDate", "fromDate", null, null, null, null);
@@ -1340,16 +1350,16 @@ public class ProductSearchSession {
         fieldsToSelect.add("categoryCount");
         entityConditionList.add(EntityCondition.makeCondition(EntityCondition.makeCondition("pcmcThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("pcmcThruDate", EntityOperator.GREATER_THAN, productSearchContext.nowTimestamp)));
         entityConditionList.add(EntityCondition.makeCondition("pcmcFromDate", EntityOperator.LESS_THAN, productSearchContext.nowTimestamp));
-        
+
         Set<String> productCategoryIdSet = FastSet.newInstance();
         ProductSearch.getAllSubCategoryIds(productCategoryId, productCategoryIdSet, delegator, productSearchContext.nowTimestamp);
         entityConditionList.add(EntityCondition.makeCondition("pcmcProductCategoryId", EntityOperator.IN, productCategoryIdSet));
-        
+
         EntityCondition whereCondition = EntityCondition.makeCondition(entityConditionList, EntityOperator.AND);
-        
+
         EntityFindOptions efo = new EntityFindOptions();
         efo.setResultSetType(EntityFindOptions.TYPE_SCROLL_INSENSITIVE);
-        
+
         EntityListIterator eli = null;
         try {
             eli = delegator.findListIteratorByCondition(dynamicViewEntity, whereCondition, null, fieldsToSelect, productSearchContext.orderByList, efo);
@@ -1357,13 +1367,13 @@ public class ProductSearchSession {
             Debug.logError(e, "Error in product search", module);
             return 0;
         }
-        
+
         GenericValue searchResult = null;
         Long categoryCount = Long.valueOf(0);
         while ((searchResult = (GenericValue) eli.next()) != null) {
             categoryCount = searchResult.getLong("categoryCount");
         }
-        
+
         if (eli != null) {
             try {
                 eli.close();

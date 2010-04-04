@@ -19,36 +19,31 @@
 package org.ofbiz.base.conversion;
 
 import java.lang.reflect.Modifier;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
-import javax.imageio.spi.ServiceRegistry;
+import java.util.ServiceLoader;
 
 import javolution.util.FastMap;
 import javolution.util.FastSet;
 
+import org.ofbiz.base.lang.SourceMonitored;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.ObjectType;
 import org.ofbiz.base.util.UtilGenerics;
 
 /** A <code>Converter</code> factory and repository. */
+@SourceMonitored
 public class Converters {
     protected static final String module = Converters.class.getName();
     protected static final String DELIMITER = "->";
-    protected static final Map<String, Converter<?, ?>> converterMap = FastMap.newInstance();
-    protected static final Set<String> noConversions = FastSet.newInstance();
-    /** Null converter used when the source and target java object
-     * types are the same. The <code>convert</code> method returns the
-     * source object.
-     * 
-     */
-    public static final Converter<Object, Object> nullConverter = new NullConverter();
+    protected static final FastMap<String, Converter<?, ?>> converterMap = FastMap.newInstance();
+    protected static final FastSet<ConverterCreator> creators = FastSet.newInstance();
+    protected static final FastSet<String> noConversions = FastSet.newInstance();
 
     static {
+        converterMap.setShared(true);
+        registerCreator(new PassThruConverterCreator());
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        Iterator<ConverterLoader> converterLoaders = ServiceRegistry.lookupProviders(ConverterLoader.class, loader);
+        Iterator<ConverterLoader> converterLoaders = ServiceLoader.load(ConverterLoader.class, loader).iterator();
         while (converterLoaders.hasNext()) {
             try {
                 ConverterLoader converterLoader = converterLoaders.next();
@@ -81,32 +76,40 @@ public class Converters {
         if (Debug.verboseOn()) {
             Debug.logVerbose("Getting converter: " + key, module);
         }
-        Converter<?, ?> result = converterMap.get(key);
-        if (result == null) {
-            if (!noConversions.contains(key)) {
-                synchronized (converterMap) {
-                    Collection<Converter<?, ?>> values = converterMap.values();
-                    for (Converter<?, ?> value : values) {
-                        if (value.canConvert(sourceClass, targetClass)) {
-                            converterMap.put(key, value);
-                            return UtilGenerics.cast(value);
-                        }
-                    }
-                    // Null converter must be checked last
-                    if (nullConverter.canConvert(sourceClass, targetClass)) {
-                        converterMap.put(key, nullConverter);
-                        return UtilGenerics.cast(nullConverter);
-                    }
-                    noConversions.add(key);
-                    Debug.logWarning("*** No converter found, converting from " +
-                            sourceClass.getName() + " to " + targetClass.getName() +
-                            ". Please report this message to the developer community so " +
-                            "a suitable converter can be created. ***", module);
+OUTER:
+        do {
+            Converter<?, ?> result = converterMap.get(key);
+            if (result != null) {
+                return UtilGenerics.cast(result);
+            }
+            if (noConversions.contains(key)) {
+                throw new ClassNotFoundException("No converter found for " + key);
+            }
+            for (Converter<?, ?> value : converterMap.values()) {
+                if (value.canConvert(sourceClass, targetClass)) {
+                    converterMap.putIfAbsent(key, value);
+                    continue OUTER;
                 }
             }
+            for (ConverterCreator value : creators) {
+                result = createConverter(value, sourceClass, targetClass);
+                if (result != null) {
+                    converterMap.putIfAbsent(key, result);
+                    continue OUTER;
+                }
+            }
+            if (noConversions.add(key)) {
+                Debug.logWarning("*** No converter found, converting from " +
+                        sourceClass.getName() + " to " + targetClass.getName() +
+                        ". Please report this message to the developer community so " +
+                        "a suitable converter can be created. ***", module);
+            }
             throw new ClassNotFoundException("No converter found for " + key);
-        }
-        return UtilGenerics.cast(result);
+        } while (true);
+    }
+
+    private static <S, SS extends S, T, TT extends T> Converter<SS, TT> createConverter(ConverterCreator creater, Class<SS> sourceClass, Class<TT> targetClass) {
+        return creater.createConverter(sourceClass, targetClass);
     }
 
     /** Load all classes that implement <code>Converter</code> and are
@@ -115,16 +118,40 @@ public class Converters {
      * @param containerClass
      */
     public static void loadContainedConverters(Class<?> containerClass) {
-        Class<?>[] classArray = containerClass.getClasses();
-        for (int i = 0; i < classArray.length; i++) {
+        // This only returns -public- classes and interfaces
+        for (Class<?> clz: containerClass.getClasses()) {
             try {
-                if ((classArray[i].getModifiers() & Modifier.ABSTRACT) == 0) {
-                    classArray[i].newInstance();
+                // non-abstract, which means no interfaces or abstract classes
+                if ((clz.getModifiers() & Modifier.ABSTRACT) == 0) {
+                    Object value;
+                    try {
+                        value = clz.getConstructor().newInstance();
+                    } catch (NoSuchMethodException e) {
+                        // ignore this, as this class might be some other helper class,
+                        // with a non-pubilc constructor
+                        continue;
+                    }
+                    if (value instanceof ConverterLoader) {
+                        ConverterLoader loader = (ConverterLoader) value;
+                        loader.loadConverters();
+                    }
                 }
             } catch (Exception e) {
                 Debug.logError(e, module);
             }
         }
+    }
+
+    /** Registers a <code>ConverterCreater</code> instance to be used by the
+     * {@link org.ofbiz.base.conversion.Converters#getConverter(Class, Class)}
+     * method, when a converter can't be found.
+     *
+     * @param <S> The source object type
+     * @param <T> The target object type
+     * @param creator The <code>ConverterCreater</code> instance to register
+     */
+    public static <S, T> void registerCreator(ConverterCreator creator) {
+        creators.add(creator);
     }
 
     /** Registers a <code>Converter</code> instance to be used by the
@@ -136,43 +163,71 @@ public class Converters {
      * @param converter The <code>Converter</code> instance to register
      */
     public static <S, T> void registerConverter(Converter<S, T> converter) {
-        String key = converter.getSourceClass().getName().concat(DELIMITER).concat(converter.getTargetClass().getName());
-        if (converterMap.get(key) == null) {
-            synchronized (converterMap) {
-                converterMap.put(key, converter);
-            }
-            if (Debug.verboseOn()) {
-                Debug.logVerbose("Registered converter " + converter.getClass().getName(), module);
+        registerConverter(converter, converter.getSourceClass(), converter.getTargetClass());
+    }
+
+    public static <S, T> void registerConverter(Converter<S, T> converter, Class<?> sourceClass, Class<?> targetClass) {
+        StringBuilder sb = new StringBuilder();
+        if (sourceClass != null) {
+            sb.append(sourceClass.getName());
+        } else {
+            sb.append("<null>");
+        }
+        sb.append(DELIMITER);
+        sb.append(targetClass.getName());
+        String key = sb.toString();
+        if (converterMap.putIfAbsent(key, converter) == null) {
+            Debug.logVerbose("Registered converter " + converter.getClass().getName(), module);
+        }
+    }
+
+    protected static class PassThruConverterCreator implements ConverterCreator{
+        protected PassThruConverterCreator() {
+        }
+
+        public <S, T> Converter<S, T> createConverter(Class<S> sourceClass, Class<T> targetClass) {
+            if (ObjectType.instanceOf(sourceClass, targetClass)) {
+                return new PassThruConverter<S, T>(sourceClass, targetClass);
+            } else {
+                return null;
             }
         }
     }
 
-    /** Null converter used when the source and target java object
+    /** Pass thru converter used when the source and target java object
      * types are the same. The <code>convert</code> method returns the
      * source object.
-     * 
+     *
      */
-    protected static class NullConverter implements Converter<Object, Object> {
-        public NullConverter() {
+    protected static class PassThruConverter<S, T> implements Converter<S, T> {
+        private final Class<S> sourceClass;
+        private final Class<T> targetClass;
+
+        public PassThruConverter(Class<S> sourceClass, Class<T> targetClass) {
+            this.sourceClass = sourceClass;
+            this.targetClass = targetClass;
         }
 
         public boolean canConvert(Class<?> sourceClass, Class<?> targetClass) {
-            if (sourceClass.getName().equals(targetClass.getName()) || "java.lang.Object".equals(targetClass.getName())) {
-                return true;
-            }
-            return ObjectType.instanceOf(sourceClass, targetClass);
+            return this.sourceClass == sourceClass && this.targetClass == targetClass;
         }
 
-        public Object convert(Object obj) throws ConversionException {
-            return obj;
+        @SuppressWarnings("unchecked")
+        public T convert(S obj) throws ConversionException {
+            return (T) obj;
+        }
+
+        @SuppressWarnings("unchecked")
+        public T convert(Class<? extends T> targetClass, S obj) throws ConversionException {
+            return (T) obj;
         }
 
         public Class<?> getSourceClass() {
-            return Object.class;
+            return sourceClass;
         }
 
         public Class<?> getTargetClass() {
-            return Object.class;
+            return targetClass;
         }
     }
 }

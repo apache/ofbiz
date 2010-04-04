@@ -31,6 +31,11 @@ under the License.
                 <field-map field-name="viewSize" from-field="viewSize"/>
             </service>
         </actions>
+        <row-actions>
+            <service service-name="calculateFixedAssetDepreciation" result-map="assetDepreciationResultMap">
+                <field-map field-name="fixedAssetId" from-field="fixedAssetId"/>
+            </service>
+        </row-actions>
         <field name="fixedAssetId" widget-style="linktext">
             <hyperlink also-hidden="false" description="${fixedAssetId}" target="EditFixedAsset">
                 <parameter param-name="fixedAssetId"/>
@@ -47,6 +52,12 @@ under the License.
                 </sub-hyperlink>
             </display-entity>
         </field>
+        <field name="dateAcquired"><display/></field>
+        <field name="expectedEndOfLife"><display/></field>
+        <field name="purchaseCost"><display type="currency" currency="${purchaseCostUomId}"/></field>
+        <field name="salvageValue"><display type="currency" currency="${purchaseCostUomId}"/></field>
+        <field name="depreciation"><display type="currency" currency="${purchaseCostUomId}"/></field>
+        <field name="plannedPastDepreciationTotal"><display description="${assetDepreciationResultMap.plannedPastDepreciationTotal}"/></field>
         <on-event-update-area event-type="paginate" area-id="search-results" area-target="FixedAssetSearchResults"/>
     </form>
 
@@ -355,6 +366,11 @@ under the License.
 
     <form name="EditFixedAssetMaint" type="single" default-map-name="fixedAssetMaint" target="updateFixedAssetMaint" title=""
         header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <entity-one entity-name="StatusItem" value-field="currentStatus" auto-field-map="false">
+                <field-map field-name="statusId" from-field="fixedAssetMaint.statusId"/>
+            </entity-one>
+        </actions>
         <alt-target use-when="fixedAssetMaint==null" target="createFixedAssetMaint"/>
         <field name="fixedAssetId"><hidden/></field>
         <field name="estimatedStartDate"><hidden value="${parameters.estimatedStartDate}"/></field>
@@ -362,10 +378,18 @@ under the License.
         <field use-when="fixedAssetMaint==null" name="maintHistSeqId"><ignored/></field>
         <field use-when="fixedAssetMaint!=null" name="maintHistSeqId"><display/></field>
         <field use-when="fixedAssetMaint!=null" title="${uiLabelMap.CommonCreated}" name="createdStamp"><display/></field>
-        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+        <field name="statusId" use-when="fixedAssetMaint==null" title="${uiLabelMap.CommonStatus}">
             <drop-down allow-empty="false">
                 <entity-options description="${description}" entity-name="StatusItem">
                     <entity-constraint name="statusTypeId" operator="equals" value="FIXEDAST_MNT_STATUS"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" use-when="fixedAssetMaint!=null" title="${uiLabelMap.CommonStatus}">
+            <drop-down allow-empty="false" current-description="${currentStatus.description}">
+                <entity-options entity-name="StatusValidChangeToDetail" key-field-name="statusIdTo" description="${transitionName} (${description})">
+                    <entity-constraint name="statusId" env-name="fixedAssetMaint.statusId"/>
                     <entity-order-by field-name="sequenceId"/>
                 </entity-options>
             </drop-down>
@@ -576,5 +600,173 @@ under the License.
              </drop-down>
          </field>
          <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="AddFixedAssetDepMethod" type="single" target="createFixedAssetDepMethod" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createFixedAssetDepMethod" default-field-type="edit"/>
+        <field name="fixedAssetId"><hidden/></field>
+        <field name="depreciationCustomMethodId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="CustomMethod" key-field-name="customMethodId" description="${description}">
+                    <entity-constraint name="customMethodTypeId" operator="equals" value="DEPRECIATION_FORMULA"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListFixedAssetDepMethods" type="list"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="FixedAssetDepMethod" list="fixedAssetDepMethods">
+                <condition-expr field-name="fixedAssetId" from-field="parameters.fixedAssetId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="FixedAssetDepMethod" default-field-type="display"/>
+        <field name="fixedAssetId"><hidden/></field>
+        <field name="depreciationCustomMethodId">
+            <display-entity entity-name="CustomMethod" key-field-name="customMethodId"/>
+        </field>
+        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+            <hyperlink target="deleteFixedAssetDepMethod" description="${uiLabelMap.CommonDelete}" also-hidden="false">
+                <parameter param-name="fixedAssetId"/>
+                <parameter param-name="depreciationCustomMethodId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="ListFixedAssetDepreciations" type="list" list-name="assetDepreciationInfoList" default-map-name="assetDepreciationInfo"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <field name="index"><display description="${itemIndex + 1}"/></field>
+        <field name="year"><display/></field>
+        <field name="depreciation"><display type="currency" currency="${fixedAsset.purchaseCostUomId}"/></field>
+        <field name="depreciationTotal"><display type="currency" currency="${fixedAsset.purchaseCostUomId}"/></field>
+        <field name="nbv" title="Net Book Value"><display type="currency" currency="${fixedAsset.purchaseCostUomId}"/></field>
+    </form>
+    <form name="FixedAssetTransactions" type="list"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="AcctgTransAndEntries" list="fixedAssetTransactions">
+                <condition-expr field-name="fixedAssetId" from-field="fixedAssetId"/>
+                <order-by field-name="transactionDate"/>
+                <order-by field-name="debitCreditFlag"/>
+            </entity-condition>
+        </actions>
+        <field name="acctgTransId" widget-style="buttontext">
+            <hyperlink target="EditAcctgTrans" description="${acctgTransId}" also-hidden="false">
+                <parameter param-name="acctgTransId"/>
+                <parameter param-name="organizationPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="transTypeDescription"><display/></field>
+        <field name="transactionDate"><display/></field>
+        <field name="accountCode"><display/></field>
+        <field name="accountName"><display/></field>
+        <field name="amount"><display type="currency" currency="${currency}"/></field>
+        <field name="debitCreditFlag"><display/></field>
+        <field name="isPosted"><display/></field>
+    </form>
+    <form name="AddFixedAssetTypeGlAccount" type="single" target="createFixedAssetTypeGlAccountForFixedAsset" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createFixedAssetTypeGlAccount" default-field-type="edit"/>
+        <field name="fixedAssetId"><hidden/></field>
+        <field name="fixedAssetTypeId"><hidden value="_NA_"/></field>
+        <field name="organizationPartyId"><hidden value="${fixedAsset.partyId}"/></field>
+        <field name="assetGlAccountId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="GlAccountOrganizationAndClass" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${fixedAsset.partyId}"/>
+                    <entity-constraint name="glAccountClassId" operator="equals" value="LONGTERM_ASSET"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="accDepGlAccountId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="GlAccountOrganizationAndClass" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${fixedAsset.partyId}"/>
+                    <entity-constraint name="glAccountClassId" operator="equals" value="ACCUM_DEPRECIATION"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+                <entity-options entity-name="GlAccountOrganizationAndClass" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${fixedAsset.partyId}"/>
+                    <entity-constraint name="glAccountClassId" operator="equals" value="ACCUM_AMORTIZATION"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="depGlAccountId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="GlAccountOrganizationAndClass" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${fixedAsset.partyId}"/>
+                    <entity-constraint name="glAccountClassId" operator="equals" value="DEPRECIATION"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+                <entity-options entity-name="GlAccountOrganizationAndClass" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${fixedAsset.partyId}"/>
+                    <entity-constraint name="glAccountClassId" operator="equals" value="AMORTIZATION"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="profitGlAccountId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="GlAccountOrganizationAndClass" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${fixedAsset.partyId}"/>
+                    <entity-constraint name="glAccountClassId" operator="equals" value="CASH_INCOME"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="lossGlAccountId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="GlAccountOrganizationAndClass" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${fixedAsset.partyId}"/>
+                    <entity-constraint name="glAccountClassId" operator="equals" value="SGA_EXPENSE"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="GlobalFixedAssetTypeGlAccounts" type="list"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="FixedAssetTypeGlAccount" list="globalFixedAssetTypeGlAccounts">
+                <condition-list combine="and">
+                    <condition-expr field-name="fixedAssetId" value="_NA_"/>
+                    <condition-list combine="or">
+                        <condition-expr field-name="fixedAssetTypeId" from-field="fixedAsset.fixedAssetTypeId"/>
+                        <condition-expr field-name="fixedAssetTypeId" value="_NA_"/>
+                    </condition-list>
+                </condition-list>
+            </entity-condition>
+        </actions>
+        <field name="fixedAssetTypeId"><display-entity entity-name="FixedAssetType"/></field>
+        <field name="assetGlAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]"/></field>
+        <field name="accDepGlAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]"/></field>
+        <field name="depGlAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]"/></field>
+        <field name="profitGlAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]"/></field>
+        <field name="lossGlAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]"/></field>
+    </form>
+    <form name="FixedAssetTypeGlAccounts" type="list"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="FixedAssetTypeGlAccount" list="fixedAssetTypeGlAccounts">
+                <condition-expr field-name="fixedAssetId" from-field="fixedAssetId"/>
+            </entity-condition>
+        </actions>
+        <field name="assetGlAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]"/></field>
+        <field name="accDepGlAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]"/></field>
+        <field name="depGlAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]"/></field>
+        <field name="profitGlAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]"/></field>
+        <field name="lossGlAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]"/></field>
+        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+            <hyperlink target="deleteFixedAssetTypeGlAccountForFixedAsset" description="${uiLabelMap.CommonDelete}" also-hidden="false">
+                <parameter param-name="fixedAssetTypeId"/>
+                <parameter param-name="fixedAssetId"/>
+                <parameter param-name="organizationPartyId"/>
+            </hyperlink>
+        </field>
     </form>
 </forms>

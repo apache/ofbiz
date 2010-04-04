@@ -1,3 +1,21 @@
+/*******************************************************************************
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *******************************************************************************/
 package org.ofbiz.testtools;
 
 import java.io.BufferedInputStream;
@@ -42,9 +60,9 @@ public class VerifySeleniumSetups {
 
     }
 
-    /* prepare lib for selenium test 
+    /* prepare lib for selenium test
      * Check & download selenium-server.jar from http://downloads.sourceforge.net/seleniumxml/selenium-server-1.0-SNAPSHOT-20081126.jar?use_mirror=
-     * Check a change use HTTP as the default at file framework/webapp/config/url.properties  
+     * Check a change use HTTP as the default at file framework/webapp/config/url.properties
      * Check correct the config/seleniumXml.properties and firefox  path
      */
 
@@ -54,7 +72,7 @@ public class VerifySeleniumSetups {
         Map<String,Object> msgMap = FastMap.newInstance();
         Properties urlProps = null;
         try{
-            /* Check and down load selenium-server.jar */ 
+            /* Check and down load selenium-server.jar */
             File file = new File(libPath);
             URL url = new URL(urlSite);
             URLConnection connection = url.openConnection();

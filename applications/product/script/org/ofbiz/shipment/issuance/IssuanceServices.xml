@@ -22,9 +22,6 @@ under the License.
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
     <!-- ItemIssuance services -->
     <simple-method method-name="createItemIssuance" short-description="Create ItemIssuance">
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-message message="Security Error: to run createItemIssuance you must have the FACILITY_CREATE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Create ItemIssuance" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked" xml-resource="component://product/script/org/ofbiz/shipment/shipment/ShipmentServices.xml"/>
         <check-errors/>
@@ -50,9 +47,6 @@ under the License.
         </if-not-empty>
     </simple-method>
     <simple-method method-name="updateItemIssuance" short-description="Update ItemIssuance">
-        <check-permission permission="FACILITY" action="_UPDATE">
-            <fail-message message="Security Error: to run updateItemIssuance you must have the FACILITY_UPDATE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Update ItemIssuance" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked" xml-resource="component://product/script/org/ofbiz/shipment/shipment/ShipmentServices.xml"/>
         <check-errors/>
@@ -62,9 +56,6 @@ under the License.
         <store-value value-field="lookedUpValue"/>
     </simple-method>
     <simple-method method-name="deleteItemIssuance" short-description="Delete ItemIssuance">
-        <check-permission permission="FACILITY" action="_DELETE">
-            <fail-message message="Security Error: to run deleteItemIssuance you must have the FACILITY_DELETE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Delete ItemIssuance" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked" xml-resource="component://product/script/org/ofbiz/shipment/shipment/ShipmentServices.xml"/>
         <check-errors/>
@@ -75,27 +66,19 @@ under the License.
 
     <!-- ItemIssuanceRole services -->
     <simple-method method-name="createItemIssuanceRole" short-description="Create ItemIssuanceRole">
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-message message="Security Error: to run createItemIssuanceRole you must have the FACILITY_CREATE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Create ItemIssuanceRole" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked" xml-resource="component://product/script/org/ofbiz/shipment/shipment/ShipmentServices.xml"/>
         <check-errors/>
-
         <make-value value-field="newEntity" entity-name="ItemIssuanceRole"/>
         <set-pk-fields map="parameters" value-field="newEntity"/>
         <set-nonpk-fields map="parameters" value-field="newEntity"/>
-
         <create-value value-field="newEntity"/>
     </simple-method>
+
     <simple-method method-name="deleteItemIssuanceRole" short-description="Delete ItemIssuanceRole">
-        <check-permission permission="FACILITY" action="_DELETE">
-            <fail-message message="Security Error: to run deleteItemIssuanceRole you must have the FACILITY_DELETE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Delete ItemIssuanceRole" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked" xml-resource="component://product/script/org/ofbiz/shipment/shipment/ShipmentServices.xml"/>
         <check-errors/>
-
         <entity-one entity-name="ItemIssuanceRole" value-field="lookedUpValue"/>
         <remove-value value-field="lookedUpValue"/>
     </simple-method>
@@ -103,12 +86,6 @@ under the License.
     <!-- the actual issuance services -->
     <simple-method method-name="issueOrderItemToShipment" short-description="Issue OrderItem to Shipment">
         <set value="Issue OrderItem to Shipment" field="operationName"/>
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-message message="Security Error: to run ${operationName} you must have the FACILITY_CREATE or FACILITY_ADMIN permission"/>
-        </check-permission>
-        <check-permission permission="FACILITY" action="_UPDATE">
-            <fail-message message="Security Error: to run ${operationName} you must have the FACILITY_UPDATE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked" xml-resource="component://product/script/org/ofbiz/shipment/shipment/ShipmentServices.xml"/>
 
         <!-- get orderHeader -->
@@ -128,18 +105,15 @@ under the License.
         <entity-one entity-name="Shipment" value-field="shipment" auto-field-map="true"/>
 
         <call-simple-method method-name="findCreateIssueShipmentItem"/>
+        <!--
+            TODO: if we want to record the role of the facility operation we have to re-implement this using ShipmentReceiptRole
         <call-simple-method method-name="findCreateItemIssuance"/>
         <call-simple-method method-name="associateIssueRoles"/>
+        -->
     </simple-method>
 
     <simple-method method-name="issueOrderItemShipGrpInvResToShipment" short-description="Issue OrderItemShipGrpInvRes to Shipment">
         <set value="Issue OrderItemShipGrpInvRes to Shipment" field="operationName"/>
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-message message="Security Error: to run ${operationName} you must have the FACILITY_CREATE or FACILITY_ADMIN permission"/>
-        </check-permission>
-        <check-permission permission="FACILITY" action="_UPDATE">
-            <fail-message message="Security Error: to run ${operationName} you must have the FACILITY_UPDATE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked" xml-resource="component://product/script/org/ofbiz/shipment/shipment/ShipmentServices.xml"/>
 
         <!-- get orderItemShipGrpInvRes -->
@@ -308,6 +282,19 @@ under the License.
             <store-value value-field="shipmentItem"/>
         </else>
         </if-empty>
+        <set from-field="parameters.shipmentId" field="orderShipmentCreate.shipmentId"/>
+        <set from-field="shipmentItem.shipmentItemSeqId" field="orderShipmentCreate.shipmentItemSeqId"/>
+        <set from-field="orderItem.orderId" field="orderShipmentCreate.orderId"/>
+        <set from-field="orderItem.orderItemSeqId" field="orderShipmentCreate.orderItemSeqId"/>
+        <if-not-empty field="orderItemShipGroupAssoc">
+            <set from-field="orderItemShipGroupAssoc.shipGroupSeqId" field="orderShipmentCreate.shipGroupSeqId"/>
+        </if-not-empty>
+        <if-not-empty field="orderItemShipGrpInvRes">
+            <set from-field="orderItemShipGrpInvRes.shipGroupSeqId" field="orderShipmentCreate.shipGroupSeqId"/>
+        </if-not-empty>
+        <set from-field="parameters.quantity" field="orderShipmentCreate.quantity"/>
+        <call-service service-name="createOrderShipment" in-map-name="orderShipmentCreate"/>
+
         <field-to-result field="shipmentItem.shipmentItemSeqId" result-name="shipmentItemSeqId"/>
     </simple-method>
     <simple-method method-name="findCreateItemIssuance" short-description="Find Create ItemIssuance - meant to be called in-line">
@@ -443,11 +430,6 @@ under the License.
     </simple-method>
 
     <simple-method method-name="cancelOrderItemIssuanceFromSalesShipment" short-description="Cancel an ItemIssuance quantity from Sales Shipment">
-        <set value="Cancel Order Item Issuance from Sales Shipment" field="operationName"/>
-        <check-permission permission="FACILITY" action="_UPDATE">
-            <fail-message message="Security Error: to run ${operationName} you must have the FACILITY_UPDATE or FACILITY_ADMIN permission"/>
-        </check-permission>
-
         <!-- get ItemIssuance and related entities-->
         <entity-one entity-name="ItemIssuance" value-field="itemIssuance"/>
         <get-related-one value-field="itemIssuance" relation-name="OrderHeader" to-value-field="orderHeader"/>
@@ -588,14 +570,26 @@ under the License.
         </calculate>
         <call-service service-name="createInventoryItemDetail" in-map-name="createDetailMap"/>
     </simple-method>
-    <simple-method method-name="getTotalIssuedQuantityForOrderItem" short-description="Computes the total issued quantity for an order item">
+    <simple-method method-name="getTotalIssuedQuantityForOrderItem" short-description="Computes the total quantity assigned to shipment for a purchase order item">
         <set field="totalIssuedQuantity" type="BigDecimal" value="0"/>
-        <entity-and list="allItemIssuances" entity-name="ItemIssuance">
+        <entity-and list="orderShipments" entity-name="OrderShipment">
             <field-map field-name="orderId" from-field="orderItem.orderId"/>
             <field-map field-name="orderItemSeqId" from-field="orderItem.orderItemSeqId"/>
         </entity-and>
-        <iterate entry="itemIssuance" list="allItemIssuances">
-            <set field="totalIssuedQuantity" value="${totalIssuedQuantity$bigDecimal + itemIssuance.quantity$bigDecimal}" type="BigDecimal"/>
-        </iterate>
+        <if-not-empty field="orderShipments">
+                <iterate entry="orderShipment" list="orderShipments">
+                    <set field="totalIssuedQuantity" value="${totalIssuedQuantity$bigDecimal + orderShipment.quantity$bigDecimal}" type="BigDecimal"/>
+                </iterate>
+            <else>
+                <!-- This is here for backward compatibility only: ItemIssuances are no more created for purchase orders -->
+                <entity-and list="allItemIssuances" entity-name="ItemIssuance">
+                    <field-map field-name="orderId" from-field="orderItem.orderId"/>
+                    <field-map field-name="orderItemSeqId" from-field="orderItem.orderItemSeqId"/>
+                </entity-and>
+                <iterate entry="itemIssuance" list="allItemIssuances">
+                    <set field="totalIssuedQuantity" value="${totalIssuedQuantity$bigDecimal + itemIssuance.quantity$bigDecimal}" type="BigDecimal"/>
+                </iterate>
+            </else>
+        </if-not-empty>
     </simple-method>
 </simple-methods>

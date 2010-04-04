@@ -30,7 +30,7 @@ under the License.
                         <section>
                             <!-- do check for ACCOUNTING, _VIEW permission -->
                             <condition>
-                                <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
+                                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
                             </condition>
                             <widgets>
                                 <section>
@@ -48,7 +48,7 @@ under the License.
                         <section>
                             <!-- do check for ACCOUNTING, _VIEW permission -->
                             <condition>
-                                <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
+                                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
                             </condition>
                             <widgets>
                                 <decorator-section-include name="body"/>
@@ -81,7 +81,7 @@ under the License.
                                         <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                                             <decorator-section name="menu-bar">
                                                 <container style="button-bar">
-                                                    <link target="EditBillingAccount" text="${uiLabelMap.CommonCreateNew}" style="buttontext"/>
+                                                    <link target="EditBillingAccount" text="${uiLabelMap.CommonCreateNew}" style="buttontext create"/>
                                                 </container>
                                             </decorator-section>
                                             <decorator-section name="search-options">

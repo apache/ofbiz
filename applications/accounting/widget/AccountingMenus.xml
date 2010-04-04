@@ -144,10 +144,15 @@ under the License.
                 <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
             </link>
         </menu-item>
+        
+        <menu-item name="commissionRun" title="${uiLabelMap.AccountingCommissionRun}">
+            <link target="CommissionRun"/>
+        </menu-item>
+        
     </menu>
     
     <menu name="InvoiceSubTabBar" menu-container-style="button-bar button-style-2" default-selected-style="selected">
-        <menu-item name="createNew" title="${uiLabelMap.CommonCreateNew}" >
+        <menu-item name="createNew" title="${uiLabelMap.CommonCreateNew}" widget-style="buttontext create">
             <link target="newInvoice"/>
         </menu-item>
         <menu-item name="copyInvoice" title="${uiLabelMap.CommonCopy}">
@@ -373,7 +378,7 @@ under the License.
                 <parameter param-name="paymentId" from-field="payment.paymentId"/>
             </link>
         </menu-item>
-       	<menu-item name="paymentReport" title="Payment Report">
+           <menu-item name="paymentReport" title="Payment Report">
             <link target="paymentReport"/>
         </menu-item>
     </menu>
@@ -381,9 +386,9 @@ under the License.
     <menu name="PaymentSubTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
           menu-container-style="button-bar button-style-2">
         <actions>
-            <set field="isDisbursement" value="${bsh:org.ofbiz.accounting.util.UtilAccounting.isDisbursement(payment)}"/>
+            <set field="isDisbursement" value="${bsh:if(payment!=void)org.ofbiz.accounting.util.UtilAccounting.isDisbursement(payment)}"/>
         </actions>
-        <menu-item name="createNew" title="${uiLabelMap.CommonCreateNew}">
+        <menu-item name="createNew" title="${uiLabelMap.CommonCreateNew}" widget-style="buttontext create" >
             <condition>
                 <not><if-empty field="payment.paymentId"/></not>
             </condition>
@@ -481,7 +486,7 @@ under the License.
                 <parameter param-name="paymentGroupId" from-field="paymentGroup.paymentGroupId"/>
             </link>
         </menu-item>
-        <menu-item name="EditPaymentGroupMember" title="${uiLabelMap.AccountingPaymentGroupMember}">
+        <menu-item name="EditPaymentGroupMember" title="${uiLabelMap.AccountingGroupMembers}">
             <condition><not><if-empty field="paymentGroup.paymentGroupId"/></not></condition>
             <link target="EditPaymentGroupMember">
                 <parameter param-name="paymentGroupId" from-field="paymentGroup.paymentGroupId"/>
@@ -491,7 +496,7 @@ under the License.
     
     <menu name="PaymentGroupSubTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
             menu-container-style="button-bar button-style-2">
-        <menu-item name="createNew" title="${uiLabelMap.AccountingCreateNewPaymentGroup}">
+        <menu-item name="createNew" title="${uiLabelMap.AccountingCreateNewPaymentGroup}" widget-style="buttontext create">
             <condition>
                 <not><if-empty field="paymentGroup"/></not>
             </condition>
@@ -925,6 +930,11 @@ under the License.
         </menu-item>
         <menu-item name="PartyGlAccounts" title="${uiLabelMap.AccountingPartyGlAccounts}">
             <link target="editPartyGlAccounts">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FixedAssetTypeGlAccounts" title="${uiLabelMap.AccountingFixedAssetTypeGlAccounts}">
+            <link target="FixedAssetTypeGlAccounts">
                 <parameter param-name="organizationPartyId"/>
             </link>
         </menu-item>

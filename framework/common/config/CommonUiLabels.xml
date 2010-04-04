@@ -3482,6 +3482,7 @@
     </property>
     <property key="CommonItemsPerPage">
         <value xml:lang="en">Items per page</value>
+        <value xml:lang="fr">Éléments par page</value>
         <value xml:lang="it">Righe per pagina</value>
     </property>
     <property key="CommonJanuary">
@@ -4527,7 +4528,7 @@
         <value xml:lang="zh_CN">没有元素找到</value>
     </property>
     <property key="CommonNoGeolocationAvailable">
-        <value xml:lang="en">No Geolocation Available (for a demo you may try using DemoCustomer party profil)</value>
+        <value xml:lang="en">No Geolocation Available (for a demo you may try using DemoCustomer party profile)</value>
         <value xml:lang="fr">Aucune géolocalisation disponible (pour une démonstration vous pouvez utiliser le profil de l'acteur DemoCustomer)</value>
         <value xml:lang="hi_IN">भू स्थान उपलब्ध नहीं है (एक डेमो के लिए आप DemoCustomer पार्टी प्रोफ़ाइल का उपयोग करने का प्रयास कर सकते हैं)</value>
         <value xml:lang="it">Nessuna locazione geografica disponibile (per un dimostrazione tu puoi usare il soggetto DemoCustomer)</value>
@@ -5892,6 +5893,10 @@
         <value xml:lang="it">Rimuovi il portlet</value>
         <value xml:lang="zh">删除Portlet</value>
     </property>
+    <property key="CommonReport">
+        <value xml:lang="en">Report</value>
+        <value xml:lang="fr">Etat</value>
+    </property>
     <property key="CommonReports">
         <value xml:lang="ar">تقارير</value>
         <value xml:lang="de">Berichte</value>
@@ -6469,7 +6474,7 @@
         <value xml:lang="de">Bericht als E-Mail versenden</value>
         <value xml:lang="en">Send Report By Mail</value>
         <value xml:lang="es">Enviar informe por correo</value>
-        <value xml:lang="fr">Envoyé l'état par courriel</value>
+        <value xml:lang="fr">Envoyer l'état par courriel</value>
         <value xml:lang="hi_IN">रिपोर्ट मेल से भेजें</value>
         <value xml:lang="it">Invio stampa per email</value>
         <value xml:lang="pt">Enviar Relatório por Mail</value>
@@ -7069,6 +7074,10 @@
         <value xml:lang="it">Tasse</value>
         <value xml:lang="nl">Belasting</value>
         <value xml:lang="zh">税</value>
+    </property>
+    <property key="CommonTenantId">
+        <value xml:lang="en">Tenant ID</value>
+        <value xml:lang="fr">Instance</value>
     </property>
     <property key="CommonTelephoneAbbr">
         <value xml:lang="ar">هاتف</value>
@@ -8440,7 +8449,7 @@
         <value xml:lang="es">Crear tipo de fuente de datos</value>
         <value xml:lang="fr">Nouveau type de source de données</value>
         <value xml:lang="hi_IN">डेटा स्रोत प्रकार बनाएँ</value>
-        <value xml:lang="it">Creare tipo sorgente dati</value>
+        <value xml:lang="it">Nuovo tipo sorgente dati</value>
         <value xml:lang="nl">Aanmaken Brontype</value>
         <value xml:lang="pt">Criar Tipo de Origem de Dados</value>
         <value xml:lang="ro">Creare Tip Sursa Date</value>
@@ -8511,6 +8520,9 @@
         <value xml:lang="ru">Финансы</value>
         <value xml:lang="th">การเงิน</value>
         <value xml:lang="zh">财务</value>
+    </property>
+    <property key="FormFieldTitle_acceptButton">
+        <value xml:lang="en">Accept</value>
     </property>
     <property key="FormFieldTitle_addButton">
         <value xml:lang="ar">إضافة</value>
@@ -9455,6 +9467,26 @@
         <value xml:lang="th">บัลแกเรีย</value>
         <value xml:lang="zh">保加利亚语</value>
         <value xml:lang="zh_CN">保加利亚语</value>
+    </property>
+    <property key="CommonExtHelpDefinition">
+        <value xml:lang="en">Definition, what is it?</value>
+        <value xml:lang="it">Definizione, che cose'è ?</value>
+    </property>
+    <property key="CommonExtHelpTitle">
+        <value xml:lang="en">Help screen.</value>
+        <value xml:lang="it">Videata di aiuto.</value>
+    </property>
+    <property key="CommonExtHelpUsedFor">
+        <value xml:lang="en">What is it used for?</value>
+        <value xml:lang="it">Per cosa verrà usato ?</value>
+    </property>
+    <property key="CommonExtHelpOnScreen">
+        <value xml:lang="en">What's on the screen?</value>
+        <value xml:lang="it">Che cosa ci sarà in questa videata ?</value>
+    </property>
+    <property key="CommonExtIndex">
+        <value xml:lang="en">Index</value>
+        <value xml:lang="it">Indice</value>
     </property>
     <property key="cz">
         <value xml:lang="ar">تشيكية</value>

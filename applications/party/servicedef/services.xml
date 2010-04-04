@@ -885,6 +885,7 @@ under the License.
         <attribute name="sendTo" type="String" mode="IN" optional="false"/>
         <attribute name="contentType" type="String" mode="IN" optional="true"/>
         <attribute name="statusId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderId" type="String" mode="IN" optional="true"/>
         <attribute name="communicationEventId" type="String" mode="OUT"/>
     </service>
     <service name="updateCommEventAfterEmail" engine="java"
@@ -1053,11 +1054,13 @@ under the License.
             location="component://party/script/org/ofbiz/party/party/PartyServices.xml" invoke="sendUpdatePersonalInfoEmailNotification" auth="false">
         <attribute name="partyId" type="String" mode="IN" optional="true"/>
         <attribute name="updatedUserLogin" type="org.ofbiz.entity.GenericValue" mode="IN" optional="true"/>
+        <attribute name="productStoreId" type="String" mode="IN" optional="true"/>
     </service>
     <service name="sendCreatePartyEmailNotification" engine="simple"
             location="component://party/script/org/ofbiz/party/party/PartyServices.xml" invoke="sendCreatePartyEmailNotification" auth="false">
         <attribute name="partyId" type="String" mode="IN" optional="false"/>
         <attribute name="emailAddress" type="String" mode="IN" optional="false"/>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"/>
     </service>
 
     <!-- Email address verification services-->
@@ -1280,6 +1283,16 @@ under the License.
         <attribute name="emailAddress" type="String" mode="INOUT" optional="false"/>
         <attribute name="contactMechId" type="String" mode="IN" optional="true"/>
         <attribute name="contactMechId" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="createUpdatePartyPostalAddress" engine="simple"
+        location="component://party/script/org/ofbiz/party/contact/PartyContactMechServices.xml" invoke="createUpdatePartyPostalAddress" auth="false">
+        <description>Create or Update a postal address</description>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <auto-attributes entity-name="PartyContactMech" include="all" mode="IN" optional="true"/>
+        <auto-attributes entity-name="PostalAddress" include="nonpk" mode="IN" optional="true"/>
+        <attribute name="userLogin" type="org.ofbiz.entity.GenericValue" mode="IN" optional="true"/>
+        <attribute name="contactMechPurposeTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="contactMechId" type="String" mode="INOUT" optional="true"/>
     </service>
 
      <!--  bounced message processing -->

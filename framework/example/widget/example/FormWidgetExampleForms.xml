@@ -37,8 +37,8 @@ under the License.
         <!-- ***   field9  *** -->
         <!-- ***************** -->
         <field name="field9"
-               title="${uiLabelMap.ExampleDateField9Title}"
-               tooltip="${uiLabelMap.ExampleDateField9Tooltip}">
+            title="${uiLabelMap.ExampleDateField9Title}">
+            <!--tooltip="${uiLabelMap.ExampleDateField9Tooltip}"-->
             <date-time default-value="${groovy:org.ofbiz.base.util.UtilDateTime.nowTimestamp()}"/>
         </field>
         <!-- ***************** -->
@@ -79,7 +79,7 @@ under the License.
         <field name="field4"
                title="${uiLabelMap.ExampleDateField4Title}"
                tooltip="${uiLabelMap.ExampleDateField4Tooltip}">
-            <date-time input-method="time-dropdown" clock="24"/>
+            <date-time input-method="time-dropdown" clock="24" default-value="${exampleDateField}"/>
         </field>
         <!-- ***************** -->
         <!-- ***   field5  *** -->
@@ -87,7 +87,7 @@ under the License.
         <field name="field5"
                title="${uiLabelMap.ExampleDateField5Title}"
                tooltip="${uiLabelMap.ExampleDateField4Tooltip}">
-            <date-time input-method="time-dropdown" clock="12"/>
+            <date-time input-method="time-dropdown" clock="12" default-value="${exampleDateField}"/>
         </field>
         <!-- ***************** -->
         <!-- ***   field6  *** -->
@@ -160,7 +160,7 @@ under the License.
         <!-- ***************** -->
         <field name="field8"
                title="${uiLabelMap.ExampleDropDownField8Title}"
-               event="onChange"
+               event="onchange"
                action="return alert('You have changed the value in the select box');"
                tooltip="${uiLabelMap.ExampleDropDownField8Tooltip}">
             <drop-down>
@@ -278,6 +278,30 @@ under the License.
             </field-group>
         </sort-order>
 
+    </form>
+
+    <!-- Lookup Layer Example -->
+    <form name="ExampleLookupFields" type="single" title="">
+        <!-- Standard LookupLayer using separated labels is not recommended but here we use only Common labels to avoid dependencies from application to framework-->
+        <field name="partyIdFrom" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.CommonFrom}">
+            <lookup target-form-name="LookupPartyExamplePopup" presentation="layer" fade-background="false"/>
+        </field>
+        <!-- passes the name in one and the id in another field, the layer is centered -->
+        <field name="partyName" title="${uiLabelMap.CommonName}">
+            <lookup target-form-name="LookupPartyExamplePopupByName" description-field-name="partyIdTo" 
+                presentation="layer"  position="center" height="500px" width="600px"/>
+        </field>
+        <!-- This field may be hidden and the name rendered in partyName using default-value if partyIdTo exists-->
+        <field name="partyIdTo" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.CommonTo}"><text/></field><!-- the text field is only used for rendering  -->
+        <sort-order>
+            <field-group>
+                <sort-field name="partyIdFrom"/>
+            </field-group>
+            <field-group>
+                <sort-field name="partyName"/>
+                <sort-field name="partyIdTo"/>
+            </field-group>
+        </sort-order>
     </form>
 
     <form name="SelectionBoxesExampleForm" type="single">

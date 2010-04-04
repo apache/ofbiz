@@ -437,6 +437,7 @@ under the License.
             location="org.ofbiz.product.inventory.InventoryServices" invoke="completeInventoryTransfer">
         <description>Completes the inventory transfer</description>
         <attribute name="inventoryTransferId" type="String" mode="IN" optional="false"/>
+        <attribute name="receiveDate" type="Timestamp" mode="IN" optional="true"/>
     </service>
     <service name="cancelInventoryTransfer" engine="java"
             location="org.ofbiz.product.inventory.InventoryServices" invoke="cancelInventoryTransfer">
@@ -787,6 +788,21 @@ under the License.
         <attribute name="partyId" type="String" mode="IN" optional="false"/>
         <attribute name="roleTypeId" type="String" mode="IN" optional="false"/>
     </service>
+    
+    <service name="createFacilityContent" engine="simple" default-entity-name="FacilityContent"
+        location="component://product/script/org/ofbiz/product/storage/StorageServices.xml" invoke="createFacilityContent" auth="true">
+        <description>Create a Facility Content</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    
+    <service name="deleteFacilityContent" engine="simple" default-entity-name="FacilityContent"
+                location="component://product/script/org/ofbiz/product/storage/StorageServices.xml" invoke="deleteFacilityContent" auth="true">
+        <description>Delete Content From Facility</description>
+        <permission-service service-name="facilityGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
 
     <!-- Stock Move Services -->
     <service name="findStockMovesNeeded" engine="simple"
@@ -913,5 +929,15 @@ under the License.
                 location="component://product/script/org/ofbiz/product/inventory/InventoryServices.xml" invoke="setLastInventoryCount">
         <description>Schedule service that updates lastInventoryCount hourly for products available in facility</description>
         <attribute name="recurrenceInfoId" mode="IN" type="String" optional="false"/>
+    </service>
+    <service name="createUpdateFacilityGeoPoint" engine="simple" default-entity-name="GeoPoint"
+                location="component://product/script/org/ofbiz/product/inventory/InventoryServices.xml" invoke="createUpdateFacilityGeoPoint">
+        <description>Create or update GeoPoint assigned to facility</description>
+        <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        <attribute name="facilityId" mode="IN" type="String"/>
+        <auto-attributes include="all" mode="IN" optional="true"/>
+        <override name="dataSourceId" optional="false"/>
+        <override name="latitude" optional="false"/>
+        <override name="longitude" optional="false"/>
     </service>
 </services>

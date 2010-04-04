@@ -23,9 +23,7 @@ under the License.
     <screen name="LookupOrderHeader">
         <section>
             <condition>
-                <or>
-                    <if-has-permission permission="ORDERMGR" action="_VIEW"/>
-                </or>
+                <if-has-permission permission="ORDERMGR" action="_VIEW"/>
             </condition>
             <actions>
                 <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
@@ -36,6 +34,8 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="OrderHeader"/>
+                <set field="searchFields" value="[orderId, orderName]"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
@@ -52,9 +52,7 @@ under the License.
     <screen name="LookupOrderHeaderAndShipInfo">
         <section>
             <condition>
-                <or>
-                    <if-has-permission permission="ORDERMGR" action="_VIEW"/>
-                </or>
+                <if-has-permission permission="ORDERMGR" action="_VIEW"/>
             </condition>
             <actions>
                 <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
@@ -63,6 +61,8 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="OrderHeaderAndShipGroups"/>
+                <set field="searchFields" value="[orderId, orderName, toName]"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
@@ -79,9 +79,7 @@ under the License.
     <screen name="LookupPurchaseOrderHeaderAndShipInfo">
         <section>
             <condition>
-                <or>
-                    <if-has-permission permission="ORDERMGR" action="_VIEW"/>
-                </or>
+                <if-has-permission permission="ORDERMGR" action="_VIEW"/>
             </condition>
             <actions>
                 <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
@@ -89,6 +87,8 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="OrderHeaderAndShipGroups"/>
+                <set field="searchFields" value="[orderId, orderName, toName]"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
@@ -105,9 +105,7 @@ under the License.
     <screen name="LookupCustRequest">
         <section>
             <condition>
-                <or>
-                    <if-has-permission permission="ORDERMGR" action="_VIEW"/>
-                </or>
+                <if-has-permission permission="ORDERMGR" action="_VIEW"/>
             </condition>
             <actions>
                 <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
@@ -117,7 +115,7 @@ under the License.
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
                 <set field="entityName" value="CustRequest"/>
-                <set field="searchFields" value="[custRequestId, custRequestName, statusId]"/>                
+                <set field="searchFields" value="[custRequestId, custRequestName]"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
@@ -134,9 +132,7 @@ under the License.
     <screen name="LookupCustRequestItem">
         <section>
             <condition>
-                <or>
-                    <if-has-permission permission="ORDERMGR" action="_VIEW"/>
-                </or>
+                <if-has-permission permission="ORDERMGR" action="_VIEW"/>
             </condition>
             <actions>
                 <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
@@ -163,9 +159,7 @@ under the License.
     <screen name="LookupQuote">
         <section>
             <condition>
-                <or>
-                    <if-has-permission permission="ORDERMGR" action="_VIEW"/>
-                </or>
+                <if-has-permission permission="ORDERMGR" action="_VIEW"/>
             </condition>
             <actions>
                 <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
@@ -173,6 +167,8 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="Quote"/>
+                <set field="searchFields" value="[quoteId, quoteName, description]"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
@@ -189,9 +185,7 @@ under the License.
     <screen name="LookupQuoteItem">
         <section>
             <condition>
-                <or>
-                    <if-has-permission permission="ORDERMGR" action="_VIEW"/>
-                </or>
+                <if-has-permission permission="ORDERMGR" action="_VIEW"/>
             </condition>
             <actions>
                 <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
@@ -200,6 +194,8 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="QuoteItem"/>
+                <set field="searchFields" value="[quoteItemSeqId, quoteId, productId, comments]"/> 
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
@@ -216,9 +212,7 @@ under the License.
     <screen name="LookupRequirement">
         <section>
             <condition>
-                <or>
-                    <if-has-permission permission="ORDERMGR" action="_VIEW"/>
-                </or>
+                <if-has-permission permission="ORDERMGR" action="_VIEW"/>
             </condition>
             <actions>
                 <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
@@ -226,6 +220,8 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="Requirement"/>
+                <set field="searchFields" value="[requirementId, description]"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
@@ -242,9 +238,7 @@ under the License.
     <screen name="LookupShoppingList">
         <section>
             <condition>
-                <or>
-                    <if-has-permission permission="ORDERMGR" action="_VIEW"/>
-                </or>
+                <if-has-permission permission="ORDERMGR" action="_VIEW"/>
             </condition>
             <actions>
                 <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
@@ -252,6 +246,8 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="ShoppingList"/>
+                <set field="searchFields" value="[shoppingListId, listName, description]"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">

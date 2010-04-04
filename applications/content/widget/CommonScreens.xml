@@ -223,9 +223,11 @@ under the License.
                 <set field="headerItem" value="CompDoc"/>
             </actions>
             <widgets>
-                <decorator-screen name="main-decorator" >
-                    <decorator-section name="body">
+                <decorator-screen name="main-decorator">
+                    <decorator-section name="pre-body">
                         <include-menu name="${menuName}" location="component://content/widget/compdoc/CompDocMenus.xml"/>
+                    </decorator-section>
+                    <decorator-section name="body">
                         <label text="${title}" style="h1"/>
                         <decorator-section-include name="body"/>
                     </decorator-section>
@@ -330,10 +332,10 @@ under the License.
                                 <if-has-permission permission="CONTENTMGR" action="_VIEW"/>
                             </condition>
                             <widgets>
-                                <container style="widget-container">
-                                    <link  text="${uiLabelMap.CommonCreateNew} ${uiLabelMap.ContentWebSite}" target="EditWebSite" style="buttontext"/>
-                                </container>
                                 <label style="h1" text="${uiLabelMap[labelTitleProperty]} ${uiLabelMap.CommonFor}: ${webSite.siteName} [${webSite.webSiteId}]  ${${extraFunctionName}}"/>
+                                <container style="button-bar">
+                                    <link  text="${uiLabelMap.ContentCreateNewWebSite}" target="EditWebSite" style="buttontext create"/>
+                                </container>
                                 <decorator-section-include name="body"/>
                             </widgets>
                             <fail-widgets>

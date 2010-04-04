@@ -34,10 +34,7 @@ under the License.
                     <decorator-section name="pre-body">
                         <section>
                             <condition>
-                                <and>
-                                    <if-service-permission service-name="acctgInvoicePermissionCheck" main-action="VIEW"/>
-                                    <not><if-empty field="parameters.invoiceId"/></not>
-                                </and>
+                                <if-service-permission service-name="acctgInvoicePermissionCheck" main-action="VIEW"/>
                             </condition>
                             <widgets>
                                 <include-menu name="InvoiceTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
@@ -71,7 +68,7 @@ under the License.
             </widgets>
         </section>
     </screen>
-
+    
     <screen name="FindInvoices">
         <section>
             <actions>

@@ -101,8 +101,11 @@ under the License.
     <ContactMechTypePurpose contactMechPurposeTypeId="PHONE_PAYMENT" contactMechTypeId="TELECOM_NUMBER"/>
     <ContactMechTypePurpose contactMechPurposeTypeId="PRIMARY_PHONE" contactMechTypeId="TELECOM_NUMBER"/>
     <ContactMechTypePurpose contactMechPurposeTypeId="PHONE_QUICK" contactMechTypeId="TELECOM_NUMBER"/>
+    <ContactMechTypePurpose contactMechPurposeTypeId="FAX_SHIPPING" contactMechTypeId="TELECOM_NUMBER"/>
+    <ContactMechTypePurpose contactMechPurposeTypeId="FAX_BILLING" contactMechTypeId="TELECOM_NUMBER"/>
+    <ContactMechTypePurpose contactMechPurposeTypeId="PHONE_ASSISTANT" contactMechTypeId="TELECOM_NUMBER"/>
     <ContactMechTypePurpose contactMechPurposeTypeId="PRIMARY_WEB_URL" contactMechTypeId="WEB_ADDRESS"/>
-
+    
     <!-- communication events -->
     <CommunicationEventPrpTyp communicationEventPrpTypId="ACTIVITY_REQUEST" description="Activity Request" hasTable="N" parentTypeId=""/>
     <CommunicationEventPrpTyp communicationEventPrpTypId="CONFERENCE" description="Conference" hasTable="N" parentTypeId=""/>
@@ -325,6 +328,7 @@ under the License.
     <StatusItem description="Bounced" sequenceId="50" statusCode="BOUNCED" statusId="COM_BOUNCED" statusTypeId="COM_EVENT_STATUS"/>
     <StatusItem description="Cancelled" sequenceId="99" statusCode="CANCELLED" statusId="COM_CANCELLED" statusTypeId="COM_EVENT_STATUS"/>
     <StatusValidChange condition="" statusId="COM_ENTERED" statusIdTo="COM_PENDING" transitionName="Set Pending, only visible to originator"/>
+    <StatusValidChange condition="" statusId="COM_ENTERED" statusIdTo="COM_IN_PROGRESS" transitionName="Set In Progress, waiting to be send"/>
     <StatusValidChange condition="" statusId="COM_ENTERED" statusIdTo="COM_COMPLETE" transitionName="Complete"/>
     <StatusValidChange condition="" statusId="COM_PENDING" statusIdTo="COM_ENTERED" transitionName="Entered,visible to all participants"/>
     <StatusValidChange condition="" statusId="COM_PENDING" statusIdTo="COM_IN_PROGRESS" transitionName="Set In Progress, waiting to be send"/>

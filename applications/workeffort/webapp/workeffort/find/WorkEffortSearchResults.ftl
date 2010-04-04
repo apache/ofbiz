@@ -22,13 +22,13 @@ under the License.
   </div>
   <div class="screenlet-body">
     <#list searchConstraintStrings as searchConstraintString>
-        <div>&nbsp;<a href="<@ofbizUrl>WorkEffortSearchResults?removeConstraint=${searchConstraintString_index}&clearSearch=N</@ofbizUrl>" class="buttontext">X</a>&nbsp;${searchConstraintString}</div>
+        <div>&nbsp;<a href="<@ofbizUrl>WorkEffortSearchResults?removeConstraint=${searchConstraintString_index}&amp;clearSearch=N</@ofbizUrl>" class="buttontext">X</a>&nbsp;${searchConstraintString}</div>
     </#list>
     <div><span class="label">${uiLabelMap.CommonSortedBy}</span> ${searchSortOrderString}</div>
     <div><a href="<@ofbizUrl>WorkEffortSearchOptions</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonRefineSearch}</a></div>
 
     <#if !workEffortIds?has_content>
-      <br/><h2>&nbsp;${uiLabelMap.ProductNoResultsFound}.</h2>
+      <br /><h2>&nbsp;${uiLabelMap.ProductNoResultsFound}.</h2>
     </#if>
 
     <#if workEffortIds?has_content>

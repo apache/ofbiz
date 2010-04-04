@@ -97,7 +97,7 @@ public class CommonServices {
         System.out.println("----- SVC: " + dctx.getName() + " -----");
         return response;
     }
-    
+
     /**
      * Generic Test SOAP Service
      *@param dctx The DispatchContext that this service is operating in
@@ -132,12 +132,6 @@ public class CommonServices {
         } catch (InterruptedException e) {
         }
         return CommonServices.testService(dctx, context);
-    }
-
-    public static Map<String, Object> testWorkflowCondition(DispatchContext dctx, Map<String, ?> context) {
-        Map<String, Object> result = FastMap.newInstance();
-        result.put("evaluationResult", Boolean.TRUE);
-        return result;
     }
 
     public static Map<String, Object> testRollbackListener(DispatchContext dctx, Map<String, ?> context) {

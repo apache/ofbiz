@@ -153,7 +153,7 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
     /** This Map is keyed with the field name and has a ModelFormField for the value.
      */
     protected Map<String, ModelFormField> fieldMap = FastMap.newInstance();
-    
+
     /** Keeps track of conditional fields to help ensure that only one is rendered
      */
     protected Set<String> useWhenFields = FastSet.newInstance();
@@ -178,7 +178,7 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
 
     /** Pagination settings and defaults. */
     public static int DEFAULT_PAGE_SIZE = 10;
-    public static int MAX_PAGE_SIZE = 10000;    
+    public static int MAX_PAGE_SIZE = 10000;
     protected int defaultViewSize = DEFAULT_PAGE_SIZE;
     public static String DEFAULT_PAG_INDEX_FIELD = "viewIndex";
     public static String DEFAULT_PAG_SIZE_FIELD = "viewSize";
@@ -213,7 +213,12 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
         super(formElement);
         this.entityModelReader = entityModelReader;
         this.dispatchContext = dispatchContext;
-        initForm(formElement);
+        try {
+            initForm(formElement);
+        } catch (RuntimeException e) {
+            Debug.logError(e, "Error parsing form [" + formElement.getAttribute("name") + "]: " + e.toString(), module);
+            throw e;
+        }
     }
 
     public ModelForm(Element formElement) {
@@ -299,7 +304,7 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
                 this.onSubmitUpdateAreas = parent.onSubmitUpdateAreas;
                 this.onPaginateUpdateAreas = parent.onPaginateUpdateAreas;
                 this.altRowStyles = parent.altRowStyles;
-                
+
                 this.useWhenFields = parent.useWhenFields;
 
                 //these are done below in a special way...
@@ -791,6 +796,19 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
      *   use the same form definitions for many types of form UIs
      */
     public void renderFormString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
+        //  increment the paginator, only for list and multi forms
+        if ("list".equals(this.type) || "multi".equals(this.type)) {
+            this.incrementPaginatorNumber(context);
+        }
+
+        //if pagination is disabled, update the defualt view size
+        if (!getPaginate(context)) {
+            setDefaultViewSize(this.MAX_PAGE_SIZE);
+        }
+
+        // Populate the viewSize and viewIndex so they are available for use during form actions
+        context.put("viewIndex", this.getViewIndex(context));
+        context.put("viewSize", this.getViewSize(context));
         ThreadContext.pushExecutionArtifact(this);
         try {
             ThreadContext.getAccessController().checkPermission(View);
@@ -1110,7 +1128,9 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
 
         int numOfColumns = 0;
         // ===== render header row =====
-        numOfColumns = this.renderHeaderRow(writer, context, formStringRenderer);
+        if (!getHideHeader()) {
+            numOfColumns = this.renderHeaderRow(writer, context, formStringRenderer);
+        }
 
         // ===== render the item rows =====
         this.renderItemRows(writer, context, formStringRenderer, false, numOfColumns);
@@ -1447,7 +1467,7 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
                 if (UtilValidate.isNotEmpty(context.get("renderFormSeqNumber"))) {
                     localContext.put("formUniqueId", "_"+context.get("renderFormSeqNumber"));
                 }
-                
+
                 this.resetBshInterpreter(localContext);
 
                 if (Debug.verboseOn()) Debug.logVerbose("In form got another row, context is: " + localContext, module);
@@ -1516,7 +1536,9 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
                             break;
                         }
 
-                        if (!modelFormField.shouldUse(localContext)) {
+                        // if this is a list or multi form don't skip here because we don't want to skip the table cell, will skip the actual field later
+                        if (!"list".equals(this.getType()) && !"multi".equals(this.getType()) &&
+                                !modelFormField.shouldUse(localContext)) {
                             continue;
                         }
                         innerDisplayHyperlinkFieldsBegin.add(modelFormField);
@@ -1537,7 +1559,9 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
                             continue;
                         }
 
-                        if (!modelFormField.shouldUse(localContext)) {
+                        // if this is a list or multi form don't skip here because we don't want to skip the table cell, will skip the actual field later
+                        if (!"list".equals(this.getType()) && !"multi".equals(this.getType()) &&
+                                !modelFormField.shouldUse(localContext)) {
                             continue;
                         }
                         innerFormFields.add(modelFormField);
@@ -1557,7 +1581,9 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
                             continue;
                         }
 
-                        if (!modelFormField.shouldUse(localContext)) {
+                        // if this is a list or multi form don't skip here because we don't want to skip the table cell, will skip the actual field later
+                        if (!"list".equals(this.getType()) && !"multi".equals(this.getType()) &&
+                                !modelFormField.shouldUse(localContext)) {
                             continue;
                         }
                         innerDisplayHyperlinkFieldsEnd.add(modelFormField);
@@ -1607,18 +1633,40 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
 
         // render row formatting open
         formStringRenderer.renderFormatItemRowOpen(writer, localContext, this);
+        Iterator<ModelFormField> innerDisplayHyperlinkFieldsBeginIter = innerDisplayHyperlinkFieldsBegin.iterator();
+        Map<String, Integer> fieldCount = FastMap.newInstance();
+        while(innerDisplayHyperlinkFieldsBeginIter.hasNext()){
+            ModelFormField modelFormField = innerDisplayHyperlinkFieldsBeginIter.next();
+            if(fieldCount.containsKey(modelFormField.getFieldName())){
+                fieldCount.put(modelFormField.getFieldName(), fieldCount.get(modelFormField.getFieldName())+1);
+            }
+            else{
+                fieldCount.put(modelFormField.getFieldName(), 1);
+            }
+        }
 
         // do the first part of display and hyperlink fields
         Iterator<ModelFormField> innerDisplayHyperlinkFieldIter = innerDisplayHyperlinkFieldsBegin.iterator();
         while (innerDisplayHyperlinkFieldIter.hasNext()) {
             ModelFormField modelFormField = innerDisplayHyperlinkFieldIter.next();
             // span columns only if this is the last column in the row (not just in this first list)
-            if (innerDisplayHyperlinkFieldIter.hasNext() || numOfCells > innerDisplayHyperlinkFieldsBegin.size()) {
-                formStringRenderer.renderFormatItemRowCellOpen(writer, localContext, this, modelFormField, 1);
-            } else {
-                formStringRenderer.renderFormatItemRowCellOpen(writer, localContext, this, modelFormField, numOfColumnsToSpan);
+            if( fieldCount.get(modelFormField.getName()) < 2 ){
+                if ((innerDisplayHyperlinkFieldIter.hasNext() || numOfCells > innerDisplayHyperlinkFieldsBegin.size())) {
+                    formStringRenderer.renderFormatItemRowCellOpen(writer, localContext, this, modelFormField, 1);
+                } else {
+                    formStringRenderer.renderFormatItemRowCellOpen(writer, localContext, this, modelFormField, numOfColumnsToSpan);
+                }
             }
-            modelFormField.renderFieldString(writer, localContext, formStringRenderer);
+            if ((!"list".equals(this.getType()) && !"multi".equals(this.getType())) || modelFormField.shouldUse(localContext)) { 
+                    if(( fieldCount.get(modelFormField.getName()) > 1 )){
+                        if ((innerDisplayHyperlinkFieldIter.hasNext() || numOfCells > innerDisplayHyperlinkFieldsBegin.size())) {
+                            formStringRenderer.renderFormatItemRowCellOpen(writer, localContext, this, modelFormField, 1);
+                        } else {
+                            formStringRenderer.renderFormatItemRowCellOpen(writer, localContext, this, modelFormField, numOfColumnsToSpan);
+                        }
+                    }
+                modelFormField.renderFieldString(writer, localContext, formStringRenderer);
+            }
             formStringRenderer.renderFormatItemRowCellClose(writer, localContext, this, modelFormField);
         }
 
@@ -1641,7 +1689,10 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
                     formStringRenderer.renderFormatItemRowCellOpen(writer, localContext, this, modelFormField, 1);
                 }
                 // render field widget
-                modelFormField.renderFieldString(writer, localContext, formStringRenderer);
+                if ((!"list".equals(this.getType()) && !"multi".equals(this.getType())) || modelFormField.shouldUse(localContext)) {
+                    modelFormField.renderFieldString(writer, localContext, formStringRenderer);
+                }
+
                 if (separateColumns || modelFormField.getSeparateColumn()) {
                     formStringRenderer.renderFormatItemRowCellClose(writer, localContext, this, modelFormField);
                 }
@@ -1664,7 +1715,9 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
             } else {
                 formStringRenderer.renderFormatItemRowCellOpen(writer, localContext, this, modelFormField, numOfColumnsToSpan);
             }
-            modelFormField.renderFieldString(writer, localContext, formStringRenderer);
+            if ((!"list".equals(this.getType()) && !"multi".equals(this.getType())) || modelFormField.shouldUse(localContext)) {
+                modelFormField.renderFieldString(writer, localContext, formStringRenderer);
+            }
             formStringRenderer.renderFormatItemRowCellClose(writer, localContext, this, modelFormField);
         }
 
@@ -1948,16 +2001,16 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
             return this.getName();
         }
     }
-    
+
     public String getCurrentContainerId(Map<String, Object> context) {
         Integer itemIndex = (Integer) context.get("itemIndex");
         if (itemIndex != null && "list".equals(this.getType())) {
             return this.getContainerId() + this.getItemIndexSeparator() + itemIndex.intValue();
-        } 
-        
+        }
+
         return this.getContainerId();
     }
-    
+
     public String getContainerStyle() {
         return this.containerStyle;
     }
@@ -2201,7 +2254,7 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
         }
         return field;
     }
-    
+
     public String getMultiPaginateIndexField(Map<String, Object> context) {
         String field = this.paginateIndexField.expandString(context);
         if (UtilValidate.isEmpty(field)) {
@@ -2230,7 +2283,7 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
                     }
                 }
             }
-            
+
             // try paginate index field without paginator number
             if (value == null) {
                 field = this.getPaginateIndexField(context);
@@ -2256,7 +2309,7 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
         }
         return field;
     }
-    
+
     public String getMultiPaginateSizeField(Map<String, Object> context) {
         String field = this.paginateSizeField.expandString(context);
         if (UtilValidate.isEmpty(field)) {
@@ -2285,7 +2338,7 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
                     }
                 }
             }
-            
+
             // try the page size field without paginator number
             if (value == null) {
                 field = this.getPaginateSizeField(context);
@@ -2386,7 +2439,7 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
             return Boolean.valueOf(this.paginate.expandString(context)).booleanValue();
         } else {
             return true;
-        }        
+        }
     }
 
     public boolean getSkipStart() {
@@ -2416,11 +2469,11 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
     public boolean getClientAutocompleteFields() {
         return this.clientAutocompleteFields;
     }
-    
+
     public void setPaginate(boolean val) {
         this.paginate = FlexibleStringExpander.getInstance(Boolean.valueOf(val).toString());
     }
- 
+
     public void setOverridenListSize(boolean overridenListSize) {
         this.overridenListSize = overridenListSize;
     }
@@ -2931,16 +2984,22 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
         }
         if (this.actions != null) {
             for (ModelFormAction modelFormAction: this.actions) {
-                if (modelFormAction instanceof ModelFormAction.Service) {
-                    allServiceNamesUsed.add(((ModelFormAction.Service)modelFormAction).serviceNameExdr.getOriginal());
-                }
+                try {
+                    ModelFormAction.Service service = (ModelFormAction.Service) modelFormAction;
+                    if (!service.serviceNameExdr.isEmpty()) {
+                        allServiceNamesUsed.add(service.serviceNameExdr.toString());
+                    }
+                } catch (ClassCastException e) {}
             }
         }
         if (this.rowActions != null) {
             for (ModelFormAction modelFormAction: this.rowActions) {
-                if (modelFormAction instanceof ModelFormAction.Service) {
-                    allServiceNamesUsed.add(((ModelFormAction.Service)modelFormAction).serviceNameExdr.getOriginal());
-                }
+                try {
+                    ModelFormAction.Service service = (ModelFormAction.Service) modelFormAction;
+                    if (!service.serviceNameExdr.isEmpty()) {
+                        allServiceNamesUsed.add(service.serviceNameExdr.toString());
+                    }
+                } catch (ClassCastException e) {}
             }
         }
         for (ModelFormField modelFormField: this.fieldList) {
@@ -2992,14 +3051,6 @@ public class ModelForm extends ModelWidget implements ExecutionArtifact {
                     }
                 } else if (modelFormField.getFieldInfo() instanceof ModelFormField.ImageField) {
                     ModelFormField.ImageField parentField = (ModelFormField.ImageField) modelFormField.getFieldInfo();
-                    if (parentField.subHyperlink != null) {
-                        Set<String> controllerLocAndRequestSet = ConfigXMLReader.findControllerRequestUniqueForTargetType(parentField.subHyperlink.getTarget(null), parentField.subHyperlink.getTargetType());
-                        if (controllerLocAndRequestSet != null) {
-                            allRequestsUsed.addAll(controllerLocAndRequestSet);
-                        }
-                    }
-                } else if (modelFormField.getFieldInfo() instanceof ModelFormField.DropDownField) {
-                    ModelFormField.DropDownField parentField = (ModelFormField.DropDownField) modelFormField.getFieldInfo();
                     if (parentField.subHyperlink != null) {
                         Set<String> controllerLocAndRequestSet = ConfigXMLReader.findControllerRequestUniqueForTargetType(parentField.subHyperlink.getTarget(null), parentField.subHyperlink.getTargetType());
                         if (controllerLocAndRequestSet != null) {

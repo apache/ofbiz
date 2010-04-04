@@ -20,14 +20,19 @@ package org.ofbiz.widget;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.ofbiz.base.util.StringUtil;
+import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilValidate;
@@ -191,7 +196,7 @@ public class WidgetWorker {
             writer.append("</a>");
         }
     }
-    
+
     public static void makeHiddenFormLinkAnchor(Appendable writer, String linkStyle, String description, String confirmation, ModelFormField modelFormField, HttpServletRequest request, HttpServletResponse response, Map<String, Object> context) throws IOException {
         if (UtilValidate.isNotEmpty(description) || UtilValidate.isNotEmpty(request.getAttribute("image"))) {
             writer.append("<a");
@@ -213,7 +218,7 @@ public class WidgetWorker {
                 writer.append(modelFormField.getAction(context));
                 writer.append('"');
             }
-            
+
             if (UtilValidate.isNotEmpty(confirmation)){
                 writer.append(" onclick=\"return confirm('");
                 writer.append(confirmation);
@@ -313,8 +318,35 @@ public class WidgetWorker {
             if (this.value != null) {
                 return this.value.expandString(context);
             } else if (this.fromField != null && this.fromField.get(context) != null) {
-                Object contextVal = this.fromField.get(context);
-                return contextVal.toString();
+                Object retVal = this.fromField.get(context);
+                
+                if (retVal != null) {
+                    TimeZone timeZone = (TimeZone) context.get("timeZone");
+                    if (timeZone == null) timeZone = TimeZone.getDefault();
+                    
+                    String returnValue = null;
+                    // format string based on the user's time zone (not locale because these are parameters)
+                    if (retVal instanceof Double || retVal instanceof Float || retVal instanceof BigDecimal) {
+                        returnValue = retVal.toString();
+                    } else if (retVal instanceof java.sql.Date) {
+                        DateFormat df = UtilDateTime.toDateFormat(UtilDateTime.DATE_FORMAT, timeZone, null);
+                        returnValue = df.format((java.util.Date) retVal);
+                    } else if (retVal instanceof java.sql.Time) {
+                        DateFormat df = UtilDateTime.toTimeFormat(UtilDateTime.TIME_FORMAT, timeZone, null);
+                        returnValue = df.format((java.util.Date) retVal);
+                    } else if (retVal instanceof java.sql.Timestamp) {
+                        DateFormat df = UtilDateTime.toDateTimeFormat(UtilDateTime.DATE_TIME_FORMAT, timeZone, null);
+                        returnValue = df.format((java.util.Date) retVal);
+                    } else if (retVal instanceof java.util.Date) {
+                        DateFormat df = UtilDateTime.toDateTimeFormat("EEE MMM dd hh:mm:ss z yyyy", timeZone, null);
+                        returnValue = df.format((java.util.Date) retVal);
+                    } else {
+                        returnValue = retVal.toString();
+                    }
+                    return returnValue;
+                } else {
+                    return null;
+                }
             } else {
                 // as a last chance try finding a context field with the key of the name field
                 Object obj = context.get(this.name);
@@ -333,7 +365,7 @@ public class WidgetWorker {
                 String requestUri = (target.indexOf('?') > -1) ? target.substring(0, target.indexOf('?')) : target;
                 ServletContext servletContext = (ServletContext) request.getSession().getServletContext();
                 RequestHandler rh = (RequestHandler) servletContext.getAttribute("_REQUEST_HANDLER_");
-                ConfigXMLReader.RequestMap requestMap = rh.getControllerConfig().requestMapMap.get(requestUri);
+                ConfigXMLReader.RequestMap requestMap = rh.getControllerConfig().getRequestMapMap().get(requestUri);
                 if (requestMap != null && requestMap.event != null) {
                     return "hidden-form";
                 } else {
@@ -346,4 +378,34 @@ public class WidgetWorker {
             return linkType;
         }
     }
+
+    /** Returns the script location based on a script combined name:
+     * <code>location#methodName</code>.
+     * 
+     * @param combinedName The combined location/method name
+     * @return The script location
+     */
+    public static String getScriptLocation(String combinedName) {
+        int pos = combinedName.lastIndexOf("#");
+        if (pos == -1) {
+            return combinedName;
+        }
+        return combinedName.substring(0, pos);
+    }
+
+    /** Returns the script method name based on a script combined name:
+     * <code>location#methodName</code>. Returns <code>null</code> if
+     * no method name is found.
+     * 
+     * @param combinedName The combined location/method name
+     * @return The method name or <code>null</code>
+     */
+    public static String getScriptMethodName(String combinedName) {
+        int pos = combinedName.lastIndexOf("#");
+        if (pos == -1) {
+            return null;
+        }
+        return combinedName.substring(pos + 1);
+    }
+
 }

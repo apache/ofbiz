@@ -18,31 +18,23 @@
  *******************************************************************************/
 package org.ofbiz.base.conversion;
 
-import org.ofbiz.base.util.ObjectType;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /** Abstract LocalizedConverter class. This class handles converter registration
  * and it implements the <code>canConvert</code>, <code>getSourceClass</code>,
  * and <code>getTargetClass</code> methods.
  */
-public abstract class AbstractLocalizedConverter<S, T> implements LocalizedConverter<S, T> {
-    private final Class<S> sourceClass;
-    private final Class<T> targetClass;
-
-    protected AbstractLocalizedConverter(Class<S> sourceClass, Class<T> targetClass) {
-        this.sourceClass = sourceClass;
-        this.targetClass = targetClass;
-        Converters.registerConverter(this);
+public abstract class AbstractLocalizedConverter<S, T> extends AbstractConverter<S, T> implements LocalizedConverter<S, T> {
+    protected AbstractLocalizedConverter(Class<? super S> sourceClass, Class<? super T> targetClass) {
+        super(sourceClass, targetClass);
     }
 
-    public boolean canConvert(Class<?> sourceClass, Class<?> targetClass) {
-        return ObjectType.instanceOf(sourceClass, this.getSourceClass()) && ObjectType.instanceOf(targetClass, this.getTargetClass());
+    public T convert(Class<? extends T> targetClass, S obj, Locale locale, TimeZone timeZone) throws ConversionException {
+        return convert(obj, locale, timeZone);
     }
 
-    public final Class<S> getSourceClass() {
-        return sourceClass;
-    }
-
-    public final Class<T> getTargetClass() {
-        return targetClass;
+    public T convert(Class<? extends T> targetClass, S obj, Locale locale, TimeZone timeZone, String formatString) throws ConversionException {
+        return convert(obj, locale, timeZone, formatString);
     }
 }

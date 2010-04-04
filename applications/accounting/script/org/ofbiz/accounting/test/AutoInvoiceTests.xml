@@ -20,6 +20,94 @@ under the License.
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+
+    <simple-method method-name="testInvoiceWorkerGetInvoiceTotal" login-required="false" 
+        short-description="Tests InvoiceWorker.getInvoiceTotal(GenericValue) for all demo invoices">
+        <set field="invoiceId" value="demo10000"/>
+        <set field="amount" value="323.54" type="BigDecimal"/>
+        <call-simple-method method-name="assertInvoiceTotal"/>
+
+        <set field="invoiceId" value="demo10001"/>
+        <set field="amount" value="36.43" type="BigDecimal"/>
+        <call-simple-method method-name="assertInvoiceTotal"/>
+
+        <set field="invoiceId" value="demo10002"/>
+        <set field="amount" value="56.99" type="BigDecimal"/>
+        <call-simple-method method-name="assertInvoiceTotal"/>
+
+        <set field="invoiceId" value="demo11000"/>
+        <set field="amount" value="20" type="BigDecimal"/>
+        <call-simple-method method-name="assertInvoiceTotal"/>
+
+        <set field="invoiceId" value="demo11001"/>
+        <set field="amount" value="543.23" type="BigDecimal"/>
+        <call-simple-method method-name="assertInvoiceTotal"/>
+
+        <set field="invoiceId" value="demo1200"/>
+        <set field="amount" value="511.23" type="BigDecimal"/>
+        <call-simple-method method-name="assertInvoiceTotal"/>
+
+        <set field="invoiceId" value="8000"/>
+        <set field="amount" value="60" type="BigDecimal"/>
+        <call-simple-method method-name="assertInvoiceTotal"/>
+
+        <set field="invoiceId" value="8001"/>
+        <set field="amount" value="10" type="BigDecimal"/>
+        <call-simple-method method-name="assertInvoiceTotal"/>
+
+        <set field="invoiceId" value="8002"/>
+        <set field="amount" value="36.43" type="BigDecimal"/>
+        <call-simple-method method-name="assertInvoiceTotal"/>
+
+        <set field="invoiceId" value="8003"/>
+        <set field="amount" value="46.43" type="BigDecimal"/>
+        <call-simple-method method-name="assertInvoiceTotal"/>
+
+        <set field="invoiceId" value="8004"/>
+        <set field="amount" value="33.99" type="BigDecimal"/>
+        <call-simple-method method-name="assertInvoiceTotal"/>
+
+        <set field="invoiceId" value="8100"/>
+        <set field="amount" value="1320" type="BigDecimal"/>
+        <call-simple-method method-name="assertInvoiceTotal"/>
+
+        <set field="invoiceId" value="8005"/>
+        <set field="amount" value="33.99" type="BigDecimal"/>
+        <call-simple-method method-name="assertInvoiceTotal"/>
+
+        <set field="invoiceId" value="8006"/>
+        <set field="amount" value="46.43" type="BigDecimal"/>
+        <call-simple-method method-name="assertInvoiceTotal"/>
+
+        <set field="invoiceId" value="8007"/>
+        <set field="amount" value="36.43" type="BigDecimal"/>
+        <call-simple-method method-name="assertInvoiceTotal"/>
+
+        <set field="invoiceId" value="8008"/>
+        <set field="amount" value="48" type="BigDecimal"/>
+        <call-simple-method method-name="assertInvoiceTotal"/>
+
+        <set field="invoiceId" value="8009"/>
+        <set field="amount" value="127.09" type="BigDecimal"/>
+        <call-simple-method method-name="assertInvoiceTotal"/>
+
+        <set field="invoiceId" value="8010"/>
+        <set field="amount" value="179.97" type="BigDecimal"/>
+        <call-simple-method method-name="assertInvoiceTotal"/>
+
+        <check-errors/>
+    </simple-method>
+    <simple-method method-name="assertInvoiceTotal" login-required="false"
+    short-description="Inline method to assist testInvoiceWorkerGetInvoiceTotal">
+        <entity-one value-field="invoice" entity-name="Invoice">
+            <field-map field-name="invoiceId"/>
+        </entity-one>
+        <call-class-method method-name="getInvoiceTotal" class-name="org.ofbiz.accounting.invoice.InvoiceWorker" ret-field="invoiceTotal">
+            <field field="invoice" type="GenericValue"/>
+        </call-class-method>
+        <assert><if-compare-field field="invoiceTotal" operator="equals" to-field="amount" type="BigDecimal"/></assert>
+    </simple-method>
+
     <!-- Test case for Commission Run -->
     <simple-method method-name="testCommissionRun" short-description="Test case for Commission Run" login-required="false">
 
@@ -29,7 +117,7 @@ under the License.
         <!-- Postcondition :
                 1 ) Two commission will be creating for the parties DemoCustAgent and DemoRepAll (like 10000 and 10001 invoiceId).
                 2 ) Its amountTotal will be same as commission cost of associated products. -->
- 
+
         <set field="invoiceId" value="8100"/>
         <set field="invoiceIds[]" from-field="invoiceId"/>
         <set field="partyIds[]" value="DemoRepAll"/>
@@ -60,7 +148,7 @@ under the License.
         <iterate list="invoicesCreated" entry="invoice">
             <call-class-method method-name="getInvoiceTotal" ret-field="amountTotal" class-name="org.ofbiz.accounting.invoice.InvoiceWorker">
                 <field field="delegator" type="org.ofbiz.entity.Delegator"/>
-                <field field="invoice.commissionInvoiceId" type="String"/> 
+                <field field="invoice.commissionInvoiceId" type="String"/>
             </call-class-method>
             <assert>
                 <or>
@@ -90,8 +178,8 @@ under the License.
         </entity-one>
         <set field="getAcctgTransEntriesAndTransTotalMap.userLogin" from-field="userLogin"/>
         <set field="getAcctgTransEntriesAndTransTotalMap.organizationPartyId" value="Company"/>
-        <set field="getAcctgTransEntriesAndTransTotalMap.customTimePeriodStartDate" value="2009-01-01 16:55:01.0" type="Timestamp"/>
-        <set field="getAcctgTransEntriesAndTransTotalMap.customTimePeriodEndDate" value="2009-12-31 16:55:01.0" type="Timestamp"/>
+        <set field="getAcctgTransEntriesAndTransTotalMap.customTimePeriodStartDate" value="2010-01-01 16:55:01.0" type="Timestamp"/>
+        <set field="getAcctgTransEntriesAndTransTotalMap.customTimePeriodEndDate" value="2010-12-31 16:55:01.0" type="Timestamp"/>
         <set field="getAcctgTransEntriesAndTransTotalMap.glAccountId" value="210000"/>
         <call-service service-name="getAcctgTransEntriesAndTransTotal" in-map-name="getAcctgTransEntriesAndTransTotalMap">
             <result-to-field result-name="debitTotal" field="payableDebitTotal"/>
@@ -158,8 +246,8 @@ under the License.
         </entity-one>
         <set field="getAcctgTransEntriesAndTransTotalMap.userLogin" from-field="userLogin"/>
         <set field="getAcctgTransEntriesAndTransTotalMap.organizationPartyId" value="Company"/>
-        <set field="getAcctgTransEntriesAndTransTotalMap.customTimePeriodStartDate" value="2009-01-01 16:55:01.0" type="Timestamp"/>
-        <set field="getAcctgTransEntriesAndTransTotalMap.customTimePeriodEndDate" value="2009-12-31 16:55:01.0" type="Timestamp"/>
+        <set field="getAcctgTransEntriesAndTransTotalMap.customTimePeriodStartDate" value="2010-01-01 16:55:01.0" type="Timestamp"/>
+        <set field="getAcctgTransEntriesAndTransTotalMap.customTimePeriodEndDate" value="2010-12-31 16:55:01.0" type="Timestamp"/>
         <set field="getAcctgTransEntriesAndTransTotalMap.glAccountId" value="210000"/>
         <call-service service-name="getAcctgTransEntriesAndTransTotal" in-map-name="getAcctgTransEntriesAndTransTotalMap">
             <result-to-field result-name="debitTotal" field="payableDebitTotal"/>
@@ -173,10 +261,10 @@ under the License.
             <result-to-field result-name="creditTotal" field="undepositedCreditTotal"/>
             <result-to-field result-name="debitCreditDifference" field="undepositedDebitCreditDifference"/>
         </call-service>
-        
+
         <log level="info" message="BEFORE  RUNNING CANCEL CHECK RUN  : ACCOUNTS PAYABLE ;debitTotal :${payableDebitTotal} ; creditTotal:${payableCreditTotal} ; debitCreditDifference : ${payableDebitCreditDifference}"/>
         <log level="info" message="BEFORE  RUNNING CANCEL CHECK RUN : UNDEPOSITED RECEIPTS ;debitTotal :${undepositedDebitTotal} ; creditTotal:${undepositedCreditTotal} ; debitCreditDifference : ${undepositedDebitCreditDifference}"/>
-        
+
         <set field="paymentGroupId" value="9000"/>
         <set field="cancelCheckRunPaymentsMap.userLogin" from-field="userLogin"/>
         <set field="cancelCheckRunPaymentsMap.paymentGroupId" from-field="paymentGroupId"/>
@@ -186,7 +274,7 @@ under the License.
         </entity-and>
         <first-from-list list="paymentGroupMemberAndTransList" entry="paymentGroupMemberAndTrans"/>
         <if-compare field="paymentGroupMemberAndTrans.finAccountTransStatusId" operator="not-equals" value="FINACT_TRNS_APPROVED">
-        
+
         <set field="totalPayableDebitAmount" value="${payableDebitTotal + 82.86}" type="BigDecimal"/>
         <set field="totalPayableCreditAmount" value="${payableCreditTotal + 165.72}" type="BigDecimal"/>
         <set field="totalPayableDebitCreditDifference" value="${payableDebitCreditDifference - 82.86}" type="BigDecimal"/>
@@ -196,7 +284,7 @@ under the License.
             <result-to-field result-name="creditTotal" field="payableCreditTotal"/>
             <result-to-field result-name="debitCreditDifference" field="payableDebitCreditDifference"/>
         </call-service>
-        
+
         <assert>
             <if-compare-field field="totalPayableDebitAmount" operator="equals" to-field="payableDebitTotal" type="BigDecimal"/>
             <if-compare-field field="totalPayableCreditAmount" operator="equals" to-field="payableCreditTotal" type="BigDecimal"/>

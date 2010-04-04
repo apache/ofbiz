@@ -664,11 +664,17 @@ under the License.
                     <xs:enumeration value="date-time">
                         <xs:annotation><xs:documentation>Display only the date and hours:minutes part of a timestamp field</xs:documentation></xs:annotation>
                     </xs:enumeration>
+                    <xs:enumeration value="image">
+                        <xs:annotation><xs:documentation>Display the image specified in image-location</xs:documentation></xs:annotation>
+                    </xs:enumeration>
                 </xs:restriction>
             </xs:simpleType>
         </xs:attribute>
         <xs:attribute type="xs:string" name="currency">
             <xs:annotation><xs:documentation>Specifies the currency uom ID used to format context value, should generally use the ${} syntax to retrieve value.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="image-location">
+            <xs:annotation><xs:documentation>Specifies the image to display.</xs:documentation></xs:annotation>
         </xs:attribute>
     </xs:attributeGroup>
     <xs:element name="display-entity" substitutionGroup="AllFields">
@@ -830,6 +836,12 @@ under the License.
             <xs:annotation><xs:documentation>Specifies the string to display, can use the ${} syntax to insert context values; if empty the value of the field will be printed for a default.</xs:documentation></xs:annotation>
         </xs:attribute>
         <xs:attribute type="xs:string" name="target-window"/>
+        <xs:attribute type="xs:string" name="alternate">
+            <xs:annotation><xs:documentation>Alternate text if the image is not found at image-location</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="image-title">
+            <xs:annotation><xs:documentation>Use as a title for the HTML img tag</xs:documentation></xs:annotation>
+        </xs:attribute>
         <xs:attribute type="xs:string" name="image-location"/>
         <xs:attribute name="request-confirmation" default="false">
             <xs:annotation><xs:documentation>If true then the user is presented with a dialog box, if confirmation-message is empty, use default</xs:documentation></xs:annotation>
@@ -869,6 +881,8 @@ under the License.
         <xs:attribute type="xs:positiveInteger" name="height"/>
         <xs:attribute type="xs:string" name="value"/>
         <xs:attribute type="xs:string" name="default-value"/>
+        <xs:attribute type="xs:string" name="description"/>
+        <xs:attribute type="xs:string" name="alternate"/>
     </xs:attributeGroup>
     <xs:element name="lookup" substitutionGroup="AllFields">
         <xs:complexType>
@@ -880,7 +894,7 @@ under the License.
     </xs:element>
     <xs:attributeGroup name="attlist.lookup">
         <xs:attribute type="xs:string" name="target-form-name" use="required"/>
-        <xs:attribute type="xs:positiveInteger" name="size" default="25"/>
+        <xs:attribute type="xs:nonNegativeInteger" name="size" default="25"/>
         <xs:attribute type="xs:positiveInteger" name="maxlength"/>
         <xs:attribute type="xs:string" name="default-value"/>
         <xs:attribute type="xs:string" name="description-field-name"/>
@@ -898,6 +912,44 @@ under the License.
         <xs:attribute name="disabled" default="false">
             <xs:simpleType>
                 <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="presentation" default="window">
+            <xs:annotation><xs:documentation>Shows the lookup as moveable and resizable layer or window. For layer lookups use the 'LookupLayerPopupDecorator'</xs:documentation></xs:annotation>
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="layer"/>
+                    <xs:enumeration value="window"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="height">
+            <xs:annotation><xs:documentation>Only layer height. I.e. 250px, 12%</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="width">
+            <xs:annotation><xs:documentation>Only layer width. I.e. 250px, 12%</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="position" default="normal">
+            <xs:annotation><xs:documentation>Only layer position. Normal sets the layer under the target field.</xs:documentation></xs:annotation>
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="normal"/>
+                    <xs:enumeration value="center"/>
+                    <xs:enumeration value="left"/>
+                    <xs:enumeration value="right"/>
+                    <xs:enumeration value="topleft"/>
+                    <xs:enumeration value="topright"/>
+                    <xs:enumeration value="topcenter"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="fade-background" default="true">
+            <xs:annotation><xs:documentation>True = The window Background will be faded.</xs:documentation></xs:annotation>
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
                     <xs:enumeration value="true"/>
                     <xs:enumeration value="false"/>
                 </xs:restriction>
@@ -1527,6 +1579,14 @@ under the License.
         </xs:attribute>
         <!-- this is deprecated and should not be used; use result-map-list-name instead: <xs:attribute type="xs:string" name="result-map-list-iterator-name"/> -->
         <xs:attribute type="xs:string" name="result-map-list"/>
+        <xs:attribute name="ignore-error" default="false">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
     </xs:attributeGroup>
     <xs:element name="set" substitutionGroup="AllActions">
         <xs:complexType>

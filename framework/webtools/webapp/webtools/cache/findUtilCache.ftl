@@ -19,10 +19,9 @@ under the License.
 
 <#macro displayButtonBar>
     <div class="button-bar">
-        <a href="<@ofbizUrl>FindUtilCache</@ofbizUrl>" class="smallSubmit">${uiLabelMap.WebtoolsReloadCacheList}</a>
-        <a href="<@ofbizUrl>FindUtilCacheClearAll</@ofbizUrl>" class="smallSubmit">${uiLabelMap.WebtoolsClearAllCaches}</a>
-        <a href="<@ofbizUrl>FindUtilCacheClearAllExpired</@ofbizUrl>" class="smallSubmit">${uiLabelMap.WebtoolsClearExpiredFromAll}</a>
-        <a href="<@ofbizUrl>ForceGarbageCollection</@ofbizUrl>" class="smallSubmit">${uiLabelMap.WebtoolsRunGC}</a>
+        <a href="<@ofbizUrl>FindUtilCache</@ofbizUrl>" class="buttontext refresh">${uiLabelMap.WebtoolsReloadCacheList}</a>
+        <a href="<@ofbizUrl>FindUtilCacheClearAll</@ofbizUrl>" class="buttontext">${uiLabelMap.WebtoolsClearAllCaches}</a>
+        <a href="<@ofbizUrl>ForceGarbageCollection</@ofbizUrl>" class="buttontext">${uiLabelMap.WebtoolsRunGC}</a>
     </div>
 </#macro>
 <div class="screenlet">
@@ -33,7 +32,7 @@ under the License.
     <br class="clear"/>
   </div>
   <div class="screenlet-body">
-    <br/>
+    <br />
     <p>
         <u><b>${uiLabelMap.WebtoolsMemory}</b></u>
         <b>${uiLabelMap.WebtoolsTotalMemory}</b> ${memory}
@@ -41,7 +40,7 @@ under the License.
         <b>${uiLabelMap.WebtoolsUsedMemory}</b> ${usedMemory}
         <b>${uiLabelMap.WebtoolsMaxMemory}</b> ${maxMemory}
     </p>
-    <br/>
+    <br />
 
     <@displayButtonBar/>
 
@@ -53,7 +52,7 @@ under the License.
                 <td>${uiLabelMap.WebtoolsHits}</td>
                 <td>${uiLabelMap.WebtoolsMisses}</td>
                 <td>${uiLabelMap.WebtoolsRemoves}</td>
-                <td>${uiLabelMap.WebtoolsMaxSize}</td>
+                <td>${uiLabelMap.WebtoolsMaxInMemory}</td>
                 <td>${uiLabelMap.WebtoolsExpireTime}</td>
                 <td align="center">${uiLabelMap.WebtoolsUseSoftRef}</td>
                 <td align="center">${uiLabelMap.WebtoolsUseFileStore}</td>
@@ -67,7 +66,7 @@ under the License.
                     <td>${cache.hitCount?if_exists}</td>
                     <td>${cache.missCountTot?if_exists}/${cache.missCountNotFound?if_exists}/${cache.missCountExpired?if_exists}/${cache.missCountSoftRef?if_exists}</td>
                     <td>${cache.removeHitCount?if_exists}/${cache.removeMissCount?if_exists}</td>
-                    <td>${cache.maxSize?if_exists}</td>
+                    <td>${cache.maxInMemory?if_exists}</td>
                     <td>${cache.expireTime?if_exists}</td>
                     <td align="center">${cache.useSoftReference?if_exists}</td>
                     <td align="center">${cache.useFileSystemStore?if_exists}</td>

@@ -21,44 +21,47 @@ under the License.
 <screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
 
-    <screen name="showPortletDecorator">
+    <screen name="showPortlet">
         <section>
-            <actions>
-                <set field="headerItem" from-field="parameters.portletId"/>
-            </actions>
+            <widgets>
+                <section>
+                    <actions>
+                        <entity-one entity-name="PortalPortlet" value-field="portlet" />
+                    </actions>
+                    <widgets>
+                        <!--
+                            label text=" id: ${parameters.portalPortletId} location:
+                            ${portlet.screenLocation} screen: ${portlet.screenName}"></label
+                        -->
+                        <platform-specific>
+                            <html>
+                                <html-template
+                                    location="component://common/webcommon/portal/showPortlet.ftl" />
+                            </html>
+                        </platform-specific>
+                    </widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="showPortletMainDecorator">
+        <section>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <section>
-                            <actions>
-                                <entity-one entity-name="PortalPortlet" value-field="portlet"/>
-                            </actions>
-                            <widgets>
-                                <platform-specific><html><html-template location="component://common/webcommon/portal/showPortlet.ftl"/></html></platform-specific>
-                            </widgets>
-                        </section>
+                        <include-screen name="showPortlet"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
         </section>
     </screen>
 
-    <screen name="showPortlet">
+    <screen name="showPortletSimpleDecorator">
         <section>
-            <actions>
-                <set field="headerItem" from-field="parameters.portletId"/>
-            </actions>
             <widgets>
                 <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="body">
-                        <section>
-                            <actions>
-                                <entity-one entity-name="PortalPortlet" value-field="portlet"/>
-                            </actions>
-                            <widgets>
-                                <platform-specific><html><html-template location="component://common/webcommon/portal/showPortlet.ftl"/></html></platform-specific>
-                            </widgets>
-                        </section>
+                        <include-screen name="showPortlet"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -70,30 +73,14 @@ under the License.
             <actions>
                 <set field="layoutSettings.javaScripts[]" value="/images/myportal.js" global="true"/>
                 <set field="layoutSettings.styleSheets[+0]" value="/images/myportal.css" global="true"/>
-                <set field="headerItem" from-field="parameters.portalPageId"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <section>
-                            <actions>
-                                <entity-one entity-name="PortalPage" value-field="portalPage"/>
-                                <entity-and entity-name="PortalPageColumn" list="portalPageColumns">
-                                    <field-map field-name="portalPageId" from-field="parameters.portalPageId"/>
-                                    <order-by field-name="columnSeqId"/>
-                                </entity-and>
-                                <entity-and entity-name="PortalPagePortletView" list="portalPagePortlets">
-                                    <field-map field-name="portalPageId" from-field="portalPage.portalPageId"/>
-                                    <order-by field-name="columnSeqId"/>
-                                    <order-by field-name="sequenceNum"/>
-                                </entity-and>
-                            </actions>
-                            <widgets>
-                                <container id="portalContainerId">
-                                    <platform-specific><html><html-template location="component://common/webcommon/portal/showPortalPage.ftl"/></html></platform-specific>
-                                </container>
-                            </widgets>
-                        </section>
+                        <!-- label text=" id: ${parameters.portalPortletId} location: ${portlet.screenLocation} screen: ${portlet.screenName}"></label-->
+                        <container id="portalContainerId">
+                            <include-screen name="PortalPageScreen" location="component://common/widget/CommonScreens.xml"/>
+                        </container>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -103,6 +90,7 @@ under the License.
     <screen name="ManagePortalPages">
         <section>
             <actions>
+                <set field="headerItem" value="Dashboard"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/myportal.js" global="true"/>
                 <set field="layoutSettings.styleSheets[+0]" value="/images/myportal.css" global="true"/>
                 <entity-one entity-name="PortalPage" value-field="portalPage"/>

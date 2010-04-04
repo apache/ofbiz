@@ -200,6 +200,7 @@ under the License.
     <PaymentMethodType paymentMethodTypeId="EXT_PAYPAL" defaultGlAccountId="122000"/>
     <PaymentMethodType paymentMethodTypeId="EXT_WORLDPAY" defaultGlAccountId="122000"/>
 
+    <CostComponentCalc costComponentCalcId="GEN_COST_CALC" costGlAccountTypeId="OPERATING_EXPENSE"/>
     <CostComponentCalc costComponentCalcId="TASK_COST_CALC" costGlAccountTypeId="OPERATING_EXPENSE"/>
 
     <!-- General Ledger Setup for the "Company" organization for "Company" -->
@@ -207,7 +208,7 @@ under the License.
     <!-- GL journal for suspended transactions (failed post) -->
     <GlJournal organizationPartyId="Company" glJournalId="ERROR_JOURNAL" glJournalName="Suspense transactions"/>
 
-    <PartyAcctgPreference partyId="Company" taxFormId="US_IRS_1120" cogsMethodId="COGS_AVG_COST" baseCurrencyUomId="USD"
+    <PartyAcctgPreference partyId="Company" taxFormId="US_IRS_1120" cogsMethodId="COGS_LIFO" baseCurrencyUomId="USD"
         invoiceSequenceEnumId="INVSQ_ENF_SEQ" invoiceIdPrefix="CI"
         quoteSequenceEnumId="INVSQ_ENF_SEQ" quoteIdPrefix="CQ"
         orderSequenceEnumId="INVSQ_ENF_SEQ" orderIdPrefix="CO"
@@ -235,6 +236,7 @@ under the License.
     <GlAccountOrganization organizationPartyId="Company" glAccountId="150000" fromDate="2001-01-01 00:00:00.0"/>
     <GlAccountOrganization organizationPartyId="Company" glAccountId="171000" fromDate="2001-01-01 00:00:00.0"/>
     <GlAccountOrganization organizationPartyId="Company" glAccountId="174000" fromDate="2001-01-01 00:00:00.0"/>
+    <GlAccountOrganization organizationPartyId="Company" glAccountId="188000" fromDate="2001-01-01 00:00:00.0"/>
     <GlAccountOrganization organizationPartyId="Company" glAccountId="210000" fromDate="2001-01-01 00:00:00.0"/>
     <GlAccountOrganization organizationPartyId="Company" glAccountId="213000" fromDate="2001-01-01 00:00:00.0"/>
     <GlAccountOrganization organizationPartyId="Company" glAccountId="213200" fromDate="2001-01-01 00:00:00.0"/>
@@ -282,6 +284,7 @@ under the License.
     <GlAccountOrganization organizationPartyId="Company" glAccountId="625000" fromDate="2001-01-01 00:00:00.0"/>
     <GlAccountOrganization organizationPartyId="Company" glAccountId="649000" fromDate="2001-01-01 00:00:00.0"/>
     <GlAccountOrganization organizationPartyId="Company" glAccountId="650000" fromDate="2001-01-01 00:00:00.0"/>
+    <GlAccountOrganization organizationPartyId="Company" glAccountId="675400" fromDate="2001-01-01 00:00:00.0"/>
     <GlAccountOrganization organizationPartyId="Company" glAccountId="804000" fromDate="2001-01-01 00:00:00.0"/>
     <GlAccountOrganization organizationPartyId="Company" glAccountId="810000" fromDate="2001-01-01 00:00:00.0"/>
     <GlAccountOrganization organizationPartyId="Company" glAccountId="850000" fromDate="2001-01-01 00:00:00.0"/>

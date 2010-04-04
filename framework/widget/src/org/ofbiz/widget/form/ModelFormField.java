@@ -281,7 +281,7 @@ public class ModelFormField implements ExecutionArtifact {
             this.fieldName = overrideFormField.fieldName;
         if (UtilValidate.isNotEmpty(overrideFormField.attributeName))
             this.attributeName = overrideFormField.attributeName;
-        if (overrideFormField.title != null && overrideFormField.title.getOriginal() != null) // title="" can be used to override the original value
+        if (overrideFormField.title != null && !overrideFormField.title.isEmpty()) // title="" can be used to override the original value
             this.title = overrideFormField.title;
         if (overrideFormField.tooltip != null && !overrideFormField.tooltip.isEmpty())
             this.tooltip = overrideFormField.tooltip;
@@ -757,23 +757,22 @@ public class ModelFormField implements ExecutionArtifact {
                 if (retVal instanceof Double || retVal instanceof Float || retVal instanceof BigDecimal) {
                     NumberFormat nf = NumberFormat.getInstance(locale);
                     nf.setMaximumFractionDigits(10);
-                    returnValue = nf.format(retVal);
+                    return nf.format(retVal);
                 } else if (retVal instanceof java.sql.Date) {
                     DateFormat df = UtilDateTime.toDateFormat(UtilDateTime.DATE_FORMAT, timeZone, null);
-                    returnValue = df.format((java.util.Date) retVal);
+                    return df.format((java.util.Date) retVal);
                 } else if (retVal instanceof java.sql.Time) {
                     DateFormat df = UtilDateTime.toTimeFormat(UtilDateTime.TIME_FORMAT, timeZone, null);
-                    returnValue = df.format((java.util.Date) retVal);
+                    return df.format((java.util.Date) retVal);
                 } else if (retVal instanceof java.sql.Timestamp) {
                     DateFormat df = UtilDateTime.toDateTimeFormat(UtilDateTime.DATE_TIME_FORMAT, timeZone, null);
-                    returnValue = df.format((java.util.Date) retVal);
+                    return df.format((java.util.Date) retVal);
                 } else if (retVal instanceof java.util.Date) {
                     DateFormat df = UtilDateTime.toDateTimeFormat("EEE MMM dd hh:mm:ss z yyyy", timeZone, null);
-                    returnValue = df.format((java.util.Date) retVal);
+                    return df.format((java.util.Date) retVal);
                 } else {
                     returnValue = retVal.toString();
                 }
-                return returnValue; // do not encode date and number type fields
             } else {
                 returnValue = defaultValue;
             }
@@ -877,7 +876,7 @@ public class ModelFormField implements ExecutionArtifact {
     }
 
     public String getAction(Map<String, ? extends Object> context) {
-        if (this.action != null && this.action.getOriginal() != null) {
+        if (this.action != null && !this.action.isEmpty()) {
             return action.expandString(context);
         } else {
             return null;
@@ -1008,7 +1007,7 @@ public class ModelFormField implements ExecutionArtifact {
     }
 
     public String getTitle(Map<String, Object> context) {
-        if (this.title != null && this.title.getOriginal() != null) {
+        if (this.title != null && !this.title.isEmpty()) {
             return title.expandString(context);
         } else {
             // create a title from the name of this field; expecting a Java method/field style name, ie productName or productCategoryId
@@ -1385,7 +1384,7 @@ public class ModelFormField implements ExecutionArtifact {
     }
 
     public boolean isSortField() {
-        return this.sortField != null ? this.sortField.booleanValue() : false;
+        return this.sortField != null && this.sortField.booleanValue();
     }
 
     /**
@@ -1772,7 +1771,7 @@ public class ModelFormField implements ExecutionArtifact {
 
                     Object keyFieldObject = value.get(this.getKeyFieldName());
                     if (keyFieldObject == null) {
-                        throw new IllegalArgumentException("The value found for key-name [" + this.getKeyFieldName() + "], may not be a valid key field name.");
+                        throw new IllegalArgumentException("The entity-options identifier (from key-name attribute, or default to the field name) [" + this.getKeyFieldName() + "], may not be a valid key field name for the entity [" + this.entityName + "].");
                     }
                     String keyFieldValue = keyFieldObject.toString();
                     optionValues.add(new OptionValue(keyFieldValue, optionDesc));
@@ -2052,6 +2051,7 @@ public class ModelFormField implements ExecutionArtifact {
         protected boolean alsoHidden = true;
         protected FlexibleStringExpander description;
         protected String type;  // matches type of field, currently text or currency
+        protected String imageLocation;
         protected FlexibleStringExpander currency;
         protected FlexibleStringExpander date;
         protected InPlaceEditor inPlaceEditor;
@@ -2071,6 +2071,7 @@ public class ModelFormField implements ExecutionArtifact {
         public DisplayField(Element element, ModelFormField modelFormField) {
             super(element, modelFormField);
             this.type = element.getAttribute("type");
+            this.imageLocation = element.getAttribute("image-location");
             this.setCurrency(element.getAttribute("currency"));
             this.setDescription(element.getAttribute("description"));
             this.setDate(element.getAttribute("date"));
@@ -2090,11 +2091,24 @@ public class ModelFormField implements ExecutionArtifact {
         public boolean getAlsoHidden() {
             return alsoHidden;
         }
+        public String getType(){
+            return this.type;
+        }
+
+        public String getImageLocation(){
+            return this.imageLocation;
+        }
 
         public String getDescription(Map<String, Object> context) {
             String retVal = null;
             if (this.description != null && !this.description.isEmpty()) {
                 retVal = this.description.expandString(context);
+                if (retVal != null) {
+                    StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+                    if (simpleEncoder != null) {
+                        retVal = simpleEncoder.encode(retVal);
+                    }
+                }
             } else {
                 retVal = this.modelFormField.getEntry(context);
             }
@@ -2107,8 +2121,8 @@ public class ModelFormField implements ExecutionArtifact {
                 String isoCode = null;
                 if (this.currency != null && !this.currency.isEmpty()) {
                     isoCode = this.currency.expandString(context);
-                } 
-                
+                }
+
                 try {
                     BigDecimal parsedRetVal = (BigDecimal) ObjectType.simpleTypeConvert(retVal, "BigDecimal", null, null, locale, true);
                     retVal = UtilFormatOut.formatCurrency(parsedRetVal, isoCode, locale, 10); // we set the max to 10 digits as an hack to not round numbers in the ui
@@ -2254,6 +2268,8 @@ public class ModelFormField implements ExecutionArtifact {
         protected String image;
         protected FlexibleStringExpander target;
         protected FlexibleStringExpander description;
+        protected FlexibleStringExpander alternate;
+        protected FlexibleStringExpander imageTitle;
         protected FlexibleStringExpander targetWindowExdr;
         protected List<WidgetWorker.Parameter> parameterList = FastList.newInstance();
 
@@ -2275,6 +2291,8 @@ public class ModelFormField implements ExecutionArtifact {
             super(element, modelFormField);
 
             this.setDescription(element.getAttribute("description"));
+            this.setAlternate(element.getAttribute("alternate"));
+            this.setImageTitle(element.getAttribute("image-title"));
             this.setTarget(element.getAttribute("target"));
             this.alsoHidden = !"false".equals(element.getAttribute("also-hidden"));
             this.linkType = element.getAttribute("link-type");
@@ -2297,7 +2315,7 @@ public class ModelFormField implements ExecutionArtifact {
         public boolean getAlsoHidden() {
             return this.alsoHidden;
         }
-        
+
         public boolean getRequestConfirmation() {
             return this.requestConfirmation;
         }
@@ -2313,12 +2331,12 @@ public class ModelFormField implements ExecutionArtifact {
                 return getConfirmationMsg(context);
             }
             return "";
-        }       
-        
+        }
+
         public String getConfirmationMsg(Map<String, Object> context) {
             return this.confirmationMsgExdr.expandString(context);
-        }       
-        
+        }
+
         public String getLinkType() {
             return this.linkType;
         }
@@ -2338,6 +2356,14 @@ public class ModelFormField implements ExecutionArtifact {
 
         public String getDescription(Map<String, Object> context) {
             return this.description.expandString(context);
+        }
+
+        public String getAlternate(Map<String, Object> context) {
+            return this.alternate.expandString(context);
+        }
+
+        public String getImageTitle(Map<String, Object> context) {
+            return this.imageTitle.expandString(context);
         }
 
         public String getTarget(Map<String, Object> context) {
@@ -2376,14 +2402,28 @@ public class ModelFormField implements ExecutionArtifact {
         /**
          * @param string
          */
+        public void setImageTitle(String string) {
+            this.imageTitle = FlexibleStringExpander.getInstance(string);
+        }
+
+        /**
+         * @param string
+         */
+        public void setAlternate(String string) {
+            this.alternate = FlexibleStringExpander.getInstance(string);
+        }
+
+        /**
+         * @param string
+         */
         public void setTarget(String string) {
             this.target = FlexibleStringExpander.getInstance(string);
         }
-       
+
         public void setRequestConfirmation(boolean val) {
             this.requestConfirmation = val;
         }
-        
+
         public void setConfirmationMsg(String val) {
             this.confirmationMsgExdr = FlexibleStringExpander.getInstance(val);
         }
@@ -2419,7 +2459,7 @@ public class ModelFormField implements ExecutionArtifact {
 
             this.modelFormField = modelFormField;
         }
-        
+
         public String getLinkStyle() {
             return this.linkStyle;
         }
@@ -2468,15 +2508,15 @@ public class ModelFormField implements ExecutionArtifact {
                 return "";
             }
         }
-        
+
         public boolean getRequestConfirmation() {
             return this.requestConfirmation;
         }
-        
+
         public String getConfirmationMsg(Map<String, Object> context) {
             return this.confirmationMsgExdr.expandString(context);
         }
-        
+
         public String getConfirmation(Map<String, Object> context) {
             String message = getConfirmationMsg(context);
             if (UtilValidate.isNotEmpty(message)) {
@@ -2488,8 +2528,8 @@ public class ModelFormField implements ExecutionArtifact {
                 return getConfirmationMsg(context);
             }
             return "";
-        }       
-        
+        }
+
         public ModelFormField getModelFormField() {
             return this.modelFormField;
         }
@@ -2557,12 +2597,12 @@ public class ModelFormField implements ExecutionArtifact {
          */
         public void setUseWhen(String string) {
             this.useWhen = FlexibleStringExpander.getInstance(string);
-        } 
-        
+        }
+
         public void setRequestConfirmation(boolean val) {
             this.requestConfirmation = val;
         }
-        
+
         public void setConfirmationMsg(String val) {
             this.confirmationMsgExdr = FlexibleStringExpander.getInstance(val);
         }
@@ -3219,7 +3259,7 @@ public class ModelFormField implements ExecutionArtifact {
             this.backgroundSubmitRefreshTargetExdr = FlexibleStringExpander.getInstance(element.getAttribute("background-submit-refresh-target"));
             setRequestConfirmation("true".equals(element.getAttribute("request-confirmation")));
             setConfirmationMsg(element.getAttribute("confirmation-message"));
-        }        
+        }
 
         @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
@@ -3232,16 +3272,16 @@ public class ModelFormField implements ExecutionArtifact {
 
         public String getImageLocation() {
             return imageLocation;
-        }        
+        }
 
         public boolean getRequestConfirmation() {
             return this.requestConfirmation;
         }
-        
+
         public String getConfirmationMsg(Map<String, Object> context) {
             return this.confirmationMsgExdr.expandString(context);
         }
-        
+
         public String getConfirmation(Map<String, Object> context) {
             String message = getConfirmationMsg(context);
             if (UtilValidate.isNotEmpty(message)) {
@@ -3253,8 +3293,8 @@ public class ModelFormField implements ExecutionArtifact {
                 return getConfirmationMsg(context);
             }
             return "";
-        }       
-        
+        }
+
         /**
          * @param string
          */
@@ -3271,12 +3311,12 @@ public class ModelFormField implements ExecutionArtifact {
 
         public String getBackgroundSubmitRefreshTarget(Map<String, Object> context) {
             return this.backgroundSubmitRefreshTargetExdr.expandString(context);
-        }        
-        
+        }
+
         public void setRequestConfirmation(boolean val) {
             this.requestConfirmation = val;
         }
-        
+
         public void setConfirmationMsg(String val) {
             this.confirmationMsgExdr = FlexibleStringExpander.getInstance(val);
         }
@@ -3386,7 +3426,7 @@ public class ModelFormField implements ExecutionArtifact {
             if(element.hasAttribute("default-option")) {
                 this.defaultOption = element.getAttribute("default-option");
             } else {
-            	this.defaultOption = UtilProperties.getPropertyValue("widget", "widget.form.defaultTextFindOption", "like");
+                this.defaultOption = UtilProperties.getPropertyValue("widget", "widget.form.defaultTextFindOption", "like");
             }
             this.hideOptions = "true".equals(element.getAttribute("hide-options")) ||
                 "options".equals(element.getAttribute("hide-options")) ? true : false;
@@ -3479,12 +3519,22 @@ public class ModelFormField implements ExecutionArtifact {
         protected String descriptionFieldName;
         protected String targetParameter;
         protected SubHyperlink subHyperlink;
+        protected String lookupPresentation;
+        protected String lookupWidth;
+        protected String lookupHeight;
+        protected String lookupPosition;
+        protected String fadeBackground;
 
         public LookupField(Element element, ModelFormField modelFormField) {
             super(element, modelFormField);
             this.formName = FlexibleStringExpander.getInstance(element.getAttribute("target-form-name"));
             this.descriptionFieldName = element.getAttribute("description-field-name");
             this.targetParameter = element.getAttribute("target-parameter");
+            this.lookupPresentation = element.getAttribute("presentation");
+            this.lookupHeight = element.getAttribute("height");
+            this.lookupWidth = element.getAttribute("width");
+            this.lookupPosition = element.getAttribute("position");
+            this.fadeBackground = element.getAttribute("fade-background");
 
             Element subHyperlinkElement = UtilXml.firstChildElement(element, "sub-hyperlink");
             if (subHyperlinkElement != null) {
@@ -3532,6 +3582,46 @@ public class ModelFormField implements ExecutionArtifact {
         public SubHyperlink getSubHyperlink() {
             return this.subHyperlink;
         }
+
+        public String getLookupPresentation() {
+            return this.lookupPresentation;
+        }
+
+        public void setLookupPresentation(String str) {
+            this.lookupPresentation = str;
+        }
+
+        public String getLookupWidth() {
+            return this.lookupWidth;
+        }
+
+        public void setLookupWidth(String str) {
+            this.lookupWidth = str;
+        }
+
+        public String getLookupHeight() {
+            return this.lookupHeight;
+        }
+
+        public void setLookupHeight(String str) {
+            this.lookupHeight = str;
+        }
+
+        public String getLookupPosition() {
+            return this.lookupPosition;
+        }
+
+        public void setLookupPosition(String str) {
+            this.lookupPosition = str;
+        }
+
+        public String getFadeBackground() {
+            return this.fadeBackground;
+        }
+
+        public void setFadeBackground(String str) {
+            this.fadeBackground = str;
+        }
     }
 
     public static class FileField extends TextField {
@@ -3573,6 +3663,8 @@ public class ModelFormField implements ExecutionArtifact {
         protected FlexibleStringExpander defaultValue;
         protected FlexibleStringExpander value;
         protected SubHyperlink subHyperlink;
+        protected FlexibleStringExpander description;
+        protected FlexibleStringExpander alternate;
 
         protected ImageField() {
             super();
@@ -3589,6 +3681,8 @@ public class ModelFormField implements ExecutionArtifact {
         public ImageField(Element element, ModelFormField modelFormField) {
             super(element, modelFormField);
             this.setValue(element.getAttribute("value"));
+            this.setDescription(element.getAttribute("description"));
+            this.setAlternate(element.getAttribute("alternate"));
 
             String borderStr = element.getAttribute("border");
             try {
@@ -3679,8 +3773,32 @@ public class ModelFormField implements ExecutionArtifact {
             this.value = FlexibleStringExpander.getInstance(string);
         }
 
+        public String getDescription(Map<String, Object> context) {
+            if (this.description != null && !this.description.isEmpty()) {
+                return this.description.expandString(context);
+            } else {
+                return "";
+            }
+        }
+
+        public void setDescription(String description) {
+            this.description = FlexibleStringExpander.getInstance(description);
+        }
+
+        public String getAlternate(Map<String, Object> context) {
+            if (this.alternate != null && !this.alternate.isEmpty()) {
+                return this.alternate.expandString(context);
+            } else {
+                return "";
+            }
+        }
+
+        public void setAlternate(String alternate) {
+            this.alternate = FlexibleStringExpander.getInstance(alternate);
+        }
+
     }
-    
+
     public static class ContainerField extends FieldInfo {
         protected String id;
 

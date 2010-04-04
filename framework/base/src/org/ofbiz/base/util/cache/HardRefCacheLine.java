@@ -19,26 +19,16 @@
 package org.ofbiz.base.util.cache;
 
 @SuppressWarnings("serial")
-public final class HardRefCacheLine<V> extends CacheLine<V> {
+public abstract class HardRefCacheLine<V> extends CacheLine<V> {
     public final V value;
 
-    public HardRefCacheLine(V value, long expireTime) {
-        super(expireTime);
-        this.value = value;
-    }
-
-    public HardRefCacheLine(V value, long loadTime, long expireTime) {
-        super(loadTime, expireTime);
+    public HardRefCacheLine(V value, long loadTimeNanos, long expireTimeNanos) {
+        super(loadTimeNanos, expireTimeNanos);
         this.value = value;
     }
 
     @Override
     public V getValue() {
         return value;
-    }
-
-    @Override
-    public boolean isInvalid() {
-        return value == null;
     }
 }

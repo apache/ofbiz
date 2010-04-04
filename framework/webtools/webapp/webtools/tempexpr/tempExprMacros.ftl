@@ -42,7 +42,7 @@ your template file:
   <tr>
     <td class="label">${uiLabelMap.CommonTo}</td>
     <td>
-      <@DateField formName=currentForm fieldName="date2" fieldValue=toDate/>
+      <@DateField formName=formName fieldName="date2" fieldValue=toDate/>
     </td>
   </tr>
 </#macro>
@@ -75,6 +75,17 @@ your template file:
   <tr>
     <td class="label">${uiLabelMap.CommonTo}</td>
     <td><@DayOfMonthField fieldName="integer2" fieldValue=toDay/></td>
+  </tr>
+</#macro>
+
+<#macro HourOfDayRange fromHour=1 toHour=23>
+  <tr>
+    <td class="label">${uiLabelMap.CommonFrom}</td>
+    <td><@HourOfDayField fieldName="integer1" fieldValue=fromHour/></td>
+  </tr>
+  <tr>
+    <td class="label">${uiLabelMap.CommonTo}</td>
+    <td><@HourOfDayField fieldName="integer2" fieldValue=toHour/></td>
   </tr>
 </#macro>
 
@@ -115,6 +126,17 @@ your template file:
         </#list>
       </select>
     </td>
+  </tr>
+</#macro>
+
+<#macro MinuteRange fromMinute=1 toMinute=59>
+  <tr>
+    <td class="label">${uiLabelMap.CommonFrom}</td>
+    <td><@MinuteField fieldName="integer1" fieldValue=fromMinute/></td>
+  </tr>
+  <tr>
+    <td class="label">${uiLabelMap.CommonTo}</td>
+    <td><@MinuteField fieldName="integer2" fieldValue=toMinute/></td>
   </tr>
 </#macro>
 

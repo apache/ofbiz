@@ -72,8 +72,8 @@ public class Loop extends MethodOperation {
             return false;
         }
 
-        if (count < 1) {
-            Debug.logWarning("Count is less than one, not doing nothing: " + rawString(), module);
+        if (count < 0) {
+            Debug.logWarning("Unable to execute loop operation because the count variable is negative: " + rawString(), module);
             return false;
         }
 

@@ -230,7 +230,9 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         this.overrideParameters = model.overrideParameters;
         this.inheritedParameters = model.inheritedParameters();
         this.internalGroup = model.internalGroup;
-        this.invoker = model.invoker.copy(this);
+        if (model.invoker != null) {
+            this.invoker = model.invoker.copy(this);
+        }
 
         List<ModelParam> modelParamList = model.getModelParamList();
         for (ModelParam param: modelParamList) {
@@ -1213,7 +1215,7 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
             throw new WSDLException("can not create WSDL", module);
         }
         def.setTypes(this.getTypes(document, def));
-        
+
         // set the IN parameters
         Input input = def.createInput();
         Set<String> inParam = this.getInParamNames();
@@ -1333,7 +1335,7 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
 
         SOAPOperation soapOperation = new SOAPOperationImpl();
         // soapAction should be set to the location of the SOAP URI, or Visual Studio won't construct the correct SOAP message
-        soapOperation.setSoapActionURI(locationURI); 
+        soapOperation.setSoapActionURI(locationURI);
         // this is the RPC/literal style.  See http://www.ibm.com/developerworks/webservices/library/ws-whichwsdl/
         // this parameter is necessary or Apache Synapse won't recognize the WSDL
         soapOperation.setStyle("rpc");
@@ -1358,7 +1360,7 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         service.addPort(port);
         def.addService(service);
     }
-    
+
     public Types getTypes(Document document, Definition def) {
         Types types = def.createTypes();
         /* Schema */
@@ -1368,7 +1370,7 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         /*-----------------------------------*/
         /*--------- Standard Objects --------*/
         /*-----------------------------------*/
-        
+
         /* std-String Element */
         Element stdStringElement = document.createElement("xsd:element");
         stdStringElement.setAttribute("name", "std-String");
@@ -1450,7 +1452,7 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         /*-----------------------------------*/
         /*----------- SQL Objects -----------*/
         /*-----------------------------------*/
-        
+
         /* sql-Timestamp Element */
         Element sqlTimestampElement = document.createElement("xsd:element");
         sqlTimestampElement.setAttribute("name", "sql-Timestamp");
@@ -1488,40 +1490,47 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         /*-----------------------------------*/
         /*----------- List Objects -----------*/
         /*-----------------------------------*/
-        
+
         /* col-ArrayList Element */
         Element colArrayListElement = document.createElement("xsd:element");
         colArrayListElement.setAttribute("name", "col-ArrayList");
+        colArrayListElement.setAttribute("type", "tns:col-Collection");
         schema.appendChild(colArrayListElement);
         /* col-LinkedList Element */
         Element colLinkedListElement = document.createElement("xsd:element");
         colLinkedListElement.setAttribute("name", "col-LinkedList");
+        colLinkedListElement.setAttribute("type", "tns:col-Collection");
         schema.appendChild(colLinkedListElement);
         /* col-Stack Element */
         Element colStackElement = document.createElement("xsd:element");
         colStackElement.setAttribute("name", "col-Stack");
+        colStackElement.setAttribute("type", "tns:col-Collection");
         schema.appendChild(colStackElement);
         /* col-Vector Element */
         Element colVectorElement = document.createElement("xsd:element");
         colVectorElement.setAttribute("name", "col-Vector");
+        colVectorElement.setAttribute("type", "tns:col-Collection");
         schema.appendChild(colVectorElement);
         /* col-TreeSet Element */
         Element colTreeSetElement = document.createElement("xsd:element");
         colTreeSetElement.setAttribute("name", "col-TreeSet");
+        colTreeSetElement.setAttribute("type", "tns:col-Collection");
         schema.appendChild(colTreeSetElement);
         /* col-HashSet Element */
         Element colHashSetElement = document.createElement("xsd:element");
         colHashSetElement.setAttribute("name", "col-HashSet");
+        colHashSetElement.setAttribute("type", "tns:col-Collection");
         schema.appendChild(colHashSetElement);
         /* col-Collection Element */
         Element colCollectionElement = document.createElement("xsd:element");
         colCollectionElement.setAttribute("name", "col-Collection");
+        colCollectionElement.setAttribute("type", "tns:col-Collection");
         schema.appendChild(colCollectionElement);
-        
+
         /*-----------------------------------*/
         /*----------- Map Objects -----------*/
         /*-----------------------------------*/
-        
+
         /* map-TreeMap Element */
         Element mapTreeMapElement = document.createElement("xsd:element");
         mapTreeMapElement.setAttribute("name", "map-TreeMap");
@@ -1591,7 +1600,7 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         /*-----------------------------------*/
         /*----------- Custom Objects -----------*/
         /*-----------------------------------*/
-        
+
         /* cus-obj Element */
         Element cusObjElement = document.createElement("xsd:element");
         cusObjElement.setAttribute("name", "cus-obj");
@@ -1605,7 +1614,7 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         /*-----------------------------------*/
         /*---------- Complex Types ----------*/
         /*-----------------------------------*/
-        
+
         /* map-Map Complex Type */
         Element mapMapComplexType = document.createElement("xsd:complexType");
         mapMapComplexType.setAttribute("name", "map-Map");
@@ -1775,7 +1784,139 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         mapValueComplexType25.setAttribute("maxOccurs", "1");
         mapValueComplexType0.appendChild(mapValueComplexType25);
         schema.appendChild(mapValueComplexType);
-        
+
+        /* col-Collection Complex Type */
+        Element colCollectionComplexType = document.createElement("xsd:complexType");
+        colCollectionComplexType.setAttribute("name", "col-Collection");
+        Element colCollectionComplexType0 = document.createElement("xsd:choice");
+        colCollectionComplexType.appendChild(colCollectionComplexType0);
+        Element colCollectionComplexType1 = document.createElement("xsd:element");
+        colCollectionComplexType1.setAttribute("ref", "tns:std-String");
+        colCollectionComplexType1.setAttribute("minOccurs", "0");
+        colCollectionComplexType1.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType1);
+        Element colCollectionComplexType2 = document.createElement("xsd:element");
+        colCollectionComplexType2.setAttribute("ref", "tns:std-Integer");
+        colCollectionComplexType2.setAttribute("minOccurs", "0");
+        colCollectionComplexType2.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType2);
+        Element colCollectionComplexType3 = document.createElement("xsd:element");
+        colCollectionComplexType3.setAttribute("ref", "tns:std-Long");
+        colCollectionComplexType3.setAttribute("minOccurs", "0");
+        colCollectionComplexType3.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType3);
+        Element colCollectionComplexType4 = document.createElement("xsd:element");
+        colCollectionComplexType4.setAttribute("ref", "tns:std-Float");
+        colCollectionComplexType4.setAttribute("minOccurs", "0");
+        colCollectionComplexType4.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType4);
+        Element colCollectionComplexType5 = document.createElement("xsd:element");
+        colCollectionComplexType5.setAttribute("ref", "tns:std-Double");
+        colCollectionComplexType5.setAttribute("minOccurs", "0");
+        colCollectionComplexType5.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType5);
+        Element colCollectionComplexType6 = document.createElement("xsd:element");
+        colCollectionComplexType6.setAttribute("ref", "tns:std-Boolean");
+        colCollectionComplexType6.setAttribute("minOccurs", "0");
+        colCollectionComplexType6.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType6);
+        Element colCollectionComplexType7 = document.createElement("xsd:element");
+        colCollectionComplexType7.setAttribute("ref", "tns:std-Locale");
+        colCollectionComplexType7.setAttribute("minOccurs", "0");
+        colCollectionComplexType7.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType7);
+        Element colCollectionComplexType8 = document.createElement("xsd:element");
+        colCollectionComplexType8.setAttribute("ref", "tns:sql-Timestamp");
+        colCollectionComplexType8.setAttribute("minOccurs", "0");
+        colCollectionComplexType8.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType8);
+        Element colCollectionComplexType9 = document.createElement("xsd:element");
+        colCollectionComplexType9.setAttribute("ref", "tns:sql-Date");
+        colCollectionComplexType9.setAttribute("minOccurs", "0");
+        colCollectionComplexType9.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType9);
+        Element colCollectionComplexType10 = document.createElement("xsd:element");
+        colCollectionComplexType10.setAttribute("ref", "tns:sql-Time");
+        colCollectionComplexType10.setAttribute("minOccurs", "0");
+        colCollectionComplexType10.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType10);
+        Element colCollectionComplexType11 = document.createElement("xsd:element");
+        colCollectionComplexType11.setAttribute("ref", "tns:col-ArrayList");
+        colCollectionComplexType11.setAttribute("minOccurs", "0");
+        colCollectionComplexType11.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType11);
+        Element colCollectionComplexType12 = document.createElement("xsd:element");
+        colCollectionComplexType12.setAttribute("ref", "tns:col-LinkedList");
+        colCollectionComplexType12.setAttribute("minOccurs", "0");
+        colCollectionComplexType12.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType12);
+        Element colCollectionComplexType13 = document.createElement("xsd:element");
+        colCollectionComplexType13.setAttribute("ref", "tns:col-Stack");
+        colCollectionComplexType13.setAttribute("minOccurs", "0");
+        colCollectionComplexType13.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType13);
+        Element colCollectionComplexType14 = document.createElement("xsd:element");
+        colCollectionComplexType14.setAttribute("ref", "tns:col-Vector");
+        colCollectionComplexType14.setAttribute("minOccurs", "0");
+        colCollectionComplexType14.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType14);
+        Element colCollectionComplexType15 = document.createElement("xsd:element");
+        colCollectionComplexType15.setAttribute("ref", "tns:col-TreeSet");
+        colCollectionComplexType15.setAttribute("minOccurs", "0");
+        colCollectionComplexType15.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType15);
+        Element colCollectionComplexType16 = document.createElement("xsd:element");
+        colCollectionComplexType16.setAttribute("ref", "tns:col-HashSet");
+        colCollectionComplexType16.setAttribute("minOccurs", "0");
+        colCollectionComplexType16.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType16);
+        Element colCollectionComplexType17 = document.createElement("xsd:element");
+        colCollectionComplexType17.setAttribute("ref", "tns:col-Collection");
+        colCollectionComplexType17.setAttribute("minOccurs", "0");
+        colCollectionComplexType17.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType17);
+        Element colCollectionComplexType18 = document.createElement("xsd:element");
+        colCollectionComplexType18.setAttribute("ref", "tns:map-HashMap");
+        colCollectionComplexType18.setAttribute("minOccurs", "0");
+        colCollectionComplexType18.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType18);
+        Element colCollectionComplexType19 = document.createElement("xsd:element");
+        colCollectionComplexType19.setAttribute("ref", "tns:map-Properties");
+        colCollectionComplexType19.setAttribute("minOccurs", "0");
+        colCollectionComplexType19.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType19);
+        Element colCollectionComplexType20 = document.createElement("xsd:element");
+        colCollectionComplexType20.setAttribute("ref", "tns:map-Hashtable");
+        colCollectionComplexType20.setAttribute("minOccurs", "0");
+        colCollectionComplexType20.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType20);
+        Element colCollectionComplexType21 = document.createElement("xsd:element");
+        colCollectionComplexType21.setAttribute("ref", "tns:map-WeakHashMap");
+        colCollectionComplexType21.setAttribute("minOccurs", "0");
+        colCollectionComplexType21.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType21);
+        Element colCollectionComplexType22 = document.createElement("xsd:element");
+        colCollectionComplexType22.setAttribute("ref", "tns:map-TreeMap");
+        colCollectionComplexType22.setAttribute("minOccurs", "0");
+        colCollectionComplexType22.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType22);
+        Element colCollectionComplexType23 = document.createElement("xsd:element");
+        colCollectionComplexType23.setAttribute("ref", "tns:map-Map");
+        colCollectionComplexType23.setAttribute("minOccurs", "0");
+        colCollectionComplexType23.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType23);
+        Element colCollectionComplexType24 = document.createElement("xsd:element");
+        colCollectionComplexType24.setAttribute("ref", "tns:eepk-");
+        colCollectionComplexType24.setAttribute("minOccurs", "0");
+        colCollectionComplexType24.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType24);
+        Element colCollectionComplexType25 = document.createElement("xsd:element");
+        colCollectionComplexType25.setAttribute("ref", "tns:eeval-");
+        colCollectionComplexType25.setAttribute("minOccurs", "0");
+        colCollectionComplexType25.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType25);
+        schema.appendChild(colCollectionComplexType);
+
         types.setDocumentationElement(schema);
         return types;
     }

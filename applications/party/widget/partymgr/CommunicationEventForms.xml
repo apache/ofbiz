@@ -22,6 +22,7 @@ under the License.
 
     <form name="EditCommEvent" type="single" target="updateCommunicationEvent" default-map-name="communicationEvent">
         <alt-target target="createCommunicationEvent" use-when="communicationEvent==null"/>
+        <field name="action"><hidden value="${parameters.action}"/></field>
         <field name="communicationEventId" use-when="communicationEvent!=null"><display/></field>
         <field name="my"><hidden value="${my}"/></field>
         <field name="parentCommEventId" position="2">
@@ -350,7 +351,14 @@ under the License.
         <!-- <field name="origCommEventId"><text-find/></field-->
         <field name="partyIdFrom" position="1" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.CommonFrom}"><lookup target-form-name="LookupPartyName"/></field>
         <field name="partyIdTo" position="2" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.CommonTo}"><lookup target-form-name="LookupPartyName"/></field>
-        <field name="partyId" position="2" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.PartyAnyRole}"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="partyId" position="1" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.PartyAnyRole}"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="roleTypeId" position="2">
+            <drop-down allow-empty="true">
+                <entity-options description="${description}" entity-name="RoleType">
+                    <entity-constraint name="parentTypeId" value="COMMEVENT_ROLE"/>
+                </entity-options>
+            </drop-down>
+        </field>
         <field name="communicationEventTypeId" position="1">
             <drop-down allow-empty="true">
                 <entity-options description="${description}" entity-name="CommunicationEventType" key-field-name="communicationEventTypeId"/>
@@ -408,24 +416,76 @@ under the License.
             </hyperlink>
         </field>
         <field name="communicationEventTypeId" title="${uiLabelMap.CommonType}"><display-entity description="${description}" entity-name="CommunicationEventType" key-field-name="communicationEventTypeId"/></field>
-        <field name="partyIdFrom" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.CommonFrom}">
+        <field name="statusId">
+            <display-entity description="${description}" entity-name="StatusItem" key-field-name="statusId"/>
+        </field>
+        <field name="partyId" title="${uiLabelMap.CommonPartyID}">
             <display-entity description="${firstName} ${middleName} ${lastName} ${groupName}" entity-name="PartyNameView" key-field-name="partyId">
                 <sub-hyperlink target="/partymgr/control/viewprofile" description="[${partyIdFrom}]" target-type="inter-app">
                     <parameter param-name="partyId" from-field="partyIdFrom"/>
                 </sub-hyperlink>
             </display-entity>
         </field>
-        <field name="partyIdTo" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.CommonTo}">
-            <display-entity description="${firstName} ${middleName} ${lastName} ${groupName}" entity-name="PartyNameView" key-field-name="partyId">
-                <sub-hyperlink target="/partymgr/control/viewprofile" description="[${partyIdTo}]" target-type="inter-app">
-                    <parameter param-name="partyId" from-field="partyIdTo"/>
-                </sub-hyperlink>
-            </display-entity>
+        <field name="roleTypeId">
+            <display-entity description="${description}" entity-name="RoleType"/>
         </field>
-        <field name="statusId"><display-entity description="${description}" entity-name="StatusItem" key-field-name="statusId"/></field>
+        <field name="roleStatusId">
+            <display-entity description="${description}" entity-name="StatusItem" key-field-name="statusId"/>
+        </field>
         <field name="entryDate" title="${uiLabelMap.CommonCreated}"><display type="date"/></field>
         <field name="datetimeStarted" title="${uiLabelMap.CommonSend}"><display type="date"/></field>
     </form>
+
+    <form name="FindCommunicationByOrder" type="single" target="FindCommunicationByOrder" paginate="true" focus-field-name="submitButton"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="orderId" position="1"><text-find/></field>
+        <field name="communicationEventId" position="1"><text-find/></field>
+        <field name="partyIdFrom" position="1" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.CommonFrom}"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="partyIdTo" position="2" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.CommonTo}"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="partyId" position="1" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.PartyAnyRole}"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="communicationEventTypeId" position="2">
+            <drop-down allow-empty="true">
+                <entity-options description="${description}" entity-name="CommunicationEventType" key-field-name="communicationEventTypeId"/>
+            </drop-down>
+        </field>
+        <field name="statusId" position="2">
+            <drop-down allow-empty="true">
+                <entity-options description="${description}" entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" operator="equals" value="COM_EVENT_STATUS"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListCommunicationByOrder" type="list" list-name="listIt" extends="ListCommEvents" header-row-style="header-row-2">
+        <actions>
+            <service result-map-list="listIt" result-map="result" service-name="performFind">
+                <field-map from-field="parameters" field-name="inputFields"/>
+                <field-map from-field="entityName" field-name="entityName"/>
+                <field-map value="-entryDate" field-name="orderBy"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <field name="orderId" title="${uiLabelMap.FormFieldTitle_orderId}">
+            <hyperlink target="/ordermgr/control/orderview?orderId=${orderId}" description="${orderId}" target-type="inter-app"/>
+        </field>
+        <field name="communicationEventId">
+            <hyperlink description="${communicationEventId}" target="ViewCommunicationEvent">
+                <parameter param-name="communicationEventId"/>
+            </hyperlink>
+        </field>
+        <field name="subject">
+            <hyperlink description="${subject}" target="ViewCommunicationEvent">
+                <parameter param-name="communicationEventId"/>
+                <parameter param-name="partyIdFrom" from-field="partyId"/>
+                <parameter param-name="roleTypeId"/>
+            </hyperlink>
+        </field>
+    </form>
+    
     <form name="ListPartyCommEvents" type="list" target="RemoveCommunicationEventRole" list-name="listIt"
         odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
         <actions>
@@ -528,9 +588,12 @@ under the License.
     <form name="ListChildCommEvents" type="list" extends="ListCommEvents" paginate-target="EditCommunicationEvent">
         <actions>
             <entity-condition entity-name="CommunicationEvent" list="commEvents">
-                <condition-list combine="or">
-                    <condition-expr field-name="parentCommEventId" operator="equals" value="${communicationEventId}"/>
-                    <condition-expr field-name="origCommEventId" operator="equals" value="${communicationEventId}"/>
+                <condition-list combine="and">
+                    <condition-expr field-name="statusId" operator="not-equals" value="COM_COMPLETE"/>
+                    <condition-list combine="or">
+                        <condition-expr field-name="parentCommEventId" operator="equals" value="${communicationEventId}"/>
+                        <condition-expr field-name="origCommEventId" operator="equals" value="${communicationEventId}"/>
+                    </condition-list>
                 </condition-list>
             </entity-condition>
         </actions>
@@ -640,6 +703,12 @@ under the License.
 
     <form name="AddEventRole" type="single" target="createCommunicationEventRole"
         header-row-style="header-row" default-table-style="basic-table">
+        <field name="subject"><hidden/></field>
+        <field name="content"><hidden/></field>
+        <field name="partyIdTo"><hidden/></field>
+        <field name="datetimeStarted"><hidden/></field>
+        <field name="my"><hidden value="${my}"/></field>
+        <field name="datetimeStarted"><hidden/></field>
         <field name="communicationEventId"><hidden/></field>
         <field name="partyId" title="${uiLabelMap.PartyPartyId}" position="1"><lookup target-form-name="LookupPartyName"/></field>
         <field name="roleTypeId" position="2">
@@ -651,7 +720,11 @@ under the License.
                 </entity-options>
             </drop-down>
         </field>
-        <field name="submitButton" title="${uiLabelMap.PartyAddRole}"><submit button-type="text-link"/></field>
+        <field name="submitButton" title=" ">
+            <hyperlink also-hidden="true"
+                target-type="plain" description="${uiLabelMap.PartyAddRole}"
+                target="javascript:(document.AddEventRole.communicationEventId.value=document.EditEmail.communicationEventId.value),(document.AddEventRole.datetimeStarted.value=document.EditEmail.datetimeStarted.value),(document.AddEventRole.partyIdTo.value=document.EditEmail.partyIdTo.value),(document.AddEventRole.subject.value=document.EditEmail.subject.value),(document.AddEventRole.content.value=document.EditEmail.content.value),(document.AddEventRole.submit())"/>
+        </field>
     </form>
 
     <form name="listCommContent" type="list" list-name="contentDataResourceList" paginate-target="/ListCommContent" target="removeAttachFile"

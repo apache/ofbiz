@@ -19,6 +19,7 @@
 package org.ofbiz.base.conversion;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.List;
@@ -33,30 +34,35 @@ import javolution.util.FastSet;
 
 /** Number Converter classes. */
 public class NumberConverters implements ConverterLoader {
-    public static final String module = NumberConverters.class.getName();
 
-    public static abstract class AbstractToNumberConverter<S, T> extends AbstractUsesLocaleConverter<S, T> {
-        protected AbstractToNumberConverter(Class<S> sourceClass, Class<T> targetClass) {
-            super(sourceClass, targetClass);
-        }
-
-        protected Number fromString(String str, Locale locale) throws ConversionException {
-            NumberFormat nf = NumberFormat.getNumberInstance(locale);
-            try {
-                return nf.parse(str);
-            } catch (ParseException e) {
-                throw new ConversionException(e);
-            }
+    protected static Number fromString(String str, Locale locale) throws ConversionException {
+        NumberFormat nf = NumberFormat.getNumberInstance(locale);
+        try {
+            return nf.parse(str);
+        } catch (ParseException e) {
+            throw new ConversionException(e);
         }
     }
 
-    public static abstract class AbstractUsesLocaleConverter<S, T> extends AbstractLocalizedConverter<S, T> {
-        protected AbstractUsesLocaleConverter(Class<S> sourceClass, Class<T> targetClass) {
-            super(sourceClass, targetClass);
+    public static abstract class AbstractStringToNumberConverter<N extends Number> extends AbstractNumberConverter<String, N> {
+        public AbstractStringToNumberConverter(Class<N> targetClass) {
+            super(String.class, targetClass);
         }
 
-        public T convert(S obj) throws ConversionException {
-            return convert(obj, Locale.getDefault(), null);
+        public N convert(String obj, Locale locale, TimeZone timeZone) throws ConversionException {
+            String trimStr = StringUtil.removeSpaces(obj);
+            if (trimStr.length() == 0) {
+                return null;
+            }
+            return convert(fromString(trimStr, locale));
+        }
+
+        protected abstract N convert(Number number) throws ConversionException;
+    }
+
+    public static abstract class AbstractNumberConverter<S, T> extends AbstractLocalizedConverter<S, T> {
+        protected AbstractNumberConverter(Class<S> sourceClass, Class<T> targetClass) {
+            super(sourceClass, targetClass);
         }
 
         public T convert(S obj, Locale locale, TimeZone timeZone, String formatString) throws ConversionException {
@@ -64,77 +70,78 @@ public class NumberConverters implements ConverterLoader {
         }
     }
 
-    public static class BigDecimalToDouble extends AbstractConverter<BigDecimal, Double> {
-        public BigDecimalToDouble() {
-            super(BigDecimal.class, Double.class);
+    public static abstract class AbstractNumberToStringConverter<N extends Number> extends AbstractNumberConverter<N, String> {
+        public AbstractNumberToStringConverter(Class<N> sourceClass) {
+            super(sourceClass, String.class);
         }
 
-        public Double convert(BigDecimal obj) throws ConversionException {
-            return Double.valueOf(obj.doubleValue());
+        public String convert(N obj) throws ConversionException {
+            return obj.toString();
+        }
+
+        public String convert(N obj, Locale locale, TimeZone timeZone) throws ConversionException {
+            return format(obj, NumberFormat.getNumberInstance(locale));
+        }
+
+        protected abstract String format(N obj, NumberFormat nf) throws ConversionException;
+    }
+
+    public static class GenericNumberToDouble<N extends Number> extends AbstractConverter<N, Double> {
+        public GenericNumberToDouble(Class<N> sourceClass) {
+            super(sourceClass, Double.class);
+        }
+
+        public Double convert(N obj) throws ConversionException {
+            return obj.doubleValue();
         }
     }
 
-    public static class BigDecimalToFloat extends AbstractConverter<BigDecimal, Float> {
-        public BigDecimalToFloat() {
-            super(BigDecimal.class, Float.class);
+    public static class GenericNumberToFloat<N extends Number> extends AbstractConverter<N, Float> {
+        public GenericNumberToFloat(Class<N> sourceClass) {
+            super(sourceClass, Float.class);
         }
 
-        public Float convert(BigDecimal obj) throws ConversionException {
-            return Float.valueOf(obj.floatValue());
-        }
-    }
-
-    public static class BigDecimalToInteger extends AbstractConverter<BigDecimal, Integer> {
-        public BigDecimalToInteger() {
-            super(BigDecimal.class, Integer.class);
-        }
-
-        public Integer convert(BigDecimal obj) throws ConversionException {
-            return Integer.valueOf(obj.intValue());
+        public Float convert(N obj) throws ConversionException {
+            return obj.floatValue();
         }
     }
 
-    public static class BigDecimalToList extends AbstractConverter<BigDecimal, List<BigDecimal>> {
-        public BigDecimalToList() {
-            super(BigDecimal.class, List.class);
+    public static class GenericNumberToInteger<N extends Number> extends AbstractConverter<N, Integer> {
+        public GenericNumberToInteger(Class<N> sourceClass) {
+            super(sourceClass, Integer.class);
         }
 
-        public List<BigDecimal> convert(BigDecimal obj) throws ConversionException {
-            List<BigDecimal> tempList = FastList.newInstance();
-            tempList.add(obj);
-            return tempList;
+        public Integer convert(N obj) throws ConversionException {
+            return obj.intValue();
         }
     }
 
-    public static class BigDecimalToLong extends AbstractConverter<BigDecimal, Long> {
-        public BigDecimalToLong() {
-            super(BigDecimal.class, Long.class);
+    public static class GenericNumberToLong<N extends Number> extends AbstractConverter<N, Long> {
+        public GenericNumberToLong(Class<N> sourceClass) {
+            super(sourceClass, Long.class);
         }
 
-        public Long convert(BigDecimal obj) throws ConversionException {
-            return Long.valueOf(obj.longValue());
-        }
-    }
-
-    public static class BigDecimalToSet extends AbstractConverter<BigDecimal, Set<BigDecimal>> {
-        public BigDecimalToSet() {
-            super(BigDecimal.class, Set.class);
-        }
-
-        public Set<BigDecimal> convert(BigDecimal obj) throws ConversionException {
-            Set<BigDecimal> tempSet = FastSet.newInstance();
-            tempSet.add(obj);
-            return tempSet;
+        public Long convert(N obj) throws ConversionException {
+            return obj.longValue();
         }
     }
 
-    public static class BigDecimalToString extends AbstractUsesLocaleConverter<BigDecimal, String> {
+    public static class GenericNumberToShort<N extends Number> extends AbstractConverter<N, Short> {
+        public GenericNumberToShort(Class<N> sourceClass) {
+            super(sourceClass, Short.class);
+        }
+
+        public Short convert(N obj) throws ConversionException {
+            return obj.shortValue();
+        }
+    }
+
+    public static class BigDecimalToString extends AbstractNumberToStringConverter<BigDecimal> {
         public BigDecimalToString() {
-            super(BigDecimal.class, String.class);
+            super(BigDecimal.class);
         }
 
-        public String convert(BigDecimal obj, Locale locale, TimeZone timeZone) throws ConversionException {
-            NumberFormat nf = NumberFormat.getNumberInstance(locale);
+        protected String format(BigDecimal obj, NumberFormat nf) throws ConversionException {
             return nf.format(obj.doubleValue());
         }
     }
@@ -149,67 +156,46 @@ public class NumberConverters implements ConverterLoader {
         }
     }
 
-    public static class DoubleToFloat extends AbstractConverter<Double, Float> {
-        public DoubleToFloat() {
-            super(Double.class, Float.class);
+    public static class BigIntegerToString extends AbstractNumberToStringConverter<BigInteger> {
+        public BigIntegerToString() {
+            super(BigInteger.class);
         }
 
-        public Float convert(Double obj) throws ConversionException {
-            return Float.valueOf(obj.floatValue());
-        }
-    }
-
-    public static class DoubleToInteger extends AbstractConverter<Double, Integer> {
-        public DoubleToInteger() {
-            super(Double.class, Integer.class);
-        }
-
-        public Integer convert(Double obj) throws ConversionException {
-            return Integer.valueOf(obj.intValue());
+        protected String format(BigInteger obj, NumberFormat nf) throws ConversionException {
+            return nf.format(obj.doubleValue());
         }
     }
 
-    public static class DoubleToList extends AbstractConverter<Double, List<Double>> {
-        public DoubleToList() {
-            super(Double.class, List.class);
+    public static class ByteToString extends AbstractNumberToStringConverter<Byte> {
+        public ByteToString() {
+            super(Byte.class);
         }
 
-        public List<Double> convert(Double obj) throws ConversionException {
-            List<Double> tempList = FastList.newInstance();
-            tempList.add(obj);
-            return tempList;
+        protected String format(Byte obj, NumberFormat nf) throws ConversionException {
+            return nf.format(obj.floatValue());
         }
     }
 
-    public static class DoubleToLong extends AbstractConverter<Double, Long> {
-        public DoubleToLong() {
-            super(Double.class, Long.class);
+    public static class StringToBigInteger extends AbstractStringToNumberConverter<BigInteger> {
+        public StringToBigInteger() {
+            super(BigInteger.class);
         }
 
-        public Long convert(Double obj) throws ConversionException {
-            return Long.valueOf(obj.longValue());
-        }
-    }
-
-    public static class DoubleToSet extends AbstractConverter<Double, Set<Double>> {
-        public DoubleToSet() {
-            super(Double.class, Set.class);
+        public BigInteger convert(String obj) throws ConversionException {
+            return new BigInteger(obj);
         }
 
-        public Set<Double> convert(Double obj) throws ConversionException {
-            Set<Double> tempSet = FastSet.newInstance();
-            tempSet.add(obj);
-            return tempSet;
+        protected BigInteger convert(Number number) throws ConversionException {
+            return BigInteger.valueOf(number.longValue());
         }
     }
 
-    public static class DoubleToString extends AbstractUsesLocaleConverter<Double, String> {
+    public static class DoubleToString extends AbstractNumberToStringConverter<Double> {
         public DoubleToString() {
-            super(Double.class, String.class);
+            super(Double.class);
         }
 
-        public String convert(Double obj, Locale locale, TimeZone timeZone) throws ConversionException {
-            NumberFormat nf = NumberFormat.getNumberInstance(locale);
+        protected String format(Double obj, NumberFormat nf) throws ConversionException {
             return nf.format(obj.doubleValue());
         }
     }
@@ -224,67 +210,12 @@ public class NumberConverters implements ConverterLoader {
         }
     }
 
-    public static class FloatToDouble extends AbstractConverter<Float, Double> {
-        public FloatToDouble() {
-            super(Float.class, Double.class);
-        }
-
-        public Double convert(Float obj) throws ConversionException {
-            return Double.valueOf(obj.doubleValue());
-        }
-    }
-
-    public static class FloatToInteger extends AbstractConverter<Float, Integer> {
-        public FloatToInteger() {
-            super(Float.class, Integer.class);
-        }
-
-        public Integer convert(Float obj) throws ConversionException {
-            return Integer.valueOf(obj.intValue());
-        }
-    }
-
-    public static class FloatToList extends AbstractConverter<Float, List<Float>> {
-        public FloatToList() {
-            super(Float.class, List.class);
-        }
-
-        public List<Float> convert(Float obj) throws ConversionException {
-            List<Float> tempList = FastList.newInstance();
-            tempList.add(obj);
-            return tempList;
-        }
-    }
-
-    public static class FloatToLong extends AbstractConverter<Float, Long> {
-        public FloatToLong() {
-            super(Float.class, Long.class);
-        }
-
-        public Long convert(Float obj) throws ConversionException {
-            return Long.valueOf(obj.longValue());
-        }
-    }
-
-    public static class FloatToSet extends AbstractConverter<Float, Set<Float>> {
-        public FloatToSet() {
-            super(Float.class, Set.class);
-        }
-
-        public Set<Float> convert(Float obj) throws ConversionException {
-            Set<Float> tempSet = FastSet.newInstance();
-            tempSet.add(obj);
-            return tempSet;
-        }
-    }
-
-    public static class FloatToString extends AbstractUsesLocaleConverter<Float, String> {
+    public static class FloatToString extends AbstractNumberToStringConverter<Float> {
         public FloatToString() {
-            super(Float.class, String.class);
+            super(Float.class);
         }
 
-        public String convert(Float obj, Locale locale, TimeZone timeZone) throws ConversionException {
-            NumberFormat nf = NumberFormat.getNumberInstance(locale);
+        protected String format(Float obj, NumberFormat nf) throws ConversionException {
             return nf.format(obj.floatValue());
         }
     }
@@ -295,71 +226,26 @@ public class NumberConverters implements ConverterLoader {
         }
 
         public BigDecimal convert(Integer obj) throws ConversionException {
-            return BigDecimal.valueOf(obj.doubleValue());
+            return BigDecimal.valueOf(obj.intValue());
         }
     }
 
-    public static class IntegerToDouble extends AbstractConverter<Integer, Double> {
-        public IntegerToDouble() {
-            super(Integer.class, Double.class);
+    public static class IntegerToByte extends AbstractConverter<Integer, Byte> {
+        public IntegerToByte() {
+            super(Integer.class, Byte.class);
         }
 
-        public Double convert(Integer obj) throws ConversionException {
-            return Double.valueOf(obj.doubleValue());
-        }
-    }
-
-    public static class IntegerToFloat extends AbstractConverter<Integer, Float> {
-        public IntegerToFloat() {
-            super(Integer.class, Float.class);
-        }
-
-        public Float convert(Integer obj) throws ConversionException {
-            return Float.valueOf(obj.floatValue());
+        public Byte convert(Integer obj) throws ConversionException {
+            return obj.byteValue();
         }
     }
 
-    public static class IntegerToList extends AbstractConverter<Integer, List<Integer>> {
-        public IntegerToList() {
-            super(Integer.class, List.class);
-        }
-
-        public List<Integer> convert(Integer obj) throws ConversionException {
-            List<Integer> tempList = FastList.newInstance();
-            tempList.add(obj);
-            return tempList;
-        }
-    }
-
-    public static class IntegerToLong extends AbstractConverter<Integer, Long> {
-        public IntegerToLong() {
-            super(Integer.class, Long.class);
-        }
-
-        public Long convert(Integer obj) throws ConversionException {
-            return Long.valueOf(obj.longValue());
-        }
-    }
-
-    public static class IntegerToSet extends AbstractConverter<Integer, Set<Integer>> {
-        public IntegerToSet() {
-            super(Integer.class, Set.class);
-        }
-
-        public Set<Integer> convert(Integer obj) throws ConversionException {
-            Set<Integer> tempSet = FastSet.newInstance();
-            tempSet.add(obj);
-            return tempSet;
-        }
-    }
-
-    public static class IntegerToString extends AbstractUsesLocaleConverter<Integer, String> {
+    public static class IntegerToString extends AbstractNumberToStringConverter<Integer> {
         public IntegerToString() {
-            super(Integer.class, String.class);
+            super(Integer.class);
         }
 
-        public String convert(Integer obj, Locale locale, TimeZone timeZone) throws ConversionException {
-            NumberFormat nf = NumberFormat.getNumberInstance(locale);
+        protected String format(Integer obj, NumberFormat nf) throws ConversionException {
             return nf.format(obj.intValue());
         }
     }
@@ -370,146 +256,184 @@ public class NumberConverters implements ConverterLoader {
         }
 
         public BigDecimal convert(Long obj) throws ConversionException {
-            return BigDecimal.valueOf(obj.doubleValue());
+            return BigDecimal.valueOf(obj.longValue());
         }
     }
 
-    public static class LongToDouble extends AbstractConverter<Long, Double> {
-        public LongToDouble() {
-            super(Long.class, Double.class);
+    public static class LongToByte extends AbstractConverter<Long, Byte> {
+        public LongToByte() {
+            super(Long.class, Byte.class);
         }
 
-        public Double convert(Long obj) throws ConversionException {
-            return Double.valueOf(obj.doubleValue());
-        }
-    }
-
-    public static class LongToFloat extends AbstractConverter<Long, Float> {
-        public LongToFloat() {
-            super(Long.class, Float.class);
-        }
-
-        public Float convert(Long obj) throws ConversionException {
-            return Float.valueOf(obj.floatValue());
+        public Byte convert(Long obj) throws ConversionException {
+            return obj.byteValue();
         }
     }
 
-    public static class LongToInteger extends AbstractConverter<Long, Integer> {
-        public LongToInteger() {
-            super(Long.class, Integer.class);
-        }
-
-        public Integer convert(Long obj) throws ConversionException {
-            return Integer.valueOf(obj.intValue());
-        }
-    }
-
-    public static class LongToList extends AbstractConverter<Long, List<Long>> {
-        public LongToList() {
-            super(Long.class, List.class);
-        }
-
-        public List<Long> convert(Long obj) throws ConversionException {
-            List<Long> tempList = FastList.newInstance();
-            tempList.add(obj);
-            return tempList;
-        }
-    }
-
-    public static class LongToSet extends AbstractConverter<Long, Set<Long>> {
-        public LongToSet() {
-            super(Long.class, Set.class);
-        }
-
-        public Set<Long> convert(Long obj) throws ConversionException {
-            Set<Long> tempSet = FastSet.newInstance();
-            tempSet.add(obj);
-            return tempSet;
-        }
-    }
-
-    public static class LongToString extends AbstractUsesLocaleConverter<Long, String> {
+    public static class LongToString extends AbstractNumberToStringConverter<Long> {
         public LongToString() {
-            super(Long.class, String.class);
+            super(Long.class);
         }
 
-        public String convert(Long obj, Locale locale, TimeZone timeZone) throws ConversionException {
-            NumberFormat nf = NumberFormat.getNumberInstance(locale);
+        protected String format(Long obj, NumberFormat nf) throws ConversionException {
             return nf.format(obj.longValue());
         }
     }
 
-    public static class StringToBigDecimal extends AbstractToNumberConverter<String, BigDecimal> {
+    public static class ShortToString extends AbstractNumberToStringConverter<Short> {
+        public ShortToString() {
+            super(Short.class);
+        }
+
+        protected String format(Short obj, NumberFormat nf) throws ConversionException {
+            return nf.format(obj.floatValue());
+        }
+    }
+
+    public static class StringToBigDecimal extends AbstractStringToNumberConverter<BigDecimal> {
         public StringToBigDecimal() {
-            super(String.class, BigDecimal.class);
+            super(BigDecimal.class);
         }
 
-        public BigDecimal convert(String obj, Locale locale, TimeZone timeZone) throws ConversionException {
-            String trimStr = StringUtil.removeSpaces(obj);
-            if (trimStr.length() == 0) {
-                return null;
-            }
-            return BigDecimal.valueOf(this.fromString(trimStr, locale).doubleValue());
+        public BigDecimal convert(String obj) throws ConversionException {
+            return BigDecimal.valueOf(Double.valueOf(obj));
+        }
+
+        protected BigDecimal convert(Number number) throws ConversionException {
+            return BigDecimal.valueOf(number.doubleValue());
         }
     }
 
-    public static class StringToDouble extends AbstractToNumberConverter<String, Double> {
+    public static class StringToByte extends AbstractConverter<String, Byte> {
+        public StringToByte() {
+            super(String.class, Byte.class);
+        }
+
+        public Byte convert(String obj) throws ConversionException {
+            return Byte.valueOf(obj);
+        }
+    }
+
+    public static class StringToDouble extends AbstractStringToNumberConverter<Double> {
         public StringToDouble() {
-            super(String.class, Double.class);
+            super(Double.class);
         }
 
-        public Double convert(String obj, Locale locale, TimeZone timeZone) throws ConversionException {
-            String trimStr = StringUtil.removeSpaces(obj);
-            if (trimStr.length() == 0) {
-                return null;
-            }
-            return this.fromString(trimStr, locale).doubleValue();
+        public Double convert(String obj) throws ConversionException {
+            return Double.valueOf(obj);
+        }
+
+        protected Double convert(Number number) throws ConversionException {
+            return number.doubleValue();
         }
     }
 
-    public static class StringToFloat extends AbstractToNumberConverter<String, Float> {
+    public static class StringToFloat extends AbstractStringToNumberConverter<Float> {
         public StringToFloat() {
-            super(String.class, Float.class);
+            super(Float.class);
         }
 
-        public Float convert(String obj, Locale locale, TimeZone timeZone) throws ConversionException {
-            String trimStr = StringUtil.removeSpaces(obj);
-            if (trimStr.length() == 0) {
-                return null;
-            }
-            return this.fromString(trimStr, locale).floatValue();
+        public Float convert(String obj) throws ConversionException {
+            return Float.valueOf(obj);
+        }
+
+        protected Float convert(Number number) throws ConversionException {
+            return number.floatValue();
         }
     }
 
-    public static class StringToInteger extends AbstractToNumberConverter<String, Integer> {
+    public static class StringToInteger extends AbstractStringToNumberConverter<Integer> {
         public StringToInteger() {
-            super(String.class, Integer.class);
+            super(Integer.class);
         }
 
-        public Integer convert(String obj, Locale locale, TimeZone timeZone) throws ConversionException {
-            String trimStr = StringUtil.removeSpaces(obj);
-            if (trimStr.length() == 0) {
-                return null;
-            }
-            return this.fromString(trimStr, locale).intValue();
+        public Integer convert(String obj) throws ConversionException {
+            return Integer.valueOf(obj);
+        }
+
+        protected Integer convert(Number number) throws ConversionException {
+            return number.intValue();
         }
     }
 
-    public static class StringToLong extends AbstractToNumberConverter<String, Long> {
+    public static class StringToLong extends AbstractStringToNumberConverter<Long> {
         public StringToLong() {
-            super(String.class, Long.class);
+            super(Long.class);
         }
 
-        public Long convert(String obj, Locale locale, TimeZone timeZone) throws ConversionException {
-            String trimStr = StringUtil.removeSpaces(obj);
-            if (trimStr.length() == 0) {
-                return null;
-            }
-            return this.fromString(trimStr, locale).longValue();
+        public Long convert(String obj) throws ConversionException {
+            return Long.valueOf(obj);
+        }
+
+        protected Long convert(Number number) throws ConversionException {
+            return number.longValue();
+        }
+    }
+
+    public static class StringToShort extends AbstractConverter<String, Short> {
+        public StringToShort() {
+            super(String.class, Short.class);
+        }
+
+        public Short convert(String obj) throws ConversionException {
+            return Short.valueOf(obj);
         }
     }
 
     public void loadConverters() {
         Converters.loadContainedConverters(NumberConverters.class);
+
+        Converters.registerConverter(new GenericNumberToDouble<BigDecimal>(BigDecimal.class));
+        Converters.registerConverter(new GenericNumberToDouble<BigInteger>(BigInteger.class));
+        Converters.registerConverter(new GenericNumberToDouble<Byte>(Byte.class));
+        Converters.registerConverter(new GenericNumberToDouble<Float>(Float.class));
+        Converters.registerConverter(new GenericNumberToDouble<Integer>(Integer.class));
+        Converters.registerConverter(new GenericNumberToDouble<Long>(Long.class));
+        Converters.registerConverter(new GenericNumberToDouble<Short>(Short.class));
+
+        Converters.registerConverter(new GenericNumberToFloat<BigDecimal>(BigDecimal.class));
+        Converters.registerConverter(new GenericNumberToFloat<BigInteger>(BigInteger.class));
+        Converters.registerConverter(new GenericNumberToFloat<Byte>(Byte.class));
+        Converters.registerConverter(new GenericNumberToFloat<Double>(Double.class));
+        Converters.registerConverter(new GenericNumberToFloat<Integer>(Integer.class));
+        Converters.registerConverter(new GenericNumberToFloat<Long>(Long.class));
+        Converters.registerConverter(new GenericNumberToFloat<Short>(Short.class));
+
+        Converters.registerConverter(new GenericNumberToInteger<BigDecimal>(BigDecimal.class));
+        Converters.registerConverter(new GenericNumberToInteger<BigInteger>(BigInteger.class));
+        Converters.registerConverter(new GenericNumberToInteger<Byte>(Byte.class));
+        Converters.registerConverter(new GenericNumberToInteger<Double>(Double.class));
+        Converters.registerConverter(new GenericNumberToInteger<Float>(Float.class));
+        Converters.registerConverter(new GenericNumberToInteger<Long>(Long.class));
+        Converters.registerConverter(new GenericNumberToInteger<Short>(Short.class));
+
+        Converters.registerConverter(new GenericSingletonToList<BigDecimal>(BigDecimal.class));
+        Converters.registerConverter(new GenericSingletonToList<BigInteger>(BigInteger.class));
+        Converters.registerConverter(new GenericSingletonToList<Byte>(Byte.class));
+        Converters.registerConverter(new GenericSingletonToList<Double>(Double.class));
+        Converters.registerConverter(new GenericSingletonToList<Float>(Float.class));
+        Converters.registerConverter(new GenericSingletonToList<Integer>(Integer.class));
+        Converters.registerConverter(new GenericSingletonToList<Long>(Long.class));
+        Converters.registerConverter(new GenericSingletonToList<Short>(Short.class));
+
+        Converters.registerConverter(new GenericNumberToLong<BigDecimal>(BigDecimal.class));
+        Converters.registerConverter(new GenericNumberToLong<BigInteger>(BigInteger.class));
+        Converters.registerConverter(new GenericNumberToLong<Byte>(Byte.class));
+        Converters.registerConverter(new GenericNumberToLong<Double>(Double.class));
+        Converters.registerConverter(new GenericNumberToLong<Float>(Float.class));
+        Converters.registerConverter(new GenericNumberToLong<Integer>(Integer.class));
+        Converters.registerConverter(new GenericNumberToLong<Short>(Short.class));
+
+        Converters.registerConverter(new GenericSingletonToSet<BigDecimal>(BigDecimal.class));
+        Converters.registerConverter(new GenericSingletonToSet<BigInteger>(BigInteger.class));
+        Converters.registerConverter(new GenericSingletonToSet<Byte>(Byte.class));
+        Converters.registerConverter(new GenericSingletonToSet<Double>(Double.class));
+        Converters.registerConverter(new GenericSingletonToSet<Float>(Float.class));
+        Converters.registerConverter(new GenericSingletonToSet<Integer>(Integer.class));
+        Converters.registerConverter(new GenericSingletonToSet<Long>(Long.class));
+        Converters.registerConverter(new GenericSingletonToSet<Short>(Short.class));
+
+        Converters.registerConverter(new GenericNumberToShort<Integer>(Integer.class));
+        Converters.registerConverter(new GenericNumberToShort<Long>(Long.class));
     }
 }

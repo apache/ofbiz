@@ -104,8 +104,9 @@ if (security.hasPermission("ENTITY_MAINT", session)) {
       relation.setMainEntity(entity);
       entity.addRelation(relation);
       if ("one".equals(type) || "one-nofk".equals(type)) {
-        for (int pk = 0; pk < relEntity.getPksSize(); pk++) {
-          ModelField pkf = relEntity.getPk(pk);
+        Iterator<ModelField> pkIterator = relEntity.getPksIterator();
+        while (pkIterator.hasNext()) {
+          ModelField pkf = pkIterator.next();
           ModelKeyMap keyMap = new ModelKeyMap();
           keyMap.setFieldName(pkf.getName());
           keyMap.setRelFieldName(pkf.getName());
@@ -333,8 +334,9 @@ A.listtext:hover {color:red;}
 <B>FIELDS</B>
   <TABLE border='1' cellpadding='2' cellspacing='0'>
     <TR><TD>Field Name</TD><TD>Column Name (Length)</TD><TD>Field Type</TD><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
-    <%for (int f = 0; f < entity.getFieldsSize(); f++) {%>
-      <%ModelField field = entity.getField(f);%>
+    <%Iterator<ModelField> fieldIterator = entity.getFieldsIterator(); %>
+    <%while (fieldIterator.hasNext()) {%>
+      <%ModelField field = fieldIterator.next();%>
       <TR>
         <TD><%=field.getIsPk()?"<B>":""%><%=field.getName()%><%=field.getIsPk()?"</B>":""%></TD>
         <TD><%=field.getColName()%> (<%=field.getColName().length()%>)</TD>
@@ -409,20 +411,20 @@ A.listtext:hover {color:red;}
     <!ELEMENT view-entity ( description?, member-entity+, alias+, view-link+, relation* )>
     <!ELEMENT member-entity EMPTY>
     <!ATTLIST member-entity
-	entity-alias CDATA #REQUIRED
-	entity-name CDATA #REQUIRED >
+    entity-alias CDATA #REQUIRED
+    entity-name CDATA #REQUIRED >
     <!ELEMENT alias EMPTY>
     <!ATTLIST alias
-	entity-alias CDATA #REQUIRED
-	name CDATA #REQUIRED
-	field CDATA #IMPLIED
-	prim-key CDATA #IMPLIED
-	group-by ( true | false ) "false"
-	function ( min | max | sum | avg | count | count-distinct | upper | lower ) #IMPLIED>
+    entity-alias CDATA #REQUIRED
+    name CDATA #REQUIRED
+    field CDATA #IMPLIED
+    prim-key CDATA #IMPLIED
+    group-by ( true | false ) "false"
+    function ( min | max | sum | avg | count | count-distinct | upper | lower ) #IMPLIED>
     <!ELEMENT view-link ( key-map+ )>
     <!ATTLIST view-link
-	entity-alias CDATA #REQUIRED
-	rel-entity-alias CDATA #REQUIRED >
+    entity-alias CDATA #REQUIRED
+    rel-entity-alias CDATA #REQUIRED >
 --%>
 
 <%}%>
@@ -464,16 +466,18 @@ A.listtext:hover {color:red;}
             <SELECT name='fieldName' class='selectBox'>
               <OPTION selected><%=keyMap.getFieldName()%></OPTION>
               <OPTION>&nbsp;</OPTION>
-              <%for (int fld=0; fld<entity.getFieldsSize(); fld++) {%>
-                <OPTION><%=entity.getField(fld).getName()%></OPTION>
+              <%Iterator<ModelField> fieldIterator = entity.getFieldsIterator(); %>
+              <%while (fieldIterator.hasNext()) {%>
+                <OPTION><%=fieldIterator.next().getName()%></OPTION>
               <%}%>
             </SELECT>
             Related:
             <SELECT name='relFieldName' class='selectBox'>
               <OPTION selected><%=keyMap.getRelFieldName()%></OPTION>
               <OPTION>&nbsp;</OPTION>
-              <%for (int fld=0; fld<relEntity.getFieldsSize(); fld++) {%>
-                <OPTION><%=relEntity.getField(fld).getName()%></OPTION>
+              <%Iterator<ModelField> relFieldIterator = entity.getFieldsIterator(); %>
+              <%while (relFieldIterator.hasNext()) {%>
+                <OPTION><%=relFieldIterator.next().getName()%></OPTION>
               <%}%>
             </SELECT>
           </td>

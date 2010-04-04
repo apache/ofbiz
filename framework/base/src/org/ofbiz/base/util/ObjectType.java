@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.base.util;
 
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -32,6 +33,7 @@ import org.ofbiz.base.conversion.ConversionException;
 import org.ofbiz.base.conversion.Converter;
 import org.ofbiz.base.conversion.Converters;
 import org.ofbiz.base.conversion.LocalizedConverter;
+import org.ofbiz.base.lang.SourceMonitored;
 import org.w3c.dom.Node;
 
 /**
@@ -469,6 +471,7 @@ public class ObjectType {
      * @return the converted value
      * @throws GeneralException
      */
+    @SourceMonitored
     @SuppressWarnings("unchecked")
     public static Object simpleTypeConvert(Object obj, String type, String format, TimeZone timeZone, Locale locale, boolean noTypeFail) throws GeneralException {
         if (obj == null) {
@@ -480,16 +483,33 @@ public class ObjectType {
             type = type.substring(0, genericsStart);
         }
 
+        if ("PlainString".equals(type)) {
+            return obj.toString();
+        }
         Class<?> sourceClass = obj.getClass();
+        if (sourceClass.getName().equals(type)) {
+            return obj;
+        }
+        if ("Object".equals(type) || "java.lang.Object".equals(type)) {
+            return obj;
+        }
+        if (obj instanceof String && UtilValidate.isEmpty(obj)) {
+            return null;
+        }
+        if (obj instanceof Node) {
+            Node node = (Node) obj;
+            String nodeValue =  node.getTextContent();
+            if ("String".equals(type) || "java.lang.String".equals(type)) {
+                return nodeValue;
+            } else {
+                return simpleTypeConvert(nodeValue, type, format, timeZone, locale, noTypeFail);
+            }
+        }
         Class<?> targetClass = null;
         try {
             targetClass = loadClass(type);
         } catch (ClassNotFoundException e) {
-            Debug.logError(e, module);
-            return obj;
-        }
-        if (sourceClass.equals(targetClass)) {
-            return obj;
+            throw new GeneralException("Conversion from " + sourceClass.getName() + " to " + type + " not currently supported", e);
         }
         Converter<Object,Object> converter = null;
         try {
@@ -499,7 +519,7 @@ public class ObjectType {
             LocalizedConverter<Object, Object> localizedConverter = null;
             try {
                 localizedConverter = (LocalizedConverter) converter;
-            } catch (Exception e) {}
+            } catch (ClassCastException e) {}
             if (localizedConverter != null) {
                 if (timeZone == null) {
                     timeZone = TimeZone.getDefault();
@@ -510,22 +530,13 @@ public class ObjectType {
                 try {
                     return localizedConverter.convert(obj, locale, timeZone, format);
                 } catch (ConversionException e) {
-                    Debug.logError(e, module);
+                    throw new GeneralException(e.getMessage(), e);
                 }
             }
             try {
                 return converter.convert(obj);
             } catch (ConversionException e) {
-                Debug.logError(e, module);
-            }
-        }
-        if (obj instanceof Node) {
-            Node node = (Node) obj;
-            String nodeValue =  node.getTextContent();
-            if (targetClass.equals(String.class)) {
-                return nodeValue;
-            } else {
-                return simpleTypeConvert(nodeValue, type, format, timeZone, locale, noTypeFail);
+                throw new GeneralException(e.getMessage(), e);
             }
         }
         // we can pretty much always do a conversion to a String, so do that here
@@ -756,31 +767,36 @@ public class ObjectType {
     @SuppressWarnings("unchecked")
     public static boolean isEmpty(Object value) {
         if (value == null) return true;
-        
+
         if (value instanceof String) return UtilValidate.isEmpty((String) value);
         if (value instanceof Collection) return UtilValidate.isEmpty((Collection<? extends Object>) value);
         if (value instanceof Map) return UtilValidate.isEmpty((Map<? extends Object, ? extends Object>) value);
         if (value instanceof CharSequence) return UtilValidate.isEmpty((CharSequence) value);
-        
+
         // These types would flood the log
         // Number covers: BigDecimal, BigInteger, Byte, Double, Float, Integer, Long, Short
-        if (value instanceof Boolean) return false;        
-        if (value instanceof Number) return false;        
-        if (value instanceof Character) return false;        
-        if (value instanceof java.sql.Timestamp) return false;        
-        
+        if (value instanceof Boolean) return false;
+        if (value instanceof Number) return false;
+        if (value instanceof Character) return false;
+        if (value instanceof java.sql.Timestamp) return false;
+
         if (Debug.verboseOn()) {
             Debug.logVerbose("In ObjectType.isEmpty(Object value) returning false for " + value.getClass() + " Object.", module);
         }
         return false;
     }
 
-    public static final class NullObject {
+    public static final class NullObject implements Serializable {
         public NullObject() { }
 
         @Override
         public String toString() {
             return "ObjectType.NullObject";
+        }
+
+        @Override
+        public int hashCode() {
+            return toString().hashCode();
         }
 
         @Override

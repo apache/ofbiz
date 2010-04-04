@@ -21,11 +21,14 @@ under the License.
 <#assign partyId = requestParameters.partyId?if_exists>
 <#assign partyIdTo = requestParameters.partyIdTo?if_exists>
 
-<br/>
+<br />
 <#if hasUpdatePermission>
   <div id="linkParty" class="screenlet">
     <div class="screenlet-title-bar">
-      <h3>${uiLabelMap.PartyLink}</h3>
+      <ul>
+        <li class="h3">${uiLabelMap.PartyLink}</li>
+      </ul>
+      <br class="clear"/>
     </div>
     <div class="screenlet-body" align="center">
         <#if partyTo?has_content && partyFrom?has_content>
@@ -33,7 +36,7 @@ under the License.
             <div class="h1 alert">
               ${uiLabelMap.PartyLinkMessage1}
             </div>
-            <br/>
+            <br />
             <div>
               <span class="label">${uiLabelMap.PartyLink}</span>
               <input type="hidden" name="partyId" value="${partyFrom.partyId}"/>
@@ -58,7 +61,7 @@ under the License.
               </#if>
               &nbsp;${partyTo.partyId}
             </div>
-            <br/>
+            <br />
             <div>
               <a href="javascript:document.linkparty.submit()" class="smallSubmit">${uiLabelMap.CommonConfirm}</a>
             </div>

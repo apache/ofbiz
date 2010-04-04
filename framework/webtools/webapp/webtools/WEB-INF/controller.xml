@@ -21,7 +21,6 @@ under the License.
 <site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
     <include location="component://common/webcommon/WEB-INF/common-controller.xml"/>
-    <include location="component://commonext/webapp/WEB-INF/controller.xml"/>
     <include location="component://common/webcommon/WEB-INF/tempexpr-controller.xml"/>
     <include location="component://testtools/webapp/testtools/WEB-INF/controller.xml"/>
     <description>WebTools Site Configuration File</description>
@@ -186,12 +185,6 @@ under the License.
     <request-map uri="FindUtilCacheClearAll">
         <security https="true" auth="true"/>
         <event type="java" path="org.ofbiz.webtools.UtilCacheEvents" invoke="clearAllEvent"/>
-        <response name="success" type="view" value="FindUtilCache"/>
-        <response name="error" type="view" value="FindUtilCache"/>
-    </request-map>
-    <request-map uri="FindUtilCacheClearAllExpired">
-        <security https="true" auth="true"/>
-        <event type="java" path="org.ofbiz.webtools.UtilCacheEvents" invoke="clearAllExpiredEvent"/>
         <response name="success" type="view" value="FindUtilCache"/>
         <response name="error" type="view" value="FindUtilCache"/>
     </request-map>
@@ -530,8 +523,8 @@ under the License.
 
     <!-- View Mappings -->
     <view-map name="main" type="screen" page="component://webtools/widget/CommonScreens.xml#main"/>
-    <view-map name="ping" type="ftl" page="/ping.ftl"/>
-    <view-map name="showDateTime" type="ftl" page="/showDateTime.ftl"/>
+    <view-map name="ping" type="ftl" page="component://webtools/webapp/webtools/ping.ftl"/>
+    <view-map name="showDateTime" type="ftl" page="component://webtools/webapp/webtools/showDateTime.ftl"/>
 
     <view-map name="entityref" type="screen" page="component://webtools/widget/EntityScreens.xml#EntityRef"/>
     <view-map name="entityref_list" type="screen" page="component://webtools/widget/EntityScreens.xml#EntityRefList"/>

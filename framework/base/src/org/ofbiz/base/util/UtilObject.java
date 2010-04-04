@@ -18,43 +18,50 @@
  *******************************************************************************/
 package org.ofbiz.base.util;
 
+import java.lang.reflect.Array;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.InputStream;
 import java.util.Iterator;
-import javax.imageio.spi.ServiceRegistry;
+import java.util.ServiceLoader;
+
+import org.ofbiz.base.lang.Factory;
+import org.ofbiz.base.lang.SourceMonitored;
 
 /**
  * UtilObject
  *
  */
-public class UtilObject {
+@SourceMonitored
+public final class UtilObject {
+    private UtilObject() {
+    }
 
     public static final String module = UtilObject.class.getName();
 
     public static byte[] getBytes(InputStream is) {
         byte[] buffer = new byte[4 * 1024];
-        ByteArrayOutputStream bos = null;
         byte[] data = null;
         try {
-            bos = new ByteArrayOutputStream();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            try {
 
-            int numBytesRead;
-            while ((numBytesRead = is.read(buffer)) != -1) {
-                bos.write(buffer, 0, numBytesRead);
+                int numBytesRead;
+                while ((numBytesRead = is.read(buffer)) != -1) {
+                    bos.write(buffer, 0, numBytesRead);
+                }
+                data = bos.toByteArray();
+            } finally {
+                bos.close();
             }
-            data = bos.toByteArray();
         } catch (IOException e) {
             Debug.logError(e, module);
         } finally {
             try {
                 if (is != null) {
                     is.close();
-                }
-                if (bos != null) {
-                    bos.close();
                 }
             } catch (IOException e) {
                 Debug.logError(e, module);
@@ -66,28 +73,34 @@ public class UtilObject {
 
     /** Serialize an object to a byte array */
     public static byte[] getBytes(Object obj) {
-        ByteArrayOutputStream bos = null;
-        ObjectOutputStream oos = null;
         byte[] data = null;
         try {
-            bos = new ByteArrayOutputStream();
-            oos = new ObjectOutputStream(bos);
-            oos.writeObject(obj);
-            data = bos.toByteArray();
-        } catch (IOException e) {
-            Debug.logError(e, module);
-        } finally {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
             try {
-                if (oos != null) {
+                ObjectOutputStream oos = new ObjectOutputStream(bos);
+                try {
+                    oos.writeObject(obj);
+                    data = bos.toByteArray();
+                } catch (IOException e) {
+                    Debug.logError(e, module);
+                } finally {
                     oos.flush();
                     oos.close();
                 }
-                if (bos != null) {
-                    bos.close();
-                }
             } catch (IOException e) {
+                // I don't know how to force an error during flush or
+                // close of ObjectOutputStream; since OOS is wrapping
+                // BAOS, and BAOS does not throw IOException during
+                // write, I don't think this can happen.
                 Debug.logError(e, module);
+            } finally {
+                bos.close();
             }
+        } catch (IOException e) {
+            // How could this ever happen?  BAOS.close() is listed as
+            // throwing the exception, but I don't understand why this
+            // is.
+            Debug.logError(e, module);
         }
 
         return data;
@@ -115,31 +128,31 @@ public class UtilObject {
 
     /** Deserialize a byte array back to an object */
     public static Object getObject(byte[] bytes) {
-        ByteArrayInputStream bis = null;
-        ObjectInputStream ois = null;
         Object obj = null;
-
         try {
-            bis = new ByteArrayInputStream(bytes);
-            ois = new ObjectInputStream(bis, Thread.currentThread().getContextClassLoader());
-            obj = ois.readObject();
-        } catch (ClassNotFoundException e) {
-            Debug.logError(e, module);
-        } catch (IOException e) {
-            Debug.logError(e, module);
-        } finally {
+            ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
             try {
-                if (ois != null) {
+                ObjectInputStream ois = new ObjectInputStream(bis, Thread.currentThread().getContextClassLoader());
+                try {
+                    obj = ois.readObject();
+                } catch (ClassNotFoundException e) {
+                    Debug.logError(e, module);
+                } catch (IOException e) {
+                    Debug.logError(e, module);
+                } finally {
                     ois.close();
-                }
-                if (bis != null) {
-                    bis.close();
                 }
             } catch (IOException e) {
                 Debug.logError(e, module);
+            } finally {
+                bis.close();
             }
+        } catch (IOException e) {
+            // How could this ever happen?  BAIS.close() is listed as
+            // throwing the exception, but I don't understand why this
+            // is.
+            Debug.logError(e, module);
         }
-
         return obj;
     }
 
@@ -171,11 +184,19 @@ public class UtilObject {
 
     public static int doHashCode(Object o1) {
         if (o1 == null) return 0;
+        if (o1.getClass().isArray()) {
+            int length = Array.getLength(o1);
+            int result = 0;
+            for (int i = 0; i < length; i++) {
+                result += doHashCode(Array.get(o1, i));
+            }
+            return result;
+        }
         return o1.hashCode();
     }
 
     public static <A, R> R getObjectFromFactory(Class<? extends Factory<R, A>> factoryInterface, A obj) throws ClassNotFoundException {
-        Iterator<? extends Factory<R, A>> it = ServiceRegistry.lookupProviders(factoryInterface);
+        Iterator<? extends Factory<R, A>> it = ServiceLoader.load(factoryInterface).iterator();
         while (it.hasNext()) {
             Factory<R, A> factory = it.next();
             R instance = factory.getInstance(obj);

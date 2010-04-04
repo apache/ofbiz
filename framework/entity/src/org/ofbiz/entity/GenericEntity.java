@@ -21,6 +21,7 @@ package org.ofbiz.entity;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -122,13 +123,13 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
     }
 
     /** Creates new GenericEntity from existing Map */
-    public static GenericEntity createGenericEntity(ModelEntity modelEntity, Map<String, ? extends Object> fields) {
+    public static GenericEntity createGenericEntity(Delegator delegator, ModelEntity modelEntity, Map<String, ? extends Object> fields) {
         if (modelEntity == null) {
             throw new IllegalArgumentException("Cannot create a GenericEntity with a null modelEntity parameter");
         }
 
         GenericEntity newEntity = new GenericEntity();
-        newEntity.init(modelEntity, fields);
+        newEntity.init(delegator, modelEntity, fields);
         return newEntity;
     }
 
@@ -158,12 +159,14 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
     }
 
     /** Creates new GenericEntity from existing Map */
-    protected void init(ModelEntity modelEntity, Map<String, ? extends Object> fields) {
+    protected void init(Delegator delegator, ModelEntity modelEntity, Map<String, ? extends Object> fields) {
         if (modelEntity == null) {
             throw new IllegalArgumentException("Cannot create a GenericEntity with a null modelEntity parameter");
         }
         this.modelEntity = modelEntity;
         this.entityName = modelEntity.getEntityName();
+        this.delegatorName = delegator.getDelegatorName();
+        this.internalDelegator = delegator;
         setFields(fields);
 
         // check some things
@@ -173,7 +176,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
     }
 
     /** Creates new GenericEntity from existing Map */
-    protected void init(ModelEntity modelEntity, Object singlePkValue) {
+    protected void init(Delegator delegator, ModelEntity modelEntity, Object singlePkValue) {
         if (modelEntity == null) {
             throw new IllegalArgumentException("Cannot create a GenericEntity with a null modelEntity parameter");
         }
@@ -182,6 +185,8 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         }
         this.modelEntity = modelEntity;
         this.entityName = modelEntity.getEntityName();
+        this.delegatorName = delegator.getDelegatorName();
+        this.internalDelegator = delegator;
         set(modelEntity.getOnlyPk().getName(), singlePkValue);
 
         // check some things
@@ -424,9 +429,11 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
                     } catch (GeneralException e) {}
                 }
                 if (!ObjectType.instanceOf(value, type.getJavaType())) {
-                    String errMsg = "In entity field [" + this.getEntityName() + "." + name + "] set the value passed in [" + value.getClass().getName() + "] is not compatible with the Java type of the field [" + type.getJavaType() + "]";
-                    // eventually we should do this, but for now we'll do a "soft" failure: throw new IllegalArgumentException(errMsg);
-                    Debug.logWarning(new Exception("Location of database type warning"), "=-=-=-=-=-=-=-=-= Database type warning GenericEntity.set =-=-=-=-=-=-=-=-= " + errMsg, module);
+                    if (!("java.sql.Blob".equals(type.getJavaType()) && (value instanceof byte[] || ObjectType.instanceOf(value, ByteBuffer.class)))) {
+                        String errMsg = "In entity field [" + this.getEntityName() + "." + name + "] set the value passed in [" + value.getClass().getName() + "] is not compatible with the Java type of the field [" + type.getJavaType() + "]";
+                        // eventually we should do this, but for now we'll do a "soft" failure: throw new IllegalArgumentException(errMsg);
+                        Debug.logWarning(new Exception("Location of database type warning"), "=-=-=-=-=-=-=-=-= Database type warning GenericEntity.set =-=-=-=-=-=-=-=-= " + errMsg, module);
+                    }
                 }
             }
             Object old = fields.put(name, value);
@@ -822,9 +829,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
             ModelField curField = iter.next();
             pkNames.add(curField.getName());
         }
-        GenericPK newPK = GenericPK.create(getModelEntity(), this.getFields(pkNames));
-        newPK.setDelegator(this.getDelegator());
-        return newPK;
+        return GenericPK.create(this.getDelegator(), getModelEntity(), this.getFields(pkNames));
     }
 
     /** go through the pks and for each one see if there is an entry in fields to set */

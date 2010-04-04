@@ -37,12 +37,14 @@ import org.ofbiz.base.util.UtilURL;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
+import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.ThreadContext;
+import org.ofbiz.entity.datasource.GenericHelperInfo;
 import org.ofbiz.entity.jdbc.DatabaseUtil;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.util.EntityDataLoader;
 import org.ofbiz.service.ServiceDispatcher;
-import org.ofbiz.service.ThreadContext;
 
 
 /**
@@ -149,15 +151,15 @@ public class EntityDataLoadContainer implements Container {
                     }
                 } else if ("drop-pks".equalsIgnoreCase(argumentName)) {
                     if (UtilValidate.isEmpty(argumentVal) || "true".equalsIgnoreCase(argumentVal)) {
-                        dropPks = true;                        
+                        dropPks = true;
                     }
                 } else if ("create-pks".equalsIgnoreCase(argumentName)) {
                     if (UtilValidate.isEmpty(argumentVal) || "true".equalsIgnoreCase(argumentVal)) {
                         createPks = true;
-                    } 
+                    }
                 } else if ("drop-constraints".equalsIgnoreCase(argumentName)) {
                     if (UtilValidate.isEmpty(argumentVal) || "true".equalsIgnoreCase(argumentVal)) {
-                        dropConstraints = true;                      
+                        dropConstraints = true;
                     }
                 } else if ("create-constraints".equalsIgnoreCase(argumentName)) {
                     if (UtilValidate.isEmpty(argumentVal) || "true".equalsIgnoreCase(argumentVal)) {
@@ -226,31 +228,30 @@ public class EntityDataLoadContainer implements Container {
 
         String delegatorNameToUse = overrideDelegator != null ? overrideDelegator : delegatorName;
         String groupNameToUse = overrideGroup != null ? overrideGroup : entityGroupName;
-        Delegator delegator = null;
-        delegator = DelegatorFactory.getDelegator(delegatorNameToUse);
+        Delegator delegator = DelegatorFactory.getDelegator(delegatorNameToUse);
         if (delegator == null) {
             throw new ContainerException("Invalid delegator name!");
         }
 
-        String helperName = delegator.getGroupHelperName(groupNameToUse);
-        if (helperName == null) {
+        GenericHelperInfo helperInfo = delegator.getGroupHelperInfo(groupNameToUse);
+        if (helperInfo == null) {
             throw new ContainerException("Unable to locate the datasource helper for the group [" + groupNameToUse + "]");
         }
 
         // get the database util object
-        DatabaseUtil dbUtil = new DatabaseUtil(helperName);
+        DatabaseUtil dbUtil = new DatabaseUtil(helperInfo);
         Map<String, ModelEntity> modelEntities;
         try {
             modelEntities = delegator.getModelEntityMapByGroup(groupNameToUse);
         } catch (GenericEntityException e) {
             throw new ContainerException(e.getMessage(), e);
-        }        
-        TreeSet<String> modelEntityNames = new TreeSet<String>(modelEntities.keySet());    
-        
+        }
+        TreeSet<String> modelEntityNames = new TreeSet<String>(modelEntities.keySet());
+
         // check for drop index/fks
-        if (dropConstraints) {                   
+        if (dropConstraints) {
             List<String> messages = FastList.newInstance();
-            
+
             Debug.logImportant("Dropping foreign key indcies...", module);
             for (String entityName : modelEntityNames) {
                 ModelEntity modelEntity = modelEntities.get(entityName);
@@ -258,7 +259,7 @@ public class EntityDataLoadContainer implements Container {
                     dbUtil.deleteForeignKeyIndices(modelEntity, messages);
                 }
             }
-            
+
             Debug.logImportant("Dropping declared indices...", module);
             for (String entityName : modelEntityNames) {
                 ModelEntity modelEntity = modelEntities.get(entityName);
@@ -266,7 +267,7 @@ public class EntityDataLoadContainer implements Container {
                     dbUtil.deleteDeclaredIndices(modelEntity, messages);
                 }
             }
-            
+
             Debug.logImportant("Dropping foreign keys...", module);
             for (String entityName : modelEntityNames) {
                 ModelEntity modelEntity = modelEntities.get(entityName);
@@ -274,7 +275,7 @@ public class EntityDataLoadContainer implements Container {
                     dbUtil.deleteForeignKeys(modelEntity, modelEntities, messages);
                 }
             }
-            
+
             if (messages.size() > 0) {
                 if (Debug.infoOn()) {
                     for (String message : messages) {
@@ -283,18 +284,18 @@ public class EntityDataLoadContainer implements Container {
                 }
             }
         }
-        
+
         // drop pks
         if (dropPks) {
             List<String> messages = FastList.newInstance();
             Debug.logImportant("Dropping primary keys...", module);
             for (String entityName : modelEntityNames) {
-                ModelEntity modelEntity = modelEntities.get(entityName); 
+                ModelEntity modelEntity = modelEntities.get(entityName);
                 if (modelEntity != null) {
                     dbUtil.deletePrimaryKey(modelEntity, messages);
                 }
             }
-            
+
             if (messages.size() > 0) {
                 if (Debug.infoOn()) {
                     for (String message : messages) {
@@ -303,7 +304,7 @@ public class EntityDataLoadContainer implements Container {
                 }
             }
         }
-        
+
         // repair columns
         if (repairColumns) {
             List<String> fieldsToRepair = FastList.newInstance();
@@ -321,13 +322,13 @@ public class EntityDataLoadContainer implements Container {
                 }
             }
         }
-        
+
         // get the reader name URLs first
         List<URL> urlList = null;
         if (readerNames != null) {
-            urlList = EntityDataLoader.getUrlList(helperName, component, readerNames);
+            urlList = EntityDataLoader.getUrlList(helperInfo.getHelperBaseName(), component, readerNames);
         } else if (!"none".equalsIgnoreCase(this.readers)) {
-            urlList = EntityDataLoader.getUrlList(helperName, component);
+            urlList = EntityDataLoader.getUrlList(helperInfo.getHelperBaseName(), component);
         }
 
         // need a list if it is empty
@@ -384,7 +385,7 @@ public class EntityDataLoadContainer implements Container {
                 ThreadContext.setDelegator(delegator);
                 for (URL dataUrl: urlList) {
                     try {
-                        int rowsChanged = EntityDataLoader.loadData(dataUrl, helperName, delegator, errorMessages, txTimeout, useDummyFks, maintainTxs, tryInserts);
+                        int rowsChanged = EntityDataLoader.loadData(dataUrl, helperInfo.getHelperBaseName(), delegator, errorMessages, txTimeout, useDummyFks, maintainTxs, tryInserts);
                         totalRowsChanged += rowsChanged;
                         infoMessages.add(changedFormat.format(rowsChanged) + " of " + changedFormat.format(totalRowsChanged) + " from " + dataUrl.toExternalForm());
                     } catch (GenericEntityException e) {
@@ -394,7 +395,6 @@ public class EntityDataLoadContainer implements Container {
             } finally {
                 ThreadContext.popExecutionArtifact();
                 ThreadContext.endRunUnprotected();
-
             }
         } else {
             Debug.logImportant("=-=-=-=-=-=-= No data load files found.", module);
@@ -419,7 +419,7 @@ public class EntityDataLoadContainer implements Container {
         // create primary keys
         if (createPks) {
             List<String> messages = FastList.newInstance();
-            
+
             Debug.logImportant("Creating primary keys...", module);
             for (String entityName : modelEntityNames) {
                 ModelEntity modelEntity = modelEntities.get(entityName);
@@ -435,11 +435,11 @@ public class EntityDataLoadContainer implements Container {
                 }
             }
         }
-        
+
         // create constraints
-        if (createConstraints) {                   
+        if (createConstraints) {
             List<String> messages = FastList.newInstance();
-            
+
             Debug.logImportant("Creating foreign keys...", module);
             for (String entityName : modelEntityNames) {
                 ModelEntity modelEntity = modelEntities.get(entityName);
@@ -447,7 +447,7 @@ public class EntityDataLoadContainer implements Container {
                     dbUtil.createForeignKeys(modelEntity, modelEntities, messages);
                 }
             }
-            
+
             Debug.logImportant("Creating foreign key indcies...", module);
             for (String entityName : modelEntityNames) {
                 ModelEntity modelEntity = modelEntities.get(entityName);
@@ -455,7 +455,7 @@ public class EntityDataLoadContainer implements Container {
                     dbUtil.createForeignKeyIndices(modelEntity, messages);
                 }
             }
-            
+
             Debug.logImportant("Creating declared indices...", module);
             for (String entityName : modelEntityNames) {
                 ModelEntity modelEntity = modelEntities.get(entityName);
@@ -463,7 +463,7 @@ public class EntityDataLoadContainer implements Container {
                     dbUtil.createDeclaredIndices(modelEntity, messages);
                 }
             }
-                                    
+
             if (messages.size() > 0) {
                 if (Debug.infoOn()) {
                     for (String message : messages) {
@@ -472,7 +472,7 @@ public class EntityDataLoadContainer implements Container {
                 }
             }
         }
-        
+
         return true;
     }
 

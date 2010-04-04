@@ -32,11 +32,13 @@ import java.util.TimeZone;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
+import javolution.util.FastSet;
 
 import org.ofbiz.base.context.ExecutionArtifact;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.ObjectType;
+import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilPlist;
 import org.ofbiz.base.util.UtilTimer;
@@ -59,9 +61,10 @@ import org.w3c.dom.Element;
 @SuppressWarnings("serial")
 public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, Serializable, ExecutionArtifact {
 
+    @SuppressWarnings("hiding")
     public static final String module = ModelEntity.class.getName();
 
-    /** The name of the time stamp field for locking/syncronization */
+    /** The name of the time stamp field for locking/synchronization */
     public static final String STAMP_FIELD = "lastUpdatedStamp";
     public static final String STAMP_TX_FIELD = "lastUpdatedTxStamp";
     public static final String CREATE_STAMP_FIELD = "createdStamp";
@@ -101,8 +104,14 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
     /** indexes on fields/columns in this entity */
     protected List<ModelIndex> indexes = FastList.newInstance();
 
+    /** The reference of the dependentOn entity model */
+    protected ModelEntity specializationOfModelEntity = null;
+
+    /** The list of entities that are specialization of on this entity */
+    protected Map<String, ModelEntity> specializedEntities = FastMap.newInstance();
+
     /** map of ModelViewEntities that references this model */
-    protected Map<String, ModelViewEntity> viewEntities = FastMap.newInstance();
+    protected Set<String> viewEntities = FastSet.newInstance();
 
     /** An indicator to specify if this entity requires locking for updates */
     protected boolean doLock = false;
@@ -127,11 +136,19 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
     /** Default Constructor */
     public ModelEntity() {}
 
+    protected ModelEntity(ModelReader reader) {
+        this.modelReader = reader;
+    }
+
+    protected ModelEntity(ModelReader reader, ModelInfo def) {
+        super(def);
+        this.modelReader = reader;
+    }
+
     /** XML Constructor */
     protected ModelEntity(ModelReader reader, Element entityElement, ModelInfo def) {
-        super(def);
+        this(reader, def);
         populateFromAttributes(entityElement);
-        this.modelReader = reader;
     }
 
     /** XML Constructor */
@@ -296,9 +313,17 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
                 if (!field.isPk) this.nopks.add(field);
             }
         }
+        
+        // override the default resource file
+        String defResourceName = StringUtil.internString(extendEntityElement.getAttribute("default-resource-name"));
+        //Debug.log("Extended entity - " + extendEntityElement.getAttribute("entity-name") + " new resource name : " + defResourceName, module);
+        if (UtilValidate.isNotEmpty(defResourceName)) {
+            this.setDefaultResourceName(defResourceName);
+        }
 
         this.populateRelated(reader, extendEntityElement);
         this.populateIndexes(extendEntityElement);
+        this.dependentOn = UtilXml.checkEmpty(extendEntityElement.getAttribute("dependent-on")).intern();
     }
 
     // ===== GETTERS/SETTERS =====
@@ -460,14 +485,6 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
         return this.pks.size();
     }
 
-    /**
-     * @deprecated
-     */
-    @Deprecated
-    public ModelField getPk(int index) {
-        return this.pks.get(index);
-    }
-
     public ModelField getOnlyPk() {
         if (this.pks.size() == 1) {
             return this.pks.get(0);
@@ -507,14 +524,6 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
         return this.nopks.size();
     }
 
-    /**
-     * @deprecated
-     */
-    @Deprecated
-    public ModelField getNopk(int index) {
-        return this.nopks.get(index);
-    }
-
     public Iterator<ModelField> getNopksIterator() {
         return this.nopks.iterator();
     }
@@ -527,14 +536,6 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
 
     public int getFieldsSize() {
         return this.fields.size();
-    }
-
-    /**
-     * @deprecated
-     */
-    @Deprecated
-    public ModelField getField(int index) {
-        return this.fields.get(index);
     }
 
     public Iterator<ModelField> getFieldsIterator() {
@@ -757,29 +758,25 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
         return this.viewEntities.size();
     }
 
-    public ModelViewEntity getViewEntity(String viewEntityName) {
-        return this.viewEntities.get(viewEntityName);
-    }
-
-    public Iterator<Map.Entry<String, ModelViewEntity>> getViewConvertorsIterator() {
-        return this.viewEntities.entrySet().iterator();
+    public Iterator<String> getViewConvertorsIterator() {
+        return this.viewEntities.iterator();
     }
 
     public void addViewEntity(ModelViewEntity view) {
-        this.viewEntities.put(view.getEntityName(), view);
+        this.viewEntities.add(view.getEntityName());
     }
 
     public List<? extends Map<String, Object>> convertToViewValues(String viewEntityName, GenericEntity entity) {
         if (entity == null || entity == GenericEntity.NULL_ENTITY || entity == GenericValue.NULL_VALUE) return UtilMisc.toList(entity);
-        ModelViewEntity view = this.viewEntities.get(viewEntityName);
+        ModelViewEntity view = (ModelViewEntity) entity.getDelegator().getModelEntity(viewEntityName);
         return view.convert(getEntityName(), entity);
     }
 
-    public ModelViewEntity removeViewEntity(String viewEntityName) {
+    public boolean removeViewEntity(String viewEntityName) {
         return this.viewEntities.remove(viewEntityName);
     }
 
-    public ModelViewEntity removeViewEntity(ModelViewEntity viewEntity) {
+    public boolean removeViewEntity(ModelViewEntity viewEntity) {
        return removeViewEntity(viewEntity.getEntityName());
     }
 
@@ -1116,7 +1113,7 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
                 returnString.append(ModelUtil.upperFirstChar(keyMap.fieldName));
                 returnString.append("() + \"&\" + ");
             } else {
-                Debug.logWarning("-- -- ENTITYGEN ERROR:httpRelationArgList: Related Key in Key Map not found for name: " + ((ModelField) flds.get(i)).name + " related entity: " + relation.relEntityName + " main entity: " + relation.mainEntity.entityName + " type: " + relation.type, module);
+                Debug.logWarning("-- -- ENTITYGEN ERROR:httpRelationArgList: Related Key in Key Map not found for name: " + flds.get(i).name + " related entity: " + relation.relEntityName + " main entity: " + relation.mainEntity.entityName + " type: " + relation.type, module);
             }
         }
         ModelKeyMap keyMap = relation.findKeyMapByRelated(flds.get(i).name);
@@ -1132,7 +1129,7 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
             returnString.append(ModelUtil.upperFirstChar(keyMap.fieldName));
             returnString.append("()");
         } else {
-            Debug.logWarning("-- -- ENTITYGEN ERROR:httpRelationArgList: Related Key in Key Map not found for name: " + ((ModelField) flds.get(i)).name + " related entity: " + relation.relEntityName + " main entity: " + relation.mainEntity.entityName + " type: " + relation.type, module);
+            Debug.logWarning("-- -- ENTITYGEN ERROR:httpRelationArgList: Related Key in Key Map not found for name: " + flds.get(i).name + " related entity: " + relation.relEntityName + " main entity: " + relation.mainEntity.entityName + " type: " + relation.type, module);
         }
         return returnString.toString();
     }
@@ -1428,7 +1425,7 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
         Iterator<ModelRelation> relIter = this.getRelationsIterator();
         while (relIter != null && relIter.hasNext()) {
             ModelRelation rel = relIter.next();
-
+            root.appendChild(rel.toXmlElement(document));
         }
 
         // append index elements

@@ -44,29 +44,17 @@ under the License.
                 <set field="tabButtonItem" value="main"></set>
                 <set field="parameters.portalPageId" value="ApPortalPage"/>
                 <set field="invoiceTypeId" value="PURCHASE_INVOICE"/>
-                <set field="organizationPartyId" from-field="organizationPartyId" default-value="${defaultOrganizationPartyId}"/>
-                <script location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/InvoiceReport.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
                             <actions>
-                                <entity-one entity-name="PortalPage" value-field="portalPage"/>
-                                <entity-and entity-name="PortalPageColumn" list="portalPageColumns">
-                                    <field-map field-name="portalPageId" from-field="parameters.portalPageId"/>
-                                    <order-by field-name="columnSeqId"/>
-                                </entity-and>
-                                <entity-and entity-name="PortalPagePortletView" list="portalPagePortlets">
-                                    <field-map field-name="portalPageId" from-field="portalPage.portalPageId"/>
-                                    <order-by field-name="columnSeqId"/>
-                                    <order-by field-name="sequenceNum"/>
-                                </entity-and>
+                                <set field="organizationPartyId" from-field="organizationPartyId" default-value="${defaultOrganizationPartyId}"/>
+                                <script location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/InvoiceReport.groovy"/>
                             </actions>
                             <widgets>
-                                <platform-specific>
-                                    <html><html-template location="component://common/webcommon/portal/showPortalPage.ftl"/></html>
-                                </platform-specific>
+                                <include-screen name="PortalPageScreen" location="component://common/widget/CommonScreens.xml"/>
                             </widgets>
                         </section>
                     </decorator-section>
@@ -135,7 +123,7 @@ under the License.
                                 <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                                     <decorator-section name="menu-bar">
                                         <container style="button-bar">
-                                            <link target="editVendor" text="${uiLabelMap.CommonNew} ${uiLabelMap.PartyVendor}" style="buttontext"/>
+                                            <link target="editVendor" text="${uiLabelMap.CommonNew} ${uiLabelMap.PartyVendor}" style="buttontext create"/>
                                         </container>
                                     </decorator-section>
                                     <decorator-section name="search-options">
@@ -182,7 +170,7 @@ under the License.
                         <section>
                             <!-- do check for ACCOUNTING, _VIEW permission -->
                             <condition>
-                                <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
+                                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
                             </condition>
                             <widgets>
                                 <include-menu name="PaymentTabBar" location="component://accounting/widget/AccountingMenus.xml"/>

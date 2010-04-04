@@ -31,8 +31,6 @@ under the License.
                 <property-map resource="ManufacturingUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
 
-                <property-map resource="AccountingHelpUrls" map-name="helpUrlsMap" global="true"/>
-
                 <set field="layoutSettings.companyName" from-field="uiLabelMap.AccountingCompanyName" global="true"/>
                 <set field="layoutSettings.companySubtitle" from-field="uiLabelMap.AccountingCompanySubtitle" global="true"/>
                 <!-- layoutSettings.headerImageUrl can be used to specify an application specific logo; if not set,
@@ -56,23 +54,32 @@ under the License.
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                                <include-menu name="PaymentTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
                     <decorator-section name="body">
                         <section>
                             <!-- do check for ACCOUNTING, _VIEW permission -->
                             <condition>
-                                <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
+                                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
                             </condition>
                             <widgets>
-                                <include-menu name="PaymentTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
                                 <include-menu name="PaymentSubTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
                                 <container style="leftclear">
-                                	<section>
-                                		<condition>
-                                			<not><if-empty field="paymentId"/></not>
-                                		</condition>
-                                		<widgets>
-                                		<label style="h1" text="${uiLabelMap[labelTitleProperty]} ${uiLabelMap.CommonId}:[${paymentId}]  ${${extraFunctionName}}"/>
-                                		</widgets>
+                                    <section>
+                                        <condition>
+                                            <not><if-empty field="paymentId"/></not>
+                                        </condition>
+                                        <widgets>
+                                        <label style="h1" text="${uiLabelMap[labelTitleProperty]} ${uiLabelMap.CommonId}:[${paymentId}]  ${${extraFunctionName}}"/>
+                                        </widgets>
                                     </section>
                                 </container>
                                 <decorator-section-include name="body"/>
@@ -103,7 +110,7 @@ under the License.
                         <section>
                             <condition>
                                 <and>
-                                    <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
+                                    <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
                                     <not><if-empty field="paymentGroup"/></not>
                                 </and>
                             </condition>
@@ -116,7 +123,7 @@ under the License.
                         <section>
                             <!-- do check for ACCOUNTING, _VIEW permission -->
                             <condition>
-                                <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
+                                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
                             </condition>
                             <widgets>
                                 <section>
@@ -274,6 +281,14 @@ under the License.
                         <decorator-section-include name="body"/>
                     </decorator-section>
                 </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="CommonApInvoiceDecorator"><!-- used for invoice commission runs -->
+        <section>
+            <widgets>
+                <include-screen name="CommonInvoiceDecorator" location="component://accounting/widget/InvoiceScreens.xml"/>
             </widgets>
         </section>
     </screen>

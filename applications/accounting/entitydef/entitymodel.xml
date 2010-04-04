@@ -613,14 +613,6 @@ under the License.
     <!-- org.ofbiz.accounting.fixedasset -->
     <!-- ========================================================= -->
 
-    <entity entity-name="DepreciationMethod"
-            package-name="org.ofbiz.accounting.fixedasset"
-            title="Depreciation Method Entity">
-      <field name="depreciationMethodId" type="id-ne"></field>
-      <field name="description" type="description"></field>
-      <field name="formula" type="long-varchar"></field>
-      <prim-key field="depreciationMethodId"/>
-    </entity>
     <entity entity-name="FixedAsset" package-name="org.ofbiz.accounting.fixedasset" title="Fixed Asset Entity">
         <field name="fixedAssetId" type="id-ne"></field>
         <field name="fixedAssetTypeId" type="id"></field>
@@ -904,6 +896,46 @@ under the License.
       <field name="description" type="description"></field>
       <prim-key field="fixedAssetProductTypeId"/>
     </entity>
+    <entity entity-name="FixedAssetTypeGlAccount"
+            package-name="org.ofbiz.accounting.fixedasset"
+            title="Gl Account Mapping For Fixed Asset Or Fixed Asset Types">
+      <field name="fixedAssetTypeId" type="id-ne"><description>The fixed asset type for the mappings. This field can be set to _NA_ in order to define a mapping for all types or for a specific asset (specified by the id in the fixedAssetId field).</description></field>
+      <field name="fixedAssetId" type="id-ne"><description>The fixed asset id for the mappings. This field can be set to _NA_ in order to define a mapping for all assets of a given type (specified by the id in the fixedAssetTypeId field).</description></field>
+      <field name="organizationPartyId" type="id-ne"></field>
+      <field name="assetGlAccountId" type="id"><description>The (debit) account for the initial asset value (purchase cost)</description></field>
+      <field name="accDepGlAccountId" type="id"><description>The (credit) account for the accumulated depreciation</description></field>
+      <field name="depGlAccountId" type="id"><description>The (debit) account for the depreciation expense (matches the accDepGlAccountId)</description></field>
+      <field name="profitGlAccountId" type="id"><description>The (credit) account for the eventual profit derived from the sale of the asset</description></field>
+      <field name="lossGlAccountId" type="id"><description>The (debit) account for the eventual loss derived from the sale of the asset</description></field>
+      <prim-key field="fixedAssetTypeId"/>
+      <prim-key field="fixedAssetId"/>
+      <prim-key field="organizationPartyId"/>
+      <relation type="one-nofk" rel-entity-name="FixedAssetType">
+        <key-map field-name="fixedAssetTypeId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="FixedAsset">
+        <key-map field-name="fixedAssetId"/>
+      </relation>
+      <relation type="one" fk-name="FATGL_OP" rel-entity-name="Party">
+        <key-map field-name="organizationPartyId" rel-field-name="partyId"/>
+      </relation>
+      <relation type="one" fk-name="FATGL_AGL" title="Asset" rel-entity-name="GlAccount">
+        <key-map field-name="assetGlAccountId" rel-field-name="glAccountId"/>
+      </relation>
+      <relation type="one" fk-name="FATGL_ACCDGL" title="AccumulatedDepreciation" rel-entity-name="GlAccount">
+        <key-map field-name="accDepGlAccountId" rel-field-name="glAccountId"/>
+      </relation>
+      <relation type="one" fk-name="FATGL_DGL" title="Depreciation" rel-entity-name="GlAccount">
+        <key-map field-name="depGlAccountId" rel-field-name="glAccountId"/>
+      </relation>
+      <relation type="one" fk-name="FATGL_PGL" title="Profit" rel-entity-name="GlAccount">
+        <key-map field-name="profitGlAccountId" rel-field-name="glAccountId"/>
+      </relation>
+      <relation type="one" fk-name="FATGL_LGL" title="Loss" rel-entity-name="GlAccount">
+        <key-map field-name="lossGlAccountId" rel-field-name="glAccountId"/>
+      </relation>
+    </entity>
+
     <entity entity-name="FixedAssetRegistration" package-name="org.ofbiz.accounting.fixedasset" title="Fixed Asset Registration Entity">
         <field name="fixedAssetId" type="id-ne"></field>
         <field name="fromDate" type="date-time"></field>
@@ -1576,7 +1608,9 @@ under the License.
         <member-entity entity-alias="INTM" entity-name="InvoiceItem"/>
         <member-entity entity-alias="IIA" entity-name="InvoiceItemAssoc"/>
         <member-entity entity-alias="PROD" entity-name="Product"/>
-        <alias-all entity-alias="IIA"/>
+        <alias-all entity-alias="IIA">
+            <exclude field="amount"/>
+        </alias-all>
         <alias name="termAmount" field="amount" entity-alias="IIA"/>
         <alias name="productId" entity-alias="PROD"/>
         <alias name="productName" entity-alias="PROD"/>
@@ -1708,6 +1742,7 @@ under the License.
       <field name="theirPartyId" type="id"></field>
       <field name="productId" type="id"></field>
       <field name="theirProductId" type="id"></field>
+      <field name="inventoryItemId" type="id"></field>
       <field name="glAccountTypeId" type="id"></field>
       <field name="glAccountId" type="id-ne"></field>
       <field name="organizationPartyId" type="id-ne"></field>
@@ -1735,6 +1770,9 @@ under the License.
       </relation>
       <relation type="one" fk-name="ACCTTXENT_ACTX" rel-entity-name="AcctgTrans">
         <key-map field-name="acctgTransId"/>
+      </relation>
+      <relation type="one" fk-name="ACCTTXENT_INVITEM" rel-entity-name="InventoryItem">
+        <key-map field-name="inventoryItemId"/>
       </relation>
       <relation type="one" fk-name="ACCTTXENT_PARTY" rel-entity-name="Party">
         <key-map field-name="partyId"/>
@@ -1785,6 +1823,7 @@ under the License.
       <alias entity-alias="ATR" name="receiptId"/>
       <alias entity-alias="ATR" name="inventoryItemId"/>
       <alias entity-alias="ATR" name="workEffortId"/>
+      <alias entity-alias="ATR" name="fixedAssetId"/>
       <alias entity-alias="ATR" name="physicalInventoryId"/>
       <alias entity-alias="ATE" name="acctgTransId"/>
       <alias entity-alias="ATE" name="acctgTransEntrySeqId"/>
@@ -3958,6 +3997,8 @@ under the License.
         <alias-all entity-alias="FA"/>
         <alias-all entity-alias="PM">
             <exclude field="finAccountId"/>
+            <exclude field="fromDate"/>
+            <exclude field="thruDate"/>
         </alias-all>
         <view-link rel-entity-alias="PM" entity-alias="FA">
             <key-map field-name="finAccountId"/>

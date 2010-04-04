@@ -72,8 +72,6 @@ public class UtilProperties implements java.io.Serializable {
      */
     protected static UtilCache<String, Properties> urlCache = UtilCache.createUtilCache("properties.UtilPropertiesUrlCache");
 
-    public static final Locale LOCALE_ROOT = new Locale("", "", "");
-
     protected static Locale fallbackLocale = null;
     protected static Set<Locale> defaultCandidateLocales = null;
     protected static Set<String> propertiesNotFound = FastSet.newInstance();
@@ -120,14 +118,21 @@ public class UtilProperties implements java.io.Serializable {
             return value;
     }
 
-    public static double getPropertyNumber(String resource, String name) {
+    public static double getPropertyNumber(String resource, String name, double defaultValue) {
         String str = getPropertyValue(resource, name);
-        double strValue = 0.00000;
+        if (str == null) {
+            return defaultValue;
+        }
 
         try {
-            strValue = Double.parseDouble(str);
-        } catch (NumberFormatException nfe) {}
-        return strValue;
+            return Double.parseDouble(str);
+        } catch (NumberFormatException nfe) {
+            return defaultValue;
+        }
+    }
+
+    public static double getPropertyNumber(String resource, String name) {
+        return getPropertyNumber(resource, name, 0.00000);
     }
 
     /** Returns the value of the specified property name from the specified resource/properties file
@@ -253,14 +258,21 @@ public class UtilProperties implements java.io.Serializable {
             return value;
     }
 
-    public static double getPropertyNumber(URL url, String name) {
+    public static double getPropertyNumber(URL url, String name, double defaultValue) {
         String str = getPropertyValue(url, name);
-        double strValue = 0.00000;
+        if (str == null) {
+            return defaultValue;
+        }
 
         try {
-            strValue = Double.parseDouble(str);
-        } catch (NumberFormatException nfe) {}
-        return strValue;
+            return Double.parseDouble(str);
+        } catch (NumberFormatException nfe) {
+            return defaultValue;
+        }
+    }
+
+    public static double getPropertyNumber(URL url, String name) {
+        return getPropertyNumber(url, name, 0.00000);
     }
 
     /** Returns the value of the specified property name from the specified resource/properties file
@@ -605,7 +617,9 @@ public class UtilProperties implements java.io.Serializable {
      * configured using the <code>locale.properties.fallback</code> property in
      * <code>general.properties</code>.
      * @return The configured fallback locale
+     * @deprecated Use <code>java.util.ResourceBundle.Control.getFallbackLocale(...)</code>
      */
+    @Deprecated
     public static Locale getFallbackLocale() {
         if (fallbackLocale == null) {
             synchronized (UtilProperties.class) {
@@ -653,9 +667,8 @@ public class UtilProperties implements java.io.Serializable {
                 if (defaultCandidateLocales == null) {
                     defaultCandidateLocales = FastSet.newInstance();
                     defaultCandidateLocales.addAll(localeToCandidateList(Locale.getDefault()));
-                    // Change to Locale.ROOT in Java 6
-                    defaultCandidateLocales.add(LOCALE_ROOT);
                     defaultCandidateLocales.addAll(localeToCandidateList(getFallbackLocale()));
+                    defaultCandidateLocales.add(Locale.ROOT);
                 }
             }
         }
@@ -668,10 +681,12 @@ public class UtilProperties implements java.io.Serializable {
      * - in that order.
      * @param locale The desired locale
      * @return A list of candidate locales
+     * @deprecated Use <code>java.util.ResourceBundle.Control.getCandidateLocales(...)</code>
      */
+    @Deprecated
     public static List<Locale> getCandidateLocales(Locale locale) {
         // Java 6 conformance
-        if (LOCALE_ROOT.equals(locale)) {
+        if (Locale.ROOT.equals(locale)) {
             return UtilMisc.toList(locale);
         }
         Set<Locale> localeSet = FastSet.newInstance();

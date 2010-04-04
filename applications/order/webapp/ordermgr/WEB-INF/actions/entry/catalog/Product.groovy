@@ -93,8 +93,8 @@ if (productId) {
         context.metaKeywords = StringUtil.join(keywords, ", ");
 
         // Set the default template for aggregated product (product component configurator ui)
-        if (product.productTypeId && "AGGREGATED".equals(product.productTypeId) && configproductdetailScreen) {
-            detailScreen = configproductdetailScreen;
+        if (product.productTypeId && "AGGREGATED".equals(product.productTypeId) && context.configproductdetailScreen) {
+            detailScreen = context.configproductdetailScreen;
         }
 
         productTemplate = product.detailScreen;

@@ -1,3 +1,21 @@
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
 <!-- Use this file to deploy some handlers/chains and services      -->
 <!-- Two ways to do this:                                           -->
 <!--   java org.apache.axis.client.AdminClient deploy.wsdd          -->
@@ -10,52 +28,52 @@
     xmlns="http://xml.apache.org/axis/wsdd/"
     xmlns:java="http://xml.apache.org/axis/wsdd/providers/java">
 
-	<globalConfiguration>
-		<parameter
-			 name="adminPassword"
-			 value="admin"/>
-		<parameter
-			 name="sendMultiRefs"
-			 value="true"/>
-		<parameter
-			 name="sendXsiTypes"
-			 value="true"/>
-		<parameter
-			 name="attachments.implementation"
-			 value="org.apache.axis.attachments.AttachmentsImpl"/>
-		<parameter
-			 name="sendXMLDeclaration"
-			 value="true"/>
-		<parameter
-			 name="axis.sendMinimizedElements"
-			 value="true"/>
-		<requestFlow>
-			<handler
-				 type="java:org.apache.axis.handlers.JWSHandler">
-				<parameter
-					 name="scope"
-					 value="session"/>
-			</handler>
-			<handler
-				 type="java:org.apache.axis.handlers.JWSHandler">
-				<parameter
-					 name="scope"
-					 value="request"/>
-				<parameter
-					 name="extension"
-					 value=".jwr"/>
-			</handler>
-		</requestFlow>
-	</globalConfiguration>
-	<handler
-		 name="LocalResponder"
-		 type="java:org.apache.axis.transport.local.LocalResponder"/>
-	<handler
-		 name="URLMapper"
-		 type="java:org.apache.axis.handlers.http.URLMapper"/>
-	<handler
-		 name="Authenticate"
-		 type="java:org.apache.axis.handlers.SimpleAuthenticationHandler"/>
+    <globalConfiguration>
+        <parameter
+             name="adminPassword"
+             value="admin"/>
+        <parameter
+             name="sendMultiRefs"
+             value="true"/>
+        <parameter
+             name="sendXsiTypes"
+             value="true"/>
+        <parameter
+             name="attachments.implementation"
+             value="org.apache.axis.attachments.AttachmentsImpl"/>
+        <parameter
+             name="sendXMLDeclaration"
+             value="true"/>
+        <parameter
+             name="axis.sendMinimizedElements"
+             value="true"/>
+        <requestFlow>
+            <handler
+                 type="java:org.apache.axis.handlers.JWSHandler">
+                <parameter
+                     name="scope"
+                     value="session"/>
+            </handler>
+            <handler
+                 type="java:org.apache.axis.handlers.JWSHandler">
+                <parameter
+                     name="scope"
+                     value="request"/>
+                <parameter
+                     name="extension"
+                     value=".jwr"/>
+            </handler>
+        </requestFlow>
+    </globalConfiguration>
+    <handler
+         name="LocalResponder"
+         type="java:org.apache.axis.transport.local.LocalResponder"/>
+    <handler
+         name="URLMapper"
+         type="java:org.apache.axis.handlers.http.URLMapper"/>
+    <handler
+         name="Authenticate"
+         type="java:org.apache.axis.handlers.SimpleAuthenticationHandler"/>
 
 
   <service name="BirtSoapPort" provider="java:RPC" style="document" use="literal">
@@ -905,48 +923,48 @@
       />
 <namespace>http://schemas.eclipse.org/birt</namespace>
   </service>
-	
-	<service
-		 name="AdminService"
-		 provider="java:MSG">
-		<parameter
-			 name="allowedMethods"
-			 value="AdminService"/>
-		<parameter
-			 name="enableRemoteAdmin"
-			 value="false"/>
-		<parameter
-			 name="className"
-			 value="org.apache.axis.utils.Admin"/>
-		<namespace>http://xml.apache.org/axis/wsdd/</namespace>
-	</service>
-	
-	<service
-		 name="Version"
-		 provider="java:RPC">
-		<parameter
-			 name="allowedMethods"
-			 value="getVersion"/>
-		<parameter
-			 name="className"
-			 value="org.apache.axis.Version"/>
-	</service>
-	
-	<transport
-		 name="http">
-		<requestFlow>
-			<handler
-				 type="URLMapper"/>
-			<handler
-				 type="java:org.apache.axis.handlers.http.HTTPAuthHandler"/>
-		</requestFlow>
-	</transport>
-	
-	<transport
-		 name="local">
-		<responseFlow>
-			<handler
-				 type="LocalResponder"/>
-		</responseFlow>
-	</transport>
+    
+    <service
+         name="AdminService"
+         provider="java:MSG">
+        <parameter
+             name="allowedMethods"
+             value="AdminService"/>
+        <parameter
+             name="enableRemoteAdmin"
+             value="false"/>
+        <parameter
+             name="className"
+             value="org.apache.axis.utils.Admin"/>
+        <namespace>http://xml.apache.org/axis/wsdd/</namespace>
+    </service>
+    
+    <service
+         name="Version"
+         provider="java:RPC">
+        <parameter
+             name="allowedMethods"
+             value="getVersion"/>
+        <parameter
+             name="className"
+             value="org.apache.axis.Version"/>
+    </service>
+    
+    <transport
+         name="http">
+        <requestFlow>
+            <handler
+                 type="URLMapper"/>
+            <handler
+                 type="java:org.apache.axis.handlers.http.HTTPAuthHandler"/>
+        </requestFlow>
+    </transport>
+    
+    <transport
+         name="local">
+        <responseFlow>
+            <handler
+                 type="LocalResponder"/>
+        </responseFlow>
+    </transport>
 </deployment>

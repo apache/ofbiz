@@ -18,24 +18,39 @@
  *******************************************************************************/
 package org.ofbiz.base.util.cache;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.reardencommerce.kernel.collections.shared.evictable.ConcurrentLinkedHashMap;
+
 import javolution.util.FastList;
+import javolution.util.FastMap;
 import javolution.util.FastSet;
 
+import jdbm.helper.FastIterator;
+import jdbm.htree.HTree;
+
+import org.ofbiz.base.concurrent.ExecutionPool;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.ObjectType;
+import org.ofbiz.base.util.UtilObject;
 import org.ofbiz.base.util.UtilValidate;
 
 /**
@@ -58,13 +73,10 @@ public class UtilCache<K, V> implements Serializable {
     private static final ConcurrentHashMap<String, UtilCache<?, ?>> utilCacheTable = new ConcurrentHashMap<String, UtilCache<?, ?>>();
 
     /** An index number appended to utilCacheTable names when there are conflicts. */
-    private final static ConcurrentHashMap<String, Integer> defaultIndices = new ConcurrentHashMap<String, Integer>();
+    private final static ConcurrentHashMap<String, AtomicInteger> defaultIndices = new ConcurrentHashMap<String, AtomicInteger>();
 
     /** The name of the UtilCache instance, is also the key for the instance in utilCacheTable. */
     private final String name;
-
-    /** A hashtable containing a CacheLine object with a value and a loadTime for each element. */
-    private final CacheLineTable<K, V> cacheLineTable;
 
     /** A count of the number of cache hits */
     protected AtomicLong hitCount = new AtomicLong(0);
@@ -84,13 +96,13 @@ public class UtilCache<K, V> implements Serializable {
     /** The maximum number of elements in the cache.
      * If set to 0, there will be no limit on the number of elements in the cache.
      */
-    protected int maxSize = 0;
+    protected int sizeLimit = 0;
     protected int maxInMemory = 0;
 
     /** Specifies the amount of time since initial loading before an element will be reported as expired.
      * If set to 0, elements will never expire.
      */
-    protected long expireTime = 0;
+    protected long expireTimeNanos = 0;
 
     /** Specifies whether or not to use soft references for this cache, defaults to false */
     protected boolean useSoftReference = false;
@@ -102,57 +114,92 @@ public class UtilCache<K, V> implements Serializable {
     /** The set of listeners to receive notifcations when items are modidfied(either delibrately or because they were expired). */
     protected Set<CacheListener<K, V>> listeners = new CopyOnWriteArraySet<CacheListener<K, V>>();
 
-    /** Constructor which specifies the cacheName as well as the maxSize, expireTime and useSoftReference.
-     * The passed maxSize, expireTime and useSoftReference will be overridden by values from cache.properties if found.
-     * @param maxSize The maxSize member is set to this value
+    protected transient HTree<Object, V> fileTable = null;
+    protected ConcurrentMap<Object, CacheLine<V>> memoryTable = null;
+
+    protected JdbmRecordManager jdbmMgr;
+
+    // weak ref on this
+    private static final ConcurrentMap<String, JdbmRecordManager> fileManagers = new ConcurrentHashMap<String, JdbmRecordManager>();
+
+    /** Constructor which specifies the cacheName as well as the sizeLimit, expireTime and useSoftReference.
+     * The passed sizeLimit, expireTime and useSoftReference will be overridden by values from cache.properties if found.
+     * @param sizeLimit The sizeLimit member is set to this value
      * @param expireTime The expireTime member is set to this value
      * @param cacheName The name of the cache.
      * @param useSoftReference Specifies whether or not to use soft references for this cache.
      */
-    private UtilCache(String cacheName, int maxSize, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore, String propName, String... propNames) {
+    private UtilCache(String cacheName, int sizeLimit, int maxInMemory, long expireTimeMillis, boolean useSoftReference, boolean useFileSystemStore, String propName, String... propNames) {
         this.name = cacheName;
-        this.maxSize = maxSize;
+        this.sizeLimit = sizeLimit;
         this.maxInMemory = maxInMemory;
-        this.expireTime = expireTime;
+        this.expireTimeNanos = TimeUnit.NANOSECONDS.convert(expireTimeMillis, TimeUnit.MILLISECONDS);
         this.useSoftReference = useSoftReference;
         this.useFileSystemStore = useFileSystemStore;
         setPropertiesParams(propName);
         setPropertiesParams(propNames);
         int maxMemSize = this.maxInMemory;
-        if (maxMemSize == 0) maxMemSize = maxSize;
-        this.cacheLineTable = new CacheLineTable<K, V>(this.fileStore, this.name, this.useFileSystemStore, maxMemSize);
+        if (maxMemSize == 0) maxMemSize = sizeLimit;
+        if (maxMemSize == 0) {
+            memoryTable = new ConcurrentHashMap<Object, CacheLine<V>>();
+        } else {
+            memoryTable = ConcurrentLinkedHashMap.create(ConcurrentLinkedHashMap.EvictionPolicy.LRU, maxMemSize);
+        }
+        if (this.useFileSystemStore) {
+            // create the manager the first time it is needed
+            jdbmMgr = fileManagers.get(fileStore);
+            if (jdbmMgr == null) {
+                Debug.logImportant("Creating file system cache store for cache with name: " + cacheName, module);
+                try {
+                    String ofbizHome = System.getProperty("ofbiz.home");
+                    if (ofbizHome == null) {
+                        Debug.logError("No ofbiz.home property set in environment", module);
+                    } else {
+                        jdbmMgr = new JdbmRecordManager(ofbizHome + "/" + fileStore);
+                    }
+                } catch (IOException e) {
+                    Debug.logError(e, "Error creating file system cache store for cache with name: " + cacheName, module);
+                }
+                fileManagers.putIfAbsent(fileStore, jdbmMgr);
+            }
+            jdbmMgr = fileManagers.get(fileStore);
+            if (jdbmMgr != null) {
+                try {
+                    this.fileTable = HTree.createInstance(jdbmMgr);
+                    jdbmMgr.setNamedObject(cacheName, this.fileTable.getRecid());
+                    jdbmMgr.commit();
+                } catch (IOException e) {
+                    Debug.logError(e, module);
+                }
+            }
+        }
     }
 
     private static String getNextDefaultIndex(String cacheName) {
-        Integer curInd;
-        do {
+        AtomicInteger curInd = defaultIndices.get(cacheName);
+        if (curInd == null) {
+            defaultIndices.putIfAbsent(cacheName, new AtomicInteger(0));
             curInd = defaultIndices.get(cacheName);
-            if (curInd == null) {
-                if (defaultIndices.putIfAbsent(cacheName, 1) == null) {
-                    // no one else was able to store a value before us
-                    break;
-                }
-            } else if (defaultIndices.replace(cacheName, curInd, curInd + 1)) {
-                // replaced the current value, so we know that this iteration
-                // has control over curInd
-                break;
-            }
-        } while (true);
-        return curInd == null ? "" : Integer.toString(curInd + 1);
+        }
+        int i = curInd.getAndIncrement();
+        return i == 0 ? "" : Integer.toString(i);
     }
 
     public static String getPropertyParam(ResourceBundle res, String[] propNames, String parameter) {
-        String value = null;
-        for (String propName: propNames) {
-            try {
-                value = res.getString(propName + '.' + parameter);
-            } catch (MissingResourceException e) {}
+        try {
+            for (String propName: propNames) {
+                try {
+                    return res.getString(propName + '.' + parameter);
+                } catch (MissingResourceException e) {}
+            }
+            // don't need this, just return null
+            //if (value == null) {
+            //    throw new MissingResourceException("Can't find resource for bundle", res.getClass().getName(), Arrays.asList(propNames) + "." + parameter);
+            //}
+        } catch (Exception e) {
+            Debug.logWarning(e, "Error getting " + parameter + " value from cache.properties file for propNames: " + propNames, module);
         }
-        // don't need this, just return null
-        //if (value == null) {
-        //    throw new MissingResourceException("Can't find resource for bundle", res.getClass().getName(), Arrays.asList(propNames) + "." + parameter);
-        //}
-        return value;
+        return null;
     }
 
     protected void setPropertiesParams(String cacheName) {
@@ -163,63 +210,75 @@ public class UtilCache<K, V> implements Serializable {
         ResourceBundle res = ResourceBundle.getBundle("cache");
 
         if (res != null) {
-            try {
-                String value = getPropertyParam(res, propNames, "maxSize");
-                if (UtilValidate.isNotEmpty(value)) {
-                    this.maxSize = Integer.parseInt(value);
-                }
-            } catch (Exception e) {
-                Debug.logWarning(e, "Error getting maxSize value from cache.properties file for propNames: " + propNames, module);
+            String value = getPropertyParam(res, propNames, "maxSize");
+            if (UtilValidate.isNotEmpty(value)) {
+                this.sizeLimit = Integer.parseInt(value);
             }
-            try {
-                String value = getPropertyParam(res, propNames, "maxInMemory");
-                if (UtilValidate.isNotEmpty(value)) {
-                    this.maxInMemory = Integer.parseInt(value);
-                }
-            } catch (Exception e) {
-                Debug.logWarning(e, "Error getting maxInMemory value from cache.properties file for propNames: " + propNames, module);
+            value = getPropertyParam(res, propNames, "maxInMemory");
+            if (UtilValidate.isNotEmpty(value)) {
+                this.maxInMemory = Integer.parseInt(value);
             }
-            try {
-                String value = getPropertyParam(res, propNames, "expireTime");
-                if (UtilValidate.isNotEmpty(value)) {
-                    this.expireTime = Long.parseLong(value);
-                }
-            } catch (Exception e) {
-                Debug.logWarning(e, "Error getting expireTime value from cache.properties file for propNames: " + propNames, module);
+            value = getPropertyParam(res, propNames, "expireTime");
+            if (UtilValidate.isNotEmpty(value)) {
+                this.expireTimeNanos = TimeUnit.NANOSECONDS.convert(Long.parseLong(value), TimeUnit.MILLISECONDS);
             }
-            try {
-                String value = getPropertyParam(res, propNames, "useSoftReference");
-                if (value != null) {
-                    useSoftReference = "true".equals(value);
-                }
-            } catch (Exception e) {
-                Debug.logWarning(e, "Error getting useSoftReference value from cache.properties file for propNames: " + propNames, module);
+            value = getPropertyParam(res, propNames, "useSoftReference");
+            if (value != null) {
+                useSoftReference = "true".equals(value);
             }
-            try {
-                String value = getPropertyParam(res, propNames, "useFileSystemStore");
-                if (value != null) {
-                    useFileSystemStore = "true".equals(value);
-                }
-            } catch (Exception e) {
-                Debug.logWarning(e, "Error getting useFileSystemStore value from cache.properties file for propNames: " + propNames, module);
+            value = getPropertyParam(res, propNames, "useFileSystemStore");
+            if (value != null) {
+                useFileSystemStore = "true".equals(value);
             }
-            try {
-                String value = res.getString("cache.file.store");
-                if (value != null) {
-                    fileStore = value;
-                }
-            } catch (Exception e) {
-                Debug.logWarning(e, "Error getting cache.file.store value from cache.properties file for propNames: " + propNames, module);
+            value = getPropertyParam(res, new String[0], "cache.file.store");
+            if (value != null) {
+                fileStore = value;
             }
         }
     }
 
-    public CacheLineTable<K, V> getCacheLineTable() {
-        return cacheLineTable;
+    private Object fromKey(Object key) {
+        return key == null ? ObjectType.NULL : key;
+    }
+
+    @SuppressWarnings("unchecked")
+    private K toKey(Object key) {
+        return key == ObjectType.NULL ? null : (K) key;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void addAllFileTableValues(List<V> values) throws IOException {
+        FastIterator<V> iter = fileTable.values();
+        V value = iter.next();
+        while (value != null) {
+            values.add(value);
+            value = iter.next();
+        }
+    }
+
+    private void addAllFileTableKeys(Set<Object> keys) throws IOException {
+        FastIterator<Object> iter = fileTable.keys();
+        Object key = null;
+        while ((key = iter.next()) != null) {
+            keys.add(key);
+        }
+    }
+
+    public Object getCacheLineTable() {
+        throw new UnsupportedOperationException();
     }
 
     public boolean isEmpty() {
-        return cacheLineTable.isEmpty();
+        if (fileTable != null) {
+            try {
+                return fileTable.keys().next() == null;
+            } catch (IOException e) {
+                Debug.logError(e, module);
+                return false;
+            }
+        } else {
+            return memoryTable.isEmpty();
+        }
     }
 
     /** Puts or loads the passed element into the cache
@@ -227,90 +286,192 @@ public class UtilCache<K, V> implements Serializable {
      * @param value The value of the element
      */
     public V put(K key, V value) {
-        return put(key, value, expireTime);
+        return putInternal(key, value, expireTimeNanos);
+    }
+
+    CacheLine<V> createSoftRefCacheLine(final Object key, V value, long loadTimeNanos, long expireTimeNanos) {
+        return tryRegister(loadTimeNanos, new SoftRefCacheLine<V>(value, loadTimeNanos, expireTimeNanos) {
+            @Override
+            CacheLine<V> changeLine(boolean useSoftReference, long expireTimeNanos) {
+                if (useSoftReference) {
+                    if (differentExpireTime(expireTimeNanos)) {
+                        return this;
+                    } else {
+                        return createSoftRefCacheLine(key, getValue(), loadTimeNanos, expireTimeNanos);
+                    }
+                } else {
+                    return createHardRefCacheLine(key, getValue(), loadTimeNanos, expireTimeNanos);
+                }
+            }
+
+            @Override
+            void remove() {
+                removeInternal(key, this);
+            }
+        });
+    }
+
+    CacheLine<V> createHardRefCacheLine(final Object key, V value, long loadTimeNanos, long expireTimeNanos) {
+        return tryRegister(loadTimeNanos, new HardRefCacheLine<V>(value, loadTimeNanos, expireTimeNanos) {
+            @Override
+            CacheLine<V> changeLine(boolean useSoftReference, long expireTimeNanos) {
+                if (useSoftReference) {
+                    return createSoftRefCacheLine(key, getValue(), loadTimeNanos, expireTimeNanos);
+                } else {
+                    if (differentExpireTime(expireTimeNanos)) {
+                        return this;
+                    } else {
+                        return createHardRefCacheLine(key, getValue(), loadTimeNanos, expireTimeNanos);
+                    }
+                }
+            }
+
+            @Override
+            void remove() {
+                removeInternal(key, this);
+            }
+        });
+    }
+
+    private CacheLine<V> tryRegister(long loadTimeNanos, CacheLine<V> line) {
+        if (loadTimeNanos > 0) {
+            ExecutionPool.addPulse(line);
+        }
+        return line;
+    }
+
+    private CacheLine<V> createCacheLine(K key, V value, long expireTimeNanos) {
+        long loadTimeNanos = expireTimeNanos > 0 ? System.nanoTime() : 0;
+        if (useSoftReference) {
+            return createSoftRefCacheLine(key, value, loadTimeNanos, expireTimeNanos);
+        } else {
+            return createHardRefCacheLine(key, value, loadTimeNanos, expireTimeNanos);
+        }
+    }
+    private V cancel(CacheLine<V> line) {
+        // FIXME: this is a race condition, the item could expire
+        // between the time it is replaced, and it is cancelled
+        V oldValue = line.getValue();
+        ExecutionPool.removePulse(line);
+        line.cancel();
+        return oldValue;
     }
 
     /** Puts or loads the passed element into the cache
      * @param key The key for the element, used to reference it in the hastables and LRU linked list
      * @param value The value of the element
-     * @param expireTime how long to keep this key in the cache
+     * @param expireTimeMillis how long to keep this key in the cache
      */
-    public V put(K key, V value, long expireTime) {
-        CacheLine<V> oldCacheLine;
-        CacheLine<V> newCacheLine;
-        if (expireTime > 0) {
-            newCacheLine = useSoftReference ? new SoftRefCacheLine<V>(value, System.currentTimeMillis(), expireTime) : new HardRefCacheLine<V>(value, System.currentTimeMillis(), expireTime);
-        } else {
-            newCacheLine = useSoftReference ? new SoftRefCacheLine<V>(value, expireTime) : new HardRefCacheLine<V>(value, expireTime);
-        }
-        oldCacheLine = cacheLineTable.put(key, newCacheLine);
+    public V put(K key, V value, long expireTimeMillis) {
+        return putInternal(key, value, TimeUnit.NANOSECONDS.convert(expireTimeMillis, TimeUnit.MILLISECONDS));
+    }
 
-        if (oldCacheLine == null) {
+    V putInternal(K key, V value, long expireTimeNanos) {
+        Object nulledKey = fromKey(key);
+        CacheLine<V> oldCacheLine = memoryTable.put(nulledKey, createCacheLine(key, value, expireTimeNanos));
+        V oldValue = oldCacheLine == null ? null : cancel(oldCacheLine);
+        if (fileTable != null) {
+            try {
+                if (oldValue == null) oldValue = fileTable.get(nulledKey);
+                fileTable.put(nulledKey, value);
+                jdbmMgr.commit();
+            } catch (IOException e) {
+                Debug.logError(e, module);
+            }
+        }
+        if (oldValue == null) {
             noteAddition(key, value);
             return null;
         } else {
-            noteUpdate(key, value, oldCacheLine.getValue());
-            return oldCacheLine.getValue();
+            noteUpdate(key, value, oldValue);
+            return oldValue;
         }
-
     }
 
     /** Gets an element from the cache according to the specified key.
-     * If the requested element hasExpired, it is removed before it is looked up which causes the function to return null.
      * @param key The key for the element, used to reference it in the hastables and LRU linked list
      * @return The value of the element specified by the key
      */
     public V get(Object key) {
-        CacheLine<V> line = getInternal(key, true);
+        boolean countGet = true;
+        Object nulledKey = fromKey(key);
+        CacheLine<V> line = memoryTable.get(nulledKey);
         if (line == null) {
-            return null;
+            if (fileTable != null) {
+                V value;
+                try {
+                    value = fileTable.get(nulledKey);
+                } catch (IOException e) {
+                    Debug.logError(e, module);
+                    value = null;
+                }
+                if (value == null) {
+                    missCountNotFound.incrementAndGet();
+                    return null;
+                } else {
+                    hitCount.incrementAndGet();
+                }
+                memoryTable.put(nulledKey, createCacheLine((K) key, value, expireTimeNanos));
+                return value;
+            } else {
+                missCountNotFound.incrementAndGet();
+            }
         } else {
-            return line.getValue();
+            if (countGet) hitCount.incrementAndGet();
         }
-    }
-
-    protected CacheLine<V> getInternalNoCheck(Object key) {
-        CacheLine<V> line = cacheLineTable.get(key);
-        return line;
-    }
-
-    protected CacheLine<V> getInternal(Object key, boolean countGet) {
-        CacheLine<V> line = getInternalNoCheck(key);
-        if (line == null) {
-            if (countGet) incrementCounter(missCountNotFound);
-        } else if (line.isInvalid()) {
-            removeInternal(key, false);
-            if (countGet) incrementCounter(missCountSoftRef);
-            line = null;
-        } else if (line.hasExpired()) {
-            // note that print.info in debug.properties cannot be checked through UtilProperties here, it would cause infinite recursion...
-            // if (Debug.infoOn()) Debug.logInfo("Element has expired with key " + key, module);
-            removeInternal(key, false);
-            if (countGet) incrementCounter(missCountExpired);
-            line = null;
-        } else {
-            if (countGet) incrementCounter(hitCount);
-        }
-        return line;
+        return line != null ? line.getValue() : null;
     }
 
     public Collection<V> values() {
-        if (cacheLineTable.isEmpty()) {
-            return Collections.emptyList();
+        if (fileTable != null) {
+            List<V> values = FastList.newInstance();
+            try {
+                FastIterator<V> iter = fileTable.values();
+                V value = iter.next();
+                while (value != null) {
+                    values.add(value);
+                    value = iter.next();
+                }
+            } catch (IOException e) {
+                Debug.logError(e, module);
+            }
+            return values;
+        } else {
+            List<V> valuesList = FastList.newInstance();
+            for (CacheLine<V> line: memoryTable.values()) {
+                valuesList.add(line.getValue());
+            }
+            return valuesList;
         }
+    }
 
-        List<V> valuesList = FastList.newInstance();
-        for (K key: cacheLineTable.keySet()) {
-            valuesList.add(this.get(key));
+    private long findSizeInBytes(Object o) {
+        try {
+            return UtilObject.getByteCount(o);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
         }
-
-        return valuesList;
     }
 
     public long getSizeInBytes() {
         long totalSize = 0;
-        for (CacheLine<V> line: cacheLineTable.values()) {
-            totalSize += line.getSizeInBytes();
+        if (fileTable != null) {
+            try {
+                FastIterator<V> iter = fileTable.values();
+                V value = iter.next();
+                while (value != null) {
+                    totalSize += findSizeInBytes(value);
+                    value = iter.next();
+                }
+            } catch (IOException e) {
+                Debug.logError(e, module);
+                return 0;
+            }
+        } else {
+            for (CacheLine<V> line: memoryTable.values()) {
+                totalSize += findSizeInBytes(line.getValue());
+            }
         }
         return totalSize;
     }
@@ -326,45 +487,109 @@ public class UtilCache<K, V> implements Serializable {
     /** This is used for internal remove calls because we only want to count external calls */
     @SuppressWarnings("unchecked")
     protected synchronized V removeInternal(Object key, boolean countRemove) {
-        CacheLine<V> line = cacheLineTable.remove(key);
-        if (line != null) {
-            noteRemoval((K) key, line.getValue());
-            if (countRemove) incrementCounter(removeHitCount);
-            return line.getValue();
+        if (key == null) {
+            if (Debug.verboseOn()) Debug.logVerbose("In UtilCache tried to remove with null key, using NullObject" + this.name, module);
+        }
+        Object nulledKey = fromKey(key);
+        CacheLine<V> oldCacheLine;
+        V oldValue;
+        if (fileTable != null) {
+            try {
+                try {
+                    oldValue = fileTable.get(nulledKey);
+                } catch (IOException e) {
+                    oldValue = null;
+                    throw e;
+                }
+                fileTable.remove(nulledKey);
+                jdbmMgr.commit();
+            } catch (IOException e) {
+                oldValue = null;
+                Debug.logError(e, module);
+            }
+            oldCacheLine = memoryTable.remove(nulledKey);
         } else {
-            if (countRemove) incrementCounter(removeMissCount);
+            oldCacheLine = memoryTable.remove(nulledKey);
+            oldValue = oldCacheLine != null ? oldCacheLine.getValue() : null;
+        }
+        if (oldCacheLine != null) {
+            cancel(oldCacheLine);
+        }
+        return postRemove((K) key, oldValue, countRemove);
+    }
+
+    protected synchronized void removeInternal(Object key, CacheLine<V> existingCacheLine) {
+        Object nulledKey = fromKey(key);
+        cancel(existingCacheLine);
+        if (!memoryTable.remove(nulledKey, existingCacheLine)) {
+            return;
+        }
+        if (fileTable != null) {
+            try {
+                fileTable.remove(nulledKey);
+                jdbmMgr.commit();
+            } catch (IOException e) {
+                Debug.logError(e, module);
+            }
+        }
+        noteRemoval((K) key, existingCacheLine.getValue());
+    }
+
+    V postRemove(K key, V oldValue, boolean countRemove) {
+        if (oldValue != null) {
+            noteRemoval((K) key, oldValue);
+            if (countRemove) removeHitCount.incrementAndGet();
+            return oldValue;
+        } else {
+            if (countRemove) removeMissCount.incrementAndGet();
             return null;
         }
     }
 
     /** Removes all elements from this cache */
-    public synchronized void clear() {
-        for (K key: cacheLineTable.keySet()) {
-            CacheLine<V> line = getInternalNoCheck(key);
-            noteRemoval(key, line == null ? null : line.getValue());
+    public synchronized void erase() {
+        if (fileTable != null) {
+            // FIXME: erase from memory too
+            Set<Object> keys = new HashSet<Object>();
+            try {
+                addAllFileTableKeys(keys);
+            } catch (IOException e) {
+                Debug.logError(e, module);
+            }
+            for (Object key: keys) {
+                try {
+                    V value = fileTable.get(key);
+                    noteRemoval(toKey(key), value);
+                    removeHitCount.incrementAndGet();
+                    fileTable.remove(key);
+                    jdbmMgr.commit();
+                } catch (IOException e) {
+                    Debug.logError(e, module);
+                }
+            }
+            memoryTable.clear();
+        } else {
+            Iterator<Map.Entry<Object, CacheLine<V>>> it = memoryTable.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<Object, CacheLine<V>> entry = it.next();
+                noteRemoval(toKey(entry.getKey()), entry.getValue().getValue());
+                removeHitCount.incrementAndGet();
+                it.remove();
+            }
         }
-        cacheLineTable.clear();
+    }
+
+    public void clear() {
+        erase();
         clearCounters();
     }
 
     /** Removes all elements from this cache */
     public static void clearAllCaches() {
         // We make a copy since clear may take time
-        List<UtilCache<?,?>> list = getUtilCacheTableValuesImage();
-        for (UtilCache<?,?> cache : list) {
+        for (UtilCache<?,?> cache : utilCacheTable.values()) {
             cache.clear();
         }
-        list.clear();
-    }
-
-    /**
-     * Return an image of the values at a time
-     * @return {@link List}
-     */
-    private static List<UtilCache<?, ?>> getUtilCacheTableValuesImage() {
-        List<UtilCache<?, ?>> list = new ArrayList<UtilCache<?, ?>>(utilCacheTable.size());
-        list.addAll(utilCacheTable.values());
-        return list;
     }
 
     public static Set<String> getUtilCacheTableKeySet() {
@@ -378,13 +603,6 @@ public class UtilCache<K, V> implements Serializable {
      */
     public String getName() {
         return this.name;
-    }
-
-    private static final void incrementCounter(AtomicLong stat) {
-        long currentValue;
-        do {
-            currentValue = stat.get();
-        } while (!stat.weakCompareAndSet(currentValue, currentValue + 1));
     }
 
     /** Returns the number of successful hits on the cache
@@ -444,57 +662,80 @@ public class UtilCache<K, V> implements Serializable {
     /** Sets the maximum number of elements in the cache.
      * If 0, there is no maximum.
      * @param maxSize The maximum number of elements in the cache
+     * @deprecated Use setMaxInMemory
      */
     public void setMaxSize(int maxSize) {
-        cacheLineTable.setLru(maxSize);
-        this.maxSize = maxSize;
+        setMaxInMemory(maxSize);
     }
 
     /** Returns the current maximum number of elements in the cache
      * @return The maximum number of elements in the cache
+     * @deprecated Use getMaxInMemory
      */
-    public long getMaxSize() {
-        return maxSize;
+    public int getMaxSize() {
+        return getMaxInMemory();
+    }
+
+    public void setMaxInMemory(int newInMemory) {
+        this.maxInMemory = newInMemory;
+        Map<Object, CacheLine<V>> oldmap = this.memoryTable;
+
+        if (newInMemory > 0) {
+            if (this.memoryTable instanceof ConcurrentLinkedHashMap) {
+                ((ConcurrentLinkedHashMap) this.memoryTable).setCapacity(newInMemory);
+                return;
+            } else {
+                this.memoryTable = ConcurrentLinkedHashMap.create(ConcurrentLinkedHashMap.EvictionPolicy.LRU, newInMemory);
+            }
+        } else {
+            this.memoryTable = new ConcurrentHashMap<Object, CacheLine<V>>();
+        }
+
+        this.memoryTable.putAll(oldmap);
+    }
+
+    public int getMaxInMemory() {
+        return maxInMemory;
+    }
+
+    public void setSizeLimit(int newSizeLimit) {
+        this.sizeLimit = sizeLimit;
+    }
+
+    public int getSizeLimit() {
+        return sizeLimit;
     }
 
     /** Sets the expire time for the cache elements.
      * If 0, elements never expire.
      * @param expireTime The expire time for the cache elements
      */
-    public void setExpireTime(long expireTime) {
+    public void setExpireTime(long expireTimeMillis) {
         // if expire time was <= 0 and is now greater, fill expire table now
-        if (this.expireTime <= 0 && expireTime > 0) {
-            long currentTime = System.currentTimeMillis();
-            for (CacheLine<V> line: cacheLineTable.values()) {
-                line.loadTime = currentTime;
+        if (expireTimeMillis > 0) {
+            this.expireTimeNanos = TimeUnit.NANOSECONDS.convert(expireTimeMillis, TimeUnit.MILLISECONDS);
+            for (Map.Entry<?, CacheLine<V>> entry: memoryTable.entrySet()) {
+                entry.setValue(entry.getValue().changeLine(useSoftReference, expireTimeNanos));
             }
-        } else if (this.expireTime <= 0 && expireTime > 0) {
+        } else {
+            this.expireTimeNanos = 0;
             // if expire time was > 0 and is now <=, do nothing, just leave the load times in place, won't hurt anything...
         }
-
-        this.expireTime = expireTime;
     }
 
     /** return the current expire time for the cache elements
      * @return The expire time for the cache elements
      */
     public long getExpireTime() {
-        return expireTime;
+        return TimeUnit.MILLISECONDS.convert(expireTimeNanos, TimeUnit.NANOSECONDS);
     }
 
     /** Set whether or not the cache lines should use a soft reference to the data */
     public void setUseSoftReference(boolean useSoftReference) {
         if (this.useSoftReference != useSoftReference) {
             this.useSoftReference = useSoftReference;
-            for (K key: cacheLineTable.keySet()) {
-                CacheLine<V> line = cacheLineTable.get(key);
-                if (useSoftReference) {
-                    if (line instanceof SoftRefCacheLine) continue;
-                    cacheLineTable.put(key, new SoftRefCacheLine<V>(line.getValue(), line.loadTime, line.expireTime));
-                } else {
-                    if (line instanceof HardRefCacheLine) continue;
-                    cacheLineTable.put(key, new HardRefCacheLine<V>(line.getValue(), line.loadTime, line.expireTime));
-                }
+            for (Map.Entry<?, CacheLine<V>> entry: memoryTable.entrySet()) {
+                entry.setValue(entry.getValue().changeLine(useSoftReference, expireTimeNanos));
             }
         }
     }
@@ -512,20 +753,46 @@ public class UtilCache<K, V> implements Serializable {
      * @return The number of elements currently in the cache
      */
     public int size() {
-        return cacheLineTable.size();
+        if (fileTable != null) {
+            int size = 0;
+            try {
+                FastIterator<Object> iter = fileTable.keys();
+                while (iter.next() != null) {
+                    size++;
+                }
+            } catch (IOException e) {
+                Debug.logError(e, module);
+            }
+            return size;
+        } else {
+            return memoryTable.size();
+        }
     }
 
     /** Returns a boolean specifying whether or not an element with the specified key is in the cache.
-     * If the requested element hasExpired, it is removed before it is looked up which causes the function to return false.
      * @param key The key for the element, used to reference it in the hastables and LRU linked list
      * @return True is the cache contains an element corresponding to the specified key, otherwise false
      */
     public boolean containsKey(Object key) {
-        CacheLine<V> line = getInternal(key, false);
-        if (line != null) {
-            return true;
-        } else {
+        Object nulledKey = fromKey(key);
+        CacheLine<V> line = memoryTable.get(nulledKey);
+        if (line == null) {
+            if (fileTable != null) {
+                try {
+                    FastIterator<Object> iter = fileTable.keys();
+                    Object checkKey = null;
+                    while ((checkKey = iter.next()) != null) {
+                        if (nulledKey.equals(checkKey)) {
+                            return true;
+                        }
+                    }
+                } catch (IOException e) {
+                    Debug.logError(e, module);
+                }
+            }
             return false;
+        } else {
+            return true;
         }
     }
 
@@ -535,11 +802,75 @@ public class UtilCache<K, V> implements Serializable {
      * This behavior is necessary for now for the persisted cache feature.
      */
     public Set<? extends K> getCacheLineKeys() {
-        return cacheLineTable.keySet();
+        // note that this must be a HashSet and not a FastSet in order to have a null value
+        Set<Object> keys;
+
+        if (fileTable != null) {
+            keys = new HashSet<Object>();
+            try {
+                addAllFileTableKeys(keys);
+            } catch (IOException e) {
+                Debug.logError(e, module);
+            }
+            if (keys.remove(ObjectType.NULL)) {
+                keys.add(null);
+            }
+        } else {
+            if (memoryTable.containsKey(ObjectType.NULL)) {
+                keys = new HashSet<Object>(memoryTable.keySet());
+                keys.remove(ObjectType.NULL);
+                keys.add(null);
+            } else {
+                keys = memoryTable.keySet();
+            }
+        }
+        return Collections.unmodifiableSet((Set<? extends K>) keys);
     }
 
     public Collection<? extends CacheLine<V>> getCacheLineValues() {
-        return cacheLineTable.values();
+        throw new UnsupportedOperationException();
+    }
+
+    private Map<String, Object> createLineInfo(int keyNum, K key, CacheLine<V> line) {
+        Map<String, Object> lineInfo = FastMap.newInstance();
+        lineInfo.put("elementKey", key);
+
+        if (line.getLoadTimeNanos() > 0) {
+            lineInfo.put("expireTimeMillis", TimeUnit.MILLISECONDS.convert(line.getExpireTimeNanos() - System.nanoTime(), TimeUnit.NANOSECONDS));
+        }
+        lineInfo.put("lineSize", findSizeInBytes(line.getValue()));
+        lineInfo.put("keyNum", keyNum);
+        return lineInfo;
+    }
+
+    private Map<String, Object> createLineInfo(int keyNum, K key, V value) {
+        Map<String, Object> lineInfo = FastMap.newInstance();
+        lineInfo.put("elementKey", key);
+        lineInfo.put("lineSize", findSizeInBytes(value));
+        lineInfo.put("keyNum", keyNum);
+        return lineInfo;
+    }
+
+    public Collection<? extends Map<String, Object>> getLineInfos() {
+        List<Map<String, Object>> lineInfos = FastList.newInstance();
+        int keyIndex = 0;
+        for (K key: getCacheLineKeys()) {
+            Object nulledKey = fromKey(key);
+            if (fileTable != null) {
+                try {
+                    lineInfos.add(createLineInfo(keyIndex, key, fileTable.get(nulledKey)));
+                } catch (IOException e) {
+                    Debug.logError(e, module);
+                }
+            } else {
+                CacheLine<V> line = memoryTable.get(nulledKey);
+                if (line != null) {
+                    lineInfos.add(createLineInfo(keyIndex, key, line));
+                }
+            }
+            keyIndex++;
+        }
+        return lineInfos;
     }
 
     /** Returns a boolean specifying whether or not the element corresponding to the key has expired.
@@ -549,20 +880,19 @@ public class UtilCache<K, V> implements Serializable {
      *
      * @param key The key for the element, used to reference it in the hastables and LRU linked list
      * @return True is the element corresponding to the specified key has expired, otherwise false
+     * @deprecated elements are automatically expired in the background
      */
+    @Deprecated
     public boolean hasExpired(Object key) {
-        CacheLine<V> line = getInternalNoCheck(key);
-        if (line == null) return false;
-        return line.hasExpired();
+        return !memoryTable.containsKey(fromKey(key));
     }
 
-    /** Clears all expired cache entries; also clear any cache entries where the SoftReference in the CacheLine object has been cleared by the gc */
+    /** Clears all expired cache entries; also clear any cache entries where the SoftReference in the CacheLine object has been cleared by the gc
+     * @deprecated entries are removed automatically now
+    */
+    @Deprecated
     public void clearExpired() {
-        for (K key: cacheLineTable.keySet()) {
-            if (hasExpired(key)) {
-                removeInternal(key, false);
-            }
-        }
+        // do nothing, expired values are removed automatically in the background
     }
 
     /** Send a key addition event to all registered listeners */
@@ -596,14 +926,12 @@ public class UtilCache<K, V> implements Serializable {
         listeners.remove(listener);
     }
 
-    /** Clears all expired cache entries from all caches */
+    /** Clears all expired cache entries from all caches
+     * @deprecated entries are removed automatically now
+    */
+    @Deprecated
     public static void clearExpiredFromAllCaches() {
-        // We make a copy since clear may take time
-        List<UtilCache<?,?>> list = getUtilCacheTableValuesImage();
-        for (UtilCache<?,?> utilCache : list) {
-            utilCache.clearExpired();
-        }
-        list.clear();
+        // do nothing, expired values are removed automatically in the background
     }
 
     /** Checks for a non-expired key in a specific cache */
@@ -633,42 +961,38 @@ public class UtilCache<K, V> implements Serializable {
     }
 
     @SuppressWarnings("unchecked")
-    public static <K, V> UtilCache<K, V> getOrCreateUtilCache(String name, int maxSize, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore, String... names) {
+    public static <K, V> UtilCache<K, V> getOrCreateUtilCache(String name, int sizeLimit, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore, String... names) {
         UtilCache<K, V> existingCache = (UtilCache<K, V>) utilCacheTable.get(name);
         if (existingCache != null) return existingCache;
         String cacheName = name + getNextDefaultIndex(name);
-        UtilCache<K, V> newCache = new UtilCache<K, V>(cacheName, maxSize, maxInMemory, expireTime, useSoftReference, useFileSystemStore, name, names);
-        UtilCache<K, V> oldCache = (UtilCache<K, V>) utilCacheTable.putIfAbsent(name, newCache);
-        if (oldCache == null) {
-            return newCache;
-        } else {
-            return oldCache;
-        }
+        UtilCache<K, V> newCache = new UtilCache<K, V>(cacheName, sizeLimit, maxInMemory, expireTime, useSoftReference, useFileSystemStore, name, names);
+        utilCacheTable.putIfAbsent(name, newCache);
+        return (UtilCache<K, V>) utilCacheTable.get(name);
     }
 
-    public static <K, V> UtilCache<K, V> createUtilCache(String name, int maxSize, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore, String... names) {
+    public static <K, V> UtilCache<K, V> createUtilCache(String name, int sizeLimit, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore, String... names) {
         String cacheName = name + getNextDefaultIndex(name);
-        return storeCache(new UtilCache<K, V>(cacheName, maxSize, maxInMemory, expireTime, useSoftReference, useFileSystemStore, name, names));
+        return storeCache(new UtilCache<K, V>(cacheName, sizeLimit, maxInMemory, expireTime, useSoftReference, useFileSystemStore, name, names));
     }
 
-    public static <K, V> UtilCache<K, V> createUtilCache(String name, int maxSize, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore) {
+    public static <K, V> UtilCache<K, V> createUtilCache(String name, int sizeLimit, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore) {
         String cacheName = name + getNextDefaultIndex(name);
-        return storeCache(new UtilCache<K, V>(cacheName, maxSize, maxInMemory, expireTime, useSoftReference, useFileSystemStore, name));
+        return storeCache(new UtilCache<K, V>(cacheName, sizeLimit, maxInMemory, expireTime, useSoftReference, useFileSystemStore, name));
     }
 
-    public static <K,V> UtilCache<K, V> createUtilCache(String name, int maxSize, long expireTime, boolean useSoftReference) {
+    public static <K,V> UtilCache<K, V> createUtilCache(String name, int sizeLimit, long expireTime, boolean useSoftReference) {
         String cacheName = name + getNextDefaultIndex(name);
-        return storeCache(new UtilCache<K, V>(cacheName, maxSize, maxSize, expireTime, useSoftReference, false, name));
+        return storeCache(new UtilCache<K, V>(cacheName, sizeLimit, sizeLimit, expireTime, useSoftReference, false, name));
     }
 
-    public static <K,V> UtilCache<K, V> createUtilCache(String name, int maxSize, long expireTime) {
+    public static <K,V> UtilCache<K, V> createUtilCache(String name, int sizeLimit, long expireTime) {
         String cacheName = name + getNextDefaultIndex(name);
-        return storeCache(new UtilCache<K, V>(cacheName, maxSize, maxSize, expireTime, false, false, name));
+        return storeCache(new UtilCache<K, V>(cacheName, sizeLimit, sizeLimit, expireTime, false, false, name));
     }
 
-    public static <K,V> UtilCache<K, V> createUtilCache(int maxSize, long expireTime) {
+    public static <K,V> UtilCache<K, V> createUtilCache(int sizeLimit, long expireTime) {
         String cacheName = "specified" + getNextDefaultIndex("specified");
-        return storeCache(new UtilCache<K, V>(cacheName, maxSize, maxSize, expireTime, false, false, "specified"));
+        return storeCache(new UtilCache<K, V>(cacheName, sizeLimit, sizeLimit, expireTime, false, false, "specified"));
     }
 
     public static <K,V> UtilCache<K, V> createUtilCache(String name, boolean useSoftReference) {

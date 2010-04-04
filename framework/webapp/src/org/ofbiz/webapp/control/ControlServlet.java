@@ -33,6 +33,7 @@ import org.apache.bsf.BSFManager;
 
 import org.ofbiz.base.authorization.AuthorizationManager;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilJ2eeCompat;
@@ -45,7 +46,10 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.security.Security;
+import org.ofbiz.security.SecurityConfigurationException;
+import org.ofbiz.security.SecurityFactory;
 import org.ofbiz.security.authz.Authorization;
+import org.ofbiz.security.authz.AuthorizationFactory;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ThreadContext;
 import org.ofbiz.webapp.stats.ServerHitBin;
@@ -188,12 +192,12 @@ public class ControlServlet extends HttpServlet {
         Authorization authz = (Authorization) session.getAttribute("authz");
         if (authz == null) {
             authz = (Authorization) getServletContext().getAttribute("authz");
-        }                
+        }
         if (authz == null) {
             Debug.logError("[ControlServlet] ERROR: authorization not found in ServletContext", module);
         }
         request.setAttribute("authz", authz); // maybe we should also add the value to 'security'
-        
+
         AuthorizationManager security = (AuthorizationManager) session.getAttribute("security");
         if (security == null) {
             security = (AuthorizationManager) getServletContext().getAttribute("security");
@@ -206,7 +210,7 @@ public class ControlServlet extends HttpServlet {
         request.setAttribute("security", security);
 
         request.setAttribute("_REQUEST_HANDLER_", requestHandler);
-        
+
         ServletContextHashModel ftlServletContext = new ServletContextHashModel(this, BeansWrapper.getDefaultInstance());
         request.setAttribute("ftlServletContext", ftlServletContext);
 
@@ -235,11 +239,13 @@ public class ControlServlet extends HttpServlet {
         } catch (RequestHandlerException e) {
             Throwable throwable = e.getNested() != null ? e.getNested() : e;
             Debug.logError(throwable, "Error in request handler: ", module);
-            request.setAttribute("_ERROR_MESSAGE_", throwable.toString());
+            StringUtil.HtmlEncoder encoder = new StringUtil.HtmlEncoder();
+            request.setAttribute("_ERROR_MESSAGE_", encoder.encode(throwable.toString()));
             errorPage = requestHandler.getDefaultErrorPage(request);
         } catch (Exception e) {
             Debug.logError(e, "Error in request handler: ", module);
-            request.setAttribute("_ERROR_MESSAGE_", e.toString());
+            StringUtil.HtmlEncoder encoder = new StringUtil.HtmlEncoder();
+            request.setAttribute("_ERROR_MESSAGE_", encoder.encode(e.toString()));
             errorPage = requestHandler.getDefaultErrorPage(request);
         }
 
@@ -324,7 +330,7 @@ public class ControlServlet extends HttpServlet {
                 UtilHttp.setInitialRequestInfo(request);
                 VisitHandler.getVisitor(request, response);
                 if (requestHandler.trackStats(request)) {
-                    ServerHitBin.countRequest(webappName + "." + rname, request, requestStartTime, System.currentTimeMillis() - requestStartTime, userLogin, delegator);
+                    ServerHitBin.countRequest(webappName + "." + rname, request, requestStartTime, System.currentTimeMillis() - requestStartTime, userLogin);
                 }
             } catch (Throwable t) {
                 Debug.logError(t, "Error in ControlServlet saving ServerHit/Bin information; the output was successful, but can't save this tracking information. The error was: " + t.toString(), module);

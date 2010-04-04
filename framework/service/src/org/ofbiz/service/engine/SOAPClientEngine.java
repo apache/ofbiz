@@ -37,9 +37,9 @@ import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
-import org.ofbiz.entity.serialize.XmlSerializer;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ModelParam;
 import org.ofbiz.service.ModelService;
@@ -81,10 +81,10 @@ public final class SOAPClientEngine extends GenericAsyncEngine {
         Delegator delegator = dispatcher.getDelegator();
         if (modelService.location == null || modelService.invoke == null)
             throw new GenericServiceException("Cannot locate service to invoke");
-        
+
         ServiceClient client = null;
         QName serviceName = null;
-        
+
         try {
             client = new ServiceClient();
             Options options = new Options();
@@ -94,19 +94,19 @@ public final class SOAPClientEngine extends GenericAsyncEngine {
         } catch (AxisFault e) {
             throw new GenericServiceException("RPC service error", e);
         }
-        
+
         List<ModelParam> inModelParamList = modelService.getInModelParamList();
-        
+
         if (Debug.infoOn()) Debug.logInfo("[SOAPClientEngine.invoke] : Parameter length - " + inModelParamList.size(), module);
-        
+
         if (UtilValidate.isNotEmpty(modelService.nameSpace)) {
             serviceName = new QName(modelService.nameSpace, modelService.invoke);
         } else {
             serviceName = new QName(modelService.invoke);
         }
-        
+
         int i = 0;
-        
+
         Map<String, Object> parameterMap = FastMap.newInstance();
         for (ModelParam p: inModelParamList) {
             if (Debug.infoOn()) Debug.logInfo("[SOAPClientEngine.invoke} : Parameter: " + p.name + " (" + p.mode + ") - " + i, module);
@@ -119,23 +119,23 @@ public final class SOAPClientEngine extends GenericAsyncEngine {
         }
 
         OMElement parameterSer = null;
-        
+
         try {
-            String xmlParameters = XmlSerializer.serialize(parameterMap);
+            String xmlParameters = SoapSerializer.serialize(parameterMap);
             XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(new StringReader(xmlParameters));
             StAXOMBuilder builder = new StAXOMBuilder(reader);
             parameterSer = builder.getDocumentElement();
         } catch (Exception e) {
             Debug.logError(e, module);
         }
-        
+
         Map<String, Object> results = null;
         try {
             OMFactory factory = OMAbstractFactory.getOMFactory();
             OMElement payload = factory.createOMElement(serviceName);
             payload.addChild(parameterSer.getFirstElement());
             OMElement respOMElement = client.sendReceive(payload);
-            results = (Map<String, Object>) XmlSerializer.deserialize(respOMElement.toString(), delegator);
+            results = UtilGenerics.cast(SoapSerializer.deserialize(respOMElement.toString(), delegator));
         } catch (Exception e) {
             Debug.logError(e, module);
         }

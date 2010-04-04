@@ -710,7 +710,7 @@ under the License.
     -->
     <request-map uri="quickcheckout">
         <security https="true" auth="true"/>
-        <response name="success" type="view" value="quickcheckout"/>
+        <response name="success" type="view" value="quickcheckout" save-home-view="true"/>
     </request-map>
     <request-map uri="updateCheckoutOptions">
         <description>When user selects a shipping method, this automatically reloads quick checkout page with shipping estimates filled in.</description>
@@ -1081,15 +1081,29 @@ under the License.
     <request-map uri="PurchasesByOrganizationReport.pdf"><security https="true" auth="true"/>
         <response name="success" type="view" value="PurchasesByOrganizationReport"/>
     </request-map>
+    
     <request-map uri="SalesReport.pdf"><security https="true" auth="true"/>
         <event type="groovy" path="component://order/webapp/ordermgr/WEB-INF/actions/reports/" invoke="SalesReport.groovy"/>
         <response name="success" type="view" value="SalesOrderReport"/>
     </request-map>
+    <request-map uri="NetBeforeOverheadReport.pdf"><security https="true" auth="true"/>
+        <event type="groovy" path="component://order/webapp/ordermgr/WEB-INF/actions/reports/" invoke="NetBeforeOverheadReport.groovy"/>
+        <response name="success" type="view" value="NetBeforeOverheadOrderReport"/>
+    </request-map>
+    <request-map uri="ProductDemandReport.pdf"><security https="true" auth="true"/>
+        <event type="groovy" path="component://order/webapp/ordermgr/WEB-INF/actions/reports/" invoke="ProductDemandReport.groovy"/>
+        <response name="success" type="view" value="ProductDemandOrderReport"/>
+    </request-map>
+    <request-map uri="ProductContributionReport.pdf"><security https="true" auth="true"/>
+        <event type="groovy" path="component://order/webapp/ordermgr/WEB-INF/actions/reports/" invoke="ProductContributionReport.groovy"/>
+        <response name="success" type="view" value="ProductDemandOrderReport"/>
+    </request-map>
+
     <request-map uri="OrderByReferrer.pdf"><security https="true" auth="true"/>
         <response name="success" type="view" value="OrderByReferrerReport"/>
     </request-map>
     <request-map uri="OrdersByChannel.pdf"><security https="true" auth="true"/>
-    	<event type="groovy" path="component://order/webapp/ordermgr/WEB-INF/actions/reports/" invoke="OrderByChannel.groovy"/>
+        <event type="groovy" path="component://order/webapp/ordermgr/WEB-INF/actions/reports/" invoke="OrderByChannel.groovy"/>
         <response name="success" type="view" value="OrdersByChannelReport"/>
     </request-map>
     <request-map uri="OrderDiscountCode.pdf">
@@ -1780,8 +1794,11 @@ under the License.
     <view-map name="SalesByStoreReport" type="screenfop" page="component://order/widget/ordermgr/ReportScreens.xml#SalesByStoreReport" content-type="application/pdf" encoding="none"/>
     <view-map name="OpenOrderItemsReport" type="screen" page="component://order/widget/ordermgr/ReportScreens.xml#OpenOrderItemsReport"/>
     <view-map name="PurchasesByOrganizationReport" type="screenfop" page="component://order/widget/ordermgr/ReportScreens.xml#PurchasesByOrganizationReport" content-type="application/pdf" encoding="none"/>
-	<view-map name="SalesOrderReport" type="birt" page="component://order/webapp/ordermgr/reports/SalesReport.rptdesign" content-type="application/pdf"/>
-	<view-map name="OrderByReferrerReport" type="birt" page="component://order/webapp/ordermgr/reports/OrderByReferrer.rptdesign" content-type="application/pdf"/>
+
+    <view-map name="SalesOrderReport" type="birt" page="component://order/webapp/ordermgr/reports/SalesReport.rptdesign" content-type="application/pdf"/>
+    <view-map name="NetBeforeOverheadOrderReport" type="birt" page="component://order/webapp/ordermgr/reports/NetBeforeOverheadReport.rptdesign" content-type="application/pdf"/>
+    <view-map name="ProductDemandOrderReport" type="birt" page="component://order/webapp/ordermgr/reports/ProductDemandReport.rptdesign" content-type="application/pdf"/>
+    <view-map name="OrderByReferrerReport" type="birt" page="component://order/webapp/ordermgr/reports/OrderByReferrer.rptdesign" content-type="application/pdf"/>
     <view-map name="OrdersByChannelReport" type="birt" page="component://order/webapp/ordermgr/reports/OrdersByChannel.rptdesign" content-type="application/pdf"/>
     <view-map name="SaleOrderDiscountCodeReport" type="birt" page="component://order/webapp/ordermgr/reports/OrderDiscountCodeReport.rptdesign" content-type="application/pdf"/>
     <view-map name="Last3MonthsSalesReport" type="birt" page="component://order/webapp/ordermgr/reports/Last3MonthsSalesReport.rptdesign" content-type="application/pdf"/>    

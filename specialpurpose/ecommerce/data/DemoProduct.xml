@@ -124,6 +124,9 @@ under the License.
 
     <ProductStoreEmailSetting productStoreId="9000" emailType="CONT_NOTI_EMAIL" bodyScreenLocation="component://ecommerce/widget/EmailContactListScreens.xml#ContactUsEmailNotification" subject="Contact-us Information Notification" fromAddress="ofbiztest@yahoo.com" />
 
+    <WebAnalyticsConfig productStoreId="9000" webAnalyticsTypeId="GOOGLE_ANALYTICS" webAnalyticsCode="123456" isEnabled="Y" description="This is code provided from google analytics" contentId="GOOGLE_ANA_CNT"/>
+    <WebAnalyticsConfig productStoreId="9000" webAnalyticsTypeId="BING_ANALYTICS" webAnalyticsCode="123456" isEnabled="Y" description="This is code provided from bing analytics" contentId="BING_ANA_CNT"/>
+
     <ProductStoreFacility productStoreId="9000" facilityId="WebStoreWarehouse" fromDate="2001-05-13 12:00:00.0"/>
     <ProductStoreRole partyId="admin" roleTypeId="SALES_REP" productStoreId="9000" fromDate="2001-05-13 12:00:00.0"/>
     <ProductStoreKeywordOvrd productStoreId="9000" keyword="gizmo" fromDate="2001-05-13 12:00:00.0" target="100" targetTypeEnumId="KOTT_PRODCAT"/>
@@ -652,52 +655,52 @@ under the License.
     <ProductFacilityLocation productId="GZ-1004" facilityId="WebStoreWarehouse" locationSeqId="TLTLTLLL04" minimumStock="5" moveQuantity="20"/>
 
     <!-- some default inventory quantities, things are a bit underutilized without these... -->
-    <InventoryItem facilityId="WebStoreWarehouse" locationSeqId="TLTLTLUL01"
+    <InventoryItem facilityId="WebStoreWarehouse" locationSeqId="TLTLTLUL01" datetimeReceived="2008-08-01 08:00:00.000"
         inventoryItemId="9000" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="GZ-2644" ownerPartyId="Company" currencyUomId="USD" unitCost="2.5"/>
-    <InventoryItemDetail inventoryItemId="9000" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="500" quantityOnHandDiff="500"/>
-    <InventoryItem facilityId="WebStoreWarehouse" locationSeqId="TLTLTLLL01"
+    <InventoryItemDetail inventoryItemId="9000" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="500" quantityOnHandDiff="500" accountingQuantityDiff="500"/>
+    <InventoryItem facilityId="WebStoreWarehouse" locationSeqId="TLTLTLLL01" datetimeReceived="2008-08-01 08:00:00.000"
         inventoryItemId="9001" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="GZ-2644" ownerPartyId="Company" currencyUomId="USD" unitCost="2.5"/>
-    <InventoryItemDetail inventoryItemId="9001" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="5" quantityOnHandDiff="5"/>
-    <InventoryItem facilityId="WebStoreWarehouse" locationSeqId="TLTLTLUL02"
+    <InventoryItemDetail inventoryItemId="9001" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="5" quantityOnHandDiff="5" accountingQuantityDiff="5"/>
+    <InventoryItem facilityId="WebStoreWarehouse" locationSeqId="TLTLTLUL02" datetimeReceived="2008-08-01 08:00:00.000"
         inventoryItemId="9002" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="GZ-8544" ownerPartyId="Company" currencyUomId="USD" unitCost="3.0"/>
-    <InventoryItemDetail inventoryItemId="9002" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="15" quantityOnHandDiff="15"/>
-    <InventoryItem facilityId="WebStoreWarehouse" locationSeqId="TLTLTLLL02"
+    <InventoryItemDetail inventoryItemId="9002" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="15" quantityOnHandDiff="15" accountingQuantityDiff="15"/>
+    <InventoryItem facilityId="WebStoreWarehouse" locationSeqId="TLTLTLLL02" datetimeReceived="2008-08-01 08:00:00.000"
         inventoryItemId="9003" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="GZ-8544" ownerPartyId="Company" currencyUomId="USD" unitCost="3.0"/>
-    <InventoryItemDetail inventoryItemId="9003" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="3" quantityOnHandDiff="3"/>
-    <InventoryItem facilityId="WebStoreWarehouse" locationSeqId="TLTLTLUL03"
+    <InventoryItemDetail inventoryItemId="9003" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="3" quantityOnHandDiff="3" accountingQuantityDiff="3"/>
+    <InventoryItem facilityId="WebStoreWarehouse" locationSeqId="TLTLTLUL03" datetimeReceived="2008-08-01 08:00:00.000"
         inventoryItemId="9004" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="WG-1111" ownerPartyId="Company" currencyUomId="USD" unitCost="4.5"/>
-    <InventoryItemDetail inventoryItemId="9004" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="50" quantityOnHandDiff="50"/>
-    <InventoryItem facilityId="WebStoreWarehouse" locationSeqId="TLTLTLLL03"
+    <InventoryItemDetail inventoryItemId="9004" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="50" quantityOnHandDiff="50" accountingQuantityDiff="50"/>
+    <InventoryItem facilityId="WebStoreWarehouse" locationSeqId="TLTLTLLL03" datetimeReceived="2008-08-01 08:00:00.000"
         inventoryItemId="9005" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="WG-1111" ownerPartyId="Company" currencyUomId="USD" unitCost="4.5"/>
-    <InventoryItemDetail inventoryItemId="9005" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="5" quantityOnHandDiff="5"/>
-    <InventoryItem facilityId="WebStoreWarehouse" locationSeqId="TLTLTLUL04"
+    <InventoryItemDetail inventoryItemId="9005" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="5" quantityOnHandDiff="5" accountingQuantityDiff="5"/>
+    <InventoryItem facilityId="WebStoreWarehouse" locationSeqId="TLTLTLUL04" datetimeReceived="2008-08-01 08:00:00.000"
         inventoryItemId="9006" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="WG-5569" ownerPartyId="Company" currencyUomId="USD" unitCost="5.0"/>
-    <InventoryItemDetail inventoryItemId="9006" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="10" quantityOnHandDiff="10"/>
+    <InventoryItemDetail inventoryItemId="9006" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="10" quantityOnHandDiff="10" accountingQuantityDiff="10"/>
 
-    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9010" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="WG-9943-B3" ownerPartyId="Company" currencyUomId="USD" unitCost="3.5"/>
-    <InventoryItemDetail inventoryItemId="9010" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="10" quantityOnHandDiff="10"/>
-    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9011" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="WG-9943-B4" ownerPartyId="Company" currencyUomId="USD" unitCost="3.5"/>
-    <InventoryItemDetail inventoryItemId="9011" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="10" quantityOnHandDiff="10"/>
-    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9012" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="WG-9943-S3" ownerPartyId="Company" currencyUomId="USD" unitCost="3.5"/>
-    <InventoryItemDetail inventoryItemId="9012" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="10" quantityOnHandDiff="10"/>
-    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9013" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="WG-9943-S4" ownerPartyId="Company" currencyUomId="USD" unitCost="3.5"/>
-    <InventoryItemDetail inventoryItemId="9013" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="10" quantityOnHandDiff="10"/>
+    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9010" inventoryItemTypeId="NON_SERIAL_INV_ITEM" datetimeReceived="2008-08-01 08:00:00.000" productId="WG-9943-B3" ownerPartyId="Company" currencyUomId="USD" unitCost="3.5"/>
+    <InventoryItemDetail inventoryItemId="9010" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="10" quantityOnHandDiff="10" accountingQuantityDiff="10"/>
+    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9011" inventoryItemTypeId="NON_SERIAL_INV_ITEM" datetimeReceived="2008-08-01 08:00:00.000" productId="WG-9943-B4" ownerPartyId="Company" currencyUomId="USD" unitCost="3.5"/>
+    <InventoryItemDetail inventoryItemId="9011" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="10" quantityOnHandDiff="10" accountingQuantityDiff="10"/>
+    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9012" inventoryItemTypeId="NON_SERIAL_INV_ITEM" datetimeReceived="2008-08-01 08:00:00.000" productId="WG-9943-S3" ownerPartyId="Company" currencyUomId="USD" unitCost="3.5"/>
+    <InventoryItemDetail inventoryItemId="9012" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="10" quantityOnHandDiff="10" accountingQuantityDiff="10"/>
+    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9013" inventoryItemTypeId="NON_SERIAL_INV_ITEM" datetimeReceived="2008-08-01 08:00:00.000" productId="WG-9943-S4" ownerPartyId="Company" currencyUomId="USD" unitCost="3.5"/>
+    <InventoryItemDetail inventoryItemId="9013" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="10" quantityOnHandDiff="10" accountingQuantityDiff="10"/>
 
-    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9021" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="GZ-1006-1" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
-    <InventoryItemDetail inventoryItemId="9021" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8"/>
-    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9022" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="GZ-1006-2" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
-    <InventoryItemDetail inventoryItemId="9022" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8"/>
-    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9023" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="GZ-1006-3" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
-    <InventoryItemDetail inventoryItemId="9023" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8"/>
-    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9024" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="GZ-1006-4" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
-    <InventoryItemDetail inventoryItemId="9024" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8"/>
+    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9021" inventoryItemTypeId="NON_SERIAL_INV_ITEM" datetimeReceived="2008-08-01 08:00:00.000" productId="GZ-1006-1" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
+    <InventoryItemDetail inventoryItemId="9021" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8" accountingQuantityDiff="8"/>
+    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9022" inventoryItemTypeId="NON_SERIAL_INV_ITEM" datetimeReceived="2008-08-01 08:00:00.000" productId="GZ-1006-2" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
+    <InventoryItemDetail inventoryItemId="9022" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8" accountingQuantityDiff="8"/>
+    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9023" inventoryItemTypeId="NON_SERIAL_INV_ITEM" datetimeReceived="2008-08-01 08:00:00.000" productId="GZ-1006-3" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
+    <InventoryItemDetail inventoryItemId="9023" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8" accountingQuantityDiff="8"/>
+    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9024" inventoryItemTypeId="NON_SERIAL_INV_ITEM" datetimeReceived="2008-08-01 08:00:00.000" productId="GZ-1006-4" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
+    <InventoryItemDetail inventoryItemId="9024" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8" accountingQuantityDiff="8"/>
     
-    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9026" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="GZ-1000" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
-    <InventoryItemDetail inventoryItemId="9026" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8"/>
-    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9027" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="GZ-1001" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
-    <InventoryItemDetail inventoryItemId="9027" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8"/>
-    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9028" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="GZ-1004" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
-    <InventoryItemDetail inventoryItemId="9028" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8"/>
+    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9026" inventoryItemTypeId="NON_SERIAL_INV_ITEM" datetimeReceived="2008-08-01 08:00:00.000" productId="GZ-1000" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
+    <InventoryItemDetail inventoryItemId="9026" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8" accountingQuantityDiff="8"/>
+    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9027" inventoryItemTypeId="NON_SERIAL_INV_ITEM" datetimeReceived="2008-08-01 08:00:00.000" productId="GZ-1001" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
+    <InventoryItemDetail inventoryItemId="9027" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8" accountingQuantityDiff="8"/>
+    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9028" inventoryItemTypeId="NON_SERIAL_INV_ITEM" datetimeReceived="2008-08-01 08:00:00.000" productId="GZ-1004" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
+    <InventoryItemDetail inventoryItemId="9028" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8" accountingQuantityDiff="8"/>
     
 
     <!-- Some additional test promotions -->
@@ -918,5 +921,47 @@ under the License.
     <ProductFeatureAppl productId="GC-001-H50" productFeatureId="2004" productFeatureApplTypeId="STANDARD_FEATURE" fromDate="2003-11-20 13:52:45.336" sequenceNum="3"/>
     <ProductFeatureAppl productId="GC-001-HO" productFeatureId="2001" productFeatureApplTypeId="STANDARD_FEATURE" fromDate="2003-11-21 10:27:33.716" sequenceNum="2"/>
     <ProductFeatureAppl productId="GC-001-HO" productFeatureId="2006" productFeatureApplTypeId="STANDARD_FEATURE" fromDate="2003-11-21 10:27:33.633"/>
+
+    <ProductFeatureCategory productFeatureCategoryId="1000" description="Hazmat Features"/>
+    <ProductFeature productFeatureId="1000" productFeatureCategoryId="1000" productFeatureTypeId="HAZMAT" description="Hazmat" idCode="Y"/>
+    <ProductFeature productFeatureId="1001" productFeatureCategoryId="1000" productFeatureTypeId="HAZMAT" description="Non-Hazmat" idCode="N"/>
+
+    <ProductFeatureCategory productFeatureCategoryId="1001" description="Model Year Features"/>
+    <ProductFeature productFeatureId="Y1990" description="1990" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y1991" description="1991" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y1992" description="1992" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y1993" description="1993" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y1994" description="1994" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y1995" description="1995" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y1996" description="1996" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y1997" description="1997" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y1998" description="1998" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y1999" description="1999" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y2000" description="2000" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y2001" description="2001" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y2002" description="2002" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y2003" description="2003" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y2004" description="2004" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y2005" description="2005" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y2006" description="2006" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y2007" description="2007" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y2008" description="2008" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y2009" description="2009" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+    <ProductFeature productFeatureId="Y2010" description="2010" productFeatureCategoryId="1001" productFeatureTypeId="MODEL_YEAR"/>
+
+    <ProductFeatureCategory productFeatureCategoryId="1002" description="Equipment Class Features"/>
+    <ProductFeature productFeatureId="EC_BOAT" description="Boat" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
+    <ProductFeature productFeatureId="EC_FORKLIFT" description="Forklift" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
+    <ProductFeature productFeatureId="EC_DIGGER" description="Digger" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
+    <ProductFeature productFeatureId="EC_MANLIFT" description="Manlift" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
+    <ProductFeature productFeatureId="EC_SERVICE_BODY" description="Service Body" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
+    <ProductFeature productFeatureId="EC_TRACTOR" description="Tractor" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
+    <ProductFeature productFeatureId="EC_PASSENGER" description="Passenger Vehicle" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
+    <ProductFeature productFeatureId="EC_COMPRESSOR" description="Compressor" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
+    <ProductFeature productFeatureId="EC_TRENCHER" description="Trencher" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
+    <ProductFeature productFeatureId="EC_PULLER" description="Puller" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
+    <ProductFeature productFeatureId="EC_MOBILE" description="Mobile" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
+    <ProductFeature productFeatureId="EC_TANKER" description="Tanker" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
+    <ProductFeature productFeatureId="EC_REEL_STAND" description="Reel Stand" productFeatureCategoryId="1002" productFeatureTypeId="EQUIP_CLASS"/>
 
 </entity-engine-xml>

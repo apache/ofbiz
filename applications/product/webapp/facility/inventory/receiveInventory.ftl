@@ -29,7 +29,7 @@ under the License.
         <#-- Receiving Results -->
         <#if receivedItems?has_content>
           <h3>${uiLabelMap.ProductReceiptPurchaseOrder} ${purchaseOrder.orderId}</h3>
-          <hr/>
+          <hr />
           <table class="basic-table" cellspacing="0">
             <tr class="header-row">
               <td>${uiLabelMap.ProductShipmentId}</td>
@@ -49,7 +49,7 @@ under the License.
                 <input type="hidden" name="purchaseOrderId" value ="${(item.orderId)?if_exists}"/>
                 <input type="hidden" name="facilityId" value ="${facilityId?if_exists}"/>
                 <tr>
-                  <td><a href="<@ofbizUrl>ViewShipment?shipmentId=${item.shipmentId?if_exists}</@ofbizUrl>" class="buttontext">${item.shipmentId?if_exists}</a></td>
+                  <td><a href="<@ofbizUrl>ViewShipment?shipmentId=${item.shipmentId?if_exists}</@ofbizUrl>" class="buttontext">${item.shipmentId?if_exists} ${item.shipmentItemSeqId?if_exists}</a></td>
                   <td>${item.receiptId}</td>
                   <td>${item.getString("datetimeReceived").toString()}</td>
                   <td><a href="/ordermgr/control/orderview?orderId=${item.orderId}" class="buttontext">${item.orderId}</a></td>
@@ -66,9 +66,9 @@ under the License.
                 </tr>
               </form>
             </#list>
-            <tr><td colspan="10"><hr/></td></tr>
+            <tr><td colspan="10"><hr /></td></tr>
           </table>
-          <br/>
+          <br />
         </#if>
 
         <#-- Single Product Receiving -->
@@ -259,7 +259,7 @@ under the License.
                 <#assign shipmentType = shipment.getRelatedOneCache("ShipmentType")/>
                 <#assign shipmentDate = shipment.estimatedArrivalDate?if_exists/>
                 <tr>
-                  <td><hr/></td>
+                  <td><hr /></td>
                 </tr>
                 <tr>
                   <td>
@@ -278,7 +278,7 @@ under the License.
                 </tr>
               </#list>
               <tr>
-                <td><hr/></td>
+                <td><hr /></td>
               </tr>
               <tr>
                 <td>
@@ -299,6 +299,8 @@ under the License.
 
         <#-- Multi-Item PO Receiving -->
         <#elseif requestParameters.initialSelected?exists && purchaseOrder?has_content>
+          <input type="hidden" id="getConvertedPrice" value="<@ofbizUrl secure="${request.isSecure()?string}">getConvertedPrice"</@ofbizUrl> />
+          <input type="hidden" id="alertMessage" value="${uiLabelMap.ProductChangePerUnitPrice}" />
           <form method="post" action="<@ofbizUrl>receiveInventoryProduct</@ofbizUrl>" name="selectAllForm">
             <#-- general request fields -->
             <input type="hidden" name="facilityId" value="${requestParameters.facilityId?if_exists}"/>
@@ -334,7 +336,11 @@ under the License.
                   <#assign itemCost = orderItem.unitPrice?default(0)/>
                   <#assign salesOrderItem = salesOrderItems[orderItem.orderItemSeqId]?if_exists/>
                   <#if shipment?has_content>
-                  <#assign defaultQuantity = shippedQuantities[orderItem.orderItemSeqId]?double - receivedQuantities[orderItem.orderItemSeqId]?double/>
+                    <#if shippedQuantities[orderItem.orderItemSeqId]?exists>
+                      <#assign defaultQuantity = shippedQuantities[orderItem.orderItemSeqId]?double - receivedQuantities[orderItem.orderItemSeqId]?double/>
+                    <#else>
+                      <#assign defaultQuantity = 0/>
+                    </#if>
                   </#if>
                   <#if 0 < defaultQuantity>
                   <#assign orderItemType = orderItem.getRelatedOne("OrderItemType")/>
@@ -351,7 +357,7 @@ under the License.
                   </#if>
 
                   <tr>
-                    <td colspan="2"><hr/></td>
+                    <td colspan="2"><hr /></td>
                   </tr>
                   <tr>
                     <td>
@@ -433,12 +439,27 @@ under the License.
                           <td>&nbsp;</td>
                           <td align="right">${uiLabelMap.ProductFacilityOwner}:</td>
                           <td align="right"><input type="text" name="ownerPartyId_o_${rowCount}" size="20" maxlength="20" value="${facility.ownerPartyId}"/></td>
-                          <td align="right">${uiLabelMap.ProductPerUnitPrice} :</td>
-                          <td align="right">
-                            <input type="hidden" name="currencyUomId_o_${rowCount}" value="${currencyUomId?if_exists}"/>
-                            <input type="text" name="unitCost_o_${rowCount}" value="${itemCost}" size="6" maxlength="20"/>
-                            ${currencyUomId?if_exists}
-                          </td>
+                          <#if currencyUomId != orderCurrencyUomId>
+                            <td>${uiLabelMap.ProductPerUnitPriceOrder}:</td>
+                            <td>
+                              <input type="hidden" name="orderCurrencyUomId_o_${rowCount}" value="${orderCurrencyUomId?if_exists}" />
+                              <input type="text" id="orderCurrencyUnitPrice_${rowCount}" name="orderCurrencyUnitPrice_o_${rowCount}" value="${orderCurrencyUnitPriceMap[orderItem.orderItemSeqId]}" onchange="javascript:getConvertedPrice(orderCurrencyUnitPrice_${rowCount}, '${orderCurrencyUomId}', '${currencyUomId}', '${rowCount}', '${orderCurrencyUnitPriceMap[orderItem.orderItemSeqId]}', '${itemCost}');" size="6" maxlength="20" />
+                              ${orderCurrencyUomId?if_exists}
+                            </td>
+                            <td>${uiLabelMap.ProductPerUnitPriceFacility}:</td>
+                            <td>
+                              <input type="hidden" name="currencyUomId_o_${rowCount}" value="${currencyUomId?if_exists}" />
+                              <input type="text" id="unitCost_${rowCount}" name="unitCost_o_${rowCount}" value="${itemCost}" readonly size="6" maxlength="20" />
+                              ${currencyUomId?if_exists}
+                            </td>
+                          <#else>
+                            <td>${uiLabelMap.ProductPerUnitPrice}:</td>
+                            <td align="right">
+                              <input type="hidden" name="currencyUomId_o_${rowCount}" value="${currencyUomId?if_exists}" />
+                              <input type="text" name="unitCost_o_${rowCount}" value="${itemCost}" size="6" maxlength="20" />
+                              ${currencyUomId?if_exists}
+                            </td>
+                          </#if>
                         </tr>
                       </table>
                     </td>
@@ -451,7 +472,7 @@ under the License.
                 </#list>
                 <tr>
                   <td colspan="2">
-                    <hr/>
+                    <hr />
                   </td>
                 </tr>
                 <#if rowCount == 0>

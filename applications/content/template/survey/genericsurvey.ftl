@@ -45,27 +45,27 @@ under the License.
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "TEXTAREA"/>
     <textarea cols="40" rows="5" name="${questionFieldName}">${(answer.textResponse)?if_exists}</textarea>
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "TEXT_SHORT"/>
-    <input type="text" size="15" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}">
+    <input type="text" size="15" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "TEXT_LONG"/>
-    <input type="text" size="35" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}">
+    <input type="text" size="35" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "EMAIL"/>
-    <input type="text" size="30" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}">
+    <input type="text" size="30" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "URL"/>
-    <input type="text" size="40" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}">
+    <input type="text" size="40" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "DATE"/>
-    <input type="text" size="12" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}">
+    <input type="text" size="12" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "CREDIT_CARD"/>
-    <input type="text" size="20" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}">
+    <input type="text" size="20" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "GIFT_CARD"/>
-    <input type="text" size="20" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}">
+    <input type="text" size="20" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "NUMBER_CURRENCY"/>
-    <input type="text" size="6" class="inputBox" name="${questionFieldName}" value="${(answer.currencyResponse)?default(defValue?if_exists)}">
+    <input type="text" size="6" class="inputBox" name="${questionFieldName}" value="${(answer.currencyResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "NUMBER_FLOAT"/>
-    <input type="text" size="6" class="inputBox" name="${questionFieldName}" value="${(answer.floatResponse)?default(defValue?if_exists)}">
+    <input type="text" size="6" class="inputBox" name="${questionFieldName}" value="${(answer.floatResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "NUMBER_LONG"/>
-    <input type="text" size="6" class="inputBox" name="${questionFieldName}" value="${(answer.numericResponse?default(defValue)?string("#"))?if_exists}">
+    <input type="text" size="6" class="inputBox" name="${questionFieldName}" value="${(answer.numericResponse?default(defValue)?string("#"))?if_exists}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "PASSWORD"/>
-    <input type="password" size="30" class="textBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}">
+    <input type="password" size="30" class="textBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "CONTENT"/>
      <#if (answer.contentId)?has_content>
       <#assign content = answer.getRelatedOne("Content")>
@@ -163,11 +163,11 @@ under the License.
 <input type="hidden" name="surveyId" value="${survey.surveyId}"/>
 
 <h1>${survey.description?if_exists}</h1>
-<br/>
+<br />
 
 <#if survey.comments?has_content>
 <div class="tabletext">${survey.comments}</div>
-<br/>
+<br />
 </#if>
 
 <table width="100%" border="0" cellpadding="2" cellspacing="0">
@@ -276,7 +276,7 @@ under the License.
       <#if surveyQuestionAndAppl.surveyQuestionTypeId == "SEPERATOR_TEXT">
         <td colspan="5"><div class="tabletext">${surveyQuestionAndAppl.question?if_exists}</div></td>
       <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "SEPERATOR_LINE"/>
-        <td colspan="5"><hr/></td>
+        <td colspan="5"><hr /></td>
       <#else/>
         <#-- standard question options -->
         <td align="right">

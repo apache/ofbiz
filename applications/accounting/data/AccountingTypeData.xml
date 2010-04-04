@@ -181,6 +181,12 @@ under the License.
     <StatusItem description="In Process" sequenceId="05" statusCode="IN_PROCESS" statusId="FAM_IN_PROCESS" statusTypeId="FIXEDAST_MNT_STATUS"/>
     <StatusItem description="Completed" sequenceId="10" statusCode="COMPLETED" statusId="FAM_COMPLETED" statusTypeId="FIXEDAST_MNT_STATUS"/>
     <StatusItem description="Cancelled" sequenceId="99" statusCode="CANCELLED" statusId="FAM_CANCELLED" statusTypeId="FIXEDAST_MNT_STATUS"/>
+    <StatusValidChange condition="" statusId="FAM_CREATED" statusIdTo="FAM_SCHEDULED" transitionName="Created Maintenance Scheduled"/>
+    <StatusValidChange condition="" statusId="FAM_CREATED" statusIdTo="FAM_IN_PROCESS" transitionName="Created Maintenance In-Process"/>
+    <StatusValidChange condition="" statusId="FAM_CREATED" statusIdTo="FAM_CANCELLED" transitionName="Created Maintenace Cancelled"/>
+    <StatusValidChange condition="" statusId="FAM_SCHEDULED" statusIdTo="FAM_IN_PROCESS" transitionName="Scheduled Maintenace In-Process"/>
+    <StatusValidChange condition="" statusId="FAM_SCHEDULED" statusIdTo="FAM_CANCELLED" transitionName="Scheduled Maintenace Cancelled"/>
+    <StatusValidChange condition="" statusId="FAM_IN_PROCESS" statusIdTo="FAM_COMPLETED" transitionName="In-Process Maintenance Completed"/>
 
     <!-- The following three elements set up a regularly scheduled job that will automatically create
         fixed asset maintenances from ProductMaint time intervals. -->
@@ -204,21 +210,18 @@ under the License.
         DEBIT
             |___> NON_POSTING
             |
-            |___> DISTRIBUTION
-            |               |___> RETURN_OF_CAPITAL
-            |               |
-            |               |___> DIVIDEND
-            |
             |___> ASSET
             |         |_________> LONGTERM_ASSET
-            |         |                       |____> ACCUM_DEPRECIATION
-            |         |                       |
-            |         |                       |____> ACCUM_AMORTIZATION
             |         |
             |         |_________> CURRENT_ASSET
             |                                 |____> CASH_EQUIVALENT
             |                                 |
             |                                 |____> INVENTORY_ASSET
+            |
+            |___> DISTRIBUTION
+            |               |___> RETURN_OF_CAPITAL
+            |               |
+            |               |___> DIVIDEND
             |
             |___> EXPENSE
                       |_________> CASH_EXPENSE
@@ -236,22 +239,27 @@ under the License.
                                               |____> INVENTORY_ADJUST
 
         CREDIT
-            |___> REVENUE
+            |___> CONTRA_ASSET
+            |              |___> ACCUM_DEPRECIATION
+            |              |
+            |              |___> ACCUM_AMORTIZATION
             |
-            |___> INCOME
-            |          |_______> CASH_INCOME
-            |          |
-            |          |_______> NON_CASH_INCOME
+            |___> LIABILITY
+            |         |_________> CURRENT_LIABILITY
+            |         |
+            |         |_________> LONGTERM_LIABILITY
             |
             |___> EQUITY
             |         |_________> OWNERS_EQUITY
             |         |
             |         |_________> RETAINED_EARNINGS
             |
-            |___> LIABILITY
-                      |_________> CURRENT_LIABILITY
-                      |
-                      |_________> LONGTERM_LIABILITY
+            |___> REVENUE
+            |
+            |___> INCOME
+                       |________> CASH_INCOME
+                       |
+                       |________> NON_CASH_INCOME
 
         RESOURCE
 
@@ -285,12 +293,13 @@ under the License.
     <GlAccountClass description="Non-Cash Expense" glAccountClassId="NON_CASH_EXPENSE" parentClassId="EXPENSE"/>
     <GlAccountClass description="Depreciation" glAccountClassId="DEPRECIATION" parentClassId="NON_CASH_EXPENSE"/>
     <GlAccountClass description="Amortization" glAccountClassId="AMORTIZATION" parentClassId="NON_CASH_EXPENSE"/>
-    <!-- a special class for non-cash inventory adjustment expenses to avoid duplicating opearting cash flow adjustments for inventory
+    <!-- a special class for non-cash inventory adjustment expenses to avoid duplicating operating cash flow adjustments for inventory
          account transactions, which adjust operating cash flows -->
     <GlAccountClass description="Inventory Adjustment" glAccountClassId="INVENTORY_ADJUST" parentClassId="NON_CASH_EXPENSE"/>
-    <!-- same idea: these avoid double counting of depreciaton & amortization -->
-    <GlAccountClass description="Accumulated Depreciation" glAccountClassId="ACCUM_DEPRECIATION" parentClassId="LONGTERM_ASSET"/>
-    <GlAccountClass description="Accumulated Amortization" glAccountClassId="ACCUM_AMORTIZATION" parentClassId="LONGTERM_ASSET"/>
+    <!-- same idea: these avoid double counting of depreciation & amortization -->
+    <GlAccountClass description="Contra Asset" glAccountClassId="CONTRA_ASSET" parentClassId="CREDIT"/>
+    <GlAccountClass description="Accumulated Depreciation" glAccountClassId="ACCUM_DEPRECIATION" parentClassId="CONTRA_ASSET"/>
+    <GlAccountClass description="Accumulated Amortization" glAccountClassId="ACCUM_AMORTIZATION" parentClassId="CONTRA_ASSET"/>
     <GlAccountClass description="Non-Posting" glAccountClassId="NON_POSTING" parentClassId="DEBIT"/>
 
     <GlAccountType description="Accounts Receivable" glAccountTypeId="ACCOUNTS_RECEIVABLE" hasTable="N" parentTypeId=""/>
@@ -621,7 +630,7 @@ under the License.
     <InvoiceItemType description="Pay Period adj pay" hasTable="N" invoiceItemTypeId="PAYROL_PAYPER_PAY" parentTypeId="PAYROL_EARN_HOURS"/>
     <!-- Deductions -->
     <InvoiceItemType description="Deductions from Gross" hasTable="N" invoiceItemTypeId="PAYROL_DD_FROM_GROSS" parentTypeId="PAYROL"/>
-    <InvoiceItemType description="125*Compy. Contr Other Prem." hasTable="N" invoiceItemTypeId="PAYROL_DD_125COMPY" parentTypeId="PAYROL_DD_FROM_GROSS" defaultGlAccountId=""/>/>
+    <InvoiceItemType description="125*Compy. Contr Other Prem." hasTable="N" invoiceItemTypeId="PAYROL_DD_125COMPY" parentTypeId="PAYROL_DD_FROM_GROSS" defaultGlAccountId=""/>
     <InvoiceItemType description="125*PPO (pre tax)" hasTable="N" invoiceItemTypeId="PAYROL_DD_125PPO" parentTypeId="PAYROL_DD_FROM_GROSS" defaultGlAccountId=""/>
     <InvoiceItemType description="125*HSA Contribution (pre tax)" hasTable="N" invoiceItemTypeId="PAYROL_DD_125HSA" parentTypeId="PAYROL_DD_FROM_GROSS" defaultGlAccountId=""/>
     <InvoiceItemType description="401K Emp." hasTable="N" invoiceItemTypeId="PAYROL_DD_401K" parentTypeId="PAYROL_DD_FROM_GROSS" defaultGlAccountId=""/>
@@ -946,6 +955,7 @@ under the License.
     <Enumeration description="LIFO" enumCode="LIFO" enumId="COGS_LIFO" sequenceId="01" enumTypeId="COGS_METHODS"/>
     <Enumeration description="FIFO" enumCode="FIFO" enumId="COGS_FIFO" sequenceId="02" enumTypeId="COGS_METHODS"/>
     <Enumeration description="Average Cost" enumCode="AVG_COST" enumId="COGS_AVG_COST" sequenceId="03" enumTypeId="COGS_METHODS"/>
+    <Enumeration description="Inventory Item Cost" enumCode="INV_COST" enumId="COGS_INV_COST" sequenceId="04" enumTypeId="COGS_METHODS"/>
 
     <!-- inventory sequencing mode for accounting preferences -->
     <EnumerationType description="Invoice Sequence Mode" enumTypeId="INVOICE_SEQMD" hasTable="N" parentTypeId=""/>
@@ -1074,4 +1084,10 @@ under the License.
     <StatusItem statusId="GLREC_CREATED" statusTypeId="GLREC_STATUS" statusCode="CREATED" sequenceId="11" description="Created"/>
     <StatusItem statusId="GLREC_RECONCILED" statusTypeId="GLREC_STATUS" statusCode="RECONCILED" sequenceId="12" description="Reconciled"/>
     <StatusValidChange condition="" statusId="GLREC_CREATED" statusIdTo="GLREC_RECONCILED" transitionName="Set Created to Reconciled"/>
+
+    <!--Depreciation Formulae-->
+    <CustomMethodType customMethodTypeId="DEPRECIATION_FORMULA" description="Formula for calculating depreciation for fixed asset"/>
+    <CustomMethod customMethodId="STR_LINE_DEP_FORMULA" customMethodTypeId="DEPRECIATION_FORMULA" customMethodName="straightLineDepreciation" description="Straight Line depreciatiion algorithm for fixed asset((purchaseCost - salvageCost)/expectedLifeInYears)"/>
+    <CustomMethod customMethodId="DBL_DECL_DEP_FORMULA" customMethodTypeId="DEPRECIATION_FORMULA" customMethodName="doubleDecliningBalanceDepreciation" description="Double decline depreciatiion algorithm for fixed asset((NetBookValue - salvageCost)*2/remainingLifeInYears)"/>
+
 </entity-engine-xml>

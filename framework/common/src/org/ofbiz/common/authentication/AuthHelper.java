@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Iterator;
-import javax.imageio.spi.ServiceRegistry;
+import java.util.ServiceLoader;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.common.authentication.api.Authenticator;
@@ -74,14 +74,14 @@ public class AuthHelper {
     public static void updatePassword(String username, String password, String newPassword) throws AuthenticatorException {
         if (!authenticatorsLoaded) throw new AuthenticatorException("Authenticators never loaded; be sure to call AuthHelper.loadAuthenticators()");
         for (Authenticator auth : authenticators) {
-            auth.updatePassword(username, password, newPassword);            
+            auth.updatePassword(username, password, newPassword);
         }
     }
 
     public static boolean authenticatorsLoaded() {
         return authenticatorsLoaded;
     }
-    
+
     public static void loadAuthenticators(LocalDispatcher dispatcher) {
         if (!authenticatorsLoaded) {
             loadAuthenticators_internal(dispatcher);
@@ -90,12 +90,12 @@ public class AuthHelper {
 
     private synchronized static void loadAuthenticators_internal(LocalDispatcher dispatcher) {
         if (!authenticatorsLoaded) {
-            Iterator<Authenticator> it = ServiceRegistry.lookupProviders(Authenticator.class, getContextClassLoader());
+            Iterator<Authenticator> it = ServiceLoader.load(Authenticator.class, getContextClassLoader()).iterator();
             while (it.hasNext()) {
                 try {
                     Authenticator auth = it.next();
                     if (auth.isEnabled()) {
-                        auth.initialize(dispatcher);                    
+                        auth.initialize(dispatcher);
                         authenticators.add(auth);
                     }
                 } catch (ClassCastException e) {

@@ -26,7 +26,10 @@ function lookupInventory() {
 </script>
 <div class="screenlet">
   <div class="screenlet-title-bar">
-    <h3>${uiLabelMap.PageTitleFindInventoryEventPlan}</h3>
+    <ul>
+      <li class="h3">${uiLabelMap.PageTitleFindInventoryEventPlan}</li>
+    </ul>
+    <br class="clear"/>
   </div>
   <div class="screenlet-body">
     <form method="post" name="lookupinventory" action="<@ofbizUrl>FindInventoryEventPlan</@ofbizUrl>">
@@ -63,10 +66,10 @@ function lookupInventory() {
                         <input type='text' size='25' name='productId' value='${requestParameters.productId?if_exists}'/>
                         <span>
                           <a href="javascript:call_fieldlookup2(document.lookupinventory.productId,'LookupProduct');">
-                            <a href="javascript:call_fieldlookup2(document.copyCategoryProductMembersForm.productCategoryIdTo,'LookupProductCategory');"><img src='/images/fieldlookup.gif' width='15' height='14' border='0' alt="${uiLabelMap.CommonClickHereForFieldLookup}"/></a>
+                            <img src='/images/fieldlookup.gif' width='15' height='14' border='0' alt="${uiLabelMap.CommonClickHereForFieldLookup}"/></a>
                           </a>
                         </span>
-                        <input type='text' size='25' readonly name='productId_description' value=''/>
+                        <input type='text' size='25' readonly name='productId_description' value=''/>${uiLabelMap.CommonDescription}
                      </td>
                   </tr>
                   <tr>
@@ -147,7 +150,7 @@ document.lookupinventory.productId.focus();
           <td align="right">${uiLabelMap.ManufacturingTotalQuantity}</td>
         </tr>
         <tr>
-          <td colspan="7"><hr/></td>
+          <td colspan="7"><hr /></td>
         </tr>
         <#assign count = lowIndex>
         <#assign productTmp = "">
@@ -227,9 +230,9 @@ document.lookupinventory.productId.focus();
 
        </table>
       <#else>
-       <br/>
+       <br />
        <div align="center">${uiLabelMap.CommonNoElementFound}</div>
-       <br/>
+       <br />
       </#if>
     </#if>
     </td>

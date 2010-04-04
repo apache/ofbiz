@@ -207,8 +207,9 @@ under the License.
             author="<%=entity.getAuthor()%>"<%}%><%if (!version.equals(entity.getVersion())) {%>
             version="<%=entity.getVersion()%>"<%}%>><%if (!description.equals(entity.getDescription())) {%>
       <description><%=entity.getDescription()%></description><%}%><%
-  for (int y = 0; y < entity.getFieldsSize(); y++) {
-    ModelField field = entity.getField(y);
+  Iterator<ModelField> fieldIterator = entity.getFieldsIterator();
+  while (fieldIterator.hasNext()) {
+    ModelField field = fieldIterator.next();
     if (!ignoredFields.contains(field.getName())) {%>
       <field name="<%=field.getName()%>"<%if (!field.getName().equals(ModelUtil.dbNameToVarName(field.getColName()))){
       %> col-name="<%=field.getColName()%>"<%}%> type="<%=field.getType()%>"><%
@@ -217,8 +218,9 @@ under the License.
       %><validate name="<%=valName%>"/><%
     }%></field><%
     }}
-  for (int y = 0; y < entity.getPksSize(); y++) {
-    ModelField field = entity.getPk(y);%>
+  Iterator<ModelField> pkIterator = entity.getPksIterator();
+  while (pkIterator.hasNext()) {
+    ModelField field = pkIterator.next();%>
       <prim-key field="<%=field.getName()%>"/><%
   }
   if (entity.getRelationsSize() > 0) {

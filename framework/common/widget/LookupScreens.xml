@@ -26,11 +26,12 @@ under the License.
         <section>
             <actions>
                 <property-map resource="MarketingUiLabels" map-name="uiLabelMap" global="true"/>
-
                 <set field="title" value="${uiLabelMap.PageTitleLookupGeo}"/>
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="Geo"/>
+                <set field="searchFields" value="[geoId, geoName, geoCode]"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
@@ -46,7 +47,7 @@ under the License.
     </screen>
 
     <!-- Locales Lookup Screen -->
-    <screen name="LookupLocales">
+    <screen name="ListLocales">
         <section>
             <actions>
                 <set field="title" value="${uiLabelMap.CommonChooseLanguage}"/>
@@ -66,7 +67,7 @@ under the License.
     </screen>
 
     <!-- Timezones Lookup Screen -->
-    <screen name="LookupTimezones">
+    <screen name="ListTimezones">
         <section>
             <actions>
                 <set field="title" value="${uiLabelMap.CommonTime}"/>
@@ -86,7 +87,7 @@ under the License.
     </screen>
 
     <!-- Visual Themes Lookup Screen -->
-    <screen name="LookupVisualThemes">
+    <screen name="ListVisualThemes">
         <section>
             <actions>
                 <set field="title" value="${uiLabelMap.CommonVisualThemes}"/>

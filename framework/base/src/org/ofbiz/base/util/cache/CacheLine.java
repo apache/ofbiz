@@ -18,50 +18,32 @@
  *******************************************************************************/
 package org.ofbiz.base.util.cache;
 
-import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
 
-import org.ofbiz.base.util.UtilObject;
+import org.ofbiz.base.concurrent.ExecutionPool;
 
-public abstract class CacheLine<V> implements Serializable {
-    public long loadTime;
-    public final long expireTime;
-
-    protected CacheLine(long expireTime) {
-        this(0, expireTime);
+public abstract class CacheLine<V> extends ExecutionPool.Pulse {
+    protected CacheLine(long loadTimeNanos, long expireTimeNanos) {
+        super(loadTimeNanos, expireTimeNanos);
+        // FIXME: this seems very odd to me (ARH)
+        //if (loadTime <= 0) {
+        //    hasExpired = true;
+        //}
     }
 
-    protected CacheLine(long loadTime, long expireTime) {
-        this.expireTime = expireTime;
-        this.loadTime = loadTime;
+    abstract CacheLine<V> changeLine(boolean useSoftReference, long expireTimeNanos);
+    abstract void remove();
+    boolean differentExpireTime(long expireTimeNanos) {
+        return this.expireTimeNanos - loadTimeNanos - expireTimeNanos != 0;
     }
-
     public abstract V getValue();
-    public abstract boolean isInvalid();
 
-    public long getExpireTime() {
-        return this.expireTime;
+    void cancel() {
     }
 
-    public long getSizeInBytes() {
-        try {
-            return UtilObject.getByteCount(this);
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-
-    public boolean hasExpired() {
-        // check this BEFORE checking to see if expireTime <= 0, ie if time expiration is enabled
-        // check to see if we are using softReference first, slight performance increase
-        if (isInvalid()) return true;
-
-        // check if expireTime <= 0, ie if time expiration is not enabled
-        if (expireTime <= 0) return false;
-
-        // check if the time was saved for this; if the time was not saved, but expire time is > 0, then we don't know when it was saved so expire it to be safe
-        if (loadTime <= 0) return true;
-
-        return (loadTime + expireTime) < System.currentTimeMillis();
+    @Override
+    public void run() {
+        remove();
     }
 }
 

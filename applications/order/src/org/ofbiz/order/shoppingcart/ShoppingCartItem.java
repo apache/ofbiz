@@ -32,6 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
@@ -137,7 +138,7 @@ public class ShoppingCartItem implements java.io.Serializable {
 
     private Map contactMechIdsMap = FastMap.newInstance();
     private List orderItemPriceInfos = null;
-    private List itemAdjustments = new LinkedList();
+    private List<GenericValue> itemAdjustments = FastList.newInstance();
     private boolean isPromo = false;
     private BigDecimal promoQuantityUsed = BigDecimal.ZERO;
     private Map quantityUsedPerPromoCandidate = new HashMap();
@@ -239,7 +240,8 @@ public class ShoppingCartItem implements java.io.Serializable {
         newItem.setCancelBackOrderDate(cancelBackOrderDate != null ? cancelBackOrderDate : cart.getCancelBackOrderDate());
 
         try {
-            newItem.setQuantity(quantity, dispatcher, cart, true);
+            newItem.setQuantity(quantity, dispatcher, cart, true, false);
+            cart.setItemShipGroupQty(newItem, quantity, 0);
         } catch (CartItemModifyException e) {
             cart.removeCartItem(cart.getItemIndex(newItem), dispatcher);
             cart.clearItemShipInfo(newItem);
@@ -675,7 +677,7 @@ public class ShoppingCartItem implements java.io.Serializable {
         this.attributes = item.getAttributes() == null ? new HashMap() : new HashMap(item.getAttributes());
         this.contactMechIdsMap = item.getOrderItemContactMechIds() == null ? null : new HashMap(item.getOrderItemContactMechIds());
         this.orderItemPriceInfos = item.getOrderItemPriceInfos() == null ? null : new LinkedList(item.getOrderItemPriceInfos());
-        this.itemAdjustments = item.getAdjustments() == null ? null : new LinkedList(item.getAdjustments());
+        this.itemAdjustments.addAll(item.getAdjustments());
         if (this._product == null) {
             this.itemDescription = item.getName();
         }
@@ -723,9 +725,8 @@ public class ShoppingCartItem implements java.io.Serializable {
                     this.itemType = "PRODUCT_ORDER_ITEM";
                 }
             } else {
-                Debug.logError("Error calling ShoppingCartItem (trying to creates new ShoppingCartItem object)." +
-                                " Check that there is a type for this product ", module);
-                return;
+                // NOTE DEJ20100111: it seems safe to assume here that because a product is passed in that even if the product has no type this type of item still applies; thanks to whoever wrote the previous code, that's a couple of hours tracking this down that I wouldn't have minded doing something else with... :)
+                this.itemType = "PRODUCT_ORDER_ITEM";
             }
         } else {
             this.itemType = itemType;
@@ -2195,16 +2196,16 @@ public class ShoppingCartItem implements java.io.Serializable {
         itemAdjustments.remove(index);
     }
 
-    public List getAdjustments() {
+    public List<GenericValue> getAdjustments() {
         return itemAdjustments;
     }
 
     public void removeFeatureAdjustment(String productFeatureId) {
         if (productFeatureId == null) return;
-        Iterator itemAdjustmentsIter = itemAdjustments.iterator();
+        Iterator<GenericValue> itemAdjustmentsIter = itemAdjustments.iterator();
 
         while (itemAdjustmentsIter.hasNext()) {
-            GenericValue itemAdjustment = (GenericValue) itemAdjustmentsIter.next();
+            GenericValue itemAdjustment = itemAdjustmentsIter.next();
 
             if (productFeatureId.equals(itemAdjustment.getString("productFeatureId"))) {
                 itemAdjustmentsIter.remove();
@@ -2295,7 +2296,7 @@ public class ShoppingCartItem implements java.io.Serializable {
             return false;
         }
 
-        if (this.getSelectedAmount() != selectedAmount) {
+        if (selectedAmount != null && this.selectedAmount.compareTo(selectedAmount) != 0) {
             return false;
         }
 
@@ -2306,11 +2307,11 @@ public class ShoppingCartItem implements java.io.Serializable {
             return false;
         }
 
-        if (this.reservLength != reservLength) {
+        if (reservLength != null && this.reservLength.compareTo(reservLength) != 0) {
             return false;
         }
 
-        if (this.reservPersons != reservPersons) {
+        if (reservPersons != null && this.reservPersons.compareTo(reservPersons) != 0) {
             return false;
         }
 
@@ -2331,7 +2332,7 @@ public class ShoppingCartItem implements java.io.Serializable {
             return false;
         }
 
-        if ((this.attributes != null && attributes != null) &&
+        if ((UtilValidate.isNotEmpty(this.attributes) && UtilValidate.isNotEmpty(attributes)) &&
                 ((this.attributes.size() != attributes.size()) ||
                 !(this.attributes.equals(attributes)))) {
             return false;
@@ -2411,7 +2412,7 @@ public class ShoppingCartItem implements java.io.Serializable {
     public Delegator getDelegator() {
         if (delegator == null) {
             if (UtilValidate.isEmpty(delegatorName)) {
-                throw new IllegalStateException("Bad delegator name");
+                throw new IllegalStateException("No delegator or delegatorName on ShoppingCartItem, somehow was not setup right.");
             }
             delegator = DelegatorFactory.getDelegator(delegatorName);
         }
@@ -2434,11 +2435,8 @@ public class ShoppingCartItem implements java.io.Serializable {
                 // now copy/calc the adjustments
                 Debug.logInfo("Clone's adj: " + item.getAdjustments(), module);
                 if (UtilValidate.isNotEmpty(item.getAdjustments())) {
-                    List adjustments = new LinkedList(item.getAdjustments());
-                    Iterator adjIterator = adjustments.iterator();
-
-                    while (adjIterator.hasNext()) {
-                        GenericValue adjustment = (GenericValue) adjIterator.next();
+                    List<GenericValue> adjustments = UtilMisc.makeListWritable(item.getAdjustments());
+                    for (GenericValue adjustment: adjustments) {
 
                         if (adjustment != null) {
                             item.removeAdjustment(adjustment);
@@ -2466,11 +2464,8 @@ public class ShoppingCartItem implements java.io.Serializable {
 
             // re-calc this item's adjustments
             if (UtilValidate.isNotEmpty(this.getAdjustments())) {
-                List adjustments = new LinkedList(this.getAdjustments());
-                Iterator adjIterator = adjustments.iterator();
-
-                while (adjIterator.hasNext()) {
-                    GenericValue adjustment = (GenericValue) adjIterator.next();
+                List<GenericValue> adjustments = UtilMisc.makeListWritable(this.getAdjustments());
+                for (GenericValue adjustment: adjustments) {
 
                     if (adjustment != null) {
                         this.removeAdjustment(adjustment);

@@ -2393,7 +2393,7 @@
         <value xml:lang="en">Visit List</value>
         <value xml:lang="es">Lista de visitas</value>
         <value xml:lang="fr">Liste connexion</value>
-        <value xml:lang="it">Visita Lista</value>
+        <value xml:lang="it">Lista delle visite</value>
         <value xml:lang="nl">Bezoekenlijst</value>
         <value xml:lang="pt_BR">Lista de visitas</value>
         <value xml:lang="pt_PT">Visitar Lista</value>
@@ -5467,6 +5467,9 @@
         <value xml:lang="th">ค้นหาผลการติดต่อ</value>
         <value xml:lang="zh">查找沟通事件</value>
     </property>
+    <property key="PartyFindCommunicationsByOrder">
+        <value xml:lang="en">Find Communications by Order</value>
+    </property>
     <property key="PartyFindParties">
         <value xml:lang="de">Akteure suchen</value>
         <value xml:lang="en">Find Parties</value>
@@ -5570,6 +5573,7 @@
     </property>
     <property key="PartyForward">
         <value xml:lang="en">Forward</value>
+        <value xml:lang="fr">Transférer</value>
         <value xml:lang="hi_IN">आगे</value>
         <value xml:lang="it">Inoltra</value>
         <value xml:lang="pt_BR">Encaminhar</value>
@@ -5619,6 +5623,7 @@
     </property>
     <property key="PartyFullName">
         <value xml:lang="en">Full Name</value>
+        <value xml:lang="fr">Nom complet</value>
         <value xml:lang="it">Nome completo</value>
         <value xml:lang="pt_BR">Nome completo</value>
     </property>
@@ -5877,6 +5882,7 @@
     </property>
     <property key="PartyInProgresstEmails">
         <value xml:lang="en">Emails scheduled to be sent</value>
+        <value xml:lang="fr">Courriels prêts à être envoyés</value>
         <value xml:lang="hi_IN">ईमेल भेजने के लिए शिड्यूल है</value>
         <value xml:lang="it">Email schedulate da inviare</value>
         <value xml:lang="pt_BR">E-mails agendados para o envio</value>
@@ -6576,6 +6582,7 @@
     </property>
     <property key="PartyMainRole">
         <value xml:lang="en">Main Role</value>
+        <value xml:lang="fr">Rôle principal</value>
         <value xml:lang="it">Ruolo principale</value>
         <value xml:lang="pt_BR">Pepel principal</value>
     </property>
@@ -6948,6 +6955,7 @@
     </property>
     <property key="PartyMyCommunications">
         <value xml:lang="en">My Communications</value>
+        <value xml:lang="fr">Mes communications</value>
         <value xml:lang="hi_IN">मेरा संचार</value>
         <value xml:lang="it">Proprie comunicazioni</value>
         <value xml:lang="pt_BR">Minhas comunicações</value>
@@ -7440,7 +7448,7 @@
         <value xml:lang="es">No se encontraron participantes</value>
         <value xml:lang="fr">Aucun acteur trouvé.</value>
         <value xml:lang="hi_IN">कोई भी पार्टी नहीं मिली|</value>
-        <value xml:lang="it">Nessun Soggetto trovato.</value>
+        <value xml:lang="it">Nessun soggetto trovato.</value>
         <value xml:lang="nl">Geen relaties gevonden.</value>
         <value xml:lang="pt_BR">Nenhum participante encontrado</value>
         <value xml:lang="pt_PT">Secções Não Encontradas</value>
@@ -7550,6 +7558,10 @@
         <value xml:lang="ru">В файле нет информации о способе платежа.</value>
         <value xml:lang="th">ไม่พบข้อมูลวิธีการจ่ายเงินบนไฟล์</value>
         <value xml:lang="zh">没有存档的支付方式信息。</value>
+    </property>
+    <property key="PartyNoProductStoreFoundForThisParty">
+        <value xml:lang="de">Kein Laden für diesen Akteur gefunden.</value>
+        <value xml:lang="en">No product store(s) found for this party.</value>
     </property>
     <property key="PartyNoServerHitsFound">
         <value xml:lang="de">Keine Server Hits für diesen Webseiten Besuch gefunden</value>
@@ -7808,6 +7820,9 @@
         <value xml:lang="it">Sostituzione importo tasso di default</value>
         <value xml:lang="pt_BR">Substituir quantidade da taxa padrão</value>
         <value xml:lang="zh">覆盖缺省税金金额</value>
+    </property>
+    <property key="PartyOtherAndGeneralCommunicationEvents">
+        <value xml:lang="en">Others and General Communication Events</value>
     </property>
     <property key="PartyPagePushFollowing">
         <value xml:lang="de">Page Push/Following</value>
@@ -9133,6 +9148,7 @@
     </property>
     <property key="PartyReplyAll">
         <value xml:lang="en">Reply All</value>
+        <value xml:lang="fr">Répondre à tous</value>
         <value xml:lang="hi_IN">सभी को जवाब दे</value>
         <value xml:lang="it">Rispondi a tutti</value>
         <value xml:lang="pt_BR">Responder para todos</value>
@@ -9453,7 +9469,7 @@
         <value xml:lang="zh">分区</value>
     </property>
     <property key="PartySelectContactType">
-        <value xml:lang="de">Auswahl Kontakttyp</value>
+        <value xml:lang="de">Kontakttyp auswählen</value>
         <value xml:lang="en">Select Contact Type</value>
         <value xml:lang="es">Seleccionar tipo de contacto</value>
         <value xml:lang="fr">Sélectionner un type de coordonnées</value>

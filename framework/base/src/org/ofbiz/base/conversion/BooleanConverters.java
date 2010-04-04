@@ -18,6 +18,12 @@
  *******************************************************************************/
 package org.ofbiz.base.conversion;
 
+import java.util.List;
+import java.util.Set;
+
+import javolution.util.FastList;
+import javolution.util.FastSet;
+
 /** Boolean Converter classes. */
 public class BooleanConverters implements ConverterLoader {
     public static class BooleanToInteger extends AbstractConverter<Boolean, Integer> {
@@ -27,6 +33,18 @@ public class BooleanConverters implements ConverterLoader {
 
         public Integer convert(Boolean obj) throws ConversionException {
              return obj.booleanValue() ? 1 : 0;
+        }
+    }
+
+    public static class BooleanToList extends GenericSingletonToList<Boolean> {
+        public BooleanToList() {
+            super(Boolean.class);
+        }
+    }
+
+    public static class BooleanToSet extends GenericSingletonToSet<Boolean> {
+        public BooleanToSet() {
+            super(Boolean.class);
         }
     }
 
@@ -56,7 +74,7 @@ public class BooleanConverters implements ConverterLoader {
         }
 
         public Boolean convert(String obj) throws ConversionException {
-            return "TRUE".equals(obj.toUpperCase());
+            return "TRUE".equals(obj.trim().toUpperCase());
         }
     }
 

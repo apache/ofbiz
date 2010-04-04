@@ -32,27 +32,25 @@ under the License.
     <eca service="storeOrder" event="return">
         <action service="balanceOrderItemsWithNegativeReservations" mode="sync"/>
     </eca>
-    <!--
+
     <eca service="storeOrder" event="return">
         <condition field-name="orderTypeId" operator="equals" value="PURCHASE_ORDER"/>
         <action service="setUnitPriceAsLastPrice" mode="sync"/>
     </eca>
-    -->
+
     <eca service="storeOrder" event="return">
         <action service="setOrderReservationPriority" mode="sync"/>
     </eca>
-    <!--
+
     <eca service="updateOrderItems" event="commit">
         <condition field-name="orderTypeId" operator="equals" value="PURCHASE_ORDER"/>
         <action service="setUnitPriceAsLastPrice" mode="sync"/>
     </eca>
-    -->
+
     <eca service="receiveInventoryProduct" event="commit">
         <condition field-name="facilityId" operator="is-not-empty"/>
         <action service="addProductsBackToCategory" mode="sync"/>
-        <!--
         <action service="setUnitPriceAsLastPrice" mode="sync"/>
-        -->
     </eca>
     <eca service="receiveInventoryProduct" event="commit">
         <condition field-name="facilityId" operator="is-not-empty"/>
@@ -352,6 +350,7 @@ under the License.
     <!-- notification of a customer request received and accepted -->
     <eca service="setCustRequestStatus" event="commit">
         <condition field-name="oldStatusId" operator="not-equals" value="CRQ_ACCEPTED"/>
+        <condition field-name="oldStatusId" operator="not-equals" value="CRQ_PENDING"/>
         <condition field-name="statusId" operator="equals" value="CRQ_ACCEPTED"/>
         <set field-name="bodyParameters.custRequestId" env-name="custRequestId"/>
         <set field-name="bodyParameters.custRequestName" env-name="custRequestName"/>
@@ -409,5 +408,8 @@ under the License.
         <condition field-name="statusId" operator="equals" value="ITEM_APPROVED"/>
         <condition-field field-name="statusId" operator="not-equals" to-field-name="oldStatusId"/>
         <action service="loadSalesOrderFact" mode="sync" run-as-user="system"/>
+    </eca>
+    <eca service="createUpdateCustomerAndShippingAddress" event="invoke">
+        <action service="setAnonUserLogin" mode="sync"/>
     </eca>
 </service-eca>

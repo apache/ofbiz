@@ -255,6 +255,10 @@ if (product) {
                     context.variantTree = variantTree;
                     context.variantTreeSize = variantTree.size();
                 }
+                unavailableVariants = variantTreeMap.unavailableVariants;
+                if (unavailableVariants) {
+                    context.unavailableVariants = unavailableVariants;
+                }
                 if (imageMap) {
                     context.variantSample = imageMap;
                     context.variantSampleKeys = imageMap.keySet();
@@ -401,6 +405,19 @@ if (product) {
         }
     }
 
+    //get last inventory count from product facility for the product
+    facilities = delegator.findList("ProductFacility", EntityCondition.makeCondition([productId : product.productId]), null, null, null, false);
+    availableInventory = 0.0;
+    if(facilities) {
+        facilities.each { facility ->
+            lastInventoryCount = facility.lastInventoryCount;
+            if (lastInventoryCount != null && availableInventory.compareTo(lastInventoryCount) != 0) {
+                availableInventory += lastInventoryCount;
+            }
+        }
+    }
+    context.availableInventory = availableInventory;
+
     // get product associations
     alsoBoughtProducts = dispatcher.runSync("getAssociatedProducts", [productId : productId, type : "ALSO_BOUGHT", checkViewAllow : true, prodCatalogId : currentCatalogId, bidirectional : true, sortDescending : true]);
     context.alsoBoughtProducts = alsoBoughtProducts.assocProducts;
@@ -416,6 +433,9 @@ if (product) {
 
     obsolenscenseProducts = dispatcher.runSync("getAssociatedProducts", [productIdTo : productId, type : "PRODUCT_OBSOLESCENCE", checkViewAllow : true, prodCatalogId : currentCatalogId]);
     context.obsolenscenseProducts = obsolenscenseProducts.assocProducts;
+
+    accessoryProducts = dispatcher.runSync("getAssociatedProducts", [productId : productId, type : "PRODUCT_ACCESSORY", checkViewAllow : true, prodCatalogId : currentCatalogId]);
+    context.accessoryProducts = accessoryProducts.assocProducts;
 
     // get other cross-sell information: product with a common feature
     commonProductFeatureId = "SYMPTOM";

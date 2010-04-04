@@ -76,11 +76,11 @@ public class ServiceUtil {
     /** A little short-cut method to check to see if a service was successful (neither error or failed) */
     public static boolean isSuccess(Map<String, ? extends Object> results) {
         if (ServiceUtil.isError(results) || ServiceUtil.isFailure(results)) {
-        	return false;
+            return false;
         }
         return true;
     }
-    
+
     /** A small routine used all over to improve code efficiency, make a result map with the message and the error response code */
     public static Map<String, Object> returnError(String errorMessage) {
         return returnProblem(ModelService.RESPOND_ERROR, errorMessage, null, null, null);
@@ -414,8 +414,11 @@ public class ServiceUtil {
                     beganTx1 = TransactionUtil.begin();
 
                     EntityListIterator foundJobs = delegator.find("JobSandbox", mainCond, null, null, null, findOptions);
-                    curList = foundJobs.getPartialList(1, 1000);
-                    foundJobs.close();
+                    try {
+                        curList = foundJobs.getPartialList(1, 1000);
+                    } finally {
+                        foundJobs.close();
+                    }
 
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "Cannot obtain job data from datasource", module);

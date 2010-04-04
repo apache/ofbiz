@@ -70,8 +70,8 @@ under the License.
         <attribute name="oldProductId" type="String" mode="IN" optional="false"/>
         <attribute name="newInternalName" type="String" mode="IN" optional="true"/>
         <attribute name="newProductName" type="String" mode="IN" optional="true"/>
-        <attribute name="newDescription" type="String" mode="IN" optional="true"/>
-        <attribute name="newLongDescription" type="String" mode="IN" optional="true"/>
+        <attribute name="newDescription" type="String" mode="IN" optional="true" allow-html="safe"/>
+        <attribute name="newLongDescription" type="String" mode="IN" optional="true" allow-html="safe"/>
         <attribute name="duplicatePrices" type="String" mode="IN" optional="true"/>
         <attribute name="duplicateIDs" type="String" mode="IN" optional="true"/>
         <attribute name="duplicateContent" type="String" mode="IN" optional="true"/>
@@ -1256,5 +1256,66 @@ under the License.
             location="org.ofbiz.product.spreadsheetimport.ImportProductServices" invoke="productImportFromSpreadsheet" auth="true">
         <description>Create product and inventory item</description>
         <attribute name="dirName" type="java.lang.String" mode="IN" optional="true"/>
+    </service>
+    
+    <!-- Start Web Analytics configuration services -->
+    <service name="createWebAnalyticsConfig" default-entity-name="WebAnalyticsConfig" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a WebAnalyticsConfig</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateWebAnalyticsConfig" default-entity-name="WebAnalyticsConfig" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a WebAnalyticsConfig</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteWebAnalyticsConfig" default-entity-name="WebAnalyticsConfig" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a WebAnalyticsConfig</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    
+    <service name="createWebAnalyticsType" default-entity-name="WebAnalyticsType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a WebAnalyticsType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateWebAnalyticsType" default-entity-name="WebAnalyticsType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a WebAnalyticsType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteWebAnalyticsType" default-entity-name="WebAnalyticsType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a WebAnalyticsType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    
+    <!-- Product Promo Content services -->
+    <service name="createProductPromoContent" default-entity-name="ProductPromoContent" engine="simple"
+            location="component://product/script/org/ofbiz/product/product/ProductContentServices.xml" invoke="createProductPromoContent" auth="true">
+        <description>Create Product Promo Content</description>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="updateProductPromoContent" default-entity-name="ProductPromoContent" engine="simple"
+            location="component://product/script/org/ofbiz/product/product/ProductContentServices.xml" invoke="updateProductPromoContent" auth="true">
+        <description>Update Product Promo Content</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeProductPromoContent" default-entity-name="ProductPromoContent" engine="simple"
+            location="component://product/script/org/ofbiz/product/product/ProductContentServices.xml" invoke="removeProductPromoContent" auth="true">
+        <description>Remove Product Promo Content</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="addImageForProductPromo" default-entity-name="ProductPromoContent" engine="java"
+            location="org.ofbiz.product.product.ProductServices" invoke="addImageForProductPromo" auth="true">
+        <implements service="uploadFileInterface"/>
+        <auto-attributes include="pk" mode="IN" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="contentId" mode="IN" optional="true" type="String"/>
+        <override name="productPromoContentTypeId" optional="false"/>
+        <override name="productPromoId" optional="false"/>
     </service>
 </services>

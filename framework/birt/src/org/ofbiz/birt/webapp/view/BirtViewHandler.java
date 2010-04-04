@@ -36,6 +36,7 @@ import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.birt.BirtWorker;
@@ -47,32 +48,28 @@ import org.ofbiz.birt.widget.BirtFactory;
 import org.xml.sax.SAXException;
 
 public class BirtViewHandler implements ViewHandler {
-    
+
     public static final String module = BirtViewHandler.class.getName();
 
     protected ServletContext servletContext = null;
 
     private String name = "birt";
-    
+
     public void init(ServletContext context) throws ViewHandlerException {
-        // TODO Auto-generated method stub
         this.servletContext = context;
     }
 
     public String getName() {
-        // TODO Auto-generated method stub
         return name;
     }
 
     public void setName(String name) {
-        // TODO Auto-generated method stub
         this.name = name;
     }
 
     public void render(String name, String page, String info,
             String contentType, String encoding, HttpServletRequest request,
             HttpServletResponse response) throws ViewHandlerException {
-        // TODO Auto-generated method stub
         try {
             IReportEngine engine = BirtContainer.getReportEngine();
             // open report design
@@ -83,10 +80,10 @@ public class BirtViewHandler implements ViewHandler {
             } else {
                 design = engine.openReportDesign(servletContext.getRealPath(page));
             }
-            
-             Map context = FastMap.newInstance();
+
+             Map<String, Object> context = FastMap.newInstance();
             // set parameters from request
-             Map parameters = (Map)request.getAttribute(BirtWorker.BIRT_PARAMETERS);
+             Map<String, Object> parameters = UtilGenerics.cast(request.getAttribute(BirtWorker.BIRT_PARAMETERS));
                 if (parameters != null) {
                     context.put(BirtWorker.BIRT_PARAMETERS, parameters);
                 }

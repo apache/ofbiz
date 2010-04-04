@@ -136,13 +136,16 @@ under the License.
                 <set field="projectId" from-field="parameters.projectId"/>
                 <entity-and entity-name="ProjectAndPhaseAndTask" list="tasks">
                     <field-map field-name="projectId" from-field="parameters.projectId"/>
+                    <order-by field-name="phaseSeqNum"/>
                     <order-by field-name="phaseName"/>
+                    <order-by field-name="sequenceNum"/>
                     <order-by field-name="workEffortName"/>
                 </entity-and>
                 <entity-and entity-name="WorkEffort" list="phases">
                     <field-map field-name="workEffortParentId" from-field="parameters.projectId"/>
                     <field-map field-name="workEffortTypeId" value="PHASE"/>
                 </entity-and>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonProjectDecorator" location="${parameters.mainDecoratorLocation}">
@@ -392,16 +395,17 @@ under the License.
                             <screenlet title="${uiLabelMap.PageTitleProjectInformation}">
                                 <include-form name="ProjectInfo" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
                             </screenlet>
+                            <include-screen name="SubProjectsInfo"/>
                             <include-screen name="PhasesInfo"/>
-                            <include-screen name="TasksInfo"/>
                         </container>
                         <container style="righthalf">
-                           <include-screen name="SubProjectsInfo"/>
-                           <include-screen name="PartiesInfo"/>
-                           <include-screen name="NoteInfo"/>
-                           <include-screen name="ListProjectContent"/>
+                            <include-screen name="PartiesInfo"/>
+                            <include-screen name="NoteInfo"/>
+                            <include-screen name="ListProjectContent"/>
                             <include-screen name="OrderInfo"/>
                         </container>
+                        <container style="clear"/>
+                        <include-screen name="TasksInfo"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -417,7 +421,7 @@ under the License.
                 <script location="component://projectmgr/webapp/projectmgr/WEB-INF/actions/GanttChart.groovy"/>
             </actions>
             <widgets>
-                <label text="${project}"></label>
+                <label text="${project}"/>
                 <decorator-screen name="CommonProjectDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleProjectGanttChart}">
@@ -452,10 +456,8 @@ under the License.
                 <set field="phases" from-field="result.phaseList"/>
             </actions>
             <widgets>
-                <screenlet>
-                    <screenlet title="${uiLabelMap.ProjectMgrPhases}">
-                        <include-form name="ListPhaseInfo" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
-                    </screenlet>
+                <screenlet title="${uiLabelMap.ProjectMgrPhases}">
+                    <include-form name="ListPhaseInfo" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
                 </screenlet>
             </widgets>
         </section>
@@ -538,7 +540,7 @@ under the License.
                             <not><if-empty field="clientAssigns"/></not>
                         </condition>
                         <widgets>
-                            <label style="h3" text="${uiLabelMap.ProjectMgrClientContacts}"></label>
+                            <label style="h3" text="${uiLabelMap.ProjectMgrClientContacts}"/>
                             <include-form name="ListProjectClientParties" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
                         </widgets>
                     </section>
@@ -547,7 +549,7 @@ under the License.
                             <not><if-empty field="companyAssigns"/></not>
                         </condition>
                         <widgets>
-                            <label style="h3" text="${uiLabelMap.ProjectMgrCompanies}"></label>
+                            <label style="h3" text="${uiLabelMap.ProjectMgrCompanies}"/>
                             <include-form name="ListProjectCompanyParties" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
                         </widgets>
                     </section>
@@ -848,7 +850,7 @@ under the License.
                         <section>
                             <!-- do check for PARTYMGR, _VIEW permission -->
                             <condition>
-                                <if-has-permission permission="PARTYMGR" action="_VIEW"/>
+                                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
                             </condition>
                             <widgets>
                                 <platform-specific>
@@ -879,7 +881,7 @@ under the License.
                         <section>
                             <!-- do check for PARTYMGR, _VIEW permission -->
                             <condition>
-                                <if-has-permission permission="PARTYMGR" action="_VIEW"/>
+                                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
                             </condition>
                             <widgets>
                                 <platform-specific>
@@ -1103,7 +1105,7 @@ under the License.
                         <if-empty field="projects"/>
                     </condition>
                     <widgets>
-                        <label style="h2" text="${uiLabelMap.ProjectMgrNoProjectsFound}"></label>
+                        <label style="h2" text="${uiLabelMap.ProjectMgrNoProjectsFound}"/>
                     </widgets>
                 </section>
             </widgets>

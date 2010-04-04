@@ -933,7 +933,7 @@ public class OrderServices {
                 toBeStored.add(productPromoUse);
             }
         }
-        
+
         // store the orderProductPromoCodes
         Set orderProductPromoCodes = (Set) context.get("orderProductPromoCodes");
         if (UtilValidate.isNotEmpty(orderProductPromoCodes)) {
@@ -2458,6 +2458,9 @@ public class OrderServices {
         if (sendResp != null && !ServiceUtil.isError(sendResp)) {
             sendResp.put("emailType", emailType);
         }
+        if (UtilValidate.isNotEmpty(orderId)) {
+            sendResp.put("orderId", orderId);
+        }
         return sendResp;
     }
 
@@ -2662,7 +2665,7 @@ public class OrderServices {
         //Locale locale = (Locale) context.get("locale");
 
         try {
-            orderHeader = delegator.findByPrimaryKeyCache("OrderHeader", UtilMisc.toMap("orderId", orderId));
+            orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
             if (orderHeader != null)
                 result.put("orderHeader", orderHeader);
         } catch (GenericEntityException e) {
@@ -3191,7 +3194,7 @@ public class OrderServices {
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         String orderId = (String) context.get("orderId");
         Locale locale = (Locale) context.get("locale");
-        
+
         OrderReadHelper orh = null;
         try {
             orh = new OrderReadHelper(delegator, orderId);
@@ -3314,20 +3317,37 @@ public class OrderServices {
 
         // add in the new product
         try {
-            ShoppingCartItem item = ShoppingCartItem.makeItem(null, productId, null, quantity, null, null, null, null, null, null, null, null, prodCatalogId, null, null, null, dispatcher, cart, null, null, null, Boolean.FALSE, Boolean.FALSE);
-            if (basePrice != null && overridePrice != null) {
-                item.setBasePrice(basePrice);
-                // special hack to make sure we re-calc the promos after a price change
-                item.setQuantity(quantity.add(BigDecimal.ONE), dispatcher, cart, false);
-                item.setQuantity(quantity, dispatcher, cart, false);
-                item.setBasePrice(basePrice);
-                item.setIsModifiedPrice(true);
+            if ("PURCHASE_ORDER".equals(cart.getOrderType())) {
+                GenericValue supplierProduct = cart.getSupplierProduct(productId, quantity, dispatcher);
+                ShoppingCartItem item = null;
+                if (supplierProduct != null) {
+                    item = ShoppingCartItem.makePurchaseOrderItem(null, productId, null, quantity, null, null, prodCatalogId, null, null, null, dispatcher, cart, supplierProduct, itemDesiredDeliveryDate, itemDesiredDeliveryDate, null);
+                    cart.addItem(0, item);
+                } else {
+                    throw new CartItemModifyException("No supplier information found for product [" + productId + "] and quantity quantity [" + quantity + "], cannot add to cart.");
+                }
+
+                if (basePrice != null) {
+                    item.setBasePrice(basePrice);
+                    item.setIsModifiedPrice(true);
+                }
+
+                cart.setItemShipGroupQty(item, item.getQuantity(), shipGroupIdx);
+            } else {
+                ShoppingCartItem item = ShoppingCartItem.makeItem(null, productId, null, quantity, null, null, null, null, null, null, null, null, prodCatalogId, null, null, null, dispatcher, cart, null, null, null, Boolean.FALSE, Boolean.FALSE);
+                if (basePrice != null && overridePrice != null) {
+                    item.setBasePrice(basePrice);
+                    // special hack to make sure we re-calc the promos after a price change
+                    item.setQuantity(quantity.add(BigDecimal.ONE), dispatcher, cart, false);
+                    item.setQuantity(quantity, dispatcher, cart, false);
+                    item.setBasePrice(basePrice);
+                    item.setIsModifiedPrice(true);
+                }
+
+                // set the item in the selected ship group
+                item.setShipBeforeDate(itemDesiredDeliveryDate);
+                cart.setItemShipGroupQty(item, item.getQuantity(), shipGroupIdx);
             }
-
-
-            // set the item in the selected ship group
-            item.setShipBeforeDate(itemDesiredDeliveryDate);
-            cart.setItemShipGroupQty(item, item.getQuantity(), shipGroupIdx);
         } catch (CartItemModifyException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(e.getMessage());
@@ -3548,7 +3568,7 @@ public class OrderServices {
 
         // run promotions to handle all changes in the cart
         ProductPromoWorker.doPromotions(cart, dispatcher);
-        
+
         // log an order note
         try {
             dispatcher.runSync("createOrderNote", UtilMisc.<String, Object>toMap("orderId", orderId, "note", "Updated order.", "internalNote", "Y", "userLogin", userLogin));
@@ -3820,7 +3840,7 @@ public class OrderServices {
 
         toStore.addAll(cart.makeOrderItems());
         toStore.addAll(cart.makeAllAdjustments());
-        
+
         String shipGroupSeqId = null;
         long groupIndex = cart.getShipInfoSize();
         List orderAdjustments = new ArrayList();
@@ -3846,7 +3866,7 @@ public class OrderServices {
         }
         for (GenericValue toAdd: (List<GenericValue>)toAddList) {
             if ("OrderAdjustment".equals(toAdd.getEntityName())) {
-                if (toAdd.get("comments") != null && ((String)toAdd.get("comments")).startsWith("Added manually by") && (("PROMOTION_ADJUSTMENT".equals(toAdd.get("orderAdjustmentTypeId"))) || 
+                if (toAdd.get("comments") != null && ((String)toAdd.get("comments")).startsWith("Added manually by") && (("PROMOTION_ADJUSTMENT".equals(toAdd.get("orderAdjustmentTypeId"))) ||
                         ("SHIPPING_CHARGES".equals(toAdd.get("orderAdjustmentTypeId"))) || ("SALES_TAX".equals(toAdd.get("orderAdjustmentTypeId"))))) {
                     toStore.add(toAdd);
                 }
@@ -5287,7 +5307,7 @@ public class OrderServices {
         LocalDispatcher dispatcher = dctx.getDispatcher();
         // All orders with an entryDate > orderEntryFromDateTime will be processed
         Timestamp orderEntryFromDateTime = (Timestamp) context.get("orderEntryFromDateTime");
-        // If true all orders ever created will be processed and any pre-existing ALSO_BOUGHT ProductAssocs will be expired 
+        // If true all orders ever created will be processed and any pre-existing ALSO_BOUGHT ProductAssocs will be expired
         boolean processAllOrders = context.get("processAllOrders") == null ? false : (Boolean) context.get("processAllOrders");
         if (orderEntryFromDateTime == null && !processAllOrders) {
             // No from date supplied, check to see when this service last ran and use the startDateTime
@@ -5351,14 +5371,14 @@ public class OrderServices {
         }
         return ServiceUtil.returnSuccess();
     }
-    
+
     public static Map<String, Object> createAlsoBoughtProductAssocsForOrder(DispatchContext dctx, Map context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
         Delegator delegator = dctx.getDelegator();
         String orderId = (String) context.get("orderId");
         OrderReadHelper orh = new OrderReadHelper(delegator, orderId);
         List<GenericValue> orderItems = orh.getOrderItems();
-        // In order to improve efficiency a little bit, we will always create the ProductAssoc records 
+        // In order to improve efficiency a little bit, we will always create the ProductAssoc records
         // with productId < productIdTo when the two are compared.  This way when checking for an existing
         // record we don't have to check both possible combinations of productIds
         TreeSet<String> productIdSet = new TreeSet<String>();
@@ -5419,7 +5439,7 @@ public class OrderServices {
                 }
             }
         }
-        
+
         return ServiceUtil.returnSuccess();
     }
 }

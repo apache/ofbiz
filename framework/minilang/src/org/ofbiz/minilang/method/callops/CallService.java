@@ -57,7 +57,7 @@ public class CallService extends MethodOperation {
 
     public static final String module = CallService.class.getName();
     public static final String resource = "MiniLangErrorUiLabels";
-    
+
     protected String serviceName;
     protected ContextAccessor<Map<String, Object>> inMapAcsr;
     protected String includeUserLoginStr;
@@ -124,7 +124,7 @@ public class CallService extends MethodOperation {
         successSuffix = new FlexibleMessage(UtilXml.firstChildElement(element, "success-suffix"), "service.success.suffix");
         messagePrefix = new FlexibleMessage(UtilXml.firstChildElement(element, "message-prefix"), "service.message.prefix");
         messageSuffix = new FlexibleMessage(UtilXml.firstChildElement(element, "message-suffix"), "service.message.suffix");
-        defaultMessage = new FlexibleMessage(UtilXml.firstChildElement(element, "default-message"), "service.default.message");
+        defaultMessage = new FlexibleMessage(UtilXml.firstChildElement(element, "default-message"), null);//"service.default.message"
 
         List<? extends Element> resultsToMapElements = UtilXml.childElementList(element, "results-to-map");
         if (UtilValidate.isNotEmpty(resultsToMapElements)) {
@@ -247,16 +247,20 @@ public class CallService extends MethodOperation {
                 result = methodContext.getDispatcher().runSync(serviceName, inMap, timeout, requireNewTransaction);
             }
         } catch (GenericServiceException e) {
-            Debug.logError(e, module);
             String errMsg = "ERROR: Could not complete the " + simpleMethod.getShortDescription() + " process [problem invoking the [" + serviceName + "] service with the map named [" + inMapAcsr + "] containing [" + inMap + "]: " + e.getMessage() + "]";
-            if (methodContext.getMethodType() == MethodContext.EVENT) {
-                methodContext.putEnv(simpleMethod.getEventErrorMessageName(), errMsg);
-                methodContext.putEnv(simpleMethod.getEventResponseCodeName(), errorCode);
-            } else if (methodContext.getMethodType() == MethodContext.SERVICE) {
-                methodContext.putEnv(simpleMethod.getServiceErrorMessageName(), errMsg);
-                methodContext.putEnv(simpleMethod.getServiceResponseMessageName(), errorCode);
+            Debug.logError(e, errMsg, module);
+            if (breakOnError) {
+                if (methodContext.getMethodType() == MethodContext.EVENT) {
+                    methodContext.putEnv(simpleMethod.getEventErrorMessageName(), errMsg);
+                    methodContext.putEnv(simpleMethod.getEventResponseCodeName(), errorCode);
+                } else if (methodContext.getMethodType() == MethodContext.SERVICE) {
+                    methodContext.putEnv(simpleMethod.getServiceErrorMessageName(), errMsg);
+                    methodContext.putEnv(simpleMethod.getServiceResponseMessageName(), errorCode);
+                }
+                return false;
+            } else {
+                return true;
             }
-            return false;
         }
 
         if (resultsToMap.size() > 0) {
@@ -316,14 +320,14 @@ public class CallService extends MethodOperation {
         String successSuffixStr = successSuffix.getMessage(methodContext.getLoader(), methodContext);
         String messagePrefixStr = messagePrefix.getMessage(methodContext.getLoader(), methodContext);
         String messageSuffixStr = messageSuffix.getMessage(methodContext.getLoader(), methodContext);
-        
+
         String errorMessage = ServiceUtil.makeErrorMessage(result, messagePrefixStr, messageSuffixStr, errorPrefixStr, errorSuffixStr);
-        if (UtilValidate.isNotEmpty(errorMessage)) {
+        if (UtilValidate.isNotEmpty(errorMessage) && breakOnError) {
             errorMessage += UtilProperties.getMessage(resource, "simpleMethod.error_show_service_name", UtilMisc.toMap("serviceName", serviceName, "methodName", simpleMethod.getMethodName()), locale);
             if (methodContext.getMethodType() == MethodContext.EVENT) {
                 methodContext.putEnv(simpleMethod.getEventErrorMessageName(), errorMessage);
             } else if (methodContext.getMethodType() == MethodContext.SERVICE) {
-                ServiceUtil.addErrors(UtilMisc.<String, String>getListFromMap(methodContext.getEnvMap(), this.simpleMethod.getServiceErrorMessageListName()), 
+                ServiceUtil.addErrors(UtilMisc.<String, String>getListFromMap(methodContext.getEnvMap(), this.simpleMethod.getServiceErrorMessageListName()),
                         UtilMisc.<String, String, Object>getMapFromMap(methodContext.getEnvMap(), this.simpleMethod.getServiceErrorMessageMapName()), result);
                 // the old way, makes a mess of messages passed up the stack: methodContext.putEnv(simpleMethod.getServiceErrorMessageName(), errorMessage);
                 Debug.logError(new Exception(errorMessage), module);
@@ -350,15 +354,25 @@ public class CallService extends MethodOperation {
 
         // handle the result
         String responseCode = result.containsKey(ModelService.RESPONSE_MESSAGE) ? (String) result.get(ModelService.RESPONSE_MESSAGE) : successCode;
-        if (methodContext.getMethodType() == MethodContext.EVENT) {
-            methodContext.putEnv(simpleMethod.getEventResponseCodeName(), responseCode);
-        } else if (methodContext.getMethodType() == MethodContext.SERVICE) {
-            methodContext.putEnv(simpleMethod.getServiceResponseMessageName(), responseCode);
-        }
 
-        if (errorCode.equals(responseCode) && breakOnError) {
-            return false;
+        if (errorCode.equals(responseCode)) {
+            if (breakOnError) {
+                if (methodContext.getMethodType() == MethodContext.EVENT) {
+                    methodContext.putEnv(simpleMethod.getEventResponseCodeName(), responseCode);
+                } else if (methodContext.getMethodType() == MethodContext.SERVICE) {
+                    methodContext.putEnv(simpleMethod.getServiceResponseMessageName(), responseCode);
+                }
+                return false;
+            } else {
+                // avoid responseCode here since we are ignoring the error
+                return true;
+            }
         } else {
+            if (methodContext.getMethodType() == MethodContext.EVENT) {
+                methodContext.putEnv(simpleMethod.getEventResponseCodeName(), responseCode);
+            } else if (methodContext.getMethodType() == MethodContext.SERVICE) {
+                methodContext.putEnv(simpleMethod.getServiceResponseMessageName(), responseCode);
+            }
             return true;
         }
     }

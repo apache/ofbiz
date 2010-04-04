@@ -18,19 +18,59 @@
  *******************************************************************************/
 package org.ofbiz.base.conversion;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.ofbiz.base.util.ObjectType;
-import org.ofbiz.base.util.StringUtil;
-
 import javolution.util.FastList;
 import javolution.util.FastSet;
 
+import org.ofbiz.base.util.StringUtil;
+import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilValidate;
+
 /** Collection Converter classes. */
 public class CollectionConverters implements ConverterLoader {
+    public static class ArrayCreator implements ConverterCreator, ConverterLoader {
+        public void loadConverters() {
+            Converters.registerCreator(this);
+        }
+
+        public <S, T> Converter<S, T> createConverter(Class<S> sourceClass, Class<T> targetClass) {
+            if (!sourceClass.isArray()) {
+               return null;
+            }
+            if (targetClass != List.class) {
+               return null;
+            }
+            if (!(sourceClass.getComponentType() instanceof Object)) {
+                return null;
+            }
+            return UtilGenerics.cast(new ArrayClassToList<S, T>(sourceClass, targetClass));
+        }
+    }
+
+    private static class ArrayClassToList<S, T> extends AbstractConverter<S, T> {
+        public ArrayClassToList(Class<S> sourceClass, Class<T> targetClass) {
+            super(sourceClass, targetClass);
+        }
+
+        public boolean canConvert(Class<?> sourceClass, Class<?> targetClass) {
+            return sourceClass == this.getSourceClass() && targetClass == this.getTargetClass();
+        }
+
+        public T convert(S obj) throws ConversionException {
+            List<Object> list = FastList.newInstance();
+            int len = Array.getLength(obj);
+            for (int i = 0; i < len; i++) {
+                list.add(Array.get(obj, i));
+            }
+            return UtilGenerics.<T>cast(list);
+        }
+    }
+
     public static class ArrayToList<T> extends AbstractConverter<T[], List<T>> {
         public ArrayToList() {
             super(Object[].class, List.class);
@@ -38,7 +78,16 @@ public class CollectionConverters implements ConverterLoader {
 
         @Override
         public boolean canConvert(Class<?> sourceClass, Class<?> targetClass) {
-            return sourceClass.isArray() && ObjectType.instanceOf(targetClass, this.getTargetClass());
+            if (!sourceClass.isArray()) {
+                return false;
+            }
+            if (!List.class.isAssignableFrom(targetClass)) {
+                return false;
+            }
+            if (Object[].class.isAssignableFrom(sourceClass)) {
+                return true;
+            }
+            return false;
         }
 
         public List<T> convert(T[] obj) throws ConversionException {
@@ -90,18 +139,16 @@ public class CollectionConverters implements ConverterLoader {
         }
     }
 
-    public static class StringToList extends AbstractConverter<String, List<String>> {
+    public static class StringToList extends GenericSingletonToList<String> {
         public StringToList() {
-            super(String.class, List.class);
+            super(String.class);
         }
 
         public List<String> convert(String obj) throws ConversionException {
             if (obj.startsWith("[") && obj.endsWith("]")) {
                 return StringUtil.toList(obj);
             } else {
-                List<String> tempList = FastList.newInstance();
-                tempList.add(obj);
-                return tempList;
+                return super.convert(obj);
             }
         }
     }
@@ -119,18 +166,16 @@ public class CollectionConverters implements ConverterLoader {
         }
     }
 
-    public static class StringToSet extends AbstractConverter<String, Set<String>> {
+    public static class StringToSet extends GenericSingletonToSet<String> {
         public StringToSet() {
-            super(String.class, Set.class);
+            super(String.class);
         }
 
         public Set<String> convert(String obj) throws ConversionException {
             if (obj.startsWith("[") && obj.endsWith("]")) {
                 return StringUtil.toSet(obj);
             } else {
-                Set<String> tempSet = FastSet.newInstance();
-                tempSet.add(obj);
-                return tempSet;
+                return super.convert(obj);
             }
         }
     }

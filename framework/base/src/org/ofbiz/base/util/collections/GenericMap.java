@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
-import org.ofbiz.base.util.Appender;
+import org.ofbiz.base.lang.Appender;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilObject;
 
@@ -223,7 +223,6 @@ public abstract class GenericMap<K, V> implements Appender<StringBuilder>, Map<K
     protected abstract <KE extends K, VE extends V> void putAllIterator(Iterator<Map.Entry<KE, VE>> it);
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
         return appendTo(new StringBuilder()).toString();
     }
 

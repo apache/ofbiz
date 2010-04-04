@@ -470,7 +470,7 @@ under the License.
             Map of Lists, where the resourceTypeEnumId is the key and the value
             is a List of resourceValue Strings for that resourceTypeEnumId.
         </description>
-        <attribute name="visualThemeId" type="String" mode="IN" optional="true" default-value="BIZZNESS_TIME"/>
+        <attribute name="visualThemeId" type="String" mode="IN" optional="true"/>
         <attribute name="themeResources" type="Map" mode="IN" optional="true"/>
         <attribute name="themeResources" type="Map" mode="OUT" optional="false"/>
     </service>
@@ -537,7 +537,7 @@ under the License.
     <service name="createTemporalExpression" default-entity-name="TemporalExpression" engine="entity-auto" invoke="create" auth="true">
         <description>Create a Temporal Expression</description>
         <permission-service service-name="tempExprPermissionCheck" main-action="CREATE"/>
-        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
     </service>
     <service name="updateTemporalExpression" default-entity-name="TemporalExpression" engine="entity-auto" invoke="update" auth="true">
