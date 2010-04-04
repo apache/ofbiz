@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.api.authorization;
+package org.ofbiz.base.authorization;
 
 import java.io.IOException;
 import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.Map;
 
-import org.ofbiz.api.context.ThreadContext;
+import org.ofbiz.base.context.ThreadContext;
 import org.ofbiz.base.util.Debug;
 
 import freemarker.core.Environment;

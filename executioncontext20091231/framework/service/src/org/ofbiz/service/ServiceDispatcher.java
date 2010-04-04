@@ -18,7 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.service;
 
-import static org.ofbiz.api.authorization.BasicPermissions.Access;
+import static org.ofbiz.base.authorization.BasicPermissions.Access;
 
 import java.util.List;
 import java.util.Locale;

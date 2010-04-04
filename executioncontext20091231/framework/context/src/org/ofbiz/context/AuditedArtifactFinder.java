@@ -19,7 +19,7 @@
 package org.ofbiz.context;
 
 import org.ofbiz.context.PathNode.BranchNode;
-import org.ofbiz.api.context.ArtifactPath;
+import org.ofbiz.base.context.ArtifactPath;
 
 public class AuditedArtifactFinder extends TreeWalker {
 

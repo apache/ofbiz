@@ -34,8 +34,8 @@ import java.util.TimeZone;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import static org.ofbiz.api.authorization.BasicPermissions.View;
-import org.ofbiz.api.context.ExecutionArtifact;
+import static org.ofbiz.base.authorization.BasicPermissions.View;
+import org.ofbiz.base.context.ExecutionArtifact;
 import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;

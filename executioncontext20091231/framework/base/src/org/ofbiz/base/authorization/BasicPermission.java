@@ -16,33 +16,45 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.api.authorization;
+package org.ofbiz.base.authorization;
 
 import java.security.Permission;
-import java.util.Arrays;
-import java.util.List;
 
 /**
- * A <code>Set</code> of permissions that represent a union.
+ * Generic permission class. Similar to java.security.BasicPermission.
  */
 @SuppressWarnings("serial")
-public class PermissionsUnion extends PermissionsSet {
+public class BasicPermission extends Permission {
 
-    public PermissionsUnion(String listName) {
-        super(listName);
+    protected final String permissionString;
+
+    public BasicPermission(String permissionString) {
+        super(permissionString);
+        this.permissionString = permissionString;
     }
 
-    public PermissionsUnion(String listName, List<Permission> permissionsList) {
-        super(listName, permissionsList);
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        try {
+            BasicPermission that = (BasicPermission) obj;
+            return this.permissionString.equals(that.permissionString);
+        } catch (ClassCastException e) {}
+        return false;
     }
 
-    public PermissionsUnion(String listName, Permission... permissions) {
-        super(listName, Arrays.asList(permissions));
+    @Override
+    public String getActions() {
+        return null;
     }
 
-    /** Returns <code>true</code> if any of the contained permissions
-     * returns <code>true</code>.
-     */
+    @Override
+    public int hashCode() {
+        return this.permissionString.hashCode();
+    }
+
     @Override
     public boolean implies(Permission permission) {
         try {
@@ -53,7 +65,7 @@ public class PermissionsUnion extends PermissionsSet {
                 }
             }
             return false;
-        } catch (ClassCastException e) {}
+        } catch (Exception e) {}
         try {
             PermissionsIntersection permissionsIntersection = (PermissionsIntersection) permission;
             for (Permission perm : permissionsIntersection.getPermissionsSet()) {
@@ -62,12 +74,12 @@ public class PermissionsUnion extends PermissionsSet {
                 }
             }
             return true;
-        } catch (ClassCastException e) {}
-        for (Permission perm : this.permissionsSet) {
-            if (perm.implies(permission)) {
-                return true;
-            }
-        }
-        return false;
+        } catch (Exception e) {}
+        return this.equals(permission);
+    }
+
+    @Override
+    public String toString() {
+        return this.permissionString;
     }
 }

@@ -20,7 +20,7 @@ package org.ofbiz.context;
 
 import javolution.util.FastMap;
 
-import org.ofbiz.api.context.ArtifactPath;
+import org.ofbiz.base.context.ArtifactPath;
 import org.ofbiz.context.PathNode.BranchNode;
 import org.ofbiz.context.PathNode.SubstitutionNode;
 import org.ofbiz.context.PathNode.WildCardNode;

@@ -22,7 +22,7 @@ package org.ofbiz.entity;
  * ExecutionContext Interface. This interface extends the ExecutionContext
  * interface defined in the <code>base</code> component.
  */
-public interface ExecutionContext extends org.ofbiz.api.context.ExecutionContext {
+public interface ExecutionContext extends org.ofbiz.base.context.ExecutionContext {
 
 	/** Returns the current <code>GenericDelegator</code> instance.
 	 * 

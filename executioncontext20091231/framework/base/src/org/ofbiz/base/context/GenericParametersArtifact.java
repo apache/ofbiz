@@ -16,53 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.api.authorization;
+package org.ofbiz.base.context;
 
-import java.security.Permission;
+import java.util.Map;
 
-/**
- * Admin permission class. Extends BasicPermission.
- */
-@SuppressWarnings("serial")
-public class AdminPermission extends BasicPermission {
+/** A basic implementation of the ParametersArtifact interface. */
+public class GenericParametersArtifact extends GenericExecutionArtifact implements ParametersArtifact {
 
-    public AdminPermission() {
-        super("admin=true");
+    protected final Map<String, ? extends Object> parameters;
+
+    public GenericParametersArtifact(String location, String name, Map<String, ? extends Object> parameters) {
+        super(location, name);
+        this.parameters = parameters;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        try {
-            AdminPermission that = (AdminPermission) obj;
-            return this.permissionString.equals(that.permissionString);
-        } catch (ClassCastException e) {}
-        return false;
+    public GenericParametersArtifact(ExecutionArtifact artifact, Map<String, ? extends Object> parameters) {
+        super(artifact.getLocation(), artifact.getName());
+        this.parameters = parameters;
     }
 
-    @Override
-    public String getActions() {
-        return null;
-    }
-
-    @Override
-    public int hashCode() {
-        return this.permissionString.hashCode();
-    }
-
-    /** Returns <code>true</code> - the admin permission has
-     * no restrictions.
-     *
-     */
-    @Override
-    public boolean implies(Permission permission) {
-        return true;
+    public Map<String, ? extends Object> getParameters() {
+        return this.parameters;
     }
 
     @Override
     public String toString() {
-        return this.permissionString;
+        return "GenericParametersArtifact: location = " + this.location + ", name = " + this.name;
     }
 }

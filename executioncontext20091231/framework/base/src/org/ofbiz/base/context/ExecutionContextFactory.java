@@ -16,31 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.api.context;
+package org.ofbiz.base.context;
 
-import java.util.Map;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilProperties;
 
-/** A basic implementation of the ParametersArtifact interface. */
-public class GenericParametersArtifact extends GenericExecutionArtifact implements ParametersArtifact {
+/** An <code>ExecutionContext</code> factory.
+ */
+public class ExecutionContextFactory {
 
-    protected final Map<String, ? extends Object> parameters;
+    public static final String module = ExecutionContextFactory.class.getName();
 
-    public GenericParametersArtifact(String location, String name, Map<String, ? extends Object> parameters) {
-        super(location, name);
-        this.parameters = parameters;
-    }
-
-    public GenericParametersArtifact(ExecutionArtifact artifact, Map<String, ? extends Object> parameters) {
-        super(artifact.getLocation(), artifact.getName());
-        this.parameters = parameters;
-    }
-
-    public Map<String, ? extends Object> getParameters() {
-        return this.parameters;
-    }
-
-    @Override
-    public String toString() {
-        return "GenericParametersArtifact: location = " + this.location + ", name = " + this.name;
+    public static ExecutionContext getInstance() {
+        ExecutionContext result = null;
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        String className = UtilProperties.getPropertyValue("api.properties", "executionContext.class");
+        try {
+            result = (ExecutionContext) loader.loadClass(className).newInstance();
+        } catch (Exception e) {
+            Debug.logError(e, module);
+        }
+        return result;
     }
 }

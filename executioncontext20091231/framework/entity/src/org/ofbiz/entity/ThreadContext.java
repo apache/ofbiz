@@ -21,7 +21,7 @@ package org.ofbiz.entity;
 /** A convenience class for accessing the current thread's <code>ExecutionContext</code>.
  * @see {@link org.ofbiz.entity.ExecutionContext} 
  */
-public class ThreadContext extends org.ofbiz.api.context.ThreadContext {
+public class ThreadContext extends org.ofbiz.base.context.ThreadContext {
 
     protected static final String module = ThreadContext.class.getName();
 

@@ -16,45 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.api.authorization;
+package org.ofbiz.base.authorization;
 
 import java.security.Permission;
+import java.util.Arrays;
+import java.util.List;
 
 /**
- * Generic permission class. Similar to java.security.BasicPermission.
+ * A <code>Set</code> of permissions that represents an intersection.
  */
 @SuppressWarnings("serial")
-public class BasicPermission extends Permission {
+public class PermissionsIntersection extends PermissionsSet {
 
-    protected final String permissionString;
-
-    public BasicPermission(String permissionString) {
-        super(permissionString);
-        this.permissionString = permissionString;
+    public PermissionsIntersection(String listName) {
+        super(listName);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        try {
-            BasicPermission that = (BasicPermission) obj;
-            return this.permissionString.equals(that.permissionString);
-        } catch (ClassCastException e) {}
-        return false;
+    public PermissionsIntersection(String listName, List<Permission> permissionsList) {
+        super(listName, permissionsList);
     }
 
-    @Override
-    public String getActions() {
-        return null;
+    public PermissionsIntersection(String listName, Permission... permissions) {
+        super(listName, Arrays.asList(permissions));
     }
 
-    @Override
-    public int hashCode() {
-        return this.permissionString.hashCode();
-    }
-
+    /** Returns <code>true</code> if all of the contained permissions
+     * return <code>true</code>.
+     */
     @Override
     public boolean implies(Permission permission) {
         try {
@@ -75,11 +63,11 @@ public class BasicPermission extends Permission {
             }
             return true;
         } catch (Exception e) {}
-        return this.equals(permission);
-    }
-
-    @Override
-    public String toString() {
-        return this.permissionString;
+        for (Permission perm : this.permissionsSet) {
+            if (!perm.implies(permission)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

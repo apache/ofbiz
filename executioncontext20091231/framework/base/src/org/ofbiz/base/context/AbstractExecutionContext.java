@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.api.context;
+package org.ofbiz.base.context;
 
 import java.util.Currency;
 import java.util.Locale;

@@ -16,32 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.api.authorization;
+package org.ofbiz.base.authorization;
 
 import java.security.Permission;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * A <code>Set</code> of permissions that represents an intersection.
+ * A <code>Set</code> of permissions that represent a union.
  */
 @SuppressWarnings("serial")
-public class PermissionsIntersection extends PermissionsSet {
+public class PermissionsUnion extends PermissionsSet {
 
-    public PermissionsIntersection(String listName) {
+    public PermissionsUnion(String listName) {
         super(listName);
     }
 
-    public PermissionsIntersection(String listName, List<Permission> permissionsList) {
+    public PermissionsUnion(String listName, List<Permission> permissionsList) {
         super(listName, permissionsList);
     }
 
-    public PermissionsIntersection(String listName, Permission... permissions) {
+    public PermissionsUnion(String listName, Permission... permissions) {
         super(listName, Arrays.asList(permissions));
     }
 
-    /** Returns <code>true</code> if all of the contained permissions
-     * return <code>true</code>.
+    /** Returns <code>true</code> if any of the contained permissions
+     * returns <code>true</code>.
      */
     @Override
     public boolean implies(Permission permission) {
@@ -53,7 +53,7 @@ public class PermissionsIntersection extends PermissionsSet {
                 }
             }
             return false;
-        } catch (Exception e) {}
+        } catch (ClassCastException e) {}
         try {
             PermissionsIntersection permissionsIntersection = (PermissionsIntersection) permission;
             for (Permission perm : permissionsIntersection.getPermissionsSet()) {
@@ -62,12 +62,12 @@ public class PermissionsIntersection extends PermissionsSet {
                 }
             }
             return true;
-        } catch (Exception e) {}
+        } catch (ClassCastException e) {}
         for (Permission perm : this.permissionsSet) {
-            if (!perm.implies(permission)) {
-                return false;
+            if (perm.implies(permission)) {
+                return true;
             }
         }
-        return true;
+        return false;
     }
 }
