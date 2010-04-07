@@ -65,7 +65,7 @@ public class BasicPermission extends Permission {
                 }
             }
             return false;
-        } catch (Exception e) {}
+        } catch (ClassCastException e) {}
         try {
             PermissionsIntersection permissionsIntersection = (PermissionsIntersection) permission;
             for (Permission perm : permissionsIntersection.getPermissionsSet()) {
@@ -74,7 +74,7 @@ public class BasicPermission extends Permission {
                 }
             }
             return true;
-        } catch (Exception e) {}
+        } catch (ClassCastException e) {}
         return this.equals(permission);
     }
 
