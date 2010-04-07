@@ -69,6 +69,7 @@ under the License.
     <ArtifactPath artifactPath="ofbiz/?/ServerHit" description="All Applications - Server hit"/>
 
     <ArtifactPermission permissionValue="access=true" description="Access granted"/>
+    <ArtifactPermission permissionValue="access=false" description="Access denied"/>
     <ArtifactPermission permissionValue="admin=true" description="Admin access granted"/>
     <ArtifactPermission permissionValue="create=true" description="Create access granted"/>
     <ArtifactPermission permissionValue="create=false" description="Create access denied"/>
