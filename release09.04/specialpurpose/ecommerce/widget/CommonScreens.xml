@@ -60,25 +60,35 @@ under the License.
                 <set field="footerTemplateLocation" from-field="layoutSettings.VT_FTR_TMPLT_LOC[0]" default-value="component://ecommerce/webapp/ecommerce/includes/footer.ftl"/>
             </actions>
             <widgets>
-                <!-- render header -->
-                <platform-specific><html><html-template location="${headerTemplateLocation}"/></html></platform-specific>
+               <section>
+                  <condition>
+                     <not><if-empty field="globalContext.productStore"/></not>
+                  </condition>
+                  <widgets>
+                      <!-- render header -->
+                      <platform-specific><html><html-template location="${headerTemplateLocation}"/></html></platform-specific>
 
-                <container id="ecom-mainarea">
-                    <!-- by default will render left-bar only if left/rightbarScreenName value not empty -->
-                    <include-screen name="${leftbarScreenName}" location="${leftbarScreenLocation}"/>
-                    <include-screen name="${rightbarScreenName}" location="${rightbarScreenLocation}"/>
+                   <container id="ecom-mainarea">
+                          <!-- by default will render left-bar only if left/rightbarScreenName value not empty-->
+                          <include-screen name="${leftbarScreenName}" location="${leftbarScreenLocation}"/>
+                          <include-screen name="${rightbarScreenName}" location="${rightbarScreenLocation}"/>
 
-                    <container style="${MainColumnStyle}">
-                        <!-- render messages -->
-                        <platform-specific><html><html-template location="component://common/webcommon/includes/messages.ftl"/></html></platform-specific>
-                        <decorator-section-include name="body"/>
-                    </container>
+                          <container style="${MainColumnStyle}">
+                              <!-- render messages -->
+                              <platform-specific><html><html-template location="component://common/webcommon/includes/messages.ftl"/></html></platform-specific>
+                              <decorator-section-include name="body"/>
+                          </container>
 
-                    <container style="endcolumns"/>
-                </container>
+                          <container style="endcolumns"/>
+                      </container>
 
-                <!-- render footer -->
-                <platform-specific><html><html-template location="${footerTemplateLocation}"/></html></platform-specific>
+                      <!-- render footer -->
+                      <platform-specific><html><html-template location="${footerTemplateLocation}"/></html></platform-specific>
+                  </widgets>
+                  <fail-widgets>
+                     <label text="A Product Store has not been defined for this ecommerce site.  A Product Store can be defined using the Catalog component."/>
+                  </fail-widgets>
+            </section>
             </widgets>
         </section>
     </screen>
