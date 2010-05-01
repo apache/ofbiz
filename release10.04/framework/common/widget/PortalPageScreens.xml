@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+    <screen name="showPortlet">
+        <section>
+            <widgets>
+                <section>
+                    <actions>
+                        <entity-one entity-name="PortalPortlet" value-field="portlet" />
+                    </actions>
+                    <widgets>
+                        <!--
+                            label text=" id: ${parameters.portalPortletId} location:
+                            ${portlet.screenLocation} screen: ${portlet.screenName}"></label
+                        -->
+                        <platform-specific>
+                            <html>
+                                <html-template
+                                    location="component://common/webcommon/portal/showPortlet.ftl" />
+                            </html>
+                        </platform-specific>
+                    </widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="showPortletUiLabelDecorator">
+        <section>
+            <widgets>
+                <decorator-screen name="uiLabelDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-screen name="showPortlet"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="showPortletMainDecorator">
+        <section>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-screen name="showPortlet"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="showPortletSimpleDecorator">
+        <section>
+            <widgets>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <include-screen name="showPortlet"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="showPortalPage">
+        <section>
+            <actions>
+                <set field="layoutSettings.javaScripts[]" value="/images/myportal.js" global="true"/>
+                <set field="layoutSettings.styleSheets[+0]" value="/images/myportal.css" global="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <!-- label text=" id: ${parameters.portalPortletId} location: ${portlet.screenLocation} screen: ${portlet.screenName}"></label-->
+                        <container id="portalContainerId">
+                            <include-screen name="PortalPageScreen" location="component://common/widget/CommonScreens.xml"/>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ManagePortalPages">
+        <section>
+            <actions>
+                <set field="headerItem" value="Dashboard"/>
+                <set field="layoutSettings.javaScripts[]" value="/images/myportal.js" global="true"/>
+                <set field="layoutSettings.styleSheets[+0]" value="/images/myportal.css" global="true"/>
+                <entity-one entity-name="PortalPage" value-field="portalPage"/>
+                <script location="component://common/webcommon/WEB-INF/actions/includes/ListPortalPages.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container style="no-clear">
+                            <screenlet title="${uiLabelMap.CommonPortalPagesForApplication}: ${parameters.parentPortalPageId}">
+                                <include-form name="ListPortalPages" location="component://common/widget/PortalPageForms.xml"/>
+                            </screenlet>
+                            <section>
+                                <condition>
+                                    <and>
+                                        <not><if-empty field="portalPage"/></not>
+                                        <not><if-empty field="parameters.editAttributes"/></not>
+                                    </and>
+                                </condition>
+                                <actions>
+                                    <property-map resource="CommonUiLabels" map-name="uiLabelMap"/>
+                                    <set field="originalPortalPageId" from-field="parameters.originalPortalPageId"/>
+                                    <entity-one entity-name="PortalPortlet" value-field="portalPortlet"/>
+                                </actions>
+                                <widgets>
+                                    <screenlet title="${uiLabelMap.CommonEditPortletAttributes}: ${portalPortlet.portletName}">
+                                        <include-form name="${portalPortlet.editFormName}" location="${portalPortlet.editFormLocation}"/>
+                                    </screenlet>
+                                </widgets>
+                                <fail-widgets>
+                                    <screenlet title="${uiLabelMap.CommonPortalNewPage}">
+                                        <include-form name="NewPortalPage" location="component://common/widget/PortalPageForms.xml"/>
+                                    </screenlet>
+                                </fail-widgets>
+                            </section>
+                            <section>
+                                <condition>
+                                    <not><if-empty field="portalPage"/></not>
+                                </condition>
+                                <actions>
+                                    <set field="portalPages[]" from-field="portalPage"/>
+                                    <entity-condition entity-name="PortalPageColumn" list="portalPageColumnList">
+                                        <condition-expr field-name="portalPageId" from-field="parameters.portalPageId"/>
+                                        <order-by field-name="columnSeqId"/>
+                                    </entity-condition>
+                                    <entity-condition entity-name="PortalPagePortletView" list="portalPagePortletViewList">
+                                        <condition-expr field-name="portalPageId" from-field="parameters.portalPageId"/>
+                                        <order-by field-name="+columnSeqId"/>
+                                        <order-by field-name="+sequenceNum"/>
+                                    </entity-condition>
+                                </actions>
+                                <widgets>
+                                    <container id="portalContainerId">
+                                        <screenlet title="${uiLabelMap.CommonPortalEditPage}: ${portalPage.portalPageName} [${portalPage.portalPageId}]">
+                                            <link target="addPortalPageColumn" style="buttontext" text="${uiLabelMap.CommonAddColumn}">
+                                                <parameter param-name="portalPageId" from-field="portalPage.portalPageId"/>
+                                            </link>
+                                            <platform-specific><html><html-template location="component://common/webcommon/portal/editPortalPage.ftl"/></html></platform-specific>
+                                        </screenlet>
+                                    </container>
+                                </widgets>
+                            </section>
+                       </container>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="AddPortlet">
+        <section>
+            <actions>
+                <set field="originalPortalPageId" from-field="parameters.originalPortalPageId"/>
+                <set field="mainPortalPageId" from-field="parameters.mainPortalPageId"/>
+                <script location="component://common/webcommon/WEB-INF/actions/includes/ListPortalPortlets.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.CommonPortalCategoryPage}: ${parameters.parentPortalPageId}">
+                            <include-form name="PortletCategoryAndPortlet" location="component://common/widget/PortalPageForms.xml"/>
+                        </screenlet>
+                        <platform-specific><html><html-template location="component://common/webcommon/portal/listPortalPortlets.ftl"/></html></platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="GenericPortalPage">
+        <section>
+            <actions>
+                <script location="component://common/webcommon/WEB-INF/actions/includes/retrievePortletAttributes.groovy"/>
+                <set field="portalPageId" value="${pageId}"/>
+            </actions>
+            <widgets>
+                <include-screen name="PortalPageScreen" location="component://common/widget/CommonScreens.xml"/>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FindGenericEntity">
+        <section>
+            <actions>
+                <script location="component://common/webcommon/WEB-INF/actions/includes/retrievePortletAttributes.groovy"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.${titleLabel}}">
+                    <include-form name="FindGenericEntity" location="component://common/widget/PortalPageForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="GenericScreenlet">
+        <section>
+            <actions>
+                <script location="component://common/webcommon/WEB-INF/actions/includes/retrievePortletAttributes.groovy"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.${titleLabel}}" collapsible="true" id="scrlt_${formName}">
+                    <include-form name="${formName}" location="${formLocation}"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="GenericScreenletAjax">
+        <section>
+            <actions>
+                <script location="component://common/webcommon/WEB-INF/actions/includes/retrievePortletAttributes.groovy"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.${titleLabel}}">
+                    <container id="${divIdArea}">
+                        <include-screen name="${screenName}" location="${screenLocation}"/>
+                    </container>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="GenericScreenletAjaxWithMenu">
+        <section>
+            <actions>
+                <script location="component://common/webcommon/WEB-INF/actions/includes/retrievePortletAttributes.groovy"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.${titleLabel}}" navigation-menu-name="${menuName}">
+                    <include-menu name="${menuName}" location="${menuLocation}"/>
+                    <container id="${divIdArea}">
+                        <include-screen name="${screenName}" location="${screenLocation}"/>
+                    </container>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+</screens>

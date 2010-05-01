@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <form name="FindContacts" target="${currentUrl}" extends="FindAccounts" extends-resource="component://marketing/widget/sfa/forms/AccountForms.xml">
+        <field name="groupName"><hidden/></field>
+        <field name="firstName" title="${uiLabelMap.PartyFirstName}"><text-find/></field>
+        <field name="lastName" title="${uiLabelMap.PartyLastName}"><text-find/></field>
+        <sort-order>
+            <sort-field name="all"/>
+            <sort-field name="groupName"/>
+            <sort-field name="noConditionFind"/>
+            <sort-field name="partyId"/>
+            <sort-field name="firstName"/>
+            <sort-field name="lastName"/>
+            <sort-field name="contactMechTypeId"/>
+            <sort-field name="contactMechContainer"/>
+            <sort-field name="submitButton"/>
+        </sort-order>
+    </form>
+    <form name="ListContacts" paginate-target="${currentUrl}"
+            extends="listAccounts" extends-resource="component://marketing/widget/sfa/forms/AccountForms.xml">
+        <actions>
+            <set field="roleTypeIdFrom" value="ACCOUNT"/>
+            <set field="roleTypeIdTo" value="CONTACT"/>
+            <set field="partyRelationshipTypeId" value="EMPLOYMENT"/>
+            <set field="relatedCompanyRoleTypeIdTo" value="CONTACT"/>
+            <set field="relatedCompanyRoleTypeIdFrom" value="ACCOUNT"/>
+            <set field="relatedCompanyRelationshipTypeId" value="EMPLOYMENT"/>
+            <set field="parameters.roleTypeId" from-field="roleTypeIdTo"/>
+            <set field="parameters.statusId" value="PARTY_DISABLED"/>
+            <set field="parameters.statusId_op" value="notEqual"/>
+            <set field="fieldList" value="${groovy:[&quot;partyId&quot;,&quot;roleTypeId&quot;]}" type="List"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="PartyRoleAndContactMechDetail"/>
+                <field-map field-name="orderBy" value="partyId"/>
+                <field-map field-name="distinct" value="Y"/>
+                <field-map field-name="fieldList" from-field="fieldList"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <field name="export" title="${uiLabelMap.SfaVCard}">
+            <hyperlink target="createVCardFromContact" description="${uiLabelMap.SfaVCard}">
+                <parameter param-name="partyId"/>
+            </hyperlink>
+        </field>
+        <field name="assignToMe" use-when="existRelationship==null&amp;&amp;!&quot;false&quot;.equals(parameters.get(&quot;all&quot;))"
+                title="${uiLabelMap.SfaAssignToMe}" widget-style="buttontext">
+            <hyperlink target="createPartyRelationshipAndRole" description="${uiLabelMap.SfaAssignToMe}">
+                <parameter param-name="partyId" from-field="userLogin.partyId"/>
+                <parameter param-name="roleTypeId" from-field="roleTypeIdFrom"/>
+                <parameter param-name="roleTypeIdFrom"/>
+                <parameter param-name="roleTypeIdTo"/>
+                <parameter param-name="partyRelationshipTypeId"/>
+                <parameter param-name="partyIdTo" from-field="partyId"/>
+            </hyperlink>
+        </field>
+        <sort-order>
+            <sort-field name="partyId"/>
+            <sort-field name="emailAddress"/>
+            <sort-field name="telecomNumber"/>
+            <sort-field name="city"/>
+            <sort-field name="countryGeoId"/>
+            <sort-field name="relatedCompany"/>
+            <sort-field name="export"/>
+            <sort-field name="assignToMe"/>
+        </sort-order>
+    </form>
+    <form name="ListMyContacts" extends="ListContacts">
+        <actions>
+            <set field="relatedCompanyRoleTypeIdTo" value="CONTACT"/>
+            <set field="relatedCompanyRoleTypeIdFrom" value="ACCOUNT"/>
+            <set field="relatedCompanyRelationshipTypeId" value="EMPLOYMENT"/>
+            <set field="parameters.partyIdFrom" from-field="userLogin.partyId"/>
+            <set field="parameters.roleTypeIdTo" value="CONTACT"/>
+            <set field="parameters.partyStatusId" value="PARTY_DISABLED"/>
+            <set field="parameters.partyStatusId_op" value="notEqual"/>
+            <set field="parameters.partyRelationshipTypeId" value="EMPLOYMENT"/>
+            <set field="fieldList" value="${groovy:[&quot;partyIdFrom&quot;,&quot;partyId&quot;]}" type="List"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="PartyRelationshipAndContactMechDetail"/>
+                <field-map field-name="orderBy" value="partyId"/>
+                <field-map field-name="distinct" value="Y"/>
+                <field-map field-name="fieldList" from-field="fieldList"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <field name="assignToMe"><hidden/></field>
+    </form>
+    <form name="NewContact" type="single" target="createContact" header-row-style="header-row" default-table-style="basic-table">
+        <field name="firstName" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text/></field>
+        <field name="lastName" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text/></field>
+        <field name="suffix"><text/></field>
+        <field name="postalAddressTitle" title="${uiLabelMap.PartyGeneralCorrespondenceAddress}" title-area-style="group-label"><display description=" " also-hidden="false"/></field>
+        <field name="address1" title="${uiLabelMap.CommonAddress1}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="50" maxlength="60"/></field>
+        <field name="address2" title="${uiLabelMap.CommonAddress2}"><text size="50" maxlength="60"/></field>
+        <field name="city" title="${uiLabelMap.CommonCity}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="30" maxlength="60"/></field>
+        <field name="stateProvinceGeoId" title="${uiLabelMap.CommonState}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Geo" key-field-name="geoId" description="${geoId} - ${geoName}">
+                    <entity-constraint name="geoTypeId" operator="in" value="STATE,PROVINCE"/>
+                    <entity-order-by field-name="geoId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="postalCode" title="${uiLabelMap.CommonZipPostalCode}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="10" maxlength="30"/></field>
+        <field name="countryGeoId" title="${uiLabelMap.CommonCountry}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+            <drop-down allow-empty="false" no-current-selected-key="${defaultCountryGeoId}">
+                <entity-options entity-name="Geo" key-field-name="geoId" description="${geoId}: ${geoName}">
+                    <entity-constraint name="geoTypeId" value="COUNTRY"/>
+                    <entity-order-by field-name="geoId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="phoneTitle" title="${uiLabelMap.PartyPrimaryPhone}" title-area-style="group-label"><display/></field>
+        <field name="countryCode" title="${uiLabelMap.PartyCountryCode}"><text size="4" maxlength="10"/></field>
+        <field name="areaCode" title="${uiLabelMap.PartyAreaCode}"><text size="4" maxlength="10"/></field>
+        <field name="contactNumber" title="${uiLabelMap.PartyPhoneNumber}"><text size="15" maxlength="15"/></field>
+        <field name="extension" title="${uiLabelMap.PartyContactExt}"><text size="6" maxlength="10"/></field>
+        <field name="emailAddressTitle" title="${uiLabelMap.PartyEmailAddress}" title-area-style="group-label"><display/></field>
+        <field name="emailAddress" title="${uiLabelMap.CommonEmail}"><text size="50" maxlength="60"/></field>
+        <field name="contactListTitle" title="${uiLabelMap.MarketingContactList}" title-area-style="group-label"><display/></field>
+        <field name="contactListId" title="${uiLabelMap.MarketingContactList}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="ContactList" description="${description}" key-field-name="contactListId"/>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="MergeContacts" type="single"  target="MergeContacts">
+        <actions>
+            <set field="roleTypeId" value="CONTACT"/>
+            <set field="partyTypeId" value="PERSON"/>
+            <set field="lookupFlag" value="Y"/>
+            <service service-name="findParty" auto-field-map="true"/>
+        </actions>
+        <field name="partyIdTo" title="${uiLabelMap.AccountingToParty}" position="1">
+            <drop-down allow-empty="false">
+               <list-options list-name="partyList" key-name="contact.partyId"  list-entry-name="contact" description="${bsh:org.ofbiz.party.party.PartyHelper.getPartyName(delegator, &quot;${contact.partyId}&quot;, false)} [${contact.partyId}]"/>
+            </drop-down>
+        </field>
+        <field name="partyIdFrom" title="${uiLabelMap.AccountingFromParty}" position="2">
+            <drop-down allow-empty="false">
+                <list-options list-name="partyList" key-name="contact.partyId"  list-entry-name="contact" description="${bsh:org.ofbiz.party.party.PartyHelper.getPartyName(delegator, &quot;${contact.partyId}&quot;, false)} : [${contact.partyId}]"/>
+            </drop-down>
+        </field>
+        <field name="submitButton" position="3" title="${uiLabelMap.SfaMergeContacts}" widget-style="buttontext" tooltip-style="button-text"><submit button-type="text-link"/></field>
+    </form>
+
+    <form name="NewContactFromVCard" type="upload" target="createContactFromVCard" header-row-style="header-row" default-table-style="basic-table">
+        <field name="infile" title="${uiLabelMap.SfaUploadVCard}"><file/></field>
+        <field name="serviceName"><hidden value="createContact"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpload}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="QuickAddContact" type="single" target="quickAddContact">
+        <field name="firstName"  title="${uiLabelMap.PartyFirstName}*" widget-style="required"><text size="15"/></field>
+        <field name="lastName" title="${uiLabelMap.PartyLastName}*" widget-style="required"><text size="15"/></field>
+        <field name="emailAddress" title="${uiLabelMap.CommonEmail}"><text size="15"/></field>
+        <field name="contactListId" title="${uiLabelMap.MarketingContactList}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="ContactList" description="${groovy:contactListName.substring(0,Math.min(contactListName.length(), 12))}..." key-field-name="contactListId"/>
+            </drop-down>
+        </field>
+        <field name="quickAdd"><hidden value="Y"/></field>
+        <field name="submitButton"><submit/></field>
+    </form>
+</forms>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="ApplicationDecorator">
+        <section>
+            <actions>
+                <property-map resource="CommonExtUiLabels" map-name="uiLabelMap" global="true"/>
+                <service service-name="getUserPreferenceGroup" result-map="prefResult">
+                    <field-map field-name="userPrefGroupTypeId" value="GLOBAL_PREFERENCES"/>
+                </service>
+                <set field="userPreferences" from-field="prefResult.userPrefMap" global="true"/>
+                <entity-one entity-name="PartyNameView" value-field="partyNameView">
+                    <field-map field-name="partyId" from-field="userLogin.partyId"/>
+                </entity-one>
+                <set field="line.text" value="${uiLabelMap.CommonWelcome} ${person.firstName} ${person.middleName} ${person.lastName}"/>
+                <set field="line.urlText" value="[${userLogin.userLoginId}]"/>
+                <set field="line.url" value="/partymgr/control/viewprofile?partyId=${userLogin.partyId}"/>
+                <set field="layoutSettings.topLines[]" from-field="line" global="true"/>
+                <script location="component://commonext/webapp/ofbizsetup/organization/changeOrgPartyId.groovy"/><!-- to see ofbizsetup needs to be displayed -->
+                <set field="layoutSettings.suppressTab" value="ofbizsetup"/><!-- diseable ofbiz setup by default -->
+                <!-- system info notes -->
+                <service service-name="getLastSystemInfoNote" result-map="resultNote"/>
+                <set field="linkStart" value="/myportal/control/showPortletMainDecorator?portalPortletId="/>
+                <set field="layoutSettings.middleTopHeader" value="---------- ${uiLabelMap.CommonLastSytemNotes} ----------"/>
+                <set field="layoutSettings.middleTopMessage1" value="${groovy:resultNote.lastSystemInfoNote1!=null?resultNote.lastSystemInfoNote1.noteDateTime.toString().substring(0,16) + &quot; &quot; + resultNote.lastSystemInfoNote1.noteInfo:&quot;&quot;}"/>
+                <set field="layoutSettings.middleTopLink1" value="${linkStart}${resultNote.lastSystemInfoNote1.moreInfoPortletId}&amp;amp;id=${resultNote.lastSystemInfoNote1.moreInfoItemId}"/>
+                <set field="layoutSettings.middleTopMessage2" value="${groovy:resultNote.lastSystemInfoNote2!=null?resultNote.lastSystemInfoNote2.noteDateTime.toString().substring(0,16) + &quot; &quot; + resultNote.lastSystemInfoNote2.noteInfo:&quot;&quot;}"/>
+                <set field="layoutSettings.middleTopLink2" value="${linkStart}${resultNote.lastSystemInfoNote2.moreInfoPortletId}&amp;amp;id=${resultNote.lastSystemInfoNote2.moreInfoItemId}"/>
+                <set field="layoutSettings.middleTopMessage3" value="${groovy:resultNote.lastSystemInfoNote3!=null?resultNote.lastSystemInfoNote3.noteDateTime.toString().substring(0,16) + &quot; &quot; + resultNote.lastSystemInfoNote3.noteInfo:&quot;&quot;}"/>
+                <set field="layoutSettings.middleTopLink3" value="${linkStart}${resultNote.lastSystemInfoNote3.moreInfoPortletId}&amp;amp;id=${resultNote.lastSystemInfoNote3.moreInfoItemId}"/>
+            </actions>
+            <widgets>
+                <section>
+                    <condition><not><if-empty field="PartyAcctgPrefAndGroupList"/></not></condition><!-- produced by  changeOrgPartyId.groovy-->
+                    <actions>
+                        <set field="defaultOrganizationPartyId" value="${userPreferences.ORGANIZATION_PARTY}" global="true"/>
+                        <property-to-field resource="general" property="currency.uom.id.default" field="defaultCurrencyUomId"/>
+                        <entity-one entity-name="PartyAcctgPrefAndGroup" value-field="orgParty">
+                            <field-map field-name="partyId" from-field="defaultOrganizationPartyId"/>
+                        </entity-one>
+                        <set field="defaultOrganizationPartyCurrencyUomId" from-field="orgParty.baseCurrencyUomId" default-value="${defaultCurrencyUomId}" global="true"/>
+                        <set field="defaultOrganizationPartyGroupName" from-field="orgParty.groupName" global="true"/>
+                        <set field="dropdown.hiddenFieldList" from-field="hiddenFields" global="true"/>
+                        <set field="dropdown.action" value="setUserPreference"/>
+                        <set field="dropdown.textBegin" value="${uiLabelMap.CommonDefaultOrganizationPartyId} :"/>
+                        <set field="dropdown.dropDownList" from-field="PartyAcctgPrefAndGroupList"/>
+                        <set field="dropdown.selectionName" value="userPrefValue"/>
+                        <set field="dropdown.selectedKey" value="${defaultOrganizationPartyId}"/>
+                        <set field="dropdown.textEnd" value="[${defaultOrganizationPartyId}]"/>
+                        <set field="layoutSettings.topLines[]" from-field="dropdown" global="true"/>
+                    </actions>
+                    <widgets/>
+                </section>
+                <section>
+                    <condition><if-empty field="PartyAcctgPrefAndGroupList"/></condition>
+                    <actions>
+                       <set field="layoutSettings.suppressTab" value=""/><!-- enable ofbiz setup -->
+                    </actions>
+                    <widgets/>
+                </section>
+                <decorator-screen name="GlobalDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="pre-body">
+                        <decorator-section-include name="pre-body"/>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <container id="column-container">
+                            <section>
+                                <condition>
+                                    <if-empty-section section-name="left-column"/>
+                                </condition>
+                                <widgets>
+                                    <container id="content-main-section">
+                                        <decorator-section-include name="body"/>
+                                    </container>
+                                </widgets>
+                                <fail-widgets>
+                                    <container style="left">
+                                        <decorator-section-include name="left-column"/>
+                                    </container>
+                                    <container id="content-main-section" style="leftonly">
+                                        <container style="no-clear">
+                                            <decorator-section-include name="body"/>
+                                        </container>
+                                    </container>
+                                </fail-widgets>
+                            </section>
+                            <container style="clear"></container>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>
