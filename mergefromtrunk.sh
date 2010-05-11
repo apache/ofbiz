@@ -1,5 +1,6 @@
 #!/bin/sh
 
+set -e
 prevRev=`expr $1 - 1`
 svn merge -r $prevRev:$1 https://svn.apache.org/repos/asf/ofbiz/trunk 
 trunkLog=runtime/trunkLog.xml
