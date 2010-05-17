@@ -97,7 +97,7 @@ under the License.
     <tr>
       <td width="26%" align="right"><div class="tabletext">${uiLabelMap.PartyBirthDate}</div></td>
       <td width="74%">
-        <input type="text" class='inputBox' size="11" maxlength="20" name="birthDate" value="${personData.birthDate?if_exists}"/>
+        <input type="text" class='inputBox' size="11" maxlength="20" name="birthDate" value="${(personData.birthDate.toString())?if_exists}"/>
         <div class="tabletext">${uiLabelMap.CommonFormatDate}</div>
       </td>
     </tr>
