@@ -212,7 +212,7 @@ under the License.
                             <container style="screenlet-body">
                                 <section>
                                     <widgets>
-                                        <include-tree name="GlAccountTree" location="component://accounting/widget/AccountingTrees.xml"/>
+                                        <include-tree name="ListGlAccountTree" location="component://accounting/widget/AccountingTrees.xml"/>
                                     </widgets>
                                 </section>
                             </container>
@@ -260,7 +260,7 @@ under the License.
                             <container style="screenlet-body">
                                 <section>
                                     <widgets>
-                                        <include-tree name="GlAccountTree" location="component://accounting/widget/AccountingTrees.xml"/>
+                                        <include-tree name="ListGlAccountTree" location="component://accounting/widget/AccountingTrees.xml"/>
                                     </widgets>
                                 </section>
                             </container>
@@ -314,7 +314,7 @@ under the License.
 
                         <!-- include-screen screen-name="ListGlAccounts" name="ListGlAccounts" / -->
 
-                        <!-- tree name="GlAccountTree" location="component://accounting/widget/AccountingTrees.xml"/ -->
+                        <!-- tree name="ListGlAccountTree" location="component://accounting/widget/AccountingTrees.xml"/ -->
                      </decorator-section>
                 </decorator-screen>
             </widgets>
