@@ -51,7 +51,7 @@ function call_fieldlookupLayer(target, viewName, lookupWidth, lookupHeight, look
         return lookup_error("Lookup can't be created, one of these variables is missing: target=" + target + " viewName=" + viewName);
     }
 
-    var fieldLookupPopup = new FieldLookupPopup(target, viewName, lookupWidth, lookupHeight, lookupPosition, fadeBackground);
+    var fieldLookupPopup = new FieldLookupPopup(target, viewName, lookupWidth, lookupHeight, lookupPosition, fadeBackground, arguments);
     fieldLookupPopup.showLookup();
     this.target = target;
 }
@@ -61,7 +61,7 @@ function call_fieldlookupLayer3(target, target2, viewName, lookupWidth, lookupHe
         return lookup_error("Lookup can't be created, one of these variables is missing: target=" + target + " target2=" + target2 + " viewName=" + viewName);
     }
 
-    var fieldLookupPopup = new FieldLookupPopup(target, viewName, lookupWidth, lookupHeight, lookupPosition, fadeBackground);
+    var fieldLookupPopup = new FieldLookupPopup(target, viewName, lookupWidth, lookupHeight, lookupPosition, fadeBackground, arguments);
     fieldLookupPopup.showLookup();
     this.target = target;
     this.target2 = target2;
@@ -201,7 +201,21 @@ var GLOBAL_LOOKUP_REF = new FieldLookupCounter;
 * position - normal (under the target field), center (layer is centered) [default: normal] -- !work still in process
 */
 var FieldLookupPopup = Class.create({
-    initialize: function (target, viewName, lookupWidth, lookupHeight, position, fadeBackground) {
+    initialize: function (target, viewName, lookupWidth, lookupHeight, position, fadeBackground, args) {
+        if (args != null) {
+            var argString = "";
+            if (args.length > 7) {
+                for (var i = 7; i < args.length; i++) {
+                    if ((viewName.indexOf("?") == -1) && (i - 6) == 1) {
+                        sep = "?";
+                    } else {
+                        sep = "&";
+                    }
+                    argString += sep + "parm" + (i - 6) + "=" + args[i];
+                }
+            viewName += argString;
+            }
+        }
 
         //fade the background if the flag is set
         if (fadeBackground != "false") {
@@ -252,6 +266,7 @@ var FieldLookupPopup = Class.create({
 
     createElement: function () {
         var parent = this.parentTarget;
+        
         var that = this;
         
         //set global reference
@@ -331,7 +346,6 @@ var FieldLookupPopup = Class.create({
         var lookupCont = new Element('DIV', {
             id: "fieldLookupContent"
         });
-
         new Ajax.Request(this.viewName, {
             parameters: { presentation : "layer" },
             onSuccess: function (transport) {
@@ -584,6 +598,7 @@ function modifySubmitButton (lookupDiv) {
         
         //find the lookup form
         var forms = lookupDiv.getElementsByTagName('form');
+        
         var lookupForm = null;
         for (var i = 0; i < forms.length; i++) {
             if (! isEmpty(forms[i].getAttribute('id'))) {
@@ -594,12 +609,14 @@ function modifySubmitButton (lookupDiv) {
         if (lookupForm == null) {
             return;
         }
-        
+
         //set new form name and id
         oldFormName = lookupForm.getAttribute('name');
         lookupForm.setAttribute('name', 'form_' + GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).globalRef);
         lookupForm.setAttribute('id', 'form_' + GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).globalRef);
         lookupForm = $('form_' + GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).globalRef);
+        
+        
         
         //set new links for lookups
         var newLookups = $A(lookupDiv.getElementsByClassName('field-lookup'));
@@ -621,7 +638,7 @@ function modifySubmitButton (lookupDiv) {
         //disable the form action
         var formAction = lookupForm.getAttribute('action');
         lookupForm.setAttribute('action', '');
-
+        
         //modify the form submit button
         for (var i = 0; i < lookupForm.length; i++) {
             var ele = lookupForm.elements[i];
@@ -745,7 +762,7 @@ function lookupAjaxRequest(request) {
     lookupContent = (GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).contentRef);
     
     // get request arguments
-    var arg = request.substring(request.indexOf('?')+1,(request.length));
+    var arg = request.substring(request.indexOf('?')+1,(request.length));    
 
     new Ajax.Request(request, {
         method: 'post',
