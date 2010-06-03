@@ -578,7 +578,14 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
     // -------------------------------------
 
     public static String renderDataResourceAsText(GenericDelegator delegator, String dataResourceId, Map templateContext,
-    public static void clearAssociatedRenderCache(Delegator delegator, String dataResourceId) throws GeneralException {
+
+             Locale locale, String targetMimeTypeId, boolean cache) throws GeneralException, IOException {
+        Writer writer = new StringWriter();
+        renderDataResourceAsText(delegator, dataResourceId, writer, templateContext, locale, targetMimeTypeId, cache);
+        return writer.toString();
+    }
+    
+    public static void clearAssociatedRenderCache(GenericDelegator delegator, String dataResourceId) throws GeneralException {
         if (dataResourceId == null) {
             throw new GeneralException("Cannot clear dataResource related cache for a null dataResourceId");
         }
@@ -590,13 +597,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
                 FreeMarkerWorker.clearTemplateFromCache("DataResource:" + dataResourceId);        
             }
         }
-    }
-
-             Locale locale, String targetMimeTypeId, boolean cache) throws GeneralException, IOException {
-        Writer writer = new StringWriter();
-        renderDataResourceAsText(delegator, dataResourceId, writer, templateContext, locale, targetMimeTypeId, cache);
-        return writer.toString();
-    }
+    }    
 
     public static void renderDataResourceAsText(GenericDelegator delegator, String dataResourceId, Appendable out,
             Map templateContext, Locale locale, String targetMimeTypeId, boolean cache) throws GeneralException, IOException {
