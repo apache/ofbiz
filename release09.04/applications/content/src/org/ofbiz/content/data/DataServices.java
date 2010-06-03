@@ -55,7 +55,7 @@ public class DataServices {
     public static final String module = DataServices.class.getName();
 
     public static Map<String, Object> clearAssociatedRenderCache(DispatchContext dctx, Map<String, Object> context) {
-        Delegator delegator = dctx.getDelegator();
+	GenericDelegator delegator = dctx.getDelegator();
         String dataResourceId = (String) context.get("dataResourceId");
         try {
             DataResourceWorker.clearAssociatedRenderCache(delegator, dataResourceId);
