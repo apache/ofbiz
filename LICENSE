@@ -1261,6 +1261,8 @@ ofbiz/trunk/framework/jetty/lib/slf4j-api-1.3.1.jar
 ofbiz/trunk/framework/jetty/lib/slf4j-log4j12-1.3.1.jar
 ofbiz/trunk/framework/images/webapp/images/htmledit/whizzywig_v55i.js
 ofbiz/trunk/framework/images/webapp/images/calendarDateSelect/calendar_date_select.js
+ofbiz/trunk/framework/images/webapp/images/jquery/jquery-1.4.2.js
+ofbiz/trunk/framework/images/webapp/images/jquery/jquery-1.4.2.min.js
 =========================================================================
 The MIT License
 
