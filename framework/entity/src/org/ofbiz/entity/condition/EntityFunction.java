@@ -174,8 +174,6 @@ public abstract class EntityFunction<T extends Comparable> extends EntityConditi
         this.function = function;
         if (value instanceof EntityConditionValue) {
             this.nested = (EntityConditionValue) value;
-        } else if (value instanceof String) {
-            this.value = ((String) value).replaceAll("'", "''");
         } else {
             this.value = value;
         }
