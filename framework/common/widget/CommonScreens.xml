@@ -114,9 +114,8 @@ under the License.
         <section>
             <actions>
                 <!-- The default (global) java scripts -->
-                <set field="layoutSettings.javaScripts[+0]" value="/images/prototypejs/scriptaculous.js" global="true"/>
-                <set field="layoutSettings.javaScripts[+0]" value="/images/prototypejs/prototype.js" global="true"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/resize.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/jquery-1.4.2.js" global="true"/>
+                <set field="layoutSettings.javaScripts[]" value="/images/jquery/plugins/jquery.class/jquery.class.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/selectall.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/fieldlookup.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/calendarDateSelect/calendar_date_select.js" global="true"/>
@@ -190,8 +189,8 @@ under the License.
                     <widgets>
                         <platform-specific><html><html-template location="${appbarCloseTemplateLocation}"/></html></platform-specific>
                     </widgets>
-                </section>              
-                
+                </section>
+
                 <!-- render messages -->
                 <platform-specific><html><html-template location="${messagesTemplateLocation}"/></html></platform-specific>
 
@@ -231,7 +230,7 @@ under the License.
                             <field-map field-name="userPrefGroupTypeId" value="GLOBAL_PREFERENCES"/>
                         </service>
                         <set field="userPreferences" from-field="prefResult.userPrefMap" global="true"/>
-        
+
                         <property-map resource="general" map-name="generalProperties" global="true"/>
                         <set field="visualThemeId" from-field="userPreferences.VISUAL_THEME" global="true"/>
                         <service service-name="getVisualThemeResources">
@@ -314,9 +313,10 @@ under the License.
                 <set field="layoutSettings.styleSheets[+0]" value="/images/maincss.css" global="true"/>
                 <set field="layoutSettings.rtlStyleSheets[+0]" value="/images/mainrtl.css" global="true"/>
                 <!-- The default (global) java scripts -->
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/jquery-1.4.2.js" global="true"/>
+                <set field="layoutSettings.javaScripts[]" value="/images/jquery/plugins/jquery.class/jquery.class.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/selectall.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/fieldlookup.js" global="true"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/prototype.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/calendarDateSelect/calendar_date_select.js" global="true"/>
                 <set field="initialLocale" type="String" value="${parameters.userLogin.lastLocale}" default-value="${groovy:locale.toString()}"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/calendarDateSelect/locale/${initialLocale}.js" global="true"/>
@@ -523,7 +523,7 @@ under the License.
         <section>
             <actions>
                 <entity-one entity-name="PortalPage" value-field="portalPage" use-cache="true"/>
-                <get-related value-field="portalPage" relation-name="PortalPageColumn" 
+                <get-related value-field="portalPage" relation-name="PortalPageColumn"
                              order-by-list="columnSeqId" list="portalPageColumns" use-cache="true"/>
                 <entity-and entity-name="PortalPagePortletView" list="portalPagePortlets" use-cache="true">
                     <field-map field-name="portalPageId" from-field="portalPage.portalPageId"/>

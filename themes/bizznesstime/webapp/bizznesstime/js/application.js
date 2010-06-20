@@ -28,42 +28,41 @@ adds functionality to style layout elements
 **************************************************/
 //ADD CLEARFIX STYLING TO MAIN CONTENT AREA
 OFBIZ.clearFix = function(){
-    if($$('.contentarea')){
-        $$('.contentarea').each(function(elm) {
-            $(elm).addClassName('clearfix');
+    if(jQuery('.contentarea')){
+        jQuery('.contentarea').each(function(elm) {
+            jQuery(this).addClass('clearfix');
         });
     }
 }
 
 //GLOBAL FUNCTION FOR APP DROP-DROWN SECTIONS
 OFBIZ.initExpansion = function() {
-    if($$('.contracted')){
-        $$('.contracted').each(function(elm) {
-            $(elm).next().style.display = 'none';
+    if(jQuery('.contracted')){
+        jQuery('.contracted').each(function(elm) {
+            jQuery(this).next().css({'display': 'none'});
         });    
     }
-    if($$('.expanded, .contracted')) {
-        $$('.expanded, .contracted').each(function(elm) {
-            $(elm).onclick = function() {
-                Effect.toggle($(elm).next(),'blind',{
-                    duration : .2,
-                    afterFinish: function() {
-                        if($(elm).next().visible()) {
-                            $(elm).removeClassName('contracted');
-                            $(elm).addClassName('expanded');
+    if(jQuery('.expanded, .contracted')) {
+        jQuery('.expanded, .contracted').each(function(elm) {
+            var menu = jQuery(this);
+            menu.click( function() {
+                menu.next().toggle( function () {
+                       if(menu.next().is(':visible')) {
+                            menu.removeClass('contracted');
+                            menu.addClass('expanded');
                         } else {
-                            $(elm).removeClassName('expanded');
-                            $(elm).addClassName('contracted');
+                            menu.removeClass('expanded');
+                            menu.addClass('contracted');
                         }
-                    }
+                    });
                 });
-            }
-        });
-    }
+            });
+    };
 }
 
 
-OFBIZ.Effect = Object.extend({}, Effect);
+//OFBIZ.Effect = Object.extend({}, Effect);
+/*
 Object.extend(Element,{
     findElement: function(element, tagName) {
         var element = $(element);
@@ -72,7 +71,7 @@ Object.extend(Element,{
             element = element.parentNode;
             return $(element);
     }
-});
+});*/
 
 /*****************************************************
 FORM FOCUS AND BLUR
@@ -80,11 +79,11 @@ javascript solution to make form focus style
 consistent cross browser form platforms that
 don't support input:focus (cough, cough, IE, cough)
 *****************************************************/
-Event.observe(window, 'load', function() {
-    var fields = $$("input, textarea");
+jQuery('document').ready(function () {
+    var fields = jQuery("input, textarea");
     for (var i = 0; i < fields.length; i++) {
-      fields[i].onfocus = function() {this.className += ' focused';}
-      fields[i].onblur = function() {this.className = this.className.replace('focused', '');}
+      fields[i].focus (function() {this.className += ' focused';});
+      fields[i].blur (function() {this.className = this.className.replace('focused', '');});
     }
 });
 
@@ -99,17 +98,17 @@ message automatically fades on keypress, click mousemove
 var humanMsg = {
     setup: function(appendTo, msgOpacity) {
       humanMsg.msgID = 'humanMsg';
-      appendTo = appendTo || $$('body')[0];
+      appendTo = appendTo || jQuery('body')[0];
       humanMsg.msgOpacity = 0.5;
       if (msgOpacity !== undefined) {
         humanMsg.msgOpacity = parseFloat(msgOpacity);
       }
-      var myTemplate = new Template(
+      /*var myTemplate = new Template(
         '<div id="#{msgID}" class="humanMsg" style="display:none;">'+
           '<div></div>'+
          '</div> ');
-      var show = {msgID: humanMsg.msgID};
-      appendTo.insert(myTemplate.evaluate(show));
+      var show = {msgID: humanMsg.msgID};*/
+      jQuery('<div id="' + humanMsg.msgID + '" class="humanMsg" style="display:none;"><div></div></div>').appendTo(appendTo);
     },
     displayMsg: function(msg) {
       if (msg === '') {
@@ -145,8 +144,10 @@ displays preferences (language, theme, timezone)
 in modal window instead of popup/new window
 **************************************************/
 //PREFERENCES POPUPS
-ModalWindow = Class.create({
-    initialize: function(){
+var ModalWindow = function () {};
+
+jQuery.extend(ModalWindow.prototype, {
+    init: function(){
         this.cont = "";
         this.overlay = "";
         this.win = "";
@@ -168,19 +169,19 @@ ModalWindow = Class.create({
 });
 
 //LOAD MODAL PREFERENCE WINDOWS
-Event.observe(window, 'load', function() {
+jQuery('document').ready (function () {
     get = new ModalWindow();
-    $("language").observe('click',function(e) {
+    jQuery("language").click (function(e) {
       var locale = new Element('div', {id:'modal-contents'}).update("<img src='/bizznesstime/images/ajax-loader.gif'/>Updating Languages, please wait...");
       var localeUpdate = new Ajax.Updater('modal-contents', this.rel, {method: 'get'});
       get.show(locale,true);
     });
-    $("theme").observe('click',function(e) {
+    jQuery("theme").click (function(e) {
           var look = new Element('div', {id:'modal-contents'}).update("<img src='/bizznesstime/images/ajax-loader.gif'/>Updating Themes, please wait...");
           var lookUpdate = new Ajax.Updater('modal-contents', this.rel, {method: 'get'});
           get.show(look,true);
     });
-    $("timezone").observe('click',function(e) {
+    jQuery("timezone").click (function(e) {
           var time = new Element('div', {id:'modal-contents'}).update("<img src='/bizznesstime/images/ajax-loader.gif'/>Updating Timezones, please wait...");
           var timeUpdate = new Ajax.Updater('modal-contents', this.rel, {method: 'get'});
           get.show(time,true);
@@ -191,7 +192,7 @@ Event.observe(window, 'load', function() {
 LOAD 'EM UP
 **************************************************/
 //LOAD GLOBAL APP FUNCTIONS
-document.observe('dom:loaded', function(){
+jQuery('document').ready(function () {
     OFBIZ.clearFix();
     OFBIZ.initExpansion();
     humanMsg.setup();

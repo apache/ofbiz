@@ -108,7 +108,7 @@ under the License.
 
 <#if userLogin?exists>
 <script type="text/javascript">
-  var mainmenu = new DropDownMenu($('main-navigation'));
-  var appmenu = new DropDownMenu($('app-navigation'));
+  var mainmenu = new DropDownMenu(jQuery('#main-navigation'));
+  var appmenu = new DropDownMenu(jQuery('#app-navigation'));
 </script>
 </#if>
