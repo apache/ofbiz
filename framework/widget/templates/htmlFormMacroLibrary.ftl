@@ -90,16 +90,23 @@ under the License.
         <#if maxlength?has_content>  maxlength="${maxlength}"</#if>
         <#if id?has_content> id="${id}"</#if>/><#rt/>
       <#if dateType!="time" >
-          <#if shortDateInput?exists && shortDateInput>
-             <a href="javascript:call_cal_notime(document.<#rt/>
-          <#else>
-             <a href="javascript:call_cal(document.<#rt/>
-          </#if>
-          ${formName}.<#t/>
-          <#if timeDropdownParamName?has_content>${timeDropdownParamName}</#if><#t/>
-          <#if defaultDateTimeString?has_content>,'${defaultDateTimeString}'</#if>);"<#lt/>
-          title="<#if localizedIconTitle?has_content>${localizedIconTitle}</#if>"><#rt/>
-          </a><#rt/>
+          <script type="application/javascript">
+              <#if shortDateInput?exists && shortDateInput>
+                 $("#${id}").datepicker({
+              <#else>
+                  $("#${id}").datetimepicker({
+                    showSecond: true,
+                    timeFormat: 'hh:mm:ss',
+                    stepHour: 1,
+                    stepMinute: 5,
+                    stepSecond: 10,
+              </#if>
+                    showOn: 'button',
+                    buttonImage: '/images/cal.gif',
+                    buttonImageOnly: false,
+                    dateFormat: 'yy-mm-dd'
+                  });
+          </script>
       </#if>
       <#if timeDropdown?has_content && timeDropdown=="time-dropdown">
           <select name="${timeHourName}" <#if classString?has_content>class="${classString}"</#if>><#rt/>
