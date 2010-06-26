@@ -90,11 +90,11 @@ under the License.
         <#if maxlength?has_content>  maxlength="${maxlength}"</#if>
         <#if id?has_content> id="${id}"</#if>/><#rt/>
       <#if dateType!="time" >
-          <script type="application/javascript">
+          <script type="text/javascript">
               <#if shortDateInput?exists && shortDateInput>
                  $("#${id}").datepicker({
               <#else>
-                  $("#${id}").datetimepicker({
+                 $("#${id}").datetimepicker({
                     showSecond: true,
                     timeFormat: 'hh:mm:ss',
                     stepHour: 1,
@@ -102,7 +102,8 @@ under the License.
                     stepSecond: 10,
               </#if>
                     showOn: 'button',
-                    buttonImage: '/images/cal.gif',
+                    buttonImage: '',
+                    buttonText: '',
                     buttonImageOnly: false,
                     dateFormat: 'yy-mm-dd'
                   });
@@ -353,13 +354,26 @@ ${item.description}</span>
 
 <#macro renderDateFindField className alert name localizedInputTitle value size maxlength dateType formName defaultDateTimeString imgSrc localizedIconTitle titleStyle defaultOptionFrom defaultOptionThru opEquals opSameDay opGreaterThanFromDayStart opGreaterThan opGreaterThan opLessThan opUpToDay opUpThruDay opIsEmpty>
 <span class="view-calendar">
-<input type="text" <@renderClass className alert /><#if name?has_content> name="${name?html}_fld0_value"</#if><#if localizedInputTitle?has_content> title="${localizedInputTitle}"</#if><#if value?has_content> value="${value}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if>/><#rt/>
+<input id="${name?html}_fld0_value" type="text" <@renderClass className alert /><#if name?has_content> name="${name?html}_fld0_value"</#if><#if localizedInputTitle?has_content> title="${localizedInputTitle}"</#if><#if value?has_content> value="${value}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if>/><#rt/>
 <#if dateType != "time">
-<#if dateType == "date">
-<a href="javascript:call_cal_notime(document.<#rt/>
-<#else>
-<a href="javascript:call_cal(document.<#rt/>
-</#if>
+    <script type="text/javascript">
+          <#if dateType == "date">
+             $("#${name?html}_fld0_value").datepicker({
+          <#else>
+             $("#${name?html}_fld0_value").datetimepicker({
+                showSecond: true,
+                timeFormat: 'hh:mm:ss',
+                stepHour: 1,
+                stepMinute: 5,
+                stepSecond: 10,
+          </#if>
+                showOn: 'button',
+                buttonImage: '',
+                buttonText: '',
+                buttonImageOnly: false,
+                dateFormat: 'yy-mm-dd'
+              });
+      </script>
 <#if formName?has_content>${formName}.</#if><#if name?has_content>${name}_fld0_value,</#if>'<#if defaultDateTimeString?has_content>${defaultDateTimeString}</#if>');" title="${localizedIconTitle}"><#rt/>
 </a><#rt/>
 </#if>
@@ -376,13 +390,26 @@ ${item.description}</span>
  </span><#rt/>
 </#if>
 <#rt/>
-<input type="text" <@renderClass className alert /><#if name?has_content> name="${name}_fld1_value"</#if><#if localizedInputTitle?exists> title="${localizedInputTitle?html}"</#if><#if value2?has_content> value="${value2}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if>/><#rt/>
+<input id="${name?html}_fld1_value" type="text" <@renderClass className alert /><#if name?has_content> name="${name}_fld1_value"</#if><#if localizedInputTitle?exists> title="${localizedInputTitle?html}"</#if><#if value2?has_content> value="${value2}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if>/><#rt/>
 <#if dateType != "time">
-<#if dateType == "date">
-<a href="javascript:call_cal_notime(document.<#rt/>
-<#else>
-<a href="javascript:call_cal(document.<#rt/>
-</#if>
+    <script type="text/javascript">
+          <#if dateType == "date">
+             $("#${name?html}_fld1_value").datepicker({
+          <#else>
+             $("#${name?html}_fld1_value").datetimepicker({
+                showSecond: true,
+                timeFormat: 'hh:mm:ss',
+                stepHour: 1,
+                stepMinute: 5,
+                stepSecond: 10,
+          </#if>
+                showOn: 'button',
+                buttonImage: '',
+                buttonText: '',
+                buttonImageOnly: false,
+                dateFormat: 'yy-mm-dd'
+              });
+      </script>
 <#if formName?has_content>${formName}.</#if><#if name?has_content>${name}_fld1_value,'</#if><#if defaultDateTimeString?has_content>${defaultDateTimeString}</#if>');" title="${localizedIconTitle}"><#rt/>
 </a><#rt/>
 </#if>

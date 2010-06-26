@@ -2044,16 +2044,6 @@ height:23px;
 padding: 0 30px 0 30px;
 }
 
-.view-calendar a {
-background: url(../images/cal.png) no-repeat !important;
-display: inline-block;
-/* margin: 3px 10px 0px 4px; */
-vertical-align:top;
-margin-top:3px;
-width:22px;
-height:22px;
-}
-
 .field-lookup a{
 background: url(../images/fieldlookup.png) no-repeat 0 0;
 display: inline-block;
@@ -2086,166 +2076,6 @@ margin-right: 20px;
 color:#FFFFFF;
 }
 
-/* ================================= */
-/* ===== Calendar Date Select ====== */
-/* ================================= */
-.calendar_date_select {
-color: #fff;
-border-left: #888 1px solid;
-border-top: #999 1px solid;
-border-right: #666 1px solid;
-border-bottom: #333 1px solid;
-display: block;
-width: 200px;
-z-index: 1000;
-}
-
-/* this is a fun ie6 hack to get drop downs to stay behind the popup window.  This should always be just underneath .calendar_date_select */
-iframe.ie6_blocker {
-position: absolute;
-z-index: 999;
-}
-
-.calendar_date_select thead th {
-    font-weight: bold;
-    background-image: url(../images/bkgd_header.gif);
-    background-color: #CCC;
-    _border-top: 1px solid #fdeb71;
-    _border-bottom: 1px solid #d68a12;
-    color: white !important;
-}
-
-.calendar_date_select .cds_buttons {
-    text-align: center;
-    padding: 5px 0px;
-    background-image: url(../images/header_top_bg.gif);
-    background-color: #CCC;
-}
-
-.calendar_date_select .cds_footer {
-background: url(../images/cds_footer.png) repeat-x;
-padding: 3px;
-font-size: 11px;
-color:#23190f;
-text-align: center;
-}
-
-.calendar_date_select table {
-margin: 0px;
-padding: 0px;
-}
-
-.calendar_date_select .cds_header {
-background-color: #87CEEB;
-padding:5px 0;
-background-image: url(../images/header_top_bg_btm.gif);
-_border-bottom: 1px solid #d68a12;
-text-align: center;
-}
-
-.calendar_date_select .cds_header span {
-font-size: 15px;
-color: #000;
-font-weight: bold;
-}
-
-.calendar_date_select select {
-font-size: 11px;
-}
-
-.calendar_date_select .cds_header a:hover {
-color: #fff;
-}
-
-.calendar_date_select .cds_header a {
-width: 22px;
-height: 20px;
-text-decoration: none;
-font-size: 14px;
-color: #fff !important;
-background: none !important;
-}
-
-.calendar_date_select .cds_header a.prev {
-float: left;
-}
-
-.calendar_date_select .cds_header a.next {
-float: right;
-}
-
-.calendar_date_select .cds_header a.close {
-float: right;
-display: none;
-}
-
-.calendar_date_select .cds_header select.month {
-width: 90px;
-}
-
-.calendar_date_select .cds_header select.year {
-width: 61px;
-}
-
-.calendar_date_select .cds_buttons a {
-color: white !important;
-font-size: 9px;
-background: none !important;
-display: inline !important;
-}
-
-.calendar_date_select td {
-    font-size: 12px;
-    width: 24px;
-    height: 21px;
-    text-align: center;
-    vertical-align: middle;
-    background-color: #FFF;
-    color:#333;
-}
-
-.calendar_date_select td.weekend {
-background-color: #f8f3d0;
-}
-
-.calendar_date_select td div {
-color: #000;
-font-size:9px;
-margin:-2px 8px 8px 1px;
-text-align:left;
-}
-
-.calendar_date_select td div.other {
-color: #444;
-}
-
-.calendar_date_select td.selected div {
-color: #000;
-}
-
-.calendar_date_select tbody td {
-border-bottom: 1px solid #e8dcb2;
-}
-
-.calendar_date_select td.selected {
-background-color: #ea9f27;
-}
-
-.calendar_date_select td:hover {
-    background-color: #FD8500;
-}
-
-.calendar_date_select td.today {
-border: 1px dashed #FFFF00;
-}
-
-.calendar_date_select td.disabled div {
-color: #454545;
-}
-
-.fieldWithErrors .calendar_date_select {
-border: 2px solid #e37102;
-}
 
 /* ============================= */
 /* ===== FieldGroup Styles ===== */
@@ -2969,6 +2799,17 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
 .ui-datepicker-multi .ui-datepicker-group-middle .ui-datepicker-header { border-left-width:0; }
 .ui-datepicker-multi .ui-datepicker-buttonpane { clear:left; }
 .ui-datepicker-row-break { clear:both; width:100%; }
+
+/* Calendar Button and Image */
+.view-calendar button {
+background: url(../images/cal.png) no-repeat !important;
+display: inline-block;
+border: none;
+vertical-align:top;
+margin-top:3px;
+width:22px;
+height:22px;
+}
 
 /* RTL support */
 .ui-datepicker-rtl { direction: rtl; }

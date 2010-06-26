@@ -325,7 +325,7 @@ function toggleOrderIdList() {
                     </#if>
                     <option value="">${uiLabelMap.OrderSelectShippingMethod}</option>
                     <#list carrierShipmentMethods as carrierShipmentMethod>
-                      <#assign shipmentMethodType = carrierShipmentMethod.getRelatedOne("ShipmentMethodType")> 
+                      <#assign shipmentMethodType = carrierShipmentMethod.getRelatedOne("ShipmentMethodType")>
                       <option value="${carrierShipmentMethod.partyId}@${carrierShipmentMethod.shipmentMethodTypeId}">${carrierShipmentMethod.partyId?if_exists} ${shipmentMethodType.description?if_exists}</option>
                     </#list>
                   </select>
@@ -363,15 +363,13 @@ function toggleOrderIdList() {
                   <table class="basic-table" cellspacing='0'>
                     <tr>
                       <td nowrap="nowrap">
-                        <input type='text' size='25' name='minDate' value='${requestParameters.minDate?if_exists}'/>
-                        <a href="javascript:call_cal(document.lookuporder.minDate,'${fromDateStr}');"><img src='/images/cal.gif' width='16' height='16' border='0' alt='Calendar'/></a>
+                        <@htmlTemplate.renderDateTimeField name="minDate" value="${requestParameters.minDate?if_exists}" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="25" maxlength="30" id="minDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                         <span class='label'>${uiLabelMap.CommonFrom}</span>
                       </td>
                     </tr>
                     <tr>
                       <td nowrap="nowrap">
-                        <input type='text' size='25' name='maxDate' value='${requestParameters.maxDate?if_exists}'/>
-                        <a href="javascript:call_cal(document.lookuporder.maxDate,'${thruDateStr}');"><img src='/images/cal.gif' width='16' height='16' border='0' alt='Calendar'/></a>
+                        <@htmlTemplate.renderDateTimeField name="maxDate" value="${requestParameters.maxDate?if_exists}" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="25" maxlength="30" id="maxDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                         <span class='label'>${uiLabelMap.CommonThru}</span>
                       </td>
                     </tr>

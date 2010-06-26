@@ -2040,6 +2040,16 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
 .ui-datepicker-multi .ui-datepicker-buttonpane { clear:left; }
 .ui-datepicker-row-break { clear:both; width:100%; }
 
+/* Calendar Button and Image */
+.view-calendar button {
+background: url(../images/cal.gif) no-repeat !important;
+display: inline-block;
+border: none;
+margin-left:10px;
+width:22px;
+height:22px;
+}
+
 /* RTL support */
 .ui-datepicker-rtl { direction: rtl; }
 .ui-datepicker-rtl .ui-datepicker-prev { right: 2px; left: auto; }

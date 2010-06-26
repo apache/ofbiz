@@ -59,8 +59,8 @@ under the License.
           <td>
     <#assign hasExpired = false>
     <#if (productFeatureAndAppl.getTimestamp("thruDate"))?exists && Static["org.ofbiz.base.util.UtilDateTime"].nowTimestamp().after(productFeatureAndAppl.getTimestamp("thruDate"))> <#assign hasExpired = true></#if>
-            <input type='text' size='25' name='thruDate_o_${productFeatureAndAppl_index}' value='${(productFeatureAndAppl.thruDate)?if_exists}' <#if hasExpired> style='color: red;'</#if> />
-            <a href="javascript:call_cal(document.selectAllForm.thruDate_o_${productFeatureAndAppl_index}, '${(productFeatureAndAppl.thruDate)?default(nowTimestamp?string)}');"><img src='/images/cal.gif' width='16' height='16' border='0' alt='Calendar'/></a>
+            <#if hasExpired><#assign class="alert"></#if>
+            <@htmlTemplate.renderDateTimeField name="thruDate_o_${productFeatureAndAppl_index}" className="${class!''}" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${(productFeatureAndAppl.thruDate)?if_exists}" size="25" maxlength="30" id="thruDate_o_${productFeatureAndAppl_index}" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
             <input type="text" size='6' name='amount_o_${productFeatureAndAppl_index}' value='${(productFeatureAndAppl.amount)?if_exists}' />
             <input type="text" size='5' name='sequenceNum_o_${productFeatureAndAppl_index}' value='${(productFeatureAndAppl.sequenceNum)?if_exists}' />
             <select name='productFeatureApplTypeId_o_${productFeatureAndAppl_index}' size="1">
@@ -162,10 +162,10 @@ under the License.
   </#list>
       </select>
       <br />
-      <span class='label'>${uiLabelMap.CommonFrom} : </span><input type="text" size='25' name='fromDate'/>
-      <a href="javascript:call_cal(document.addFeatureByTypeIdCode.fromDate, '${nowTimestamp?string}');"><img src='/images/cal.gif' width='16' height='16' border='0' alt='Calendar'/></a>
-      <span class='label'>${uiLabelMap.CommonThru} : </span><input type="text" size='25' name='thruDate'/>
-      <a href="javascript:call_cal(document.addFeatureByTypeIdCode.thruDate, '${nowTimestamp?string}');"><img src='/images/cal.gif' width='16' height='16' border='0' alt='Calendar'/></a>
+      <span class='label'>${uiLabelMap.CommonFrom} : </span>
+      <@htmlTemplate.renderDateTimeField name="fromDate" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="" size="25" maxlength="30" id="fromDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+      <span class='label'>${uiLabelMap.CommonThru} : </span>
+      <@htmlTemplate.renderDateTimeField name="thruDate" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="" size="25" maxlength="30" id="thruDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
       <span class='label'>${uiLabelMap.CommonSequence} : </span><input type="text" size='5' name='sequenceNum'/>
       <input type="submit" value="${uiLabelMap.CommonAdd}"/>
     </form>
@@ -192,10 +192,8 @@ under the License.
   </#list>
       </select>
       <br />
-      <span class="label">${uiLabelMap.CommonFrom} : </span><input type="text" size="25" name="fromDate"/>
-      <a href="javascript:call_cal(document.addFeatureById.fromDate, '${nowTimestamp?string}');"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="Calendar"/></a>
-      <span class="label">${uiLabelMap.CommonThru} : </span><input type="text" size="25" name="thruDate"/>
-      <a href="javascript:call_cal(document.addFeatureById.thruDate, '${nowTimestamp?string}');"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="Calendar"/></a>
+      <span class="label">${uiLabelMap.CommonFrom} : </span><@htmlTemplate.renderDateTimeField name="fromDate" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="" size="25" maxlength="30" id="fromDate2" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+      <span class="label">${uiLabelMap.CommonThru} : </span><@htmlTemplate.renderDateTimeField name="thruDate" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="" size="25" maxlength="30" id="thruDate2" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
       <span class="label">${uiLabelMap.CommonSequence} : </span><input type="text" size="5" name="sequenceNum"/>
       <input type="submit" value="${uiLabelMap.CommonAdd}"/>
     </form>
