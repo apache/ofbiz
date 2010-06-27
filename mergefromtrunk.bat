@@ -1,3 +1,4 @@
+echo off
 rem #####################################################################
 rem Licensed to the Apache Software Foundation (ASF) under one
 rem or more contributor license agreements.  See the NOTICE file
@@ -19,7 +20,6 @@ rem #####################################################################
 rem interactive DOS version of mergefromtrunk.sh.
 rem to use : launch and pass the trunk version number to merge in release
 
-echo off
 rem since we have now svn:mergeinfo changing root ("."), we need to update before merging
 svn up
 
