@@ -45,6 +45,7 @@ under the License.
                 <#if parameters.orderStatusId?has_content>${parameters.orderStatusId}<#else>${uiLabelMap.CommonAny}</#if>
             </fo:block>
             <#if parameters.fromOrderDate?has_content><fo:block font-size="10pt">${uiLabelMap.CommonFromDate}: ${parameters.fromOrderDate} (${uiLabelMap.OrderDate} &gt;= ${uiLabelMap.CommonFrom})</fo:block></#if>
+            <fo:table-cell border-bottom="thin solid grey"><fo:block>${uiLabelMap.OrderQuantitySold}</fo:block></fo:table-cell>
             <#if parameters.thruOrderDate?has_content><fo:block font-size="10pt">${uiLabelMap.CommonThruDate}: ${parameters.thruOrderDate} (${uiLabelMap.OrderDate} &lt; ${uiLabelMap.CommonFrom})</fo:block></#if>
             <fo:block space-after.optimum="10pt" font-size="10pt">
             <fo:table>
@@ -66,6 +67,7 @@ under the License.
                 <fo:table-body>
                     <#assign rowColor = "white">
                     <#list productReportList as productReport>
+                      <#if productReport.quantityOrdered?exists && (productReport.quantityOrdered > 0)>
                         <fo:table-row>
                             <#if showProductStore>
                                 <fo:table-cell padding="2pt" background-color="${rowColor}">
@@ -87,8 +89,9 @@ under the License.
                             <#assign rowColor = "#D4D0C8">
                         <#else>
                             <#assign rowColor = "white">
-                        </#if>        
-                    </#list>          
+                        </#if>
+                      </#if>
+                    </#list>
                 </fo:table-body>
             </fo:table>
             </fo:block>
