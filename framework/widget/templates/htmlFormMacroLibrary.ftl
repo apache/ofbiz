@@ -458,11 +458,91 @@ ${item.description}</span>
 <#macro renderLookupField className alert name value size maxlength id event action disabled autocomplete descriptionFieldName formName fieldFormName targetParameterIter imgSrc ajaxUrl ajaxEnabled presentation width height position fadeBackground clearText showDescription initiallyCollapsed>
 <span class="field-lookup">
 <#if size?has_content && size=="0"><input type="hidden" <#if name?has_content> name="${name}"/></#if><#else><input type="text" <@renderClass className alert /><#if name?has_content> name="${name}"</#if><#if value?has_content> value="${value}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if><#if id?has_content> id="${id}"</#if><#rt/><#if disabled?has_content && disabled> disabled="disabled"</#if><#rt/><#if event?has_content && action?has_content> ${event}="${action}"</#if><#rt/><#if autocomplete?has_content> autocomplete="off"</#if>/><#rt/></#if>
+    <script type="text/javascript">
+        // create Link Element with unique Key
+        var lookupId = GLOBAL_LOOKUP_REF.createNextKey();
+        var inputBox = document.getElementById("${id}");
+        inputBox.id = lookupId + "_${id}";
+        var parent = inputBox.parentNode;
+
+
+        var link = document.createElement('A');
+        link.href = "javascript:void(0);";
+        link.id = lookupId + "_button";
+
+        parent.appendChild(link);
+
+        var hiddenDiv = document.createElement("DIV");
+        hiddenDiv.id = lookupId;
+        hiddenDiv.css = "{display: none;}";
+        hiddenDiv.title = "My Dialog " + lookupId;
+
+        parent.appendChild(hiddenDiv);
+
+        // Lookup Configuration
+        var dialogOpts = {
+            modal: true,
+            bgiframe: true,
+            autoOpen: false,
+            height: 500,
+            width: 620,
+            draggable: true,
+            resizeable: true,
+            open: function() {
+                jQuery("#" + lookupId).load("${fieldFormName}");
+            },
+            close: function() {
+                //when the window is closed the prev Lookup get the focus (if exists)
+                var prevLookup = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).prevLookup;
+                if (prevLookup != null) {
+                    identifyLookup(prevLookup);
+                }
+            }
+
+        };
+
+        // init Dialog and register
+        // create an object with all Lookup Informationes that are needed
+        var dialogRef = jQuery("#" + lookupId).dialog(dialogOpts);
+        var ref = function(lookupId) {
+            this.lookupId = lookupId;
+            this.formName = "${formName?html}";
+            this.target = jQuery("form[name=${formName?html}] #" + lookupId + "_${id?html}");
+            <#if descriptionFieldName?has_content>
+            this.target2 = null;
+            </#if>
+            ((GLOBAL_LOOKUP_REF.countFields() - 1) >=0) ? this.prevLookup = (GLOBAL_LOOKUP_REF.countFields() - 1) + "_lookupId" : null;
+            this.dialogRef = dialogRef;
+           };
+        GLOBAL_LOOKUP_REF.setReference(lookupId, new ref(lookupId));
+
+        // bind click Event to Dialog button
+        jQuery("#" + lookupId + "_button").click(
+            function (){
+                jQuery("#" + lookupId).dialog("open");
+                jQuery("#" + lookupId).dialog(dialogOpts);
+                <#if descriptionFieldName?has_content>
+                //the target2 have to be set here, because the input field is not created before
+                GLOBAL_LOOKUP_REF.getReference(lookupId).target2 = jQuery(document.${formName?html}.${descriptionFieldName});
+                </#if>
+                // thats a quite bad hack to modifay the buttons
+                identifyLookup(lookupId)
+                window.setTimeout("modifySubmitButton('" +lookupId +"')", 800);
+                return false;
+            }
+        );
+    </script>
 <#if presentation?has_content && descriptionFieldName?has_content && presentation == "window">
- <a href="javascript:call_fieldlookup3(document.${formName?html}.${name?html},document.${formName?html}.${descriptionFieldName},'${fieldFormName}'<#rt/>
+<#--
+<a href="javascript:call_fieldlookup3(document.${formName?html}.${name?html},document.${formName?html}.${descriptionFieldName},'${fieldFormName}'<#rt/>
 <#elseif presentation?has_content && presentation == "window">
  <a href="javascript:call_fieldlookup2(document.${formName}.${name},'${fieldFormName}'<#rt/>
 <#elseif descriptionFieldName?has_content>
+ <button id="open${formName?html}.${name?html}"></button>
+ <script>
+     $("#open${formName?html}.${name?html}").dialog();
+
+ </script>
  <a href="javascript:call_fieldlookupLayer3(document.${formName?html}.${name?html},document.${formName?html}.${descriptionFieldName},'${fieldFormName}','${width}','${height}','${position}','${fadeBackground}','${initiallyCollapsed}'<#rt/>
 <#else>
  <a href="javascript:call_fieldlookupLayer(document.${formName?html}.${name?html},'${fieldFormName}','${width}','${height}','${position}','${fadeBackground}','${initiallyCollapsed}'<#rt/>
@@ -477,6 +557,8 @@ ${item.description}</span>
 </span>
 <#if ajaxEnabled?has_content && ajaxEnabled>
     <script language="JavaScript" type="text/javascript">ajaxAutoCompleter('${ajaxUrl}', ${showDescription});</script><#t/>
+</#if>
+-->
 </#if>
 </#macro>
 

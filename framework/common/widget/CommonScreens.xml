@@ -248,7 +248,7 @@ under the License.
                     <widgets>
                         <section>
                         <condition>
-                            <if-compare value="layer" operator="not-equals" field="parameters.presentation"/>
+                            <if-compare value="window" operator="equals" field="parameters.presentation"/>
                         </condition>
                             <widgets>
                                 <platform-specific><html><html-template location="component://common/webcommon/includes/lookup.ftl" /></html></platform-specific>
