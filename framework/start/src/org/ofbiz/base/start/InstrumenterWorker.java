@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.List;
@@ -33,6 +34,11 @@ import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public final class InstrumenterWorker {
 
@@ -68,61 +74,119 @@ public final class InstrumenterWorker {
             e.printStackTrace();
             return srcPaths;
         }
+        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(ManagementFactory.getOperatingSystemMXBean().getAvailableProcessors());
         try {
             File instrumenterFile = new File(instrumenterFileName);
             instrumenterFile.delete();
             instrumenter.open(instrumenterFile, true);
-            List<File> result = new ArrayList<File>();
+            List<Future<File>> futures = new ArrayList<Future<File>>();
             for (File file: srcPaths) {
                 String path = file.getPath();
                 if (path.matches(".*/ofbiz[^/]*\\.(jar|zip)")) {
-                    System.err.println("instrumenting " + path);
-                    String prefix = path.substring(0, path.length() - 4);
-                    int slash = prefix.lastIndexOf("/");
-                    if (slash != -1) prefix = prefix.substring(slash + 1);
-                    prefix += "-";
-                    File zipTmp = File.createTempFile("instrumented-" + prefix, path.substring(path.length() - 4));
-                    try {
-                        zipTmp.deleteOnExit();
-                        ZipInputStream zin = new ZipInputStream(new FileInputStream(file));
-                        ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipTmp));
-                        ZipEntry entry;
-                        while ((entry = zin.getNextEntry()) != null) {
-                            InputStream in;
-                            long size;
-                            if (entry.getName().endsWith(".class")) {
-                                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                                copy(zin, baos);
-                                byte[] bytes = instrumenter.instrumentClass(baos.toByteArray());
-                                size = bytes.length;
-                                in = new ByteArrayInputStream(bytes);
-                            } else {
-                                in = zin;
-                                size = entry.getSize();
-                            }
-                            ZipEntry newEntry = new ZipEntry(entry);
-                            newEntry.setSize(size);
-                            newEntry.setCompressedSize(-1);
-                            zout.putNextEntry(newEntry);
-                            copy(in, zout);
-                            if (entry.getName().endsWith(".class")) {
-                                in.close();
-                            }
-                        }
-                        zout.close();
-                        file = zipTmp;
-                    } catch (IOException e) {
-                        zipTmp.delete();
-                        throw e;
-                    }
+                    futures.add(executor.submit(new FileInstrumenter(instrumenter, file)));
+                } else {
+                    futures.add(new ConstantFutureFile(file));
                 }
-                result.add(file);
+            }
+            List<File> result = new ArrayList<File>(futures.size());
+            for (Future<File> future: futures) {
+                result.add(future.get());
             }
             instrumenter.close();
             return result;
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            return srcPaths;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return srcPaths;
         } catch (IOException e) {
             e.printStackTrace();
             return srcPaths;
+        } finally {
+            executor.shutdown();
+        }
+    }
+
+    private static final class ConstantFutureFile implements Future<File> {
+        private final File file;
+
+        protected ConstantFutureFile(File file) {
+            this.file = file;
+        }
+
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return false;
+        }
+
+        public File get() {
+            return file;
+        }
+
+        public File get(long timeout, TimeUnit  unit) {
+            return file;
+        }
+
+        public boolean isCancelled() {
+            return false;
+        }
+
+        public boolean isDone() {
+            return true;
+        }
+    }
+
+    private static final class FileInstrumenter implements Callable<File> {
+        private final Instrumenter instrumenter;
+        private final File file;
+        private final String path;
+
+        protected FileInstrumenter(Instrumenter instrumenter, File file) {
+            this.instrumenter = instrumenter;
+            this.file = file;
+            this.path = file.getPath();
+        }
+
+        public File call() throws IOException {
+            System.err.println(Thread.currentThread() + ":instrumenting " + path);
+            String prefix = path.substring(0, path.length() - 4);
+            int slash = prefix.lastIndexOf("/");
+            if (slash != -1) prefix = prefix.substring(slash + 1);
+            prefix += "-";
+            File zipTmp = File.createTempFile("instrumented-" + prefix, path.substring(path.length() - 4));
+            try {
+                zipTmp.deleteOnExit();
+                ZipInputStream zin = new ZipInputStream(new FileInputStream(file));
+                ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipTmp));
+                ZipEntry entry;
+                while ((entry = zin.getNextEntry()) != null) {
+                    InputStream in;
+                    long size;
+                    if (entry.getName().endsWith(".class")) {
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        copy(zin, baos);
+                        byte[] bytes = instrumenter.instrumentClass(baos.toByteArray());
+                        size = bytes.length;
+                        in = new ByteArrayInputStream(bytes);
+                    } else {
+                        in = zin;
+                        size = entry.getSize();
+                    }
+                    ZipEntry newEntry = new ZipEntry(entry);
+                    newEntry.setSize(size);
+                    newEntry.setCompressedSize(-1);
+                    zout.putNextEntry(newEntry);
+                    copy(in, zout);
+                    if (entry.getName().endsWith(".class")) {
+                        in.close();
+                    }
+                }
+                zout.close();
+                return zipTmp;
+            } catch (IOException e) {
+                zipTmp.delete();
+                throw e;
+            }
         }
     }
 }

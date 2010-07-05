@@ -62,7 +62,6 @@ import org.ofbiz.security.authz.Authorization;
 import org.ofbiz.security.authz.AuthorizationFactory;
 import org.ofbiz.service.GenericDispatcher;
 import org.ofbiz.service.LocalDispatcher;
-import org.ofbiz.webapp.website.WebSiteWorker;
 
 /**
  * ContextFilter - Restricts access to raw files and configures servlet objects.
@@ -134,11 +133,13 @@ public class ContextFilter implements Filter {
             Thread.currentThread().setContextClassLoader(localCachedClassLoader);
         }
 
-        // set the webSiteId in the session
-        httpRequest.getSession().setAttribute("webSiteId", WebSiteWorker.getWebSiteId(httpRequest));
-
         // set the ServletContext in the request for future use
         request.setAttribute("servletContext", config.getServletContext());
+
+        // set the webSiteId in the session
+        if (UtilValidate.isEmpty(httpRequest.getSession().getAttribute("webSiteId"))){
+            httpRequest.getSession().setAttribute("webSiteId", config.getServletContext().getAttribute("webSiteId"));
+        }
 
         // set the filesystem path of context root.
         request.setAttribute("_CONTEXT_ROOT_", config.getServletContext().getRealPath("/"));
@@ -245,10 +246,12 @@ public class ContextFilter implements Filter {
 
                 if (redirectPath == null) {
                     int error = 404;
-                    try {
-                        error = Integer.parseInt(errorCode);
-                    } catch (NumberFormatException nfe) {
-                        Debug.logWarning(nfe, "Error code specified would not parse to Integer : " + errorCode, module);
+                    if (UtilValidate.isNotEmpty(errorCode)) {
+                        try {
+                            error = Integer.parseInt(errorCode);
+                        } catch (NumberFormatException nfe) {
+                            Debug.logWarning(nfe, "Error code specified would not parse to Integer : " + errorCode, module);
+                        }
                     }
                     filterMessage = filterMessage + " (" + error + ")";
                     wrapper.sendError(error, contextUri);

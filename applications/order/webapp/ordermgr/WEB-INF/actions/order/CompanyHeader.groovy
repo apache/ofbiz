@@ -59,15 +59,15 @@ if (quoteId) {
 }
 
 // defaults:
-logoImageUrl = null; // the default value, "/images/ofbiz_powered.gif", is set in the screen decorators
-partyId = null;
+def logoImageUrl = null; // the default value, "/images/ofbiz_powered.gif", is set in the screen decorators
+def partyId = null;
 
 // get the logo partyId from order or invoice - note that it is better to do comparisons this way in case the there are null values
 if (orderHeader) {
     orh = new OrderReadHelper(orderHeader);
     // for sales order, the logo party is the "BILL_FROM_VENDOR" of the order.  If that's not available, we'll use the OrderHeader's ProductStore's payToPartyId
     if ("SALES_ORDER".equals(orderHeader.orderTypeId)) {
-        if (orh.getBillToParty()) {
+        if (orh.getBillFromParty()) {
             partyId = orh.getBillFromParty().partyId;
         } else {
             productStore = orderHeader.getRelatedOne("ProductStore");
@@ -77,10 +77,14 @@ if (orderHeader) {
         }
     // purchase orders - use the BILL_TO_CUSTOMER of the order
     } else if ("PURCHASE_ORDER".equals(orderHeader.orderTypeId)) {
-        partyId = orh.getBillToParty().partyId;
-        billToCustomer = EntityUtil.getFirst(orderHeader.getRelatedByAnd("OrderRole", [roleTypeId : "BILL_TO_CUSTOMER"]));
-        if (billToCustomer) {
-            partyId = billToCustomer.partyId;
+        def billToParty = orh.getBillToParty();
+        if (billToParty) {
+            partyId = billToParty.partyId;
+        } else {
+            def billToCustomer = EntityUtil.getFirst(orderHeader.getRelatedByAnd("OrderRole", [roleTypeId : "BILL_TO_CUSTOMER"]));
+            if (billToCustomer) {
+                partyId = billToCustomer.partyId;
+            }
         }
     }
 } else if (invoice) {
@@ -120,7 +124,7 @@ if (partyGroup?.logoImageUrl) {
 context.logoImageUrl = logoImageUrl;
 
 // the company name
-companyName = "not found";
+companyName = "Default Company";
 if (partyGroup?.groupName) {
     companyName = partyGroup.groupName;
 }
@@ -199,4 +203,20 @@ paymentMethods = delegator.findByAnd("PaymentMethod", [partyId : partyId, paymen
 selPayments = EntityUtil.filterByDate(paymentMethods, nowTimestamp, "fromDate", "thruDate", true);
 if (selPayments) {
     context.eftAccount = delegator.findByPrimaryKey("EftAccount", [paymentMethodId : selPayments[0].paymentMethodId]);
+}
+
+// Tax ID Info
+partyTaxAuthInfoList = delegator.findByAnd("PartyTaxAuthInfo", [partyId : partyId]);
+if (partyTaxAuthInfoList) {
+    if (address.countryGeoId) {
+        // if we have an address with country filter by that
+        partyTaxAuthInfoList.eachWithIndex { partyTaxAuthInfo, i ->
+            if (partyTaxAuthInfo.taxAuthGeoId.equals(address.countryGeoId)) {
+                context.sendingPartyTaxId = partyTaxAuthInfo.partyTaxId;
+            }
+        }
+    } else {
+        // otherwise just grab the first one
+        context.sendingPartyTaxId = partyTaxAuthInfoList[0].partyTaxId;
+    }
 }

@@ -250,7 +250,7 @@
         <value xml:lang="de">Neu hinzufügen</value>
         <value xml:lang="en">Add New</value>
         <value xml:lang="es">Crear nuevo</value>
-        <value xml:lang="fr">Ajouter un nouveau</value>
+        <value xml:lang="fr">Ajouter</value>
         <value xml:lang="hi_IN">नया जोड़ें</value>
         <value xml:lang="it">Aggiungi nuovo</value>
         <value xml:lang="nl">Toevoegen nieuwe</value>
@@ -1835,6 +1835,10 @@
         <value xml:lang="th">วัน</value>
         <value xml:lang="zh">日</value>
         <value xml:lang="zh_CN">天数</value>
+    </property>
+    <property key="CommonDeactivate">
+        <value xml:lang="en">Deactivate, set thruDate to Now</value>
+        <value xml:lang="fr">Désactiver, mettre la date du jour comme date de fin</value>
     </property>
     <property key="CommonDebit">
         <value xml:lang="ar">دين</value>
@@ -4051,7 +4055,7 @@
         <value xml:lang="fr">Messages</value>
         <value xml:lang="hi_IN">खबरें</value>
         <value xml:lang="it">Messaggi</value>
-        <value xml:lang="nl">Berichten</value>		
+        <value xml:lang="nl">Berichten</value>    
         <value xml:lang="ro">Mesaje </value>
         <value xml:lang="ru">Сообщения</value>
         <value xml:lang="th">ข้อความ</value>
@@ -4594,6 +4598,10 @@
         <value xml:lang="ru">Нет адреса</value>
         <value xml:lang="th">ไม่มีรหัสไปรษณีย์</value>
         <value xml:lang="zh">没有邮政地址</value>
+    </property>
+    <property key="CommonNoStatesProvinces">            
+        <value xml:lang="en">No States/Provinces exist: _NA_</value>
+        <value xml:lang="fr">Aucun état ou province: _NA_</value>
     </property>
     <property key="CommonNoTaskAssigned">
         <value xml:lang="ar">لا مهام حالية تستوجب إهتمامكم</value>

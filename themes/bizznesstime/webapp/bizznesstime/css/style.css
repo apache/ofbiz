@@ -1574,6 +1574,17 @@ height:16px;
     padding-top: 4px;
 }
 
+#controls span#last-system-msg{
+color:#1C334D;
+padding-left:10px;
+float: right;
+margin-right: 20px;
+}
+
+.last-system-msg a{
+color:#1C334D;
+}
+
 /* ========================================================= */
 /* ===== JavaScript jQuery widgets                      ===== */
 /* ========================================================== */

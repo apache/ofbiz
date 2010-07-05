@@ -386,6 +386,39 @@ function modifySubmitButton (lookupDiv) {
                     var ocSub = oc.substring((oc.indexOf('=') + 1),(oc.length - 1));
                     navPagersSelect[navPager].setAttribute("onchange", "lookupPaginationAjaxRequest(" + ocSub + ", '" + lookupForm.id +"')");
                 }
+
+                if (resultTable == null) {
+                    return;
+                }
+                resultTable = resultTable.childElements()[0];
+                var resultElements = resultTable.childElements();
+                for (i in resultElements) {
+                    var childElements = resultElements[i].childElements();
+                    if (childElements.size() == 1) {
+                        continue;
+                    }
+                    
+                    for (k = 1; k < childElements.size(); k++) {
+                        var cell = childElements[k];
+                        var cellChild = null;
+                        cellChild = cell.childElements();
+                        if (cellChild.size() > 0) {
+                            
+                            for (l in cellChild) {
+                                var cellElement = cellChild[l];
+                                if (cellElement.tagName == 'A') {
+                                    var link = cellElement.href;
+                                    var liSub = link.substring(link.lastIndexOf('/')+1,(link.length));
+                                    if (liSub.contains("javascript:set_")) {
+                                        cellElement.href = liSub;
+                                    } else {
+                                        cellElement.href = "javascript:lookupAjaxRequest('" + liSub + "')";
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }                
             }
             catch (ex) {
             }

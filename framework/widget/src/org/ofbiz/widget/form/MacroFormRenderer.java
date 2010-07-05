@@ -46,6 +46,7 @@ import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.base.util.collections.MapStack;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.entity.Delegator;
@@ -2794,6 +2795,7 @@ public class MacroFormRenderer implements FormStringRenderer {
             } else {
                 ajaxUrl += ",";
             }
+            Map<String, String> parameters = updateArea.getParameterMap((Map<String, Object>) context);
             String targetUrl = updateArea.getAreaTarget(context);
             String ajaxParams = getAjaxParamsFromTarget(targetUrl);
             if (UtilValidate.isNotEmpty(extraParams)) {
@@ -2802,11 +2804,23 @@ public class MacroFormRenderer implements FormStringRenderer {
                 }
                 ajaxParams += extraParams;
             }
+            if(UtilValidate.isNotEmpty(parameters)){
+                if(UtilValidate.isEmpty(ajaxParams)){
+                    ajaxParams = "";
+                }
+                for (String key : parameters.keySet()) {
+                    if (ajaxParams.length()>0){
+                        ajaxParams += "&";
+                    }
+                    ajaxParams += key + "=" + parameters.get(key);
+                }
+            }
             ajaxUrl += updateArea.getAreaId() + ",";
             ajaxUrl += this.rh.makeLink(this.request, this.response, UtilHttp.removeQueryStringFromTarget(targetUrl));
             ajaxUrl += "," + ajaxParams;
         }
-        return ajaxUrl;
+        Locale locale = UtilMisc.ensureLocale(context.get("locale"));
+        return FlexibleStringExpander.expandString(ajaxUrl, context, locale);
     }
     /** Extracts parameters from a target URL string, prepares them for an Ajax
      * JavaScript call. This method is currently set to return a parameter string

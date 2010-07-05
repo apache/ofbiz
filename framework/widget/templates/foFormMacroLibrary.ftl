@@ -36,8 +36,10 @@ under the License.
     <#assign foStyle = foStyles[style]?default("")/>
     ${foStyle?default("")}
 </#macro>
-<#macro makeBlock style text><fo:block<#if style?has_content> <@getFoStyle style/></#if>><#if text?exists>${text}</#if></fo:block></#macro>
 
+<#escape x as x?xml>
+
+<#macro makeBlock style text><fo:block<#if style?has_content> <@getFoStyle style/></#if>><#if text?exists>${text}</#if></fo:block></#macro>
 
 <#macro renderField text><#if text?exists>${text}</#if></#macro>
 
@@ -71,7 +73,7 @@ under the License.
 <#macro renderHiddenField name value id event action></#macro>
 <#macro renderIgnoredField></#macro>
 
-<#macro renderFieldTitle style title id fieldHelpText="">${title?default("")}</#macro>
+<#macro renderFieldTitle style title id fieldHelpText="">${title?default("")?replace("&nbsp;", " ")}</#macro>
 <#macro renderSingleFormFieldTitle title>${title?default("")}</#macro>
     
 <#macro renderFormOpen linkUrl formType targetWindow containerId containerStyle autocomplete name useRowSubmit></#macro>
@@ -138,3 +140,4 @@ under the License.
 <#macro makeHyperlinkString linkStyle hiddenFormName event action imgSrc title alternate linkUrl targetWindow description confirmation><@makeBlock linkStyle description /></#macro>
 <#macro renderTooltip tooltip tooltipStyle></#macro>
 <#macro renderAsterisks requiredField requiredStyle></#macro>
+</#escape>
