@@ -18,7 +18,7 @@ under the License.
 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-
+<#assign initialLocale = locale.toString()>
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
     <title>${uiLabelMap.OfbizTitle}</title>
@@ -27,6 +27,7 @@ under the License.
     <script language="javascript" src="/images/fieldlookup.js" type="text/javascript"></script>
     <script language="javascript" src="/images/selectall.js" type="text/javascript"></script>
     <script language="javascript" src="/images/calendar_date_select.js" type="text/javascript"></script>
+    <script language="javascript" src="/images/calendarDateSelect/locale/${(parameters.userLogin.lastLocale?substring(0,2))!initialLocale?substring(0,2)!'en'}.js" type="text/javascript"></script>
     <script language="javascript" src="/ofbiz/script/effects.js" type="text/javascript"></script>
     <script language="javascript" src="/ofbiz/script/search.js" type="text/javascript"></script>
     <script language="javascript" src="/ofbiz/script/slides.js" type="text/javascript"></script>
@@ -34,6 +35,6 @@ under the License.
     <link rel="stylesheet" href="/ofbiz/images/global.css" type="text/css"/>
     
     <meta content="OFBiz_Thai for Thai user" name="Description"/>
-    <meta content="OFBiz, ofbiz support, ofbiz training, Ant websystems, outsource, outsourcing,framework, cheap, competitive, quality, OFBiz, Open Source ERP,Open Source CRM,Open Source E-Commerce,Open Source eCommerce,Open Source POS,Open Source SCM,Open Source MRP,Open Source CMMS,Open Source EAM,web services,workflow,ebusiness,e-business,ecommerce,e-commerce,automation,enterprise software,open source,entity engine,service engine,erp,crm,party,accounting,facility,supply,chain,management,catalog,order,project,task,work effort,financial,ledger,content management,customer,inventory" name="keywords"/>
+    <meta content="Open Source ERP,Open Source CRM,Open Source E-Commerce,Open Source eCommerce,Open Source POS,Open Source SCM,Open Source MRP,Open Source CMMS,Open Source EAM,web services,workflow,ebusiness,e-business,ecommerce,e-commerce,automation,enterprise software,open source,entity engine,service engine,erp,crm,party,accounting,facility,supply,chain,management,catalog,order,project,task,work effort,financial,ledger,content management,customer,inventory" name="keywords"/>
 </head>
 
