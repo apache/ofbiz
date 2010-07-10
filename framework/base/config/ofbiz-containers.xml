@@ -96,6 +96,11 @@ under the License.
     <!-- TODO: switch to webslinger, for per-site logging
     <container name="catalina-container" class="org.ofbiz.webslinger.WebslingerCatalinaContainer">
     -->
+    <container name="jackrabbit" class="org.ofbiz.jackrabbit.JackrabbitContainer">
+        <property name="repHomeDir" value="runtime/data/jackrabbit/"/>
+        <property name="configFilePath" value="framework/jackrabbit/config/repository.xml"/>
+    </container>
+
     <container name="catalina-container" class="org.ofbiz.catalina.container.CatalinaContainer">
         <!-- static configuration for tomcat -->
         <property name="delegator-name" value="default"/>

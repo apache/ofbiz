@@ -230,6 +230,7 @@
     <classpathentry kind="src" path="framework/example/src"/>
     <classpathentry kind="src" path="framework/geronimo/src"/>
     <classpathentry kind="src" path="framework/guiapp/src"/>
+    <classpathentry kind="src" path="framework/jackrabbit/src"/>
     <classpathentry kind="src" path="framework/jetty/src"/>
     <classpathentry kind="src" path="framework/minilang/src"/>
     <classpathentry kind="src" path="framework/security/src"/>
