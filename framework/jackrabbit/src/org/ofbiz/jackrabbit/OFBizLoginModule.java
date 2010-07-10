@@ -127,6 +127,7 @@ public class OFBizLoginModule implements LoginModule {
                 Map<String, ? extends Object> result = dispatcher.runSync("userLogin", loginCtx);
                 if (ServiceUtil.isSuccess(result)) {
                     userLogin = (GenericValue) result.get("userLogin");
+                    return true;
                 }
             } catch (GenericServiceException e) {
                 Debug.logError(e, module);
