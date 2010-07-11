@@ -25,6 +25,7 @@ import java.net.URL;
 
 import javax.jcr.Credentials;
 import javax.jcr.LoginException;
+import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
@@ -51,7 +52,7 @@ public class JackrabbitContainer implements Container {
     private static File homeDir = null;
     private static File jackrabbitConfigFile = null;
 
-    private static TransientRepository repository;
+    private static Repository repository;
     private static Session session;
 
     @Override
@@ -61,7 +62,7 @@ public class JackrabbitContainer implements Container {
         try {
             homeDirURL = ContainerConfig.getPropertyValue(cc, "repHomeDir", "runtime/data/jackrabbit/");
             homeDir = new File(homeDirURL);
-            URL jackrabbitConfigUrl = FlexibleLocation.resolveLocation(ContainerConfig.getPropertyValue(cc, "configFilePath", "framework/jackrabbit/config/repository.xml"));
+            URL jackrabbitConfigUrl = FlexibleLocation.resolveLocation(ContainerConfig.getPropertyValue(cc, "configFilePath", "framework/jackrabbit/config/jackrabbit.xml"));
             jackrabbitConfigFile = new File(jackrabbitConfigUrl.toURI());
             
         } catch (MalformedURLException e) {
@@ -95,7 +96,8 @@ public class JackrabbitContainer implements Container {
             session.logout();
         }
         if (repository != null) {
-            repository.shutdown();
+            // Not needed - Jackrabbit shuts down when the session is closed
+//            repository.shutdown();
         }
     }
 

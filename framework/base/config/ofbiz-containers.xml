@@ -98,7 +98,7 @@ under the License.
     -->
     <container name="jackrabbit" class="org.ofbiz.jackrabbit.JackrabbitContainer">
         <property name="repHomeDir" value="runtime/data/jackrabbit/"/>
-        <property name="configFilePath" value="framework/jackrabbit/config/repository.xml"/>
+        <property name="configFilePath" value="framework/jackrabbit/config/jackrabbit.xml"/>
     </container>
 
     <container name="catalina-container" class="org.ofbiz.catalina.container.CatalinaContainer">
