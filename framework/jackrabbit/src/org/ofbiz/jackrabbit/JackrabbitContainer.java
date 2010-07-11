@@ -75,6 +75,7 @@ public class JackrabbitContainer implements Container {
     @Override
     public boolean start() throws ContainerException {
         repository = new TransientRepository(jackrabbitConfigFile, homeDir);
+//        repository = RepositoryFactory.getRepository();
         try {
             Delegator delegator = DelegatorFactory.getDelegator("default");
             GenericValue userLogin = delegator.findOne("UserLogin", true, "userLoginId", "system");
