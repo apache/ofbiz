@@ -18,39 +18,96 @@
  *******************************************************************************/
 package org.ofbiz.jackrabbit;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.jcr.Repository;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.base.util.UtilXml;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class RepositoryFactory {
 
     public static final String module = RepositoryFactory.class.getName();
-    private static final Repository repository = createRepoInstance();
+    private static final Map<String, Repository> repositoryMap = createRepositoryMap();
 
-    private static Repository createRepoInstance() {
-        Repository result = null;
-        try {
-            result = createUsingJndi();
-        } catch (Exception e) {
-            Debug.logError(e, module);
-        }
-        Debug.logInfo("JNDI lookup returned " + result, module);
-        return result;
+    private static Repository createFromFactory(ClassLoader loader, String className) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+        JcrRepositoryFactory factory = (JcrRepositoryFactory) loader.loadClass(className).newInstance();
+        return factory.getInstance();
     }
     
-    private static Repository createUsingJndi() throws NamingException {
-        String repoUrl = UtilProperties.getPropertyValue("repository.properties", "jndi.repository.url");
-        if (UtilValidate.isEmpty(repoUrl)) {
-            return null;
-        }
-        return (Repository) new InitialContext().lookup(repoUrl);
+    private static Map<String, Repository> createRepositoryMap() {
+        Map<String, Repository> result = new HashMap<String, Repository>();
+        loadRepositories(result);
+        Debug.logInfo("Repositories loaded: " + result.size(), module);
+        return Collections.unmodifiableMap(result);
     }
 
     public static Repository getRepository() {
-        return repository;
+        return repositoryMap.get("default");
     }
+
+    public static Repository getRepository(String name) {
+        return repositoryMap.get(name);
+    }
+
+    private static void loadRepositories(Map<String, Repository> map) {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        Enumeration<URL> resources;
+        try {
+            resources = loader.getResources("jcr-repositories.xml");
+        } catch (IOException e) {
+            Debug.logError(e, "Could not load list of jcr-repositories.xml", module);
+            return;
+        }
+        while (resources.hasMoreElements()) {
+            URL repositoriesURL = resources.nextElement();
+            Debug.logInfo("Loading repositories from: " + repositoriesURL, module);
+            Document doc = null;
+            try {
+                doc = UtilXml.readXmlDocument(repositoriesURL, false);
+            } catch (Exception e) {
+                Debug.logError(e, module);
+                continue;
+            }
+            Element resourceElement = doc.getDocumentElement();
+            List<? extends Element> repositoryList = UtilXml.childElementList(resourceElement, "repository");
+            for (Element element : repositoryList) {
+                String name = element.getAttribute("name");
+                if (UtilValidate.isEmpty(name)) {
+                    continue;
+                }
+                String jndiName = element.getAttribute("jndi-name");
+                if (UtilValidate.isNotEmpty(jndiName)) {
+                    try {
+                        map.put(name, (Repository) new InitialContext().lookup(jndiName));
+                    } catch (NamingException e) {
+                        Debug.logError(e, module);
+                    }
+                    continue;
+                }
+                String className = element.getAttribute("class-name");
+                if (UtilValidate.isNotEmpty(className)) {
+                    try {
+                        map.put(name, createFromFactory(loader, className));
+                    } catch (Exception e) {
+                        Debug.logError(e, module);
+                    }
+                }
+            }
+        }
+        
+    }
+
+    private RepositoryFactory() {}
 }
