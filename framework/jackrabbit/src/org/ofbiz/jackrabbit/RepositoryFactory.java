@@ -18,17 +18,10 @@
  *******************************************************************************/
 package org.ofbiz.jackrabbit;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-
 import javax.jcr.Repository;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.apache.jackrabbit.core.TransientRepository;
-import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
@@ -38,14 +31,6 @@ public class RepositoryFactory {
     public static final String module = RepositoryFactory.class.getName();
     private static final Repository repository = createRepoInstance();
 
-    private static Repository createEmbedded() throws MalformedURLException, URISyntaxException {
-        String homeDirURL = UtilProperties.getPropertyValue("repository.properties", "jackrabbit.repHomeDir");
-        String configFilePath = UtilProperties.getPropertyValue("repository.properties", "jackrabbit.configFilePath");
-        File homeDir = new File(homeDirURL);
-        URL configUrl = FlexibleLocation.resolveLocation(configFilePath);
-        return new TransientRepository(new File(configUrl.toURI()), homeDir);
-    }
-
     private static Repository createRepoInstance() {
         Repository result = null;
         try {
@@ -53,13 +38,7 @@ public class RepositoryFactory {
         } catch (Exception e) {
             Debug.logError(e, module);
         }
-        if (result == null) {
-            try {
-                result = createEmbedded();
-            } catch (Exception e) {
-                Debug.logError(e, module);
-            }
-        }
+        Debug.logInfo("JNDI lookup returned " + result, module);
         return result;
     }
     

@@ -29,6 +29,10 @@ import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.naming.Reference;
 
 import org.apache.jackrabbit.core.TransientRepository;
 import org.ofbiz.base.container.Container;
@@ -41,18 +45,18 @@ import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 
-// TODO: Add support for remote and jndi based repositories?
-// then use this container to register and start up an embedded instance only
-// repository access for ofbiz should be provided for in a separate class
-
+/**
+ * A container for a local JCR-compliant content repository. The current
+ * implementation uses Apache Jackrabbit. 
+ */
 public class JackrabbitContainer implements Container {
 
     public static final String module = JackrabbitContainer.class.getName();
 
     private static File homeDir = null;
     private static File jackrabbitConfigFile = null;
-
-    private static Repository repository;
+    private static String jndiName;
+    protected static Repository repository;
     private static Session session;
 
     @Override
@@ -61,6 +65,7 @@ public class JackrabbitContainer implements Container {
         String homeDirURL;
         try {
             homeDirURL = ContainerConfig.getPropertyValue(cc, "repHomeDir", "runtime/data/jackrabbit/");
+            jndiName = ContainerConfig.getPropertyValue(cc, "jndiName", "jcr/local");
             homeDir = new File(homeDirURL);
             URL jackrabbitConfigUrl = FlexibleLocation.resolveLocation(ContainerConfig.getPropertyValue(cc, "configFilePath", "framework/jackrabbit/config/jackrabbit.xml"));
             jackrabbitConfigFile = new File(jackrabbitConfigUrl.toURI());
@@ -75,7 +80,6 @@ public class JackrabbitContainer implements Container {
     @Override
     public boolean start() throws ContainerException {
         repository = new TransientRepository(jackrabbitConfigFile, homeDir);
-//        repository = RepositoryFactory.getRepository();
         try {
             Delegator delegator = DelegatorFactory.getDelegator("default");
             GenericValue userLogin = delegator.findOne("UserLogin", true, "userLoginId", "system");
@@ -88,11 +92,26 @@ public class JackrabbitContainer implements Container {
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
+        try {
+            Reference ref = new Reference(Repository.class.getName(), LocalRepositoryFactory.class.getName(), null);
+            Context context = new InitialContext();
+            context.bind(jndiName, ref);
+        } catch (NamingException e) {
+            Debug.logError(e, module);
+        }
+        // Test JNDI bind
+        RepositoryFactory.getRepository();
         return true;
     }
 
     @Override
     public void stop() throws ContainerException {
+        try {
+            Context context = new InitialContext();
+            context.unbind(jndiName);
+        } catch (NamingException e) {
+            Debug.logError(e, module);
+        }
         if (session != null) {
             session.logout();
         }
