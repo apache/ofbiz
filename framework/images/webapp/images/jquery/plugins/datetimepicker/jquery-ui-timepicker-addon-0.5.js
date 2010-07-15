@@ -15,8 +15,17 @@
 * #ui-timepicker-div dl dd{ margin: -25px 0 10px 65px; }
 */
 (function($) {
-    function Timepicker() { }
-
+    // MOD for OFBiz to pick up the current Time
+    // init current Time fields
+    var now = new Date();
+    this.hour =  now.getHours();
+    this.minute = now.getMinutes();
+    this.second = now.getSeconds();
+    // END MOD
+    
+    function Timepicker() { 
+    }
+    
     Timepicker.prototype = {
         $input: null,
         $timeObj: null,
@@ -44,9 +53,11 @@
             stepMinute: .05,
             stepSecond: .05,
             ampm: false,
-            hour: 0,
-            minute: 0,
-            second: 0,
+            // MOD for OFBiz to pick up the current Time
+            hour: hour,
+            minute: minute,
+            second: second,
+            // END MOD
             timeFormat: 'hh:mm tt',
             alwaysSetTime: true
             //----------------------------
