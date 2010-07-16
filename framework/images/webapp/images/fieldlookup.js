@@ -178,6 +178,83 @@ function initiallyCollapseDelayed() {
 /*************************************
 * Fieldlookup Class & Methods
 *************************************/
+function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalTarget, formName, width, height, position, modal) {
+    // create Link Element with unique Key
+    var lookupId = GLOBAL_LOOKUP_REF.createNextKey();
+
+    var inputBox = document.getElementById(inputFieldId);
+    inputBox.id = lookupId + "_" + inputFieldId;
+    var parent = inputBox.parentNode;
+
+
+    var link = document.createElement('A');
+    link.href = "javascript:void(0);";
+    link.id = lookupId + "_button";
+
+    parent.appendChild(link);
+
+    var hiddenDiv = document.createElement("DIV");
+    hiddenDiv.id = lookupId;
+    hiddenDiv.css = "{display: none;}";
+    hiddenDiv.title = "My Dialog " + lookupId + " --> Target:  " + requestUrl;
+
+    parent.appendChild(hiddenDiv);
+    
+    // Lookup Configuration
+    var dialogOpts = {
+        modal: (modal == "true") ? true : false,
+        bgiframe: true,
+        autoOpen: false,
+        height: (height != "") ? height : 500,
+        width: (width != "") ? width :620,
+        draggable: true,
+        resizeable: true,
+        open: function() {
+            jQuery("#" + lookupId).load(requestUrl);
+        },
+        close: function() {
+            //when the window is closed the prev Lookup get the focus (if exists)
+            var prevLookup = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).prevLookup;
+            if (prevLookup != null) {
+                identifyLookup(prevLookup);
+            }
+        }
+
+    };
+    
+    // init Dialog and register
+    // create an object with all Lookup Informationes that are needed
+    var dialogRef = jQuery("#" + lookupId).dialog(dialogOpts);
+    
+    //setting up global variabels, for external access
+    this.lookupId = lookupId;
+    this.formName = formName;
+    this.target = null;
+    if (dialogOptionalTarget != null) {
+        this.target2 = null;
+    }
+    ((GLOBAL_LOOKUP_REF.countFields() - 1) >=0) ? this.prevLookup = (GLOBAL_LOOKUP_REF.countFields() - 1) + "_lookupId" : null;
+    this.dialogRef = dialogRef;
+    //write external settings in global window manager
+    GLOBAL_LOOKUP_REF.setReference(lookupId, this);
+    
+    // bind click Event to Dialog button
+    jQuery("#" + lookupId + "_button").click(
+        function (){
+            jQuery("#" + lookupId).dialog("open");
+            jQuery("#" + lookupId).dialog(dialogOpts);
+            GLOBAL_LOOKUP_REF.getReference(lookupId).target = jQuery(dialogTarget);
+            if (dialogOptionalTarget != null) {
+                //the target2 have to be set here, because the input field is not created before
+                GLOBAL_LOOKUP_REF.getReference(lookupId).target2 = jQuery(dialogOptionalTarget);
+            }
+            // thats a quite bad hack to modifay the buttons
+            identifyLookup(lookupId);
+            window.setTimeout("modifySubmitButton('" + lookupId +"')", 800);
+            return false;
+        }
+    );
+}
 
 function FieldLookupCounter() {
 	this.refArr = {};
