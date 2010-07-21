@@ -27,7 +27,7 @@ import javax.naming.Reference;
 import javax.naming.spi.ObjectFactory;
 
 /**
- * An <code>ObjectFactory</code> that returns a <code>javax.jcr.Repository</code>
+ * A JNDI <code>ObjectFactory</code> that returns a <code>javax.jcr.Repository</code>
  * instance.
  */
 public class LocalRepositoryFactory implements ObjectFactory {

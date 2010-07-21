@@ -21,5 +21,10 @@ package org.ofbiz.jackrabbit;
 import javax.jcr.Repository;
 
 public interface JcrRepositoryFactory {
-    Repository getInstance();
+    /**
+     * 
+     * @param repositoryName The name specified in the <code>jcr-repositories.xml</code> file
+     * @return
+     */
+    Repository getInstance(String repositoryName);
 }

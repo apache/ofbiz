@@ -17,6 +17,15 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
+
+<!-- Any number of JCR repositories can be configured in this file,
+     and this file can be located anywhere in the Java classpath.
+
+      Each repository must have a unique name, and there must
+      be one repository named "default" - which is used when
+      no repository name is specified.
+ -->
+ 
 <jcr-repositories xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <!-- A JCR Repository located using JNDI -->
@@ -24,7 +33,8 @@ under the License.
 
     <!-- A JCR Repository created from a factory. The
          class-name attribute contains the name of a class that
-         implements JcrRepositoryFactory. -->
+         implements JcrRepositoryFactory. The name attribute is
+         passed to the factory's getInstance method. -->
     <!--
     <repository name="foo" class-name="com.mydomain.fooRepoFactory"/>
     -->

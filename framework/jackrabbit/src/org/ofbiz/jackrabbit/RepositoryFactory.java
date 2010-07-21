@@ -41,9 +41,9 @@ public class RepositoryFactory {
     public static final String module = RepositoryFactory.class.getName();
     private static final Map<String, Repository> repositoryMap = createRepositoryMap();
 
-    private static Repository createFromFactory(ClassLoader loader, String className) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+    private static Repository createFromFactory(String repositoryName, ClassLoader loader, String className) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         JcrRepositoryFactory factory = (JcrRepositoryFactory) loader.loadClass(className).newInstance();
-        return factory.getInstance();
+        return factory.getInstance(repositoryName);
     }
     
     private static Map<String, Repository> createRepositoryMap() {
@@ -53,10 +53,22 @@ public class RepositoryFactory {
         return Collections.unmodifiableMap(result);
     }
 
+    /**
+     * Returns the default repository.
+     * 
+     * @return
+     */
     public static Repository getRepository() {
         return repositoryMap.get("default");
     }
 
+    /**
+     * Returns the specified repository, or <code>null</code> if the
+     * specified repository doesn't exist.
+     * 
+     * @param name
+     * @return
+     */
     public static Repository getRepository(String name) {
         return repositoryMap.get(name);
     }
@@ -99,7 +111,7 @@ public class RepositoryFactory {
                 String className = element.getAttribute("class-name");
                 if (UtilValidate.isNotEmpty(className)) {
                     try {
-                        map.put(name, createFromFactory(loader, className));
+                        map.put(name, createFromFactory(name, loader, className));
                     } catch (Exception e) {
                         Debug.logError(e, module);
                     }
