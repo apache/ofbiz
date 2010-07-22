@@ -403,67 +403,67 @@ function ajaxAutoCompleteDropDown(descriptionElement, hiddenElement, data, optio
 }
 
 /** Toggle area visibility on/off.
-  * @param link The <a> element calling this function
-  * @param areaId The id of the HTML container to toggle
-  * @param expandTxt Localized 'Expand' text
-  * @param collapseTxt Localized 'Collapse' text
+ * @param link The <a> element calling this function
+ * @param areaId The id of the HTML container to toggle
+ * @param expandTxt Localized 'Expand' text
+ * @param collapseTxt Localized 'Collapse' text
 */
 function toggleCollapsiblePanel(link, areaId, expandTxt, collapseTxt){
-    var container = $(areaId);
-    var liElement = $(link).up('li');
-    if(container.visible()){
-        liElement.removeClassName('expanded');
-        liElement.addClassName('collapsed');
-        link.title = expandTxt;
-    } else {
-        liElement.removeClassName('collapsed');
-        liElement.addClassName('expanded');
-        link.title = collapseTxt;
-    }
-    Effect.toggle(container, 'appear');
+   var container = jQuery("#" + areaId);
+   var liElement = jQuery(link).parents('li:first');
+   if(container.is(':visible')){
+       liElement.removeClass('expanded');
+       liElement.addClass('collapsed');
+       link.title = expandTxt;
+   } else {
+       liElement.removeClass('collapsed');
+       liElement.addClass('expanded');
+       link.title = collapseTxt;
+   }
+   container.animate({opacity: 'toggle', height: 'toggle'}, "slow");
 }
 
 /** Toggle screenlet visibility on/off.
-  * @param link The <a> element calling this function
-  * @param areaId The id of the HTML container to toggle
-  * @param expandTxt Localized 'Expand' text
-  * @param collapseTxt Localized 'Collapse' text
+ * @param link The <a> element calling this function
+ * @param areaId The id of the HTML container to toggle
+ * @param expandTxt Localized 'Expand' text
+ * @param collapseTxt Localized 'Collapse' text
 */
 function toggleScreenlet(link, areaId, saveCollapsed, expandTxt, collapseTxt){
-    toggleCollapsiblePanel(link, areaId, expandTxt, collapseTxt);
-    var container = $(areaId);
-    var screenlet = container.up('div');
-    if(container.visible()){
-        var currentParam = screenlet.id + "_collapsed=false";
-        var newParam = screenlet.id + "_collapsed=true";
-        if(saveCollapsed=='true'){
-            setUserLayoutPreferences('GLOBAL_PREFERENCES',screenlet.id+"_collapsed",'true');
-        }
-    } else {
-        var currentParam = screenlet.id + "_collapsed=true";
-        var newParam = screenlet.id + "_collapsed=false";
-        if(saveCollapsed=='true'){
-            setUserLayoutPreferences('GLOBAL_PREFERENCES',screenlet.id+"_collapsed",'false');
-        }
-    }
-    var paginationMenus = $$('div.nav-pager');
-    paginationMenus.each(function(menu) {
-        if (menu) {
-            var childElements = menu.getElementsByTagName('a');
-            for (var i = 0; i < childElements.length; i++) {
-                if (childElements[i].href.indexOf("http") == 0) {
-                    childElements[i].href = replaceQueryParam(childElements[i].href, currentParam, newParam);
-                }
-            }
-            childElements = menu.getElementsByTagName('select');
-            for (i = 0; i < childElements.length; i++) {
-                if (childElements[i].href.indexOf("location.href") >= 0) {
-                    Element.extend(childElements[i]);
-                    childElements[i].writeAttribute("onchange", replaceQueryParam(childElements[i].readAttribute("onchange"), currentParam, newParam));
-                }
-            }
-        }
-    });
+   toggleCollapsiblePanel(link, areaId, expandTxt, collapseTxt);
+   var container = jQuery("#" + areaId);
+   var screenlet = jQuery(link).parents('div:first');;
+   if(container.is(':visible')){
+       var currentParam = screenlet.id + "_collapsed=false";
+       var newParam = screenlet.id + "_collapsed=true";
+       if(saveCollapsed=='true'){
+           setUserLayoutPreferences('GLOBAL_PREFERENCES',screenlet.id+"_collapsed",'true');
+       }
+   } else {
+       var currentParam = screenlet.id + "_collapsed=true";
+       var newParam = screenlet.id + "_collapsed=false";
+       if(saveCollapsed=='true'){
+           setUserLayoutPreferences('GLOBAL_PREFERENCES',screenlet.id+"_collapsed",'false');
+       }
+   }
+   var paginationMenus = jQuery('div.nav-pager');
+   jQuery.each(paginationMenus, function(menu) {
+       if (menu) {
+           var childElements = menu.getElementsByTagName('a');
+           for (var i = 0; i < childElements.length; i++) {
+               if (childElements[i].href.indexOf("http") == 0) {
+                   childElements[i].href = replaceQueryParam(childElements[i].href, currentParam, newParam);
+               }
+           }
+           childElements = menu.getElementsByTagName('select');
+           for (i = 0; i < childElements.length; i++) {
+               if (childElements[i].href.indexOf("location.href") >= 0) {
+                   Element.extend(childElements[i]);
+                   childElements[i].writeAttribute("onchange", replaceQueryParam(childElements[i].readAttribute("onchange"), currentParam, newParam));
+               }
+           }
+       }
+   });
 }
 
 /** In Place Editor for display elements
