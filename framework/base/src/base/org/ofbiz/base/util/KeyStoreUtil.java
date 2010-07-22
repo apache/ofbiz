@@ -87,7 +87,7 @@ public class KeyStoreUtil {
             File file = new File(fileName);
             if (file.exists() && file.canRead()) {
                 KeyStore ks = KeyStore.getInstance("jks");
-                InputStream in = new FileInputStream(keyFile);
+                InputStream in = new FileInputStream(file);
                 try {
                     ks.load(in, password.toCharArray());
                 } finally {
