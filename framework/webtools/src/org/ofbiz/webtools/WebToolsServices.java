@@ -108,7 +108,7 @@ public class WebToolsServices {
         // #############################
         // The filename to parse is prepared
         // #############################
-        if (fmfilename != null && fmfilename.lenth() > 0 && filename != null && filename.length() > 0) {
+        if (fmfilename != null && fmfilename.length() > 0 && filename != null && filename.length() > 0) {
             try {
                 url = isUrl?new URL(filename):UtilURL.fromFilename(filename);
                 InputStream is = url.openStream();
@@ -125,7 +125,7 @@ public class WebToolsServices {
         // #############################
         // The text to parse is prepared
         // #############################
-        if (fmfilename != null && fmfilename.lenth() > 0 && fulltext != null && fulltext.length() > 0) {
+        if (fmfilename != null && fmfilename.length() > 0 && fulltext != null && fulltext.length() > 0) {
             StringReader sr = new StringReader(fulltext);
             ins = new InputSource(sr);
         }
