@@ -27,6 +27,9 @@ var ACTIVATED_LOOKUP = null;
 var LOOKUP_DIV = null;
 INITIALLY_COLLAPSED = null;
 
+// not cool but necassary until someone have anthoer idea 
+var timeout = 800;
+
 function moveobj(evt) {
     if (NS4 || NS6) {
         mx = evt.screenX;
@@ -186,7 +189,6 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
     inputBox.id = lookupId + "_" + inputFieldId;
     var parent = inputBox.parentNode;
 
-
     var link = document.createElement('A');
     link.href = "javascript:void(0);";
     link.id = lookupId + "_button";
@@ -199,14 +201,14 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
     hiddenDiv.title = "My Dialog " + lookupId + " --> Target:  " + requestUrl;
 
     parent.appendChild(hiddenDiv);
-    
+
     // Lookup Configuration
     var dialogOpts = {
         modal: (modal == "true") ? true : false,
         bgiframe: true,
         autoOpen: false,
-        height: (height != "") ? height : 500,
-        width: (width != "") ? width :620,
+        height: (height != "") ? parseInt(height) : 500,
+        width: (width != "") ? parseInt(width) : 620,
         draggable: true,
         resizeable: true,
         open: function() {
@@ -227,6 +229,7 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
     var dialogRef = jQuery("#" + lookupId).dialog(dialogOpts);
     
     //setting up global variabels, for external access
+    this.inputBoxId = inputBox.id;
     this.lookupId = lookupId;
     this.formName = formName;
     this.target = null;
@@ -250,10 +253,11 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
             }
             // thats a quite bad hack to modifay the buttons
             identifyLookup(lookupId);
-            window.setTimeout("modifySubmitButton('" + lookupId +"')", 800);
+            window.setTimeout("modifySubmitButton('" + lookupId +"')", timeout);
             return false;
         }
     );
+    
 }
 
 function FieldLookupCounter() {
@@ -503,7 +507,7 @@ function modifySubmitButton (lookupDiv) {
         
         });
         // modify links in result table ...
-        var resultTable= jQuery("#search-results table:first tbody");
+        var resultTable= jQuery("#" + lookupDiv + " #search-results table:first tbody");
         var tableChildren = resultTable.children();
         jQuery.each(tableChildren, function(tableChild){
         	var childElements = jQuery(tableChildren[tableChild]);
@@ -536,7 +540,7 @@ function lookupAjaxRequest(request) {
 
     lookupId = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).lookupId;
 	$("#" + lookupId).load(request, arg);
-	window.setTimeout("modifySubmitButton('" + lookupId +"')", 800);
+    window.setTimeout("modifySubmitButton('" + lookupId +"')", timeout);
 }
 
 /**
@@ -548,7 +552,7 @@ function lookupAjaxRequest(request) {
 function lookupFormAjaxRequest(formAction, form) {
 	lookupId = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).lookupId;
 	$("#" + lookupId).load(formAction, $("#" + form).serialize());
-	window.setTimeout("modifySubmitButton('" + lookupId +"')", 800);
+    window.setTimeout("modifySubmitButton('" + lookupId +"')", timeout);
 }
 
 function lookupPaginationAjaxRequest(navAction, form, type) {
@@ -562,7 +566,7 @@ function lookupPaginationAjaxRequest(navAction, form, type) {
     
     lookupId = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).lookupId;
 	$("#" + lookupId).load(navAction);
-	window.setTimeout("modifySubmitButton('" + lookupId +"')", 800);
+    window.setTimeout("modifySubmitButton('" + lookupId +"')", timeout);
 	
 }
 
@@ -679,7 +683,6 @@ function lookupDescriptionLoaded(fieldId, url, params) {
     this.updateFunction = function(transport) {
         var wrapperElement = new Element('div').insert(transport.responseText);
         if('UL'!= wrapperElement.firstDescendant().tagName || (wrapperElement.firstDescendant().childElements().length != 1)) {    
-            //alert(transport.responseText); response is error or more than one entries are found
             return;
         }
         Element.cleanWhitespace(wrapperElement);
