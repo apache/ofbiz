@@ -75,7 +75,9 @@ public class FinAccountServices {
             }
 
             // set the dates/userlogin
-            inContext.put("thruDate", UtilDateTime.getDayEnd(now, accountValidDays.intValue()));
+            if (UtilValidate.isNotEmpty(accountValidDays)){
+                inContext.put("thruDate", UtilDateTime.getDayEnd(now, accountValidDays.intValue()));
+            }
             inContext.put("fromDate", now);
             inContext.put("userLogin", userLogin);
 
