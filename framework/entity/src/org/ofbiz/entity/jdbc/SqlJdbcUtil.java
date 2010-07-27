@@ -42,8 +42,6 @@ import javax.sql.rowset.serial.SerialClob;
 
 import javolution.util.FastMap;
 
-import org.ofbiz.base.conversion.Converter;
-import org.ofbiz.base.conversion.Converters;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.ObjectType;
 import org.ofbiz.base.util.UtilGenerics;
@@ -488,7 +486,6 @@ public class SqlJdbcUtil {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static void getValue(ResultSet rs, int ind, ModelField curField, GenericEntity entity, ModelFieldTypeReader modelFieldTypeReader) throws GenericEntityException {
         ModelFieldType mft = modelFieldTypeReader.getModelFieldType(curField.getType());
 
@@ -496,52 +493,6 @@ public class SqlJdbcUtil {
             throw new GenericModelException("definition fieldType " + curField.getType() + " not found, cannot getValue for field " +
                     entity.getEntityName() + "." + curField.getName() + ".");
         }
-
-        // ----- Try out the new converter code -----
-
-        Object sourceObject = null;
-        try {
-            sourceObject = rs.getObject(ind);
-            if (sourceObject == null) {
-                entity.dangerousSetNoCheckButFast(curField, null);
-                return;
-            }
-        } catch (SQLException e) {
-            throw new GenericEntityException(e);
-        }
-        Class<?> targetClass = mft.getJavaClass();
-        if (targetClass != null) {
-            Class<?> sourceClass = sourceObject.getClass();
-            if (targetClass.equals(sourceClass)) {
-                entity.dangerousSetNoCheckButFast(curField, sourceObject);
-                return;
-            }
-            Converter<Object, Object> converter = (Converter<Object, Object>) mft.getSqlToJavaConverter();
-            if (converter == null) {
-                if (mft.getSqlClass() == null) {
-                    mft.setSqlClass(sourceClass);
-                }
-                try {
-                    converter = (Converter<Object, Object>) Converters.getConverter(sourceClass, targetClass);
-                    mft.setSqlToJavaConverter(converter);
-                } catch (Exception e) {
-                    Debug.logError(e, module);
-                }
-            }
-            if (converter != null) {
-                try {
-                    entity.dangerousSetNoCheckButFast(curField, converter.convert(sourceObject));
-                    return;
-                } catch (ClassCastException e) {
-                    Debug.logError(e.toString(), module);
-                } catch (Exception e) {
-                    Debug.logError(e, module);
-                }
-            }
-            Debug.logInfo("Unable to convert, falling back on switch statement", module);
-        }
-
-        // ------------------------------------------
 
         String fieldType = mft.getJavaType();
 
