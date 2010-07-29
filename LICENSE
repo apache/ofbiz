@@ -1266,6 +1266,7 @@ ofbiz/trunk/framework/images/webapp/images/jquery/jquery-1.4.2.min.js
 ofbiz/trunk/framework/images/webapp/images/jquery/plugins/jquery-ui-timepicker-addon-0.5.js
 ofbiz/trunk/framework/images/webapp/images/jquery/plugins/jquery-ui-timepicker-addon-0.5.min.js
 ofbiz/trunk/framework/images/webapp/images/jquery/ui/js/jquery-ui-1.8.2.custom.min.js
+ofbiz/trunk/framework/images/webapp/images/jquery/plugins/jeditable/jquery.jeditable.js
 =========================================================================
 The MIT License
 

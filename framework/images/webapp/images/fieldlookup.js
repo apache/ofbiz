@@ -181,12 +181,13 @@ function initiallyCollapseDelayed() {
 /*************************************
 * Fieldlookup Class & Methods
 *************************************/
-function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalTarget, formName, width, height, position, modal) {
+function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalTarget, formName, width, height, position, modal, ajaxUrl, showDescription) {
     // create Link Element with unique Key
     var lookupId = GLOBAL_LOOKUP_REF.createNextKey();
 
     var inputBox = document.getElementById(inputFieldId);
-    inputBox.id = lookupId + "_" + inputFieldId;
+    newInputBoxId = lookupId + "_" + inputFieldId;
+    inputBox.id = newInputBoxId;
     var parent = inputBox.parentNode;
 
     var link = document.createElement('A');
@@ -202,6 +203,14 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
 
     parent.appendChild(hiddenDiv);
 
+    // createAjax autocomplete
+    if (ajaxUrl != "" && showDescription != "") {
+        //write the new input box id in the ajaxUrl Array
+        ajaxUrl = ajaxUrl.replace(ajaxUrl.substring(0, ajaxUrl.indexOf(",")), newInputBoxId)
+        new ajaxAutoCompleter(ajaxUrl, showDescription);
+        
+    }
+    
     // Lookup Configuration
     var dialogOpts = {
         modal: (modal == "true") ? true : false,

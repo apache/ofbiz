@@ -16,11 +16,12 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-
-<ul>
+<script type="text/javascript">
+var autocomp = [
     <#if autocompleteOptions?exists>
         <#assign displayReturnField = Static["org.ofbiz.base.util.UtilProperties"].getPropertyValue("widget.properties", "widget.autocompleter.displayReturnField")>
         <#list autocompleteOptions as autocompleteOption>
+            {
             <#assign displayString = ""/>
             <#assign returnField = ""/>
             <#-- <#list autocompleteOption.keySet() as key> instead use the field order of display fields -->
@@ -36,8 +37,12 @@ under the License.
             </#list>
             <#if ("Y" == displayReturnField)>
                 <#assign displayString = displayString +  "[" + returnField + "]">
-            </#if>            
-            <li id="${returnField}"><#if (displayString?trim?has_content )>${displayString?trim}<#else>${returnField}</#if></li>
+            </#if>
+            "id": " ${returnField}",
+            "label": "<#if (displayString?trim?has_content )>${displayString?trim}<#else>${returnField}</#if>",
+            "value": "${returnField}"
+            }<#if autocompleteOption_has_next>,</#if>
         </#list>
     </#if>
-</ul>
+];
+</script>

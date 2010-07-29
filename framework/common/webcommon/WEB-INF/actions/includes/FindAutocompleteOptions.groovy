@@ -31,10 +31,9 @@ def andExprs = [];
 def entityName = context.entityName;
 def searchFields = context.searchFields;
 def displayFields = context.displayFields ?: searchFields;
-def searchValueFieldName = parameters.searchValueField;
-if (searchValueFieldName) fieldValue = parameters.get(searchValueFieldName);
+def searchValueFieldName = parameters.term;
+if (searchValueFieldName) fieldValue = searchValueFieldName;
 def searchType = context.searchType;
-
 if (searchFields && fieldValue) {
     searchFieldsList = StringUtil.toList(searchFields);
     displayFieldsSet = StringUtil.toSet(displayFields);

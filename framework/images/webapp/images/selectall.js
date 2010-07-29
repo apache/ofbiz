@@ -304,61 +304,38 @@ function submitFormInBackground(form, areaId, submitUrl) {
         onComplete: updateFunction });
 }
 
-/** Submit form, update multiple areas (HTML container elements).
-  * @param form The form element
-  * @param areaCsvString The area CSV string. The CSV string is a flat array in the
-  * form of: areaId, target, target parameters [, areaId, target, target parameters...].
-*/
-function ajaxSubmitFormUpdateAreas(form, areaCsvString) {
-    submitFormDisableSubmits($(form));
-    waitSpinnerShow();
-    hideErrorContainer = function() {
-        $('content-messages').removeClassName('errorMessage');
-        new Effect.Fade('content-messages',{duration: 0.0});
-    }
-    updateFunction = function(transport) {
-        var data = transport.responseText.evalJSON(true);
-        if (data._ERROR_MESSAGE_LIST_ != undefined || data._ERROR_MESSAGE_ != undefined) {
-            if(!$('content-messages')) {
-               //add this div just after app-navigation
-               if($('content-main-section')){
-                   $('content-main-section' ).insert({before: '<div id="content-messages" onclick="hideErrorContainer()"></div>'});
-               }
-            }
-           $('content-messages').addClassName('errorMessage');
-           $('content-messages' ).update(data._ERROR_MESSAGE_LIST_ + " " + data._ERROR_MESSAGE_);
-           new Effect.Appear('content-messages',{duration: 0.5});
-        }else {
-            if($('content-messages')) {
-                $('content-messages').removeClassName('errorMessage');
-                new Effect.Fade('content-messages',{duration: 0.0});
-            }
-            ajaxUpdateAreas(areaCsvString);
-        }
-        waitSpinnerHide();
-    }
-    new Ajax.Request($(form).action, {
-        parameters: $(form).serialize(true),
-        onComplete: updateFunction });
-}
-
 /** Enable auto-completion for text elements.
-  * @param areaCsvString The area CSV string. The CSV string is a flat array in the
-  * form of: areaId, target, target parameters [, areaId, target, target parameters...].
+ * @param areaCsvString The area CSV string. The CSV string is a flat array in the
+ * form of: areaId, target, target parameters [, areaId, target, target parameters...].
 */
 function ajaxAutoCompleter(areaCsvString, showDescription) {
-    var areaArray = areaCsvString.replace('&amp;','&').split(",");
-    var numAreas = parseInt(areaArray.length / 3);
-    for (var i = 0; i < numAreas * 3; i = i + 3) {
-        var optionsDivId = areaArray[i] + "_autoCompleterOptions";
-        var indicatorId = areaArray[i] + "_indicator";
-        $(areaArray[i]).next().insert('<span class="indicator" style="display: none"' + 'id=' + indicatorId + '><img src="/images/ajax-loader.gif" alt=""/></span>');
-        $(areaArray[i]).insert({after: '<div class="autocomplete"' + 'id=' + optionsDivId + '></div>'});
-        new Ajax.Autocompleter($(areaArray[i]), optionsDivId, areaArray[i + 1], {parameters: areaArray[i + 2], indicator: indicatorId, afterUpdateElement : setSelection});
-        if (showDescription) {
-            new lookupDescriptionLoaded(areaArray[i], areaArray[i + 1], areaArray[i + 2]);
-        }
-    }
+   var areaArray = areaCsvString.replace('&amp;','&').split(",");
+   var numAreas = parseInt(areaArray.length / 3);
+
+   for (var i = 0; i < numAreas * 3; i = i + 3) {
+          var url = areaArray[i + 1] + "?" + areaArray[i + 2];
+          var div = areaArray[i];
+          // create a seperate div where the result JSON Opbject will be placed
+          if ((jQuery("#" + div + "_auto")).length < 1) {
+              jQuery("<div id='" + div + "_auto'></div>").insertBefore("#" + areaArray[i]);
+          }
+          
+          jQuery("#" + div).autocomplete({
+           source: function(request, response) {
+                jQuery.ajax({
+                    url: url,
+                    async: false,
+                    data: {term : request.term},
+                    success: function(data) {
+                        //update the result div
+                        jQuery("#" + div + "_auto").html(data)
+                        // autocomp is the JSON Object which will be used for the autocomplete box
+                        response(autocomp);
+                    }
+                })
+            }
+        });
+   }
 }
 
 function setSelection(text, li) {
@@ -473,8 +450,33 @@ function toggleScreenlet(link, areaId, saveCollapsed, expandTxt, collapseTxt){
 */
 
 function ajaxInPlaceEditDisplayField(element, url, options) {
-    new Ajax.InPlaceEditor($(element), url, options);
+    var jElement = jQuery("#" + element);
+    jElement.mouseover(function() {
+        $(this).css('background-color', 'rgb(255, 255, 153)');
+    });
+    
+    jElement.mouseout(function() {
+        $(this).css('background-color', 'transparent');
+    });
+    
+    jElement.editable(function(value, settings){
+        // removes all line breaks from the value param, because the parseJSON Function can't work with line breaks
+        value = value.replace("\n", " ");
+        var resultField = jQuery.parseJSON('{"' + settings.name + '":"' + value + '"}');
+        // merge both parameter objects together
+        jQuery.extend(settings.submitdata, resultField);
+        jQuery.ajax({
+            type : settings.method,
+            url : url,
+            data : settings.submitdata,
+            success : function(data) {
+                // adding the new value to the field and make the modified field 'blink' a little bit to show the user that somethink have changed
+                jElement.html(value).fadeOut(500).fadeIn(500).fadeOut(500).fadeIn(500).css('background-color', 'transparent');
+            }
+        });
+    }, options);
 }
+
 // ===== End of Ajax Functions ===== //
 
 function replaceQueryParam(queryString, currentParam, newParam) {
