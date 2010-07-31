@@ -84,10 +84,11 @@ case "$cmd" in
 		# do not run any of the following commands in a complex
 		# chained pipe; if one of the commands in the pipe fails,
 		# it isn't possible to detect the failure.
-		printf "Applied fix from trunk for revision: %s \n" "$rev" > runtime/merge-state/log-message
+		printf "Applied fix from trunk for revision: %s \n===\n\n" "$rev" > runtime/merge-state/log-message
 		svn log --xml https://svn.apache.org/repos/asf/ofbiz/trunk -r "$rev" > runtime/merge-state/log.xml
 		sed -ne '/^<msg>/s,<msg>\(.*\)</msg>$,\1,p' < runtime/merge-state/log.xml >> runtime/merge-state/log-message
 		prevRev=$(($rev - 1))
+		svn up
 		svn merge -r "$prevRev:$rev" https://svn.apache.org/repos/asf/ofbiz/trunk 
 		;;
 	(test)
@@ -96,7 +97,7 @@ case "$cmd" in
 		ant run-tests
 		;;
 	(commit)
-		svn commit
+		svn commit -F runtime/merge-state/log-message
 		rm -rf runtime/merge-state
 		;;
 	(abort)
