@@ -38,4 +38,20 @@ rem commit the backport to release with comment fom file
 echo on
 svn merge -r %prevRev%:%version% https://svn.apache.org/repos/asf/ofbiz/trunk
 svn commit -F comment.tmp
+
+
+:menu
+echo y) tests
+echo n) exit
+choice /c:yn Do you want to run tests ?
+if errorlevel = 2 goto exit
+if errorlevel = 1 goto tests
+
+:tests
+ant clean-all
+ant run-install
+ant run-tests
+
+:exit
+echo you can now do the commit by hand
 pause
