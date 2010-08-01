@@ -251,6 +251,7 @@ public class GenericDelegator implements Delegator {
         }
 
         // initialize helpers by group
+        TreeSet<String> helpersDone = new TreeSet<String>();
         Set<String> groupNames = getModelGroupReader().getGroupNames(delegatorBaseName);
         for (String groupName: groupNames) {
             GenericHelperInfo helperInfo = this.getGroupHelperInfo(groupName);
@@ -258,7 +259,6 @@ public class GenericDelegator implements Delegator {
 
             if (Debug.infoOn()) Debug.logInfo("Delegator \"" + delegatorFullName + "\" initializing helper \"" +
                     helperBaseName + "\" for entity group \"" + groupName + "\".", module);
-            TreeSet<String> helpersDone = new TreeSet<String>();
             if (UtilValidate.isNotEmpty(helperInfo.getHelperFullName())) {
                 // make sure each helper is only loaded once
                 if (helpersDone.contains(helperInfo.getHelperFullName())) {
