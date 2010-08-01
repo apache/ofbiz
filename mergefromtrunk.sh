@@ -84,8 +84,10 @@ case "$cmd" in
 		# chained pipe; if one of the commands in the pipe fails,
 		# it isn't possible to detect the failure.
 		printf "Applied fix from trunk for revision: %s \n===\n\n" "$rev" > runtime/merge-state/log-message
-		svn log --xml https://svn.apache.org/repos/asf/ofbiz/trunk -r "$rev" > runtime/merge-state/log.xml
-		sed -ne '/^<msg>/s,<msg>\(.*\)</msg>$,\1,p' < runtime/merge-state/log.xml >> runtime/merge-state/log-message
+		svn log https://svn.apache.org/repos/asf/ofbiz/trunk -r "$rev" > runtime/merge-state/log.txt
+		set -- $(wc -l runtime/merge-state/log.txt)
+		head -n $(($1 - 2)) < runtime/merge-state/log.txt > runtime/merge-state/log.txt.head
+		tail -n $(($1 - 5)) < runtime/merge-state/log.txt.head >> runtime/merge-state/log-message
 		prevRev=$(($rev - 1))
 		svn up
 		svn merge -r "$prevRev:$rev" https://svn.apache.org/repos/asf/ofbiz/trunk 
@@ -100,7 +102,8 @@ case "$cmd" in
 		rm -rf runtime/merge-state
 		;;
 	(abort)
-		svn revert .
+		svn resolved . -R
+		svn revert . -R
 		rm -rf runtime/merge-state
 		;;
 	("")
