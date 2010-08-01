@@ -338,7 +338,7 @@ public class ComponentConfig {
         this.rootLocation = rootLocation.replace('\\', '/');
 
         File rootLocationDir = new File(rootLocation);
-        if (rootLocationDir == null) {
+        if (!rootLocationDir.exists()) {
             throw new ComponentException("The given component root location is does not exist: " + rootLocation);
         }
         if (!rootLocationDir.isDirectory()) {
