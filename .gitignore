@@ -49,4 +49,5 @@ runtime/logs/*.html*
 runtime/logs/test-results/*
 runtime/data/derby/*
 runtime/catalina/work/*
+runtime/merge-state
 
