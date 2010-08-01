@@ -54,3 +54,4 @@ ant run-tests
 
 :exit
 echo you can now do the commit by hand
+pause
