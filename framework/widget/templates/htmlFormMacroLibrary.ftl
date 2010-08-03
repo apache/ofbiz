@@ -30,7 +30,7 @@ under the License.
         <#if inPlaceEditorUrl?has_content || class?has_content || alert=="true">
             <span <#if idName?has_content>id="cc_${idName}"</#if> <@renderClass class alert />><#t/>
         </#if>
-        
+
         <#if description?has_content>
             ${description?replace("\n", "<br />")}<#t/>
         <#else>
@@ -54,7 +54,7 @@ under the License.
     <#if value?has_content> value="${value}"</#if><#rt/>
     <#if textSize?has_content> size="${textSize}"</#if><#rt/>
     <#if maxlength?has_content> maxlength="${maxlength}"</#if><#rt/>
-    <#if disabled?has_content && disabled> disabled="disabled"</#if><#rt/>    
+    <#if disabled?has_content && disabled> disabled="disabled"</#if><#rt/>
     <#if id?has_content> id="${id}"</#if><#rt/>
     <#if event?has_content && action?has_content> ${event}="${action}"</#if><#rt/>
     <#if clientAutocomplete?has_content && clientAutocomplete=="false"> autocomplete="off"</#if><#rt/>
@@ -376,8 +376,7 @@ ${item.description}</span>
                 dateFormat: 'yy-mm-dd'
               });
       </script>
-<#if formName?has_content>${formName}.</#if><#if name?has_content>${name}_fld0_value,</#if>'<#if defaultDateTimeString?has_content>${defaultDateTimeString}</#if>');" title="${localizedIconTitle}"><#rt/>
-</a><#rt/>
+<#rt/>
 </#if>
 <#if titleStyle?has_content>
 <span class="${titleStyle}"><#rt/>
@@ -412,8 +411,7 @@ ${item.description}</span>
                 dateFormat: 'yy-mm-dd'
               });
       </script>
-<#if formName?has_content>${formName}.</#if><#if name?has_content>${name}_fld1_value,'</#if><#if defaultDateTimeString?has_content>${defaultDateTimeString}</#if>');" title="${localizedIconTitle}"><#rt/>
-</a><#rt/>
+<#rt/>
 </#if>
 <#if titleStyle?has_content>
  <span class="${titleStyle}"><#rt/>
