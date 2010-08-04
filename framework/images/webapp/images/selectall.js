@@ -246,21 +246,10 @@ function ajaxUpdateArea(areaId, target, targetParams) {
 */
 function ajaxUpdateAreas(areaCsvString) {
     waitSpinnerShow();
-    responseFunction = function(transport) {
-        // Uncomment the next two lines to see the HTTP responses
-        //var response = transport.responseText || "no response text";
-        //alert("Response: \n\n" + response);
-    }
     var areaArray = areaCsvString.split(",");
     var numAreas = parseInt(areaArray.length / 3);
     for (var i = 0; i < numAreas * 3; i = i + 3) {
-        new Ajax.Updater(areaArray[i], areaArray[i + 1], {
-                 parameters: areaArray[i + 2], 
-                 onComplete: responseFunction,
-                 evalScripts: true,
-                 onSuccess: function(transport) {waitSpinnerHide();},
-                 onFailure: function() {waitSpinnerHide();}
-                 });
+        jQuery("#" + areaArray[i]).load(areaArray[i + 1], areaArray[i + 2], function () {waitSpinnerHide();});
     }
 }
 
@@ -302,6 +291,53 @@ function submitFormInBackground(form, areaId, submitUrl) {
     new Ajax.Request(form.action, {
         parameters: form.serialize(true),
         onComplete: updateFunction });
+}
+
+/** Submit form, update multiple areas (HTML container elements).
+ * @param form The form element
+ * @param areaCsvString The area CSV string. The CSV string is a flat array in the
+ * form of: areaId, target, target parameters [, areaId, target, target parameters...].
+*/
+function ajaxSubmitFormUpdateAreas(form, areaCsvString) {
+   waitSpinnerShow();
+   hideErrorContainer = function() {
+       jQuery('#content-messages').removeClass('errorMessage').fadeIn('fast');
+   }
+   updateFunction = function(data) {
+       if (data._ERROR_MESSAGE_LIST_ != undefined || data._ERROR_MESSAGE_ != undefined) {
+           if(!jQuery('#content-messages')) {
+              //add this div just after app-navigation
+              if(jQuery('#content-main-section')){
+                  jQuery('#content-main-section' ).before('<div id="content-messages" onclick="hideErrorContainer()"></div>');
+              }
+           }
+           jQuery('#content-messages').addClass('errorMessage');
+          if (data._ERROR_MESSAGE_LIST_ != undefined && data._ERROR_MESSAGE_ != undefined) {
+              jQuery('#content-messages' ).html(data._ERROR_MESSAGE_LIST_ + " " + data._ERROR_MESSAGE_);
+          } else if (data._ERROR_MESSAGE_LIST_ != undefined) {
+              jQuery('#content-messages' ).html(data._ERROR_MESSAGE_LIST_);
+          } else {
+              jQuery('#content-messages' ).html(data._ERROR_MESSAGE_);
+          }
+          jQuery('#content-messages').fadeIn('fast');
+       }else {
+           if(jQuery('#content-messages')) {
+               jQuery('#content-messages').removeClass('errorMessage').fadeIn("fast");
+           }
+           ajaxUpdateAreas(areaCsvString);
+       }
+       waitSpinnerHide();
+   }
+   
+   jQuery.ajax({
+       type: "POST",
+       url: jQuery("#" + form).attr("action"),
+       data: jQuery("#" + form).serialize(),
+       dataType: "json",
+       success: function(data) {
+               updateFunction(data);
+       }
+   });
 }
 
 /** Enable auto-completion for text elements.
