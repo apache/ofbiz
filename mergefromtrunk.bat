@@ -42,11 +42,11 @@ svn merge -r %prevRev%:%version% https://svn.apache.org/repos/asf/ofbiz/trunk
 :menu
 echo y) tests
 echo n) exit
-choice /c:yn Do you want to run tests ?
-if errorlevel = 2 goto noTests
+choice /c:yn Do you want to run tests (else the commit will be done automatically using the comment grabed from trunk by the merge)?
+if errorlevel = 2 goto commit
 if errorlevel = 1 goto tests
 
-:noTests
+:commit
 svn commit -F comment.tmp
 goto exit
 
@@ -55,7 +55,7 @@ ant clean-all
 ant run-install
 ant run-tests
 
-echo you can now do the commit by hand if all is OK
+echo You can now do the commit by hand if all is OK. The comment grabed from trunk by the merge is in the file comment.tmp at root
 
 :exit
 pause
