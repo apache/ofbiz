@@ -21,25 +21,23 @@ package org.ofbiz.manufacturing.jobshopmgt;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import javolution.util.FastMap;
+
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericPK;
-import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
-
-import javolution.util.FastMap;
+import org.ofbiz.service.ServiceUtil;
 
 public class ProductionRunEvents {
 
@@ -91,6 +89,10 @@ public class ProductionRunEvents {
             inputMap.put("lotId", parameters.get("lotId"));
             inputMap.put("userLogin", userLogin);
             Map result = dispatcher.runSync("productionRunDeclareAndProduce", inputMap);
+            if (ServiceUtil.isError(result)) {
+                request.setAttribute("_ERROR_MESSAGE_", ServiceUtil.getErrorMessage(result));
+                return "error";
+            }
         } catch (GenericServiceException e) {
             String errMsg = "Error issuing materials: " + e.toString();
             Debug.logError(e, errMsg, module);

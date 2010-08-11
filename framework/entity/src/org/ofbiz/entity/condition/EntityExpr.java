@@ -249,11 +249,41 @@ public class EntityExpr extends EntityCondition {
                 Debug.logWarning(e, module);
             }
           // make sure the type of keyFieldName of EntityConditionSubSelect  matches the field Java type
-            if (!ObjectType.instanceOf(valueType.getJavaType(), type.getJavaType())) {
-                String errMsg = "Warning using ["+ value.getClass().getName() + "] and entity field [" + modelEntity.getEntityName() + "." + curField.getName() + "]. The Java type of keyFieldName : [" + valueType.getJavaType()+ "] is not compatible with the Java type of the field [" + type.getJavaType() + "]";
+            try {
+                if (!ObjectType.instanceOf(ObjectType.loadClass(valueType.getJavaType()), type.getJavaType())) {
+                    String errMsg = "Warning using ["+ value.getClass().getName() + "] and entity field [" + modelEntity.getEntityName() + "." + curField.getName() + "]. The Java type of keyFieldName : [" + valueType.getJavaType()+ "] is not compatible with the Java type of the field [" + type.getJavaType() + "]";
+                    // eventually we should do this, but for now we'll do a "soft" failure: throw new IllegalArgumentException(errMsg);
+                    Debug.logWarning(new Exception("Location of database type warning"), "=-=-=-=-=-=-=-=-= Database type warning in EntityExpr =-=-=-=-=-=-=-=-= " + errMsg, module);
+                }
+            } catch (ClassNotFoundException e) {
+                String errMsg = "Warning using ["+ value.getClass().getName() + "] and entity field [" + modelEntity.getEntityName() + "." + curField.getName() + "]. The Java type of keyFieldName : [" + valueType.getJavaType()+ "] could not be found]";
                 // eventually we should do this, but for now we'll do a "soft" failure: throw new IllegalArgumentException(errMsg);
-                Debug.logWarning(new Exception("Location of database type warning"), "=-=-=-=-=-=-=-=-= Database type warning in EntityExpr =-=-=-=-=-=-=-=-= " + errMsg, module);
+                Debug.logWarning(e, "=-=-=-=-=-=-=-=-= Database type warning in EntityExpr =-=-=-=-=-=-=-=-= " + errMsg, module);
              }
+        } else if (value instanceof EntityFieldValue) {
+            EntityFieldValue efv = (EntityFieldValue) this.lhs;
+            String rhsFieldName = efv.getFieldName();
+            ModelField rhsField = modelEntity.getField(fieldName);
+            if (rhsField == null) {
+                throw new IllegalArgumentException("FieldName " + rhsFieldName + " not found for entity: " + modelEntity.getEntityName());
+            }
+            ModelFieldType rhsType = null;
+            try {
+                rhsType = delegator.getEntityFieldType(modelEntity, rhsField.getType());
+            } catch (GenericEntityException e) {
+                Debug.logWarning(e, module);
+            }
+            try {
+                if (!ObjectType.instanceOf(ObjectType.loadClass(rhsType.getJavaType()), type.getJavaType())) {
+                    String errMsg = "Warning using ["+ value.getClass().getName() + "] and entity field [" + modelEntity.getEntityName() + "." + curField.getName() + "]. The Java type [" + rhsType.getJavaType() + "] of rhsFieldName : [" + rhsFieldName + "] is not compatible with the Java type of the field [" + type.getJavaType() + "]";
+                    // eventually we should do this, but for now we'll do a "soft" failure: throw new IllegalArgumentException(errMsg);
+                    Debug.logWarning(new Exception("Location of database type warning"), "=-=-=-=-=-=-=-=-= Database type warning in EntityExpr =-=-=-=-=-=-=-=- " + errMsg, module);
+                }
+            } catch (ClassNotFoundException e) {
+                String errMsg = "Warning using ["+ value.getClass().getName() + "] and entity field [" + modelEntity.getEntityName() + "." + curField.getName() + "]. The Java type [" + rhsType.getJavaType() + "] of rhsFieldName : [" + rhsFieldName + "] could not be found]";
+                // eventually we should do this, but for now we'll do a "soft" failure: throw new IllegalArgumentException(errMsg);
+                Debug.logWarning(e, "=-=-=-=-=-=-=-=-= Database type warning in EntityExpr =-=-=-=-=-=-=-=-= " + errMsg, module);
+            }
         } else {
         // make sure the type matches the field Java type
             if (!ObjectType.instanceOf(value, type.getJavaType())) {

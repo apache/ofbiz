@@ -18,8 +18,19 @@
  */
 package org.ofbiz.sql;
 
+import org.ofbiz.base.lang.SourceMonitored;
+
+@SourceMonitored
 public final class NumberValue<N extends Number> extends ConstantValue {
     private final N number;
+
+    public static NumberValue<Long> valueOf(long v) {
+        return new NumberValue<Long>(v);
+    }
+
+    public static NumberValue<Double> valueOf(double v) {
+        return new NumberValue<Double>(v);
+    }
 
     public NumberValue(N number) {
         this.number = number;

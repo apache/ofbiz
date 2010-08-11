@@ -21,10 +21,31 @@ package org.ofbiz.sql;
 public abstract class SQLStatement<S extends SQLStatement<S>> extends Atom {
     public interface Visitor {
         void visit(SQLDelete statement);
+        void visit(SQLIndex statement);
         void visit(SQLInsert statement);
         void visit(SQLSelect statement);
         void visit(SQLUpdate statement);
         void visit(SQLView statement);
+    }
+
+    public static class BaseVisitor implements Visitor {
+        public void visit(SQLDelete statement) {
+        }
+
+        public void visit(SQLIndex statement) {
+        }
+
+        public void visit(SQLInsert statement) {
+        }
+
+        public void visit(SQLSelect statement) {
+        }
+
+        public void visit(SQLUpdate statement) {
+        }
+
+        public void visit(SQLView statement) {
+        }
     }
 
     public abstract void accept(Visitor visitor);

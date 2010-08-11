@@ -110,7 +110,11 @@ public class OrderReadHelper {
             }
         }
         if (this.orderHeader == null) {
-            throw new IllegalArgumentException("Order header passed in is not valid for orderId [" + orderHeader.getString("orderId") + "]");
+            if (orderHeader == null) {
+                throw new IllegalArgumentException("Order header passed is null, or is otherwise invalid");
+            } else {
+                throw new IllegalArgumentException("Order header passed in is not valid for orderId [" + orderHeader.getString("orderId") + "]");
+            }
         }
     }
 
@@ -1327,6 +1331,10 @@ public class OrderReadHelper {
 
     public List<GenericValue> getOrderHeaderAdjustments(String shipGroupSeqId) {
         return getOrderHeaderAdjustments(getAdjustments(), shipGroupSeqId);
+    }
+
+    public List<GenericValue> getOrderHeaderAdjustmentsTax(String shipGroupSeqId) {
+        return filterOrderAdjustments(getOrderHeaderAdjustments(getAdjustments(), shipGroupSeqId), false, true, false, false, false);
     }
 
     public List<GenericValue> getOrderHeaderAdjustmentsToShow() {

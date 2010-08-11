@@ -345,7 +345,7 @@ function ajaxSubmitFormUpdateAreas(form, areaCsvString) {
  * form of: areaId, target, target parameters [, areaId, target, target parameters...].
 */
 function ajaxAutoCompleter(areaCsvString, showDescription) {
-   var areaArray = areaCsvString.replace('&amp;','&').split(",");
+   var areaArray = areaCsvString.replace(/&amp;/g,'&').split(",");
    var numAreas = parseInt(areaArray.length / 3);
 
    for (var i = 0; i < numAreas * 3; i = i + 3) {
@@ -579,7 +579,7 @@ function expandAll(expanded) {
             groupbody=divs1[j];
           }
         }
-        if(groupbody.style.visible != expanded) {
+        if($(groupbody).visible() != expanded) {
           toggleCollapsiblePanel(links[0], groupbody.id, 'expand', 'collapse');
         }
       }

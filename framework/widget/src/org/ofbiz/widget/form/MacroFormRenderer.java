@@ -46,7 +46,6 @@ import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.collections.MapStack;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.entity.Delegator;
@@ -448,6 +447,8 @@ public class MacroFormRenderer implements FormStringRenderer {
         String className = "";
         String alert = "false";
         String name = "";
+        String event = modelFormField.getEvent();
+        String action = modelFormField.getAction(context);
         if (UtilValidate.isNotEmpty(modelFormField.getWidgetStyle())) {
             className = modelFormField.getWidgetStyle();
             if (modelFormField.shouldBeRed(context)) {
@@ -584,6 +585,10 @@ public class MacroFormRenderer implements FormStringRenderer {
         sr.append(value);
         sr.append("\" id=\"");
         sr.append(id);
+        sr.append("\" event=\"");
+        sr.append(event);
+        sr.append("\" action=\"");
+        sr.append(action);
         sr.append("\" dateType=\"");
         sr.append(dateTimeField.getType());
         sr.append("\" shortDateInput=");

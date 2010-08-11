@@ -21,7 +21,6 @@ package org.ofbiz.entity;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -47,9 +46,6 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.entity.cache.Cache;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityConditionList;
-import org.ofbiz.entity.condition.EntityExpr;
-import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.config.DatasourceInfo;
 import org.ofbiz.entity.config.DelegatorInfo;
 import org.ofbiz.entity.config.EntityConfigUtil;
@@ -251,6 +247,7 @@ public class GenericDelegator implements Delegator {
         }
 
         // initialize helpers by group
+        TreeSet<String> helpersDone = new TreeSet<String>();
         Set<String> groupNames = getModelGroupReader().getGroupNames(delegatorBaseName);
         for (String groupName: groupNames) {
             GenericHelperInfo helperInfo = this.getGroupHelperInfo(groupName);
@@ -258,7 +255,6 @@ public class GenericDelegator implements Delegator {
 
             if (Debug.infoOn()) Debug.logInfo("Delegator \"" + delegatorFullName + "\" initializing helper \"" +
                     helperBaseName + "\" for entity group \"" + groupName + "\".", module);
-            TreeSet<String> helpersDone = new TreeSet<String>();
             if (UtilValidate.isNotEmpty(helperInfo.getHelperFullName())) {
                 // make sure each helper is only loaded once
                 if (helpersDone.contains(helperInfo.getHelperFullName())) {

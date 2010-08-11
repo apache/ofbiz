@@ -19,14 +19,12 @@
 package org.ofbiz.entity.sql;
 
 import java.io.StringReader;
-import java.util.List;
 
 import org.ofbiz.entity.condition.EntityCondition;
-
+import org.ofbiz.sql.OrderByItem;
 import org.ofbiz.sql.Parser;
 import org.ofbiz.sql.ParseException;
-import org.ofbiz.sql.SQLPlan;
-import org.ofbiz.sql.SQLStatement;
+import org.ofbiz.sql.Parser;
 
 public class SQLUtil {
     private static final EntityPlanner planner = new EntityPlanner();
@@ -37,6 +35,10 @@ public class SQLUtil {
 
     public static EntitySelectPlan parseSelect(String sql) throws ParseException {
        return planner.planSelect(updateParserFlags(new Parser(new StringReader(sql))).SelectStatement());
+    }
+
+    public static OrderByItem parseOrderByItem(String sql) throws ParseException {
+       return updateParserFlags(new Parser(new StringReader(sql))).OrderByItem();
     }
     /*
     public static EntityCondition parseCondition(String condition) throws ParseException {

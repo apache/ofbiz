@@ -18,45 +18,46 @@
  */
 package org.ofbiz.sql;
 
-public final class CountFunction extends StaticValue {
-    private final boolean isDistinct;
-    private final FieldValue field;
+public final class Unioned extends Atom {
+    public enum Operator { UNION, UNION_ALL, INTERSECT, INTERSECT_ALL, EXCEPT, EXCEPT_ALL };
 
-    public CountFunction(boolean isDistinct, FieldValue field) {
-        this.isDistinct = isDistinct;
-        this.field = field;
+    private final Operator operator;
+    private final SelectGroup group;
+    private final Unioned next;
+
+    public Unioned(Operator operator, SelectGroup group, Unioned next) {
+        this.operator = operator;
+        this.group = group;
+        this.next = next;
     }
 
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
+    public Operator getOperator() {
+        return operator;
     }
 
-    public String getDefaultName() {
-        return "COUNT";
+    public SelectGroup getGroup() {
+        return group;
     }
 
-    public boolean isDistinct() {
-        return isDistinct;
-    }
-
-    public FieldValue getField() {
-        return field;
+    public Unioned getNext() {
+        return next;
     }
 
     public boolean equals(Object o) {
-        if (o instanceof CountFunction) {
-            CountFunction other = (CountFunction) o;
-            return isDistinct == other.isDistinct && field.equals(other.field);
+        if (o instanceof Unioned) {
+            Unioned other = (Unioned) o;
+            return operator.equals(other.operator) && group.equals(other.group) && equalsHelper(next, other.next);
         } else {
             return false;
         }
     }
 
     public StringBuilder appendTo(StringBuilder sb) {
-        sb.append("COUNT(");
-        if (isDistinct) sb.append("DISTINCT ");
-        field.appendTo(sb);
-        sb.append(')');
+        sb.append(' ').append(operator.toString().replace('_', ' ')).append(' ');
+        group.appendTo(sb);
+        if (next != null) {
+            next.appendTo(sb);
+        }
         return sb;
     }
 }

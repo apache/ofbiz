@@ -24,34 +24,25 @@ import java.util.List;
 
 import javolution.util.FastList;
 
-import org.ofbiz.entity.GenericValue;
-import org.ofbiz.entity.condition.EntityFieldValue;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityConditionValue;
-import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.DynamicViewEntity;
+import org.ofbiz.entity.model.ModelKeyMap;
 import org.ofbiz.entity.model.ModelViewEntity.ComplexAlias;
 import org.ofbiz.entity.model.ModelViewEntity.ComplexAliasField;
 import org.ofbiz.entity.model.ModelViewEntity.ComplexAliasMember;
-import org.ofbiz.entity.model.ModelKeyMap;
-
-import org.ofbiz.sql.BooleanCondition;
-import org.ofbiz.sql.Condition;
-import org.ofbiz.sql.ConditionList;
 import org.ofbiz.sql.ConstantValue;
 import org.ofbiz.sql.FieldAll;
 import org.ofbiz.sql.FieldDef;
 import org.ofbiz.sql.FieldValue;
 import org.ofbiz.sql.FunctionCall;
 import org.ofbiz.sql.Joined;
-import org.ofbiz.sql.Joiner;
 import org.ofbiz.sql.KeyMap;
 import org.ofbiz.sql.MathValue;
 import org.ofbiz.sql.NumberValue;
 import org.ofbiz.sql.OrderByItem;
 import org.ofbiz.sql.Planner;
-import org.ofbiz.sql.MathValue;
 import org.ofbiz.sql.Relation;
+import org.ofbiz.sql.SelectGroup;
 import org.ofbiz.sql.SQLDelete;
 import org.ofbiz.sql.SQLInsert;
 import org.ofbiz.sql.SQLSelect;
@@ -61,6 +52,7 @@ import org.ofbiz.sql.StaticValue;
 import org.ofbiz.sql.StringValue;
 import org.ofbiz.sql.Table;
 import org.ofbiz.sql.TableName;
+import org.ofbiz.sql.Unioned;
 import org.ofbiz.sql.Value;
 
 public class EntityPlanner extends Planner<EntityPlanner, EntityCondition, EntityDeletePlan, EntityInsertPlan, EntitySelectPlan, EntityUpdatePlan, EntityViewPlan> {
@@ -78,20 +70,25 @@ public class EntityPlanner extends Planner<EntityPlanner, EntityCondition, Entit
 
     public EntitySelectPlan planSelect(SQLSelect selectStatement) {
         DynamicViewEntity dve = new DynamicViewEntity();
-        Table table = selectStatement.getTable();
+        Unioned unioned = selectStatement.getUnioned();
+        if (unioned.getOperator() != null || unioned.getNext() != null) {
+            throw new IllegalArgumentException("union views not yet supported");
+        }
+        SelectGroup selectGroup = unioned.getGroup();
+        Table table = selectGroup.getTable();
         addMember(dve, table.getTableName());
         addJoined(dve, table.getTableName().getAlias(), table.getJoined());
-        for (FieldAll fieldAll: selectStatement.getFieldAlls()) {
+        for (FieldAll fieldAll: selectGroup.getFieldAlls()) {
             dve.addAliasAll(fieldAll.getAlias(), null);
         }
         for (Relation relation: selectStatement.getRelations().values()) {
             dve.addRelation(relation.getType(), relation.getTitle(), relation.getEntityName(), buildKeyMaps(relation));
         }
-        List<String> groupBy = selectStatement.getGroupBy();
+        List<String> groupBy = selectGroup.getGroupBy();
         if (groupBy == null) {
             groupBy = Collections.emptyList();
         }
-        for (FieldDef fieldDef: selectStatement.getFieldDefs()) {
+        for (FieldDef fieldDef: selectGroup.getFieldDefs()) {
             addFieldDef(dve, groupBy, fieldDef.getAlias(), fieldDef);
         }
         List<String> orderBy;
@@ -103,7 +100,7 @@ public class EntityPlanner extends Planner<EntityPlanner, EntityCondition, Entit
                 orderBy.add(orderByItem.toString());
             }
         }
-        return new EntitySelectPlan(dve, plan(selectStatement.getWhereCondition()), plan(selectStatement.getHavingCondition()), orderBy);
+        return new EntitySelectPlan(dve, plan(selectGroup.getWhereCondition()), plan(selectGroup.getHavingCondition()), orderBy);
     }
 
     public EntityUpdatePlan planUpdate(SQLUpdate updateStatement) {

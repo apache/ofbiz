@@ -18,28 +18,25 @@
  */
 package org.ofbiz.sql.test;
 
+import java.io.StringReader;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import javolution.util.FastList;
-import javolution.util.FastMap;
-
-import junit.framework.TestCase;
-
+import org.ofbiz.base.test.GenericTestCaseBase;
+import org.ofbiz.sql.AggregateFunction;
 import org.ofbiz.sql.BetweenCondition;
 import org.ofbiz.sql.BooleanCondition;
 import org.ofbiz.sql.Condition;
 import org.ofbiz.sql.ConditionList;
-import org.ofbiz.sql.CountFunction;
+import org.ofbiz.sql.ConstantValue;
 import org.ofbiz.sql.FieldAll;
 import org.ofbiz.sql.FieldDef;
 import org.ofbiz.sql.FieldValue;
 import org.ofbiz.sql.FunctionCall;
-import org.ofbiz.sql.InsertValues;
 import org.ofbiz.sql.InsertRow;
+import org.ofbiz.sql.InsertValues;
 import org.ofbiz.sql.Joined;
 import org.ofbiz.sql.Joiner;
 import org.ofbiz.sql.KeyMap;
@@ -50,23 +47,26 @@ import org.ofbiz.sql.OrderByItem;
 import org.ofbiz.sql.ParameterValue;
 import org.ofbiz.sql.Parser;
 import org.ofbiz.sql.Relation;
-import org.ofbiz.sql.SetField;
 import org.ofbiz.sql.SQLDelete;
+import org.ofbiz.sql.SQLIndex;
 import org.ofbiz.sql.SQLInsert;
 import org.ofbiz.sql.SQLSelect;
 import org.ofbiz.sql.SQLStatement;
 import org.ofbiz.sql.SQLUpdate;
 import org.ofbiz.sql.SQLView;
+import org.ofbiz.sql.SetField;
 import org.ofbiz.sql.StringValue;
 import org.ofbiz.sql.Table;
 import org.ofbiz.sql.TableName;
 import org.ofbiz.sql.Value;
 
-import org.ofbiz.base.test.GenericTestCaseBase;
-
 public class SQLTest extends GenericTestCaseBase {
     public SQLTest(String name) {
         super(name);
+    }
+
+    private static Parser parser(SQLStatement s) throws Exception {
+        return new Parser(new StringReader(s.toString()));
     }
 
     public void testParse() throws Exception {
@@ -88,12 +88,12 @@ public class SQLTest extends GenericTestCaseBase {
                 GenericTestCaseBase.<String, FieldDef>map(
                     "roleTypeId", new FieldDef(new FieldValue("d", "roleTypeId"), null),
                     "roleDescription", new FieldDef(new FieldValue("d", "description"), "roleDescription"),
-                    "SUM",  new FieldDef(new FunctionCall("SUM", GenericTestCaseBase.<Value>list(new FieldValue("a", "partyId"))), null),
+                    "SUM",  new FieldDef(new AggregateFunction("SUM", false, new FieldValue("a", "partyId")), null),
                     "baz",  new FieldDef(new FunctionCall("FOO", GenericTestCaseBase.<Value>list(new FieldValue("a", "partyId"), new NumberValue<Integer>(Integer.valueOf(1)))), "baz"),
                     "one",  new FieldDef(new MathValue("||", list(new FieldValue("a", "partyId"), new StringValue("-"), new FieldValue("a", "partyTypeId"))), "one"),
-                    "cnt1", new FieldDef(new CountFunction(false, new FieldValue("a", "partyId")), "cnt1"),
-                    "cnt2", new FieldDef(new CountFunction(false, new FieldValue(null, "partyId")), "cnt2"),
-                    "cnt3", new FieldDef(new CountFunction(true, new FieldValue("a", "partyId")), "cnt3")
+                    "cnt1", new FieldDef(new AggregateFunction("COUNT", false, new FieldValue("a", "partyId")), "cnt1"),
+                    "cnt2", new FieldDef(new AggregateFunction("COUNT", false, new FieldValue(null, "partyId")), "cnt2"),
+                    "cnt3", new FieldDef(new AggregateFunction("COUNT", true, new FieldValue("a", "partyId")), "cnt3")
                 ),
                 new Table(
                     new TableName("Party", "a"),
@@ -137,15 +137,16 @@ public class SQLTest extends GenericTestCaseBase {
                 new BooleanCondition(new FieldValue("b", "firstName"), "LIKE", new StringValue("%foo%")),
                 null,
                 list(
-                    new OrderByItem(OrderByItem.Order.DEFAULT, "LOWER", "lastName"),
-                    new OrderByItem(OrderByItem.Order.DEFAULT, null, "firstName"),
-                    new OrderByItem(OrderByItem.Order.DESCENDING, null, "birthDate")
+                    new OrderByItem(OrderByItem.Order.DEFAULT, OrderByItem.Nulls.DEFAULT, new FunctionCall("LOWER", GenericTestCaseBase.<Value>list(new FieldValue(null, "lastName")))),
+                    new OrderByItem(OrderByItem.Order.DEFAULT, OrderByItem.Nulls.DEFAULT, new FieldValue(null, "firstName")),
+                    new OrderByItem(OrderByItem.Order.DESCENDING, OrderByItem.Nulls.DEFAULT, new FieldValue(null, "birthDate"))
                 ),
                 5,
                 10
             );
             SQLStatement stmt = stmtIt.next();
             assertEquals("firstSelect", select, stmt);
+            assertEquals("firstSelect:parse", parser(select).SelectStatement(), parser(stmt).SelectStatement());
         }
         {
             SQLInsert insert = new SQLInsert(
@@ -160,6 +161,7 @@ public class SQLTest extends GenericTestCaseBase {
             );
             SQLStatement stmt = stmtIt.next();
             assertEquals("firstInsert", insert, stmt);
+            assertEquals("firstInsert:parse", parser(insert).InsertStatement(), parser(stmt).InsertStatement());
         }
         {
             SQLInsert insert = new SQLInsert(
@@ -184,6 +186,7 @@ public class SQLTest extends GenericTestCaseBase {
             );
             SQLStatement stmt = stmtIt.next();
             assertEquals("secondInsert", insert, stmt);
+            assertEquals("secondInsert:parse", parser(insert).InsertStatement(), parser(stmt).InsertStatement());
         }
         {
             SQLUpdate update = new SQLUpdate(
@@ -195,6 +198,7 @@ public class SQLTest extends GenericTestCaseBase {
             );
             SQLStatement stmt = stmtIt.next();
             assertEquals("firstUpdate", update, stmt);
+            assertEquals("firstUpdate:parse", parser(update).UpdateStatement(), parser(stmt).UpdateStatement());
         }
         {
             SQLUpdate update = new SQLUpdate(
@@ -208,6 +212,7 @@ public class SQLTest extends GenericTestCaseBase {
             );
             SQLStatement stmt = stmtIt.next();
             assertEquals("secondUpdate", update, stmt);
+            assertEquals("secondUpdate:parse", parser(update).UpdateStatement(), parser(stmt).UpdateStatement());
         }
         {
             SQLUpdate update = new SQLUpdate(
@@ -222,6 +227,7 @@ public class SQLTest extends GenericTestCaseBase {
             );
             SQLStatement stmt = stmtIt.next();
             assertEquals("thirdUpdate", update, stmt);
+            assertEquals("thirdUpdate:parse", parser(update).UpdateStatement(), parser(stmt).UpdateStatement());
         }
         {
             SQLDelete delete = new SQLDelete(
@@ -230,6 +236,7 @@ public class SQLTest extends GenericTestCaseBase {
             );
             SQLStatement stmt = stmtIt.next();
             assertEquals("firstDelete", delete, stmt);
+            assertEquals("firstDelete:parse", parser(delete).DeleteStatement(), parser(stmt).DeleteStatement());
         }
         {
             SQLDelete delete = new SQLDelete(
@@ -238,6 +245,7 @@ public class SQLTest extends GenericTestCaseBase {
             );
             SQLStatement stmt = stmtIt.next();
             assertEquals("secondDelete", delete, stmt);
+            assertEquals("secondDelete:parse", parser(delete).DeleteStatement(), parser(stmt).DeleteStatement());
         }
         {
             SQLView view = new SQLView(
@@ -258,7 +266,22 @@ public class SQLTest extends GenericTestCaseBase {
             );
             SQLStatement stmt = stmtIt.next();
             assertEquals("firstView", view, stmt);
+            assertEquals("firstView:parse", parser(view).ViewStatement(), parser(stmt).ViewStatement());
         }
+        {
+            SQLIndex index = new SQLIndex(
+                false,
+                "testIndex",
+                "Party",
+                "btree",
+                GenericTestCaseBase.<ConstantValue>list(
+                    new FieldValue(null, "partyId")
+                )
+            );
+            SQLStatement stmt = stmtIt.next();
+            assertEquals("firstIndex", index, stmt);
+        }
+        assertFalse("has no more statements", stmtIt.hasNext());
     }
 /*
 CREATE VIEW viewOne AS SELECT a.* FROM Party a;

@@ -81,6 +81,9 @@ public class SaveLabelsToXmlFile {
                 Map<String, LabelInfo> labels = factory.getLabels();
                 Set<String> labelsList = factory.getLabelsList();
                 Set<String> localesFound = factory.getLocalesFound();
+                for (String localeName : localeNames) {
+                    localesFound.add(localeName);
+                }
                 // Remove a Label
                 if (UtilValidate.isNotEmpty(removeLabel)) {
                     labels.remove(key + LabelManagerFactory.keySeparator + fileName);

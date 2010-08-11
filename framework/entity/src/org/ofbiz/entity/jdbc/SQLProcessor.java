@@ -35,7 +35,6 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ofbiz.base.conversion.ConversionException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericDataSourceException;
 import org.ofbiz.entity.GenericEntityException;
@@ -533,7 +532,7 @@ public class SQLProcessor {
      *
      * @throws SQLException
      */
-    public void setValue(JdbcValueHandler handler, Object field) throws SQLException {
+    public <T> void setValue(JdbcValueHandler<T> handler, T field) throws SQLException {
         handler.setValue(_ps, _ind, field);
         _ind++;
     }

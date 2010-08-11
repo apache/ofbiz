@@ -208,10 +208,7 @@ under the License.
                                 <condition>
                                     <or>
                                         <if-empty field="oldRateAmount"/>
-                                        <and>
-                                            <not><if-empty field="OldRateAmount"/></not>
-                                            <if-compare-field field="rateAmount" operator="not-equals" to-field="oldRateAmount"/>
-                                        </and>
+                                        <if-compare-field field="rateAmount" operator="not-equals" to-field="oldRateAmount"/>
                                     </or>
                                 </condition>
                                 <then>
@@ -263,9 +260,9 @@ under the License.
                             <set field="updTimeEntry.invoiceId" from-field="invoiceItemMap.invoiceId"/>
                             <set field="updTimeEntry.invoiceItemSeqId" from-field="invoiceItemMap.invoiceItemSeqId"/>
                             <call-service service-name="updateTimeEntry" in-map-name="updTimeEntry"/>
-                            <else>
+                            <!-- else>
                                 <log level="info" message="Timeentry: ${timeEntry.timeEntryId} already connected to invoiceId: ${timeEntry.invoiceId}...not added to invoiceItem"/>
-                            </else>
+                            </else-->
                         </if-empty>
                         <else>
                             <set field="errMsg" value="Invoice ${invoiceId} should have the status 'in progress', the status is however: ${invoice.statusId}"/>
@@ -388,13 +385,16 @@ under the License.
     </simple-method>
 
     <!-- subroutines -->
-    <simple-method method-name="checkTimesheetStatus" short-description="Check access and if the timesheet is in progress">
+    <simple-method method-name="checkTimesheetStatus" short-description="Check access and if the timesheet is in progress, however do allow invoiceId to be updated when completed (need to invoice completed timesheets)">
         <if>
             <condition>
-                <or>
-                    <not><if-empty field="parameters.timesheetId"/></not>
-                    <not><if-empty field="lookedUpValue.timesheetId"/></not>
-                </or>
+                <and>
+                    <or>
+                        <not><if-empty field="parameters.timesheetId"/></not>
+                        <not><if-empty field="lookedUpValue.timesheetId"/></not>
+                    </or>
+                    <if-empty field="parameters.invoiceId"/>
+                </and>
             </condition>
             <then>
                 <if-empty field="parameters.timesheetId">

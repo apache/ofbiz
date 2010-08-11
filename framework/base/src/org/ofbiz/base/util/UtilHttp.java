@@ -55,6 +55,7 @@ import javolution.util.FastMap;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.owasp.esapi.errors.EncodingException;
+import org.owasp.esapi.errors.IntrusionException;
 
 /**
  * HttpUtil - Misc HTTP Utility Functions
@@ -260,7 +261,7 @@ public class UtilHttp {
             String cannedStr = StringUtil.defaultWebEncoder.canonicalize(paramValue, StringUtil.esapiCanonicalizeStrict);
             if (Debug.verboseOn()) Debug.logVerbose("Canonicalized parameter with " + (cannedStr.equals(paramValue) ? "no " : "") + "change: original [" + paramValue + "] canned [" + cannedStr + "]", module);
             return cannedStr;
-        } catch (EncodingException e) {
+        } catch (IntrusionException e) {
             Debug.logError(e, "Error in canonicalize parameter value [" + paramValue + "]: " + e.toString(), module);
             return paramValue;
         }
@@ -1312,6 +1313,9 @@ public class UtilHttp {
             int rowDelimiterIndex = (parameterName != null? parameterName.indexOf(UtilHttp.MULTI_ROW_DELIMITER): -1);
             if (rowDelimiterIndex > 0) {
                 String thisRowIndex = parameterName.substring(rowDelimiterIndex + rowDelimiterLength);
+                if (thisRowIndex.indexOf("_") > -1) {
+                    thisRowIndex = thisRowIndex.substring(0, thisRowIndex.indexOf("_"));
+                }
                 if (maxRowIndex.length() < thisRowIndex.length()) {
                     maxRowIndex = thisRowIndex;
                 } else if (maxRowIndex.length() == thisRowIndex.length() && maxRowIndex.compareTo(thisRowIndex) < 0) {
