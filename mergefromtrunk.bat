@@ -37,23 +37,28 @@ rem keep the comment.tmp file svn ignored. In case of trouble always happier to 
 rem commit the backport to release with comment fom file
 echo on
 svn merge -r %prevRev%:%version% https://svn.apache.org/repos/asf/ofbiz/trunk
-
+echo off
 
 :menu
 echo y) tests
 echo n) exit
-choice /c:yn Do you want to run tests (else the commit will be done automatically using the comment grabed from trunk by the merge)?
+
+echo Do you want to run tests (else the commit will be done automatically using the comment grabed from trunk by the merge)?
+choice /c:yn 
 if errorlevel = 2 goto commit
 if errorlevel = 1 goto tests
 
 :commit
+echo on
 svn commit -F comment.tmp
 goto exit
 
 :tests
+echo on
 ant clean-all
 ant run-install
 ant run-tests
+echo off
 
 echo You can now do the commit by hand if all is OK. The comment grabed from trunk by the merge is in the file comment.tmp at root
 
