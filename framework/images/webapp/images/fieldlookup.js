@@ -25,10 +25,7 @@ var NS6 = (document.getElementById && navigator.appName.indexOf("Netscape") >= 0
 var mx, my;
 var ACTIVATED_LOOKUP = null;
 var LOOKUP_DIV = null;
-INITIALLY_COLLAPSED = null;
-
-// not cool but necassary until someone have anthoer idea 
-var timeout = 800;
+var INITIALLY_COLLAPSED = null;
 
 function moveobj(evt) {
     if (NS4 || NS6) {
@@ -184,7 +181,6 @@ function initiallyCollapseDelayed() {
 function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalTarget, formName, width, height, position, modal, ajaxUrl, showDescription) {
     // create Link Element with unique Key
     var lookupId = GLOBAL_LOOKUP_REF.createNextKey();
-
     var inputBox = document.getElementById(inputFieldId);
     newInputBoxId = lookupId + "_" + inputFieldId;
     inputBox.id = newInputBoxId;
@@ -199,7 +195,7 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
     var hiddenDiv = document.createElement("DIV");
     hiddenDiv.id = lookupId;
     hiddenDiv.css = "{display: none;}";
-    hiddenDiv.title = "My Dialog " + lookupId + " --> Target:  " + requestUrl;
+    hiddenDiv.title = "___________________________________________________________________________________________";
 
     parent.appendChild(hiddenDiv);
 
@@ -208,7 +204,6 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
         //write the new input box id in the ajaxUrl Array
         ajaxUrl = ajaxUrl.replace(ajaxUrl.substring(0, ajaxUrl.indexOf(",")), newInputBoxId)
         new ajaxAutoCompleter(ajaxUrl, showDescription);
-        
     }
     
     // Lookup Configuration
@@ -221,11 +216,14 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
         draggable: true,
         resizeable: true,
         open: function() {
-            jQuery("#" + lookupId).load(requestUrl);
+            jQuery("#" + lookupId).load(requestUrl, function(data){ 
+                modifySubmitButton(lookupId);
+                identifyLookup(lookupId);
+            });
         },
         close: function() {
             //when the window is closed the prev Lookup get the focus (if exists)
-            var prevLookup = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).prevLookup;
+            var prevLookup = GLOBAL_LOOKUP_REF.getReference(lookupId).prevLookup;
             if (prevLookup != null) {
                 identifyLookup(prevLookup);
             }
@@ -245,7 +243,7 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
     if (dialogOptionalTarget != null) {
         this.target2 = null;
     }
-    ((GLOBAL_LOOKUP_REF.countFields() - 1) >=0) ? this.prevLookup = (GLOBAL_LOOKUP_REF.countFields() - 1) + "_lookupId" : null;
+    ((GLOBAL_LOOKUP_REF.countFields() - 1) >= 0) ? this.prevLookup = (GLOBAL_LOOKUP_REF.countFields() - 1) + "_lookupId" : null;
     this.dialogRef = dialogRef;
     //write external settings in global window manager
     GLOBAL_LOOKUP_REF.setReference(lookupId, this);
@@ -260,12 +258,12 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
                 //the target2 have to be set here, because the input field is not created before
                 GLOBAL_LOOKUP_REF.getReference(lookupId).target2 = jQuery(dialogOptionalTarget);
             }
-            // thats a quite bad hack to modifay the buttons
-            identifyLookup(lookupId);
-            window.setTimeout("modifySubmitButton('" + lookupId +"')", timeout);
             return false;
         }
     );
+    
+    // close the dialog when clicking outside the dialog area
+    jQuery(".ui-widget-overlay").live("click", function() {  jQuery("#" + lookupId).dialog("close"); } );
     
 }
 
@@ -291,25 +289,23 @@ function FieldLookupCounter() {
         return this.refArr[key] != null ? this.refArr[key] : null;
     };
     
+    this.getLastReference = function () {
+        return (this.countFields() -1) + "_lookupId";
+    }
+    
     this.createNextKey = function () {
-        return this.countFields() + "_lookupId";
+        return this.countFields() + "_lookupId";       
     };
     
     this.countFields = function () {
         var count = 0;
         jQuery.each(this.refArr, function (itm) {count++;});
-
         return count;
     };
     
     this.removeReference = function (key) {
         // deletes the Array entry (doesn't effect the array length)
         delete this.refArr[key];
-        
-        // if all lookups closed, kill the referenze
-        if (this.countFields() == 0) {
-            ACTIVATED_LOOKUP = null;
-        }
     };
     
 };
@@ -333,11 +329,6 @@ function identifyLookup (newAl) {
         ACTIVATED_LOOKUP = newAl;
     }
 }
-
-function hideLookup() {
-        obj = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP);
-        obj.closeLookup();
-    }
 
 //global expand/col button var
 var COLLAPSE = 1999;
@@ -394,25 +385,6 @@ function modifySubmitButton (lookupDiv) {
         //set new links for lookups
         var newLookups = jQuery("#" + lookupDiv + " .field-lookup");
         
-        /* TODO Problem bei Rekursiven Kalender Aufrufen, da ID des Input feldes immer die gleiche.
-         * evtl alle input felder mit DatePicker löschen und neu anlegen?!
-        jQuery.each(newLookups, function(newLookup){
-        	
-        	var link = jQuery(newLookups[newLookup]).find("a:first");
-        	alert(link.attr("href"));
-            var replaced = new  RegExp('document.' + oldFormName, 'g');
-            newLookup.getElementsByTagName('a')[0].href = link.replace(replaced, 'document.'+'form_' + GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).lookupId);
-        });
-        
-        //set new calendar links
-        var newLookups = jQuery("#" + lookupDiv + " .view-calendar");
-        jQuery.each(newLookups, function(newLookup){
-            link = $A(newLookup.getElementsByTagName('a'));
-            link.each(function(cal){
-                cal.href = cal.href.replace('document.' + oldFormName, 'document.'+'form_' + GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).lookupId);
-            });
-        });*/
-    	
     	var formAction = lookupForm.attr("action");
     	// remove the form action
     	lookupForm.attr("action", "");
@@ -425,7 +397,7 @@ function modifySubmitButton (lookupDiv) {
         	id: "lookupSubmitButton",
         	href: "javascript:void(0);",
         	click: function () {
-	            lookupFormAjaxRequest(formAction, lookupForm.attr("id"));
+                lookupFormAjaxRequest(formAction, lookupForm.attr("id"));
 	            return false;
 	        },
 	        text: txt
@@ -512,8 +484,6 @@ function modifySubmitButton (lookupDiv) {
             }
             catch (ex) {
             }
-        
-        
         });
         // modify links in result table ...
         var resultTable= jQuery("#" + lookupDiv + " #search-results table:first tbody");
@@ -546,10 +516,14 @@ function modifySubmitButton (lookupDiv) {
 function lookupAjaxRequest(request) {
     // get request arguments
     var arg = request.substring(request.indexOf('?')+1,(request.length));    
-
     lookupId = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).lookupId;
-	$("#" + lookupId).load(request, arg);
-    window.setTimeout("modifySubmitButton('" + lookupId +"')", timeout);
+    $("#" + lookupId).load(request, arg, function(data) { 
+        if (data.search(/loginform/) != -1) {
+            window.location.href = window.location.href;
+            return;
+        }
+        modifySubmitButton(lookupId);
+    });
 }
 
 /**
@@ -560,8 +534,13 @@ function lookupAjaxRequest(request) {
 */
 function lookupFormAjaxRequest(formAction, form) {
 	lookupId = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).lookupId;
-	$("#" + lookupId).load(formAction, $("#" + form).serialize());
-    window.setTimeout("modifySubmitButton('" + lookupId +"')", timeout);
+    jQuery("#" + lookupId).load(formAction, jQuery("#" + form).serialize(), function(data) { 
+        if (data.search(/loginform/) != -1) {
+            window.location.href = window.location.href;
+            return;
+        }
+        modifySubmitButton(lookupId);
+    });
 }
 
 function lookupPaginationAjaxRequest(navAction, form, type) {
@@ -574,9 +553,13 @@ function lookupPaginationAjaxRequest(navAction, form, type) {
     navAction = navAction + "&presentation=layer";
     
     lookupId = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).lookupId;
-	$("#" + lookupId).load(navAction);
-    window.setTimeout("modifySubmitButton('" + lookupId +"')", timeout);
-	
+    jQuery("#" + lookupId).load(navAction, function(data) { 
+        if (data.search(/loginform/) != -1) {
+            window.location.href = window.location.href;
+            return;
+        }
+        modifySubmitButton(lookupId);
+    });
 }
 
 /*******************************************************************************************************

@@ -51,6 +51,7 @@ under the License.
         <section>
             <actions>
                 <set field="title" value="${uiLabelMap.CommonChooseLanguage}"/>
+                <set field="parameters.presentation" value="window"/>
             </actions>
             <widgets>
                <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
@@ -71,6 +72,7 @@ under the License.
         <section>
             <actions>
                 <set field="title" value="${uiLabelMap.CommonTime}"/>
+                <set field="parameters.presentation" value="window"/>
             </actions>
             <widgets>
                <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
@@ -91,6 +93,7 @@ under the License.
         <section>
             <actions>
                 <set field="title" value="${uiLabelMap.CommonVisualThemes}"/>
+                <set field="parameters.presentation" value="window"/>
                 <entity-one entity-name="WebSite" value-field="webSite"/>
                 <entity-condition entity-name="VisualTheme" list="visualThemes">
                     <condition-expr field-name="visualThemeSetId" from-field="webSite.visualThemeSetId"/>

@@ -92,9 +92,9 @@ under the License.
       <#if dateType!="time" >
           <script type="text/javascript">
               <#if shortDateInput?exists && shortDateInput>
-                 $("#${id}").datepicker({
+                 jQuery("#${id}").datepicker({
               <#else>
-                 $("#${id}").datetimepicker({
+                 jQuery("#${id}").datetimepicker({
                     showSecond: true,
                     timeFormat: 'hh:mm:ss',
                     stepHour: 1,
@@ -360,9 +360,9 @@ ${item.description}</span>
 <#if dateType != "time">
     <script type="text/javascript">
           <#if dateType == "date">
-             $("#${name?html}_fld0_value").datepicker({
+             jQuery("#${name?html}_fld0_value").datepicker({
           <#else>
-             $("#${name?html}_fld0_value").datetimepicker({
+             jQuery("#${name?html}_fld0_value").datetimepicker({
                 showSecond: true,
                 timeFormat: 'hh:mm:ss',
                 stepHour: 1,
@@ -395,9 +395,9 @@ ${item.description}</span>
 <#if dateType != "time">
     <script type="text/javascript">
           <#if dateType == "date">
-             $("#${name?html}_fld1_value").datepicker({
+             jQuery("#${name?html}_fld1_value").datepicker({
           <#else>
-             $("#${name?html}_fld1_value").datetimepicker({
+             jQuery("#${name?html}_fld1_value").datetimepicker({
                 showSecond: true,
                 timeFormat: 'hh:mm:ss',
                 stepHour: 1,
@@ -476,7 +476,9 @@ ${item.description}</span>
     );"></a><#rt>
 <#else>
     <script type="text/javascript">
-        new ConstructLookup("${fieldFormName}", "${id}", document.${formName?html}.${name?html}, <#if descriptionFieldName?has_content>document.${formName?html}.${descriptionFieldName}<#else>null</#if>, "${formName?html}", "${width}", "${height}", "${position}", "${fadeBackground}", <#if ajaxEnabled?has_content && ajaxEnabled>"${ajaxUrl}", "${showDescription}"<#else>"", ""</#if>);
+        jQuery(document).ready(function(){
+            new ConstructLookup("${fieldFormName}", "${id}", document.${formName?html}.${name?html}, <#if descriptionFieldName?has_content>document.${formName?html}.${descriptionFieldName}<#else>null</#if>, "${formName?html}", "${width}", "${height}", "${position}", "${fadeBackground}", <#if ajaxEnabled?has_content && ajaxEnabled>"${ajaxUrl}", "${showDescription}"<#else>"", ""</#if>);
+        });
     </script>
 </#if>
 <#if disabled?has_content && disabled><a id="${id}_clear" style="background:none;margin-left:5px;margin-right:15px;" class="clearField" href="javascript:void();" onclick="javascript:document.${formName}.${name}.value='';<#if descriptionFieldName?has_content>document.${formName}.${descriptionFieldName}.value='';</#if>">${clearText}</a></#if>
