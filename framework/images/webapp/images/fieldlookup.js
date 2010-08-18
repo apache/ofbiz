@@ -195,7 +195,7 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
     var hiddenDiv = document.createElement("DIV");
     hiddenDiv.id = lookupId;
     hiddenDiv.css = "{display: none;}";
-    hiddenDiv.title = "___________________________________________________________________________________________";
+    hiddenDiv.title = "";
 
     parent.appendChild(hiddenDiv);
 

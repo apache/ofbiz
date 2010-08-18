@@ -140,7 +140,7 @@ access. For a detailed description see the core/docs/entityconfig.html file.
                 jdbc-uri="jdbc:hsqldb:data/hsqldb/ofbiz"
                 jdbc-username="sa"
                 jdbc-password=""
-                isolation-level="ReadUncommitted"
+                isolation-level="ReadCommitted"
                 pool-minsize="2"
                 pool-maxsize="250"
                 time-between-eviction-runs-millis="600000"/>
