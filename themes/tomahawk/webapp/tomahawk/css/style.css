@@ -2802,4 +2802,4 @@ height:22px;
 }/* Progressbar
 ----------------------------------*/
 .ui-progressbar { height:2em; text-align: left; }
-.ui-progressbar .ui-progressbar-value {margin: -1px; height:100%; }
+.ui-progressbar .ui-progressbar-value {background-image: url(../images/pbar-ani.gif); margin: -1px; height:100%; }

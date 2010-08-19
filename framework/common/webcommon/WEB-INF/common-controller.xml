@@ -21,7 +21,7 @@ under the License.
 <site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
     <description>Common ControlServlet Configuration File</description>
-    
+
     <errorpage>/error/error.jsp</errorpage>
 
     <!-- event handlers -->
@@ -184,7 +184,7 @@ under the License.
         <event type="java" path="org.ofbiz.common.CommonEvents" invoke="jsonResponseFromRequestAttributes"/>
         <response name="success" type="none"/>
     </request-map>
-    
+
     <request-map uri="showHelp">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="showHelp"/>
@@ -194,7 +194,7 @@ under the License.
         <security https="true" auth="true"/>
         <response name="success" type="view" value="main"/>
     </request-map>
-    
+
     <!--========================== AJAX events =====================-->
     <!-- to dynamically get products related to a product category -->
     <request-map uri="getAssociatedProductsList">
@@ -203,17 +203,25 @@ under the License.
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
-    
+
     <!-- to dynamically get states related to a country -->
     <request-map uri="getAssociatedStateList">
         <security https="true" auth="false"/>
         <event type="service" invoke="getAssociatedStateList"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
-    </request-map>    
+    </request-map>
+
+    <request-map uri="getFileUploadProgressStatus">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="getFileUploadProgressStatus"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+
     <!--========================== AJAX events =====================-->
-    
-    
+
+
     <!-- View Mappings -->
     <view-map name="error" page="/error/error.jsp"/>
     <view-map name="main" type="none"/>
