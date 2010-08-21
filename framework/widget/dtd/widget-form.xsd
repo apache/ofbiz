@@ -961,10 +961,9 @@ under the License.
             <xs:annotation><xs:documentation>Only layer width. I.e. 250px, 12%</xs:documentation></xs:annotation>
         </xs:attribute>
         <xs:attribute name="position" default="topleft">
-            <xs:annotation><xs:documentation>Only for layer position. Default to topleft, normal sets the layer just under the target field, like for the calendar.</xs:documentation></xs:annotation>
+            <xs:annotation><xs:documentation>Only for layer positionining. Default to topleft corner.</xs:documentation></xs:annotation>
             <xs:simpleType>
                 <xs:restriction base="xs:string">
-                    <xs:enumeration value="normal"/>
                     <xs:enumeration value="center"/>
                     <xs:enumeration value="left"/>
                     <xs:enumeration value="right"/>

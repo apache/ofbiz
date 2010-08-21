@@ -206,6 +206,23 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
         new ajaxAutoCompleter(ajaxUrl, showDescription);
     }
     
+    var positioning = null;
+    if (position == "topleft") {
+        positioning = ['left', 'top'];
+    } else if (position == "topcenter") {
+        positioning = ['center', 'top'];
+    } else if (position == "topright") {
+        positioning = ['right', 'top'];
+    } else if (position == "center") {
+        positioning = 'center';
+    } else if (position == "left") {
+        positioning = 'left';
+    } else if (position == "right") {
+        positioning = 'right';
+    } else {
+        positioning = ['left', 'top'];
+    }
+    
     // Lookup Configuration
     var dialogOpts = {
         modal: (modal == "true") ? true : false,
@@ -213,6 +230,7 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
         autoOpen: false,
         height: (height != "") ? parseInt(height) : 500,
         width: (width != "") ? parseInt(width) : 620,
+        position: positioning,
         draggable: true,
         resizeable: true,
         open: function() {
