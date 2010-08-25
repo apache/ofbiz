@@ -47,19 +47,23 @@ under the License.
       <#assign line=line+1>
     </#list>
   </tr>
-  <tr>
+  <tr id="portletArea">
     <#list portalPageColumnList?if_exists as portalPageColumn>
-      <td style="vertical-align: top; <#if portalPageColumn.columnWidthPercentage?has_content> width:${portalPageColumn.columnWidthPercentage}%;</#if>" id="portalColumn_${portalPageColumn.columnSeqId}">
+      <td style="vertical-align: top; <#if portalPageColumn.columnWidthPercentage?has_content> width:${portalPageColumn.columnWidthPercentage}%;</#if>" id="portalColumn_${portalPageColumn.columnSeqId}" class="connectedSortable">
+      <script type="text/javascript">
+          if (SORTABLE_COLUMN_LIST == null) {
+              SORTABLE_COLUMN_LIST = "#portalColumn_${portalPageColumn.columnSeqId}";
+          } else {
+              SORTABLE_COLUMN_LIST += ", #portalColumn_${portalPageColumn.columnSeqId}";
+          }
+      </script>
       <#assign firstInColumn = true/>
       <#list portalPagePortletViewList as portlet>
         <#if (!portlet.columnSeqId?has_content && portalPageColumn_index == 0) || (portlet.columnSeqId?if_exists == portalPageColumn.columnSeqId)>
           <#if portlet.screenName?has_content>
               <#assign portletFields = '<input name="portalPageId" value="' + portlet.portalPageId + '" type="hidden"/><input name="portalPortletId" value="' + portlet.portalPortletId + '" type="hidden"/><input name="portletSeqId" value="' + portlet.portletSeqId  + '" type="hidden"/>'>
-              <div class="portlet-config" id="portalPortlet_${portlet_index}" onmouseover="javascript:this.style.cursor='move';">
+              <div class="portlet-config" id="${portalPageColumn.columnSeqId}_${portlet_index}" portalPageId="${portlet.portalPageId}" portalPortletId="${portlet.portalPortletId}" sequenceNum="${portlet.sequenceNum!"0"}" columnSeqId="${portlet.columnSeqId}" portletSeqId="${portlet.portletSeqId}">
               <div class="portlet-config-title-bar">
-                  <script type="text/javascript">makeDragable("portalPortlet_${portlet_index}");</script>
-                  <script type="text/javascript">makeDroppable("portalPortlet_${portlet_index}");</script>
-                  <form method="post" action="<@ofbizUrl>updatePortalPagePortletAjax</@ofbizUrl>" name="freeMove_${portlet_index}">${portletFields}<input name="columnSeqId" value="${portalPageColumnList[portalPageColumn_index].columnSeqId}" type="hidden"/><input name="mode" value="RIGHT" type="hidden"/></form>
                 <#list portalPages as portalPageList>
                   <#if portalPage.portalPageId != portalPageList.portalPageId>
                     <form method="post" action="<@ofbizUrl>movePortletToPortalPage${Adm?if_exists}</@ofbizUrl>" name="movePP_${portlet_index}_${portalPageList_index}">
