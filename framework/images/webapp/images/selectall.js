@@ -225,7 +225,7 @@ function confirmActionFormLink(msg, formName) {
     }
 }
 
-// ===== Ajax Functions - based on protoype.js ===== //
+// ===== Ajax Functions - based on jQuery.js ===== //
 
 /** Update an area (HTML container element).
   * @param areaId The id of the HTML container to update
@@ -234,9 +234,15 @@ function confirmActionFormLink(msg, formName) {
 */
 function ajaxUpdateArea(areaId, target, targetParams) {
     waitSpinnerShow();
-    new Ajax.Updater(areaId, target, {parameters: targetParams, evalScripts: true,
-        onSuccess: function(transport) {waitSpinnerHide();},
-        onFailure: function() {waitSpinnerHide();}
+    jQuery.ajax({
+        url: target,
+        type: "POST",
+        data: targetParams,
+        success: function(data) {
+            jQuery("#" + areaId).html(data);
+            waitSpinnerHide();
+        },
+        error: function(data) {waitSpinnerHide()}
     });
 }
 
@@ -249,7 +255,19 @@ function ajaxUpdateAreas(areaCsvString) {
     var areaArray = areaCsvString.split(",");
     var numAreas = parseInt(areaArray.length / 3);
     for (var i = 0; i < numAreas * 3; i = i + 3) {
-        jQuery("#" + areaArray[i]).load(areaArray[i + 1], areaArray[i + 2], function () {waitSpinnerHide();});
+        var areaId = areaArray[i];
+        var target = areaArray[i + 1];
+        var targetParams = areaArray[i + 2];
+        jQuery.ajax({
+            url: target,
+            type: "POST",
+            data: targetParams,
+            success: function(data) {
+                jQuery("#" + areaId).html(data);
+                waitSpinnerHide();
+            },
+            error: function(data) {waitSpinnerHide()}
+        });
     }
 }
 
@@ -260,7 +278,23 @@ function ajaxUpdateAreas(areaCsvString) {
   * @param interval The update interval, in seconds.
 */
 function ajaxUpdateAreaPeriodic(areaId, target, targetParams, interval) {
-    new Ajax.PeriodicalUpdater(areaId, target, {parameters: targetParams, frequency: interval});
+    jQuery.fjTimer({
+        interval: interval,
+        repeat: true,
+        tick: function(container, timerId){
+            jQuery.ajax({
+                url: target,
+                type: "POST",
+                data: targetParams,
+                success: function(data) {
+                    jQuery("#" + areaId).html(data);
+                    waitSpinnerHide();
+                },
+                error: function(data) {waitSpinnerHide()}
+            });
+            
+        }
+    });
 }
 
 /** Submit request, update multiple areas (HTML container elements).
@@ -273,9 +307,12 @@ function ajaxSubmitRequestUpdateAreas(target, targetParams, areaCsvString) {
     updateFunction = function(transport) {
         ajaxUpdateAreas(areaCsvString);
     }
-    new Ajax.Request(target, {
-        parameters: targetParams,
-        onComplete: updateFunction });
+    jQuery.ajax({
+        url: target,
+        type: "POST",
+        data: targetParams,
+        success: updateFunction()
+    });
 }
 
 /** Submit form, update an area (HTML container element).
@@ -286,11 +323,13 @@ function ajaxSubmitRequestUpdateAreas(target, targetParams, areaCsvString) {
 function submitFormInBackground(form, areaId, submitUrl) {
     submitFormDisableSubmits(form);
     updateFunction = function() {
-        new Ajax.Updater(areaId, submitUrl);
+        jQuery("#" + areaId).load(submitUrl);
     }
-    new Ajax.Request(form.action, {
-        parameters: form.serialize(true),
-        onComplete: updateFunction });
+    jQuery.ajax({
+        url: jQuery(form).attr("action"),
+        data: jQuery(form).serialize(),
+        success: updateFunction()
+    });
 }
 
 /** Submit form, update multiple areas (HTML container elements).
@@ -328,7 +367,7 @@ function ajaxSubmitFormUpdateAreas(form, areaCsvString) {
        }
        waitSpinnerHide();
    }
-   
+
    jQuery.ajax({
        type: "POST",
        url: jQuery("#" + form).attr("action"),
@@ -355,7 +394,7 @@ function ajaxAutoCompleter(areaCsvString, showDescription) {
           if ((jQuery("#" + div + "_auto")).length < 1) {
               jQuery("<div id='" + div + "_auto'></div>").insertBefore("#" + areaArray[i]);
           }
-          
+
           jQuery("#" + div).autocomplete({
            source: function(request, response) {
                 jQuery.ajax({
@@ -376,7 +415,7 @@ function ajaxAutoCompleter(areaCsvString, showDescription) {
 
 function setSelection(text, li) {
     text.value = li.id;
-    var delay = function() { text.fire("lookup:changed"); };
+    var delay = function() { jQuery("#" + text).trigger("lookup:changed"); };
     setTimeout(delay, 100);
 }
 
@@ -387,14 +426,14 @@ function setLookDescription(textFieldId, description) {
             description = description.substring(0, start);
         }
     }
-    var lookupWrapperEl = $(textFieldId).up('.field-lookup');
+    var lookupWrapperEl = jQuery("#" + textFieldId).closest(jQuery('.field-lookup'));
     if (lookupWrapperEl) {
-        var tooltipElement = $(textFieldId + '_lookupDescription');
+        var tooltipElement = jQuery("#" + textFieldId + '_lookupDescription');
         if (!tooltipElement) {
-            tooltipElement = new Element('span', {id : textFieldId + '_lookupDescription', 'class' : 'tooltip'});
+            tooltipElement = jQuery("<span id='" + textFieldId + "_lookupDescription' class='tooltip'></span>");
         }
-        tooltipElement.update(description);
-        lookupWrapperEl.appendChild(tooltipElement);
+        tooltipElement.html(description);
+        tooltipElement.append(lookupWrapperEl);
     }
 }
 
@@ -406,6 +445,7 @@ function setLookDescription(textFieldId, description) {
 */
 
 function ajaxAutoCompleteDropDown(descriptionElement, hiddenElement, data, options) {
+    // TODO is still old fashined :-)
     var update = hiddenElement + "_autoCompleterOptions";
     $(descriptionElement).insert({after: '<div class="autocomplete"' + 'id=' + update + '></div>'});
     new Autocompleter.Local($(descriptionElement), update, $H(data), {autoSelect: options.autoSelect, frequency: options.frequency, minChars: options.minChars, choices: options.choices, partialSearch: options.partialSearch, partialChars: options.partialChars, ignoreCase: options.ignoreCase, fullSearch: options.fullSearch, afterUpdateElement: setKeyAsParameter});
@@ -490,11 +530,11 @@ function ajaxInPlaceEditDisplayField(element, url, options) {
     jElement.mouseover(function() {
         $(this).css('background-color', 'rgb(255, 255, 153)');
     });
-    
+
     jElement.mouseout(function() {
         $(this).css('background-color', 'transparent');
     });
-    
+
     jElement.editable(function(value, settings){
         // removes all line breaks from the value param, because the parseJSON Function can't work with line breaks
         value = value.replace("\n", " ");
@@ -554,7 +594,6 @@ function submitFormDisableButton(button) {
 }
 
 function submitFormEnableButtonByName(formName, buttonName) {
-    // alert("formName=" + formName + " buttonName=" + buttonName);
     var form = document[formName];
     var button = form.elements[buttonName];
     submitFormEnableButton(button);
@@ -589,18 +628,12 @@ function expandAll(expanded) {
 
 //calls ajax request for storing user layout preferences
 function setUserLayoutPreferences(userPrefGroupTypeId, userPrefTypeId, userPrefValue){
-  new Ajax.Request('ajaxSetUserPreference',{
-    method: "post",
-    parameters: {userPrefGroupTypeId: userPrefGroupTypeId, userPrefTypeId: userPrefTypeId, userPrefValue: userPrefValue},
-    onLoading: function(transport){
-    },
-
-    onSuccess: function(transport){
-    },
-
-    onComplete: function(transport){
-    }
- });
+    jQuery.ajax({
+        url:'ajaxSetUserPreference',
+        type: "POST",
+        data: ({userPrefGroupTypeId: userPrefGroupTypeId, userPrefTypeId: userPrefTypeId, userPrefValue: userPrefValue}),
+        success: function(data) {}
+    });
 }
 
 function toggleLeftColumn(){
