@@ -528,11 +528,11 @@ function toggleScreenlet(link, areaId, saveCollapsed, expandTxt, collapseTxt){
 function ajaxInPlaceEditDisplayField(element, url, options) {
     var jElement = jQuery("#" + element);
     jElement.mouseover(function() {
-        $(this).css('background-color', 'rgb(255, 255, 153)');
+        jQuery(this).css('background-color', 'rgb(255, 255, 153)');
     });
 
     jElement.mouseout(function() {
-        $(this).css('background-color', 'transparent');
+        jQuery(this).css('background-color', 'transparent');
     });
 
     jElement.editable(function(value, settings){
@@ -618,7 +618,7 @@ function expandAll(expanded) {
             groupbody=divs1[j];
           }
         }
-        if($(groupbody).visible() != expanded) {
+        if(jQuery(groupbody).is(':visible') != expanded) {
           toggleCollapsiblePanel(links[0], groupbody.id, 'expand', 'collapse');
         }
       }
