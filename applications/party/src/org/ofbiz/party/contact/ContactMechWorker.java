@@ -481,12 +481,13 @@ public class ContactMechWorker {
             List<EntityCondition> conditionList = FastList.newInstance();
             conditionList.add(EntityCondition.makeCondition("facilityId", facilityId));
             conditionList.add(EntityCondition.makeCondition("contactMechPurposeTypeId", purposeType));
-            conditionList.add(EntityCondition.makeConditionDate("fromDate", "thruDate"));
             EntityCondition entityCondition = EntityCondition.makeCondition(conditionList);
             try {
                 facilityContactMechPurposes = delegator.findList("FacilityContactMechPurpose", entityCondition, null, UtilMisc.toList("-fromDate"), null, true);
+                facilityContactMechPurposes = EntityUtil.filterByDate(facilityContactMechPurposes);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
+                continue;
             }
             for (GenericValue facilityContactMechPurpose: facilityContactMechPurposes) {
                 String contactMechId = facilityContactMechPurpose.getString("contactMechId");
@@ -494,10 +495,10 @@ public class ContactMechWorker {
                 conditionList = FastList.newInstance();
                 conditionList.add(EntityCondition.makeCondition("facilityId", facilityId));
                 conditionList.add(EntityCondition.makeCondition("contactMechId", contactMechId));
-                conditionList.add(EntityCondition.makeConditionDate("fromDate", "thruDate"));
                 entityCondition = EntityCondition.makeCondition(conditionList);
                 try {
                     facilityContactMechs = delegator.findList("FacilityContactMech", entityCondition, null, UtilMisc.toList("-fromDate"), null, true);
+                    facilityContactMechs = EntityUtil.filterByDate(facilityContactMechs);
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
                 }
