@@ -401,7 +401,7 @@ public final class UtilIO {
                 return;
             }
         } catch (Exception e) {
+            throw new IOException("Can't write (" + value + ")");            
         }
-        throw new IOException("Can't write (" + value + ")");
     }
 }
