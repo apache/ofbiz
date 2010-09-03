@@ -69,7 +69,8 @@ under the License.
                                             <set field="multipleSelect"  value="countryGeoIdMultiple"/>
                                             <set field="multipleSelectForm" value="DropDownMultipleFieldExampleForm"/>
                                             <set field="formSize" value="500"/>
-                                            <set field="asmListItemPercentOfForm" value="100"/>                
+                                            <set field="asmListItemPercentOfForm" value="100"/>
+                                            <set field="sortable" value="false"/>                                            
                                         </actions>
                                         <widgets>
                                             <!--platform-specific><html><html-template location="component://common/webcommon/includes/setCountryStatesEventJs.ftl"/></html></platform-specific-->

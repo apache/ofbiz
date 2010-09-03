@@ -21,7 +21,7 @@ under the License.
 
     jQuery("#${multipleSelectForm}_${multipleSelect}").asmSelect({
       addItemTarget: 'top',
-      sortable: true
+      sortable: ${sortable}
     });
 
     // track changes with our own event
