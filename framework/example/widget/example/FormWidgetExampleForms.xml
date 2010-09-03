@@ -245,6 +245,25 @@ under the License.
             </drop-down>
         </field>
     </form>
+    
+        <!-- ****************************** -->
+        <!-- ***   Multiple Dropdown    *** -->
+        <!-- ****************************** -->
+        <!-- See why this is used here http://www.ryancramer.com/journal/entries/select_multiple/ -->
+    <form name="DropDownMultipleFieldExampleForm" type="single" title="">
+        <field name="emptyField1" title="${uiLabelMap.CommonEmptyHeader}"><display/></field>
+        <field name="multipleDropDownFields" title="${uiLabelMap.ExampleMultipleDropDowns}">
+            <display description="${uiLabelMap.ExampleMultipleDropDownTooltip}"/>
+        </field>
+        <field name="countryGeoIdMultiple" title="${uiLabelMap.CommonCountry}">
+            <drop-down no-current-selected-key="USA">
+                <entity-options entity-name="Geo" key-field-name="geoId" description="${geoName}">
+                    <entity-constraint name="geoTypeId" value="COUNTRY"/>
+                    <entity-order-by field-name="geoName"/>
+                </entity-options>
+            </drop-down>
+        </field>        
+    </form>
 
     <!-- Simple form to print a FOP PDF file with the  fonts available in OFBiz Project -->
     <form name="FOPFontsExampleForm" type="single" target="printExampleFOPFonts">

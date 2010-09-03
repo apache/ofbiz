@@ -486,6 +486,14 @@
         <value xml:lang="th">สำหรับท่านที่สนใจสามารถเข้าสู่ระบบได้, โดยใช้ ชื่อผู้ใช้:admin, รหัสผ่าน:ofbiz</value>
         <value xml:lang="zh">如果对某部分感兴趣，请先确信你已登录，可以尝试用 用户名:admin、密码:ofbiz登录。</value>
     </property>
+    <property key="ExampleMultipleDropDowns">
+        <value xml:lang="en">Multiple drop-downs</value>
+        <value xml:lang="fr">liste déroulante avec choix multiples</value>
+    </property>    
+    <property key="ExampleMultipleDropDownTooltip">
+        <value xml:lang="en">Needs some fields to be set, see in FormWidgetExampleScreens.xml (begins with multipleSelect)</value>
+        <value xml:lang="fr">Nécessite de définir certains champs, voir dans FormWidgetExampleScreens.xml (commence avec multipleSelect)</value>
+    </property>    
     <property key="ExampleNewExample">
         <value xml:lang="en">New Example</value>
         <value xml:lang="fr">Nouvel exemple</value>
