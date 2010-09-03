@@ -1270,6 +1270,8 @@ ofbiz/trunk/framework/images/webapp/images/jquery/ui/js/jquery-ui-1.8.2.custom.m
 ofbiz/trunk/framework/images/webapp/images/jquery/plugins/jeditable/jquery.jeditable.js
 ofbiz/trunk/framework/images/webapp/images/jquery/plugins/fjTimer/jquerytimer-min.js
 ofbiz/trunk/framework/images/webapp/images/jquery/plugins/fjTimer/jquerytimer.js
+ofbiz/trunk/framework/images/webapp/images/jquery/plugins/asmselect/jquery.asmselect-1.0.4a-beta.js
+ofbiz/trunk/framework/images/webapp/images/jquery/plugins/asmselect/jquery.asmselect-1.0.4a-beta.css
 =========================================================================
 The MIT License
 
