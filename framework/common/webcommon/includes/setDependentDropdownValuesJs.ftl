@@ -17,12 +17,12 @@ specific language governing permissions and limitations
 under the License.
 -->
 <script type="text/javascript">
-Event.observe(window, 'load', function() {
-    if ($('${dependentForm}')) {
-        Event.observe($('${dependentForm}_${mainId}'), 'change', function() {
-            getDependentDropdownValues('${requestName}', '${paramKey}', '${dependentForm}_${mainId}', '${dependentForm}_${dependentId}', '${responseName}', '${dependentId}', '${descName}', '', '');
-        });
-        getDependentDropdownValues('${requestName}', '${paramKey}', '${dependentForm}_${mainId}', '${dependentForm}_${dependentId}', '${responseName}', '${dependentId}', '${descName}', '${selectedDependentOption}', '');
+jQuery(document).ready(function() {
+    if (jQuery('#${dependentForm}')) {
+      jQuery("#${dependentForm}_${mainId}").change(function(e, data) {
+          getDependentDropdownValues('${requestName}', '${paramKey}', '${dependentForm}_${mainId}', '${dependentForm}_${dependentId}', '${responseName}', '${dependentId}', '${descName}', '', '');
+      });
+      getDependentDropdownValues('${requestName}', '${paramKey}', '${dependentForm}_${mainId}', '${dependentForm}_${dependentId}', '${responseName}', '${dependentId}', '${descName}', '${selectedDependentOption}', '');
     }
 })
 </script>
