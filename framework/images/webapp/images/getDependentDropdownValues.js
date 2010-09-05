@@ -29,6 +29,7 @@
 // callback     = optional javascript function called at end
 function getDependentDropdownValues(request, paramKey, paramField, targetField, responseName, keyName, descName, selected, callback) {
 	data = [ { name: paramKey, value: jQuery('#' + paramField).val()} ];  // get requested value from parent dropdown field 
+	// Call jQuery.post with a json formatted result (see end of code)
     jQuery.post(request, data, function(result) { 
         optionList = '';
         list = result[responseName];
