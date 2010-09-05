@@ -28,59 +28,52 @@
 // selected     = optional name of a selected option
 // callback     = optional javascript function called at end
 function getDependentDropdownValues(request, paramKey, paramField, targetField, responseName, keyName, descName, selected, callback) {
-	// parameters
-	var params = new Array();
-	params[paramKey] = $F(paramField);			
-	
-    var optionList = [];
-    var requestToSend = request;
-    new Ajax.Request(requestToSend, {
-        asynchronous: false,
-        parameters: params,
-        onSuccess: function(transport) {
-            var data = transport.responseText.evalJSON(true);                     
-            list = data[responseName];
-            list.each(function(value) {
-            	if (typeof value == 'string') {            	
-	                values = value.split(': ');
-	                if (values[1].indexOf(selected) >=0) {
-	                    optionList.push("<option selected='selected' value = "+values[1]+" >"+values[0]+"</option>");
-	                } else {
-	                    optionList.push("<option value = "+values[1]+" >"+values[0]+"</option>");
-	                }
-            	} else {
-            		if (value[keyName] == selected) {
-            			optionList.push("<option selected='selected' value = " + value[keyName] +" >"+ value[descName] + "</option>");
-            		} else {
-            			optionList.push("<option value = " + value[keyName] + " >" + value[descName] + "</option>");
-            		}
-            	}
-            });
-            $(targetField).update(optionList);
-            if ((list.size() < 1) || ((list.size() == 1) && list[0].indexOf("_NA_") >=0)) {                
-                if ($(targetField).visible()) {
-                    Effect.Fade(targetField, {duration: 1.5});
+	data = [ { name: paramKey, value: jQuery('#' + paramField).val()} ];  // get requested value from parent dropdown field 
+    jQuery.post(request, data, function(result) { 
+        optionList = '';
+        list = result[responseName];
+        // Create and show dependent select options
+        jQuery.each(list, function (key, value) {
+            if (typeof value == 'string') {
+                values = value.split(': ');
+                if (values[1].indexOf(selected) >=0) {
+                    optionList += "<option selected='selected' value = " + values[1] + " >" + values[0] + "</option>";
+                } else {
+                    optionList +=  "<option value = " + values[1] + " >" + values[0] + "</option>";
                 }
             } else {
-                if (!$(targetField).visible()) {
-                    Effect.Appear(targetField, {duration: 0.0});
+                if (value[keyName] == selected) {
+                    optionList += "<option selected='selected' value = " + value[keyName] + " >" + value[descName] + "</option>";
+                } else {
+                    optionList += "<option value = " + value[keyName] + " >" + value[descName] + "</option>";
                 }
             }
-            if (callback != null)
-            	eval(callback);
+        });
+        target = '#' + targetField;
+        jQuery(target).html(optionList);
+        // Hide/show the dependent dropdown
+        if ((list.size() < 1) || ((list.size() == 1) && list[0].indexOf("_NA_") >=0)) {                
+            if (jQuery(target).is(':visible')) {
+                jQuery(target).fadeOut();
+            }
+        } else {
+            if (!jQuery(target).is(':visible')) {
+                jQuery(target).fadeIn();
+            }
         }
-    });
+        if (callback != null) eval(callback);
+    }, 'json');
 }
-
+  
 // calls any service already mounted as an event
 function getServiceResult(request, params) {
-	var data;
-	new Ajax.Request(request, {
+    var data;
+    new Ajax.Request(request, {
         asynchronous: false,
         parameters: params,
         onSuccess: function(transport) {
-			data = transport.responseText.evalJSON(true);  			
-		}
-	});
-	return data;
+            data = transport.responseText.evalJSON(true);           
+        }
+    });
+    return data;
 }
