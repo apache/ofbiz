@@ -35,6 +35,12 @@ under the License.
         <field name="routingId" title="${uiLabelMap.ManufacturingRoutingId}"><lookup target-form-name="LookupRouting" size="16"/></field>
         <field name="workEffortName" title="${uiLabelMap.ManufacturingProductionRunName}"><text size="30"/></field>
         <field name="description" title="${uiLabelMap.CommonDescription}"><text size="50"/></field>
+        <field name="createDependentProductionRuns">
+            <drop-down allow-empty="false">
+                <option key="N" description="${uiLabelMap.CommonNo}"/>
+                <option key="Y" description="${uiLabelMap.CommonYes}"/>
+            </drop-down>
+        </field>
         <field name="submitButton" title="${uiLabelMap.CommonSubmit}">
             <submit button-type="button"/>
         </field>
@@ -134,14 +140,24 @@ under the License.
     </form>
     <form name="ListProductionRunInventoryItems" type="list" title="" list-name="inventoryItems"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <row-actions>
+            <entity-one entity-name="InventoryItem" value-field="inventoryItem"/>
+            <entity-condition entity-name="InventoryItemDetail" list="inventoryItemDetails">
+                <condition-expr field-name="inventoryItemId" operator="equals" from-field="inventoryItemId"/>
+                <order-by field-name="inventoryItemDetailSeqId"/>
+            </entity-condition>
+            <set field="quantityOnHandDiff" from-field="inventoryItemDetails[0].quantityOnHandDiff"/>
+        </row-actions>
         <field name="inventoryItemId" widget-style="buttontext">
             <hyperlink target="/facility/control/EditInventoryItem"  description="${inventoryItemId}" also-hidden="false" target-type="inter-app">
                 <parameter param-name="inventoryItemId"/>
             </hyperlink>
         </field>
-        <field name="lotId" entry-name="inventoryItemId"><display-entity entity-name="InventoryItem" key-field-name="inventoryItemId" description="${lotId} "/></field>
-        <field name="unitCost" entry-name="inventoryItemId"><display-entity entity-name="InventoryItem" key-field-name="inventoryItemId" description="${unitCost} "/></field>
-        <field name="creationDate" entry-name="inventoryItemId"><display-entity entity-name="InventoryItem" key-field-name="inventoryItemId" description="${datetimeReceived}"/></field>
+        <field name="lotId" map-name="inventoryItem"><display/></field>
+        <field name="statusId" map-name="inventoryItem"><display-entity entity-name="StatusItem" key-field-name="statusId" description="${description}"/></field>
+        <field name="unitCost" map-name="inventoryItem"><display/></field>
+        <field name="quantity" entry-name="quantityOnHandDiff"><display/></field>
+        <field name="datetimeReceived" map-name="inventoryItem"><display/></field>
     </form>
 
      <form name="ViewListProductionRunRoutingTasks" type="list" title="" list-name="productionRunRoutingTasks"
