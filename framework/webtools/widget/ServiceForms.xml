@@ -99,4 +99,22 @@ under the License.
             </hyperlink>
         </field>
     </form>
+    <form name="ListJavaThread" type="list" list-name="threads" paginate-target="threadList" separate-columns="true"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="threadId" title="${uiLabelMap.WebtoolsThread}"><display description="${threadId} ${threadName}"/></field>
+        <field name="status" title="${uiLabelMap.CommonStatus}"><display/></field>
+        <field name="jobName" title="${uiLabelMap.WebtoolsJob}"><display default-value="${uiLabelMap.CommonNone}"/></field>
+        <field name="serviceName" title="${uiLabelMap.WebtoolsService}"><display default-value="${uiLabelMap.CommonNone}"/></field>
+        <field name="usage" title="${uiLabelMap.WebtoolsUsage}"><display/></field>
+        <field name="ttl" title="${uiLabelMap.WebtoolsTTL} (ms)"><display/></field>
+        <field name="runTime" title="${uiLabelMap.CommonTime} (ms)"><display/></field>
+    </form>
+    <form name="ListServices" type="list" list-name="services" paginate-target="ServiceLog" separate-columns="true"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" header-row-style="header-row-2">
+        <field name="serviceName" title="${uiLabelMap.WebtoolsServiceName}" sort-field="true"><display/></field>
+        <field name="localName" title="${uiLabelMap.WebtoolsDispatcherName}" sort-field="true"><display/></field>
+        <field name="modeStr" title="${uiLabelMap.WebtoolsMode}" sort-field="true"><display default-value="${uiLabelMap.CommonNone}"/></field>
+        <field name="startTime" title="${uiLabelMap.CommonStartDateTime}" sort-field="true"><display/></field>
+        <field name="endTime" title="${uiLabelMap.CommonEndDateTime}" sort-field="true"><display default-value="${uiLabelMap.WebtoolsStatusRunning}"/></field>
+    </form>
 </forms>

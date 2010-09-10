@@ -472,6 +472,7 @@ public class UtilXml {
                 if (node.getUserData("startLine") != null) {
                     return;
                 }
+                node.setUserData("systemId",locator.getLiteralSystemId(), null);
                 node.setUserData("startLine",locator.getLineNumber(), null);
                 node.setUserData("startColumn",locator.getColumnNumber(), null);
             }
@@ -561,7 +562,9 @@ public class UtilXml {
             parser.setEntityResolver(lr);
             parser.setErrorHandler(eh);
         }
-        parser.parse(new InputSource(is));
+        InputSource inputSource = new InputSource(is);
+        inputSource.setSystemId(docDescription);
+        parser.parse(inputSource);
         document = parser.getDocument();
 
         double totalSeconds = (System.currentTimeMillis() - startTime)/1000.0;
@@ -800,7 +803,7 @@ public class UtilXml {
         if (node != null) {
             do {
                 if (node.getNodeType() == Node.ELEMENT_NODE && (childElementName == null ||
-                        childElementName.equals(node.getLocalName()))) {
+                        childElementName.equals(node.getNodeName()))) {
                     Element childElement = (Element) node;
                     return childElement;
                 }

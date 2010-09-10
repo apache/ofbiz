@@ -2521,6 +2521,7 @@
     <property key="FormFieldTitle_decoratorContentId">
         <value xml:lang="da">Dekoratør indholds id</value>
         <value xml:lang="en">Decorator Content Id</value>
+        <value xml:lang="fr">Ressource de décorateur</value>
         <value xml:lang="it">Decoratore contenuto</value>
         <value xml:lang="zh">修饰程序内容标识</value>
     </property>
@@ -3723,6 +3724,10 @@
         <value xml:lang="ro">Adauga Resursa Date</value>
         <value xml:lang="th">เพิ่มแหล่งที่มาของข้อมูล</value>
         <value xml:lang="zh">新建数据资源</value>
+    </property>
+    <property key="PageTitleAddDataResourceFromContent">
+        <value xml:lang="en">Add DataResource From Content</value>
+        <value xml:lang="fr">Ajouter une ressource de données pour un contenu</value>
     </property>
     <property key="PageTitleAddDataResourceText">
         <value xml:lang="ar">إضافة نص مورد معلومات</value>
