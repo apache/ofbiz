@@ -77,14 +77,14 @@
                 </entity-options>
             </drop-down>
         </field>
-        <field name="geoId" title="${uiLabelMap.CommonGeo}" position="3">
+        <field name="geoId" title="${uiLabelMap.CommonGeo}">
             <drop-down>
                 <entity-options entity-name="Geo" key-field-name="geoId" description="${geoName}">
                     <entity-order-by field-name="geoName"/>
                 </entity-options>
             </drop-down>
         </field>
-        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit" position="2"><submit button-type="button"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
         
 </forms>

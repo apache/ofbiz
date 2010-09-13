@@ -216,8 +216,6 @@ under the License.
     </request-map>
     
     <request-map uri="LookupGeo"><security https="true" auth="true"/><response name="success" type="view" value="LookupGeo"/></request-map>
-
-    <request-map uri="LookupGeo"><security https="true" auth="true"/><response name="success" type="view" value="LookupGeo"/></request-map>
     <!--========================== AJAX events =====================-->
 
     <!-- View Mappings -->
