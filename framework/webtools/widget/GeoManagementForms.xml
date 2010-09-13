@@ -69,21 +69,22 @@
                 </entity-options>
             </drop-down>
         </field>        
-        <field name="geoAssocTypeId" title="${uiLabelMap.CommonGeoAssocTypeId}">
+        <field name="dummy" title="${uiLabelMap.CommonEmptyHeader}" position="2"><display/></field>
+        <field name="geoAssocTypeId" title="${uiLabelMap.CommonGeoAssocTypeId}" position="3">
             <drop-down allow-empty="true">
                 <entity-options key-field-name="geoAssocTypeId" entity-name="GeoAssocType" description="${description}">
                     <entity-order-by field-name="description"/>
                 </entity-options>
             </drop-down>
         </field>
-        <field name="geoId" title="${uiLabelMap.CommonGeo}">
+        <field name="geoId" title="${uiLabelMap.CommonGeo}" position="3">
             <drop-down>
                 <entity-options entity-name="Geo" key-field-name="geoId" description="${geoName}">
                     <entity-order-by field-name="geoName"/>
                 </entity-options>
             </drop-down>
         </field>
-        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit" ><submit button-type="button"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit" position="2"><submit button-type="button"/></field>
     </form>
         
 </forms>
