@@ -16,7 +16,7 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 */
-Event.observe(window, 'load', function() {
+document.observe('dom:loaded', function() {
 
     // Autocompleter for good identification field
     var j = 0;
