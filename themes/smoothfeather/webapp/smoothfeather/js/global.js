@@ -72,7 +72,7 @@ OFBIZ.initSideBar = function(){
 	Event.observe('sideBarTab', 'click', OFBIZ.slideSideBar, true);
 }
 
-Event.observe(window, 'load', OFBIZ.initSideBar, true);
+document.observe('dom:loaded', OFBIZ.initSideBar, true);
 */
 
 //GLOBAL FUNCTION FOR APP DROP-DROWN SECTIONS
@@ -210,7 +210,7 @@ var humanMsg = {
 };
 
 //LOAD MODAL PREFERENCE WINDOWS
-Event.observe(window, 'load', function() {
+document.observe('dom:loaded', function() {
 	get = new ModalWindow();
 	$("language").observe('click',function(e) {
 	  var locale = new Element('div', {id:'modal-contents'}).update("Updating Languages, please wait...");
