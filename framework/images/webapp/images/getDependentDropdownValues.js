@@ -27,12 +27,26 @@
 // descName     = name of the dependent dropdown description
 // selected     = optional name of a selected option
 // callback     = optional javascript function called at end
-function getDependentDropdownValues(request, paramKey, paramField, targetField, responseName, keyName, descName, selected, callback) {
+// inputField   = optional name of an input field to use instead of a dropdown (this will be extended later to use an of autocompleted dropdown, instead of dropdown or a lookup, when there are too much values to populate)   
+// hide         = optional argument, if true the dependend dropdown field (targetField) will be hidden when no options are available else only disabled. False by default.
+function getDependentDropdownValues(request, paramKey, paramField, targetField, responseName, keyName, descName, selected, callback, hide) {
 	data = [ { name: paramKey, value: jQuery('#' + paramField).val()} ];  // get requested value from parent dropdown field 
 	// Call jQuery.post with a json formatted result (see end of code)
     jQuery.post(request, data, function(result) { 
+        target = '#' + targetField;
         optionList = '';
         list = result[responseName];
+        // this is to handle a specific case where an input field is needed, uses inputField for the field name
+        if (!list) {
+			jQuery(target).hide();
+			jQuery(target).after("<input type='text' name=arguments[9] id=targetField + '_input' size=3>"); 
+        	return;
+        } else { 
+        	if (jQuery(target + '_input')) { 
+        		jQuery(target + '_input').remove();            		
+				jQuery(target).show();
+        	}
+        }
         // Create and show dependent select options
         jQuery.each(list, function (key, value) {
             if (typeof value == 'string') {
@@ -50,16 +64,21 @@ function getDependentDropdownValues(request, paramKey, paramField, targetField, 
                 }
             }
         });
-        target = '#' + targetField;
         jQuery(target).html(optionList);
-        // Hide/show the dependent dropdown
-        if ((list.size() < 1) || ((list.size() == 1) && list[0].indexOf("_NA_") >=0)) {                
-            if (jQuery(target).is(':visible')) {
-                jQuery(target).fadeOut();
-            }
+        // Hide/show the dependent dropdown if hide=true else simply disable/enable
+        if ((list.size() < 1) || ((list.size() == 1) && list[0].indexOf("_NA_") >=0)) {
+        	jQuery(target).attr('disabled', 'disabled');
+        	if (hide) {
+	            if (jQuery(target).is(':visible')) {
+	                jQuery(target).fadeOut();
+	            }
+        	}
         } else {
-            if (!jQuery(target).is(':visible')) {
-                jQuery(target).fadeIn();
+        	jQuery(target).removeAttr('disabled');
+        	if (hide) {
+        		if (!jQuery(target).is(':visible')) {
+        			jQuery(target).fadeIn();
+        		}
             }
         }
         if (callback != null) eval(callback);

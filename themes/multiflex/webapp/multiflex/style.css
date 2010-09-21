@@ -2599,6 +2599,15 @@ width:16px;
 height:16px;
 }
 
+#wait-spinner {
+z-index:50000;
+position:absolute;
+}
+#wait-spinner-image {
+height:21px;
+width:56px;
+background-image:url(/images/spinner.gif);
+}
 /* RTL support */
 .ui-datepicker-rtl { direction: rtl; }
 .ui-datepicker-rtl .ui-datepicker-prev { right: 2px; left: auto; }

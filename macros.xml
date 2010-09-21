@@ -52,6 +52,9 @@ under the License.
   <pathelement location="${ofbiz.home.dir}/framework/base/lib/scripting/asm-3.2.jar"/>
   <pathelement location="${ofbiz.home.dir}/framework/base/lib/scripting/groovy-all-1.7.4.jar"/>
  </path>
+ <path id="rhino.class.path">
+  <pathelement location="${ofbiz.home.dir}/extension/rhino/lib/js-1.7.R1.jar"/>
+ </path>
  <path id="ant.lib.class.path">
   <pathelement location="${ofbiz.home.dir}/framework/base/lib/ant/ant-nodeps-1.7.1.jar"/>
  </path>
@@ -152,6 +155,12 @@ under the License.
   </groovyc>
  </presetdef>
 
+ <scriptdef name="if" language="javascript" classpathref="rhino.class.path" loaderref="rhino.class.path.loader" src="${ofbiz.home.dir}/tools/If-ant.py">
+  <element name="condition" classname="org.apache.tools.ant.taskdefs.condition.And"/>
+  <element name="commands" classname="org.apache.tools.ant.taskdefs.Sequential"/>
+  <element name="else" classname="org.apache.tools.ant.taskdefs.Sequential"/>
+ </scriptdef>
+
  <taskdef name="javacc" classname="org.apache.tools.ant.taskdefs.optional.javacc.JavaCC" classpath="${ofbiz.home.dir}/framework/base/lib/ant/ant-nodeps-1.7.1.jar"/>
  <taskdef name="jjtree" classname="org.apache.tools.ant.taskdefs.optional.javacc.JJTree" classpath="${ofbiz.home.dir}/framework/base/lib/ant/ant-nodeps-1.7.1.jar"/>
  <macrodef name="ofbiz-javacc">
@@ -160,11 +169,13 @@ under the License.
   <attribute name="prefix" default=""/>
   <sequential>
    <if>
-    <not>
-     <uptodate
-      srcfile="@{prefix}src/@{dir}/@{file}.jj"
-      targetfile="@{prefix}build/gen-src/javacc/@{dir}/@{file}.java"/>
-    </not>
+    <condition>
+     <not>
+      <uptodate
+       srcfile="@{prefix}src/@{dir}/@{file}.jj"
+       targetfile="@{prefix}build/gen-src/javacc/@{dir}/@{file}.java"/>
+     </not>
+    </condition>
     <commands>
      <delete dir="@{prefix}build/gen-src/javacc/@{dir}"/>
      <mkdir dir="@{prefix}build/gen-src/javacc/@{dir}"/>
@@ -183,11 +194,13 @@ under the License.
   <attribute name="prefix" default=""/>
   <sequential>
    <if>
-    <not>
-     <uptodate
-      srcfile="@{prefix}src/@{dir}/@{file}.jjt"
-      targetfile="@{prefix}build/gen-src/jjtree/@{dir}/@{file}.jj"/>
-    </not>
+    <condition>
+     <not>
+      <uptodate
+       srcfile="@{prefix}src/@{dir}/@{file}.jjt"
+       targetfile="@{prefix}build/gen-src/jjtree/@{dir}/@{file}.jj"/>
+     </not>
+    </condition>
     <commands>
      <delete dir="@{prefix}build/gen-src/jjtree/@{dir}"/>
      <mkdir dir="@{prefix}build/gen-src/jjtree/@{dir}"/>
@@ -197,11 +210,13 @@ under the License.
     </commands>
    </if>
    <if>
-    <not>
-     <uptodate
-      srcfile="@{prefix}build/gen-src/jjtree/@{dir}/@{file}.jj"
-      targetfile="@{prefix}build/gen-src/javacc/@{dir}/@{file}.java"/>
-    </not>
+    <condition>
+     <not>
+      <uptodate
+       srcfile="@{prefix}build/gen-src/jjtree/@{dir}/@{file}.jj"
+       targetfile="@{prefix}build/gen-src/javacc/@{dir}/@{file}.java"/>
+     </not>
+    </condition>
     <commands>
      <delete dir="@{prefix}build/gen-src/javacc/@{dir}"/>
      <mkdir dir="@{prefix}build/gen-src/javacc/@{dir}"/>

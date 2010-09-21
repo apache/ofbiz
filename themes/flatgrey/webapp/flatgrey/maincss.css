@@ -2154,9 +2154,14 @@ Lookups
      left: 0px;
      top: 0px;
  }
-.wait-spinner {
-    float: right;
-    margin-right: 10px;
+#wait-spinner {
+z-index:50000;
+position:absolute;
+}
+#wait-spinner-image {
+height:21px;
+width:56px;
+background-image:url(/images/spinner.gif);
 }
 .wait-spinner div {
     padding-top: 4px;
