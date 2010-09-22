@@ -21,7 +21,8 @@ under the License.
 
     jQuery("#${multipleSelectForm}_${multipleSelect}").asmSelect({
       addItemTarget: 'top',
-      sortable: ${sortable}
+      sortable: ${sortable},
+      removeLabel: '${uiLabelMap.CommonRemove}'
     });
 
     // track changes with our own event
@@ -36,10 +37,12 @@ under the License.
 </script>
 
 <style type="text/css">
-  #${multipleSelectForm} {
+
+#${multipleSelectForm} {
     width: ${formSize}px; 
     position: relative;
   }
+
 .asmListItem {
   width: ${asmListItemPercentOfForm}%; 
 }
