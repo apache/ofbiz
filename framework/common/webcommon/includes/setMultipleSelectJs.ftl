@@ -19,25 +19,25 @@ under the License.
 <script type="text/javascript">
   jQuery(document).ready(function() {
 
-    jQuery("#${multipleSelectForm}_${multipleSelect}").asmSelect({
+    // use asmSelect
+    jQuery("#${multipleSelect}").asmSelect({
       addItemTarget: 'top',
       sortable: ${sortable},
       removeLabel: '${uiLabelMap.CommonRemove}'
     });
-
-    // track changes with our own event
-    jQuery("#${multipleSelect}").change(function(e, data) {
-      // if it's a sort or an add, then give it a little color animation to highlight it
-      if(data.type != 'drop') data.item.animate({ 'backgroundColor': '#ffffcc' }, 20, 'linear', function() {
-        data.item.animate({ 'backgroundColor': '#dddddd' }, 500); 
-      }); 
-    }); 
-
+    
+    // track possible relatedField changes
+    if (jQuery('#${multipleSelectForm}')) {
+      // on initial focus or if the field value changes, select related multi values. 
+      // FIXME : not sure why focus does not work here, must be added as event/action in the multipleSelectForm.relatedField
+      jQuery("#${relatedField}").bind('change focus', function() {
+        selectMultipleRelatedValues('${requestName}', '${paramKey}', '${relatedField}', '${multipleSelect}', '${type}', '${typeValue}', '${responseName}');
+      });
+    } 
   }); 
 </script>
 
 <style type="text/css">
-
 #${multipleSelectForm} {
     width: ${formSize}px; 
     position: relative;
