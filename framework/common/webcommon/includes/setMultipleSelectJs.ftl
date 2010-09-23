@@ -31,7 +31,8 @@ under the License.
       // on initial focus or if the field value changes, select related multi values. 
       // FIXME : not sure why focus does not work here, must be added as event/action in the multipleSelectForm.relatedField
       jQuery("#${relatedField}").bind('change focus', function() {
-        selectMultipleRelatedValues('${requestName}', '${paramKey}', '${relatedField}', '${multipleSelect}', '${type}', '${typeValue}', '${responseName}');
+        typeValue = jQuery('#${typeField}').val();
+        selectMultipleRelatedValues('${requestName}', '${paramKey}', '${relatedField}', '${multipleSelect}', '${type}', typeValue, '${responseName}');
       });
     } 
   }); 
