@@ -324,9 +324,6 @@ under the License.
             </else>
         </if-empty>
         <field-to-result field="geoList"/>
-        <log level="always" message="parameters.geoIdTo===========================${parameters.geoId}"></log>
-        <log level="always" message="parameters.geoAssocTypeId===========================${geoAssocTypeId}"></log>
-        <log level="always" message="geoList===========================${geoList}"></log>
     </simple-method>    
     
 </simple-methods>
