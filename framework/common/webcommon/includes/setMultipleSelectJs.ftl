@@ -19,10 +19,10 @@ under the License.
 <script type="text/javascript">
 jQuery(document).ready(function() {
 
-widget = jQuery("#${asm_multipleSelect}");
-ftl = jQuery("select[name='${asm_multipleSelect}']");
-isWidget = widget.length;
-isFtl = ftl.length;
+  widget = jQuery("#${asm_multipleSelect?if_exists}");
+  ftl = jQuery("select[name='${asm_multipleSelect?if_exists}']");
+  isWidget = widget.length;
+  isFtl = ftl.length;
 
 <#if asm_title?exists>
   // set the dropdown "title" if exists
@@ -33,16 +33,16 @@ isFtl = ftl.length;
   if (isWidget) {                     
       widget.asmSelect({
         addItemTarget: 'top',
-        sortable: ${asm_sortable},
-        removeLabel: '${uiLabelMap.CommonRemove}'
+        sortable: ${asm_sortable}!'false'},
+        removeLabel: '${uiLabelMap.CommonRemove}!'Remove'}'
     });
   }
   // use asmSelect in Freemarker Templates
   else if (isFtl) {    
       ftl.asmSelect({
         addItemTarget: 'top',
-        sortable: ${asm_sortable},
-        removeLabel: '${uiLabelMap.CommonRemove}'
+        sortable: ${asm_sortable}!'false'},
+        removeLabel: '${uiLabelMap.CommonRemove}!'Remove'}'
         //,debugMode: true
       });
   }
@@ -51,28 +51,21 @@ isFtl = ftl.length;
   // track possible relatedField changes
   // on initial focus or if the field value changes, select related multi values. 
   // FIXME : not sure why focus does not work here, must be added as event/action in the multipleSelectForm.relatedField
-  if (isWidget) {
-      jQuery("#${asm_relatedField}").bind('change focus', function() {
-        typeValue = jQuery('#${asm_typeField}').val();
-        selectMultipleRelatedValues('${asm_requestName}', '${asm_paramKey}', '${asm_relatedField}', '${asm_multipleSelect}', '${asm_type}', typeValue, '${asm_responseName}');
-      });
-  } else if (isFtl) {
-      jQuery("#${asm_relatedField}").bind('change focus', function() {
-        typeValue = jQuery('#${asm_typeField}').val();
-        selectMultipleRelatedValues('${asm_requestName}', '${asm_paramKey}', '${asm_relatedField}', '${asm_multipleSelect}', '${asm_type}', typeValue, '${asm_responseName}');
-      });  
-  }    
+    jQuery("#${asm_relatedField}").bind('change focus', function() {
+      typeValue = jQuery('#${asm_typeField}').val();
+      selectMultipleRelatedValues('${asm_requestName}', '${asm_paramKey}', '${asm_relatedField}', '${asm_multipleSelect}', '${asm_type}', typeValue, '${asm_responseName}');
+    });
 </#if>
 });
 </script>
 
 <style type="text/css">
 #${asm_multipleSelectForm} {
-    width: ${asm_formSize}px; 
+    width: ${asm_formSize!700}px; 
     position: relative;
 }
 
 .asmListItem {
-  width: ${asm_asmListItemPercentOfForm}%; 
+  width: ${asm_asmListItemPercentOfForm!95}%; 
 }
 </style>

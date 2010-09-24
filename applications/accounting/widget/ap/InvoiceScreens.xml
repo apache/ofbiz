@@ -168,7 +168,7 @@ under the License.
                 <set field="salesRepPartyList" type="List" from-field="parameters.partyIds"/>
                 <script location="component://accounting/webapp/ap/WEB-INF/actions/invoices/CommissionRun.groovy"/>
                 
-                <!-- asmslect parameters, must be prefixed by asm_ -->
+                <!-- asmslect parameters, must be prefixed by asm_ for setMultipleSelectJs.ftl -->
                 <set field="asm_multipleSelectForm"  value="CommissionRun"/>
                 <set field="asm_multipleSelect"  value="CommissionRun_partyId"/>
                 <set field="asm_formSize" value="700"/>
