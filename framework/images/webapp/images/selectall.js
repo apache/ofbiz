@@ -667,25 +667,22 @@ function waitSpinnerShow() {
     }
     spinner.style.display = 'block';
     var bdy = document.body;
+    jSpinner = "#wait-spinner";
 
-    var dimensions = $(spinner).getDimensions();
-    var lookupLeft = (bdy.offsetWidth / 2) - (dimensions.width / 2);
+    var lookupLeft = (bdy.offsetWidth / 2) - (jQuery(jSpinner).width() / 2);
     var scrollOffY = document.viewport.getScrollOffsets().top;
     var winHeight = document.viewport.getHeight();
-    var lookupTop = (scrollOffY + winHeight / 2) - (dimensions.height / 2);
+    var lookupTop = (scrollOffY + winHeight / 2) - (jQuery(jSpinner).height() / 2);
 
     spinner.style.left = lookupLeft + "px";
     spinner.style.top = lookupTop + "px";
-    Effect.Appear(spinner, {duration: 0.3});
+    jQuery(jSpinner).show();
 }
 
 function waitSpinnerHide() {
     var spinner = document.getElementById("wait-spinner");
-    if (spinner == null) {
-        return;
+    if (spinner != null) {
+        jQuery("#wait-spinner").fadeOut();
+        jQuery("#wait-spinner").hide();
     }
-    Effect.Fade(spinner, {duration: 0.3});
-    window.setTimeout(function() {
-	spinner.style.display = 'none';
-    }, 400);
 }
