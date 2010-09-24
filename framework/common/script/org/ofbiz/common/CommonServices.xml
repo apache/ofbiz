@@ -311,18 +311,22 @@ under the License.
 
     <simple-method method-name="getRelatedGeos" short-description="get related geos to a geo through a geoAssoc" login-required="false">      
         <entity-and entity-name="GeoAssoc" list="geoAssoc">
-            <field-map field-name="geoIdTo" from-field="parameters.geoId"/>
+            <field-map field-name="geoId" from-field="parameters.geoId"/>
             <field-map field-name="geoAssocTypeId" from-field="parameters.geoAssocTypeId"/>
         </entity-and>
         <if-empty field="geoAssoc">
-            <set field="noOptions" value="_NA_"/>
+            <set field="noOptions" value="____"/>
             <field-to-list list="geoList" field="noOptions"/>
-            <return/>
+            <else>
+                <iterate list="geoAssoc" entry="geo">
+                    <field-to-list list="geoList" field="geo.geoIdTo"/>
+                </iterate>
+            </else>
         </if-empty>
-        <iterate list="geoAssoc" entry="geo">
-            <field-to-list list="geoList" field="geo.geoId"/>
-        </iterate>
         <field-to-result field="geoList"/>
+        <log level="always" message="parameters.geoIdTo===========================${parameters.geoId}"></log>
+        <log level="always" message="parameters.geoAssocTypeId===========================${geoAssocTypeId}"></log>
+        <log level="always" message="geoList===========================${geoList}"></log>
     </simple-method>    
     
 </simple-methods>

@@ -107,7 +107,7 @@ under the License.
   <tr>
     <td width="100%">
       <table border="0" cellspacing="0" cellpadding="0" class="boxbottom">
-        <form method="post" action="<@ofbizUrl>addAdditionalParty</@ofbizUrl>">
+        <form method="post" action="<@ofbizUrl>addAdditionalParty</@ofbizUrl>" name="addAdditionalPartyForm" id="addAdditionalPartyForm">
         <tr>
           <td>&nbsp;</td>
           <td>
