@@ -33,16 +33,16 @@ jQuery(document).ready(function() {
   if (isWidget) {                     
       widget.asmSelect({
         addItemTarget: 'top',
-        sortable: ${asm_sortable}!'false'},
-        removeLabel: '${uiLabelMap.CommonRemove}!'Remove'}'
+        sortable: ${asm_sortable!'false'},
+        removeLabel: '${uiLabelMap.CommonRemove!'Remove'}'
     });
   }
   // use asmSelect in Freemarker Templates
   else if (isFtl) {    
       ftl.asmSelect({
         addItemTarget: 'top',
-        sortable: ${asm_sortable}!'false'},
-        removeLabel: '${uiLabelMap.CommonRemove}!'Remove'}'
+        sortable: ${asm_sortable!'false'},
+        removeLabel: '${uiLabelMap.CommonRemove!'Remove'}'
         //,debugMode: true
       });
   }
