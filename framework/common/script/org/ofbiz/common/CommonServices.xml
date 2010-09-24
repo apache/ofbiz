@@ -314,13 +314,14 @@ under the License.
             <field-map field-name="geoIdTo" from-field="parameters.geoId"/>
             <field-map field-name="geoAssocTypeId" from-field="parameters.geoAssocTypeId"/>
         </entity-and>
+        <if-empty field="geoAssoc">
+            <set field="noOptions" value="_NA_"/>
+            <field-to-list list="geoList" field="noOptions"/>
+            <return/>
+        </if-empty>
         <iterate list="geoAssoc" entry="geo">
             <field-to-list list="geoList" field="geo.geoId"/>
         </iterate>
-        <if-empty field="geoList">
-            <property-to-field resource="CommonUiLabels" property="CommonNoOptions" field="noOptions"/>
-            <field-to-list list="geoList" field="noOptions"/>
-        </if-empty>
         <field-to-result field="geoList"/>
     </simple-method>    
     

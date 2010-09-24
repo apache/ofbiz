@@ -18,22 +18,24 @@ under the License.
 -->
 <script type="text/javascript">
 jQuery(document).ready(function() {
-
+<#if asm_title?exists> <#-- set the dropdown "title" if exists -->
+  jQuery("#${asm_multipleSelect}").attr('title', '${asm_title}');
+</#if>
   // use asmSelect
-  jQuery("#${multipleSelect}").asmSelect({
+  jQuery("#${asm_multipleSelect}").asmSelect({
     addItemTarget: 'top',
-    sortable: ${sortable},
+    sortable: ${asm_sortable},
     removeLabel: '${uiLabelMap.CommonRemove}'
   });
     
-<#if relatedField?exists> <#-- can be used without related field -->
+<#if asm_relatedField?exists> <#-- can be used without related field -->
   // track possible relatedField changes
-  if (jQuery('#${multipleSelectForm}')) {
+  if (jQuery('#${asm_multipleSelectForm}')) {
     // on initial focus or if the field value changes, select related multi values. 
     // FIXME : not sure why focus does not work here, must be added as event/action in the multipleSelectForm.relatedField
-    jQuery("#${relatedField}").bind('change focus', function() {
-      typeValue = jQuery('#${typeField}').val();
-      selectMultipleRelatedValues('${requestName}', '${paramKey}', '${relatedField}', '${multipleSelect}', '${type}', typeValue, '${responseName}');
+    jQuery("#${asm_relatedField}").bind('change focus', function() {
+      typeValue = jQuery('#${asm_typeField}').val();
+      selectMultipleRelatedValues('${asm_requestName}', '${asm_paramKey}', '${asm_relatedField}', '${asm_multipleSelect}', '${asm_type}', typeValue, '${asm_responseName}');
     });
   }    
 </#if>
@@ -41,12 +43,12 @@ jQuery(document).ready(function() {
 </script>
 
 <style type="text/css">
-#${multipleSelectForm} {
-    width: ${formSize}px; 
+#${asm_multipleSelectForm} {
+    width: ${asm_formSize}px; 
     position: relative;
 }
 
 .asmListItem {
-  width: ${asmListItemPercentOfForm}%; 
+  width: ${asm_asmListItemPercentOfForm}%; 
 }
 </style>
