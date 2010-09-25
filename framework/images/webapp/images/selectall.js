@@ -661,28 +661,21 @@ function toggleLeftColumn(){
 }
 
 function waitSpinnerShow() {
-    var spinner = document.getElementById("wait-spinner");
-    if (spinner == null) {
-        return;
-    }
-    spinner.style.display = 'block';
-    var bdy = document.body;
-    jSpinner = "#wait-spinner";
+    jSpinner = jQuery("#wait-spinner");
+    if (!jSpinner.length) return
 
-    var lookupLeft = (bdy.offsetWidth / 2) - (jQuery(jSpinner).width() / 2);
-    var scrollOffY = document.viewport.getScrollOffsets().top;
-    var winHeight = document.viewport.getHeight();
-    var lookupTop = (scrollOffY + winHeight / 2) - (jQuery(jSpinner).height() / 2);
+    bdy = document.body;
+    lookupLeft = (bdy.offsetWidth / 2) - (jSpinner.width() / 2);
+    scrollOffY = document.viewport.getScrollOffsets().top;
+    winHeight = document.viewport.getHeight();
+    lookupTop = (scrollOffY + winHeight / 2) - (jSpinner.height() / 2);
 
-    spinner.style.left = lookupLeft + "px";
-    spinner.style.top = lookupTop + "px";
-    jQuery(jSpinner).show();
+    jSpinner.css("display", "block");
+    jSpinner.css("left", lookupLeft + "px"); 
+    jSpinner.css("top", lookupTop + "px");
+    jSpinner.show();
 }
 
 function waitSpinnerHide() {
-    var spinner = document.getElementById("wait-spinner");
-    if (spinner != null) {
-        jQuery("#wait-spinner").fadeOut();
-        jQuery("#wait-spinner").hide();
-    }
+    jQuery("#wait-spinner").hide()
 }
