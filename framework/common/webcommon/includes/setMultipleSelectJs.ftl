@@ -36,10 +36,10 @@ jQuery(document).ready(function() {
       
   <#if asm_relatedField?exists> <#-- can be used without related field -->
     // track possible relatedField changes
-    // on initial focus or if the field value changes, select related multi values. 
-    // FIXME : not sure why focus does not work here, must be added as event/action in the multipleSelectForm.relatedField
+    // on initial focus (focus-field-name must be asm_relatedField) or if the field value changes, select related multi values. 
+    typeValue = jQuery('#${asm_typeField}').val();
+    selectMultipleRelatedValues('${asm_requestName}', '${asm_paramKey}', '${asm_relatedField}', '${asm_multipleSelect}', '${asm_type}', typeValue, '${asm_responseName}');
     jQuery("#${asm_relatedField}").bind('change focus', function() {
-      typeValue = jQuery('#${asm_typeField}').val();
       selectMultipleRelatedValues('${asm_requestName}', '${asm_paramKey}', '${asm_relatedField}', '${asm_multipleSelect}', '${asm_type}', typeValue, '${asm_responseName}');
     });
   </#if>
