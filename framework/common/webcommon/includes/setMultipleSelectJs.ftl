@@ -38,8 +38,10 @@ jQuery(document).ready(function() {
     // track possible relatedField changes
     // on initial focus (focus-field-name must be asm_relatedField) or if the field value changes, select related multi values. 
     typeValue = jQuery('#${asm_typeField}').val();
-    selectMultipleRelatedValues('${asm_requestName}', '${asm_paramKey}', '${asm_relatedField}', '${asm_multipleSelect}', '${asm_type}', typeValue, '${asm_responseName}');
-    jQuery("#${asm_relatedField}").bind('change focus', function() {
+    jQuery("#${asm_relatedField}").one('focus', function() {
+      selectMultipleRelatedValues('${asm_requestName}', '${asm_paramKey}', '${asm_relatedField}', '${asm_multipleSelect}', '${asm_type}', typeValue, '${asm_responseName}');
+    });
+    jQuery("#${asm_relatedField}").bind('change', function() {
       selectMultipleRelatedValues('${asm_requestName}', '${asm_paramKey}', '${asm_relatedField}', '${asm_multipleSelect}', '${asm_type}', typeValue, '${asm_responseName}');
     });
   </#if>
