@@ -64,7 +64,7 @@ function getDependentDropdownValues(request, paramKey, paramField, targetField, 
                 }
             }
         });
-        jQuery(target).html(optionList);
+        jQuery(target).html(optionList).click().change(); // .change() needed when using also asmselect on same field, .click() specifically for IE8
         // Hide/show the dependent dropdown if hide=true else simply disable/enable
         if ((list.size() < 1) || ((list.size() == 1) && list[0].indexOf("_NA_") >=0)) {
         	jQuery(target).attr('disabled', 'disabled');
