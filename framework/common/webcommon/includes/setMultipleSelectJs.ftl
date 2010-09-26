@@ -19,6 +19,7 @@ under the License.
 <#if asm_multipleSelect?exists> <#-- we check only this var and suppose the others are also present -->
 <script type="text/javascript">
 jQuery(document).ready(function() {
+    waitSpinnerShow();
     multiple = jQuery("#${asm_multipleSelect?if_exists}");
 
   <#if asm_title?exists>
@@ -39,11 +40,14 @@ jQuery(document).ready(function() {
     // on initial focus (focus-field-name must be asm_relatedField) or if the field value changes, select related multi values. 
     typeValue = jQuery('#${asm_typeField}').val();
     selectMultipleRelatedValues('${asm_requestName}', '${asm_paramKey}', '${asm_relatedField}', '${asm_multipleSelect}', '${asm_type}', typeValue, '${asm_responseName}');
-    jQuery("#${asm_relatedField}").bind('change', function() {
+    jQuery("#${asm_relatedField}").bind('change focus', function() {
+      waitSpinnerShow();
       selectMultipleRelatedValues('${asm_requestName}', '${asm_paramKey}', '${asm_relatedField}', '${asm_multipleSelect}', '${asm_type}', typeValue, '${asm_responseName}');
+      waitSpinnerHide();
     });
   </#if>
   });
+  waitSpinnerHide();
 </script>
 
 <style type="text/css">
