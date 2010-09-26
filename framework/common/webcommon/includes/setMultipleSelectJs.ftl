@@ -19,7 +19,7 @@ under the License.
 <#if asm_multipleSelect?exists> <#-- we check only this var and suppose the others are also present -->
 <script type="text/javascript">
 jQuery(document).ready(function() {
-  multiple = jQuery("#${asm_multipleSelect?if_exists}");
+    multiple = jQuery("#${asm_multipleSelect?if_exists}");
 
   <#if asm_title?exists>
     // set the dropdown "title" if exists
