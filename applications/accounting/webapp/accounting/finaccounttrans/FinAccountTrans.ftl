@@ -47,33 +47,35 @@ function getFinAccountTransRunningTotalAndBalances() {
         }
     }
     if (isAllSelected) {
-        $('checkAllTransactions').checked = true;
+        jQuery('#checkAllTransactions').attr('checked', true);
     } else {
-        $('checkAllTransactions').checked = false;
+        jQuery('#checkAllTransactions').attr('checked', false);
     }
     if (!isSingle) {
-        $('submitButton').disabled = false;
-        if ($('showFinAccountTransRunningTotal')) {
-            new Ajax.Request('getFinAccountTransRunningTotalAndBalances', {
-                asynchronous: false,
-                onSuccess: function(transport) {
-                    var data = transport.responseText.evalJSON(true);
-                    $('showFinAccountTransRunningTotal').update(data.finAccountTransRunningTotal);
-                    $('finAccountTransRunningTotal').update(data.finAccountTransRunningTotal);
-                    $('numberOfFinAccountTransaction').update(data.numberOfTransactions);
-                    $('endingBalance').update(data.endingBalance);
-                }, parameters: $('listFinAccTra').serialize(), requestHeaders: {Accept: 'application/json'}
+        jQuery('#submitButton').attr('disabled', '');
+        if (jQuery('#showFinAccountTransRunningTotal').length) {
+            jQuery.ajax({
+                url: 'getFinAccountTransRunningTotalAndBalances',
+                async: false,
+                type: 'POST',
+                data: jQuery('#listFinAccTra').serialize(),
+                success: function(data) {
+                    jQuery('#showFinAccountTransRunningTotal').html(data.finAccountTransRunningTotal);
+                    jQuery('#finAccountTransRunningTotal').html(data.finAccountTransRunningTotal);
+                    jQuery('#numberOfFinAccountTransaction').html(data.numberOfTransactions);
+                    jQuery('#endingBalance').html(data.endingBalance);
+                }
             });
         }
     } else {
-        if ($('showFinAccountTransRunningTotal')) {
-            $('showFinAccountTransRunningTotal').update("");
-            $('finAccountTransRunningTotal').update("");
-            $('numberOfFinAccountTransaction').update("");
-            $('endingBalance').update($('endingBalanceInput').value);
-            
+        if (jQuery('#showFinAccountTransRunningTotal').length) {
+            jQuery('#showFinAccountTransRunningTotal').html("");
+            jQuery('#finAccountTransRunningTotal').html("");
+            jQuery('#numberOfFinAccountTransaction').html("");
+            jQuery('#endingBalance').html(jQuery('#endingBalanceInput').val());
+
         }
-        $('submitButton').disabled = true;
+        jQuery('#submitButton').attr('disabled', '');
     }
 }
 -->
