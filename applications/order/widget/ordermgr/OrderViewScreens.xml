@@ -53,9 +53,6 @@ under the License.
             <actions>
                 <set field="titleProperty" value="OrderViewOrder"/>
                 <set field="headerItem" value="findorders"/>
-                <set field="layoutSettings.styleSheets[+0]" value="/images/prototypejs/popup.css" global="true"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/popup.js" global="true"/>
-                <set field="layoutSettings.javaScripts[+0]" value="/images/prototypejs/validation.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/ordermgr/images/js/order.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/ordermgr/images/js/OrderShippingInfo.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/ordermgr/images/js/geoAutoCompleter.js" global="true"/>
@@ -501,9 +498,9 @@ under the License.
                    <include-form name="ListCustomerOrders" location="component://order/widget/ordermgr/OrderForms.xml"/>
                 </screenlet>
             </widgets>
-        </section> 
+        </section>
     </screen>
-    
+
     <screen name="ListSalesOrders">
         <section>
             <actions>
@@ -551,6 +548,6 @@ under the License.
                     </fail-widgets>
                 </section>
             </widgets>
-        </section> 
+        </section>
     </screen>
 </screens>

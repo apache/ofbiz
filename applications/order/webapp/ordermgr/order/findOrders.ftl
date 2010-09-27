@@ -60,7 +60,7 @@ function toggleOrderIdList() {
         if (element.name == "orderIdList" && !element.checked)
             isAllSelected = false;
     }
-    $('checkAllOrders').checked = isAllSelected;
+    jQuery('#checkAllOrders').attr("checked", isAllSelected);
 }
 
 // -->
