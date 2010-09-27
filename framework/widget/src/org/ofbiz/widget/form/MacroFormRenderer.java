@@ -1967,7 +1967,7 @@ public class MacroFormRenderer implements FormStringRenderer {
             } else {
                 autoCompleterTarget = lookupFieldFormName + "&amp;amp;";
             }
-            autoCompleterTarget = autoCompleterTarget + "ajaxLookup=Y&amp;amp;searchValueField=" + lookupField.getModelFormField().getParameterName(context);
+            autoCompleterTarget = autoCompleterTarget + "ajaxLookup=Y";
             updateAreas = FastList.newInstance();
             updateAreas.add(new ModelForm.UpdateArea("change", id, autoCompleterTarget));
         }

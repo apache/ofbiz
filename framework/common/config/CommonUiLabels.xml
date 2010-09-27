@@ -4607,6 +4607,10 @@
         <value xml:lang="en">No States/Provinces exist: _NA_</value>
         <value xml:lang="fr">Aucun état ou province: _NA_</value>
     </property>
+    <property key="CommonNoStatesProvincesExists">            
+        <value xml:lang="en">No States/Provinces exist</value>
+        <value xml:lang="fr">Aucun état ou province</value>
+    </property>
     <property key="CommonNoTaskAssigned">
         <value xml:lang="ar">لا مهام حالية تستوجب إهتمامكم</value>
         <value xml:lang="de">Zur Zeit sind keine Aufgabe vorhanden.</value>

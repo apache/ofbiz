@@ -142,13 +142,8 @@ under the License.
 </#macro>
 
 <#macro renderDropDownField name className alert id multiple formName otherFieldName event action size firstInList currentValue explicitDescription allowEmpty options fieldName otherFieldName otherValue otherFieldSize dDFCurrent ajaxEnabled noCurrentSelectedKey ajaxOptions frequency minChars choices autoSelect partialSearch partialChars ignoreCase fullSearch>
-<#if ajaxEnabled><input type="text"<#else><select</#if> name="${name?default("")}<#rt/>
-<#if ajaxEnabled>
-_description"<#if id?has_content> id="${id}_description"</#if><#if currentValue?has_content> value="${explicitDescription}"</#if>/><#rt/>
-<input type="hidden" name="${name}"<#if id?has_content> id="${id}"</#if><#if currentValue?has_content> value="${currentValue}"</#if>/><#rt/>
-<script language="JavaScript" type="text/javascript">var data = {${ajaxOptions}};ajaxAutoCompleteDropDown('<#if id?has_content>${id}_description</#if>','${id}',data,{autoSelect:${autoSelect},frequency:${frequency},minChars:${minChars},choices:${choices},partialSearch:${partialSearch},partialChars:${partialChars},ignoreCase:${ignoreCase},fullSearch:${fullSearch}});</script>
-<#else>
-" <@renderClass className alert /><#if id?has_content> id="${id}"</#if><#if multiple?has_content> multiple="multiple"</#if><#if otherFieldSize gt 0> onchange="process_choice(this,document.${formName}.${otherFieldName})"</#if><#if event?has_content> ${event}="${action}"</#if><#if size?has_content> size="${size}"</#if>>
+<span class="ui-widget">
+<select name="${name?default("")}<#rt/>" <@renderClass className alert /><#if id?has_content> id="${id}"</#if><#if multiple?has_content> multiple="multiple"</#if><#if otherFieldSize gt 0> onchange="process_choice(this,document.${formName}.${otherFieldName})"</#if><#if event?has_content> ${event}="${action}"</#if><#if size?has_content> size="${size}"</#if>>
 <#if firstInList?has_content && currentValue?has_content && !multiple?has_content>
  <option selected="selected" value="${currentValue}">${explicitDescription}</option><#rt/>
  <option value="${currentValue}">---</option><#rt/>
@@ -164,6 +159,7 @@ _description"<#if id?has_content> id="${id}_description"</#if><#if currentValue?
 </#if>
 </#list>
 </select>
+</span>
 <#if otherFieldName?has_content>
 <noscript><input type='text' name='${otherFieldName}' /></noscript>
 <script type='text/javascript' language='JavaScript'><!--
@@ -175,7 +171,16 @@ if(disa && document.styleSheets)
    document.${formName}.${fieldName}.style.visibility  = 'hidden';
 //--></script>
 </#if>
+
+<#if ajaxEnabled>
+<script language="JavaScript" type="text/javascript">
+    ajaxAutoCompleteDropDown();
+    jQuery(function() {
+        jQuery("#${id}").combobox();
+    });
+</script>
 </#if>
+
 </#macro>
 
 <#macro renderCheckField items className alert id allChecked currentValue name event action>

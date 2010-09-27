@@ -458,23 +458,101 @@ function setLookDescription(textFieldId, description) {
     }
 }
 
-/** Enable auto-completion for drop-down elements.
-  * @param descriptionElement The id of the text field
-  * @param hiddenElement The id of the drop-down.  Used as the id of hidden field inserted.
-  * @param data Choices for Autocompleter.Local, form of: {key: 'description',.......}
-  * @param options
-*/
+/** Enable auto-completion for drop-down elements.*/
 
-function ajaxAutoCompleteDropDown(descriptionElement, hiddenElement, data, options) {
-    // TODO is still old fashined :-)
-    var update = hiddenElement + "_autoCompleterOptions";
-    $(descriptionElement).insert({after: '<div class="autocomplete"' + 'id=' + update + '></div>'});
-    new Autocompleter.Local($(descriptionElement), update, $H(data), {autoSelect: options.autoSelect, frequency: options.frequency, minChars: options.minChars, choices: options.choices, partialSearch: options.partialSearch, partialChars: options.partialChars, ignoreCase: options.ignoreCase, fullSearch: options.fullSearch, afterUpdateElement: setKeyAsParameter});
+function ajaxAutoCompleteDropDown() {
+    jQuery.widget( "ui.combobox", {
+        _create: function() {
+            var self = this;
+            var select = this.element.hide(),
+                selected = select.children( ":selected" ),
+                value = selected.val() ? selected.text() : "";
+            var input = jQuery( "<input>" )
+                .insertAfter( select )
+                .val( value )
+                .autocomplete({
+                    delay: 0,
+                    minLength: 0,
+                    source: function( request, response ) {
+                        var matcher = new RegExp( jQuery.ui.autocomplete.escapeRegex(request.term), "i" );
+                        response( select.children( "option" ).map(function() {
+                            var text = jQuery( this ).text();
+                            if ( this.value && ( !request.term || matcher.test(text) ) )
+                                return {
+                                    label: text.replace(
+                                        new RegExp(
+                                            "(?![^&;]+;)(?!<[^<>]*)(" +
+                                            jQuery.ui.autocomplete.escapeRegex(request.term) +
+                                            ")(?![^<>]*>)(?![^&;]+;)", "gi"
+                                        ), "<strong>$1</strong>" ),
+                                    value: text,
+                                    option: this
+                                };
+                        }) );
+                    },
+                    select: function( event, ui ) {
+                        ui.item.option.selected = true;
+                        //select.val( ui.item.option.value );
+                        self._trigger( "selected", event, {
+                            item: ui.item.option
+                        });
+                    },
+                    change: function( event, ui ) {
+                        if ( !ui.item ) {
+                            var matcher = new RegExp( "^" + jQuery.ui.autocomplete.escapeRegex( jQuery(this).val() ) + "$", "i" ),
+                                valid = false;
+                            select.children( "option" ).each(function() {
+                                if ( this.value.match( matcher ) ) {
+                                    this.selected = valid = true;
+                                    return false;
+                                }
+                            });
+                            if ( !valid ) {
+                                // remove invalid value, as it didn't match anything
+                                jQuery( this ).val( "" );
+                                select.val( "" );
+                                return false;
+                            }
+                        }
+                    }
+                })
+                //.addClass( "ui-widget ui-widget-content ui-corner-left" );
 
-    function setKeyAsParameter(text, li) {
-        $(hiddenElement).value = li.id;
-    }
+            input.data( "autocomplete" )._renderItem = function( ul, item ) {
+                return jQuery( "<li></li>" )
+                    .data( "item.autocomplete", item )
+                    .append( "<a>" + item.label + "</a>" )
+                    .appendTo( ul );
+            };
+
+            jQuery( "<a>&nbsp;</a>" )
+                .attr( "tabIndex", -1 )
+                .attr( "title", "Show All Items" )
+                .insertAfter( input )
+                .button({
+                    icons: {
+                        primary: "ui-icon-triangle-1-s"
+                    },
+                    text: false
+                })
+                .removeClass( "ui-corner-all" )
+                .addClass( "ui-corner-right ui-button-icon" )
+                .click(function() {
+                    // close if already visible
+                    if ( input.autocomplete( "widget" ).is( ":visible" ) ) {
+                        input.autocomplete( "close" );
+                        return;
+                    }
+
+                    // pass empty string as value to search for, displaying all results
+                    input.autocomplete( "search", "" );
+                    input.focus();
+                });
+        }
+    });
+
 }
+
 
 /** Toggle area visibility on/off.
  * @param link The <a> element calling this function
