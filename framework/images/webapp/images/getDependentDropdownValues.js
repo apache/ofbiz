@@ -88,8 +88,8 @@ function getDependentDropdownValues(request, paramKey, paramField, targetField, 
 //*** calls any service already mounted as an event
 function getServiceResult(request, params) {
     data = [];
-    jQuery.each(params, function (key, value) { data.add({ name: key, value: value}); }
-    return jQuery.post(request, data, function(result) { return result; }
+    jQuery.each(params, function (key, value) { data.add({ name: key, value: value}) }
+    return jQuery.post(request, data, function(result) { return result }
 }
 
 //*** checkUomConversion returns true if an UomConversion exists 

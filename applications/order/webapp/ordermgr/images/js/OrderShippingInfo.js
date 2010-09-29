@@ -20,12 +20,12 @@ var validateNewShippingAdd = null;
 jQuery(document).ready( function() {
 
     var addShippingAddress = jQuery('#addShippingAddress');
-    if (addShippingAddress.length > 0) {
+    if (addShippingAddress.length) {
         // add the form validator
         addShippingAddress.validate();
        
-       jQuery('#country').change( function() {
-            getAssociatedStateList('country', 'state', 'advice-required-stateProvinceGeoId', 'states');
+       jQuery('#countryGeoId').change( function() {
+            getAssociatedStateList('countryGeoId', 'stateProvinceGeoId', 'advice-required-stateProvinceGeoId', 'states');
         });
     }
 });

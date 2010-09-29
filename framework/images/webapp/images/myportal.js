@@ -60,7 +60,7 @@ function preparePortletBackgroundOrderChange(serializedDate, dragedItemId, desti
     // make clean array and remove all fields with empty values
     var dataArray = []
     jQuery.each(serializedDate, function(index, value) {
-        if (value.length > 0) {
+        if (value.length) {
             dataArray.push(value);
         }
     });

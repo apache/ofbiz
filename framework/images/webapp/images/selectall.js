@@ -685,7 +685,7 @@ function submitFormDisableSubmits(form) {
 
 // prevents doubleposts for <submit> inputs of type "button" or "image"
 function submitFormDisableButton(button) {
-    if (button.form.action != null && button.form.action.length > 0) {
+    if (button.form.action != null && button.form.action.length) {
         button.disabled = true;
     }
     button.className = button.className + " disabled";
