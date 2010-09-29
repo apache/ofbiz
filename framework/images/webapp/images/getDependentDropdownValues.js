@@ -85,15 +85,16 @@ function getDependentDropdownValues(request, paramKey, paramField, targetField, 
     }, 'json');
 }
   
-// calls any service already mounted as an event
+//*** calls any service already mounted as an event
 function getServiceResult(request, params) {
-    var data;
-    new Ajax.Request(request, {
-        asynchronous: false,
-        parameters: params,
-        onSuccess: function(transport) {
-            data = transport.responseText.evalJSON(true);           
-        }
-    });
-    return data;
+    data = [];
+    jQuery.each(params, function (key, value) { data.add({ name: key, value: value}); }
+    return jQuery.post(request, data, function(result) { return result; }
 }
+
+//*** checkUomConversion returns true if an UomConversion exists 
+function checkUomConversion(request, params) {
+    data = getServiceResult(request, params);    
+    return data['exist']; 
+}
+
