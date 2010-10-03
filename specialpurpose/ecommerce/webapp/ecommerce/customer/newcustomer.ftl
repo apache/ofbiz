@@ -390,7 +390,7 @@ class name of "button". No other class names should be used to style
 button actions.
 ------------------------------------------------------------------------------->
 <div class="buttons">
-  <a href="javascript:$('newuserform').submit()">${uiLabelMap.CommonSave}</a>
+  <a href="javascript:document.getElementById('newuserform').submit()">${uiLabelMap.CommonSave}</a>
   <a href="<@ofbizUrl>checkLogin/main</@ofbizUrl>" class="reset">${uiLabelMap.CommonBack}</a>
 </div>
 

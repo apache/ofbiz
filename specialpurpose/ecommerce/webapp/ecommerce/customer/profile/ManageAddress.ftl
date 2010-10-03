@@ -222,7 +222,7 @@ under the License.
                   <form id="deletePostalAddress_${contactMech.contactMechId}" method= "post" action= "<@ofbizUrl>deletePostalAddress</@ofbizUrl>">
                     <fieldset>
                       <input type= "hidden" name= "contactMechId" value= "${contactMech.contactMechId}" />
-                      <a href="javascript:$('deletePostalAddress_${contactMech.contactMechId}').submit()" class='button'>${uiLabelMap.CommonDelete}</a>
+                      <a href="javascript:document.getElementById('deletePostalAddress_${contactMech.contactMechId}').submit()" class='button'>${uiLabelMap.CommonDelete}</a>
                     </fieldset>
                   </form> 
               </div>
