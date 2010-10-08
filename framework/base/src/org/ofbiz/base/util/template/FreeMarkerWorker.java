@@ -155,10 +155,23 @@ public class FreeMarkerWorker {
      * @param outWriter The Writer to render to
      */
     public static void renderTemplate(String templateLocation, String templateString, Map<String, Object> context, Appendable outWriter) throws TemplateException, IOException {
+        renderTemplate(templateLocation, templateString, context, outWriter, true);
+    }
+    
+    
+    /**
+     * Renders a template contained in a String.
+     * @param templateLocation A unique ID for this template - used for caching
+     * @param templateString The String containing the template
+     * @param context The context Map
+     * @param outWriter The Writer to render to
+     * @param useCache try to get template from cache
+     */
+    public static void renderTemplate(String templateLocation, String templateString, Map<String, Object> context, Appendable outWriter, boolean useCache) throws TemplateException, IOException {
         if (UtilValidate.isEmpty(templateString)) {
             renderTemplate(templateLocation, context, outWriter);
         } else {
-            renderTemplateFromString(templateString, templateLocation, context, outWriter);
+            renderTemplateFromString(templateString, templateLocation, context, outWriter, useCache);
         }
     }
 
@@ -167,18 +180,17 @@ public class FreeMarkerWorker {
      * @param templateLocation A unique ID for this template - used for caching
      * @param context The context Map
      * @param outWriter The Writer to render to
+     * @param useCache try to get template from cache
      */
     public static void renderTemplate(String templateLocation, Map<String, Object> context, Appendable outWriter) throws TemplateException, IOException {
         Template template = getTemplate(templateLocation);
         renderTemplate(template, context, outWriter);
     }
 
-    public static void clearTemplateFromCache(String templateLocation) {
-        synchronized (cachedTemplates) {
-            cachedTemplates.remove(templateLocation);
-        }
-    }
-
+    /**
+     * @deprecated, replaced by {@link #renderTemplateFromString(String templateString, String templateLocation, Map<String, Object> context, Appendable outWriter, boolean useCache)}
+     */    
+    @Deprecated
     public static Environment renderTemplateFromString(String templateString, String templateLocation, Map<String, Object> context, Appendable outWriter) throws TemplateException, IOException {
         Template template = cachedTemplates.get(templateLocation);
         if (template == null) {
@@ -193,6 +205,38 @@ public class FreeMarkerWorker {
             }
         }
         return renderTemplate(template, context, outWriter);
+    }
+
+    public static Environment renderTemplateFromString(String templateString, String templateLocation, Map<String, Object> context, Appendable outWriter, boolean useCache) throws TemplateException, IOException {
+        Template template = null;
+        if (useCache){
+            template = cachedTemplates.get(templateLocation);
+        }
+        if (template == null) {
+            if (useCache){
+                synchronized (cachedTemplates) {
+                    template = cachedTemplates.get(templateLocation);
+                    if (template == null) {
+                        Reader templateReader = new StringReader(templateString);
+                        template = new Template(templateLocation, templateReader, defaultOfbizConfig);
+                        templateReader.close();
+                        cachedTemplates.put(templateLocation, template);
+                    }
+                }
+            } else {
+                Reader templateReader = new StringReader(templateString);
+                template = new Template(templateLocation, templateReader, defaultOfbizConfig);
+                templateReader.close();
+            }
+        }
+
+        return renderTemplate(template, context, outWriter);
+    }
+
+    public static void clearTemplateFromCache(String templateLocation) {
+        synchronized (cachedTemplates) {
+            cachedTemplates.remove(templateLocation);
+        }
     }
 
     /**
@@ -645,8 +689,6 @@ public class FreeMarkerWorker {
      *
      */
     static class OFBizTemplateExceptionHandler implements TemplateExceptionHandler {
-
-        @Override
         public void handleTemplateException(TemplateException te, Environment env, Writer out) throws TemplateException {
             StringWriter tempWriter = new StringWriter();
             PrintWriter pw = new PrintWriter(tempWriter, true);

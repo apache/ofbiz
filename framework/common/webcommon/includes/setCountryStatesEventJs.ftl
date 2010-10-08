@@ -20,9 +20,9 @@ under the License.
 jQuery(document).load ( function() {
     if (jQuery('#${dependentForm}').length) {
         jQuery('#${dependentForm}_countryGeoId').change( function() {
-            getDependentDropdownValues('getAssociatedStateList', 'countryGeoId', '${dependentForm}_countryGeoId', '${dependentForm}_stateProvinceGeoId', 'stateList', 'geoId', 'geoName', '', '');
+            getDependentDropdownValues('getAssociatedStateList', 'countryGeoId', '${dependentForm}_countryGeoId', '${dependentForm}_stateProvinceGeoId', 'stateList', 'geoId', 'geoName', '', '', 'true', 'true');
         });
-        getDependentDropdownValues('getAssociatedStateList', 'countryGeoId', '${dependentForm}_countryGeoId', '${dependentForm}_stateProvinceGeoId', 'stateList', 'geoId', 'geoName', '${selectedStateProvinceGeoId}', '');
+        getDependentDropdownValues('getAssociatedStateList', 'countryGeoId', '${dependentForm}_countryGeoId', '${dependentForm}_stateProvinceGeoId', 'stateList', 'geoId', 'geoName', '${selectedStateProvinceGeoId}', '', 'true', 'true');
     }
 });
 </script>

@@ -377,28 +377,43 @@ function doPublish() {
             <input type="hidden" name="fromDate" value="${nowTimestampString}"/>
             <input type="hidden" name="productId" value="${product.productId?if_exists}"/>
             <table cellspacing="0" class="basic-table">
-            <tr>
-            <td>
-                <table cellspacing="0" class="basic-table">
-                    <tr>
-                        <td>
-                            <select multiple="multiple" name="categoryId">
-                                <#list allCategories as category>
-                                    <option value="${category.productCategoryId?if_exists}">${category.description?if_exists} ${category.productCategoryId}</option>
-                                </#list>
-                            </select>&nbsp;
-                        </td>
-                    </tr>
-                </table>
-            </td>
+              <tr>
+              <td>
+                  <table cellspacing="0" class="basic-table">
+                      <tr>
+                          <td>
+                              <select multiple="multiple" name="categoryId">
+                                  <#list allCategories as category>
+                                      <option value="${category.productCategoryId?if_exists}">${category.description?if_exists} ${category.productCategoryId}</option>
+                                  </#list>
+                              </select>&nbsp;
+                          </td>
+                      </tr>
+                  </table>
+              </td>
+              </tr>
+              <tr>
+                  <td colspan="2"><input type="submit" value="${uiLabelMap.ProductUpdateCategories}"/></td>
+              </tr>
+            </table>
+        </form>
+        <table>
+          <tr>
             <td valign="top">
                 <table cellspacing="0" class="basic-table">
                     <#assign rowClass = "2">
                     <#list productCategoryMembers as prodCatMemb>
                         <#assign prodCat = prodCatMemb.getRelatedOne("ProductCategory")/>
                         <tr valign="middle"<#if rowClass == "1"> class="alternate-row"</#if>>
-                            <td colspan="2"><a href='<@ofbizUrl>quickAdminRemoveProductFromCategory?productId=${prodCatMemb.productId?if_exists}&amp;productCategoryId=${prodCatMemb.productCategoryId}&amp;fromDate=${prodCatMemb.getString("fromDate")}</@ofbizUrl>' class="buttontext">x</a>
-                            ${prodCat.description?if_exists} ${prodCat.productCategoryId}</td>
+                            <td colspan="2">
+                              <form name="quickAdminRemoveProductFromCategory_${prodCatMemb_index}" action="<@ofbizUrl>quickAdminRemoveProductFromCategory</@ofbizUrl>" method="post">
+                                <input type="hidden" name="productId" value="${prodCatMemb.productId?if_exists}" />
+                                <input type="hidden" name="productCategoryId" value="${prodCatMemb.productCategoryId}" />
+                                <input type="hidden" name="fromDate" value="${prodCatMemb.getString("fromDate")}" />
+                                <a href="javascript:document.quickAdminRemoveProductFromCategory_${prodCatMemb_index}.submit();" class="buttontext">x</a>
+                                ${prodCat.description?if_exists} ${prodCat.productCategoryId}
+                              </form>
+                            </td>
                         </tr>
                         <#-- toggle the row color -->
                         <#if rowClass == "2">
@@ -409,12 +424,8 @@ function doPublish() {
                     </#list>
                 </table>
             </td>
-            </tr>
-            <tr>
-                <td colspan="2" align="right"><input type="submit" value="${uiLabelMap.ProductUpdateCategories}"/></td>
-            </tr>
-            </table>
-        </form>
+          </tr>
+        </table>
         <!--  **************************************************** end - Categories section -->
     </div>
 </div>

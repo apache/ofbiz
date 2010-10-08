@@ -7,14 +7,30 @@ ofbiz (UNRELEASED) unstable; urgency=low
   * Don't have per-package var folders.
   * Fix bashism in /etc/init.d/ofbiz.
   * Create runtime/uploads correctly.
-  * Bump Standards-Version to 3.8.3.
+  * Fix init script stop, to wait for jsvc to actually finish running.  This
+    fixes a race condition that can occur under load, where ofbiz is not
+    listening on the status port, but jsvc is actually still running.  This
+    would cause the pid file to exist, but then get removed by jsvc before the
+    init script could remove it itself.
   * Remove use of openjdk, it has issues compiling some things(generics
     markup), and doesn't handle all https urls.
   * Don't install build/lib/*-test.jar into the packages.
   * Set the source format to 3.0 (quilt), to make it easier to have local
     changes that might have binary files.
+  * Set the umask correctly(defaults to 002, can be overridden in defaults).
+  * Fix description of ofbiz package, so that it says 'meta-package', instead
+    of 'pseudo-package'.  The former is used by lintian to skip the no-files
+    warning.
+  * Skip rc.ofbiz.for.debian file and .pc dirs, so they don't get installed
+    anymore.
+  * Protect sourcing of /etc/default/rcS, it is a conffile that might be
+    removed.
+  * Remove Apache-2.0 license text from copyright, instead referring to the
+    shared one in /usr/share/common-licenses.
+  * Skip framework/appserver/templates as well during install.
+  * Bump Standards-Version to 3.9.1
 
- -- Adam Heath <doogie@brainfood.com>  Fri, 04 Sep 2009 16:41:32 -0500
+ -- Adam Heath <doogie@brainfood.com>  UNRELEASED
 
 ofbiz (684378) unstable; urgency=low
 

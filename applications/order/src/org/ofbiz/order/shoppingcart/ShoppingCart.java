@@ -504,7 +504,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
             if (sci.equals(productId, reservStart, reservLength, reservPersons, accommodationMapId, accommodationSpotId, features, attributes, prodCatalogId,selectedAmount, configWrapper, itemType, itemGroup, false)) {
                 BigDecimal newQuantity = sci.getQuantity().add(quantity);
                 try {
-                    BigDecimal minQuantity = getMinimumOrderQuantity(delegator,sci.getBasePrice(), productId);
+                    BigDecimal minQuantity = getMinimumOrderQuantity(getDelegator(),sci.getBasePrice(), productId);
                     if(newQuantity.compareTo(minQuantity) < 0) {
                         newQuantity = minQuantity;
                     }
@@ -549,7 +549,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
             }
         } else {
             try {
-                BigDecimal minQuantity = getMinimumOrderQuantity(delegator,null, productId);
+                BigDecimal minQuantity = getMinimumOrderQuantity(getDelegator(),null, productId);
                 if(quantity.compareTo(minQuantity) < 0) {
                     quantity = minQuantity;
                 }
@@ -4374,6 +4374,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         public List<GenericValue> shipTaxAdj = FastList.newInstance();
         public String orderTypeId = null;
         private String internalContactMechId = null;
+        public String telecomContactMechId = null;
         public String shipmentMethodTypeId = null;
         public String supplierPartyId = null;
         public String carrierRoleTypeId = null;
@@ -4459,6 +4460,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
             shipGroup.set("shippingInstructions", shippingInstructions);
             shipGroup.set("giftMessage", giftMessage);
             shipGroup.set("contactMechId", this.internalContactMechId);
+            shipGroup.set("telecomContactMechId", this.telecomContactMechId);
             shipGroup.set("maySplit", maySplit);
             shipGroup.set("isGift", isGift);
             shipGroup.set("shipGroupSeqId", shipGroupSeqId);
