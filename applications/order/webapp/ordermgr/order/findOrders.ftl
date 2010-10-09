@@ -452,9 +452,11 @@ function toggleOrderIdList() {
                        <#assign includeCountry = requestParameters.includeCountry>
                        <option value="${includeCountry}"><#if "Y" == includeCountry>${uiLabelMap.OrderOnlyInclude}<#elseif "N" == includeCountry>${uiLabelMap.OrderDoNotInclude}</#if></option>
                        <option value="${includeCountry}">---</option>
-                    </#if>  
+                    <#else>
+                       <option value="">---</option>
+                    </#if>
+                    <option value="N">${uiLabelMap.OrderDoNotInclude}</option>  
                     <option value="Y">${uiLabelMap.OrderOnlyInclude}</option>
-                    <option value="N">${uiLabelMap.OrderDoNotInclude}</option>
                   </select>
                 </td>
               </tr>
