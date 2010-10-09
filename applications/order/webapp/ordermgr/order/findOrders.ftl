@@ -444,6 +444,8 @@ function toggleOrderIdList() {
                         <#assign geo = delegator.findOne("Geo", Static["org.ofbiz.base.util.UtilMisc"].toMap("geoId", countryGeoId), true)>
                         <option value="${countryGeoId}">${geo.geoName?if_exists}</option>
                         <option value="${countryGeoId}">---</option>
+                    <#else>
+                       <option value="">---</option>
                     </#if>
                     ${screens.render("component://common/widget/CommonScreens.xml#countries")}
                   </select>
@@ -452,11 +454,9 @@ function toggleOrderIdList() {
                        <#assign includeCountry = requestParameters.includeCountry>
                        <option value="${includeCountry}"><#if "Y" == includeCountry>${uiLabelMap.OrderOnlyInclude}<#elseif "N" == includeCountry>${uiLabelMap.OrderDoNotInclude}</#if></option>
                        <option value="${includeCountry}">---</option>
-                    <#else>
-                       <option value="">---</option>
                     </#if>
-                    <option value="N">${uiLabelMap.OrderDoNotInclude}</option>  
                     <option value="Y">${uiLabelMap.OrderOnlyInclude}</option>
+                    <option value="N">${uiLabelMap.OrderDoNotInclude}</option>  
                   </select>
                 </td>
               </tr>
