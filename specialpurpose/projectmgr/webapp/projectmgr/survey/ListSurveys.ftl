@@ -44,7 +44,7 @@ under the License.
                   <td><a href="/content/control/EditSurvey?surveyId=${workEffortSurveyAppl.surveyId?if_exists}" class="buttontext">${workEffortSurveyAppl.surveyId?if_exists} - ${survey.surveyName?if_exists}</a></td>
                   <td>${workEffortSurveyAppl.fromDate?if_exists}</td>
                   <td>
-                    <@htmlTemplate.renderDateTimeField name="thruDate" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${(workEffortSurveyAppl.thruDate)?if_exists}" size="25" maxlength="30" id="thruDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+                    <@htmlTemplate.renderDateTimeField name="thruDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${(workEffortSurveyAppl.thruDate)?if_exists}" size="25" maxlength="30" id="thruDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                     </td>
                   <td><a href="<@ofbizUrl>testWorkEffortSurvey?productStoreSurveyId=${productStoreSurveyAppl.productStoreSurveyId?if_exists}&amp;workEffortId=${workEffortSurveyAppl.workEffortId?if_exists}</@ofbizUrl>" class="buttontext">${uiLabelMap.EcommerceTakeSurvey}</a></td>
                   <#if !isReadable?exists>

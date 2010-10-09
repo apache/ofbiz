@@ -51,7 +51,7 @@ under the License.
             <input type="hidden" name="roleTypeId" value="${(productRole.roleTypeId)?if_exists}" />
             <input type="hidden" name="fromDate" value="${(productRole.getTimestamp("fromDate"))?if_exists}" />
             <#if hasExpired><#assign class="alert"></#if>
-            <@htmlTemplate.renderDateTimeField name="thruDate" className="${class!''}" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${(productRole.getTimestamp('thruDate'))?if_exists}" size="25" maxlength="30" id="thruDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+            <@htmlTemplate.renderDateTimeField name="thruDate" event="" action="" className="${class!''}" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${(productRole.getTimestamp('thruDate'))?if_exists}" size="25" maxlength="30" id="thruDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
           </td>
           <td><input type="submit" value="${uiLabelMap.CommonUpdate}" /></td>
         </form>

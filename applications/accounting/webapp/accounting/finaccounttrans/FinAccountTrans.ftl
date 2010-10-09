@@ -180,10 +180,7 @@ function getFinAccountTransRunningTotalAndBalances() {
             <td>
               <#if payments?has_content>
                 <a id="togglePayment_${finAccountTrans.finAccountTransId}" href="javascript:void(0)"><img src="<@ofbizContentUrl>/images/expand.gif</@ofbizContentUrl>" alt=""/></a> ${finAccountTrans.finAccountTransId}
-                <div id="displayPayments_${finAccountTrans.finAccountTransId}" class="popup" style="display: none;width: 650px;">
-                  <div align="right">
-                    <input class="popup_closebox buttontext" type="button" value="X"/>
-                  </div>
+                <div id="displayPayments_${finAccountTrans.finAccountTransId}" style="display: none;width: 650px;">
                   <table class="basic-table hover-bar" cellspacing="0" style"width :">
                     <tr class="header-row-2">
                       <th>${uiLabelMap.AccountingDepositSlipId}</th>
@@ -224,7 +221,16 @@ function getFinAccountTransRunningTotalAndBalances() {
                   </table>
                 </div>
                 <script type="text/javascript">
-                  new Popup('displayPayments_${finAccountTrans.finAccountTransId}','togglePayment_${finAccountTrans.finAccountTransId}', {modal: true, position: 'center', trigger: 'click'})
+                   jQuery(document).ready( function() {
+                        jQuery("#displayPayments_${finAccountTrans.finAccountTransId}").dialog({autoOpen: false, modal: true,
+                                buttons: {
+                                '${uiLabelMap.CommonClose}': function() {
+                                    jQuery(this).dialog('close');
+                                    }
+                                }
+                           });
+                   jQuery("#togglePayment_${finAccountTrans.finAccountTransId}").click(function(){jQuery("#displayPayments_${finAccountTrans.finAccountTransId}").dialog("open")});
+                   });
                 </script>
                 <a href="<@ofbizUrl>DepositSlip.pdf?finAccountTransId=${finAccountTrans.finAccountTransId}</@ofbizUrl>" class="buttontext">${uiLabelMap.AccountingDepositSlip}</a>
               <#else>
