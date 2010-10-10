@@ -39,7 +39,7 @@ under the License.
             </widgets>
         </section>
     </screen>
-
+<!--
     <screen name="newcustomer">
         <section>
             <actions>
@@ -76,6 +76,7 @@ under the License.
             </widgets>
         </section>
     </screen>
+    -->
     <screen name="editcontactmech">
         <section>
             <actions>
@@ -514,7 +515,7 @@ under the License.
         </section>
     </screen>
     <!-- To use new pages uncomment following screens i.e. newcustomer and viewprofile and comment existing newcustomer and viewprofile screens above -->
-    <!--
+
     <screen name="newcustomer">
         <section>
             <actions>
@@ -543,7 +544,6 @@ under the License.
                 <entity-one entity-name="Person" value-field="person"/>
                 <entity-one entity-name="PartyGroup" value-field="partyGroup"/>
 
-                <set field="layoutSettings.javaScripts[+0]" value="/images/prototypejs/controls.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/ecommerce/images/profile.js" global="true"/>
                 <script location="component://ecommerce/webapp/ecommerce/WEB-INF/actions/customer/EditShippingAddress.groovy"/>
                 <script location="component://ecommerce/webapp/ecommerce/WEB-INF/actions/customer/EditBillingAddress.groovy"/>
@@ -558,7 +558,7 @@ under the License.
             </widgets>
         </section>
     </screen>
-    -->
+
 
     <screen name="EditProfile">
         <section>
@@ -585,7 +585,6 @@ under the License.
                 <set field="titleProperty" value="EcommerceManageAddresses"/>
                 <set field="partyId" from-field="userLogin.partyId"/>
 
-                <set field="layoutSettings.javaScripts[+0]" value="/images/prototypejs/controls.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/ecommerce/images/profile.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/ordermgr/images/js/geoAutoCompleter.js" global="true"/>
                 <script location="component://ecommerce/webapp/ecommerce/WEB-INF/actions/customer/EditShippingAddress.groovy"/>
