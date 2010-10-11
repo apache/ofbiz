@@ -44,8 +44,8 @@ jQuery(document).ready(function() {
     jQuery("#${asm_relatedField}").change(function() {
       selectMultipleRelatedValues('${asm_requestName}', '${asm_paramKey}', '${asm_relatedField}', '${asm_multipleSelect}', '${asm_type}', typeValue, '${asm_responseName}');
     });
-  </#if>
     selectMultipleRelatedValues('${asm_requestName}', '${asm_paramKey}', '${asm_relatedField}', '${asm_multipleSelect}', '${asm_type}', typeValue, '${asm_responseName}');
+  </#if>
   });  
 </script>
 
