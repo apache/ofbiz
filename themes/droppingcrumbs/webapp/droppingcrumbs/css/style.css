@@ -717,6 +717,19 @@ height: 1%;
 margin-bottom: 1em;
 }
 
+/* Special Screenlet Handling for locals and timezone window */
+DIV.lists.screenlet {
+    margin-left: 25%;
+    margin-right: 25%;
+    margin-top: 1em;
+}
+DIV.lists.screenlet .basic-table tr td {
+    text-align: center;
+}
+DIV.lists.screenlet .basic-table tr td a {
+    display: block;
+}
+
 DIV.screenlet-body {
 background-color: #FFFFFF;
 height: auto !important;

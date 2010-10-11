@@ -1201,6 +1201,19 @@ margin-bottom:1em;
 background: transparent url(../images/screenlet_shadow1.png) repeat-x 0% 100%;
 }
 
+/* Special Screenlet Handling for locals and timezone window */
+DIV.lists.screenlet {
+margin-left: 25%;
+margin-right: 25%;
+margin-top: 1em;
+}
+DIV.lists.screenlet .basic-table tr td {
+text-align: center;
+}
+DIV.lists.screenlet .basic-table tr td a {
+display: block;
+}
+
 .screenlet-title-bar {
 background:url(../images/bkgd_header.gif) repeat-x;
 min-height: 21px;
