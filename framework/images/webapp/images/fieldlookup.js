@@ -88,13 +88,9 @@ function fieldLookup1(obj_target, args) {
     // validate input parameters
     if (! obj_target) return lookup_error("Error calling the field lookup: no target control specified");
     if (obj_target.value == null) return lookup_error("Error calling the field lookup: parameter specified is not valid target control");
-    //this.target = obj_target;
     targetW = obj_target;
-    
-    // register in global collections
-    //this.id = lookups.length;
-    //lookups[this.id] = this;
 }
+
 function fieldLookup2(obj_target, obj_target2, args) {
     this.args = args;
     // passing methods
@@ -109,10 +105,6 @@ function fieldLookup2(obj_target, obj_target2, args) {
     if (obj_target2.value == null) return lookup_error("Error calling the field lookup: parameter specified is not valid target2 control");
     target2 = obj_target2;
     
-    
-    // register in global collections
-    //this.id = lookups.length;
-    //lookups[this.id] = this;
 }
 
 function lookup_popup1(view_name, form_name, viewWidth, viewheight) {
@@ -236,7 +228,18 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
         open: function() {
             jQuery("#" + lookupId).load(requestUrl, function(data){ 
                 modifySubmitButton(lookupId);
+                // set up the window chaining
+                // if the ACTIVATED_LOOKUP var is set there have to be more than one lookup,
+                // before registrating the new lookup we store the id of the old lookup in the
+                // preLookup variable of the new lookup object. I.e. lookup_1 calls lookup_8, the lookup_8
+                // object need a reference to lookup_1, this reference is set here
+                var prevLookup = null
+                if (ACTIVATED_LOOKUP) {
+                    prevLookup = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).lookupId;
+                }
                 identifyLookup(lookupId);
+                
+                GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).prevLookup = prevLookup;
             });
         },
         close: function() {
@@ -261,7 +264,7 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
     if (dialogOptionalTarget != null) {
         this.target2 = null;
     }
-    ((GLOBAL_LOOKUP_REF.countFields() - 1) >= 0) ? this.prevLookup = (GLOBAL_LOOKUP_REF.countFields() - 1) + "_lookupId" : null;
+    this.prevLookup = null;
     this.dialogRef = dialogRef;
     //write external settings in global window manager
     GLOBAL_LOOKUP_REF.setReference(lookupId, this);
@@ -598,6 +601,22 @@ function setSourceColor(src) {
     	src.css({"background-color": bkColor});
     }
 }
+// function passing selected value to calling window, using only in the TimeDuration case
+function set_duration_value (value) {
+    if(GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP)){
+        obj_caller.target = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).target;
+    }
+    else{
+        obj_caller.target = obj_caller.targetW;
+    }    
+    var target = obj_caller.target;
+    if (!target) return;
+    
+    setSourceColor(target);
+    target.value = value;    
+    
+    closeLookup();
+}
 // function passing selected value to calling window
 function set_value (value) {
     if(GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP)){
@@ -635,11 +654,8 @@ function write_value (value, target) {
     
     setSourceColor(target);
     target.val(value);
-    //target.fire("lookup:changed");
-    //if (target.onchange != null) {     
-    //    target.onchange();                    
-    //}
 }
+
 function set_multivalues(value) {
     obj_caller.target.value = value;
     obj_caller.target.fire("lookup:changed");
@@ -656,6 +672,7 @@ function set_multivalues(value) {
     }
     closeLookup();
 }
+
 //close the window after passing the value
 function closeLookup() {
     if (window.opener != null && GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP) == null) {

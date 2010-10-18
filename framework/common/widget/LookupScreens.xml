@@ -140,6 +140,7 @@ under the License.
         <section>
             <actions>
                 <set field="title" value="${uiLabelMap.CommonTime}"/>
+                <set field="parameters.presentation" value="window"/>
             </actions>
             <widgets>
                <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
