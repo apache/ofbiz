@@ -31,8 +31,8 @@
         ebay/build.xml,
         ebaystore/build.xml,
         projectmgr/build.xml,
-        crowd/build.xml,
         ldap/build.xml,
+        crowd/build.xml,
         googlecheckout/build.xml"/>
     <!-- For the Web POS add "webpos/build.xml" to the list above -->
     <!-- For the old OFBiz Workflow Engine add "workflow/build.xml" to the list above -->

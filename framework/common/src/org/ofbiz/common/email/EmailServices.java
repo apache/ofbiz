@@ -491,11 +491,10 @@ public class EmailServices {
             
             for (int i = 0; i < xslfoAttachScreenLocationList.size(); i++) {
                 String xslfoAttachScreenLocation = xslfoAttachScreenLocationList.get(i);
-                String attachmentName = attachmentNameList.get(i);
-                if (UtilValidate.isEmpty(attachmentName)) {
-                    attachmentName = "Details" + i + ".pdf";
+                String attachmentName = "Details.pdf";
+                if (UtilValidate.isNotEmpty(attachmentNameList) && attachmentNameList.size() >= i) {
+                	attachmentName = attachmentNameList.get(i);
                 }
-
                 isMultiPart = true;
                 // start processing fo pdf attachment
                 try {

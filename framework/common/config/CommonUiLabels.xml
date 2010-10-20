@@ -195,6 +195,10 @@
         <value xml:lang="zh">新建</value>
         <value xml:lang="zh_CN">添加一个</value>
     </property>
+    <property key="CommonAddAColumnToThisPortalPage">
+        <value xml:lang="en">Add a new column to this portal</value>
+        <value xml:lang="it">Aggiunge una nuova colonna a questa pagina</value>
+    </property>
     <property key="CommonAddAPortlet">
         <value xml:lang="en">Add A Portlet...</value>
         <value xml:lang="fr">Ajouter un portlet...</value>
@@ -264,6 +268,7 @@
     <property key="CommonAddPortletToPage">
         <value xml:lang="en">Add a portlet to portal page</value>
         <value xml:lang="fr">Ajouter une portlet à la page</value>
+        <value xml:lang="it">Aggiunge un portlet in questa colonna</value>
     </property>
     <property key="CommonAddProblem">
         <value xml:lang="ar">مشكل أثناء الإضافة</value>
@@ -1912,6 +1917,18 @@
         <value xml:lang="th">ลบทั้งหมด</value>
         <value xml:lang="zh">删除全部</value>
         <value xml:lang="zh_CN">删除所有</value>
+    </property>
+    <property key="CommonDeleteColumn">
+        <value xml:lang="en">Delete Column</value>
+        <value xml:lang="it">Elimina colonna</value>
+    </property>
+    <property key="CommonDeleteThisColumn">
+        <value xml:lang="en">Delete this column</value>
+        <value xml:lang="it">Elimina questa colonna</value>
+    </property>
+    <property key="CommonDeleteThisPortlet">
+        <value xml:lang="en">Delete this portlet</value>
+        <value xml:lang="it">Elimina questo portlet</value>
     </property>
     <property key="CommonDepth">
         <value xml:lang="ar">عمق</value>
@@ -4396,6 +4413,10 @@
         <value xml:lang="th">ตรวจสอบรหัสผ่านใหม่</value>
         <value xml:lang="zh">新密码验证</value>
     </property>
+    <property key="CommonNewPortalPage">
+        <value xml:lang="en">New Portal Page</value>
+        <value xml:lang="it">Nuova pagina portale</value>
+    </property>
     <property key="CommonNewSelection">
         <value xml:lang="ar">إختيار جديد</value>
         <value xml:lang="de">Neue Auswahl</value>
@@ -6689,10 +6710,10 @@
         <value xml:lang="zh">设置为当前</value>
     </property>
     <property key="CommonSetColumnWidth">
-        <value xml:lang="en">Set Column Width...</value>
+        <value xml:lang="en">Set Column Width</value>
         <value xml:lang="fr">Définir la largeur de colonne ...</value>
         <value xml:lang="hi_IN">कॉलम की चौड़ाई स्थापित करे...</value>
-        <value xml:lang="it">Larghezza colonna...</value>
+        <value xml:lang="it">Imposta larghezza colonna</value>
         <value xml:lang="zh">设置列宽度...</value>
     </property>
     <property key="CommonSetNowEmpty">
@@ -8988,15 +9009,23 @@
         <value xml:lang="zh">由用户登录标识修改</value>
     </property>
     <property key="FormFieldTitle_originalPortalPageId">
-        <value xml:lang="en">Original Portal Page Id</value>
+        <value xml:lang="en">original page</value>
+        <value xml:lang="fr">Page d'orig.</value>        
         <value xml:lang="it">Codice pagina portale originale</value>
     </property>
     <property key="FormFieldTitle_parentPortalPageId">
-        <value xml:lang="en">Parent Portal Page Id</value>
-        <value xml:lang="it">Codice pagina portale padre</value>
+        <value xml:lang="en">Parent page</value>
+        <value xml:lang="fr">Page père</value>
+        <value xml:lang="it">Pagina portale padre</value>
+    </property>
+    <property key="FormFieldTitle_portalPageName">
+        <value xml:lang="en">Portal page name</value>
+        <value xml:lang="fr">Nom de page</value>
+        <value xml:lang="it">Nome pagina portale</value>
     </property>
     <property key="FormFieldTitle_ownerUserLoginId">
         <value xml:lang="en">Owner User Login ID</value>
+        <value xml:lang="fr">Propri.</value>
         <value xml:lang="it">Codice login proprietario</value>
     </property>
     <property key="FormFieldTitle_price">
