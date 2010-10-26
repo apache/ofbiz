@@ -375,7 +375,7 @@ function processBillingAndPayment() {
         url: 'createUpdateBillingAndPayment',
         type: 'POST',
         dataType: 'json',
-        data: $('billingForm').serialize(),
+        data: jQuery('#billingForm').serialize(),
         async: false,
         success: function(json) {
             jQuery('#billingFormServerError').fadeOut('fast');
@@ -450,7 +450,7 @@ function addPromoCode() {
 function getProductLineItemIndex(event, productId) {
     var itemIndex = null;
     var productIdParam = "productId=" + productId;
-    var formValues = $('cartForm').serialize() + "&" + productIdParam;
+    var formValues = jQuery('#cartForm').serialize() + "&" + productIdParam;
     jQuery.ajax({
         url: 'getShoppingCartItemIndex',
         type: 'POST',
@@ -486,7 +486,7 @@ function cartItemQtyChanged(elmt) {
     if (jQuery(qtyElement).val() && jQuery(qtyElement).val() >= 0 && !isNaN(jQuery(qtyElement).val())) {
         var itemIndex = getProductLineItemIndex(elmt, productId);
         qtyParam = "update_" + itemIndex +"="+jQuery(qtyElement).val();
-        var formValues = $('cartForm').serialize() + '&' + qtyParam;
+        var formValues = jQuery('#cartForm').serialize() + '&' + qtyParam;
         updateCartData(elementId, formValues, qtyElement.value, itemIndex);
     }
 }
@@ -529,20 +529,22 @@ function processOrder() {
 }
 function getAssociatedBillingStateList(formName, divId) {
     var optionList = [];
-    new Ajax.Request("getAssociatedStateList", {
-        asynchronous: false,
-        parameters: $(formName).serialize(),
-        onSuccess: function(transport) {
-            var data = transport.responseText.evalJSON(true);
+    jQuery.ajax({
+        url: "getAssociatedStateList",
+        data: jQuery(formName).serialize(),
+        async: false,
+        success: function(transport) {
             stateList = data.stateList;
-            stateList.each(function(state) {
-                geoVolues = state.split(': ');
-                optionList.push("<option value = "+geoVolues[1]+" >"+geoVolues[0]+"</option>");
+            var billingStates = jQuery("#" + divId);
+            billingStates.find("option").remove();
+            jQuery.each(stateList, function(state) {
+                geoVolues = this.split(': ');
+                billingStates.append(jQuery("<option value = " + geoVolues[1] + " >" + geoVolues[0] + "</option>"));
             });
-            $(divId).update(optionList);
         }
     });
 }
+
 function updateShippingSummary() {
     var fullName = jQuery('#firstName').val() + " " +jQuery('#lastName').val();
     var extension = "";
