@@ -384,7 +384,8 @@ function ajaxSubmitFormUpdateAreas(form, areaCsvString) {
  * @param areaCsvString The area CSV string. The CSV string is a flat array in the
  * form of: areaId, target, target parameters [, areaId, target, target parameters...].
 */
-function ajaxAutoCompleter(areaCsvString, showDescription) {
+
+function ajaxAutoCompleter(areaCsvString, showDescription, formName) {
    var areaArray = areaCsvString.replace(/&amp;/g,'&').split(",");
    var numAreas = parseInt(areaArray.length / 3);
 
@@ -397,7 +398,7 @@ function ajaxAutoCompleter(areaCsvString, showDescription) {
           }
 
           jQuery("#" + div).autocomplete({
-           source: function(request, response) {
+            source: function(request, response) {
                 jQuery.ajax({
                     url: url,
                     async: false,
@@ -409,52 +410,47 @@ function ajaxAutoCompleter(areaCsvString, showDescription) {
                         response(autocomp);
                     }
                 })
+            },
+            select: function(event, ui) {
+               jQuery("#" + areaArray[0]).html(ui.item)
+               if (showDescription) {
+                  setLookDescription(areaArray[0] ,ui.item.label, areaArray[2], formName)
+                }
             }
         });
+        if (showDescription) {
+          var lookupDescriptionLoader = new lookupDescriptionLoaded(areaArray[i], areaArray[i + 1], areaArray[i + 2], formName);
+          lookupDescriptionLoader.update();
+          jQuery("#" + areaArray[i]).bind('change lookup:changed', function(){
+            lookupDescriptionLoader.update();
+          });
+        }
    }
 }
 
-function setSelection(text, li) {
-    text.value = li.id;
-    var delay = function() { jQuery("#" + text).trigger("lookup:changed"); };
-    setTimeout(delay, 100);
-}
-
-function setLookDescription(textFieldId, description) {
+function setLookDescription(textFieldId, description, params, formName) {
     if (description) {
         var start = description.lastIndexOf(' [');
         if (start != -1) {
-        /* this breaks many existing fields, so commenting for now: assumes main field is the name field and id field is hidden, determines Name/Id fields based on name instead of using description-field-name attribute
-            // To allow to set a dependent Id field when using a Name field as a lookup (the fields must have the same prefix, eg: partyName, partyId)
-            // It uses the description (Id) shown with the Name. Hence the Lookup screen must be set in order to show a description in the autocomplete part. 
-            // It seems this is not always easy notably when you need to show at least 2 parts for the Name (eg Person). 
-            // At least it easy to set and it works well for simples case for now (eg PartyGroup)            
-            var dependentId = textFieldId.replace(/Name/, "Id"); // Raw but ok for now, needs safe navigation...
-            // I did not find another way since Ajax.Autocompleter can't update another field
-            // The alternative would be navigation to the next hidden field, at least it would avoid the mandatory Id/Name pair
-            // But it's more difficult to demonstrate in Example component
-            // dependentId = (textFieldId.next('div').down('input[type=hidden]'); 
-            $(dependentId).clear();
-            var dependentIdValue = (description.substring(start + 1, description.length).replace(/\[/g, "")).replace(/\]/g, "");
-            if ($(dependentId)) {            
-                $(dependentId).value = dependentIdValue;
-            }
-         */
-             
             description = description.substring(0, start);
-        /*
-            $(dependentId).value = description;
-         */
+            
+            // This sets a possible dependent field. It depends on the searchFields order which makes sense anyway
+            var dependentField = params.substring(params.indexOf("searchValueFieldName"));
+            dependentField = jQuery("#" + formName + "_" + dependentField.substring(dependentField.indexOf("=") + 1));            
+            var dependentFieldValue = description.substring(0, description.lastIndexOf(' '))
+            if (dependentField.length) {            
+                dependentField.val(dependentFieldValue);
+            }
         }
     }
-    var lookupWrapperEl = jQuery("#" + textFieldId).closest(jQuery('.field-lookup'));
-    if (lookupWrapperEl) {
-        var tooltipElement = jQuery("#" + textFieldId + '_lookupDescription');
-        if (!tooltipElement) {
+    var lookupWrapperEl = jQuery("#" + textFieldId).closest('.field-lookup');
+    if (lookupWrapperEl.length) {
+        tooltipElement = jQuery("#" + textFieldId + '_lookupDescription')
+        if (!tooltipElement.length) {
             tooltipElement = jQuery("<span id='" + textFieldId + "_lookupDescription' class='tooltip'></span>");
         }
         tooltipElement.html(description);
-        tooltipElement.append(lookupWrapperEl);
+        lookupWrapperEl.append(tooltipElement);
     }
 }
 

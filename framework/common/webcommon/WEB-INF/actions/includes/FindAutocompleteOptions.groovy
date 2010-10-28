@@ -35,7 +35,12 @@ def displayFields = context.displayFields ?: searchFields;
 
 def searchValueFieldName = parameters.term;
 def fieldValue = null;
-if (searchValueFieldName) fieldValue = searchValueFieldName;
+if (searchValueFieldName) {
+    fieldValue = searchValueFieldName; 
+} else if (parameters.searchValueFieldName) {
+    fieldValue = parameters.get(parameters.searchValueFieldName);
+    context.description = "true";
+}
 
 def searchType = context.searchType;
 def displayFieldsSet = null;
@@ -43,7 +48,11 @@ def displayFieldsSet = null;
 if (searchFields && fieldValue) {
     def searchFieldsList = StringUtil.toList(searchFields);
     displayFieldsSet = StringUtil.toSet(displayFields);
-    returnField = searchFieldsList[0]; //default to first element of searchFields
+    if (context.description && fieldValue instanceof java.lang.String) {
+        returnField = parameters.searchValueFieldName;
+    } else {
+        returnField = searchFieldsList[0]; //default to first element of searchFields
+    }
     displayFieldsSet.add(returnField); //add it to select fields, in case it is missing
     context.returnField = returnField;
     context.displayFieldsSet = displayFieldsSet;

@@ -16,6 +16,22 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
+<#if description?exists>
+    <#if autocompleteOptions?exists>
+        <#list autocompleteOptions as autocompleteOption>
+            <#assign displayString = ""/>
+            <#list displayFieldsSet as key>
+                <#assign field = autocompleteOption.get(key)?if_exists>
+                <#if field?has_content>
+                    <#if (key != context.returnField)>
+                        <#assign displayString = displayString + field + " ">
+                    </#if>
+                </#if>
+            </#list>
+            <#if (displayString?trim?has_content )>${displayString?trim}</#if>
+        </#list>
+    </#if>
+<#else>
 <script type="text/javascript">
 var autocomp = [
     <#if autocompleteOptions?exists>
@@ -25,7 +41,7 @@ var autocomp = [
             <#assign displayString = ""/>
             <#assign returnField = ""/>
             <#-- <#list autocompleteOption.keySet() as key> instead use the field order of display fields -->
-                <#list context.displayFieldsSet as key>
+                <#list displayFieldsSet as key>
                 <#assign field = autocompleteOption.get(key)?if_exists>
                 <#if field?has_content>
                     <#if (key == context.returnField)>
@@ -46,3 +62,4 @@ var autocomp = [
     </#if>
 ];
 </script>
+</#if>

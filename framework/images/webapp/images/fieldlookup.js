@@ -26,6 +26,8 @@ var mx, my;
 var ACTIVATED_LOOKUP = null;
 var LOOKUP_DIV = null;
 var INITIALLY_COLLAPSED = null;
+var SHOW_DESCRIPTION = false;
+
 
 function moveobj(evt) {
     if (NS4 || NS6) {
@@ -193,9 +195,10 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
 
     // createAjax autocomplete
     if (ajaxUrl != "" && showDescription != "") {
+         SHOW_DESCRIPTION = showDescription;
         //write the new input box id in the ajaxUrl Array
-        ajaxUrl = ajaxUrl.replace(ajaxUrl.substring(0, ajaxUrl.indexOf(",")), newInputBoxId)
-        new ajaxAutoCompleter(ajaxUrl, showDescription);
+        ajaxUrl = ajaxUrl.replace(ajaxUrl.substring(0, ajaxUrl.indexOf(",")), newInputBoxId);
+        new ajaxAutoCompleter(ajaxUrl, showDescription, formName);
     }
     
     var positioning = null;
@@ -538,7 +541,7 @@ function lookupAjaxRequest(request) {
     // get request arguments
     var arg = request.substring(request.indexOf('?')+1,(request.length));    
     lookupId = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).lookupId;
-    $("#" + lookupId).load(request, arg, function(data) { 
+    jQuery("#" + lookupId).load(request, arg, function(data) { 
         if (data.search(/loginform/) != -1) {
             window.location.href = window.location.href;
             return;
@@ -628,6 +631,11 @@ function set_value (value) {
     var target = obj_caller.target;
     
     write_value(value, target);
+    field = jQuery("#" + target.attr('id'));
+    field.trigger("lookup:changed");
+    if (field.change != null) {
+        field.click().change()
+    }
     
     closeLookup();
 }
@@ -644,6 +652,7 @@ function set_values (value, value2) {
     var target2 = obj_caller.target2;
     write_value(value, target);
     write_value(value2, target2)
+    if (SHOW_DESCRIPTION) setLookDescription(target.attr("id"), value + " " + value2, "", "");
     
     closeLookup();
 }
@@ -658,7 +667,13 @@ function write_value (value, target) {
 
 function set_multivalues(value) {
     obj_caller.target.value = value;
-    obj_caller.target.fire("lookup:changed");
+    field = jQuery("#" + target.attr('id')); // TODO: Not tested (should be ok)we need to fix 1st the window lookup (see OFBIZ-3933)
+    field.trigger("lookup:changed"); //  If we decide to keep it (only used in Example, though it's needed also for Themes and Languages but not the same way)
+    if (field.change != null) {
+        field.click().change()
+    }
+     
+
     var thisForm = obj_caller.target.form;
     var evalString = "";
     
@@ -684,36 +699,45 @@ function closeLookup() {
 }
 
 //load description for lookup fields 
-function lookupDescriptionLoaded(fieldId, url, params) {
+var lookupDescriptionLoaded = function(fieldId, url, params, formName) {
+  this.init(fieldId, url, params, formName);
+}
 
-    this.fieldId = fieldId;
-    this.url = url;
-    this.params = params;
-    this.updateLookup();
-    $(fieldId).observe('change', this.updateLookup.bind(this));
-    $(fieldId).observe('lookup:changed', this.updateLookup.bind(this));
+jQuery.extend(lookupDescriptionLoaded.prototype, {
 
+   init: function(fieldId, url, params, formName) {
+     this.fieldId = fieldId;
+     this.url = url;
+     this.params = params;
+     this.formName = formName;
+   },
+   update: function(){
+     var tooltipElement = jQuery("#" + this.fieldId + '_lookupDescription');
+     if (tooltipElement.length) {//first remove current description
+         tooltipElement.remove();
+     }
+      //actual server call
+      var fieldName = this.params.substring(this.params.indexOf("searchValueFieldName"));
+      fieldName = fieldName.substring(fieldName.indexOf("=") + 1);
+      var fieldSerialized = jQuery("input[name=" + fieldName  + "]", jQuery("form[name=" + this.formName  + "]")).serialize();
+      this.allParams = this.params + '&' + fieldSerialized + '&' + 'searchType=EQUALS';
+      _fieldId = this.fieldId;
 
-    this.updateLookup = function() {
-        var tooltipElement = $(this.fieldId + '_lookupDescription');
-        if (tooltipElement) {//first remove current description
-            tooltipElement.remove();
-        }
-        if (!$F(this.fieldId)) {
-            return;
-        }
-        //actual server call
-        var allParams = this.params + '&' + $(this.fieldId).serialize() + '&' + 'searchType=EQUALS'
-        new Ajax.Request(this.url,{parameters: allParams, onSuccess: this.updateFunction.bind(this)});
-    }, 
-    
-    this.updateFunction = function(transport) {
-        var wrapperElement = new Element('div').insert(transport.responseText);
-        if('UL'!= wrapperElement.firstDescendant().tagName || (wrapperElement.firstDescendant().childElements().length != 1)) {    
-            return;
-        }
-        Element.cleanWhitespace(wrapperElement);
-        Element.cleanWhitespace(wrapperElement.down());
-        setLookDescription(this.fieldId, wrapperElement.firstDescendant().firstDescendant().innerHTML);
-    }            
-};
+     jQuery.ajax({
+       url: this.url,
+       type: "POST",
+       data: this.allParams,
+       async: false,
+       success: function(result){
+         // This would be far more reliable if we would remove the widget boundaries in LookupDecorator using widgetVerbose in context
+        setLookDescription(_fieldId, result.split("ajaxAutocompleteOptions.ftl -->")[1].trim().split("<!--")[0].trim(), "", "");
+      }
+    });
+  }
+});
+
+if(typeof String.prototype.trim !== 'function') { // Needed because IE8 does not implement trim yet
+  String.prototype.trim = function() {
+    return this.replace(/^\s+|\s+$/g, ''); 
+  }
+}

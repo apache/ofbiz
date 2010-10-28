@@ -480,6 +480,15 @@ ${item.description}</span>
     </#if>
     );"></a><#rt>
 <#else>
+    <#if ajaxEnabled?has_content && ajaxEnabled>
+      <#if !ajaxUrl?contains("searchValueFieldName=")>
+          <#if descriptionFieldName?has_content && showDescription == "true">
+            <#local ajaxUrl = ajaxUrl + "&amp;searchValueFieldName=" + descriptionFieldName />
+          <#else>
+            <#local ajaxUrl = ajaxUrl + "&amp;searchValueFieldName=" + name />
+          </#if>
+      </#if>
+    </#if>
     <script type="text/javascript">
         jQuery(document).ready(function(){
             new ConstructLookup("${fieldFormName}", "${id}", document.${formName?html}.${name?html}, <#if descriptionFieldName?has_content>document.${formName?html}.${descriptionFieldName}<#else>null</#if>, "${formName?html}", "${width}", "${height}", "${position}", "${fadeBackground}", <#if ajaxEnabled?has_content && ajaxEnabled>"${ajaxUrl}", "${showDescription}"<#else>"", ""</#if>);

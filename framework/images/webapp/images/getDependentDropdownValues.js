@@ -67,7 +67,7 @@ function getDependentDropdownValues(request, paramKey, paramField, targetField, 
 		        })
 	        };
             // Hide/show the dependent drop-down if hide=true else simply disable/enable
-            if ((!list) || (list.size() < 1) || ((list.size() == 1) && list[0].indexOf("_NA_") >=0)) {
+            if ((!list) || (list.length < 1) || ((list.length == 1) && list[0].indexOf("_NA_") >=0)) {
             	jQuery(target).attr('disabled', 'disabled');
             	if (hide) {
 	                if (jQuery(target).is(':visible')) {
