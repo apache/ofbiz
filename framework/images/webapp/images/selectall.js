@@ -259,6 +259,10 @@ function ajaxUpdateAreas(areaCsvString) {
         var areaId = areaArray[i];
         var target = areaArray[i + 1];
         var targetParams = areaArray[i + 2];
+        // that was done by the prototype updater internally, remove the ? and the anchor flag from the parameters
+        // not nice but works
+        targetParams = targetParams.replace('#','');
+        targetParams = targetParams.replace('?','');
         jQuery.ajax({
             url: target,
             type: "POST",
@@ -740,8 +744,8 @@ function waitSpinnerShow() {
 
     bdy = document.body;
     lookupLeft = (bdy.offsetWidth / 2) - (jSpinner.width() / 2);
-    scrollOffY = document.viewport.getScrollOffsets().top;
-    winHeight = document.viewport.getHeight();
+    scrollOffY = jQuery(window).scrollTop();
+    winHeight = jQuery(window).height();
     lookupTop = (scrollOffY + winHeight / 2) - (jSpinner.height() / 2);
 
     jSpinner.css("display", "block");

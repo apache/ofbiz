@@ -73,7 +73,7 @@ under the License.
          startDownLoad(url);
          document.getElementById('progress_bar').style.display = "";
          document.getElementById('filesize').style.display = "";
-         progressBar = new Control.ProgressBar('progress_bar');
+         progressBar = jQuery("#progress_bar").progressbar({value: 0});
     }
 
     function startDownLoad(url){
@@ -81,7 +81,7 @@ under the License.
             url: url,
             type: "POST",
             beforeSend: getProgressDownloadStatus,
-            complete: function(data) {document.getElementById('download').innerHTML = '${uiLabel.CommonLoading}'}
+            complete: function(data) {document.getElementById('download').innerHTML = '${uiLabelMap.CommonLoading}'}
         });
     }
 
@@ -100,9 +100,9 @@ under the License.
                                    var loadPercent = data.loadPercent;
                                    document.getElementById('loadpercent').innerHTML = ''+loadPercent+'%';
                                    var contentLength  = data.contentLength;
-                                   progressBar.setProgress(loadPercent);
+                                   progressBar.progressbar("option", "value", loadPercent);
                                    if(loadPercent > 99){
-                                        document.getElementById('download').innerHTML = '${uiLabel.CommonDownloaded}';
+                                        document.getElementById('download').innerHTML = '${uiLabelMap.CommonDownloaded}';
                                         timerId.stop();
                                    }
                                }

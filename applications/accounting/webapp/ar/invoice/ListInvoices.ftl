@@ -77,7 +77,7 @@ under the License.
         if ( selection.value == 'massInvoicesToApprove' || selection.value == 'massInvoicesToSent' || selection.value == 'massInvoicesToReady' || selection.value == 'massInvoicesToPaid' || selection.value == 'massInvoicesToWriteoff' || selection.value == 'massInvoicesToCancel') {
             jQuery('#listInvoices').attr('action', jQuery('#invoiceStatusChange').val());
         } else {
-            $jQuery('#listInvoices').attr('action', selection.value);
+            jQuery('#listInvoices').attr('action', selection.value);
         }
         if (selection.value == 'massInvoicesToApprove') {
             jQuery('#statusId').val("INVOICE_APPROVED");

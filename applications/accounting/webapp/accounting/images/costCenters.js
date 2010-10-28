@@ -20,14 +20,15 @@
 jQuery(document).ready( function() {
     jQuery('#costCentersSubmit').click(processCostCenterData);
     // Find all text boxes in form and add a method to list on for on change.
-    var categoryShareInputs = jQuery('#costCenters :input:text');
+    var categoryShareInputs = jQuery('#costCenters [type=text]');
+
     jQuery.each(categoryShareInputs, function (element) {
         jQuery(this).change( function() {
             var textIdSplit = jQuery(this).attr('id').split('|');
             var tableRowId = 'row_' + textIdSplit[0];
             var tableRow = jQuery("#" + tableRowId);
             // get all text inputs
-            var rowInputs = jQuery("#" + tableRowId + " :input:text");
+            var rowInputs = jQuery("#" + tableRowId + " [type=text]");
             var totalPercentage = 0;
             jQuery.each( rowInputs, function (inputElement) {
                 var inputElementIdSplit = jQuery(this).attr('id').split("|");
@@ -63,7 +64,6 @@ function processCostCenterData() {
         data: jQuery("#costCenters").serialize(),
         async: false,
         type: 'POST',
-        contentType: 'application/json',
         success: function(data){
             if (data == "") {
                 jQuery("#errorMessage").show();

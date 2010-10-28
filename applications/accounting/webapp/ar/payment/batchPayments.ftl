@@ -85,7 +85,7 @@ function setServiceName(selection) {
     } else if (selection.value == 'massPaymentsToReceived') {
         jQuery('#statusId').val("PMNT_RECEIVED");
     }else if (selection.value == 'massPaymentsToConfirmed') {
-        jQuery('#statusId').value("PMNT_CONFIRMED");
+        jQuery('#statusId').val("PMNT_CONFIRMED");
     }else if (selection.value == 'massPaymentsToCancelled') {
         jQuery('#statusId').val("PMNT_CANCELLED");
     }else if (selection.value == 'massPaymentsToVoid') {
