@@ -1107,7 +1107,7 @@ overflow:hidden;
 background: url(../images/appbar.png) no-repeat right 0px;
 }
 #app-navigation {
-background: url(../images/appbar.png) no-repeat right -90px;
+background: url(../images/appbar.png) no-repeat right -60px;
 }
 .menu_selected #app-navigation {
 background: url(../images/appbar.png) no-repeat right -30px;
@@ -1336,12 +1336,61 @@ margin:0;
 
 /* login screenlet decorator */
 .login-screenlet {
-min-width: 25em;
-width: 25%;
+width: 400px;
+margin: 100px auto 300px;
 }
 
 .login-screenlet .screenlet-title-bar {
 text-align: center;
+}
+
+.login-screenlet form {
+padding: 20px;
+}
+
+.login-screenlet .screenlet-body {
+background-image:url(../images/login_bkgd.jpg);
+border: none;
+font-size:12px;
+}
+
+/***********************************************
+ajax auto complete
+***********************************************/
+div.autocomplete {
+  position:absolute;
+  width:auto !important;
+/* min-width:154px; */
+  background-color:#f8f8f8;
+  border:1px solid #999999;
+  margin:0;
+  padding:0;
+}
+div.autocomplete ul {
+  list-style-type:none;
+  margin:0;
+  padding:0;
+}
+div.autocomplete ul li.selected {
+ background-color: #ffb;
+}
+div.autocomplete ul li {
+  list-style-type:none;
+  display:block;
+  float: none;
+  margin:0;
+  padding:2px;
+  /*height:32px;*/
+  cursor:pointer;
+}
+
+.indicator img {
+  background: url(/images/ajax-loader.gif) no-repeat 0 0;
+  display: block;
+  margin:3px 10px 0px 34px;
+  width:16px;
+  height:16px;
+  border: none;
 }
 /* ======================================================= */
 /* ===== Basic Navigation (Vertical Menu) Style ========== */
@@ -1415,6 +1464,15 @@ padding:6px 10px 6px 30px;
 
 .button-bar ul a.create:hover,.button-bar a.create:hover {
 background: url(../images/ptrn_hot_create.gif) no-repeat;
+}
+
+.button-bar ul a.delete,.button-bar a.delete {
+background: url(../images/ptrn_delete.jpg) no-repeat;
+padding:6px 10px 6px 30px;
+}
+
+.button-bar ul a.delete:hover,.button-bar a.delete:hover {
+background: url(../images/ptrn_hot_delete.jpg) no-repeat;
 }
 
 .button-bar ul a.refresh,.button-bar a.refresh {

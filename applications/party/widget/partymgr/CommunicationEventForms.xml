@@ -65,10 +65,10 @@ under the License.
 
         <!-- this is an example of how to display different types of contact mech to the user -->
         <field name="contactMechIdFrom" title="${uiLabelMap.PartyFromContactMech}" position="1">
-            <lookup target-form-name="LookupPreferredContactMech" target-parameter="partyIdFrom"/>
+            <lookup target-form-name="LookupPreferredContactMech" description-field-name="partyIdFrom" target-parameter="partyIdFrom"/>
         </field>
         <field name="contactMechIdTo" title="${uiLabelMap.PartyToContactMech}" position="2">
-            <lookup target-form-name="LookupPreferredContactMech" target-parameter="partyIdTo"/>
+            <lookup target-form-name="LookupPreferredContactMech" description-field-name="partyIdTo" target-parameter="partyIdTo"/>
         </field>
 
         <field name="roleTypeIdFrom" position="1">
@@ -236,7 +236,7 @@ under the License.
         <field name="partyIdFrom" use-when="communicationEvent.get(&quot;partyIdFrom&quot;)!=null">
             <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${firstName} ${middleName} ${lastName} ${groupName} (${contactMechFrom.infoString})">
                 <sub-hyperlink description=" [${communicationEvent.partyIdFrom}]" target="/partymgr/control/viewprofile" target-type="inter-app">
-                    <parameter param-name="partyId" from-field="partyIdFrom"/>
+                    <parameter param-name="partyId" from-field="communicationEvent.partyIdFrom"/>
                 </sub-hyperlink>
             </display-entity>
         </field>
