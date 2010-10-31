@@ -438,7 +438,7 @@ function setLookDescription(textFieldId, description, params, formName) {
         if (start != -1) {
             description = description.substring(0, start);
             
-            // This sets a possible dependent field. It depends on the searchFields order which makes sense anyway
+            // This sets a (possibly hidden) dependent field if a description-field-name is provided  
             var dependentField = params.substring(params.indexOf("searchValueFieldName"));
             dependentField = jQuery("#" + formName + "_" + dependentField.substring(dependentField.indexOf("=") + 1));            
             var dependentFieldValue = description.substring(0, description.lastIndexOf(' '))
