@@ -57,14 +57,14 @@ public class SearchWorker {
             Map results = FastMap.newInstance();
             GenericValue content = delegator.makeValue("Content", UtilMisc.toMap("contentId", siteId));
                 if (Debug.infoOn()) Debug.logInfo("in indexTree, siteId:" + siteId + " content:" + content, module);
-            List siteList = ContentWorker.getAssociatedContent(content, "From", UtilMisc.toList("SUBSITE", "PUBLISH_LINK"), null, UtilDateTime.nowTimestamp().toString(), null);
+            List<GenericValue> siteList = ContentWorker.getAssociatedContent(content, "To", UtilMisc.toList("SUBSITE", "PUBLISH_LINK", "SUB_CONTENT"), null, UtilDateTime.nowTimestamp().toString(), null);
         //if (Debug.infoOn()) Debug.logInfo("in indexTree, siteList:" + siteList, module);
             if (siteList != null) {
                 Iterator iter = siteList.iterator();
                 while (iter.hasNext()) {
                     GenericValue siteContent = (GenericValue)iter.next();
                     String siteContentId = siteContent.getString("contentId");
-                    List subContentList = ContentWorker.getAssociatedContent(siteContent, "From", UtilMisc.toList("SUBSITE", "PUBLISH_LINK", "SUB_CONTENT"), null, UtilDateTime.nowTimestamp().toString(), null);
+                    List<GenericValue> subContentList = ContentWorker.getAssociatedContent(siteContent, "To", UtilMisc.toList("SUBSITE", "PUBLISH_LINK", "SUB_CONTENT"), null, UtilDateTime.nowTimestamp().toString(), null);
               //if (Debug.infoOn()) Debug.logInfo("in indexTree, subContentList:" + subContentList, module);
                     if (subContentList != null) {
                         List contentIdList = FastList.newInstance();

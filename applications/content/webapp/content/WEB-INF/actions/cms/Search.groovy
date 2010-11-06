@@ -26,6 +26,7 @@ import org.apache.lucene.index.IndexReader
 import org.apache.lucene.search.Query
 import org.apache.lucene.search.TermQuery
 import org.apache.lucene.search.BooleanQuery
+import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.index.Term
 import org.apache.lucene.search.Hits
 import org.apache.lucene.queryParser.QueryParser
@@ -63,6 +64,7 @@ try {
 } catch (java.io.FileNotFoundException e) {
     request.setAttribute("errorMsgReq", "No index file exists.");
     Debug.logError("in search, error:" + e.getMessage(), "");
+    return;
 }
 
 if (queryLine || siteId) {
@@ -70,13 +72,13 @@ if (queryLine || siteId) {
     if (queryLine) {
         queryParser = new QueryParser("content", analyzer);
         query = queryParser.parse(queryLine);
-        combQuery.add(query, true, false);
+        combQuery.add(query, BooleanClause.Occur.MUST);
     }
     Debug.logInfo("in search, combQuery(0):" + combQuery, "");
 
     if (siteId) {
         termQuery = new TermQuery(new Term("site", siteId));
-        combQuery.add(termQuery, true, false);
+        combQuery.add(termQuery, BooleanClause.Occur.MUST);
         Debug.logInfo("in search, termQuery:" + termQuery.toString(), "");
     }
     Debug.logInfo("in search, combQuery(1):" + combQuery, "");
@@ -84,28 +86,26 @@ if (queryLine || siteId) {
 
 if (searchFeature1 || searchFeature2 || searchFeature3 || !featureIdByType.isEmpty()) {
     featureQuery = new BooleanQuery();
-    anyOrAll = paramMap.any_or_all;
-    featuresRequired = true;
-
-    if (anyOrAll && "any".equals(anyOrAll)) {
-        featuresRequired = false;
+    featuresRequired = BooleanClause.Occur.MUST;
+    if ("any".equals(paramMap.any_or_all)) {
+        featuresRequired = BooleanClause.Occur.SHOULD;
     }
 
     if (searchFeature1) {
         termQuery = new TermQuery(new Term("feature", searchFeature1));
-        featureQuery.add(termQuery, featuresRequired, false);
+        featureQuery.add(termQuery, featuresRequired);
         Debug.logInfo("in search searchFeature1, termQuery:" + termQuery.toString(), "");
     }
 
     if (searchFeature2) {
         termQuery = new TermQuery(new Term("feature", searchFeature2));
-        featureQuery.add(termQuery, featuresRequired, false);
+        featureQuery.add(termQuery, featuresRequired);
         Debug.logInfo("in search searchFeature2, termQuery:" + termQuery.toString(), "");
     }
 
     if (searchFeature3) {
         termQuery = new TermQuery(new Term("feature", searchFeature3));
-        featureQuery.add(termQuery, featuresRequired, false);
+        featureQuery.add(termQuery, featuresRequired);
         Debug.logInfo("in search searchFeature3, termQuery:" + termQuery.toString(), "");
     }
 
@@ -113,28 +113,27 @@ if (searchFeature1 || searchFeature2 || searchFeature3 || !featureIdByType.isEmp
         values = featureIdByType.values();
         values.each { val ->
             termQuery = new TermQuery(new Term("feature", val));
-            featureQuery.add(termQuery, featuresRequired, false);
+            featureQuery.add(termQuery, featuresRequired);
             Debug.logInfo("in search searchFeature3, termQuery:" + termQuery.toString(), "");
         }
-        combQuery.add(featureQuery, featuresRequired, false);
+        combQuery.add(featureQuery, featuresRequired);
     }
+}
+if (searcher) {
+    Debug.logInfo("in search searchFeature3, combQuery:" + combQuery.toString(), "");
+    Hits hits = searcher.search(combQuery);
+    Debug.logInfo("in search, hits:" + hits.length(), "");
 
-    if (searcher) {
-        Debug.logInfo("in search searchFeature3, combQuery:" + combQuery.toString(), "");
-        Hits hits = searcher.search(combQuery);
-        Debug.logInfo("in search, hits:" + hits.length(), "");
-
-        contentList = [] as ArrayList;
-        hitSet = [:] as HashSet;
-        for (int start = 0; start < hits.length(); start++) {
-             doc = hits.doc(start);
-             contentId = doc.contentId;
-             content = delegator.findOne("Content", [contentId : contentId], true);
-             if (!hitSet.contains(contentId)) {
-                 contentList.add(content);
-                 hitSet.add(contentId);
-             }
-        }
-        context.queryResults = contentList;
-    }
+    contentList = [] as ArrayList;
+    hitSet = [:] as HashSet;
+    for (int start = 0; start < hits.length(); start++) {
+         doc = hits.doc(start);
+         contentId = doc.contentId;
+         content = delegator.findOne("Content", [contentId : contentId], true);
+         if (!hitSet.contains(contentId)) {
+             contentList.add(content);
+             hitSet.add(contentId);
+         }
+     }
+    context.queryResults = contentList;
 }
