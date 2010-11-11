@@ -37,7 +37,7 @@ def searchValueFieldName = parameters.term;
 def fieldValue = null;
 if (searchValueFieldName) {
     fieldValue = searchValueFieldName; 
-} else if (parameters.searchValueFieldName) {
+} else if (parameters.searchValueFieldName) { // This is to find the description of a lookup value on initialization.
     fieldValue = parameters.get(parameters.searchValueFieldName);
     context.description = "true";
 }
@@ -52,8 +52,8 @@ if (searchFields && fieldValue) {
         returnField = parameters.searchValueFieldName;
     } else {
         returnField = searchFieldsList[0]; //default to first element of searchFields
+        displayFieldsSet.add(returnField); //add it to select fields, in case it is missing
     }
-    displayFieldsSet.add(returnField); //add it to select fields, in case it is missing
     context.returnField = returnField;
     context.displayFieldsSet = displayFieldsSet;
     if ("STARTS_WITH".equals(searchType)) {
@@ -65,7 +65,7 @@ if (searchFields && fieldValue) {
     }
     searchFieldsList.each { fieldName ->
         if ("EQUALS".equals(searchType)) {
-            orExprs.add(EntityCondition.makeCondition(EntityFieldValue.makeFieldValue(returnField), EntityOperator.EQUALS, searchValue));    
+            orExprs.add(EntityCondition.makeCondition(EntityFieldValue.makeFieldValue(searchFieldsList[0]), EntityOperator.EQUALS, searchValue));    
             return;//in case of EQUALS, we search only a match for the returned field
         } else {
             orExprs.add(EntityCondition.makeCondition(EntityFunction.UPPER(EntityFieldValue.makeFieldValue(fieldName)), EntityOperator.LIKE, searchValue));
