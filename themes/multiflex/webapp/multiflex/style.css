@@ -1745,6 +1745,7 @@ background: white;
 border: #999999 solid 1px;
 margin: 2px 1px 2px 1px;
 padding: 1px 4px 1px 4px;
+line-height: 2em;
 }
 
 A.buttontext {
@@ -2738,6 +2739,63 @@ height:22px;
 .ui-datepicker-rtl .ui-datepicker-group-last .ui-datepicker-header { border-right-width:0; border-left-width:1px; }
 .ui-datepicker-rtl .ui-datepicker-group-middle .ui-datepicker-header { border-right-width:0; border-left-width:1px; }
 
+#wait-spinner {
+z-index:50000;
+position:absolute;
+}
+#wait-spinner-image {
+height:21px;
+width:56px;
+background-image:url(/images/spinner.gif);
+}
+
+/*=================== For the quickadd page =================================*/
+.quickaddall{
+float:right;
+padding-bottom:1em;
+padding-top:1em;
+}
+
+.quickaddtable{
+clear:both;
+}
+
+.quickaddtable span {
+display:inline;
+float:left;
+border-right:1px solid #BBBBBB;
+border-top:1px solid #BBBBBB;
+margin:0px;
+padding:3px;
+}
+
+.quickaddtable p {
+clear:left;
+margin:0px;
+padding:0px;
+height:100% !important; height:1em;
+}
+
+.quickaddtable span.pid {
+width:10%;
+}
+
+.quickaddtable span.name {
+width:50%;
+text-align:left;
+}
+
+.quickaddtable span.listPrice {
+width:10%
+}
+
+.quickaddtable span.totalPrice {
+width:10%
+}
+
+.quickaddtable span.qty {
+width:10%
+}
 /* IE6 IFRAME FIX (taken from datepicker 1.5.3 */
 .ui-datepicker-cover {
     display: none; /*sorry for IE5*/

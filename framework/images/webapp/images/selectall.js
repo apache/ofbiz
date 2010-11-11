@@ -456,7 +456,14 @@ function setLookDescription(textFieldId, description, params, formName) {
         tooltipElement.html(description);
         lookupWrapperEl.append(tooltipElement);
     }
-}
+    
+    // after the description is set; the text field may have been updated 
+    // just in case, call onchange again
+    // JLR to be checked, thanks to Andrew explanations
+/*    if ($(textFieldId).onchange != null) {
+    	$(textFieldId).onchange();
+    }
+*/}
 
 /** Enable auto-completion for drop-down elements.*/
 
