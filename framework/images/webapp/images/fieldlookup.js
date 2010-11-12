@@ -633,9 +633,6 @@ function set_value (value) {
     write_value(value, target);
     field = jQuery("#" + target.attr('id'));
     field.trigger("lookup:changed");
-    if (field.change != null) {
-        field.click().change()
-    }
     
     closeLookup();
 }
