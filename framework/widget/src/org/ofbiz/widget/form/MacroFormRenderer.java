@@ -262,7 +262,7 @@ public class MacroFormRenderer implements FormStringRenderer {
             inPlaceEditorParams.append(", submitdata: " + extraParameter);
             inPlaceEditorParams.append(", type: 'textarea'");
             inPlaceEditorParams.append(", select: 'true'");
-            inPlaceEditorParams.append(", onreset: function(){jQuery('#' + element).css('background-color', 'transparent');}");
+            inPlaceEditorParams.append(", onreset: function(){jQuery('#cc_" + idName + "').css('background-color', 'transparent');}");
 
             if (UtilValidate.isNotEmpty(inPlaceEditor.getCancelText())) {
                 inPlaceEditorParams.append(", cancel: '" +inPlaceEditor.getCancelText()+ "'");
