@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/************************************** This file has been modified by Open Source Strategies, Inc. **************************************/
 package org.ofbiz.base.util;
 
 import java.math.BigDecimal;
@@ -504,21 +503,6 @@ public class UtilFormatOut {
         return retString;
     }
 
-    /** Decodes an XML string putting back the characters '<', '>', '"', ''', '&'
-     * @param inString The encoded String
-     * @return The plain value String
-     */
-    public static String decodeXmlValue(String inString) {
-        String retString = inString;
-
-        retString = StringUtil.replaceString(retString, "&amp;", "&");
-        retString = StringUtil.replaceString(retString, "&lt;", "<");
-        retString = StringUtil.replaceString(retString, "&gt;", ">");
-        retString = StringUtil.replaceString(retString, "&quot;", "\\\"");
-        retString = StringUtil.replaceString(retString, "&apos;", "'");
-        return retString;
-    }
-
     public static String padString(String str, int setLen, boolean padEnd, char padChar) {
         if (str == null) {
             return null;
@@ -559,23 +543,4 @@ public class UtilFormatOut {
         buffer.append(original.substring(original.length()-4));
         return buffer.toString();
     }
-/************************************** This file has been modified by Open Source Strategies, Inc. **************************************/
-    
-    /** Formats a double into a properly formatted currency string based on isoCode and Locale
-     * @param price The price double to be formatted
-     * @param isoCode the currency ISO code
-     * @param locale The Locale used to format the number
-     * @return A String with the formatted price
-     */
-    public static String formatCurrency(double price, String isoCode, Locale locale) {
-        return formatCurrency(price, isoCode, locale, -1);
-    }
-
-    /** Formats a double into a properly formatted currency string based on isoCode and Locale
-     * @param price The price double to be formatted
-     * @param isoCode the currency ISO code
-     * @param locale The Locale used to format the number
-     * @param maximumFractionDigits The maximum number of fraction digits used; if set to -1 than the default value for the locale is used
-     * @return A String with the formatted price
-     */
 }
