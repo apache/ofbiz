@@ -353,9 +353,7 @@
                 <div id="editorcontainer" class="nocolumns">
                     <div id="cmseditor" style="margin: 0; width: 100%; border: 1px solid black;">
                     <#if (dataText?has_content)>
-                        ${dataText.textData!}
-                        <#--${dataText.textData!?replace("&lt;", "<", "rm")?replace("&gt;", ">", "rm")?replace("&amp;", "&", "rm")?replace("&quot;", '"', "rm")?replace("&apos;", "'")}
-                        ${dataText.textData!?replace("\\&lt;", "<", "rm")?replace("\\&gt;", ">", "rm")?replace("\\&amp;", "&", "rm")?replace("\\&quot;", '"', "rm")?replace("\\&apos;", "'")}-->
+                      ${StringUtil.wrapString(dataText.textData!)} 
                     </#if>
                     </div>
                 </div>
