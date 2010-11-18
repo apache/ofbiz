@@ -366,12 +366,6 @@ var rawdata_errors = [
         }
         jQuery('#cmseditor').elrte(opts);
     }
-
-<#-------------------------------------------------------------------------------------destroyEditor function-->
-    function destroyEditor() {
-        // TODO
-    }
-
 <#-------------------------------------------------------------------------------------callMetaInfo function-->
 function callMetaInfo(contentId) {
         var ctx = {"contentId" : contentId, "webSiteId" : webSiteId};
