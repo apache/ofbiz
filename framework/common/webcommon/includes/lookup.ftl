@@ -75,11 +75,6 @@ under the License.
         if (obj_caller == null)
             obj_caller = window.opener;
 
-        var bkColor = "yellow";
-        function setSourceColor(src){
-        if(src != null)
-             src.style.backgroundColor = bkColor;
-        }
         // function passing selected value to calling window
         function set_multivalues(value) {
             obj_caller.target.value = value;

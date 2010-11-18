@@ -71,18 +71,19 @@ function call_fieldlookupLayer3(target, target2, viewName, lookupWidth, lookupHe
     this.target2 = target2;
 }
 
-function call_fieldlookup2(target, viewName) {
-    var fieldLookup = new fieldLookup1(target, arguments);
+function call_fieldlookup2(target, viewName, presentation) {
+    var fieldLookup = new fieldLookup1(target, arguments, presentation);
     fieldLookup.popup2(viewName);
 }
 
-function call_fieldlookup3(target, target2, viewName) {
-    var fieldLookup = new fieldLookup2(target, target2, arguments);
+function call_fieldlookup3(target, target2, viewName, presentation) {
+    var fieldLookup = new fieldLookup2(target, target2, arguments, presentation);
     fieldLookup.popup2(viewName);
 }
 
-function fieldLookup1(obj_target, args) {
+function fieldLookup1(obj_target, args, presentation) {
     this.args = args;
+    this.presentation = presentation;
     // passing methods
     this.popup = lookup_popup1;
     this.popup2 = lookup_popup2;
@@ -93,8 +94,9 @@ function fieldLookup1(obj_target, args) {
     targetW = obj_target;
 }
 
-function fieldLookup2(obj_target, obj_target2, args) {
+function fieldLookup2(obj_target, obj_target2, args, presentation) {
     this.args = args;
+    this.presentation = presentation;
     // passing methods
     this.popup = lookup_popup1;
     this.popup2 = lookup_popup2;
@@ -110,7 +112,7 @@ function fieldLookup2(obj_target, obj_target2, args) {
 }
 
 function lookup_popup1(view_name, form_name, viewWidth, viewheight) {
-    var obj_lookupwindow = window.open(view_name + '?formName=' + form_name + '&id=' + this.id, '_blank', 'width=' + viewWidth + ',height=' + viewheight + ',scrollbars=yes,status=no,resizable=yes,top=' + my + ',left=' + mx + ',dependent=yes,alwaysRaised=yes');
+    var obj_lookupwindow = window.open(view_name + '?formName=' + form_name + '&presentation=' + this.presentation + '&id=' + this.id, '_blank', 'width=' + viewWidth + ',height=' + viewheight + ',scrollbars=yes,status=no,resizable=yes,top=' + my + ',left=' + mx + ',dependent=yes,alwaysRaised=yes');
     obj_lookupwindow.opener = window;
     obj_lookupwindow.focus();
 }
@@ -127,7 +129,7 @@ function lookup_popup2(view_name) {
     if (view_name.indexOf("?") >= 0) {
         sep = "&";
     }
-    var obj_lookupwindow = window.open(view_name + sep + 'id=' + this.id + argString, '_blank', 'width=700,height=550,scrollbars=yes,status=no,resizable=yes,top=' + my + ',left=' + mx + ',dependent=yes,alwaysRaised=yes');
+    var obj_lookupwindow = window.open(view_name + sep + 'presentation=' + this.presentation + '&id=' + this.id + argString, '_blank', 'width=700,height=550,scrollbars=yes,status=no,resizable=yes,top=' + my + ',left=' + mx + ',dependent=yes,alwaysRaised=yes');
     obj_lookupwindow.opener = window;
     obj_lookupwindow.focus();
 }
@@ -172,7 +174,11 @@ function initiallyCollapseDelayed() {
 /*************************************
 * Fieldlookup Class & Methods
 *************************************/
-function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalTarget, formName, width, height, position, modal, ajaxUrl, showDescription) {
+function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalTarget, formName, width, height, position, modal, ajaxUrl, showDescription, presentation) {
+    
+    // add the presentation attribute to the request url to let the request know which decorator should be loaded
+    requestUrl = requestUrl + "?presentation=" + presentation;
+    
     // create Link Element with unique Key
     var lookupId = GLOBAL_LOOKUP_REF.createNextKey();
     var inputBox = document.getElementById(inputFieldId);
@@ -242,13 +248,17 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
                 }
                 identifyLookup(lookupId);
                 
-                GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).prevLookup = prevLookup;
+                if (prevLookup) {
+                    GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).prevLookup = prevLookup;
+                }
             });
         },
         close: function() {
             //when the window is closed the prev Lookup get the focus (if exists)
-            var prevLookup = GLOBAL_LOOKUP_REF.getReference(lookupId).prevLookup;
-            if (prevLookup != null) {
+            if (ACTIVATED_LOOKUP) {
+                var prevLookup = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).prevLookup;
+            }
+            if (prevLookup) {
                 identifyLookup(prevLookup);
             }
         }
@@ -264,6 +274,7 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
     this.lookupId = lookupId;
     this.formName = formName;
     this.target = null;
+    this.presentation = presentation;
     if (dialogOptionalTarget != null) {
         this.target2 = null;
     }
@@ -449,15 +460,24 @@ function modifySubmitButton (lookupDiv) {
                   var oc = jQuery(navPagersSelect[navPager]).attr("onchange");
                   if((typeof oc) == "function"){ // IE6/7 Fix
                     oc = oc.toString();
-                    var ocSub = oc.substring((oc.indexOf('=') + 2),(oc.length - 4));
-                    var searchPattern = /'\+this.value\+'/g;
-                    var searchPattern2 = /'\+this.valu/g;
+                    var ocSub = oc.substring((oc.indexOf('=') + 3),(oc.length - 4));
+                    // define search pattern we must seperate between IE and Other Browser
+                    var searchPattern = /" \+ this.value \+ "/g;
+                    var searchPattern_IE = /'\+this.value\+'/g;
+                    var searchPattern2 = /" \+ this.valu/g;
+                    var searchPattern2_IE = /'\+this.valu/g;
 
                     if (searchPattern.test(ocSub)) {
                         var viewSize = navPagersSelect[navPager].value;
                         var spl = ocSub.split(searchPattern);
                         navPagersSelect[navPager].onchange = function () {
                             lookupPaginationAjaxRequest(spl[0] + this.value + spl[1], lookupForm.id, 'select');
+                        };
+                    } else if (searchPattern_IE.test(ocSub)) {
+                        var viewSize = navPagersSelect[navPager].value;
+                        var spl = ocSub.split(searchPattern_IE);
+                        navPagersSelect[navPager].onchange = function () {
+                            lookupPaginationAjaxRequest("/" + spl[0] + this.value + spl[1], lookupForm.id, 'select');
                         };
                     } else if (searchPattern2.test(ocSub)) {
                         ocSub = ocSub.replace(searchPattern2, "");
@@ -466,6 +486,14 @@ function modifySubmitButton (lookupDiv) {
                         }
                         navPagersSelect[navPager].onchange = function () {
                             lookupPaginationAjaxRequest(ocSub + this.value, lookupForm.id, 'select');
+                        };
+                    } else if (searchPattern2_IE.test(ocSub)) {
+                        ocSub = ocSub.replace(searchPattern2_IE, "");
+                        if (searchPattern_IE.test(ocSub)) {
+                            ocSub.replace(searchPattern_IE, viewSize);
+                        }
+                        navPagersSelect[navPager].onchange = function () {
+                            lookupPaginationAjaxRequest("/" + ocSub + this.value, lookupForm.id, 'select');
                         };
                     }
                 } else {
@@ -539,7 +567,7 @@ function modifySubmitButton (lookupDiv) {
  */
 function lookupAjaxRequest(request) {
     // get request arguments
-    var arg = request.substring(request.indexOf('?')+1,(request.length));    
+    var arg = request.substring(request.indexOf('?')+1,(request.length));
     lookupId = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).lookupId;
     jQuery("#" + lookupId).load(request, arg, function(data) { 
         if (data.search(/loginform/) != -1) {
@@ -557,8 +585,10 @@ function lookupAjaxRequest(request) {
 * @return
 */
 function lookupFormAjaxRequest(formAction, form) {
-	lookupId = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).lookupId;
-    jQuery("#" + lookupId).load(formAction, jQuery("#" + form).serialize(), function(data) { 
+	  lookupId = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).lookupId;
+    var data = jQuery("#" + form).serialize();
+    data = data + "&presentation=" + GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).presentation;
+    jQuery("#" + lookupId).load(formAction, data, function(data) { 
         if (data.search(/loginform/) != -1) {
             window.location.href = window.location.href;
             return;
@@ -574,7 +604,6 @@ function lookupPaginationAjaxRequest(navAction, form, type) {
     if (type == 'link') {
         navAction = navAction.substring(0, navAction.length - 1);
     }
-    navAction = navAction + "&presentation=layer";
     
     lookupId = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).lookupId;
     jQuery("#" + lookupId).load(navAction, function(data) { 
@@ -626,10 +655,10 @@ function set_value (value) {
         obj_caller.target = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).target;
     }
     else{
-        obj_caller.target = obj_caller.targetW;
+        obj_caller.target = jQuery(obj_caller.targetW);
     }    
     var target = obj_caller.target;
-    
+
     write_value(value, target);
     field = jQuery("#" + target.attr('id'));
     field.trigger("lookup:changed");
