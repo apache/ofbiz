@@ -33,23 +33,22 @@ under the License.
     </#if>
 <#else>
 <script type="text/javascript">
-var autocomp = [
     <#if autocompleteOptions?exists>
+  var autocomp = [
         <#assign displayReturnField = Static["org.ofbiz.base.util.UtilProperties"].getPropertyValue("widget.properties", "widget.autocompleter.displayReturnField")>
         <#list autocompleteOptions as autocompleteOption>
             {
             <#assign displayString = ""/>
             <#assign returnField = ""/>
-            <#-- <#list autocompleteOption.keySet() as key> instead use the field order of display fields -->
-                <#list displayFieldsSet as key>
-                <#assign field = autocompleteOption.get(key)?if_exists>
-                <#if field?has_content>
-                    <#if (key == context.returnField)>
-                        <#assign returnField = field/>
-                    <#else>
-                        <#assign displayString = displayString + field + " ">
-                    </#if>
-                </#if>
+            <#list displayFieldsSet as key>
+              <#assign field = autocompleteOption.get(key)?if_exists>
+              <#if field?has_content>
+                  <#if (key == context.returnField)>
+                      <#assign returnField = field/>
+                  <#else>
+                      <#assign displayString = displayString + field + " ">
+                  </#if>
+              </#if>
             </#list>
             <#if ("Y" == displayReturnField)>
                 <#assign displayString = displayString +  "[" + returnField + "]">
@@ -59,7 +58,7 @@ var autocomp = [
             "value": "${returnField}"
             }<#if autocompleteOption_has_next>,</#if>
         </#list>
+  ];
     </#if>
-];
 </script>
 </#if>
