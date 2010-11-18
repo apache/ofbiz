@@ -177,6 +177,9 @@ function initiallyCollapseDelayed() {
 function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalTarget, formName, width, height, position, modal, ajaxUrl, showDescription, presentation) {
     
     // add the presentation attribute to the request url to let the request know which decorator should be loaded
+    if(!presentation) {
+      var presentation = "layer"
+    }    
     requestUrl = requestUrl + "?presentation=" + presentation;
     
     // create Link Element with unique Key
