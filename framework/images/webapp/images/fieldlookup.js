@@ -630,10 +630,9 @@ if (obj_caller == null && window.opener != null) {
     obj_caller = parent;
 }
 
-var bkColor = "yellow";
 function setSourceColor(src) {
-    if (src != null) {
-    	src.css({"background-color": bkColor});
+    if (target && target != null) {
+        src.css("background-color", "yellow");
     }
 }
 // function passing selected value to calling window, using only in the TimeDuration case
@@ -642,14 +641,11 @@ function set_duration_value (value) {
         obj_caller.target = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).target;
     }
     else{
-        obj_caller.target = obj_caller.targetW;
+        obj_caller.target = jQuery(obj_caller.targetW);
     }    
     var target = obj_caller.target;
-    if (!target) return;
-    
-    setSourceColor(target);
-    target.value = value;    
-    
+
+    write_value(value, target);
     closeLookup();
 }
 // function passing selected value to calling window
@@ -675,7 +671,7 @@ function set_values (value, value2) {
         obj_caller.target2 = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).target2;
     }
     else{
-        obj_caller.target = obj_caller.targetW;        
+        obj_caller.target = jQuery(obj_caller.targetW);        
     }
     var target = obj_caller.target;
     var target2 = obj_caller.target2;
@@ -687,11 +683,10 @@ function set_values (value, value2) {
 }
 
 function write_value (value, target) {
-    if (! target) return;
-    if (target == null) return;
-    
-    setSourceColor(target);
-    target.val(value);
+    if (target && target != null) {
+        setSourceColor(target);
+        target.val(value);
+    }
 }
 
 function set_multivalues(value) {
