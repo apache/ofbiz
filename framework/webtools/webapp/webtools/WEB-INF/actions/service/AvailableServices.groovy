@@ -458,6 +458,7 @@ if (selectedService) {
                 curOvrPrm.internal = curParam.internal ? uiLabelMap.CommonTrue : uiLabelMap.CommonFalse;
                 curOvrPrm.mode = curParam.mode;
                 curOvrPrm.name = curParam.name;
+                curOvrPrm.description = curParam.description;
                 curOvrPrm.optional = curParam.optional ? uiLabelMap.CommonTrue : uiLabelMap.CommonFalse;
                 curOvrPrm.type = curParam.type;
                 ovrPrmList.add(curOvrPrm);
