@@ -283,9 +283,7 @@ public class ContextFilter implements Filter {
             try {
                 // if tenant was specified, replace delegator with the new per-tenant delegator and set tenantId to session attribute
                 Delegator delegator = getDelegator(config.getServletContext());
-                List<EntityCondition> conds = FastList.newInstance();
-                conds.add(EntityCondition.makeCondition("domainName", serverName));
-                List<GenericValue> tenants = delegator.findList("Tenant", EntityCondition.makeCondition(conds), null, UtilMisc.toList("-createdStamp"), null, false);
+                List<GenericValue> tenants = delegator.findList("Tenant", EntityCondition.makeCondition("domainName", serverName), null, UtilMisc.toList("-createdStamp"), null, false);
                 if (UtilValidate.isNotEmpty(tenants)) {
                     GenericValue tenant = EntityUtil.getFirst(tenants);
                     String tenantId = tenant.getString("tenantId");
@@ -293,13 +291,14 @@ public class ContextFilter implements Filter {
                     // if the request path is a root mount then redirect to the initial path
                     if (UtilValidate.isNotEmpty(requestPath) && requestPath.equals(contextUri)) {
                         String initialPath = tenant.getString("initialPath");
-                        ((HttpServletResponse)response).sendRedirect(initialPath);
-                        return;
+                        if (UtilValidate.isNotEmpty(initialPath) && !"/".equals(initialPath)) {
+                            ((HttpServletResponse)response).sendRedirect(initialPath);
+                            return;
+                        }
                     }
                     
                     // make that tenant active, setup a new delegator and a new dispatcher
                     String tenantDelegatorName = delegator.getDelegatorBaseName() + "#" + tenantId;
-                    httpRequest.getSession().setAttribute("delegatorName", tenantDelegatorName);
                 
                     // after this line the delegator is replaced with the new per-tenant delegator
                     delegator = DelegatorFactory.getDelegator(tenantDelegatorName);
@@ -323,6 +322,9 @@ public class ContextFilter implements Filter {
                     
                     request.setAttribute("tenantId", tenantId);
                 }
+                
+                // always put delegator's name to the session
+                httpRequest.getSession().setAttribute("delegatorName", delegator.getDelegatorName());
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, "Unable to get Tenant", module);
             }

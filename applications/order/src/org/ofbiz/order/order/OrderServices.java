@@ -295,6 +295,8 @@ public class OrderServices {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,"OrderErrorTheProductStoreIdCanOnlyBeNullForPurchaseOrders",locale));
         }
 
+        Timestamp orderDate = (Timestamp) context.get("orderDate");
+        
         Iterator normalizedIter = normalizedItemQuantities.keySet().iterator();
         while (normalizedIter.hasNext()) {
             // lookup the product entity for each normalized item; error on products not found
@@ -331,8 +333,15 @@ public class OrderServices {
             }
 
             if ("SALES_ORDER".equals(orderTypeId)) {
+                boolean salesDiscontinuationFlag = false;
+                // When past orders are imported, they should be imported even if sales discontinuation date is in the past but if the order date was before it
+                if (orderDate != null && product.get("salesDiscontinuationDate") != null) {
+                    salesDiscontinuationFlag = orderDate.after(product.getTimestamp("salesDiscontinuationDate")) && nowTimestamp.after(product.getTimestamp("salesDiscontinuationDate"));
+                } else if (product.get("salesDiscontinuationDate") != null) {
+                    salesDiscontinuationFlag = nowTimestamp.after(product.getTimestamp("salesDiscontinuationDate"));    
+                }
                 // check to see if salesDiscontinuationDate has passed
-                if (product.get("salesDiscontinuationDate") != null && nowTimestamp.after(product.getTimestamp("salesDiscontinuationDate"))) {
+                if (salesDiscontinuationFlag) {
                     String excMsg = UtilProperties.getMessage(resource_error, "product.no_longer_for_sale",
                             new Object[] { getProductName(product, itemName), product.getString("productId") }, locale);
                     Debug.logWarning(excMsg, module);
@@ -457,7 +466,6 @@ public class OrderServices {
         }
 
         String billingAccountId = (String) context.get("billingAccountId");
-        Timestamp orderDate = (Timestamp) context.get("orderDate");
         if (orderDate == null) {
             orderDate = nowTimestamp;
         }
