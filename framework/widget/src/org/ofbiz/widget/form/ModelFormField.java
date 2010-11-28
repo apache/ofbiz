@@ -2099,7 +2099,7 @@ public class ModelFormField {
             String retVal = null;
             if (this.description != null && !this.description.isEmpty()) {
                 retVal = this.description.expandString(context);
-                if (retVal != null) {
+                if (retVal != null && this.getModelFormField().getEncodeOutput()) {
                     StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
                     if (simpleEncoder != null) {
                         retVal = simpleEncoder.encode(retVal);
