@@ -215,6 +215,7 @@ public class RequestHandler {
                     if (newUrl.toUpperCase().startsWith("HTTPS")) {
                         // if we are supposed to be secure, redirect secure.
                         callRedirect(newUrl, response, request);
+                        return;
                     }
                 }
             }
