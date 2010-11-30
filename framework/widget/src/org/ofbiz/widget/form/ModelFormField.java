@@ -1115,7 +1115,7 @@ public class ModelFormField {
         ModelForm modelForm = this.getModelForm();
         if (modelForm != null) {
             Integer itemIndex = (Integer) context.get("itemIndex");
-            if (modelForm != null && ("list".equals(modelForm.getType()) || "multi".equals(modelForm.getType() ))) {
+            if ("list".equals(modelForm.getType()) || "multi".equals(modelForm.getType() )) {
                 if (itemIndex != null) {
                     return this.getIdName() + modelForm.getItemIndexSeparator() + itemIndex.intValue();
                 }
@@ -2121,7 +2121,7 @@ public class ModelFormField {
             String retVal = null;
             if (this.description != null && !this.description.isEmpty()) {
                 retVal = this.description.expandString(context);
-                if (retVal != null) {
+                if (retVal != null && this.getModelFormField().getEncodeOutput()) {
                     StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
                     if (simpleEncoder != null) {
                         retVal = simpleEncoder.encode(retVal);
@@ -2304,9 +2304,6 @@ public class ModelFormField {
         }
         public void setSubHyperlink(SubHyperlink newSubHyperlink) {
             this.subHyperlink = newSubHyperlink;
-        }
-        public String getSize(){
-            return this.size;
         }
     }
 
@@ -3901,6 +3898,7 @@ public class ModelFormField {
     }
 
     public static class ContainerField extends FieldInfo {
+        @Deprecated
         protected String id;
 
         public ContainerField() {
@@ -3909,25 +3907,23 @@ public class ModelFormField {
 
         public ContainerField(Element element, ModelFormField modelFormField) {
             super(element, modelFormField);
-            this.setId(modelFormField.getIdName());
         }
 
-        public ContainerField(int fieldSource, int fieldType,
-                ModelFormField modelFormField) {
+        public ContainerField(int fieldSource, int fieldType, ModelFormField modelFormField) {
             super(fieldSource, fieldType, modelFormField);
         }
 
         @Override
-        public void renderFieldString(Appendable writer,
-                Map<String, Object> context,
-                FormStringRenderer formStringRenderer) throws IOException {
+        public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderContainerFindField(writer, context, this);
         }
 
+        @Deprecated
         public String getId() {
             return id;
         }
 
+        @Deprecated
         public void setId(String id) {
             this.id = id;
         }
