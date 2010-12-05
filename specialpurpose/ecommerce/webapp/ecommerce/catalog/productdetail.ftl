@@ -695,6 +695,7 @@ ${virtualJavaScript?if_exists}
   </#if>
 <#-- Upgrades/Up-Sell/Cross-Sell -->
   <#macro associated assocProducts beforeName showName afterName formNamePrefix targetRequestName>
+  <#assign pageProduct = product />
   <#assign targetRequest = "product" />
   <#if targetRequestName?has_content>
     <#assign targetRequest = targetRequestName />
@@ -724,6 +725,7 @@ ${virtualJavaScript?if_exists}
         ${setRequestAttribute("targetRequestName", targetRequestName)}
       </#if>
           ${screens.render(productsummaryScreen)}
+      <#assign product = pageProduct />
       <#local listIndex = listIndex + 1 />
     </#list>
     </div>
