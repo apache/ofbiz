@@ -563,15 +563,17 @@ function ajaxAutoCompleteDropDown() {
 function toggleCollapsiblePanel(link, areaId, expandTxt, collapseTxt){
    var container = jQuery("#" + areaId);
    var liElement = jQuery(link).parents('li:first');
-   if(container.is(':visible')){
-       liElement.removeClass('expanded');
-       liElement.addClass('collapsed');
-       link.title = expandTxt;
-   } else {
-       liElement.removeClass('collapsed');
-       liElement.addClass('expanded');
-       link.title = collapseTxt;
-   }
+    if (liElement) {
+      if (container.is(':visible')) {
+        liElement.removeClass('expanded');
+        liElement.addClass('collapsed');
+        link.title = expandTxt;
+      } else {
+        liElement.removeClass('collapsed');
+        liElement.addClass('expanded');
+        link.title = collapseTxt;
+      }
+    }
    container.animate({opacity: 'toggle', height: 'toggle'}, "slow");
 }
 
