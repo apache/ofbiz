@@ -639,7 +639,7 @@ public class CheckOutEvents {
                 GenericValue payPalProdStorePaySetting = EntityUtil.getFirst(payPalProdStorePaySettings);
                 if (payPalProdStorePaySetting != null) {
                     GenericValue gatewayConfig = payPalProdStorePaySetting.getRelatedOne("PaymentGatewayConfig");
-                    if (gatewayConfig != null && "PAYFLOWPRO".equals(gatewayConfig.getString("paymentGatewayConfigTypeId"))) {
+                    if (gatewayConfig != null && ("PAYFLOWPRO".equals(gatewayConfig.getString("paymentGatewayConfigTypeId")) || "PAYPAL".equals(gatewayConfig.getString("paymentGatewayConfigTypeId")))) {
                         return "paypal";
                     }
                 }
