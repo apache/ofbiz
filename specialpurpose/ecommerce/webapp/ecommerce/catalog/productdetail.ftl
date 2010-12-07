@@ -94,14 +94,19 @@ ${virtualJavaScript?if_exists}
        }
     }
 
-    function popupDetail() {
-        var defaultDetailImage = "${firstDetailImage?default(mainDetailImageUrl?default("_NONE_"))}";
-        if (defaultDetailImage == null || defaultDetailImage == "null" || defaultDetailImage == "") {
-            defaultDetailImage = "_NONE_";
+    function popupDetail(specificDetailImageUrl) {
+        if( specificDetailImageUrl ) {
+            detailImageUrl = specificDetailImageUrl;
         }
+        else {
+            var defaultDetailImage = "${firstDetailImage?default(mainDetailImageUrl?default("_NONE_"))}";
+            if (defaultDetailImage == null || defaultDetailImage == "null" || defaultDetailImage == "") {
+               defaultDetailImage = "_NONE_";
+            }
 
-        if (detailImageUrl == null || detailImageUrl == "null") {
-            detailImageUrl = defaultDetailImage;
+            if (detailImageUrl == null || detailImageUrl == "null") {
+                detailImageUrl = defaultDetailImage;
+            }
         }
 
         if (detailImageUrl == "_NONE_") {
@@ -111,7 +116,7 @@ ${virtualJavaScript?if_exists}
             return;
         }
         detailImageUrl = detailImageUrl.replace(/\&\#47;/g, "/");
-        popUp("<@ofbizUrl>detailImage?detail=" + detailImageUrl + "</@ofbizUrl>", 'detailImage', '400', '550');
+        popUp("<@ofbizUrl>detailImage?detail=" + detailImageUrl + "</@ofbizUrl>", 'detailImage', '600', '600');
     }
 
     function toggleAmt(toggle) {
@@ -170,6 +175,9 @@ ${virtualJavaScript?if_exists}
 
             // using the selected index locate the sku
             var sku = document.forms["addform"].elements[name].options[indexSelected].value;
+            
+            // display alternative packaging dropdown
+            ajaxUpdateArea("product_uom", "<@ofbizUrl>ProductUomDropDownOnly</@ofbizUrl>", "productId=" + sku);
 
             // set the product ID
             setAddProductId(sku);
@@ -259,6 +267,18 @@ ${virtualJavaScript?if_exists}
             block2.style.display = "none";
         }
     </#if>
+    
+    function displayProductVirtualVariantId(variantId) {
+        document.addform.product_id.value = variantId;
+        var elem = document.getElementById('product_id_display');
+        var txt = document.createTextNode(variantId);
+        if(elem.hasChildNodes()) {
+            elem.replaceChild(txt, elem.firstChild);
+        } else {
+            elem.appendChild(txt);
+        }
+        setVariantPrice(variantId);
+    }
 //]]>
  </script>
 
@@ -307,7 +327,7 @@ ${virtualJavaScript?if_exists}
         <#assign productLargeImageUrl = firstLargeImage />
       </#if>
       <#if productLargeImageUrl?string?has_content>
-        <a href="javascript:popupDetail();"><img id="detailImage" src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" name="mainImage" vspace="5" hspace="5" width="200" alt="" /></a>
+        <a href="javascript:popupDetail('${firstDetailImage?default(mainDetailImageUrl?default("_NONE_"))}');"><img id="detailImage" src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" name="mainImage" vspace="5" hspace="5"  alt="" /></a>
         <input type="hidden" id="originalImage" name="originalImage" value="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" />
       </#if>
       <#if !productLargeImageUrl?string?has_content>
@@ -316,25 +336,70 @@ ${virtualJavaScript?if_exists}
     </div>
     <div id="additionalImageBox">
       <#if productAdditionalImage1?string?has_content>
+        <#assign productAdditionalImage1Small = productContentWrapper.get("XTRA_IMG_1_SMALL")?if_exists />
+        <#assign productAdditionalImage1Large = productContentWrapper.get("XTRA_IMG_1_LARGE")?if_exists />
+        <#assign productAdditionalImage1Detail = productContentWrapper.get("XTRA_IMG_1_DETAIL")?if_exists />
         <div class="additionalImage">
+          <#if productAdditionalImage1Small?string?has_content && productAdditionalImage1Large?string?has_content>
+            <#if productAdditionalImage1Detail?string?has_content>
+              <a href="javascript:popupDetail('${productAdditionalImage1Detail}');" swapDetail="<@ofbizContentUrl>${productAdditionalImage1Large?string}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage1Small?string}</@ofbizContentUrl>" vspace="5" hspace="5" alt="" /></a>
+            <#else>
+            <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage1Large?string}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage1Small?string}</@ofbizContentUrl>" vspace="5" hspace="5" alt="" /></a>
+            </#if>
+          <#else>
           <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage1}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage1}</@ofbizContentUrl>" vspace="5" hspace="5" width="200" alt="" /></a>
+          </#if>
         </div>
       </#if>
       <#if productAdditionalImage2?string?has_content>
+        <#assign productAdditionalImage2Small = productContentWrapper.get("XTRA_IMG_2_SMALL")?if_exists />
+        <#assign productAdditionalImage2Large = productContentWrapper.get("XTRA_IMG_2_LARGE")?if_exists />
+        <#assign productAdditionalImage2Detail = productContentWrapper.get("XTRA_IMG_2_DETAIL")?if_exists />
         <div class="additionalImage">
+          <#if productAdditionalImage2Small?string?has_content && productAdditionalImage2Large?string?has_content>
+            <#if productAdditionalImage2Detail?string?has_content>
+              <a href="javascript:popupDetail('${productAdditionalImage2Detail}');" swapDetail="<@ofbizContentUrl>${productAdditionalImage2Large?string}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage2Small?string}</@ofbizContentUrl>" vspace="5" hspace="5" alt="" /></a>
+            <#else>
+            <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage2Large?string}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage2Small?string}</@ofbizContentUrl>" vspace="5" hspace="5" alt="" /></a>
+            </#if>
+          <#else>
           <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage2}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage2}</@ofbizContentUrl>" vspace="5" hspace="5" width="200" alt="" /></a>
+          </#if>
          </div>
       </#if>
       <#if productAdditionalImage3?string?has_content>
+        <#assign productAdditionalImage3Small = productContentWrapper.get("XTRA_IMG_3_SMALL")?if_exists />
+        <#assign productAdditionalImage3Large = productContentWrapper.get("XTRA_IMG_3_LARGE")?if_exists />
+        <#assign productAdditionalImage3Detail = productContentWrapper.get("XTRA_IMG_3_DETAIL")?if_exists />
         <div class="additionalImage">
+          <#if productAdditionalImage3Small?string?has_content && productAdditionalImage3Large?string?has_content>
+            <#if productAdditionalImage3Detail?string?has_content>
+              <a href="javascript:popupDetail('${productAdditionalImage3Detail}');" swapDetail="<@ofbizContentUrl>${productAdditionalImage3Large?string}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage3Small?string}</@ofbizContentUrl>" vspace="5" hspace="5" alt="" /></a>
+            <#else>
+            <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage3Large?string}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage3Small?string}</@ofbizContentUrl>" vspace="5" hspace="5" alt="" /></a>
+            </#if>
+          <#else>
           <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage3}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage3}</@ofbizContentUrl>" vspace="5" hspace="5" width="200" alt="" /></a>
+          </#if>
         </div>
       </#if>
       <#if productAdditionalImage4?string?has_content>
+        <#assign productAdditionalImage4Small = productContentWrapper.get("XTRA_IMG_4_SMALL")?if_exists />
+        <#assign productAdditionalImage4Large = productContentWrapper.get("XTRA_IMG_4_LARGE")?if_exists />
+        <#assign productAdditionalImage4Detail = productContentWrapper.get("XTRA_IMG_4_DETAIL")?if_exists />
         <div class="additionalImage">
+          <#if productAdditionalImage4Small?string?has_content && productAdditionalImage4Large?string?has_content>
+            <#if productAdditionalImage4Detail?string?has_content>
+              <a href="javascript:popupDetail('${productAdditionalImage4Detail}');" swapDetail="<@ofbizContentUrl>${productAdditionalImage4Large?string}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage4Small?string}</@ofbizContentUrl>" vspace="5" hspace="5" alt="" /></a>
+            <#else>
+            <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage4Large?string}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage4Small?string}</@ofbizContentUrl>" vspace="5" hspace="5" alt="" /></a>
+            </#if>
+          <#else>
           <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage4}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage4}</@ofbizContentUrl>" vspace="5" hspace="5" width="200" alt="" /></a>
+          </#if>
         </div>
       </#if>
+    </div>
     </div>
     <div id="productDetailBox">
       <h2>${productContentWrapper.get("PRODUCT_NAME")?if_exists}</h2>
@@ -462,7 +527,7 @@ ${virtualJavaScript?if_exists}
             <div>&nbsp;</div>
       </#if>
     </div>
-</div>
+
     <div id="addItemForm">
       <form method="post" action="<@ofbizUrl>additem</@ofbizUrl>" name="addform"  style="margin: 0;">
       <fieldset>
@@ -483,13 +548,13 @@ ${virtualJavaScript?if_exists}
                 </div>
             </#list>
               <input type="hidden" name="add_product_id" value="${product.productId}" />
-            <div id="addCart1" style="display:none;>
+            <div id="addCart1" style="display:none;">
               <span style="white-space: nowrap;"><strong>${uiLabelMap.CommonQuantity}:</strong></span>&nbsp;
               <input type="text" size="5" name="quantity" value="1" />
               <a href="javascript:javascript:addItem();" class="buttontext"><span style="white-space: nowrap;">${uiLabelMap.OrderAddToCart}</span></a>
               &nbsp;
             </div>
-            <div id="addCart2" style="display:block;>
+            <div id="addCart2" style="display:block;">
               <span style="white-space: nowrap;"><strong>${uiLabelMap.CommonQuantity}:</strong></span>&nbsp;
               <input type="text" size="5" value="1" disabled="disabled" />
               <a href="javascript:alert('Please select all features first');" class="buttontext"><span style="white-space: nowrap;">${uiLabelMap.OrderAddToCart}</span></a>
@@ -505,6 +570,8 @@ ${virtualJavaScript?if_exists}
                 </select>
               </div>
             </#list>
+            <span id="product_uom"></span>
+            <input type="hidden" name="product_id" value="${product.productId}"/>
             <input type="hidden" name="add_product_id" value="NULL"/>
             <div>
               <strong><span id="product_id_display"> </span></strong>
@@ -695,6 +762,7 @@ ${virtualJavaScript?if_exists}
   </#if>
 <#-- Upgrades/Up-Sell/Cross-Sell -->
   <#macro associated assocProducts beforeName showName afterName formNamePrefix targetRequestName>
+  <#assign pageProduct = product />
   <#assign targetRequest = "product" />
   <#if targetRequestName?has_content>
     <#assign targetRequest = targetRequestName />
@@ -724,6 +792,7 @@ ${virtualJavaScript?if_exists}
         ${setRequestAttribute("targetRequestName", targetRequestName)}
       </#if>
           ${screens.render(productsummaryScreen)}
+      <#assign product = pageProduct />
       <#local listIndex = listIndex + 1 />
     </#list>
     </div>

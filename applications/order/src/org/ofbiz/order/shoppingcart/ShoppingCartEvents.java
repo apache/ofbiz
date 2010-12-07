@@ -549,6 +549,21 @@ public class ShoppingCartEvents {
                 Debug.logError(e.getMessage(), module);
             }
         }
+        
+        // check for alternative packing
+        if(ProductWorker.isAlternativePacking(delegator, productId , parentProductId)){
+            GenericValue parentProduct = null;
+            try {
+                parentProduct = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", parentProductId));
+            } catch (GenericEntityException e) {
+                Debug.logError(e, "Error getting parent product", module);
+            }
+            BigDecimal piecesIncluded = BigDecimal.ZERO;
+            if(parentProduct != null){
+                piecesIncluded = new BigDecimal(parentProduct.getLong("piecesIncluded"));
+                quantity = quantity.multiply(piecesIncluded);
+            }
+        }
 
         // Translate the parameters and add to the cart
         result = cartHelper.addToCart(catalogId, shoppingListId, shoppingListItemSeqId, productId, productCategoryId,
@@ -1342,6 +1357,7 @@ public class ShoppingCartEvents {
             cart = (ShoppingCart) outMap.get("shoppingCart");
 
             cart.removeAdjustmentByType("SALES_TAX");
+            cart.removeAdjustmentByType("VAT_TAX");
             cart.removeAdjustmentByType("VAT_PRICE_CORRECT");
             cart.removeAdjustmentByType("PROMOTION_ADJUSTMENT");
             String shipGroupSeqId = null;

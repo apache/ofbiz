@@ -16,20 +16,11 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-
-<#-- This is now done through ECAs (see secas_shipment.xml), but we may want to allow manual usage in the future too, so leaving commented just in case
-<#if (shipment.primaryOrderId)?has_content>
-    <div><a href="<@ofbizUrl>setShipmentSettingsFromPrimaryOrder?shipmentId=${shipmentId}</@ofbizUrl>" class="buttontext">${uiLabelMap.ProductSettingsFromPrimaryOrder} [${shipment.primaryOrderId}]</a></div>
+<#if product?exists && mainProducts?exists>
+    <select name="parentProductId" onchange="javascript:displayProductVirtualVariantId(this.value);">
+        <option value="">Select Unit Of Measure</option>
+        <#list mainProducts as mainProduct>
+            <option value="${mainProduct.productId}">${mainProduct.uomDesc} : ${mainProduct.piecesIncluded}</option>
+        </#list>
+    </select>
 </#if>
--->
-<div class="screenlet">
-    <div class="screenlet-title-bar">
-        <ul>
-            <li class="h3">${uiLabelMap.ProductEditShipment}</li>
-        </ul>
-        <br class="clear"/>
-    </div>
-    <div class="screenlet-body">
-        ${editShipmentWrapper.renderFormString(context)}
-    </div>
-</div>

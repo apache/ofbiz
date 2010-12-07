@@ -2134,8 +2134,8 @@ public class OrderServices {
             String newItemStatusId = null;
             if ("ORDER_APPROVED".equals(statusId)) {
                 newItemStatusId = "ITEM_APPROVED";
-            } else if ("ORDER_COMPLETE".equals(statusId)) {
-                newItemStatusId = "ITEM_COMPLETE";
+            } else if ("ORDER_COMPLETED".equals(statusId)) {
+                newItemStatusId = "ITEM_COMPLETED";
             } else if ("ORDER_CANCELLED".equals(statusId)) {
                 newItemStatusId = "ITEM_CANCELLED";
             }
@@ -3796,6 +3796,7 @@ public class OrderServices {
             exprs.add(EntityCondition.makeCondition("orderAdjustmentTypeId", EntityOperator.EQUALS, "PROMOTION_ADJUSTMENT"));
             exprs.add(EntityCondition.makeCondition("orderAdjustmentTypeId", EntityOperator.EQUALS, "SHIPPING_CHARGES"));
             exprs.add(EntityCondition.makeCondition("orderAdjustmentTypeId", EntityOperator.EQUALS, "SALES_TAX"));
+            exprs.add(EntityCondition.makeCondition("orderAdjustmentTypeId", EntityOperator.EQUALS, "VAT_TAX"));
             exprs.add(EntityCondition.makeCondition("orderAdjustmentTypeId", EntityOperator.EQUALS, "VAT_PRICE_CORRECT"));
             adjExprs.add(EntityCondition.makeCondition(exprs, EntityOperator.OR));
             EntityCondition cond = EntityCondition.makeCondition(adjExprs, EntityOperator.AND);

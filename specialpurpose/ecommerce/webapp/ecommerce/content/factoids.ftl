@@ -31,16 +31,21 @@ under the License.
 </#if>
 
 <div id="factoids" class="screenlet">
-    <h3>${uiLabelMap.EcommerceFactoids}</h3>
-    <div class="screenlet-body">
-      <ul class="browsecategorylist">
-        <#assign count_1=0/>
-        <@limitedSubContent contentId=factoidRootId viewIndex=0 viewSize=9999 orderBy="contentName" limitSize="2">
-            <li class="browsecategorytext">
-              <@renderSubContentCache subContentId=subContentId/>
-            </li>
-            <#assign count_1=(count_1 + 1)/>
-        </@limitedSubContent>
-      </ul>
-    </div>
+  <div class="screenlet-title-bar">
+    <ul>
+      <li class="h3">${uiLabelMap.EcommerceFactoids}</li>
+    </ul>
+    <br class="clear"/>
+  </div>
+  <div class="screenlet-body">
+    <ul class="browsecategorylist">
+      <#assign count_1=0/>
+      <@limitedSubContent contentId=factoidRootId viewIndex=0 viewSize=9999 orderBy="contentName" limitSize="2">
+        <li class="browsecategorytext">
+          <@renderSubContentCache subContentId=subContentId/>
+        </li>
+        <#assign count_1=(count_1 + 1)/>
+      </@limitedSubContent>
+    </ul>
+  </div>
 </div>

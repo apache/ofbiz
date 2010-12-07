@@ -56,6 +56,7 @@ import org.ofbiz.base.util.FileUtil;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
+import org.ofbiz.base.util.UtilIO;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
@@ -149,7 +150,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
      */
     public static void getDataCategoryAncestry(Delegator delegator, String dataCategoryId, List<String> categoryTypeIds) throws GenericEntityException {
         categoryTypeIds.add(dataCategoryId);
-        GenericValue dataCategoryValue = delegator.findByPrimaryKey("DataCategory", UtilMisc.toMap("dataCategoryId", dataCategoryId));
+        GenericValue dataCategoryValue = delegator.findOne("DataCategory", UtilMisc.toMap("dataCategoryId", dataCategoryId), false);
         if (dataCategoryValue == null)
             return;
         String parentCategoryId = (String) dataCategoryValue.get("parentCategoryId");
@@ -305,7 +306,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
             String ownerContentId = (String) context.get("ownerContentId");
             if (UtilValidate.isNotEmpty(ownerContentId)) {
                 try {
-                    GenericValue content = delegator.findByPrimaryKeyCache("Content", UtilMisc.toMap("contentId", ownerContentId));
+                    GenericValue content = delegator.findOne("Content", UtilMisc.toMap("contentId", ownerContentId), false);
                     if (content != null)
                         serviceInMap.put("currentContent", content);
                 } catch (GenericEntityException e) {
@@ -329,7 +330,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
     public static byte[] acquireImage(Delegator delegator, String dataResourceId) throws GenericEntityException {
 
         byte[] b = null;
-        GenericValue dataResource = delegator.findByPrimaryKeyCache("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
+        GenericValue dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId), true);
         if (dataResource == null)
             return b;
 
@@ -340,7 +341,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
     public static byte[] acquireImage(Delegator delegator, GenericValue dataResource) throws  GenericEntityException {
         byte[] b = null;
         String dataResourceId = dataResource.getString("dataResourceId");
-        GenericValue imageDataResource = delegator.findByPrimaryKey("ImageDataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
+        GenericValue imageDataResource = delegator.findOne("ImageDataResource", UtilMisc.toMap("dataResourceId", dataResourceId), false);
         if (imageDataResource != null) {
             //b = (byte[]) imageDataResource.get("imageData");
             b = imageDataResource.getBytes("imageData");
@@ -359,8 +360,8 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
                     if (UtilValidate.isNotEmpty(fileExtension)) {
                         GenericValue ext = null;
                         try {
-                            ext = dataResource.getDelegator().findByPrimaryKey("FileExtension",
-                                    UtilMisc.toMap("fileExtensionId", fileExtension));
+                            ext = dataResource.getDelegator().findOne("FileExtension",
+                                    UtilMisc.toMap("fileExtensionId", fileExtension), false);
                         } catch (GenericEntityException e) {
                             Debug.logError(e, module);
                         }
@@ -449,7 +450,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
             mimeType = view.getString("drMimeTypeId");
             //if (Debug.infoOn()) Debug.logInfo("getDataResourceMimeType, mimeType(2):" + mimeType, "");
         if (UtilValidate.isEmpty(mimeType) && UtilValidate.isNotEmpty(dataResourceId)) {
-                GenericValue dataResource = delegator.findByPrimaryKeyCache("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
+                GenericValue dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId), true);
                 //if (Debug.infoOn()) Debug.logInfo("getDataResourceMimeType, dataResource(2):" + dataResource, "");
                 mimeType = dataResource.getString("mimeTypeId");
 
@@ -611,12 +612,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
         }
 
         // get the data resource object
-        GenericValue dataResource = null;
-        if (cache) {
-            dataResource = delegator.findByPrimaryKeyCache("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
-        } else {
-            dataResource = delegator.findByPrimaryKey("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
-        }
+        GenericValue dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId), cache);
 
         if (dataResource == null) {
             throw new GeneralException("No data resource object found for dataResourceId: [" + dataResourceId + "]");
@@ -658,7 +654,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
                 } else {
                     String defaultVisualThemeId = UtilProperties.getPropertyValue("general", "VISUAL_THEME");
                     if (defaultVisualThemeId != null) {
-                        GenericValue themeValue = delegator.findByPrimaryKeyCache("VisualThemeResource", UtilMisc.toMap("visualThemeId", defaultVisualThemeId, "resourceTypeEnumId", "VT_DOCBOOKSTYLESHEET", "sequenceId", "01"));
+                        GenericValue themeValue = delegator.findOne("VisualThemeResource", UtilMisc.toMap("visualThemeId", defaultVisualThemeId, "resourceTypeEnumId", "VT_DOCBOOKSTYLESHEET", "sequenceId", "01"), true);
                         sourceFileLocation = new File(System.getProperty("ofbiz.home") + "/themes" + themeValue.get("resourceValue"));
                         UtilMisc.copyFile(sourceFileLocation,targetFileLocation);
                     }
@@ -778,12 +774,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
             String text = dataResource.getString("objectInfo");
             writeText(dataResource, text, templateContext, mimeTypeId, locale, out);
         } else if ("ELECTRONIC_TEXT".equals(dataResourceTypeId)) {
-            GenericValue electronicText;
-            if (cache) {
-                electronicText = delegator.findByPrimaryKeyCache("ElectronicText", UtilMisc.toMap("dataResourceId", dataResourceId));
-            } else {
-                electronicText = delegator.findByPrimaryKey("ElectronicText", UtilMisc.toMap("dataResourceId", dataResourceId));
-            }
+            GenericValue electronicText = delegator.findOne("ElectronicText", UtilMisc.toMap("dataResourceId", dataResourceId), cache);
             String text = electronicText.getString("textData");
             writeText(dataResource, text, templateContext, mimeTypeId, locale, out);
 
@@ -856,7 +847,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
 
         if ("text/html".equals(targetMimeTypeId)) {
             // get the default mime type template
-            GenericValue mimeTypeTemplate = delegator.findByPrimaryKeyCache("MimeTypeHtmlTemplate", UtilMisc.toMap("mimeTypeId", dataResourceMimeTypeId));
+            GenericValue mimeTypeTemplate = delegator.findOne("MimeTypeHtmlTemplate", UtilMisc.toMap("mimeTypeId", dataResourceMimeTypeId), true);
 
             if (mimeTypeTemplate != null && mimeTypeTemplate.get("templateLocation") != null) {
                 // prepare the context
@@ -895,11 +886,8 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
             if (!file.isAbsolute()) {
                 throw new GeneralException("File (" + objectInfo + ") is not absolute");
             }
-            int c;
             FileReader in = new FileReader(file);
-            while ((c = in.read()) != -1) {
-                out.append((char)c);
-            }
+            UtilIO.copy(in, true, out);
         } else if (dataResourceTypeId.equals("OFBIZ_FILE")) {
             String prefix = System.getProperty("ofbiz.home");
             String sep = "";
@@ -907,10 +895,8 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
                 sep = "/";
             }
             File file = FileUtil.getFile(prefix + sep + objectInfo);
-            int c;
             FileReader in = new FileReader(file);
-            while ((c = in.read()) != -1)
-                out.append((char)c);
+            UtilIO.copy(in, true, out);
         } else if (dataResourceTypeId.equals("CONTEXT_FILE")) {
             String prefix = rootDir;
             String sep = "";
@@ -918,7 +904,6 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
                 sep = "/";
             }
             File file = FileUtil.getFile(prefix + sep + objectInfo);
-            int c;
             FileReader in = null;
             try {
                 in = new FileReader(file);
@@ -931,9 +916,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
             } catch (Exception e) {
                 Debug.logError(" in renderDataResourceAsHtml(CONTEXT_FILE), got exception:" + e.getMessage(), module);
             }
-            while ((c = in.read()) != -1) {
-                out.append((char)c);
-            }
+            UtilIO.copy(in, true, out);
             //out.flush();
         }
     }
@@ -970,12 +953,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
             if ("SHORT_TEXT".equals(dataResourceTypeId) || "LINK".equals(dataResourceTypeId)) {
                 text = dataResource.getString("objectInfo");
             } else if ("ELECTRONIC_TEXT".equals(dataResourceTypeId)) {
-                GenericValue electronicText;
-                if (cache) {
-                    electronicText = delegator.findByPrimaryKeyCache("ElectronicText", UtilMisc.toMap("dataResourceId", dataResourceId));
-                } else {
-                    electronicText = delegator.findByPrimaryKey("ElectronicText", UtilMisc.toMap("dataResourceId", dataResourceId));
-                }
+                GenericValue electronicText = delegator.findOne("ElectronicText", UtilMisc.toMap("dataResourceId", dataResourceId), cache);
                 if (electronicText != null) {
                     text = electronicText.getString("textData");
                 }
@@ -992,38 +970,22 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
             GenericValue valObj;
 
             if ("IMAGE_OBJECT".equals(dataResourceTypeId)) {
-                if (cache) {
-                    valObj = delegator.findByPrimaryKeyCache("ImageDataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
-                } else {
-                    valObj = delegator.findByPrimaryKey("ImageDataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
-                }
+                valObj = delegator.findOne("ImageDataResource", UtilMisc.toMap("dataResourceId", dataResourceId), cache);
                 if (valObj != null) {
                     bytes = valObj.getBytes("imageData");
                 }
             } else if ("VIDEO_OBJECT".equals(dataResourceTypeId)) {
-                if (cache) {
-                    valObj = delegator.findByPrimaryKeyCache("VideoDataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
-                } else {
-                    valObj = delegator.findByPrimaryKey("VideoDataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
-                }
+                valObj = delegator.findOne("VideoDataResource", UtilMisc.toMap("dataResourceId", dataResourceId), cache);
                 if (valObj != null) {
                     bytes = valObj.getBytes("videoData");
                 }
             } else if ("AUDIO_OBJECT".equals(dataResourceTypeId)) {
-                if (cache) {
-                    valObj = delegator.findByPrimaryKeyCache("AudioDataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
-                } else {
-                    valObj = delegator.findByPrimaryKey("AudioDataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
-                }
+                valObj = delegator.findOne("AudioDataResource", UtilMisc.toMap("dataResourceId", dataResourceId), cache);
                 if (valObj != null) {
                     bytes = valObj.getBytes("audioData");
                 }
             } else if ("OTHER_OBJECT".equals(dataResourceTypeId)) {
-                if (cache) {
-                    valObj = delegator.findByPrimaryKeyCache("OtherDataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
-                } else {
-                    valObj = delegator.findByPrimaryKey("OtherDataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
-                }
+                valObj = delegator.findOne("OtherDataResource", UtilMisc.toMap("dataResourceId", dataResourceId), cache);
                 if (valObj != null) {
                     bytes = valObj.getBytes("dataResourceContent");
                 }
@@ -1071,7 +1033,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
     // TODO: remove this method in favor of getDataResourceStream
     public static void streamDataResource(OutputStream os, Delegator delegator, String dataResourceId, String https, String webSiteId, Locale locale, String rootDir) throws IOException, GeneralException {
         try {
-            GenericValue dataResource = delegator.findByPrimaryKeyCache("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
+            GenericValue dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId), true);
             if (dataResource == null) {
                 throw new GeneralException("Error in streamDataResource: DataResource with ID [" + dataResourceId + "] was not found.");
             }
@@ -1088,7 +1050,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
                 String text = dataResource.getString("objectInfo");
                 os.write(text.getBytes());
             } else if (dataResourceTypeId.equals("ELECTRONIC_TEXT")) {
-                GenericValue electronicText = delegator.findByPrimaryKeyCache("ElectronicText", UtilMisc.toMap("dataResourceId", dataResourceId));
+                GenericValue electronicText = delegator.findOne("ElectronicText", UtilMisc.toMap("dataResourceId", dataResourceId), true);
                 if (electronicText != null) {
                     String text = electronicText.getString("textData");
                     if (text != null) os.write(text.getBytes());
@@ -1112,19 +1074,13 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
                     url = new URL(s2);
                 }
                 InputStream in = url.openStream();
-                int c;
-                while ((c = in.read()) != -1) {
-                    os.write(c);
-                }
+                UtilIO.copy(in, true, os, false);
             } else if (dataResourceTypeId.indexOf("_FILE") >= 0) {
                 String objectInfo = dataResource.getString("objectInfo");
                 File inputFile = getContentFile(dataResourceTypeId, objectInfo, rootDir);
                 //long fileSize = inputFile.length();
                 FileInputStream fis = new FileInputStream(inputFile);
-                int c;
-                while ((c = fis.read()) != -1) {
-                    os.write(c);
-                }
+                UtilIO.copy(fis, true, os, false);
             } else {
                 throw new GeneralException("The dataResourceTypeId [" + dataResourceTypeId + "] is not supported in streamDataResource");
             }
