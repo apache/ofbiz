@@ -86,8 +86,8 @@ case "$cmd" in
 		printf "Applied fix from trunk for revision: %s \n===\n\n" "$rev" > runtime/merge-state/log-message
 		svn log https://svn.apache.org/repos/asf/ofbiz/trunk -r "$rev" > runtime/merge-state/log.txt
 		set -- $(wc -l runtime/merge-state/log.txt)
-		head -n $(($1 - 2)) < runtime/merge-state/log.txt > runtime/merge-state/log.txt.head
-		tail -n $(($1 - 5)) < runtime/merge-state/log.txt.head >> runtime/merge-state/log-message
+		head -n $(($1 - 1)) < runtime/merge-state/log.txt > runtime/merge-state/log.txt.head
+		tail -n $(($1 - 4)) < runtime/merge-state/log.txt.head >> runtime/merge-state/log-message
 		prevRev=$(($rev - 1))
 		svn up
 		svn merge -r "$prevRev:$rev" https://svn.apache.org/repos/asf/ofbiz/trunk 
