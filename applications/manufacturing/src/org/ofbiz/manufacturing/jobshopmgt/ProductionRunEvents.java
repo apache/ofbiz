@@ -38,6 +38,7 @@ import org.ofbiz.entity.GenericPK;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ServiceUtil;
 
 import javolution.util.FastMap;
 
@@ -91,6 +92,10 @@ public class ProductionRunEvents {
             inputMap.put("lotId", parameters.get("lotId"));
             inputMap.put("userLogin", userLogin);
             Map result = dispatcher.runSync("productionRunDeclareAndProduce", inputMap);
+            if (ServiceUtil.isError(result)) {
+                request.setAttribute("_ERROR_MESSAGE_", ServiceUtil.getErrorMessage(result));
+                return "error";
+            }
         } catch (GenericServiceException e) {
             String errMsg = "Error issuing materials: " + e.toString();
             Debug.logError(e, errMsg, module);
