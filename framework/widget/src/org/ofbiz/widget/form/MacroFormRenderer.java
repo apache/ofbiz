@@ -424,7 +424,7 @@ public class MacroFormRenderer implements FormStringRenderer {
             visualEdtiorEnalble = "true";
             buttons = textareaField.getVisualEditorButtons(context);
             if (UtilValidate.isEmpty(buttons)) {
-                buttons = "all";
+                buttons = "maxi";
             }
         }
         String readonly = "";

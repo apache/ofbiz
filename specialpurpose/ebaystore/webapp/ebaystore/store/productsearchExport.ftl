@@ -493,17 +493,25 @@ under the License.
                                             <td width="60%" valign="top">
                                                  <table cellspacing="0">
                                                     <tr><td>
-                                                        <script language="javascript" src="/images/htmledit/whizzywig.js" type="text/javascript"></script>
-                                                        <script language="javascript" type="text/javascript"> buttonPath = "/images/htmledit/"; cssFile="/images/htmledit/simple.css";</script>                                    
+                                                        <script language="javascript" src="/images/jquery/plugins/elrteEditor/elrte.min.js" type="text/javascript"></script>
+                                                        <link href="/images/jquery/plugins/elrteEditor/css/elrte.full.css" rel="stylesheet" type="text/css">
+                                                        <script language="javascript" type="text/javascript">
+                                                                var opts = {
+                                                                    cssClass : 'el-rte',
+                                                                    toolbar  : 'maxi',
+                                                                    doctype  : '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">', //'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN">',
+                                                                    cssfiles : ['/images/jquery/plugins/elrteEditor/css/elrte-inner.css']
+                                                                }
+                                                        </script>
                                                         <textarea id="description" name="description" style="width:800px; height:300px">
                                                             <#if item.getDescription()?exists>description<#else>${item.getDescription()?if_exists}</#if>
                                                         </textarea>
                                                         <script type="text/javascript">
-                                                              makeWhizzyWig("description", "all");
+                                                              jQuery('#description').elrte(opts);
                                                         </script>
                                                     </td></tr>
                                                  </table>
-                                            </td>    
+                                            </td>
                                             <td width="30%" valign="top">
                                                 <table align="left" width="60%"  height="100%" cellspacing="0">
                                                     <tr>
