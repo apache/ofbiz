@@ -83,7 +83,7 @@ public class FixedAssetMaintServices {
                     EntityCondition.makeCondition("facilityId", EntityOperator.EQUALS, facilityId),
                     EntityCondition.makeCondition("availableToPromiseTotal", EntityOperator.GREATER_THAN, "0")),
                     EntityOperator.AND);
-            List inventoryItems = delegator.findByAnd("InventoryItem", ecl, null, null, null, false);   //&& inventoryItems.size() > 0
+            List inventoryItems = delegator.findList("InventoryItem", ecl, null, null, null, false);   //&& inventoryItems.size() > 0
             Iterator itr = inventoryItems.iterator();
             while (requestedQty > 0 && itr.hasNext()) {
                 GenericValue inventoryItem = (GenericValue)itr.next();
