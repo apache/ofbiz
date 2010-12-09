@@ -64,7 +64,7 @@ under the License.
     </#if>
 </#macro>
 
-<#macro renderTextareaField name className alert cols rows id readonly value visualEdtiorEnalble buttons>
+<#macro renderTextareaField name className alert cols rows id readonly value visualEdtiorEnalble language buttons>
     <textarea name="${name}"<#t/>
     <@renderClass className alert />
     <#if cols?has_content> cols="${cols}"</#if><#rt/>
@@ -77,10 +77,14 @@ under the License.
     </textarea><#lt/>
     <#if visualEdtiorEnalble?has_content>
         <script language="javascript" src="/images/jquery/plugins/elrteEditor/elrte.min.js" type="text/javascript"></script><#rt/>
+        <#if language?has_content && language != "en">
+            <script language="javascript" src="/images/jquery/plugins/elrteEditor/i18n/elrte.${language!"en"}.js" type="text/javascript"></script><#rt/>
+        </#if>
         <link href="/images/jquery/plugins/elrteEditor/css/elrte.full.css" rel="stylesheet" type="text/css">
         <script language="javascript" type="text/javascript">
             var opts = {
                 cssClass : 'el-rte',
+                lang     : '${language!"en"}',
                 toolbar  : '${buttons?default("maxi")}',
                 doctype  : '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">', //'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN">',
                 cssfiles : ['/images/jquery/plugins/elrteEditor/css/elrte-inner.css']

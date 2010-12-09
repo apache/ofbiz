@@ -431,6 +431,11 @@ public class MacroFormRenderer implements FormStringRenderer {
         if (textareaField.isReadOnly()) {
             readonly = "readonly";
         }
+        Map<String, Object> userLogin = UtilGenerics.checkMap(context.get("userLogin"));
+        String language = "en";
+        if (userLogin != null) {
+            language = UtilValidate.isEmpty((String) userLogin.get("lastLocale")) ? "en" : (String) userLogin.get("lastLocale");
+        }
         String value = modelFormField.getEntry(context, textareaField.getDefaultValue(context));
         StringWriter sr = new StringWriter();
         sr.append("<@renderTextareaField ");
@@ -452,6 +457,8 @@ public class MacroFormRenderer implements FormStringRenderer {
         sr.append(readonly);
         sr.append("\" visualEdtiorEnalble=\"");
         sr.append(visualEdtiorEnalble);
+        sr.append("\" language=\"");
+        sr.append(language);
         sr.append("\" buttons=\"");
         sr.append(buttons);
         sr.append("\" />");
