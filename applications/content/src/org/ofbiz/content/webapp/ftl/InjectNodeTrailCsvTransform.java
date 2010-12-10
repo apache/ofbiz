@@ -50,16 +50,26 @@ public class InjectNodeTrailCsvTransform implements TemplateTransformModel {
     public static final String [] removeKeyNames = {"nodeTrailCsv"};
 
     /**
+     * @deprecated use FreeMarkerWorker.getWrappedObject()
      * A wrapper for the FreeMarkerWorker version.
      */
+    @Deprecated
     public static Object getWrappedObject(String varName, Environment env) {
         return FreeMarkerWorker.getWrappedObject(varName, env);
     }
 
+    /**
+     * @deprecated use FreeMarkerWorker.getArg()
+     */
+    @Deprecated
     public static String getArg(Map args, String key, Environment env) {
         return FreeMarkerWorker.getArg(args, key, env);
     }
 
+    /**
+     * @deprecated use FreeMarkerWorker.getArg()
+     */
+    @Deprecated
     public static String getArg(Map args, String key, Map ctx) {
         return FreeMarkerWorker.getArg(args, key, ctx);
     }
@@ -68,11 +78,11 @@ public class InjectNodeTrailCsvTransform implements TemplateTransformModel {
     public Writer getWriter(final Writer out, Map args) {
         final StringBuilder buf = new StringBuilder();
         final Environment env = Environment.getCurrentEnvironment();
-        final Map templateCtx = (Map) FreeMarkerWorker.getWrappedObject("context", env);
+        final Map templateCtx = FreeMarkerWorker.getWrappedObject("context", env);
         //FreeMarkerWorker.convertContext(templateCtx);
-        final Delegator delegator = (Delegator) FreeMarkerWorker.getWrappedObject("delegator", env);
-        final HttpServletRequest request = (HttpServletRequest) FreeMarkerWorker.getWrappedObject("request", env);
-        final GenericValue userLogin = (GenericValue) FreeMarkerWorker.getWrappedObject("userLogin", env);
+        final Delegator delegator = FreeMarkerWorker.getWrappedObject("delegator", env);
+        final HttpServletRequest request = FreeMarkerWorker.getWrappedObject("request", env);
+        final GenericValue userLogin = FreeMarkerWorker.getWrappedObject("userLogin", env);
         FreeMarkerWorker.getSiteParameters(request, templateCtx);
         FreeMarkerWorker.overrideWithArgs(templateCtx, args);
 

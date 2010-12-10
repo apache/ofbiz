@@ -157,8 +157,7 @@ public class FreeMarkerWorker {
     public static void renderTemplate(String templateLocation, String templateString, Map<String, Object> context, Appendable outWriter) throws TemplateException, IOException {
         renderTemplate(templateLocation, templateString, context, outWriter, true);
     }
-    
-    
+
     /**
      * Renders a template contained in a String.
      * @param templateLocation A unique ID for this template - used for caching
@@ -189,7 +188,7 @@ public class FreeMarkerWorker {
 
     /**
      * @deprecated, replaced by {@link #renderTemplateFromString(String templateString, String templateLocation, Map<String, Object> context, Appendable outWriter, boolean useCache)}
-     */    
+     */
     @Deprecated
     public static Environment renderTemplateFromString(String templateString, String templateLocation, Map<String, Object> context, Appendable outWriter) throws TemplateException, IOException {
         Template template = cachedTemplates.get(templateLocation);
@@ -325,10 +324,10 @@ public class FreeMarkerWorker {
     }
 
     public static Template getTemplate(String templateLocation, UtilCache<String, Template> cache, Configuration config) throws TemplateException, IOException {
-        Template template = (Template) cache.get(templateLocation);
+        Template template = cache.get(templateLocation);
         if (template == null) {
             synchronized (cache) {
-                template = (Template) cache.get(templateLocation);
+                template = cache.get(templateLocation);
                 if (template == null) {
                     // only make the reader if we need it, and then close it right after!
                     Reader templateReader = makeReader(templateLocation);
@@ -342,16 +341,14 @@ public class FreeMarkerWorker {
     }
 
     public static String getArg(Map<String, ? extends Object> args, String key, Environment env) {
-        Map<String, ? extends Object> templateContext = UtilGenerics.checkMap(FreeMarkerWorker.getWrappedObject("context", env));
+        Map<String, ? extends Object> templateContext = FreeMarkerWorker.getWrappedObject("context", env);
         return getArg(args, key, templateContext);
     }
 
     public static String getArg(Map<String, ? extends Object> args, String key, Map<String, ? extends Object> templateContext) {
         //SimpleScalar s = null;
-        Object o = null;
-        String returnVal = null;
-        o = args.get(key);
-        returnVal = (String) unwrap(o);
+        Object o = args.get(key);
+        String returnVal = (String) unwrap(o);
         if (returnVal == null) {
             try {
                 if (templateContext != null) {
@@ -366,10 +363,8 @@ public class FreeMarkerWorker {
 
     public static Object getArgObject(Map<String, ? extends Object> args, String key, Map<String, ? extends Object> templateContext) {
         //SimpleScalar s = null;
-        Object o = null;
-        Object returnVal = null;
-        o = args.get(key);
-        returnVal = unwrap(o);
+        Object o = args.get(key);
+        Object returnVal = unwrap(o);
         if (returnVal == null) {
             try {
                 if (templateContext != null) {
@@ -382,13 +377,12 @@ public class FreeMarkerWorker {
         return returnVal;
     }
 
-
    /**
     * Gets BeanModel from FreeMarker context and returns the object that it wraps.
     * @param varName the name of the variable in the FreeMarker context.
     * @param env the FreeMarker Environment
     */
-    public static Object getWrappedObject(String varName, Environment env) {
+    public static <T> T getWrappedObject(String varName, Environment env) {
         Object obj = null;
         try {
             obj = env.getVariable(varName);
@@ -405,7 +399,7 @@ public class FreeMarkerWorker {
         } catch (TemplateModelException e) {
             Debug.logInfo(e.getMessage(), module);
         }
-        return obj;
+        return UtilGenerics.<T>cast(obj);
     }
 
    /**
@@ -424,16 +418,15 @@ public class FreeMarkerWorker {
     }
 
     public static Object get(SimpleHash args, String key) {
-        Object returnObj = null;
         Object o = null;
         try {
             o = args.get(key);
         } catch (TemplateModelException e) {
             Debug.logVerbose(e.getMessage(), module);
-            return returnObj;
+            return null;
         }
 
-        returnObj = unwrap(o);
+        Object returnObj = unwrap(o);
 
         if (returnObj == null) {
             Object ctxObj = null;
@@ -686,7 +679,6 @@ public class FreeMarkerWorker {
     /**
      * OFBiz specific TemplateExceptionHandler.  Sanitizes any error messages present in
      * the stack trace prior to printing to the output writer.
-     *
      */
     static class OFBizTemplateExceptionHandler implements TemplateExceptionHandler {
         public void handleTemplateException(TemplateException te, Environment env, Writer out) throws TemplateException {
@@ -695,7 +687,7 @@ public class FreeMarkerWorker {
             te.printStackTrace(pw);
             String stackTrace = tempWriter.toString();
 
-            StringUtil.SimpleEncoder simpleEncoder = (SimpleEncoder) FreeMarkerWorker.getWrappedObject("simpleEncoder", env);
+            StringUtil.SimpleEncoder simpleEncoder = FreeMarkerWorker.getWrappedObject("simpleEncoder", env);
             if (simpleEncoder != null) {
                 stackTrace = simpleEncoder.encode(stackTrace);
             }

@@ -52,16 +52,22 @@ public class RenderSubContentTransform implements TemplateTransformModel {
     public static final String module = RenderSubContentTransform.class.getName();
 
     /**
+     * @deprecated use FreeMarkerWorker.getArg()
      * Does a conditional search to return a value for a parameter with the passed name. Looks first to see if it was passed as an argument to the transform.
      * Secondly, it looks to see if it is passed as a parameter in the template context object.
      * <p/>
      * Note that this is different from the getArg method of EditRenderDataResourceTransform, which checks the request object instead of the template context
      * object.
      */
+    @Deprecated
     public static String getArg(Map args, String key, Environment env) {
         return FreeMarkerWorker.getArg(args, key, env);
     }
 
+    /**
+     * @deprecated use FreeMarkerWorker.getArg()
+     */
+    @Deprecated
     public static String getArg(Map args, String key, Map ctx) {
         return FreeMarkerWorker.getArg(args, key, ctx);
     }
@@ -69,22 +75,22 @@ public class RenderSubContentTransform implements TemplateTransformModel {
     public Writer getWriter(final Writer out, Map args) {
         //final StringBuilder buf = new StringBuilder();
         final Environment env = Environment.getCurrentEnvironment();
-        Map ctx = (Map) FreeMarkerWorker.getWrappedObject("context", env);
+        Map ctx = FreeMarkerWorker.getWrappedObject("context", env);
         if (ctx == null) {
             ctx = FastMap.newInstance();
         }
-        final String mapKey = getArg(args, "mapKey", ctx);
-        final String subContentId = getArg(args, "subContentId", ctx);
-        final String subDataResourceTypeId = getArg(args, "subDataResourceTypeId", ctx);
-        final String contentId = getArg(args, "contentId", ctx);
-        final String mimeTypeId = getArg(args, "mimeTypeId", ctx);
-        final String throwExceptionOnError = getArg(args, "throwExceptionOnError", ctx);
-        final Locale locale = (Locale) FreeMarkerWorker.getWrappedObject("locale", env);
-        final HttpServletRequest request = (HttpServletRequest) FreeMarkerWorker.getWrappedObject("request", env);
-        final LocalDispatcher dispatcher = (LocalDispatcher) FreeMarkerWorker.getWrappedObject("dispatcher", env);
-        final Delegator delegator = (Delegator) FreeMarkerWorker.getWrappedObject("delegator", env);
-        final GenericValue userLogin = (GenericValue) FreeMarkerWorker.getWrappedObject("userLogin", env);
-        GenericValue subContentDataResourceViewTemp = (GenericValue) FreeMarkerWorker.getWrappedObject("subContentDataResourceView", env);
+        final String mapKey = FreeMarkerWorker.getArg(args, "mapKey", ctx);
+        final String subContentId = FreeMarkerWorker.getArg(args, "subContentId", ctx);
+        final String subDataResourceTypeId = FreeMarkerWorker.getArg(args, "subDataResourceTypeId", ctx);
+        final String contentId = FreeMarkerWorker.getArg(args, "contentId", ctx);
+        final String mimeTypeId = FreeMarkerWorker.getArg(args, "mimeTypeId", ctx);
+        final String throwExceptionOnError = FreeMarkerWorker.getArg(args, "throwExceptionOnError", ctx);
+        final Locale locale = FreeMarkerWorker.getWrappedObject("locale", env);
+        final HttpServletRequest request = FreeMarkerWorker.getWrappedObject("request", env);
+        final LocalDispatcher dispatcher = FreeMarkerWorker.getWrappedObject("dispatcher", env);
+        final Delegator delegator = FreeMarkerWorker.getWrappedObject("delegator", env);
+        final GenericValue userLogin = FreeMarkerWorker.getWrappedObject("userLogin", env);
+        GenericValue subContentDataResourceViewTemp = FreeMarkerWorker.getWrappedObject("subContentDataResourceView", env);
         if (subContentDataResourceViewTemp == null) {
             List assocTypes = UtilMisc.toList("SUB_CONTENT");
             Timestamp fromDate = UtilDateTime.nowTimestamp();
@@ -150,7 +156,7 @@ public class RenderSubContentTransform implements TemplateTransformModel {
                     throw new IOException("Error rendering content" + e.toString());
                 }
 
-                //Map resultCtx = (Map) FreeMarkerWorker.getWrappedObject("context", env);
+                //Map resultCtx = FreeMarkerWorker.getWrappedObject("context", env);
                 templateContext.put("mapKey", null);
                 templateContext.put("subContentId", null);
                 templateContext.put("subDataResourceTypeId", null);
