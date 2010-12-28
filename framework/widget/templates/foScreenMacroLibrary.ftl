@@ -49,7 +49,7 @@ under the License.
 </#macro>
 <#macro renderContainerBegin id style autoUpdateLink autoUpdateInterval><fo:block <#if style?has_content><@getFoStyle style/></#if>></#macro>
 <#macro renderContainerEnd></fo:block></#macro>
-<#macro renderContentBegin></#macro>
+<#macro renderContentBegin editRequest enableEditValue editContainerStyle></#macro>
 <#macro renderContentBody></#macro>
 <#macro renderContentEnd></#macro>
 <#macro renderSubContentBegin></#macro>
