@@ -83,8 +83,10 @@ don't support input:focus (cough, cough, IE, cough)
 document.observe('dom:loaded', function() {
     var fields = $$("input, textarea");
     for (var i = 0; i < fields.length; i++) {
+     if (!fields[i].style.visibility == 'hidden') {
       fields[i].onfocus = function() {this.className += ' focused';}
       fields[i].onblur = function() {this.className = this.className.replace('focused', '');}
+     }
     }
 });
 
