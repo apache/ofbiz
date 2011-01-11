@@ -104,35 +104,38 @@ under the License.
                 <field-map field-name="orderId" from-field="orderHeader.orderId"/>
             </entity-and>
 
-            <iterate list="orderItems" entry="orderItem">
-                <!-- get information about location for each order item -->
-                <entity-and entity-name="OrderItemAndFacilityLocationView" list="OrderItemAndFacilityLocationList">
-                    <field-map field-name="orderId" from-field="orderHeader.orderId"/>
-                    <field-map field-name="locationTypeEnumId" value="FLT_PICKLOC"/>
-                    <field-map field-name="orderItemSeqId" from-field="orderItem.orderItemSeqId"/>
-                    <order-by field-name="orderItemSeqId"/>
-                </entity-and>
+            <set field="groupName"/>
+            <set field="groupName1"/> <!-- Group by Shipping Method -->
+            <set field="groupName2"/> <!-- Group by Warehouse Area -->
+            <set field="groupName3"/> <!-- Group by Number of Order Items -->
 
-                <iterate entry="OrderItemAndFacilityLocation" list="OrderItemAndFacilityLocationList">
-                    <!-- set groupName for order according to user selected options and available informations  -->
-                    <set field="groupName1" value=""/>
-                    <set field="groupName2" value=""/>
-                    <set field="groupName3" value=""/>
-                    <if>
-                        <condition>
-                            <or>
-                                <if-compare field="groupByShippingMethod" operator="equals" value="Y"/>
-                                <and>
-                                    <if-empty field="groupByShippingMethod"/>
-                                    <if-empty field="groupByWarehouseArea"/>
-                                    <if-empty field="groupByNoOfOrderItems"/>
-                                </and>
-                            </or>
-                        </condition>
-                        <then>
-                            <set field="groupName1" from-field="OrderItemAndFacilityLocation.shipmentMethodTypeId"/>
-                        </then>
-                    </if>
+            <!-- If user does not select any grouping method, then skip the grouping part. This is the default behavior of the picking screen -->
+            <if>
+                <condition>
+                    <and>
+                        <if-empty field="groupByShippingMethod"/>
+                        <if-empty field="groupByWarehouseArea"/>
+                        <if-empty field="groupByNoOfOrderItems"/>
+                    </and>
+                </condition>
+                <then>
+                    <set field="groupName" from-field="orderHeader.orderId"/>
+                </then>
+            <else>
+                <entity-condition entity-name="OrderHeaderAndItemFacilityLocation" list="OrderHeaderAndItemFacilityLocationList" distinct="true">
+                    <condition-list combine="and">
+                        <condition-expr field-name="orderId" from-field="orderHeader.orderId"/>
+                        <condition-list combine="or">
+                            <condition-expr field-name="locationTypeEnumId" operator="equals" value="FLT_PICKLOC"/>
+                            <condition-expr field-name="locationTypeEnumId" operator="equals" from-field="nullField"/>
+                        </condition-list>
+                    </condition-list>
+                    <select-field field-name="shipmentMethodTypeId"/>
+                    <select-field field-name="areaId"/>
+                    <use-iterator/>
+                </entity-condition>
+                <iterate list="OrderHeaderAndItemFacilityLocationList" entry="orderHeaderAndItemFacilityLocation">
+                <!-- set groupName for order according to the options selected by the user -->
 
                     <if-compare field="groupByWarehouseArea" operator="equals" value="Y">
                         <set field="groupName2" from-field="OrderItemAndFacilityLocation.areaId"/>
