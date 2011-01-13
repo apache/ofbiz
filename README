@@ -1,13 +1,12 @@
 
-Welcome to Apache OFBiz!
+Welcome to Apache OFBiz 10.04!
 
-If you have a release build all you need to run OFBiz is a 
+In order to run OFBiz you will need a
 1.6 (version 6) JDK (not just the JRE, the full JDK).
-http://java.sun.com/javase/downloads/index.jsp
+http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
-However if you have downloaded ofbiz from SVN then you should
-load the demo data (strongly advised) with the following command
-on the command line: (being in the OFbiz directory)
+You can build OFBiz and load the demo data (strongly advised) with the following command
+on the command line: (being in the OFBiz directory)
 
 linux: ./ant run-install
 windows: ant run-install 
