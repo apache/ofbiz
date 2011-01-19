@@ -22,7 +22,6 @@ import org.ofbiz.minilang.SimpleMapProcessor
 import org.ofbiz.content.ContentManagementWorker
 import org.ofbiz.content.content.ContentWorker
 import org.ofbiz.content.data.DataResourceWorker
-import org.ofbiz.webapp.ftl.FreeMarkerViewHandler
 
 userLogin = session.getAttribute("userLogin");
 contentAssocDataResourceViewFrom = delegator.makeValue("ContentAssocDataResourceViewFrom");
@@ -39,10 +38,10 @@ if (contentAssocPK.isPrimaryKey()) {
 }
 
 if (contentAssoc) {
-    SimpleMapProcessor.runSimpleMapProcessor("component://content/script/org/ofbiz/content/ContentManagementMapProcessors.xml", "contentAssocOut", contentAssoc, contentAssocDataResourceViewFrom, new ArrayList(), Locale.getDefault());
+    SimpleMapProcessor.runSimpleMapProcessor("org/ofbiz/content/ContentManagementMapProcessors.xml", "contentAssocOut", contentAssoc, contentAssocDataResourceViewFrom, new ArrayList(), Locale.getDefault());
 } else {
     contentAssocPK.setAllFields(context, false, "ca", null); //set all field, pk and non
-    SimpleMapProcessor.runSimpleMapProcessor("component://content/script/org/ofbiz/content/ContentManagementMapProcessors.xml", "contentAssocOut", contentAssocPK, contentAssocDataResourceViewFrom, new ArrayList(), Locale.getDefault());
+    SimpleMapProcessor.runSimpleMapProcessor("org/ofbiz/content/ContentManagementMapProcessors.xml", "contentAssocOut", contentAssocPK, contentAssocDataResourceViewFrom, new ArrayList(), Locale.getDefault());
 }
 Debug.logInfo("in cmseditaddprep, contentAssocDataResourceViewFrom:" + contentAssocDataResourceViewFrom,"");
 
@@ -69,10 +68,10 @@ if (!dataResourceId) {
 }
 if (dataResourceId) {
     dataResource = delegator.findOne("DataResource", [dataResourceId : dataResourceId], true);
-    SimpleMapProcessor.runSimpleMapProcessor("component://content/script/org/ofbiz/content/ContentManagementMapProcessors.xml", "dataResourceOut", dataResource, contentAssocDataResourceViewFrom, new ArrayList(), Locale.getDefault());
+    SimpleMapProcessor.runSimpleMapProcessor("org/ofbiz/content/ContentManagementMapProcessors.xml", "dataResourceOut", dataResource, contentAssocDataResourceViewFrom, new ArrayList(), Locale.getDefault());
     templateRoot = [:];
     FreeMarkerViewHandler.prepOfbizRoot(templateRoot, request, response);
-    txt = DataResourceWorker.getDataResourceText(dataResource, "text/html", Locale.getDefault(), templateRoot, delegator, true);
+    txt = DataResourceWorker.getDataResourceTextCache(dataResource, "text/html", Locale.getDefault(), templateRoot, delegator);
 
     if (txt) {
         textData = UtilFormatOut.encodeXmlValue(txt);
