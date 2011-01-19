@@ -19,7 +19,13 @@ under the License.
 <#if partyTaxAuthInfoAndDetailList?exists>
     <#list partyTaxAuthInfoAndDetailList as partyTaxAuthInfoAndDetail>
         <div>
-            <a href="<@ofbizUrl>deleteCustomerTaxAuthInfo?partyId=${partyId}&amp;taxAuthPartyId=${partyTaxAuthInfoAndDetail.taxAuthPartyId}&amp;taxAuthGeoId=${partyTaxAuthInfoAndDetail.taxAuthGeoId}&amp;fromDate=${partyTaxAuthInfoAndDetail.fromDate}</@ofbizUrl>" class="buttontext">X</a>
+          <form name="deleteCustomerTaxAuthInfo" id="deleteCustomerTaxAuthInfo" method="POST" action="<@ofbizUrl>deleteCustomerTaxAuthInfo</@ofbizUrl>">
+            <input type="hidden" name="partyId" value="${partyId}">
+            <input type="hidden" name="taxAuthPartyId" value="${partyTaxAuthInfoAndDetail.taxAuthPartyId}">
+            <input type="hidden" name="taxAuthGeoId" value="${partyTaxAuthInfoAndDetail.taxAuthGeoId}">
+            <input type="hidden" name="fromDate" value="${partyTaxAuthInfoAndDetail.fromDate}">
+            <input type="submit" name="deleteCustomerTaxAuthInfo" class="buttontext" value="X">
+          </form>
             [${partyTaxAuthInfoAndDetail.geoCode}] ${partyTaxAuthInfoAndDetail.geoName} (${partyTaxAuthInfoAndDetail.groupName?if_exists}): ${uiLabelMap.PartyTaxId} [${partyTaxAuthInfoAndDetail.partyTaxId?default("N/A")}], ${uiLabelMap.PartyTaxIsExempt} [${partyTaxAuthInfoAndDetail.isExempt?default("N")}]
         </div>
     </#list>
