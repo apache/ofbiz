@@ -274,12 +274,6 @@ public class ShipmentServices {
 
         // Get the PostalAddress
         GenericValue shipAddress = null;
-        try {
-            shipAddress = delegator.findByPrimaryKey("PostalAddress", UtilMisc.toMap("contactMechId", shippingContactMechId));
-        } catch (GenericEntityException e) {
-            return ServiceUtil.returnFailure("Cannot get shipping address entity");
-        }
-
         if (shippingContactMechId != null) {
             try {
                 shipAddress = delegator.findByPrimaryKey("PostalAddress", UtilMisc.toMap("contactMechId", shippingContactMechId));
