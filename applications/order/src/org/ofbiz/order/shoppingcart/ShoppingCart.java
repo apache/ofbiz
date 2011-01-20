@@ -3236,7 +3236,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
             return UtilProperties.getMessage(resource_error, "productpromoworker.promotion_code_already_been_entered", UtilMisc.toMap("productPromoCodeId", productPromoCodeId), locale);
         }
         // if the promo code requires it make sure the code is valid
-        String checkResult = ProductPromoWorker.checkCanUsePromoCode(productPromoCodeId, this.getPartyId(), this.getDelegator(), locale);
+        String checkResult = ProductPromoWorker.checkCanUsePromoCode(productPromoCodeId, this.getPartyId(), this.getDelegator(), this, locale);
         if (checkResult == null) {
             this.productPromoCodes.add(productPromoCodeId);
             // new promo code, re-evaluate promos
