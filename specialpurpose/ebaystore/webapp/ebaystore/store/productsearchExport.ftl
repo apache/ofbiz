@@ -126,10 +126,7 @@ under the License.
      }
      function removeOptions(id){
        var elSel = $(id);
-       var i;
-       for (i = elSel.length - 1; i>=0; i--) {
-               elSel.remove(i);
-       }
+       elSel.find('option').remove();
      }
      function enabledItemTemplate(val){
         var field = "enabledTheme";
