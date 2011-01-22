@@ -88,6 +88,8 @@ import com.ebay.soap.eBLBaseComponents.InsuranceDetailsType;
 import com.ebay.soap.eBLBaseComponents.SalesTaxType;
 import com.ebay.soap.eBLBaseComponents.AddItemRequestType;
 import com.ebay.soap.eBLBaseComponents.AddItemResponseType;
+import com.ebay.soap.eBLBaseComponents.AddItemRequestType;
+import com.ebay.soap.eBLBaseComponents.AddItemResponseType;
 
 public class EbayEvents {
 
@@ -753,6 +755,7 @@ public class EbayEvents {
                         attributeMapList.put("ShippingServiceCostCurrency", "USD");
                         attributeMapList.put("ShippingServicePriority", "1");
                         attributeMapList.put("ShippingType", "Flat");
+                        attributeMapList.put("ShippingServiceAdditionalCost", amtServiceCost.getValue());
 
                         EbayStoreHelper.mappedShippingLocations(requestParams, item, apiContext, request, attributeMapList);
 
@@ -794,6 +797,12 @@ public class EbayEvents {
                         if (UtilValidate.isNotEmpty(requestParams.get("ebayStore1Category")) || UtilValidate.isNotEmpty(requestParams.get("ebayStore2Category"))) {
                             item.setStorefront(storeFront);
                         }
+                        //TODO: set value of country and currency on the basis of request param values
+                        item.setCountry(CountryCodeType.US);
+                        attributeMapList.put("Country", "US");
+                        item.setCurrency(CurrencyCodeType.USD);
+                        attributeMapList.put("Currency", "USD");
+
                         if (UtilValidate.isNotEmpty(requestParams.get("requireEbayInventory")) && "Y".equals(requestParams.get("requireEbayInventory").toString())) {
                             GenericValue ebayProductStore = EntityUtil.getFirst(EntityUtil.filterByDate(delegator.findByAnd("EbayProductStoreInventory", UtilMisc.toMap("productStoreId", productStoreId, "productId", productId))));
                             if (UtilValidate.isNotEmpty(ebayProductStore)) {
@@ -892,7 +901,7 @@ public class EbayEvents {
         return "success";
     }
 
-    public static String verifyItemBeforeAdd(HttpServletRequest request, HttpServletResponse response) {
+    public static String verifyItemBeforeAddAndExportToEbay(HttpServletRequest request, HttpServletResponse response) {
         Delegator delegator = (Delegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         Map<String,Object> requestParams = UtilHttp.getParameterMap(request);
@@ -905,6 +914,8 @@ public class EbayEvents {
             ApiContext apiContext = EbayStoreHelper.getApiContext(productStoreId, locale, delegator);
             VerifyAddItemRequestType req = new VerifyAddItemRequestType();
             VerifyAddItemResponseType resp = null;
+            AddItemResponseType addItemResp = null;
+
 
             VerifyAddItemCall verifyCall = new VerifyAddItemCall(apiContext);
             Map<String,Object> addItemObject = getAddItemListingObject(request, apiContext);
@@ -932,6 +943,10 @@ public class EbayEvents {
                                 double dfee = fee.getFee().getValue();
                                 feesummary = feesummary + dfee;
                             }
+                            //if item is verified then export it to ebay
+                            AddItemRequestType addItemReq = new AddItemRequestType();
+                            addItemReq.setItem(item);
+                            addItemResp = (AddItemResponseType) addItemCall.execute(addItemReq);
                         } else {
                             EbayStoreHelper.createErrorLogMessage(userLogin, dispatcher, productStoreId, resp.getAck().toString(), "Verify Item : verifyItemBeforeAdd", resp.getErrors(0).getLongMessage());
                         }
