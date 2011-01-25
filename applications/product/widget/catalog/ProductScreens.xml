@@ -21,6 +21,95 @@ under the License.
 <screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
 
+    <!-- Custom apps can use their own Product Decorator by specifying its
+         location in parameters.productDecoratorLocation -->
+
+    <screen name="CommonProductDecorator">
+        <section>
+            <actions>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="productId" from-field="parameters.productId"/>
+                <entity-one entity-name="Product" value-field="product"/>
+                <set field="productName" from-field="product.productName"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <and>
+                                    <if-has-permission permission="CATALOG" action="_VIEW"/>
+                                    <not><if-empty field="product"/></not>
+                                </and>
+                            </condition>
+                            <widgets>
+                                <include-menu name="ProductTabBar" location="component://product/widget/catalog/CatalogMenus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="left-column">
+                        <include-screen name="leftbar" location="component://product/widget/catalog/CommonScreens.xml"/>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for CATALOG, _VIEW permission -->
+                            <condition>
+                                <if-has-permission permission="CATALOG" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <section>
+                                    <condition>
+                                        <not><if-empty field="product"/></not>
+                                    </condition>
+                                    <widgets>
+                                        <container>
+                                            <label style="h1">${uiLabelMap[labelTitleProperty]} ${uiLabelMap.CommonFor}: ${product.internalName} [${uiLabelMap.CommonId}:${productId}]  ${${extraFunctionName}}</label>
+                                            <image src="${product.smallImageUrl}" height="40" width="40" url-mode="content" alt="${product.internalName}"/>
+                                        </container>
+
+                                        <!-- add Create Product and View Product (in ecommerce) links -->
+                                        <container style="button-bar">
+                                            <link target="EditProduct" text="${uiLabelMap.ProductNewProduct}" style="buttontext create"/>
+                                            <link target="CreateVirtualWithVariantsForm" text="${uiLabelMap.ProductNewVirtualProduct}" style="buttontext create"/>
+                                            <link target="/ecommerce/control/product" url-mode="inter-app" text="${uiLabelMap.ProductProductPage}" style="buttontext">
+                                                <parameter param-name="product_id" from-field="productId"/>
+                                            </link>
+                                            <link target="ProductBarCode.pdf" target-window="_blank" text="${uiLabelMap.ProductBarcode}" style="buttontext">
+                                                <parameter param-name="productId"/>
+                                                <parameter param-name="productName"/>
+                                            </link>
+
+                                            <link target="javascript:expandAll(true);"  text="${uiLabelMap.CommonExpandAll}" style="buttontext expand-all" url-mode="plain"/>
+                                            <link target="javascript:expandAll(false);" text="${uiLabelMap.CommonCollapseAll}" style="buttontext collapse-all" url-mode="plain"/>
+                                        </container>
+                                    </widgets>
+                                </section>
+                                <section>
+                                    <condition>
+                                        <or>
+                                            <not><if-empty field="product"/></not>
+                                            <if-empty field="productId"/>
+                                        </or>
+                                    </condition>
+                                    <widgets>
+                                        <decorator-section-include name="body"/>
+                                    </widgets>
+                                    <fail-widgets>
+                                        <label style="h3">${uiLabelMap.ProductNoExistingProductsFound}</label>
+                                    </fail-widgets>
+                                </section>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.ProductCatalogViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
     <screen name="EditProduct">
         <section>
             <actions>
@@ -32,7 +121,7 @@ under the License.
                 <entity-one entity-name="Product" value-field="product"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditProduct}">
                             <include-form name="EditProduct" location="component://product/widget/catalog/ProductForms.xml"/>
@@ -98,7 +187,7 @@ under the License.
                 <property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="USD"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditProductPrices}">
                             <include-form name="UpdateProductPrice" location="component://product/widget/catalog/ProductForms.xml"/>
@@ -140,7 +229,7 @@ under the License.
                 </entity-and>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <container>
                             <link target="/accounting/control/EditAgreement" url-mode="inter-app" text="${uiLabelMap.PageTitleEditAgreement}" style="buttontext">
@@ -236,7 +325,7 @@ under the License.
                 </entity-condition>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditProductAssetUsage}">
                             <include-form name="EditProductAssetUsage" location="component://product/widget/catalog/ProductForms.xml"/>                        
@@ -266,7 +355,7 @@ under the License.
                 <entity-one entity-name="FixedAssetProduct" value-field="fixedAssetProduct"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditProductAssetUsage}">
                             <container>
@@ -457,7 +546,7 @@ under the License.
                 <script location="component://product/webapp/catalog/WEB-INF/actions/product/EditProductQuickAdmin.groovy"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
                             <widgets>
@@ -524,7 +613,7 @@ under the License.
                 </entity-condition>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditProductFacilityLocations}">
                             <include-form name="UpdateProductFacilityLocations" location="component://product/widget/catalog/ProductForms.xml"/>
@@ -584,7 +673,7 @@ under the License.
                 <script location="component://product/webapp/catalog/WEB-INF/actions/product/EditProductInventoryItems.groovy"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
                             <condition>
@@ -631,7 +720,7 @@ under the License.
                 </entity-condition>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditProductGoodIdentifications}">
                             <include-form name="UpdateProductGoodIdentifications" location="component://product/widget/catalog/ProductForms.xml"/>
@@ -666,7 +755,7 @@ under the License.
                 </entity-condition>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditProductGlAccounts}">
                             <section>
@@ -718,7 +807,7 @@ under the License.
                 </entity-condition>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditProductPaymentMethodType}">
                             <include-form name="UpdateProductPaymentMethodType" location="component://product/widget/catalog/ProductForms.xml"/>
@@ -747,7 +836,7 @@ under the License.
                 </entity-and>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <container>
                             <section>
@@ -795,7 +884,7 @@ under the License.
                 <entity-one entity-name="SupplierProduct" value-field="supplierProduct" auto-field-map="true"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditSupplierProduct}">
                             <include-form name="ListSupplierProducts" location="component://product/widget/catalog/ProductForms.xml"/>
@@ -829,7 +918,7 @@ under the License.
                 <script location="component://product/webapp/catalog/WEB-INF/actions/product/EditProductContent.groovy"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditProductContent}">
                             <include-form name="ListProductContentInfos" location="component://product/widget/catalog/ProductForms.xml"/>
@@ -868,7 +957,7 @@ under the License.
                 <script location="component://product/webapp/catalog/WEB-INF/actions/product/EditProductContentContent.groovy"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditProductContent}">
                             <include-form name="${contentFormName}" location="component://product/widget/catalog/ProductForms.xml"/>
@@ -900,7 +989,7 @@ under the License.
                 </entity-and>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditProductAttributes}">
                             <include-form name="UpdateProductAttribute" location="component://product/widget/catalog/ProductForms.xml"/>
@@ -925,7 +1014,7 @@ under the License.
                 <script location="component://product/webapp/catalog/WEB-INF/actions/product/EditProductAssoc.groovy"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <container>
                             <section>
@@ -961,7 +1050,7 @@ under the License.
                 </entity-and>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <include-form name="ListProductAssocs" location="component://product/widget/catalog/ProductForms.xml"/>
                         <include-form name="ListProductAssocsTo" location="component://product/widget/catalog/ProductForms.xml"/>
@@ -987,7 +1076,7 @@ under the License.
                 <script location="component://product/webapp/catalog/WEB-INF/actions/product/ApplyFeaturesFromGroup.groovy"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <platform-specific>
                             <html><html-template location="component://product/webapp/catalog/product/ApplyFeaturesFromCategory.ftl"/></html>
@@ -1033,7 +1122,7 @@ under the License.
                 <set field="productId" from-field="parameters.productId"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditProductMaintenance}">
                             <include-form name="ListProductMaints" location="component://product/widget/catalog/ProductForms.xml"/>
@@ -1055,7 +1144,7 @@ under the License.
                 <set field="productId" from-field="parameters.productId"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditProductMeters}">
                             <include-form name="ListProductMeters" location="component://product/widget/catalog/ProductForms.xml"/>
@@ -1077,7 +1166,7 @@ under the License.
                 <set field="labelTitleProperty" value="ProductGeos"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditProductGeos}">
                             <include-form name="ListProductGeos" location="component://product/widget/catalog/ProductForms.xml"/>
@@ -1100,7 +1189,7 @@ under the License.
                 <set field="productId" from-field="parameters.productId"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditProductSubscriptionResources}">
                             <include-form name="ListProductSubscriptionResources" location="component://product/widget/catalog/ProductForms.xml"/>
@@ -1123,7 +1212,7 @@ under the License.
                 <set field="productId" from-field="parameters.productId"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditProductWorkEffort}">
                             <include-form name="ListProductWorkEfforts" location="component://product/widget/catalog/ProductForms.xml"/>
@@ -1177,7 +1266,7 @@ under the License.
                 </entity-condition>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditProductParties}">
                             <platform-specific>
@@ -1203,7 +1292,7 @@ under the License.
                 </entity-condition>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditVendorProduct}">
                             <include-form name="ListVendorProducts" location="component://product/widget/catalog/ProductForms.xml"/>
@@ -1251,7 +1340,7 @@ under the License.
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/order/FindOrders.groovy"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <platform-specific>
                             <html><html-template location="component://product/webapp/catalog/product/ViewProductOrders.ftl"/></html>
@@ -1274,7 +1363,7 @@ under the License.
                 </entity-and>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <link style="buttontext" target="AddCommEventForProduct" text="${uiLabelMap.CommonNew}">
                             <parameter param-name="productId"/>
@@ -1299,7 +1388,7 @@ under the License.
                 <entity-one entity-name="CommunicationEvent" value-field="communicationEvent"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.ProductAddCommunicationEvent}">
                             <include-form name="EditCommEvent" location="component://product/widget/catalog/ProductForms.xml"/>
