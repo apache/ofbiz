@@ -270,6 +270,7 @@ public class ImportOrdersFromEbay {
             // default shipped = Y (call from eca during order completed)
             if (paid == null && shipped == null) {
                 shipped = "Y";
+                paid = "Y";
             }
 
             // Set item id to paid or not paid
@@ -796,7 +797,7 @@ public class ImportOrdersFromEbay {
                     // create the payment from the preference
                     if (approved) {
                         Debug.logInfo("Creating payment for approved order.", module);
-                        EbayHelper.createPaymentFromPaymentPreferences(delegator, dispatcher, userLogin, orderId, externalId, cart.getOrderDate(), partyId);
+                        EbayHelper.createPaymentFromPaymentPreferences(delegator, dispatcher, userLogin, orderId, externalId, cart.getOrderDate(), amountPaid, partyId);
                         Debug.logInfo("Payment created.", module);
                     }
                 }
