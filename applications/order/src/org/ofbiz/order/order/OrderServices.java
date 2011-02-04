@@ -3860,7 +3860,7 @@ public class OrderServices {
         long groupIndex = cart.getShipInfoSize();
         List orderAdjustments = new ArrayList();
         for (long itr = 1; itr <= groupIndex; itr++) {
-            shipGroupSeqId = UtilFormatOut.formatPaddedNumber(1, 5);
+            shipGroupSeqId = UtilFormatOut.formatPaddedNumber(itr, 5);
             List<GenericValue> removeList = new ArrayList<GenericValue>();
             for (GenericValue stored: (List<GenericValue>)toStore) {
                 if ("OrderAdjustment".equals(stored.getEntityName())) {
