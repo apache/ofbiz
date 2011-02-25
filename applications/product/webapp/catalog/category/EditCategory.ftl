@@ -94,9 +94,13 @@ function insertImageName(type,nameValue) {
                     <td>&nbsp;</td>
                     <td width="74%">
                         <select name="productCategoryTypeId" size="1">
+                        <#assign selectedKey = "CATALOG_CATEGORY">
                         <#list productCategoryTypes as productCategoryTypeData>
-                        <option <#if ((productCategory?has_content) && (productCategory.productCategoryTypeId==productCategoryTypeData.productCategoryTypeId)) || (productCategoryTypeData.productCategoryTypeId=="CATALOG_CATEGORY")>selected="selected"</#if> value="${productCategoryTypeData.productCategoryTypeId}">${productCategoryTypeData.get("description",locale)}</option>
-                        </#list>
+                          <#if (productCategory?has_content && productCategory.productCategoryTypeId?if_exists == productCategoryTypeData.productCategoryTypeId)>
+                            <#assign selectedKey = productCategory.productCategoryTypeId>
+                          </#if>
+                            <option <#if selectedKey == productCategoryTypeData.productCategoryTypeId>selected="selected"</#if> value="${productCategoryTypeData.productCategoryTypeId}">${productCategoryTypeData.get("description",locale)}</option>
+                          </#list>
                         </select>
                     </td>
                 </tr>
