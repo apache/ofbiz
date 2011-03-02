@@ -1056,8 +1056,8 @@ public class ContentWorker implements org.ofbiz.widget.ContentWorkerInterface {
         Map permResults = FastMap.newInstance();
         String skipPermissionCheck = (String) context.get("skipPermissionCheck");
 
-        if (UtilValidate.isEmpty(skipPermissionCheck)
-            || (!skipPermissionCheck.equalsIgnoreCase("true") && !skipPermissionCheck.equalsIgnoreCase("granted"))) {
+        if (UtilValidate.isEmpty(skipPermissionCheck) 
+                || (!"true".equalsIgnoreCase(skipPermissionCheck) && !"granted".equalsIgnoreCase(skipPermissionCheck))) {
             GenericValue userLogin = (GenericValue) context.get("userLogin");
             Map serviceInMap = FastMap.newInstance();
             serviceInMap.put("userLogin", userLogin);
