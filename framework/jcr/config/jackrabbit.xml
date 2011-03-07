@@ -64,7 +64,7 @@
             <!-- <param name="config" value="${rep.home}/access.xml"/> -->
         </AccessManager>
 
-        <LoginModule class="org.ofbiz.jackrabbit.OFBizLoginModule"/>
+        <LoginModule class="org.ofbiz.jcr.OFBizLoginModule"/>
     </Security>
 
     <!--

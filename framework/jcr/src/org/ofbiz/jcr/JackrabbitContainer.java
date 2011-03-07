@@ -61,13 +61,13 @@ public class JackrabbitContainer implements Container {
 
     @Override
     public void init(String[] args, String configFile) throws ContainerException {
-        ContainerConfig.Container cc = ContainerConfig.getContainer("jackrabbit", configFile);
+        ContainerConfig.Container cc = ContainerConfig.getContainer("jcr-container", configFile);
         String homeDirURL;
         try {
             homeDirURL = ContainerConfig.getPropertyValue(cc, "repHomeDir", "runtime/data/jackrabbit/");
             jndiName = ContainerConfig.getPropertyValue(cc, "jndiName", "jcr/local");
             homeDir = new File(homeDirURL);
-            URL jackrabbitConfigUrl = FlexibleLocation.resolveLocation(ContainerConfig.getPropertyValue(cc, "configFilePath", "framework/jackrabbit/config/jackrabbit.xml"));
+            URL jackrabbitConfigUrl = FlexibleLocation.resolveLocation(ContainerConfig.getPropertyValue(cc, "configFilePath", "framework/jcr/config/jackrabbit.xml"));
             jackrabbitConfigFile = new File(jackrabbitConfigUrl.toURI());
 
         } catch (MalformedURLException e) {
