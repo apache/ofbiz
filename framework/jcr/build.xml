@@ -18,19 +18,20 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<project name="OFBiz - Jackrabbit" default="jar" basedir=".">
+<project name="OFBiz - JCR" default="jar" basedir=".">
     <import file="../../common.xml"/>
 
     <!-- ================================================================== -->
     <!-- Initialization of all property settings                            -->
     <!-- ================================================================== -->
 
-    <property name="desc" value="Jackrabbit Component"/>
-    <property name="name" value="ofbiz-jackrabbit"/>
+    <property name="desc" value="JCR Component"/>
+    <property name="name" value="ofbiz-jcr"/>
     <property name="ofbiz.home.dir" value="../.."/>
 
     <path id="local.class.path">
         <fileset dir="${lib.dir}" includes="*.jar"/>
+        <fileset dir="../../framework/base/lib" includes="*.jar"/>
         <fileset dir="../../framework/base/lib/commons" includes="*.jar"/>
         <fileset dir="../../framework/base/build/lib" includes="*.jar"/>
         <fileset dir="../../framework/entity/build/lib" includes="*.jar"/>
