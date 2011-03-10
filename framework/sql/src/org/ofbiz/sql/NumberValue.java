@@ -18,13 +18,25 @@
  */
 package org.ofbiz.sql;
 
+import org.ofbiz.base.lang.SourceMonitored;
+
+@SourceMonitored
 public final class NumberValue<N extends Number> extends ConstantValue {
     private final N number;
+
+    public static NumberValue<Long> valueOf(long v) {
+        return new NumberValue<Long>(v);
+    }
+
+    public static NumberValue<Double> valueOf(double v) {
+        return new NumberValue<Double>(v);
+    }
 
     public NumberValue(N number) {
         this.number = number;
     }
 
+    @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
@@ -33,9 +45,10 @@ public final class NumberValue<N extends Number> extends ConstantValue {
         return number;
     }
 
+    @Override
     public boolean equals(Object o) {
-        if (o instanceof NumberValue) {
-            NumberValue other = (NumberValue) o;
+        if (o instanceof NumberValue<?>) {
+            NumberValue<?> other = (NumberValue<?>) o;
             return number.equals(other.number);
         } else {
             return false;

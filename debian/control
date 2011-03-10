@@ -20,7 +20,7 @@ Priority: extra
 Maintainer: Adam Heath <doogie@brainfood.com>
 Origin: brainfood
 Bugs: mozilla://bugs.brainfood.com
-Standards-Version: 3.8.3
+Standards-Version: 3.9.1
 Build-Depends: sun-java6-jdk, debhelper (>= 5), po-debconf
 
 Package: ofbiz-framework
@@ -52,7 +52,7 @@ Description: An Open Source E-Commerce System
  automation software providing: ERP, CRM, E-Business / E-Commerce,
  SCM, MRP, CMMS/EAM, and more.
  .
- This is a pseudo-package, used to install all of the standard Apache
+ This is a meta-package, used to install all of the standard Apache
  OFBiz components.
 
 Package: ofbiz-specialpurpose

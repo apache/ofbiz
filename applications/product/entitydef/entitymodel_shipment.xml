@@ -603,7 +603,7 @@ under the License.
       <relation type="one" fk-name="SHPMNT_PRTNHDR" title="Primary" rel-entity-name="ReturnHeader">
         <key-map field-name="primaryReturnId" rel-field-name="returnId"/>
       </relation>
-      <relation type="one" rel-entity-name="PicklistBin">
+      <relation type="one" fk-name="SHPMNT_PKLSTBIN" rel-entity-name="PicklistBin">
           <key-map field-name="picklistBinId"/>
       </relation>
       <relation type="one-nofk" title="Primary" rel-entity-name="OrderItemShipGroup">
@@ -883,6 +883,7 @@ under the License.
       <field name="saveCertInfo" type="short-varchar"><description>Setting to save files needed for UPS certification (true|false)</description></field>
       <field name="saveCertPath" type="value"><description>UPS file certificate path</description></field>
       <field name="shipperPickupType" type="short-varchar"><description>Shipper Default Pickup Type</description></field>
+      <field name="customerClassification" type="short-varchar"><description>Customer Classification</description></field>
       <field name="maxEstimateWeight" type="fixed-point"><description>Estimate split into packages</description></field>
       <field name="minEstimateWeight" type="fixed-point"><description>Minimum weight for a package</description></field>
       <field name="codAllowCod" type="value"><description>All shipment package items are from orders which have been fully paid via EXT_COD</description></field>
@@ -902,10 +903,12 @@ under the License.
             title="USPS Shipment Gateway Configuration">
       <field name="shipmentGatewayConfigId" type="id-ne"></field>
       <field name="connectUrl" type="value"><description>USPS Connection URL</description></field>
+      <field name="connectUrlLabels" type="value"><description>USPS Connection URL for Labels</description></field>
       <field name="connectTimeout" type="numeric"><description>Timeout in seconds</description></field>
       <field name="accessUserId" type="value" encrypt="true"><description>USPS Access User ID</description></field>
       <field name="accessPassword" type="value" encrypt="true"><description>USPS Access Password</description></field>
       <field name="maxEstimateWeight" type="numeric"><description>Estimate split into packages</description></field>
+      <field name="test" type="short-varchar"><description>Test/Production mode</description></field>
       <prim-key field="shipmentGatewayConfigId"/>
       <relation type="one" fk-name="SGUSPS_SGC" rel-entity-name="ShipmentGatewayConfig">
         <key-map field-name="shipmentGatewayConfigId"/>

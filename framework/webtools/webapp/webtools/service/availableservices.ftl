@@ -62,7 +62,7 @@ under the License.
           </tr>
           <tr>
             <td class="label">${uiLabelMap.WebtoolsExportable}</td>
-            <td>${selectedServiceMap.export}<#if selectedServiceMap.export = "True">&nbsp;(<a href='<@ofbizUrl>${url}?sel_service_name=${selectedServiceMap.serviceName}&amp;show_wsdl=true</@ofbizUrl>'>${uiLabelMap.WebtoolsShowShowWSDL}</a>)</#if></td>
+            <td>${selectedServiceMap.export}<#if selectedServiceMap.exportBool = "true">&nbsp;(<a href='<@ofbizUrl>${url}?sel_service_name=${selectedServiceMap.serviceName}&amp;show_wsdl=true</@ofbizUrl>'>${uiLabelMap.WebtoolsShowShowWSDL}</a>)</#if></td>
             <td class="label">${uiLabelMap.WebtoolsLocation}</td>
             <td><a href='<@ofbizUrl>${url}?constraint=location@${selectedServiceMap.location}</@ofbizUrl>'>${selectedServiceMap.location}</a></td>
           </tr>
@@ -93,7 +93,7 @@ under the License.
 
     <div class="screenlet">
       <div class="screenlet-title-bar">
-        <h3>${uiLabelMap.CommonSecurityGroups}</h3>
+        <h3>${uiLabelMap.SecurityGroups}</h3>
       </div>
       <#if selectedServiceMap.permissionGroups != 'NA'>
         <table class="basic-table" cellspacing='0'>
@@ -271,14 +271,21 @@ under the License.
     <#-- End if service has ECA's -->
 
     <#list selectedServiceMap.allParamsList?if_exists as paramList>
+      <style type="text/css">
+        .param-table tr td {
+          width: 12.5%;
+          vertical-align: top;
+        }
+      </style>
       <div class="screenlet">
         <div class="screenlet-title-bar">
           <h3>${paramList.title}</h3>
         </div>
         <#if paramList.paramList?exists && paramList.paramList?has_content>
-          <table class="basic-table" cellspacing='0'>
+          <table class="basic-table param-table" cellspacing='0'>
               <tr class="header-row">
                 <td>${uiLabelMap.WebtoolsParameterName}</td>
+                <td>${uiLabelMap.CommonDescription}</td>
                 <td>${uiLabelMap.WebtoolsOptional}</td>
                 <td>${uiLabelMap.CommonType}</td>
                 <#-- <td>Default Value</td> -->
@@ -290,6 +297,7 @@ under the License.
               <#list paramList.paramList as modelParam>
                 <tr>
                   <td>${modelParam.name?if_exists}</td>
+                  <td>${modelParam.description?if_exists}</td>
                   <td>${modelParam.optional?if_exists}</td>
                   <td>${modelParam.type?if_exists}</td>
                   <#-- <td>[${modelParam.defaultValue?if_exists}]</td> -->

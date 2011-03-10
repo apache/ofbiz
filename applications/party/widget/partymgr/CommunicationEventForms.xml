@@ -65,10 +65,10 @@ under the License.
 
         <!-- this is an example of how to display different types of contact mech to the user -->
         <field name="contactMechIdFrom" title="${uiLabelMap.PartyFromContactMech}" position="1">
-            <lookup target-form-name="LookupPreferredContactMech" target-parameter="partyIdFrom"/>
+            <lookup target-form-name="LookupPreferredContactMech" description-field-name="partyIdFrom" target-parameter="partyIdFrom"/>
         </field>
         <field name="contactMechIdTo" title="${uiLabelMap.PartyToContactMech}" position="2">
-            <lookup target-form-name="LookupPreferredContactMech" target-parameter="partyIdTo"/>
+            <lookup target-form-name="LookupPreferredContactMech" description-field-name="partyIdTo" target-parameter="partyIdTo"/>
         </field>
 
         <field name="roleTypeIdFrom" position="1">
@@ -236,7 +236,7 @@ under the License.
         <field name="partyIdFrom" use-when="communicationEvent.get(&quot;partyIdFrom&quot;)!=null">
             <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${firstName} ${middleName} ${lastName} ${groupName} (${contactMechFrom.infoString})">
                 <sub-hyperlink description=" [${communicationEvent.partyIdFrom}]" target="/partymgr/control/viewprofile" target-type="inter-app">
-                    <parameter param-name="partyId" from-field="partyIdFrom"/>
+                    <parameter param-name="partyId" from-field="communicationEvent.partyIdFrom"/>
                 </sub-hyperlink>
             </display-entity>
         </field>
@@ -349,9 +349,9 @@ under the License.
         <field name="communicationEventId" position="1"><text-find/></field>
         <field name="parentCommEventId" position="2"><text-find/></field>
         <!-- <field name="origCommEventId"><text-find/></field-->
-        <field name="partyIdFrom" position="1" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.CommonFrom}"><lookup target-form-name="LookupPartyName"/></field>
-        <field name="partyIdTo" position="2" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.CommonTo}"><lookup target-form-name="LookupPartyName"/></field>
-        <field name="partyId" position="1" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.PartyAnyRole}"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="partyIdFrom" position="1" title="${uiLabelMap.CommonPartyId} ${uiLabelMap.CommonFrom}"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="partyIdTo" position="2" title="${uiLabelMap.CommonPartyId} ${uiLabelMap.CommonTo}"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="partyId" position="1" title="${uiLabelMap.CommonPartyId} ${uiLabelMap.PartyAnyRole}"><lookup target-form-name="LookupPartyName"/></field>
         <field name="roleTypeId" position="2">
             <drop-down allow-empty="true">
                 <entity-options description="${description}" entity-name="RoleType">
@@ -419,7 +419,7 @@ under the License.
         <field name="statusId">
             <display-entity description="${description}" entity-name="StatusItem" key-field-name="statusId"/>
         </field>
-        <field name="partyId" title="${uiLabelMap.CommonPartyID}">
+        <field name="partyId" title="${uiLabelMap.CommonPartyId}">
             <display-entity description="${firstName} ${middleName} ${lastName} ${groupName}" entity-name="PartyNameView" key-field-name="partyId">
                 <sub-hyperlink target="/partymgr/control/viewprofile" description="[${partyIdFrom}]" target-type="inter-app">
                     <parameter param-name="partyId" from-field="partyIdFrom"/>
@@ -441,9 +441,9 @@ under the License.
         <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
         <field name="orderId" position="1"><text-find/></field>
         <field name="communicationEventId" position="1"><text-find/></field>
-        <field name="partyIdFrom" position="1" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.CommonFrom}"><lookup target-form-name="LookupPartyName"/></field>
-        <field name="partyIdTo" position="2" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.CommonTo}"><lookup target-form-name="LookupPartyName"/></field>
-        <field name="partyId" position="1" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.PartyAnyRole}"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="partyIdFrom" position="1" title="${uiLabelMap.CommonPartyId} ${uiLabelMap.CommonFrom}"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="partyIdTo" position="2" title="${uiLabelMap.CommonPartyId} ${uiLabelMap.CommonTo}"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="partyId" position="1" title="${uiLabelMap.CommonPartyId} ${uiLabelMap.PartyAnyRole}"><lookup target-form-name="LookupPartyName"/></field>
         <field name="communicationEventTypeId" position="2">
             <drop-down allow-empty="true">
                 <entity-options description="${description}" entity-name="CommunicationEventType" key-field-name="communicationEventTypeId"/>
@@ -524,14 +524,14 @@ under the License.
         <field name="communicationEventTypeId">
             <display-entity entity-name="CommunicationEventType" description="${description}"/>
         </field>
-        <field name="partyIdFrom" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.CommonFrom}" sort-field="true">
+        <field name="partyIdFrom" title="${uiLabelMap.CommonPartyId} ${uiLabelMap.CommonFrom}" sort-field="true">
             <display-entity description="${firstName} ${middleName} ${lastName} ${groupName}" entity-name="PartyNameView" key-field-name="partyId">
                 <sub-hyperlink target="/partymgr/control/viewprofile" description="[${partyIdFrom}]" target-type="inter-app">
                     <parameter param-name="partyId" from-field="partyIdFrom"/>
                 </sub-hyperlink>
             </display-entity>
         </field>
-        <field name="partyIdTo" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.CommonTo}" sort-field="true">
+        <field name="partyIdTo" title="${uiLabelMap.CommonPartyId} ${uiLabelMap.CommonTo}" sort-field="true">
             <display-entity description="${firstName} ${middleName} ${lastName} ${groupName}" entity-name="PartyNameView" key-field-name="partyId">
                 <sub-hyperlink target="/partymgr/control/viewprofile" description="[${partyIdTo}]" target-type="inter-app">
                     <parameter param-name="partyId" from-field="partyIdTo"/>
@@ -918,7 +918,7 @@ under the License.
         <field name="delContentDataResource"><hidden value="Y"/></field>
         <field name="communicationEventId"><hidden/></field>
         <field name="subject" widget-style="buttontext" widget-area-style="fieldWidth300">
-            <hyperlink description="${subject}" target="${parameters._LAST_VIEW_NAME_}">
+            <hyperlink description="${subject}" target="${parameters._LAST_VIEW_NAME_}" also-hidden="true">
                 <parameter param-name="communicationEventId"/>
                 <parameter param-name="partyId"/>
                 <parameter param-name="my" value="My"/>
@@ -981,10 +981,10 @@ under the License.
         </field>
     </form>
     <form name="EditCommPortletParams" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml">
-        <field name="communicationPartyId" entry-name="attributeMap.communicationPartyId">
+        <field name="communicationPartyId">
             <lookup target-form-name="LookupPartyName" default-value="${userLogin.partyId}"/>
         </field>
-        <field name="internalNotesOnly" entry-name="attributeMap.internalNotesOnly">
+        <field name="internalNotesOnly">
             <drop-down>
                 <option key="false" description="${uiLabelMap.CommonFalse}"/>
                 <option key="true" description="${uiLabelMap.CommonTrue}"/>

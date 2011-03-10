@@ -195,6 +195,16 @@ under the License.
         <key-map field-name="geoAssocTypeId"/>
       </relation>
     </entity>
+    <view-entity entity-name="GeoAssocAndGeoFrom" package-name="org.ofbiz.common.geo">
+        <member-entity entity-alias="GA" entity-name="GeoAssoc"/>
+        <member-entity entity-alias="GFR" entity-name="Geo"/>
+        <alias-all entity-alias="GFR"/>
+        <alias entity-alias="GA" name="geoIdTo"/>
+        <alias entity-alias="GA" name="geoAssocTypeId"/>
+        <view-link entity-alias="GA" rel-entity-alias="GFR">
+            <key-map field-name="geoId"/>
+        </view-link>
+    </view-entity>
     <view-entity entity-name="GeoAssocAndGeoTo" package-name="org.ofbiz.common.geo">
         <member-entity entity-alias="GA" entity-name="GeoAssoc"/>
         <member-entity entity-alias="GTO" entity-name="Geo"/>
@@ -671,12 +681,20 @@ under the License.
         <field name="portalPageId" type="id-ne"></field>
         <field name="portalPageName" type="name"></field>
         <field name="description" type="description"></field>
+        <!-- defined in an extend in content component to avoid dependencies between common and content
+        <field name="helpContentId" type="id"><description>Used to give contentId which will be shown when help on this page will be called</description></field>
+         -->
         <field name="ownerUserLoginId" type="id"></field>
         <field name="originalPortalPageId" type="id"><description>The system portal page this page is derived from</description></field>
         <field name="parentPortalPageId" type="id"><description>the parent this page is belonging to, normally the startpage of the portal page group</description></field>
         <field name="sequenceNum" type="numeric"></field>
         <field name="securityGroupId" type="id"></field>
         <prim-key field="portalPageId"/>
+        <!-- defined in an extend in content component to avoid dependencies between common and content
+        <relation type="one" fk-name="PORTPAL_HELP_CONTENT" rel-entity-name="Content">
+          <key-map field-name="helpContentId" rel-field-name="contentId"/>
+        </relation>
+        -->
         <relation type="one" fk-name="PortPage_PARENT" title="Parent" rel-entity-name="PortalPage">
           <key-map field-name="parentPortalPageId" rel-field-name="portalPageId"/>
         </relation>
@@ -738,7 +756,7 @@ under the License.
             <key-map field-name="portalPortletId"/>
         </view-link>
     </view-entity>
-    <entity entity-name="PortletAttribute" package-name="org.ofbiz.common.portal" title="Product Attribute Entity">
+    <entity entity-name="PortletAttribute" package-name="org.ofbiz.common.portal" title="Allows to set different attribute values for each instance of the same portlet">
         <field name="portalPageId" type="id-ne"></field>
         <field name="portalPortletId" type="id-ne"></field>
         <field name="portletSeqId" type="id-ne"></field>

@@ -357,6 +357,7 @@ if (selectedService) {
         engineName = curServiceModel.engineName ?: "NA";
         defaultEntityName = curServiceModel.defaultEntityName ?: "NA";
         export = curServiceModel.export ? uiLabelMap.CommonTrue : uiLabelMap.CommonFalse;
+        exportBool = curServiceModel.export ? "true" : "false";
         permissionGroups = curServiceModel.permissionGroups ?: "NA";
         implServices = curServiceModel.implServices ?: "NA";
         overrideParameters = curServiceModel.overrideParameters;
@@ -380,6 +381,7 @@ if (selectedService) {
         curServiceMap.location = location;
         curServiceMap.requireNewTransaction = requireNewTransaction;
         curServiceMap.export = export;
+        curServiceMap.exportBool = exportBool;
 
         if (permissionGroups && !permissionGroups.equals("NA")) {
             permList = new ArrayList(permissionGroups.size());
@@ -421,6 +423,7 @@ if (selectedService) {
             curInParam.internal = curParam.internal ? uiLabelMap.CommonTrue : uiLabelMap.CommonFalse;
             curInParam.mode = curParam.mode;
             curInParam.name = curParam.name;
+            curInParam.description = curParam.description;
             curInParam.optional = curParam.optional ? uiLabelMap.CommonTrue : uiLabelMap.CommonFalse;
             curInParam.type = curParam.type;
             inParamsList.add(curInParam);
@@ -440,6 +443,7 @@ if (selectedService) {
             curOutParam.internal = curParam.internal ? uiLabelMap.CommonTrue : uiLabelMap.CommonFalse;
             curOutParam.mode = curParam.mode;
             curOutParam.name = curParam.name;
+            curOutParam.description = curParam.description;
             curOutParam.optional = curParam.optional ? uiLabelMap.CommonTrue : uiLabelMap.CommonFalse;
             curOutParam.type = curParam.type;
             outParamsList.add(curOutParam);
@@ -458,6 +462,7 @@ if (selectedService) {
                 curOvrPrm.internal = curParam.internal ? uiLabelMap.CommonTrue : uiLabelMap.CommonFalse;
                 curOvrPrm.mode = curParam.mode;
                 curOvrPrm.name = curParam.name;
+                curOvrPrm.description = curParam.description;
                 curOvrPrm.optional = curParam.optional ? uiLabelMap.CommonTrue : uiLabelMap.CommonFalse;
                 curOvrPrm.type = curParam.type;
                 ovrPrmList.add(curOvrPrm);

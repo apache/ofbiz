@@ -33,8 +33,12 @@ under the License.
         <attribute name="sendFrom" type="String" mode="IN" optional="true"/>
         <attribute name="authUser" type="String" mode="IN" optional="true"/>
         <attribute name="authPass" type="String" mode="IN" optional="true"/>
+        <attribute name="port" type="String" mode="IN" optional="true"/>
         <attribute name="sendVia" type="String" mode="IN" optional="true"/>
-        <attribute name="sendType" type="String" mode="IN" optional="true"/>
+        <attribute name="sendType" type="String" mode="IN" optional="true"/>        
+        <attribute name="socketFactoryClass" type="String" mode="IN" optional="true"/>
+        <attribute name="socketFactoryPort" type="String" mode="IN" optional="true"/>
+        <attribute name="socketFactoryFallback" type="String" mode="IN" optional="true"/>        
         <attribute name="sendFailureNotification" mode="IN" type="Boolean" optional="true"/>
         <attribute name="sendPartial" mode="IN" type="Boolean" optional="true"/>
         <attribute name="subject" type="String" mode="INOUT" optional="true" allow-html="safe"/>
@@ -83,6 +87,8 @@ under the License.
         <attribute name="bodyScreenUri" type="String" mode="IN" optional="true"/>
         <attribute name="xslfoAttachScreenLocation" type="String" mode="IN" optional="true"/>
         <attribute name="attachmentName" type="String" mode="IN" optional="true"/>
+        <attribute name="xslfoAttachScreenLocationList" type="List" mode="IN" optional="true"/>
+        <attribute name="attachmentNameList" type="List" mode="IN" optional="true"/>
         <attribute name="bodyParameters" type="Map" mode="IN" optional="true"/>
         <attribute name="webSiteId" type="String" mode="IN" optional="true"/>
         <attribute name="subject" type="String" mode="OUT" optional="true"/>

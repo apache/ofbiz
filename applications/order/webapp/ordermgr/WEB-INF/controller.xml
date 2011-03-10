@@ -264,6 +264,82 @@ under the License.
         <event type="service" invoke="quickShipEntireOrder"/>
         <response name="success" type="request-redirect" value="orderview"><redirect-parameter name="orderId"/></response>
         <response name="error" type="view" value="orderview"/>
+    </request-map>    
+    <request-map uri="createQuoteTerm">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createQuoteTerm"/>
+        <response name="success" type="request-redirect" value="ListQuoteTerms">
+            <redirect-parameter name="quoteId"/>
+        </response>
+        <response name="error" type="request-redirect" value="EditQuoteTerm">
+            <redirect-parameter name="quoteId"/>
+        </response>
+    </request-map>
+    <request-map uri="createQuoteTermFromItem">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createQuoteTerm"/>
+        <response name="success" type="request-redirect" value="EditQuoteItem">
+            <redirect-parameter name="quoteId"/>
+            <redirect-parameter name="quoteItemSeqId"/>
+        </response>
+        <response name="error" type="request-redirect" value="EditQuoteTermItem">
+            <redirect-parameter name="quoteId"/>
+            <redirect-parameter name="quoteItemSeqId"/>
+        </response>
+    </request-map>
+    <request-map uri="updateQuoteTermFromItem">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="updateQuoteTerm"/>
+        <response name="success" type="request-redirect" value="EditQuoteItem">
+            <redirect-parameter name="quoteId"/>
+            <redirect-parameter name="quoteItemSeqId"/>
+        </response>
+        <response name="error" type="request-redirect" value="EditQuoteTermItem">
+            <redirect-parameter name="quoteId"/>
+            <redirect-parameter name="quoteItemSeqId"/>
+            <redirect-parameter name="termTypeId"/>
+            <redirect-parameter name="termDays"/>
+            <redirect-parameter name="textValue"/>
+            <redirect-parameter name="uomId"/>
+            <redirect-parameter name="description"/>
+            <redirect-parameter name="termValue"/>
+        </response>
+    </request-map>    
+    <request-map uri="updateQuoteTerm">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="updateQuoteTerm"/>
+        <response name="success" type="request-redirect" value="ListQuoteTerms">
+            <redirect-parameter name="quoteId"/>
+            <redirect-parameter name="quoteItemSeqId"/>
+        </response>
+        <response name="error" type="request-redirect" value="EditQuoteTerm">
+            <redirect-parameter name="quoteId"/>
+            <redirect-parameter name="quoteItemSeqId"/>
+            <redirect-parameter name="termTypeId"/>
+            <redirect-parameter name="termDays"/>
+            <redirect-parameter name="textValue"/>
+            <redirect-parameter name="uomId"/>
+            <redirect-parameter name="description"/>
+            <redirect-parameter name="termValue"/>
+        </response>
+    </request-map>
+    <request-map uri="deleteQuoteTermFromItem">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="deleteQuoteTerm"/>
+        <response name="success" type="request-redirect" value="EditQuoteItem">
+            <redirect-parameter name="quoteId"/>
+            <redirect-parameter name="quoteItemSeqId"/>
+        </response>
+        <response name="error" type="view" value="EditQuoteItem"/>
+    </request-map>
+    <request-map uri="deleteQuoteTerm">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="deleteQuoteTerm"/>
+        <response name="success" type="request-redirect" value="ListQuoteTerms">
+            <redirect-parameter name="quoteId"/>
+            <redirect-parameter name="quoteItemSeqId"/>
+        </response>
+        <response name="error" type="view" value="ListQuoteTerms"/>
     </request-map>
     <request-map uri="quickDropShipOrder">
         <security https="true" auth="true"/>
@@ -1080,9 +1156,58 @@ under the License.
         <response name="success" type="view" value="PurchasesByOrganizationReport"/>
     </request-map>
     
+    <request-map uri="checkReportBy">
+        <security https="true" auth="true"/>
+        <event type="groovy" path="component://order/webapp/ordermgr/WEB-INF/actions/reports/" invoke="CheckReportBy.groovy"/>
+        <response name="dayPDF" type="request" value="SalesReport.pdf"/>
+        <response name="weekPDF" type="request" value="SalesReportWeek.pdf"/>
+        <response name="monthPDF" type="request" value="SalesReportMonth.pdf"/>
+        <response name="dayExcel" type="request" value="SalesReport.excel"/>
+        <response name="weekExcel" type="request" value="SalesReportWeek.excel"/>
+        <response name="monthExcel" type="request" value="SalesReportMonth.excel"/>
+        <response name="dayHTML" type="request" value="SalesReport.html"/>
+        <response name="weekHTML" type="request" value="SalesReportWeek.html"/>
+        <response name="monthHTML" type="request" value="SalesReportMonth.html"/>
+        <response name="error" type="request-redirect" value="OrderPurchaseReportOptions">
+            <redirect-parameter name="fromDate"/>
+            <redirect-parameter name="reportBy" from="parameters.reportDate"/>
+        </response>
+    </request-map>
     <request-map uri="SalesReport.pdf"><security https="true" auth="true"/>
         <event type="groovy" path="component://order/webapp/ordermgr/WEB-INF/actions/reports/" invoke="SalesReport.groovy"/>
-        <response name="success" type="view" value="SalesOrderReport"/>
+        <response name="success" type="view" value="SalesOrderReportPDF"/>
+    </request-map>
+    <request-map uri="SalesReportWeek.pdf"><security https="true" auth="true"/>
+        <event type="groovy" path="component://order/webapp/ordermgr/WEB-INF/actions/reports/" invoke="SalesReport.groovy"/>
+        <response name="success" type="view" value="SalesOrderReportWeekPDF"/>
+    </request-map>
+    <request-map uri="SalesReportMonth.pdf"><security https="true" auth="true"/>
+        <event type="groovy" path="component://order/webapp/ordermgr/WEB-INF/actions/reports/" invoke="SalesReport.groovy"/>
+        <response name="success" type="view" value="SalesOrderReportMonthPDF"/>
+    </request-map>
+    <request-map uri="SalesReport.excel"><security https="true" auth="true"/>
+        <event type="groovy" path="component://order/webapp/ordermgr/WEB-INF/actions/reports/" invoke="SalesReport.groovy"/>
+        <response name="success" type="view" value="SalesOrderReportExcel"/>
+    </request-map>
+    <request-map uri="SalesReportWeek.excel"><security https="true" auth="true"/>
+        <event type="groovy" path="component://order/webapp/ordermgr/WEB-INF/actions/reports/" invoke="SalesReport.groovy"/>
+        <response name="success" type="view" value="SalesOrderReportWeekExcel"/>
+    </request-map>
+    <request-map uri="SalesReportMonth.excel"><security https="true" auth="true"/>
+        <event type="groovy" path="component://order/webapp/ordermgr/WEB-INF/actions/reports/" invoke="SalesReport.groovy"/>
+        <response name="success" type="view" value="SalesOrderReportMonthExcel"/>
+    </request-map>
+    <request-map uri="SalesReport.html"><security https="true" auth="true"/>
+        <event type="groovy" path="component://order/webapp/ordermgr/WEB-INF/actions/reports/" invoke="SalesReport.groovy"/>
+        <response name="success" type="view" value="SalesOrderReportHTML"/>
+    </request-map>
+    <request-map uri="SalesReportWeek.html"><security https="true" auth="true"/>
+        <event type="groovy" path="component://order/webapp/ordermgr/WEB-INF/actions/reports/" invoke="SalesReport.groovy"/>
+        <response name="success" type="view" value="SalesOrderReportWeekHTML"/>
+    </request-map>
+    <request-map uri="SalesReportMonth.html"><security https="true" auth="true"/>
+        <event type="groovy" path="component://order/webapp/ordermgr/WEB-INF/actions/reports/" invoke="SalesReport.groovy"/>
+        <response name="success" type="view" value="SalesOrderReportMonthHTML"/>
     </request-map>
     <request-map uri="NetBeforeOverheadReport.pdf"><security https="true" auth="true"/>
         <event type="groovy" path="component://order/webapp/ordermgr/WEB-INF/actions/reports/" invoke="NetBeforeOverheadReport.groovy"/>
@@ -1384,13 +1509,13 @@ under the License.
     <request-map uri="createQuote">
         <security https="true" auth="true"/>
         <event type="service" path="" invoke="createQuote"/>
-        <response name="success" type="view" value="EditQuote"/>
+        <response name="success" type="view" value="ViewQuote"/>
         <response name="error" type="view" value="EditQuote"/>
     </request-map>
     <request-map uri="updateQuote">
         <security https="true" auth="true"/>
         <event type="service" path="" invoke="updateQuote"/>
-        <response name="success" type="view" value="EditQuote"/>
+        <response name="success" type="view" value="ViewQuote"/>
         <response name="error" type="view" value="EditQuote"/>
     </request-map>
     <request-map uri="copyQuote">
@@ -1420,12 +1545,15 @@ under the License.
     <request-map uri="createQuoteItem">
         <security https="true" auth="true"/>
         <event type="service" path="" invoke="createQuoteItem"/>
-        <response name="success" type="view" value="EditQuoteItem"/>
+        <response name="success" type="request-redirect" value="ListQuoteItems">
+            <redirect-parameter name="quoteId"/>
+        </response>
     </request-map>
     <request-map uri="updateQuoteItem">
         <security https="true" auth="true"/>
         <event type="service" path="" invoke="updateQuoteItem"/>
-        <response name="success" type="view" value="EditQuoteItem"/>
+        <response name="success" type="view" value="ListQuoteItems"/>
+        <response name="error" type="view" value="EditQuoteItem"/>
     </request-map>
     <request-map uri="removeQuoteItem">
         <security https="true" auth="true"/>
@@ -1563,6 +1691,12 @@ under the License.
         <response name="success" type="view" value="ListOrderHeaders"/>
         <response name="error" type="view" value="ListOrderHeaders"/>
     </request-map>
+    <request-map uri="createOrderItemShipGroup">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createOrderItemShipGroup"/>
+        <response name="success" type="view" value="orderview"/>
+        <response name="error" type="view" value="orderview"/>
+    </request-map>
     <request-map uri="updateOrderItemShipGroup">
         <security https="true" auth="true"/>
         <event type="service" invoke="updateOrderItemShipGroup"/>
@@ -1699,6 +1833,43 @@ under the License.
         <response name="success" type="view" value="showcart"/>
         <response name="error" type="view" value="showcart"/>
     </request-map>
+
+    <request-map uri="clearSearchOptionsHistoryList">
+        <security https="true" auth="true"/>
+        <event type="java" path="org.ofbiz.product.product.ProductSearchSession" invoke="clearSearchOptionsHistoryList"/>
+        <response name="success" type="view" value="advancedsearch"/>
+        <response name="error" type="view" value="advancedsearch"/>
+    </request-map>
+    <request-map uri="setCurrentSearchFromHistory">
+        <security https="true" auth="true"/>
+        <event type="java" path="org.ofbiz.product.product.ProductSearchSession" invoke="setCurrentSearchFromHistory"/>
+        <response name="success" type="view" value="advancedsearch"/>
+        <response name="error" type="view" value="advancedsearch"/>
+    </request-map>
+    <request-map uri="setCurrentSearchFromHistoryAndSearch">
+        <security https="true" auth="true"/>
+        <event type="java" path="org.ofbiz.product.product.ProductSearchSession" invoke="setCurrentSearchFromHistory"/>
+        <response name="success" type="request" value="keywordsearch"/>
+        <response name="error" type="view" value="advancedsearch"/>
+    </request-map>
+
+    <request-map uri="ProductUomDropDownOnly">
+        <security auth="true" https="true"/>
+        <response name="success" type="view" value="ProductUomDropDownOnly" save-last-view="true"/>
+    </request-map>
+    
+    <request-map uri="ListQuoteTerms">
+        <security auth="true" https="true"/>
+        <response name="success" type="view" value="ListQuoteTerms" save-last-view="true"/>
+    </request-map>
+    <request-map uri="EditQuoteTerm">
+        <security auth="true" https="true"/>
+        <response name="success" type="view" value="EditQuoteTerm" save-last-view="true"/>
+    </request-map>
+    <request-map uri="EditQuoteTermItem">
+        <security auth="true" https="true"/>
+        <response name="success" type="view" value="EditQuoteTermItem" save-last-view="true"/>
+    </request-map>
     <!--
         These are just examples of reports developed using JasperReport and not really
         useful reports. In order to run them you'll have to follow the notes in the
@@ -1793,7 +1964,15 @@ under the License.
     <view-map name="OpenOrderItemsReport" type="screen" page="component://order/widget/ordermgr/ReportScreens.xml#OpenOrderItemsReport"/>
     <view-map name="PurchasesByOrganizationReport" type="screenfop" page="component://order/widget/ordermgr/ReportScreens.xml#PurchasesByOrganizationReport" content-type="application/pdf" encoding="none"/>
 
-    <view-map name="SalesOrderReport" type="birt" page="component://order/webapp/ordermgr/reports/SalesReport.rptdesign" content-type="application/pdf"/>
+    <view-map name="SalesOrderReportPDF" type="birt" page="component://order/webapp/ordermgr/reports/SalesReport.rptdesign" content-type="application/pdf"/>
+    <view-map name="SalesOrderReportWeekPDF" type="birt" page="component://order/webapp/ordermgr/reports/SalesReportWeek.rptdesign" content-type="application/pdf"/>
+    <view-map name="SalesOrderReportMonthPDF" type="birt" page="component://order/webapp/ordermgr/reports/SalesReportMonth.rptdesign" content-type="application/pdf"/>
+    <view-map name="SalesOrderReportExcel" type="birt" page="component://order/webapp/ordermgr/reports/SalesReport.rptdesign" content-type="application/vnd.ms-excel"/>
+    <view-map name="SalesOrderReportWeekExcel" type="birt" page="component://order/webapp/ordermgr/reports/SalesReportWeek.rptdesign" content-type="application/vnd.ms-excel"/>
+    <view-map name="SalesOrderReportMonthExcel" type="birt" page="component://order/webapp/ordermgr/reports/SalesReportMonth.rptdesign" content-type="application/vnd.ms-excel"/>
+    <view-map name="SalesOrderReportHTML" type="birt" page="component://order/webapp/ordermgr/reports/SalesReport.rptdesign" content-type="text/html"/>
+    <view-map name="SalesOrderReportWeekHTML" type="birt" page="component://order/webapp/ordermgr/reports/SalesReportWeek.rptdesign" content-type="text/html"/>
+    <view-map name="SalesOrderReportMonthHTML" type="birt" page="component://order/webapp/ordermgr/reports/SalesReportMonth.rptdesign" content-type="text/html"/>
     <view-map name="NetBeforeOverheadOrderReport" type="birt" page="component://order/webapp/ordermgr/reports/NetBeforeOverheadReport.rptdesign" content-type="application/pdf"/>
     <view-map name="ProductDemandOrderReport" type="birt" page="component://order/webapp/ordermgr/reports/ProductDemandReport.rptdesign" content-type="application/pdf"/>
     <view-map name="OrderByReferrerReport" type="birt" page="component://order/webapp/ordermgr/reports/OrderByReferrer.rptdesign" content-type="application/pdf"/>
@@ -1893,5 +2072,9 @@ under the License.
     <view-map name="SendConfirmationMail" type="screen" page="component://order/widget/ordermgr/OrderViewScreens.xml#SendOrderConfirmation"/>
     <view-map name="SendCompletionMail" type="screen" page="component://order/widget/ordermgr/OrderViewScreens.xml#SendOrderCompletion"/>
     <view-map name="ReturnHistory" type="screen" page="component://order/widget/ordermgr/OrderReturnScreens.xml#OrderReturnHistory"/>
+    <view-map name="ProductUomDropDownOnly" type="screen" page="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#ProductUomDropDownOnly"/>
+    <view-map name="EditQuoteTerm" type="screen" page="component://order/widget/ordermgr/QuoteScreens.xml#EditQuoteTerm"/>
+    <view-map name="EditQuoteTermItem" type="screen" page="component://order/widget/ordermgr/QuoteScreens.xml#EditQuoteTermItem"/>
+    <view-map name="ListQuoteTerms" type="screen" page="component://order/widget/ordermgr/QuoteScreens.xml#ListQuoteTerms"/>
     <!-- end of view mappings -->
 </site-conf>

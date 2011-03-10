@@ -472,6 +472,7 @@ public class UtilXml {
                 if (node.getUserData("startLine") != null) {
                     return;
                 }
+                node.setUserData("systemId",locator.getLiteralSystemId(), null);
                 node.setUserData("startLine",locator.getLineNumber(), null);
                 node.setUserData("startColumn",locator.getColumnNumber(), null);
             }
@@ -561,7 +562,9 @@ public class UtilXml {
             parser.setEntityResolver(lr);
             parser.setErrorHandler(eh);
         }
-        parser.parse(new InputSource(is));
+        InputSource inputSource = new InputSource(is);
+        inputSource.setSystemId(docDescription);
+        parser.parse(inputSource);
         document = parser.getDocument();
 
         double totalSeconds = (System.currentTimeMillis() - startTime)/1000.0;
@@ -854,6 +857,20 @@ public class UtilXml {
         else
             return elementValue;
     }
+
+    /** Return a named attribute of a named child node or a default if null. */
+    public static String childElementAttribute(Element element, String childElementName, String attributeName, String defaultValue) {
+        if (element == null) return defaultValue;
+        // get the value of the first element with the given name
+        Element childElement = firstChildElement(element, childElementName);
+        String elementAttribute = elementAttribute(childElement, attributeName, defaultValue);
+
+        if (UtilValidate.isEmpty(elementAttribute))
+            return defaultValue;
+        else
+            return elementAttribute;
+    }
+
 
     /** Return the text (node value) of the first node under this, works best if normalized. */
     public static String elementValue(Element element) {

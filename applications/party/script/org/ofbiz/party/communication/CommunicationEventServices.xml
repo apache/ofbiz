@@ -288,6 +288,7 @@ under the License.
                 </if-not-empty>
                 <!-- add new role -->
                 <set field="newRoleFrom.partyId" from-field="parameters.partyIdFrom"/>
+                <set field="newRoleFrom.contactMechPurposeTypeId" from-field="parameters.contactMechPurposeTypeIdFrom" set-if-empty="false"/>
                 <call-service service-name="getPartyEmail" in-map-name="newRoleFrom">
                     <result-to-field result-name="contactMechId" field="newRoleFrom.contactMechId"/>
                 </call-service>
@@ -340,6 +341,9 @@ under the License.
 
     <simple-method method-name="deleteCommunicationEvent" short-description="Delete a CommunicationEvent">
         <entity-one entity-name="CommunicationEvent" value-field="event"/>
+        <if-empty field="event"><!-- the service can be called multiple times because event can have several recipients-->
+            <return/><!-- ignore if already deleted -->
+        </if-empty>
         <!-- remove related links to content -->
         <get-related value-field="event" relation-name="CommEventContentAssoc" list="contentAssocs"/>
         <if-not-empty field="contentAssocs">
@@ -352,19 +356,26 @@ under the License.
                         <iterate entry="content" list="contents">
                             <remove-related value-field="content" relation-name="ContentRole"/>
                             <remove-value value-field="content"/>
-                            <get-related-one value-field="content" relation-name="DataResource" to-value-field="dataResource"/>
-                            <if-not-empty field="dataResource">
-                                <get-related-one value-field="dataResource" relation-name="ImageDataResource" to-value-field="imageDataResource"/>
-                                <if-not-empty field="imageDataResource">
-                                    <remove-value value-field="imageDataResource"/>
+                            <!-- check first if the content is used on any other communication event if yes, only delete link-->
+                            <entity-and entity-name="CommEventContentAssoc" list="commEvents">
+                                <field-map field-name="contentId" from-field="content.contentId"/>
+                            </entity-and>
+                            <set field="commEventsSize" value="${groovy: return(commEvents.size())}" type="Integer"/>
+                            <if-compare field="commEventsSize" operator="equals" value="1">
+                                <get-related-one value-field="content" relation-name="DataResource" to-value-field="dataResource"/>
+                                <if-not-empty field="dataResource">
+                                    <get-related-one value-field="dataResource" relation-name="ImageDataResource" to-value-field="imageDataResource"/>
+                                    <if-not-empty field="imageDataResource">
+                                        <remove-value value-field="imageDataResource"/>
+                                    </if-not-empty>
+                                    <get-related-one value-field="dataResource" relation-name="ElectronicText" to-value-field="electronicText"/>
+                                    <if-not-empty field="electronicText">
+                                        <remove-value value-field="electronicText"/>
+                                    </if-not-empty>
+                                    <remove-related value-field="dataResource" relation-name="DataResourceRole"/>
+                                    <remove-value value-field="dataResource"/>
                                 </if-not-empty>
-                                <get-related-one value-field="dataResource" relation-name="ElectronicText" to-value-field="electronicText"/>
-                                <if-not-empty field="electronicText">
-                                    <remove-value value-field="electronicText"/>
-                                </if-not-empty>
-                                <remove-related value-field="dataResource" relation-name="DataResourceRole"/>
-                                <remove-value value-field="dataResource"/>
-                            </if-not-empty>
+                            </if-compare>
                         </iterate>
                     </if-not-empty>
                 </if-compare>
@@ -539,7 +550,9 @@ under the License.
                 <field-map field-name="statusIdTo" from-field="parameters.statusId"/>
             </entity-one>
             <if-empty field="statusChange">
-                <add-error><fail-message message="Status is not a valid change; old Status: ${communicationEvent.statusId}, new status: ${parameters.statusId}"/></add-error>
+                <add-error>
+                    <fail-property resource="PartyErrorUiLabels" property="commeventservices.communication_event_status"/>
+                </add-error>
                 <log level="error" message="Cannot change from ${communicationEvent.statusId} to ${parameters.statusId}"/>
                 <check-errors/>
                 <else>
@@ -615,7 +628,9 @@ under the License.
                 <field-map field-name="statusIdTo" from-field="parameters.statusId"/>
             </entity-one>
             <if-empty field="statusChange">
-                <add-error><fail-message message="Status is not a valid change"/></add-error>
+               <add-error>
+                    <fail-property resource="PartyErrorUiLabels" property="commeventservices.communication_event_role_status"/>
+                </add-error>
                 <log level="error" message="Cannot change from ${communicationEventRole.statusId} to ${parameters.statusId}"/>
                 <check-errors/>
                 <else>

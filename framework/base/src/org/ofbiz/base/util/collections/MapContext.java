@@ -25,13 +25,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javolution.lang.Reusable;
 import javolution.context.ObjectFactory;
+import javolution.lang.Reusable;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 import javolution.util.FastSet;
 
-import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilGenerics;
 
 
@@ -227,7 +226,7 @@ public class MapContext<K, V> implements Map<K, V>, Reusable, LocalizedMap<V> {
         for (Map<K, V> curMap: this.stackList) {
             // only return if the curMap contains the key, rather than checking for null; this allows a null at a lower level to override a value at a higher level
             if (curMap.containsKey(name)) {
-                if (curMap instanceof LocalizedMap) {
+                if (curMap instanceof LocalizedMap<?>) {
                     LocalizedMap<V> lmap = UtilGenerics.cast(curMap);
                     return lmap.get(name, locale);
                 } else {
@@ -333,7 +332,7 @@ public class MapContext<K, V> implements Map<K, V>, Reusable, LocalizedMap<V> {
                 fullMapString.append(curEntry.getKey());
                 fullMapString.append("]:");
                 // skip the instances of MapContext to avoid infinite loop
-                if (curEntry.getValue() instanceof MapContext) {
+                if (curEntry.getValue() instanceof MapContext<?, ?>) {
                     fullMapString.append("<Instance of MapContext, not printing to avoid infinite recursion>");
                 } else {
                     fullMapString.append(curEntry.getValue());

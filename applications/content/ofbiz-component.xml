@@ -34,7 +34,7 @@ under the License.
     <entity-resource type="data" reader-name="seed" loader="main" location="data/MimeTypeData.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/MimeTypeTemplate.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/DataCategoryData.xml"/>
-    <entity-resource type="data" reader-name="seed" loader="main" location="data/SeedBlogData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/BlogSeedData.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/TemplateData.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/ContentSecurityData.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/MiscData.xml"/>
@@ -50,7 +50,6 @@ under the License.
     <entity-resource type="data" reader-name="demo" loader="main" location="data/UsersDemoData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoBlogPubPtData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoBlogUsersData.xml"/>
-    <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoBlogMiscData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoBlogEntryData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/WebSitePublishPointData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/CompDocData.xml"/>
@@ -65,6 +64,9 @@ under the License.
     <service-resource type="model" loader="main" location="servicedef/services_website.xml"/>
     <service-resource type="eca" loader="main" location="servicedef/secas.xml"/>
     <service-resource type="mca" loader="main" location="servicedef/mca.xml"/>
+
+    <test-suite loader="main" location="testdef/lucenetests.xml"/>
+
     <webapp name="content"
         title="Content"
         server="default-server"

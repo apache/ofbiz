@@ -115,7 +115,7 @@ public class ProductConfigWrapper implements Serializable {
             basePrice = price;
         }
         questions = FastList.newInstance();
-        if (product.getString("productTypeId") != null && product.getString("productTypeId").equals("AGGREGATED")) {
+        if ("AGGREGATED".equals(product.getString("productTypeId"))) {
             List<GenericValue> questionsValues = delegator.findByAnd("ProductConfig", UtilMisc.toMap("productId", productId), UtilMisc.toList("sequenceNum"));
             questionsValues = EntityUtil.filterByDate(questionsValues);
             Set<String> itemIds = FastSet.newInstance();
@@ -242,7 +242,7 @@ public class ProductConfigWrapper implements Serializable {
         List<ConfigOption> avalOptions = ci.getOptions();
         if (ci.isSingleChoice()) {
             for (int j = 0; j < avalOptions.size(); j++) {
-                ConfigOption oneOption = (ConfigOption)avalOptions.get(j);
+                ConfigOption oneOption = avalOptions.get(j);
                 oneOption.setSelected(false);
                 oneOption.setComments(null);
             }

@@ -25,6 +25,7 @@ import java.util.Map;
 import javolution.util.FastMap;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -56,8 +57,8 @@ import com.ebay.soap.eBLBaseComponents.SellingManagerProductInventoryStatusType;
 import com.ebay.soap.eBLBaseComponents.SellingManagerProductType;
 
 public class EbayStoreInventoryServices {
-    private static final String resource = "EbayUiLabels";
     private static final String module = EbayStoreInventoryServices.class.getName();
+    public static final String resource = "EbayStoreUiLabels";
     private static final String defaultFolderName = "OFBizProducts";
     private static String folderId = null;
     public EbayStoreInventoryServices() {
@@ -75,7 +76,7 @@ public class EbayStoreInventoryServices {
         boolean status = false;
         try {
             if (context.get("productStoreId") == null || context.get("productId") == null || context.get("folderId") == null) {
-                result  = ServiceUtil.returnError("The process was required productStoreId, productId and ebay inventory folderId.");
+                result = ServiceUtil.returnError(UtilProperties.getMessage(resource, "EbayStoreInventoryFolderIdRequired", locale));
                 result.put("productStoreId", context.get("productStoreId"));
                 result.put("facilityId", context.get("facilityId"));
                 result.put("folderId", context.get("folderId"));
@@ -84,7 +85,7 @@ public class EbayStoreInventoryServices {
 
             String productId = (String)context.get("productId");
             String folderId = (String)context.get("folderId");
-            // start upload/update products which selected  to an ebay inventory 
+            // start upload/update products which selected  to an ebay inventory
             if (folderId != null) {
                 GetSellingManagerInventoryCall invenCall = new GetSellingManagerInventoryCall(EbayStoreHelper.getApiContext((String)context.get("productStoreId"), locale, delegator));
                 invenReq = new GetSellingManagerInventoryRequestType();
@@ -112,9 +113,9 @@ public class EbayStoreInventoryServices {
                 }
                 if (status) {
                     Debug.logInfo("Done to updated product ".concat(context.get("productId").toString()), module);
-                    result = ServiceUtil.returnSuccess("Updated ebay store inventory in folder "+context.get("folderId")+" success..");
+                    result = ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, "EbayStoreInventoryFolderIdUpdated", UtilMisc.toMap("folderId", context.get("folderId")), locale));
                 } else {
-                    result = ServiceUtil.returnError("Fail to update ebay store inventory.");
+                    result = ServiceUtil.returnError(UtilProperties.getMessage(resource, "EbayStoreInventoryFolderIdUpdatedFailed", locale));
                 }
             }
         }catch (ApiException e) {
@@ -125,7 +126,7 @@ public class EbayStoreInventoryServices {
             result = ServiceUtil.returnFailure(e.getMessage());
         } catch (GenericEntityException e) {
             result = ServiceUtil.returnFailure(e.getMessage());
-        } 
+        }
         result.put("productStoreId", context.get("productStoreId"));
         result.put("facilityId", context.get("facilityId"));
         result.put("folderId", context.get("folderId"));
@@ -155,7 +156,7 @@ public class EbayStoreInventoryServices {
                 //Must keep productId in SKU NUMBER because ebay allow productId field only long value.
                 sellingManagerProductDetailsType.setCustomLabel(productId);
                 if (ebayProductStoreInventory!=null) sellingManagerProductDetailsType.setQuantityAvailable(ebayProductStoreInventory.getBigDecimal("availableToPromiseListing").intValue());
-                
+
                 productReq.setSellingManagerProductDetails(sellingManagerProductDetailsType);
                 productResp = (AddSellingManagerProductResponseType) productCall.execute(productReq);
                 if (productResp != null && "SUCCESS".equals(productResp.getAck().toString())) {
@@ -208,7 +209,7 @@ public class EbayStoreInventoryServices {
                 sellingManagerProductDetailsType.setProductID(ebayProductId);
 
                 sellingManagerProductDetailsType.setProductName((delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", productId))).getString("internalName"));
-                //Must keep productId in SKU NUMBER because ebay allow productId field only long value. 
+                //Must keep productId in SKU NUMBER because ebay allow productId field only long value.
                 sellingManagerProductDetailsType.setCustomLabel(productId);
                 if (ebayProductStoreInventory!=null) sellingManagerProductDetailsType.setQuantityAvailable(ebayProductStoreInventory.getBigDecimal("availableToPromiseListing").intValue());
 
@@ -243,7 +244,7 @@ public class EbayStoreInventoryServices {
         Delegator delegator = dctx.getDelegator();
         GetSellingManagerInventoryFolderRequestType req = null;
         GetSellingManagerInventoryFolderResponseType resp = null;
-        boolean flag = false; 
+        boolean flag = false;
 
         try {
             if (context.get("productStoreId") != null) {
@@ -269,7 +270,7 @@ public class EbayStoreInventoryServices {
                 } else {
                     EbayStoreHelper.createErrorLogMessage(userLogin, dctx.getDispatcher(), context.get("productStoreId").toString(), resp.getAck().toString(), "GetSellingManagerInventoryFolderCall : getFolderInEbayStoreInventory", resp.getErrors(0).getLongMessage());
                 }
-                result = ServiceUtil.returnSuccess("load ebay store folderId "+folderId+" success..");
+                result = ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, "EbayStoreInventoryFolderIdLoaded", UtilMisc.toMap("folderId", folderId), locale));
             }
         } catch (ApiException e) {
             result = ServiceUtil.returnFailure(e.getMessage());
@@ -351,7 +352,7 @@ public class EbayStoreInventoryServices {
                             ebayProductStoreInventory.put("sold",new BigDecimal(prodInventoryStatus.getQuantitySold()));
                             ebayProductStoreInventory.put("unSold",new BigDecimal(prodInventoryStatus.getQuantityUnsold()));
                             ebayProductStoreInventory.store();
-                            result = ServiceUtil.returnSuccess("Updated inventory status of product ".concat(productId));
+                            result = ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, "EbayStoreInventoryStatusUpdated", UtilMisc.toMap("productId", productId), locale));
                             break;
                         }
                     }

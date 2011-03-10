@@ -19,15 +19,12 @@
 package org.ofbiz.base.util.test;
 
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Exchanger;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.TimeUnit;
 
-import org.ofbiz.base.util.ReferenceCleaner;
 import org.ofbiz.base.lang.SourceMonitored;
 import org.ofbiz.base.test.GenericTestCaseBase;
+import org.ofbiz.base.util.ReferenceCleaner;
 
 @SourceMonitored
 public class ReferenceCleanerTests extends GenericTestCaseBase {
@@ -39,22 +36,19 @@ public class ReferenceCleanerTests extends GenericTestCaseBase {
         assertStaticHelperClass(ReferenceCleaner.class);
         final SynchronousQueue<String> queue = new SynchronousQueue<String>();
         Object obj = new Object();
-        final CountDownLatch softLatch = new CountDownLatch(1);
         ReferenceCleaner.Soft<Object> soft = new ReferenceCleaner.Soft<Object>(obj) {
             public void remove() throws Exception {
                 queue.put("soft");
                 Thread.currentThread().interrupt();
             }
         };
-        final CountDownLatch weakLatch = new CountDownLatch(1);
         ReferenceCleaner.Weak<Object> weak = new ReferenceCleaner.Weak<Object>(obj) {
             public void remove() throws Exception {
                 queue.put("weak");
                 throw new RuntimeException();
             }
         };
-        final CountDownLatch phantomLatch = new CountDownLatch(1);
-        ReferenceCleaner.Phantom<Object> phantom = new ReferenceCleaner.Phantom<Object>(obj) {
+        new ReferenceCleaner.Phantom<Object>(obj) {
             public void remove() throws Exception {
                 queue.put("phantom");
             }

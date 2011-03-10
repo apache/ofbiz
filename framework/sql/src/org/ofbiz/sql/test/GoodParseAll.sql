@@ -33,10 +33,6 @@ FROM
     Party a LEFT JOIN Person b USING partyId
     LEFT JOIN PartyGroup c ON b.partyId = c.partyId
     JOIN PartyRole d ON c.partyId = d.partyId AND c.partyId = d.partyId
-RELATION TYPE one TITLE MainA Person USING partyId
-RELATION TITLE MainB Person USING partyId
-RELATION TYPE one Person USING partyId
-RELATION PartyGroup USING partyId
 WHERE
     a.partyTypeId = 'PERSON'
     AND
@@ -52,8 +48,12 @@ WHERE
     
 HAVING
     b.firstName LIKE '%foo%'
+RELATION TYPE one TITLE MainA Person MAP partyId
+RELATION TITLE MainB Person MAP partyId
+RELATION TYPE one Person MAP partyId
+RELATION PartyGroup MAP partyId
 ORDER BY
-    LOWER(lastName), firstName, birthDate DESC
+    LOWER(lastName), firstName, -birthDate
 OFFSET 5
 LIMIT 10
 ;
@@ -68,6 +68,7 @@ UPDATE Person SET lastName = ('auto-' || partyId), height = 6, width = 5, nickna
 DELETE FROM Person WHERE partyId IN ('a', 'b');
 DELETE FROM Party WHERE partyId IN ('a', 'b');
 CREATE VIEW viewOne AS SELECT a.* FROM Party a;
+CREATE INDEX testIndex ON Party USING btree (partyId);
 /*
 UPDATE Person SET firstName = partyId || '-auto' WHERE partyId IN ('a', 'b');
 */

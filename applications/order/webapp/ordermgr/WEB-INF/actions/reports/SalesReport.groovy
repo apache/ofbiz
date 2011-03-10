@@ -18,14 +18,24 @@
  */
 import org.ofbiz.base.util.*;
 import java.sql.*;
+import java.util.Calendar;
 
 fromDateStr = parameters.fromDate;
-thruDateStr = parameters.thruDate;
+cal = Calendar.getInstance();
+cal.setTime(Date.valueOf(fromDateStr));
+int week = cal.get(Calendar.WEEK_OF_YEAR);
+int month = cal.get(Calendar.MONTH) + 1;
+int year = cal.get(Calendar.YEAR);
 
 birtParameters = [:];
 try {
-    birtParameters.fromDate = Date.valueOf(fromDateStr);
-    birtParameters.thruDate = Date.valueOf(thruDateStr);
+    birtParameters.reportBy = parameters.reportBy;
+    birtParameters.fromDate = (Date.valueOf(fromDateStr))-2;
+    birtParameters.thruDate = Date.valueOf(fromDateStr);
+    birtParameters.lastDate = (Date.valueOf(fromDateStr))-7;
+    birtParameters.thruWeek = week;
+    birtParameters.thruMonth = month;
+    birtParameters.thisYear = year;
 } catch (e) {
     Debug.logError(e, "");
 }

@@ -54,6 +54,7 @@ public final class Joined extends Atom implements Iterable<KeyMap> {
         return joined;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o instanceof Joined) {
             Joined other = (Joined) o;
@@ -76,8 +77,10 @@ public final class Joined extends Atom implements Iterable<KeyMap> {
         tableName.appendTo(sb);
         sb.append(" ON ");
         for (int i = 0; i < keyMaps.size(); i++) {
+            KeyMap keyMap = keyMaps.get(i);
             if (i != 0) sb.append(" AND ");
-            keyMaps.get(i).appendTo(leftAlias, tableName.getAlias(), sb);
+            sb.append(' ').append(leftAlias).append('.').append(keyMap.getLeftFieldName());
+            sb.append(" = ").append(tableName.getAlias()).append('.').append(keyMap.getRightFieldName());
         }
         if (joined != null) {
             joined.appendTo(tableName.getAlias(), sb);

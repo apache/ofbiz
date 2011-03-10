@@ -47,7 +47,10 @@ import org.ofbiz.entity.finder.ByAndFinder;
 import org.ofbiz.entity.finder.ByConditionFinder;
 import org.ofbiz.entity.finder.EntityFinderUtil;
 import org.ofbiz.entity.finder.PrimaryKeyFinder;
-import org.ofbiz.entity.util.EntityListIterator;
+import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.SimpleMethod;
+import org.ofbiz.minilang.method.MethodContext;
+import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.widget.WidgetWorker;
@@ -303,6 +306,17 @@ public abstract class ModelFormAction {
                     Debug.logError(e, errMsg, module);
                     throw new IllegalArgumentException(errMsg);
                 }
+            } else if (location.endsWith(".xml")) {
+                Map<String, Object> localContext = FastMap.newInstance();
+                localContext.putAll(context);
+                DispatchContext ctx = this.modelForm.dispatchContext;
+                MethodContext methodContext = new MethodContext(ctx, localContext, null);
+                try {
+                    SimpleMethod.runSimpleMethod(location, method, methodContext);
+                    context.putAll(methodContext.getResults());
+                } catch (MiniLangException e) {
+                    throw new IllegalArgumentException("Error running simple method at location [" + location + "]", e);
+                }
             } else {
                 throw new IllegalArgumentException("For screen script actions the script type is not yet support for location:" + location);
             }
@@ -392,7 +406,7 @@ public abstract class ModelFormAction {
                 String listName = resultMapListNameExdr.expandString(context);
                 Object listObj = result.get(listName);
                 if (listObj != null) {
-                    if (!(listObj instanceof List) && !(listObj instanceof ListIterator)) {
+                    if (!(listObj instanceof List<?>) && !(listObj instanceof ListIterator<?>)) {
                         throw new IllegalArgumentException("Error in form [" + this.modelForm.getName() + "] calling service with name [" + serviceNameExpanded + "]: the result that is supposed to be a List or ListIterator and is not.");
                     }
                     context.put("listName", listName);
@@ -458,11 +472,17 @@ public abstract class ModelFormAction {
             try {
                 // don't want to do this: context.put("defaultFormResultList", null);
                 finder.runFind(context, WidgetWorker.getDelegator(context));
+                
+                /* NOTE DEJ20100925: this should not be running any more as it causes actions in a list or multi 
+                 * form definition to overwrite the desired list elsewhere, this was the really old way of doing 
+                 * it that was removed a long time ago and needs to stay gone to avoid issues; the form's list 
+                 * should be found by explicitly matching the name:
                 Object obj = context.get(this.actualListName);
                 if (obj != null && ((obj instanceof List) || (obj instanceof EntityListIterator))) {
                     String modelFormListName = modelForm.getListName();
                     context.put(modelFormListName, obj);
                 }
+                 */
             } catch (GeneralException e) {
                 String errMsg = "Error doing entity query by condition: " + e.toString();
                 Debug.logError(e, errMsg, module);
@@ -502,11 +522,17 @@ public abstract class ModelFormAction {
             try {
                 // don't want to do this: context.put("defaultFormResultList", null);
                 finder.runFind(context, WidgetWorker.getDelegator(context));
+                
+                /* NOTE DEJ20100925: this should not be running any more as it causes actions in a list or multi 
+                 * form definition to overwrite the desired list elsewhere, this was the really old way of doing 
+                 * it that was removed a long time ago and needs to stay gone to avoid issues; the form's list 
+                 * should be found by explicitly matching the name:
                 Object obj = context.get(this.actualListName);
                 if (obj != null && ((obj instanceof List) || (obj instanceof EntityListIterator))) {
                     String modelFormListName = modelForm.getListName();
                     context.put(modelFormListName, obj);
                 }
+                 */
             } catch (GeneralException e) {
                 String errMsg = "Error doing entity query by condition: " + e.toString();
                 Debug.logError(e, errMsg, module);
@@ -515,7 +541,3 @@ public abstract class ModelFormAction {
         }
     }
 }
-
-
-
-

@@ -175,11 +175,12 @@ under the License.
     <ProdCatalogCategoryType description="Purchase Allow (One)" prodCatalogCategoryTypeId="PCCT_PURCH_ALLW"/>
     <ProdCatalogCategoryType description="Admin Allow (One)" prodCatalogCategoryTypeId="PCCT_ADMIN_ALLW"/>
     <ProdCatalogCategoryType description="Ebay Root (One)" prodCatalogCategoryTypeId="PCCT_EBAY_ROOT"/>
+    <ProdCatalogCategoryType description="Best Selling (One)" prodCatalogCategoryTypeId="PCCT_BEST_SELL"/>
 
     <ProductAssocType description="Also Bought" hasTable="N" parentTypeId="" productAssocTypeId="ALSO_BOUGHT"/>
     <ProductAssocType description="Upgrade or Up-Sell" hasTable="N" parentTypeId="" productAssocTypeId="PRODUCT_UPGRADE"/>
     <ProductAssocType description="Complementary or Cross-Sell" hasTable="N" parentTypeId="" productAssocTypeId="PRODUCT_COMPLEMENT"/>
-    <ProductAssocType description="Incompatable" hasTable="N" parentTypeId="" productAssocTypeId="PRODUCT_INCOMPATABLE"/>
+    <ProductAssocType description="Incompatible" hasTable="N" parentTypeId="" productAssocTypeId="PRODUCT_INCOMPATABLE"/>
     <ProductAssocType description="New Version, Replacement" hasTable="N" parentTypeId="" productAssocTypeId="PRODUCT_OBSOLESCENCE"/>
     <ProductAssocType description="Actual Product Component" hasTable="N" parentTypeId="" productAssocTypeId="PRODUCT_COMPONENT"/>
     <ProductAssocType description="Equivalent or Substitute" hasTable="N" parentTypeId="" productAssocTypeId="PRODUCT_SUBSTITUTE"/>
@@ -195,6 +196,7 @@ under the License.
     <ProductAssocType description="Engineering Bill of Materials" hasTable="N" parentTypeId="PRODUCT_COMPONENT" productAssocTypeId="ENGINEER_COMPONENT"/>
     <ProductAssocType description="Product Manufactured As" hasTable="N" parentTypeId="" productAssocTypeId="PRODUCT_MANUFACTURED"/>
     <ProductAssocType description="Configurable product instance" hasTable="N" parentTypeId="" productAssocTypeId="PRODUCT_CONF"/>
+    <ProductAssocType description="Alternative Packaging" hasTable="N" parentTypeId="" productAssocTypeId="ALTERNATIVE_PACKAGE"/>
 
     <ProductCategoryType description="Catalog" hasTable="N" parentTypeId="" productCategoryTypeId="CATALOG_CATEGORY"/>
     <ProductCategoryType description="Industry" hasTable="N" parentTypeId="" productCategoryTypeId="INDUSTRY_CATEGORY"/>
@@ -208,6 +210,7 @@ under the License.
     <ProductCategoryType description="Tax" hasTable="N" parentTypeId="" productCategoryTypeId="TAX_CATEGORY"/>
     <ProductCategoryType description="Google Base" hasTable="N" parentTypeId="" productCategoryTypeId="GOOGLE_BASE_CATEGORY"/>
     <ProductCategoryType description="Gift Cards" hasTable="N" parentTypeId="" productCategoryTypeId="GIFT_CARD_CATEGORY"/>
+    <ProductCategoryType description="Best Selling" hasTable="N" parentTypeId="" productCategoryTypeId="BEST_SELL_CATEGORY"/>
 
     <!-- product geo data -->
     <EnumerationType description="Product Geo Data" enumTypeId="PROD_GEO" hasTable="N" parentTypeId=""/>
@@ -254,6 +257,22 @@ under the License.
     <ProductContentType description="Image - Additional View 2" hasTable="N" parentTypeId="" productContentTypeId="ADDITIONAL_IMAGE_2"/>
     <ProductContentType description="Image - Additional View 3" hasTable="N" parentTypeId="" productContentTypeId="ADDITIONAL_IMAGE_3"/>
     <ProductContentType description="Image - Additional View 4" hasTable="N" parentTypeId="" productContentTypeId="ADDITIONAL_IMAGE_4"/>
+    <ProductContentType description="Image - Additional View 1 Small" hasTable="N" parentTypeId="" productContentTypeId="XTRA_IMG_1_SMALL"/>
+    <ProductContentType description="Image - Additional View 1 Medium" hasTable="N" parentTypeId="" productContentTypeId="XTRA_IMG_1_MEDIUM"/>
+    <ProductContentType description="Image - Additional View 1 Large" hasTable="N" parentTypeId="" productContentTypeId="XTRA_IMG_1_LARGE"/>
+    <ProductContentType description="Image - Additional View 1 Detail" hasTable="N" parentTypeId="" productContentTypeId="XTRA_IMG_1_DETAIL"/>
+    <ProductContentType description="Image - Additional View 2 Small" hasTable="N" parentTypeId="" productContentTypeId="XTRA_IMG_2_SMALL"/>
+    <ProductContentType description="Image - Additional View 2 Medium" hasTable="N" parentTypeId="" productContentTypeId="XTRA_IMG_2_MEDIUM"/>
+    <ProductContentType description="Image - Additional View 2 Large" hasTable="N" parentTypeId="" productContentTypeId="XTRA_IMG_2_LARGE"/>
+    <ProductContentType description="Image - Additional View 2 Detail" hasTable="N" parentTypeId="" productContentTypeId="XTRA_IMG_2_DETAIL"/>
+    <ProductContentType description="Image - Additional View 3 Small" hasTable="N" parentTypeId="" productContentTypeId="XTRA_IMG_3_SMALL"/>
+    <ProductContentType description="Image - Additional View 3 Medium" hasTable="N" parentTypeId="" productContentTypeId="XTRA_IMG_3_MEDIUM"/>
+    <ProductContentType description="Image - Additional View 3 Large" hasTable="N" parentTypeId="" productContentTypeId="XTRA_IMG_3_LARGE"/>
+    <ProductContentType description="Image - Additional View 3 Detail" hasTable="N" parentTypeId="" productContentTypeId="XTRA_IMG_3_DETAIL"/>
+    <ProductContentType description="Image - Additional View 4 Small" hasTable="N" parentTypeId="" productContentTypeId="XTRA_IMG_4_SMALL"/>
+    <ProductContentType description="Image - Additional View 4 Medium" hasTable="N" parentTypeId="" productContentTypeId="XTRA_IMG_4_MEDIUM"/>
+    <ProductContentType description="Image - Additional View 4 Large" hasTable="N" parentTypeId="" productContentTypeId="XTRA_IMG_4_LARGE"/>
+    <ProductContentType description="Image - Additional View 4 Detail" hasTable="N" parentTypeId="" productContentTypeId="XTRA_IMG_4_DETAIL"/>
     <ProductContentType description="Add To Cart Label" hasTable="N" parentTypeId="" productContentTypeId="ADDTOCART_LABEL"/>
     <ProductContentType description="Add To Cart Image" hasTable="N" parentTypeId="" productContentTypeId="ADDTOCART_IMAGE"/>
     <ProductContentType description="Short Sales Pitch" hasTable="N" parentTypeId="" productContentTypeId="SHORT_SALES_PITCH"/>
@@ -370,8 +389,10 @@ under the License.
     <Enumeration description="Promotion Recurrence" enumCode="PROMO_RECURRENCE" enumId="PPIP_RECURRENCE" sequenceId="11" enumTypeId="PROD_PROMO_IN_PARAM"/>
     <Enumeration description="Order sub-total X since beginning of current year" enumCode="ORST_YEAR" enumId="PPIP_ORST_YEAR" sequenceId="12" enumTypeId="PROD_PROMO_IN_PARAM"/>
     <Enumeration description="Order sub-total X last year" enumCode="ORST_LAST_YEAR" enumId="PPIP_ORST_LAST_YEAR" sequenceId="13" enumTypeId="PROD_PROMO_IN_PARAM"/>
-    <Enumeration description="Shipping Total" enumCode="ORDER_SHIP_TOTAL" enumId="PPIP_ORDER_SHIPTOTAL" sequenceId="14" enumTypeId="PROD_PROMO_IN_PARAM"/>
-    <Enumeration description="Call Service" enumCode="SERVICE" enumId="PPIP_SERVICE" sequenceId="15" enumTypeId="PROD_PROMO_IN_PARAM"/>
+    <Enumeration description="List Price minus Unit Price (Amount)" enumCode="LPMUP_AMT" enumId="PPIP_LPMUP_AMT" sequenceId="14" enumTypeId="PROD_PROMO_IN_PARAM"/>
+    <Enumeration description="List Price minus Unit Price (Percent)" enumCode="LPMUP_PER" enumId="PPIP_LPMUP_PER" sequenceId="15" enumTypeId="PROD_PROMO_IN_PARAM"/>
+    <Enumeration description="Shipping Total" enumCode="ORDER_SHIP_TOTAL" enumId="PPIP_ORDER_SHIPTOTAL" sequenceId="16" enumTypeId="PROD_PROMO_IN_PARAM"/>
+    <Enumeration description="Call Service" enumCode="SERVICE" enumId="PPIP_SERVICE" sequenceId="17" enumTypeId="PROD_PROMO_IN_PARAM"/>
 
     <EnumerationType description="Product Promotion Condition" enumTypeId="PROD_PROMO_COND" hasTable="N" parentTypeId="PROD_PROMO"/>
     <!-- old style very technical ...
@@ -436,6 +457,7 @@ under the License.
     <ProductPriceActionType description="Percent Of Default Price" productPriceActionTypeId="PRICE_POD"/>
     <ProductPriceActionType description="Percent Of Average Cost" productPriceActionTypeId="PRICE_POAC"/>
     <ProductPriceActionType description="Percent Of Margin" productPriceActionTypeId="PRICE_POM"/>
+    <ProductPriceActionType description="Percent Of Wholesale" productPriceActionTypeId="PRICE_POWHS"/>
     <ProductPriceActionType description="Flat Amount Modify" productPriceActionTypeId="PRICE_FOL"/>
     <ProductPriceActionType description="Flat Amount Override" productPriceActionTypeId="PRICE_FLAT"/>
     <ProductPriceActionType description="Promo Amount Override" productPriceActionTypeId="PRICE_PFLAT"/>
@@ -565,7 +587,53 @@ under the License.
     <WebSite webSiteId="FACILITY" siteName="Facility Manager" visualThemeSetId="BACKOFFICE"/>
 
     <WebAnalyticsType description="Web Analytics" hasTable="N" parentTypeId="" webAnalyticsTypeId="WEB_ANALYTICS"/>
-    <WebAnalyticsType webAnalyticsTypeId="GOOGLE_ANALYTICS" parentTypeId="WEB_ANALYTICS" hasTable="N" description="Google Analytics"/>    
+    <WebAnalyticsType webAnalyticsTypeId="GOOGLE_ANALYTICS" parentTypeId="WEB_ANALYTICS" hasTable="N" description="Google Analytics"/>
     <WebAnalyticsType webAnalyticsTypeId="BING_ANALYTICS" parentTypeId="WEB_ANALYTICS" hasTable="N" description="Bing Analytics"/>
-
+    
+    <!-- Image Management -->
+    <RoleType roleTypeId="IMAGEAPPROVER" hasTable="N" description="Image Approver"/>
+    
+    <ProductContentType description="Image" hasTable="N" parentTypeId="" productContentTypeId="IMAGE"/>
+    <ProductContentType description="Image Thumbnail" hasTable="N" parentTypeId="" productContentTypeId="DEFAULT_IMAGE"/>
+    <ProductContentType description="Frame" hasTable="N" parentTypeId="" productContentTypeId="FRAME"/>
+    
+    <ContentType contentTypeId="IMAGE_FRAME" description="Frame Image"/>
+    
+    <ContentAssocType contentAssocTypeId="IMAGE_THUMBNAIL" description="Image Thumbnail"/>
+    
+    <StatusType description="Image Management" hasTable="N" parentTypeId="" statusTypeId="IMAGE_MANAGEMENT_ST"/>
+    <StatusItem description="Pending" sequenceId="01" statusCode="PENDING" statusId="IM_PENDING" statusTypeId="IMAGE_MANAGEMENT_ST"/>
+    <StatusItem description="Approved" sequenceId="02" statusCode="APPROVED" statusId="IM_APPROVED" statusTypeId="IMAGE_MANAGEMENT_ST"/>
+    <StatusItem description="Rejected" sequenceId="03" statusCode="REJECTED" statusId="IM_REJECTED" statusTypeId="IMAGE_MANAGEMENT_ST"/>
+    
+    <ProductFeatureCategory productFeatureCategoryId="IMAGE" description="Image"/>
+    <ProductFeatureCategory productFeatureCategoryId="TEXT" description="Text"/>
+    
+    <ProductFeature productFeatureId="IMAGE_AVATAR" productFeatureTypeId="SIZE" productFeatureCategoryId="IMAGE" description="100 X 75 (avatar)" defaultSequenceNum="1"/>
+    <ProductFeature productFeatureId="IMAGE_THUMBNAIL" productFeatureTypeId="SIZE" productFeatureCategoryId="IMAGE" description="150 X 112 (thumbnail)" defaultSequenceNum="2"/>
+    <ProductFeature productFeatureId="IMAGE_WEBSITE" productFeatureTypeId="SIZE" productFeatureCategoryId="IMAGE" description="320 X 240 (for websites and email)" defaultSequenceNum="3"/>
+    <ProductFeature productFeatureId="IMAGE_BOARD" productFeatureTypeId="SIZE" productFeatureCategoryId="IMAGE" description="640 X 480 (for message boards)" defaultSequenceNum="4"/>
+    <ProductFeature productFeatureId="IMAGE_MONITOR15" productFeatureTypeId="SIZE" productFeatureCategoryId="IMAGE" description="800 X 600 (15-inch monitor)" defaultSequenceNum="5"/>
+    <ProductFeature productFeatureId="IMAGE_MONITOR17" productFeatureTypeId="SIZE" productFeatureCategoryId="IMAGE" description="1024 X 768 (17-inch monitor)" defaultSequenceNum="6"/>
+    <ProductFeature productFeatureId="IMAGE_MONITOR19" productFeatureTypeId="SIZE" productFeatureCategoryId="IMAGE" description="1280 X 1024 (19-inch monitor)" defaultSequenceNum="7"/>
+    <ProductFeature productFeatureId="IMAGE_MONITOR21" productFeatureTypeId="SIZE" productFeatureCategoryId="IMAGE" description="1600 X 1200 (21-inch monitor)" defaultSequenceNum="8"/>
+    
+    <ProductFeature productFeatureId="TEXT_SMALL" productFeatureTypeId="SIZE" productFeatureCategoryId="TEXT" description="Small" defaultSequenceNum="1"/>
+    <ProductFeature productFeatureId="TEXT_MIDDLE" productFeatureTypeId="SIZE" productFeatureCategoryId="TEXT" description="Middle" defaultSequenceNum="2"/>
+    <ProductFeature productFeatureId="TEXT_LARGE" productFeatureTypeId="SIZE" productFeatureCategoryId="TEXT" description="Large" defaultSequenceNum="3"/>
+    <ProductFeature productFeatureId="TEXT_VERYLARGE" productFeatureTypeId="SIZE" productFeatureCategoryId="TEXT" description="Very Large" defaultSequenceNum="4"/>
+    
+    <ProductFeature productFeatureId="TEXT_WHITE" productFeatureTypeId="COLOR" productFeatureCategoryId="TEXT" description="White" defaultSequenceNum="1"/>
+    <ProductFeature productFeatureId="TEXT_GRAY" productFeatureTypeId="COLOR" productFeatureCategoryId="TEXT" description="Gray" defaultSequenceNum="2"/>
+    <ProductFeature productFeatureId="TEXT_BLACK" productFeatureTypeId="COLOR" productFeatureCategoryId="TEXT" description="Black" defaultSequenceNum="3"/>
+    <ProductFeature productFeatureId="TEXT_RED" productFeatureTypeId="COLOR" productFeatureCategoryId="TEXT" description="Red" defaultSequenceNum="4"/>
+    <ProductFeature productFeatureId="TEXT_GREEN" productFeatureTypeId="COLOR" productFeatureCategoryId="TEXT" description="Green" defaultSequenceNum="5"/>
+    <ProductFeature productFeatureId="TEXT_BLUE" productFeatureTypeId="COLOR" productFeatureCategoryId="TEXT" description="Blue" defaultSequenceNum="6"/>
+    <ProductFeature productFeatureId="TEXT_YELLOW" productFeatureTypeId="COLOR" productFeatureCategoryId="TEXT" description="Yellow" defaultSequenceNum="7"/>
+    
+    <EnumerationType description="Image Reject Reason" enumTypeId="IMAGE_REJECT_REASON" hasTable="N" parentTypeId=""/>
+    <Enumeration description="Re-take Photo" enumCode="RETAKE_PHOTO" enumId="RETAKE_PHOTO" sequenceId="01" enumTypeId="IMAGE_REJECT_REASON"/>
+    <Enumeration description="Remove Logo" enumCode="REMOVE_LOGO" enumId="REMOVE_LOGO" sequenceId="02" enumTypeId="IMAGE_REJECT_REASON"/>
+    <Enumeration description="Other" enumCode="OTHER" enumId="OTHER" sequenceId="03" enumTypeId="IMAGE_REJECT_REASON"/>
+    
 </entity-engine-xml>

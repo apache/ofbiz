@@ -23,7 +23,6 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -518,6 +517,7 @@ public class ModelServiceReader implements Serializable {
             ModelParam param = new ModelParam();
 
             param.name = UtilXml.checkEmpty(attribute.getAttribute("name")).intern();
+            param.description = getCDATADef(attribute, "description");
             param.type = UtilXml.checkEmpty(attribute.getAttribute("type")).intern();
             param.mode = UtilXml.checkEmpty(attribute.getAttribute("mode")).intern();
             param.entityName = UtilXml.checkEmpty(attribute.getAttribute("entity-name")).intern();

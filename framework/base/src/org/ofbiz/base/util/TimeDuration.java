@@ -19,12 +19,15 @@
 package org.ofbiz.base.util;
 
 import java.io.Serializable;
-import com.ibm.icu.util.Calendar;
 
 import org.ofbiz.base.lang.SourceMonitored;
+import org.ofbiz.base.lang.ThreadSafe;
+
+import com.ibm.icu.util.Calendar;
 
 /** An immutable representation of a period of time. */
 @SourceMonitored
+@ThreadSafe
 @SuppressWarnings("serial")
 public class TimeDuration implements Serializable, Comparable<TimeDuration> {
     /** A <code>TimeDuration</code> instance that represents a zero time duration. */
@@ -304,10 +307,10 @@ public class TimeDuration implements Serializable, Comparable<TimeDuration> {
         }
         long units = duration / 0x757B12C00L;
         int years = (int) units;
-        duration -= 0x757B12C00L * (long) years;
+        duration -= 0x757B12C00L * years;
         units = duration / 0x9CA41900L;
         int months = (int) units;
-        duration -= 0x9CA41900L * (long) months;
+        duration -= 0x9CA41900L * months;
         units = duration / 86400000;
         int days = (int) units;
         duration -= 86400000 * (long) days;
@@ -370,8 +373,8 @@ public class TimeDuration implements Serializable, Comparable<TimeDuration> {
      */
     public static long toLong(TimeDuration duration) {
         return
-        (0x757B12C00L * (long) duration.years) +
-        (0x9CA41900L * (long) duration.months) +
+        (0x757B12C00L * duration.years) +
+        (0x9CA41900L * duration.months) +
         (86400000 * (long) duration.days) +
         (3600000 * (long) duration.hours) +
         (60000 * (long) duration.minutes) +

@@ -18,6 +18,9 @@
  */
 package org.ofbiz.sql;
 
+import org.ofbiz.base.lang.SourceMonitored;
+
+@SourceMonitored
 public final class FieldValue extends StaticValue {
     private final String fieldName;
     private final String tableName;
@@ -26,6 +29,7 @@ public final class FieldValue extends StaticValue {
         this(null, fieldName);
     }
 
+    @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
@@ -43,10 +47,12 @@ public final class FieldValue extends StaticValue {
         return fieldName;
     }
 
+    @Override
     public String getDefaultName() {
         return fieldName;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o instanceof FieldValue) {
             FieldValue other = (FieldValue) o;

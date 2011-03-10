@@ -18,8 +18,6 @@
  *******************************************************************************/
 package org.ofbiz.base.concurrent;
 
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -29,16 +27,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
-import org.ofbiz.base.lang.SourceMonitored;
 import org.ofbiz.base.lang.ObjectWrapper;
-import org.ofbiz.base.util.UtilIO;
+import org.ofbiz.base.lang.SourceMonitored;
+import org.ofbiz.base.util.UtilGenerics;
 
 @SourceMonitored
 public abstract class TTLObject<T> implements ObjectWrapper<T> {
     private static final ScheduledExecutorService updateExecutor = ExecutionPool.getNewOptimalExecutor("TTLObject(async-update)");
 
-    private static final <T> T getConfigForClass(ConcurrentHashMap<String, T> config, Class c) {
-        Class ptr = c;
+    private static final <T> T getConfigForClass(ConcurrentHashMap<String, T> config, Class<?> c) {
+        Class<?> ptr = c;
         T value = null;
         while (value == null && ptr != null) {
             value = config.get(ptr.getName());
@@ -49,15 +47,15 @@ public abstract class TTLObject<T> implements ObjectWrapper<T> {
 
     private static final ConcurrentHashMap<String, Long> ttls = new ConcurrentHashMap<String, Long>();
 
-    public static void setDefaultTTLForClass(Class c, long ttl) {
+    public static void setDefaultTTLForClass(Class<?> c, long ttl) {
         ttls.putIfAbsent(c.getName(), ttl);
     }
 
-    public static void setTTLForClass(Class c, long ttl) {
+    public static void setTTLForClass(Class<?> c, long ttl) {
         ttls.put(c.getName(), ttl);
     }
 
-    public static long getTTLForClass(Class c) throws ConfigurationException {
+    public static long getTTLForClass(Class<?> c) throws ConfigurationException {
         Long ttl = getConfigForClass(ttls, c);
         if (ttl != null) return ttl.longValue();
         throw new ConfigurationException("No TTL defined for " + c.getName());
@@ -65,15 +63,15 @@ public abstract class TTLObject<T> implements ObjectWrapper<T> {
 
     private static final ConcurrentHashMap<String, Boolean> inForeground = new ConcurrentHashMap<String, Boolean>();
 
-    public static void setDefaultForegroundForClass(Class c, boolean foreground) {
+    public static void setDefaultForegroundForClass(Class<?> c, boolean foreground) {
         inForeground.putIfAbsent(c.getName(), foreground);
     }
 
-    public static void setForegroundForClass(Class c, boolean foreground) {
+    public static void setForegroundForClass(Class<?> c, boolean foreground) {
         inForeground.put(c.getName(), foreground);
     }
 
-    public static boolean getForegroundForClass(Class c) {
+    public static boolean getForegroundForClass(Class<?> c) {
         Boolean foreground = getConfigForClass(inForeground, c);
         if (foreground != null) return foreground.booleanValue();
         return true;
@@ -84,9 +82,9 @@ public abstract class TTLObject<T> implements ObjectWrapper<T> {
     }
 
     public enum State { INVALID, REGEN, REGENERATING, GENERATE, GENERATING, GENERATING_INITIAL, VALID, ERROR, ERROR_INITIAL, SET }
-    private volatile ValueAndState<T> object = new StandardValueAndState<T>(this, null, null, State.INVALID, 0, null, null);
-    private static final AtomicReferenceFieldUpdater<TTLObject, ValueAndState> objectAccessor = AtomicReferenceFieldUpdater.newUpdater(TTLObject.class, ValueAndState.class, "object");
-    private static final AtomicIntegerFieldUpdater<TTLObject> serialAccessor = AtomicIntegerFieldUpdater.newUpdater(TTLObject.class, "serial");
+    @SuppressWarnings("unchecked")
+    private static final AtomicReferenceFieldUpdater<TTLObject<?>, ValueAndState> objectAccessor = UtilGenerics.cast(AtomicReferenceFieldUpdater.newUpdater(TTLObject.class, ValueAndState.class, "object"));
+    private static final AtomicIntegerFieldUpdater<TTLObject<?>> serialAccessor = UtilGenerics.cast(AtomicIntegerFieldUpdater.newUpdater(TTLObject.class, "serial"));
     protected volatile int serial;
 
     protected static abstract class ValueAndState<T> {
@@ -141,6 +139,7 @@ public abstract class TTLObject<T> implements ObjectWrapper<T> {
         return new StandardValueAndState<T>(this, value, future, state, serial, t, pulse);
     }
 
+    @SuppressWarnings("hiding")
     private class StandardValueAndState<T> extends ValueAndState<T> {
         protected final T value;
 
@@ -149,6 +148,7 @@ public abstract class TTLObject<T> implements ObjectWrapper<T> {
             this.value = value;
         }
 
+        @Override
         protected T getValue() {
             return value;
         }

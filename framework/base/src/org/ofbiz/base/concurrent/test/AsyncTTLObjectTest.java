@@ -23,7 +23,6 @@ import java.util.concurrent.Future;
 
 import org.ofbiz.base.concurrent.TTLObject;
 import org.ofbiz.base.lang.SourceMonitored;
-import org.ofbiz.base.test.GenericTestCaseBase;
 
 @SourceMonitored
 public class AsyncTTLObjectTest extends TTLObjectTest {
@@ -60,7 +59,7 @@ public class AsyncTTLObjectTest extends TTLObjectTest {
         Thread.sleep(300);
         loadData = "4";
         sleepTime = 200;
-        Future<Void> future = schedule(new Callable<Void>() {
+        schedule(new Callable<Void>() {
             public Void call() {
                 object.refresh();
                 return null;

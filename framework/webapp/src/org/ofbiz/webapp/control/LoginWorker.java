@@ -98,7 +98,7 @@ public class LoginWorker {
     }
     public static StringWrapper makeLoginUrl(HttpServletRequest request, String requestName) {
         Map<String, Object> urlParams = UtilHttp.getUrlOnlyParameterMap(request);
-        String queryString = UtilHttp.urlEncodeArgs(urlParams, false);
+        String queryString = UtilHttp.urlEncodeArgs(urlParams);
         String currentView = UtilFormatOut.checkNull((String) request.getAttribute("_CURRENT_VIEW_"));
 
         String loginUrl = "/" + requestName;
@@ -129,7 +129,10 @@ public class LoginWorker {
         synchronized (session) {
             // if the session has a previous key in place, remove it from the master list
             String sesExtKey = (String) session.getAttribute(EXTERNAL_LOGIN_KEY_ATTR);
+
             if (sesExtKey != null) {
+                if (isAjax(request)) return sesExtKey; 
+
                 externalLoginKeys.remove(sesExtKey);
             }
 
@@ -371,11 +374,19 @@ public class LoginWorker {
                 ServletContext servletContext = session.getServletContext();
                 
                 // make that tenant active, setup a new delegator and a new dispatcher
-                String delegatorName = delegator.getDelegatorName() + "#" + tenantId;
+                String delegatorName = delegator.getDelegatorBaseName() + "#" + tenantId;
                 
-                // after this line the delegator is replaced with the new per-tenant delegator
-                delegator = DelegatorFactory.getDelegator(delegatorName);
-                dispatcher = ContextFilter.makeWebappDispatcher(servletContext, delegator);
+                try {
+                    // after this line the delegator is replaced with the new per-tenant delegator
+                    delegator = DelegatorFactory.getDelegator(delegatorName);
+                    dispatcher = ContextFilter.makeWebappDispatcher(servletContext, delegator);
+                } catch (NullPointerException e) {
+                    Debug.logError(e, "Error getting tenant delegator", module);
+                    Map<String, String> messageMap = UtilMisc.toMap("errorMessage", "Tenant [" + tenantId + "]  not found...");
+                    String errMsg = UtilProperties.getMessage(resourceWebapp, "loginevents.following_error_occurred_during_login", messageMap, UtilHttp.getLocale(request));
+                    request.setAttribute("_ERROR_MESSAGE_", errMsg);
+                    return "error";
+                }
                 
                 // NOTE: these will be local for now and set in the request and session later, after we've verified that the user
                 setupNewDelegatorEtc = true;
@@ -843,7 +854,7 @@ public class LoginWorker {
 
                         Map<String, String> x500Map = KeyStoreUtil.getCertX500Map(clientCerts[i]);
                         if (i == 0) {
-                            String cn = (String) x500Map.get("CN");
+                            String cn = x500Map.get("CN");
                             cn = cn.replaceAll("\\\\", "");
                             Matcher m = pattern.matcher(cn);
                             if (m.matches()) {
@@ -925,8 +936,19 @@ public class LoginWorker {
         String externalKey = request.getParameter(LoginWorker.EXTERNAL_LOGIN_KEY_ATTR);
         if (externalKey == null) return "success";
 
-        GenericValue userLogin = (GenericValue) LoginWorker.externalLoginKeys.get(externalKey);
+        GenericValue userLogin = LoginWorker.externalLoginKeys.get(externalKey);
         if (userLogin != null) {
+            //to check it's the right tenant 
+            //in case username and password are the same in different tenants
+            LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
+            Delegator delegator = (Delegator) request.getAttribute("delegator");
+            String oldDelegatorName = delegator.getDelegatorName();
+            ServletContext servletContext = session.getServletContext();
+            if (!oldDelegatorName.equals(userLogin.getDelegator().getDelegatorName())) {
+                delegator = DelegatorFactory.getDelegator(userLogin.getDelegator().getDelegatorName());
+                dispatcher = ContextFilter.makeWebappDispatcher(servletContext, delegator);
+                setWebContextObjects(request, response, delegator, dispatcher);
+            }
             // found userLogin, do the external login...
 
             // if the user is already logged in and the login is different, logout the other user
@@ -1013,4 +1035,9 @@ public class LoginWorker {
         }
         return userLoginSessionMap;
     }
+    
+    public static boolean isAjax(HttpServletRequest request) {
+       return "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+    }
+    
 }

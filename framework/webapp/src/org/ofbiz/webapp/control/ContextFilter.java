@@ -50,10 +50,16 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
+import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilObject;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
+import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.security.Security;
 import org.ofbiz.security.SecurityConfigurationException;
 import org.ofbiz.security.SecurityFactory;
@@ -190,6 +196,8 @@ public class ContextFilter implements Filter {
         }
 
         // test to see if we have come through the control servlet already, if not do the processing
+        String requestPath = null;
+        String contextUri = null;
         if (request.getAttribute(ContextFilter.FORWARDED_FROM_SERVLET) == null) {
             // Debug.logInfo("In ContextFilter.doFilter, FORWARDED_FROM_SERVLET is NOT set", module);
             String allowedPath = config.getInitParameter("allowedPaths");
@@ -202,7 +210,7 @@ public class ContextFilter implements Filter {
 
             if (debug) Debug.log("[Request]: " + httpRequest.getRequestURI(), module);
 
-            String requestPath = httpRequest.getServletPath();
+            requestPath = httpRequest.getServletPath();
             if (requestPath == null) requestPath = "";
             if (requestPath.lastIndexOf("/") > 0) {
                 if (requestPath.indexOf("/") == 0) {
@@ -228,7 +236,7 @@ public class ContextFilter implements Filter {
             if (httpRequest.getPathInfo() != null) {
                 contextUriBuffer.append(httpRequest.getPathInfo());
             }
-            String contextUri = contextUriBuffer.toString();
+            contextUri = contextUriBuffer.toString();
 
             // Verbose Debugging
             if (Debug.verboseOn()) {
@@ -264,6 +272,65 @@ public class ContextFilter implements Filter {
                 }
                 Debug.logWarning(filterMessage, module);
                 return;
+            }
+        }
+        
+        // check if multi tenant is enabled
+        String useMultitenant = UtilProperties.getPropertyValue("general.properties", "multitenant");
+        if ("Y".equals(useMultitenant)) {
+            // get tenant delegator by domain name
+            String serverName = request.getServerName();
+            try {
+                // if tenant was specified, replace delegator with the new per-tenant delegator and set tenantId to session attribute
+                Delegator delegator = getDelegator(config.getServletContext());
+                List<GenericValue> tenants = delegator.findList("Tenant", EntityCondition.makeCondition("domainName", serverName), null, UtilMisc.toList("-createdStamp"), null, false);
+                if (UtilValidate.isNotEmpty(tenants)) {
+                    GenericValue tenant = EntityUtil.getFirst(tenants);
+                    String tenantId = tenant.getString("tenantId");
+                    
+                    // if the request path is a root mount then redirect to the initial path
+                    if (UtilValidate.isNotEmpty(requestPath) && requestPath.equals(contextUri)) {
+                        String initialPath = tenant.getString("initialPath");
+                        if (UtilValidate.isNotEmpty(initialPath) && !"/".equals(initialPath)) {
+                            ((HttpServletResponse)response).sendRedirect(initialPath);
+                            return;
+                        }
+                    }
+                    
+                    // make that tenant active, setup a new delegator and a new dispatcher
+                    String tenantDelegatorName = delegator.getDelegatorBaseName() + "#" + tenantId;
+                    httpRequest.getSession().setAttribute("delegatorName", tenantDelegatorName);
+                
+                    // after this line the delegator is replaced with the new per-tenant delegator
+                    delegator = DelegatorFactory.getDelegator(tenantDelegatorName);
+                    config.getServletContext().setAttribute("delegator", delegator);
+                    
+                    // clear web context objects
+                    config.getServletContext().setAttribute("authorization", null);
+                    config.getServletContext().setAttribute("security", null);
+                    config.getServletContext().setAttribute("dispatcher", null);
+                    
+                    // initialize authorizer
+                    getAuthz();
+                    // initialize security
+                    Security security = getSecurity();
+                    // initialize the services dispatcher
+                    LocalDispatcher dispatcher = getDispatcher(config.getServletContext());
+                    
+                    // set web context objects
+                    httpRequest.getSession().setAttribute("dispatcher", dispatcher);
+                    httpRequest.getSession().setAttribute("security", security);
+                    
+                    request.setAttribute("tenantId", tenantId);
+                }
+                
+                // NOTE DEJ20101130: do NOT always put the delegator name in the user's session because the user may 
+                // have logged in and specified a tenant, and even if no Tenant record with a matching domainName field 
+                // is found this will change the user's delegator back to the base one instead of the one for the 
+                // tenant specified on login 
+                // httpRequest.getSession().setAttribute("delegatorName", delegator.getDelegatorName());
+            } catch (GenericEntityException e) {
+                Debug.logWarning(e, "Unable to get Tenant", module);
             }
         }
 

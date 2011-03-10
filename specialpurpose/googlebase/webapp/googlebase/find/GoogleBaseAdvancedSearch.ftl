@@ -21,18 +21,18 @@ under the License.
 //<![CDATA[
     function selectChange(formId, elementId) {
         if (elementId.id == 'searchProductStoreId') {
-           $('searchCatalogId')[$('searchCatalogId').selectedIndex].value = "";
-           if ($('searchCategoryId').selectedIndex) {
-               $('searchCategoryId')[$('searchCategoryId').selectedIndex].value = "";
+           document.getElementById('searchCatalogId')[document.getElementById('searchCatalogId').selectedIndex].value = "";
+           if (document.getElementById('searchCategoryId').selectedIndex) {
+               document.getElementById('searchCategoryId')[document.getElementById('searchCategoryId').selectedIndex].value = "";
            } else {
-               $('searchCategoryId').value = "";
+               document.getElementById('searchCategoryId').value = "";
            }
         }
         if (elementId.id == 'searchCatalogId') {
-            if ($('searchCategoryId').selectedIndex) {
-               $('searchCategoryId')[$('searchCategoryId').selectedIndex].value = "";
+            if (document.getElementById('searchCategoryId').selectedIndex) {
+               document.getElementById('searchCategoryId')[document.getElementById('searchCategoryId').selectedIndex].value = "";
            } else {
-               $('searchCategoryId').value = "";
+               document.getElementById('searchCategoryId').value = "";
            }
         }
         formId.action="<@ofbizUrl>main</@ofbizUrl>";
@@ -40,14 +40,14 @@ under the License.
     }
     function submit (id) {
       var formId = id;
-      if(!$('searchCatalogId').empty() && !$('searchProductStoreId').empty()){
-          $(formId).submit();
+      if(!jQuery('#searchCatalogId').is(":empty") && !jQuery('#searchProductStoreId').is(":empty")){
+          document.getElementById(formId).submit();
       } else {
-          if($('searchProductStoreId').empty()) {
-               $('productStoreErrorMessage').show();
+          if(jQuery('#searchProductStoreId').is(":empty")) {
+               jQuery('#productStoreErrorMessage').fadeIn("fast");
           }
-          if($('searchCatalogId').empty()) {
-             $('catalogErrorMessage').show();
+          if(jQuery('#searchCatalogId').is(":empty")) {
+             jQuery('#catalogErrorMessage').fadeIn("fast");
           }
       }
     }
@@ -58,7 +58,7 @@ under the License.
     <h3>${uiLabelMap.ProductAdvancedSearchInCategory}</h3>
   </div>
   <div class="screenlet-body">
-    <form id="advToKeywordSearchform" method="post" action="<@ofbizUrl>keywordsearch</@ofbizUrl>" style="margin: 0;">
+    <form name="advToKeywordSearchform" id="advToKeywordSearchform" method="post" action="<@ofbizUrl>keywordsearch</@ofbizUrl>" style="margin: 0;">
       <fieldset>
         <input type="hidden" name="VIEW_SIZE" value="25"/>
         <input type="hidden" name="PAGING" value="Y"/>
@@ -72,7 +72,7 @@ under the License.
               </td>
               <td valign="middle">
                 <div>
-                  <b>"${(searchCategory.description)?if_exists}" [${(searchCategory.productCategoryId)?if_exists}]</b> ${uiLabelMap.ProductIncludeSubCategories}?
+                  <b>"${(searchCategory.description)?if_exists}" [${(searchCategory.productCategoryId)?if_exists}]</b> ${uiLabelMap.ProductIncludeSubCategories}
                   ${uiLabelMap.CommonYes}<input type="radio" name="SEARCH_SUB_CATEGORIES" value="Y" checked="checked"/>
                   ${uiLabelMap.CommonNo}<input type="radio" name="SEARCH_SUB_CATEGORIES" value="N"/>
                 </div>
@@ -84,7 +84,7 @@ under the License.
                 ${uiLabelMap.ProductProductStore}:
               </td>
               <td valign="middle">
-                <select name="productStoreId" id="searchProductStoreId" onchange="javascript:selectChange($('advToKeywordSearchform'), $('searchProductStoreId'));">
+                <select name="productStoreId" id="searchProductStoreId" onchange="javascript:selectChange(document.getElementById('advToKeywordSearchform'), document.getElementById('searchProductStoreId'));">
                   <#if googleBaseConfigList?has_content>
                     <#list googleBaseConfigList as googleBaseConfig>
                       <#assign productStore = delegator.findOne("ProductStore", {"productStoreId" : googleBaseConfig.productStoreId}, true) />
@@ -105,7 +105,7 @@ under the License.
               </td>
               <td valign="middle">
                 <div>
-                  <select name="SEARCH_CATALOG_ID" id="searchCatalogId" onchange="javascript:selectChange($('advToKeywordSearchform'), $('searchCatalogId'));" class="required">
+                  <select name="SEARCH_CATALOG_ID" id="searchCatalogId" onchange="javascript:selectChange(document.getElementById('advToKeywordSearchform'), document.getElementById('searchCatalogId'));" class="required">
                     <#list prodCatalogList as prodCatalog>
                       <#assign displayDesc = prodCatalog.catalogName?default("${uiLabelMap.ProductNoDescription}") />
                       <#if (18 < displayDesc?length)>
@@ -139,7 +139,7 @@ under the License.
                   <#else>
                     <@htmlTemplate.lookupField value="${requestParameters.SEARCH_CATEGORY_ID?if_exists}" formName="advToKeywordSearchform" name="SEARCH_CATEGORY_ID" id="searchCategoryId" fieldFormName="LookupProductCategory"/>
                   </#if>
-                  ${uiLabelMap.ProductIncludeSubCategories}?
+                  ${uiLabelMap.ProductIncludeSubCategories}
                   ${uiLabelMap.CommonYes}<input type="radio" name="SEARCH_SUB_CATEGORIES" value="Y" checked="checked" />
                   ${uiLabelMap.CommonNo}<input type="radio" name="SEARCH_SUB_CATEGORIES" value="N" />
                   ${uiLabelMap.CommonInclude}<input type="radio" name="SEARCH_CATEGORY_EXC" value="" checked="checked" />
@@ -377,7 +377,7 @@ under the License.
           <tr>
             <td align="center" colspan="2">
               <hr />
-              <a href="javascript:submit($('advToKeywordSearchform'));" class="buttontext">${uiLabelMap.CommonFind}</a>
+              <a href="javascript:submit('advToKeywordSearchform');" class="buttontext">${uiLabelMap.CommonFind}</a>
             </td>
           </tr>
         </table>

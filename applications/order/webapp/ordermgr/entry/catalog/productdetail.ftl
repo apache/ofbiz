@@ -82,7 +82,7 @@ ${virtualJavaScript?if_exists}
     }
     function addItem() {
        if (document.addform.add_product_id.value == 'NULL') {
-           alert("Please select all of the required options.");
+           showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.CommonPleaseSelectAllRequiredOptions}");
            return;
        } else {
            if (isVirtual(document.addform.add_product_id.value)) {
@@ -107,7 +107,7 @@ ${virtualJavaScript?if_exists}
         if (detailImageUrl == "_NONE_") {
             hack = document.createElement('span');
             hack.innerHTML="${uiLabelMap.CommonNoDetailImageAvailableToDisplay}";
-            alert(hack.innerHTML);
+            showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.CommonNoDetailImageAvailableToDisplay}");
             return;
         }
         detailImageUrl = detailImageUrl.replace(/\&\#47;/g, "/");
@@ -171,6 +171,9 @@ ${virtualJavaScript?if_exists}
             // using the selected index locate the sku
             var sku = document.forms["addform"].elements[name].options[indexSelected].value;
 
+            // display alternative packaging dropdown
+            ajaxUpdateArea("product_uom", "<@ofbizUrl>ProductUomDropDownOnly</@ofbizUrl>", "productId=" + sku);
+
             // set the product ID
             setAddProductId(sku);
 
@@ -187,21 +190,25 @@ ${virtualJavaScript?if_exists}
         msg[0]="Please use correct date format [yyyy-mm-dd]";
 
         var y=x.split("-");
-        if(y.length!=3){ alert(msg[0]);return false; }
-        if((y[2].length>2)||(parseInt(y[2])>31)) { alert(msg[0]); return false; }
+        if(y.length!=3){ showAlert(msg[0]);return false; }
+        if((y[2].length>2)||(parseInt(y[2])>31)) { showAlert(msg[0]); return false; }
         if(y[2].length==1){ y[2]="0"+y[2]; }
-        if((y[1].length>2)||(parseInt(y[1])>12)){ alert(msg[0]); return false; }
+        if((y[1].length>2)||(parseInt(y[1])>12)){ showAlert(msg[0]); return false; }
         if(y[1].length==1){ y[1]="0"+y[1]; }
-        if(y[0].length>4){ alert(msg[0]); return false; }
+        if(y[0].length>4){ showAlert(msg[0]); return false; }
         if(y[0].length<4) {
             if(y[0].length==2) {
                 y[0]="20"+y[0];
             } else {
-                alert(msg[0]);
+                showAlert(msg[0]);
                 return false;
             }
         }
         return (y[0]+"-"+y[1]+"-"+y[2]);
+    }
+
+    function showAlert(msg) {
+        showErrorAlert("${uiLabelMap.CommonErrorMessage2}",msg);
     }
 
     function additemSubmit(){
@@ -259,6 +266,18 @@ ${virtualJavaScript?if_exists}
             block2.style.display = "none";
         }
     </#if>
+    
+    function displayProductVirtualVariantId(variantId) {
+        document.addform.product_id.value = variantId;
+        var elem = document.getElementById('product_id_display');
+        var txt = document.createTextNode(variantId);
+        if(elem.hasChildNodes()) {
+            elem.replaceChild(txt, elem.firstChild);
+        } else {
+            elem.appendChild(txt);
+        }
+        setVariantPrice(variantId);
+    }
  //-->
  </script>
 
@@ -414,6 +433,12 @@ ${virtualJavaScript?if_exists}
       </#if>
 
       <form method="post" action="<@ofbizUrl>additem<#if requestAttributes._CURRENT_VIEW_?exists>/${requestAttributes._CURRENT_VIEW_}</#if></@ofbizUrl>" name="addform"  style="margin: 0;">
+        <#if requestAttributes.paramMap?has_content>
+          <input type="hidden" name="itemComment" value="${requestAttributes.paramMap.itemComment?if_exists}" />
+          <input type="hidden" name="shipBeforeDate" value="${requestAttributes.paramMap.shipBeforeDate?if_exists}" />
+          <input type="hidden" name="shipAfterDate" value="${requestAttributes.paramMap.shipAfterDate?if_exists}" />
+          <input type="hidden" name="itemDesiredDeliveryDate" value="${requestAttributes.paramMap.itemDesiredDeliveryDate?if_exists}" />
+        </#if>
         <#assign inStock = true>
         <#-- Variant Selection -->
         <#if product.isVirtual?if_exists?upper_case == "Y">
@@ -441,7 +466,7 @@ ${virtualJavaScript?if_exists}
             <div id="addCart2" style="display:block;>
               <span style="white-space: nowrap;"><b>${uiLabelMap.CommonQuantity}:</b></span>&nbsp;
               <input type="text" size="5" value="1" disabled="disabled"/>
-              <a href="javascript:alert('Please select all features first');" class="buttontext"><span style="white-space: nowrap;">${uiLabelMap.OrderAddToCart}</span></a>
+              <a href="javascript:showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.CommonPleaseSelectAllFeaturesFirst}");" class="buttontext"><span style="white-space: nowrap;">${uiLabelMap.OrderAddToCart}</span></a>
               &nbsp;
             </div>
           </#if>
@@ -454,6 +479,7 @@ ${virtualJavaScript?if_exists}
                 </select>
               </div>
             </#list>
+            <span id="product_uom"></span>
             <input type="hidden" name="product_id" value="${product.productId}"/>
             <input type="hidden" name="add_product_id" value="NULL"/>
             <div>
@@ -505,8 +531,8 @@ ${virtualJavaScript?if_exists}
             </div>
             <#if product.productTypeId?if_exists == "ASSET_USAGE">
                 <table width="100%"><tr>
-                <td nowrap="nowrap" align="right">Start Date<br />(yyyy-mm-dd)</td><td><input type="text" size="10" name="reservStart"/><a href="javascript:call_cal_notime(document.addform.reservStart, '${nowTimestamp.toString().substring(0,10)}');"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="Calendar"/></a></td>
-                <td nowrap="nowrap" align="right">End Date<br />(yyyy-mm-dd)</td><td><input type="text" size="10" name="reservEnd"/><a href="javascript:call_cal_notime(document.addform.reservEnd, '${nowTimestamp.toString().substring(0,10)}');"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="Calendar"/></a></td></tr>
+                    <@htmlTemplate.renderDateTimeField name="reservStart" event="" action="" value="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="25" maxlength="30" id="startDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+                    <@htmlTemplate.renderDateTimeField name="reservEnd" event="" action="" value="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="25" maxlength="30" id="endDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                 <tr>
                 <#--td nowrap="nowrap" align="right">Number<br />of days</td><td><input type="textt" size="4" name="reservLength"/></td></tr><tr><td>&nbsp;</td><td align="right" nowrap>&nbsp;</td-->
                 <td nowrap="nowrap" align="right">Number of persons</td><td><input type="text" size="4" name="reservPersons" value="2"/></td>

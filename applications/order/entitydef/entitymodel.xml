@@ -59,6 +59,7 @@ under the License.
       <field name="description" type="description"></field>
       <field name="amount" type="currency-precise"></field>
       <field name="recurringAmount" type="currency-precise"></field>
+      <field name="amountAlreadyIncluded" type="currency-precise"><description>The amount here is already represented in the price, such as VAT taxes.</description></field>
       <field name="productPromoId" type="id"></field>
       <field name="productPromoRuleId" type="id"></field>
       <field name="productPromoActionSeqId" type="id"></field>
@@ -492,8 +493,8 @@ under the License.
       <field name="quantity" type="fixed-point" enable-audit-log="true"></field>
       <field name="cancelQuantity" type="fixed-point"></field>
       <field name="selectedAmount" type="fixed-point"></field>
-      <field name="unitPrice" type="currency-amount" enable-audit-log="true"></field>
-      <field name="unitListPrice" type="currency-amount"></field>
+      <field name="unitPrice" type="currency-precise" enable-audit-log="true"></field>
+      <field name="unitListPrice" type="currency-precise"></field>
       <field name="unitAverageCost" type="currency-amount"></field>
       <field name="unitRecurringPrice" type="currency-amount"></field>
       <field name="isModifiedPrice" type="indicator"></field>
@@ -1495,6 +1496,9 @@ under the License.
       <field name="quoteItemSeqId" type="id-ne"></field>
       <field name="termValue" type="numeric"></field>
       <field name="uomId" type="id"></field>
+      <field name="termDays" type="numeric"></field>
+      <field name="textValue" type="description"></field>
+      <field name="description" type="description"></field>
       <prim-key field="termTypeId"/>
       <prim-key field="quoteId"/>
       <prim-key field="quoteItemSeqId"/>
@@ -2377,6 +2381,7 @@ under the License.
         <field name="destinationFacilityId" type="id"></field>
         <field name="needsInventoryReceive" type="indicator"></field>
         <field name="currencyUomId" type="id-ne"></field>
+        <field name="supplierRmaId" type="id"></field>
         <prim-key field="returnId"/>
         <relation type="one" fk-name="RTN_HEAD_TYPE" rel-entity-name="ReturnHeaderType">
             <key-map field-name="returnHeaderTypeId"/>
@@ -2657,6 +2662,27 @@ under the License.
         <key-map field-name="shipmentId"/>
         <key-map field-name="shipmentItemSeqId"/>
       </relation>
+    </entity>
+
+    <entity entity-name="ReturnContactMech"
+            package-name="org.ofbiz.order.return"
+            never-cache="true"
+            title="Retrun Contact Mechanism Entity">
+        <field name="returnId" type="id-ne"></field>
+        <field name="contactMechPurposeTypeId" type="id-ne"></field>
+        <field name="contactMechId" type="id-ne"></field>
+        <prim-key field="returnId"/>
+        <prim-key field="contactMechPurposeTypeId"/>
+        <prim-key field="contactMechId"/>
+        <relation type="one" fk-name="RETURN_CMECH_HDR" rel-entity-name="ReturnHeader">
+            <key-map field-name="returnId"/>
+        </relation>
+        <relation type="one" fk-name="RETURN_CMECH_CM" rel-entity-name="ContactMech">
+            <key-map field-name="contactMechId"/>
+        </relation>
+        <relation type="one" fk-name="RETURN_CMECH_CMPT" rel-entity-name="ContactMechPurposeType">
+            <key-map field-name="contactMechPurposeTypeId"/>
+        </relation>
     </entity>
 
   <!-- ========================================================= -->

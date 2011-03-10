@@ -25,6 +25,7 @@ under the License.
          elements found in the common-controller.xml file. -->
     <include location="component://common/webcommon/WEB-INF/common-controller.xml"/>
     <include location="component://common/webcommon/WEB-INF/portal-controller.xml"/>
+    <include location="component://example/webapp/birt/WEB-INF/controller.xml"/>
 
     <description>Example Component Site Configuration File</description>
     
@@ -53,15 +54,16 @@ under the License.
     <!-- Example Requests -->
     <request-map uri="FindExample"><security https="true" auth="true"/><response name="success" type="view" value="FindExample"/></request-map>
     <request-map uri="EditExample"><security https="true" auth="true"/><response name="success" type="view" value="EditExample"/></request-map>
+    <request-map uri="EditExampleLayer"><security https="true" auth="true"/><response name="success" type="view" value="EditExampleLayer"/></request-map>
     <request-map uri="ExampleReportHtml"><security https="true" auth="true"/><response name="success" type="view" value="ExampleReportHtml"/></request-map>
     <request-map uri="ExampleReportPdf"><security https="true" auth="true"/><response name="success" type="view" value="ExampleReportPdf"/></request-map>
     <request-map uri="createExample">
         <security https="true" auth="true"/>
         <event type="service" invoke="createExample"/>
-        <response name="success" type="request-redirect" value="EditExample">
+        <response name="success" type="request-redirect" value="FindExample">
             <redirect-parameter name="exampleId"/>
         </response>
-        <response name="error" type="view" value="EditExample"/>
+        <response name="error" type="view" value="FindExample"/>
     </request-map>
     <request-map uri="updateExample">
         <security https="true" auth="true"/>
@@ -191,8 +193,8 @@ under the License.
     <request-map uri="FormWidgetExamples"><security https="true" auth="true"/><response name="success" type="view" value="FormWidgetExamples"/></request-map>
 
     <request-map uri="LookupExampleFeature"><security https="true" auth="true"/><response name="success" type="view" value="LookupExampleFeature"/></request-map>
-    <request-map uri="LookupPartyExample"><security https="true" auth="true"/><response name="success" type="view" value="LookupPartyExample"/></request-map>
-    <request-map uri="LookupPartyExampleByName"><security https="true" auth="true"/><response name="success" type="view" value="LookupPartyExampleByName"/></request-map>
+    <request-map uri="LookupPartyName"><security https="true" auth="true"/><response name="success" type="view" value="LookupPartyName"/></request-map>
+    <request-map uri="LookupPartyGroupByName"><security https="true" auth="true"/><response name="success" type="view" value="LookupPartyGroupByName"/></request-map>
 
     <request-map uri="ListExampleFormOnly"><security https="true" auth="false"/><response name="success" type="view" value="ListExampleFormOnly"/></request-map>
     <request-map uri="CreateExampleFormOnly"><security https="true" auth="false"/><response name="success" type="view" value="CreateExampleFormOnly"/></request-map>
@@ -212,30 +214,18 @@ under the License.
     <request-map uri="ExampleGeoLocationPointSet3"><security https="true" auth="true"/><response name="success" type="view" value="ExampleGeoLocationPointSet3"/></request-map>
     <request-map uri="ExampleGeoLocationPointSet4"><security https="true" auth="true"/><response name="success" type="view" value="ExampleGeoLocationPointSet4"/></request-map>
     <request-map uri="ExampleGeoLocationAddress"><security https="true" auth="true"/><response name="success" type="view" value="ExampleGeoLocationAddress"/></request-map>
+    <request-map uri="ExampleOsmGeoLocationPointSet1"><security https="true" auth="true"/><response name="success" type="view" value="ExampleOsmGeoLocationPointSet1"/></request-map>
+    <request-map uri="ExampleOsmGeoLocationPointSet2"><security https="true" auth="true"/><response name="success" type="view" value="ExampleOsmGeoLocationPointSet2"/></request-map>
+    <request-map uri="ExampleOsmGeoLocationPointSet3"><security https="true" auth="true"/><response name="success" type="view" value="ExampleOsmGeoLocationPointSet3"/></request-map>
+    <request-map uri="ExampleOsmGeoLocationPointSet4"><security https="true" auth="true"/><response name="success" type="view" value="ExampleOsmGeoLocationPointSet4"/></request-map>
 
     <!-- Birt example Requests -->
     <request-map uri="BirtMain">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="BirtMain"/>
     </request-map>
-    <request-map uri="Report">
-        <security https="true" auth="true"/>
-        <response name="success" type="view" value="Report"/>
-    </request-map>
-    <request-map uri="Mail">
-        <security https="true" auth="true"/>
-        <response name="success" type="view" value="Mail"/>
-    </request-map>
-    <request-map uri="sendBirtMail">
-        <security https="true" auth="true"/>
-        <event type="service" invoke="sendBirtMail"/>
-        <response name="success" type="view" value="Mail"/>
-        <response name="error" type="view" value="Mail"/>
-    </request-map>
-    <request-map uri="ViewHandler">
-        <security https="true" auth="true"/>
-        <response name="success" type="view" value="ViewHandler"/>
-    </request-map>
+
+    <!--flot example requests-->
     <request-map uri="ExampleBarChart">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="ExampleBarChart"/>
@@ -251,6 +241,7 @@ under the License.
 
     <view-map name="FindExample" type="screen" page="component://example/widget/example/ExampleScreens.xml#FindExample"/>
     <view-map name="EditExample" type="screen" page="component://example/widget/example/ExampleScreens.xml#EditExample"/>
+    <view-map name="EditExampleLayer" type="screen" page="component://example/widget/example/ExampleScreens.xml#EditExampleLayer"/>
     <view-map name="EditExampleItems" type="screen" page="component://example/widget/example/ExampleScreens.xml#EditExampleItems"/>
     <view-map name="EditExampleFeatureAppls" type="screen" page="component://example/widget/example/ExampleScreens.xml#EditExampleFeatureAppls"/>
     <view-map name="ExampleReportHtml" type="screen" page="component://example/widget/example/ExampleScreens.xml#ExampleReport"/>
@@ -263,8 +254,8 @@ under the License.
     <view-map name="FormWidgetExamples" type="screen" page="component://example/widget/example/FormWidgetExampleScreens.xml#FormWidgetExamples"/>
 
     <view-map name="LookupExampleFeature" type="screen" page="component://example/widget/example/ExampleFeatureScreens.xml#LookupExampleFeature"/>
-    <view-map name="LookupPartyExample" type="screen" page="component://example/widget/example/FormWidgetExampleLookupScreens.xml#LookupParty"/>
-    <view-map name="LookupPartyExampleByName" type="screen" page="component://example/widget/example/FormWidgetExampleLookupScreens.xml#LookupPartyByName"/>
+    <view-map name="LookupPartyName" type="screen" page="component://example/widget/example/FormWidgetExampleLookupScreens.xml#LookupPartyName"/>
+    <view-map name="LookupPartyGroupByName" type="screen" page="component://example/widget/example/FormWidgetExampleLookupScreens.xml#LookupPartyGroupByName"/>
 
     <!-- ajax view mappings -->
     <view-map name="findExampleAjax" type="screen" page="component://example/widget/example/ExampleAjaxScreens.xml#AjaxExample"/>
@@ -277,14 +268,15 @@ under the License.
     <view-map name="ExampleGeoLocationPointSet3" type="screen" page="component://example/widget/example/ExampleScreens.xml#ExampleGeoLocationPointSet3"/>
     <view-map name="ExampleGeoLocationPointSet4" type="screen" page="component://example/widget/example/ExampleScreens.xml#ExampleGeoLocationPointSet4"/>
     <view-map name="ExampleGeoLocationAddress" type="screen" page="component://example/widget/example/ExampleScreens.xml#ExampleGeoLocationAddress"/>
+    <view-map name="ExampleOsmGeoLocationPointSet1" type="screen" page="component://example/widget/example/ExampleScreens.xml#ExampleOsmGeoLocationPointSet1"/>
+    <view-map name="ExampleOsmGeoLocationPointSet2" type="screen" page="component://example/widget/example/ExampleScreens.xml#ExampleOsmGeoLocationPointSet2"/>
+    <view-map name="ExampleOsmGeoLocationPointSet3" type="screen" page="component://example/widget/example/ExampleScreens.xml#ExampleOsmGeoLocationPointSet3"/>
+    <view-map name="ExampleOsmGeoLocationPointSet4" type="screen" page="component://example/widget/example/ExampleScreens.xml#ExampleOsmGeoLocationPointSet4"/>
 
     <!-- Birt example View Mappings -->
     <view-map name="BirtMain" type="screen" page="component://example/widget/example/BirtScreens.xml#main"/>
-    <view-map name="Report" type="screen" page="component://example/widget/example/BirtScreens.xml#Report"/>
-    <view-map name="Mail" type="screen" page="component://example/widget/example/BirtScreens.xml#EditMail"/>
-    <view-map name="ViewHandler" type="birt" page="component://example/webapp/birt/report/product.rptdesign" content-type="application/pdf"/>
 
-    <!-- Flotr view mapping -->
+    <!-- Flot view mapping -->
     <view-map name="ExampleBarChart" page="component://example/widget/example/ExampleScreens.xml#ExampleBarChart" type="screen"/>
     <view-map name="ExamplePieChart" page="component://example/widget/example/ExampleScreens.xml#ExamplePieChart" type="screen"/>
 

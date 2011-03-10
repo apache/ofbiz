@@ -21,25 +21,24 @@ package org.ofbiz.ebaystore;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.Iterator;
-import java.util.Calendar;
 
 import javax.servlet.http.HttpServletRequest;
 
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilDateTime;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.ebay.EbayHelper;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntityException;
@@ -54,7 +53,6 @@ import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.service.calendar.RecurrenceInfo;
 import org.ofbiz.service.calendar.RecurrenceInfoException;
 import org.ofbiz.service.config.ServiceConfigUtil;
-import org.ofbiz.service.job.JobManager;
 
 import com.ebay.sdk.ApiAccount;
 import com.ebay.sdk.ApiContext;
@@ -86,20 +84,15 @@ import com.ebay.soap.eBLBaseComponents.PictureDetailsType;
 import com.ebay.soap.eBLBaseComponents.ReturnPolicyType;
 import com.ebay.soap.eBLBaseComponents.ShipmentTrackingDetailsType;
 import com.ebay.soap.eBLBaseComponents.ShippingDetailsType;
-import com.ebay.soap.eBLBaseComponents.ShippingServiceCodeType;
+import com.ebay.soap.eBLBaseComponents.ShippingLocationDetailsType;
 import com.ebay.soap.eBLBaseComponents.ShippingServiceOptionsType;
 import com.ebay.soap.eBLBaseComponents.ShippingTypeCodeType;
 import com.ebay.soap.eBLBaseComponents.SiteCodeType;
-import com.ebay.soap.eBLBaseComponents.ShippingLocationDetailsType;
 import com.ebay.soap.eBLBaseComponents.TradingRoleCodeType;
 import com.ebay.soap.eBLBaseComponents.VATDetailsType;
-
-import org.ofbiz.ebay.EbayHelper;
-
-import sun.net.www.content.text.Generic;
+import com.ibm.icu.text.SimpleDateFormat;
 
 public class EbayStoreHelper {
-    private static final String configFileName = "ebayStore.properties";
     private static final String module = EbayStoreHelper.class.getName();
     public static final String resource = "EbayStoreUiLabels";
 
@@ -292,7 +285,9 @@ public class EbayStoreHelper {
                 }
             }
             if (UtilValidate.isEmpty(ebayProductPref.getString("autoPrefJobId"))) {
-                if (UtilValidate.isEmpty(serviceName)) return ServiceUtil.returnError("If you add a new job, you have to add serviec name.");
+                if (UtilValidate.isEmpty(serviceName)) {
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "EbayStoreAutoPrefJobEmpty", locale));
+                }
                 /*** RuntimeData ***/
                 String runtimeDataId = null;
                 GenericValue runtimeData = delegator.makeValue("RuntimeData");
@@ -321,7 +316,7 @@ public class EbayStoreHelper {
                 jFields.put("poolId", ServiceConfigUtil.getSendPool());
 
                 // set the loader name
-                jFields.put("loaderName", JobManager.dispatcherName);
+                jFields.put("loaderName", delegator.getDelegatorName());
                 // create the value and store
                 GenericValue jobV;
                 jobV = delegator.makeValue("JobSandbox", jFields);
@@ -355,7 +350,6 @@ public class EbayStoreHelper {
         LocalDispatcher dispatcher = dctx.getDispatcher();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         Delegator delegator = dctx.getDelegator();
-        Locale locale = (Locale) context.get("locale");
         String productStoreId = (String) context.get("productStoreId");
         String autoPrefEnumId = (String) context.get("autoPrefEnumId");
         try {
@@ -377,7 +371,7 @@ public class EbayStoreHelper {
         return result;
     }
 
-    public static void mappedPaymentMethods(Map requestParams, String itemPkCateId, Map<String,Object> addItemObject, ItemType item, HashMap attributeMapList) {
+    public static void mappedPaymentMethods(Map<String,Object> requestParams, String itemPkCateId, Map<String,Object> addItemObject, ItemType item, HashMap<String, Object> attributeMapList) {
         String refName = "itemCateFacade_"+itemPkCateId;
         if (UtilValidate.isNotEmpty(addItemObject) && UtilValidate.isNotEmpty(requestParams)) {
             EbayStoreCategoryFacade cf = (EbayStoreCategoryFacade) addItemObject.get(refName);
@@ -405,10 +399,10 @@ public class EbayStoreHelper {
         }
     }
 
-    public static void mappedShippingLocations(Map requestParams, ItemType item, ApiContext apiContext, HttpServletRequest request, HashMap attributeMapList) {
+    public static void mappedShippingLocations(Map<String, Object> requestParams, ItemType item, ApiContext apiContext, HttpServletRequest request, HashMap<String, Object> attributeMapList) {
         try {
             if (UtilValidate.isNotEmpty(requestParams)) {
-                EbayStoreSiteFacade sf = (EbayStoreSiteFacade) EbayEvents.getSiteFacade(apiContext, request);
+                EbayStoreSiteFacade sf = EbayEvents.getSiteFacade(apiContext, request);
                 Map<SiteCodeType, GeteBayDetailsResponseType> eBayDetailsMap = sf.getEBayDetailsMap();
                 GeteBayDetailsResponseType eBayDetails = eBayDetailsMap.get(apiContext.getSite());
                 ShippingLocationDetailsType[] shippingLocationDetails = eBayDetails.getShippingLocationDetails();
@@ -416,7 +410,7 @@ public class EbayStoreHelper {
                     int i = 0;
                     String[] tempShipLocation = new String[shippingLocationDetails.length];
                     for (ShippingLocationDetailsType shippingLocationDetail : shippingLocationDetails) {
-                        String shippingLocation = (String) shippingLocationDetail.getShippingLocation();
+                        String shippingLocation = shippingLocationDetail.getShippingLocation();
                         String shipParam = (String)requestParams.get("Shipping_".concat(shippingLocation));
                         if ("true".equals(shipParam)) {
                             tempShipLocation[i] = shippingLocation;
@@ -434,9 +428,9 @@ public class EbayStoreHelper {
 
     public static Map<String, Object> exportProductEachItem(DispatchContext dctx, Map<String, Object> context) {
         Map<String,Object> result = FastMap.newInstance();
-        LocalDispatcher dispatcher = (LocalDispatcher) dctx.getDispatcher();
+        LocalDispatcher dispatcher = dctx.getDispatcher();
         Delegator delegator = dctx.getDelegator();
-        Map<String, Object> itemObject = (Map<String, Object>) context.get("itemObject");
+        Map<String, Object> itemObject = UtilGenerics.checkMap(context.get("itemObject"));
         String productListingId = itemObject.get("productListingId").toString();
         AddItemCall addItemCall = (AddItemCall) itemObject.get("addItemCall");
         AddItemRequestType req = new AddItemRequestType();
@@ -470,12 +464,8 @@ public class EbayStoreHelper {
     }
 
     public static Map<String, Object> setEbayProductListingAttribute(DispatchContext dctx, Map<String, Object> context) {
-        Map<String, Object>result = FastMap.newInstance();
-        LocalDispatcher dispatcher = dctx.getDispatcher();
-        GenericValue userLogin = (GenericValue) context.get("userLogin");
         Delegator delegator = dctx.getDelegator();
-        Locale locale = (Locale) context.get("locale");
-        HashMap attributeMapList = (HashMap) context.get("attributeMapList");
+        HashMap<String, Object> attributeMapList = UtilGenerics.cast(context.get("attributeMapList"));
         String productListingId = (String) context.get("productListingId");
         try {
            List<GenericValue> attributeToClears = delegator.findByAnd("EbayProductListingAttribute", UtilMisc.toMap("productListingId", productListingId));
@@ -485,16 +475,12 @@ public class EbayStoreHelper {
                  valueToClear.remove();
               }
            }
-           Set attributeSet = attributeMapList.entrySet();
-           Iterator itr = attributeSet.iterator();
-           while (itr.hasNext()) {
-             Map.Entry attrMap = (Map.Entry) itr.next();
-
-             if (UtilValidate.isNotEmpty(attrMap.getKey())) {
-                 GenericValue ebayProductListingAttribute = delegator.makeValue("EbayProductListingAttribute");
+           for (Map.Entry<String,Object> entry : attributeMapList.entrySet()) {
+              if (UtilValidate.isNotEmpty(entry.getKey())) {
+                  GenericValue ebayProductListingAttribute = delegator.makeValue("EbayProductListingAttribute");
                   ebayProductListingAttribute.set("productListingId", productListingId);
-                  ebayProductListingAttribute.set("attrName", attrMap.getKey().toString());
-                  ebayProductListingAttribute.set("attrValue", attrMap.getValue().toString());
+                  ebayProductListingAttribute.set("attrName", entry.getKey().toString());
+                  ebayProductListingAttribute.set("attrValue", entry.getValue().toString());
                   ebayProductListingAttribute.create();
               }
            }
@@ -661,7 +647,7 @@ public class EbayStoreHelper {
                             AddOrderRequestType addReq = new AddOrderRequestType();
                             AddOrderResponseType addResp = null;
                             OrderType newOrder = new OrderType();
-                            ShippingDetailsType shippingDetail = (ShippingDetailsType) order.getShippingDetails();
+                            ShippingDetailsType shippingDetail = order.getShippingDetails();
                             if (trackingOrders.size() > 0) {
                                 ShipmentTrackingDetailsType[] trackDetails = new ShipmentTrackingDetailsType[trackingOrders.size()];
                                 for (int i = 0; i < trackDetails.length; i++) {
@@ -741,5 +727,10 @@ public class EbayStoreHelper {
             Debug.log("Error from get eBay Inventory data : "+ ex.getMessage());
         }
         return isReserve;
+    }
+
+    public static String convertDate(Date date, Locale locale) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",locale);
+        return simpleDateFormat.format(date);
     }
 }

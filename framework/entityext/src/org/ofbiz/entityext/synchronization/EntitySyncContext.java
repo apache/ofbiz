@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.parsers.ParserConfigurationException;
 
 import javolution.util.FastList;
@@ -41,11 +42,8 @@ import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityConditionList;
-import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.ModelEntity;
-import org.ofbiz.entity.model.ModelViewEntity;
 import org.ofbiz.entity.serialize.SerializeException;
 import org.ofbiz.entity.serialize.XmlSerializer;
 import org.ofbiz.entity.transaction.GenericTransactionException;
@@ -58,7 +56,6 @@ import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceUtil;
-
 import org.xml.sax.SAXException;
 
 /**
@@ -1073,13 +1070,14 @@ public class EntitySyncContext {
     /**
      * Static method to obtain a list of entity names which will be synchronized
      */
-    public static Set getEntitySyncModelNamesToUse(LocalDispatcher dispatcher, String entitySyncId) throws SyncDataErrorException, SyncAbortException {
+    public static Set<String> getEntitySyncModelNamesToUse(LocalDispatcher dispatcher, String entitySyncId) throws SyncDataErrorException, SyncAbortException {
         DispatchContext dctx = dispatcher.getDispatchContext();
         EntitySyncContext ctx = new EntitySyncContext(dctx, UtilMisc.toMap("entitySyncId", entitySyncId));
         return ctx.makeEntityNameToUseSet();
     }
 
     /** This class signifies an abort condition, so the state and such of the EntitySync value in the datasource should not be changed */
+    @SuppressWarnings("serial")
     public static class SyncAbortException extends GeneralServiceException {
         public SyncAbortException() {
             super();
@@ -1102,6 +1100,7 @@ public class EntitySyncContext {
         }
     }
 
+    @SuppressWarnings("serial")
     public static abstract class SyncErrorException extends GeneralServiceException {
         public SyncErrorException() { super(); }
         public SyncErrorException(String str) { super(str); }
@@ -1112,6 +1111,7 @@ public class EntitySyncContext {
     }
 
     /** This class signifies an error condition, so the state of the EntitySync value and the EntitySyncHistory value in the datasource should be changed to reflect the error */
+    @SuppressWarnings("serial")
     public static class SyncOtherErrorException extends SyncErrorException {
         public SyncOtherErrorException() { super(); }
         public SyncOtherErrorException(String str) { super(str); }
@@ -1129,6 +1129,7 @@ public class EntitySyncContext {
     }
 
     /** This class signifies an error condition, so the state of the EntitySync value and the EntitySyncHistory value in the datasource should be changed to reflect the error */
+    @SuppressWarnings("serial")
     public static class SyncDataErrorException extends SyncErrorException {
         public SyncDataErrorException() { super(); }
         public SyncDataErrorException(String str) { super(str); }
@@ -1146,6 +1147,7 @@ public class EntitySyncContext {
     }
 
     /** This class signifies an error condition, so the state of the EntitySync value and the EntitySyncHistory value in the datasource should be changed to reflect the error */
+    @SuppressWarnings("serial")
     public static class SyncServiceErrorException extends SyncErrorException {
         public SyncServiceErrorException() { super(); }
         public SyncServiceErrorException(String str) { super(str); }

@@ -21,8 +21,10 @@ package org.ofbiz.sql;
 import java.util.Iterator;
 import java.util.List;
 
+import org.ofbiz.base.lang.SourceMonitored;
 import org.ofbiz.base.util.StringUtil;
 
+@SourceMonitored
 public final class MathValue extends StaticValue implements Iterable<ConstantValue> {
     private final String op;
     private final List<ConstantValue> values;
@@ -32,6 +34,7 @@ public final class MathValue extends StaticValue implements Iterable<ConstantVal
         this.values = values;
     }
 
+    @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
@@ -40,6 +43,7 @@ public final class MathValue extends StaticValue implements Iterable<ConstantVal
         return op;
     }
 
+    @Override
     public String getDefaultName() {
         return null;
     }
@@ -48,6 +52,7 @@ public final class MathValue extends StaticValue implements Iterable<ConstantVal
         return values.iterator();
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o instanceof MathValue) {
             MathValue other = (MathValue) o;
@@ -59,7 +64,7 @@ public final class MathValue extends StaticValue implements Iterable<ConstantVal
 
     public StringBuilder appendTo(StringBuilder sb) {
         sb.append('(');
-        StringUtil.appendTo(sb, values, " ", null, op);
+        StringUtil.appendTo(sb, values, null, null, " ", op, " ");
         sb.append(')');
         return sb;
     }

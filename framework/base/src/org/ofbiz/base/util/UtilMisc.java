@@ -335,7 +335,7 @@ public class UtilMisc {
     public static <T> Set<T> collectionToSet(Collection<T> c) {
         if (c == null) return null;
         Set<T> theSet = null;
-        if (c instanceof Set) {
+        if (c instanceof Set<?>) {
             theSet = (Set<T>) c;
         } else {
             theSet = FastSet.newInstance();
@@ -419,10 +419,23 @@ public class UtilMisc {
         theSet.add(obj6);
         return theSet;
     }
+    
+    public static <T> Set<T> toSet(T obj1, T obj2, T obj3, T obj4, T obj5, T obj6, T obj7, T obj8) {
+        Set<T> theSet = FastSet.newInstance();
+        theSet.add(obj1);
+        theSet.add(obj2);
+        theSet.add(obj3);
+        theSet.add(obj4);
+        theSet.add(obj5);
+        theSet.add(obj6);
+        theSet.add(obj7);
+        theSet.add(obj8);
+        return theSet;
+    }
 
     public static <T> Set<T> toSet(Collection<T> collection) {
         if (collection == null) return null;
-        if (collection instanceof Set) {
+        if (collection instanceof Set<?>) {
             return (Set<T>) collection;
         } else {
             Set<T> theSet = FastSet.newInstance();
@@ -522,10 +535,25 @@ public class UtilMisc {
         list.add(obj6);
         return list;
     }
+    
+    public static <T> List<T> toList(T obj1, T obj2, T obj3, T obj4, T obj5, T obj6, T obj7, T obj8, T obj9) {
+        List<T> list = FastList.newInstance();
+
+        list.add(obj1);
+        list.add(obj2);
+        list.add(obj3);
+        list.add(obj4);
+        list.add(obj5);
+        list.add(obj6);
+        list.add(obj7);
+        list.add(obj8);
+        list.add(obj9);
+        return list;
+    }
 
     public static <T> List<T> toList(Collection<T> collection) {
         if (collection == null) return null;
-        if (collection instanceof List) {
+        if (collection instanceof List<?>) {
             return (List<T>) collection;
         } else {
             List<T> list = FastList.newInstance();

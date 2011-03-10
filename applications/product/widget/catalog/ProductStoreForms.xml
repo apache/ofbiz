@@ -20,20 +20,22 @@
 
 <forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
-    <form name="FindProductStore" type="list" list-name="productStores"
-        odd-row-style="alternate-row" default-table-style="basic-table">
-        <field name="ProductStoreNameId" title="${uiLabelMap.ProductStoreNameId}" widget-style="buttontext">
-            <hyperlink target="EditProductStore" description="${storeName} [${productStoreId}]">
+    <form name="ListProductStore" type="list" list-name="productStores"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" header-row-style="header-row-2">
+        <actions>
+            <set field="parameters.sortField" from-field="parameters.sortField" default-value="storeName"/>
+            <entity-condition entity-name="ProductStore" use-cache="true" list="productStores">
+                <order-by field-name="${parameters.sortField}"/>
+            </entity-condition>
+        </actions>
+        <field name="productStoreId" title="${uiLabelMap.ProductStoreId}" widget-style="buttontext" sort-field="true">
+            <hyperlink target="EditProductStore" description="${productStoreId}">
                 <parameter param-name="productStoreId"/>
             </hyperlink>
         </field>
-        <field name="title" title="${uiLabelMap.ProductTitle}"><display/></field>
-        <field name="subtitle" title="${uiLabelMap.ProductSubTitle}"><display/></field>
-        <field name="editLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
-            <hyperlink target="EditProductStore" description="${uiLabelMap.CommonEdit}">
-                <parameter param-name="productStoreId"/>
-            </hyperlink>
-        </field>
+        <field name="storeName" title="${uiLabelMap.ProductStoreName}" sort-field="true"><display/></field>
+        <field name="title" title="${uiLabelMap.ProductTitle}" sort-field="true"><display/></field>
+        <field name="subtitle" title="${uiLabelMap.ProductSubTitle}" sort-field="true"><display/></field>
     </form>
     <form name="EditProductStore" type="single" target="updateProductStore" title="" default-map-name="productStore"
         header-row-style="header-row" default-table-style="basic-table">
@@ -119,6 +121,9 @@
         </field>
         <field name="balanceResOnOrderCreation">
             <drop-down allow-empty="false" no-current-selected-key="N"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
+        </field>
+        <field name="showOutOfStockProducts">
+            <drop-down allow-empty="false"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
         </field>
         <field name="oneInventoryFacility">
             <drop-down allow-empty="true" no-current-selected-key="Y"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
@@ -496,7 +501,7 @@
         <field name="emailType" title="${uiLabelMap.CommonEmailType}">
             <drop-down>
                 <entity-options entity-name="Enumeration" key-field-name="enumId" description="${description}">
-                    <entity-constraint name="enumTypeId" value="PRDS_EMAIL"/>
+                    <entity-constraint name="enumTypeId" operator="in" value="PRDS_EMAIL,PARTY_EMAIL"/>
                     <entity-order-by field-name="sequenceId"/>
                 </entity-options>
             </drop-down>
@@ -659,20 +664,10 @@
             <drop-down allow-empty="false" no-current-selected-key="Y"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
         </field>
         <field name="includeGeoId" title="${uiLabelMap.ProductIncludeGeo}" tooltip="${uiLabelMap.ProductIncludeGeoMessage}">
-            <drop-down allow-empty="true">
-                <entity-options entity-name="Geo" key-field-name="geoId" description="${geoName}">
-                    <entity-order-by field-name="geoTypeId"/>
-                    <entity-order-by field-name="geoName"/>
-                </entity-options>
-            </drop-down>
+            <lookup target-form-name="LookupGeo"/>
         </field>
         <field name="excludeGeoId" title="${uiLabelMap.ProductExcludeGeo}" tooltip="${uiLabelMap.ProductExcludeGeoMessage}">
-            <drop-down allow-empty="true">
-                <entity-options entity-name="Geo" key-field-name="geoId" description="${geoName}">
-                    <entity-order-by field-name="geoTypeId"/>
-                    <entity-order-by field-name="geoName"/>
-                </entity-options>
-            </drop-down>
+            <lookup target-form-name="LookupGeo"/>
         </field>
         <field name="includeFeatureGroup" title="${uiLabelMap.ProductIncludeFeature}" tooltip="${uiLabelMap.ProductIncludeFeatureMessage}"><text/></field>
         <field name="excludeFeatureGroup" title="${uiLabelMap.ProductExcludeFeature}" tooltip="${uiLabelMap.ProductExcludeFeatureMessage}"><text/></field>
@@ -756,20 +751,10 @@
             </drop-down>
         </field>
         <field name="fromGeo" title="${uiLabelMap.ProductFromGeo}">
-            <drop-down allow-empty="true">
-                <entity-options entity-name="Geo" key-field-name="geoId" description="${geoName}">
-                    <entity-order-by field-name="geoTypeId"/>
-                    <entity-order-by field-name="geoName"/>
-                </entity-options>
-            </drop-down>
+            <lookup target-form-name="LookupGeo"/>
         </field>
         <field name="toGeo" title="${uiLabelMap.ProductToGeo}">
-            <drop-down allow-empty="true">
-                <entity-options entity-name="Geo" key-field-name="geoId" description="${geoName}">
-                    <entity-order-by field-name="geoTypeId"/>
-                    <entity-order-by field-name="geoName"/>
-                </entity-options>
-            </drop-down>
+            <lookup target-form-name="LookupGeo"/>
         </field>
         <field name="partyId"><text/></field>
         <field name="roleTypeId"><text/></field>

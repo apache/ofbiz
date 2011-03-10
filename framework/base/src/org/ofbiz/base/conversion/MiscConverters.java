@@ -137,43 +137,42 @@ public class MiscConverters implements ConverterLoader {
         }
     }
 
-    public static class EnumToString extends AbstractConverter<Enum, String> {
+    public static class EnumToString extends AbstractConverter<Enum<?>, String> {
         public EnumToString() {
             super(Enum.class, String.class);
         }
 
+        @Override
         public boolean canConvert(Class<?> sourceClass, Class<?> targetClass) {
             return Enum.class.isAssignableFrom(sourceClass) && String.class.isAssignableFrom(targetClass);
         }
 
-        public String convert(Enum obj) throws ConversionException {
+        public String convert(Enum<?> obj) throws ConversionException {
             return obj.name();
         }
 
-        public String convert(Class<? extends String> targetClass, Enum obj) throws ConversionException {
+        @Override
+        public String convert(Class<? extends String> targetClass, Enum<?> obj) throws ConversionException {
             return convert(obj);
         }
 
-        public Class<? super Enum> getSourceClass() {
+        @Override
+        public Class<? super Enum<?>> getSourceClass() {
             return null;
         }
     }
 
-    public static class StringToEnumConverterCreator implements ConverterCreator, ConverterLoader {
+    public static class StringToEnumConverterCreator<E extends Enum<E>> implements ConverterCreator, ConverterLoader {
         public void loadConverters() {
             Converters.registerCreator(this);
         }
 
         public <S, T> Converter<S, T> createConverter(Class<S> sourceClass, Class<T> targetClass) {
             if (String.class == sourceClass && Enum.class.isAssignableFrom(targetClass)) {
-                return UtilGenerics.cast(new StringToEnum());
+                return UtilGenerics.cast(new StringToEnum<E>());
             } else {
                 return null;
             }
-        }
-
-        private <E extends Enum<E>> StringToEnum<E> createConverter(Class<Enum<E>> targetClass) {
-            return new StringToEnum<E>();
         }
     }
 
@@ -182,6 +181,7 @@ public class MiscConverters implements ConverterLoader {
             super(String.class, Enum.class);
         }
 
+        @Override
         public boolean canConvert(Class<?> sourceClass, Class<?> targetClass) {
             return String.class.isAssignableFrom(sourceClass) && Enum.class.isAssignableFrom(targetClass);
         }
@@ -190,11 +190,13 @@ public class MiscConverters implements ConverterLoader {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public E convert(Class<? extends E> targetClass, String obj) throws ConversionException {
             return Enum.valueOf(UtilGenerics.<Class<E>>cast(targetClass), obj);
         }
 
-        public Class<? super Enum> getTargetClass() {
+        @Override
+        public Class<? super Enum<?>> getTargetClass() {
             return null;
         }
     }

@@ -23,14 +23,14 @@ under the License.
     </#if>
 </#macro>
 
-<#macro renderDisplayField type imageLocation idName description class alert inPlaceEditorUrl="" inPlaceEditorParams="">
+<#macro renderDisplayField type imageLocation idName description title class alert inPlaceEditorUrl="" inPlaceEditorParams="">
     <#if type?has_content && type=="image">
         <img src="${imageLocation}" alt=""><#lt/>
     <#else>
-        <#if inPlaceEditorUrl?has_content || class?has_content || alert=="true">
-            <span <#if idName?has_content>id="cc_${idName}"</#if> <@renderClass class alert />><#t/>
+        <#if inPlaceEditorUrl?has_content || class?has_content || alert=="true" || title?has_content>
+            <span <#if idName?has_content>id="cc_${idName}"</#if> <#if title?has_content>title="${title}"</#if> <@renderClass class alert />><#t/>
         </#if>
-        
+
         <#if description?has_content>
             ${description?replace("\n", "<br />")}<#t/>
         <#else>
@@ -54,17 +54,18 @@ under the License.
     <#if value?has_content> value="${value}"</#if><#rt/>
     <#if textSize?has_content> size="${textSize}"</#if><#rt/>
     <#if maxlength?has_content> maxlength="${maxlength}"</#if><#rt/>
-    <#if disabled?has_content && disabled> disabled="disabled"</#if><#rt/>    
+    <#if disabled?has_content && disabled> disabled="disabled"</#if><#rt/>
     <#if id?has_content> id="${id}"</#if><#rt/>
     <#if event?has_content && action?has_content> ${event}="${action}"</#if><#rt/>
     <#if clientAutocomplete?has_content && clientAutocomplete=="false"> autocomplete="off"</#if><#rt/>
     /><#t/>
     <#if ajaxEnabled?has_content && ajaxEnabled>
-        <script language="JavaScript" type="text/javascript">ajaxAutoCompleter('${ajaxUrl}', false);</script><#lt/>
+        <#assign defaultMinLength = Static["org.ofbiz.base.util.UtilProperties"].getPropertyValue("widget.properties", "widget.autocompleter.defaultMinLength")>
+        <script language="JavaScript" type="text/javascript">ajaxAutoCompleter('${ajaxUrl}', false, ${defaultMinLength!2});</script><#lt/>
     </#if>
 </#macro>
 
-<#macro renderTextareaField name className alert cols rows id readonly value visualEdtiorEnalble buttons>
+<#macro renderTextareaField name className alert cols rows id readonly value visualEditorEnable buttons language="">
     <textarea name="${name}"<#t/>
     <@renderClass className alert />
     <#if cols?has_content> cols="${cols}"</#if><#rt/>
@@ -75,31 +76,52 @@ under the License.
     ><#t/>
     <#if value?has_content>${value}</#if><#t/>
     </textarea><#lt/>
-    <#if visualEdtiorEnalble?has_content>
-        <script language="javascript" src="/images/htmledit/whizzywig.js" type="text/javascript"></script><#rt/>
-        <script language="javascript" type="text/javascript"> buttonPath = "/images/htmledit/"; cssFile="/images/htmledit/simple.css"; makeWhizzyWig("${id?default("")}", "${buttons?default("")}")</script>
+    <#if visualEditorEnable?has_content>
+        <script language="javascript" src="/images/jquery/plugins/elrteEditor/elrte.min.js" type="text/javascript"></script><#rt/>
+        <#if language?has_content && language != "en">
+            <script language="javascript" src="/images/jquery/plugins/elrteEditor/i18n/elrte.${language!"en"}.js" type="text/javascript"></script><#rt/>
+        </#if>
+        <link href="/images/jquery/plugins/elrteEditor/css/elrte.full.css" rel="stylesheet" type="text/css">
+        <script language="javascript" type="text/javascript">
+            var opts = {
+                cssClass : 'el-rte',
+                lang     : '${language!"en"}',
+                toolbar  : '${buttons?default("maxi")}',
+                doctype  : '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">', //'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN">',
+                cssfiles : ['/images/jquery/plugins/elrteEditor/css/elrte-inner.css']
+            }
+            jQuery('#${id?default("")}').elrte(opts);
+       </script>
     </#if>
 </#macro>
 
-<#macro renderDateTimeField name className alert title value size maxlength id dateType shortDateInput timeDropdownParamName defaultDateTimeString localizedIconTitle timeDropdown timeHourName classString hour1 hour2 timeMinutesName minutes isTwelveHour ampmName amSelected pmSelected compositeType formName>
+<#macro renderDateTimeField name className alert title value size maxlength id dateType shortDateInput timeDropdownParamName defaultDateTimeString localizedIconTitle timeDropdown timeHourName classString hour1 hour2 timeMinutesName minutes isTwelveHour ampmName amSelected pmSelected compositeType formName event="" action="" step="" timeValues="">
   <span class="view-calendar">
-      <input type="text" name="${name}" <@renderClass className alert /><#rt/>
+      <input type="text" name="${name}" <#if event?has_content && action?has_content> ${event}="${action}"</#if> <@renderClass className alert /><#rt/>
         <#if title?has_content> title="${title}"</#if>
         <#if value?has_content> value="${value}"</#if>
         <#if size?has_content> size="${size}"</#if><#rt/>
         <#if maxlength?has_content>  maxlength="${maxlength}"</#if>
         <#if id?has_content> id="${id}"</#if>/><#rt/>
       <#if dateType!="time" >
-          <#if shortDateInput?exists && shortDateInput>
-             <a href="javascript:call_cal_notime(document.<#rt/>
-          <#else>
-             <a href="javascript:call_cal(document.<#rt/>
-          </#if>
-          ${formName}.<#t/>
-          <#if timeDropdownParamName?has_content>${timeDropdownParamName}</#if><#t/>
-          <#if defaultDateTimeString?has_content>,'${defaultDateTimeString}'</#if>);"<#lt/>
-          title="<#if localizedIconTitle?has_content>${localizedIconTitle}</#if>"><#rt/>
-          </a><#rt/>
+          <script type="text/javascript">
+              <#if shortDateInput?exists && shortDateInput>
+                 jQuery("#${id}").datepicker({
+              <#else>
+                 jQuery("#${id}").datetimepicker({
+                    showSecond: true,
+                    timeFormat: 'hh:mm:ss',
+                    stepHour: 1,
+                    stepMinute: 1,
+                    stepSecond: 1,
+              </#if>
+                    showOn: 'button',
+                    buttonImage: '',
+                    buttonText: '',
+                    buttonImageOnly: false,
+                    dateFormat: 'yy-mm-dd'
+                  });
+          </script>
       </#if>
       <#if timeDropdown?has_content && timeDropdown=="time-dropdown">
           <select name="${timeHourName}" <#if classString?has_content>class="${classString}"</#if>><#rt/>
@@ -115,9 +137,9 @@ under the License.
             </#list>
           </#if>
           </select>:<select name="${timeMinutesName}" <#if classString?has_content>class="${classString}"</#if>><#rt/>
-            <#assign x=59>
-            <#list 0..x as i>
-              <option value="${i}"<#if minutes?has_content><#if i=minutes> selected="selected"</#if></#if>>${i}</option><#rt/>
+            <#assign values = Static["org.ofbiz.base.util.StringUtil"].toList(timeValues)>
+            <#list values as i>
+              <option value="${i}"<#if minutes?has_content><#if i?number== minutes || ((minutes &gt; i?number )&& (minutes &lt; i?number+(step?number/2))) || ((minutes &lt; i?number )&& (minutes &gt; i?number-(step?number/2)))> selected="selected"</#if></#if>>${i}</option><#rt/>
             </#list>
           </select>
         <#rt/>
@@ -134,13 +156,8 @@ under the License.
 </#macro>
 
 <#macro renderDropDownField name className alert id multiple formName otherFieldName event action size firstInList currentValue explicitDescription allowEmpty options fieldName otherFieldName otherValue otherFieldSize dDFCurrent ajaxEnabled noCurrentSelectedKey ajaxOptions frequency minChars choices autoSelect partialSearch partialChars ignoreCase fullSearch>
-<#if ajaxEnabled><input type="text"<#else><select</#if> name="${name?default("")}<#rt/>
-<#if ajaxEnabled>
-_description"<#if id?has_content> id="${id}_description"</#if><#if currentValue?has_content> value="${explicitDescription}"</#if>/><#rt/>
-<input type="hidden" name="${name}"<#if id?has_content> id="${id}"</#if><#if currentValue?has_content> value="${currentValue}"</#if>/><#rt/>
-<script language="JavaScript" type="text/javascript">var data = {${ajaxOptions}};ajaxAutoCompleteDropDown('<#if id?has_content>${id}_description</#if>','${id}',data,{autoSelect:${autoSelect},frequency:${frequency},minChars:${minChars},choices:${choices},partialSearch:${partialSearch},partialChars:${partialChars},ignoreCase:${ignoreCase},fullSearch:${fullSearch}});</script>
-<#else>
-" <@renderClass className alert /><#if id?has_content> id="${id}"</#if><#if multiple?has_content> multiple="multiple"</#if><#if otherFieldSize gt 0> onchange="process_choice(this,document.${formName}.${otherFieldName})"</#if><#if event?has_content> ${event}="${action}"</#if><#if size?has_content> size="${size}"</#if>>
+<span class="ui-widget">
+<select name="${name?default("")}<#rt/>" <@renderClass className alert /><#if id?has_content> id="${id}"</#if><#if multiple?has_content> multiple="multiple"</#if><#if otherFieldSize gt 0> onchange="process_choice(this,document.${formName}.${otherFieldName})"</#if><#if event?has_content> ${event}="${action}"</#if><#if size?has_content> size="${size}"</#if>>
 <#if firstInList?has_content && currentValue?has_content && !multiple?has_content>
  <option selected="selected" value="${currentValue}">${explicitDescription}</option><#rt/>
  <option value="${currentValue}">---</option><#rt/>
@@ -156,6 +173,7 @@ _description"<#if id?has_content> id="${id}_description"</#if><#if currentValue?
 </#if>
 </#list>
 </select>
+</span>
 <#if otherFieldName?has_content>
 <noscript><input type='text' name='${otherFieldName}' /></noscript>
 <script type='text/javascript' language='JavaScript'><!--
@@ -167,12 +185,21 @@ if(disa && document.styleSheets)
    document.${formName}.${fieldName}.style.visibility  = 'hidden';
 //--></script>
 </#if>
+
+<#if ajaxEnabled>
+<script language="JavaScript" type="text/javascript">
+    ajaxAutoCompleteDropDown();
+    jQuery(function() {
+        jQuery("#${id}").combobox();
+    });
+</script>
 </#if>
+
 </#macro>
 
-<#macro renderCheckField items className alert allChecked currentValue name event action>
+<#macro renderCheckField items className alert id allChecked currentValue name event action>
 <#list items as item>
-<input type="checkbox" <@renderClass className alert /><#rt/>
+<input type="checkbox"<#if (item_index == 0)> id="${id}"</#if> <@renderClass className alert /><#rt/>
 <#if allChecked?has_content && allChecked> checked="checked" <#elseif allChecked?has_content && !allChecked><#elseif currentValue?has_content && currentValue==item.value> checked="checked"</#if> name="${name?default("")?html}" value="${item.value?default("")?html}"<#if event?has_content> ${event}="${action}"</#if>/><#rt/>
 ${item.description?default("")}
 </#list>
@@ -226,7 +253,9 @@ ${item.description}</span>
         <script language="JavaScript" type="text/javascript">document.${formName}.${focusFieldName}.focus();</script><#lt/>
     </#if>
 </#macro>
-<#macro renderMultiFormClose></#macro>
+<#macro renderMultiFormClose>
+    </form><#lt/>
+</#macro>
 
 <#macro renderFormatListWrapperOpen formName style columnStyles>
     <table cellspacing="0" class="<#if style?has_content>${style}<#else>basic-table form-widget-table dark-grid</#if>"><#lt/>
@@ -346,15 +375,27 @@ ${item.description}</span>
 
 <#macro renderDateFindField className alert name localizedInputTitle value size maxlength dateType formName defaultDateTimeString imgSrc localizedIconTitle titleStyle defaultOptionFrom defaultOptionThru opEquals opSameDay opGreaterThanFromDayStart opGreaterThan opGreaterThan opLessThan opUpToDay opUpThruDay opIsEmpty>
 <span class="view-calendar">
-<input type="text" <@renderClass className alert /><#if name?has_content> name="${name?html}_fld0_value"</#if><#if localizedInputTitle?has_content> title="${localizedInputTitle}"</#if><#if value?has_content> value="${value}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if>/><#rt/>
+<input id="${name?html}_fld0_value" type="text" <@renderClass className alert /><#if name?has_content> name="${name?html}_fld0_value"</#if><#if localizedInputTitle?has_content> title="${localizedInputTitle}"</#if><#if value?has_content> value="${value}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if>/><#rt/>
 <#if dateType != "time">
-<#if dateType == "date">
-<a href="javascript:call_cal_notime(document.<#rt/>
-<#else>
-<a href="javascript:call_cal(document.<#rt/>
-</#if>
-<#if formName?has_content>${formName}.</#if><#if name?has_content>${name}_fld0_value,</#if>'<#if defaultDateTimeString?has_content>${defaultDateTimeString}</#if>');" title="${localizedIconTitle}"><#rt/>
-</a><#rt/>
+    <script type="text/javascript">
+          <#if dateType == "date">
+             jQuery("#${name?html}_fld0_value").datepicker({
+          <#else>
+             jQuery("#${name?html}_fld0_value").datetimepicker({
+                showSecond: true,
+                timeFormat: 'hh:mm:ss',
+                stepHour: 1,
+                stepMinute: 5,
+                stepSecond: 10,
+          </#if>
+                showOn: 'button',
+                buttonImage: '',
+                buttonText: '',
+                buttonImageOnly: false,
+                dateFormat: 'yy-mm-dd'
+              });
+      </script>
+<#rt/>
 </#if>
 <#if titleStyle?has_content>
 <span class="${titleStyle}"><#rt/>
@@ -369,15 +410,27 @@ ${item.description}</span>
  </span><#rt/>
 </#if>
 <#rt/>
-<input type="text" <@renderClass className alert /><#if name?has_content> name="${name}_fld1_value"</#if><#if localizedInputTitle?exists> title="${localizedInputTitle?html}"</#if><#if value2?has_content> value="${value2}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if>/><#rt/>
+<input id="${name?html}_fld1_value" type="text" <@renderClass className alert /><#if name?has_content> name="${name}_fld1_value"</#if><#if localizedInputTitle?exists> title="${localizedInputTitle?html}"</#if><#if value2?has_content> value="${value2}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if>/><#rt/>
 <#if dateType != "time">
-<#if dateType == "date">
-<a href="javascript:call_cal_notime(document.<#rt/>
-<#else>
-<a href="javascript:call_cal(document.<#rt/>
-</#if>
-<#if formName?has_content>${formName}.</#if><#if name?has_content>${name}_fld1_value,'</#if><#if defaultDateTimeString?has_content>${defaultDateTimeString}</#if>');" title="${localizedIconTitle}"><#rt/>
-</a><#rt/>
+    <script type="text/javascript">
+          <#if dateType == "date">
+             jQuery("#${name?html}_fld1_value").datepicker({
+          <#else>
+             jQuery("#${name?html}_fld1_value").datetimepicker({
+                showSecond: true,
+                timeFormat: 'hh:mm:ss',
+                stepHour: 1,
+                stepMinute: 5,
+                stepSecond: 10,
+          </#if>
+                showOn: 'button',
+                buttonImage: '',
+                buttonText: '',
+                buttonImageOnly: false,
+                dateFormat: 'yy-mm-dd'
+              });
+      </script>
+<#rt/>
 </#if>
 <#if titleStyle?has_content>
  <span class="${titleStyle}"><#rt/>
@@ -422,27 +475,78 @@ ${item.description}</span>
 </#macro>
 
 <#macro renderLookupField className alert name value size maxlength id event action disabled autocomplete descriptionFieldName formName fieldFormName targetParameterIter imgSrc ajaxUrl ajaxEnabled presentation width height position fadeBackground clearText showDescription initiallyCollapsed>
+<#if ajaxEnabled?has_content && ajaxEnabled>
+    <script type="text/javascript">
+    jQuery(document).ready(function(){
+        if (!jQuery('form[name="${formName}"]').length) {
+            alert("Developer: for lookups to work you must provide a form name!")
+        }
+    });
+    </script>
+</#if>
 <span class="field-lookup">
 <#if size?has_content && size=="0"><input type="hidden" <#if name?has_content> name="${name}"/></#if><#else><input type="text" <@renderClass className alert /><#if name?has_content> name="${name}"</#if><#if value?has_content> value="${value}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if><#if id?has_content> id="${id}"</#if><#rt/><#if disabled?has_content && disabled> disabled="disabled"</#if><#rt/><#if event?has_content && action?has_content> ${event}="${action}"</#if><#rt/><#if autocomplete?has_content> autocomplete="off"</#if>/><#rt/></#if>
 <#if presentation?has_content && descriptionFieldName?has_content && presentation == "window">
- <a href="javascript:call_fieldlookup3(document.${formName?html}.${name?html},document.${formName?html}.${descriptionFieldName},'${fieldFormName}'<#rt/>
+     <a href="javascript:call_fieldlookup3(document.${formName?html}.${name?html},document.${formName?html}.${descriptionFieldName},'${fieldFormName}', '${presentation}'<#rt/>
+    <#if targetParameterIter?has_content>
+     <#list targetParameterIter as item>
+    ,document.${formName}.${item}.value<#rt>
+     </#list>
+    </#if>
+    );"></a><#rt>
 <#elseif presentation?has_content && presentation == "window">
- <a href="javascript:call_fieldlookup2(document.${formName}.${name},'${fieldFormName}'<#rt/>
-<#elseif descriptionFieldName?has_content>
- <a href="javascript:call_fieldlookupLayer3(document.${formName?html}.${name?html},document.${formName?html}.${descriptionFieldName},'${fieldFormName}','${width}','${height}','${position}','${fadeBackground}','${initiallyCollapsed}'<#rt/>
+     <a href="javascript:call_fieldlookup2(document.${formName?html}.${name?html},'${fieldFormName}', '${presentation}'<#rt/>
+    <#if targetParameterIter?has_content>
+     <#list targetParameterIter as item>
+    ,document.${formName}.${item}.value<#rt>
+     </#list>
+    </#if>
+    );"></a><#rt>
 <#else>
- <a href="javascript:call_fieldlookupLayer(document.${formName?html}.${name?html},'${fieldFormName}','${width}','${height}','${position}','${fadeBackground}','${initiallyCollapsed}'<#rt/>
+    <#if ajaxEnabled?has_content && ajaxEnabled>
+      <#assign defaultMinLength = Static["org.ofbiz.base.util.UtilProperties"].getPropertyValue("widget.properties", "widget.autocompleter.defaultMinLength")>
+      <#if parameters?has_content && parameters._LAST_VIEW_NAME_?has_content>
+        <#local ajaxUrl = ajaxUrl + "&amp;_LAST_VIEW_NAME_=" + parameters._LAST_VIEW_NAME_ />
+      <#else>
+        <#local ajaxUrl = ajaxUrl + "&amp;_LAST_VIEW_NAME_=main"/>
+      </#if>      
+      <#if !ajaxUrl?contains("searchValueFieldName=")>
+          <#if descriptionFieldName?has_content && showDescription == "true">
+            <#local ajaxUrl = ajaxUrl + "&amp;searchValueFieldName=" + descriptionFieldName />
+          <#else>
+            <#local ajaxUrl = ajaxUrl + "&amp;searchValueFieldName=" + name />
+          </#if>
+      </#if>
+    </#if>
+    <script type="text/javascript">
+        jQuery(document).ready(function(){
+            new ConstructLookup("${fieldFormName}", "${id}", document.${formName?html}.${name?html}, <#if descriptionFieldName?has_content>document.${formName?html}.${descriptionFieldName}<#else>null</#if>, "${formName?html}", "${width}", "${height}", "${position}", "${fadeBackground}", <#if ajaxEnabled?has_content && ajaxEnabled>"${ajaxUrl}", "${showDescription}"<#else>"", ""</#if>, "${presentation!}", "${defaultMinLength!2}"<#rt/>
+    <#if targetParameterIter?has_content>
+      <#assign isFirst = true>
+      <#lt/>, [<#rt/>
+      <#list targetParameterIter as item>
+        <#if isFirst>
+          <#lt/>document.${formName}.${item}<#rt/>
+          <#assign isFirst = false>
+        <#else>
+          <#lt/> ,document.${formName}.${item}<#rt/>
+        </#if>
+      </#list>
+      <#lt/>]<#rt/>
+    </#if>
+            <#lt/>);
+        });
+    </script>
 </#if>
-<#if targetParameterIter?has_content>
- <#list targetParameterIter as item>
-,document.${formName}.${item}.value<#rt>
- </#list>
-</#if>
-);"></a><#rt>
 <#if disabled?has_content && disabled><a id="${id}_clear" style="background:none;margin-left:5px;margin-right:15px;" class="clearField" href="javascript:void();" onclick="javascript:document.${formName}.${name}.value='';<#if descriptionFieldName?has_content>document.${formName}.${descriptionFieldName}.value='';</#if>">${clearText}</a></#if>
 </span>
 <#if ajaxEnabled?has_content && ajaxEnabled>
-    <script language="JavaScript" type="text/javascript">ajaxAutoCompleter('${ajaxUrl}', ${showDescription});</script><#t/>
+      <#if parameters?has_content && parameters._LAST_VIEW_NAME_?has_content && ajaxUrl?index_of("_LAST_VIEW_NAME_") < 0>
+        <#local ajaxUrl = ajaxUrl + "&amp;_LAST_VIEW_NAME_=" + parameters._LAST_VIEW_NAME_ />
+      <#elseif ajaxUrl?index_of("_LAST_VIEW_NAME_") < 0>
+        <#local ajaxUrl = ajaxUrl + "&amp;_LAST_VIEW_NAME_=main"/>
+      </#if>      
+    <script language="JavaScript" type="text/javascript">ajaxAutoCompleter('${ajaxUrl}', ${showDescription}, ${defaultMinLength!2});</script><#t/>
 </#if>
 </#macro>
 
@@ -451,8 +555,8 @@ ${item.description}</span>
 <div class="${paginateStyle}">&nbsp; <ul>
 <li class="${paginateFirstStyle}<#if viewIndex gt 0>"><a href="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxFirstUrl}')<#else>${firstUrl}</#if>">${paginateFirstLabel}</a><#else>-disabled"><span>${paginateFirstLabel}</span></#if></li>
 <li class="${paginatePreviousStyle}<#if viewIndex gt 0>"><a href="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxPreviousUrl}')<#else>${previousUrl}</#if>">${paginatePreviousLabel}</a><#else>-disabled"><span>${paginatePreviousLabel}</span></#if></li>
-<#if listSize gt 0 && javaScriptEnabled><li>${pageLabel}<select name="page" size="1" onchange="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxSelectUrl}')<#else>location.href='${selectUrl}'+this.value;</#if>"><#rt/>
-<#assign x=listSize/viewSize?floor>
+<#if listSize gt 0 && javaScriptEnabled><li class="nav-page-select">${pageLabel} <select name="page" size="1" onchange="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxSelectUrl}')<#else>location.href='${selectUrl}'+this.value;</#if>"><#rt/>
+<#assign x=Static["java.lang.Math"].floor(listSize/viewSize)>
 <#if listSize gt (viewIndex*viewSize)><#assign x=x+1></#if>
 <#list 1..x as i>
 <#if i == (viewIndex+1)><option selected="selected" value="<#else><option value="</#if>${i-1}">${i}</option>
@@ -473,7 +577,7 @@ ${item.description}</span>
 
 <#macro renderFileField className alert name value size maxlength autocomplete><input type="file" <@renderClass className alert /><#if name?has_content> name="${name}"</#if><#if value?has_content> value="${value}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if><#if autocomplete?has_content> autocomplete="off"</#if>/><#rt/></#macro>
 <#macro renderPasswordField className alert name value size maxlength id autocomplete><input type="password" <@renderClass className alert /><#if name?has_content> name="${name}"</#if><#if value?has_content> value="${value}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if><#if id?has_content> id="${id}"</#if><#if autocomplete?has_content> autocomplete="off"</#if>/></#macro>
-<#macro renderImageField value description alternate border width height event action><img<#if value?has_content> src="${value}"</#if><#if description?has_content> title="${description}"</#if> alt="<#if alternate?has_content>${alternate}"</#if>"<#if border?has_content> border="${border}"</#if><#if width?has_content> width="${width}"</#if><#if height?has_content> height="${height}"</#if><#if event?has_content> ${rp.event?html}="${action}" </#if>/></#macro>
+<#macro renderImageField value description alternate border width height event action><img<#if value?has_content> src="${value}"</#if><#if description?has_content> title="${description}"</#if> alt="<#if alternate?has_content>${alternate}"</#if>"<#if border?has_content> border="${border}"</#if><#if width?has_content> width="${width}"</#if><#if height?has_content> height="${height}"</#if><#if event?has_content> ${event?html}="${action}" </#if>/></#macro>
 
 <#macro renderBanner style leftStyle rightStyle leftText text rightText>
 <table width="100%">  <tr><#rt/>
@@ -515,4 +619,4 @@ ${item.description}</span>
 
 <#macro makeHiddenFormLinkForm actionUrl name parameters targetWindow><form method="post" action="${actionUrl}" <#if targetWindow?has_content>target="${targetWindow}"</#if> onsubmit="javascript:submitFormDisableSubmits(this)" name="${name}"><#list parameters as parameter><input name="${parameter.name}" value="${parameter.value}" type="hidden"/></#list></form></#macro>
 <#macro makeHiddenFormLinkAnchor linkStyle hiddenFormName event action imgSrc description confirmation><a <#if linkStyle?has_content>class="${linkStyle}"</#if> href="javascript:document.${hiddenFormName}.submit()"<#if action?has_content && event?has_content> ${event}="${action}"</#if><#if confirmation?has_content> onclick="return confirm('${confirmation?js_string}')"</#if>><#if imgSrc?has_content><img src="${imgSrc}" alt=""/></#if>${description}</a></#macro>
-<#macro makeHyperlinkString linkStyle hiddenFormName event action imgSrc title alternate linkUrl targetWindow description confirmation><a <#if linkStyle?has_content>class="${linkStyle}"</#if> href="${linkUrl}"<#if targetWindow?has_content> target="${targetWindow}"</#if><#if action?has_content && event?has_content> ${event}="${action}"</#if><#if confirmation?has_content> onclick="return confirm('${confirmation?js_string}')"</#if>><#if imgSrc?has_content><img src="${imgSrc}" alt="${alternate}" title="${title}"/></#if>${description}</a></#macro>
+<#macro makeHyperlinkString linkStyle hiddenFormName event action imgSrc title alternate linkUrl targetWindow description confirmation><a <#if linkStyle?has_content>class="${linkStyle}"</#if> href="${linkUrl}"<#if targetWindow?has_content> target="${targetWindow}"</#if><#if action?has_content && event?has_content> ${event}="${action}"</#if><#if confirmation?has_content> onclick="return confirm('${confirmation?js_string}')"</#if><#if imgSrc?length == 0 && title?has_content> title="${title}"</#if>><#if imgSrc?has_content><img src="${imgSrc}" alt="${alternate}" title="${title}"/></#if>${description}</a></#macro>

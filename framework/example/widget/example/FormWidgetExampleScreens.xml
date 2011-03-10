@@ -51,11 +51,45 @@ under the License.
                                         <label>${uiLabelMap.ExampleDefinitionName} &quot;DropDownFieldsExampleForm&quot; ${uiLabelMap.ExampleDefinitionFile}</label>
                                         <link target="http://svn.apache.org/repos/asf/ofbiz/trunk/framework/example/widget/example/FormWidgetExampleForms.xml" url-mode="plain" target-window="svnPage" text="${uiLabelMap.ExampleDefinitionFileTooltip}" style="buttontext"/>
                                     </container>
-                                    <include-form name="DropDownFieldsExampleForm" location="component://example/widget/example/FormWidgetExampleForms.xml"/>
+                                    <section>
+                                        <actions>
+                                            <!-- setCountryStatesEventJs.ftl, it's not used here but could be. It's a good example of a reusable template-script with harcoded values which make sense -->
+                                            <!-- fields for setDependentDropdownValuesJs.ftl, it's a try on generalization, if you need an example with more than one dropdown in a form have a look at EditProductPriceRules screen -->
+                                            <set field="dependentForm" value="DropDownFieldsExampleForm"/>
+                                            <set field="paramKey" value="countryGeoId"/>                                            
+                                            <set field="mainId" value="countryGeoId"/>
+                                            <set field="dependentId" value="stateProvinceGeoId"/>
+                                            <set field="requestName" value="getAssociatedStateList"/>
+                                            <set field="responseName" value="stateList"/>
+                                            <set field="dependentKeyName" value="geoId"/>
+                                            <set field="descName" value="geoName"/>
+                                            <set field="selectedDependentOption" from-field="postalAddress.stateProvinceGeoId" default-value="_none_"/><!-- postalAddress.stateProvinceGeoId does not make much sense here, only to get the idea -->
+                                            
+                                            <!-- asmslect parameters, must be prefixed by asm_ for setMultipleSelectJs.ftl -->
+                                            <set field="asm_multipleSelectForm" value="DropDownMultipleFieldExampleForm"/>
+                                            <set field="asm_multipleSelect"  value="DropDownMultipleFieldExampleForm_countryGeoIdMultiple"/>
+                                            <set field="asm_formSize" value="600"/>
+                                            <set field="asm_asmListItemPercentOfForm" value="95"/>
+                                            <set field="asm_sortable" value="false"/>                                            
+                                        </actions>
+                                        <widgets>
+                                            <!--platform-specific><html><html-template location="component://common/webcommon/includes/setCountryStatesEventJs.ftl"/></html></platform-specific-->
+                                            <platform-specific><html><html-template location="component://common/webcommon/includes/setDependentDropdownValuesJs.ftl"/></html></platform-specific>
+                                            <platform-specific><html><html-template location="component://common/webcommon/includes/setMultipleSelectJs.ftl"/></html></platform-specific>
+                                            <include-form name="DropDownFieldsExampleForm" location="component://example/widget/example/FormWidgetExampleForms.xml"/>
+                                            <include-form name="DropDownMultipleFieldExampleForm" location="component://example/widget/example/FormWidgetExampleForms.xml"/>
+                                        </widgets>
+                                    </section>
                                 </container>
                                 <container style="screenlet-body">
-                                    <container style="button-bar"><label style="h2">${uiLabelMap.ExampleLookupFields}</label></container>
-                                    <include-form name="ExampleLookupFields" location="component://example/widget/example/FormWidgetExampleForms.xml"/>
+                                    <container style="button-bar"><label style="h2">${uiLabelMap.ExampleLookupFieldsTitle}</label></container>
+                                        <container style="screenlet-body">
+                                            <label style="h3">${uiLabelMap.ExampleSourceCode}</label>
+                                            <label>${uiLabelMap.ExampleDefinitionName} &quot;ExampleLookupFields&quot; ${uiLabelMap.ExampleDefinitionFile}</label>
+                                            <link target="http://svn.apache.org/repos/asf/ofbiz/trunk/framework/example/widget/example/FormWidgetExampleForms.xml" url-mode="plain" target-window="svnPage" text="${uiLabelMap.ExampleDefinitionFileTooltip}" style="buttontext"/>
+                                            <label>${uiLabelMap.ExampleLookupFields}</label>
+                                            <include-form name="ExampleLookupFields" location="component://example/widget/example/FormWidgetExampleForms.xml"/>
+                                        </container>
                                 </container>
                                 <container style="screenlet-body">
                                     <container style="button-bar"><label style="h2">${uiLabelMap.ExampleGroupFields}</label></container>
@@ -63,6 +97,10 @@ under the License.
                                         <label style="h3">${uiLabelMap.ExampleSourceCode}</label>
                                         <label>${uiLabelMap.ExampleDefinitionName} &quot;FieldGroupExampleForm&quot; ${uiLabelMap.ExampleDefinitionFile}</label>
                                         <link target="http://svn.apache.org/repos/asf/ofbiz/trunk/framework/example/widget/example/FormWidgetExampleForms.xml" url-mode="plain" target-window="svnPage" text="${uiLabelMap.ExampleDefinitionFileTooltip}" style="buttontext"/>
+                                        <container style="button-bar">
+                                            <link target="javascript:expandAll(true);"  text="${uiLabelMap.CommonExpandAll}" style="buttontext expand-all" url-mode="plain"/>
+                                            <link target="javascript:expandAll(false);" text="${uiLabelMap.CommonCollapseAll}" style="buttontext collapse-all" url-mode="plain"/>
+                                        </container>
                                         <include-form name="FieldGroupExampleForm" location="component://example/widget/example/FormWidgetExampleForms.xml"/>
                                     </container>
                                 </container>

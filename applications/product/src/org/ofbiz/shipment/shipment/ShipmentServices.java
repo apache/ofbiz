@@ -18,28 +18,39 @@
  *******************************************************************************/
 package org.ofbiz.shipment.shipment;
 
-import java.util.*;
 import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.ofbiz.base.util.*;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilNumber;
+import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.collections.ResourceBundleMapWrapper;
 import org.ofbiz.common.geo.GeoWorker;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.condition.EntityConditionList;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.party.party.PartyWorker;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceUtil;
-import org.ofbiz.party.party.PartyWorker;
 
 /**
  * ShipmentServices
@@ -57,22 +68,25 @@ public class ShipmentServices {
     public static Map<String, Object> createShipmentEstimate(DispatchContext dctx, Map<String, ? extends Object> context) {
         Map<String, Object> result = FastMap.newInstance();
         Delegator delegator = dctx.getDelegator();
+        Locale locale = (Locale) context.get("locale");
         List<GenericValue> storeAll = FastList.newInstance();
-
         String productStoreShipMethId = (String)context.get("productStoreShipMethId");
 
         GenericValue productStoreShipMeth = null;
         try {
             productStoreShipMeth = delegator.findByPrimaryKey("ProductStoreShipmentMeth", UtilMisc.toMap("productStoreShipMethId", productStoreShipMethId));
         } catch (GenericEntityException e) {
-            return ServiceUtil.returnError("Problem retrieving ProductStoreShipmentMeth entry with id [" + productStoreShipMethId + "]: " + e.toString());
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductStoreShipmentMethodCannotRetrieve", 
+                    UtilMisc.toMap("productStoreShipMethId", productStoreShipMethId, 
+                            "errorString", e.toString()), locale));
         }
-
 
         // Create the basic entity.
         GenericValue estimate = delegator.makeValue("ShipmentCostEstimate");
 
         estimate.set("shipmentCostEstimateId", delegator.getNextSeqId("ShipmentCostEstimate"));
+        estimate.set("productStoreShipMethId", productStoreShipMethId);
         estimate.set("shipmentMethodTypeId", productStoreShipMeth.getString("shipmentMethodTypeId"));
         estimate.set("carrierPartyId", productStoreShipMeth.getString("partyId"));
         estimate.set("carrierRoleTypeId", "CARRIER");
@@ -129,6 +143,7 @@ public class ShipmentServices {
     public static Map<String, Object> removeShipmentEstimate(DispatchContext dctx, Map<String, ? extends Object> context) {
         Delegator delegator = dctx.getDelegator();
         String shipmentCostEstimateId = (String) context.get("shipmentCostEstimateId");
+        Locale locale = (Locale) context.get("locale");
 
         GenericValue estimate = null;
 
@@ -137,7 +152,9 @@ public class ShipmentServices {
             estimate.remove();
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
-            return ServiceUtil.returnError("Problem removing entity or related entities (" + e.toString() + ")");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductShipmentCostEstimateRemoveError", 
+                    UtilMisc.toMap("errorString", e.toString()), locale));
         }
         /* Commented out this code because QuantityBreak may be used by other records
         try {
@@ -228,6 +245,7 @@ public class ShipmentServices {
         BigDecimal shippableQuantity = (BigDecimal) context.get("shippableQuantity");
         BigDecimal shippableWeight = (BigDecimal) context.get("shippableWeight");
         BigDecimal initialEstimateAmt = (BigDecimal) context.get("initialEstimateAmt");
+        Locale locale = (Locale) context.get("locale");
 
         if (shippableTotal == null) {
             shippableTotal = BigDecimal.ZERO;
@@ -258,12 +276,13 @@ public class ShipmentServices {
             estimates = delegator.findList("ShipmentCostEstimate", estFieldsCond, null, null, null, true);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
-            return ServiceUtil.returnError("Unable to locate estimates from database");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductShipmentCostEstimateCannotRetrieve", locale));
         }
         if (estimates == null || estimates.size() < 1) {
             if (initialEstimateAmt.compareTo(BigDecimal.ZERO) == 0) {
                 Debug.logWarning("Using the passed context : " + context, module);
-                Debug.logWarning("No shipping estimates found; the shipping amount returned is 0!", module);
+                Debug.logWarning("No shipping estimates found; the shipping amount returned is 0! Condition used was: " + estFieldsCond, module);
             }
 
             Map<String, Object> respNow = ServiceUtil.returnSuccess();
@@ -273,22 +292,27 @@ public class ShipmentServices {
 
         // Get the PostalAddress
         GenericValue shipAddress = null;
-        try {
-            shipAddress = delegator.findByPrimaryKey("PostalAddress", UtilMisc.toMap("contactMechId", shippingContactMechId));
-        } catch (GenericEntityException e) {
-            return ServiceUtil.returnFailure("Cannot get shipping address entity");
-        }
-
         if (shippingContactMechId != null) {
             try {
                 shipAddress = delegator.findByPrimaryKey("PostalAddress", UtilMisc.toMap("contactMechId", shippingContactMechId));
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
-                return ServiceUtil.returnError("Cannot get shipping address entity");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductShipmentCostEstimateCannotGetShippingAddress", locale));
             }
         } else if (shippingPostalCode != null) {
+            String countryGeoId = null;
+            try {
+                EntityCondition cond =EntityCondition.makeCondition(UtilMisc.toMap("geoTypeId", "COUNTRY", "geoCode", shippingCountryCode));
+                GenericValue countryGeo = EntityUtil.getFirst(delegator.findList("Geo", cond, null, null, null, true));
+                if (countryGeo != null) {
+                    countryGeoId = countryGeo.getString("geoId");
+                }
+            } catch (GenericEntityException e) {
+                Debug.logError(e, module);
+            }
             shipAddress = delegator.makeValue("PostalAddress");
-            shipAddress.set("countryGeoId", shippingCountryCode);
+            shipAddress.set("countryGeoId", countryGeoId);
             shipAddress.set("postalCodeGeoId", shippingPostalCode);
         }
         // Get the possible estimates.
@@ -392,7 +416,10 @@ public class ShipmentServices {
         }
 
         if (estimateList.size() < 1) {
-            return ServiceUtil.returnFailure("No shipping estimate found for carrier [" + carrierPartyId + "] and shipment method type [" + shipmentMethodTypeId +"]");
+            return ServiceUtil.returnFailure(UtilProperties.getMessage(resource, 
+                    "ProductShipmentCostEstimateCannotFoundForCarrier",
+                    UtilMisc.toMap("carrierPartyId", carrierPartyId, 
+                            "shipmentMethodTypeId", shipmentMethodTypeId), locale));
         }
 
         // make the shippable item size/feature objects
@@ -587,6 +614,7 @@ public class ShipmentServices {
     public static Map<String, Object> fillShipmentStagingTables(DispatchContext dctx, Map<String, ? extends Object> context) {
         Delegator delegator = dctx.getDelegator();
         String shipmentId = (String) context.get("shipmentId");
+        Locale locale = (Locale) context.get("locale");
 
         GenericValue shipment = null;
         if (shipmentId != null) {
@@ -598,7 +626,8 @@ public class ShipmentServices {
             }
         }
         if (shipment == null) {
-            return ServiceUtil.returnError("No shipment found!");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductShipmentNotFoundId", locale));
         }
 
         String shipmentStatusId = shipment.getString("statusId");
@@ -611,7 +640,8 @@ public class ShipmentServices {
                 return ServiceUtil.returnError(e.getMessage());
             }
             if (address == null) {
-                return ServiceUtil.returnError("No address found for shipment!");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductShipmentNoAddressFound", locale));
             }
 
             List<GenericValue> packages = null;
@@ -623,7 +653,8 @@ public class ShipmentServices {
             }
 
             if (UtilValidate.isEmpty(packages)) {
-                return ServiceUtil.returnError("No packages are available for shipping!");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductShipmentNoPackagesAvailable", locale));
             }
 
             List<GenericValue> routeSegs = null;
@@ -691,7 +722,7 @@ public class ShipmentServices {
         LocalDispatcher dispatcher = dctx.getDispatcher();
         Delegator delegator = dctx.getDelegator();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
-
+        Locale locale = (Locale) context.get("locale");
         List<String> orderBy = UtilMisc.toList("shipmentId", "shipmentPackageSeqId", "voidIndicator");
         Map<String, String> shipmentMap = FastMap.newInstance();
 
@@ -754,7 +785,10 @@ public class ShipmentServices {
                     }
 
                     if (pkg == null) {
-                        return ServiceUtil.returnError("Package not found! - " + pkgCtx);
+                        return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                                "ProductShipmentPackageNotFound", 
+                                UtilMisc.toMap("shipmentPackageSeqId", packageSeqId, 
+                                "shipmentId",shipmentId), locale));
                     }
 
                     pkg.set("weight", pkgInfo.get("packageWeight"));
@@ -926,23 +960,26 @@ public class ShipmentServices {
             Debug.logError(se, module);
             return ServiceUtil.returnError(se.getMessage());
         }
-        return ServiceUtil.returnSuccess("Intentional error at end to keep from committing.");
+        return ServiceUtil.returnSuccess();
     }
 
     public static Map<String, Object> duplicateShipmentRouteSegment(DispatchContext dctx, Map<String, ? extends Object> context) {
         Delegator delegator = dctx.getDelegator();
         LocalDispatcher dispatcher = dctx.getDispatcher();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
-
         String shipmentId = (String) context.get("shipmentId");
         String shipmentRouteSegmentId = (String) context.get("shipmentRouteSegmentId");
+        Locale locale = (Locale) context.get("locale");
 
         Map<String, Object> results = ServiceUtil.returnSuccess();
 
         try {
             GenericValue shipmentRouteSeg = delegator.findByPrimaryKey("ShipmentRouteSegment", UtilMisc.toMap("shipmentId", shipmentId, "shipmentRouteSegmentId", shipmentRouteSegmentId));
             if (shipmentRouteSeg == null) {
-                return ServiceUtil.returnError("Shipment Route Segment not found for shipment [" + shipmentId + "] route segment [" + shipmentRouteSegmentId + "]");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductShipmentRouteSegmentNotFound", 
+                        UtilMisc.toMap("shipmentId", shipmentId,
+                                "shipmentRouteSegmentId", shipmentRouteSegmentId), locale));
             }
 
             Map<String, Object> params = UtilMisc.<String, Object>toMap("shipmentId", shipmentId, "carrierPartyId", shipmentRouteSeg.getString("carrierPartyId"), "shipmentMethodTypeId", shipmentRouteSeg.getString("shipmentMethodTypeId"),
@@ -1098,7 +1135,8 @@ public class ShipmentServices {
         String shipmentId = (String) context.get("shipmentId");
         String sendTo = (String) context.get("sendTo");
         String screenUri = (String) context.get("screenUri");
-
+        Locale localePar = (Locale) context.get("locale");
+        
         // prepare the shipment information
         Map<String, Object> sendMap = FastMap.newInstance();
         GenericValue shipment = null ;
@@ -1116,7 +1154,10 @@ public class ShipmentServices {
             Debug.logError(e, "Problem getting the ProductStoreEmailSetting for productStoreId =" + orderHeader.get("productStoreId") + " and emailType = PRDS_ODR_SHIP_COMPLT", module);
         }
         if (productStoreEmail == null) {
-            return ServiceUtil.returnFailure("No valid email setting for store with productStoreId =" + orderHeader.get("productStoreId") + " and emailType = PRDS_ODR_SHIP_COMPLT");
+            return ServiceUtil.returnFailure(UtilProperties.getMessage(resource, 
+                    "ProductProductStoreEmailSettingsNotValid", 
+                    UtilMisc.toMap("productStoreId", orderHeader.get("productStoreId"), 
+                            "emailType", "PRDS_ODR_SHIP_COMPLT"), localePar));
         }
         // the override screenUri
         if (UtilValidate.isEmpty(screenUri)) {
@@ -1135,7 +1176,8 @@ public class ShipmentServices {
             emailString = email.getString("infoString");
         }
         if (UtilValidate.isEmpty(emailString)) {
-            return ServiceUtil.returnError("No sendTo email address found");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductProductStoreEmailSettingsNoSendToFound", localePar));
         }
 
         Locale locale = PartyWorker.findPartyLastLocale(partyId, delegator);
@@ -1167,13 +1209,66 @@ public class ShipmentServices {
             sendResp = dispatcher.runSync("sendMailFromScreen", sendMap);
         } catch (Exception e) {
             Debug.logError(e, "Problem sending mail", module);
-            return ServiceUtil.returnError(UtilProperties.getMessage(resource_error, "OrderProblemSendingEmail", locale));
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource_error, "OrderProblemSendingEmail", localePar));
         }
         // check for errors
         if (sendResp != null && ServiceUtil.isError(sendResp)) {
             sendResp.put("emailType", "PRDS_ODR_SHIP_COMPLT");
-            return ServiceUtil.returnError(UtilProperties.getMessage(resource_error, "OrderProblemSendingEmail", locale), null, null, sendResp);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource_error, "OrderProblemSendingEmail", localePar), null, null, sendResp);
         }
         return sendResp;
+    }
+    
+    public static Map<String, Object> getShipmentGatewayConfigFromShipment(Delegator delegator, String shipmentId, Locale locale) {
+        Map<String, Object> shipmentGatewayConfig = ServiceUtil.returnSuccess();
+        try {
+            GenericValue shipment = delegator.findOne("Shipment", UtilMisc.toMap("shipmentId", shipmentId), false);
+            if (shipment == null) {
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductShipmentNotFoundId", locale) + shipmentId);
+            }
+            GenericValue primaryOrderHeader = shipment.getRelatedOne("PrimaryOrderHeader");
+            if (primaryOrderHeader == null) {
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductShipmentPrimaryOrderHeaderNotFound", 
+                        UtilMisc.toMap("shipmentId", shipmentId), locale));
+            }
+            String productStoreId = primaryOrderHeader.getString("productStoreId");
+            if (UtilValidate.isEmpty(productStoreId)) {
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductShipmentPrimaryOrderHeaderProductStoreNotFound", 
+                        UtilMisc.toMap("productStoreId", productStoreId, "shipmentId", shipmentId), locale));
+            }
+            GenericValue primaryOrderItemShipGroup = shipment.getRelatedOne("PrimaryOrderItemShipGroup");
+            if (primaryOrderItemShipGroup == null) {
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductShipmentPrimaryOrderHeaderItemShipGroupNotFound", 
+                        UtilMisc.toMap("shipmentId", shipmentId), locale));
+            }
+            String shipmentMethodTypeId = primaryOrderItemShipGroup.getString("shipmentMethodTypeId");
+            String carrierPartyId = primaryOrderItemShipGroup.getString("carrierPartyId");
+            String carrierRoleTypeId = primaryOrderItemShipGroup.getString("carrierRoleTypeId");
+            List<EntityCondition> conditions = FastList.newInstance();
+            conditions.add(EntityCondition.makeCondition("productStoreId", EntityOperator.EQUALS, productStoreId));
+            conditions.add(EntityCondition.makeCondition("shipmentMethodTypeId", EntityOperator.EQUALS, shipmentMethodTypeId));
+            conditions.add(EntityCondition.makeCondition("partyId", EntityOperator.EQUALS, carrierPartyId));
+            conditions.add(EntityCondition.makeCondition("roleTypeId", EntityOperator.EQUALS, carrierRoleTypeId));
+            EntityConditionList<EntityCondition> ecl = EntityCondition.makeCondition(conditions, EntityOperator.AND);
+            List<GenericValue> productStoreShipmentMeths = delegator.findList("ProductStoreShipmentMeth", ecl, null, null, null, false);
+            GenericValue productStoreShipmentMeth = EntityUtil.getFirst(productStoreShipmentMeths);
+            if (UtilValidate.isNotEmpty(productStoreShipmentMeth)) {
+                shipmentGatewayConfig.put("shipmentGatewayConfigId", productStoreShipmentMeth.getString("shipmentGatewayConfigId"));
+                shipmentGatewayConfig.put("configProps", productStoreShipmentMeth.getString("configProps"));
+            } else {
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductStoreShipmentMethodNotFound", 
+                        UtilMisc.toMap("shipmentId", shipmentId), locale));
+            }
+        } catch (Exception e) {
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "FacilityShipmentGatewayConfigFromShipmentError", 
+                    UtilMisc.toMap("errorString", e.getMessage()), locale));
+        }
+        return shipmentGatewayConfig;
     }
 }

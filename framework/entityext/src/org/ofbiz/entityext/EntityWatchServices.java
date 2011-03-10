@@ -18,27 +18,14 @@
  *******************************************************************************/
 package org.ofbiz.entityext;
 
-import org.ofbiz.service.ServiceUtil;
-import org.ofbiz.service.DispatchContext;
-import org.ofbiz.service.LocalDispatcher;
-import org.ofbiz.service.GenericServiceException;
-import org.ofbiz.security.Security;
-import org.ofbiz.entity.Delegator;
+import java.util.Map;
+
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.entity.jdbc.DatabaseUtil;
-import org.ofbiz.entity.model.ModelEntity;
-import org.ofbiz.entity.model.ModelField;
-import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilURL;
-import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.UtilValidate;
-
-import java.util.Map;
-import java.net.URI;
-import java.net.URL;
-import java.net.URISyntaxException;
+import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.ServiceUtil;
 
 public class EntityWatchServices {
 
@@ -51,7 +38,7 @@ public class EntityWatchServices {
      * @param context
      * @return
      */
-    public static Map watchEntity(DispatchContext dctx, Map context) {
+    public static Map<String, Object> watchEntity(DispatchContext dctx, Map<String, ? extends Object> context) {
         GenericValue newValue = (GenericValue) context.get("newValue");
         String fieldName = (String) context.get("fieldName");
 

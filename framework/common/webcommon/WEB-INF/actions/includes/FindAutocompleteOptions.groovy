@@ -18,6 +18,7 @@
  */
 
 import org.ofbiz.base.util.StringUtil;
+import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.util.EntityFindOptions;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityConditionList;
@@ -26,19 +27,33 @@ import org.ofbiz.entity.condition.EntityFieldValue;
 import org.ofbiz.entity.condition.EntityFunction;
 import org.ofbiz.entity.condition.EntityOperator;
 
-andExprs = [];
-entityName = context.entityName;
-searchFields = context.searchFields;
-displayFields = context.displayFields ?: searchFields;
-searchValueFieldName = parameters.searchValueField;
-if (searchValueFieldName) fieldValue = parameters.get(searchValueFieldName);
-searchType = context.searchType;
+def mainAndConds = [];
+def orExprs = [];
+def entityName = context.entityName;
+def searchFields = context.searchFields;
+def displayFields = context.displayFields ?: searchFields;
+
+def searchValueFieldName = parameters.term;
+def fieldValue = null;
+if (searchValueFieldName) {
+    fieldValue = searchValueFieldName; 
+} else if (parameters.searchValueFieldName) { // This is to find the description of a lookup value on initialization.
+    fieldValue = parameters.get(parameters.searchValueFieldName);
+    context.description = "true";
+}
+
+def searchType = context.searchType;
+def displayFieldsSet = null;
 
 if (searchFields && fieldValue) {
-    searchFieldsList = StringUtil.toList(searchFields);
+    def searchFieldsList = StringUtil.toList(searchFields);
     displayFieldsSet = StringUtil.toSet(displayFields);
-    returnField = searchFieldsList[0]; //default to first element of searchFields
-    displayFieldsSet.add(returnField); //add it to select fields, in case it is missing
+    if (context.description && fieldValue instanceof java.lang.String) {
+        returnField = parameters.searchValueFieldName;
+    } else {
+        returnField = searchFieldsList[0]; //default to first element of searchFields
+        displayFieldsSet.add(returnField); //add it to select fields, in case it is missing
+    }
     context.returnField = returnField;
     context.displayFieldsSet = displayFieldsSet;
     if ("STARTS_WITH".equals(searchType)) {
@@ -50,21 +65,35 @@ if (searchFields && fieldValue) {
     }
     searchFieldsList.each { fieldName ->
         if ("EQUALS".equals(searchType)) {
-            andExprs.add(EntityCondition.makeCondition(EntityFieldValue.makeFieldValue(returnField), EntityOperator.EQUALS, searchValue));    
+            orExprs.add(EntityCondition.makeCondition(EntityFieldValue.makeFieldValue(searchFieldsList[0]), EntityOperator.EQUALS, searchValue));    
             return;//in case of EQUALS, we search only a match for the returned field
         } else {
-            andExprs.add(EntityCondition.makeCondition(EntityFunction.UPPER(EntityFieldValue.makeFieldValue(fieldName)), EntityOperator.LIKE, searchValue));
+            orExprs.add(EntityCondition.makeCondition(EntityFunction.UPPER(EntityFieldValue.makeFieldValue(fieldName)), EntityOperator.LIKE, searchValue));
         }        
     }
 }
 
-if (andExprs && entityName && displayFieldsSet) {
-    entityConditionList = EntityCondition.makeCondition(andExprs, EntityOperator.OR);
-
-    //if there is an extra condition, add it to main condition
-    if (context.andCondition && context.andCondition  instanceof EntityCondition) {
-        entityConditionList = EntityCondition.makeCondition(context.andCondition, entityConditionList);
+/* the following is part of an attempt to handle additional parameters that are passed in from other form fields at run-time,
+ * but that is not supported by the scrip.aculo.us Ajax.Autocompleter, but this is still useful to pass parameters from the
+ * lookup screen definition:
+ */
+def conditionFields = context.conditionFields;
+if (conditionFields) {
+    // these fields are for additonal conditions, this is a Map of name/value pairs
+    for (conditionFieldEntry in conditionFields.entrySet()) {
+        mainAndConds.add(EntityCondition.makeCondition(EntityFieldValue.makeFieldValue(conditionFieldEntry.getKey()), EntityOperator.EQUALS, conditionFieldEntry.getValue()));    
     }
+}
+
+if (orExprs && entityName && displayFieldsSet) {
+    mainAndConds.add(EntityCondition.makeCondition(orExprs, EntityOperator.OR));
+
+    //if there is an extra condition, add it to main condition list
+    if (context.andCondition && context.andCondition instanceof EntityCondition) {
+        mainAndConds.add(context.andCondition);
+    }
+    
+    def entityConditionList = EntityCondition.makeCondition(mainAndConds, EntityOperator.AND);
 
     Integer autocompleterViewSize = Integer.valueOf(context.autocompleterViewSize ?: 10);
     EntityFindOptions findOptions = new EntityFindOptions();

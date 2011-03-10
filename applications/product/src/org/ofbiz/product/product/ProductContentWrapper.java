@@ -153,11 +153,15 @@ public class ProductContentWrapper implements ContentWrapper {
 
         String candidateFieldName = ModelUtil.dbNameToVarName(productContentTypeId);
         ModelEntity productModel = delegator.getModelEntity("Product");
+        if (product == null) {
+            product = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", productId));
+        }
+        if (UtilValidate.isEmpty(product)) {
+            Debug.logWarning("No Product entity found for productId: " + productId, module);
+            return;
+        }
+        
         if (productModel.isField(candidateFieldName)) {
-            if (product == null) {
-                product = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", productId));
-            }
-            if (product != null) {
                 String candidateValue = product.getString(candidateFieldName);
                 if (UtilValidate.isNotEmpty(candidateValue)) {
                     outWriter.write(candidateValue);
@@ -173,18 +177,24 @@ public class ProductContentWrapper implements ContentWrapper {
                         }
                     }
                 }
-            }
         }
 
         List<GenericValue> productContentList = delegator.findByAndCache("ProductContent", UtilMisc.toMap("productId", productId, "productContentTypeId", productContentTypeId), UtilMisc.toList("-fromDate"));
         productContentList = EntityUtil.filterByDate(productContentList);
+        if (UtilValidate.isEmpty(productContentList) && ("Y".equals(product.getString("isVariant")))) {
+            GenericValue parent = ProductWorker.getParentProduct(productId, delegator);
+            if (UtilValidate.isNotEmpty(parent)) {
+                productContentList = delegator.findByAndCache("ProductContent", UtilMisc.toMap("productId", parent.get("productId"), "productContentTypeId", productContentTypeId), UtilMisc.toList("-fromDate"));
+                productContentList = EntityUtil.filterByDate(productContentList);
+            }
+        }
         GenericValue productContent = EntityUtil.getFirst(productContentList);
         if (productContent != null) {
             // when rendering the product content, always include the Product and ProductContent records that this comes from
             Map<String, Object> inContext = FastMap.newInstance();
             inContext.put("product", product);
             inContext.put("productContent", productContent);
-            ContentWorker.renderContentAsText(dispatcher, delegator, productContent.getString("contentId"), outWriter, inContext, locale, mimeTypeId, partyId, roleTypeId, false);
+            ContentWorker.renderContentAsText(dispatcher, delegator, productContent.getString("contentId"), outWriter, inContext, locale, mimeTypeId, partyId, roleTypeId, true);
         }
     }
 }

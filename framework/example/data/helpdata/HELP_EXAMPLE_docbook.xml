@@ -46,4 +46,27 @@ under the License.
             <listitem><para>and this can go longer...</para></listitem>
         </itemizedlist>
     </section>
+
+    <section>
+        <title>Examples of text formatting</title>
+        <caution>
+            <title>Caution title</title>
+            <para>Here is a caution text</para>
+        </caution>
+        <important>
+            <title>Important title</title>
+            <para>Here is an important text</para>
+        </important>
+        <note>
+            <title>Note title</title>
+            <para>Here is a note</para>
+        </note>
+        <tip>
+            <title>Tip title</title>
+            <para>Here is a tip</para>
+        </tip>
+        <warning>
+            <para>Here is a warning</para>
+        </warning>
+    </section>
 </section>

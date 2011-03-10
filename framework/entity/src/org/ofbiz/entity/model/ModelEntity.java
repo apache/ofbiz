@@ -60,7 +60,6 @@ import org.w3c.dom.Element;
 @SuppressWarnings("serial")
 public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, Serializable {
 
-    @SuppressWarnings("hiding")
     public static final String module = ModelEntity.class.getName();
 
     /** The name of the time stamp field for locking/synchronization */
@@ -123,6 +122,7 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
      * from cache on read showing a warning messages to that effect
      */
     protected boolean neverCache = false;
+    protected boolean neverCheck = false;
 
     protected boolean autoClearCache = true;
 
@@ -257,6 +257,7 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
         this.doLock = UtilXml.checkBoolean(entityElement.getAttribute("enable-lock"), false);
         this.noAutoStamp = UtilXml.checkBoolean(entityElement.getAttribute("no-auto-stamp"), false);
         this.neverCache = UtilXml.checkBoolean(entityElement.getAttribute("never-cache"), false);
+        this.neverCheck = UtilXml.checkBoolean(entityElement.getAttribute("never-check"), false);
         this.autoClearCache = UtilXml.checkBoolean(entityElement.getAttribute("auto-clear-cache"), true);
 
         String sequenceBankSizeStr = UtilXml.checkEmpty(entityElement.getAttribute("sequence-bank-size"));
@@ -302,6 +303,33 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
 
 
     public void addExtendEntity(ModelReader reader, Element extendEntityElement) {
+        if (extendEntityElement.hasAttribute("enable-lock")) {
+            this.doLock = UtilXml.checkBoolean(extendEntityElement.getAttribute("enable-lock"), false);
+        }
+        
+        if (extendEntityElement.hasAttribute("no-auto-stamp")) {
+            this.noAutoStamp = UtilXml.checkBoolean(extendEntityElement.getAttribute("no-auto-stamp"), false);
+        }
+        
+        if (extendEntityElement.hasAttribute("auto-clear-cache")) {
+            this.autoClearCache = UtilXml.checkBoolean(extendEntityElement.getAttribute("auto-clear-cache"), false);
+        }
+        
+        if (extendEntityElement.hasAttribute("never-cache")) {
+            this.neverCache = UtilXml.checkBoolean(extendEntityElement.getAttribute("never-cache"), false);
+        }
+        
+        if (extendEntityElement.hasAttribute("sequence-bank-size")) {
+            String sequenceBankSizeStr = UtilXml.checkEmpty(extendEntityElement.getAttribute("sequence-bank-size"));
+            if (UtilValidate.isNotEmpty(sequenceBankSizeStr)) {
+                try {
+                    this.sequenceBankSize = Integer.valueOf(sequenceBankSizeStr);
+                } catch (NumberFormatException e) {
+                    Debug.logError("Error parsing sequence-bank-size value [" + sequenceBankSizeStr + "] for entity [" + this.entityName + "]", module);
+                }
+            }
+        }
+        
         for (Element fieldElement: UtilXml.childElementList(extendEntityElement, "field")) {
             ModelField field = reader.createModelField(fieldElement);
             if (field != null) {
@@ -368,7 +396,7 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
 
     /** The table-name of the Entity including a Schema name if specified in the datasource config */
     public String getTableName(DatasourceInfo datasourceInfo) {
-        if (UtilValidate.isNotEmpty(datasourceInfo.schemaName)) {
+        if (datasourceInfo != null && UtilValidate.isNotEmpty(datasourceInfo.schemaName)) {
             return datasourceInfo.schemaName + "." + this.tableName;
         } else {
             return this.tableName;
@@ -408,7 +436,20 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
     public void setNeverCache(boolean neverCache) {
         this.neverCache = neverCache;
     }
-
+    
+    /**
+     * An indicator to specific if this entity should ignore automatic DB checks.
+     * This should be set when the entity is mapped to a database view to prevent
+     * warnings and attempts to modify the schema.     
+     */
+    public boolean getNeverCheck() {
+        return neverCheck;
+    }
+    
+    public void setNeverCheck(boolean neverCheck) {
+        this.neverCheck = neverCheck;
+    }
+        
     public boolean getAutoClearCache() {
         return this.autoClearCache;
     }
@@ -1409,6 +1450,10 @@ public class ModelEntity extends ModelInfo implements Comparable<ModelEntity>, S
 
         if (this.getNeverCache()) {
             root.setAttribute("never-cache", "true");
+        }
+        
+        if (this.getNeverCheck()) {
+            root.setAttribute("never-check", "true");
         }
 
         if (!this.getAutoClearCache()) {

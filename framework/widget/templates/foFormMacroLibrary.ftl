@@ -43,16 +43,16 @@ under the License.
 
 <#macro renderField text><#if text?exists>${text}</#if></#macro>
 
-<#macro renderDisplayField type imageLocation idName description class alert inPlaceEditorId="" inPlaceEditorUrl="" inPlaceEditorParams="">
+<#macro renderDisplayField type imageLocation idName description title class alert inPlaceEditorId="" inPlaceEditorUrl="" inPlaceEditorParams="">
 <@makeBlock class description />
 </#macro>
 <#macro renderHyperlinkField></#macro>
 
 <#macro renderTextField name className alert value textSize maxlength id event action disabled clientAutocomplete ajaxUrl ajaxEnabled><@makeBlock className value /></#macro>
 
-<#macro renderTextareaField name className alert cols rows id readonly value visualEdtiorEnalble buttons><@makeBlock className value /></#macro>
+<#macro renderTextareaField name className alert cols rows id readonly value visualEditorEnable language buttons><@makeBlock className value /></#macro>
 
-<#macro renderDateTimeField name className alert title value size maxlength id dateType shortDateInput timeDropdownParamName defaultDateTimeString localizedIconTitle timeDropdown timeHourName classString hour1 hour2 timeMinutesName minutes isTwelveHour ampmName amSelected pmSelected compositeType formName><@makeBlock className value /></#macro>
+<#macro renderDateTimeField name className alert title value size maxlength step timeValues id event action dateType shortDateInput timeDropdownParamName defaultDateTimeString localizedIconTitle timeDropdown timeHourName classString hour1 hour2 timeMinutesName minutes isTwelveHour ampmName amSelected pmSelected compositeType formName><@makeBlock className value /></#macro>
 
 <#macro renderDropDownField name className alert id multiple formName otherFieldName event action size firstInList currentValue explicitDescription allowEmpty options fieldName otherFieldName otherValue otherFieldSize dDFCurrent ajaxEnabled noCurrentSelectedKey ajaxOptions frequency minChars choices autoSelect partialSearch partialChars ignoreCase fullSearch>
 <#if currentValue?has_content && firstInList?has_content>
@@ -64,7 +64,7 @@ under the License.
 </#if>
 </#macro>
 
-<#macro renderCheckField items className alert allChecked currentValue name event action><@makeBlock "" "" /></#macro>
+<#macro renderCheckField items className alert id allChecked currentValue name event action><@makeBlock "" "" /></#macro>
 <#macro renderRadioField items className alert currentValue noCurrentSelectedKey name event ation><@makeBlock "" "" /></#macro>
 
 <#macro renderSubmitField buttonType className alert formName title name event action imgSrc confirmation containerId ajaxUrl><@makeBlock "" "" /></#macro>
@@ -102,8 +102,7 @@ under the License.
 <#macro renderFormatItemRowFormCellOpen style><fo:table-cell></#macro>
 <#macro renderFormatItemRowFormCellClose></fo:table-cell></#macro>
 
-<#-- TODO: multi columns (position attribute) in single forms are still not implemented -->
-<#macro renderFormatSingleWrapperOpen formName style><fo:table><fo:table-column column-width="2in"/><fo:table-column/><fo:table-body></#macro>
+<#macro renderFormatSingleWrapperOpen formName style><fo:table><fo:table-column column-width="1.75in"/><fo:table-column column-width="1.75in"/><fo:table-column column-width="1.75in"/><fo:table-column column-width="1.75in"/><fo:table-body></#macro>
 <#macro renderFormatSingleWrapperClose formName></fo:table-body></fo:table></#macro>
 
 <#macro renderFormatFieldRowOpen><fo:table-row></#macro>
@@ -111,7 +110,7 @@ under the License.
 <#macro renderFormatFieldRowTitleCellOpen style><fo:table-cell font-weight="bold" text-align="right" padding="3pt"><fo:block></#macro>
 <#macro renderFormatFieldRowTitleCellClose></fo:block></fo:table-cell></#macro>
 <#macro renderFormatFieldRowSpacerCell></#macro>
-<#macro renderFormatFieldRowWidgetCellOpen positionSpan style><fo:table-cell text-align="left" padding="2pt" padding-left="5pt"></#macro>
+<#macro renderFormatFieldRowWidgetCellOpen positionSpan style><fo:table-cell text-align="left" padding="2pt" padding-left="5pt" <#if positionSpan?has_content && positionSpan gt 1 >number-columns-spanned="${positionSpan}"</#if>></#macro>
 <#macro renderFormatFieldRowWidgetCellClose></fo:table-cell></#macro>
 
 <#macro renderFormatEmptySpace> </#macro>

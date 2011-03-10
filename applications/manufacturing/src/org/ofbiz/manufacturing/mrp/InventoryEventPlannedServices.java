@@ -19,10 +19,12 @@
 package org.ofbiz.manufacturing.mrp;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
@@ -30,10 +32,10 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.ServiceUtil;
 
-
 public class InventoryEventPlannedServices {
 
     public static final String module = InventoryEventPlannedServices.class.getName();
+    public static final String resource = "ManufacturingUiLabels";
 
     /**
      *
@@ -44,24 +46,25 @@ public class InventoryEventPlannedServices {
      * @param context: a map containing the parameters used to create an MrpEvent
      * @return result: a map with service status
      */
-    public static Map createMrpEvent(DispatchContext ctx, Map context) {
+    public static Map<String, Object> createMrpEvent(DispatchContext ctx, Map<String, ? extends Object> context) {
         Delegator delegator = ctx.getDelegator();
-        Map parameters = UtilMisc.toMap("mrpId", context.get("mrpId"),
+        Locale locale = (Locale) context.get("locale");
+        Map<String, Object> parameters = UtilMisc.<String, Object>toMap("mrpId", context.get("mrpId"),
                                         "productId", context.get("productId"),
                                         "eventDate", context.get("eventDate"),
                                         "mrpEventTypeId", context.get("mrpEventTypeId"));
         BigDecimal quantity = (BigDecimal)context.get("quantity");
-        GenericValue mrpEvent = null;
         try {
             createOrUpdateMrpEvent(parameters, quantity, (String)context.get("facilityId"), (String)context.get("eventName"), false, delegator);
         } catch (GenericEntityException e) {
             Debug.logError(e,"Error : findByPrimaryKey(\"MrpEvent\", parameters =)"+parameters, module);
-            return ServiceUtil.returnError("Problem, on database access, for more detail look at the log");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingMrpCreateOrUpdateEvent", UtilMisc.toMap("parameters", parameters), locale));
         }
         return ServiceUtil.returnSuccess();
     }
 
-    public static void createOrUpdateMrpEvent(Map mrpEventKeyMap, BigDecimal newQuantity, String facilityId, String eventName, boolean isLate, Delegator delegator) throws GenericEntityException {
+    public static void createOrUpdateMrpEvent(Map<String, Object> mrpEventKeyMap, BigDecimal newQuantity, String facilityId,
+            String eventName, boolean isLate, Delegator delegator) throws GenericEntityException {
         GenericValue mrpEvent = null;
         mrpEvent = delegator.findByPrimaryKey("MrpEvent", mrpEventKeyMap);
         if (mrpEvent == null) {
@@ -72,7 +75,7 @@ public class InventoryEventPlannedServices {
             mrpEvent.put("isLate", (isLate? "Y": "N"));
             mrpEvent.create();
         } else {
-            BigDecimal qties = newQuantity.add((BigDecimal)mrpEvent.getBigDecimal("quantity"));
+            BigDecimal qties = newQuantity.add(mrpEvent.getBigDecimal("quantity"));
             mrpEvent.put("quantity", qties.doubleValue());
             if (!UtilValidate.isEmpty(eventName)) {
                 String existingEventName = mrpEvent.getString("eventName");

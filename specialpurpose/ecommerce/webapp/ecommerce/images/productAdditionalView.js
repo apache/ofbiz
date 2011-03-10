@@ -32,12 +32,12 @@ imgView = {
         }
     },
     showDetailImage: function() { 
-        var mainImage = $('detailImage');
-        mainImage.src = $F('originalImage');
+        var mainImage = document.getElementById('detailImage');
+        mainImage.src = document.getElementById('originalImage').value;
         return false;
     },
     showImage: function() {
-        var mainImage = $('detailImage');
+        var mainImage = document.getElementById('detailImage');
         mainImage.src = this.getAttributeNode('swapDetail').value;
         return false;
     },
@@ -53,4 +53,4 @@ imgView = {
         }
     }
 }
-Event.observe(window, 'load', imgView.init, false);
+jQuery(document).ready(imgView.init);

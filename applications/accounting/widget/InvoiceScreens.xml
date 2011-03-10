@@ -192,6 +192,7 @@ under the License.
                 <set field="appliedAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceApplied(invoice)}" type="BigDecimal"/>
                 <entity-condition entity-name="AcctgTransAndEntries" list="AcctgTransAndEntries">
                     <condition-expr field-name="invoiceId"  operator="equals" from-field="invoiceId"/>
+                    <order-by field-name="acctgTransId"/>
                     <order-by field-name="acctgTransEntrySeqId"/>
                 </entity-condition>
             </actions>
@@ -418,6 +419,8 @@ under the License.
     <screen name="EditInvoiceItems">
         <section>
             <actions>
+                <set field="viewIndex" from-field="parameters.viewIndex"/>
+                <set field="viewSize" from-field="parameters.viewSize"/>
                 <set field="titleProperty" value="PageTitleListInvoices"/>
                 <set field="tabButtonItem" value="listInvoiceItems"/>
                 <set field="invoiceId" from-field="parameters.invoiceId"/>
@@ -463,6 +466,8 @@ under the License.
     <screen name="EditInvoiceTimeEntries">
         <section>
             <actions>
+                <set field="viewIndex" from-field="parameters.viewIndex"/>
+                <set field="viewSize" from-field="parameters.viewSize"/>
                 <set field="titleProperty" value="PageTitleListInvoiceTimeEntries"/>
                 <set field="tabButtonItem" value="EditInvoiceTimeEntries"/>
                 <set field="invoiceId" from-field="parameters.invoiceId"/>
@@ -540,6 +545,7 @@ under the License.
     <screen name="ListCustomerInvoices">
         <section>
             <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
                 <script location="component://party/webapp/partymgr/WEB-INF/actions/party/GetMyCompany.groovy"/>
                 <entity-condition list="invoices" entity-name="Invoice">
                     <condition-list combine="and">

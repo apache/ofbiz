@@ -60,7 +60,7 @@ if (orderId) {
     orderHeader = delegator.findByPrimaryKey("OrderHeader", [orderId : orderId]);
 }
 
-if (orderHeader) {    
+if (orderHeader) {
     // note these are overridden in the OrderViewWebSecure.groovy script if run
     context.hasPermission = true;
     context.canViewInternalDetails = true;
@@ -116,7 +116,7 @@ if (orderHeader) {
 
     canceledPromoOrderItem = [:];
     orderItemList = orderReadHelper.getOrderItems();
-    orderItemList.each { orderItem -> 
+    orderItemList.each { orderItem ->
         if("Y".equals(orderItem.get("isPromo")) && "ITEM_CANCELLED".equals(orderItem.get("statusId"))) {
             canceledPromoOrderItem = orderItem;
         }
@@ -345,13 +345,18 @@ if (orderHeader) {
     }
     context.productionProductQuantityMap = productionMap;
 
-    // INVENTORY: find the number of products in outstanding sales orders for the same product store
-    requiredMap = InventoryWorker.getOutstandingProductQuantitiesForSalesOrders(productIds, delegator);
-    context.requiredProductQuantityMap = requiredMap;
-
-    // INVENTORY: find the quantity of each product in outstanding purchase orders
-    onOrderMap = InventoryWorker.getOutstandingProductQuantitiesForPurchaseOrders(productIds, delegator);
-    context.onOrderProductQuantityMap = onOrderMap;
+    if (productIds.size() > 0) {
+        // INVENTORY: find the number of products in outstanding sales orders for the same product store    
+        requiredMap = InventoryWorker.getOutstandingProductQuantitiesForSalesOrders(productIds, delegator);
+        context.requiredProductQuantityMap = requiredMap;
+    
+        // INVENTORY: find the quantity of each product in outstanding purchase orders
+        onOrderMap = InventoryWorker.getOutstandingProductQuantitiesForPurchaseOrders(productIds, delegator);
+        context.onOrderProductQuantityMap = onOrderMap;
+    } else {
+        context.requiredProductQuantityMap = FastMap.newInstance();
+        context.onOrderProductQuantityMap = FastMap.newInstance();
+    }
 }
 
 paramString = "";
@@ -430,6 +435,14 @@ if (orderHeader) {
    orderParty = delegator.findByPrimaryKey("Party", [partyId : partyId]);
    postalContactMechList = ContactHelper.getContactMechByType(orderParty,"POSTAL_ADDRESS", false);
    context.postalContactMechList = postalContactMechList;
+
+   // list to find all the TELECOM_NUMBER for the party.
+   telecomContactMechList = ContactHelper.getContactMechByType(orderParty,"TELECOM_NUMBER", false);
+   context.telecomContactMechList = telecomContactMechList;
+
+   // list to find all the EMAIL_ADDRESS for the party.
+   emailContactMechList = ContactHelper.getContactMechByType(orderParty,"EMAIL_ADDRESS", false);
+   context.emailContactMechList = emailContactMechList;
 }
 
 if (orderItems) {
@@ -441,7 +454,7 @@ if (orderItems) {
 // This case comes when order's shipping amount is  more then or less than default percentage (defined in shipment.properties) of online UPS shipping amount.
 
     condn = EntityCondition.makeCondition([
-                                      EntityCondition.makeCondition("primaryOrderId", EntityOperator.EQUALS, orderId), 
+                                      EntityCondition.makeCondition("primaryOrderId", EntityOperator.EQUALS, orderId),
                                       EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "SHIPMENT_PICKED")],
                                   EntityOperator.AND);
     shipments = delegator.findList("Shipment", condn, null, null, null, false);
@@ -473,7 +486,7 @@ if (orderItems) {
             }
         }
     }
-      
+
     // get orderAdjustmentId for SHIPPING_CHARGES
     orderAdjustmentId = null;
     orderAdjustments.each { orderAdjustment ->

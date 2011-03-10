@@ -329,7 +329,7 @@ function doPublish() {
                 <#list standardFeatureAppls as standardFeatureAppl>
                     <#assign featureId = standardFeatureAppl.productFeatureId/>
                     <tr valign="middle"<#if rowClass == "1"> class="alternate-row"</#if>>
-                        <td colspan="2"><a href='<@ofbizUrl>quickAdminRemoveFeatureFromProduct?productId=${standardFeatureAppl.productId?if_exists}&amp;productFeatureId=${featureId?if_exists}&amp;fromDate=${standardFeatureAppl.getString("fromDate")}</@ofbizUrl>' class="buttontext">x</a>
+                        <td colspan="2"><a href='<@ofbizUrl>quickAdminRemoveFeatureFromProduct?productId=${standardFeatureAppl.productId?if_exists}&amp;productFeatureId=${featureId?if_exists}&amp;fromDate=${(standardFeatureAppl.fromDate)?if_exists}</@ofbizUrl>' class="buttontext">x</a>
                         ${productFeatureTypeLookup.get(featureId).description}: ${standardFeatureLookup.get(featureId).description}
                         </td>
                     </tr>
@@ -377,28 +377,43 @@ function doPublish() {
             <input type="hidden" name="fromDate" value="${nowTimestampString}"/>
             <input type="hidden" name="productId" value="${product.productId?if_exists}"/>
             <table cellspacing="0" class="basic-table">
-            <tr>
-            <td>
-                <table cellspacing="0" class="basic-table">
-                    <tr>
-                        <td>
-                            <select multiple="multiple" name="categoryId">
-                                <#list allCategories as category>
-                                    <option value="${category.productCategoryId?if_exists}">${category.description?if_exists} ${category.productCategoryId}</option>
-                                </#list>
-                            </select>&nbsp;
-                        </td>
-                    </tr>
-                </table>
-            </td>
+              <tr>
+              <td>
+                  <table cellspacing="0" class="basic-table">
+                      <tr>
+                          <td>
+                              <select multiple="multiple" name="categoryId">
+                                  <#list allCategories as category>
+                                      <option value="${category.productCategoryId?if_exists}">${category.description?if_exists} ${category.productCategoryId}</option>
+                                  </#list>
+                              </select>&nbsp;
+                          </td>
+                      </tr>
+                  </table>
+              </td>
+              </tr>
+              <tr>
+                  <td colspan="2"><input type="submit" value="${uiLabelMap.ProductUpdateCategories}"/></td>
+              </tr>
+            </table>
+        </form>
+        <table>
+          <tr>
             <td valign="top">
                 <table cellspacing="0" class="basic-table">
                     <#assign rowClass = "2">
                     <#list productCategoryMembers as prodCatMemb>
                         <#assign prodCat = prodCatMemb.getRelatedOne("ProductCategory")/>
                         <tr valign="middle"<#if rowClass == "1"> class="alternate-row"</#if>>
-                            <td colspan="2"><a href='<@ofbizUrl>quickAdminRemoveProductFromCategory?productId=${prodCatMemb.productId?if_exists}&amp;productCategoryId=${prodCatMemb.productCategoryId}&amp;fromDate=${prodCatMemb.getString("fromDate")}</@ofbizUrl>' class="buttontext">x</a>
-                            ${prodCat.description?if_exists} ${prodCat.productCategoryId}</td>
+                            <td colspan="2">
+                              <form name="quickAdminRemoveProductFromCategory_${prodCatMemb_index}" action="<@ofbizUrl>quickAdminRemoveProductFromCategory</@ofbizUrl>" method="post">
+                                <input type="hidden" name="productId" value="${prodCatMemb.productId?if_exists}" />
+                                <input type="hidden" name="productCategoryId" value="${prodCatMemb.productCategoryId}" />
+                                <input type="hidden" name="fromDate" value="${(prodCatMemb.fromDate)?if_exists}" />
+                                <a href="javascript:document.quickAdminRemoveProductFromCategory_${prodCatMemb_index}.submit();" class="buttontext">x</a>
+                                ${prodCat.description?if_exists} ${prodCat.productCategoryId}
+                              </form>
+                            </td>
                         </tr>
                         <#-- toggle the row color -->
                         <#if rowClass == "2">
@@ -409,12 +424,8 @@ function doPublish() {
                     </#list>
                 </table>
             </td>
-            </tr>
-            <tr>
-                <td colspan="2" align="right"><input type="submit" value="${uiLabelMap.ProductUpdateCategories}"/></td>
-            </tr>
-            </table>
-        </form>
+          </tr>
+        </table>
         <!--  **************************************************** end - Categories section -->
     </div>
 </div>
@@ -431,10 +442,7 @@ function doPublish() {
         <table cellspacing="0" class="basic-table">
             <tr>
                 <td>
-                    <input type="text" size="25" name="fromDate"/>
-                    <a href="javascript:call_cal(document.publish.fromDate,'${nowTimestampString}');">
-                        <img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="Calendar"/>
-                    </a>
+                    <@htmlTemplate.renderDateTimeField name="fromDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="" size="25" maxlength="30" id="fromDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                     <input type="button" value="${uiLabelMap.ProductPublishAndView}" onclick="doPublish();"/>
                 </td>
             </tr>
@@ -447,10 +455,7 @@ function doPublish() {
         <table cellspacing="0" class="basic-table">
             <tr>
                 <td>
-                    <input type="text" size="25" name="thruDate"/>
-                    <a href="javascript:call_cal(document.unpublish.thruDate,'${nowTimestampString}');">
-                        <img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="Calendar"/>
-                    </a>
+                    <@htmlTemplate.renderDateTimeField name="thruDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="" size="25" maxlength="30" id="thruDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                     <input type="submit" value="${uiLabelMap.ProductRemoveFromSite}"/>
                 </td>
             </tr>

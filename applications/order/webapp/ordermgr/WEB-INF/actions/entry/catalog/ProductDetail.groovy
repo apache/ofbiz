@@ -233,7 +233,27 @@ if (product) {
     // an example of getting features of a certain type to show
     sizeProductFeatureAndAppls = delegator.findByAnd("ProductFeatureAndAppl", [productId : productId, productFeatureTypeId : "SIZE"], ["sequenceNum", "defaultSequenceNum"]);
     context.sizeProductFeatureAndAppls = sizeProductFeatureAndAppls;
-
+    
+    // get product variant for Box/Case/Each
+    productVariants = [];
+    boolean isAlternativePacking = ProductWorker.isAlternativePacking(delegator, product.productId, null);
+    mainProducts = [];
+    if(isAlternativePacking){
+        productVirtualVariants = delegator.findByAndCache("ProductAssoc", UtilMisc.toMap("productIdTo", product.productId , "productAssocTypeId", "ALTERNATIVE_PACKAGE"));
+        if(productVirtualVariants){
+            productVirtualVariants.each { virtualVariantKey ->
+                mainProductMap = [:];
+                mainProduct = virtualVariantKey.getRelatedOneCache("MainProduct");
+                quantityUom = mainProduct.getRelatedOneCache("QuantityUom");
+                mainProductMap.productId = mainProduct.productId;
+                mainProductMap.piecesIncluded = mainProduct.piecesIncluded;
+                mainProductMap.uomDesc = quantityUom.description;
+                mainProducts.add(mainProductMap);
+            }
+        }
+    }
+    context.mainProducts = mainProducts;
+    
     // Special Variant Code
     if ("Y".equals(product.isVirtual)) {
         if ("VV_FEATURETREE".equals(ProductWorker.getProductVirtualVariantMethod(delegator, productId))) {
@@ -417,6 +437,51 @@ if (product) {
                             if (variantPriceMap && variantPriceMap.basePrice) {
                                 variantPriceJS.append("  if (sku == \"" + variant.productId + "\") return \"" + numberFormat.format(variantPriceMap.basePrice) + "\"; ");
                             }
+                            
+                            // make a list of virtual variants sku with requireAmount
+                            virtualVariantsRes = dispatcher.runSync("getAssociatedProducts", [productIdTo : variant.productId, type : "ALTERNATIVE_PACKAGE", checkViewAllow : true, prodCatalogId : currentCatalogId]);
+                            virtualVariants = virtualVariantsRes.assocProducts;
+                            
+                            if(virtualVariants){
+                                virtualVariants.each { virtualAssoc ->
+                                    virtual = virtualAssoc.getRelatedOne("MainProduct");
+                                    // Get price from a virtual product
+                                    priceContext.product = virtual;
+                                    if (cart.isSalesOrder()) {
+                                        // sales order: run the "calculateProductPrice" service
+                                        virtualPriceMap = dispatcher.runSync("calculateProductPrice", priceContext);
+                                        BigDecimal calculatedPrice = (BigDecimal)virtualPriceMap.get("price");
+                                        // Get the minimum quantity for variants if MINIMUM_ORDER_PRICE is set for variants.
+                                        virtualPriceMap.put("minimumQuantity", ShoppingCart.getMinimumOrderQuantity(delegator, calculatedPrice, virtual.get("productId")));
+                                        Iterator treeMapIter = variantTree.entrySet().iterator();
+                                        while (treeMapIter.hasNext()) {
+                                            Map.Entry entry = treeMapIter.next();
+                                            if (entry.getValue() instanceof  Map) {
+                                                Iterator entryIter = entry.getValue().entrySet().iterator();
+                                                while (entryIter.hasNext()) {
+                                                    Map.Entry innerentry = entryIter.next();
+                                                    if (virtual.get("productId").equals(innerentry.getValue().get(0))) {
+                                                        virtualPriceMap.put("variantName", innerentry.getKey());
+                                                        virtualPriceMap.put("secondVariantName", entry.getKey());
+                                                        break;
+                                                    }
+                                                }
+                                            } else if (UtilValidate.isNotEmpty(entry.getValue())) { 
+                                                if (virtual.get("productId").equals(entry.getValue().get(0))) {
+                                                    virtualPriceMap.put("variantName", entry.getKey());
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        variantPriceList.add(virtualPriceMap);
+                                        variantPriceJS.append("  if (sku == \"" + virtual.productId + "\") return \"" + numberFormat.format(virtualPriceMap.basePrice) + "\"; ");
+                                    } else {
+                                        virtualPriceMap = dispatcher.runSync("calculatePurchasePrice", priceContext);
+                                        variantPriceJS.append("  if (sku == \"" + virtual.productId + "\") return \"" + numberFormat.format(virtualPriceMap.price) + "\"; ");
+                                    }
+                                }
+                                
+                            }
                         }
                         amt.append(" } ");
                         variantPriceJS.append(" } ");
@@ -432,7 +497,56 @@ if (product) {
         }
     } else {
         context.minimumQuantity= ShoppingCart.getMinimumOrderQuantity(delegator, priceMap.price, productId);
-    } 
+        if(isAlternativePacking){
+            // get alternative product price when product doesn't have any feature 
+            jsBuf = new StringBuffer();
+            jsBuf.append("<script language=\"JavaScript\" type=\"text/javascript\">");
+            
+            // make a list of variant sku with requireAmount
+            virtualVariantsRes = dispatcher.runSync("getAssociatedProducts", [productIdTo : productId, type : "ALTERNATIVE_PACKAGE", checkViewAllow : true, prodCatalogId : categoryId]);
+            virtualVariants = virtualVariantsRes.assocProducts;
+            // Format to apply the currency code to the variant price in the javascript
+            if (productStore) {
+                localeString = productStore.defaultLocaleString;
+                if (localeString) {
+                    locale = UtilMisc.parseLocale(localeString);
+                }
+            }
+            virtualVariantPriceList = [];
+            numberFormat = NumberFormat.getCurrencyInstance(locale);
+            
+            if(virtualVariants){
+                amt = new StringBuffer();
+                // Create the javascript to return the price for each variant
+                variantPriceJS = new StringBuffer();
+                variantPriceJS.append("function getVariantPrice(sku) { ");
+                
+                virtualVariants.each { virtualAssoc ->
+                    virtual = virtualAssoc.getRelatedOne("MainProduct");
+                    // Get price from a virtual product
+                    priceContext.product = virtual;
+                    if (cart.isSalesOrder()) {
+                        // sales order: run the "calculateProductPrice" service
+                        virtualPriceMap = dispatcher.runSync("calculateProductPrice", priceContext);
+                        BigDecimal calculatedPrice = (BigDecimal)virtualPriceMap.get("price");
+                        // Get the minimum quantity for variants if MINIMUM_ORDER_PRICE is set for variants.
+                        virtualVariantPriceList.add(virtualPriceMap);
+                        variantPriceJS.append("  if (sku == \"" + virtual.productId + "\") return \"" + numberFormat.format(virtualPriceMap.basePrice) + "\"; ");
+                    } else {
+                        virtualPriceMap = dispatcher.runSync("calculatePurchasePrice", priceContext);
+                        variantPriceJS.append("  if (sku == \"" + virtual.productId + "\") return \"" + numberFormat.format(virtualPriceMap.price) + "\"; ");
+                    }
+                }
+                variantPriceJS.append(" } ");
+                
+                context.virtualVariantPriceList = virtualVariantPriceList;
+                jsBuf.append(amt.toString());
+                jsBuf.append(variantPriceJS.toString());
+                jsBuf.append("</script>");
+                context.virtualVariantJavaScript = jsBuf;
+            }
+        }
+    }
 
     //get last inventory count from product facility for the product
     facilities = delegator.findList("ProductFacility", EntityCondition.makeCondition([productId : product.productId]), null, null, null, false);

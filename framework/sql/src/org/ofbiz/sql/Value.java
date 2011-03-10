@@ -22,6 +22,7 @@ public abstract class Value extends Atom {
     public static final class Null extends Value {
         private Null() {
         }
+        @Override
         public void accept(Visitor visitor) {
             visitor.visit(this);
         }
@@ -34,15 +35,44 @@ public abstract class Value extends Atom {
     public static final Null NULL = new Null();
 
     public interface Visitor {
+        void visit(AggregateFunction value);
         void visit(FieldValue value);
         void visit(FunctionCall value);
         void visit(MathValue value);
         void visit(Null value);
-        void visit(NumberValue value);
+        void visit(NumberValue<?> value);
         void visit(ParameterValue value);
         void visit(StringValue value);
-        void visit(CountFunction value);
         void visit(CountAllFunction value);
+    }
+
+    public static class BaseVisitor implements Visitor {
+        public void visit(AggregateFunction value) {
+        }
+
+        public void visit(FieldValue value) {
+        }
+
+        public void visit(FunctionCall value) {
+        }
+
+        public void visit(MathValue value) {
+        }
+
+        public void visit(Null value) {
+        }
+
+        public void visit(NumberValue<?> value) {
+        }
+
+        public void visit(ParameterValue value) {
+        }
+
+        public void visit(StringValue value) {
+        }
+
+        public void visit(CountAllFunction value) {
+        }
     }
 
     public abstract void accept(Visitor visitor);

@@ -18,50 +18,61 @@
  */
 package org.ofbiz.sql;
 
+import org.ofbiz.base.lang.SourceMonitored;
+
+@SourceMonitored
 public final class OrderByItem extends Atom {
-    public enum Order { DEFAULT, ASCENDING, DESCENDING };
+    public enum Order { DEFAULT, ASCENDING, DESCENDING }
+    public enum Nulls { DEFAULT, FIRST, LAST }
 
     private final Order order;
-    private final String functionName;
-    private final String fieldName;
+    private final Nulls nulls;
+    private final ConstantValue value;
 
-    public OrderByItem(Order order, String functionName, String fieldName) {
+    public OrderByItem(Order order, Nulls nulls, ConstantValue value) {
         this.order = order;
-        this.functionName = functionName;
-        this.fieldName = fieldName;
+        this.nulls = nulls;
+        this.value = value;
     }
 
     public final Order getOrder() {
         return order;
     }
 
-    public final String getFunctionName() {
-        return functionName;
+    public final Nulls getNulls() {
+        return nulls;
     }
 
-    public final String getFieldName() {
-        return fieldName;
+    public final ConstantValue getValue() {
+        return value;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o instanceof OrderByItem) {
             OrderByItem other = (OrderByItem) o;
-            return order.equals(other.order) && equalsHelper(functionName, other.functionName) && fieldName.equals(other.fieldName);
+            return order.equals(other.order) && nulls.equals(other.nulls) && value.equals(other.value);
         } else {
             return false;
         }
     }
 
     public StringBuilder appendTo(StringBuilder sb) {
-        if (functionName != null) sb.append(functionName).append('(');
-        sb.append(fieldName);
-        if (functionName != null) sb.append(')');
+        value.appendTo(sb);
         switch (order) {
             case ASCENDING:
                 sb.append(" ASC");
                 break;
             case DESCENDING:
                 sb.append(" DESC");
+                break;
+        }
+        switch (nulls) {
+            case FIRST:
+                sb.append(" NULLS FIRST");
+                break;
+            case LAST:
+                sb.append(" NULLS LAST");
                 break;
         }
         return sb;

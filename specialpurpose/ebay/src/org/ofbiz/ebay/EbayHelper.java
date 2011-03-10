@@ -175,6 +175,14 @@ public class EbayHelper {
             if (UtilValidate.isNotEmpty(ebayShippingMethod)) {
                 partyId = ebayShippingMethod.getString("carrierPartyId");
                 shipmentMethodTypeId = ebayShippingMethod.getString("shipmentMethodTypeId");
+            } else {
+                //Find ebay shipping method on the basis of shipmentMethodName so that we can create new record with productStorId, EbayShippingMethod data is required for atleast one productStore
+                List<GenericValue> ebayShippingMethods = delegator.findByAnd("EbayShippingMethod", UtilMisc.toMap("shipmentMethodName", shippingService));
+                ebayShippingMethod = EntityUtil.getFirst(ebayShippingMethods);
+                ebayShippingMethod.put("productStoreId", productStoreId);
+                delegator.create(ebayShippingMethod);
+                partyId = ebayShippingMethod.getString("carrierPartyId");
+                shipmentMethodTypeId = ebayShippingMethod.getString("shipmentMethodTypeId");
             }
         } catch (GenericEntityException e) {
             Debug.logInfo("Unable to find EbayShippingMethod", module);
@@ -184,7 +192,7 @@ public class EbayHelper {
     }
 
     public static boolean createPaymentFromPaymentPreferences(Delegator delegator, LocalDispatcher dispatcher, GenericValue userLogin,
-            String orderId, String externalId, Timestamp orderDate, String partyIdFrom) {
+        String orderId, String externalId, Timestamp orderDate, BigDecimal amount, String partyIdFrom) {
         List<GenericValue> paymentPreferences = null;
         try {
             Map<String, String> paymentFields = UtilMisc.toMap("orderId", orderId, "statusId", "PAYMENT_RECEIVED",
@@ -194,12 +202,30 @@ public class EbayHelper {
             if (UtilValidate.isNotEmpty(paymentPreferences)) {
                 Iterator<GenericValue> i = paymentPreferences.iterator();
                 while (i.hasNext()) {
-                    GenericValue pref = (GenericValue) i.next();
+                    GenericValue pref = i.next();
                     boolean okay = createPayment(dispatcher, userLogin, pref, orderId, externalId, orderDate, partyIdFrom);
                     if (!okay)
                         return false;
                 }
-            }
+            } else {
+                paymentFields = UtilMisc.toMap("orderId", orderId, "statusId", "PAYMENT_NOT_RECEIVED",
+                    "paymentMethodTypeId", "EXT_EBAY");
+                paymentPreferences = delegator.findByAnd("OrderPaymentPreference", paymentFields);
+                if (UtilValidate.isNotEmpty(paymentPreferences)) {
+                    Iterator<GenericValue> i = paymentPreferences.iterator();
+                    while (i.hasNext()) {
+                        GenericValue pref = (GenericValue) i.next();
+                        if (UtilValidate.isNotEmpty(amount)) {
+                            pref.set("statusId", "PAYMENT_RECEIVED");
+                            pref.set("maxAmount", amount);
+                            pref.store();
+                        }
+                        boolean okay = createPayment(dispatcher, userLogin, pref, orderId, externalId, orderDate, partyIdFrom);
+                        if (!okay)
+                            return false;
+                    }
+                }
+            } 
         } catch (Exception e) {
             Debug.logError(e, "Cannot get payment preferences for order #" + orderId, module);
             return false;
@@ -304,10 +330,10 @@ public class EbayHelper {
         try {
             Map<String, Object> context = FastMap.newInstance();
             context.put("partyId", partyId);
-            context.put("toName", (String) address.get("buyerName"));
-            context.put("address1", (String) address.get("shippingAddressStreet1"));
-            context.put("address2", (String) address.get("shippingAddressStreet2"));
-            context.put("postalCode", (String) address.get("shippingAddressPostalCode"));
+            context.put("toName", address.get("buyerName"));
+            context.put("address1", address.get("shippingAddressStreet1"));
+            context.put("address2", address.get("shippingAddressStreet2"));
+            context.put("postalCode", address.get("shippingAddressPostalCode"));
             context.put("userLogin", userLogin);
             context.put("contactMechPurposeTypeId", contactMechPurposeTypeId);
 
@@ -469,7 +495,7 @@ public class EbayHelper {
         }
 
         Map<String, Object> result = ServiceUtil.returnSuccess();
-        result.put("geoId", (String) geo.get("geoId"));
+        result.put("geoId", geo.get("geoId"));
         return result;
     }
 
@@ -485,7 +511,7 @@ public class EbayHelper {
         // check them to see if one matches
         Iterator<GenericValue> shippingLocationsIterator = shippingLocations.iterator();
         while (shippingLocationsIterator.hasNext()) {
-            GenericValue shippingLocation = (GenericValue) shippingLocationsIterator.next();
+            GenericValue shippingLocation = shippingLocationsIterator.next();
             contactMechId = shippingLocation.getString("contactMechId");
             GenericValue postalAddress;
             try {
@@ -532,7 +558,7 @@ public class EbayHelper {
         // check them to see if one matches
         Iterator<GenericValue> emailAddressesContactMechsIterator = emailAddressContactMechs.iterator();
         while (emailAddressesContactMechsIterator.hasNext()) {
-            GenericValue emailAddressContactMech = (GenericValue) emailAddressesContactMechsIterator.next();
+            GenericValue emailAddressContactMech = emailAddressesContactMechsIterator.next();
             contactMechId = emailAddressContactMech.getString("contactMechId");
             // now compare values. If one matches, that's our email address.
             // Return the related contact mech id.
@@ -557,7 +583,7 @@ public class EbayHelper {
         // check them to see if one matches
         Iterator<GenericValue> phoneNumbersIterator = phoneNumbers.iterator();
         while (phoneNumbersIterator.hasNext()) {
-            GenericValue phoneNumberContactMech = (GenericValue) phoneNumbersIterator.next();
+            GenericValue phoneNumberContactMech = phoneNumbersIterator.next();
             contactMechId = phoneNumberContactMech.getString("contactMechId");
             GenericValue phoneNumber;
             try {
@@ -587,7 +613,7 @@ public class EbayHelper {
             // First try to get an exact match: title == internalName
             List<GenericValue> products = delegator.findByAnd("Product", UtilMisc.toMap("internalName", title));
             if (UtilValidate.isNotEmpty(products) && products.size() == 1) {
-                productId = (String) ((GenericValue)products.get(0)).get("productId");
+                productId = (String) (products.get(0)).get("productId");
             }
             // If it fails, attempt to get the product id from the first word of the title
             if (UtilValidate.isEmpty(productId)) {

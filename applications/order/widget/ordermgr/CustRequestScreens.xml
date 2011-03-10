@@ -30,13 +30,19 @@ under the License.
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <screenlet title="${uiLabelMap.OrderFindRequests}" collapsible="true" id="findRequests">
-                            <link target="request" text="${uiLabelMap.OrderNewRequest}" style="buttontext"/>
-                            <include-form name="FindRequests" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
-                        </screenlet>
-                        <screenlet title="${uiLabelMap.OrderRequestList}" navigation-form-name="ListRequests" >
-                            <include-form name="ListRequests" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
-                        </screenlet>
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="menu-bar">
+                                <container style="button-bar">
+                                    <link target="request" text="${uiLabelMap.OrderNewRequest}" style="buttontext create"/>
+                                </container>
+                            </decorator-section>
+                            <decorator-section name="search-options">
+                                <include-form name="FindRequests" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="ListRequests" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -490,6 +496,8 @@ under the License.
     <screen name="IncomingCustRequests">
         <section>
             <actions>
+                <set field="parameters.sortField" from-field="parameters.sortField" default-value="-custRequestDate"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
                 <entity-condition list="custRequests" entity-name="CustReqAndTypeAndPartyRel">
                     <condition-list combine="and">
                         <condition-expr field-name="statusId" operator="equals" value="CRQ_SUBMITTED"/>
@@ -498,7 +506,7 @@ under the License.
                             <condition-expr field-name="partyIdTo" operator="equals" from-field="userLogin.partyId"/>
                         </condition-list>
                     </condition-list>
-                    <order-by field-name="-custRequestDate"/>
+                    <order-by field-name="${parameters.sortField}"/>
                 </entity-condition>
             </actions>
             <widgets>
@@ -520,7 +528,7 @@ under the License.
     <screen name="ListCustRequests">
         <section>
             <actions>
-                <script location="component://common/webcommon/WEB-INF/actions/includes/retrievePortletAttributes.groovy"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="fromPartyId" from-field="userLogin.partyId"/>
             </actions>
             <widgets>

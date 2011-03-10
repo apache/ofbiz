@@ -116,6 +116,14 @@ under the License.
                tooltip="${uiLabelMap.ExampleDateField8Tooltip}">
             <display description="${groovy:org.ofbiz.base.util.UtilDateTime.toDateString(exampleDateField, &quot;MMMM,dd,yyyy&quot;);}"/>
         </field>
+        <!-- ***************** -->
+        <!-- ***   field12  *** -->
+        <!-- ***************** -->
+        <field name="field12"
+               title="${uiLabelMap.ExampleDateField12Title}"
+               tooltip="${uiLabelMap.ExampleDateField12Tooltip}">
+            <date-time input-method="time-dropdown" clock="24" default-value="${exampleDateField}" step="5"/>
+        </field>
     </form>
 
     <form name="DropDownFieldsExampleForm" type="single" title="">
@@ -161,7 +169,7 @@ under the License.
         <field name="field8"
                title="${uiLabelMap.ExampleDropDownField8Title}"
                event="onchange"
-               action="return alert('You have changed the value in the select box');"
+               action="return showErrorAlert('${uiLabelMap.CommonErrorMessage2}','${uiLabelMap.YouChangedTheSelectBoxValue}');"
                tooltip="${uiLabelMap.ExampleDropDownField8Tooltip}">
             <drop-down>
                 <option key="Y" description="${uiLabelMap.CommonY}"/>
@@ -215,19 +223,69 @@ under the License.
         <!-- ***   field7  *** -->
         <!-- ***************** -->
         <field name="field7"
-               title="${uiLabelMap.ExampleDropDownField7Title}"
-               tooltip="${uiLabelMap.ExampleToDo}">
+            title="${uiLabelMap.ExampleDropDownField7Title}"
+            tooltip="${uiLabelMap.ExampleToDo}">
             <drop-down>
                 <entity-options entity-name="ExampleType"
-                                key-field-name="exampleTypeId"
-                                description="${description}">
+                    key-field-name="exampleTypeId"
+                    description="${description}">
                     <entity-constraint name="exampleTypeId"
-                                       value="INSPIRED"
-                                       operator="greater"/>
+                        value="INSPIRED"
+                        operator="greater"/>
                     <entity-order-by field-name="description"/>
                 </entity-options>
             </drop-down>
         </field>
+        <!-- ****************************** -->
+        <!-- *** Autocomplete dropdown *** -->
+        <!-- ****************************** -->        
+        <!-- TODO : return only the Id, else you need to edit the field to remove the description -->
+        <field name="emptyField1" title="${uiLabelMap.CommonEmptyHeader}"><display/></field>
+        <field name="geoId" title="${uiLabelMap.ExampleAutocompleteDropdown}"
+            tooltip="${uiLabelMap.ExampleAutocompleteTooltip}">
+            <drop-down>
+                <auto-complete/>
+                <entity-options entity-name="Geo" description="${geoId}: ${geoName}">
+                    <entity-constraint name="geoTypeId" value="COUNTRY"/>
+                    <entity-order-by field-name="geoName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <!-- ****************************** -->
+        <!-- ***   Dependent dropdowns  *** -->
+        <!-- ****************************** -->        
+        <field name="emptyField2" title="${uiLabelMap.CommonEmptyHeader}"><display/></field>
+        <field name="dependendDropDownFields" title="${uiLabelMap.ExampleDependentDropDowns}">
+            <display description="${uiLabelMap.ExampleDependentDropDownTooltip}"/>
+        </field>
+        <field name="stateProvinceGeoId" title="${uiLabelMap.CommonState}" widget-style="required"><drop-down allow-empty="false"/></field>                       
+        <field name="countryGeoId" title="${uiLabelMap.CommonCountry}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+            <drop-down no-current-selected-key="USA">
+                <entity-options entity-name="Geo" key-field-name="geoId" description="${geoName}">
+                    <entity-constraint name="geoTypeId" value="COUNTRY"/>
+                    <entity-order-by field-name="geoName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+    </form>
+    
+        <!-- ****************************** -->
+        <!-- ***   Multiple Dropdown    *** -->
+        <!-- ****************************** -->
+        <!-- See why this is used here http://www.ryancramer.com/journal/entries/select_multiple/ -->
+    <form name="DropDownMultipleFieldExampleForm" type="single" title="">
+        <field name="emptyField1" title="${uiLabelMap.CommonEmptyHeader}"><display/></field>
+        <field name="multipleDropDownFields" title="${uiLabelMap.ExampleMultipleDropDowns}">
+            <display description="${uiLabelMap.ExampleMultipleDropDownTooltip}"/>
+        </field>
+        <field name="countryGeoIdMultiple" title="${uiLabelMap.CommonCountry}">
+            <drop-down no-current-selected-key="USA">
+                <entity-options entity-name="Geo" key-field-name="geoId" description="${geoName}">
+                    <entity-constraint name="geoTypeId" value="COUNTRY"/>
+                    <entity-order-by field-name="geoName"/>
+                </entity-options>
+            </drop-down>
+        </field>        
     </form>
 
     <!-- Simple form to print a FOP PDF file with the  fonts available in OFBiz Project -->
@@ -280,28 +338,27 @@ under the License.
 
     </form>
 
-    <!-- Lookup Layer Example -->
+    <!-- Lookup Examples -->
     <form name="ExampleLookupFields" type="single" title="">
-        <!-- Old style lookup (in a popup window) -->
-        <!-- Using separated labels is not recommended (it's better using sentences than words for translation) -->
-        <field name="partyIdFrom" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.CommonFrom}"><!-- we use partyIdFrom here only to differentiate from the other partyId field we use below, ie partyIdTo-->
-            <lookup target-form-name="LookupPartyExample" presentation="window"/>
+        <!-- Old style lookup (in a popup window without autocompletion), geoIdAlone because we have another geoId below -->
+        <field name="geoIdAlone" title="${uiLabelMap.CommonGeoId}">
+            <lookup target-form-name="LookupGeo" presentation="window"/>
         </field>
-        <!-- Standard lookup (in a layer)-->
-        <!-- passes the name in one and the id in another field -->
-        <field name="partyName" title="${uiLabelMap.CommonName}">
-            <lookup target-form-name="LookupPartyExampleByName" description-field-name="partyIdTo"/>
+        <!-- Standard lookup (in a layer with autocompletion) -->
+        <!-- passes the name in one field and the id in another, passing the id in the other field does not work yet with autocompletion, WIP... -->
+        <field name="geoName" title="${uiLabelMap.CommonGeoName}">
+            <lookup target-form-name="LookupGeoName" description-field-name="geoId"/>
         </field>
-        <!-- This field may be hidden and the name rendered in partyName using default-value if partyIdTo exists-->
-        <field name="partyIdTo" title="${uiLabelMap.CommonPartyID} ${uiLabelMap.CommonTo}"><text/></field><!-- the text field is only used for rendering. In the "real life" you would use the hidden fiels commented below to pass the data to the request  -->
-        <!--field name="partyIdTo"><hidden/></field-->        
+        <!-- This field may be hidden and the name rendered in geoName using default-value if geoId is known when loading the form-->
+        <field name="geoId" title="${uiLabelMap.CommonGeoId}"><text/></field><!-- the text field is only used for rendering. In the "real life" you would use the hidden field commented below to pass the data to the request  -->
+        <!--field name="geoId"><hidden/></field-->        
         <sort-order>
             <field-group>
-                <sort-field name="partyIdFrom"/>
+                <sort-field name="geoIdAlone"/>
             </field-group>
             <field-group>
-                <sort-field name="partyName"/>
-                <sort-field name="partyIdTo"/>
+                <sort-field name="geoName"/>
+                <sort-field name="geoId"/>
             </field-group>
         </sort-order>
     </form>

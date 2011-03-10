@@ -94,14 +94,6 @@ under the License.
         <section>
             <actions>
                 <set field="autocompleteOptions" from-field="parameters.autocompleteOptions"/>
-                <!--
-                FIXME: Disabled because it represents a security hole.
-                <set field="entityName" from-field="parameters.entityName"/>
-                <set field="fieldName" from-field="parameters.fieldName"/>
-                <set field="selectFields" from-field="parameters.selectFields"/>
-                <set field="sortByFields" from-field="parameters.sortByFields"/>
-                <script location="component://common/webcommon/WEB-INF/actions/includes/FindAutocompleteOptions.groovy"/>
-                -->
             </actions>
             <widgets>
                 <platform-specific><html><html-template location="component://common/webcommon/includes/ajaxAutocompleteOptions.ftl"/></html></platform-specific>
@@ -114,15 +106,35 @@ under the License.
         <section>
             <actions>
                 <!-- The default (global) java scripts -->
-                <set field="layoutSettings.javaScripts[+0]" value="/images/prototypejs/scriptaculous.js" global="true"/>
-                <set field="layoutSettings.javaScripts[+0]" value="/images/prototypejs/prototype.js" global="true"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/resize.js" global="true"/>
+                    <!-- jQuery part -->
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/asmselect/jquery.asmselect-1.0.4a-beta.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/datetimepicker/jquery-ui-timepicker-addon-0.9.3.min.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/ui/js/jquery-ui-1.8.6.custom.min.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/jeditable/jquery.jeditable.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/validate/jquery.validate.min.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/fjTimer/jquerytimer-min.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/ui/development-bundle/ui/jquery.ui.datepicker.js" global="true"/>
+
+                <!-- What a mess? OK a Groovy script could be used, but anyway we need this to have real locale for calendar... -->
+                <set field="initialLocaleComplete" type="String" value="${groovy:parameters?.userLogin?.lastLocale}" default-value="${groovy:locale.toString()}"/>
+                <set field="initialLocale" type="String" value="${groovy:parameters?.userLogin?.lastLocale?.substring(0,2)}" default-value="${groovy:locale.toString()?.substring(0,2)?:'en'}"/>
+                <set field="localeFileNameComplete" type="String" value="/images/jquery/ui/development-bundle/ui/i18n/jquery.ui.datepicker-${initialLocaleComplete}.js"/>
+                <set field="localeFileNameComplete" type="String" value="${groovy: localeFileNameComplete.replace('_', '-')}"/> <!-- those files are build this way OOTB (ie a - not a _ between language and country -->
+                <set field="fileNameComplete" type="String" value="${groovy: org.ofbiz.base.location.FlexibleLocation.resolveLocation('component://images/webapp' + localeFileNameComplete)}"/>
+                <set field="localeFileName" type="String" value="/images/jquery/ui/development-bundle/ui/i18n/jquery.ui.datepicker-${initialLocale}.js"/>
+                <set field="localeJsFile" type="String" value="${groovy: fileNameComplete ? localeFileNameComplete : localeFileName}"/>
+                <set field="layoutSettings.javaScripts[+0]" value="${localeJsFile}" global="true"/>
+
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/jquery-1.4.2.min.js" global="true"/>
+                    <!-- jQuery CSSs -->
+                <set field="layoutSettings.styleSheets[+0]" value="/images/jquery/plugins/asmselect/jquery.asmselect-1.0.4a-beta.css" global="true"/>
+
                 <set field="layoutSettings.javaScripts[]" value="/images/selectall.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/fieldlookup.js" global="true"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/calendarDateSelect/calendar_date_select.js" global="true"/>
-                <set field="initialLocale" type="String" value="${groovy:parameters?.userLogin?.lastLocale?.substring(0,2)}" default-value="${groovy:locale?.toString()?.substring(0,2)?:'en'}"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/calendarDateSelect/locale/${initialLocale}.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/GooglemapMarkers.js" global="true"/>
+                <set field="layoutSettings.javaScripts[]" value="/images/getDependentDropdownValues.js" global="true"/>
+                <set field="layoutSettings.javaScripts[]" value="/images/selectMultipleRelatedValues.js" global="true"/>
+
                 <set field="layoutSettings.commonHeaderImageLinkUrl" from-field="layoutSettings.commonHeaderImageLinkUrl" default-value="main" global="true"/>
                 <set field="visualThemeId" from-field="userPreferences.VISUAL_THEME" global="true"/>
                 <service service-name="getVisualThemeResources">
@@ -140,9 +152,8 @@ under the License.
             <widgets>
                 <!-- render header -->
                 <platform-specific><html><html-template location="${headerTemplateLocation}"/></html></platform-specific>
-
                 <!-- render appbar or its opening part -->
-                <section>
+                <section name="Render-Main-Nav">
                     <condition>
                         <not><if-empty field="appbarOpenTemplateLocation"/></not>
                     </condition>
@@ -155,7 +166,7 @@ under the License.
                 </section>
 
                 <!-- render appheader: both menu widget style and ftl template style menus are supported-->
-                <section>
+                <section name="Render-App-Nav">
                     <condition>
                         <not><if-empty field="userLogin"/></not>
                     </condition>
@@ -190,8 +201,8 @@ under the License.
                     <widgets>
                         <platform-specific><html><html-template location="${appbarCloseTemplateLocation}"/></html></platform-specific>
                     </widgets>
-                </section>              
-                
+                </section>
+
                 <!-- render messages -->
                 <platform-specific><html><html-template location="${messagesTemplateLocation}"/></html></platform-specific>
 
@@ -202,7 +213,7 @@ under the License.
                 </container>
 
                 <!-- render footer -->
-                <section>
+                <section name="Render-Footer">
                     <condition>
                         <if-empty field="applicationFooterTemplate"/>
                     </condition>
@@ -217,7 +228,7 @@ under the License.
         </section>
     </screen>
 
-    <!-- Global decorator for Lookup pop-up windows -->
+    <!-- Global decorator for Lookup pop-up windows or layered CSS -->
     <screen name="LookupDecorator">
         <section>
             <condition>
@@ -231,14 +242,17 @@ under the License.
                             <field-map field-name="userPrefGroupTypeId" value="GLOBAL_PREFERENCES"/>
                         </service>
                         <set field="userPreferences" from-field="prefResult.userPrefMap" global="true"/>
-        
+
                         <property-map resource="general" map-name="generalProperties" global="true"/>
                         <set field="visualThemeId" from-field="userPreferences.VISUAL_THEME" global="true"/>
                         <service service-name="getVisualThemeResources">
                             <field-map field-name="visualThemeId"/>
                             <field-map field-name="themeResources" from-field="layoutSettings"/>
                         </service>
+
                         <set field="layoutSettings" from-field="themeResources" default-value="${layoutSettings}" global="true"/>
+                        <set field="layoutSettings.javaScripts[]" value="/images/fieldlookup.js" global="true"/>                        
+                        
                         <set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC[0]" default-value="component://common/webcommon/includes/messages.ftl"/>
                         <property-to-field  field="defaultCurrencyUomId" property="currency.uom.id.default" resource="general"/>
                         <set field="defaultOrganizationPartyId" from-field="userPreferences.ORGANIZATION_PARTY" global="true"/>
@@ -250,7 +264,7 @@ under the License.
                     <widgets>
                         <section>
                         <condition>
-                            <if-compare value="layer" operator="not-equals" field="parameters.presentation"/>
+                                <if-compare value="layer" operator="not-equals" field="parameters.presentation"/>
                         </condition>
                             <widgets>
                                 <platform-specific><html><html-template location="component://common/webcommon/includes/lookup.ftl" /></html></platform-specific>
@@ -314,12 +328,22 @@ under the License.
                 <set field="layoutSettings.styleSheets[+0]" value="/images/maincss.css" global="true"/>
                 <set field="layoutSettings.rtlStyleSheets[+0]" value="/images/mainrtl.css" global="true"/>
                 <!-- The default (global) java scripts -->
+                    <!-- jQuery part -->
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/asmselect/jquery.asmselect-1.0.4a-beta.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/datetimepicker/jquery-ui-timepicker-addon-0.9.3.min.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/ui/js/jquery-ui-1.8.6.custom.min.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/jeditable/jquery.jeditable.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/fjTimer/jquerytimer-min.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/validate/jquery.validate.min.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/ui/development-bundle/ui/jquery.ui.datepicker.js" global="true"/>
+                <set field="initialLocale" type="String" value="${groovy:parameters?.userLogin?.lastLocale?.substring(0,2)}" default-value="${groovy:locale.toString()?.substring(0,2)?:'en'}"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/ui/development-bundle/ui/i18n/jquery.ui.datepicker-${initialLocale}.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/jquery-1.4.2.min.js" global="true"/>
+                    <!-- jQuery CSSs -->
+                <set field="layoutSettings.styleSheets[+0]" value="/images/jquery/plugins/asmselect/jquery.asmselect-1.0.4a-beta.css" global="true"/>
+
                 <set field="layoutSettings.javaScripts[]" value="/images/selectall.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/fieldlookup.js" global="true"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/prototype.js" global="true"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/calendarDateSelect/calendar_date_select.js" global="true"/>
-                <set field="initialLocale" type="String" value="${groovy:parameters?.userLogin?.lastLocale?.substring(0,2)}" default-value="${groovy:locale?.toString()?.substring(0,2)?:'en'}"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/calendarDateSelect/locale/${initialLocale}.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/GooglemapSimple.js" global="true"/>
                 <!-- The default (global) shortcut icon -->
                 <set field="layoutSettings.shortcutIcon" value="/images/ofbiz.ico" global="true"/>
@@ -451,22 +475,21 @@ under the License.
                         <if-empty field="titleProperty"/>
                     </condition>
                     <widgets>
-                        <label style="h1" text="${title}"></label>
+                        <container style="page-title"><label text="${title}"></label></container>
                     </widgets>
                     <fail-widgets>
-                        <label style="h1" text="${uiLabelMap[titleProperty]}"/>
+                        <container style="page-title"><label text="${uiLabelMap[titleProperty]}"></label></container>
                     </fail-widgets>
                 </section>
                 <decorator-section-include name="menu-bar"/>
                 <container style="clear"/>
-                <screenlet id="searchOptions" name="findScreenlet" collapsible="true">
-                    <label style="h2" text="${uiLabelMap.CommonSearchOptions}"/>
+                <screenlet id="searchOptions" name="findScreenlet" collapsible="true" title="${uiLabelMap.CommonSearchOptions}">
                     <container id="search-options">
-                        <decorator-section-include name="search-options"/>
+                        <decorator-section-include name="search-options" />
                     </container>
                 </screenlet>
                 <screenlet padded="false">
-                    <label style="h2" text="${uiLabelMap.CommonSearchResults}"/>
+                    <label style="h3" text="${uiLabelMap.CommonSearchResults}"/>
                     <container id="search-results">
                         <decorator-section-include name="search-results"/>
                     </container>
@@ -514,26 +537,6 @@ under the License.
             <widgets>
                 <platform-specific>
                     <html><html-template location="component://common/webcommon/includes/geolocation.ftl"/></html>
-                </platform-specific>
-            </widgets>
-        </section>
-    </screen>
-
-    <screen name="PortalPageScreen">
-        <section>
-            <actions>
-                <entity-one entity-name="PortalPage" value-field="portalPage" use-cache="true"/>
-                <get-related value-field="portalPage" relation-name="PortalPageColumn" 
-                             order-by-list="columnSeqId" list="portalPageColumns" use-cache="true"/>
-                <entity-and entity-name="PortalPagePortletView" list="portalPagePortlets" use-cache="true">
-                    <field-map field-name="portalPageId" from-field="portalPage.portalPageId"/>
-                    <order-by field-name="columnSeqId"/>
-                    <order-by field-name="sequenceNum"/>
-                </entity-and>
-            </actions>
-            <widgets>
-                <platform-specific>
-                    <html><html-template location="component://common/webcommon/portal/showPortalPage.ftl"/></html>
                 </platform-specific>
             </widgets>
         </section>

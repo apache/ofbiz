@@ -26,9 +26,10 @@ public abstract class GenericMapSet<K, V, M extends Map<K, V>, I> extends Generi
         super(source);
     }
 
+    @Override
     public final boolean equals(Object o) {
-        if (!(o instanceof Set)) return false;
-        Set other = (Set) o;
+        if (!(o instanceof Set<?>)) return false;
+        Set<?> other = (Set<?>) o;
         if (source.size() != other.size()) return false;
         for (I item: this) {
             if (!other.contains(item)) return false;
@@ -36,6 +37,7 @@ public abstract class GenericMapSet<K, V, M extends Map<K, V>, I> extends Generi
         return true;
     }
 
+    @Override
     public final int hashCode() {
         int h = 0;
         for (I item: this) {

@@ -45,6 +45,7 @@ under the License.
 
     <AcctgTransType acctgTransTypeId="SALES_INVOICE" description="Sales Invoice" hasTable="N" parentTypeId="OBLIGATION_ACCTG_TRA"/><!-- FIXME: replace with "SALES" -->
     <AcctgTransType acctgTransTypeId="PURCHASE_INVOICE" description="Purchase Invoice" hasTable="N" parentTypeId="OBLIGATION_ACCTG_TRA"/><!-- FIXME: replace with "SALES" -->
+    <AcctgTransType acctgTransTypeId="CUST_RTN_INVOICE" description="Customer Return" hasTable="N" parentTypeId="OBLIGATION_ACCTG_TRA"/><!-- FIXME: replace with "SALES" -->
     <AcctgTransType acctgTransTypeId="SALES_SHIPMENT" description="Sales Shipment" hasTable="N" parentTypeId="EXTERNAL_ACCTG_TRANS"/>
     <AcctgTransType acctgTransTypeId="SHIPMENT_RECEIPT" description="Shipment Receipt" hasTable="N" parentTypeId="EXTERNAL_ACCTG_TRANS"/>
     <AcctgTransType acctgTransTypeId="MANUFACTURING" description="Manufacturing" hasTable="N" parentTypeId=""/>
@@ -187,12 +188,7 @@ under the License.
     <StatusValidChange condition="" statusId="FAM_SCHEDULED" statusIdTo="FAM_IN_PROCESS" transitionName="Scheduled Maintenace In-Process"/>
     <StatusValidChange condition="" statusId="FAM_SCHEDULED" statusIdTo="FAM_CANCELLED" transitionName="Scheduled Maintenace Cancelled"/>
     <StatusValidChange condition="" statusId="FAM_IN_PROCESS" statusIdTo="FAM_COMPLETED" transitionName="In-Process Maintenance Completed"/>
-
-    <!-- The following three elements set up a regularly scheduled job that will automatically create
-        fixed asset maintenances from ProductMaint time intervals. -->
-    <TemporalExpression tempExprId="FAM_AUTO_CREATE" tempExprTypeId="FREQUENCY" description="Every Hour" integer1="12" integer2="60"/>
-    <JobSandbox jobId="FAM_AUTO_CREATE" jobName="Auto-create Fixed Asset Maintenances" runTime="2000-01-01 00:00:00.000" serviceName="createMaintsFromTimeInterval" poolId="pool" runAsUser="system" tempExprId="FAM_AUTO_CREATE" maxRecurrenceCount="-1"/>
-
+    
     <!-- Fixed Asset Maintenance party roles -->
     <RoleType description="Fixed Asset Maint Assignee" hasTable="N" roleTypeId="FAM_ASSIGNEE"/>
     <RoleType description="Maintenance Supplier or Service" hasTable="N" parentTypeId="FAM_ASSIGNEE" roleTypeId="FAM_SUPPLIER"/>
@@ -209,6 +205,8 @@ under the License.
 
         DEBIT
             |___> NON_POSTING
+            |
+            |___> CONTRA_REVENUE
             |
             |___> ASSET
             |         |_________> LONGTERM_ASSET
@@ -282,6 +280,7 @@ under the License.
     <GlAccountClass description="Return of Capital" glAccountClassId="RETURN_OF_CAPITAL" parentClassId="DISTRIBUTION"/>
     <GlAccountClass description="Dividends" glAccountClassId="DIVIDEND" parentClassId="DISTRIBUTION"/>
     <GlAccountClass description="Revenue" glAccountClassId="REVENUE" parentClassId="CREDIT"/>
+    <GlAccountClass description="Contra Revenue" glAccountClassId="CONTRA_REVENUE" parentClassId="DEBIT"/>     
     <GlAccountClass description="Income" glAccountClassId="INCOME" parentClassId="CREDIT"/>
     <GlAccountClass description="Cash Income" glAccountClassId="CASH_INCOME" parentClassId="INCOME"/>
     <GlAccountClass description="Non-Cash Income" glAccountClassId="NON_CASH_INCOME" parentClassId="INCOME"/>
@@ -675,6 +674,7 @@ under the License.
     <PaymentMethodType description="Offline Payment" paymentMethodTypeId="EXT_OFFLINE"/>
     <PaymentMethodType description="PayPal" paymentMethodTypeId="EXT_PAYPAL"/>
     <PaymentMethodType description="RBS WorldPay" paymentMethodTypeId="EXT_WORLDPAY"/>
+    <PaymentMethodType description="iDEAL" paymentMethodTypeId="EXT_IDEAL"/>
 
     <PaymentType description="Disbursement" hasTable="N" parentTypeId="" paymentTypeId="DISBURSEMENT"/>
     <PaymentType description="Customer Refund" hasTable="N" parentTypeId="DISBURSEMENT" paymentTypeId="CUSTOMER_REFUND"/> <!-- a refund TO the customer -->
@@ -702,41 +702,7 @@ under the License.
     <!-- Payment Group Type -->
     <PaymentGroupType paymentGroupTypeId="CHECK_RUN" parentTypeId="" hasTable="N" description="Check Run"/>
     <PaymentGroupType paymentGroupTypeId="BATCH_PAYMENT" parentTypeId="" hasTable="N" description="Batch of Payments"/>
-
-    <!-- Payment Gateway Config -->
-    <PaymentGatewayConfigType paymentGatewayConfigTypeId="SAGEPAY" hasTable="N" description="SagePay Payment Gateway"/>
-    <PaymentGatewayConfig paymentGatewayConfigId="SAGEPAY_CONFIG" paymentGatewayConfigTypeId="SAGEPAY" description="SagePay Config"/>
-    <PaymentGatewaySagePay paymentGatewayConfigId="SAGEPAY_CONFIG" vendor="YOUR_VENDOR_NAME" productionHost="https://live.sagepay.com:443" testingHost="https://test.sagepay.com:443" sagePayMode="TEST" protocolVersion="2.22" authenticationTransType="DEFERRED" authenticationUrl="/gateway/service/vspdirect-register.vsp" authoriseTransType="RELEASE" authoriseUrl="/gateway/service/release.vsp" releaseTransType="ABORT" releaseUrl="/gateway/service/abort.vsp" voidUrl="/gateway/service/void.vsp" refundUrl="/gateway/service/refund.vsp"/>
-
-    <PaymentGatewayConfigType paymentGatewayConfigTypeId="AUTHORIZE_NET" hasTable="N" description="Authorize Dot Net Payment Gateway"/>
-    <PaymentGatewayConfig paymentGatewayConfigId="AUTHORIZE_NET_CONFIG" paymentGatewayConfigTypeId="AUTHORIZE_NET" description="Authorize Dot Net Config"/>
-    <PaymentGatewayAuthorizeNet paymentGatewayConfigId="AUTHORIZE_NET_CONFIG" transactionUrl="https://certification.authorize.net/gateway/transact.dll" certificateAlias="certification.authorize.net-1" apiVersion="3.1" delimitedData="TRUE" delimiterChar="|" method="CC" emailCustomer="FALSE" emailMerchant="FALSE" testMode="TRUE" relayResponse="FALSE" tranKey="" userId="" pwd="" transDescription="OFBizAuthNet"/>
-
-    <PaymentGatewayConfigType paymentGatewayConfigTypeId="CYBERSOURCE" hasTable="N" description="CyberSource Payment Gateway"/>
-    <PaymentGatewayConfig paymentGatewayConfigId="CYBERSOURCE_CONFIG" paymentGatewayConfigTypeId="CYBERSOURCE" description="CyberSource Config"/>
-    <PaymentGatewayCyberSource paymentGatewayConfigId="CYBERSOURCE_CONFIG" merchantId="[MerchantID]" apiVersion="1.43" production="false" keysDir="${sys:getProperty('ofbiz.home')}/applications/accounting/icskeys" keysFile="merchantID.p12" logEnabled="true" logDir="${sys:getProperty('ofbiz.home')}/runtime/logs" logFile="cybersource.log" logSize="10" merchantDescr="Some Nice Web Store" merchantContact="" autoBill="false" enableDav="N" fraudScore="N" ignoreAvs="false" disableBillAvs="Y" avsDeclineCodes=""/>
-
-    <PaymentGatewayConfigType paymentGatewayConfigTypeId="PAYFLOWPRO" hasTable="N" description="Payflow Pro Payment Gateway"/>
-    <PaymentGatewayConfig paymentGatewayConfigId="PAYFLOWPRO_CONFIG" paymentGatewayConfigTypeId="PAYFLOWPRO" description="Payflow Pro Config"/>
-    <PaymentGatewayPayflowPro paymentGatewayConfigId="PAYFLOWPRO_CONFIG" certsPath="${sys:getProperty('ofbiz.home')}/applications/accounting/pfcerts" hostAddress="pilot-payflowpro.paypal.com" hostPort="443" timeout="80" proxyAddress="" proxyPort="80" proxyLogon="" proxyPassword=""
-        vendor="[Vendor]" userId="[PayFlow UserID]" pwd="[PayFlow Password]" partner="[PayFlow Partner]" checkAvs="Y" checkCvv2="Y" preAuth="Y" enableTransmit="true" logFileName="${sys:getProperty('ofbiz.home')}/runtime/logs/payflow_java.log" loggingLevel="6" maxLogFileSize="1000000" stackTraceOn="N" returnUrl="[Express Checkout Return URL]" cancelReturnUrl="[Express Checkout Cancel Return URL]" redirectUrl="[Express Checkout Customer Redirect URL]"/>
-
-    <PaymentGatewayConfigType paymentGatewayConfigTypeId="PAYPAL" hasTable="N" description="PayPal Payment Gateway"/>
-    <PaymentGatewayConfig paymentGatewayConfigId="PAYPAL_CONFIG" paymentGatewayConfigTypeId="PAYPAL" description="PayPal Config"/>
-    <PaymentGatewayPayPal paymentGatewayConfigId="PAYPAL_CONFIG" businessEmail="" apiUserName="" apiPassword="" apiSignature="" apiEnvironment="" notifyUrl="" returnUrl="" cancelReturnUrl="" imageUrl="" confirmTemplate="/order/emailconfirmation.ftl" redirectUrl="https://www.sandbox.paypal.com/webscr" confirmUrl="https://www.sandbox.paypal.com/us/cgi-bin/webscr" shippingCallbackUrl="" requireConfirmedShipping="N"/>
-
-    <PaymentGatewayConfigType paymentGatewayConfigTypeId="CLEARCOMMERCE" hasTable="N" description="Clear Commerce Payment Gateway"/>
-    <PaymentGatewayConfig paymentGatewayConfigId="CLEARCOMMERCE_CONFIG" paymentGatewayConfigTypeId="CLEARCOMMERCE" description="Clear Commerce Config"/>
-    <PaymentGatewayClearCommerce paymentGatewayConfigId="CLEARCOMMERCE_CONFIG" sourceId="mySource" groupId="myGroup" clientId="[ClearCommerce clientId]" username="[ClearCommerce username]" pwd="[ClearCommerce password]" userAlias="[ClearCommerce alias]" effectiveAlias="" processMode="P" serverURL="https://test5x.clearcommerce.com:11500" enableCVM="N"/>
-
-    <PaymentGatewayConfigType paymentGatewayConfigTypeId="WORLDPAY" hasTable="N" description="RBS WorldPay Payment Gateway"/>
-    <PaymentGatewayConfig paymentGatewayConfigId="WORLDPAY_CONFIG" paymentGatewayConfigTypeId="WORLDPAY" description="RBS WorldPay Config"/>
-    <PaymentGatewayWorldPay paymentGatewayConfigId="WORLDPAY_CONFIG" redirectUrl="https://select-test.worldpay.com/wcc/purchase" instId="" authMode="A" fixContact="N" hideContact="N" hideCurrency="N" langId="" noLanguageMenu="N" withDelivery="N" testMode="100"/>
-
-    <PaymentGatewayConfigType paymentGatewayConfigTypeId="ORBITAL" hasTable="N" description="Orbital Payment Gateway"/>
-    <PaymentGatewayConfig paymentGatewayConfigId="ORBITAL_CONFIG" paymentGatewayConfigTypeId="ORBITAL" description="Orbital Config"/>
-    <PaymentGatewayOrbital paymentGatewayConfigId="ORBITAL_CONFIG" username="ofbizuser" connectionPassword="ofbizpwd" merchantId="785240009879" engineClass="com.paymentech.orbital.sdk.engine.https.HttpsEngine" hostName="orbitalvar1.paymentech.net" port="443" hostNameFailover="orbitalvar2.paymentech.net" portFailover="443" connectionTimeoutSeconds="90" readTimeoutSeconds="90" authorizationURI="/authorize" sdkVersion="PaymentechSDK_6.3.0" sslSocketFactory="default" responseType="gateway"/>
-
+    
     <!--  Credit Card methods by type -->
     <CustomMethodType customMethodTypeId="CC_AUTH" parentTypeId="" hasTable="N" description="Credit Card authorize methods"/>
     <CustomMethodType customMethodTypeId="CC_CAPTURE" parentTypeId="" hasTable="N" description="Credit Card capture methods"/>
@@ -855,6 +821,16 @@ under the License.
 
     <CustomMethod customMethodId="PAYPAL_RELEASE_PFP" customMethodTypeId="PAYPAL_RELEASE" customMethodName="payflowPayPalVoid" description="Payflow PayPal Order release"/>
     <CustomMethod customMethodId="PAYPAL_RELEASE" customMethodTypeId="PAYPAL_RELEASE" customMethodName="payPalVoid" description="PayPal Order Release"/>
+
+    <CustomMethod customMethodId="CC_CHARGE_EWAY" customMethodTypeId="CC_AUTH" customMethodName="ewayCharge" description="eWay CC Charge"/>
+    <CustomMethod customMethodId="CC_REFUND_EWAY" customMethodTypeId="CC_REFUND" customMethodName="ewayRefund" description="eWay CC Refund"/>
+    <CustomMethod customMethodId="CC_RELEASE_EWAY" customMethodTypeId="CC_RELEASE" customMethodName="ewayRelease" description="eWay CC Release"/>
+
+    <CustomMethod customMethodId="SECURE_AUTH_OFBIZ" customMethodTypeId="CC_AUTH" customMethodName="ofbScAuthorize" description="SecurePay payment authorize"/>
+    <CustomMethod customMethodId="SECURE_CAPTURE_OFBIZ" customMethodTypeId="CC_CAPTURE" customMethodName="ofbScCapture" description="SecurePay payment capture"/>
+    <CustomMethod customMethodId="SECURE_REFUND_OFBIZ" customMethodTypeId="CC_REFUND" customMethodName="ofbScRefund" description="SecurePay payment refund"/>
+    <CustomMethod customMethodId="SECURE_RELEASE_OFBIZ" customMethodTypeId="CC_RELEASE" customMethodName="ofbScRelease" description="SecurePay payment release"/>
+    <CustomMethod customMethodId="SECURE_CREDIT_OFBIZ" customMethodTypeId="CC_CREDIT" customMethodName="ofbScCCCredit" description="SecurePay Credit Card"/>
 
     <!-- Credit Cart Types -->
     <EnumerationType description="Credit Card Type" enumTypeId="CREDIT_CARD_TYPE" hasTable="N" parentTypeId=""/>

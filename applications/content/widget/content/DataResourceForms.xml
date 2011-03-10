@@ -69,28 +69,28 @@ under the License.
     <form name="ListDataResource" target="" title="" list-name="listIt" type="list" paginate-target="findDataResource"
         odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
         <actions>
-          <service service-name="performFind" result-map="result" result-map-list="listIt">
-            <field-map field-name="inputFields" from-field="parameters"/>
-            <field-map field-name="entityName" value="DataResource"/>
-            <field-map field-name="orderBy" value="dataResourceId"/>
-            <field-map field-name="viewIndex" from-field="viewIndex"/>
-            <field-map field-name="viewSize" from-field="viewSize"/>
-          </service>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="DataResource"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
         </actions>
         <field name="dataResourceId"><hidden/></field>
-        <field name="dataResourceName" widget-style="tabletext">
+        <field name="dataResourceName" widget-style="tabletext" sort-field="true">
             <display-entity entity-name="DataResource" description="${dataResourceName}" key-field-name="dataResourceId">
                 <sub-hyperlink target="EditDataResource" description="[${dataResourceId}]" link-style="buttontext">
                     <parameter param-name="dataResourceId"/>
                 </sub-hyperlink>
             </display-entity>
         </field>
-        <field name="dataResourceTypeId"><display-entity entity-name="DataResourceType" description="${description}"></display-entity></field>
-        <field name="mimeTypeId"><display-entity entity-name="MimeType" description="${description}"></display-entity></field>
-        <field name="statusId"><display-entity entity-name="StatusItem" description="${description}"></display-entity></field>
-        <field name="localeString"><display-entity entity-name="CountryCode" description="${countryName}[${countryCode}]" key-field-name="countryCode"></display-entity></field>
-        <field name="createdByUserLogin"><display-entity also-hidden="false" entity-name="PartyNameView" key-field-name="partyId" description="${groupName}${firstName} ${lastName}"/></field>
-        <field name="dataCategoryId"><display-entity entity-name="DataCategory" description="${categoryName}[${dataCategoryId}]"></display-entity></field>
+        <field name="dataResourceTypeId" sort-field="true"><display-entity entity-name="DataResourceType" description="${description}"></display-entity></field>
+        <field name="mimeTypeId" sort-field="true"><display-entity entity-name="MimeType" description="${description}"></display-entity></field>
+        <field name="statusId" sort-field="true"><display-entity entity-name="StatusItem" description="${description}"></display-entity></field>
+        <field name="localeString" sort-field="true"><display-entity entity-name="CountryCode" description="${countryName}[${countryCode}]" key-field-name="countryCode"></display-entity></field>
+        <field name="createdByUserLogin" sort-field="true"><display-entity also-hidden="false" entity-name="PartyNameView" key-field-name="partyId" description="${groupName}${firstName} ${lastName}"/></field>
+        <field name="dataCategoryId" sort-field="true"><display-entity entity-name="DataCategory" description="${categoryName}[${dataCategoryId}]"></display-entity></field>
         <on-event-update-area event-type="paginate" area-id="search-results" area-target="findDataResourceSearchResults"/>
     </form>
 
@@ -206,6 +206,12 @@ under the License.
         <field name="createButton" title="${uiLabelMap.CommonCreate}" use-when="currentValue==null" widget-style="smallSubmit"><submit button-type="button"/></field>
         <field name="updateButton" title="${uiLabelMap.CommonUpdate}" use-when="currentValue!=null" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
+
+    <form name="AddDataResourceFromContent" extends="AddDataResource" target="createDataResourceAndAssocToContent" >
+        <field name="contentId"><hidden value="${parameters.contentId}"/></field>
+        <field name="templateDataResource"><hidden value="${parameters.templateDataResource}"/></field>
+    </form>
+    
     <form name="ListContentsAssociatedToDataResource" type="list" list-name="contentRecords" default-widget-style="display"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
         <actions>
@@ -494,7 +500,7 @@ under the License.
         <alt-target use-when="electronicText==null" target="addHtmlText"/>
         <auto-fields-entity entity-name="ElectronicText"/>
         <field name="dataResourceId" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext"><display/></field>
-        <field name="textData" id-name="textData" encode-output="false"><textarea cols="120" rows="20" visual-editor-enable="true"/></field>
+        <field name="textData" id-name="textData" encode-output="true"><textarea cols="120" rows="20" visual-editor-enable="true" /></field>
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
 </forms>

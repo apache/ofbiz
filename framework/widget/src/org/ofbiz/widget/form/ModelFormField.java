@@ -20,8 +20,10 @@ package org.ofbiz.widget.form;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,6 +35,9 @@ import java.util.TimeZone;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.base.conversion.ConversionException;
+import org.ofbiz.base.conversion.DateTimeConverters;
+import org.ofbiz.base.conversion.DateTimeConverters.StringToTimestamp;
 import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
@@ -779,8 +784,16 @@ public class ModelFormField {
             //Debug.logInfo("Getting Map from default of the form because of no mapAcsr for field " + this.getName(), module);
             return this.modelForm.getDefaultMap(context);
         } else {
-            //Debug.logInfo("Getting Map from mapAcsr for field " + this.getName(), module);
-            return mapAcsr.get(context);
+            // Debug.logInfo("Getting Map from mapAcsr for field " + this.getName() + ", map-name=" + mapAcsr.getOriginalName() + ", context type=" + context.getClass().toString(), module);
+            Map<String, ? extends Object> result = null;
+            try {
+                result = mapAcsr.get(context);
+            } catch (java.lang.ClassCastException e) {
+                String errMsg = "Got an unexpected object type (not a Map) for map-name [" + mapAcsr.getOriginalName() + "] in field with name [" + this.getName() + "]: " + e.getMessage();
+                Debug.logError(errMsg, module);
+                throw new ClassCastException(errMsg);
+            }
+            return result;
         }
     }
 
@@ -1107,7 +1120,7 @@ public class ModelFormField {
         ModelForm modelForm = this.getModelForm();
         if (modelForm != null) {
             Integer itemIndex = (Integer) context.get("itemIndex");
-            if (modelForm != null && ("list".equals(modelForm.getType()) || "multi".equals(modelForm.getType() ))) {
+            if ("list".equals(modelForm.getType()) || "multi".equals(modelForm.getType() )) {
                 if (itemIndex != null) {
                     return this.getIdName() + modelForm.getItemIndexSeparator() + itemIndex.intValue();
                 }
@@ -1156,7 +1169,7 @@ public class ModelFormField {
                     condTrue = boolVal.booleanValue();
                 } else {
                     throw new IllegalArgumentException("Return value from use-when condition eval was not a Boolean: "
-                            + retVal.getClass().getName() + " [" + retVal + "] on the field " + this.name + " of form " + this.modelForm.getName());
+                            + (retVal != null ? retVal.getClass().getName() : "null") + " [" + retVal + "] on the field " + this.name + " of form " + this.modelForm.getName());
                 }
 
                 return condTrue;
@@ -1735,6 +1748,9 @@ public class ModelFormField {
                 List<EntityCondition> expandedConditionList = new LinkedList<EntityCondition>();
                 for (EntityFinderUtil.Condition condition: constraintList) {
                     ModelEntity modelEntity = delegator.getModelEntity(this.entityName);
+                    if (modelEntity == null) {
+                        throw new IllegalArgumentException("Error in entity-options: could not find entity [" + this.entityName + "]");
+                    }
                     expandedConditionList.add(condition.createCondition(context, modelEntity, delegator.getModelFieldTypeReader(modelEntity)));
                 }
                 findCondition = EntityCondition.makeCondition(expandedConditionList);
@@ -2047,10 +2063,12 @@ public class ModelFormField {
         protected boolean alsoHidden = true;
         protected FlexibleStringExpander description;
         protected String type;  // matches type of field, currently text or currency
+        protected String size;  // maximum number of characters to display
         protected String imageLocation;
         protected FlexibleStringExpander currency;
         protected FlexibleStringExpander date;
         protected InPlaceEditor inPlaceEditor;
+        protected FlexibleStringExpander defaultValue;
 
         protected DisplayField() {
             super();
@@ -2067,11 +2085,13 @@ public class ModelFormField {
         public DisplayField(Element element, ModelFormField modelFormField) {
             super(element, modelFormField);
             this.type = element.getAttribute("type");
+            this.size = element.getAttribute("size");
             this.imageLocation = element.getAttribute("image-location");
             this.setCurrency(element.getAttribute("currency"));
             this.setDescription(element.getAttribute("description"));
             this.setDate(element.getAttribute("date"));
             this.alsoHidden = !"false".equals(element.getAttribute("also-hidden"));
+            this.setDefaultValue(element.getAttribute("default-value"));
 
             Element inPlaceEditorElement = UtilXml.firstChildElement(element, "in-place-editor");
             if (inPlaceEditorElement != null) {
@@ -2091,6 +2111,13 @@ public class ModelFormField {
             return this.type;
         }
 
+        public String getSize(){
+            return this.size;
+        }
+        public String setSize(String size){
+            return this.size = size;
+        }
+
         public String getImageLocation(){
             return this.imageLocation;
         }
@@ -2099,7 +2126,7 @@ public class ModelFormField {
             String retVal = null;
             if (this.description != null && !this.description.isEmpty()) {
                 retVal = this.description.expandString(context);
-                if (retVal != null) {
+                if (retVal != null && this.getModelFormField().getEncodeOutput()) {
                     StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
                     if (simpleEncoder != null) {
                         retVal = simpleEncoder.encode(retVal);
@@ -2109,7 +2136,7 @@ public class ModelFormField {
                 retVal = this.modelFormField.getEntry(context);
             }
             if (UtilValidate.isEmpty(retVal)) {
-                retVal = "";
+                retVal = this.getDefaultValue(context);
             } else if ("currency".equals(type)) {
                 retVal = retVal.replaceAll("&nbsp;", " "); // FIXME : encoding currency is a problem for some locale, we should not have any &nbsp; in retVal other case may arise in future...
                 Locale locale = (Locale) context.get("locale");
@@ -2128,9 +2155,52 @@ public class ModelFormField {
                     throw new IllegalArgumentException(errMsg);
                 }
             } else if ("date".equals(this.type) && retVal.length() > 10) {
-                retVal = retVal.substring(0,10);
+                Locale locale = (Locale) context.get("locale");
+                if (locale == null) {
+                    locale = Locale.getDefault();
+                }
+
+                StringToTimestamp stringToTimestamp = new DateTimeConverters.StringToTimestamp();
+                Timestamp timestamp = null;
+                try {
+                    timestamp = stringToTimestamp.convert(retVal);
+                    Date date = new Date(timestamp.getTime());
+
+                    DateFormat dateFormatter = DateFormat.getDateInstance(DateFormat.SHORT, locale);
+                    retVal = dateFormatter.format(date);
+                }
+                catch (ConversionException e) {
+                    String errMsg = "Error formatting date using default instead [" + retVal + "]: " + e.toString();
+                    Debug.logError(e, errMsg, module);
+                    // create default date value from timestamp string
+                    retVal = retVal.substring(0,10);
+                }
+
             } else if ("date-time".equals(this.type) && retVal.length() > 16) {
-                retVal = retVal.substring(0,16);
+                Locale locale = (Locale) context.get("locale");
+                TimeZone timeZone = (TimeZone) context.get("timeZone");
+                if (locale == null) {
+                    locale = Locale.getDefault();
+                }
+                if (timeZone == null) {
+                    timeZone = TimeZone.getDefault();
+                }
+
+                StringToTimestamp stringToTimestamp = new DateTimeConverters.StringToTimestamp();
+                Timestamp timestamp = null;
+                try {
+                    timestamp = stringToTimestamp.convert(retVal);
+                    Date date = new Date(timestamp.getTime());
+
+                    DateFormat dateFormatter = UtilDateTime.toDateTimeFormat(null, timeZone, locale);
+                    retVal = dateFormatter.format(date);
+                }
+                catch (ConversionException e) {
+                    String errMsg = "Error formatting date/time using default instead [" + retVal + "]: " + e.toString();
+                    Debug.logError(e, errMsg, module);
+                    // create default date/time value from timestamp string
+                    retVal = retVal.substring(0,16);
+                }
             } else if ("accounting-number".equals(this.type)) {
                 Locale locale = (Locale) context.get("locale");
                 if (locale == null) {
@@ -2183,6 +2253,21 @@ public class ModelFormField {
         public void setInPlaceEditor(InPlaceEditor newInPlaceEditor) {
             this.inPlaceEditor = newInPlaceEditor;
         }
+
+        /**
+         * @param str
+         */
+        public void setDefaultValue(String str) {
+            this.defaultValue = FlexibleStringExpander.getInstance(str);
+        }
+
+        public String getDefaultValue(Map<String, Object> context) {
+            if (this.defaultValue != null) {
+                return this.defaultValue.expandString(context);
+            } else {
+                return "";
+            }
+        }
     }
 
     public static class DisplayEntityField extends DisplayField {
@@ -2211,6 +2296,7 @@ public class ModelFormField {
             this.entityName = element.getAttribute("entity-name");
             this.keyFieldName = element.getAttribute("key-field-name");
             this.cache = !"false".equals(element.getAttribute("cache"));
+            this.size = element.getAttribute("size");
 
             if (this.description == null || this.description.isEmpty()) {
                 this.setDescription("${description}");
@@ -2276,6 +2362,7 @@ public class ModelFormField {
         protected String linkType;
         protected String targetType;
         protected String image;
+        protected String size;
         protected FlexibleStringExpander target;
         protected FlexibleStringExpander description;
         protected FlexibleStringExpander alternate;
@@ -2311,6 +2398,7 @@ public class ModelFormField {
             this.targetWindowExdr = FlexibleStringExpander.getInstance(element.getAttribute("target-window"));
             this.parametersMapAcsr = FlexibleMapAccessor.getInstance(element.getAttribute("parameters-map"));
             this.image = element.getAttribute("image-location");
+            this.size = element.getAttribute("size");
             this.setRequestConfirmation("true".equals(element.getAttribute("request-confirmation")));
             this.setConfirmationMsg(element.getAttribute("confirmation-message"));
             List<? extends Element> parameterElementList = UtilXml.childElementList(element, "parameter");
@@ -2399,6 +2487,14 @@ public class ModelFormField {
 
         public String getImage() {
             return this.image;
+        }
+
+        public String getSize() {
+            return this.size;
+        }
+
+        public String setSize(String size) {
+            return this.size = size;
         }
 
         /**
@@ -2977,6 +3073,7 @@ public class ModelFormField {
         protected FlexibleStringExpander defaultValue;
         protected String inputMethod;
         protected String clock;
+        protected String step;
 
         protected DateTimeField() {
             super();
@@ -2996,6 +3093,12 @@ public class ModelFormField {
             type = element.getAttribute("type");
             inputMethod = element.getAttribute("input-method");
             clock = element.getAttribute("clock");
+            if (UtilValidate.isNotEmpty(element.getAttribute("step"))) {
+                this.setStep(element.getAttribute("step"));
+            }
+            else {
+                this.setStep("1");
+            }
         }
 
         @Override
@@ -3021,6 +3124,13 @@ public class ModelFormField {
 
         public String getClock() {
             return this.clock;
+        }
+
+        public String getStep() {
+            return this.step;
+        }
+        public void setStep(String step) {
+            this.step = step;
         }
 
         /**
@@ -3071,6 +3181,7 @@ public class ModelFormField {
         protected boolean allowMulti = false;
         protected String current;
         protected String size;
+        protected String textSize;
         protected FlexibleStringExpander currentDescription;
         protected SubHyperlink subHyperlink;
         protected int otherFieldSize = 0;
@@ -3093,6 +3204,7 @@ public class ModelFormField {
 
             this.current = element.getAttribute("current");
             this.size = element.getAttribute("size");
+            this.textSize = element.getAttribute("text-size");
             this.allowEmpty = "true".equals(element.getAttribute("allow-empty"));
             this.allowMulti = "true".equals(element.getAttribute("allow-multiple"));
             this.currentDescription = FlexibleStringExpander.getInstance(element.getAttribute("current-description"));
@@ -3100,6 +3212,9 @@ public class ModelFormField {
             // set the default size
             if (size == null) {
                 size = "1";
+            }
+            if (textSize == null) {
+                textSize = "0";
             }
 
             String sizeStr = element.getAttribute("other-field-size");
@@ -3183,6 +3298,10 @@ public class ModelFormField {
 
         public String getSize() {
             return this.size;
+        }
+
+        public String getTextSize() {
+            return this.textSize;
         }
 
         /**
@@ -3841,6 +3960,7 @@ public class ModelFormField {
     }
 
     public static class ContainerField extends FieldInfo {
+        @Deprecated
         protected String id;
 
         public ContainerField() {
@@ -3849,25 +3969,23 @@ public class ModelFormField {
 
         public ContainerField(Element element, ModelFormField modelFormField) {
             super(element, modelFormField);
-            this.setId(modelFormField.getIdName());
         }
 
-        public ContainerField(int fieldSource, int fieldType,
-                ModelFormField modelFormField) {
+        public ContainerField(int fieldSource, int fieldType, ModelFormField modelFormField) {
             super(fieldSource, fieldType, modelFormField);
         }
 
         @Override
-        public void renderFieldString(Appendable writer,
-                Map<String, Object> context,
-                FormStringRenderer formStringRenderer) throws IOException {
+        public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderContainerFindField(writer, context, this);
         }
 
+        @Deprecated
         public String getId() {
             return id;
         }
 
+        @Deprecated
         public void setId(String id) {
             this.id = id;
         }

@@ -40,6 +40,39 @@ under the License.
   </div>
   <div class="screenlet-body">
      <table class="basic-table" cellspacing='0'>
+     <#assign orderTypeId = orderReadHelper.getOrderTypeId()> 
+     <#if orderTypeId == "PURCHASE_ORDER">
+       <tr>
+         <th>${uiLabelMap.AccountingPaymentID}</th>
+         <th>${uiLabelMap.CommonTo}</th>
+         <th>${uiLabelMap.CommonAmount}</th>
+         <th>${uiLabelMap.CommonStatus}</th>
+       </tr>
+       <#list orderPaymentPreferences as orderPaymentPreference>
+         <#assign payments = orderPaymentPreference.getRelated("Payment")>
+         <#list payments as payment>
+           <#assign statusItem = payment.getRelatedOne("StatusItem")>
+           <#assign partyName = delegator.findOne("PartyNameView", {"partyId" : payment.partyIdTo}, true)>
+           <tr>
+             <#if security.hasPermission("PAY_INFO_VIEW", session) || security.hasPermission("PAY_INFO_ADMIN", session)> 
+               <td><a href="/accounting/control/paymentOverview?paymentId=${payment.paymentId}">${payment.paymentId}</a></td>
+             <#else>
+               <td>${payment.paymentId}</td>
+             </#if>
+             <td>${partyName.groupName?if_exists}${partyName.lastName?if_exists} ${partyName.firstName?if_exists} ${partyName.middleName?if_exists}
+             <#if security.hasPermission("PARTYMGR_VIEW", session) || security.hasPermission("PARTYMGR_ADMIN", session)> 
+               [<a href="/partymgr/control/viewprofile?partyId=${partyId}">${partyId}</a>]
+             <#else>
+               [${partyId}]
+             </#if>
+             </td>
+             <td><@ofbizCurrency amount=payment.amount?if_exists/></td>
+             <td>${statusItem.description}</td>
+           </tr>
+         </#list>
+       </#list>
+     <#else>
+     
      <#-- order payment status -->
      <tr>
        <td align="center" valign="top" width="29%" class="label">&nbsp;${uiLabelMap.OrderStatusHistory}</td>
@@ -419,7 +452,7 @@ under the License.
             <td valign="top" width="60%">
               <#list invoices as invoice>
                 <div>${uiLabelMap.CommonNbr}<a href="/accounting/control/invoiceOverview?invoiceId=${invoice}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">${invoice}</a>
-                (<a href="/accounting/control/invoice.pdf?invoiceId=${invoice}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">PDF</a>)</div>
+                (<a target="_BLANK" href="/accounting/control/invoice.pdf?invoiceId=${invoice}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">PDF</a>)</div>
               </#list>
             </td>
             <td width="10%">&nbsp;</td>
@@ -484,6 +517,7 @@ under the License.
    </table>
    </form>
    </td></tr>
+</#if>
 </#if>
 </table>
 </div>

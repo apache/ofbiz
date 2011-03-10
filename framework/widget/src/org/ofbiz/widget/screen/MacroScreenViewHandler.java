@@ -76,10 +76,10 @@ public class MacroScreenViewHandler extends AbstractViewHandler {
             }
             boolean compressOutput = "compressed".equals(encoding);
             if (!compressOutput) {
-                compressOutput = "true".equals(UtilProperties.getPropertyValue("widget", "compress.HTML"));
+                compressOutput = "true".equals(UtilProperties.getPropertyValue("widget", getName() + ".compress"));
             }
             if (!compressOutput && this.servletContext != null) {
-                compressOutput = "true".equals((String) this.servletContext.getAttribute("compressHTML"));
+                compressOutput = "true".equals(this.servletContext.getAttribute("compressHTML"));
             }
             if (compressOutput) {
                 // StandardCompress defaults to a 2k buffer. That could be increased

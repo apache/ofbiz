@@ -42,7 +42,9 @@ MEMIF=""
 UMASK=002
 
 . /lib/lsb/init-functions
-. /etc/default/rcS
+if [ -e /etc/default/rcS ]; then
+	. /etc/default/rcS
+fi
 
 if [ -e /etc/default/locale ]; then
 	. /etc/default/locale
@@ -53,6 +55,7 @@ fi
 if [ -e "$DEFAULT" ]; then
 	. "$DEFAULT"
 fi
+umask $UMASK
 
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
 
@@ -269,7 +272,7 @@ stop() {
 	esac
 	wait_for_stop
 	if [ -e "$PIDFILE" ]; then
-		rm "$PIDFILE"
+		rm -f "$PIDFILE"
 	fi
 }
 

@@ -81,6 +81,9 @@ public class SaveLabelsToXmlFile {
                 Map<String, LabelInfo> labels = factory.getLabels();
                 Set<String> labelsList = factory.getLabelsList();
                 Set<String> localesFound = factory.getLocalesFound();
+                for (String localeName : localeNames) {
+                    localesFound.add(localeName);
+                }
                 // Remove a Label
                 if (UtilValidate.isNotEmpty(removeLabel)) {
                     labels.remove(key + LabelManagerFactory.keySeparator + fileName);
@@ -131,7 +134,6 @@ public class SaveLabelsToXmlFile {
                         if (UtilValidate.isNotEmpty(valueString)) {
                             valueString = StringEscapeUtils.unescapeHtml(valueString);
                             Element valueElem = UtilXml.addChildElementValue(propertyElem, "value", valueString, resourceDocument);
-                            ;
                             valueElem.setAttribute("xml:lang", localeFound);
                             if (valueString.trim().length() == 0) {
                                 valueElem.setAttribute("xml:space", "preserve");

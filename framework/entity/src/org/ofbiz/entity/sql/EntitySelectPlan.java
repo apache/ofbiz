@@ -19,29 +19,19 @@
 package org.ofbiz.entity.sql;
 
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.Callable;
-
-import javolution.util.FastList;
-import javolution.util.FastMap;
-
-import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityOperator;
-import org.ofbiz.entity.model.DynamicViewEntity;
 
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.model.DynamicViewEntity;
-import org.ofbiz.entity.model.ModelKeyMap;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.entity.util.EntityListIterator;
-
-import org.ofbiz.sql.SelectPlan;
 import org.ofbiz.sql.ConditionPlan;
 import org.ofbiz.sql.ParameterizedConditionException;
+import org.ofbiz.sql.SelectPlan;
 
 public final class EntitySelectPlan extends SelectPlan<EntitySelectPlan, EntityCondition> {
     private final DynamicViewEntity dve;
@@ -99,6 +89,7 @@ public final class EntitySelectPlan extends SelectPlan<EntitySelectPlan, EntityC
         return limit;
     }
 
+    @Override
     public StringBuilder appendTo(StringBuilder sb) {
         sb.append("dve=").append(dve);
         if (getWherePlan() != null) {
@@ -113,6 +104,7 @@ public final class EntitySelectPlan extends SelectPlan<EntitySelectPlan, EntityC
             getHavingPlan().appendTo(sb);
             sb.append(")");
         }
+        /*TODO death code can be removed ?
         if (offset != -1) {
             if (sb.length() > 0) sb.append(", ");
             sb.append("offset=").append(offset);
@@ -121,6 +113,7 @@ public final class EntitySelectPlan extends SelectPlan<EntitySelectPlan, EntityC
             if (sb.length() > 0) sb.append(", ");
             sb.append("limit=").append(limit);
         }
+        */
         sb.append("]");
         sb.insert(0, "[");
         return sb;

@@ -43,8 +43,6 @@ under the License.
                 <set field="applicationMenuName" value="ExampleAppBar" global="true"/>
                 <set field="applicationMenuLocation" value="component://example/widget/example/ExampleMenus.xml" global="true"/>
                 <!--set field="appheaderTemplate" value="component://example/webapp/appheader.ftl"/-->
-                <set field="parameters.parentPortalPageId" from-field="parameters.parentPortalPageId" default-value="EXAMPLE"/>
-                <script location="component://common/webcommon/WEB-INF/actions/includes/GetParentPortalPageId.groovy"/>
                 <set field="applicationTitle" value="${uiLabelMap.ExampleApplication}" global="true"/>
             </actions>
             <widgets>
@@ -60,7 +58,7 @@ under the License.
                             <container style="clear"></container>
                         </container>
                     </decorator-section>
-                </decorator-screen>                
+                </decorator-screen>
             </widgets>
         </section>
     </screen>
@@ -197,7 +195,31 @@ under the License.
                 <set field="headerItem" value="ExampleGeoLocation"/>
                 <set field="geoChart.dataSourceId" value="GEOPT_GOOGLE"/>
                 <set field="geoChart.width" value="600px"/>
-                <set field="geoChart.height" value="500px"/>                
+                <set field="geoChart.height" value="500px"/>
+                <set field="geoChart.points" from-field="geoPoints"/>
+                <set field="geoChart.center" from-field="geoCenter"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <include-menu name="ExampleGeoLocation" location="component://example/widget/example/ExampleMenus.xml"/>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <container style="clear" />
+                        <include-screen name="geoChart" location="component://common/widget/CommonScreens.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="CommonExampleOsmGeoLocationDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="ExampleGeoLocation"/>
+                <set field="geoChart.dataSourceId" value="GEOPT_OSM"/>
+                <set field="geoChart.width" value="600px"/>
+                <set field="geoChart.height" value="500px"/>
                 <set field="geoChart.points" from-field="geoPoints"/>
                 <set field="geoChart.center" from-field="geoCenter"/>
             </actions>
@@ -270,7 +292,7 @@ under the License.
                     </decorator-section>
                     <decorator-section name="body">
                         <container style="clear" />
-                        <include-screen name="FlotrChart" location="component://common/widget/flotrScreens.xml"/>
+                        <include-screen name="FlotChart" location="component://common/widget/flotScreens.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -284,12 +306,6 @@ under the License.
         <section>
             <actions>
                 <set field="tabButtonItem" value="main"/>
-                <set field="parameters.portalPageId" value="EXAMPLE"/>
-                <entity-one entity-name="PortalPage" value-field="portalPage"/>
-                <get-related value-field="portalPage" relation-name="PortalPageColumn" list="portalPageColumns"/>
-                <entity-and entity-name="PortalPagePortletView" list="portalPagePortlets">
-                    <field-map field-name="portalPageId" from-field="portalPage.portalPageId"/>
-                </entity-and>
             </actions>
             <widgets>
                  <include-screen name="FindExample" location="component://example/widget/example/ExampleScreens.xml"/>

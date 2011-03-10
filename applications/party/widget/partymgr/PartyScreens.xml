@@ -59,14 +59,10 @@ under the License.
     <screen name="viewprofile">
         <section>
             <actions>
-                <set field="parameters.portalPageId" value="PartyProfile"/>
                 <set field="titleProperty" value="PageTitleViewPartyProfile"/>
                 <set field="tabButtonItem" value="viewprofile"/>
                 <set field="labelTitleProperty" value="PartyTaxAuthInfos"/>
                 <set field="partyId" from-field="parameters.partyId"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/prototype.js" global="true"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/control.progress_bar.js" global="true"/>
-                <set field="layoutSettings.styleSheets[]" value="/images/prototypejs/progress_bar.css" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/partymgr/js/PartyProfileContent.js" global="true"/>
                 <script location="component://party/webapp/partymgr/WEB-INF/actions/party/ViewProfile.groovy"/>
             </actions>
@@ -134,7 +130,7 @@ under the License.
                                 </section>
                                 <section>
                                     <widgets>
-                                        <include-screen name="PortalPageScreen" location="component://common/widget/CommonScreens.xml"/>
+                                        <include-portal-page id="PartyProfile"/>
                                     </widgets>
                                 </section>
                             </widgets>
@@ -175,6 +171,12 @@ under the License.
                             </condition>
                             <widgets>
                                 <screenlet title="${uiLabelMap.PartyAddToRole}">
+                                    <container>
+                                        <label style="h2">${uiLabelMap.PartyAddToMainRole}</label>
+                                        <include-form name="AddPartyMainRole" location="component://party/widget/partymgr/PartyForms.xml"/>
+                                        <container id="addPartySecondaryRole"/>
+                                    </container>
+                                    <label style="h2">${uiLabelMap.PartyAddToRoleViewAll}</label>
                                     <include-form name="AddPartyRole" location="component://party/widget/partymgr/PartyForms.xml"/>
                                 </screenlet>
                             </widgets>
@@ -200,21 +202,42 @@ under the License.
             </widgets>
         </section>
     </screen>
+    <screen name="AddPartySecondaryRoles">
+        <section>
+            <actions>
+                <property-map map-name="uiLabelMap" resource="CommonUiLabels"/>
+                <property-map map-name="uiLabelMap" resource="PartyUiLabels"/>
+            </actions>
+            <widgets>
+                <label style="h2">${uiLabelMap.PartyAddToSecondRole}</label>
+                <include-form name="AddPartySecondaryRoles" location="component://party/widget/partymgr/PartyForms.xml"/>
+            </widgets>
+        </section>
+    </screen>
     <screen name="linkparty">
         <section>
             <actions>
                 <set field="titleProperty" value="PartyLink"/>
                 <set field="headerItem" value="link"/>
                 <set field="tabButtonItem" value="linkparty"/>
-                <script location="component://party/webapp/partymgr/WEB-INF/actions/HasPartyPermissions.groovy"/>
-                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/LinkParty.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <platform-specific>
-                            <html><html-template location="component://party/webapp/partymgr/party/linkparty.ftl"/></html>
-                        </platform-specific>
+                        <section>
+                            <condition>
+                                <if-has-permission permission="PARTYMGR" action="_UPDATE"/>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.PartyLink}">
+                                    <label text="${uiLabelMap.PartyLinkExplanation}"></label>
+                                    <include-form name="PartyLink" location="component://party/widget/partymgr/PartyForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3" text="${uiLabelMap.PartyPermissionError}"/>
+                            </fail-widgets>
+                        </section>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -481,11 +504,12 @@ under the License.
     <screen name="EditUserLogin">
         <section>
             <actions>
-                <set field="titleProperty" value="PageTitleEditGroupInformation"/>
+                <set field="titleProperty" value="UserLoginUpdateSecuritySettings"/>
                 <set field="tabButtonItem" value="viewprofile"/>
-                <set field="labelTitleProperty" value="PageTitleEditGroupInformation"/>
-
-                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="viewprofile"/>
+                <set field="labelTitleProperty" value="UserLoginUpdateSecuritySettings"/>
+                <set field="updateUserLoginSecurityURI" value="ProfileUpdateUserLoginSecurity"/>
+                <set field="updatePasswordURI" value="ProfileUpdatePassword"/>
+                <set field="cancelPage" from-field="parameters.CANCEL_PAGE" default-value="viewprofile"/>
                 <set field="partyId" from-field="parameters.partyId"/>
                 <set field="userLoginId" from-field="parameters.userLoginId"/>
                 <entity-one entity-name="UserLogin" value-field="editUserLogin"/>
@@ -493,11 +517,12 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <screenlet title="${uiLabelMap.PartyUserLoginChangePassword}">
-                            <include-form name="updatePassword" location="component://party/widget/partymgr/PartyForms.xml"/>
-                        </screenlet>
-                        <screenlet title="${uiLabelMap.PartyUserLoginUpdateSecuritySettings}">
-                            <include-form name="updateUserLoginSecurity" location="component://party/widget/partymgr/PartyForms.xml"/>
+                        <container style="page-title">
+                            <label text="${uiLabelMap.UserLoginUpdateSecuritySettings} - ${userLoginId}"/>
+                        </container>
+                        <include-form name="updateUserLoginSecurity" location="component://common/widget/SecurityForms.xml"/>
+                        <screenlet title="${uiLabelMap.UserLoginChangePassword}">
+                            <include-form name="updatePassword" location="component://common/widget/SecurityForms.xml"/>
                         </screenlet>
                     </decorator-section>
                 </decorator-screen>
@@ -507,18 +532,18 @@ under the License.
     <screen name="CreateUserLogin">
         <section>
             <actions>
-                <set field="titleProperty" value="PartyCreateUserLogin"/>
+                <set field="titleProperty" value="CreateUserLogin"/>
                 <set field="tabButtonItem" value="viewprofile"/>
-                <set field="labelTitleProperty" value="PartyCreateUserLogin"/>
-
-                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="viewprofile"/>
+                <set field="labelTitleProperty" value="CreateUserLogin"/>
+                <set field="cancelPage" from-field="parameters.CANCEL_PAGE" default-value="viewprofile"/>
+                <set field="createUserLoginURI" value="ProfileCreateUserLogin"/>
                 <set field="partyId" from-field="parameters.partyId"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <screenlet title="${uiLabelMap.PartyCreateUserLogin}">
-                            <include-form name="AddUserLogin" location="component://party/widget/partymgr/PartyForms.xml"/>
+                        <screenlet title="${uiLabelMap.CreateUserLogin}">
+                            <include-form name="AddUserLogin" location="component://common/widget/SecurityForms.xml"/>
                         </screenlet>
                     </decorator-section>
                 </decorator-screen>
@@ -530,8 +555,10 @@ under the License.
             <actions>
                 <set field="titleProperty" value="PageTitleEditUserLoginSecurityGroups"/>
                 <set field="tabButtonItem" value="viewprofile"/>
-                <set field="labelTitleProperty" value="PageTitleEditUserLoginSecurityGroups"/>
-
+                <set field="cancelPage" from-field="parameters.CANCEL_PAGE" default-value="viewprofile"/>
+                <set field="addUserLoginSecurityGroupURI" value="ProfileAddUserLoginToSecurityGroup"/>
+                <set field="removeUserLoginSecurityGroupURI" value="ProfileRemoveUserLoginFromSecurityGroup"/>
+                <set field="updateUserLoginSecurityGroupURI" value="ProfileUpdateUserLoginToSecurityGroup"/>
                 <set field="userLoginId" from-field="parameters.userLoginId"/>
                 <entity-one entity-name="UserLogin" value-field="editUserLogin"/>
                 <set field="partyId" from-field="parameters.partyId" default-value="${editUserLogin.partyId}"/>
@@ -539,10 +566,10 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <screenlet id="AddUserLoginSecurityGroupsPanel" title="${uiLabelMap.PartyAddUserLoginToSecurityGroup}" collapsible="true">
-                            <include-form name="AddUserLoginSecurityGroup" location="component://party/widget/partymgr/SecurityForms.xml"/>
+                        <screenlet id="AddUserLoginSecurityGroupsPanel" title="${uiLabelMap.AddUserLoginToSecurityGroup}" collapsible="true">
+                            <include-form name="AddUserLoginSecurityGroup" location="component://common/widget/SecurityForms.xml"/>
                         </screenlet>
-                        <include-form name="ListUserLoginSecurityGroups" location="component://party/widget/partymgr/SecurityForms.xml"/>
+                        <include-form name="ListUserLoginSecurityGroups" location="component://common/widget/SecurityForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -665,7 +692,20 @@ under the License.
                             <condition>
                                 <if-has-permission permission="PARTYMGR" action="_CREATE"/>
                             </condition>
+                            <actions>
+                                <!-- fields for setDependentDropdownValuesJs.ftl, it's a try on generalization, if you need an example with more than one dropdown in a form have a look at EditProductPriceRules screen -->
+                                <set field="dependentForm" value="NewUser"/>
+                                <set field="paramKey" value="countryGeoId"/>                                        
+                                <set field="mainId" value="USER_COUNTRY"/>
+                                <set field="dependentId" value="USER_STATE"/>
+                                <set field="requestName" value="getAssociatedStateList"/>
+                                <set field="responseName" value="stateList"/>
+                                <set field="dependentKeyName" value="geoId"/>
+                                <set field="descName" value="geoName"/>
+                                <set field="selectedDependentOption" value="_none_"/>
+                            </actions>
                             <widgets>
+                                <platform-specific><html><html-template location="component://common/webcommon/includes/setDependentDropdownValuesJs.ftl"/></html></platform-specific>
                                 <screenlet title="${uiLabelMap.PartyCreateNewCustomer}">
                                     <include-form name="NewUser" location="component://party/widget/partymgr/PartyForms.xml"/>
                                 </screenlet>
@@ -697,7 +737,20 @@ under the License.
                             <condition>
                                 <if-has-permission permission="PARTYMGR" action="_CREATE"/>
                             </condition>
+                            <actions>
+                                <!-- fields for setDependentDropdownValuesJs.ftl, it's a try on generalization, if you need an example with more than one dropdown in a form have a look at EditProductPriceRules screen -->
+                                <set field="dependentForm" value="NewUser"/>
+                                <set field="paramKey" value="countryGeoId"/>                                        
+                                <set field="mainId" value="USER_COUNTRY"/>
+                                <set field="dependentId" value="USER_STATE"/>
+                                <set field="requestName" value="getAssociatedStateList"/>
+                                <set field="responseName" value="stateList"/>
+                                <set field="dependentKeyName" value="geoId"/>
+                                <set field="descName" value="geoName"/>
+                                <set field="selectedDependentOption" value="_none_"/>
+                            </actions>
                             <widgets>
+                                <platform-specific><html><html-template location="component://common/webcommon/includes/setDependentDropdownValuesJs.ftl"/></html></platform-specific>
                                 <screenlet title="${uiLabelMap.PartyCreateNewProspect}">
                                     <include-form name="NewUser" location="component://party/widget/partymgr/PartyForms.xml"/>
                                 </screenlet>
@@ -729,7 +782,20 @@ under the License.
                             <condition>
                                 <if-has-permission permission="PARTYMGR" action="_CREATE"/>
                             </condition>
+                            <actions>
+                                <!-- fields for setDependentDropdownValuesJs.ftl, it's a try on generalization, if you need an example with more than one dropdown in a form have a look at EditProductPriceRules screen -->
+                                <set field="dependentForm" value="NewUser"/>
+                                <set field="paramKey" value="countryGeoId"/>                                        
+                                <set field="mainId" value="USER_COUNTRY"/>
+                                <set field="dependentId" value="USER_STATE"/>
+                                <set field="requestName" value="getAssociatedStateList"/>
+                                <set field="responseName" value="stateList"/>
+                                <set field="dependentKeyName" value="geoId"/>
+                                <set field="descName" value="geoName"/>
+                                <set field="selectedDependentOption" value="_none_"/>
+                            </actions>
                             <widgets>
+                                <platform-specific><html><html-template location="component://common/webcommon/includes/setDependentDropdownValuesJs.ftl"/></html></platform-specific>
                                 <screenlet title="${uiLabelMap.PartyCreateNewEmployee}">
                                     <include-form name="NewUser" location="component://party/widget/partymgr/PartyForms.xml"/>
                                 </screenlet>

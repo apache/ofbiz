@@ -82,7 +82,9 @@ under the License.
                     </and>
                 </condition>
                 <then>
-                    <add-error><fail-message message="Tried to receive a serialized inventory item with serialNumber [${parameters.serialNumber}] or inventoryItemId [${parameters.currentInventoryItemId}] passed in and quantityAccepted [${parameters.quantityAccepted}] was greater than 1; we don't know what to do with that!"/></add-error>
+                    <add-error>
+                        <fail-property resource="ProductUiLabels" property="FacilityReceiveInventoryProduct"/>
+                    </add-error>
                 </then>
             </if>
 
@@ -132,6 +134,18 @@ under the License.
             <!-- if there is an inventoryItemId, update it (this will happen when receiving serialized inventory already in the system, like for returns); if not create one -->
             <clear-field field="serviceInMap"/>
             <clear-field field="currentInventoryItemId"/>
+
+            <!-- Set supplier partyId, if inventory received by purchase order -->
+            <if-not-empty field="parameters.orderId">
+                <entity-and entity-name="OrderRole" list="orderRoles">
+                    <field-map field-name="orderId" from-field="parameters.orderId"/>
+                    <field-map field-name="roleTypeId" value="SUPPLIER_AGENT"/>
+                </entity-and>
+                <if-not-empty field="orderRoles">
+                    <first-from-list list="orderRoles" entry="orderRole"/>
+                    <set field="parameters.partyId" from-field="orderRole.partyId"/>
+                </if-not-empty>
+            </if-not-empty>
 
             <if-empty field="parameters.currentInventoryItemId">
                 <set-service-fields service-name="createInventoryItem" map="parameters" to-map="serviceInMap"/>
@@ -316,12 +330,12 @@ under the License.
                 <set field="returnHeader.needsInventoryReceive" value="N"/>
                 <store-value value-field="returnHeader"/>
 
-                <!-- check if we need to manually update the status -->
-                <if-compare-field field="nonProductItems" to-field="returnItemCount" operator="equals" type="Long">
+                <!-- always check/update the ReturnHeader status, even though it might have been from the receiving above, just make sure -->
+                <if-compare field="returnHeader.statusId" operator="not-equals" value="RETURN_RECEIVED">
                     <set field="retStCtx.returnId" from-field="returnHeader.returnId"/>
                     <set field="retStCtx.statusId" value="RETURN_RECEIVED"/>
                     <call-service service-name="updateReturnHeader" in-map-name="retStCtx"/>
-                </if-compare-field>
+                </if-compare>
             <else>
                 <log level="info" message="Not receiving inventory for returnId ${returnHeader.returnId}, no inventory information available."/>
             </else>

@@ -325,7 +325,7 @@ under the License.
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
         <attribute name="serviceName" mode="IN" type="String" optional="false"/>
     </service>
-    <service name="updateEbayProductStorePref" engine="entity-auto" default-entity-name="EbayProductStorePref" invoke="update" auth="true" >
+    <service name="updateEbayProductStorePref" engine="entity-auto" default-entity-name="EbayProductStorePref" invoke="update" auth="true">
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true" />
         <attribute name="enabled" mode="IN" type="String" optional="false" default-value="N"/>
@@ -408,21 +408,6 @@ under the License.
         <attribute name="productListingId" mode="IN" type="String" optional="false"/>
         <attribute name="attributeMapList" mode="IN" type="java.util.HashMap" optional="false"/>
     </service>
-    <service name="getMyeBaySelling" engine="java" transaction-timeout="3600"
-        location="org.ofbiz.ebaystore.EbayStore" invoke="getMyeBaySelling" auth="true">
-        <attribute name="productStoreId" mode="IN" type="String" optional="false"/>
-        <attribute name="entriesPerPage" mode="IN" type="String" optional="true"/>
-        <attribute name="pageNumber" mode="IN" type="String" optional="true"/>
-        <attribute name="listingType" mode="IN" type="String" optional="true"/>
-        <attribute name="activeItems" mode="OUT" type="List" optional="true"/>
-        <attribute name="soldItems" mode="OUT" type="List" optional="true"/>
-        <attribute name="unsoldItems" mode="OUT" type="List" optional="true"/>
-        <attribute name="scheduledItems" mode="OUT" type="List" optional="true"/>
-        <attribute name="activeSize" mode="OUT" type="Integer" optional="true"/>
-        <attribute name="soldSize" mode="OUT" type="Integer" optional="true"/>
-        <attribute name="unsoldeSize" mode="OUT" type="Integer" optional="true"/>
-        <attribute name="scheduledSize" mode="OUT" type="Integer" optional="true"/>
-    </service>
     <service name="autoRelistingItems" engine="java" transaction-timeout="7200"
         location="org.ofbiz.ebaystore.EbayStoreAutoPreferences" invoke="autoRelistingItems" auth="false">
         <description>Automatic service to re-listing items when They are end item</description>
@@ -440,6 +425,37 @@ under the License.
         <attribute name="logAck" mode="IN" type="String" optional="false"/>
         <attribute name="functionName" mode="IN" type="String" optional="false"/>
         <attribute name="logMessage" mode="IN" type="String" optional="false"/>
+    </service>
+    <service name="ebayBestOfferPrefCond" engine="java"
+        location="org.ofbiz.ebaystore.EbayBestOfferAutoPref" invoke="ebayBestOfferPrefCond" auth="true">
+        <attribute name="productStoreId" mode="IN" type="String"/>
+        <attribute name="enabled" mode="IN" type="String" default-value="N" optional="true"></attribute>
+        <!--<attribute name="userLogin" mode="IN" type="String"></attribute>-->
+        <attribute name="condition1" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="condition2" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="condition3" mode="IN" type="String" default-value="N" optional="true"></attribute>
+        <attribute name="condition4" mode="IN" type="String" default-value="N" optional="true"></attribute>
+        <attribute name="condition5" mode="IN" type="String" default-value="N" optional="true"></attribute>
+        <attribute name="condition6" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="condition7" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="condition8" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="condition9" mode="IN" type="String" default-value="N"></attribute>
+        <attribute name="condition10" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="condition11" mode="IN" type="String" optional="true"></attribute>
+    </service>
+    <service name="createEbayProductStorePrefCond" engine="entity-auto" default-entity-name="EbayProductStorePrefCond" invoke="create" auth="true" use-transaction="true">
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateEbayProductStorePrefCond" engine="entity-auto" default-entity-name="EbayProductStorePrefCond" invoke="update" auth="true" use-transaction="true">
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true" />
+        <attribute name="condition" mode="IN" type="String" optional="false"/>
+    </service>
+    <service name="autoBestOffer" engine="java" transaction-timeout="36000"
+        location="org.ofbiz.ebaystore.EbayStoreAutoPreferences" invoke="autoBestOffer" auth="false">
+        <attribute name="jobId" mode="IN" type="String" optional="false"/>
+        <attribute name="productStoreId" mode="IN" type="String" optional="false"/>
     </service>
     <service name="getMyeBaySelling" engine="java" transaction-timeout="36000"
         location="org.ofbiz.ebaystore.EbayStore" invoke="getMyeBaySelling" auth="true">
@@ -481,5 +497,203 @@ under the License.
         <attribute mode="IN" name="imageData" optional="true" type="java.nio.ByteBuffer"/>
         <attribute mode="IN" name="_imageData_contentType" optional="true" type="String"/>
         <attribute mode="IN" name="_imageData_fileName" optional="true" type="String"/>
+    </service>
+    <service name="listBestOfferIncludeMessage" engine="java" transaction-timeout="10000"
+        location="org.ofbiz.ebaystore.EbayStoreCustomerService" invoke="listBestOfferIncludeMessage">
+        <description>List customer offer data</description>
+        <attribute name="userId" mode="IN" type="String"></attribute>
+        <attribute name="itemId" mode="IN" type="String"></attribute>
+        <attribute name="bestOfferId" mode="IN" type="String"></attribute>
+        <attribute name="productStoreId" mode="IN" type="String"></attribute>
+        <attribute name="email" mode="OUT" type="String" optional="true"></attribute>
+        <attribute name="message" mode="OUT" type="String" optional="true"></attribute>
+        <attribute name="price" mode="OUT" type="String" optional="true"></attribute>
+        <attribute name="quantity" mode="OUT" type="String" optional="true"></attribute>
+        <attribute name="offerStatus" mode="OUT" type="String" optional="true"></attribute>
+        <attribute name="itemName" mode="OUT" type="String" optional="true"></attribute>
+    </service>
+    <service name="updateContactStatus" engine="java" transaction-timeout="10000"
+        location="org.ofbiz.ebaystore.EbayStoreCustomerService" invoke="updateContactStatus">
+        <description>List customer offer data</description>
+        <attribute name="userId" mode="INOUT" type="String"></attribute>
+        <attribute name="itemId" mode="INOUT" type="String"></attribute>
+        <attribute name="itemName" mode="INOUT" type="String"></attribute>
+        <attribute name="productStoreId" mode="INOUT" type="String"></attribute>
+        <attribute name="offerId" mode="INOUT" type="String"></attribute>
+        <attribute name="price" mode="INOUT" type="String"></attribute>
+        <attribute name="email" mode="INOUT" type="String"></attribute>
+        <attribute name="quantity" mode="INOUT" type="String"></attribute>
+        <attribute name="contactStatus" mode="INOUT" type="String"></attribute>
+        <attribute name="contactSetting" mode="IN" type="String"></attribute>
+    </service>
+    <service name="deleteContactAlert" engine="java" transaction-timeout="10000"
+        location="org.ofbiz.ebaystore.EbayStoreCustomerService" invoke="deleteContactAlert">
+        <description>Delete customer offer data</description>
+        <attribute name="userId" mode="IN" type="String"></attribute>
+        <attribute name="itemId" mode="IN" type="String"></attribute>
+        <attribute name="productStoreId" mode="INOUT" type="String"></attribute>
+    </service>
+    <service name="geteBayClosedItem" engine="java" transaction-timeout="12000"
+        location="org.ofbiz.ebaystore.EbayStore" invoke="geteBayClosedItem">
+        <description>List closed item in store</description>
+        <attribute name="productStoreId" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="closedItemList" mode="OUT" type="List"></attribute>
+    </service>
+    <service name="getEbayOrders" engine="java" transaction-timeout="120000"
+        location="org.ofbiz.ebaystore.EbayStore" invoke="getEbayOrders">
+        <description>List closed item in store</description>
+        <attribute name="productStoreId" mode="INOUT" type="String" optional="false"></attribute>
+        <attribute name="itemId" mode="IN" type="String" optional="false"></attribute>
+        <attribute name="transactionId" mode="IN" type="String" optional="false"></attribute>
+        <attribute name="startTime" mode="IN" type="String" optional="false"></attribute>
+        <attribute name="endTime" mode="IN" type="String" optional="false"></attribute>
+        <attribute name="totalPrice" mode="OUT" type="Double" optional="true"></attribute>
+        <attribute name="amountPaid" mode="OUT" type="Double" optional="true"></attribute>
+        <attribute name="shippingDetail" mode="OUT" type="Map" optional="true"></attribute>
+        <attribute name="checkoutStatus" mode="OUT" type="String" optional="true"></attribute>
+        <attribute name="paymentMethod" mode="OUT" type="String" optional="true"></attribute>
+    </service>
+    <service name="getOrderTransactionList" engine="java" transaction-timeout="12000"
+        location="org.ofbiz.ebaystore.EbayStore" invoke="getOrderTransactionList">
+        <description>List closed item in store</description>
+        <attribute name="productStoreId" mode="INOUT" type="String" optional="true"></attribute>
+        <attribute name="orderList" mode="OUT" type="List" optional="true"></attribute>
+    </service>
+    <service name="getSellerTransaction" engine="java" transaction-timeout="12000"
+        location="org.ofbiz.ebaystore.EbayStore" invoke="getSellerTransaction">
+        <description>List closed item in store</description>
+        <attribute name="productStoreId" mode="INOUT" type="String" optional="true"></attribute>
+        <attribute name="timeTo" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="timeFrom" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="orderList" mode="OUT" type="List"></attribute>
+    </service>
+    <service name="getEbayStoreTransaction" engine="java" transaction-timeout="12000"
+        location="org.ofbiz.ebaystore.EbayStore" invoke="getEbayStoreTransaction">
+        <description>List closed item in store</description>
+        <attribute name="productStoreId" mode="INOUT" type="String" optional="false"></attribute>
+        <attribute name="fromDate" mode="IN" type="String" optional="false"></attribute>
+        <attribute name="thruDate" mode="IN" type="String" optional="false"></attribute>
+        <attribute name="formSelect" mode="OUT" type="String" optional="false"></attribute>
+        <attribute name="orderIdList" mode="OUT" type="List" optional="true"></attribute>
+        <attribute name="transactionsList" mode="OUT" type="List" optional="true"></attribute>
+    </service>
+    <service name="getEbayStoreOrder" engine="java" transaction-timeout="12000"
+        location="org.ofbiz.ebaystore.EbayStore" invoke="getEbayStoreOrder">
+        <description>Import transaction from ebay to OFBiz</description>
+        <attribute name="productStoreId" mode="INOUT" type="String" optional="false"></attribute>
+        <attribute name="fromDate" mode="IN" type="String" optional="false"></attribute>
+        <attribute name="thruDate" mode="IN" type="String" optional="false"></attribute>
+        <attribute name="formSelect" mode="OUT" type="String" optional="false"></attribute>
+        <attribute name="orderList" mode="OUT" type="List" optional="true"></attribute>
+    </service>
+    <service name="EbayStoreImportTransaction" engine="java" transaction-timeout="12000"
+        location="org.ofbiz.ebaystore.EbayStoreOrder" invoke="EbayStoreImportTransaction">
+        <description>List closed item in store</description>
+        <attribute name="productStoreId" mode="INOUT" type="String" optional="false"></attribute>
+        <attribute name="externalId" mode="IN" type="String" optional="false"></attribute>
+        <attribute name="title" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="createdDate" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="ebayUserIdBuyer" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="eiasTokenBuyer" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="checkoutStatus" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="importStatus" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="productId" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="quantityPurchased" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="transactionPrice" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingService" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingServiceCost" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingTotalAdditionalCost" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="salesTaxAmount" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="salesTaxPercent" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="amountPaid" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippedTime" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="paidTime" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="buyerName" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="emailBuyer" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressPhone" mode="IN" type="String"></attribute>
+        <attribute name="shippingAddressStreet" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressStreet1" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressStreet2" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressPostalCode" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressCountry" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressStateOrProvince" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressCityName" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressCountry" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="formSelect" mode="OUT" type="String" optional="false"></attribute>
+    </service>
+    <service name="EbayStoreCreateTransactionShoppingCart" engine="java" transaction-timeout="12000"
+        location="org.ofbiz.ebaystore.EbayStoreOrder" invoke="EbayStoreCreateTransactionShoppingCart">
+        <description>Create Shopping Cart to store transaction from Ebay</description>
+        <attribute name="productStoreId" mode="IN" type="String" optional="false"></attribute>
+        <attribute name="externalId" mode="IN" type="String" optional="false"></attribute>
+        <attribute name="title" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="createdDate" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="ebayUserIdBuyer" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="eiasTokenBuyer" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="checkoutStatus" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="importStatus" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="productId" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="quantityPurchased" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="transactionPrice" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingService" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingServiceCost" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingTotalAdditionalCost" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="salesTaxAmount" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="salesTaxPercent" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="amountPaid" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippedTime" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="paidTime" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="buyerName" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="emailBuyer" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressPhone" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressStreet" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressStreet1" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressStreet2" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressPostalCode" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressCountry" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressStateOrProvince" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressCityName" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressCountry" mode="IN" type="String" optional="true"></attribute>
+    </service>
+    <service name="EbayStoreImportOrder" engine="java" transaction-timeout="12000"
+        location="org.ofbiz.ebaystore.EbayStoreOrder" invoke="EbayStoreImportOrder">
+        <description>Import order from ebay to OFBiz</description>
+        <attribute name="orderId" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="externalId" mode="IN" type="String" optional="false"></attribute>
+        <attribute name="productStoreId" mode="INOUT" type="String" optional="false"></attribute>
+        <attribute name="ebayUserIdBuyer" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="emailBuyer" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="createdDate" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="paymentMethodUsed" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="amountPaid" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="paidTime" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippedTime" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressCtx" mode="IN" type="Map" optional="true"></attribute>
+        <attribute name="shippingServiceSelectedCtx" mode="IN" type="Map" optional="true"></attribute>
+        <attribute name="shippingDetailsCtx" mode="IN" type="Map" optional="true"></attribute>
+        <attribute name="checkoutStatusCtx" mode="IN" type="Map" optional="true"></attribute>
+        <attribute name="externalTransactionCtx" mode="IN" type="Map" optional="true"></attribute>
+        <attribute name="orderItemList" mode="IN" type="List" optional="true"></attribute>
+        <attribute name="formSelect" mode="OUT" type="String" optional="true"></attribute>
+    </service>
+    <service name="EbayStoreCreateOrderShoppingCart" engine="java" transaction-timeout="12000"
+        location="org.ofbiz.ebaystore.EbayStoreOrder" invoke="EbayStoreCreateOrderShoppingCart">
+        <description>Import order from ebay to OFBiz</description>
+        <attribute name="productStoreId" mode="IN" type="String"></attribute>
+        <attribute name="orderId" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="externalId" mode="IN" type="String"></attribute>
+        <attribute name="ebayUserIdBuyer" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="emailBuyer" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="createdDate" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="paymentMethodUsed" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="amountPaid" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="paidTime" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippedTime" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="shippingAddressCtx" mode="IN" type="Map" optional="true"></attribute>
+        <attribute name="shippingServiceSelectedCtx" mode="IN" type="Map" optional="true"></attribute>
+        <attribute name="shippingDetailsCtx" mode="IN" type="Map" optional="true"></attribute>
+        <attribute name="checkoutStatusCtx" mode="IN" type="Map" optional="true"></attribute>
+        <attribute name="externalTransactionCtx" mode="IN" type="Map" optional="true"></attribute>
+        <attribute name="orderItemList" mode="IN" type="List" optional="true"></attribute>
     </service>
 </services>

@@ -26,6 +26,7 @@ under the License.
                 <!-- base/top/specific map first, then more common map added for shared labels -->
                 <property-map resource="TemporalExpressionUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="SecurityUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="layoutSettings.companyName" from-field="uiLabelMap.WebtoolsCompanyName" global="true"/>
                 <set field="layoutSettings.companySubtitle" from-field="uiLabelMap.WebtoolsCompanySubtitle" global="true"/>
@@ -91,7 +92,7 @@ under the License.
     <screen name="browsercerts">
         <section>
             <actions>
-                <set field="headerItem" value="main"/>
+                <set field="tabButtonItem" value="myCertificates"/>
                 <set field="titleProperty" value="WebtoolsCertsX509"/>
             </actions>
             <widgets>
@@ -284,16 +285,40 @@ under the License.
         </section>
     </screen>
 
-    <screen name="uiLabelDecorator">
+    <screen name="CommonGeoManagementDecorator">
         <section>
             <actions>
-                <property-map resource="TemporalExpressionUiLabels" map-name="uiLabelMap" global="true"/>
-                <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap" global="true"/>
-                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="headerItem" value="geoManagement"/>
             </actions>
             <widgets>
-                <decorator-section-include name="body"/>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="WEBTOOLS" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <include-menu name="geoManagement" location="component://webtools/widget/Menus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for WEBTOOLS, _VIEW permission -->
+                            <condition>
+                                <if-has-permission permission="WEBTOOLS" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.WebtoolsPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
             </widgets>
-         </section>
-     </screen>
+        </section>
+    </screen>
+    
 </screens>

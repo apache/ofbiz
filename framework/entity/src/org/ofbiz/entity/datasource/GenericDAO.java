@@ -311,29 +311,26 @@ public class GenericDAO {
             throw new org.ofbiz.entity.GenericNotImplementedException("Operation updateByCondition not supported yet for view entities");
         }
 
-        String sql = "UPDATE " + modelEntity.getTableName(datasourceInfo);
-        sql += " SET ";
-        List<ModelField> fieldList = new LinkedList<ModelField>();
-        boolean firstField = true;
-        for (String name: fieldsToSet.keySet()) {
+        StringBuilder sql = new StringBuilder("UPDATE ").append(modelEntity.getTableName(datasourceInfo));
+        sql.append(" SET ");
+        List<EntityConditionParam> params = new LinkedList<EntityConditionParam>();
+        for (Map.Entry<String, ? extends Object> entry: fieldsToSet.entrySet()) {
+            String name = entry.getKey();
             ModelField field = modelEntity.getField(name);
             if (field != null) {
-                if (!firstField) {
-                    sql += ", ";
-                } else {
-                    firstField = false;
+                if (!params.isEmpty()) {
+                    sql.append(", ");
                 }
-                sql += field.getColName() + " = ?";
-                fieldList.add(field);
+                sql.append(field.getColName()).append(" = ?");
+                params.add(new EntityConditionParam(field, entry.getValue()));
             }
         }
-        sql += " WHERE " + condition.makeWhereString(modelEntity, null, this.datasourceInfo);
+        sql.append(" WHERE ").append(condition.makeWhereString(modelEntity, params, this.datasourceInfo));
 
         try {
-            sqlP.prepareStatement(sql);
-            for (ModelField field: fieldList) {
-                Object value = fieldsToSet.get(field.getName());
-                SqlJdbcUtil.setValue(sqlP, field, modelEntity.getEntityName(), value, modelFieldTypeReader);
+            sqlP.prepareStatement(sql.toString());
+            for (EntityConditionParam param: params) {
+                SqlJdbcUtil.setValue(sqlP, param.getModelField(), modelEntity.getEntityName(), param.getFieldValue(), modelFieldTypeReader);
             }
 
             return sqlP.executeUpdate();
@@ -441,7 +438,7 @@ public class GenericDAO {
                 }
             } else if (meResult.size() == 1) {
                 // Update existing value
-                meGenericValue = (GenericValue) meResult.iterator().next();
+                meGenericValue = meResult.iterator().next();
             } else {
                 throw new GenericEntityException("Found more than one result for member entity " + meName + " in view " + modelViewEntity.getEntityName() + " - this is no updatable view");
             }
@@ -652,12 +649,13 @@ public class GenericDAO {
         if (UtilValidate.isNotEmpty(fieldsToSelect)) {
             Set<String> tempKeys = FastSet.newInstance();
             tempKeys.addAll(fieldsToSelect);
-            Iterator<ModelField> fieldIter = modelEntity.getFieldsIterator();
-            while (fieldIter.hasNext()) {
-                ModelField curField = fieldIter.next();
-                if (tempKeys.contains(curField.getName())) {
-                    selectFields.add(curField);
-                    tempKeys.remove(curField.getName());
+            for (String fieldToSelect : fieldsToSelect) {
+                if (tempKeys.contains(fieldToSelect)) {
+                    ModelField curField = modelEntity.getField(fieldToSelect);
+                    if (curField != null) {
+                        selectFields.add(curField);
+                        tempKeys.remove(fieldToSelect);
+                    }
                 }
             }
 
@@ -752,7 +750,7 @@ public class GenericDAO {
             long queryEndTime = System.currentTimeMillis();
             long queryTotalTime = queryEndTime - queryStartTime;
             if (queryTotalTime > 150) {
-                Debug.logTiming("Ran query in " + queryTotalTime + " milli-seconds: " + sql, module);
+                Debug.logTiming("Ran query in " + queryTotalTime + " milli-seconds: " + " EntityName: " + modelEntity.getEntityName() + " Sql: " + sql + " where clause:" + whereEntityConditionParams, module);
             }
         }
         return new EntityListIterator(sqlP, modelEntity, selectFields, modelFieldTypeReader, this, whereEntityCondition, havingEntityCondition, findOptions.getDistinct());
@@ -1147,15 +1145,15 @@ public class GenericDAO {
             throw new org.ofbiz.entity.GenericNotImplementedException("Operation deleteByCondition not supported yet for view entities");
         }
 
-        String sql = "DELETE FROM " + modelEntity.getTableName(this.datasourceInfo);
+        StringBuilder sql = new StringBuilder("DELETE FROM ").append(modelEntity.getTableName(this.datasourceInfo));
 
         String whereCondition = condition.makeWhereString(modelEntity, null, this.datasourceInfo);
         if (UtilValidate.isNotEmpty(whereCondition)) {
-            sql += " WHERE " + whereCondition;
+            sql.append(" WHERE ").append(whereCondition);
         }
 
         try {
-            sqlP.prepareStatement(sql);
+            sqlP.prepareStatement(sql.toString());
 
             return sqlP.executeUpdate();
         } finally {

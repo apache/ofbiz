@@ -157,10 +157,10 @@ if (selPhones) {
     context.phone = delegator.findByPrimaryKey("TelecomNumber", [contactMechId : selPhones[0].contactMechId]);
 }
 
-// Fax 
+// Fax
 faxNumbers = delegator.findByAnd("PartyContactMechPurpose", [partyId : partyId, contactMechPurposeTypeId : "FAX_NUMBER"]);
 faxNumbers = EntityUtil.filterByDate(faxNumbers, nowTimestamp, null, null, true);
-if (faxNumbers) {  
+if (faxNumbers) {
     context.fax = delegator.findOne("TelecomNumber", [contactMechId : faxNumbers[0].contactMechId], false);
 }
 
@@ -185,6 +185,11 @@ if (selEmails) {
 }
 
 // website
+websiteUrls = EntityUtil.filterByDate(delegator.findByAnd("PartyContactMechPurpose", [partyId : partyId, contactMechPurposeTypeId : "PRIMARY_WEB_URL"]));
+if (websiteUrls) {
+    websiteUrl = EntityUtil.getFirst(websiteUrls);
+    context.website = delegator.findOne("ContactMech", [contactMechId : websiteUrl.contactMechId], false);
+} else { //get web address from party contact mech
 contacts = delegator.findByAnd("PartyContactMech", [partyId : partyId]);
 selContacts = EntityUtil.filterByDate(contacts, nowTimestamp, "fromDate", "thruDate", true);
 if (selContacts) {
@@ -196,6 +201,7 @@ if (selContacts) {
             break;
         }
     }
+}
 }
 
 //Bank account

@@ -22,6 +22,7 @@
     xsi:schemaLocation="http://docbook.org/ns/docbook ../../content/dtd/docbook.xsd"
     xmlns="http://docbook.org/ns/docbook">
     <title>The Product Catalog Component</title>
+    <anchor xml:id="ProductCatalogComponent"/>
     <section>
         <title>Introduction Paragraph</title>
         <para>

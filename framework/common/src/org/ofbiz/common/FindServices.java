@@ -24,6 +24,7 @@ import static org.ofbiz.base.util.UtilGenerics.checkMap;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -65,7 +66,7 @@ import org.ofbiz.service.ServiceUtil;
 public class FindServices {
 
     public static final String module = FindServices.class.getName();
-
+    public static final String resource = "CommonUiLabels";
     public static Map<String, EntityComparisonOperator<?, ?>> entityOperators;
 
     static {
@@ -266,7 +267,7 @@ public class FindServices {
             if (fieldValue == null) {
                 fieldValue = parameters.get(fieldName);
             }
-            if (ObjectType.isEmpty(fieldValue)) {
+            if (ObjectType.isEmpty(fieldValue) && !"empty".equals(operation)) {
                 continue;
             }
             result.add(createSingleCondition(modelField, operation, fieldValue, ignoreCase, delegator, context));
@@ -356,7 +357,6 @@ public class FindServices {
     public static List<EntityCondition> createCondition(ModelEntity modelEntity, Map<String, Map<String, Map<String, Object>>> normalizedFields, Map<String, Object> queryStringMap, Map<String, List<Object[]>> origValueMap, Delegator delegator, Map<String, ?> context) {
         Map<String, Map<String, Object>> subMap = null;
         Map<String, Object> subMap2 = null;
-        EntityComparisonOperator<?, ?> fieldOp = null;
         Object fieldValue = null; // If it is a "value" field, it will be the value to be used in the query.
                                   // If it is an "op" field, it will be "equals", "greaterThan", etc.
         EntityCondition cond = null;
@@ -372,10 +372,11 @@ public class FindServices {
             }
             subMap2 = subMap.get("fld0");
             fieldValue = subMap2.get("value");
-            if (fieldValue == null) {
+            opString = (String) subMap2.get("op");
+            // null fieldValue is OK if operator is "empty"
+            if (fieldValue == null && !"empty".equals(opString)) {
                 continue;
             }
-            opString = (String) subMap2.get("op");
             ignoreCase = "Y".equals(subMap2.get("ic"));
             cond = createSingleCondition(modelField, opString, fieldValue, ignoreCase, delegator, context); 
             tmpList.add(cond);
@@ -384,10 +385,10 @@ public class FindServices {
                 continue;
             }
             fieldValue = subMap2.get("value");
-            if (fieldValue == null) {
+            opString = (String) subMap2.get("op");
+            if (fieldValue == null && !"empty".equals(opString)) {
                 continue;
             }
-            opString = (String) subMap2.get("op");
             ignoreCase = "Y".equals(subMap2.get("ic"));
             cond = createSingleCondition(modelField, opString, fieldValue, ignoreCase, delegator, context); 
             tmpList.add(cond);
@@ -456,6 +457,7 @@ public class FindServices {
         String distinct = (String) context.get("distinct");
         List<String> fieldList =  UtilGenerics.<String>checkList(context.get("fieldList"));
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
         if (UtilValidate.isEmpty(noConditionFind)) {
             // try finding in inputFields Map
             noConditionFind = (String) inputFields.get("noConditionFind");
@@ -487,9 +489,9 @@ public class FindServices {
                                                "filterByDateValue", filterByDateValue, "userLogin", userLogin,
                                                "locale", context.get("locale"), "timeZone", context.get("timeZone")));
         } catch (GenericServiceException gse) {
-            return ServiceUtil.returnError("Error preparing conditions: " + gse.getMessage());
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonFindErrorPreparingConditions", UtilMisc.toMap("errorString", gse.getMessage()), locale));
         }
-        EntityConditionList exprList = (EntityConditionList)prepareResult.get("entityConditionList");
+        EntityConditionList<EntityCondition> exprList = UtilGenerics.cast(prepareResult.get("entityConditionList"));
         List<String> orderByList = checkList(prepareResult.get("orderByList"), String.class);
 
         Map<String, Object> executeResult = null;
@@ -500,7 +502,7 @@ public class FindServices {
                                                                              "locale", context.get("locale"), "timeZone", context.get("timeZone"),
                                                                              "maxRows", maxRows));
         } catch (GenericServiceException gse) {
-            return ServiceUtil.returnError("Error finding iterator: " + gse.getMessage());
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonFindErrorRetrieveIterator", UtilMisc.toMap("errorString", gse.getMessage()), locale));
         }
 
         if (executeResult.get("listIt") == null) {
@@ -509,6 +511,7 @@ public class FindServices {
 
         Map<String, Object> results = ServiceUtil.returnSuccess();
         results.put("listIt", executeResult.get("listIt"));
+        results.put("listSize", executeResult.get("listSize"));
         results.put("queryString", prepareResult.get("queryString"));
         results.put("queryStringMap", prepareResult.get("queryStringMap"));
         return results;
@@ -520,7 +523,7 @@ public class FindServices {
      * This is a generic method that expects entity data affixed with special suffixes
      * to indicate their purpose in formulating an SQL query statement.
      */
-    public static Map prepareFind(DispatchContext dctx, Map<String, ?> context) {
+    public static Map<String, Object> prepareFind(DispatchContext dctx, Map<String, ?> context) {
         String entityName = (String) context.get("entityName");
         String orderBy = (String) context.get("orderBy");
         Map<String, ?> inputFields = checkMap(context.get("inputFields"), String.class, Object.class); // Input
@@ -563,7 +566,7 @@ public class FindServices {
             }
         }
 
-        EntityConditionList exprList = null;
+        EntityConditionList<EntityCondition> exprList = null;
         if (tmpList.size() > 0) {
             exprList = EntityCondition.makeCondition(tmpList);
         }
@@ -590,11 +593,12 @@ public class FindServices {
      */
     public static Map<String, Object> executeFind(DispatchContext dctx, Map<String, ?> context) {
         String entityName = (String) context.get("entityName");
-        EntityConditionList entityConditionList = (EntityConditionList) context.get("entityConditionList");
+        EntityConditionList<EntityCondition> entityConditionList = UtilGenerics.cast(context.get("entityConditionList"));
         List<String> orderByList = checkList(context.get("orderByList"), String.class);
-        boolean noConditionFind = "Y".equals((String) context.get("noConditionFind"));
-        boolean distinct = "Y".equals((String) context.get("distinct"));
+        boolean noConditionFind = "Y".equals(context.get("noConditionFind"));
+        boolean distinct = "Y".equals(context.get("distinct"));
         List<String> fieldList =  UtilGenerics.checkList(context.get("fieldList"));
+        Locale locale = (Locale) context.get("locale");
         Set<String> fieldSet = null;
         if (fieldList != null) {
             fieldSet = UtilMisc.makeSetWritable(fieldList);
@@ -604,17 +608,20 @@ public class FindServices {
         Delegator delegator = dctx.getDelegator();
         // Retrieve entities  - an iterator over all the values
         EntityListIterator listIt = null;
+        int listSize = 0;
         try {
             if (noConditionFind || (entityConditionList != null && entityConditionList.getConditionListSize() > 0)) {
                 listIt = delegator.find(entityName, entityConditionList, null, fieldSet, orderByList,
                         new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, -1, maxRows, distinct));
+                listSize = listIt.getResultsSizeAfterPartialList();
             }
         } catch (GenericEntityException e) {
-            return ServiceUtil.returnError("Error running Find on the [" + entityName + "] entity: " + e.getMessage());
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonFindErrorRunning", UtilMisc.toMap("entityName", entityName, "errorString", e.getMessage()), locale));
         }
 
         Map<String, Object> results = ServiceUtil.returnSuccess();
         results.put("listIt", listIt);
+        results.put("listSize", listSize);
         return results;
     }
 
@@ -658,13 +665,11 @@ public class FindServices {
         for (String fieldNameRaw: inputFields.keySet()) { // The name as it appeas in the HTML form
             String fieldNameRoot = null; // The entity field name. Everything to the left of the first "_" if
                                                                  //  it exists, or the whole word, if not.
-            String fieldPair = null; // "fld0" or "fld1" - begin/end of range or just fld0 if no range.
             Object fieldValue = null; // If it is a "value" field, it will be the value to be used in the query.
                                                         // If it is an "op" field, it will be "equals", "greaterThan", etc.
             int iPos = -1;
             int iPos2 = -1;
-            String fieldMode = null;
-
+            
             fieldValue = inputFields.get(fieldNameRaw);
             if (ObjectType.isEmpty(fieldValue)) {
                 continue;
@@ -687,8 +692,6 @@ public class FindServices {
             // If no field op is present, it will assume "equals".
             if (iPos < 0) {
                 fieldNameRoot = fieldNameRaw;
-                fieldPair = "fld0";
-                fieldMode = "value";
             } else { // Must have at least "fld0/1" or "equals, greaterThan, etc."
                 // Some bogus fields will slip in, like "ENTITY_NAME", but they will be ignored
 
@@ -730,6 +733,10 @@ public class FindServices {
             result.put("item",item);
         }
         result.remove("listIt");
+        
+        if (result.containsKey("listSize")) {
+            result.remove("listSize");
+        }
         return result;
     }
 }

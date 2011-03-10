@@ -18,6 +18,9 @@
  */
 package org.ofbiz.sql;
 
+import org.ofbiz.base.lang.SourceMonitored;
+
+@SourceMonitored
 public final class BetweenCondition extends Condition {
     private final Value left;
     private final Value r1;
@@ -29,6 +32,7 @@ public final class BetweenCondition extends Condition {
         this.r2 = r2;
     }
 
+    @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
@@ -45,6 +49,7 @@ public final class BetweenCondition extends Condition {
         return r2;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o instanceof BetweenCondition) {
             BetweenCondition other = (BetweenCondition) o;

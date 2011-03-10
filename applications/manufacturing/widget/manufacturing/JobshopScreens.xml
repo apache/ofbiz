@@ -163,7 +163,7 @@ under the License.
                 <script location="component://manufacturing/webapp/manufacturing/WEB-INF/actions/jobshopmgt/ProductionRunDeclaration.groovy"/>
                 <script location="component://manufacturing/webapp/manufacturing/WEB-INF/actions/jobshopmgt/productionRunAllFixedAssets.groovy"/>
 
-                <set field="productionRunId" from-field="parameters.productionRunId"/>
+                <set field="productionRunId" from-field="parameters.productionRunId" default-value="${parameters.workEffortId}"/>
                 <entity-one entity-name="WorkEffort" value-field="productionRun">
                     <field-map field-name="workEffortId" from-field="productionRunId"/>
                 </entity-one>
@@ -266,6 +266,7 @@ under the License.
                 <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="titleProperty" value="ManufacturingProductionRun"/>
+                <set field="bodyFontSize" value="10pt"/>
                 <script location="component://manufacturing/webapp/manufacturing/WEB-INF/actions/jobshopmgt/ProductionRunDeclaration.groovy"/>
             </actions>
             <widgets>
@@ -573,10 +574,10 @@ under the License.
                                         <if-compare field="workInProgress" operator="equals" value="true"/>
                                     </condition>
                                     <widgets>
-                                        <link text="${uiLabelMap.ManufacturingTasksReport}" style="buttontext" target="ShipmentWorkEffortTasks.pdf">
+                                        <link text="${uiLabelMap.ManufacturingTasksReport}" style="buttontext" target="ShipmentWorkEffortTasks.pdf" target-window="_BLANK">
                                             <parameter param-name="shipmentId" from-field="shipment.shipmentId"/>
                                         </link>
-                                        <link text="${uiLabelMap.ManufacturingCuttingListReport}" style="buttontext" target="CuttingListReport.pdf">
+                                        <link text="${uiLabelMap.ManufacturingCuttingListReport}" style="buttontext" target="CuttingListReport.pdf" target-window="_BLANK">
                                             <parameter param-name="shipmentId" from-field="shipment.shipmentId"/>
                                         </link>
                                     </widgets>
@@ -584,12 +585,12 @@ under the License.
                                         <link text="${uiLabelMap.ManufacturingGenerateProductionRuns}" style="buttontext" target="createProductionRunsForShipment">
                                             <parameter param-name="shipmentId" from-field="shipment.shipmentId"/>
                                         </link>
-                                        <link text="${uiLabelMap.ManufacturingShipmentPlanStockReport}" style="buttontext" target="ShipmentPlanStockReport.pdf">
+                                        <link text="${uiLabelMap.ManufacturingShipmentPlanStockReport}" style="buttontext" target="ShipmentPlanStockReport.pdf" target-window="_BLANK">
                                             <parameter param-name="shipmentId" from-field="shipment.shipmentId"/>
                                         </link>
                                     </fail-widgets>
                                 </section>
-                                <link text="${uiLabelMap.ManufacturingPackageLabelsReport}" style="buttontext" target="ShipmentLabel.pdf">
+                                <link text="${uiLabelMap.ManufacturingPackageLabelsReport}" style="buttontext" target="ShipmentLabel.pdf" target-window="_BLANK">
                                     <parameter param-name="shipmentId" from-field="shipment.shipmentId"/>
                                 </link>
                             </widgets>

@@ -838,7 +838,7 @@ under the License.
     <screen name="MyCommunicationEvents">
         <section>
             <actions>
-                <script location="component://common/webcommon/WEB-INF/actions/includes/retrievePortletAttributes.groovy"/>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="internalNotesOnly" from-field="internalNotesOnly" default-value="false"/>
                 <set field="partyId" from-field="communicationPartyId" default-value="${userLogin.partyId}"/>
                 <entity-one entity-name="CommunicationEvent" value-field="communicationEvent"/>

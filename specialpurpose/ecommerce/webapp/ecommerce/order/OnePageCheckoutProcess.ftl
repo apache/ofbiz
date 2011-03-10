@@ -543,8 +543,8 @@ under the License.
                                 <input id="cardNumber" name="cardNumber" class="required" type="text" value="${cardNumber?if_exists}" size="30" maxlength="16" />
                             </span>
                             <span>
-                                <label for="CVV2">CVV2</label>
-                                <input id="CVV2" name="cardSecurityCode" size="4" type="text" maxlength="4" value="" />
+                                <label for="billToCardSecurityCode">CVV2</label>
+                                <input id="billToCardSecurityCode" name="billToCardSecurityCode" size="4" type="text" maxlength="4" value="" />
                             </span>
                         </div>
                         <div>
@@ -624,6 +624,7 @@ under the License.
                           </div>
                         </div>
                     </fieldset>
+                    <br style="clear:both;"/>
                     <fieldset>
                       <a href="javascript:void(0);" class="button" id="savePaymentAndBillingContact">${uiLabelMap.EcommerceContinueToStep} 5</a>
                       <a href="javascript:void(0);" class="button" style="display: none;" id="processingOrderSubmitPanel">${uiLabelMap.EcommercePleaseWait}....</a>

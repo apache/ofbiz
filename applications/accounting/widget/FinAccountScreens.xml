@@ -266,12 +266,11 @@ under the License.
         <section>
             <actions>
                 <set field="tabButtonItem" value="finAccountMain"/>
-                <set field="parameters.portalPageId" value="FinAccountPortalPage"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonFinAccountDecorator" location="${parameters.finAccountDecoratorLocation}">
                     <decorator-section name="body">
-                        <include-screen name="PortalPageScreen" location="component://common/widget/CommonScreens.xml"/>
+                        <include-portal-page id="FinAccountPortalPage"/>                        
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -280,6 +279,7 @@ under the License.
     <screen name="ListBankAccount">
         <section>
             <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="parameters.finAccountTypeId" value="BANK_ACCOUNT"/>
             </actions>
             <widgets>
@@ -358,7 +358,7 @@ under the License.
                             </condition>
                             <widgets>
                                 <container style="button-bar">
-                                    <link target="DepositSlip.pdf" text="${uiLabelMap.AccountingPrintDepositSlip}" style="buttontext">
+                                    <link target="DepositSlip.pdf" target-window="_BLANK" text="${uiLabelMap.AccountingPrintDepositSlip}" style="buttontext">
                                         <parameter param-name="paymentGroupId"/>
                                     </link>
                                 </container>
@@ -418,8 +418,6 @@ under the License.
             <actions>
                 <set field="titleProperty" value="PageTitleFindFinAccountTrans"/>
                 <set field="tabButtonItem" value="FinAccountTrans"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/popup.js" global="true"/>
-                <set field="layoutSettings.styleSheets[+0]" value="/images/prototypejs/popup.css" global="true"/>
                 <service service-name="getFinAccountTransListAndTotals" result-map="finAccountTransListAndTotals" auto-field-map="true"/>
                 <set field="finAccountTransList" type="List" from-field="finAccountTransListAndTotals.finAccountTransList"/>
                 <set field="searchedNumberOfRecords" type="Integer" from-field="finAccountTransListAndTotals.searchedNumberOfRecords"/>
@@ -472,8 +470,6 @@ under the License.
             <actions>
                 <set field="titleProperty" value="AccountingBankReconciliation"/>
                 <set field="tabButtonItem" value="FinAccountTrans"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/popup.js" global="true"/>
-                <set field="layoutSettings.styleSheets[+0]" value="/images/prototypejs/popup.css" global="true"/>
                 <set field="finAccountId" from-field="parameters.finAccountId"/>
                 <entity-one entity-name="FinAccount" value-field="finAccount"/>
             </actions>
@@ -619,8 +615,6 @@ under the License.
         <section>
             <actions>
                 <set field="tabButtonItem" value="FindFinAccountReconciliations"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/popup.js" global="true"/>
-                <set field="layoutSettings.styleSheets[+0]" value="/images/prototypejs/popup.css" global="true"/>
                 <set field="titleProperty" value="AccountingEditFinAccountReconciliations"/>
                 <set field="finAccountId" from-field="parameters.finAccountId"/>
                 <set field="glReconciliationId" from-field="parameters.glReconciliationId"/>

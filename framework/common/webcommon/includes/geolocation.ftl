@@ -41,10 +41,10 @@ under the License.
                 for (var i = 0; i < latlng.length; i++) {
                   latlngbounds.extend(latlng[i]);
                 }
-                map.setCenter(latlngbounds.getCenter(), map.getBoundsZoomLevel(latlngbounds) - 1);//reduce bounds zoom level to see all markers
+                map.setCenter(latlngbounds.getCenter(), Math.min (15, map.getBoundsZoomLevel(latlngbounds)));//reduce bounds zoom level to see all markers
               <#else>
-                //map.setCenter(new GLatLng(37.4419, -122.1419), 12);
                 map.setCenter(new GLatLng(0, 0), 1);
+                map.setZoom(15); // 0=World, 19=max zoom in
               </#if>
             </#if>
             <#if geoChart.controlUI?has_content && geoChart.controlUI == "small">
@@ -81,13 +81,39 @@ under the License.
             var geocoder = new GClientGeocoder();
             var map = new GMap2(document.getElementById("<#if geoChart.id?has_content>${geoChart.id}<#else>map_canvas</#if>"));
             geocoder.getLatLng("${pointAddress}", function(point) {
-              if (!point) { alert("Address not found");}
+              if (!point) { showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.CommonAddressNotFound}");}
               map.setUIToDefault();
               map.setCenter(point, 13);
               map.addOverlay(new GMarker(point));
+              map.setZoom(15); // 0=World, 19=max zoom in
             });
           }
         --></script>
+      <#elseif geoChart.dataSourceId == "GEOPT_OSM">
+        <div id="<#if geoChart.id?has_content>${geoChart.id}<#else>map_canvas</#if>" style="border:1px solid #979797; background-color:#e5e3df; width:${geoChart.width}; height:${geoChart.height}; margin:2em auto;">
+        </div>
+        <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+        <script>
+          map = new OpenLayers.Map("<#if geoChart.id?has_content>${geoChart.id}<#else>map_canvas</#if>");
+          map.addLayer(new OpenLayers.Layer.OSM());
+          <#if geoChart.center?has_content>
+            var zoom = ${geoChart.center.zoom};
+            var center= new OpenLayers.LonLat(${geoChart.center.lon?c},${geoChart.center.lat?c})
+              .transform(new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+                         map.getProjectionObject() // to Spherical Mercator Projection
+                         );
+          </#if>
+          var markers = new OpenLayers.Layer.Markers( "Markers" );
+          map.addLayer(markers);
+          <#if geoChart.points?has_content>
+            <#list geoChart.points as point>
+              markers.addMarker(new OpenLayers.Marker(new OpenLayers.LonLat(${point.lon?c} ,${point.lat?c}).transform(
+                new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject())));
+            </#list>
+          </#if>
+          map.setCenter(center, zoom);
+          map.setZoom(15); // 0=World, 19=max zoom in
+        </script>
       </#if>
     </#if>
 <#else>

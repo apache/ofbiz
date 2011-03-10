@@ -21,16 +21,16 @@ package org.ofbiz.base.util.collections.test;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ofbiz.base.test.GenericTestCaseBase;
 import org.ofbiz.base.util.collections.GenericMap;
 import org.ofbiz.base.util.collections.GenericMapEntry;
 import org.ofbiz.base.util.collections.IteratorWrapper;
-import org.ofbiz.base.test.GenericTestCaseBase;
 
 public class GenericMapTest extends GenericTestCaseBase {
+    @SuppressWarnings("serial")
     public static class TestGenericMap<K, V> extends GenericMap<K, V> {
         private static final String[] countNames = {
             "clearInternal",
@@ -76,6 +76,7 @@ public class GenericMapTest extends GenericTestCaseBase {
             return result;
         }
 
+        @Override
         protected void clearInternal() {
             incrementCallCount("clearInternal");
             proxyMap.clear();
@@ -86,6 +87,7 @@ public class GenericMapTest extends GenericTestCaseBase {
             return proxyMap.containsKey(key);
         }
 
+        @Override
         protected V get(Object key, boolean noteAccess) {
             incrementCallCount("get-" + noteAccess);
             return proxyMap.get(key);
@@ -96,13 +98,16 @@ public class GenericMapTest extends GenericTestCaseBase {
             return proxyMap.isEmpty();
         }
 
+        @Override
         protected Iterator<Map.Entry<K, V>> iterator(final boolean noteAccess) {
             incrementCallCount("iterator-" + noteAccess);
             //return new IteratorWrapper<Map.Entry<K, V>, Map.Entry<K, V>>(noteAccess, proxyMap.entrySet().iterator()) {
             return new IteratorWrapper<Map.Entry<K, V>, Map.Entry<K, V>>(proxyMap.entrySet().iterator()) {
+                @Override
                 protected Map.Entry<K, V> convert(Map.Entry<K, V> src) {
                     return new GenericMapEntry<K, V>(TestGenericMap.this, src.getKey(), noteAccess);
                 }
+                @Override
                 protected void noteRemoval(Map.Entry<K, V> dest, Map.Entry<K, V> src) {
                 }
             };
@@ -114,6 +119,7 @@ public class GenericMapTest extends GenericTestCaseBase {
             return proxyMap.put(key, value);
         }
 
+        @Override
         protected <KE extends K, VE extends V> void putAllIterator(Iterator<Map.Entry<KE, VE>> it) {
             incrementCallCount("putAllIterator");
             while (it.hasNext()) {
@@ -122,6 +128,7 @@ public class GenericMapTest extends GenericTestCaseBase {
             }
         }
 
+        @Override
         protected V removeInternal(Object key, boolean incrementModCount) {
             incrementCallCount("removeInternal-" + incrementModCount);
             if (!proxyMap.containsKey(key)) return null;

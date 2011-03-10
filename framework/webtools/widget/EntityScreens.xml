@@ -159,20 +159,22 @@ under the License.
             </condition>
             <actions>
                 <script location="component://webtools/webapp/webtools/WEB-INF/actions/entity/FindGeneric.groovy"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap"/>
                 <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap"/>
                 <set field="title" value="${uiLabelMap.WebtoolsFindValues} ${uiLabelMap.WebtoolsForEntity}: ${entityName}"/>
+                <set field="commonDisplaying" value="${uiLabelMap.CommonDisplaying}"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                             <decorator-section name="menu-bar">
-                                <container style="button-bar">
-                                    <link target="entitymaint" text="${uiLabelMap.WebtoolsBackToEntityList}" style="buttontext"/>
-                                    <link target="ViewRelations" text="${uiLabelMap.WebtoolsViewRelations}" style="buttontext">
+                                <container style="button-bar button-style-1">
+                                    <link target="entitymaint" text="${uiLabelMap.WebtoolsBackToEntityList}"/>
+                                    <link target="ViewRelations" text="${uiLabelMap.WebtoolsViewRelations}">
                                         <parameter param-name="entityName" from-field="entityName"/>
                                     </link>
-                                    <link target="ViewGeneric" text="${uiLabelMap.CommonCreateNew}" style="buttontext">
+                                    <link target="ViewGeneric" text="${uiLabelMap.CommonCreateNew}" style="create">
                                         <parameter param-name="entityName" from-field="entityName"/>
                                         <parameter param-name="enableEdit" value="true"/>
                                     </link>
@@ -384,6 +386,9 @@ under the License.
     </screen>
     <screen name="EntityPerformanceTest">
         <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
             <actions>
                 <set field="headerItem" value="main"/>
                 <set field="titleProperty" value="WebtoolsPerformanceTests"/>
@@ -392,12 +397,16 @@ under the License.
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <platform-specific>
-                            <html><html-template location="component://webtools/webapp/webtools/performance/EntityPerformanceTest.ftl"/></html>
-                        </platform-specific>
+                        <screenlet title="${uiLabelMap.WebtoolsEntityEnginePerformanceTests}">
+                            <label>${uiLabelMap.WebtoolsNotePerformanceResultsMayVary}</label>
+                            <include-form name="ListPerformanceResults" location="component://webtools/widget/EntityForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
+            <fail-widgets>
+                <label style="h3">${uiLabelMap.WebtoolsPermissionMaint}</label>
+            </fail-widgets>
         </section>
     </screen>
     <screen name="xmldsdump">
@@ -440,5 +449,3 @@ under the License.
         </section>
     </screen>
 </screens>
-
-

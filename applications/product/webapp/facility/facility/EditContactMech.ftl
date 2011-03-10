@@ -65,6 +65,18 @@ under the License.
         <#if contactMechPurposeTypeId?exists><input type='hidden' name='contactMechPurposeTypeId' value='${contactMechPurposeTypeId?if_exists}' /></#if>
 
         <#if paymentMethodId?exists><input type='hidden' name='paymentMethodId' value='${paymentMethodId}' /></#if>
+
+        <tr>
+          <td class="label">${uiLabelMap.PartyContactPurposes}</td>
+          <td>
+            <select name='contactMechPurposeTypeId' class="required">
+              <option></option>
+              <#list mechMap.purposeTypes as contactMechPurposeType>
+                <option value='${contactMechPurposeType.contactMechPurposeTypeId}'>${contactMechPurposeType.get("description",locale)}</option>
+               </#list>
+            </select>
+          *</td>
+        </tr>
     <#else>
       <h1>${title}</h1>
       <div class="button-bar">
@@ -90,7 +102,7 @@ under the License.
                       </#if>
                       (${uiLabelMap.CommonSince}: ${facilityContactMechPurpose.fromDate})
                       <#if facilityContactMechPurpose.thruDate?has_content>(${uiLabelMap.CommonExpires}: ${facilityContactMechPurpose.thruDate.toString()}</#if>
-                      <a href="javascript:$('deleteFacilityContactMechPurpose_${facilityContactMechPurpose_index}').submit();" class="buttontext">${uiLabelMap.CommonDelete}</a>
+                      <a href="javascript:document.getElementById('deleteFacilityContactMechPurpose_${facilityContactMechPurpose_index}').submit();" class="buttontext">${uiLabelMap.CommonDelete}</a>
                   </td>
                 </tr>
                 <#-- toggle the row color -->

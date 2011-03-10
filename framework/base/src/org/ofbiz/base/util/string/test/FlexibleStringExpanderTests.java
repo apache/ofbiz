@@ -212,6 +212,7 @@ public class FlexibleStringExpanderTests extends TestCase {
         return null;
     }
 
+    @Override
     public void setUp() {
         wasVerbose = Debug.isOn(Debug.VERBOSE);
         if (getName().equals("testWithVerbosity")) {
@@ -220,6 +221,7 @@ public class FlexibleStringExpanderTests extends TestCase {
         Converters.registerConverter(new SpecialNumberToString());
     }
 
+    @Override
     public void tearDown() {
         Debug.set(Debug.VERBOSE, wasVerbose);
     }
@@ -236,7 +238,6 @@ public class FlexibleStringExpanderTests extends TestCase {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static class SpecialNumberToString extends AbstractConverter<SpecialNumber, String> {
         public SpecialNumberToString() {
             super(SpecialNumber.class, String.class);
@@ -247,11 +248,13 @@ public class FlexibleStringExpanderTests extends TestCase {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class SpecialNumber extends BigDecimal {
         public SpecialNumber(String value) {
             super(value);
         }
 
+        @Override
         public String toString() {
             return getClass().getName();
         }

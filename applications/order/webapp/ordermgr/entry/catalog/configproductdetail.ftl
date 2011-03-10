@@ -69,7 +69,7 @@ ${virtualJavaScript?if_exists}
         if (detailImageUrl == "_NONE_") {
             hack = document.createElement('span');
             hack.innerHTML="${uiLabelMap.CommonNoDetailImageAvailableToDisplay}";
-            alert(hack.innerHTML);
+            showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.CommonNoDetailImageAvailableToDisplay}");
             return;
         }
         detailImageUrl = detailImageUrl.replace(/\&\#47;/g, "/");
@@ -138,23 +138,23 @@ ${virtualJavaScript?if_exists}
 <script language="JavaScript" type="text/javascript">
 <!--
 
-Event.observe(window, 'load', function() {
-  Event.observe($('configFormId'),'change',getConfigDetails);
+jQuery(document).ready( function() {
+  jQuery('#configFormId').change(getConfigDetails);
 });
 
-function getConfigDetails(event) {
-       var element = Event.element(event);
-       if (element.identify().startsWith('comments_')) {
+function getConfigDetails() {
+       var element = jQuery(this);
+       if (element.attr("id").is("[id^='comments_']")) {
          //  don't update the price for comment change
          return;
        }
 
-       new Ajax.Request('/ordermgr/control/getConfigDetailsEvent',{parameters: $('configFormId').serialize(),  requestHeaders: {Accept: 'application/json'},
-
-           onSuccess: function(transport){
-                var data = transport.responseText.evalJSON(true);
-
-                if (data._ERROR_MESSAGE_LIST_ != undefined) {
+       jQuery.ajax({
+           url: '/ordermgr/control/getConfigDetailsEvent',
+           data: jQuery('configFormId').serialize(),
+           type: "POST",
+           success: function(data) {
+               if (data._ERROR_MESSAGE_LIST_ != undefined) {
                    //console.log(data._ERROR_MESSAGE_LIST_);
                    //alert(data._ERROR_MESSAGE_LIST_);
                 }else if (data._ERROR_MESSAGE_ != undefined) {
@@ -167,15 +167,12 @@ function getConfigDetails(event) {
                   var configId = data.configId;
                   document.getElementById('totalPrice').innerHTML = totalPrice;
                   document.addToShoppingList.configId.value = configId;
-                  event.stop();
                 }
-            },
+           },
+           error: function(data) {
 
-           onFailure: function(transport) {
-             var data = transport.responseText.evalJSON(true);
-             //console.log('Failure');
            }
-        });
+       });
 }
 
 -->
@@ -471,7 +468,7 @@ function getConfigDetails(event) {
                 <div>${question.description?if_exists}</div>
                 <#assign instructions = question.content.get("INSTRUCTIONS")?if_exists>
                 <#if instructions?has_content>
-                  <a href="javascript:alert('${instructions}');" class="buttontext">Instructions</a>
+                  <a href="javascript:showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${instructions}");" class="buttontext">Instructions</a>
                 </#if>
                 <#assign image = question.content.get("IMAGE_URL")?if_exists>
                 <#if image?has_content>

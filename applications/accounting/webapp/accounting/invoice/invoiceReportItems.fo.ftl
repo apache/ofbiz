@@ -70,20 +70,20 @@ under the License.
     <fo:table-column column-width="25mm"/>
 
     <fo:table-header height="14px">
-      <fo:table-row>
-        <fo:table-cell border-bottom-style="solid" border-bottom-width="thin" border-bottom-color="black">
+      <fo:table-row border-bottom-style="solid" border-bottom-width="thin" border-bottom-color="black">
+        <fo:table-cell>
           <fo:block font-weight="bold">${uiLabelMap.AccountingProduct}</fo:block>
         </fo:table-cell>
-        <fo:table-cell border-bottom-style="solid" border-bottom-width="thin" border-bottom-color="black">
+        <fo:table-cell>
           <fo:block font-weight="bold">${uiLabelMap.CommonDescription}</fo:block>
         </fo:table-cell>
-        <fo:table-cell border-bottom-style="solid" border-bottom-width="thin" border-bottom-color="black">
+        <fo:table-cell>
           <fo:block font-weight="bold" text-align="right">${uiLabelMap.CommonQty}</fo:block>
         </fo:table-cell>
-        <fo:table-cell border-bottom-style="solid" border-bottom-width="thin" border-bottom-color="black">
+        <fo:table-cell>
           <fo:block font-weight="bold" text-align="right">${uiLabelMap.AccountingUnitPrice}</fo:block>
         </fo:table-cell>
-        <fo:table-cell border-bottom-style="solid" border-bottom-width="thin" border-bottom-color="black">
+        <fo:table-cell>
           <fo:block font-weight="bold" text-align="right">${uiLabelMap.CommonAmount}</fo:block>
         </fo:table-cell>
       </fo:table-row>
@@ -96,7 +96,7 @@ under the License.
         <#-- if the item has a description, then use its description.  Otherwise, use the description of the invoiceItemType -->
         <#list invoiceItems as invoiceItem>
             <#assign itemType = invoiceItem.getRelatedOne("InvoiceItemType")>
-            <#assign isItemAdjustment = Static["org.ofbiz.common.CommonWorkers"].hasParentType(delegator, "InvoiceItemType", "invoiceItemTypeId", itemType.getString("invoiceItemTypeId"), "parentTypeId", "INVOICE_ADJ")/>
+            <#assign isItemAdjustment = Static["org.ofbiz.entity.util.EntityTypeUtil"].hasParentType(delegator, "InvoiceItemType", "invoiceItemTypeId", itemType.getString("invoiceItemTypeId"), "parentTypeId", "INVOICE_ADJ")/>
 
             <#assign taxRate = invoiceItem.getRelatedOne("TaxAuthorityRateProduct")?if_exists>
             <#assign itemBillings = invoiceItem.getRelated("OrderItemBilling")?if_exists>

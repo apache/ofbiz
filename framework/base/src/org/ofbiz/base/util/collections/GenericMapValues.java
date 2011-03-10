@@ -39,10 +39,11 @@ public abstract class GenericMapValues<K, V, M extends Map<K, V>> extends Generi
         return false;
     }
 
+    @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Collection)) return false;
-        if (o instanceof List || o instanceof Set) return false;
-        Collection other = (Collection) o;
+        if (!(o instanceof Collection<?>)) return false;
+        if (o instanceof List<?> || o instanceof Set<?>) return false;
+        Collection<?> other = (Collection<?>) o;
         if (source.size() != other.size()) return false;
         Iterator<V> it = iterator(false);
         while (it.hasNext()) {
@@ -52,6 +53,7 @@ public abstract class GenericMapValues<K, V, M extends Map<K, V>> extends Generi
         return true;
     }
 
+    @Override
     public int hashCode() {
         int h = 0;
         Iterator<V> it = iterator(false);

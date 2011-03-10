@@ -12,12 +12,14 @@ applications/workeffort/build/
 bin/
 framework/appserver/build/
 framework/base/build/
+framework/base/lib/cobertura-*.jar
 framework/bi/build/
 framework/birt/build/
 framework/catalina/build/
 framework/common/build/
 framework/datafile/build/
 framework/entity/build/
+framework/entity/lib/jdbc/postgresql-*.jar
 framework/entityext/build/
 framework/example/build/
 framework/geronimo/build/
@@ -54,7 +56,8 @@ changelog
 runtime/svninfo.ftl
 runtime/test-list-build.xml
 runtime/logs/access_log.*
-runtime/logs/cobertura.dat
+runtime/logs/cobertura-base.dat
+runtime/logs/cobertura-components.dat
 runtime/logs/cobertura-report
 runtime/logs/*.log*
 runtime/logs/*.html*

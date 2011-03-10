@@ -783,6 +783,7 @@ under the License.
         <permission-service service-name="partyCommunicationEventPermissionCheck" main-action="UPDATE"/>
         <auto-attributes entity-name="CommunicationEvent" include="pk" mode="IN" optional="false"/>
         <auto-attributes entity-name="CommunicationEvent" include="nonpk" mode="IN" optional="true"/>
+        <attribute name="contactMechPurposeTypeIdFrom" type="String" mode="IN" optional="true"><description>Set a specific purpose for the originator email</description></attribute>
         <attribute name="oldStatusId" type="String" mode="OUT" optional="true"/>
         <override name="messageId" allow-html="safe"/>
         <override name="content" allow-html="safe"/>
@@ -1003,6 +1004,7 @@ under the License.
         location="component://party/script/org/ofbiz/party/party/PartyServices.xml" invoke="getPartyEmail" auth="false">
         <description>Get the main party Email address</description>
         <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="contactMechPurposeTypeId" type="String" mode="IN" optional="false" default-value="PRIMARY_EMAIL"/>
         <attribute name="emailAddress" type="String" mode="OUT" optional="true"/>
         <attribute name="contactMechId" type="String" mode="OUT" optional="true"/>
     </service>

@@ -20,7 +20,6 @@ package org.ofbiz.base.concurrent.test;
 
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -52,10 +51,12 @@ public abstract class TTLObjectTest extends GenericTestCaseBase {
         object = new TTLObjectTestTTLObject(foreground);
     }
 
+    @Override
     protected void setUp() throws InterruptedException {
         executor = ExecutionPool.getNewExactExecutor(getName());
     }
 
+    @Override
     protected void tearDown() throws InterruptedException {
         doneCount.set(0);
         lastLoadThread.set(null);
@@ -80,7 +81,7 @@ public abstract class TTLObjectTest extends GenericTestCaseBase {
     protected void assertGetObject(String label, String wantedData, int wantedDoneCount, long minTime, long maxTime) throws Exception {
         long t1 = System.nanoTime();
         assertEquals(label + ": data", wantedData, object.getObject());
-        int serial = object.getSerial();
+        object.getSerial();
         assertEquals(label + ": doneCount", wantedDoneCount, doneCount.get());
         long t2 = System.nanoTime();
         long time = t2 - t1;
@@ -99,14 +100,17 @@ public abstract class TTLObjectTest extends GenericTestCaseBase {
             this.foreground = foreground;
         }
 
+        @Override
         public long getTTL() throws ConfigurationException {
             return super.getTTL();
         }
 
+        @Override
         protected boolean getForeground() {
             return foreground ? super.getForeground() : false;
         }
 
+        @Override
         protected String load(String old, int serial) throws Exception {
             lastLoadThread.set(Thread.currentThread());
             try {

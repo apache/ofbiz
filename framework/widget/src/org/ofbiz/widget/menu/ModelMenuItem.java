@@ -33,19 +33,15 @@ import javolution.util.FastMap;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilFormatOut;
-import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
-import org.ofbiz.entity.Delegator;
-import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityOperator;
-import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.entityext.permission.EntityPermissionChecker;
 import org.ofbiz.widget.WidgetWorker;
+import org.ofbiz.widget.PortalPageWorker;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
@@ -197,7 +193,7 @@ public class ModelMenuItem {
     public ModelMenuItem addUpdateMenuItem(ModelMenuItem modelMenuItem) {
 
         // not a conditional item, see if a named item exists in Map
-        ModelMenuItem existingMenuItem = (ModelMenuItem) this.menuItemMap.get(modelMenuItem.getName());
+        ModelMenuItem existingMenuItem = this.menuItemMap.get(modelMenuItem.getName());
         if (existingMenuItem != null) {
             // does exist, update the item by doing a merge/override
             existingMenuItem.mergeOverrideModelMenuItem(modelMenuItem);
@@ -283,24 +279,26 @@ public class ModelMenuItem {
             ModelMenuAction.runSubActions(this.actions, context);
             String parentPortalPageId = this.getParentPortalPageId(context);
             if (UtilValidate.isNotEmpty(parentPortalPageId)) {
-                List<GenericValue> portalPages = this.getPortalPages(context);
-                for (GenericValue portalPage : portalPages) {
-                    if (UtilValidate.isNotEmpty(portalPage.getString("portalPageName"))) {
-                        ModelMenuItem localItem = new ModelMenuItem(this.getModelMenu());
-                        localItem.name =  portalPage.getString("portalPageId");
-                        localItem.setTitle((String) portalPage.get("portalPageName", locale));
-                        localItem.link = new Link(this);
-                        List<WidgetWorker.Parameter> linkParams = localItem.link.getParameterList();
-                        linkParams.add(new WidgetWorker.Parameter("portalPageId", portalPage.getString("portalPageId"), false));
-                        linkParams.add(new WidgetWorker.Parameter("parentPortalPageId", parentPortalPageId, false));
-                        if (link != null) {
-                            localItem.link.setTarget(link.targetExdr.getOriginal());
-                            linkParams.addAll(link.parameterList);
-                        } else {
-                            localItem.link.setTarget("showPortalPage");
+                List<GenericValue> portalPages = PortalPageWorker.getPortalPages(parentPortalPageId, context);
+                if (UtilValidate.isNotEmpty(portalPages)) {
+                    for (GenericValue portalPage : portalPages) {
+                        if (UtilValidate.isNotEmpty(portalPage.getString("portalPageName"))) {
+                            ModelMenuItem localItem = new ModelMenuItem(this.getModelMenu());
+                            localItem.name =  portalPage.getString("portalPageId");
+                            localItem.setTitle((String) portalPage.get("portalPageName", locale));
+                            localItem.link = new Link(this);
+                            List<WidgetWorker.Parameter> linkParams = localItem.link.getParameterList();
+                            linkParams.add(new WidgetWorker.Parameter("portalPageId", portalPage.getString("portalPageId"), false));
+                            linkParams.add(new WidgetWorker.Parameter("parentPortalPageId", parentPortalPageId, false));
+                            if (link != null) {
+                                localItem.link.setTarget(link.targetExdr.getOriginal());
+                                linkParams.addAll(link.parameterList);
+                            } else {
+                                localItem.link.setTarget("showPortalPage");
+                            }
+                            localItem.link.setText((String)portalPage.get("portalPageName", locale));
+                            menuStringRenderer.renderMenuItem(writer, context, localItem);
                         }
-                        localItem.link.setText((String)portalPage.get("portalPageName", locale));
-                        menuStringRenderer.renderMenuItem(writer, context, localItem);
                     }
                 }
             } else {
@@ -314,6 +312,9 @@ public class ModelMenuItem {
         return modelMenu;
     }
 
+    public List<ModelMenuAction> getActions() {
+        return actions;
+    }
 
     public String getEntityName() {
         if (UtilValidate.isNotEmpty(this.entityName)) {
@@ -402,51 +403,6 @@ public class ModelMenuItem {
         return this.parentPortalPageId.expandString(context);
     }
 
-    public List<GenericValue> getPortalPages(Map<String, Object> context) {
-        List<GenericValue> portalPages = null;
-        String parentPortalPageId = this.getParentPortalPageId(context);
-        if (UtilValidate.isNotEmpty(parentPortalPageId)) {
-            Delegator delegator = WidgetWorker.getDelegator(context);
-            try {
-                // first get public pages
-                EntityCondition cond =
-                    EntityCondition.makeCondition(UtilMisc.toList(
-                        EntityCondition.makeCondition("ownerUserLoginId", EntityOperator.EQUALS, "_NA_"),
-                        EntityCondition.makeCondition(UtilMisc.toList(
-                                EntityCondition.makeCondition("portalPageId", EntityOperator.EQUALS, parentPortalPageId),
-                                EntityCondition.makeCondition("parentPortalPageId", EntityOperator.EQUALS, parentPortalPageId)),
-                                EntityOperator.OR)),
-                        EntityOperator.AND);
-                portalPages = delegator.findList("PortalPage", cond, null, null, null, false);
-                if (UtilValidate.isNotEmpty(context.get("userLogin"))) { // check if a user is logged in
-                    String userLoginId = ((GenericValue)context.get("userLogin")).getString("userLoginId");
-                    // replace with private pages
-                    for (GenericValue portalPage : portalPages) {
-                        cond = EntityCondition.makeCondition(UtilMisc.toList(
-                                EntityCondition.makeCondition("ownerUserLoginId", EntityOperator.EQUALS, userLoginId),
-                                EntityCondition.makeCondition("originalPortalPageId", EntityOperator.EQUALS, portalPage.getString("portalPageId"))),
-                                EntityOperator.AND);
-                        List <GenericValue> privatePortalPages = delegator.findList("PortalPage", cond, null, null, null, false);
-                        if (UtilValidate.isNotEmpty(privatePortalPages)) {
-                            portalPages.remove(portalPage);
-                            portalPages.add(privatePortalPages.get(0));
-                        }
-                    }
-                    // add any other created private pages
-                    cond = EntityCondition.makeCondition(UtilMisc.toList(
-                            EntityCondition.makeCondition("ownerUserLoginId", EntityOperator.EQUALS, userLoginId),
-                            EntityCondition.makeCondition("originalPortalPageId", EntityOperator.EQUALS, null),
-                            EntityCondition.makeCondition("parentPortalPageId", EntityOperator.EQUALS, parentPortalPageId)),
-                            EntityOperator.AND);
-                    portalPages.addAll(delegator.findList("PortalPage", cond, null, null, null, false));
-                }
-                portalPages = EntityUtil.orderBy(portalPages, UtilMisc.toList("sequenceNum"));
-            } catch (GenericEntityException e) {
-                Debug.logError("Could not retrieve portalpages in the menu:" + e.getMessage(), module);
-            }
-        }
-        return portalPages;
-    }
     public String getWidgetStyle() {
         if (UtilValidate.isNotEmpty(this.widgetStyle)) {
             return this.widgetStyle;
@@ -622,6 +578,7 @@ public class ModelMenuItem {
         protected boolean secure = false;
         protected boolean encode = false;
         protected String linkType;
+        protected FlexibleMapAccessor<Map<String, String>> parametersMapAcsr;
         protected List<WidgetWorker.Parameter> parameterList = FastList.newInstance();
         protected boolean requestConfirmation = false;
         protected FlexibleStringExpander confirmationMsgExdr;
@@ -645,6 +602,7 @@ public class ModelMenuItem {
             }
 
             this.linkType = linkElement.getAttribute("link-type");
+            this.parametersMapAcsr = FlexibleMapAccessor.getInstance(linkElement.getAttribute("parameters-map"));
             List<? extends Element> parameterElementList = UtilXml.childElementList(linkElement, "parameter");
             for (Element parameterElement: parameterElementList) {
                 this.parameterList.add(new WidgetWorker.Parameter(parameterElement));
@@ -748,13 +706,13 @@ public class ModelMenuItem {
         public Map<String, String> getParameterMap(Map<String, Object> context) {
             Map<String, String> fullParameterMap = FastMap.newInstance();
 
-            /* leaving this here... may want to add it at some point like the hyperlink element:
-            Map<String, String> addlParamMap = this.parametersMapAcsr.get(context);
-            if (addlParamMap != null) {
-                fullParameterMap.putAll(addlParamMap);
+            if (this.parametersMapAcsr != null) {
+                Map<String, String> addlParamMap = this.parametersMapAcsr.get(context);
+                if (addlParamMap != null) {
+                    fullParameterMap.putAll(addlParamMap);
+                }
             }
-            */
-            
+
             for (WidgetWorker.Parameter parameter: this.parameterList) {
                 fullParameterMap.put(parameter.getName(), parameter.getValue(context));
             }

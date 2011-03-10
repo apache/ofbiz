@@ -19,7 +19,7 @@ under the License.
 
 <#if requestParameters.product_id?exists>
   <form id="reviewProduct" method="post" action="<@ofbizUrl>createProductReview</@ofbizUrl>">
-    <fieldset>
+    <fieldset class="inline">
       <input type="hidden" name="productStoreId" value="${productStore.productStoreId}" />
       <input type="hidden" name="productId" value="${requestParameters.product_id}" />
       <input type="hidden" name="product_id" value="${requestParameters.product_id}" />
@@ -63,7 +63,7 @@ under the License.
         <textarea class="textAreaBox" name="productReview" cols="40"></textarea>
       </div>
       <div>
-        <a href="javascript:$('reviewProduct').submit();" class="button">[${uiLabelMap.CommonSave}]</a>
+        <a href="javascript:document.getElementById('reviewProduct').submit();" class="button">[${uiLabelMap.CommonSave}]</a>
         <a href="<@ofbizUrl>product?product_id=${requestParameters.product_id}</@ofbizUrl>" class="button">[${uiLabelMap.CommonCancel}]</a>
       </div>
     </fieldset>

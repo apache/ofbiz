@@ -21,6 +21,8 @@ under the License.
 <site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
     <include location="component://common/webcommon/WEB-INF/common-controller.xml"/>
+    <include location="component://common/webcommon/WEB-INF/portal-controller.xml"/>
+    <include location="component://common/webcommon/WEB-INF/security-controller.xml"/>
     <include location="component://common/webcommon/WEB-INF/tempexpr-controller.xml"/>
     <include location="component://testtools/webapp/testtools/WEB-INF/controller.xml"/>
     <description>WebTools Site Configuration File</description>
@@ -527,10 +529,6 @@ under the License.
         <security https="true" auth="true"/>
         <response name="success" type="view" value="EditPortalPage"/>
     </request-map>
-    <request-map uri="ManagePortalPagesAdm">
-        <security https="true" auth="true"/>
-        <response name="success" type="view" value="EditPortalPage"/>
-    </request-map>
     <request-map uri="DuplicatePortalPage">
         <security https="true" auth="true"/>
         <event  type="simple" invoke="duplicatePortalPage" path="component://common/script/org/ofbiz/common/PortalPageMethods.xml"/>
@@ -553,64 +551,45 @@ under the License.
         <response name="error" type="view" value="EditPortalPage"/>
     </request-map>
 
-    <!-- PortalPage detail administration, copy from portal-controller with response target change to EditPortalPage-->
-    <request-map uri="addPortalPageColumnAdm">
+    <!-- Geo Management -->
+    <request-map uri="FindGeo"><security https="true" auth="true"/><response name="success" type="view" value="FindGeo" save-home-view="true"/></request-map>
+    <request-map uri="EditGeo"><security https="true" auth="true"/><response name="success" type="view" value="EditGeo"/></request-map>
+    <request-map uri="LinkGeos"><security https="true" auth="true"/><response name="success" type="view" value="LinkGeos"/></request-map>
+    <request-map uri="LookupGeo"><security https="true" auth="true"/><response name="success" type="view" value="LookupGeo"/></request-map>
+    <request-map uri="createGeo">
         <security https="true" auth="true"/>
-        <event type="service" invoke="addPortalPageColumn"/>
-        <response name="success" type="view" value="EditPortalPage"/>
-        <response name="error" type="view" value="EditPortalPage"/>
+        <event type="service" path="" invoke="createGeo"/>
+        <response name="success" type="view" value="EditGeo"/>
+        <response name="error" type="view" value="EditGeo"/>
     </request-map>
-    <request-map uri="deletePortalPageColumnAdm">
+    <request-map uri="updateGeo">
         <security https="true" auth="true"/>
-        <event type="service" invoke="deletePortalPageColumn"/>
-        <response name="success" type="view" value="EditPortalPage"/>
-        <response name="error" type="view" value="EditPortalPage"/>
+        <event type="service" path="" invoke="updateGeo"/>
+        <response name="success" type="view" value="EditGeo"/>
+        <response name="error" type="view" value="EditGeo"/>
     </request-map>
-    <request-map uri="AddPortletAdm">
+    <request-map uri="deleteGeo">
         <security https="true" auth="true"/>
-        <response name="success" type="view" value="AddPortletAdm"/>
+        <event type="service" path="" invoke="deleteGeo"/>
+        <response name="success" type="request-redirect" value="FindGeo">
+            <redirect-parameter name="noConditionFind"/>
+        </response>
+        <response name="error" type="view" value="FindGeo"/>
+    </request-map>    
+    <request-map uri="linkGeos">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="linkGeos"/>
+        <response name="success" type="view" value="LinkGeos"/>
+        <response name="error" type="view" value="LinkGeos"/>
     </request-map>
-    <request-map uri="updatePortalPageColumnAdm">
+    <request-map uri="security">
         <security https="true" auth="true"/>
-        <event type="service" invoke="updatePortalPageColumn"/>
-        <response name="success" type="view" value="EditPortalPage"/>
-        <response name="error" type="view" value="EditPortalPage"/>
+        <response name="success" type="view" value="FindUserLogin"/>
     </request-map>
-    <request-map uri="movePortletToPortalPageAdm">
+    
+    <request-map uri="WebtoolsLayoutDemo">
         <security https="true" auth="true"/>
-        <event type="service" invoke="movePortletToPortalPage"/>
-        <response name="success" type="view" value="EditPortalPage"/>
-        <response name="error" type="view" value="EditPortalPage"/>
-    </request-map>
-    <request-map uri="deletePortalPagePortletAdm">
-        <security https="true" auth="true"/>
-        <event type="service" invoke="deletePortalPagePortlet"/>
-        <response name="success" type="view" value="EditPortalPage"/>
-        <response name="error" type="view" value="EditPortalPage"/>
-    </request-map>
-    <request-map uri="updatePortalPagePortletSeqAdm">
-        <security https="true" auth="true"/>
-        <event type="service" invoke="updatePortalPagePortletSeq"/>
-        <response name="success" type="view" value="EditPortalPage"/>
-        <response name="error" type="view" value="EditPortalPage"/>
-    </request-map>
-    <request-map uri="updatePortalPagePortletAdm">
-        <security https="true" auth="true"/>
-        <event type="service" invoke="updatePortalPagePortlet"/>
-        <response name="success" type="view" value="EditPortalPage"/>
-        <response name="error" type="view" value="EditPortalPage"/>
-    </request-map>
-    <request-map uri="createPortalPagePortletAdm">
-        <security https="true" auth="true"/>
-        <event type="service" invoke="createPortalPagePortlet"/>
-        <response name="success" type="view" value="EditPortalPage"/>
-        <response name="error" type="view" value="EditPortalPage"/>
-    </request-map>
-    <request-map uri="setPortalPortletAttributesAdm">
-        <security https="true" auth="true"/>
-        <event type="simple" invoke="setPortalPortletAttributes" path="component://common/script/org/ofbiz/common/PortalPageMethods.xml"/>
-        <response name="success" type="view" value="EditPortalPage"/>
-        <response name="error" type="view" value="EditPortalPage"/>
+        <response name="success" type="view" value="WebtoolsLayoutDemo"/>
     </request-map>
 
     <!-- end of request mappings -->
@@ -704,7 +683,14 @@ under the License.
     <view-map name="FindPortalPage" type="screen" page="component://webtools/widget/PortalAdmScreens.xml#FindPortalPage"/>
     <view-map name="CreatePortalPage" type="screen" page="component://webtools/widget/PortalAdmScreens.xml#CreatePortalPage"/>
     <view-map name="EditPortalPage" type="screen" page="component://webtools/widget/PortalAdmScreens.xml#EditPortalPage"/>
-    <view-map name="AddPortletAdm" type="screen" page="component://webtools/widget/PortalAdmScreens.xml#AddPortletAdm"/>
+
+    <!-- Geo Management -->
+    <view-map name="FindGeo" type="screen" page="component://webtools/widget/GeoManagementScreens.xml#FindGeo"/>
+    <view-map name="EditGeo" type="screen" page="component://webtools/widget/GeoManagementScreens.xml#EditGeo"/>
+    <view-map name="LinkGeos" type="screen" page="component://webtools/widget/GeoManagementScreens.xml#LinkGeos"/>
+    <view-map name="LookupGeo" type="screen" page="component://webtools/widget/GeoManagementScreens.xml#LookupGeo"/>    
+    
+    <view-map name="WebtoolsLayoutDemo" page="component://webtools/widget/MiscScreens.xml#WebtoolsLayoutDemo" type="screen"/>
 
     <!-- end of view mappings -->
 </site-conf>

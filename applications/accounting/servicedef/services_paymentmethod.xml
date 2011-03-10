@@ -114,7 +114,7 @@ under the License.
         <attribute name="thruDate" type="Timestamp" mode="IN" optional="true"/>
         <attribute name="description" type="String" mode="IN" optional="true"/>
         <attribute name="paymentMethodId" type="String" mode="INOUT" optional="false"/>
-        <attribute name="cardNumber" type="String" mode="IN" optional="true"/>
+        <attribute name="cardNumber" type="String" mode="IN" optional="false"/>
         <attribute name="pinNumber" type="String" mode="IN" optional="true"/>
         <attribute name="expireDate" type="String" mode="IN" optional="true"/>
         <attribute name="expMonth" type="String" mode="IN" optional="true"/>
@@ -267,6 +267,7 @@ under the License.
         <attribute name="errors" type="Boolean" mode="OUT" optional="false"/>
         <attribute name="messages" type="List" mode="OUT" optional="true"/>
         <attribute name="processAmount" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="authCode" type="String" mode="OUT" optional="true"/>
     </service>
 
     <service name="authOrderPayments" engine="java"
@@ -276,6 +277,7 @@ under the License.
         <attribute name="processResult" type="String" mode="OUT" optional="false"/>
         <attribute name="authResultMsgs" type="List" mode="OUT" optional="true"/>
         <attribute name="reAuth" type="Boolean" mode="IN" optional="true"/>
+        <attribute name="authCode" type="String" mode="OUT" optional="true"/>
     </service>
 
     <service name="releaseOrderPayments" engine="java"
@@ -460,6 +462,13 @@ under the License.
             location="org.ofbiz.accounting.payment.PaymentGatewayServices" invoke="savePaymentGatewayResponse" auth="false">
         <description>Method to make sure PaymentGatewayResponse records get stored (uses XA wrapper on rollback)</description>
         <attribute name="paymentGatewayResponse" type="org.ofbiz.entity.GenericValue" mode="IN" optional="false"/>
+    </service>
+
+    <service name="savePaymentGatewayResponseAndMessages" engine="java"
+            location="org.ofbiz.accounting.payment.PaymentGatewayServices" invoke="savePaymentGatewayResponseAndMessages" auth="false">
+        <description>Method to make sure PaymentGatewayResponse records get stored (uses XA wrapper on rollback)</description>
+        <attribute name="paymentGatewayResponse" type="org.ofbiz.entity.GenericValue" mode="IN" optional="false"/>
+        <attribute name="messages" type="List" mode="IN" optional="false"/>
     </service>
 
     <!-- Payment Gateway Interfaces -->

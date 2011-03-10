@@ -18,13 +18,13 @@
  *******************************************************************************/
 package org.ofbiz.entityext.data;
 
-import java.net.URL;
+import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
-import java.io.File;
 
 import javolution.util.FastList;
 
@@ -37,7 +37,6 @@ import org.ofbiz.base.util.UtilURL;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
-import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
 import org.ofbiz.entity.jdbc.DatabaseUtil;
@@ -337,7 +336,7 @@ public class EntityDataLoadContainer implements Container {
 
         // add in the defined extra files
         for (String fileName: this.files) {
-            URL fileUrl = UtilURL.fromResource((String) fileName);
+            URL fileUrl = UtilURL.fromResource(fileName);
             if (fileUrl != null) {
                 urlList.add(fileUrl);
             }

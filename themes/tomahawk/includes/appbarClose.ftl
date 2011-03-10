@@ -34,7 +34,7 @@ under the License.
 
 <#if appModelMenu.getModelMenuItemByName(headerItem)?exists>
   <#if headerItem!="main">
-    <div class="breadcrumbs-sep">
+    <div id="app-nav-selected-item">
       ${appModelMenu.getModelMenuItemByName(headerItem).getTitle(context)}
     </div>
   </#if>
@@ -44,7 +44,7 @@ under the License.
     <#assign findMap = Static["org.ofbiz.base.util.UtilMisc"].toMap("portalPageId", parameters.portalPageId)>
     <#assign portalPage = delegator.findByPrimaryKeyCache("PortalPage", findMap)>
     <#if portalPage?has_content>
-      <div class="breadcrumbs-sep">
+      <div id="app-nav-selected-item">
         ${portalPage.portalPageName?if_exists}
       </div>
     </#if>
@@ -53,13 +53,6 @@ under the License.
 <div id="control-area">
   <ul id="preferences-menu">
     <#if userLogin?exists>
-      <li>
-        <div class="wait-spinner" style="background:none; visibility:hidden;">
-          <div id="wait-spinner" style="">
-            <img src="/tomahawk/images/spinner.gif" alt="" title=""/>
-          </div>
-        </div>
-      </li>
       <#if (userPreferences.COMPACT_HEADER)?default("N") == "Y">
         <li class="collapsed"><a href="javascript:document.setUserPreferenceCompactHeaderN.submit()">&nbsp;</a>
           <form name="setUserPreferenceCompactHeaderN" method="post" action="<@ofbizUrl>setUserPreference</@ofbizUrl>">
@@ -78,11 +71,11 @@ under the License.
         </li>
       </#if>
     </#if>
-    <#if webSiteId?exists && requestAttributes._CURRENT_VIEW_?exists>
-      <#include "component://common/webcommon/includes/helplink.ftl" />
-      <li><a class="help-link <#if pageAvail?has_content> alert</#if>" href="javascript:lookup_popup2('showHelp?helpTopic=${helpTopic}&amp;portalPageId=${parameters.portalPageId?if_exists}','help' ,500,500);" title="${uiLabelMap.CommonHelp}"></a></li>
-    </#if>
     <#if userLogin?exists>
+      <#if webSiteId?exists && requestAttributes._CURRENT_VIEW_?exists>
+        <#include "component://common/webcommon/includes/helplink.ftl" />
+        <li><a class="help-link <#if pageAvail?has_content> alert</#if>" href="javascript:lookup_popup2('showHelp?helpTopic=${helpTopic}&amp;portalPageId=${parameters.portalPageId?if_exists}','help' ,500,500);" title="${uiLabelMap.CommonHelp}"></a></li>
+      </#if>
       <li><a href="<@ofbizUrl>logout</@ofbizUrl>">${uiLabelMap.CommonLogout}</a></li>
       <li><a href="<@ofbizUrl>ListVisualThemes</@ofbizUrl>">${uiLabelMap.CommonVisualThemes}</a></li>
     <#else>
@@ -102,13 +95,12 @@ under the License.
   </ul>
 </div>
 </div>
-</div>
 <div class="clear">
 </div>
 
 <#if userLogin?exists>
 <script type="text/javascript">
-  var mainmenu = new DropDownMenu($('main-navigation'));
-  var appmenu = new DropDownMenu($('app-navigation'));
+  var mainmenu = new DropDownMenu(jQuery('#main-navigation'));
+  var appmenu = new DropDownMenu(jQuery('#app-navigation'));
 </script>
 </#if>

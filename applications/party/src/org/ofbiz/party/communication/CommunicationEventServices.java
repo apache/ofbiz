@@ -54,6 +54,7 @@ import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.common.email.NotificationServices;
 import org.ofbiz.content.data.DataResourceWorker;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
@@ -292,7 +293,6 @@ public class CommunicationEventServices {
             Map<String, Object> sendMailParams = FastMap.newInstance();
             sendMailParams.put("sendFrom", communicationEvent.getRelatedOne("FromContactMech").getString("infoString"));
             sendMailParams.put("subject", communicationEvent.getString("subject"));
-            sendMailParams.put("body", communicationEvent.getString("content"));
             sendMailParams.put("contentType", communicationEvent.getString("contentMimeTypeId"));
             sendMailParams.put("userLogin", userLogin);
 
@@ -305,7 +305,7 @@ public class CommunicationEventServices {
                         EntityUtil.getFilterByDateExpr(), EntityUtil.getFilterByDateExpr("contactFromDate", "contactThruDate"));
 
             EntityConditionList<EntityCondition> conditions = EntityCondition.makeCondition(conditionList, EntityOperator.AND);
-            Set<String> fieldsToSelect = UtilMisc.toSet("infoString");
+            Set<String> fieldsToSelect = UtilMisc.toSet("partyId", "preferredContactMechId", "fromDate", "infoString");
 
             eli = delegator.find("ContactListPartyAndContactMech", conditions, null, fieldsToSelect, null,
                     new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, true));
@@ -347,6 +347,7 @@ public class CommunicationEventServices {
 
                     sendMailParams.put("sendTo", emailAddress);
                     sendMailParams.put("partyId", partyId);
+                    
 
                     // if it is a NEWSLETTER then we do not want the outgoing emails stored, so put a communicationEventId in the sendMail context to prevent storeEmailAsCommunicationEvent from running
                     /*
@@ -371,10 +372,51 @@ public class CommunicationEventServices {
                         // There was a successful earlier attempt, so skip this address
                         continue;
                     }
-
+                    
+                    // Send e-mail
                     Debug.logInfo("Sending email to contact list [" + contactListId + "] party [" + partyId + "] : " + emailAddress, module);
                     // Make the attempt to send the email to the address
-                    Map<String, Object> tmpResult = dispatcher.runSync("sendMail", sendMailParams, 360, true);
+                    
+                    Map<String, Object> tmpResult = null;
+                    
+                    // Retrieve a contact list party status
+                    List<GenericValue> contactListPartyStatuses = delegator.findByAnd("ContactListPartyStatus", UtilMisc.toMap("contactListId", contactListId, "partyId", contactListPartyAndContactMech.getString("partyId"), "fromDate", contactListPartyAndContactMech.getTimestamp("fromDate"), "statusId", "CLPT_ACCEPTED"));
+                    GenericValue contactListPartyStatus = EntityUtil.getFirst(contactListPartyStatuses);
+                    if (UtilValidate.isNotEmpty(contactListPartyStatus)) {
+                        // prepare body parameters
+                        Map<String, Object> bodyParameters = FastMap.newInstance();
+                        bodyParameters.put("contactListId", contactListId);
+                        bodyParameters.put("partyId", contactListPartyAndContactMech.getString("partyId"));
+                        bodyParameters.put("preferredContactMechId", contactListPartyAndContactMech.getString("preferredContactMechId"));
+                        bodyParameters.put("emailAddress", emailAddress);
+                        bodyParameters.put("fromDate", contactListPartyAndContactMech.getTimestamp("fromDate"));
+                        bodyParameters.put("optInVerifyCode", contactListPartyStatus.getString("optInVerifyCode"));
+                        bodyParameters.put("content", communicationEvent.getString("content"));
+                        NotificationServices.setBaseUrl(delegator, contactList.getString("verifyEmailWebSiteId"), bodyParameters);
+
+                        GenericValue webSite = delegator.findOne("WebSite", UtilMisc.toMap("webSiteId", contactList.getString("verifyEmailWebSiteId")), false);
+                        if (UtilValidate.isNotEmpty(webSite)) {
+                            GenericValue productStore = webSite.getRelatedOne("ProductStore");
+                            if (UtilValidate.isNotEmpty(productStore)) {
+                                List<GenericValue> productStoreEmailSettings = productStore.getRelatedByAnd("ProductStoreEmailSetting", UtilMisc.toMap("emailType", "CONT_EMAIL_TEMPLATE"));
+                                GenericValue productStoreEmailSetting = EntityUtil.getFirst(productStoreEmailSettings);
+                                if (UtilValidate.isNotEmpty(productStoreEmailSetting)) {
+                                    // send e-mail using screen template
+                                    sendMailParams.put("bodyScreenUri", productStoreEmailSetting.getString("bodyScreenLocation"));
+                                    sendMailParams.put("bodyParameters", bodyParameters);
+                                    sendMailParams.remove("body");
+                                    tmpResult = dispatcher.runSync("sendMailFromScreen", sendMailParams, 360, true);
+                                }
+                            }
+                        }
+                    }
+                    
+                    // If the e-mail does not be sent then send normal e-mail
+                    if (UtilValidate.isEmpty(tmpResult)) {
+                        sendMailParams.put("body", communicationEvent.getString("content"));
+                        tmpResult = dispatcher.runSync("sendMail", sendMailParams, 360, true);
+                    }
+
                     if (tmpResult == null || ServiceUtil.isError(tmpResult)) {
                         if (ServiceUtil.getErrorMessage(tmpResult).startsWith("[ADDRERR]")) {
                             // address error; mark the communication event as BOUNCED
@@ -642,13 +684,12 @@ public class CommunicationEventServices {
      * @return
      */
     public static Map<String, Object> storeIncomingEmail(DispatchContext dctx, Map<String, ? extends Object> context) {
-
         Delegator delegator = dctx.getDelegator();
         LocalDispatcher dispatcher = dctx.getDispatcher();
         MimeMessageWrapper wrapper = (MimeMessageWrapper) context.get("messageWrapper");
-
         Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
         String partyIdTo = null;
         String partyIdFrom = null;
         String contentType = null;
@@ -668,7 +709,7 @@ public class CommunicationEventServices {
             Address[] addressesTo = wrapper.getTo();
             Address[] addressesCC = wrapper.getCc();
             Address[] addressesBCC = wrapper.getBcc();
-            String messageId = wrapper.getMessageId();
+            String messageId = wrapper.getMessageId().replaceAll("[<>]", "");
 
             String aboutThisEmail = "message [" + messageId + "] from [" +
                 (addressesFrom[0] == null? "not found" : addressesFrom[0].toString()) + "] to [" +
@@ -683,14 +724,16 @@ public class CommunicationEventServices {
                 String msgHeaderValue = wrapper.getHeader(spamHeaderName)[0];
                 if (msgHeaderValue != null && msgHeaderValue.startsWith(configHeaderValue)) {
                     Debug.logInfo("Incoming Email message ignored, was detected by external spam checker", module);
-                    return ServiceUtil.returnSuccess(" Message Ignored: detected by external spam checker");
+                    return ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, 
+                            "PartyCommEventMessageIgnoredDetectedByExternalSpamChecker", locale));
                 }
             }
 
             // if no 'from' addresses specified ignore the message
             if (addressesFrom == null) {
                 Debug.logInfo("Incoming Email message ignored, had not 'from' email address", module);
-                return ServiceUtil.returnSuccess(" Message Ignored: no 'From' address specified");
+                return ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, 
+                        "PartyCommEventMessageIgnoredNoFromAddressSpecified", locale));
             }
 
             // make sure this isn't a duplicate
@@ -703,7 +746,8 @@ public class CommunicationEventServices {
             }
             if (!commEvents.isEmpty()) {
                 Debug.logInfo("Ignoring Duplicate Email: " + aboutThisEmail, module);
-                return ServiceUtil.returnSuccess(" Message Ignored: duplicate messageId");
+                return ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, 
+                        "PartyCommEventMessageIgnoredDuplicateMessageId", locale));
             }
 
             // get the related partId's
@@ -736,9 +780,7 @@ public class CommunicationEventServices {
             }
             if (userLogin.get("partyId") == null && partyIdTo != null) {
                 int ch = 0;
-                for (ch=partyIdTo.length(); ch > 0 && Character.isDigit(partyIdTo.charAt(ch-1)); ch--) {
-                    ;
-                }
+                for (ch=partyIdTo.length(); ch > 0 && Character.isDigit(partyIdTo.charAt(ch-1)); ch--) {}
                 userLogin.put("partyId", partyIdTo.substring(0,ch)); //allow services to be called to have prefix
             }
 
@@ -794,7 +836,7 @@ public class CommunicationEventServices {
             if (inReplyTo != null && inReplyTo[0] != null) {
                 GenericValue parentCommEvent = null;
                 try {
-                    List<GenericValue> events = delegator.findByAnd("CommunicationEvent", UtilMisc.toMap("messageId", inReplyTo[0]));
+                    List<GenericValue> events = delegator.findByAnd("CommunicationEvent", UtilMisc.toMap("messageId", inReplyTo[0].replaceAll("[<>]", "")));
                     parentCommEvent = EntityUtil.getFirst(events);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, module);
@@ -854,7 +896,8 @@ public class CommunicationEventServices {
                 headerString.append(System.getProperty("line.separator"));
                 headerString.append(headerLines.nextElement());
             }
-            commEventMap.put("headerString", headerString.toString());
+            String header = headerString.toString();
+            commEventMap.put("headerString", header.replaceAll("[<>]", ""));
 
             result = dispatcher.runSync("createCommunicationEvent", commEventMap);
             communicationEventId = (String)result.get("communicationEventId");
@@ -1232,7 +1275,6 @@ public class CommunicationEventServices {
                             } else {
                                 if (Debug.infoOn()) {
                                     Debug.logInfo("Unable to find ContactListCommStatus with the matching messageId : "  + messageId, module);
-
                                 }
                             }
                         }

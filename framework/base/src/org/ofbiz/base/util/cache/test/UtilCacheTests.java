@@ -18,27 +18,23 @@
  *******************************************************************************/
 package org.ofbiz.base.util.cache.test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
+
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-
-import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.test.GenericTestCaseBase;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilObject;
 import org.ofbiz.base.util.cache.CacheListener;
 import org.ofbiz.base.util.cache.UtilCache;
-import org.ofbiz.base.test.GenericTestCaseBase;
 
+@SuppressWarnings("serial")
 public class UtilCacheTests extends GenericTestCaseBase implements Serializable {
     public static final String module = UtilCacheTests.class.getName();
 
@@ -53,13 +49,15 @@ public class UtilCacheTests extends GenericTestCaseBase implements Serializable 
             this.oldValue = oldValue;
         }
 
+        @Override
         public int hashCode() {
             return UtilObject.doHashCode(oldValue);
         }
 
+        @Override
         public boolean equals(Object o) {
-            if (o instanceof Removal) {
-                Removal other = (Removal) o;
+            if (o instanceof Removal<?>) {
+                Removal<?> other = (Removal<?>) o;
                 return UtilObject.equalsHelper(oldValue, other.oldValue);
             }
             return false;
@@ -73,13 +71,15 @@ public class UtilCacheTests extends GenericTestCaseBase implements Serializable 
             this.newValue = newValue;
         }
 
+        @Override
         public int hashCode() {
             return UtilObject.doHashCode(newValue);
         }
 
+        @Override
         public boolean equals(Object o) {
-            if (o instanceof Addition) {
-                Addition other = (Addition) o;
+            if (o instanceof Addition<?>) {
+                Addition<?> other = (Addition<?>) o;
                 return UtilObject.equalsHelper(newValue, other.newValue);
             }
             return false;
@@ -95,13 +95,15 @@ public class UtilCacheTests extends GenericTestCaseBase implements Serializable 
             this.oldValue = oldValue;
         }
 
+        @Override
         public int hashCode() {
             return UtilObject.doHashCode(newValue) ^ UtilObject.doHashCode(oldValue);
         }
 
+        @Override
         public boolean equals(Object o) {
-            if (o instanceof Update) {
-                Update other = (Update) o;
+            if (o instanceof Update<?>) {
+                Update<?> other = (Update<?>) o;
                 if (!UtilObject.equalsHelper(newValue, other.newValue)) {
                    return false;
                 }
@@ -141,8 +143,9 @@ public class UtilCacheTests extends GenericTestCaseBase implements Serializable 
             add(key, new Update<V>(newValue, oldValue));
         }
 
+        @Override
         public boolean equals(Object o) {
-            Listener other = (Listener) o;
+            Listener<?, ?> other = (Listener<?, ?>) o;
             return changeMap.equals(other.changeMap);
         }
     }

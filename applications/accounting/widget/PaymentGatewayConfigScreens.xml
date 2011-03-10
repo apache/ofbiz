@@ -95,6 +95,9 @@ under the License.
                 <entity-one entity-name="PaymentGatewayCyberSource" value-field="paymentGatewayCyberSource">
                     <field-map field-name="paymentGatewayConfigId" from-field="parameters.paymentGatewayConfigId"/>
                 </entity-one>
+                <entity-one entity-name="PaymentGatewayEway" value-field="paymentGatewayEway">
+                    <field-map field-name="paymentGatewayConfigId" from-field="parameters.paymentGatewayConfigId"/>
+                </entity-one>
                 <entity-one entity-name="PaymentGatewayPayflowPro" value-field="paymentGatewayPayflowPro">
                     <field-map field-name="paymentGatewayConfigId" from-field="parameters.paymentGatewayConfigId"/>
                 </entity-one>
@@ -105,6 +108,12 @@ under the License.
                     <field-map field-name="paymentGatewayConfigId" from-field="parameters.paymentGatewayConfigId"/>
                 </entity-one>
                 <entity-one entity-name="PaymentGatewayWorldPay" value-field="paymentGatewayWorldPay">
+                    <field-map field-name="paymentGatewayConfigId" from-field="parameters.paymentGatewayConfigId"/>
+                </entity-one>
+                <entity-one entity-name="PaymentGatewaySecurePay" value-field="paymentGatewaySecurePay">
+                    <field-map field-name="paymentGatewayConfigId" from-field="parameters.paymentGatewayConfigId"/>
+                </entity-one>
+                <entity-one entity-name="PaymentGatewayiDEAL" value-field="paymentGatewayiDEAL">
                     <field-map field-name="paymentGatewayConfigId" from-field="parameters.paymentGatewayConfigId"/>
                 </entity-one>
             </actions>
@@ -192,6 +201,36 @@ under the License.
                             <widgets>
                                 <screenlet title="${uiLabelMap.PageTitleUpdatePaymentGatewayConfigWorldPay}">
                                     <include-form name="EditPaymentGatewayConfigWorldPay" location="component://accounting/widget/PaymentGatewayConfigForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                        <section>
+                            <condition>
+                                <not><if-empty field="paymentGatewaySecurePay"/></not>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.PageTitleUpdatePaymentGatewayConfigSecurePay}">
+                                    <include-form name="EditPaymentGatewayConfigSecurePay" location="component://accounting/widget/PaymentGatewayConfigForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                        <section>
+                            <condition>
+                                <not><if-empty field="paymentGatewayEway"/></not>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.PageTitleUpdatePaymentGatewayConfigEway}">
+                                    <include-form name="EditPaymentGatewayConfigEway" location="component://accounting/widget/PaymentGatewayConfigForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                        <section>
+                            <condition>
+                                <not><if-empty field="paymentGatewayiDEAL"/></not>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.PageTitleUpdatePaymentGatewayConfigiDEAL}">
+                                    <include-form name="EditPaymentGatewayConfigiDEAL" location="component://accounting/widget/PaymentGatewayConfigForms.xml"/>
                                 </screenlet>
                             </widgets>
                         </section>

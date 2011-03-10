@@ -19,10 +19,9 @@
 package org.ofbiz.base.util.test;
 
 import java.io.ByteArrayInputStream;
-import java.io.Externalizable;
 import java.io.FilterInputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -31,10 +30,10 @@ import java.util.Set;
 
 import org.ofbiz.base.lang.Factory;
 import org.ofbiz.base.lang.SourceMonitored;
+import org.ofbiz.base.test.GenericTestCaseBase;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GroovyUtil;
 import org.ofbiz.base.util.UtilObject;
-import org.ofbiz.base.test.GenericTestCaseBase;
 
 @SourceMonitored
 public class UtilObjectTests extends GenericTestCaseBase {
@@ -42,10 +41,12 @@ public class UtilObjectTests extends GenericTestCaseBase {
         super(name);
     }
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
     }
 
+    @Override
     protected void tearDown() throws Exception {
         super.tearDown();
     }
@@ -72,6 +73,7 @@ public class UtilObjectTests extends GenericTestCaseBase {
             this.onClose = onClose;
         }
 
+        @Override
         public int read() throws IOException {
             if (after == 0) {
                 throw new IOException();
@@ -82,10 +84,12 @@ public class UtilObjectTests extends GenericTestCaseBase {
             return super.read();
         }
 
+        @Override
         public int read(byte[] buf) throws IOException {
             return read(buf, 0, buf.length);
         }
 
+        @Override
         public int read(byte[] buf, int offset, int length) throws IOException {
             if (after == 0) {
                 throw new IOException();
@@ -102,6 +106,7 @@ public class UtilObjectTests extends GenericTestCaseBase {
             }
         }
 
+        @Override
         public void close() throws IOException {
             if (onClose) {
                 throw new IOException();
@@ -176,6 +181,7 @@ public class UtilObjectTests extends GenericTestCaseBase {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class SerializationInjector implements Serializable {
         private boolean onRead;
         private boolean onWrite;
@@ -259,9 +265,9 @@ public class UtilObjectTests extends GenericTestCaseBase {
         assertFalse("null == a", UtilObject.equalsHelper(null, this));
         assertFalse("a == null", UtilObject.equalsHelper(this, null));
         assertTrue("null == null", UtilObject.equalsHelper(null, null));
-        assertTrue("map == map", UtilObject.equalsHelper(new HashMap(), new HashMap()));
-        assertFalse("map == this", UtilObject.equalsHelper(new HashMap(), this));
-        assertFalse("this == map", UtilObject.equalsHelper(this, new HashMap()));
+        assertTrue("map == map", UtilObject.equalsHelper(new HashMap<String, Object>(), new HashMap<String, Object>()));
+        assertFalse("map == this", UtilObject.equalsHelper(new HashMap<String, Object>(), this));
+        assertFalse("this == map", UtilObject.equalsHelper(this, new HashMap<String, Object>()));
     }
 
     public void testCompareToHelper() {

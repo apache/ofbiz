@@ -19,12 +19,12 @@ under the License.
 ***********************************************/
 body {
     background:none;
-    font-size=105%;
+    font-size:105%;
 }
 
 .left-border {
     float:left;
-    width:20em;
+    width:50em;
 }
 
 div.contentarea {
@@ -37,7 +37,7 @@ div.contentarea {
 }
 
 #column-container .leftonly {
-margin-left:20em;
+margin-left:50em;
 width:auto;
 }
 
@@ -60,4 +60,22 @@ ul.dots {
     padding-left: 20px;
 }
 
+span.caution{
+    color:yellow;
+}
 
+span.important {
+    color: #ff4500;
+}
+
+span.note {
+    color:#adff2f;
+}
+
+span.tip {
+    color:blue;
+}
+
+span.warning {
+    color:red;
+}

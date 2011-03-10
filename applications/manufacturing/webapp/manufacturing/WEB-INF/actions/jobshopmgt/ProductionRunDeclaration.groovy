@@ -67,6 +67,7 @@ if (productionRunId) {
         productionRunData = [:];
         productionRunData.workEffortId = productionRunId;
         productionRunData.productId = productionRun.getProductProduced().productId;
+        productionRunData.product = productionRun.getProductProduced();
         if (maxQuantity > 0 && !"WIP".equals(productionRun.getProductProduced().productTypeId)) {
             productionRunData.quantity = maxQuantity;
             context.canProduce = "Y";
@@ -152,7 +153,8 @@ if (productionRunId) {
                   !issueTaskId &&
                   !completeTaskId &&
                   ("PRUN_CREATED".equals(task.currentStatusId) ||
-                   "PRUN_SCHEDULED".equals(task.currentStatusId))) {
+                   "PRUN_SCHEDULED".equals(task.currentStatusId) ||
+                   "PRUN_DOC_PRINTED".equals(task.currentStatusId))) {
                 startTaskId = task.workEffortId;
             }
         }

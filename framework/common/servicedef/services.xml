@@ -30,6 +30,17 @@ under the License.
         <implements service="permissionInterface"/>
     </service>
 
+    <service name="commonGetAllCrudPermissions" engine="simple"
+        location="component://common/script/org/ofbiz/common/permission/CommonPermissionServices.xml" invoke="getAllCrudPermissions" auth="false">
+        <description>Returns all CRUD and View Permissions</description>
+        <attribute name="primaryPermission" type="String" mode="IN" optional="false"/>
+        <attribute name="altPermission" type="String" mode="IN" optional="true"/>
+        <attribute name="hasCreatePermission" type="Boolean" mode="OUT" optional="false"/>
+        <attribute name="hasUpdatePermission" type="Boolean" mode="OUT" optional="false"/>
+        <attribute name="hasDeletePermission" type="Boolean" mode="OUT" optional="false"/>
+        <attribute name="hasViewPermission" type="Boolean" mode="OUT" optional="false"/>
+    </service>
+
     <service name="echoService" engine="java" validate="false"
             location="org.ofbiz.common.CommonServices" invoke="echoService">
         <description>Echos back all passed parameters</description>
@@ -61,6 +72,7 @@ under the License.
         <description>Update a note record</description>
         <auto-attributes include="pk" mode="INOUT" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="noteInfo" allow-html="safe"/>
     </service>
     
     <service name="adjustDebugLevels" engine="java"
@@ -97,7 +109,7 @@ under the License.
         <auto-attributes include="pk" mode="OUT" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
         <override name="enumTypeId" optional="false"/>
-        <override name="description" optional="false"/>
+        <override name="description" optional="false" allow-html="safe"/>
     </service>
     <service name="updateEnumeration" default-entity-name="Enumeration" engine="simple"
         location="component://common/script/org/ofbiz/common/EnumerationServices.xml" invoke="updateEnumeration" auth="true">
@@ -106,9 +118,14 @@ under the License.
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
         <override name="enumTypeId" optional="false"/>
-        <override name="description" optional="false"/>
+        <override name="description" optional="false" allow-html="safe"/>
     </service>
-
+    <service name="deleteEnumeration" default-entity-name="Enumeration" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a Enumeration</description>
+        <permission-service service-name="commonGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    
     <!-- DataSource Services -->
     <service name="interfaceDataSource" engine="interface" location="" invoke="">
         <attribute name="dataSourceId" type="String" mode="IN" optional="false"/>
@@ -219,6 +236,7 @@ under the License.
         <attribute name="noConditionFind" type="String" mode="IN" optional="true"><!-- find with no condition (empty entityConditionList) only done when this is Y --></attribute>
         <attribute name="distinct" type="String" mode="IN" optional="true"><!-- distinct find only done when this is Y --></attribute>
         <attribute name="listIt" type="org.ofbiz.entity.util.EntityListIterator" mode="OUT" optional="true"/>
+        <attribute name="listSize" type="Integer" mode="OUT" optional="true"/>
     </service>
 
     <service name="performFind" auth="false" engine="java" invoke="performFind" location="org.ofbiz.common.FindServices">
@@ -235,6 +253,7 @@ under the License.
         <attribute name="viewIndex" type="Integer" mode="IN" optional="true"/>
         <attribute name="viewSize" type="Integer" mode="IN" optional="true"/>
         <attribute name="listIt" type="org.ofbiz.entity.util.EntityListIterator" mode="OUT" optional="true"/>
+        <attribute name="listSize" type="Integer" mode="OUT" optional="true"/>
         <attribute name="queryString" type="String" mode="OUT" optional="true"/>
         <attribute name="queryStringMap" type="java.util.Map" mode="OUT" optional="true"/>
     </service>
@@ -618,11 +637,6 @@ under the License.
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
     </service>
-    <service name="updatePortalPagePortletSeq" engine="simple" default-entity-name="PortalPagePortlet" auth="true"
-        location="component://common/script/org/ofbiz/common/PortalPageServices.xml" invoke="updatePortalPagePortletSeq">
-        <auto-attributes mode="IN" include="pk"/>
-        <attribute name="mode" type="String" mode="IN"/><!-- possible values: TOP, BOTTOM, UP, DOWN -->
-    </service>
     <service name="updatePortalPageSeq" engine="simple" default-entity-name="PortalPage" auth="true"
         location="component://common/script/org/ofbiz/common/PortalPageServices.xml" invoke="updatePortalPageSeq">
         <auto-attributes mode="IN" include="pk"/>
@@ -680,6 +694,37 @@ under the License.
         <attribute name="attributeMap" type="Map" mode="OUT" optional="true"/>
     </service>
 
+    <!-- Geo services -->
+    <service name="createGeo" default-entity-name="Geo" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Geo</description>
+        <permission-service service-name="commonGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="INOUT"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="geoName" optional="false"/>
+        <override name="geoTypeId" optional="false"/>        
+    </service>
+    <service name="updateGeo" default-entity-name="Geo" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Geo</description>
+        <permission-service service-name="commonGenericPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="geoName" optional="false"/>
+        <override name="geoTypeId" optional="false"/>        
+    </service>
+    <service name="deleteGeo" default-entity-name="Geo" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a Geo</description>
+        <permission-service service-name="commonGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="linkGeos" engine="simple" auth="true"
+        location="component://common/script/org/ofbiz/common/CommonServices.xml" invoke="linkGeos">        
+        <description>Link Geos to another Geo</description>
+        <permission-service service-name="commonGenericPermission" main-action="CREATE"/>
+        <attribute name="geoIds" type="List" mode="IN" optional="true"/>
+        <attribute name="geoId" type="String" mode="IN"/>
+        <attribute name="geoAssocTypeId" type="String" mode="IN"/>
+    </service>
+    
     <!-- GeoPoint services -->
     <service name="createGeoPoint" default-entity-name="GeoPoint" engine="entity-auto" invoke="create" auth="true">
         <description>Create a GeoPoint</description>
@@ -704,4 +749,33 @@ under the License.
         <permission-service service-name="commonGenericPermission" main-action="DELETE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
     </service>
+    
+    <!-- Get a list of country and associated states from Geo -->
+    <service name="getCountryList" engine="simple" auth="false"
+        location="component://common/script/org/ofbiz/common/CommonServices.xml" invoke="getCountryList">
+        <attribute name="countryList" mode="OUT" type="java.util.List"/>
+    </service>
+    
+    <service name="getAssociatedStateList" engine="simple" auth="false"
+        location="component://common/script/org/ofbiz/common/CommonServices.xml" invoke="getAssociatedStateList">
+        <attribute name="countryGeoId" mode="IN" type="String" optional="false"/>
+        <attribute name="listOrderBy" mode="IN" type="String" optional="true"/>
+        <attribute name="stateList" mode="OUT" type="java.util.List"/>
+    </service>
+    
+    <service name="checkUomConversion" engine="simple" default-entity-name="UomConversion"
+        location="component://common/script/org/ofbiz/common/CommonServices.xml" invoke="checkUomConversion">
+        <description>Returns true if an UomConversion exists</description>
+        <permission-service service-name="commonGenericPermission" main-action="VIEW"/>
+        <auto-attributes include="pk" mode="IN"/>
+        <attribute name="exist" mode="OUT" type="Boolean"/>
+    </service>    
+    
+    <service name="getRelatedGeos" engine="simple" auth="false"
+        location="component://common/script/org/ofbiz/common/CommonServices.xml" invoke="getRelatedGeos">
+        <attribute name="geoId" mode="IN" type="String"/>
+        <attribute name="geoAssocTypeId" mode="IN" type="String"/>        
+        <attribute name="geoList" mode="OUT" type="java.util.List"/>
+    </service>
+    
 </services>

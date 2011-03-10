@@ -127,6 +127,10 @@ under the License.
     </request-map>
 
     <!-- ================ Category Requests ================= -->
+    <request-map uri="FindCategory">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindCategory"/>
+    </request-map>
     <request-map uri="EditCategory">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="EditCategory"/>
@@ -431,7 +435,11 @@ under the License.
     </request-map>
 
     <!-- ================ Product Requests ================= -->
-    <request-map uri="EditProduct">
+     <request-map uri="FindProduct">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindProduct"/>
+    </request-map>
+   <request-map uri="EditProduct">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="EditProduct"/>
     </request-map>
@@ -1844,7 +1852,15 @@ under the License.
         <response name="success" type="view" value="EditProductPriceRules"/>
         <response name="error" type="view" value="EditProductPriceRules"/>
     </request-map>
-
+    
+    <!-- Get Values options associated with a Price Rule Condition Input -->
+    <request-map uri="getAssociatedPriceRulesConds">
+        <security https="true" auth="false"/>
+        <event type="service" invoke="getAssociatedPriceRulesConds"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    
     <!-- ================ ProductPromoCode Requests ================= -->
     <request-map uri="FindProductPromoCode">
         <security https="true" auth="true"/>
@@ -2300,6 +2316,10 @@ under the License.
     <request-map uri="ProductStoreFacilities"><security https="true" auth="true"/>
         <response name="success" type="view" value="ProductStoreFacilities"/>
     </request-map>
+    <request-map uri="ListProductStoreFacilityFormOnly">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ListProductStoreFacilityFormOnly"/>
+    </request-map>
     <request-map uri="editProductStoreFacility"><security https="true" auth="true"/>
         <response name="success" type="view" value="EditProductStoreFacility"/>
     </request-map>
@@ -2318,8 +2338,8 @@ under the License.
     <request-map uri="deleteProductStoreFacility">
         <security https="true" auth="true"/>
         <event type="service" invoke="deleteProductStoreFacility"/>
-        <response name="success" type="view" value="ListProductStoreFacility"/>
-        <response name="error" type="view" value="ListProductStoreFacility"/>
+        <response name="success" type="view" value="ListProductStoreFacilityFormOnly"/>
+        <response name="error" type="view" value="ListProductStoreFacilityFormOnly"/>
     </request-map>
 
     <!-- ================ Keyword Thesaurus Requests ================= -->
@@ -2654,12 +2674,335 @@ under the License.
         <response name="success" type="view" value="EditWebAnalyticsType"/>
         <response name="error" type="view" value="EditWebAnalyticsType"/>
     </request-map>
+    
+    <!-- ================ Image Management Requests ================= -->
+    <request-map uri="Imagemanagement"><security https="true" auth="true"/>
+        <response name="success" type="view" value="Imagemanagement"/>
+    </request-map>
+    <request-map uri="ImageGallery">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ImageGallery"/>
+        <response name="error" type="view" value="ImageGallery"/>
+    </request-map> 
+    <request-map uri="ImageUpload">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ImageUpload"/>
+        <response name="error" type="view" value="ImageUpload"/>
+    </request-map>
+    <request-map uri="ImageApprove">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ImageApprove"/>
+        <response name="error" type="view" value="ImageApprove"/>
+    </request-map>
+    <request-map uri="ImageRejected">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ImageRejected"/>
+        <response name="error" type="view" value="ImageRejected"/>
+    </request-map>
+    <request-map uri="ImageFrames">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ImageFrames"/>
+        <response name="error" type="view" value="ImageFrames"/>
+    </request-map>
+    <request-map uri="ImageWatermarking">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ImageWatermarking"/>
+        <response name="error" type="view" value="ImageWatermarking"/>
+    </request-map>
+    <request-map uri="ImageCropping">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ImageCropping"/>
+        <response name="error" type="view" value="ImageCropping"/>
+    </request-map>
+    <request-map uri="ImageRotating">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ImageRotating"/>
+        <response name="error" type="view" value="ImageRotating"/>
+    </request-map>
+    <request-map uri="ImageShare">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ImageShare"/>
+        <response name="error" type="view" value="ImageShare"/>
+    </request-map>
+    <request-map uri="ImageReplace">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ImageReplace"/>
+        <response name="error" type="view" value="ImageReplace"/>
+    </request-map>
+    <request-map uri="setImageDetail">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="setImageDetail"/>
+        <response name="success" type="view" value="ListImageManage"/>
+        <response name="error" type="view" value="ListImageManage"/>
+    </request-map>
+    <request-map uri="setDefaultImage">
+        <security https="true" auth="true"/>
+        <event type="simple" path="component://product/script/org/ofbiz/product/imagemanagement/ImageManagementEvents.xml" invoke="setDefaultImage"/>
+        <response name="success" type="view" value="ListImageManage"/>
+        <response name="error" type="view" value="ListImageManage"/>
+    </request-map>
+    <request-map uri="updateStatusImageManagement">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="updateStatusImageManagement"/>
+        <response name="success" type="request" value="checkRejected"/>
+        <response name="error" type="view" value="ImageApprove"/>
+    </request-map>  
+    <request-map uri="addRejectedReasonImageManagement">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="addRejectedReasonImageManagement"/>
+        <response name="success" type="view" value="ImageRejected"/>
+        <response name="error" type="view" value="ImageRejected"/>
+    </request-map>
+    <request-map uri="uploadFrame">
+        <security https="true" auth="true"/>
+        <event type="java" path="org.ofbiz.product.imagemanagement.FrameImage" invoke="uploadFrame"/>
+        <response name="success" type="request-redirect" value="ImageFrames">
+            <redirect-parameter name="productId"/>
+            <redirect-parameter name="contentId"/>
+            <redirect-parameter name="dataResourceId"/>
+        </response>
+        <response name="error" type="request-redirect" value="ImageFrames">
+            <redirect-parameter name="productId"/>
+            <redirect-parameter name="contentId"/>
+            <redirect-parameter name="dataResourceId"/>
+        </response>
+    </request-map>
+    <request-map uri="createImageFrame">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="addImageFrame"/>
+        <response name="success" type="view" value="ListImageManage"/>
+        <response name="error" type="view-last" value="ImageFrames"/>
+    </request-map>
+    <request-map uri="addImageForProduct">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="multipleUploadProductImages"/>
+        <response name="success" type="view" value="ImageUpload"/>
+        <response name="error" type="view" value="ImageUpload"/>
+    </request-map>
+    <request-map uri="removeImageUpload">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="removeProductContentAndImageFile"/>
+        <response name="success" type="view" value="ImageUpload"/>
+        <response name="error" type="view" value="ImageUpload"/>
+    </request-map>
+    <request-map uri="removeImage">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="removeProductContentAndImageFile"/>
+        <response name="success" type="view" value="ListImageRemove"/>
+        <response name="error" type="view" value="ListImageRemove"/>
+    </request-map>
+    <request-map uri="createWatermarkImage">
+        <security https="true" auth="true"/>
+        <event type="java" path="org.ofbiz.product.imagemanagement.WatermarkImage" invoke="createWatermarkImage"/>
+        <response name="success" type="view" value="ListImageManage"/>
+        <response name="error" type="view" value="ImageWatermarking"/>
+    </request-map>
+    <request-map uri="previewWatermarkImage">
+        <security https="true" auth="true"/>
+        <event type="java" path="org.ofbiz.product.imagemanagement.WatermarkImage" invoke="previewWatermarkImage"/>
+        <response name="success" type="view" value="viewPreviewImage"/>
+        <response name="error" type="view" value="viewPreviewImage"/>
+    </request-map>
+    <request-map uri="previewFrameImage">
+        <security https="true" auth="true"/>
+        <event type="java" path="org.ofbiz.product.imagemanagement.FrameImage" invoke="previewFrameImage"/>
+        <response name="success" type="view" value="viewPreviewImage"/>
+        <response name="error" type="request-redirect" value="ImageFrames">
+            <redirect-parameter name="productId"/>
+            <redirect-parameter name="contentId"/>
+            <redirect-parameter name="dataResourceId"/>
+        </response>
+    </request-map>
+    <request-map uri="viewImage">
+        <security https="false" auth="false"/>
+        <response name="success" type="view" value="viewImage"/>
+        <response name="error" type="view" value="viewImage"/>
+    </request-map>
+    <request-map uri="viewPreviewImage">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="viewPreviewImage"/>
+        <response name="error" type="view" value="viewPreviewImage"/>
+    </request-map>
+    <request-map uri="LookupProduct">
+        <security auth="true" https="true"/>
+        <response name="success" type="view" value="LookupProduct"/>
+    </request-map>
+    <request-map uri="LookupImage">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="LookupImage"/>
+        <response name="error" type="view" value="LookupImage"/>
+    </request-map>
+     <request-map uri="replaceImageToExistImage">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="replaceImageToExistImage"/>
+        <response name="success" type="view" value="ListImageReplace"/>
+        <response name="error" type="view" value="ListImageReplace"/>
+    </request-map>
+    <request-map uri="CropImage">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="imageCrop"/>
+        <response name="success" type="view" value="ListImageManage"/>
+        <response name="error" type="view" value="ImageCropping"/>
+    </request-map>
+    <request-map uri="RotateImage">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="imageRotate"/>
+        <response name="success" type="view" value="ListImageManage"/>
+        <response name="error" type="view" value="ImageRotating"/>
+    </request-map>
+    <request-map uri="ListImageGallery">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ListImageGallery"/>
+        <response name="error" type="view" value="ListImageGallery"/>
+    </request-map> 
+    <request-map uri="ImageManage">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ImageManage"/>
+        <response name="error" type="view" value="ImageManage"/>
+    </request-map>
+    <request-map uri="ListImageManage">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ListImageManage"/>
+        <response name="error" type="view" value="ListImageManage"/>
+    </request-map>
+    <request-map uri="checkAction">
+        <security https="true" auth="true"/>
+        <event type="groovy" path="component://product/webapp/catalog/WEB-INF/actions/imagemanagement/" invoke="checkAction.groovy"/>
+        <response name="frame" type="request" value="ImageFrames"/>
+        <response name="watermark" type="request" value="ImageWatermarking"/>
+        <response name="crop" type="request" value="ImageCropping"/>
+        <response name="rotate" type="request" value="ImageRotating"/>
+        <response name="noAction" type="request-redirect" value="ListImageManage"/>
+    </request-map>
+    <request-map uri="checkRejected">
+        <security https="true" auth="true"/>
+        <event type="groovy" path="component://product/webapp/catalog/WEB-INF/actions/imagemanagement/" invoke="checkRejected.groovy"/>
+        <response name="approved" type="view" value="ImageApprove"/>
+        <response name="rejected" type="view" value="ImageRejected"/>
+    </request-map>
+    <request-map uri="ListImageReplace">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ListImageReplace"/>
+        <response name="error" type="view" value="ListImageReplace"/>
+    </request-map>
+    <request-map uri="ImageRecentlyApproved">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ImageRecentlyApproved"/>
+        <response name="error" type="view" value="ImageRecentlyApproved"/>
+    </request-map>
+    <request-map uri="ListImageRecentlyApproved">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ListImageRecentlyApproved"/>
+        <response name="error" type="view" value="ListImageRecentlyApproved"/>
+    </request-map>
+    <request-map uri="ListPeopleApproved">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ListPeopleApproved"/>
+        <response name="error" type="view" value="ListPeopleApproved"/>
+    </request-map>
+    <request-map uri="ListPeopleRejected">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ListPeopleRejected"/>
+        <response name="error" type="view" value="ListPeopleRejected"/>
+    </request-map>
+    <request-map uri="setPreviewWaterMark">
+        <security https="true" auth="true"/>
+        <event type="java" path="org.ofbiz.product.imagemanagement.WatermarkImage" invoke="setPreviewWaterMark"/>
+        <response name="success" type="view" value="viewPreviewImage"/>
+        <response name="error" type="view" value="viewPreviewImage"/>
+    </request-map>
+    <request-map uri="multipleUploadImage">
+        <security https="true" auth="true"/>
+        <event type="java" path="org.ofbiz.product.imagemanagement.ImageManagementServices" invoke="multipleUploadImage"/>
+        <response name="success" type="view" value="ImageUpload"/>
+        <response name="error" type="view" value="ImageUpload"/>
+    </request-map>
+    <request-map uri="progressUploadImage">
+        <security https="true" auth="true"/>
+        <event type="java" path="org.ofbiz.virtualvillage.imagemanagement.ImageManagementServices" invoke="progressUploadImage"/>
+        <response name="success" type="view" value="main"/>
+    </request-map>
+    <request-map uri="AutomaticResize">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="AutomaticResize"/>
+        <response name="error" type="view" value="AutomaticResize"/>
+    </request-map>
+    <request-map uri="ListAutomaticResize">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ListAutomaticResize"/>
+        <response name="error" type="view" value="ListAutomaticResize"/>
+    </request-map>
+    <request-map uri="UploadProductImageForManageMent">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ListAutomaticResize"/>
+    </request-map>
+    <request-map uri="chooseFrameImage">
+        <security https="true" auth="true"/>
+        <event type="java" path="org.ofbiz.product.imagemanagement.FrameImage" invoke="chooseFrameImage"/>
+        <response name="success" type="request-redirect" value="ImageFrames">
+            <redirect-parameter name="productId"/>
+            <redirect-parameter name="contentId"/>
+            <redirect-parameter name="dataResourceId"/>
+        </response>
+        <response name="error" type="request-redirect" value="ImageFrames">
+            <redirect-parameter name="productId"/>
+            <redirect-parameter name="contentId"/>
+            <redirect-parameter name="dataResourceId"/>
+        </response>
+    </request-map>
+    <request-map uri="LookupImageFrame">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="LookupImageFrame"/>
+    </request-map>
+    <request-map uri="deletePreviewWatermarkImage">
+        <security https="true" auth="true"/>
+        <event type="java" path="org.ofbiz.product.imagemanagement.WatermarkImage" invoke="deletePreviewWatermarkImage"/>
+        <response name="success" type="view" value="ListImageManage"/>
+        <response name="error" type="view" value="ImageWatermarking"/>
+    </request-map>
+    <request-map uri="ImageRemove">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ImageRemove"/>
+    </request-map>
+    <request-map uri="ListImageRemove">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ListImageRemove"/>
+    </request-map>
+    <request-map uri="ImageResize">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ImageResize"/>
+    </request-map>
+    <request-map uri="resizeAllImageOfProduct">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="resizeAllImageOfProduct"/>
+        <response name="success" type="view" value="ImageResize"/>
+        <response name="error" type="view" value="ImageResize"/>
+    </request-map>
+    <request-map uri="removeImageBySize">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="removeImageBySize"/>
+        <response name="success" type="view" value="ImageResize"/>
+        <response name="error" type="view" value="ImageResize"/>
+    </request-map>
+    <request-map uri="ImageRename">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ImageRename"/>
+    </request-map>
+    <request-map uri="ListImageRename">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ListImageRename"/>
+    </request-map>
+    <request-map uri="renameImage">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="renameImage"/>
+        <response name="success" type="view" value="ListImageRename"/>
+        <response name="error" type="view" value="ListImageRename"/>
+    </request-map>
 
    <!-- ================ Lookup Requests ================= -->
     <request-map uri="LookupContent"><security auth="true" https="true"/><response name="success" type="view" value="LookupContent"/></request-map>
     <request-map uri="LookupFixedAsset"><security auth="true" https="true"/><response name="success" type="view" value="LookupFixedAsset"/></request-map>
     <request-map uri="LookupPartyName"><security auth="true" https="true"/><response name="success" type="view" value="LookupPartyName"/></request-map>
-    <request-map uri="LookupGeo"><security auth="true" https="true"/><response name="success" type="view" value="LookupGeo"/></request-map>
     <request-map uri="LookupOrderHeader"><security auth="true" https="true"/><response name="success" type="view" value="LookupOrderHeader"/></request-map>
     <request-map uri="LookupCommEvent"><security auth="true" https="true"/><response name="success" type="view" value="LookupCommEvent"/></request-map>
 
@@ -2729,6 +3072,7 @@ under the License.
     <view-map name="exportproducts" type="screen" page="component://product/widget/catalog/FindScreens.xml#exportproducts"/>
     <view-map name="FindProductById" type="screen" page="component://product/widget/catalog/FindScreens.xml#FindProductById"/>
 
+    <view-map name="FindCategory" type="screen" page="component://product/widget/catalog/CategoryScreens.xml#FindCategory"/>
     <view-map name="EditCategory" type="screen" page="component://product/widget/catalog/CategoryScreens.xml#EditCategory"/>
     <view-map name="EditCategoryContent" type="screen" page="component://product/widget/catalog/CategoryScreens.xml#EditCategoryContent"/>
     <view-map name="EditCategoryAttributes" type="screen" page="component://product/widget/catalog/CategoryScreens.xml#EditCategoryAttributes"/>
@@ -2743,6 +3087,7 @@ under the License.
     <view-map name="createProductInCategoryStart" type="screen" page="component://product/widget/catalog/CategoryScreens.xml#createProductInCategoryStart"/>
     <view-map name="CreateProductInCategoryCheckExisting" type="screen" page="component://product/widget/catalog/CategoryScreens.xml#CreateProductInCategoryCheckExisting"/>
 
+    <view-map name="FindProduct" type="screen" page="component://product/widget/catalog/ProductScreens.xml#FindProduct"/>
     <view-map name="EditProduct" type="screen" page="component://product/widget/catalog/ProductScreens.xml#EditProduct"/>
     <view-map name="EditProductPrices" type="screen" page="component://product/widget/catalog/ProductScreens.xml#EditProductPrices"/>
     <view-map name="EditProductAssetUsage" type="screen" page="component://product/widget/catalog/ProductScreens.xml#EditProductAssetUsage"/>
@@ -2839,6 +3184,7 @@ under the License.
     <view-map name="EditProductStoreVendorShipments" type="screen" page="component://product/widget/catalog/StoreScreens.xml#EditProductStoreVendorShipments"/>
     <view-map name="ProductStoreFacilities" page="component://product/widget/catalog/StoreScreens.xml#ProductStoreFacilities" type="screen"/>
     <view-map name="ListProductStoreFacility" page="component://product/widget/catalog/StoreScreens.xml#ListProductStoreFacility" type="screen"/>
+    <view-map name="ListProductStoreFacilityFormOnly" page="component://product/widget/catalog/StoreScreens.xml#ListProductStoreFacilityFormOnly" type="screen"/>
     <view-map name="EditProductStoreFacility" page="component://product/widget/catalog/StoreScreens.xml#EditProductStoreFacility" type="screen"/>
     <view-map name="EditVendorProduct" type="screen" page="component://product/widget/catalog/ProductScreens.xml#EditVendorProduct"/>
     <view-map name="EditKeywordThesaurus" type="screen" page="component://product/widget/catalog/ThesaurusScreens.xml#EditKeywordThesaurus"/>
@@ -2873,7 +3219,6 @@ under the License.
     <view-map name="LookupContent" page="component://content/widget/content/ContentScreens.xml#LookupContent" type="screen"/>
     <view-map name="LookupFixedAsset" type="screen" page="component://accounting/widget/LookupScreens.xml#LookupFixedAsset"/>
     <view-map name="LookupPartyName" type="screen" page="component://party/widget/partymgr/LookupScreens.xml#LookupPartyName"/>
-    <view-map name="LookupGeo" type="screen" page="component://common/widget/LookupScreens.xml#LookupGeo"/>
     <view-map name="LookupOrderHeader" type="screen" page="component://order/widget/ordermgr/LookupScreens.xml#LookupOrderHeader"/>
     <view-map name="LookupCommEvent" type="screen" page="component://party/widget/partymgr/LookupScreens.xml#LookupCommEvent"/>
 
@@ -2890,5 +3235,38 @@ under the License.
     <view-map name="LookupPerson" page="component://party/widget/partymgr/LookupScreens.xml#LookupPerson" type="screen"/>
     <view-map name="LookupPreferredContactMech" type="screen" page="component://marketing/widget/ContactListScreens.xml#LookupPreferredContactMech"/>
     <view-map name="LookupContactList" type="screen" page="component://party/widget/partymgr/PartyContactListScreens.xml#ListLookupContactList"/>
+    
+    <!-- Image Management request mappings -->
+    <view-map name="Imagemanagement" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#Imagemanagement"/>
+    <view-map name="ImageGallery" page="component://product/widget/catalog/ImageManagementScreens.xml#ImageGallery" type="screen"/>
+    <view-map name="ImageUpload" page="component://product/widget/catalog/ImageManagementScreens.xml#ImageUpload" type="screen"/>
+    <view-map name="ImageApprove" page="component://product/widget/catalog/ImageManagementScreens.xml#ImageApprove" type="screen"/>
+    <view-map name="ImageRejected" page="component://product/widget/catalog/ImageManagementScreens.xml#ImageRejected" type="screen"/>
+    <view-map name="ImageFrames" page="component://product/widget/catalog/ImageManagementScreens.xml#ImageFrames" type="screen"/>
+    <view-map name="ImageWatermarking" page="component://product/widget/catalog/ImageManagementScreens.xml#ImageWatermarking" type="screen"/>
+    <view-map name="ImageCropping" page="component://product/widget/catalog/ImageManagementScreens.xml#ImageCropping" type="screen"/>
+    <view-map name="ImageRotating" page="component://product/widget/catalog/ImageManagementScreens.xml#ImageRotating" type="screen"/>
+    <view-map name="ImageShare" page="component://product/widget/catalog/ImageManagementScreens.xml#ImageShare" type="screen"/>
+    <view-map name="ImageReplace" page="component://product/widget/catalog/ImageManagementScreens.xml#ImageReplace" type="screen"/>
+    <view-map name="viewImage" page="component://product/widget/catalog/ImageManagementScreens.xml#ViewImage" type="screen"/>
+    <view-map name="viewPreviewImage" page="component://product/widget/catalog/ImageManagementScreens.xml#ViewPreviewImage" type="screen"/>
+    <view-map name="LookupImage" page="component://product/widget/catalog/ImageManagementScreens.xml#LookupImage" type="screen"/>
+    <view-map name="LookupProduct" type="screen" page="component://product/widget/catalog/LookupScreens.xml#LookupProduct"/>
+    <view-map name="ListImageGallery" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ListImageGallery"/>
+    <view-map name="ImageManage" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ImageManage"/>
+    <view-map name="ListImageManage" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ListImageManage"/>
+    <view-map name="ListImageReplace" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ListImageReplace"/>
+    <view-map name="ImageRecentlyApproved" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ImageRecentlyApproved"/>
+    <view-map name="ListImageRecentlyApproved" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ListImageRecentlyApproved"/>
+    <view-map name="ListPeopleApproved" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ListPeopleApproved"/>
+    <view-map name="ListPeopleRejected" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ListPeopleRejected"/>
+    <view-map name="AutomaticResize" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#AutomaticResize"/>
+    <view-map name="ListAutomaticResize" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ListAutomaticResize"/>
+    <view-map name="LookupImageFrame" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#LookupImageFrame"/>
+    <view-map name="ImageRemove" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ImageRemove"/>
+    <view-map name="ListImageRemove" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ListImageRemove"/>
+    <view-map name="ImageResize" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ImageResize"/>
+    <view-map name="ImageRename" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ImageRename"/>
+    <view-map name="ListImageRename" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ListImageRename"/>
     <!-- end of view mappings -->
 </site-conf>

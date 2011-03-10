@@ -18,6 +18,9 @@
  */
 package org.ofbiz.sql;
 
+import org.ofbiz.base.lang.SourceMonitored;
+
+@SourceMonitored
 public final class BooleanCondition extends Condition {
     private final Value left;
     private final String op;
@@ -29,6 +32,7 @@ public final class BooleanCondition extends Condition {
         this.right = right;
     }
 
+    @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
@@ -45,6 +49,7 @@ public final class BooleanCondition extends Condition {
         return right;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o instanceof BooleanCondition) {
             BooleanCondition other = (BooleanCondition) o;

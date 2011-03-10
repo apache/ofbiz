@@ -47,7 +47,7 @@ under the License.
       <input type="hidden" name="originOrderId" value="${parameters.originOrderId?if_exists}"/>
       <input type="hidden" name="finalizeMode" value="type"/>
       <input type="hidden" name="orderMode" value="SALES_ORDER"/>
-      <table width="100%" border="0" cellspacing="0" cellpadding="0" class="boxbottom">
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr>
           <td >&nbsp;</td>
           <td width="300" align='right' valign='middle' nowrap="nowrap"><div class='tableheadtext'>${uiLabelMap.ProductProductStore}</div></td>
@@ -97,7 +97,7 @@ under the License.
         </#if>
         <tr>
           <td>&nbsp;</td>
-          <td align='right' valign='middle' nowrap="nowrap"><div class='tableheadtext'>${uiLabelMap.PartyUserLoginId}</div></td>
+          <td align='right' valign='middle' nowrap="nowrap"><div class='tableheadtext'>${uiLabelMap.CommonUserLoginId}</div></td>
           <td>&nbsp;</td>
           <td valign='middle'>
             <div class='tabletext'>
@@ -138,7 +138,7 @@ under the License.
       <form method="post" name="poentryform" action="<@ofbizUrl>initorderentry</@ofbizUrl>">
       <input type='hidden' name='finalizeMode' value='type'/>
       <input type='hidden' name='orderMode' value='PURCHASE_ORDER'/>
-      <table width="100%" border='0' cellspacing='0' cellpadding='0' class='boxbottom'>
+      <table width="100%" border='0' cellspacing='0' cellpadding='0'>
         <#if partyId?exists>
           <#assign thisPartyId = partyId>
         <#else>
@@ -164,7 +164,7 @@ under the License.
         <tr><td colspan="4">&nbsp;</td></tr>
         <tr>
           <td>&nbsp;</td>
-          <td align='right' valign='middle' nowrap="nowrap"><div class='tableheadtext'>${uiLabelMap.PartyUserLoginId}</div></td>
+          <td align='right' valign='middle' nowrap="nowrap"><div class='tableheadtext'>${uiLabelMap.CommonUserLoginId}</div></td>
           <td>&nbsp;</td>
           <td valign='middle'>
             <div class='tabletext'>

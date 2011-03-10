@@ -31,11 +31,12 @@ import org.ofbiz.base.lang.Appender;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilObject;
 
+@SuppressWarnings("serial")
 public abstract class GenericMap<K, V> implements Appender<StringBuilder>, Map<K, V>, Serializable {
-    private static final AtomicReferenceFieldUpdater<GenericMap, Set> keySetUpdater = AtomicReferenceFieldUpdater.newUpdater(GenericMap.class, Set.class, "keySet");
-    private static final AtomicReferenceFieldUpdater<GenericMap, Set> entrySetUpdater = AtomicReferenceFieldUpdater.newUpdater(GenericMap.class, Set.class, "entrySet");
-    private static final AtomicReferenceFieldUpdater<GenericMap, Collection> valuesUpdater = AtomicReferenceFieldUpdater.newUpdater(GenericMap.class, Collection.class, "values");
-    private static final AtomicIntegerFieldUpdater<GenericMap> modCountUpdater = AtomicIntegerFieldUpdater.newUpdater(GenericMap.class, "modCount");
+    private static final AtomicReferenceFieldUpdater<GenericMap<?, ?>, Set<?>> keySetUpdater = UtilGenerics.cast(AtomicReferenceFieldUpdater.newUpdater(GenericMap.class, Set.class, "keySet"));
+    private static final AtomicReferenceFieldUpdater<GenericMap<?, ?>, Set<?>> entrySetUpdater = UtilGenerics.cast(AtomicReferenceFieldUpdater.newUpdater(GenericMap.class, Set.class, "entrySet"));
+    private static final AtomicReferenceFieldUpdater<GenericMap<?, ?>, Collection<?>> valuesUpdater = UtilGenerics.cast(AtomicReferenceFieldUpdater.newUpdater(GenericMap.class, Collection.class, "values"));
+    private static final AtomicIntegerFieldUpdater<GenericMap<?, ?>> modCountUpdater = UtilGenerics.cast(AtomicIntegerFieldUpdater.newUpdater(GenericMap.class, "modCount"));
 
     private volatile Set<K> keySet;
     private volatile Set<Map.Entry<K, V>> entrySet;
@@ -62,16 +63,17 @@ public abstract class GenericMap<K, V> implements Appender<StringBuilder>, Map<K
         return values().contains(value);
     }
 
+    @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Map)) return false;
+        if (!(o instanceof Map<?, ?>)) return false;
         if (this == o) return true;
-        Map map = (Map) o;
+        Map<?, ?> map = (Map<?, ?>) o;
         if (size() != map.size()) return false;
-        if (o instanceof GenericMap) return equalsGenericMap((GenericMap) o);
+        if (o instanceof GenericMap<?, ?>) return equalsGenericMap((GenericMap<?, ?>) o);
         return equalsMap(map);
     }
 
-    protected boolean equalsGenericMap(GenericMap map) {
+    protected boolean equalsGenericMap(GenericMap<?, ?> map) {
         Iterator<Map.Entry<K, V>> it = iterator(false);
         while (it.hasNext()) {
             Map.Entry<K, V> entry = it.next();
@@ -88,7 +90,7 @@ public abstract class GenericMap<K, V> implements Appender<StringBuilder>, Map<K
         return true;
     }
 
-    protected boolean equalsMap(Map map) {
+    protected boolean equalsMap(Map<?, ?> map) {
         Iterator<Map.Entry<K, V>> it = iterator(false);
         while (it.hasNext()) {
             Map.Entry<K, V> entry = it.next();
@@ -127,18 +129,22 @@ public abstract class GenericMap<K, V> implements Appender<StringBuilder>, Map<K
     public final Set<Map.Entry<K, V>> entrySet() {
         if (entrySet == null) {
             entrySetUpdater.compareAndSet(this, null, new GenericMapEntrySet<K, V, GenericMap<K, V>>(this) {
+                @Override
                 protected boolean contains(Object key, Object value) {
                     return UtilObject.equalsHelper(get(key, false), value);
                 }
 
+                @Override
                 public Iterator<Map.Entry<K, V>> iterator(boolean noteAccess) {
                     return new GenericMapIterator<Map.Entry<K, V>>(noteAccess) {
+                        @Override
                         protected void noteRemoval(Map.Entry<K, V> dest, Map.Entry<K, V> src) {
                             // No need to note the remove, the wrapped iterator does that for us
                             // evictionPolicy.remove(evictionDeque, dest);
                             // if (diskStore != null) diskStore.remove(dest);
                         }
 
+                        @Override
                         protected Map.Entry<K, V> convert(Map.Entry<K, V> src) {
                             return src;
                         }
@@ -158,14 +164,17 @@ public abstract class GenericMap<K, V> implements Appender<StringBuilder>, Map<K
                     return containsKey(key);
                 }
 
+                @Override
                 public Iterator<K> iterator(boolean noteAccess) {
                     return new GenericMapIterator<K>(noteAccess) {
+                        @Override
                         protected void noteRemoval(K dest, Map.Entry<K, V> src) {
                             // No need to note the remove, the wrapped iterator does that for us
                             // evictionPolicy.remove(evictionDeque, dest);
                             // if (diskStore != null) diskStore.remove(dest);
                         }
 
+                        @Override
                         protected K convert(Map.Entry<K, V> src) {
                             return src.getKey();
                         }
@@ -179,14 +188,17 @@ public abstract class GenericMap<K, V> implements Appender<StringBuilder>, Map<K
     public final Collection<V> values() {
         if (values == null) {
             valuesUpdater.compareAndSet(this, null, new GenericMapValues<K, V, GenericMap<K, V>>(this) {
+                @Override
                 public Iterator<V> iterator(boolean noteAccess) {
                     return new GenericMapIterator<V>(noteAccess) {
+                        @Override
                         protected void noteRemoval(V dest, Map.Entry<K, V> src) {
                             // No need to note the remove, the wrapped iterator does that for us
                             // evictionPolicy.remove(evictionDeque, src.getKey());
                             // if (diskStore != null) diskStore.remove(src.getKey());
                         }
 
+                        @Override
                         protected V convert(Map.Entry<K, V> src) {
                             return src.getValue();
                         }
@@ -211,7 +223,7 @@ public abstract class GenericMap<K, V> implements Appender<StringBuilder>, Map<K
         if (map.isEmpty()) return;
         incrementModCount();
         Iterator<Map.Entry<KE, VE>> it;
-        if (map instanceof GenericMap) {
+        if (map instanceof GenericMap<?, ?>) {
             GenericMap<KE, VE> otherMap = UtilGenerics.cast(map);
             it = otherMap.iterator(false);
         } else {
@@ -222,6 +234,7 @@ public abstract class GenericMap<K, V> implements Appender<StringBuilder>, Map<K
 
     protected abstract <KE extends K, VE extends V> void putAllIterator(Iterator<Map.Entry<KE, VE>> it);
 
+    @Override
     public String toString() {
         return appendTo(new StringBuilder()).toString();
     }

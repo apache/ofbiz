@@ -21,13 +21,12 @@ package org.ofbiz.entity;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
@@ -47,9 +46,6 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.entity.cache.Cache;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityConditionList;
-import org.ofbiz.entity.condition.EntityExpr;
-import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.config.DatasourceInfo;
 import org.ofbiz.entity.config.DelegatorInfo;
 import org.ofbiz.entity.config.EntityConfigUtil;
@@ -120,9 +116,9 @@ public class GenericDelegator implements Delegator {
 
     private boolean testMode = false;
     private boolean testRollbackInProgress = false;
-    private static final AtomicReferenceFieldUpdater<GenericDelegator, LinkedBlockingDeque> testOperationsUpdater = AtomicReferenceFieldUpdater.newUpdater(GenericDelegator.class, LinkedBlockingDeque.class, "testOperations");
+    private static final AtomicReferenceFieldUpdater<GenericDelegator, LinkedBlockingDeque<?>> testOperationsUpdater = UtilGenerics.cast(AtomicReferenceFieldUpdater.newUpdater(GenericDelegator.class, LinkedBlockingDeque.class, "testOperations"));
     private volatile LinkedBlockingDeque<TestOperation> testOperations = null;
-    private enum OperationType {INSERT, UPDATE, DELETE};
+    private enum OperationType {INSERT, UPDATE, DELETE}
 
     /** @deprecated Use Delegator delegator = DelegatorFactory.getDelegator(delegatorName);
      * @param delegatorName
@@ -258,14 +254,7 @@ public class GenericDelegator implements Delegator {
 
             if (Debug.infoOn()) Debug.logInfo("Delegator \"" + delegatorFullName + "\" initializing helper \"" +
                     helperBaseName + "\" for entity group \"" + groupName + "\".", module);
-            TreeSet<String> helpersDone = new TreeSet<String>();
             if (UtilValidate.isNotEmpty(helperInfo.getHelperFullName())) {
-                // make sure each helper is only loaded once
-                if (helpersDone.contains(helperInfo.getHelperFullName())) {
-                    if (Debug.infoOn()) Debug.logInfo("Helper \"" + helperInfo.getHelperFullName() + "\" already initialized, not re-initializing.", module);
-                    continue;
-                }
-                helpersDone.add(helperInfo.getHelperFullName());
                 // pre-load field type defs, the return value is ignored
                 ModelFieldTypeReader.getModelFieldTypeReader(helperBaseName);
                 // get the helper and if configured, do the datasource check
@@ -897,7 +886,7 @@ public class GenericDelegator implements Delegator {
             return value;
         } catch (GenericEntityException e) {
             String errMsg = "Failure in create operation for entity [" + value.getEntityName() + "]: " + e.toString() + ". Rolling back transaction.";
-            Debug.logError(e, errMsg, module);
+            Debug.logError(errMsg, module);
             try {
                 // only rollback the transaction if we started one...
                 TransactionUtil.rollback(beganTransaction, errMsg, e);
@@ -2655,29 +2644,21 @@ public class GenericDelegator implements Delegator {
     }
 
     protected void createEntityAuditLogAll(GenericValue value, boolean isUpdate, boolean isRemove) throws GenericEntityException {
+        Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
         for (ModelField mf: value.getModelEntity().getFieldsUnmodifiable()) {
             if (mf.getEnableAuditLog()) {
-                createEntityAuditLogSingle(value, mf, isUpdate, isRemove);
+                createEntityAuditLogSingle(value, mf, isUpdate, isRemove, nowTimestamp);
             }
         }
     }
 
-    protected void createEntityAuditLogSingle(GenericValue value, ModelField mf, boolean isUpdate, boolean isRemove) throws GenericEntityException {
+    protected void createEntityAuditLogSingle(GenericValue value, ModelField mf, boolean isUpdate, boolean isRemove, Timestamp nowTimestamp) throws GenericEntityException {
         if (value == null || mf == null || !mf.getEnableAuditLog() || this.testRollbackInProgress) {
             return;
         }
 
-        GenericValue entityAuditLog = this.makeValue("EntityAuditLog");
-        entityAuditLog.set("auditHistorySeqId", this.getNextSeqId("EntityAuditLog"));
-        entityAuditLog.set("changedEntityName", value.getEntityName());
-        entityAuditLog.set("changedFieldName", mf.getName());
-
-        String pkCombinedValueText = value.getPkShortValueString();
-        if (pkCombinedValueText.length() > 250) {
-            // uh-oh, the string is too long!
-            pkCombinedValueText = pkCombinedValueText.substring(0, 250);
-        }
-        entityAuditLog.set("pkCombinedValueText", pkCombinedValueText);
+        String newValueText = null;
+        String oldValueText = null;
 
         GenericValue oldGv = null;
         if (isUpdate) {
@@ -2688,11 +2669,10 @@ public class GenericDelegator implements Delegator {
         }
         if (oldGv == null) {
             if (isUpdate || isRemove) {
-                entityAuditLog.set("oldValueText", "[ERROR] Old value not found even though it was an update or remove");
+                oldValueText = "[ERROR] Old value not found even though it was an update or remove";
             }
         } else {
             // lookup old value
-            String oldValueText = null;
             Object oldValue = oldGv.get(mf.getName());
             if (oldValue != null) {
                 oldValueText = oldValue.toString();
@@ -2700,11 +2680,9 @@ public class GenericDelegator implements Delegator {
                     oldValueText = oldValueText.substring(0, 250);
                 }
             }
-            entityAuditLog.set("oldValueText", oldValueText);
         }
 
         if (!isRemove) {
-            String newValueText = null;
             Object newValue = value.get(mf.getName());
             if (newValue != null) {
                 newValueText = newValue.toString();
@@ -2712,14 +2690,28 @@ public class GenericDelegator implements Delegator {
                     newValueText = newValueText.substring(0, 250);
                 }
             }
-            entityAuditLog.set("newValueText", newValueText);
         }
-
-        entityAuditLog.set("changedDate", UtilDateTime.nowTimestamp());
-        entityAuditLog.set("changedByInfo", getCurrentUserIdentifier());
-        entityAuditLog.set("changedSessionInfo", getCurrentSessionIdentifier());
-
-        this.create(entityAuditLog);
+        
+        if (!(newValueText==null ? "" : newValueText).equals((oldValueText==null ? "" : oldValueText))) {
+            // only save changed values
+            GenericValue entityAuditLog = this.makeValue("EntityAuditLog");
+            entityAuditLog.set("auditHistorySeqId", this.getNextSeqId("EntityAuditLog"));
+            entityAuditLog.set("changedEntityName", value.getEntityName());
+            entityAuditLog.set("changedFieldName", mf.getName());
+            
+            String pkCombinedValueText = value.getPkShortValueString();
+            if (pkCombinedValueText.length() > 250) {
+                // uh-oh, the string is too long!
+                pkCombinedValueText = pkCombinedValueText.substring(0, 250);
+            }
+            entityAuditLog.set("pkCombinedValueText", pkCombinedValueText);
+            entityAuditLog.set("newValueText", newValueText);
+            entityAuditLog.set("oldValueText", oldValueText);
+            entityAuditLog.set("changedDate", nowTimestamp);
+            entityAuditLog.set("changedByInfo", getCurrentUserIdentifier());
+            entityAuditLog.set("changedSessionInfo", getCurrentSessionIdentifier());
+            this.create(entityAuditLog);       
+        }
     }
 
     /* (non-Javadoc)
@@ -2773,7 +2765,7 @@ public class GenericDelegator implements Delegator {
     private void setTestMode(boolean testMode) {
         this.testMode = testMode;
         if (testMode) {
-            testOperationsUpdater.set(this, new LinkedBlockingDeque());
+            testOperationsUpdater.set(this, new LinkedBlockingDeque<TestOperation>());
         } else {
             this.testOperations.clear();
         }

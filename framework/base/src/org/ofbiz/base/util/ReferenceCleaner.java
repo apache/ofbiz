@@ -18,9 +18,8 @@
  *******************************************************************************/
 package org.ofbiz.base.util;
 
-import java.lang.ref.Reference;
-import java.lang.ref.ReferenceQueue;
 import java.lang.ref.PhantomReference;
+import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 
@@ -39,6 +38,7 @@ public final class ReferenceCleaner {
             keepRunning = false;
         }
 
+        @Override
         public void run() {
             while (keepRunning) {
                 try {

@@ -62,14 +62,14 @@ public class TreeFactory {
 
                     URL treeFileUrl = null;
                     treeFileUrl = FlexibleLocation.resolveLocation(resourceName); //, loader);
-                    Document treeFileDoc = UtilXml.readXmlDocument(treeFileUrl, true);
+                    Document treeFileDoc = UtilXml.readXmlDocument(treeFileUrl, true, true);
                     modelTreeMap = readTreeDocument(treeFileDoc, delegator, dispatcher, resourceName);
                     treeLocationCache.put(resourceName, modelTreeMap);
                 }
             }
         }
 
-        ModelTree modelTree = (ModelTree) modelTreeMap.get(treeName);
+        ModelTree modelTree = modelTreeMap.get(treeName);
         if (modelTree == null) {
             throw new IllegalArgumentException("Could not find tree with name [" + treeName + "] in class resource [" + resourceName + "]");
         }
@@ -92,14 +92,14 @@ public class TreeFactory {
                     LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
 
                     URL treeFileUrl = servletContext.getResource(resourceName);
-                    Document treeFileDoc = UtilXml.readXmlDocument(treeFileUrl, true);
+                    Document treeFileDoc = UtilXml.readXmlDocument(treeFileUrl, true, true);
                     modelTreeMap = readTreeDocument(treeFileDoc, delegator, dispatcher, cacheKey);
                     treeWebappCache.put(cacheKey, modelTreeMap);
                 }
             }
         }
 
-        ModelTree modelTree = (ModelTree) modelTreeMap.get(treeName);
+        ModelTree modelTree = modelTreeMap.get(treeName);
         if (modelTree == null) {
             throw new IllegalArgumentException("Could not find tree with name [" + treeName + "] in webapp resource [" + resourceName + "] in the webapp [" + webappName + "]");
         }

@@ -19,7 +19,6 @@
 package org.ofbiz.base.json;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Iterator;
@@ -114,7 +113,7 @@ public class JSONWriter {
                 writer.write(c);
             } else {
                 writer.write("\\u");
-                String n = Integer.toString((int) c, 16);
+                String n = Integer.toString(c, 16);
                 for (int j = 4 - n.length(); j > 0; j--) writer.write('0');
                 writer.write(n);
             }
@@ -180,9 +179,9 @@ public class JSONWriter {
             return this;
         } else if (o instanceof String) {
             return write((String) o);
-        } else if (o instanceof Map) {
+        } else if (o instanceof Map<?, ?>) {
             return write(UtilGenerics.<Map<?, ?>>cast(o));
-        } else if (o instanceof Collection) {
+        } else if (o instanceof Collection<?>) {
             return write(UtilGenerics.<Collection<?>>cast(o));
         } else if (o instanceof Byte) {
             return write(((Byte) o).byteValue());

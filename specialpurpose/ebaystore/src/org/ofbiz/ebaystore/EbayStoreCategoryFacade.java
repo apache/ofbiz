@@ -22,11 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilValidate;
-
 import javolution.util.FastList;
 import javolution.util.FastMap;
+
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilGenerics;
+
 import com.ebay.sdk.ApiContext;
 import com.ebay.sdk.ApiException;
 import com.ebay.sdk.SdkException;
@@ -48,7 +49,6 @@ import com.ebay.soap.eBLBaseComponents.ItemSpecificsEnabledCodeType;
 import com.ebay.soap.eBLBaseComponents.ListingDurationDefinitionType;
 import com.ebay.soap.eBLBaseComponents.ListingDurationDefinitionsType;
 import com.ebay.soap.eBLBaseComponents.ListingDurationReferenceType;
-import com.ebay.soap.eBLBaseComponents.ListingTypeCodeType;
 import com.ebay.soap.eBLBaseComponents.NameRecommendationType;
 import com.ebay.soap.eBLBaseComponents.RecommendationsType;
 import com.ebay.soap.eBLBaseComponents.SiteDefaultsType;
@@ -167,7 +167,7 @@ public class EbayStoreCategoryFacade {
                 al.add(pm);
             }
         }
-        return (BuyerPaymentMethodCodeType[])al.toArray(new BuyerPaymentMethodCodeType[0]);
+        return al.toArray(new BuyerPaymentMethodCodeType[0]);
     }
 
     /**
@@ -257,7 +257,7 @@ public class EbayStoreCategoryFacade {
                         temGroupList.add(templateGroup);
                     } else {
                         if (templateGroup.get("Templates") != null) {
-                            templateList = (List<Map<String,Object>>) templateGroup.get("Templates");
+                            templateList = UtilGenerics.checkList(templateGroup.get("Templates"));
                             templateList.add(template);
                         }
                     }
@@ -285,7 +285,7 @@ public class EbayStoreCategoryFacade {
         List<Map<String,Object>> themes = FastList.newInstance();
         for (Map<String,Object> temp : this.adItemTemplates) {
             if (temp.get("TemplateGroupId").equals(temGroupId)) {
-                themes = (List<Map<String,Object>>) temp.get("Templates");
+                themes = UtilGenerics.checkList(temp.get("Templates"));
                 break;
             }
         }

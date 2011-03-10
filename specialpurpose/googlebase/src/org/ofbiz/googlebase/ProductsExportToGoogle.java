@@ -93,7 +93,7 @@ public class ProductsExportToGoogle {
                 return ServiceUtil.returnFailure(ServiceUtil.getErrorMessage(result));
             }
         } catch (IOException e) {
-            return ServiceUtil.returnFailure(ServiceUtil.getErrorMessage(result) + "IO Error loading resource :" + e.getMessage());
+            return ServiceUtil.returnFailure(ServiceUtil.getErrorMessage(result) + UtilProperties.getMessage(resource, "GoogleBaseExportErrorLoadingResource", locale) + e.getMessage());
         }
         return result;
     }
@@ -362,7 +362,7 @@ public class ProductsExportToGoogle {
             GenericValue googleProduct;
             while (productsListItr.hasNext()) {
                 itemActionType = actionType;
-                GenericValue prod = (GenericValue)productsListItr.next();
+                GenericValue prod = productsListItr.next();
                 String price = getProductPrice(dispatcher, prod);
                 if (price == null) {
                     Debug.logInfo("Price not found for product [" + prod.getString("productId")+ "]; product will not be exported.", module);
@@ -445,7 +445,7 @@ public class ProductsExportToGoogle {
 
                 Iterator<GenericValue> productCategoryMembersIter = productCategoryMembers.iterator();
                 while (productCategoryMembersIter.hasNext()) {
-                    GenericValue productCategoryMember = (GenericValue) productCategoryMembersIter.next();
+                    GenericValue productCategoryMember = productCategoryMembersIter.next();
                     GenericValue productCategory = productCategoryMember.getRelatedOne("ProductCategory");
                     String productCategoryTypeId = productCategory.getString("productCategoryTypeId");
                     if (UtilValidate.isNotEmpty(productCategoryTypeId) && "GOOGLE_BASE_CATEGORY".equals(productCategoryTypeId)) {
@@ -506,9 +506,9 @@ public class ProductsExportToGoogle {
             //Debug.logInfo("The value of generated String is ========\n" + UtilXml.writeXmlDocument(feedDocument), module);
             dataItemsXml.append(UtilXml.writeXmlDocument(feedDocument));
         } catch (IOException e) {
-            return ServiceUtil.returnError("IO Error creating XML document for Google :" + e.getMessage());
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "GoogleBaseExportErrorCreatingXmlDocument", locale) + e.getMessage());
         } catch (GenericEntityException e) {
-            return ServiceUtil.returnError("Unable to read from product entity: "  + e.toString());
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "GoogleBaseExportUnableToReadFromProduct", locale) + e.toString());
         }
 
         Map<String, Object> result = ServiceUtil.returnSuccess();
@@ -544,10 +544,10 @@ public class ProductsExportToGoogle {
             Iterator<? extends Element> atomEntryElemIter = atomEntryList.iterator();
             int index = 0;
             while (atomEntryElemIter.hasNext()) {
-                Element atomEntryElement = (Element)atomEntryElemIter.next();
+                Element atomEntryElement = atomEntryElemIter.next();
                 String id = UtilXml.childElementValue(atomEntryElement, "atom:id", "");
                 if (UtilValidate.isNotEmpty(id) && newProductsInGoogle.get(index) != null) {
-                    String productId = (String)newProductsInGoogle.get(index);
+                    String productId = newProductsInGoogle.get(index);
                     try {
                         GenericValue googleProductId = delegator.makeValue("GoodIdentification");
                         googleProductId.set("goodIdentificationTypeId", "GOOGLE_ID");
@@ -559,7 +559,7 @@ public class ProductsExportToGoogle {
                     }
                 }
                 if (UtilValidate.isNotEmpty(id) && productsRemovedFromGoogle.get(index) != null) {
-                    String productId = (String)productsRemovedFromGoogle.get(index);
+                    String productId = productsRemovedFromGoogle.get(index);
                     try {
                         delegator.removeByAnd("GoodIdentification", UtilMisc.toMap("goodIdentificationTypeId", "GOOGLE_ID", "productId", productId));
                     } catch (GenericEntityException gee) {
@@ -570,7 +570,7 @@ public class ProductsExportToGoogle {
                 List<? extends Element> batchStatusList = UtilXml.childElementList(atomEntryElement, "batch:status");
                 Iterator<? extends Element> batchStatusEntryElemIter = batchStatusList.iterator();
                 while (batchStatusEntryElemIter.hasNext()) {
-                    Element batchStatusEntryElement = (Element)batchStatusEntryElemIter.next();
+                    Element batchStatusEntryElement = batchStatusEntryElemIter.next();
                     if (UtilValidate.isNotEmpty(batchStatusEntryElement.getAttribute("reason"))) {
                         message.add(title + " " + batchStatusEntryElement.getAttribute("reason"));
                     }

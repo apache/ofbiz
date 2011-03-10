@@ -21,12 +21,6 @@
 
 package org.ofbiz.common;
 
-import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.ofbiz.base.util.UtilHttp;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -35,8 +29,11 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import org.ofbiz.base.util.Debug;
+
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.ofbiz.base.util.UtilDateTime;
 
 public class Captcha {
@@ -110,7 +107,7 @@ public class Captcha {
                 // we can rotate it independently
                 int charWidth = fontMetrics.charWidth(characterToShow.charAt(i));
                 int charDim = Math.max(maxAdvance, fontHeight);
-                int halfCharDim = (int) (charDim / 2);
+                int halfCharDim = (charDim / 2);
 
                 BufferedImage charImage =
                         new BufferedImage(charDim, charDim, BufferedImage.TYPE_INT_ARGB);
@@ -124,10 +121,10 @@ public class Captcha {
 
                 int charX = (int) (0.5 * charDim - 0.5 * charWidth);
                 charGraphics.drawString("" + characterToShow.charAt(i), charX,
-                        (int) ((charDim - fontMetrics.getAscent()) / 2 + fontMetrics.getAscent()));
+                        ((charDim - fontMetrics.getAscent()) / 2 + fontMetrics.getAscent()));
 
                 float x = horizMargin + spacePerChar * (i) - charDim / 2.0f;
-                int y = (int) ((height - charDim) / 2);
+                int y = ((height - charDim) / 2);
 
                 g.drawImage(charImage, (int) x, y, charDim, charDim, null, null);
 

@@ -18,6 +18,11 @@ specific language governing permissions and limitations
 under the License.
 -->
 <project name="Ant - Macros">
+ <condition property="antatleast171">
+  <antversion atleast="1.7.1"/>
+ </condition>
+ <fail unless="antatleast171" message="Please upgrade ant to at least 1.7.1"/>
+
  <dirname property="ofbiz.home.dir" file="${ant.file.Ant - Macros}"/>
  <macrodef name="iterate">
   <attribute name="filelist" default="subdirs"/>
@@ -45,7 +50,10 @@ under the License.
   <pathelement location="${ofbiz.home.dir}/framework/base/lib/commons/commons-cli-1.0.jar"/>
   <pathelement location="${ofbiz.home.dir}/framework/base/lib/scripting/antlr-2.7.6.jar"/>
   <pathelement location="${ofbiz.home.dir}/framework/base/lib/scripting/asm-3.2.jar"/>
-  <pathelement location="${ofbiz.home.dir}/framework/base/lib/scripting/groovy-all-1.7.3.jar"/>
+  <pathelement location="${ofbiz.home.dir}/framework/base/lib/scripting/groovy-all-1.7.7.jar"/>
+ </path>
+ <path id="rhino.class.path">
+  <pathelement location="${ofbiz.home.dir}/extension/rhino/lib/js-1.7.R1.jar"/>
  </path>
  <path id="ant.lib.class.path">
   <pathelement location="${ofbiz.home.dir}/framework/base/lib/ant/ant-nodeps-1.7.1.jar"/>
@@ -64,7 +72,7 @@ under the License.
  </presetdef>
 
  <presetdef name="javac16">
-  <default-javac compiler="javac1.6" target="1.6" source="1.6" encoding="UTF-8" sourcepathref="src-path">
+  <default-javac compiler="javac1.6" target="1.6" source="1.6" encoding="UTF-8" sourcepathref="src-path" includeantruntime="false">
    <!--
    <compilerarg value="-Xlint:unchecked"/>
    -->
@@ -147,6 +155,12 @@ under the License.
   </groovyc>
  </presetdef>
 
+ <scriptdef name="if" language="javascript" classpathref="rhino.class.path" loaderref="rhino.class.path.loader" src="${ofbiz.home.dir}/tools/If-ant.py">
+  <element name="condition" classname="org.apache.tools.ant.taskdefs.condition.And"/>
+  <element name="commands" classname="org.apache.tools.ant.taskdefs.Sequential"/>
+  <element name="else" classname="org.apache.tools.ant.taskdefs.Sequential"/>
+ </scriptdef>
+
  <taskdef name="javacc" classname="org.apache.tools.ant.taskdefs.optional.javacc.JavaCC" classpath="${ofbiz.home.dir}/framework/base/lib/ant/ant-nodeps-1.7.1.jar"/>
  <taskdef name="jjtree" classname="org.apache.tools.ant.taskdefs.optional.javacc.JJTree" classpath="${ofbiz.home.dir}/framework/base/lib/ant/ant-nodeps-1.7.1.jar"/>
  <macrodef name="ofbiz-javacc">
@@ -155,17 +169,23 @@ under the License.
   <attribute name="prefix" default=""/>
   <sequential>
    <if>
-    <not>
-     <uptodate
-      srcfile="@{prefix}src/@{dir}/@{file}.jj"
-      targetfile="@{prefix}build/gen-src/javacc/@{dir}/@{file}.java"/>
-    </not>
+    <condition>
+     <not>
+      <uptodate
+       srcfile="@{prefix}src/@{dir}/@{file}.jj"
+       targetfile="@{prefix}build/gen-src/javacc/@{dir}/@{file}.java"/>
+     </not>
+    </condition>
     <commands>
      <delete dir="@{prefix}build/gen-src/javacc/@{dir}"/>
      <mkdir dir="@{prefix}build/gen-src/javacc/@{dir}"/>
      <javacc target="@{prefix}src/@{dir}/@{file}.jj"
       javacchome="${ofbiz.home.dir}/lib/build/javacc"
       outputdirectory="@{prefix}build/gen-src/javacc/@{dir}"/>
+     <replace token="public class" 
+     	value='@SuppressWarnings("all") public class' 
+     	dir="@{prefix}build/gen-src/javacc/@{dir}"
+     	includes="*.java" />
      <delete dir="@{prefix}build/classes/@{dir}"/>
     </commands>
    </if>
@@ -178,11 +198,13 @@ under the License.
   <attribute name="prefix" default=""/>
   <sequential>
    <if>
-    <not>
-     <uptodate
-      srcfile="@{prefix}src/@{dir}/@{file}.jjt"
-      targetfile="@{prefix}build/gen-src/jjtree/@{dir}/@{file}.jj"/>
-    </not>
+    <condition>
+     <not>
+      <uptodate
+       srcfile="@{prefix}src/@{dir}/@{file}.jjt"
+       targetfile="@{prefix}build/gen-src/jjtree/@{dir}/@{file}.jj"/>
+     </not>
+    </condition>
     <commands>
      <delete dir="@{prefix}build/gen-src/jjtree/@{dir}"/>
      <mkdir dir="@{prefix}build/gen-src/jjtree/@{dir}"/>
@@ -192,11 +214,13 @@ under the License.
     </commands>
    </if>
    <if>
-    <not>
-     <uptodate
-      srcfile="@{prefix}build/gen-src/jjtree/@{dir}/@{file}.jj"
-      targetfile="@{prefix}build/gen-src/javacc/@{dir}/@{file}.java"/>
-    </not>
+    <condition>
+     <not>
+      <uptodate
+       srcfile="@{prefix}build/gen-src/jjtree/@{dir}/@{file}.jj"
+       targetfile="@{prefix}build/gen-src/javacc/@{dir}/@{file}.java"/>
+     </not>
+    </condition>
     <commands>
      <delete dir="@{prefix}build/gen-src/javacc/@{dir}"/>
      <mkdir dir="@{prefix}build/gen-src/javacc/@{dir}"/>

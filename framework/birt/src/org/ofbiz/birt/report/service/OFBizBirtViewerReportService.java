@@ -21,8 +21,6 @@ package org.ofbiz.birt.report.service;
 import java.io.File;
 import java.io.OutputStream;
 import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -51,10 +49,8 @@ import org.eclipse.birt.report.utility.ParameterAccessor;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.birt.container.BirtContainer;
-import org.ofbiz.entity.Delegator;
-import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.jdbc.ConnectionFactory;
 
+@SuppressWarnings("deprecation")
 public class OFBizBirtViewerReportService extends BirtViewerReportService {
 
     public final static String module = OFBizBirtViewerReportService.class.getName();
@@ -63,6 +59,7 @@ public class OFBizBirtViewerReportService extends BirtViewerReportService {
         super(servletContext);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public String runReport(IViewerReportDesignHandle design, String outputDocName, InputOptions runOptions, Map parameters,
             Map displayTexts, List<Exception> errorList) throws ReportServiceException {
@@ -137,6 +134,7 @@ public class OFBizBirtViewerReportService extends BirtViewerReportService {
      * @return list of exceptions which occured during the run or null
      * @throws RemoteException
      */
+    @SuppressWarnings("unchecked")
     public List<Exception> runReport(HttpServletRequest request,
             IReportRunnable runnable, String documentName, Locale locale,
             TimeZone timeZone, Map parameters, Map displayTexts, Integer maxRows)
@@ -217,6 +215,7 @@ public class OFBizBirtViewerReportService extends BirtViewerReportService {
      *      java.lang.String, org.eclipse.birt.report.service.api.InputOptions,
      *      java.util.Map, java.io.OutputStream, java.util.List, java.util.Map)
      */
+    @SuppressWarnings("unchecked")
     @Override
     public void runAndRenderReport(IViewerReportDesignHandle design,
             String outputDocName, InputOptions options, Map parameters,

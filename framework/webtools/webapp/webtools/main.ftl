@@ -95,8 +95,10 @@ under the License.
           <li><a href="<@ofbizUrl>viewdatafile</@ofbizUrl>">${uiLabelMap.WebtoolsWorkWithDataFiles}</a></li>
         </#if>
         <li><h3>${uiLabelMap.WebtoolsMiscSetupTools}</h3></li>
-        <#if security.hasPermission("PORTALPAGE_MAINT", session)>
+        <#if security.hasPermission("PORTALPAGE_ADMIN", session)>
           <li><a href="<@ofbizUrl>FindPortalPage</@ofbizUrl>">${uiLabelMap.WebtoolsAdminPortalPage}</a></li>
+          <li><a href="<@ofbizUrl>FindGeo</@ofbizUrl>">${uiLabelMap.WebtoolsGeoManagement}</a></li>
+          <li><a href="<@ofbizUrl>WebtoolsLayoutDemo</@ofbizUrl>">${uiLabelMap.WebtoolsLayoutDemo}</a></li>
         </#if>
         <#if security.hasPermission("ENUM_STATUS_MAINT", session)>
           <#--

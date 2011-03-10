@@ -19,7 +19,7 @@ under the License.
 
 <#include "component://widget/templates/htmlFormMacroLibrary.ftl"/>
 
-<#macro lookupField className="" alert="" name="" value="" size="20" maxlength="20" id="" event="" action="" disabled="" autocomplete="" descriptionFieldName="" formName="" fieldFormName="" targetParameterIter="" imgSrc="" ajaxUrl="" ajaxEnabled="" presentation="" width="20" height="20" position="topleft" fadeBackground="" clearText="" showDescription="" initiallyCollapsed="">
+<#macro lookupField className="" alert="" name="" value="" size="20" maxlength="20" id="" event="" action="" disabled="" autocomplete="" descriptionFieldName="" formName="" fieldFormName="" targetParameterIter="" imgSrc="" ajaxUrl="" ajaxEnabled="" presentation="layer" width="" height="" position="topleft" fadeBackground="true" clearText="" showDescription="" initiallyCollapsed="">
     <#if (!ajaxEnabled?has_content)>
         <#assign javascriptEnabled = Static["org.ofbiz.base.util.UtilHttp"].isJavaScriptEnabled(request) />
         <#if (javascriptEnabled)>
@@ -31,7 +31,7 @@ under the License.
     </#if>
     <#if (!ajaxUrl?has_content)>
         <#local ajaxUrl = requestAttributes._REQUEST_HANDLER_.makeLink(request, response, fieldFormName)/>
-        <#local ajaxUrl = id + "," + ajaxUrl + ",ajaxLookup=Y&amp;searchValueField=" + name />
+        <#local ajaxUrl = id + "," + ajaxUrl + ",ajaxLookup=Y" />
     </#if>
     <#if (!showDescription?has_content)>
         <#local showDescription = Static["org.ofbiz.base.util.UtilProperties"].getPropertyValue("widget.properties", "widget.lookup.showDescription", "N")>
@@ -41,6 +41,11 @@ under the License.
             <#local showDescription = "false" />
         </#if>
     </#if>
+        <#if "true" == disabled>
+            <#local disabled = true/>
+        <#else>
+            <#local disabled = false />
+        </#if>    
     <@renderLookupField className alert name value size maxlength id event action disabled autocomplete descriptionFieldName formName fieldFormName targetParameterIter imgSrc ajaxUrl ajaxEnabled presentation width height position fadeBackground clearText showDescription initiallyCollapsed/>
 </#macro>
 
@@ -50,27 +55,24 @@ under the License.
         <#local javaScriptEnabled = Static["org.ofbiz.base.util.UtilHttp"].isJavaScriptEnabled(request) />
     </#if>
     <#if (commonUrl?has_content)>
-        <#if (!firstUr?has_content)>
+        <#if (!firstUrl?has_content)>
             <#local firstUrl=commonUrl+"VIEW_SIZE=${viewSize}&amp;VIEW_INDEX=${viewIndexFirst}"/>
         </#if>
         <#if (!previousUrl?has_content)>
              <#local previousUrl=commonUrl+"VIEW_SIZE=${viewSize}&amp;VIEW_INDEX=${viewIndexPrevious}"/>
         </#if>
-        <#if (!firstUr?has_content)>
+        <#if (!nextUrl?has_content)>
             <#local nextUrl=commonUrl+"VIEW_SIZE=${viewSize}&amp;VIEW_INDEX=${viewIndexNext}"/>
         </#if>
-        <#if (!firstUr?has_content)>
+        <#if (!lastUrl?has_content)>
             <#local lastUrl=commonUrl+"VIEW_SIZE=${viewSize}&amp;VIEW_INDEX=${viewIndexLast}"/>
         </#if>
-        <#if (!firstUr?has_content)>
+        <#if (!selectUrl?has_content)>
             <#local selectUrl=commonUrl+"VIEW_SIZE=${viewSize}&amp;VIEW_INDEX="/>
         </#if>
-        <#if (!firstUr?has_content)>
+        <#if (!selectSizeUrl?has_content)>
             <#local selectSizeUrl=commonUrl+"VIEW_SIZE='+this.value+'&amp;VIEW_INDEX=0"/>
         </#if>
     </#if>
-    <#if (!commonDisplaying?has_content)>
-        <#local commonDisplaying="${lowIndex} - ${highIndex} ${uiLabelMap.CommonOf} ${listSize}"/>    
-    </#if>
-    <@renderNextPrev paginateStyle paginateFirstStyle viewIndex highIndex listSize viewSize ajaxEnabled javaScriptEnabled ajaxFirstUrl firstUrl paginateFirstLabel paginatePreviousStyle ajaxPreviousUrl previousUrl paginatePreviousLabel pageLabel ajaxSelectUrl selectUrl ajaxSelectSizeUrl selectSizeUrl commonDisplaying paginateNextStyle ajaxNextUrl nextUrl paginateNextLabel paginateLastStyle ajaxLastUrl lastUrl paginateLastLabel paginateViewSizeLabel />
+    <@renderNextPrev paginateStyle paginateFirstStyle viewIndex highIndex listSize viewSize ajaxEnabled javaScriptEnabled ajaxFirstUrl firstUrl uiLabelMap.CommonFirst paginatePreviousStyle ajaxPreviousUrl previousUrl uiLabelMap.CommonPrevious uiLabelMap.CommonPage ajaxSelectUrl selectUrl ajaxSelectSizeUrl selectSizeUrl commonDisplaying paginateNextStyle ajaxNextUrl nextUrl uiLabelMap.CommonNext paginateLastStyle ajaxLastUrl lastUrl uiLabelMap.CommonLast uiLabelMap.CommonItemsPerPage/>
 </#macro>

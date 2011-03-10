@@ -210,8 +210,8 @@ under the License.
 
     <PartyAcctgPreference partyId="Company" taxFormId="US_IRS_1120" cogsMethodId="COGS_LIFO" baseCurrencyUomId="USD"
         invoiceSeqCustMethId="INV_HOOK_ENF_SEQ" invoiceIdPrefix="CI"
-        quoteSeqCustMethId="QUOTE_HOOK_ENF_SEQ" quoteIdPrefix="CQ"
-        orderSeqCustMethId="ORDER_HOOK_ENF_SEQ" orderIdPrefix="CO"
+        quoteIdPrefix="CQ"
+        orderIdPrefix="CO"
         errorGlJournalId="ERROR_JOURNAL"/>
 
     <!-- Chart Of Accounts -->
@@ -327,7 +327,7 @@ under the License.
     <PaymentGlAccountTypeMap organizationPartyId="Company" paymentTypeId="COMMISSION_PAYMENT" glAccountTypeId="COMMISSIONS_PAYABLE"/>
     <PaymentGlAccountTypeMap organizationPartyId="Company" paymentTypeId="PAY_CHECK" glAccountTypeId="ACCPAYABLE_UNAPPLIED"/>
     <PaymentGlAccountTypeMap organizationPartyId="Company" paymentTypeId="GC_WITHDRAWAL" glAccountTypeId="CUSTOMER_CREDIT"/>
-    <PaymentGlAccountTypeMap organizationPartyId="Company" paymentTypeId="SALES_TAX_PAYMENT" glAccountTypeId="TAX_ACCOUNT"/>
+    <PaymentGlAccountTypeMap organizationPartyId="Company" paymentTypeId="SALES_TAX_PAYMENT" glAccountTypeId="ACCPAYABLE_UNAPPLIED"/>
     <PaymentGlAccountTypeMap organizationPartyId="Company" paymentTypeId="PAYROL_PAYMENT" glAccountTypeId="OPERATING_EXPENSE"/>
     <PaymentGlAccountTypeMap organizationPartyId="Company" paymentTypeId="PAYROLL_TAX_PAYMENT" glAccountTypeId="TAX_ACCOUNT"/>
     <PaymentGlAccountTypeMap organizationPartyId="Company" paymentTypeId="INCOME_TAX_PAYMENT" glAccountTypeId="TAX_ACCOUNT"/>
@@ -393,20 +393,21 @@ under the License.
     <VarianceReasonGlAccount organizationPartyId="Company" varianceReasonId="VAR_SAMPLE" glAccountId="625000"/>
 
     <!-- Some Sample Time Periods, two Years with Quarters -->
-    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6010" periodTypeId="FISCAL_YEAR" fromDate="2009-01-01" thruDate="2010-01-01" isClosed="N" periodNum="1" periodName="2009"/>
-    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6011" periodTypeId="FISCAL_QUARTER" fromDate="2009-01-01" thruDate="2009-04-01" isClosed="N" periodNum="2" periodName="2009/Q1" parentPeriodId="6010"/>
-    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6012" periodTypeId="FISCAL_QUARTER" fromDate="2009-04-01" thruDate="2009-07-01" isClosed="N" periodNum="3" periodName="2009/Q2" parentPeriodId="6010"/>
-    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6013" periodTypeId="FISCAL_QUARTER" fromDate="2009-07-01" thruDate="2009-10-01" isClosed="N" periodNum="4" periodName="2009/Q3" parentPeriodId="6010"/>
-    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6014" periodTypeId="FISCAL_QUARTER" fromDate="2009-10-01" thruDate="2010-01-01" isClosed="N" periodNum="5" periodName="2009/Q4" parentPeriodId="6010"/>
-    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6015" periodTypeId="FISCAL_YEAR" fromDate="2010-01-01" thruDate="2011-01-01" isClosed="N" periodNum="1" periodName="2010"/>
-    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6016" periodTypeId="FISCAL_QUARTER" fromDate="2010-01-01" thruDate="2010-04-01" isClosed="N" periodNum="2" periodName="2010/Q1" parentPeriodId="6015"/>
-    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6017" periodTypeId="FISCAL_QUARTER" fromDate="2010-04-01" thruDate="2010-07-01" isClosed="N" periodNum="3" periodName="2010/Q2" parentPeriodId="6015"/>
-    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6018" periodTypeId="FISCAL_QUARTER" fromDate="2010-07-01" thruDate="2010-10-01" isClosed="N" periodNum="4" periodName="2010/Q3" parentPeriodId="6015"/>
-    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6019" periodTypeId="FISCAL_QUARTER" fromDate="2010-10-01" thruDate="2011-01-01" isClosed="N" periodNum="5" periodName="2010/Q4" parentPeriodId="6015"/>
+    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6010" periodTypeId="FISCAL_YEAR" fromDate="2010-01-01" thruDate="2011-01-01" isClosed="N" periodNum="1" periodName="2010"/>
+    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6011" periodTypeId="FISCAL_QUARTER" fromDate="2010-01-01" thruDate="2010-04-01" isClosed="N" periodNum="2" periodName="2010/Q1" parentPeriodId="6010"/>
+    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6012" periodTypeId="FISCAL_QUARTER" fromDate="2010-04-01" thruDate="2010-07-01" isClosed="N" periodNum="3" periodName="2010/Q2" parentPeriodId="6010"/>
+    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6013" periodTypeId="FISCAL_QUARTER" fromDate="2010-07-01" thruDate="2010-10-01" isClosed="N" periodNum="4" periodName="2010/Q3" parentPeriodId="6010"/>
+    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6014" periodTypeId="FISCAL_QUARTER" fromDate="2010-10-01" thruDate="2011-01-01" isClosed="N" periodNum="5" periodName="2010/Q4" parentPeriodId="6010"/>
+    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6015" periodTypeId="FISCAL_YEAR" fromDate="2011-01-01" thruDate="2012-01-01" isClosed="N" periodNum="1" periodName="2011"/>
+    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6016" periodTypeId="FISCAL_QUARTER" fromDate="2011-01-01" thruDate="2011-04-01" isClosed="N" periodNum="2" periodName="2011/Q1" parentPeriodId="6015"/>
+    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6017" periodTypeId="FISCAL_QUARTER" fromDate="2011-04-01" thruDate="2011-07-01" isClosed="N" periodNum="3" periodName="2011/Q2" parentPeriodId="6015"/>
+    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6018" periodTypeId="FISCAL_QUARTER" fromDate="2011-07-01" thruDate="2011-10-01" isClosed="N" periodNum="4" periodName="2011/Q3" parentPeriodId="6015"/>
+    <CustomTimePeriod organizationPartyId="Company" customTimePeriodId="6019" periodTypeId="FISCAL_QUARTER" fromDate="2011-10-01" thruDate="2012-01-01" isClosed="N" periodNum="5" periodName="2011/Q4" parentPeriodId="6015"/>
 
     <!-- to convert demo invoice -->
     <UomConversionDated uomId="USD" uomIdTo="EUR" fromDate="2001-01-01 00:00:00.0" conversionFactor="0.7"/>
     <UomConversionDated uomId="EUR" uomIdTo="USD" fromDate="2001-01-01 00:00:00.0" conversionFactor="1.5"/>
+    <UomConversionDated uomId="USD" uomIdTo="USD" fromDate="2001-01-01 00:00:00.0" conversionFactor="1"/>
 
     <!-- Gl Reconciliation -->
     <GlReconciliation glReconciliationId="9000" glReconciliationName="demoGlReconciliation" glAccountId="111100" statusId="GLREC_RECONCILED" organizationPartyId="Company" reconciledBalance="75000.00" reconciledDate="2009-08-08 20:03:14.000"/>

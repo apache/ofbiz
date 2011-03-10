@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.security.cert.X509Certificate;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -53,7 +54,6 @@ import org.ofbiz.webapp.event.EventFactory;
 import org.ofbiz.webapp.event.EventHandler;
 import org.ofbiz.webapp.event.EventHandlerException;
 import org.ofbiz.webapp.stats.ServerHitBin;
-import org.ofbiz.webapp.stats.VisitHandler;
 import org.ofbiz.webapp.view.ViewFactory;
 import org.ofbiz.webapp.view.ViewHandler;
 import org.ofbiz.webapp.view.ViewHandlerException;
@@ -173,9 +173,9 @@ public class RequestHandler {
 
             // Check to make sure we are allowed to access this request directly. (Also checks if this request is defined.)
             // If the request cannot be called, or is not defined, check and see if there is a default-request we can process
-            String defaultRequest = controllerConfig.getDefaultRequest();
-            if (!requestMap.securityDirectRequest && defaultRequest != null) {
-                if (!requestMapMap.get(defaultRequest).securityDirectRequest) {
+            if (!requestMap.securityDirectRequest) {
+                String defaultRequest = controllerConfig.getDefaultRequest();
+                if (defaultRequest == null || !requestMapMap.get(defaultRequest).securityDirectRequest) {
                     // use the same message as if it was missing for security reasons, ie so can't tell if it is missing or direct request is not allowed
                     throw new RequestHandlerException(requestMissingErrorMessage);
                 } else {
@@ -184,7 +184,9 @@ public class RequestHandler {
             }
             boolean forceHttpSession = "true".equals(context.getInitParameter("forceHttpSession"));
             // Check if we SHOULD be secure and are not.
-            if (!request.isSecure() && requestMap.securityHttps) {
+            String forwardedProto = request.getHeader("X-Forwarded-Proto");
+            boolean isForwardedSecure = UtilValidate.isNotEmpty(forwardedProto) && "HTTPS".equals(forwardedProto.toUpperCase());
+            if ((!request.isSecure() && !isForwardedSecure) && requestMap.securityHttps) {
                 // If the request method was POST then return an error to avoid problems with XSRF where the request may have come from another machine/program and had the same session ID but was not encrypted as it should have been (we used to let it pass to not lose data since it was too late to protect that data anyway)
                 if (request.getMethod().equalsIgnoreCase("POST")) {
                     // we can't redirect with the body parameters, and for better security from XSRF, just return an error message
@@ -222,6 +224,7 @@ public class RequestHandler {
                     if (newUrl.toUpperCase().startsWith("HTTPS")) {
                         // if we are supposed to be secure, redirect secure.
                         callRedirect(newUrl, response, request);
+                        return;
                     }
                 }
             // if this is a new session and forceHttpSession is true and the request is secure but does not
@@ -236,6 +239,7 @@ public class RequestHandler {
                 String newUrl = RequestHandler.makeUrl(request, response, urlBuf.toString(), true, false, false);
                 if (newUrl.toUpperCase().startsWith("HTTP")) {
                     callRedirect(newUrl, response, request);
+                    return;
                 }
             }
 
@@ -274,23 +278,20 @@ public class RequestHandler {
             }
 
             // If its the first visit run the first visit events.
-            if (this.trackVisit(request) && session.getAttribute("visit") == null) {
+            if (this.trackVisit(request) && session.getAttribute("_FIRST_VISIT_EVENTS_") == null) {
                 if (Debug.infoOn())
                     Debug.logInfo("This is the first request in this visit." + " sessionId=" + UtilHttp.getSessionId(request), module);
-                // This isn't an event because it is required to run. We do not want to make it optional.
-                GenericValue visit = VisitHandler.getVisit(session);
-                if (visit != null) {
-                    for (ConfigXMLReader.Event event: controllerConfig.getFirstVisitEventList().values()) {
-                        try {
-                            String returnString = this.runEvent(request, response, event, null, "firstvisit");
-                            if (returnString != null && !returnString.equalsIgnoreCase("success")) {
-                                throw new EventHandlerException("First-Visit event did not return 'success'.");
-                            } else if (returnString == null) {
-                                interruptRequest = true;
-                            }
-                        } catch (EventHandlerException e) {
-                            Debug.logError(e, module);
+                session.setAttribute("_FIRST_VISIT_EVENTS_", "complete");
+                for (ConfigXMLReader.Event event: controllerConfig.getFirstVisitEventList().values()) {
+                    try {
+                        String returnString = this.runEvent(request, response, event, null, "firstvisit");
+                        if (returnString != null && !returnString.equalsIgnoreCase("success")) {
+                            throw new EventHandlerException("First-Visit event did not return 'success'.");
+                        } else if (returnString == null) {
+                            interruptRequest = true;
                         }
+                    } catch (EventHandlerException e) {
+                        Debug.logError(e, module);
                     }
                 }
             }
@@ -693,11 +694,10 @@ public class RequestHandler {
         return nextPage;
     }
 
-    @SuppressWarnings("unchecked")
     private void callRedirect(String url, HttpServletResponse resp, HttpServletRequest req) throws RequestHandlerException {
         if (Debug.infoOn()) Debug.logInfo("Sending redirect to: [" + url + "], sessionId=" + UtilHttp.getSessionId(req), module);
         // set the attributes in the session so we can access it.
-        java.util.Enumeration attributeNameEnum = req.getAttributeNames();
+        Enumeration<String> attributeNameEnum = UtilGenerics.cast(req.getAttributeNames());
         Map<String, Object> reqAttrMap = FastMap.newInstance();
         while (attributeNameEnum.hasMoreElements()) {
             String name = (String) attributeNameEnum.nextElement();
@@ -754,7 +754,11 @@ public class RequestHandler {
         // add in the attributes as well so everything needed for the rendering context will be in place if/when we get back to this view
         paramMap.putAll(UtilHttp.getAttributeMap(req));
         UtilMisc.makeMapSerializable(paramMap);
-        req.getSession().setAttribute("_LAST_VIEW_NAME_", view);
+        if (paramMap.containsKey("_LAST_VIEW_NAME_")) { // Used by lookups to keep the real view (request)
+            req.getSession().setAttribute("_LAST_VIEW_NAME_", paramMap.get("_LAST_VIEW_NAME_"));
+        } else {
+            req.getSession().setAttribute("_LAST_VIEW_NAME_", view);
+        }
         req.getSession().setAttribute("_LAST_VIEW_PARAMS_", paramMap);
 
         if ("SAVED".equals(saveName)) {
@@ -904,7 +908,8 @@ public class RequestHandler {
      * @return
      */
     public String makeQueryString(HttpServletRequest request, ConfigXMLReader.RequestResponse requestResponse) {
-        if (requestResponse == null || requestResponse.redirectParameterMap.size() == 0) {
+        if (requestResponse == null || 
+                (requestResponse.redirectParameterMap.size() == 0 && requestResponse.redirectParameterValueMap.size() == 0)) {
             Map<String, Object> urlParams = UtilHttp.getUrlOnlyParameterMap(request);
             String queryString = UtilHttp.urlEncodeArgs(urlParams, false);
             if(UtilValidate.isEmpty(queryString)) {
@@ -922,6 +927,19 @@ public class RequestHandler {
                 if (value == null) {
                     value = request.getParameter(from);
                 }
+
+                if (UtilValidate.isNotEmpty(value)) {
+                    if (queryString.length() > 1) {
+                        queryString.append("&");
+                    }
+                    queryString.append(name);
+                    queryString.append("=");
+                    queryString.append(value);
+                }
+            }
+            for (Map.Entry<String, String> entry: requestResponse.redirectParameterValueMap.entrySet()) {
+                String name = entry.getKey();
+                String value = entry.getValue();
 
                 if (UtilValidate.isNotEmpty(value)) {
                     if (queryString.length() > 1) {

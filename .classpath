@@ -2,8 +2,10 @@
 <classpath>
     <classpathentry kind="con" path="GROOVY_SUPPORT" exported="true"/>
     <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-    <classpathentry kind="lib" path="applications/content/lib/lucene-core-2.4.1.jar"/>
+    <classpathentry kind="lib" path="applications/content/lib/lucene-core-3.0.3.jar"/>
     <classpathentry kind="lib" path="applications/content/lib/poi-3.2-FINAL-20081019.jar"/>
+    <classpathentry kind="lib" path="applications/product/lib/watermarker-0.0.4.jar"/>
+    <classpathentry kind="lib" path="applications/product/lib/dozer-4.2.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/ant-1.7.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/ant-junit-1.7.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/ant-launcher-1.7.1.jar"/>
@@ -17,13 +19,14 @@
     <classpathentry kind="lib" path="framework/base/lib/batik-all-1.7.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/clhm-release-1.0-lru.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/hamcrest-all-1.2.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/fop-0.95.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/freemarker-2.3.15.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/fop-1.0.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/freemarker-2.3.10.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/httpclient-4.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/httpcore-4.0.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/httpunit.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/ical4j-1.0-rc2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/icu4j-4_4.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/ivy-2.2.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/jakarta-regexp-1.5.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/javolution-5.4.3.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/jcip-annotations-1.0.jar"/>
@@ -47,7 +50,7 @@
     <classpathentry kind="lib" path="framework/base/lib/ws-commons-util-1.0.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/xml-apis-2.9.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/xml-apis-ext-1.3.04.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/xmlgraphics-commons-1.3.1.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/xmlgraphics-commons-1.4.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/xmlrpc-client-3.1.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/xmlrpc-common-3.1.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/xmlrpc-server-3.1.2.jar"/>
@@ -60,7 +63,7 @@
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-digester-1.8.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-discovery-0.4.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-el-1.0.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/commons/commons-fileupload-1.2.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/commons/commons-fileupload-1.2.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-io-1.4.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-lang-2.4.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-logging-1.1.jar"/>
@@ -78,10 +81,10 @@
     <classpathentry kind="lib" path="framework/base/lib/j2eespecs/geronimo-jta_1.1_spec-1.1.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/j2eespecs/geronimo-qname_1.1_spec-1.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/j2eespecs/geronimo-saaj_1.1_spec-1.0.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/j2eespecs/tomcat-6.0.26-annotations-api.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/j2eespecs/tomcat-6.0.26-el-api.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/j2eespecs/tomcat-6.0.26-jsp-api.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/j2eespecs/tomcat-6.0.26-servlet-api.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/j2eespecs/tomcat-6.0.32-annotations-api.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/j2eespecs/tomcat-6.0.32-el-api.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/j2eespecs/tomcat-6.0.32-jsp-api.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/j2eespecs/tomcat-6.0.32-servlet-api.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/scripting/antlr-2.7.6.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/scripting/asm-3.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/scripting/asm-analysis-3.2.jar"/>
@@ -89,9 +92,11 @@
     <classpathentry kind="lib" path="framework/base/lib/scripting/asm-util-3.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/scripting/bsf-2.4.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/scripting/bsh-2.0b4.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/scripting/groovy-all-1.7.3.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/scripting/groovy-all-1.7.7.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/scripting/jakarta-oro-2.0.8.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/scripting/jython-nooro.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/scripting/jansi-1.2.1.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/scripting/jline-0.9.94.jar"/>
     <classpathentry kind="lib" path="framework/birt/lib/chartengineapi.jar"/>
     <classpathentry kind="lib" path="framework/birt/lib/chartitemapi.jar"/>
     <classpathentry kind="lib" path="framework/birt/lib/coreapi.jar"/>
@@ -109,16 +114,16 @@
     <classpathentry kind="lib" path="framework/birt/lib/saaj.jar"/>
     <classpathentry kind="lib" path="framework/birt/lib/scriptapi.jar"/>
     <classpathentry kind="lib" path="framework/birt/lib/viewservlets.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.26-catalina.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.26-catalina-ha.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.26-catalina-tribes.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.26-jasper.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.26-jasper-el.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.26-jasper-jdt.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.26-tomcat-coyote.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.26-tomcat-dbcp.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.26-tomcat-juli.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.26-tomcat-juli-adapters.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/ecj-3.3.1.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.32-catalina.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.32-catalina-ha.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.32-catalina-tribes.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.32-jasper.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.32-jasper-el.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.32-tomcat-coyote.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.32-tomcat-dbcp.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.32-tomcat-juli.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.32-tomcat-juli-adapters.jar"/>
     <classpathentry kind="lib" path="framework/entity/lib/commons-dbcp-1.3-20091113-r835956.jar"/>
     <classpathentry kind="lib" path="framework/entity/lib/ofbiz-minerva.jar"/>
     <classpathentry kind="lib" path="framework/geronimo/lib/geronimo-connector-2.1.1.jar"/>
@@ -146,18 +151,18 @@
     <classpathentry kind="lib" path="framework/service/lib/axis.jar"/>
     <classpathentry kind="lib" path="framework/service/lib/axis-ant.jar"/>
     <classpathentry kind="lib" path="framework/service/lib/wsdl4j.jar"/>
-    <classpathentry kind="lib" path="framework/service/lib/axiom-api-1.2.8.jar"/>
-    <classpathentry kind="lib" path="framework/service/lib/axiom-impl-1.2.8.jar"/>
-    <classpathentry kind="lib" path="framework/service/lib/axis2-kernel-1.5.1.jar"/>
-    <classpathentry kind="lib" path="framework/service/lib/axis2-transport-http-1.5.1.jar"/>
-    <classpathentry kind="lib" path="framework/service/lib/axis2-transport-local-1.5.1.jar"/>
+    <classpathentry kind="lib" path="framework/service/lib/axiom-api-1.2.9.jar"/>
+    <classpathentry kind="lib" path="framework/service/lib/axiom-impl-1.2.9.jar"/>
+    <classpathentry kind="lib" path="framework/service/lib/axis2-kernel-1.5.2.jar"/>
+    <classpathentry kind="lib" path="framework/service/lib/axis2-transport-http-1.5.2.jar"/>
+    <classpathentry kind="lib" path="framework/service/lib/axis2-transport-local-1.5.2.jar"/>
     <classpathentry kind="lib" path="framework/service/lib/commons-httpclient-3.1.jar"/>
     <classpathentry kind="lib" path="framework/service/lib/neethi-2.0.4.jar"/>
     <classpathentry kind="lib" path="framework/service/lib/XmlSchema-1.4.3.jar"/>
     <classpathentry kind="lib" path="framework/testtools/lib/selenium-java-client-driver.jar"/>
     <classpathentry kind="lib" path="framework/webapp/lib/DataVision-1.0.0.jar"/>
     <classpathentry kind="lib" path="framework/webapp/lib/ezmorph-0.9.1.jar"/>
-    <classpathentry kind="lib" path="framework/webapp/lib/itext-2.0.1.jar"/>
+    <classpathentry kind="lib" path="framework/webapp/lib/iText-2.1.7.jar"/>
     <classpathentry kind="lib" path="framework/webapp/lib/json-lib-2.2.3-jdk15.jar"/>
     <classpathentry kind="lib" path="framework/webapp/lib/rome-0.9.jar"/>
     <classpathentry kind="lib" path="framework/webapp/lib/velocity-1.6.1.jar"/>
@@ -208,7 +213,7 @@
     <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/ebaycalls.jar"/>
     <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/ebaysdkcore.jar"/>
     <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/helper.jar"/>
-    <classpathentry kind="src" path="applications/accounting/src" excluding="org/ofbiz/accounting/thirdparty/cybersource/**|org/ofbiz/accounting/thirdparty/verisign/**|org/ofbiz/accounting/thirdparty/worldpay/**|org/ofbiz/accounting/thirdparty/paypal/PayPalServices.java|org/ofbiz/accounting/thirdparty/orbital/**"/>
+    <classpathentry kind="src" path="applications/accounting/src" excluding="org/ofbiz/accounting/thirdparty/cybersource/**|org/ofbiz/accounting/thirdparty/verisign/**|org/ofbiz/accounting/thirdparty/worldpay/**|org/ofbiz/accounting/thirdparty/paypal/PayPalServices.java|org/ofbiz/accounting/thirdparty/orbital/**|org/ofbiz/accounting/thirdparty/securepay/**|org/ofbiz/accounting/thirdparty/ideal/**"/>
     <classpathentry kind="src" path="applications/content/src" excluding="org/ofbiz/content/openoffice/|org/ofbiz/content/report/"/>
     <classpathentry kind="src" path="applications/manufacturing/src"/>
     <classpathentry kind="src" path="applications/marketing/src"/>

@@ -19,8 +19,6 @@
 package org.ofbiz.order.shoppingcart.shipping;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -45,9 +43,9 @@ public class ShippingEstimateWrapper {
     protected List<GenericValue> shippingMethods = null;
 
     protected GenericValue shippingAddress = null;
-    protected Map shippableItemFeatures = null;
-    protected List shippableItemSizes = null;
-    protected List shippableItemInfo = null;
+    protected Map<String, BigDecimal> shippableItemFeatures = null;
+    protected List<BigDecimal> shippableItemSizes = null;
+    protected List<Map<String, Object>> shippableItemInfo = null;
     protected String productStoreId = null;
     protected BigDecimal shippableQuantity = BigDecimal.ZERO;
     protected BigDecimal shippableWeight = BigDecimal.ZERO;
@@ -97,7 +95,7 @@ public class ShippingEstimateWrapper {
                 String productStoreShipMethId = shipMethod.getString("productStoreShipMethId");
                 String shippingCmId = shippingAddress != null ? shippingAddress.getString("contactMechId") : null;
 
-                Map estimateMap = ShippingEvents.getShipGroupEstimate(dispatcher, delegator, "SALES_ORDER",
+                Map<String, Object> estimateMap = ShippingEvents.getShipGroupEstimate(dispatcher, delegator, "SALES_ORDER",
                         shippingMethodTypeId, carrierPartyId, carrierRoleTypeId, shippingCmId, productStoreId,
                         supplierPartyId, shippableItemInfo, shippableWeight, shippableQuantity, shippableTotal, partyId, productStoreShipMethId);
 
@@ -118,7 +116,7 @@ public class ShippingEstimateWrapper {
     }
 
     public BigDecimal getShippingEstimate(GenericValue storeCarrierShipMethod) {
-        return (BigDecimal) shippingEstimates.get(storeCarrierShipMethod);
+        return shippingEstimates.get(storeCarrierShipMethod);
     }
 
 }

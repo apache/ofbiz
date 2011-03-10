@@ -44,6 +44,8 @@ partyIds.add(organizationPartyId);
 // Get the group of account classes that will be used to position accounts in the proper section of the financial statement
 GenericValue revenueGlAccountClass = delegator.findOne("GlAccountClass", UtilMisc.toMap("glAccountClassId", "REVENUE"), true);
 List revenueAccountClassIds = UtilAccounting.getDescendantGlAccountClassIds(revenueGlAccountClass);
+GenericValue contraRevenueGlAccountClass = delegator.findOne("GlAccountClass", UtilMisc.toMap("glAccountClassId", "CONTRA_REVENUE"), true);
+List contraRevenueAccountClassIds = UtilAccounting.getDescendantGlAccountClassIds(contraRevenueGlAccountClass);
 GenericValue incomeGlAccountClass = delegator.findOne("GlAccountClass", UtilMisc.toMap("glAccountClassId", "INCOME"), true);
 List incomeAccountClassIds = UtilAccounting.getDescendantGlAccountClassIds(incomeGlAccountClass);
 GenericValue expenseGlAccountClass = delegator.findOne("GlAccountClass", UtilMisc.toMap("glAccountClassId", "EXPENSE"), true);
@@ -52,6 +54,8 @@ GenericValue cogsExpenseGlAccountClass = delegator.findOne("GlAccountClass", Uti
 List cogsExpenseAccountClassIds = UtilAccounting.getDescendantGlAccountClassIds(cogsExpenseGlAccountClass);
 GenericValue sgaExpenseGlAccountClass = delegator.findOne("GlAccountClass", UtilMisc.toMap("glAccountClassId", "SGA_EXPENSE"), true);
 List sgaExpenseAccountClassIds = UtilAccounting.getDescendantGlAccountClassIds(sgaExpenseGlAccountClass);
+GenericValue depreciationGlAccountClass = delegator.findOne("GlAccountClass", UtilMisc.toMap("glAccountClassId", "DEPRECIATION"), true);
+List depreciationAccountClassIds = UtilAccounting.getDescendantGlAccountClassIds(depreciationGlAccountClass);
 
 List mainAndExprs = FastList.newInstance();
 mainAndExprs.add(EntityCondition.makeCondition("organizationPartyId", EntityOperator.IN, partyIds));
@@ -105,7 +109,48 @@ if (transactionTotals) {
 context.revenueAccountBalanceList = accountBalanceList;
 context.revenueAccountBalanceList.add(UtilMisc.toMap("accountName", "TOTAL REVENUES", "balance", balanceTotal));
 context.revenueBalanceTotal = balanceTotal;
-balanceTotalList.add(UtilMisc.toMap("totalName", "AccountingNetSales", "balance", balanceTotal));
+
+// CONTRA REVENUE
+// account balances
+accountBalanceList = [];
+transactionTotals = [];
+balanceTotal = BigDecimal.ZERO;
+List contraRevenueAndExprs = FastList.newInstance(mainAndExprs);
+contraRevenueAndExprs.add(EntityCondition.makeCondition("glAccountClassId", EntityOperator.IN, contraRevenueAccountClassIds));
+transactionTotals = delegator.findList("AcctgTransEntrySums", EntityCondition.makeCondition(contraRevenueAndExprs, EntityOperator.AND), UtilMisc.toSet("glAccountId", "accountName", "accountCode", "debitCreditFlag", "amount"), UtilMisc.toList("glAccountId"), null, false);
+if (transactionTotals) {
+    Map transactionTotalsMap = [:];
+    balanceTotalCredit = BigDecimal.ZERO;
+    balanceTotalDebit = BigDecimal.ZERO;
+    transactionTotals.each { transactionTotal ->
+        Map accountMap = (Map)transactionTotalsMap.get(transactionTotal.glAccountId);
+        if (!accountMap) {
+            accountMap = UtilMisc.makeMapWritable(transactionTotal);
+            accountMap.remove("debitCreditFlag");
+            accountMap.remove("amount");
+            accountMap.put("D", BigDecimal.ZERO);
+            accountMap.put("C", BigDecimal.ZERO);
+            accountMap.put("balance", BigDecimal.ZERO);
+        }
+        UtilMisc.addToBigDecimalInMap(accountMap, transactionTotal.debitCreditFlag, transactionTotal.amount);
+        if ("D".equals(transactionTotal.debitCreditFlag)) {
+            balanceTotalDebit = balanceTotalDebit.add(transactionTotal.amount);
+        } else {
+            balanceTotalCredit = balanceTotalCredit.add(transactionTotal.amount);
+        }
+        BigDecimal debitAmount = (BigDecimal)accountMap.get("D");
+        BigDecimal creditAmount = (BigDecimal)accountMap.get("C");
+        // contra revenues are accounts of class DEBIT: the balance is given by debits minus credits
+        BigDecimal balance = debitAmount.subtract(creditAmount);
+        accountMap.put("balance", balance);
+        transactionTotalsMap.put(transactionTotal.glAccountId, accountMap);
+    }
+    accountBalanceList = UtilMisc.sortMaps(transactionTotalsMap.values().asList(), UtilMisc.toList("accountCode"));
+    // contra revenues are accounts of class DEBIT: the balance is given by debits minus credits
+    balanceTotal = balanceTotalDebit.subtract(balanceTotalCredit);
+}
+context.contraRevenueBalanceTotal = balanceTotal;
+balanceTotalList.add(UtilMisc.toMap("totalName", "TOTAL CONTRA REVENUE", "balance", balanceTotal));
 
 // EXPENSE
 // account balances
@@ -233,6 +278,47 @@ if (transactionTotals) {
 }
 sgaExpense = balanceTotal;
 
+//DEPRECIATION (DEPRECIATION)
+//account balances
+accountBalanceList = [];
+transactionTotals = [];
+balanceTotal = BigDecimal.ZERO;
+List depreciationAndExprs = FastList.newInstance(mainAndExprs);
+depreciationAndExprs.add(EntityCondition.makeCondition("glAccountClassId", EntityOperator.IN, depreciationAccountClassIds));
+transactionTotals = delegator.findList("AcctgTransEntrySums", EntityCondition.makeCondition(depreciationAndExprs, EntityOperator.AND), UtilMisc.toSet("glAccountId", "accountName", "accountCode", "debitCreditFlag", "amount"), UtilMisc.toList("glAccountId"), null, false);
+if (transactionTotals) {
+Map transactionTotalsMap = [:];
+balanceTotalCredit = BigDecimal.ZERO;
+balanceTotalDebit = BigDecimal.ZERO;
+transactionTotals.each { transactionTotal ->
+   Map accountMap = (Map)transactionTotalsMap.get(transactionTotal.glAccountId);
+   if (!accountMap) {
+       accountMap = UtilMisc.makeMapWritable(transactionTotal);
+       accountMap.remove("debitCreditFlag");
+       accountMap.remove("amount");
+       accountMap.put("D", BigDecimal.ZERO);
+       accountMap.put("C", BigDecimal.ZERO);
+       accountMap.put("balance", BigDecimal.ZERO);
+   }
+   UtilMisc.addToBigDecimalInMap(accountMap, transactionTotal.debitCreditFlag, transactionTotal.amount);
+   if ("D".equals(transactionTotal.debitCreditFlag)) {
+       balanceTotalDebit = balanceTotalDebit.add(transactionTotal.amount);
+   } else {
+       balanceTotalCredit = balanceTotalCredit.add(transactionTotal.amount);
+   }
+   BigDecimal debitAmount = (BigDecimal)accountMap.get("D");
+   BigDecimal creditAmount = (BigDecimal)accountMap.get("C");
+   // expenses are accounts of class DEBIT: the balance is given by debits minus credits
+   BigDecimal balance = debitAmount.subtract(creditAmount);
+   accountMap.put("balance", balance);
+   transactionTotalsMap.put(transactionTotal.glAccountId, accountMap);
+}
+accountBalanceList = UtilMisc.sortMaps(transactionTotalsMap.values().asList(), UtilMisc.toList("accountCode"));
+// expenses are accounts of class DEBIT: the balance is given by debits minus credits
+balanceTotal = balanceTotalDebit.subtract(balanceTotalCredit);
+}
+depreciation = balanceTotal;
+
 // INCOME
 // account balances
 accountBalanceList = [];
@@ -276,18 +362,23 @@ context.incomeAccountBalanceList = accountBalanceList;
 context.incomeAccountBalanceList.add(UtilMisc.toMap("accountName", "TOTAL INCOME", "balance", balanceTotal));
 context.incomeBalanceTotal = balanceTotal;
 
+// NET SALES = REVENUES - CONTRA REVENUES
+context.netSales = (context.revenueBalanceTotal).subtract(context.contraRevenueBalanceTotal);
+balanceTotalList.add(UtilMisc.toMap("totalName", "AccountingTotalNetSales", "balance", context.netSales));
 // GROSS MARGIN = NET SALES - COSTS OF GOODS SOLD
-context.grossMargin = (context.revenueBalanceTotal).subtract(context.cogsExpense);
+context.grossMargin = (context.netSales).subtract(context.cogsExpense);
 balanceTotalList.add(UtilMisc.toMap("totalName", "AccountingGrossMargin", "balance", context.grossMargin));
 // OPERATING EXPENSES
 context.sgaExpense = sgaExpense;
 balanceTotalList.add(UtilMisc.toMap("totalName", "AccountingOperatingExpenses", "balance", context.sgaExpense));
+// DEPRECIATION
+context.depreciation = depreciation;
+balanceTotalList.add(UtilMisc.toMap("totalName", "AccountingDepreciation", "balance", context.depreciation));
 // INCOME FROM OPERATIONS = GROSS MARGIN - OPERATING EXPENSES
 context.incomeFromOperations = (context.grossMargin).subtract(context.sgaExpense);
 balanceTotalList.add(UtilMisc.toMap("totalName", "AccountingIncomeFromOperations", "balance", context.incomeFromOperations));
 // NET INCOME
-context.netIncome = (context.revenueBalanceTotal).add(context.incomeBalanceTotal).subtract(context.expenseBalanceTotal);
+context.netIncome = (context.netSales).add(context.incomeBalanceTotal).subtract(context.expenseBalanceTotal);
 balanceTotalList.add(UtilMisc.toMap("totalName", "AccountingNetIncome", "balance", context.netIncome));
 
 context.balanceTotalList = balanceTotalList;
-

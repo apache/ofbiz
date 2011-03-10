@@ -20,6 +20,9 @@ under the License.
 <!-- Global IE fix to avoid layout crash when single word size wider than column width -->
 <!--[if IE]><style type="text/css"> body {word-wrap: break-word;}</style><![endif]-->
 
+  <div id="wait-spinner" style="display:none">
+    <div id="wait-spinner-image"></div>
+  </div>
   <div class="page-container">
     <div class="header">
       <div class="header-top">
@@ -28,9 +31,9 @@ under the License.
         <a class="sitelogo" href="<@ofbizUrl>main</@ofbizUrl>" title="${uiLabelMap.CommonMain}"></a>
         <div class="sitename">
           <#if !productStore?exists>
-            <h1><a href="index.html" title="Go to Start page">${uiLabelMap.EcommerceNoProductStore}</a></h1>
+            <h1><a href="<@ofbizUrl>main</@ofbizUrl>" title="Go to Start page">${uiLabelMap.EcommerceNoProductStore}</a></h1>
           </#if>
-          <#if (productStore.title)?exists><h1><a href="index.html" title="Go to Start page">${productStore.title}</a></h1></#if>
+          <#if (productStore.title)?exists><h1><a href="<@ofbizUrl>main</@ofbizUrl>" title="Go to Start page">${productStore.title}</a></h1></#if>
           <#if (productStore.subtitle)?exists><h2>${productStore.subtitle}</h2></#if>
         </div>
 
@@ -104,7 +107,7 @@ under the License.
           <#if userLogin?has_content && userLogin.userLoginId != "anonymous">
             <!-- Navigation item -->
             <ul>
-              <li><a href="#">Utente<!--[if IE 7]><!--></a><!--<![endif]-->
+              <li><a href="#">${uiLabelMap.EcommerceMyAccount}<!--[if IE 7]><!--></a><!--<![endif]-->
                 <!--[if lte IE 6]><table><tr><td><![endif]-->
                   <ul>
                     <li id="header-bar-viewprofile"><a href="<@ofbizUrl>viewprofile</@ofbizUrl>">${uiLabelMap.CommonProfile}</a></li>

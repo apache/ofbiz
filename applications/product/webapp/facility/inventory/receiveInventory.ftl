@@ -24,7 +24,7 @@ under the License.
             <div class="errorMessage">${invalidProductId}</div>
         </#if>
         <div class="button-bar">
-          <a href="<@ofbizUrl>EditFacility</@ofbizUrl>" class="buttontext">${uiLabelMap.ProductNewFacility}</a>
+          <a href="<@ofbizUrl>EditFacility</@ofbizUrl>" class="buttontext create">${uiLabelMap.ProductNewFacility}</a>
         </div>
         <#-- Receiving Results -->
         <#if receivedItems?has_content>
@@ -159,6 +159,23 @@ under the License.
               </tr>
               <tr>
                 <td width="14%">&nbsp;</td>
+                <td width="6%" align="right" nowrap="nowrap" class="label">${uiLabelMap.ProductSupplier}</td>
+                <td width="6%">&nbsp;</td>
+                <td width="74%">
+                  <select name="partyId">
+                    <option value=""></option>
+                    <#if supplierPartyIds?has_content>
+                      <#list supplierPartyIds as supplierPartyId>
+                        <option value="${supplierPartyId}" <#if supplierPartyId == parameters.partyId?if_exists> selected="selected"</#if>>
+                          [${supplierPartyId}] ${Static["org.ofbiz.party.party.PartyHelper"].getPartyName(delegator, supplierPartyId, true)}
+                        </option>
+                      </#list>
+                    </#if>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td width="14%">&nbsp;</td>
                 <td width="6%" align="right" nowrap="nowrap" class="label">${uiLabelMap.ProductDateReceived}</td>
                 <td width="6%">&nbsp;</td>
                 <td width="74%">
@@ -185,7 +202,12 @@ under the License.
                       <option value="">${uiLabelMap.ProductNoLocation}</option>
                     </select>
                   <#else>
-                      <@htmlTemplate.lookupField formName="selectAllForm" name="locationSeqId" id="locationSeqId" fieldFormName="LookupFacilityLocation<#if parameters.facilityId?exists>?facilityId=${facilityId}</#if>"/>
+                    <#if parameters.facilityId?exists>
+                      <#assign LookupFacilityLocationView="LookupFacilityLocation?facilityId=${facilityId}">
+                    <#else>
+                      <#assign LookupFacilityLocationView="LookupFacilityLocation">
+                    </#if>
+                    <@htmlTemplate.lookupField formName="selectAllForm" name="locationSeqId_o_${rowCount}" id="locationSeqId_o_${rowCount}" fieldFormName="${LookupFacilityLocationView}"/>
                   </#if>
                 </td>
               </tr>
@@ -387,7 +409,12 @@ under the License.
                                 <option value="">${uiLabelMap.ProductNoLocation}</option>
                               </select>
                             <#else>
-                              <@htmlTemplate.lookupField formName="selectAllForm" name="locationSeqId_o_${rowCount}" id="locationSeqId_o_${rowCount}" fieldFormName="LookupFacilityLocation<#if parameters.facilityId?exists>?facilityId=${facilityId}</#if>"/>
+                              <#if parameters.facilityId?exists>
+                                <#assign LookupFacilityLocationView="LookupFacilityLocation?facilityId=${facilityId}">
+                              <#else>
+                                <#assign LookupFacilityLocationView="LookupFacilityLocation">
+                              </#if>
+                              <@htmlTemplate.lookupField formName="selectAllForm" name="locationSeqId_o_${rowCount}" id="locationSeqId_o_${rowCount}" fieldFormName="${LookupFacilityLocationView}"/>
                             </#if>
                           </td>
                           <td align="right">${uiLabelMap.ProductQtyReceived} :</td>

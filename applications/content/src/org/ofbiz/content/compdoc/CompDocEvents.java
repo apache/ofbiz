@@ -21,10 +21,10 @@ package org.ofbiz.content.compdoc;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.Iterator;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -34,12 +34,11 @@ import javax.servlet.http.HttpSession;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.FileUtil;
+import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -69,7 +68,7 @@ public class CompDocEvents {
      */
 
     public static String persistRootCompDoc(HttpServletRequest request, HttpServletResponse response) {
-        Map paramMap = UtilHttp.getParameterMap(request);
+        Map<String, Object> paramMap = UtilHttp.getParameterMap(request);
         Delegator delegator = (Delegator)request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher)request.getAttribute("dispatcher");
         Locale locale = UtilHttp.getLocale(request);
@@ -79,13 +78,9 @@ public class CompDocEvents {
         String contentId = (String)paramMap.get("contentId");
         //String instanceContentId = null;
 
-        boolean contentExists = true;
-        if (UtilValidate.isEmpty(contentId)) {
-            contentExists = false;
-        } else {
+        if (UtilValidate.isNotEmpty(contentId)) {
             try {
-                GenericValue val = delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", contentId));
-                if (val == null)  contentExists = false;
+                delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", contentId));
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error running serviceName persistContentAndAssoc", module);
                 String errMsg = UtilProperties.getMessage(CoreEvents.err_resource, "coreEvents.error_modelservice_for_srv_name", locale);
@@ -103,30 +98,30 @@ public class CompDocEvents {
             request.setAttribute("_ERROR_MESSAGE_", "<li>" + errMsg + "</li>");
             return "error";
         }
-        Map persistMap = modelService.makeValid(paramMap, ModelService.IN_PARAM);
+        Map<String, Object> persistMap = modelService.makeValid(paramMap, ModelService.IN_PARAM);
         persistMap.put("userLogin", userLogin);
         try {
-            Map persistResult = dispatcher.runSync("persistContentAndAssoc", persistMap);
+            Map<String, Object> persistResult = dispatcher.runSync("persistContentAndAssoc", persistMap);
             contentId = (String)persistResult.get("contentId");
             //request.setAttribute("contentId", contentId);
-            Set keySet = persistResult.keySet();
-            Iterator iter = keySet.iterator();
+            Set<String> keySet = persistResult.keySet();
+            Iterator<String> iter = keySet.iterator();
             while (iter.hasNext()) {
                 Object obj = iter.next();
                 Object val = persistResult.get(obj);
                 request.setAttribute(obj.toString(), val);
             }
             // Update ContentRevision and ContentRevisonItem
-            Map contentRevisionMap = FastMap.newInstance();
+            Map<String, Object> contentRevisionMap = FastMap.newInstance();
             contentRevisionMap.put("itemContentId", contentId);
             contentRevisionMap.put("contentId", contentId);
             contentRevisionMap.put("userLogin", userLogin);
-            Map result = dispatcher.runSync("persistContentRevisionAndItem", contentRevisionMap);
+            Map<String, Object> result = dispatcher.runSync("persistContentRevisionAndItem", contentRevisionMap);
             keySet = result.keySet();
             iter = keySet.iterator();
             while (iter.hasNext()) {
                 Object obj = iter.next();
-                Object val = persistResult.get(obj);
+                Object val = result.get(obj);
                 request.setAttribute(obj.toString(), val);
             }
             String errorMsg = ServiceUtil.getErrorMessage(result);
@@ -158,7 +153,7 @@ public class CompDocEvents {
         GenericValue userLogin = (GenericValue)session.getAttribute("userLogin");
         ServletContext servletContext = session.getServletContext();
         LocalDispatcher dispatcher = (LocalDispatcher)request.getAttribute("dispatcher");
-        Map paramMap = UtilHttp.getParameterMap(request);
+        Map<String, Object> paramMap = UtilHttp.getParameterMap(request);
         String contentId = (String)paramMap.get("contentId");
         Locale locale = UtilHttp.getLocale(request);
         String rootDir = null;
@@ -175,7 +170,7 @@ public class CompDocEvents {
             https = (String) servletContext.getAttribute("https");
         }
 
-        Map mapIn = FastMap.newInstance();
+        Map<String, Object> mapIn = FastMap.newInstance();
         mapIn.put("contentId", contentId);
         mapIn.put("locale", locale);
         mapIn.put("rootDir", rootDir);
@@ -183,7 +178,7 @@ public class CompDocEvents {
         mapIn.put("https", https);
         mapIn.put("userLogin", userLogin);
 
-        Map results = null;
+        Map<String, Object> results = null;
         try {
             results = dispatcher.runSync("renderCompDocPdf", mapIn);
         } catch (ServiceAuthException e) {
@@ -232,7 +227,7 @@ public class CompDocEvents {
         GenericValue userLogin = (GenericValue)session.getAttribute("userLogin");
         ServletContext servletContext = session.getServletContext();
         LocalDispatcher dispatcher = (LocalDispatcher)request.getAttribute("dispatcher");
-        Map paramMap = UtilHttp.getParameterMap(request);
+        Map<String, Object> paramMap = UtilHttp.getParameterMap(request);
         String contentId = (String)paramMap.get("contentId");
         Locale locale = UtilHttp.getLocale(request);
         String rootDir = null;
@@ -249,7 +244,7 @@ public class CompDocEvents {
             https = (String) servletContext.getAttribute("https");
         }
 
-        Map mapIn = FastMap.newInstance();
+        Map<String, Object> mapIn = FastMap.newInstance();
         mapIn.put("contentId", contentId);
         mapIn.put("locale", locale);
         mapIn.put("rootDir", rootDir);
@@ -257,7 +252,7 @@ public class CompDocEvents {
         mapIn.put("https", https);
         mapIn.put("userLogin", userLogin);
 
-        Map results = null;
+        Map<String, Object> results = null;
         try {
             results = dispatcher.runSync("renderContentPdf", mapIn);
         } catch (ServiceAuthException e) {

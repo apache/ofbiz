@@ -30,5 +30,6 @@
     </para>
     <xi:include href="HELP_MARKETING_FindContactLists.xml" />
     <xi:include href="HELP_MARKETING_EditContactList.xml" />
+    <xi:include href="HELP_MARKETING_ImportContactListParties.xml" />
 </section>
 

@@ -26,12 +26,12 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.content.content.ContentWorker;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.GenericValue;
 import org.ofbiz.webapp.ftl.LoopWriter;
 
 import freemarker.core.Environment;
@@ -50,29 +50,39 @@ public class InjectNodeTrailCsvTransform implements TemplateTransformModel {
     public static final String [] removeKeyNames = {"nodeTrailCsv"};
 
     /**
+     * @deprecated use FreeMarkerWorker.getWrappedObject()
      * A wrapper for the FreeMarkerWorker version.
      */
+    @Deprecated
     public static Object getWrappedObject(String varName, Environment env) {
         return FreeMarkerWorker.getWrappedObject(varName, env);
     }
 
-    public static String getArg(Map args, String key, Environment env) {
+    /**
+     * @deprecated use FreeMarkerWorker.getArg()
+     */
+    @Deprecated
+    public static String getArg(Map<String, ? extends Object> args, String key, Environment env) {
         return FreeMarkerWorker.getArg(args, key, env);
     }
 
-    public static String getArg(Map args, String key, Map ctx) {
+    /**
+     * @deprecated use FreeMarkerWorker.getArg()
+     */
+    @Deprecated
+    public static String getArg(Map<String, ? extends Object> args, String key, Map<String, ? extends Object> ctx) {
         return FreeMarkerWorker.getArg(args, key, ctx);
     }
 
-
+    @SuppressWarnings("unchecked")
     public Writer getWriter(final Writer out, Map args) {
         final StringBuilder buf = new StringBuilder();
         final Environment env = Environment.getCurrentEnvironment();
-        final Map templateCtx = (Map) FreeMarkerWorker.getWrappedObject("context", env);
+        final Map<String, Object> templateCtx = FreeMarkerWorker.getWrappedObject("context", env);
         //FreeMarkerWorker.convertContext(templateCtx);
-        final Delegator delegator = (Delegator) FreeMarkerWorker.getWrappedObject("delegator", env);
-        final HttpServletRequest request = (HttpServletRequest) FreeMarkerWorker.getWrappedObject("request", env);
-        final GenericValue userLogin = (GenericValue) FreeMarkerWorker.getWrappedObject("userLogin", env);
+        final Delegator delegator = FreeMarkerWorker.getWrappedObject("delegator", env);
+        final HttpServletRequest request = FreeMarkerWorker.getWrappedObject("request", env);
+        //final GenericValue userLogin = FreeMarkerWorker.getWrappedObject("userLogin", env);
         FreeMarkerWorker.getSiteParameters(request, templateCtx);
         FreeMarkerWorker.overrideWithArgs(templateCtx, args);
 
@@ -94,7 +104,7 @@ public class InjectNodeTrailCsvTransform implements TemplateTransformModel {
             public int onStart() throws TemplateModelException, IOException {
                 String csvTrail = null;
 
-                List trail = (List)templateCtx.get("globalNodeTrail");
+                List<Map<String, ? extends Object>> trail = UtilGenerics.checkList(templateCtx.get("globalNodeTrail"));
 
                 if (Debug.infoOn()) Debug.logInfo("in InjectNodeTrailCsv(0), trail:"+trail,module);
                 // This will build a nodeTrail if none exists
@@ -103,7 +113,7 @@ public class InjectNodeTrailCsvTransform implements TemplateTransformModel {
                 String redo = (String)templateCtx.get("redo");
 
                 if (UtilValidate.isEmpty(trail) || (redo != null && redo.equalsIgnoreCase("true"))) {
-                    String thisContentId = null;
+                    // String thisContentId = null;
                     String subContentId = (String)templateCtx.get("subContentId");
                     if (Debug.infoOn()) Debug.logInfo("in InjectNodeTrailCsv(0), subContentId:"+subContentId,module);
                     String contentId = (String)templateCtx.get("contentId");
@@ -142,7 +152,7 @@ public class InjectNodeTrailCsvTransform implements TemplateTransformModel {
 
                         if (UtilValidate.isNotEmpty(lastPassedContentId)) {
                             if (UtilValidate.isNotEmpty(trail)) {
-                                Map nd = (Map)trail.get(0);
+                                Map<String, ? extends Object> nd = trail.get(0);
                                 String firstTrailContentId = (String)nd.get("contentId");
                                 if (UtilValidate.isNotEmpty(firstTrailContentId)
                                     && UtilValidate.isNotEmpty(lastPassedContentId)
@@ -161,7 +171,6 @@ public class InjectNodeTrailCsvTransform implements TemplateTransformModel {
                 templateCtx.put("nodeTrailCsv", csvTrail);
                 return TransformControl.EVALUATE_BODY;
             }
-
 
             @Override
             public void close() throws IOException {

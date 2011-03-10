@@ -18,6 +18,9 @@
  */
 package org.ofbiz.sql;
 
+import org.ofbiz.base.lang.SourceMonitored;
+
+@SourceMonitored
 public final class StringValue extends ConstantValue {
     private final String str;
 
@@ -25,6 +28,7 @@ public final class StringValue extends ConstantValue {
         this.str = str;
     }
 
+    @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
@@ -33,6 +37,7 @@ public final class StringValue extends ConstantValue {
         return str;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o instanceof StringValue) {
             StringValue other = (StringValue) o;

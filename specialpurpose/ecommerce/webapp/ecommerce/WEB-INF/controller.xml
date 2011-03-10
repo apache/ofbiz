@@ -39,7 +39,7 @@ under the License.
 
     <handler name="jsp" type="view" class="org.ofbiz.webapp.view.JspViewHandler"/>
     <handler name="http" type="view" class="org.ofbiz.webapp.view.HttpViewHandler"/>
-    <handler name="screen" type="view" class="org.ofbiz.widget.screen.ScreenWidgetViewHandler"/>
+    <handler name="screen" type="view" class="org.ofbiz.widget.screen.MacroScreenViewHandler"/>
     <handler name="simplecontent" type="view" class="org.ofbiz.content.view.SimpleContentViewHandler"/>
     <handler name="screenfop" type="view" class="org.ofbiz.widget.screen.ScreenFopViewHandler"/>
 
@@ -588,7 +588,7 @@ under the License.
     <request-map uri="checkoutoptions">
       <security https="true" auth="true"/>
       <event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents" invoke="setCheckOutPages"/>
-      <response name="shippingaddress" type="view" value="checkoutshippingaddress"/>
+      <response name="shippingaddress" type="view" value="checkoutshippingaddress" save-current-view="true"/>
       <response name="shippingoptions" type="request" value="setOrderCurrencyAgreementShipDates"/>
       <response name="payment" type="request" value="setPoNumber"/>
       <response name="confirm" type="request" value="calcShipping"/>
@@ -756,6 +756,7 @@ under the License.
         <response name="paypal" type="request" value="callPayPal"/>
         <response name="billact" type="request" value="emailorder"/>
         <response name="cod" type="request" value="emailorder"/>
+        <response name="ideal" type="request" value="callIdeal"/>
         <response name="error" type="view" value="checkoutreview"/>
     </request-map>
 
@@ -796,6 +797,18 @@ under the License.
         <event type="java" path="org.ofbiz.accounting.thirdparty.paypal.PayPalEvents" invoke="cancelPayPalOrder"/>
         <response name="success" type="view" value="main"/>
         <response name="error" type="view" value="main"/>
+    </request-map>
+    <request-map uri="callIdeal">
+        <security https="true" direct-request="false"/>
+        <event type="java" path="org.ofbiz.accounting.thirdparty.ideal.IdealEvents" invoke="callIdeal"/>
+        <response name="success" type="none"/>
+        <response name="error" type="view" value="checkoutreview"/>
+    </request-map>
+    <request-map uri="idealNotify">
+        <security https="false"/>
+        <event type="java" path="org.ofbiz.accounting.thirdparty.ideal.IdealEvents" invoke="idealNotify"/>
+        <response name="success" type="view" value="ordercomplete"/>
+        <response name="error" type="view" value="checkoutreview"/>
     </request-map>
 
     <!-- PayPal Express Checkout Requests -->
@@ -994,7 +1007,7 @@ under the License.
     </request-map>
 
     <!-- ContactMech Requests -->
-    <request-map uri="editcontactmech"><security https="true" auth="true"/><response name="success" type="view" value="editcontactmech" save-last-view="true"/></request-map>
+    <request-map uri="editcontactmech"><security https="true" auth="true"/><response name="success" type="view" value="editcontactmech"/></request-map>
     <request-map uri="editcontactmechnosave"><security https="true" auth="true"/><response name="success" type="view" value="editcontactmech"/></request-map>
     <request-map uri="editcontactmechdone"><security https="true" auth="true"/><response name="success" type="view-last" value="editcontactmech"/></request-map>
 
@@ -1295,6 +1308,7 @@ under the License.
     </request-map>
     <request-map uri="AnonContactus">
         <security https="true" auth="false"/>
+        <event type="java" invoke="getCodeCaptcha" path="org.ofbiz.common.Captcha"/>
         <response name="success" type="view" value="AnonContactus"/>
     </request-map>
     <request-map uri="contactsubmit">
@@ -1305,9 +1319,10 @@ under the License.
     </request-map>
     <request-map uri="submitAnonContact">
         <security https="true" auth="false"/>
-        <event type="service" invoke="sendContactUsEmailToCompany"/>
-        <response name="success" type="view" value="AnonContactus"/>
-        <response name="error" type="view" value="AnonContactus"/>
+        <event type="simple" invoke="createAnonContact" path="component://ecommerce/script/org/ofbiz/ecommerce/customer/CustomerEvents.xml"/>
+        <response name="success" type="request-redirect" value="main"/>
+        <response name="confirm" type="request" value="AnonContactus"/>
+        <response name="error" type="request" value="AnonContactus"/>
     </request-map>
 
     <request-map uri="signUpForContactList">
@@ -1315,6 +1330,17 @@ under the License.
         <event type="service" invoke="signUpForContactList"/>
         <response name="success" type="view" value="main"/>
         <response name="error" type="view" value="main"/>
+    </request-map>
+    <request-map uri="unsubscribeContactListParty">
+        <security https="false" auth="false"/>
+        <event type="service" invoke="unsubscribeContactListParty"/>
+        <response name="success" type="view" value="main"/>
+        <response name="error" type="view" value="main"/>
+    </request-map>
+    <request-map uri="contactListOptOut" track-serverhit="false" track-visit="false">
+        <security https="true" auth="false"/>
+        <event type="service" invoke="updateContactListPartyNoUserLogin"/>
+        <response name="success" type="view" value="ContactListOptOut"/>
     </request-map>
 
     <!-- ======================= Content Requests: Forums/Content/Articles ======================= -->
@@ -1349,7 +1375,7 @@ under the License.
 
     <!-- used in blog -->
     <request-map uri="MainBlog">
-        <security https="true" auth="false"/>
+        <security https="false" auth="false"/>
         <response name="success" type="view" value="MainBlog"/>
     </request-map>
 
@@ -1565,6 +1591,12 @@ under the License.
         <event type="service" invoke="updateContactListParty"/>
         <response name="success" type="view" value="viewprofile"/>
         <response name="error" type="view" value="viewprofile"/>
+    </request-map>
+    <request-map uri="updateContactListPartyNoUserLogin">
+        <security https="true" auth="false"/>
+        <event type="service" invoke="updateContactListPartyNoUserLogin"/>
+        <response name="success" type="view" value="main"/>
+        <response name="error" type="view" value="main"/>
     </request-map>
 
     <request-map uri="choosecatalog">
@@ -1902,6 +1934,21 @@ under the License.
         <response name="success" type="view" value="compareProducts" save-last-view="true"/>
     </request-map>
     
+    <request-map uri="ProductUomDropDownOnly">
+        <security auth="false" https="false"/>
+        <response name="success" type="view" value="ProductUomDropDownOnly" save-last-view="true"/>
+    </request-map>
+    
+    <!-- Captcha -->
+    <request-map uri="reloadCaptchaImage">
+        <security https="true" auth="false"/>        
+        <response name="success" type="view" value="reloadCaptchaImage"/>
+    </request-map>
+    <request-map uri="reloadCaptchaCode">
+        <security https="true" auth="false"/>
+        <response name="success" type="view" value="reloadCaptchaCode"/>
+    </request-map>
+    
     <!-- End of Request Mappings -->
 
     <!-- View Mappings -->
@@ -2044,5 +2091,15 @@ under the License.
     <view-map name="redirectToGoogleCheckout" type="screen" page="component://googlecheckout/widget/GoogleCheckoutScreens.xml#redirect"/>
     
     <view-map name="compareProducts" type="screen" page="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#compareProducts"/>
+    
+    <!-- Product in the different UOM -->
+    <view-map name="ProductUomDropDownOnly" type="screen" page="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#ProductUomDropDownOnly"/>
+    
+    <!-- Contact List -->
+    <view-map name="ContactListOptOut" type="screen" page="component://marketing/widget/ContactListScreens.xml#OptOutResponse"/>
+    
+    <!-- Captcha -->
+    <view-map name="reloadCaptchaImage" type="screen" page="component://myportal/widget/CommonScreens.xml#reloadCaptchaImage"/>
+    <view-map name="reloadCaptchaCode" type="screen" page="component://myportal/widget/CommonScreens.xml#reloadCaptchaCode"/>
     <!-- End of View Mappings -->
 </site-conf>

@@ -66,7 +66,6 @@ import org.ofbiz.webapp.control.ConfigXMLReader.RequestMap;
 public class XmlRpcEventHandler extends XmlRpcHttpServer implements EventHandler {
 
     public static final String module = XmlRpcEventHandler.class.getName();
-    public static final String dispatcherName = "xmlrpc-dispatcher";
     protected Delegator delegator;
     protected LocalDispatcher dispatcher;
 
@@ -76,7 +75,7 @@ public class XmlRpcEventHandler extends XmlRpcHttpServer implements EventHandler
     public void init(ServletContext context) throws EventHandlerException {
         String delegatorName = context.getInitParameter("entityDelegatorName");
         this.delegator = DelegatorFactory.getDelegator(delegatorName);
-        this.dispatcher = GenericDispatcher.getLocalDispatcher(dispatcherName, delegator);
+        this.dispatcher = GenericDispatcher.getLocalDispatcher(delegator.getDelegatorName(), delegator);
         this.setHandlerMapping(new ServiceRpcHandler());
 
         String extensionsEnabledString = context.getInitParameter("xmlrpc.enabledForExtensions");
@@ -296,11 +295,11 @@ public class XmlRpcEventHandler extends XmlRpcHttpServer implements EventHandler
                 // only one parameter; if its a map use it as the context; otherwise make sure the service takes one param
                 } else if (parameterCount == 1) {
                     Object param = xmlRpcReq.getParameter(0);
-                    if (param instanceof Map) {
+                    if (param instanceof Map<?, ?>) {
                         context = checkMap(param, String.class, Object.class);
                     } else {
                         if (model.getDefinedInCount() == 1) {
-                            String paramName = (String) model.getInParamNames().iterator().next();
+                            String paramName = model.getInParamNames().iterator().next();
                             context.put(paramName, xmlRpcReq.getParameter(0));
                         } else {
                             throw new XmlRpcException("More than one parameter defined on service; cannot call via RPC with parameter list");

@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javolution.util.FastMap;
@@ -32,6 +33,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -45,9 +47,9 @@ import org.ofbiz.service.ServiceUtil;
 public class SagePayPaymentServices {
 
     public static final String module = SagePayPaymentServices.class.getName();
+    public final static String resource = "AccountingUiLabels";
 
     private static Map<String, String> buildCustomerBillingInfo(Map<String, Object> context) {
-
         Debug.logInfo("SagePay - Entered buildCustomerBillingInfo", module);
         Debug.logInfo("SagePay buildCustomerBillingInfo context : " + context, module);
 
@@ -151,11 +153,12 @@ public class SagePayPaymentServices {
         Debug.logInfo("SagePay - Entered ccAuth", module);
         Debug.logInfo("SagePay ccAuth context : " + context, module);
         Map<String, Object> response = null;
-
         String orderId = (String) context.get("orderId");
+        Locale locale = (Locale) context.get("locale");
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
-        if (null == orderPaymentPreference) {
-            response = ServiceUtil.returnError("OrderPaymentPreference for order : " + orderId + " is null : " + orderPaymentPreference);
+        
+        if (orderPaymentPreference == null) {
+            response = ServiceUtil.returnError(UtilProperties.getMessage(resource, "AccountingSagePayOrderPaymenPreferenceIsNull", UtilMisc.toMap("orderId", orderId, "orderPaymentPreference", orderPaymentPreference), locale));
         } else {
             response = processCardAuthorisationPayment(dctx, context);
         }
@@ -166,10 +169,9 @@ public class SagePayPaymentServices {
 
 
     private static Map<String, Object> processCardAuthorisationPayment(DispatchContext ctx, Map<String, Object> context) {
-
         Map<String, Object> result = ServiceUtil.returnSuccess();
         LocalDispatcher dispatcher = ctx.getDispatcher();
-
+        Locale locale = (Locale) context.get("locale");
         Map<String, String> billingInfo = buildCustomerBillingInfo(context);
         String paymentGatewayConfigId = (String) context.get("paymentGatewayConfigId");
 
@@ -228,7 +230,7 @@ public class SagePayPaymentServices {
             }
         } catch(GenericServiceException e) {
             Debug.logError(e, "Error in calling SagePayPaymentAuthentication", module);
-            result = ServiceUtil.returnError("Exception in calling SagePayPaymentRegistration : " + e.getMessage());
+            result = ServiceUtil.returnError(UtilProperties.getMessage(resource, "AccountingSagePayPaymentAuthorisationException", UtilMisc.toMap("errorString", e.getMessage()), locale));
         }
         return result;
     }
@@ -236,7 +238,6 @@ public class SagePayPaymentServices {
     public static Map<String, Object> ccCapture(DispatchContext ctx, Map<String, Object> context) {
         Debug.logInfo("SagePay - Entered ccCapture", module);
         Debug.logInfo("SagePay ccCapture context : " + context, module);
-
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
         GenericValue authTransaction = PaymentGatewayServices.getAuthTransaction(orderPaymentPreference);
         context.put("authTransaction", authTransaction);
@@ -248,12 +249,10 @@ public class SagePayPaymentServices {
         return response;
     }
 
-
     private static Map<String, Object> processCardCapturePayment(DispatchContext ctx, Map<String, Object> context) {
-
         Map<String, Object> result = ServiceUtil.returnSuccess();
         LocalDispatcher dispatcher = ctx.getDispatcher();
-
+        Locale locale = (Locale) context.get("locale");
         String paymentGatewayConfigId = (String) context.get("paymentGatewayConfigId");
         GenericValue authTransaction = (GenericValue) context.get("authTransaction");
         BigDecimal amount = (BigDecimal) context.get("captureAmount");
@@ -286,21 +285,20 @@ public class SagePayPaymentServices {
             }
         } catch(GenericServiceException e) {
             Debug.logError(e, "Error in calling SagePayPaymentAuthorisation", module);
-            result = ServiceUtil.returnError("Exception in calling SagePayPaymentRegistration : " + e.getMessage());
+            result = ServiceUtil.returnError(UtilProperties.getMessage(resource, "AccountingSagePayPaymentAuthorisationException", UtilMisc.toMap("errorString", e.getMessage()), locale));
         }
         return result;
     }
 
-
     public static Map<String, Object> ccRefund(DispatchContext ctx, Map<String, Object> context) {
         Debug.logInfo("SagePay - Entered ccRefund", module);
         Debug.logInfo("SagePay ccRefund context : " + context, module);
-
+        Locale locale = (Locale) context.get("locale");
         Delegator delegator = ctx.getDelegator();
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
         GenericValue captureTransaction = PaymentGatewayServices.getCaptureTransaction(orderPaymentPreference);
         if (captureTransaction == null) {
-            return ServiceUtil.returnError("No captured transaction found for the OrderPaymentPreference; cannot Refund");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "AccountingPaymentTransactionAuthorizationNotFoundCannotRefund", locale));
         }
         Debug.logInfo("SagePay ccRefund captureTransaction : " + captureTransaction, module);
         GenericValue creditCard = null;
@@ -308,7 +306,7 @@ public class SagePayPaymentServices {
             creditCard = delegator.getRelatedOne("CreditCard", orderPaymentPreference);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Error getting CreditCard for OrderPaymentPreference : " + orderPaymentPreference, module);
-            return ServiceUtil.returnError("Unable to obtain cc information from payment preference");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "AccountingPaymentUnableToGetCCInfo", locale) + " " + orderPaymentPreference);
         }
         context.put("creditCard",creditCard);
         context.put("captureTransaction", captureTransaction);
@@ -356,10 +354,9 @@ public class SagePayPaymentServices {
     }
 
     private static Map<String, Object> processCardRefundPayment(DispatchContext ctx, Map<String, Object> context) {
-
         Map<String, Object> result = ServiceUtil.returnSuccess();
         LocalDispatcher dispatcher = ctx.getDispatcher();
-
+        Locale locale = (Locale) context.get("locale");
         String paymentGatewayConfigId = (String) context.get("paymentGatewayConfigId");
         GenericValue captureTransaction = (GenericValue) context.get("captureTransaction");
         BigDecimal amount = (BigDecimal) context.get("refundAmount");
@@ -399,24 +396,22 @@ public class SagePayPaymentServices {
 
         } catch(GenericServiceException e) {
             Debug.logError(e, "Error in calling SagePayPaymentRefund", module);
-            result = ServiceUtil.returnError("Exception in calling SagePayPaymentRefund : " + e.getMessage());
+            result = ServiceUtil.returnError(UtilProperties.getMessage(resource, "AccountingSagePayPaymentRefundException", UtilMisc.toMap("errorString", e.getMessage()), locale));
         }
 
         return result;
     }
 
     private static Map<String, Object> processCardVoidPayment(DispatchContext ctx, Map<String, Object> context) {
-
         Map<String, Object> result = ServiceUtil.returnSuccess();
         LocalDispatcher dispatcher = ctx.getDispatcher();
-
+        Locale locale = (Locale) context.get("locale");
         String paymentGatewayConfigId = (String) context.get("paymentGatewayConfigId");
         GenericValue captureTransaction = (GenericValue) context.get("captureTransaction");
         BigDecimal amount = (BigDecimal) context.get("refundAmount");
         String orderId = (String) captureTransaction.get("altReference");
 
         try {
-
             Map<String, Object> paymentResult = dispatcher.runSync("SagePayPaymentVoid",
                     UtilMisc.toMap(
                             "paymentGatewayConfigId", paymentGatewayConfigId,
@@ -448,21 +443,20 @@ public class SagePayPaymentServices {
 
         } catch(GenericServiceException e) {
             Debug.logError(e, "Error in calling SagePayPaymentVoid", module);
-            result = ServiceUtil.returnError("Exception in calling SagePayPaymentVoid : " + e.getMessage());
+            result = ServiceUtil.returnError(UtilProperties.getMessage(resource, "AccountingSagePayPaymentVoidException", UtilMisc.toMap("errorString", e.getMessage()), locale));
         }
         return result;
     }
 
     public static Map<String, Object> ccRelease(DispatchContext ctx, Map<String, Object> context) {
-
         Debug.logInfo("SagePay - Entered ccRelease", module);
         Debug.logInfo("SagePay ccRelease context : " + context, module);
-
+        Locale locale = (Locale) context.get("locale");
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
 
         GenericValue authTransaction = PaymentGatewayServices.getAuthTransaction(orderPaymentPreference);
         if (authTransaction == null) {
-            return ServiceUtil.returnError("No authorization transaction found for the OrderPaymentPreference; cannot Release");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "AccountingPaymentTransactionAuthorizationNotFoundCannotRelease", locale));
         }
         context.put("authTransaction", authTransaction);
 
@@ -472,9 +466,8 @@ public class SagePayPaymentServices {
     }
 
     private static Map<String, Object> processCardReleasePayment(DispatchContext ctx, Map<String, Object> context) {
-
         Map<String, Object> result = ServiceUtil.returnSuccess();
-
+        Locale locale = (Locale) context.get("locale");
         LocalDispatcher dispatcher = ctx.getDispatcher();
 
         String paymentGatewayConfigId = (String) context.get("paymentGatewayConfigId");
@@ -485,7 +478,6 @@ public class SagePayPaymentServices {
         String refNum = (String) authTransaction.get("referenceNum");
 
         try {
-
             Map<String, Object> paymentResult = dispatcher.runSync("SagePayPaymentRelease",
                     UtilMisc.toMap(
                             "paymentGatewayConfigId", paymentGatewayConfigId,
@@ -512,7 +504,7 @@ public class SagePayPaymentServices {
 
         } catch(GenericServiceException e) {
             Debug.logError(e, "Error in calling SagePayPaymentRelease", module);
-            result = ServiceUtil.returnError("Exception in calling SagePayPaymentRefund : " + e.getMessage());
+            result = ServiceUtil.returnError(UtilProperties.getMessage(resource, "AccountingSagePayPaymentReleaseException", UtilMisc.toMap("errorString", e.getMessage()), locale));
         }
 
         return result;

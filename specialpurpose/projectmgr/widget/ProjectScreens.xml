@@ -65,7 +65,7 @@ under the License.
                 </section>
                 <decorator-screen name="CommonProjectDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <include-menu name="ProjectSubTabBar" location="component://projectmgr/widget/ProjectMenus.xml"/>
+                        <include-menu name="ProjectButtonBar" location="component://projectmgr/widget/ProjectMenus.xml"/>
                         <container style="clear"/>
                         <screenlet name="findProject" collapsible="true" title="${uiLabelMap.PageTitleFindProject}">
                             <include-form name="FindProject" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
@@ -343,13 +343,10 @@ under the License.
                         <container>
                              <link target="EditPartySkill" text="${uiLabelMap.HumanResNewPartySkill}" style="buttontext"/>
                         </container>
-                        <container style="boxoutside">
-                            <container style="screenlet-header">
-                                <label style="boxhead">${uiLabelMap.HumanResEditPartySkill}</label>
-                            </container>
+                        <screenlet title="${uiLabelMap.HumanResEditPartySkill}">
                             <include-form name="ListPartySkills" location="component://humanres/widget/forms/PartySkillForms.xml"/>
                             <include-form name="AddPartySkills" location="component://humanres/widget/forms/PartySkillForms.xml"/>
-                        </container>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -814,27 +811,6 @@ under the License.
         </section>
     </screen>
 
-    <screen name="CreateUserLogin">
-        <section>
-            <actions>
-                <set field="titleProperty" value="PartyCreateUserLogin"/>
-                <set field="tabButtonItem" value="viewprofile"/>
-                <set field="labelTitleProperty" value="PartyCreateUserLogin"/>
-
-                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="viewprofile"/>
-                <set field="partyId" from-field="parameters.partyId"/>
-            </actions>
-            <widgets>
-                <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
-                        <container><label text="${uiLabelMap.PartyCreateUserLogin}" style="h2"/></container>
-                        <include-form name="AddUserLogin" location="component://party/widget/partymgr/PartyForms.xml"/>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-
     <screen name="showvisits">
         <section>
             <actions>
@@ -892,55 +868,6 @@ under the License.
                                 <label style="h3">${uiLabelMap.PartyMgrViewPermissionError}</label>
                             </fail-widgets>
                         </section>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-
-    <screen name="EditUserLogin">
-        <section>
-            <actions>
-                <set field="titleProperty" value="PageTitleEditGroupInformation"/>
-                <set field="tabButtonItem" value="viewprofile"/>
-                <set field="labelTitleProperty" value="PageTitleEditGroupInformation"/>
-
-                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="viewprofile"/>
-                <set field="partyId" from-field="parameters.partyId"/>
-                <set field="userLoginId" from-field="parameters.userLoginId"/>
-                <entity-one entity-name="UserLogin" value-field="editUserLogin"/>
-            </actions>
-            <widgets>
-                <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
-                        <container><label text="${uiLabelMap.PartyUserLoginChangePassword}" style="h2"/></container>
-                        <include-form name="updatePassword" location="component://party/widget/partymgr/PartyForms.xml"/>
-                        <container><label text="${uiLabelMap.PartyUserLoginUpdateSecuritySettings}" style="h2"/></container>
-                        <include-form name="updateUserLoginSecurity" location="component://party/widget/partymgr/PartyForms.xml"/>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-
-    <screen name="EditUserLoginSecurityGroups">
-        <section>
-            <actions>
-                <set field="titleProperty" value="PageTitleEditUserLoginSecurityGroups"/>
-                <set field="tabButtonItem" value="viewprofile"/>
-                <set field="labelTitleProperty" value="PageTitleEditUserLoginSecurityGroups"/>
-
-                <set field="userLoginId" from-field="parameters.userLoginId"/>
-                <entity-one entity-name="UserLogin" value-field="editUserLogin"/>
-                <set field="partyId" from-field="parameters.partyId" default-value="${editUserLogin.partyId}"/>
-            </actions>
-            <widgets>
-                <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
-                        <container><label style="h2" text="${uiLabelMap.PageTitleEditUserLoginSecurityGroups}"/></container>
-                        <include-form name="ListUserLoginSecurityGroups" location="component://party/widget/partymgr/SecurityForms.xml"/>
-                        <container><label style="h2" text="${uiLabelMap.PartyAddUserLoginToSecurityGroup}"/></container>
-                        <include-form name="AddUserLoginSecurityGroup" location="component://party/widget/partymgr/SecurityForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -1029,6 +956,7 @@ under the License.
     <screen name="ListCustomerProjects">
         <section>
             <actions>
+                <property-map resource="ProjectMgrUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/jsgantt.js" global="true"/>
                 <set field="layoutSettings.styleSheets[]" value="/images/jsgantt.css" global="true"/>
                 <entity-condition list="projects" entity-name="WorkEffortPartyAssignByGroup" filter-by-date="true">

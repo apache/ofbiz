@@ -21,8 +21,10 @@ package org.ofbiz.sql;
 import java.util.Iterator;
 import java.util.List;
 
+import org.ofbiz.base.lang.SourceMonitored;
 import org.ofbiz.base.util.StringUtil;
 
+@SourceMonitored
 public final class ConditionList extends Condition implements Iterable<Condition> {
     private final Joiner joiner;
     private final List<Condition> conditions;
@@ -32,6 +34,7 @@ public final class ConditionList extends Condition implements Iterable<Condition
         this.conditions = conditions;
     }
 
+    @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
@@ -48,6 +51,7 @@ public final class ConditionList extends Condition implements Iterable<Condition
         return conditions.iterator();
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o instanceof ConditionList) {
             ConditionList other = (ConditionList) o;

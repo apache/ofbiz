@@ -32,17 +32,15 @@ import javax.servlet.http.HttpSession;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
+import net.sf.json.JSONObject;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.ebay.ProductsExportToEbay;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
-import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.webapp.event.EventHandlerException;
 
 import com.ebay.sdk.ApiContext;
@@ -55,14 +53,9 @@ import com.ebay.soap.eBLBaseComponents.GetStoreOptionsRequestType;
 import com.ebay.soap.eBLBaseComponents.GetStoreOptionsResponseType;
 import com.ebay.soap.eBLBaseComponents.StoreColorSchemeType;
 import com.ebay.soap.eBLBaseComponents.StoreColorType;
-import com.ebay.soap.eBLBaseComponents.StoreCustomCategoryType;
-import com.ebay.soap.eBLBaseComponents.StoreFontFaceCodeType;
-import com.ebay.soap.eBLBaseComponents.StoreFontSizeCodeType;
 import com.ebay.soap.eBLBaseComponents.StoreFontType;
 import com.ebay.soap.eBLBaseComponents.StoreThemeArrayType;
 import com.ebay.soap.eBLBaseComponents.StoreThemeType;
-
-import net.sf.json.JSONObject;
 
 public class EbayStoreOptions {
 
@@ -79,7 +72,7 @@ public class EbayStoreOptions {
         StoreThemeArrayType returnedBasicThemeArray = null;
 
         try {
-            Map paramMap = UtilHttp.getCombinedMap(request);
+            Map<String, Object> paramMap = UtilHttp.getCombinedMap(request);
             if (paramMap.get("productStoreId") != null) {
                 String themeId = (String)paramMap.get("themeId");
 
@@ -99,7 +92,7 @@ public class EbayStoreOptions {
                     Map<String,Object> storeColorSchemeMap = FastMap.newInstance();
                     while (i < storeBasicTheme.length) {
 
-                        StoreThemeType storeThemeType = (StoreThemeType)storeBasicTheme[i];
+                        StoreThemeType storeThemeType = storeBasicTheme[i];
                         if (themeId.equals(storeThemeType.getThemeID().toString())) {
                             StoreColorSchemeType colorSchemeType = storeThemeType.getColorScheme();
                             if (colorSchemeType != null) {
@@ -176,7 +169,7 @@ public class EbayStoreOptions {
     }
 
     public static String retrieveItemTemplateByTemplateGroupId(HttpServletRequest request,HttpServletResponse response) {
-        Map paramMap = UtilHttp.getCombinedMap(request);
+        Map<String, Object> paramMap = UtilHttp.getCombinedMap(request);
         try {
             if (paramMap.get("productStoreId") != null) {
                 String temGroupId = (String)paramMap.get("templateGroupId");
@@ -201,7 +194,7 @@ public class EbayStoreOptions {
     public static String retrieveEbayCategoryByParent(HttpServletRequest request, HttpServletResponse response) {
         List<CategoryType> results = FastList.newInstance();
         try {
-            Map paramMap = UtilHttp.getCombinedMap(request);
+            Map<String, Object> paramMap = UtilHttp.getCombinedMap(request);
             if (paramMap.get("productStoreId") != null) {
                 String ebayCategoryId = (String)paramMap.get("ebayCategoryId");
                 // when change category should be remove old category from session

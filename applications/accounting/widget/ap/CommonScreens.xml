@@ -42,7 +42,6 @@ under the License.
         <section>
             <actions>
                 <set field="tabButtonItem" value="main"></set>
-                <set field="parameters.portalPageId" value="ApPortalPage"/>
                 <set field="invoiceTypeId" value="PURCHASE_INVOICE"/>
             </actions>
             <widgets>
@@ -54,7 +53,7 @@ under the License.
                                 <script location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/InvoiceReport.groovy"/>
                             </actions>
                             <widgets>
-                                <include-screen name="PortalPageScreen" location="component://common/widget/CommonScreens.xml"/>
+                                <include-portal-page id="ApPortalPage"/>
                             </widgets>
                         </section>
                     </decorator-section>
@@ -66,6 +65,7 @@ under the License.
     <screen name="ApPastDueInvoices">
         <section>
            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="invoices" from-field="PastDueInvoices"/>
             </actions>
             <widgets>
@@ -78,6 +78,7 @@ under the License.
     <screen name="ApInvoicesDueSoon">
         <section>
             <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="invoices" from-field="InvoicesDueSoon"/>
             </actions>
             <widgets>

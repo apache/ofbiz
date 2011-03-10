@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 
 import org.ofbiz.base.component.AlreadyLoadedException;
@@ -72,13 +73,11 @@ public class ComponentContainer implements Container {
         if (cc.getProperty("update-classpath") != null) {
             updateClassPath = "true".equalsIgnoreCase(cc.getProperty("update-classpath").value);
         }
-        String instrumenterClassName;
         if (cc.getProperty("ofbiz.instrumenterClassName") != null) {
             instrumenterClassName = cc.getProperty("ofbiz.instrumenterClassName").value;
         } else {
             instrumenterClassName = null;
         }
-        String instrumenterFile;
         if (cc.getProperty("ofbiz.instrumenterFile") != null) {
             instrumenterFile = cc.getProperty("ofbiz.instrumenterFile").value;
         } else {
@@ -195,7 +194,9 @@ public class ComponentContainer implements Container {
                     Debug.logError(e, "Unable to load components from URL: " + configUrl.toExternalForm(), module);
                 }
             } else {
-                for (String sub: parentPath.list()) {
+                String[] fileNames = parentPath.list();
+                Arrays.sort(fileNames);
+                for (String sub: fileNames) {
                     try {
                         File componentPath = FileUtil.getFile(parentPath.getCanonicalPath() + "/" + sub);
                         if (componentPath.isDirectory() && !sub.equals("CVS") && !sub.equals(".svn")) {

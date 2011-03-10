@@ -52,14 +52,15 @@ public class RenderContentTransform implements TemplateTransformModel {
 
     public static final String module = RenderContentTransform.class.getName();
 
+    @SuppressWarnings("unchecked")
     public Writer getWriter(final Writer out, Map args) {
         final Environment env = Environment.getCurrentEnvironment();
-        final Delegator delegator = (Delegator) FreeMarkerWorker.getWrappedObject("delegator", env);
-        final LocalDispatcher dispatcher = (LocalDispatcher) FreeMarkerWorker.getWrappedObject("dispatcher", env);
-        final HttpServletRequest request = (HttpServletRequest) FreeMarkerWorker.getWrappedObject("request", env);
-        final HttpServletResponse response = (HttpServletResponse) FreeMarkerWorker.getWrappedObject("response", env);
+        final Delegator delegator = FreeMarkerWorker.getWrappedObject("delegator", env);
+        final LocalDispatcher dispatcher = FreeMarkerWorker.getWrappedObject("dispatcher", env);
+        final HttpServletRequest request = FreeMarkerWorker.getWrappedObject("request", env);
+        final HttpServletResponse response = FreeMarkerWorker.getWrappedObject("response", env);
 
-        final Map templateRoot = MapStack.create(FreeMarkerWorker.createEnvironmentMap(env));
+        final Map<String, Object> templateRoot = MapStack.create(FreeMarkerWorker.createEnvironmentMap(env));
         ((MapStack)templateRoot).push(args);
         final String xmlEscape =  (String)templateRoot.get("xmlEscape");
         final String thisContentId = (String)templateRoot.get("contentId");
@@ -129,7 +130,7 @@ public class RenderContentTransform implements TemplateTransformModel {
             }
 
             public void closeEditWrap(Writer out, String editRequestName) throws IOException {
-                StringBuilder sb = new StringBuilder();
+                // StringBuilder sb = new StringBuilder();
                 String fullRequest = editRequestName;
                 String delim = "?";
                 if (UtilValidate.isNotEmpty(thisContentId)) {
@@ -138,7 +139,7 @@ public class RenderContentTransform implements TemplateTransformModel {
                 }
 
                 out.write("<a href=\"");
-                ServletContext servletContext = (ServletContext) request.getSession().getServletContext();
+                ServletContext servletContext = request.getSession().getServletContext();
                 RequestHandler rh = (RequestHandler) servletContext.getAttribute("_REQUEST_HANDLER_");
                 out.append(rh.makeLink(request, response, "/" + fullRequest, false, false, true));
                 out.write("\">Edit</a>");

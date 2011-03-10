@@ -56,6 +56,7 @@ import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.security.Security;
 import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.service.calendar.TemporalExpression;
@@ -67,11 +68,13 @@ import org.ofbiz.service.calendar.TemporalExpressionWorker;
 public class WorkEffortServices {
 
     public static final String module = WorkEffortServices.class.getName();
+    public static final String resourceError = "WorkEffortUiLabels";
 
     public static Map<String, Object> getWorkEffortAssignedEventsForRole(DispatchContext ctx, Map<String, ? extends Object> context) {
         Delegator delegator = ctx.getDelegator();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         String roleTypeId = (String) context.get("roleTypeId");
+        Locale locale = (Locale) context.get("locale");
 
         List<GenericValue> validWorkEfforts = null;
 
@@ -92,7 +95,8 @@ public class WorkEffortServices {
                );
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
-                return ServiceUtil.returnError("Error finding desired WorkEffort records: " + e.toString());
+                return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                        "WorkEffortNotFound", UtilMisc.toMap("errorString", e.toString()), locale));
             }
         }
 
@@ -107,6 +111,7 @@ public class WorkEffortServices {
     public static Map<String, Object> getWorkEffortAssignedEventsForRoleOfAllParties(DispatchContext ctx, Map<String, ? extends Object> context) {
         Delegator delegator = ctx.getDelegator();
         String roleTypeId = (String) context.get("roleTypeId");
+        Locale locale = (Locale) context.get("locale");
 
         List<GenericValue> validWorkEfforts = null;
 
@@ -125,7 +130,8 @@ public class WorkEffortServices {
            );
         } catch (GenericEntityException e) {
             Debug.logWarning(e, module);
-            return ServiceUtil.returnError("Error finding desired WorkEffort records: " + e.toString());
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                    "WorkEffortNotFound", UtilMisc.toMap("errorString", e.toString()), locale));
         }
 
         Map<String, Object> result = FastMap.newInstance();
@@ -139,6 +145,7 @@ public class WorkEffortServices {
     public static Map<String, Object> getWorkEffortAssignedTasks(DispatchContext ctx, Map<String, ? extends Object> context) {
         Delegator delegator = ctx.getDelegator();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
         List<GenericValue> validWorkEfforts = null;
 
@@ -164,7 +171,8 @@ public class WorkEffortServices {
                 validWorkEfforts.addAll(EntityUtil.filterByDate(delegator.findList("WorkEffortAndPartyAssign", ecl, null, UtilMisc.toList("createdDate DESC"), null, false)));
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
-                return ServiceUtil.returnError("Error finding desired WorkEffort records: " + e.toString());
+                return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                        "WorkEffortNotFound", UtilMisc.toMap("errorString", e.toString()), locale));
             }
         }
 
@@ -178,6 +186,7 @@ public class WorkEffortServices {
     public static Map<String, Object> getWorkEffortAssignedActivities(DispatchContext ctx, Map<String, ? extends Object> context) {
         Delegator delegator = ctx.getDelegator();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
         List<GenericValue> validWorkEfforts = null;
 
@@ -200,7 +209,8 @@ public class WorkEffortServices {
                 validWorkEfforts = EntityUtil.filterByDate(delegator.findList("WorkEffortAndPartyAssign", ecl, null, UtilMisc.toList("priority"), null, false));
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
-                return ServiceUtil.returnError("Error finding desired WorkEffort records: " + e.toString());
+                return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                        "WorkEffortNotFound", UtilMisc.toMap("errorString", e.toString()), locale));
             }
         }
 
@@ -213,6 +223,7 @@ public class WorkEffortServices {
     public static Map<String, Object> getWorkEffortAssignedActivitiesByRole(DispatchContext ctx, Map<String, ? extends Object> context) {
         Delegator delegator = ctx.getDelegator();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
         List<GenericValue> roleWorkEfforts = null;
 
@@ -237,7 +248,8 @@ public class WorkEffortServices {
                );
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
-                return ServiceUtil.returnError("Error finding desired WorkEffort records: " + e.toString());
+                return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                        "WorkEffortNotFound", UtilMisc.toMap("errorString", e.toString()), locale));
             }
         }
 
@@ -250,6 +262,7 @@ public class WorkEffortServices {
     public static Map<String, Object> getWorkEffortAssignedActivitiesByGroup(DispatchContext ctx, Map<String, ? extends Object> context) {
         Delegator delegator = ctx.getDelegator();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
         List<GenericValue> groupWorkEfforts = null;
 
@@ -274,7 +287,8 @@ public class WorkEffortServices {
                );
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
-                return ServiceUtil.returnError("Error finding desired WorkEffort records: " + e.toString());
+                return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                        "WorkEffortNotFound", UtilMisc.toMap("errorString", e.toString()), locale));
             }
         }
 
@@ -537,7 +551,8 @@ public class WorkEffortServices {
             if (partyId.equals(userLogin.getString("partyId")) || security.hasEntityPermission("WORKEFFORTMGR", "_VIEW", userLogin)) {
                 partyIdsToUse.add(partyId);
             } else {
-                return ServiceUtil.returnError("You do not have permission to view information for party with ID [" + partyId + "], you must be logged in as a user associated with this party, or have the WORKEFFORTMGR_VIEW or WORKEFFORTMGR_ADMIN permissions.");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                        "WorkEffortPartyPermissionError", UtilMisc.toMap("partyId", partyId), locale));
             }
         } else {
             if ("CAL_PERSONAL".equals(calendarType) && UtilValidate.isNotEmpty(userLogin.getString("partyId"))) {
@@ -742,6 +757,7 @@ public class WorkEffortServices {
         Delegator delegator = ctx.getDelegator();
         String productId = (String) context.get("productId");
         String facilityId = (String) context.get("facilityId"); // optional
+        Locale locale = (Locale) context.get("locale");
 
         Map<String, Map<String, Object>> summaryInByFacility = FastMap.newInstance();
         Map<String, Map<String, Object>> summaryOutByFacility = FastMap.newInstance();
@@ -864,7 +880,8 @@ public class WorkEffortServices {
             }
 
         } catch (GenericEntityException gee) {
-            return ServiceUtil.returnError("Error retrieving manufacturing data for productId [" + productId + "]: " + gee.getMessage());
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                    "WorkEffortManufacturingError", UtilMisc.toMap("productId", productId, "errorString", gee.getMessage()), locale));
         }
         Map<String, Object> resultMap = ServiceUtil.returnSuccess();
         resultMap.put("summaryInByFacility", summaryInByFacility);
@@ -879,12 +896,15 @@ public class WorkEffortServices {
      */
     public static Map<String, Object> processWorkEffortEventReminders(DispatchContext ctx, Map<String, ? extends Object> context) {
         Delegator delegator = ctx.getDelegator();
+        LocalDispatcher dispatcher = ctx.getDispatcher();
+        Locale localePar = (Locale) context.get("locale");
         Timestamp now = new Timestamp(System.currentTimeMillis());
         List<GenericValue> eventReminders = null;
         try {
             eventReminders = delegator.findList("WorkEffortEventReminder", EntityCondition.makeCondition(UtilMisc.<EntityCondition>toList(EntityCondition.makeCondition("reminderDateTime", EntityOperator.EQUALS, null), EntityCondition.makeCondition("reminderDateTime", EntityOperator.LESS_THAN_EQUAL_TO, now)), EntityOperator.OR), null, null, null, false);
         } catch (GenericEntityException e) {
-            return ServiceUtil.returnError("Error while retrieving work effort event reminders: " + e);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                    "WorkEffortEventRemindersRetrivingError", UtilMisc.toMap("errorString", e), localePar));
         }
         for (GenericValue reminder : eventReminders) {
             if (UtilValidate.isEmpty(reminder.get("contactMechId"))) {
@@ -909,6 +929,9 @@ public class WorkEffortServices {
             Locale locale = reminder.getString("localeId") == null ? Locale.getDefault() : new Locale(reminder.getString("localeId"));
             TimeZone timeZone = reminder.getString("timeZoneId") == null ? TimeZone.getDefault() : TimeZone.getTimeZone(reminder.getString("timeZoneId"));
             Map<String, Object> parameters = UtilMisc.toMap("locale", locale, "timeZone", timeZone, "workEffortId", reminder.get("workEffortId"));
+
+            Map<String, Object> processCtx = UtilMisc.toMap("reminder", reminder, "bodyParameters", parameters, "userLogin", context.get("userLogin"));
+
             Calendar cal = UtilDateTime.toCalendar(now, timeZone, locale);
             Timestamp reminderStamp = reminder.getTimestamp("reminderDateTime");
             Date eventDateTime = workEffort.getTimestamp("estimatedStartDate");
@@ -939,7 +962,8 @@ public class WorkEffortServices {
                     if (reminderDateTime.before(now) && reminderStamp != null) {
                         try {
                             parameters.put("eventDateTime", new Timestamp(eventDateTime.getTime()));
-                            processEventReminder(ctx, reminder, parameters);
+
+                            dispatcher.runSync("processWorkEffortEventReminder", processCtx);
                             if (repeatCount != 0 && currentCount + 1 >= repeatCount) {
                                 reminder.remove();
                             } else {
@@ -961,6 +985,8 @@ public class WorkEffortServices {
                             }
                         } catch (GenericEntityException e) {
                             Debug.logWarning("Error while processing temporal expression reminder, id = " + tempExprId + ": " + e, module);
+                        } catch (GenericServiceException e) {
+                            Debug.logError(e, module);
                         }
                     } else if (reminderStamp == null) {
                         try {
@@ -978,7 +1004,7 @@ public class WorkEffortServices {
                 if (reminderDateTime.before(now)) {
                     try {
                         parameters.put("eventDateTime", eventDateTime);
-                        processEventReminder(ctx, reminder, parameters);
+                        dispatcher.runSync("processWorkEffortEventReminder", processCtx);
                         TimeDuration duration = TimeDuration.fromNumber(reminder.getLong("repeatInterval"));
                         if ((repeatCount != 0 && currentCount + 1 >= repeatCount) || duration.isZero()) {
                             reminder.remove();
@@ -992,6 +1018,8 @@ public class WorkEffortServices {
                         }
                     } catch (GenericEntityException e) {
                         Debug.logWarning("Error while processing event reminder: " + e, module);
+                    } catch (GenericServiceException e) {
+                        Debug.logError(e, module);
                     }
                 }
             }
@@ -999,6 +1027,53 @@ public class WorkEffortServices {
         return ServiceUtil.returnSuccess();
     }
 
+    public static Map<String, Object> processWorkEffortEventReminder(DispatchContext dctx, Map<String, ? extends Object> context) {
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dctx.getDelegator();
+        Map<String, Object> parameters = UtilGenerics.checkMap(context.get("bodyParameters"));
+        GenericValue reminder = (GenericValue) context.get("reminder");
+        GenericValue contactMech = null;
+        try {
+            contactMech = reminder.getRelatedOne("ContactMech");
+        } catch (GenericEntityException e) {
+            Debug.logError(e, module);
+        }
+        if (contactMech != null && "EMAIL_ADDRESS".equals(contactMech.get("contactMechTypeId"))) {
+            String toAddress = contactMech.getString("infoString");
+
+            GenericValue emailTemplateSetting = null;
+            try {
+                emailTemplateSetting = delegator.findOne("EmailTemplateSetting", true, "emailTemplateSettingId", "WEFF_EVENT_REMINDER");
+            } catch (GenericEntityException e1) {
+                Debug.logError(e1, module);
+            }
+            if (emailTemplateSetting != null) {
+                Map<String, Object> emailCtx = UtilMisc.toMap("emailTemplateSettingId", "WEFF_EVENT_REMINDER", "sendTo", toAddress, "bodyParameters", parameters);
+                try {
+                    dispatcher.runAsync("sendMailFromTemplateSetting", emailCtx);
+                } catch (Exception e) {
+                    Debug.logWarning("Error while emailing event reminder - workEffortId = " + reminder.get("workEffortId") + ", contactMechId = " + reminder.get("contactMechId") + ": " + e, module);
+                }
+            } else {
+                // TODO: Remove this block after the next release 2010-11-29
+                String screenLocation = UtilProperties.getPropertyValue("EventReminders", "eventReminders.emailScreenWidgetLocation");
+                String fromAddress = UtilProperties.getPropertyValue("EventReminders", "eventReminders.emailFromAddress");
+                String subject = UtilProperties.getMessage("WorkEffortUiLabels", "WorkEffortEventReminder", (Locale) parameters.get("locale"));
+                Map<String, Object> emailCtx = UtilMisc.toMap("sendFrom", fromAddress, "sendTo", toAddress, "subject", subject, "bodyParameters", parameters, "bodyScreenUri", screenLocation);
+                try {
+                    dispatcher.runAsync("sendMailFromScreen", emailCtx);
+                } catch (Exception e) {
+                    Debug.logWarning("Error while emailing event reminder - workEffortId = " + reminder.get("workEffortId") + ", contactMechId = " + reminder.get("contactMechId") + ": " + e, module);
+                }
+            }
+            return ServiceUtil.returnSuccess();
+        }
+        // TODO: Other contact mechanism types
+        Debug.logWarning("Invalid event reminder contact mech, workEffortId = " + reminder.get("workEffortId") + ", contactMechId = " + reminder.get("contactMechId"), module);
+        return ServiceUtil.returnSuccess();
+    }
+
+    @Deprecated
     protected static void processEventReminder(DispatchContext ctx, GenericValue reminder, Map<String, Object> parameters) throws GenericEntityException {
         LocalDispatcher dispatcher = ctx.getDispatcher();
         GenericValue contactMech = reminder.getRelatedOne("ContactMech");
@@ -1026,6 +1101,7 @@ public class WorkEffortServices {
      */
     public static Map<String, Object> migrateWorkEffortEventReminders(DispatchContext ctx, Map<String, ? extends Object> context) {
         Delegator delegator = ctx.getDelegator();
+        Locale locale = (Locale) context.get("locale");
         ModelEntity modelEntity = delegator.getModelEntity("WorkEffortEventReminder");
         if (modelEntity != null && modelEntity.getField("recurrenceOffset") != null) {
             List<GenericValue> eventReminders = null;
@@ -1038,7 +1114,8 @@ public class WorkEffortServices {
                     }
                 }
             } catch (GenericEntityException e) {
-                return ServiceUtil.returnError("Error while migrating work effort event reminders: " + e);
+                return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                        "WorkEffortEventRemindersMigrationError", UtilMisc.toMap("errorString", e), locale));
             }
         }
         return ServiceUtil.returnSuccess();

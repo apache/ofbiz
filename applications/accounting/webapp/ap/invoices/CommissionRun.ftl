@@ -61,14 +61,14 @@ function enableSubmitButton() {
         }
     }
     if (isAllSelected) {
-        $('checkAllInvoices').checked = true;
+        jQuery('#checkAllInvoices').attr('checked', true);
     } else {
-        $('checkAllInvoices').checked = false;
+        jQuery('#checkAllInvoices').attr('checked', false);
     }
-    if (!isSingle && $('serviceName').value != "")
-        $('submitButton').disabled = false;
+    if (!isSingle && jQuery('#serviceName').val() != "")
+        jQuery('#submitButton').attr('disabled', '');
     else
-        $('submitButton').disabled = true;
+        jQuery('#submitButton').attr('disabled', 'disabled');
 }
 
 -->
@@ -76,8 +76,8 @@ function enableSubmitButton() {
 
 <#if invoices?has_content >
   <form name="listSalesInvoices" id="listSalesInvoices" method="post">
-    <#if parties?has_content>
-      <input type="hidden" name="partyIds" value="${parties?if_exists}"/>
+    <#if salesRepPartyList?has_content>
+      ${setRequestAttribute("partyIds", salesRepPartyList)}
     </#if>
     <div align="right">
       <select name="serviceName" id="serviceName" onchange="javascript:setServiceName(this);">

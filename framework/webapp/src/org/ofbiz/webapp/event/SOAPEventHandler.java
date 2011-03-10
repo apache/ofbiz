@@ -170,7 +170,7 @@ public class SOAPEventHandler implements EventHandler {
         try {
             // each is a different service call
             SOAPBody reqBody = reqEnv.getBody();
-            Iterator serviceIter = reqBody.getChildElements();
+            Iterator<Object> serviceIter = UtilGenerics.cast(reqBody.getChildElements());
             while (serviceIter.hasNext()) {
                 Object serviceObj = serviceIter.next();
                 if (serviceObj instanceof OMElement) {
@@ -221,7 +221,7 @@ public class SOAPEventHandler implements EventHandler {
                         }
 
                     } catch (GenericServiceException e) {
-                        sendError(response, "Problem processing the service");
+                        //sendError(response, "Problem processing the service"); this causes a not a valid XML response. See https://issues.apache.org/jira/browse/OFBIZ-4207
                         throw new EventHandlerException(e.getMessage(), e);
                     }
                 }

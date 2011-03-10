@@ -23,6 +23,11 @@ import java.sql.SQLException;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.eclipse.birt.report.engine.api.EXCELRenderOption;
 import org.eclipse.birt.report.engine.api.EngineException;
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
@@ -36,7 +41,11 @@ import org.eclipse.birt.report.engine.api.RenderOption;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.birt.container.BirtContainer;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.security.Security;
+import org.ofbiz.service.LocalDispatcher;
 
 public class BirtWorker {
 
@@ -47,6 +56,7 @@ public class BirtWorker {
     public final static String BIRT_LOCALE = "birtLocale";
     public final static String BIRT_IMAGE_DIRECTORY = "birtImageDirectory";
     public final static String BIRT_CONTENT_TYPE = "birtContentType";
+    public final static String BIRT_OUTPUT_FILE_NAME = "birtOutputFileName";
 
     private static HTMLServerImageHandler imageHandler = new HTMLServerImageHandler();
 
@@ -127,7 +137,7 @@ public class BirtWorker {
             pdfOptions.setOption(IPDFRenderOption.PAGE_OVERFLOW, Boolean.TRUE );
         } else if (options.getOutputFormat().equalsIgnoreCase("xls")) {
             // set excel render options
-            EXCELRenderOption excelOptions = new EXCELRenderOption(options);
+            new EXCELRenderOption(options);
         }
         options.setOutputStream(output);
         task.setRenderOption(options);
@@ -137,5 +147,48 @@ public class BirtWorker {
         Debug.logInfo("Run report's task", module);
         task.run();
         task.close();
+    }
+    
+    public static void setWebContextObjects(IReportEngine engine, HttpServletRequest request, HttpServletResponse response) {
+        HttpSession session = request.getSession();
+        ServletContext servletContext = session.getServletContext();
+        
+        Map<String, Object> appContext = UtilGenerics.checkMap(engine.getConfig().getAppContext());
+        
+        // set delegator
+        Delegator delegator = (Delegator) session.getAttribute("delegator");
+        if (UtilValidate.isEmpty(delegator)) {
+            delegator = (Delegator) servletContext.getAttribute("delegator");
+        }
+        if (UtilValidate.isEmpty(delegator)) {
+            delegator = (Delegator) request.getAttribute("delegator");
+        }
+        if (UtilValidate.isNotEmpty(delegator)) {
+            appContext.put("delegator", delegator);
+        }
+
+        // set delegator
+        LocalDispatcher dispatcher = (LocalDispatcher) session.getAttribute("dispatcher");
+        if (UtilValidate.isEmpty(dispatcher)) {
+            dispatcher = (LocalDispatcher) servletContext.getAttribute("dispatcher");
+        }
+        if (UtilValidate.isEmpty(dispatcher)) {
+            dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
+        }
+        if (UtilValidate.isNotEmpty(dispatcher)) {
+            appContext.put("dispatcher", dispatcher);
+        }
+
+        // set security
+        Security security = (Security) session.getAttribute("security");
+        if (UtilValidate.isEmpty(security)) {
+            security = (Security) servletContext.getAttribute("security");
+        }
+        if (UtilValidate.isEmpty(security)) {
+            security = (Security) request.getAttribute("security");
+        }
+        if (UtilValidate.isNotEmpty(security)) {
+            appContext.put("security", security);
+        }
     }
 }

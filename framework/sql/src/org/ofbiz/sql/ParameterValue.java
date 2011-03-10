@@ -18,6 +18,9 @@
  */
 package org.ofbiz.sql;
 
+import org.ofbiz.base.lang.SourceMonitored;
+
+@SourceMonitored
 public final class ParameterValue extends Value {
     private final String name;
 
@@ -25,6 +28,7 @@ public final class ParameterValue extends Value {
         this.name = name;
     }
 
+    @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
@@ -33,6 +37,7 @@ public final class ParameterValue extends Value {
         return name;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o instanceof ParameterValue) {
             ParameterValue other = (ParameterValue) o;

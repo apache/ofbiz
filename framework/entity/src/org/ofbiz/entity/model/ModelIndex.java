@@ -35,6 +35,7 @@ import org.ofbiz.base.util.collections.IteratorWrapper;
  * Generic Entity - Relation model class
  *
  */
+@SuppressWarnings("serial")
 public class ModelIndex extends ModelChild {
 
     /** the index name, used for the database index name */
@@ -101,9 +102,11 @@ public class ModelIndex extends ModelChild {
     @Deprecated
     public Iterator<String> getIndexFieldsIterator() {
         return new IteratorWrapper<String, Field>(this.fields.iterator()) {
+            @Override
             protected void noteRemoval(String dest, Field src) {
             }
 
+            @Override
             protected String convert(Field src) {
                 return src.getFieldName();
             }
@@ -174,6 +177,7 @@ public class ModelIndex extends ModelChild {
             return function;
         }
 
+        @Override
         public String toString() {
             if (function == null) {
                 return fieldName;

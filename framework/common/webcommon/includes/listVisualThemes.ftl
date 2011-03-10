@@ -23,6 +23,26 @@ margin: 1em;
 }
 </style>
 -->
+
+<script type="text/javascript" src="/images/jquery/plugins/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+<link rel="stylesheet" href="/images/jquery/plugins/fancybox/jquery.fancybox-1.3.4.css" type="text/css" media="screen" />
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("a#single_image").fancybox();
+        $("a#inline").fancybox({
+            'hideOnContentClick': true
+        });
+        $("a.group").fancybox({
+            'transitionIn'	:	'elastic',
+            'transitionOut'	:	'elastic',
+            'speedIn'		:	600,
+            'speedOut'		:	200,
+            'overlayShow'	:	false
+        });
+    });
+</script>
+
 <div class="screenlet" style="margin: 1em;">
   <div class="screenlet-title-bar">
     <ul>
@@ -31,6 +51,7 @@ margin: 1em;
     </ul>
     <br class="clear"/>
   </div>
+  <li class="h2" style="padding-top:1em">${uiLabelMap.CommonVisualThemeUsage}</li>
   <#if visualThemes?has_content>
     <#assign orderByList = Static["org.ofbiz.base.util.UtilMisc"].toList("visualThemeId")/>
     <table cellspacing="0" class="basic-table">
@@ -53,7 +74,7 @@ margin: 1em;
           <td>
             <#if screenshots?has_content>
               <#list screenshots as screenshot>
-                <a href="<@ofbizContentUrl>${screenshot.resourceValue}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${screenshot.resourceValue}</@ofbizContentUrl>" width="150" alt=""/></a>
+                <a id="single_image" href="<@ofbizContentUrl>${screenshot.resourceValue}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${screenshot.resourceValue}</@ofbizContentUrl>" width="150" alt=""/></a>
               </#list>
            <#else>
               ${uiLabelMap.CommonVisualThemeNoScreenshots}

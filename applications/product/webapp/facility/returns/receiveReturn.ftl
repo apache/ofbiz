@@ -150,7 +150,12 @@ under the License.
                               </select>
                             <#else>
                               <span>
-                                <@htmlTemplate.lookupField formName="selectAllForm" name="locationSeqId_o_${rowCount}" id="locationSeqId_o_${rowCount}" fieldFormName="LookupFacilityLocation<#if parameters.facilityId?exists>?facilityId=${facilityId}</#if>"/>
+                                <#if parameters.facilityId?exists>
+                                    <#assign LookupFacilityLocationView="LookupFacilityLocation?facilityId=${facilityId}">
+                                <#else>
+                                    <#assign LookupFacilityLocationView="LookupFacilityLocation">
+                                </#if>
+                                <@htmlTemplate.lookupField formName="selectAllForm" name="locationSeqId_o_${rowCount}" id="locationSeqId_o_${rowCount}" fieldFormName="${LookupFacilityLocationView}"/>
                               </span>
                             </#if>
                           </td>
@@ -262,6 +267,12 @@ under the License.
 <script language="JavaScript" type="text/javascript">
     function setInventoryItemStatus(selection,index) {
         var statusId = "statusId_o_" + index;
-        new Ajax.Updater($(statusId), 'UpdatedInventoryItemStatus',{parameters: {inventoryItemType:selection.value,inventoryItemStatus:$(statusId).value}});
+        jObjectStatusId = jQuery("#" + statusId);
+        jQuery.ajax({
+            url: 'UpdatedInventoryItemStatus',
+            data: {inventoryItemType: selection.value, inventoryItemStatus: jObjectStatusId.val()},
+            type: "POST",
+            success: function(data){jObjectStatusId.html(data);}
+        });
     }
 </script>

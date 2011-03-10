@@ -35,6 +35,8 @@ under the License.
             <exclude field-name="lastModifiedDate"/>
             <exclude field-name="lastModifiedByUserLogin"/>
         </auto-attributes>
+        <override name="workEffortName" allow-html="safe"/>
+        <override name="description" allow-html="safe"/>
     </service>
     <service name="createWorkEffort" default-entity-name="WorkEffort" engine="simple"
         location="component://workeffort/script/org/ofbiz/workeffort/workeffort/WorkEffortSimpleServices.xml" invoke="createWorkEffort">
@@ -49,6 +51,7 @@ under the License.
         <override name="workEffortTypeId" optional="false"/>
         <override name="workEffortName" optional="false"/>
         <override name="currentStatusId" optional="false"/>
+        <override name="description" allow-html="safe"/>
     </service>
     <service name="createWorkEffortAndPartyAssign" default-entity-name="WorkEffort" engine="simple"
         location="component://workeffort/script/org/ofbiz/workeffort/workeffort/WorkEffortSimpleServices.xml" invoke="createWorkEffortAndPartyAssign">
@@ -361,6 +364,7 @@ under the License.
         <auto-attributes include="pk" mode="IN" optional="false" entity-name="CustRequestWorkEffort"/>
         <auto-attributes include="all" mode="IN" optional="true" entity-name="CustRequest"/>
         <override name="custRequestId" optional="true" mode="INOUT"/>
+        <override name="description" allow-html="safe"/>
     </service>
     <service name="deleteWorkEffortRequest" engine="simple" location="component://workeffort/script/org/ofbiz/workeffort/workeffort/WorkEffortSimpleServices.xml" invoke="deleteWorkEffortRequest" auth="true">
         <description>Deletes a CustRequestWorkEffort</description>
@@ -729,6 +733,12 @@ under the License.
     <service name="processWorkEffortEventReminders" engine="java"
             location="org.ofbiz.workeffort.workeffort.WorkEffortServices" invoke="processWorkEffortEventReminders" auth="true">
         <description>Process work effort event reminders. This service is run by the job scheduler.</description>
+    </service>
+    <service name="processWorkEffortEventReminder" engine="java"
+            location="org.ofbiz.workeffort.workeffort.WorkEffortServices" invoke="processWorkEffortEventReminder" auth="true">
+        <description>Send a work effort event reminder</description>
+        <attribute name="reminder" mode="IN" type="GenericValue"/>
+        <attribute name="bodyParameters" mode="IN" type="Map"/>
     </service>
     <service name="migrateWorkEffortEventReminders" engine="java"
             location="org.ofbiz.workeffort.workeffort.WorkEffortServices" invoke="migrateWorkEffortEventReminders" auth="true">

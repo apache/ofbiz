@@ -48,114 +48,6 @@ under the License.
         </section>
     </screen>
 
-    <screen name="uiLabelDecorator">
-        <section>
-            <condition>
-                <if-has-permission permission="CATALOG" action="_VIEW" />
-            </condition>
-            <actions>
-                <!-- base/top/specific map first, then more common map added for shared labels -->
-                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
-                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
-                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap" global="true"/>
-                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
-                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
-            </actions>
-            <widgets>
-                   <decorator-section-include name="body"/>
-            </widgets>
-            <fail-widgets>
-                <label style="h3">${uiLabelMap.ProductCatalogViewPermissionError}</label>
-           </fail-widgets>
-        </section>
-    </screen>
-
-    <screen name="CommonProductDecorator">
-        <section>
-            <actions>
-                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
-                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
-                <set field="productId" from-field="parameters.productId"/>
-                <entity-one entity-name="Product" value-field="product"/>
-                <set field="productName" from-field="product.productName"/>
-            </actions>
-            <widgets>
-                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="pre-body">
-                        <section>
-                            <condition>
-                                <and>
-                                    <if-has-permission permission="CATALOG" action="_VIEW"/>
-                                    <not><if-empty field="product"/></not>
-                                </and>
-                            </condition>
-                            <widgets>
-                                <include-menu name="ProductTabBar" location="component://product/widget/catalog/CatalogMenus.xml"/>
-                            </widgets>
-                        </section>
-                    </decorator-section>
-                    <decorator-section name="left-column">
-                        <include-screen name="leftbar"/>
-                    </decorator-section>                    
-                    <decorator-section name="body">
-                        <section>
-                            <!-- do check for CATALOG, _VIEW permission -->
-                            <condition>
-                                <if-has-permission permission="CATALOG" action="_VIEW"/>
-                            </condition>
-                            <widgets>
-                                <section>
-                                    <condition>
-                                        <not><if-empty field="product"/></not>
-                                    </condition>
-                                    <widgets>
-                                        <container>
-                                            <label style="h1">${uiLabelMap[labelTitleProperty]} ${uiLabelMap.CommonFor}: ${product.internalName} [${uiLabelMap.CommonId}:${productId}]  ${${extraFunctionName}}</label>
-                                            <image src="${product.smallImageUrl}" height="40" width="40" url-mode="content" alt="${product.internalName}"/>
-                                        </container>
-
-                                        <!-- add Create Product and View Product (in ecommerce) links -->
-                                        <container style="button-bar">
-                                            <link target="EditProduct" text="${uiLabelMap.ProductNewProduct}" style="buttontext create"/>
-                                            <link target="CreateVirtualWithVariantsForm" text="${uiLabelMap.ProductNewVirtualProduct}" style="buttontext create"/>
-                                            <link target="/ecommerce/control/product" url-mode="inter-app" text="${uiLabelMap.ProductProductPage}" style="buttontext">
-                                                <parameter param-name="product_id" from-field="productId"/>
-                                            </link>
-                                            <link target="ProductBarCode.pdf" target-window="_blank" text="${uiLabelMap.ProductBarcode}" style="buttontext">
-                                                <parameter param-name="productId"/>
-                                                <parameter param-name="productName"/>
-                                            </link>
-
-                                            <link target="javascript:expandAll(true);"  text="${uiLabelMap.CommonExpandAll}" style="buttontext expand-all" url-mode="plain"/>
-                                            <link target="javascript:expandAll(false);" text="${uiLabelMap.CommonCollapseAll}" style="buttontext collapse-all" url-mode="plain"/>
-                                        </container>
-                                    </widgets>
-                                </section>
-                                <section>
-                                    <condition>
-                                        <or>
-                                            <not><if-empty field="product"/></not>
-                                            <if-empty field="productId"/>
-                                        </or>
-                                    </condition>
-                                    <widgets>
-                                        <decorator-section-include name="body"/>
-                                    </widgets>
-                                    <fail-widgets>
-                                        <label style="h3">${uiLabelMap.ProductNoExistingProductsFound}</label>
-                                    </fail-widgets>
-                                </section>
-                            </widgets>
-                            <fail-widgets>
-                                <label style="h3">${uiLabelMap.ProductCatalogViewPermissionError}</label>
-                            </fail-widgets>
-                        </section>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-
     <screen name="CommonCatalogDecorator">
         <section>
             <widgets>
@@ -316,14 +208,22 @@ under the License.
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator"  location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
+                    <decorator-section name="pre-body">
                         <section>
-                            <!-- do check for CATALOG, _VIEW permission -->
                             <condition>
                                 <if-has-permission permission="CATALOG" action="_VIEW"/>
                             </condition>
                             <widgets>
                                 <include-menu name="WebAnalyticsTabBar" location="component://product/widget/catalog/CatalogMenus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="CATALOG" action="_VIEW"/>
+                            </condition>
+                            <widgets>
                                 <container style="no-clear">
                                     <decorator-section-include name="body"/>
                                 </container>
@@ -342,8 +242,9 @@ under the License.
         <section>
             <widgets>
                 <include-screen name="keywordsearchbox"/>
-                <include-screen name="sidecatalogs"/>
-                <include-screen name="sidedeepcategory"/>
+                <!--<include-screen name="sidecatalogs"/>
+                <include-screen name="sidedeepcategory"/>-->
+                <include-screen name="categorytree"/>
                 <include-screen name="miniproductlist"/>
             </widgets>
         </section>
@@ -412,7 +313,9 @@ under the License.
                         <container style="button-bar">
                             <link target="EditCategory" text="${uiLabelMap.ProductNewCategory}" style="buttontext create"/>
                         </container>
-                        <platform-specific><html><html-template location="component://product/webapp/catalog/ChooseTopCategory.ftl"/></html></platform-specific>
+                        <screenlet title="${uiLabelMap.ProductCategoryWithNoParent}">
+                            <include-form name="ListTopCategory" location="component://product/widget/catalog/CategoryForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -436,7 +339,22 @@ under the License.
             </widgets>
         </section>
     </screen>
-
+    
+    <screen name="categorytree">
+        <section>
+            <actions>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/jquery-1.4.2.min.js" global="true"/>
+                <script location="component://product/webapp/catalog/WEB-INF/actions/category/CategoryTree.groovy"></script>
+            </actions>
+            <widgets>
+                <screenlet id="ProductBrowseCategoriesPanel" title="${uiLabelMap.ProductBrowseCatalogeAndCategories}" collapsible="true">
+                    <container id="EditDocumentTree"/>
+                    <platform-specific><html><html-template location="component://product/webapp/catalog/category/CategoryTree.ftl"/></html></platform-specific>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+    
     <screen name="main">
         <section>
             <actions>
@@ -448,13 +366,49 @@ under the License.
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="left-column">
                         <include-screen name="leftbar"/>
-                    </decorator-section>                    
+                    </decorator-section>
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.ProductCatalogAdministrationMainPage}">
                             <platform-specific>
                                 <html><html-template location="component://product/webapp/catalog/main.ftl"/></html>
                             </platform-specific>
                         </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ImageManagementDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="Imagemanagement"/><!-- this highlights the selected menu-item with name "main" -->
+                <set field="userTabButtonMainAppBar" value="Imagemanagement"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="CATALOG" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <include-menu name="ImageManagementTabBar" location="component://product/widget/catalog/CatalogMenus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="CATALOG" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.ProductCatalogViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

@@ -24,7 +24,6 @@ under the License.
     <form name="FindInvoices" type="single" target="findInvoices" title="Find and list invoices"
         header-row-style="header-row" default-table-style="basic-table">
         <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
-        <field name="hideSearch"><hidden value="Y"/></field>
         <field name="invoiceId"><text-find ignore-case="true"/></field>
         <field name="description"><text-find ignore-case="true"/></field>
         <field position="1" name="invoiceTypeId">
@@ -43,6 +42,7 @@ under the License.
         <field position="2" name="partyIdTo" parameter-name="partyId"><lookup target-form-name="LookupPartyName"/></field>
         <field name="billingAccountId"><lookup target-form-name="LookupBillingAccount"/></field>
         <field name="invoiceDate"><date-find type="date"/></field>
+        <field name="referenceNumber"><text-find/></field>
         <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
 
@@ -135,6 +135,7 @@ under the License.
         <field position="2" name="dueDate"><display description="${bsh:if(invoice.get(&quot;dueDate&quot;)!=null)return(invoice.getString(&quot;dueDate&quot;).substring(0,10));}"/></field>
         <field position="1" name="total"><display description="${total}" type="currency" currency="${invoice.currencyUomId}"/></field>
         <field position="2" name="paidDate"><display description="${bsh:if(invoice.get(&quot;paidDate&quot;)!=null)return(invoice.getString(&quot;paidDate&quot;).substring(0,10));}"/></field>
+        <field position="1" name="referenceNumber"><display/></field>
         <field name="currencyUomId"><hidden/></field>
     </form>
 
@@ -339,6 +340,7 @@ under the License.
         </field>
         <field position="2" name="recurrenceInfoId"><text size="10"/></field>
         <field position="1" name="invoiceMessage" encode-output="false"><text size="100"/></field>
+        <field position="1" name="referenceNumber"><text/></field>
         <!--field position="2" name="invoiceAmount" use-when="invoiceId!=null"><display/></field-->
         <field position="1" name="updateButton" widget-style="smallSubmit" use-when="invoice!=null&amp;&amp;invoice.getString(&quot;statusId&quot;).equals(&quot;INVOICE_IN_PROCESS&quot;)">
             <submit button-type="button"/>
@@ -353,7 +355,11 @@ under the License.
                if(quantity == null || quantity.compareTo(BigDecimal.ZERO) == 0) quantity = BigDecimal.ONE;
                return(quantity.multiply(amount));}"/>
        </row-actions>
+       <field name="viewSize"><hidden value="${viewSize}"/></field>
+       <field name="viewIndex"><hidden value="${viewIndex}"/></field>
        <field name="invoiceId"><hidden/></field>
+       <field name="uomId"><hidden/></field>
+       <field name="taxableFlag"><hidden/></field>
        <field name="invoiceItemSeqId" widget-style="buttontext">
            <hyperlink target="listInvoiceItems"  description="${invoiceItemSeqId}">
                 <parameter param-name="invoiceId"/>
@@ -367,7 +373,7 @@ under the License.
            </drop-down>
        </field>
        <field name="productId"><lookup target-form-name="LookupProduct" size="20"/></field>
-       <field name="description"><text size="30"/></field>
+       <field name="description"><text size="50"/></field>
        <field name="overrideGlAccountId">
            <drop-down allow-empty="true">
                <list-options list-name="glAccountOrganizationAndClassList" key-name="glAccountId" description="${glAccountId} ${accountName}"/>
@@ -375,13 +381,13 @@ under the License.
        </field>
        <field name="amount" title="${uiLabelMap.AccountingUnitPrice}"><text size="7"/></field>
        <field name="total" widget-area-style="align-text"><display type="currency" currency="${invoice.currencyUomId}"/></field>  <!-- this should not look like something you can modify, hence display -->
-       <field name="uomId"><hidden/></field>
-       <field name="taxableFlag"><hidden/></field>
        <field name="updateButton" title="${uiLabelMap.CommonUpdate}" widget-style="buttontext" ><submit button-type="text-link"/></field>
        <field name="removeButton" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
             <hyperlink description="${uiLabelMap.CommonRemove}" target="removeInvoiceItem">
                 <parameter param-name="invoiceId"/>
                 <parameter param-name="invoiceItemSeqId"/>
+                <parameter param-name="viewIndex"/>
+                <parameter param-name="viewSize"/>
             </hyperlink>
        </field>
     </form>
@@ -465,6 +471,8 @@ under the License.
             <hyperlink description="${uiLabelMap.CommonRemove}" target="removeInvoiceApplication">
                 <parameter param-name="paymentApplicationId"/>
                 <parameter param-name="invoiceId"/>
+                <parameter param-name="viewIndex"/>
+                <parameter param-name="viewSize"/>
             </hyperlink>
         </field>
     </form>
@@ -521,6 +529,8 @@ under the License.
                 <parameter param-name="invoiceId"/>
                 <parameter param-name="partyId"/>
                 <parameter param-name="roleTypeId"/>
+                <parameter param-name="viewIndex"/>
+                <parameter param-name="viewSize"/>
             </hyperlink>
         </field>
     </form>
@@ -569,6 +579,8 @@ under the License.
             <hyperlink target="unlinkInvoiceFromTimeEntry" description="${uiLabelMap.CommonDelete}" also-hidden="false">
                 <parameter param-name="timeEntryId"/>
                 <parameter param-name="invoiceId"/>
+                <parameter param-name="viewIndex"/>
+                <parameter param-name="viewSize"/>
             </hyperlink>
         </field>
     </form>

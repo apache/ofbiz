@@ -315,8 +315,6 @@ public class ProductSearch {
                     }
                     entityConditionList.add(EntityCondition.makeCondition(keywordOrList, EntityOperator.OR));
 
-                    productIdGroupBy = true;
-
                     if (doingBothAndOr) {
                         relevancyComplexAlias.addComplexAliasMember(new ComplexAliasField(entityAlias, "relevancyWeight", null, "sum"));
                     } else {
@@ -721,7 +719,7 @@ public class ProductSearch {
                 productIds.add(searchResult.getString("mainProductId"));
                 productIdSet.add(searchResult.getString("mainProductId"));
 
-                while ((maxResults == null || numRetreived < maxResults.intValue()) && ((searchResult = (GenericValue) eli.next()) != null)) {
+                while ((maxResults == null || numRetreived < maxResults.intValue()) && ((searchResult = eli.next()) != null)) {
                     String productId = searchResult.getString("mainProductId");
                     if (!productIdSet.contains(productId)) {
                         productIds.add(productId);
@@ -1950,6 +1948,8 @@ public class ProductSearch {
                 // we have to check this in order to be sure that there is a totalRelevancy to sort by...
                 productSearchContext.orderByList.add("-totalRelevancy");
                 productSearchContext.fieldsToSelect.add("totalRelevancy");
+                if (productSearchContext.keywordFixedOrSetAndList.size() > 0)
+                    productSearchContext.productIdGroupBy = true;
             }
         }
 

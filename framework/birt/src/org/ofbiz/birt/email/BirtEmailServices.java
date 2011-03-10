@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -46,6 +47,8 @@ import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.birt.BirtWorker;
 import org.ofbiz.birt.container.BirtContainer;
 import org.ofbiz.common.email.NotificationServices;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.security.Security;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
@@ -69,7 +72,10 @@ public class BirtEmailServices {
      */
     public static Map<String, Object> sendBirtMail(DispatchContext ctx, Map<String, ? extends Object> context) {
         Map<String, Object> serviceContext = UtilMisc.makeMapWritable(context);
+        Delegator delegator = ctx.getDelegator();
         LocalDispatcher dispatcher = ctx.getDispatcher();
+        Security security = ctx.getSecurity();
+        
         String webSiteId = (String) serviceContext.remove("webSiteId");
         String bodyText = (String) serviceContext.remove("bodyText");
         String bodyScreenUri = (String) serviceContext.remove("bodyScreenUri");
@@ -153,11 +159,15 @@ public class BirtEmailServices {
                     birtContentType = "application/pdf";
                 }
                 IReportEngine engine = BirtContainer.getReportEngine();
+                HashMap<String, Object> appContext = UtilGenerics.cast(engine.getConfig().getAppContext());
+                appContext.put("delegator", delegator);
+                appContext.put("dispatcher", dispatcher);
+                appContext.put("security", security);
+                
                 InputStream reportInputStream = BirtFactory.getReportInputStreamFromLocation(birtReportLocation);
                 IReportRunnable design = engine.openReportDesign(reportInputStream);
-                     Debug.logInfo("Export report as content type:" + birtContentType, module);
-                     BirtWorker.exportReport(design, context, birtContentType, baos);
-                // and generate the PDF
+                Debug.logInfo("Export report as content type:" + birtContentType, module);
+                BirtWorker.exportReport(design, context, birtContentType, baos);
                 baos.flush();
                 baos.close();
 

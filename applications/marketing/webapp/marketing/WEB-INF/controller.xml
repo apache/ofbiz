@@ -321,14 +321,22 @@ under the License.
         <response name="success" type="view" value="ListContactListParties"/>
         <response name="error" type="view" value="ListContactListParties"/>
     </request-map>
+    <request-map uri="importContactListParties">
+        <security https="true" auth="true"/>
+        <event type="simple" path="component://marketing/script/org/ofbiz/marketing/contact/ContactListEvents.xml" invoke="importContactListParties"/>
+        <response name="success" type="request-redirect" value="FindImportContactListParties"/>
+        <response name="error" type="request-redirect" value="FindImportContactListParties"/>
+    </request-map>
     <request-map uri="contactListOptOut" track-serverhit="false" track-visit="false">
         <security https="true" auth="false"/>        
+        <event type="service" invoke="updateContactListPartyNoUserLogin"/>
         <response name="success" type="view" value="ContactListOptOut"/>
     </request-map>   
 
     <request-map uri="ListContactListCommEvents"><security https="true" auth="true"/><response name="success" type="view" value="ListContactListCommEvents"/></request-map>
     <request-map uri="EditContactListCommEvent"><security https="true" auth="true"/><response name="success" type="view" value="EditContactListCommEvent"/></request-map>
     <request-map uri="FindContactListCommEvents"><security https="true" auth="true"/><response name="success" type="view" value="FindContactListCommEvents"/></request-map>
+    <request-map uri="FindImportContactListParties"><security https="true" auth="true"/><response name="success" type="view" value="FindImportContactListParties"/></request-map>
     <request-map uri="PreviewContactListCommEvent">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="PreviewContactListCommEvent"/>
@@ -360,12 +368,15 @@ under the License.
         </response>
         <response name="error" type="view" value="ListContactListParties"/>
     </request-map>
+    <request-map uri="ContactMechTypeOnly">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ContactMechTypeOnly"/>
+    </request-map>
     
 
     <!-- Lookup request mappings -->
     <request-map uri="LookupSegmentGroup"><security https="true" auth="true"/><response name="success" type="view" value="LookupSegmentGroup"/></request-map>
     <request-map uri="LookupProductStore"><security https="true" auth="true"/><response name="success" type="view" value="LookupProductStore"/></request-map>
-    <request-map uri="LookupGeo"><security https="true" auth="true"/><response name="success" type="view" value="LookupGeo"/></request-map>
 
     <request-map uri="LookupPartyName"><security https="true" auth="true"/><response name="success" type="view" value="LookupPartyName"/></request-map>
     <request-map uri="LookupPartyClassificationGroup"><security https="true" auth="true"/><response name="success" type="view" value="LookupPartyClassificationGroup"/></request-map>
@@ -437,6 +448,9 @@ under the License.
     <view-map name="EditContactListCommEvent" type="screen" page="component://marketing/widget/ContactListScreens.xml#EditContactListCommEvent"/>
     <view-map name="FindContactListCommEvents" type="screen" page="component://marketing/widget/ContactListScreens.xml#FindContactListCommEvents"/>
     <view-map name="PreviewContactListCommEvent" type="screen" page="component://marketing/widget/ContactListScreens.xml#PreviewContactListCommEvent"/>
+    <view-map name="FindImportContactListParties" type="screen" page="component://marketing/widget/ContactListScreens.xml#FindImportContactListParties"/>
+    
+    <view-map name="ContactMechTypeOnly" type="screen" page="component://marketing/widget/sfa/AccountScreens.xml#ContactMechTypeOnly"/>
 
     <view-map name="LookupSegmentGroup" type="screen" page="component://marketing/widget/LookupScreens.xml#LookupSegmentGroup"/>
     <view-map name="LookupContactList" type="screen" page="component://marketing/widget/ContactListScreens.xml#LookupContactList"/>
@@ -446,7 +460,6 @@ under the License.
     <view-map name="LookupPartyName" type="screen" page="component://party/widget/partymgr/LookupScreens.xml#LookupPartyName"/>
     <view-map name="LookupPartyClassificationGroup" type="screen" page="component://party/widget/partymgr/LookupScreens.xml#LookupPartyClassificationGroup"/>
     <view-map name="LookupCommEvent" type="screen" page="component://party/widget/partymgr/LookupScreens.xml#LookupCommEvent"/>
-    <view-map name="LookupGeo" type="screen" page="component://common/widget/LookupScreens.xml#LookupGeo"/>
     <view-map name="LookupContactMech" type="screen" page="component://party/widget/partymgr/LookupScreens.xml#LookupContactMech"/>
 
     <view-map name="TrackingCodeReport" type="screen" page="component://marketing/widget/MarketingReportScreens.xml#TrackingCodeReport"/>

@@ -47,13 +47,15 @@ under the License.
             </if-compare>
         <else>
             <!-- make sure that the party to return to is an INTERNAL_ORGANIZATIO for customer return and SUPPLIER for vendor return else stop -->
-            <if-compare field="returnHeaderTypeId" operator="equals" value="CUSTOMER_RETURN">
+            <if-compare field="returnHeaderTypeId" operator="contains" value="CUSTOMER_">
                 <entity-one entity-name="PartyRole" value-field="partyRole" use-cache="true" auto-field-map="false">
                     <field-map field-name="partyId" from-field="parameters.toPartyId"/>
                     <field-map field-name="roleTypeId" value="INTERNAL_ORGANIZATIO"/>
                 </entity-one>
                 <if-empty field="partyRole">
-                    <add-error><fail-message message="Error: a return must be to a party in the role of internal organization"/></add-error>
+                    <add-error>
+                        <fail-property resource="OrderErrorUiLabels" property="OrderReturnRequestPartyRoleInternalOrg"/>
+                    </add-error>
                 </if-empty>
             <else>
                 <entity-one entity-name="PartyRole" value-field="partyRole" use-cache="true" auto-field-map="false">
@@ -61,7 +63,9 @@ under the License.
                     <field-map field-name="roleTypeId" value="SUPPLIER"/>
                 </entity-one>
                 <if-empty field="partyRole">
-                    <add-error><fail-message message="Error: a return must be to a party in the role of supplier"/></add-error>
+                    <add-error>
+                        <fail-property resource="OrderErrorUiLabels" property="OrderReturnRequestPartyRoleSupplier"/>
+                    </add-error>
                 </if-empty>
             </else>
             </if-compare>
@@ -274,7 +278,9 @@ under the License.
         </if-empty>
 
         <if-empty field="parameters.returnItemTypeId">
-            <add-error><fail-message message="Return Item Type is not defined for this item; or no mapping was found."/></add-error>
+            <add-error>
+                <fail-property resource="OrderErrorUiLabels" property="OrderReturnItemTypeIsNotDefined"/>
+            </add-error>
             <check-errors/>
         </if-empty>
 
@@ -474,7 +480,9 @@ under the License.
                 <not><if-has-permission permission="ORDERMGR" action="_CREATE"/></not>
             </condition>
             <then>
-                <add-error><fail-message message="Security error to run createReturnAdjustment"/></add-error>
+                <add-error>
+                    <fail-property resource="OrderErrorUiLabels" property="OrderErrorCreatePermissionError"/>
+                </add-error>
             </then>
         </if>
         <check-errors/>
@@ -488,7 +496,9 @@ under the License.
         <field-to-result field="responseMessage" result-name="successMessage"/>
     </simple-method>
     <simple-method method-name="removeReturnAdjustment" short-description="Remove Return Adjustment">
-        <check-permission permission="ORDERMGR" action="_DELETE"><fail-message message="Order security ErrorToRunUpdateReturnAdjustment"/></check-permission>
+        <check-permission permission="ORDERMGR" action="_DELETE">
+            <fail-property resource="OrderErrorUiLabels" property="OrderErrorDeletePermissionError"/>
+        </check-permission>
         <check-errors/>
 
         <set from-field="parameters.returnAdjustmentId" field="lookupPKMap.returnAdjustmentId"/>
@@ -694,7 +704,9 @@ under the License.
             </if-compare>
 
             <if-empty field="returnItemTypeMapping.returnItemTypeId">
-                <add-error><fail-message message="No matching return item type map found for order item: [${orderItem}]"/></add-error>
+                <add-error>
+                    <fail-property resource="OrderErrorUiLabels" property="OrderReturnItemTypeOrderItemNoMatching"/>
+                </add-error>
                 <check-errors/>
             <else>
                 <set from-field="returnItemTypeMapping.returnItemTypeId" field="newItemCtx.returnItemTypeId"/>
@@ -971,13 +983,13 @@ under the License.
                                 <set field="orderItemAssocMap.toOrderItemSeqId" from-field="orderItem.orderItemSeqId"/>
                             </then>
                         <else-if>
-                                <condition>
-                                    <if-compare-field field="returnItemCounter" operator="greater" to-field="orderItemSize" type="Long"/>
-                                </condition>
-                                <then>
-                                    <set field="orderItemAssocMap.toOrderId" from-field="parameters.orderId"/>
-                                    <set field="orderItemAssocMap.toOrderItemSeqId" from-field="orderItem.orderItemSeqId"/>
-                                </then>
+                            <condition>
+                                <if-compare-field field="returnItemCounter" operator="greater" to-field="orderItemSize" type="Long"/>
+                            </condition>
+                            <then>
+                                <set field="orderItemAssocMap.toOrderId" from-field="parameters.orderId"/>
+                                <set field="orderItemAssocMap.toOrderItemSeqId" from-field="orderItem.orderItemSeqId"/>
+                            </then>
                         </else-if>
                         </if>
                         <set field="orderItemCounter" value="${orderItemCounter+1}" type="Long"/>
@@ -987,7 +999,11 @@ under the License.
                     <set field="orderItemAssocMap.orderItemAssocTypeId" value="EXCHANGE"/>
                     <make-value entity-name="OrderItemAssoc" value-field="orderItemAssoc"/>
                     <set-pk-fields map="orderItemAssocMap" value-field="orderItemAssoc"/>
-                    <create-value value-field="orderItemAssoc"/>
+                    <find-by-primary-key entity-name="OrderItemAssoc" map="orderItemAssoc" value-field="orderItemAssocValue"/>
+                    <if-empty field="orderItemAssocValue">
+                        <create-value value-field="orderItemAssoc"/>
+                        <clear-field field="orderItemAssoc"/>
+                    </if-empty>
                     <set field="returnItemCounter" value="${returnItemCounter+1}" type="Long"/>
                 </iterate>
             </then>
@@ -1007,13 +1023,13 @@ under the License.
                                 <set field="orderItemAssocMap.orderItemSeqId" from-field="returnItem.orderItemSeqId"/>
                             </then>
                         <else-if>
-                                <condition>
-                                    <if-compare-field field="orderItemCounter" operator="greater" to-field="returnItemSize" type="Long"/>
-                                </condition>
-                                <then>
-                                    <set field="orderItemAssocMap.orderId" from-field="parameters.originOrderId"/>
-                                    <set field="orderItemAssocMap.orderItemSeqId" from-field="returnItem.orderItemSeqId"/>
-                                </then>
+                            <condition>
+                                <if-compare-field field="orderItemCounter" operator="greater" to-field="returnItemSize" type="Long"/>
+                            </condition>
+                            <then>
+                                <set field="orderItemAssocMap.orderId" from-field="parameters.originOrderId"/>
+                                <set field="orderItemAssocMap.orderItemSeqId" from-field="returnItem.orderItemSeqId"/>
+                            </then>
                         </else-if>
                         </if>
                         <set field="returnItemCounter" value="${returnItemCounter+1}" type="Long"/>
@@ -1023,8 +1039,11 @@ under the License.
                     <set field="orderItemAssocMap.orderItemAssocTypeId" value="EXCHANGE"/>
                     <make-value entity-name="OrderItemAssoc" value-field="orderItemAssoc"/>
                     <set-pk-fields map="orderItemAssocMap" value-field="orderItemAssoc"/>
-                    <create-value value-field="orderItemAssoc"/>
-                    <clear-field field="orderItemAssocMap"/>
+                    <find-by-primary-key entity-name="OrderItemAssoc" map="orderItemAssoc" value-field="orderItemAssocValue"/>
+                    <if-empty field="orderItemAssocValue">
+                        <create-value value-field="orderItemAssoc"/>
+                        <clear-field field="orderItemAssocMap"/>
+                    </if-empty>
                     <set field="orderItemCounter" value="${orderItemCounter+1}" type="Long"/>
                 </iterate>
             </else>
@@ -1094,4 +1113,34 @@ under the License.
         <now-timestamp field="newEntity.statusDatetime"/>
         <create-value value-field="newEntity"/>
     </simple-method>
+    
+    <simple-method method-name="updateReturnContactMech" short-description="Update ReturnContactMech">
+        <check-permission permission="ORDERMGR" action="_UPDATE">
+           <fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunUpdateOrderContactMech"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="returnContactMechMap" entity-name="ReturnContactMech"/>
+
+        <set-pk-fields map="parameters" value-field="returnContactMechMap"/>
+        <entity-one value-field="returnHeader" entity-name="ReturnHeader"/>
+        <set from-field="parameters.returnId" field="createReturnContactMechMap.returnId"/>
+        <set from-field="parameters.contactMechPurposeTypeId" field="createReturnContactMechMap.contactMechPurposeTypeId"/>
+        <set from-field="parameters.contactMechId" field="createReturnContactMechMap.contactMechId"/>
+  
+        <find-by-and entity-name="ReturnContactMech" map="createReturnContactMechMap" list="returnContactMechList"/>
+        <!-- If returnContactMechList value is null then create new entry in ReturnContactMech entity-->
+        <if-empty field="returnContactMechList">
+            <if-compare value="SHIPPING_LOCATION" field="parameters.contactMechPurposeTypeId" operator="equals">
+                <set field="returnHeader.originContactMechId" from-field="createReturnContactMechMap.contactMechId"/>
+                <store-value value-field="returnHeader"/>
+            </if-compare>
+            <call-service service-name="createReturnContactMech" in-map-name="createReturnContactMechMap" include-user-login="true"/>
+            <set from-field="parameters.returnId" field="deleteReturnContactMechMap.returnId"/>
+            <set from-field="parameters.oldContactMechId" field="deleteReturnContactMechMap.contactMechId"/>
+            <set from-field="parameters.contactMechPurposeTypeId" field="deleteReturnContactMechMap.contactMechPurposeTypeId"/>
+            <call-service service-name="deleteReturnContactMech" in-map-name="deleteReturnContactMechMap" include-user-login="true"/>
+        </if-empty>
+        <store-value value-field="returnContactMechMap"/>
+     </simple-method>
 </simple-methods>

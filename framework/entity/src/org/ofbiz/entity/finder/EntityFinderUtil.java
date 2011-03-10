@@ -99,7 +99,7 @@ public class EntityFinderUtil {
             for (Map.Entry<FlexibleMapAccessor<Object>, Object> entry: fieldMap.entrySet()) {
                 FlexibleMapAccessor<Object> serviceContextFieldAcsr = entry.getKey();
                 Object valueSrc = entry.getValue();
-                if (valueSrc instanceof FlexibleMapAccessor) {
+                if (valueSrc instanceof FlexibleMapAccessor<?>) {
                     FlexibleMapAccessor<Object> contextEnvAcsr = cast(valueSrc);
                     serviceContextFieldAcsr.put(outContext, contextEnvAcsr.get(context));
                 } else if (valueSrc instanceof FlexibleStringExpander) {
@@ -149,6 +149,7 @@ public class EntityFinderUtil {
     public static interface Condition extends Serializable {
         public EntityCondition createCondition(Map<String, ? extends Object> context, ModelEntity modelEntity, ModelFieldTypeReader modelFieldTypeReader);
     }
+    @SuppressWarnings("serial")
     public static class ConditionExpr implements Condition {
         protected FlexibleStringExpander fieldNameExdr;
         protected FlexibleStringExpander operatorExdr;
@@ -218,7 +219,7 @@ public class EntityFinderUtil {
 
             // don't convert the field to the desired type if this is an IN or BETWEEN operator and we have a Collection
             if (!((operator.equals(EntityOperator.IN) || operator.equals(EntityOperator.BETWEEN) || operator.equals(EntityOperator.NOT_IN))
-                    && value instanceof Collection)) {
+                    && value instanceof Collection<?>)) {
                 // now to a type conversion for the target fieldName
                 value = modelEntity.convertFieldValue(modelEntity.getField(fieldName), value, modelFieldTypeReader, context);
             }
@@ -261,6 +262,7 @@ public class EntityFinderUtil {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class ConditionList implements Condition {
         List<Condition> conditionList = new LinkedList<Condition>();
         FlexibleStringExpander combineExdr;
@@ -308,14 +310,15 @@ public class EntityFinderUtil {
             return EntityCondition.makeCondition(entityConditionList, UtilGenerics.<EntityJoinOperator>cast(operator));
         }
     }
+    @SuppressWarnings("serial")
     public static class ConditionObject implements Condition {
         protected FlexibleMapAccessor<Object> fieldNameAcsr;
 
         public ConditionObject(Element conditionExprElement) {
-            this.fieldNameAcsr = FlexibleMapAccessor.getInstance(conditionExprElement.getAttribute("field-name"));
+            this.fieldNameAcsr = FlexibleMapAccessor.getInstance(conditionExprElement.getAttribute("field"));
             if (this.fieldNameAcsr.isEmpty()) {
-                // no "field-name"? try "name"
-                this.fieldNameAcsr = FlexibleMapAccessor.getInstance(conditionExprElement.getAttribute("name"));
+                // no "field"? try "field-name"
+                this.fieldNameAcsr = FlexibleMapAccessor.getInstance(conditionExprElement.getAttribute("field-name"));
             }
         }
 
@@ -329,6 +332,7 @@ public class EntityFinderUtil {
         public void handleOutput(EntityListIterator eli, Map<String, Object> context, FlexibleMapAccessor<Object> listAcsr);
         public void handleOutput(List<GenericValue> results, Map<String, Object> context, FlexibleMapAccessor<Object> listAcsr);
     }
+    @SuppressWarnings("serial")
     public static class LimitRange implements OutputHandler {
         FlexibleStringExpander startExdr;
         FlexibleStringExpander sizeExdr;
@@ -383,6 +387,7 @@ public class EntityFinderUtil {
             listAcsr.put(context, results.subList(start, end));
         }
     }
+    @SuppressWarnings("serial")
     public static class LimitView implements OutputHandler {
         FlexibleStringExpander viewIndexExdr;
         FlexibleStringExpander viewSizeExdr;
@@ -439,6 +444,7 @@ public class EntityFinderUtil {
             listAcsr.put(context, results.subList(begin, end));
         }
     }
+    @SuppressWarnings("serial")
     public static class UseIterator implements OutputHandler {
         public UseIterator(Element useIteratorElement) {
             // no parameters, nothing to do
@@ -452,6 +458,7 @@ public class EntityFinderUtil {
             throw new IllegalArgumentException("Cannot handle output with use-iterator when the query is cached, or the result in general is not an EntityListIterator");
         }
     }
+    @SuppressWarnings("serial")
     public static class GetAll implements OutputHandler {
         public GetAll() {
             // no parameters, nothing to do

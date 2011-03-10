@@ -28,7 +28,7 @@ under the License.
             document.${parameters.formNameValue}.processButton.disabled=true;
             document.${parameters.formNameValue}.submit();
         } else {
-            alert("You order is being processed, this may take a moment.");
+            showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.YoureOrderIsBeingProcessed}");
         }
     }
 // -->
@@ -50,6 +50,9 @@ under the License.
         <form type="post" action="<@ofbizUrl>processorder</@ofbizUrl>" name="${parameters.formNameValue}">
           <#if (requestParameters.checkoutpage)?has_content>
             <input type="hidden" name="checkoutpage" value="${requestParameters.checkoutpage}" />
+          </#if>
+          <#if (requestAttributes.issuerId)?has_content>
+            <input type="hidden" name="issuerId" value="${requestAttributes.issuerId}" />
           </#if>
           <input type="button" name="processButton" value="${uiLabelMap.OrderSubmitOrder}" onclick="processOrder();" class="mediumSubmit" />
         </form>

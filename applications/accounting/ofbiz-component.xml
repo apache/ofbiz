@@ -25,6 +25,7 @@ under the License.
     <classpath type="jar" location="build/lib/*"/>
     <classpath type="dir" location="config"/>
     <classpath type="jar" location="lib/*"/>
+    <classpath type="jar" location="lib/securepay/*"/>
     <classpath type="jar" location="lib/cybersource/*"/>
     <classpath type="jar" location="lib/worldpay/*"/>
     <classpath type="dir" location="lib/worldpay"/>
@@ -40,6 +41,7 @@ under the License.
     <entity-resource type="data" reader-name="seed" loader="main" location="data/UsTaxAccountGroups.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/AccountingSecurityData.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/AccountingPortletData.xml"/>
+    <entity-resource type="data" reader-name="seed-initial" loader="main" location="data/PaymentGatewayConfData.xml"/>
     <entity-resource type="data" reader-name="seed-initial" loader="main" location="data/AccountingScheduledServiceData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoGeneralChartOfAccounts.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoOrganizationData.xml"/>
@@ -78,6 +80,7 @@ under the License.
     <service-resource type="model" loader="main" location="servicedef/services_valuelink.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_verisign.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_orbital.xml"/>
+    <service-resource type="model" loader="main" location="servicedef/services_securepay.xml"/>
 
     <!-- Accounting Permission Services -->
     <service-resource type="model" loader="main" location="servicedef/services_perm.xml"/>

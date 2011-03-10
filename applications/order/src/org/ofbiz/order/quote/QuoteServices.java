@@ -27,6 +27,7 @@ import java.util.Map;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
@@ -44,13 +45,13 @@ public class QuoteServices {
     public static final String module = QuoteServices.class.getName();
     public static final String resource = "OrderUiLabels";
     public static final String resource_error = "OrderErrorUiLabels";
+    public static final String resourceProduct = "ProductUiLabels";
 
-    public static Map sendQuoteReportMail(DispatchContext dctx, Map context) {
+    public static Map<String, Object> sendQuoteReportMail(DispatchContext dctx, Map<String, ? extends Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
         Delegator delegator = dctx.getDelegator();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         Locale locale = (Locale) context.get("locale");
-
         String emailType = (String) context.get("emailType");
         String quoteId = (String) context.get("quoteId");
         String sendTo = (String) context.get("sendTo");
@@ -58,7 +59,7 @@ public class QuoteServices {
         String note = (String) context.get("note");
 
         // prepare the order information
-        Map sendMap = FastMap.newInstance();
+        Map<String, Object> sendMap = FastMap.newInstance();
 
         // get the quote and store
         GenericValue quote = null;
@@ -69,7 +70,9 @@ public class QuoteServices {
         }
 
         if (quote == null) {
-            return ServiceUtil.returnFailure("Could not find Quote with ID [" + quoteId + "]");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "OrderOrderQuoteCannotBeFound", 
+                    UtilMisc.toMap("quoteId", quoteId), locale));
         }
 
         GenericValue productStoreEmail = null;
@@ -79,21 +82,28 @@ public class QuoteServices {
             Debug.logError(e, "Problem getting the ProductStoreEmailSetting for productStoreId=" + quote.get("productStoreId") + " and emailType=" + emailType, module);
         }
         if (productStoreEmail == null) {
-            return ServiceUtil.returnFailure("No valid email setting for store with productStoreId=" + quote.get("productStoreId") + " and emailType=" + emailType);
+            return ServiceUtil.returnFailure(UtilProperties.getMessage(resourceProduct, 
+                    "ProductProductStoreEmailSettingsNotValid", 
+                    UtilMisc.toMap("productStoreId", quote.get("productStoreId"), 
+                            "emailType", emailType), locale));
         }
         String bodyScreenLocation = productStoreEmail.getString("bodyScreenLocation");
         if (UtilValidate.isEmpty(bodyScreenLocation)) {
-            return ServiceUtil.returnFailure("No valid bodyScreenLocation in email setting for store with productStoreId=" + quote.get("productStoreId") + " and emailType=" + emailType);
+            return ServiceUtil.returnFailure(UtilProperties.getMessage(resourceProduct, 
+                    "ProductProductStoreEmailSettingsNotValidBodyScreenLocation", 
+                    UtilMisc.toMap("productStoreId", quote.get("productStoreId"), 
+                            "emailType", emailType), locale));
         }
         sendMap.put("bodyScreenUri", bodyScreenLocation);
         String xslfoAttachScreenLocation = productStoreEmail.getString("xslfoAttachScreenLocation");
         sendMap.put("xslfoAttachScreenLocation", xslfoAttachScreenLocation);
 
         if ((sendTo == null) || !UtilValidate.isEmail(sendTo)) {
-            return ServiceUtil.returnError("No sendTo email address found");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceProduct, 
+                    "ProductProductStoreEmailSettingsNoSendToFound", locale));
         }
 
-        Map bodyParameters = UtilMisc.toMap("quoteId", quoteId, "userLogin", userLogin, "locale", locale);
+        Map<String, Object> bodyParameters = UtilMisc.<String, Object>toMap("quoteId", quoteId, "userLogin", userLogin, "locale", locale);
         bodyParameters.put("note", note);
         bodyParameters.put("partyId", quote.getString("partyId")); // This is set to trigger the "storeEmailAsCommunication" seca
         sendMap.put("bodyParameters", bodyParameters);
@@ -114,7 +124,7 @@ public class QuoteServices {
         }
 
         // send the notification
-        Map sendResp = null;
+        Map<String, Object> sendResp = null;
         try {
             sendResp = dispatcher.runSync("sendMailFromScreen", sendMap);
         } catch (Exception e) {
@@ -129,10 +139,9 @@ public class QuoteServices {
         return sendResp;
     }
 
-    public static Map storeQuote(DispatchContext dctx, Map context) {
+    public static Map<String, Object> storeQuote(DispatchContext dctx, Map<String, ? extends Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
-
         String quoteTypeId = (String) context.get("quoteTypeId");
         String partyId = (String) context.get("partyId");
         Timestamp issueDate = (Timestamp) context.get("issueDate");
@@ -144,19 +153,24 @@ public class QuoteServices {
         Timestamp validThruDate = (Timestamp) context.get("validThruDate");
         String quoteName = (String) context.get("quoteName");
         String description = (String) context.get("description");
-        List quoteItems = (List) context.get("quoteItems");
-        List quoteAttributes = (List) context.get("quoteAttributes");
-        List quoteCoefficients = (List) context.get("quoteCoefficients");
-        List quoteRoles = (List) context.get("quoteRoles");
-        List quoteTerms = (List) context.get("quoteTerms");
-        List quoteTermAttributes = (List) context.get("quoteTermAttributes");
-        List quoteWorkEfforts = (List) context.get("quoteWorkEfforts");
-        List quoteAdjustments = (List) context.get("quoteAdjustments");
-
-        Map result = FastMap.newInstance();
+        List<GenericValue> quoteItems = UtilGenerics.checkList(context.get("quoteItems"));
+        List<GenericValue> quoteAttributes = UtilGenerics.checkList(context.get("quoteAttributes"));
+        List<GenericValue> quoteCoefficients = UtilGenerics.checkList(context.get("quoteCoefficients"));
+        List<GenericValue> quoteRoles = UtilGenerics.checkList(context.get("quoteRoles"));
+        List<GenericValue> quoteWorkEfforts = UtilGenerics.checkList(context.get("quoteWorkEfforts"));
+        List<GenericValue> quoteAdjustments = UtilGenerics.checkList(context.get("quoteAdjustments"));
+        Locale locale = (Locale) context.get("locale");
+        
+        //TODO create Quote Terms still to be implemented
+        //List<GenericValue> quoteTerms = UtilGenerics.cast(context.get("quoteTerms"));
+        
+        //TODO create Quote Term Attributes still to be implemented
+        //List<GenericValue> quoteTermAttributes = UtilGenerics.cast(context.get("quoteTermAttributes"));
+        
+        Map<String, Object> result = FastMap.newInstance();
 
         try {
-            Map quoteIn = UtilMisc.toMap("quoteTypeId", quoteTypeId, "partyId", partyId, "issueDate", issueDate, "statusId", statusId, "currencyUomId", currencyUomId);
+            Map<String, Object> quoteIn = UtilMisc.toMap("quoteTypeId", quoteTypeId, "partyId", partyId, "issueDate", issueDate, "statusId", statusId, "currencyUomId", currencyUomId);
             quoteIn.put("productStoreId", productStoreId);
             quoteIn.put("salesChannelEnumId", salesChannelEnumId);
             quoteIn.put("productStoreId", productStoreId);
@@ -170,7 +184,7 @@ public class QuoteServices {
 
 
             // create Quote
-            Map quoteOut = dispatcher.runSync("createQuote", quoteIn);
+            Map<String, Object> quoteOut = dispatcher.runSync("createQuote", quoteIn);
 
             if (UtilValidate.isNotEmpty(quoteOut) && UtilValidate.isNotEmpty(quoteOut.get("quoteId"))) {
                 String quoteId = (String)quoteOut.get("quoteId");
@@ -178,11 +192,11 @@ public class QuoteServices {
 
                 // create Quote Items
                 if (UtilValidate.isNotEmpty(quoteItems)) {
-                    Iterator quoteIt = quoteItems.iterator();
+                    Iterator<GenericValue> quoteIt = quoteItems.iterator();
                     while (quoteIt.hasNext()) {
                         GenericValue quoteItem = (GenericValue)quoteIt.next();
                         quoteItem.set("quoteId", quoteId);
-                        Map quoteItemIn = quoteItem.getAllFields();
+                        Map<String, Object> quoteItemIn = quoteItem.getAllFields();
                         quoteItemIn.put("userLogin", userLogin);
 
                         dispatcher.runSync("createQuoteItem", quoteItemIn);
@@ -191,11 +205,11 @@ public class QuoteServices {
 
                 // create Quote Attributes
                 if (UtilValidate.isNotEmpty(quoteAttributes)) {
-                    Iterator quoteAttrIt = quoteAttributes.iterator();
+                    Iterator<GenericValue> quoteAttrIt = quoteAttributes.iterator();
                     while (quoteAttrIt.hasNext()) {
                         GenericValue quoteAttr = (GenericValue)quoteAttrIt.next();
                         quoteAttr.set("quoteId", quoteId);
-                        Map quoteAttrIn = quoteAttr.getAllFields();
+                        Map<String, Object> quoteAttrIn = quoteAttr.getAllFields();
                         quoteAttrIn.put("userLogin", userLogin);
 
                         dispatcher.runSync("createQuoteAttribute", quoteAttrIn);
@@ -204,11 +218,11 @@ public class QuoteServices {
 
                 // create Quote Coefficients
                 if (UtilValidate.isNotEmpty(quoteCoefficients)) {
-                    Iterator quoteCoefficientIt = quoteCoefficients.iterator();
+                    Iterator<GenericValue> quoteCoefficientIt = quoteCoefficients.iterator();
                     while (quoteCoefficientIt.hasNext()) {
                         GenericValue quoteCoefficient = (GenericValue)quoteCoefficientIt.next();
                         quoteCoefficient.set("quoteId", quoteId);
-                        Map quoteCoefficientIn = quoteCoefficient.getAllFields();
+                        Map<String, Object> quoteCoefficientIn = quoteCoefficient.getAllFields();
                         quoteCoefficientIn.put("userLogin", userLogin);
 
                         dispatcher.runSync("createQuoteCoefficient", quoteCoefficientIn);
@@ -217,11 +231,11 @@ public class QuoteServices {
 
                 // create Quote Roles
                 if (UtilValidate.isNotEmpty(quoteRoles)) {
-                    Iterator quoteRoleIt = quoteRoles.iterator();
+                    Iterator<GenericValue> quoteRoleIt = quoteRoles.iterator();
                     while (quoteRoleIt.hasNext()) {
                         GenericValue quoteRole = (GenericValue)quoteRoleIt.next();
                         quoteRole.set("quoteId", quoteId);
-                        Map quoteRoleIn = quoteRole.getAllFields();
+                        Map<String, Object> quoteRoleIn = quoteRole.getAllFields();
                         quoteRoleIn.put("userLogin", userLogin);
 
                         dispatcher.runSync("createQuoteRole", quoteRoleIn);
@@ -230,11 +244,11 @@ public class QuoteServices {
 
                 // create Quote WorkEfforts
                 if (UtilValidate.isNotEmpty(quoteWorkEfforts)) {
-                    Iterator quoteWorkEffortIt = quoteWorkEfforts.iterator();
+                    Iterator<GenericValue> quoteWorkEffortIt = quoteWorkEfforts.iterator();
                     while (quoteWorkEffortIt.hasNext()) {
                         GenericValue quoteWorkEffort = (GenericValue)quoteWorkEffortIt.next();
                         quoteWorkEffort.set("quoteId", quoteId);
-                        Map quoteWorkEffortIn = quoteWorkEffort.getAllFields();
+                        Map<String, Object> quoteWorkEffortIn = quoteWorkEffort.getAllFields();
                         quoteWorkEffortIn.put("userLogin", userLogin);
 
                         dispatcher.runSync("createQuoteWorkEffort", quoteWorkEffortIn);
@@ -243,11 +257,11 @@ public class QuoteServices {
 
                 // create Quote Adjustments
                 if (UtilValidate.isNotEmpty(quoteAdjustments)) {
-                    Iterator quoteAdjustmentIt = quoteAdjustments.iterator();
+                    Iterator<GenericValue> quoteAdjustmentIt = quoteAdjustments.iterator();
                     while (quoteAdjustmentIt.hasNext()) {
                         GenericValue quoteAdjustment = (GenericValue)quoteAdjustmentIt.next();
                         quoteAdjustment.set("quoteId", quoteId);
-                        Map quoteAdjustmentIn = quoteAdjustment.getAllFields();
+                        Map<String, Object> quoteAdjustmentIn = quoteAdjustment.getAllFields();
                         quoteAdjustmentIn.put("userLogin", userLogin);
 
                         dispatcher.runSync("createQuoteAdjustment", quoteAdjustmentIn);
@@ -257,7 +271,8 @@ public class QuoteServices {
                 //TODO create Quote Terms still to be implemented the base service createQuoteTerm
                 //TODO create Quote Term Attributes still to be implemented the base service createQuoteTermAttribute
             } else {
-                return ServiceUtil.returnFailure("Could not storing Quote");
+                return ServiceUtil.returnFailure(UtilProperties.getMessage(resource, 
+                        "OrderOrderQuoteCannotBeStored", locale));
             }
         } catch (GenericServiceException e) {
             Debug.logError(e, "Problem storing Quote", module);

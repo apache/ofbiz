@@ -19,31 +19,30 @@
 package org.ofbiz.base.util;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.Reader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-
 import org.ofbiz.base.container.ClassLoaderContainer;
 import org.ofbiz.base.conversion.Converter;
 import org.ofbiz.base.conversion.Converters;
@@ -53,6 +52,68 @@ import org.ofbiz.base.json.JSONWriter;
 public final class UtilIO {
     public static final Charset UTF8 = Charset.forName("UTF-8");
     public static final String module = UtilIO.class.getName();
+
+    /** Copy an InputStream to an OutputStream, optionally closing either
+     *  the input or the output.
+     *
+     * @param in the InputStream to copy from
+     * @param closeIn whether to close the input when the copy is done
+     * @param out the OutputStream to copy to
+     * @param closeOut whether to close the output when the copy is done
+     * @throws IOException if an error occurs
+     */
+    public static void copy(InputStream in, boolean closeIn, OutputStream out, boolean closeOut) throws IOException {
+        try {
+            try {
+                IOUtils.copy(in, out);
+            } finally {
+                if (closeIn) IOUtils.closeQuietly(in);
+            }
+        } finally {
+            if (closeOut) IOUtils.closeQuietly(out);
+        }
+    }
+
+    /** Copy a Reader to a Writer, optionally closing either the input or
+     *  the output.
+     *
+     * @param reader the Reader to copy from
+     * @param closeIn whether to close the input when the copy is done
+     * @param writer the Writer to copy to
+     * @param closeOut whether to close the output when the copy is done
+     * @throws IOException if an error occurs
+     */
+    public static void copy(Reader reader, boolean closeIn, Writer writer, boolean closeOut) throws IOException {
+        try {
+            try {
+                IOUtils.copy(reader, writer);
+            } finally {
+                if (closeIn) IOUtils.closeQuietly(reader);
+            }
+        } finally {
+            if (closeOut) IOUtils.closeQuietly(writer);
+        }
+    }
+
+    /** Copy a Reader to an Appendable, optionally closing the input.
+     *
+     * @param reader the Reader to copy from
+     * @param closeIn whether to close the input when the copy is done
+     * @param out the Appendable to copy to
+     * @throws IOException if an error occurs
+     */
+    public static void copy(Reader reader, boolean closeIn, Appendable out) throws IOException {
+        try {
+            CharBuffer buffer = CharBuffer.allocate(4096);
+            while (reader.read(buffer) > 0) {
+                buffer.flip();
+                buffer.rewind();
+                out.append(buffer);
+            }
+        } finally {
+            if (closeIn) IOUtils.closeQuietly(reader);
+        }
+    }
 
     /** Convert a byte array to a string; consistently uses \n line endings
      * in java.  This uses a default {@link Charset UTF-8} charset.
@@ -186,7 +247,7 @@ public final class UtilIO {
             StringBuilder sb = new StringBuilder();
             char[] buf = new char[4096];
             int r;
-            while ((r = reader.read(buf, 0, 4096)) != -1) {
+            while ((r = reader.read(buf, 0, 4096)) > 0) {
                 sb.append(buf, 0, r);
             }
             return filterLineEndings(sb).toString();
@@ -364,7 +425,7 @@ public final class UtilIO {
     private static <T> boolean encodeObject(Writer writer, T value, boolean allowJsonResolve) throws Exception {
         Converter<T, String> converter = UtilGenerics.cast(Converters.getConverter(value.getClass(), String.class));
         if (converter != null) {
-            Class clz = converter.getSourceClass();
+            Class<?> clz = converter.getSourceClass();
             String str = converter.convert(value);
             if (clz != null) {
                 writer.write(clz.getName());
@@ -382,7 +443,7 @@ public final class UtilIO {
                 jsonWriter = new JSONWriter(indenting, JSONWriter.ResolvingFallbackHandler);
             } else {
                 jsonWriter = new JSONWriter(indenting);
-            };
+            }
             jsonWriter.write(value);
             writer.write(sw.toString());
             return true;
@@ -400,8 +461,7 @@ public final class UtilIO {
                 sb.append(writer.toString());
                 return;
             }
-        } catch (Exception e) {
-        }
-        throw new IOException("Can't write (" + value + ")");
+        } catch (Exception e) {} //Empty catch because writeObject() calls encodeObject(), which *always* returns true, unless an error occurs.  
+        throw new IOException("Can't write (" + value + ")");            
     }
 }

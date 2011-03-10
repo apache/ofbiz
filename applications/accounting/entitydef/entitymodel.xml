@@ -2325,9 +2325,9 @@ under the License.
             </description>
         </field>
         <!-- Deprecated Field-->
-        <field name="oldInvoiceSequenceEnumId" type="id-ne"/>
-        <field name="oldOrderSequenceEnumId" type="id-ne"/>
-        <field name="oldQuoteSequenceEnumId" type="id-ne"/>
+        <field name="oldInvoiceSequenceEnumId" col-name="INVOICE_SEQUENCE_ENUM_ID" type="id-ne"/>
+        <field name="oldOrderSequenceEnumId" col-name="ORDER_SEQUENCE_ENUM_ID" type="id-ne"/>
+        <field name="oldQuoteSequenceEnumId" col-name="QUOTE_SEQUENCE_ENUM_ID" type="id-ne"/>
         <prim-key field="partyId"/>
         <relation type="one" rel-entity-name="Party" fk-name="ACTG_PREF_PTY">
             <key-map field-name="partyId"/>
@@ -2350,7 +2350,7 @@ under the License.
         <relation type="one" fk-name="ACTGPREF_ODRCM" title="Order" rel-entity-name="CustomMethod">
             <key-map field-name="orderSeqCustMethId" rel-field-name="customMethodId"/>
         </relation>
-        <relation type="one" rel-entity-name="PaymentMethod">
+        <relation type="one" fk-name="ACTGPREF_PAYMTH" rel-entity-name="PaymentMethod">
             <key-map field-name="refundPaymentMethodId" rel-field-name="paymentMethodId"/>
         </relation>
         <relation type="one" fk-name="ACTGPREF_GLJRNL" rel-entity-name="GlJournal">
@@ -3254,6 +3254,9 @@ under the License.
       <field name="apiVersion" type="short-varchar"><description>Target Authorize Dot Net API version</description></field>
       <field name="delimitedData" type="short-varchar"><description>Delimited data (TRUE|FALSE)</description></field>
       <field name="delimiterChar" type="short-varchar"><description>Delimited Character - the delimiter to use in the response</description></field>
+      <field name="cpVersion" type="short-varchar"><description>Card Present Version</description></field>
+      <field name="cpMarketType" type="short-varchar"><description>Card Present Market Type</description></field>
+      <field name="cpDeviceType" type="short-varchar"><description>Card Present Device Type</description></field>
       <field name="method" type="short-varchar"><description>Method - CC for credit card processing</description></field>
       <field name="emailCustomer" type="short-varchar"><description>Email Customer? - if should send an email to the customer for each transaction (TRUE|FALSE)</description></field>
       <field name="emailMerchant" type="short-varchar"><description>Email Merchant? - if should send email to the merchant for each transaction (TRUE|FALSE)</description></field>
@@ -3265,6 +3268,20 @@ under the License.
       <field name="transDescription" type="value"><description>Default Transaction Description</description></field>
       <prim-key field="paymentGatewayConfigId"/>
       <relation type="one" fk-name="PGAN_PGC" rel-entity-name="PaymentGatewayConfig">
+        <key-map field-name="paymentGatewayConfigId"/>
+      </relation>
+    </entity>
+    <entity entity-name="PaymentGatewayEway"
+            package-name="org.ofbiz.accounting.payment"
+            title="eWay Payment Gateway Configuration">
+      <field name="paymentGatewayConfigId" type="id-ne"></field>                                        
+      <field name="customerId" type="value"/>
+      <field name="refundPwd" type="value" encrypt="true"/>
+      <field name="testMode" type="short-varchar"/>
+      <field name="enableCvn" type="short-varchar"/>
+      <field name="enableBeagle" type="short-varchar"/>
+      <prim-key field="paymentGatewayConfigId"/>
+      <relation type="one" fk-name="PGEW_PGC" rel-entity-name="PaymentGatewayConfig">
         <key-map field-name="paymentGatewayConfigId"/>
       </relation>
     </entity>
@@ -3407,6 +3424,40 @@ under the License.
       <field name="responseType" type="short-varchar"><description>Response Type (gateway|host)</description></field>
       <prim-key field="paymentGatewayConfigId"/>
       <relation type="one" fk-name="PGORB_PGC" rel-entity-name="PaymentGatewayConfig">
+        <key-map field-name="paymentGatewayConfigId"/>
+      </relation>
+    </entity>
+    <entity entity-name="PaymentGatewaySecurePay"
+            package-name="org.ofbiz.accounting.payment"
+            title="SecurePay Payment Gateway Config">
+      <field name="paymentGatewayConfigId" type="id-ne"></field>
+      <field name="merchantId" type="value"><description>You merchant ID</description></field>
+      <field name="pwd" type="value" encrypt="true"><description>SecurePay Password of account information</description></field>
+      <field name="serverURL" type="value"><description>Server URL of the payment processor</description></field>
+      <field name="processTimeout" type="numeric"><description>Process Timeout</description></field>
+      <field name="enableAmountRound" type="indicator"><description>Enable rounds the currency amount to .00 (Y / N)</description></field>
+      <prim-key field="paymentGatewayConfigId"/>
+      <relation type="one" fk-name="PGSCP_PGC" rel-entity-name="PaymentGatewayConfig">
+        <key-map field-name="paymentGatewayConfigId"/>
+      </relation>
+    </entity>
+    <entity entity-name="PaymentGatewayiDEAL"
+            package-name="org.ofbiz.accounting.payment"
+            title="iDEAL Payment Gateway Config">
+      <field name="paymentGatewayConfigId" type="id-ne"></field>
+      <field name="merchantId" type="value"><description>The ID of the webshop, received by the acceptor during the registration process</description></field>
+      <field name="merchantSubId" type="value"><description>SubID of the webshop, default value = 0 (zero); only to be changed in consultation with the acquirer</description></field>
+      <field name="merchantReturnURL" type="value"><description>URL of the page in the webshop to which the consumer is redirected after an iDEAL transaction. This value can be overruled as necessary in the webshop implementation</description></field>
+      <field name="acquirerURL" type="value"><description>URL of the acceptor’s acquirer; the following prescribed values apply to ING</description></field>
+      <field name="acquirerTimeout" type="value"><description>Number of seconds (default = 10) of waiting time for a response from the iDEAL services. If no response is received during that time, an exception is displayed</description></field>
+      <field name="privateCert" type="value"><description>Name of the acceptor’s organization as given during the creation of his or her own certificate. See section 0 for more information about the acceptor’s certificate</description></field>
+      <field name="acquirerKeyStoreFilename" type="value"><description>Keystore file and acquirer’s password</description></field>
+      <field name="acquirerKeyStorePassword" type="value" encrypt="true"><description>Password of the Acquirer keystore</description></field>
+      <field name="merchantKeyStoreFilename" type="value"><description>Keystore file and merchant’s password</description></field>
+      <field name="merchantKeyStorePassword" type="value" encrypt="true"><description>Password of the Merchant keystore</description></field>
+      <field name="expirationPeriod" type="value"><description>Expiration period of the transaction</description></field>
+      <prim-key field="paymentGatewayConfigId"/>
+      <relation type="one" fk-name="PGID_PGC" rel-entity-name="PaymentGatewayConfig">
         <key-map field-name="paymentGatewayConfigId"/>
       </relation>
     </entity>

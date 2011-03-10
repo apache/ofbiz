@@ -28,7 +28,6 @@ import javax.transaction.xa.XAException;
 import org.apache.geronimo.transaction.log.UnrecoverableLog;
 import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
 import org.apache.geronimo.transaction.manager.TransactionLog;
-import org.apache.geronimo.transaction.manager.XidFactory;
 import org.apache.geronimo.transaction.manager.XidFactoryImpl;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericEntityException;
@@ -53,7 +52,7 @@ public class GeronimoTransactionFactory implements TransactionFactoryInterface {
         // creates an instance of Geronimo transaction context, etc with a local transaction factory which is not bound to a registry
         try {
             transactionLog = new UnrecoverableLog();
-            geronimoTransactionManager = new GeronimoTransactionManager(defaultTransactionTimeoutSeconds, (XidFactory)new XidFactoryImpl(), transactionLog);
+            geronimoTransactionManager = new GeronimoTransactionManager(defaultTransactionTimeoutSeconds, new XidFactoryImpl(), transactionLog);
         } catch (XAException e) {
             Debug.logError(e, "Error initializing Geronimo transaction manager: " + e.toString(), module);
         }

@@ -18,7 +18,9 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<project name="OFBiz Main Build" default="build" basedir=".">
+<project name="OFBiz Main Build" default="build" basedir="."
+    xmlns:ivy="antlib:org.apache.ivy.ant">
+
     <import file="macros.xml"/>
     <property name="site.dir" value="../site"/>
     <property name="memory.initial.param" value="-Xms128M"/>
@@ -35,10 +37,15 @@ under the License.
 
     <target name="ofbiz-init">
         <property environment="env"/>
-        <mkdir dir="tools/build/classes"/>
-        <javac srcdir="tools/src" debug="on" deprecation="off" destdir="tools/build/classes" compiler="javac1.5" target="1.5" source="1.5"/>
-        <mkdir dir="tools/build/lib"/>
-        <jar jarfile="tools/build/lib/ofbiz-tools.jar" basedir="tools/build/classes"/>
+    </target>
+
+    <target name="ivy-init">
+        <taskdef resource="org/apache/ivy/ant/antlib.xml"
+            uri="antlib:org.apache.ivy.ant">
+            <classpath>
+                <pathelement location="framework/base/lib/ivy-2.2.0.jar" />
+            </classpath>
+        </taskdef>
     </target>
 
     <!-- ================================================================== -->
@@ -61,9 +68,16 @@ under the License.
         <antcall target="clean-cache"/>
         <antcall target="clean-tempfiles"/>
         <antcall target="clean"/>
-        <antcall target="clean-tools"/>
     </target>
 
+    <target name="clean-downloads"
+          description="Clean all downloaded files">
+        <delete>
+            <fileset dir="framework/base/lib" includes="cobertura-*.jar"/>
+            <fileset dir="framework/base/lib" includes="sonar-*.jar"/>
+            <fileset dir="framework/entity/lib/jdbc" includes="postgresql-*.jar"/>
+        </delete>
+    </target>
     <target name="clean-data"
           description="Clean all DB data (Derby and HSQL) under runtime/data">
         <subant target="clean-data">
@@ -115,17 +129,10 @@ under the License.
         </subant>
     </target>
 
-    <target name="download-selenium" 
+    <target name="download-selenium"
           description="Download the selenium files">
         <subant target="install-seleniumxml">
             <filelist dir="." files="framework/testtools/build.xml"/>
-        </subant>
-    </target>
-
-    <target name="download-PG-JDBC"
-            description="Download the PostgreSQL JDBC driver file">
-        <subant target="install-PG-JDBC">
-            <filelist dir="." files="framework/entity/build.xml"/>
         </subant>
     </target>
 
@@ -155,10 +162,6 @@ under the License.
         </subant>
         <delete file="ofbiz.jar"/>
         <echo message="[clean] ========== Done Cleaning =========="/>
-    </target>
-
-    <target name="clean-tools">
-        <delete dir="tools/build"/>
     </target>
 
     <target name="svninfo"
@@ -204,7 +207,7 @@ under the License.
                 <include name="*/build.xml"/>
             </fileset>
         </subant>
-        <antcall target="clean-svninfo"></antcall>
+        <antcall target="clean-svninfo"/>
 
         <echo message="[build] ========== Done Building (Compile) =========="/>
     </target>
@@ -273,7 +276,7 @@ under the License.
     <!-- ================================================================== -->
 
     <target name="build-website" 
-            description="For committers : Update dtds and JavaDoc from OFBiz intance to site">
+            description="For committers : Update dtds and JavaDoc from OFBiz instance to site">
         <antcall target="copy-dtds"/>
         <antcall target="docs"/>
         <antcall target="copy-apis"/>
@@ -424,6 +427,198 @@ under the License.
             <arg value="file=${data-file}"/>
         </java>
     </target>
+
+    <!-- ================================= 
+          target: run-create-tenant        
+         ================================= -->
+    <target name="run-create-tenant" 
+        depends="create-tenant-on-Derby,create-tenant-on-MySQL,create-tenant-on-Oracle,create-tenant-on-PostgreSQL"
+        description="Creates a new tenant in your environment, creates the delegator, loads initial data with admin-user and password (needs multitenant=Y in general.properties)">
+        <tstamp/>
+    </target>
+
+    <!-- description="This creates entity Tenant and TenantDataSource in default, installs data in the delegator and creates the admin-user and password for the tenant"  
+        sub-target of run-create-tenant, can't used alone => no description, to not clutter "ant -p" -->
+    <target name="get-tenant-data">
+        <input addproperty="tenantId" message="Enter Id for the tenant: "/>
+        <input addproperty="tenantName" message="Enter name for tenant: "/>
+        <input addproperty="data-readers" message="Enter data to install.
+        Choices are e.g. seed,seed-initial,ext,demo.
+        Multipe datasets must be separated with a comma: "/>
+        <input addproperty="db-Platform" message="Select your default database platform, D = Derby,M = MySQL, O = Oracle, P = PostgreSQL"
+            validargs="D,M,O,P"/>
+        <echo message="Please make sure that the driver of the platform is installed and that the databases have been created (in function of the entityengine.xml datasource-names)"/>
+        <input addproperty="db-IP" message="Enter IP address of the database server (you may add a port number)"/>
+        <input addproperty="db-User" message="Enter userID of database user: "/>
+        <input addproperty="db-Password" message="Enter password of database user: "/>
+        <condition property="isDerby">
+            <equals arg1="${db-Platform}" arg2="D"/>
+        </condition>
+        <condition property="isMySQL">
+            <equals arg1="${db-Platform}" arg2="M"/>
+        </condition>
+        <condition property="isOracle">
+            <equals arg1="${db-Platform}" arg2="O"/>
+        </condition>
+        <condition property="isPostgreSQL">
+            <equals arg1="${db-Platform}" arg2="P"/>
+        </condition>
+        <antcall target="tenant-data-entry"/>
+    </target>
+    <!-- description="Creates tenant data and instance"  
+        sub-target of run-create-tenant, can't used alone => no description, to not clutter "ant -p" -->
+    <target name="create-tenant-on-Derby" depends="get-tenant-data" if="isDerby">
+        <echo message="Installing on Derby"/>
+        <copy file="${basedir}/framework/resources/templates/AdminNewTenantData-Derby.xml" tofile="runtime/tmp/tmpTenantData.xml">
+            <filterset>
+                <filter token="tenantId" value="${tenantId}"/>
+                <filter token="tenantName" value="${tenantName}"/>
+            </filterset>
+        </copy>
+        <antcall target="run-install-file">
+            <param name="data-file" value="runtime/tmp/tmpTenantData.xml"/>
+        </antcall>
+        <delete file="runtime/tmp/tmpTenantData.xml"/>
+        <antcall target="load-tenant-data-readers"/>
+        <antcall target="load-tenant-admin-user-login">
+            <param name="userLoginId" value="${tenantId}-admin"/>
+            <param name="delegatorId" value="default#${tenantId}"/>
+        </antcall>
+    </target>
+    <!-- description="Creates tenant data and instance. Don't forget db driver(s) and already created DBs in function of the entityengine.xml datasource-names"  
+        sub-target of run-create-tenant, can't used alone => no description, to not clutter "ant -p" -->
+    <target name="create-tenant-on-MySQL" depends="get-tenant-data" if="isMySQL">
+        <echo message="Installing on MySQL"/>
+        <copy file="${basedir}/framework/resources/templates/AdminNewTenantData-MySQL.xml" tofile="runtime/tmp/tmpTenantData.xml">
+            <filterset>
+                <filter token="tenantId" value="${tenantId}"/>
+                <filter token="tenantName" value="${tenantName}"/>
+                <filter token="db-IP" value="${db-IP}"/>
+                <filter token="db-User" value="${db-User}"/>
+                <filter token="db-Password" value="${db-Password}"/>
+            </filterset>
+        </copy>
+        <antcall target="run-install-file">
+            <param name="data-file" value="runtime/tmp/tmpTenantData.xml"/>
+        </antcall>
+        <delete file="runtime/tmp/tmpTenantData.xml"/>
+        <antcall target="load-tenant-data-readers"/>
+        <antcall target="load-tenant-admin-user-login">
+            <param name="userLoginId" value="${tenantId}-admin"/>
+            <param name="delegatorId" value="default#${tenantId}"/>
+        </antcall>
+    </target>
+    <!-- description="Creates tenant data and instance. Don't forget db driver(s) and already created DBs in function of the entityengine.xml datasource-names"  
+        sub-target of run-create-tenant, can't used alone => no description, to not clutter "ant -p" -->
+    <target name="create-tenant-on-Oracle" depends="get-tenant-data" if="isOracle">
+        <echo message="Installing on Oracle"/>
+        <copy file="${basedir}/framework/resources/templates/AdminNewTenantData-Oracle.xml" tofile="runtime/tmp/tmpTenantData.xml">
+            <filterset>
+                <filter token="tenantId" value="${tenantId}"/>
+                <filter token="tenantName" value="${tenantName}"/>
+                <filter token="db-IP" value="${db-IP}"/>
+                <filter token="db-User" value="${db-User}"/>
+                <filter token="db-Password" value="${db-Password}"/>
+            </filterset>
+        </copy>
+        <antcall target="run-install-file">
+            <param name="data-file" value="runtime/tmp/tmpTenantData.xml"/>
+        </antcall>
+        <delete file="runtime/tmp/tmpTenantData.xml"/>
+        <antcall target="load-tenant-data-readers"/>
+        <antcall target="load-tenant-admin-user-login">
+            <param name="userLoginId" value="${tenantId}-admin"/>
+            <param name="delegatorId" value="default#${tenantId}"/>
+        </antcall>
+    </target>
+    <!-- description="Creates tenant data and instance. Don't forget db driver(s) and already created DBs in function of the entityengine.xml datasource-names"  
+        sub-target of run-create-tenant, can't used alone => no description, to not clutter "ant -p" -->
+    <target name="create-tenant-on-PostgreSQL" depends="get-tenant-data" if="isPostgreSQL">
+        <echo message="Installing on PostgreSQL"/>
+        <copy file="${basedir}/framework/resources/templates/AdminNewTenantData-PostgreSQL.xml" tofile="runtime/tmp/tmpTenantData.xml">
+            <filterset>
+                <filter token="tenantId" value="${tenantId}"/>
+                <filter token="tenantName" value="${tenantName}"/>
+                <filter token="db-IP" value="${db-IP}"/>
+                <filter token="db-User" value="${db-User}"/>
+                <filter token="db-Password" value="${db-Password}"/>
+            </filterset>
+        </copy>
+        <antcall target="run-install-file">
+            <param name="data-file" value="runtime/tmp/tmpTenantData.xml"/>
+        </antcall>
+        <delete file="runtime/tmp/tmpTenantData.xml"/>
+        <antcall target="load-tenant-data-readers"/>
+        <antcall target="load-tenant-admin-user-login">
+            <param name="userLoginId" value="${tenantId}-admin"/>
+            <param name="delegatorId" value="default#${tenantId}"/>
+        </antcall>
+    </target>
+    <!-- description="displays tenant data"  sub-target of get-tenant-data, can't used alone => no description, to not clutter "ant -p" -->
+    <target name="tenant-data-entry">
+        <echo>------------------------------------</echo>
+        <echo message="tenantId = ${tenantId}"/>
+        <echo>tenantName = ${tenantName}</echo>
+        <echo>db-Platform = ${db-Platform}</echo>
+        <echo>db-IP = ${db-IP}</echo>
+        <echo>db-User = ${db-User}</echo>
+        <echo>db-Password = ${db-Password}</echo>
+        <echo>------------------------------------</echo>
+        <echo>database for tenant data will be 'ofbiz_${tenantId}'</echo>
+        <echo>database for tenant olap data will be 'ofbizolap_${tenantId}</echo>
+        <echo message="Please make sure that the driver of the platform is installed and that the databases have been created (Check names just above)"/>
+        <echo>------------------------------------</echo>
+        <input addproperty="continueYN" message="Continue Y or N" validargs="N,n,Y,y"/>
+        
+    </target>
+    <target name="load-tenant-admin-user-login"
+        description="Creates the admin login for the tenant with admin privileges, and a temporay password equal to 'ofbiz'. Password must be changed on first login">
+        <echo>------------------------------------</echo>
+        <echo message="Installing the admin for the tenant"/>
+        <echo message="Delegator = ${delegatorId}"/>
+        <echo message="Tenant admin = '${userLoginId}'"/>
+        <echo message="Password for tenant admin is 'ofbiz' must change on first login"/>
+        <echo>------------------------------------</echo>
+        <input addproperty="continueYN" message="Continue Y or N" validargs="N,n,Y,y"/>
+        <copy file="${basedir}/framework/resources/templates/AdminUserLoginData.xml" tofile="runtime/tmp/tmpUserLogin.xml">
+            <filterset>
+                <filter token="userLoginId" value="${userLoginId}"/>
+            </filterset>
+        </copy>
+        <antcall target="run-tenant-install-file">
+            <param name="data-file" value="runtime/tmp/tmpUserLogin.xml"/>
+            <param name="delegatorId" value="${delegatorId}"/>
+        </antcall>
+        <delete file="runtime/tmp/tmpUserLogin.xml"/>
+    </target>
+    <target name="load-tenant-data-readers"
+        description="Loads data of given data-readers in the tenant database">
+        <echo>------------------------------------</echo>
+        <echo message="Loading selected data-readers in tenant databaset"/>
+        <echo message="Delegator = default#${tenantId}"/>
+        <echo message="Data-readers = ${data-readers}"/>
+        <echo>------------------------------------</echo>
+        <input addproperty="continueYN" message="Continue Y or N" validargs="N,n,Y,y"/>
+        <java jar="ofbiz.jar" fork="true">
+            <jvmarg value="${memory.initial.param}"/>
+            <jvmarg value="${memory.max.param}"/>
+            <jvmarg value="${memory.maxpermsize.param}"/>
+            <arg value="install"/>
+            <arg value="readers=${data-readers}"/>
+            <arg value="delegator=default#${tenantId}"/>
+        </java>
+    </target>
+    <target name="run-tenant-install-file"
+        description="Loads the data of the tenant using the command line argument 'file' to load data from a given file">
+        <java jar="ofbiz.jar" fork="true">
+            <jvmarg value="${memory.initial.param}"/>
+            <jvmarg value="${memory.max.param}"/>
+            <jvmarg value="${memory.maxpermsize.param}"/>
+            <arg value="install"/>
+            <arg value="file=${data-file}"/>
+            <arg value="delegator=${delegatorId}"/>
+        </java>
+    </target>
     <target name="load-admin-user-login"
             description="Creates a user login with admin privileges and a temporary password equal to 'ofbiz'; after a succesful login the user will be prompted for a new password. Example command for the userLogin 'admin': ./ant load-admin-user-login -DuserLoginId=admin">
         <fail message="userLoginId parameter is required. To add the parameter to the command for user admin: -DuserLoginId=admin">
@@ -459,7 +654,7 @@ under the License.
             <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8091"/>
         </java>
     </target>
-    <target name="run-tests" depends="build" 
+    <target name="run-tests" depends="download-cobertura, build"
           description="Run OFBiz default tests, execute ant run-install before and see results in runtime/logs/test-results/html/all-tests.html">
         <java jar="ofbiz.jar" fork="true" resultproperty="test.result">
             <jvmarg value="${memory.initial.param}"/>
@@ -496,8 +691,8 @@ under the License.
             <arg value="-ant"/>
         </java>
     </target>
-    <target name="run-single-test" depends="build"
-          description="Run a single test">
+    <target name="run-single-test" depends="download-cobertura, build"
+          description="Run a single test, syntax eg: ant run-single-test -Dtest.component=service -Dtest.case=service-soap-tests">
         <java jar="ofbiz.jar" fork="true" resultproperty="test.result">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -519,8 +714,8 @@ under the License.
             </condition>
         </fail>
     </target>
-    <target name="run-single-test-suite" depends="build"
-            description="Run a single test suite">
+    <target name="run-single-test-suite" depends="download-cobertura, build"
+            description="Run a single test suite, syntax eg: ant run-single-test-suite -Dtest.component=mycomponent -Dtest.suiteName=mytests">      
         <java jar="ofbiz.jar" fork="true" resultproperty="test.result">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -542,7 +737,7 @@ under the License.
         <delete dir="runtime/logs/test-results"/>
         <ant antfile="runtime/test-list-build.xml" target="all-tests"/>
     </target>
-    
+
     <target name="cobertura-report">
         <delete dir="runtime/logs/cobertura-report"/>
         <mkdir dir="runtime/logs/cobertura-report"/>
@@ -555,6 +750,12 @@ under the License.
                 </fileset>
             </classpath>
         </taskdef>
+        <cobertura-merge datafile="runtime/logs/cobertura.dat">
+            <fileset dir="runtime/logs">
+                <include name="cobertura-base.dat"/>
+                <include name="cobertura-components.dat"/>
+            </fileset>
+        </cobertura-merge>
         <cobertura-report datafile="runtime/logs/cobertura.dat" destdir="runtime/logs/cobertura-report">
             <dirset dir=".">
                 <include name="*/*/src"/>
@@ -562,6 +763,22 @@ under the License.
 
             <include name="**/*.java"/>
         </cobertura-report>
+    </target>
+
+    <!-- ================================================================== -->
+    <!--    Ivy targets, more info at  http://ant.apache.org/ivy/  -->
+    <!-- ================================================================== -->
+
+    <target name="download-cobertura" depends="ivy-init">
+        <ivy:retrieve pattern="framework/base/lib/[artifact]-[revision].[ext]" conf="cobertura"/>
+    </target>
+
+    <target name="download-PG-JDBC" depends="ivy-init" description="Download postgres jdbc driver">
+        <ivy:retrieve pattern="framework/entity/lib/jdbc/[artifact]-[revision].[ext]" conf="postgres"/>
+    </target>
+
+    <target name="download-sonar-ant-task" depends="ivy-init">
+        <ivy:retrieve pattern="framework/base/lib/[artifact]-[revision].[ext]" conf="sonar-ant-task"/>
     </target>
 
     <!-- ================================================================== -->
@@ -616,7 +833,9 @@ under the License.
         <mkdir dir="${basedir}/hot-deploy/${component-name}"/>
         <mkdir dir="${basedir}/hot-deploy/${component-name}/config"/>
         <mkdir dir="${basedir}/hot-deploy/${component-name}/data"/>
+        <mkdir dir="${basedir}/hot-deploy/${component-name}/data/helpdata"/>
         <mkdir dir="${basedir}/hot-deploy/${component-name}/dtd"/>
+        <mkdir dir="${basedir}/hot-deploy/${component-name}/documents"/>
         <mkdir dir="${basedir}/hot-deploy/${component-name}/entitydef"/>
         <mkdir dir="${basedir}/hot-deploy/${component-name}/lib"/>
         <mkdir dir="${basedir}/hot-deploy/${component-name}/patches"/>
@@ -630,55 +849,61 @@ under the License.
         <mkdir dir="${basedir}/hot-deploy/${component-name}/webapp/${webapp-name}/WEB-INF"/>
         <mkdir dir="${basedir}/hot-deploy/${component-name}/webapp/${webapp-name}/WEB-INF/actions"/>
         <mkdir dir="${basedir}/hot-deploy/${component-name}/widget/"/>
-        <copy file="${basedir}/framework/resources/templates/ofbiz-component.xml" tofile="${basedir}/hot-deploy/${component-name}/ofbiz-component.xml">
+        <copy file="${basedir}/framework/resources/templates/ofbiz-component.xml" tofile="${basedir}/hot-deploy/${component-name}/ofbiz-component.xml" encoding="utf-8">
             <filterset refid="replacePlaceholders"/>
         </copy>
-        <copy file="${basedir}/framework/resources/templates/build.xml" tofile="${basedir}/hot-deploy/${component-name}/build.xml">
+        <copy file="${basedir}/framework/resources/templates/build.xml" tofile="${basedir}/hot-deploy/${component-name}/build.xml" encoding="utf-8">
             <filterset refid="replacePlaceholders"/>
         </copy>
-        <copy file="${basedir}/framework/resources/templates/TypeData.xml" tofile="${basedir}/hot-deploy/${component-name}/data/${component-resource-name}TypeData.xml">
+        <copy file="${basedir}/framework/resources/templates/TypeData.xml" tofile="${basedir}/hot-deploy/${component-name}/data/${component-resource-name}TypeData.xml" encoding="utf-8">
             <filterset refid="replacePlaceholders"/>
         </copy>
-        <copy file="${basedir}/framework/resources/templates/SecurityData.xml" tofile="${basedir}/hot-deploy/${component-name}/data/${component-resource-name}SecurityData.xml">
+        <copy file="${basedir}/framework/resources/templates/SecurityData.xml" tofile="${basedir}/hot-deploy/${component-name}/data/${component-resource-name}SecurityData.xml" encoding="utf-8">
             <filterset refid="replacePlaceholders"/>
         </copy>
-        <copy file="${basedir}/framework/resources/templates/DemoData.xml" tofile="${basedir}/hot-deploy/${component-name}/data/${component-resource-name}DemoData.xml">
+        <copy file="${basedir}/framework/resources/templates/DemoData.xml" tofile="${basedir}/hot-deploy/${component-name}/data/${component-resource-name}DemoData.xml" encoding="utf-8">
             <filterset refid="replacePlaceholders"/>
         </copy>
-        <copy file="${basedir}/framework/resources/templates/entitymodel.xml" tofile="${basedir}/hot-deploy/${component-name}/entitydef/entitymodel.xml">
+        <copy file="${basedir}/framework/resources/templates/HELP.xml" tofile="${basedir}/hot-deploy/${component-name}/data/helpdata/HELP_${component-resource-name}.xml" encoding="utf-8">
             <filterset refid="replacePlaceholders"/>
         </copy>
-        <copy file="${basedir}/framework/resources/templates/services.xml" tofile="${basedir}/hot-deploy/${component-name}/servicedef/services.xml">
+        <copy file="${basedir}/framework/resources/templates/document.xml" tofile="${basedir}/hot-deploy/${component-name}/documents/${component-resource-name}.xml" encoding="utf-8">
             <filterset refid="replacePlaceholders"/>
         </copy>
-        <copy file="${basedir}/framework/resources/templates/Tests.xml" tofile="${basedir}/hot-deploy/${component-name}/testdef/${component-resource-name}Tests.xml">
+        <copy file="${basedir}/framework/resources/templates/entitymodel.xml" tofile="${basedir}/hot-deploy/${component-name}/entitydef/entitymodel.xml" encoding="utf-8">
             <filterset refid="replacePlaceholders"/>
         </copy>
-        <copy file="${basedir}/framework/resources/templates/UiLabels.xml" tofile="${basedir}/hot-deploy/${component-name}/config/${component-resource-name}UiLabels.xml">
+        <copy file="${basedir}/framework/resources/templates/services.xml" tofile="${basedir}/hot-deploy/${component-name}/servicedef/services.xml" encoding="utf-8">
             <filterset refid="replacePlaceholders"/>
         </copy>
-        <copy file="${basedir}/framework/resources/templates/index.jsp" tofile="${basedir}/hot-deploy/${component-name}/webapp/${webapp-name}/index.jsp">
+        <copy file="${basedir}/framework/resources/templates/Tests.xml" tofile="${basedir}/hot-deploy/${component-name}/testdef/${component-resource-name}Tests.xml" encoding="utf-8">
             <filterset refid="replacePlaceholders"/>
         </copy>
-        <copy file="${basedir}/framework/resources/templates/error.jsp" tofile="${basedir}/hot-deploy/${component-name}/webapp/${webapp-name}/error/error.jsp">
+        <copy file="${basedir}/framework/resources/templates/UiLabels.xml" tofile="${basedir}/hot-deploy/${component-name}/config/${component-resource-name}UiLabels.xml" encoding="utf-8">
             <filterset refid="replacePlaceholders"/>
         </copy>
-        <copy file="${basedir}/framework/resources/templates/controller.xml" tofile="${basedir}/hot-deploy/${component-name}/webapp/${webapp-name}/WEB-INF/controller.xml">
+        <copy file="${basedir}/framework/resources/templates/index.jsp" tofile="${basedir}/hot-deploy/${component-name}/webapp/${webapp-name}/index.jsp" encoding="iso-8859-1">
             <filterset refid="replacePlaceholders"/>
         </copy>
-        <copy file="${basedir}/framework/resources/templates/web.xml" tofile="${basedir}/hot-deploy/${component-name}/webapp/${webapp-name}/WEB-INF/web.xml">
+        <copy file="${basedir}/framework/resources/templates/error.jsp" tofile="${basedir}/hot-deploy/${component-name}/webapp/${webapp-name}/error/error.jsp" encoding="iso-8859-1">
             <filterset refid="replacePlaceholders"/>
         </copy>
-        <copy file="${basedir}/framework/resources/templates/CommonScreens.xml" tofile="${basedir}/hot-deploy/${component-name}/widget/CommonScreens.xml">
+        <copy file="${basedir}/framework/resources/templates/controller.xml" tofile="${basedir}/hot-deploy/${component-name}/webapp/${webapp-name}/WEB-INF/controller.xml" encoding="utf-8">
             <filterset refid="replacePlaceholders"/>
         </copy>
-        <copy file="${basedir}/framework/resources/templates/Screens.xml" tofile="${basedir}/hot-deploy/${component-name}/widget/${component-resource-name}Screens.xml">
+        <copy file="${basedir}/framework/resources/templates/web.xml" tofile="${basedir}/hot-deploy/${component-name}/webapp/${webapp-name}/WEB-INF/web.xml" encoding="utf-8">
             <filterset refid="replacePlaceholders"/>
         </copy>
-        <copy file="${basedir}/framework/resources/templates/Menus.xml" tofile="${basedir}/hot-deploy/${component-name}/widget/${component-resource-name}Menus.xml">
+        <copy file="${basedir}/framework/resources/templates/CommonScreens.xml" tofile="${basedir}/hot-deploy/${component-name}/widget/CommonScreens.xml" encoding="utf-8">
             <filterset refid="replacePlaceholders"/>
         </copy>
-        <copy file="${basedir}/framework/resources/templates/Forms.xml" tofile="${basedir}/hot-deploy/${component-name}/widget/${component-resource-name}Forms.xml">
+        <copy file="${basedir}/framework/resources/templates/Screens.xml" tofile="${basedir}/hot-deploy/${component-name}/widget/${component-resource-name}Screens.xml" encoding="utf-8">
+            <filterset refid="replacePlaceholders"/>
+        </copy>
+        <copy file="${basedir}/framework/resources/templates/Menus.xml" tofile="${basedir}/hot-deploy/${component-name}/widget/${component-resource-name}Menus.xml" encoding="utf-8">
+            <filterset refid="replacePlaceholders"/>
+        </copy>
+        <copy file="${basedir}/framework/resources/templates/Forms.xml" tofile="${basedir}/hot-deploy/${component-name}/widget/${component-resource-name}Forms.xml" encoding="utf-8">
             <filterset refid="replacePlaceholders"/>
         </copy>
         <echo>Component successfully created in folder ${basedir}/hot-deploy/${component-name}.

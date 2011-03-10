@@ -19,24 +19,39 @@ under the License.
 
 <#-- A simple macro that builds the contact list -->
 <#macro contactList publicEmailContactLists>
-    <select name="contactListId" class="selectBox" style="width:134px">
-        <#list publicEmailContactLists as publicEmailContactList>
-            <#assign publicContactMechType = publicEmailContactList.getRelatedOneCache("ContactMechType")?if_exists>
-            <option value="${publicEmailContactList.contactListId}">${publicEmailContactList.contactListName?if_exists}</option>
-        </#list>
-    </select>
+  <select name="contactListId" class="selectBox" style="width:134px">
+    <#list publicEmailContactLists as publicEmailContactList>
+      <#assign publicContactMechType = publicEmailContactList.getRelatedOneCache("ContactMechType")?if_exists>
+        <option value="${publicEmailContactList.contactListId}">${publicEmailContactList.contactListName?if_exists}</option>
+    </#list>
+  </select>
 </#macro>
 
+<script type="text/javascript" language="JavaScript">
+    function unsubscribe() {
+        var form = document.getElementById("signUpForContactListForm");
+        form.action = "<@ofbizUrl>unsubscribeContactListParty</@ofbizUrl>"
+        document.getElementById("statusId").value = "CLPT_UNSUBS_PENDING";
+        form.submit();
+    }
+</script>
+
 <div id="miniSignUpForContactList" class="screenlet">
-  <h3>${uiLabelMap.EcommerceSignUpForContactList}</h3>
+  <div class="screenlet-title-bar">
+    <ul>
+      <li class="h3">${uiLabelMap.EcommerceSignUpForContactList}</li>
+    </ul>
+    <br class="clear"/>
+  </div>
+  <div class="screenlet-body">
   <#if sessionAttributes.autoName?has_content>
   <#-- The visitor potentially has an account and party id -->
     <#if userLogin?has_content && userLogin.userLoginId != "anonymous">
     <#-- They are logged in so lets present the form to sign up with their email address -->
-      <form method="post" action="<@ofbizUrl>createContactListParty</@ofbizUrl>" name="signUpForContactListForm">
+      <form method="post" action="<@ofbizUrl>createContactListParty</@ofbizUrl>" name="signUpForContactListForm" id="signUpForContactListForm">
         <fieldset>
           <input type="hidden" name="partyId" value="${partyId}"/>
-          <input type="hidden" name="statusId" value="CLPT_PENDING"/>
+          <input type="hidden" id="statusId" name="statusId" value="CLPT_PENDING"/>
           <p>${uiLabelMap.EcommerceSignUpForContactListComments}</p>
           <div>
             <@contactList publicEmailContactLists=publicEmailContactLists/>
@@ -50,6 +65,7 @@ under the License.
           </div>
           <div>
             <input type="submit" value="${uiLabelMap.EcommerceSubscribe}"/>
+            <input type="button" value="${uiLabelMap.EcommerceUnsubscribe}" onclick="javascript:unsubscribe();"/>
           </div>
         </fieldset>
       </form>
@@ -63,6 +79,7 @@ under the License.
   <#-- There is no party info so just offer an anonymous (non-partyId) related newsletter sign up -->
     <form method="post" action="<@ofbizUrl>signUpForContactList</@ofbizUrl>" name="signUpForContactListForm" id="signUpForContactListForm">
       <fieldset>
+        <input type="hidden" id="statusId" name="statusId"/>
         <div>
           <label>${uiLabelMap.EcommerceSignUpForContactListComments}</label>
           <@contactList publicEmailContactLists=publicEmailContactLists/>
@@ -72,11 +89,10 @@ under the License.
         </div>
         <div>
           <input type="submit" value="${uiLabelMap.EcommerceSubscribe}"/>
+          <input type="button" value="${uiLabelMap.EcommerceUnsubscribe}" onclick="javascript:unsubscribe();"/>
         </div>
       </fieldset>
     </form>
   </#if>
+  </div>
 </div>
-
-
-

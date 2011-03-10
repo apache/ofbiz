@@ -1,5 +1,5 @@
 /*
- Licensed to the Apache Software Foundation (ASF) under one
+k Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
  distributed with this work for additional information
  regarding copyright ownership.  The ASF licenses this file
@@ -19,22 +19,12 @@
 
 package org.ofbiz.content.content;
 
-import org.ofbiz.entity.Delegator;
-import org.ofbiz.entity.GenericValue;
-import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.util.EntityUtil;
-import org.ofbiz.service.LocalDispatcher;
-import org.ofbiz.webapp.control.RequestHandler;
-import org.ofbiz.webapp.website.WebSiteWorker;
-import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.content.data.DataResourceWorker;
-
-import java.util.*;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -43,10 +33,24 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 import javolution.util.FastSet;
 
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.GeneralException;
+import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.content.data.DataResourceWorker;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.webapp.control.RequestHandler;
+import org.ofbiz.webapp.website.WebSiteWorker;
+
 /**
  * ContentMapFacade
  */
-public class ContentMapFacade implements Map {
+public class ContentMapFacade implements Map<Object, Object> {
 
     public static final String module = ContentMapFacade.class.getName();
 
@@ -67,7 +71,7 @@ public class ContentMapFacade implements Map {
     protected final Delegator delegator;
     protected final String contentId;
     protected final GenericValue value;
-    protected final Map context;
+    protected final Map<String, Object> context;
     protected final Locale locale;
     protected final String mimeType;
     protected final boolean cache;
@@ -85,7 +89,7 @@ public class ContentMapFacade implements Map {
     private Content content;
     private GenericValue fields = null;
 
-    public ContentMapFacade(LocalDispatcher dispatcher, GenericValue content, Map context, Locale locale, String mimeTypeId, boolean cache) {
+    public ContentMapFacade(LocalDispatcher dispatcher, GenericValue content, Map<String, Object> context, Locale locale, String mimeTypeId, boolean cache) {
         this.dispatcher = dispatcher;
         this.value = content;
         this.context = context;
@@ -98,7 +102,7 @@ public class ContentMapFacade implements Map {
         init();
     }
 
-    private ContentMapFacade(LocalDispatcher dispatcher, Delegator delegator, String contentId, Map context, Locale locale, String mimeTypeId, boolean cache) {
+    private ContentMapFacade(LocalDispatcher dispatcher, Delegator delegator, String contentId, Map<String, Object> context, Locale locale, String mimeTypeId, boolean cache) {
         this.dispatcher = dispatcher;
         this.delegator = delegator;
         this.contentId = contentId;
@@ -161,7 +165,7 @@ public class ContentMapFacade implements Map {
         return null;
     }
 
-    public void putAll(Map map) {
+    public void putAll(Map<?, ?> map) {
         Debug.logWarning("This method [putAll()] is not implemented in ContentMapFacade", module);
     }
 
@@ -169,17 +173,17 @@ public class ContentMapFacade implements Map {
         Debug.logWarning("This method [clear()] is not implemented in ContentMapFacade", module);
     }
 
-    public Set<String> keySet() {
+    public Set<Object> keySet() {
         // Debug.logWarning("This method [keySet()] is not completely implemented in ContentMapFacade", module);
-        return mapKeySet;
+        return UtilGenerics.checkSet(mapKeySet);
     }
 
-    public Collection values() {
+    public Collection<Object> values() {
         Debug.logWarning("This method [values()] is not implemented in ContentMapFacade", module);
         return null;
     }
 
-    public Set entrySet() {
+    public Set<Map.Entry<Object, Object>> entrySet() {
         Debug.logWarning("This method [entrySet()] is not implemented in ContentMapFacade", module);
         return null;
     }
@@ -284,7 +288,7 @@ public class ContentMapFacade implements Map {
             List<ContentMapFacade> subContent = FastList.newInstance();
             List<GenericValue> subs = null;
             try {
-                Map expressions = FastMap.newInstance();
+                Map<String, Object> expressions = FastMap.newInstance();
                 expressions.put("contentIdStart", contentId);
                 if(!this.mapKeyFilter.equals("")) {
                     expressions.put("caMapKey", this.mapKeyFilter);
@@ -333,7 +337,7 @@ public class ContentMapFacade implements Map {
             return "=========> " + errorMsg + " <=========";
         }
         // TODO: change to use the MapStack instead of a cloned Map
-        Map renderCtx = FastMap.newInstance();
+        Map<String, Object> renderCtx = FastMap.newInstance();
         renderCtx.putAll(context);
         if (this.decoratedContent != null) {
             renderCtx.put("decoratedContent", decoratedContent);
@@ -359,7 +363,7 @@ public class ContentMapFacade implements Map {
         return this.renderThis();
     }
 
-    abstract class AbstractInfo implements Map {
+    abstract class AbstractInfo implements Map<Object, Object> {
         public int size() {
             return 1;
         }
@@ -389,7 +393,7 @@ public class ContentMapFacade implements Map {
             return null;
         }
 
-        public void putAll(Map map) {
+        public void putAll(Map<?, ?> map) {
             Debug.logWarning("This method [putAll()] is not implemented in ContentMapFacade.AbstractInfo", module);
         }
 
@@ -397,17 +401,17 @@ public class ContentMapFacade implements Map {
             Debug.logWarning("This method [clear()] is not implemented in ContentMapFacade.AbstractInfo", module);
         }
 
-        public Set keySet() {
+        public Set<Object> keySet() {
             Debug.logWarning("This method [keySet()] is not implemented in ContentMapFacade.AbstractInfo", module);
             return null;
         }
 
-        public Collection values() {
+        public Collection<Object> values() {
             Debug.logWarning("This method [values()] is not implemented in ContentMapFacade.AbstractInfo", module);
             return null;
         }
 
-        public Set entrySet() {
+        public Set<Map.Entry<Object, Object>> entrySet() {
             Debug.logWarning("This method [entrySet()] is not implemented in ContentMapFacade.AbstractInfo", module);
             return null;
         }
@@ -459,9 +463,9 @@ public class ContentMapFacade implements Map {
             }
 
             // key is the mapKey
-            List subs = null;
+            List<GenericValue> subs = null;
             try {
-                Map expressions = FastMap.newInstance();
+                Map<String, Object> expressions = FastMap.newInstance();
                 expressions.put("contentIdStart", contentId);
                 expressions.put("caMapKey", name);
                 if(!this.statusFilter.equals("")) {
@@ -509,7 +513,7 @@ public class ContentMapFacade implements Map {
                 return null;
             }
             String name = (String) key;
-            List metaData = null;
+            List<GenericValue> metaData = null;
             try {
                 if (cache) {
                     metaData = delegator.findByAndCache("ContentMetaData", UtilMisc.toMap("contentId", contentId, "metaDataPredicateId", name));

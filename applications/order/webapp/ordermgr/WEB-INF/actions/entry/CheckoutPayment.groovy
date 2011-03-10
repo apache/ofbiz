@@ -56,3 +56,22 @@ if (billingAccountList) {
     context.selectedBillingAccountId = cart.getBillingAccountId();
     context.billingAccountList = billingAccountList;
 }
+
+checkIdealPayment = false;
+productStore = ProductStoreWorker.getProductStore(request);
+productStorePaymentSettingList = productStore.getRelatedCache("ProductStorePaymentSetting");
+productStorePaymentSettingIter = productStorePaymentSettingList.iterator();
+while (productStorePaymentSettingIter.hasNext()) {
+    productStorePaymentSetting = productStorePaymentSettingIter.next();
+    if (productStorePaymentSetting.get("paymentMethodTypeId") == "EXT_IDEAL") {
+        checkIdealPayment = true;
+    }
+    
+}
+
+if (checkIdealPayment) {
+    issuerList = org.ofbiz.accounting.thirdparty.ideal.IdealEvents.getIssuerList();
+    if (issuerList) {
+        context.issuerList = issuerList;
+    }
+}

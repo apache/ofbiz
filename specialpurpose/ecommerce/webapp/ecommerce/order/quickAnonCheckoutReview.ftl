@@ -28,18 +28,19 @@ under the License.
             document.${parameters.formNameValue}.processButton.disabled=true;
             document.${parameters.formNameValue}.submit();
         } else {
-            alert("You order is being processed, this may take a moment.");
+            showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.YoureOrderIsBeingProcessed}");
         }
     }
 
     function shippingMethodChanged(shippingMethod) {
         var submitToUri = "<@ofbizUrl>quickAnonProcessShipOptionsUpdateOrderItems</@ofbizUrl>?shipping_method=" + shippingMethod;
-        dojo.io.bind({url: submitToUri,
-            load: function(type, data, evt){
-            if(type == "load"){
+        jQuery.ajax({
+            url: submitToUri,
+            type: "POST",
+            success: function(data) {
                 document.getElementById("orderItemsSection").innerHTML = data;
             }
-          },mimetype: "text/html"});
+        });
     }
 
 // -->

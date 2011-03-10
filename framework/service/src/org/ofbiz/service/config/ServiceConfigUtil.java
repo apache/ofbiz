@@ -37,6 +37,7 @@ import org.w3c.dom.NodeList;
 /**
  * Misc. utility method for dealing with the serviceengine.xml file
  */
+@SuppressWarnings("serial")
 public class ServiceConfigUtil implements Serializable {
 
     public static final String module = ServiceConfigUtil.class.getName();
@@ -161,7 +162,7 @@ public class ServiceConfigUtil implements Serializable {
                             for (int index = 0; index < params.getLength(); index++) {
                                 Element param = (Element) params.item(index);
                                 if (param != null && name.equals(param.getAttribute("name"))) {
-                                    return (String) param.getAttribute("value");
+                                    return param.getAttribute("value");
                                 }
                             }
                         }

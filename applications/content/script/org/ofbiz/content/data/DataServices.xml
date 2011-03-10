@@ -75,6 +75,34 @@ under the License.
         <entity-one entity-name="DataResource" value-field="lookedUpValue"/>
         <remove-value value-field="lookedUpValue"/>
     </simple-method>
+    
+    <simple-method method-name="createDataResourceAndAssocToContent" short-description="Create a Data Resource and return the data resource type">
+       <entity-one value-field="content" entity-name="Content"/>
+       <if-empty field="content">
+           <add-error>
+               <fail-property resource="ContentErrorUiLabels" property="layoutEvents.content_empty"/>
+           </add-error>
+           <check-errors/>
+       </if-empty>
+   
+       <set-service-fields service-name="createDataResource" to-map="dataResourceCtx" map="parameters"/>
+       <call-service service-name="createDataResource" in-map-name="dataResourceCtx">
+           <result-to-field result-name="dataResource"/>
+       </call-service>
+
+       <if-compare field="parameters.templateDataResource" operator="equals" value="Y">
+           <set field="contentCtx.templateDataResourceId" from-field="parameters.dataResourceId" />
+           <else>
+               <set field="contentCtx.dataResourceId" from-field="parameters.dataResourceId" />
+           </else>
+       </if-compare>
+       <set field="contentCtx.contentId" from-field="parameters.contentId"/>
+       <call-service service-name="updateContent" in-map-name="contentCtx"/>
+       
+       <field-to-result field="parameters.contentId" result-name="contentId"/>       
+       <if-compare field="dataResource.dataResourceTypeId" operator="equals" value="ELECTRONIC_TEXT"><return response-code="${dataResource.dataResourceTypeId}"/></if-compare>
+       <if-compare field="dataResource.dataResourceTypeId" operator="equals" value="IMAGE_OBJECT"><return response-code="${dataResource.dataResourceTypeId}"/></if-compare>       
+    </simple-method>
 
   <!-- Methods for DataCategory -->
     <simple-method method-name="createDataCategory" short-description="Create a Data Category">
@@ -100,7 +128,9 @@ under the License.
 
   <!-- Methods for DataResourceMetaData -->
     <simple-method method-name="createDataResourceMetaData" short-description="Create Data Resource Meta Data">
-        <check-permission permission="CONTENTMGR" action="_CREATE"><fail-message message="Security Error: to run createDataResourceMetaData you must have the CONTENTMGR_CREATE or CONTENTMGR_ADMIN permission"/></check-permission>
+        <check-permission permission="CONTENTMGR" action="_CREATE">
+            <fail-property resource="ContentUiLabels" property="ContentSecurityCreatePermission"/>
+        </check-permission>
         <check-errors/>
 
         <make-value entity-name="DataResourceMetaData" value-field="newEntity"/>
@@ -109,7 +139,9 @@ under the License.
         <create-value value-field="newEntity"/>
     </simple-method>
     <simple-method method-name="updateDataResourceMetaData" short-description="Update Data Resource Meta Data">
-        <check-permission permission="CONTENTMGR" action="_UPDATE"><fail-message message="Security Error: to run updateDataResourceMetaData you must have the CONTENTMGR_UPDATE or CONTENTMGR_ADMIN permission"/></check-permission>
+        <check-permission permission="CONTENTMGR" action="_UPDATE">
+            <fail-property resource="ContentUiLabels" property="ContentSecurityUpdatePermission"/>
+        </check-permission>
         <check-errors/>
 
         <make-value entity-name="DataResourceMetaData" value-field="lookupKeyValue"/>
@@ -119,7 +151,9 @@ under the License.
         <store-value value-field="lookedUpValue"/>
     </simple-method>
     <simple-method method-name="removeDataResourceMetaData" short-description="Remove Data Resource Meta Data">
-        <check-permission permission="CONTENTMGR" action="_DELETE"><fail-message message="Security Error: to run removeDataResourceMetaData you must have the CONTENTMGR_DELETE or CONTENTMGR_ADMIN permission"/></check-permission>
+        <check-permission permission="CONTENTMGR" action="_DELETE">
+            <fail-property resource="ContentUiLabels" property="ContentSecurityDeletePermission"/>
+        </check-permission>
         <check-errors/>
 
         <make-value entity-name="DataResourceMetaData" value-field="lookupKeyValue"/>
@@ -130,7 +164,9 @@ under the License.
 
   <!-- Methods for DataResourcePurpose -->
     <simple-method method-name="createDataResourcePurpose" short-description="Create Data Resource Purpose">
-        <check-permission permission="CONTENTMGR" action="_CREATE"><fail-message message="Security Error: to run createDataResourcePurpose you must have the CONTENTMGR_CREATE or CONTENTMGR_ADMIN permission"/></check-permission>
+        <check-permission permission="CONTENTMGR" action="_CREATE">
+            <fail-property resource="ContentUiLabels" property="ContentSecurityCreatePermission"/>        
+        </check-permission>
         <check-errors/>
 
         <make-value entity-name="DataResourcePurpose" value-field="newEntity"/>
@@ -139,7 +175,9 @@ under the License.
         <create-value value-field="newEntity"/>
     </simple-method>
     <simple-method method-name="updateDataResourcePurpose" short-description="Update Data Resource Purpose">
-        <check-permission permission="CONTENTMGR" action="_UPDATE"><fail-message message="Security Error: to run updateDataResourcePurpose you must have the CONTENTMGR_UPDATE or CONTENTMGR_ADMIN permission"/></check-permission>
+        <check-permission permission="CONTENTMGR" action="_UPDATE">
+            <fail-property resource="ContentUiLabels" property="ContentSecurityUpdatePermission"/>
+        </check-permission>
         <check-errors/>
 
         <make-value entity-name="DataResourcePurpose" value-field="lookupKeyValue"/>
@@ -149,7 +187,9 @@ under the License.
         <store-value value-field="lookedUpValue"/>
     </simple-method>
     <simple-method method-name="removeDataResourcePurpose" short-description="Remove Data Resource Purpose">
-        <check-permission permission="CONTENTMGR" action="_DELETE"><fail-message message="Security Error: to run removeDataResourcePurpose you must have the CONTENTMGR_DELETE or CONTENTMGR_ADMIN permission"/></check-permission>
+        <check-permission permission="CONTENTMGR" action="_DELETE">
+            <fail-property resource="ContentUiLabels" property="ContentSecurityDeletePermission"/>    
+        </check-permission>
         <check-errors/>
 
         <make-value entity-name="DataResourcePurpose" value-field="lookupKeyValue"/>
@@ -510,15 +550,15 @@ under the License.
             </if-not-empty>
             <if-empty field="currentContent">
                 <add-error>
-                    <fail-message message="Neither content nor contentId supplied."/>
+                    <fail-property resource="ContentUiLabels" property="ContentNeitherContentSupplied"/>
                 </add-error>
             </if-empty>
         </if-empty>
         <check-errors/>
         <if-empty field="currentContent.dataResourceId">
-                <add-error>
-                    <fail-message message="No dataResourceId found"/>
-                </add-error>
+            <add-error>
+                <fail-property resource="ContentUiLabels" property="ContentDataResourceNotFound"/>
+            </add-error>
         </if-empty>
         <check-errors/>
         <field-to-result field="currentContent.dataResourceId" result-name="dataResourceId"/>
@@ -526,9 +566,9 @@ under the License.
             <field-map field-name="dataResourceId" from-field="currentContent.dataResourceId"/>
         </entity-one>
         <if-empty field="eText">
-                <add-error>
-                    <fail-message message="Electronic Text not found."/>
-                </add-error>
+            <add-error>
+                <fail-property resource="ContentUiLabels" property="ContentElectronicTextNotFound"/>
+            </add-error>
         </if-empty>
         <check-errors/>
 
@@ -541,9 +581,23 @@ under the License.
     <simple-method method-name="attachUploadToDataResource" short-description="Attach an uploaded file to a data resource">
         <set field="isUpdate" value="false"/>
         <property-to-field resource="content.properties" property="content.upload.always.local.file" field="forceLocal"/>
-        <if-compare field="forceLocal" value="true" operator="equals">
-            <set field="parameters.dataResourceTypeId" value="LOCAL_FILE"/>
-        </if-compare>
+        <if>
+            <condition>
+            <!-- if (forceLocal && !("LOCAL_FILE".equals(parameters.dataResourceTypeId) || "OFBIZ_FILE".equals(parameters.dataResourceTypeId)) -->
+                <and>
+                    <if-compare field="forceLocal" value="true" operator="equals"/>
+                    <not>
+                        <or>
+                            <if-compare field="parameters.dataResourceTypeId" operator="equals" value="LOCAL_FILE"/>
+                            <if-compare field="parameters.dataResourceTypeId" operator="equals" value="OFBIZ_FILE"/>
+                        </or>
+                    </not>
+                </and>
+            </condition>
+            <then>
+                <set field="parameters.dataResourceTypeId" value="LOCAL_FILE"/>
+            </then>
+        </if>
 
         <if-empty field="parameters.dataResourceTypeId">
             <!-- create default behavior -->
@@ -589,7 +643,12 @@ under the License.
         </if-empty>
 
         <if-compare field="parameters.dataResourceTypeId" value="LOCAL_FILE" operator="equals">
-            <call-simple-method method-name="saveLocalFileDateResource"/>
+            <call-simple-method method-name="saveLocalFileDataResource"/>
+            <return/>
+        </if-compare>
+
+        <if-compare field="parameters.dataResourceTypeId" value="OFBIZ_FILE" operator="equals">
+            <call-simple-method method-name="saveOfbizFileDataResource"/>
             <return/>
         </if-compare>
 
@@ -637,15 +696,24 @@ under the License.
             <return/>
         </if-compare>
 
-        <add-error><fail-message message="Data type [${dataResourceTypeId} is not yet supported!"/></add-error>
+        <add-error>
+            <fail-property resource="ContentUiLabels" property="ContentDataTypeNotYetSupported"/>
+        </add-error>
         <check-errors/>
     </simple-method>
 
     <!-- save LOCAL_FILE data -->
-    <simple-method method-name="saveLocalFileDateResource" short-description="Attach an uploaded file to a data resource as LOCAL_FILE">
+    <simple-method method-name="saveLocalFileDataResource" short-description="Attach an uploaded file to a data resource as LOCAL_FILE">
         <entity-one entity-name="DataResource" value-field="dataResource"/>
         <if-empty field="dataResource">
-            <add-error><fail-message message="No data resource found for ID: [${parameters.dataResourceId}]"/></add-error>
+            <add-error>
+                <fail-property resource="ContentUiLabels" property="ContentDataResourceNotFound"/>
+            </add-error>
+            <else>
+                <if-not-empty field="dataResource.objectInfo">
+                    <set field="isUpdate" value="Y"/>
+                </if-not-empty>
+            </else>
         </if-empty>
         <if>
             <condition>
@@ -660,7 +728,9 @@ under the License.
                         </or>
                     </condition>
                     <then>
-                        <add-error><fail-message message="No uploaded content found in context"/></add-error>
+                        <add-error>
+                            <fail-property resource="ContentUiLabels" property="ContentNoUploadedContentFound"/>
+                        </add-error>
                     </then>
                     <else>
                         <!-- if not upload is found on an update; its okay, don't do anything just return -->
@@ -699,13 +769,18 @@ under the License.
         <field-to-result result-name="mimeTypeId" field="dataResource.mimeTypeId"/>
     </simple-method>
 
-    <!-- save OTHER_OBJECT data -->
-    <simple-method method-name="saveOtherObjectDateResource" short-description="Attach an uploaded file to a data resource as OTHER_OBJECT">
-        <entity-one entity-name="DataResource" value-field="dataResource">
-            <field-map field-name="dataResourceId" from-field="parameters.dataResourceId"/>
-        </entity-one>
+    <!-- save OFBIZ_FILE data -->
+    <simple-method method-name="saveOfbizFileDataResource" short-description="Attach an uploaded file to a data resource as OFBIZ_FILE">
+        <entity-one entity-name="DataResource" value-field="dataResource"/>
         <if-empty field="dataResource">
-            <add-error><fail-message message="No data resource found for ID: [${parameters.dataResourceId}]"/></add-error>
+            <add-error>
+                <fail-property resource="ContentUiLabels" property="ContentDataResourceNotFound"/>
+            </add-error>
+            <else>
+                <if-not-empty field="dataResource.objectInfo">
+                    <set field="isUpdate" value="Y"/>
+                </if-not-empty>
+            </else>
         </if-empty>
         <if>
             <condition>
@@ -720,7 +795,76 @@ under the License.
                         </or>
                     </condition>
                     <then>
-                        <add-error><fail-message message="No uploaded content found in context"/></add-error>
+                        <add-error>
+                            <fail-property resource="ContentUiLabels" property="ContentNoUploadedContentFound"/>
+                        </add-error>
+                    </then>
+                    <else>
+                        <!-- if not upload is found on an update; its okay, don't do anything just return -->
+                        <field-to-result result-name="dataResourceId" field="dataResource.dataResourceId"/>
+                        <field-to-result result-name="mimeTypeId" field="dataResource.mimeTypeId"/>
+                        <return/>
+                    </else>
+                </if>
+
+            </then>
+        </if>
+        <check-errors/>
+
+        <set field="absolute" value="false" type="Boolean"/>
+        <call-class-method class-name="org.ofbiz.content.data.DataResourceWorker" method-name="getDataResourceContentUploadPath" ret-field="uploadPath">
+            <field field="absolute" type="boolean"/>
+        </call-class-method>
+        <log level="info" message="[attachLocalFileToDataResource] - Found Subdir : ${uploadPath}"/>
+
+        <set from-field="parameters._uploadedFile_contentType" field="extenLookup.mimeTypeId"/>
+        <find-by-and entity-name="FileExtension" map="extenLookup" list="extensions"/>
+        <first-from-list entry="extension" list="extensions"/>
+
+        <set from-field="parameters._uploadedFile_fileName" field="dataResource.dataResourceName"/>
+        <set from-field="parameters._uploadedFile_contentType" field="dataResource.mimeTypeId"/>
+        <set value="${uploadPath}/${dataResource.dataResourceId}" field="dataResource.objectInfo"/>
+        <if-not-empty field="extension">
+            <set value="${uploadPath}/${dataResource.dataResourceId}.${extension.fileExtensionId}" field="dataResource.objectInfo"/>
+        </if-not-empty>
+        <set value="OFBIZ_FILE" field="dataResource.dataResourceTypeId"/>
+        <store-value value-field="dataResource"/>
+
+        <set-service-fields service-name="createAnonFile" map="dataResource" to-map="fileCtx"/>
+        <set from-field="parameters.uploadedFile" field="fileCtx.binData"/>
+        <set from-field="dataResource" field="fileCtx.dataResource"/>
+        <call-service service-name="createAnonFile" in-map-name="fileCtx" include-user-login="true"/>
+
+        <field-to-result result-name="dataResourceId" field="dataResource.dataResourceId"/>
+        <field-to-result result-name="mimeTypeId" field="dataResource.mimeTypeId"/>
+    </simple-method>
+
+    <!-- save OTHER_OBJECT data -->
+    <simple-method method-name="saveOtherObjectDateResource" short-description="Attach an uploaded file to a data resource as OTHER_OBJECT">
+        <entity-one entity-name="DataResource" value-field="dataResource">
+            <field-map field-name="dataResourceId" from-field="parameters.dataResourceId"/>
+        </entity-one>
+        <if-empty field="dataResource">
+            <add-error>
+                <fail-property resource="ContentUiLabels" property="ContentDataResourceNotFound"/>
+            </add-error>
+        </if-empty>
+        <if>
+            <condition>
+                <if-empty field="parameters._uploadedFile_fileName"/>
+            </condition>
+            <then>
+                <if>
+                    <condition>
+                        <or>
+                            <if-empty field="isUpdate"/>
+                            <if-compare field="isUpdate" value="Y" operator="not-equals"/>
+                        </or>
+                    </condition>
+                    <then>
+                        <add-error>
+                            <fail-property resource="ContentUiLabels" property="ContentNoUploadedContentFound"/>
+                        </add-error>
                     </then>
                     <else>
                         <!-- if not upload is found on an update; its okay, don't do anything just return -->
@@ -761,7 +905,9 @@ under the License.
             <field-map field-name="dataResourceId" from-field="parameters.dataResourceId"/>
         </entity-one>
         <if-empty field="dataResource">
-            <add-error><fail-message message="No data resource found for ID: [${parameters.dataResourceId}]"/></add-error>
+            <add-error>
+                <fail-property resource="ContentUiLabels" property="ContentDataResourceNotFound"/>
+            </add-error>
         </if-empty>
         <if>
             <condition>
@@ -776,7 +922,9 @@ under the License.
                         </or>
                     </condition>
                     <then>
-                        <add-error><fail-message message="No uploaded content found in context"/></add-error>
+                        <add-error>
+                            <fail-property resource="ContentUiLabels" property="ContentNoUploadedContentFound"/>
+                        </add-error>
                     </then>
                     <else>
                         <!-- if not upload is found on an update; its okay, don't do anything just return -->
@@ -817,7 +965,9 @@ under the License.
             <field-map field-name="dataResourceId" from-field="parameters.dataResourceId"/>
         </entity-one>
         <if-empty field="dataResource">
-            <add-error><fail-message message="No data resource found for ID: [${parameters.dataResourceId}]"/></add-error>
+            <add-error>
+                <fail-property resource="ContentUiLabels" property="ContentDataResourceNotFound"/>
+            </add-error>
         </if-empty>
         <if>
             <condition>
@@ -832,7 +982,9 @@ under the License.
                         </or>
                     </condition>
                     <then>
-                        <add-error><fail-message message="No uploaded content found in context"/></add-error>
+                        <add-error>
+                            <fail-property resource="ContentUiLabels" property="ContentNoUploadedContentFound"/>
+                        </add-error>
                     </then>
                     <else>
                         <!-- if not upload is found on an update; its okay, don't do anything just return -->
@@ -873,7 +1025,9 @@ under the License.
             <field-map field-name="dataResourceId" from-field="parameters.dataResourceId"/>
         </entity-one>
         <if-empty field="dataResource">
-            <add-error><fail-message message="No data resource found for ID: [${parameters.dataResourceId}]"/></add-error>
+            <add-error>
+                <fail-property resource="ContentUiLabels" property="ContentDataResourceNotFound"/>
+            </add-error>
         </if-empty>
         <if>
             <condition>
@@ -888,7 +1042,9 @@ under the License.
                         </or>
                     </condition>
                     <then>
-                        <add-error><fail-message message="No uploaded content found in context"/></add-error>
+                        <add-error>
+                            <fail-property resource="ContentUiLabels" property="ContentNoUploadedContentFound"/>
+                        </add-error>
                     </then>
                     <else>
                         <!-- if not upload is found on an update; its okay, don't do anything just return -->

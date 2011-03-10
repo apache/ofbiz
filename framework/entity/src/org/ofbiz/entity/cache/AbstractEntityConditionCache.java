@@ -33,7 +33,6 @@ import org.ofbiz.entity.GenericPK;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.model.ModelEntity;
-import org.ofbiz.entity.model.ModelViewEntity;
 
 public abstract class AbstractEntityConditionCache<K, V> extends AbstractCache<EntityCondition, Map<K, V>> {
 
@@ -151,7 +150,7 @@ public abstract class AbstractEntityConditionCache<K, V> extends AbstractCache<E
     protected List<? extends Map<String, Object>> convert(boolean isPK, String targetEntityName, GenericEntity entity) {
         if (isNull(entity)) return null;
         if (isPK) {
-            return entity.getModelEntity().convertToViewValues(targetEntityName, (GenericPK) entity);
+            return entity.getModelEntity().convertToViewValues(targetEntityName, entity);
         } else {
             return entity.getModelEntity().convertToViewValues(targetEntityName, entity);
         }

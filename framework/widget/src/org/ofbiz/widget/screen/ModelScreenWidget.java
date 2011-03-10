@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ListIterator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -48,6 +49,7 @@ import org.ofbiz.widget.ModelWidget;
 import org.ofbiz.widget.ModelWidgetAction;
 import org.ofbiz.widget.WidgetFactory;
 import org.ofbiz.widget.WidgetWorker;
+import org.ofbiz.widget.PortalPageWorker;
 import org.ofbiz.widget.form.FormFactory;
 import org.ofbiz.widget.form.FormStringRenderer;
 import org.ofbiz.widget.form.ModelForm;
@@ -61,6 +63,7 @@ import org.ofbiz.widget.tree.TreeFactory;
 import org.ofbiz.widget.tree.TreeStringRenderer;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+import org.ofbiz.entity.condition.*;
 
 
 /**
@@ -481,7 +484,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
             // if we are not sharing the scope, protect it using the MapStack
             boolean protectScope = !shareScope(context);
             if (protectScope) {
-                if (!(context instanceof MapStack)) {
+                if (!(context instanceof MapStack<?>)) {
                     context = MapStack.create(context);
                 }
 
@@ -507,37 +510,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
                 return;
             }
 
-            // check to see if the name is a composite name separated by a #, if so split it up and get it by the full loc#name
-            if (ScreenFactory.isCombinedName(name)) {
-                String combinedName = name;
-                location = ScreenFactory.getResourceNameFromCombined(combinedName);
-                name = ScreenFactory.getScreenNameFromCombined(combinedName);
-            }
-
-            ModelScreen modelScreen = null;
-            if (UtilValidate.isNotEmpty(location)) {
-                try {
-                    modelScreen = ScreenFactory.getScreenFromLocation(location, name);
-                } catch (IOException e) {
-                    String errMsg = "Error rendering included screen named [" + name + "] at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new RuntimeException(errMsg);
-                } catch (SAXException e) {
-                    String errMsg = "Error rendering included screen named [" + name + "] at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new RuntimeException(errMsg);
-                } catch (ParserConfigurationException e) {
-                    String errMsg = "Error rendering included screen named [" + name + "] at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new RuntimeException(errMsg);
-                }
-            } else {
-                modelScreen = this.modelScreen.modelScreenMap.get(name);
-                if (modelScreen == null) {
-                    throw new IllegalArgumentException("Could not find screen with name [" + name + "] in the same file as the screen with name [" + this.modelScreen.getName() + "]");
-                }
-            }
-            modelScreen.renderScreenString(writer, context, screenStringRenderer);
+            ScreenFactory.renderReferencedScreen(name, location, this, writer, context, screenStringRenderer);
 
             if (protectScope) {
                 UtilGenerics.<MapStack<String>>cast(context).pop();
@@ -577,8 +550,8 @@ public abstract class ModelScreenWidget extends ModelWidget {
 
             List<? extends Element> decoratorSectionElementList = UtilXml.childElementList(decoratorScreenElement, "decorator-section");
             for (Element decoratorSectionElement: decoratorSectionElementList) {
-                String name = decoratorSectionElement.getAttribute("name");
-                this.sectionMap.put(name, new DecoratorSection(modelScreen, decoratorSectionElement));
+                DecoratorSection decoratorSection = new DecoratorSection(modelScreen, decoratorSectionElement);
+                this.sectionMap.put(decoratorSection.getName(), decoratorSection);
             }
         }
 
@@ -604,37 +577,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
             String name = this.getName(context);
             String location = this.getLocation(context);
 
-            // check to see if the name is a composite name separated by a #, if so split it up and get it by the full loc#name
-            if (ScreenFactory.isCombinedName(name)) {
-                String combinedName = name;
-                location = ScreenFactory.getResourceNameFromCombined(combinedName);
-                name = ScreenFactory.getScreenNameFromCombined(combinedName);
-            }
-
-            ModelScreen modelScreen = null;
-            if (UtilValidate.isNotEmpty(location)) {
-                try {
-                    modelScreen = ScreenFactory.getScreenFromLocation(location, name);
-                } catch (IOException e) {
-                    String errMsg = "Error rendering included screen named [" + name + "] at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new RuntimeException(errMsg);
-                } catch (SAXException e) {
-                    String errMsg = "Error rendering included screen named [" + name + "] at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new RuntimeException(errMsg);
-                } catch (ParserConfigurationException e) {
-                    String errMsg = "Error rendering included screen named [" + name + "] at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new RuntimeException(errMsg);
-                }
-            } else {
-                modelScreen = this.modelScreen.modelScreenMap.get(name);
-                if (modelScreen == null) {
-                    throw new IllegalArgumentException("Could not find screen with name [" + name + "] in the same file as the screen with name [" + this.modelScreen.getName() + "]");
-                }
-            }
-            modelScreen.renderScreenString(writer, context, screenStringRenderer);
+            ScreenFactory.renderReferencedScreen(name, location, this, writer, context, screenStringRenderer);
 
             contextMs.pop();
         }
@@ -783,7 +726,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) {
             boolean protectScope = !shareScope(context);
             if (protectScope) {
-                if (!(context instanceof MapStack)) {
+                if (!(context instanceof MapStack<?>)) {
                     context = MapStack.create(context);
                 }
                 UtilGenerics.<MapStack<String>>cast(context).push();
@@ -871,7 +814,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
             boolean protectScope = !shareScope(context);
             if (protectScope) {
-                if (!(context instanceof MapStack)) {
+                if (!(context instanceof MapStack<?>)) {
                     context = MapStack.create(context);
                 }
                 UtilGenerics.<MapStack<String>>cast(context).push();
@@ -1025,7 +968,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
                 GenericValue content = null;
                 String expandedDataResourceId = getDataResourceId(context);
                 String expandedContentId = getContentId(context);
-                if (!(context instanceof MapStack)) {
+                if (!(context instanceof MapStack<?>)) {
                     context = MapStack.create(context);
                 }
 
@@ -1055,7 +998,6 @@ public abstract class ModelScreenWidget extends ModelWidget {
                 GenericValue dataResource = null;
                 if (UtilValidate.isNotEmpty(expandedDataResourceId)) {
                     dataResource = delegator.findByPrimaryKeyCache("DataResource", UtilMisc.toMap("dataResourceId", expandedDataResourceId));
-                    this.dataResourceId = FlexibleStringExpander.getInstance(expandedDataResourceId);
                 }
 
                 String mimeTypeId = null;
@@ -1355,6 +1297,8 @@ public abstract class ModelScreenWidget extends ModelWidget {
         protected boolean secure = false;
         protected boolean encode = false;
         protected String linkType;
+        protected String width;
+        protected String height;
         protected List<WidgetWorker.Parameter> parameterList = FastList.newInstance();
 
 
@@ -1382,6 +1326,9 @@ public abstract class ModelScreenWidget extends ModelWidget {
             for (Element parameterElement: parameterElementList) {
                 this.parameterList.add(new WidgetWorker.Parameter(parameterElement));
             }
+
+            this.width = linkElement.getAttribute("width");
+            this.height = linkElement.getAttribute("height");
         }
 
         @Override
@@ -1455,6 +1402,14 @@ public abstract class ModelScreenWidget extends ModelWidget {
 
         public String getLinkType() {
             return this.linkType;
+        }
+
+        public String getWidth() {
+            return this.width;
+        }
+
+        public String getHeight() {
+            return this.height;
         }
 
         public Map<String, String> getParameterMap(Map<String, Object> context) {
@@ -1639,18 +1594,172 @@ public abstract class ModelScreenWidget extends ModelWidget {
             return "<image id=\"" + this.idExdr.getOriginal() + "\" style=\"" + this.styleExdr.getOriginal() + "\" src=\"" + this.srcExdr.getOriginal() + "\" url-mode=\"" + this.urlMode + "\"/>";
         }
     }
+
+    public static class PortalPage extends ModelScreenWidget {
+        public static final String TAG_NAME = "include-portal-page";
+        protected FlexibleStringExpander idExdr;
+        protected FlexibleStringExpander confModeExdr;
+        protected String originalPortalPageId;
+        protected String actualPortalPageId;
+        protected Boolean usePrivate;
+
+        public PortalPage(ModelScreen modelScreen, Element portalPageElement) {
+            super(modelScreen, portalPageElement);
+            this.idExdr = FlexibleStringExpander.getInstance(portalPageElement.getAttribute("id"));
+            this.confModeExdr = FlexibleStringExpander.getInstance(portalPageElement.getAttribute("conf-mode"));
+            this.usePrivate = !("false".equals(portalPageElement.getAttribute("use-private")));
+        }
+
+        @Override
+        public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
+            try {
+                Delegator delegator = (Delegator) context.get("delegator");
+                GenericValue portalPage = null;
+                List<GenericValue> portalPageColumns = null;
+                List<GenericValue> portalPagePortlets = null;
+                List<GenericValue> portletAttributes = null;
+
+                String expandedPortalPageId = getId(context);
+
+                if (UtilValidate.isNotEmpty(expandedPortalPageId)) {
+                    if (usePrivate) {
+                        portalPage = PortalPageWorker.getPortalPage(expandedPortalPageId, context);
+                    }
+                    else {
+                        portalPage = delegator.findByPrimaryKeyCache("PortalPage", UtilMisc.toMap("portalPageId", expandedPortalPageId));
+                    }
+                    if (portalPage == null) {
+                        String errMsg = "Could not find PortalPage with portalPageId [" + expandedPortalPageId + "] ";
+                        Debug.logError(errMsg, module);
+                        throw new RuntimeException(errMsg);
+                    } else {
+                        actualPortalPageId = portalPage.getString("portalPageId");
+                        originalPortalPageId = portalPage.getString("originalPortalPageId");
+                        portalPageColumns = delegator.getRelatedCache("PortalPageColumn", portalPage);
+                    }
+                } else {
+                    String errMsg = "portalPageId is empty.";
+                    Debug.logError(errMsg, module);
+                    return;
+                }
+
+                // Renders the portalPage header
+                screenStringRenderer.renderPortalPageBegin(writer, context, this);
+                
+                // First column has no previous column
+                String prevColumnSeqId = "";
+                
+                // Iterates through the PortalPage columns
+                ListIterator <GenericValue>columnsIterator = portalPageColumns.listIterator();
+                while(columnsIterator.hasNext()) {
+                    GenericValue columnValue = columnsIterator.next();
+                    String columnSeqId = columnValue.getString("columnSeqId");
+                    
+                    // Renders the portalPageColumn header
+                    screenStringRenderer.renderPortalPageColumnBegin(writer, context, this, columnValue);
+
+                    // Get the Portlets located in the current column
+                    portalPagePortlets = delegator.findByAnd("PortalPagePortletView", UtilMisc.toMap("portalPageId", portalPage.getString("portalPageId"), "columnSeqId", columnSeqId), UtilMisc.toList("sequenceNum"));
+                    
+                    // First Portlet in a Column has no previous Portlet
+                    String prevPortletId = "";
+                    String prevPortletSeqId = "";
+
+                    // If this is not the last column, get the next columnSeqId
+                    String nextColumnSeqId = "";
+                    if (columnsIterator.hasNext()) {
+                        nextColumnSeqId = portalPageColumns.get(columnsIterator.nextIndex()).getString("columnSeqId");
+                    }
+                    
+                    // Iterates through the Portlets in the Column
+                    ListIterator <GenericValue>portletsIterator = portalPagePortlets.listIterator();
+                    while(portletsIterator.hasNext()) {
+                        GenericValue portletValue = portletsIterator.next();
+
+                        // If not the last portlet in the column, get the next nextPortletId and nextPortletSeqId
+                        String nextPortletId = "";
+                        String nextPortletSeqId = "";
+                        if (portletsIterator.hasNext()) {
+                            nextPortletId = portalPagePortlets.get(portletsIterator.nextIndex()).getString("portalPortletId");
+                            nextPortletSeqId = portalPagePortlets.get(portletsIterator.nextIndex()).getString("portletSeqId");
+                        }
+
+                        // Set info to allow portlet movement in the page
+                        context.put("prevPortletId", prevPortletId);
+                        context.put("prevPortletSeqId", prevPortletSeqId);
+                        context.put("nextPortletId", nextPortletId);
+                        context.put("nextPortletSeqId", nextPortletSeqId);
+                        context.put("prevColumnSeqId", prevColumnSeqId);
+                        context.put("nextColumnSeqId", nextColumnSeqId);
+                       
+                        // Get portlet's attributes
+                        portletAttributes = delegator.findList("PortletAttribute",
+                            EntityCondition.makeCondition(UtilMisc.toMap("portalPageId", portletValue.get("portalPageId"), "portalPortletId", portletValue.get("portalPortletId"), "portletSeqId", portletValue.get("portletSeqId"))),
+                            null, null, null, false);
+                        ListIterator <GenericValue>attributesIterator = portletAttributes.listIterator();
+                        while (attributesIterator.hasNext()) {
+                            GenericValue attribute = attributesIterator.next();
+                            context.put(attribute.getString("attrName"), attribute.getString("attrValue"));
+                        }
+                        
+                        // Renders the portalPagePortlet
+                        screenStringRenderer.renderPortalPagePortletBegin(writer, context, this, portletValue);
+                        screenStringRenderer.renderPortalPagePortletBody(writer, context, this, portletValue);
+                        screenStringRenderer.renderPortalPagePortletEnd(writer, context, this, portletValue);
+
+                        // Remove the portlet's attributes so that these are not available for other portlets
+                        while (attributesIterator.hasPrevious()) {
+                            GenericValue attribute = attributesIterator.previous();
+                            context.remove(attribute.getString("attrName"));
+                        }
+                        
+                        // Uses the actual portlet as prevPortlet for next iteration
+                        prevPortletId = (String) portletValue.get("portalPortletId");
+                        prevPortletSeqId = (String) portletValue.get("portletSeqId");
+                    }
+                    // Renders the portalPageColumn footer
+                    screenStringRenderer.renderPortalPageColumnEnd(writer, context, this, columnValue);
+
+                    // Uses the actual columnSeqId as prevColumnSeqId for next iteration
+                    prevColumnSeqId = columnSeqId;
+                }
+                // Renders the portalPage footer
+                screenStringRenderer.renderPortalPageEnd(writer, context, this);
+            } catch (IOException e) {
+                String errMsg = "Error rendering PortalPage with portalPageId [" + getId(context) + "]: " + e.toString();
+                Debug.logError(e, errMsg, module);
+                throw new RuntimeException(errMsg);
+            } catch (GenericEntityException e) {
+                String errMsg = "Error obtaining PortalPage with portalPageId [" + getId(context) + "]: " + e.toString();
+                Debug.logError(e, errMsg, module);
+                throw new RuntimeException(errMsg);
+            }
+        }
+
+        public String getId(Map<String, Object> context) {
+            return this.idExdr.expandString(context);
+        }
+
+        public String getOriginalPortalPageId() {
+            return this.originalPortalPageId;
+        }
+        
+        public String getActualPortalPageId() {
+            return this.actualPortalPageId;
+        }
+
+        public String getConfMode(Map<String, Object> context) {
+            return this.confModeExdr.expandString(context);
+        }
+
+        public String getUsePrivate() {
+            return Boolean.toString(this.usePrivate);
+        }
+
+        @Override
+        public String rawString() {
+            return "<include-portal-page id=\"" + this.idExdr.getOriginal() + "\" name=\"" + this.idExdr.getOriginal() + "\">";
+        }
+    }
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

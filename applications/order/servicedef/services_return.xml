@@ -197,16 +197,19 @@ under the License.
             location="org.ofbiz.order.order.OrderReturnServices" invoke="sendReturnAcceptNotification">
         <description>Send a notification that a return has been accepted</description>
         <attribute name="returnId" type="String" mode="IN" optional="false"/>
+        <attribute name="communicationEventId" type="String" mode="OUT" optional="true"/>
     </service>
     <service name="sendReturnCompleteNotification" engine="java" max-retry="3"
             location="org.ofbiz.order.order.OrderReturnServices" invoke="sendReturnCompleteNotification">
         <description>Send a notification that a return has been completed</description>
         <attribute name="returnId" type="String" mode="IN" optional="false"/>
+        <attribute name="communicationEventId" type="String" mode="OUT" optional="true"/>
     </service>
      <service name="sendReturnCancelNotification" engine="java" max-retry="3"
             location="org.ofbiz.order.order.OrderReturnServices" invoke="sendReturnCancelNotification">
         <description>Send a notification that a return has been cancelled</description>
         <attribute name="returnId" type="String" mode="IN" optional="false"/>
+        <attribute name="communicationEventId" type="String" mode="OUT" optional="true"/>
     </service>
     <service name="autoCancelReplacementOrders" engine="java" max-retry="3" transaction-timeout="36000"
             location="org.ofbiz.order.order.OrderReturnServices" invoke="autoCancelReplacementOrders">
@@ -348,5 +351,22 @@ under the License.
         <description>Create Return Status</description>
         <attribute name="returnId" type="String" mode="IN" optional="false"/>
         <attribute name="returnItemSeqId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <!-- Return ContactMech Services -->
+    <service name="createReturnContactMech" default-entity-name="ReturnContactMech" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a ReturnContactMech</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateReturnContactMech" engine="simple"
+            location="component://order/script/org/ofbiz/order/order/OrderReturnServices.xml" invoke="updateReturnContactMech" auth="true" default-entity-name="ReturnContactMech">
+        <description>Update Return Contact Mech</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <attribute name="oldContactMechId" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteReturnContactMech" default-entity-name="ReturnContactMech" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a ReturnContactMech</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
     </service>
 </services>

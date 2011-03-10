@@ -76,7 +76,7 @@ public class UtilDateTime {
     }
 
     public static int getIntervalInDays(Timestamp from, Timestamp thru) {
-        return thru != null ? (int) (thru.getTime() - from.getTime()) / (24*60*60*1000) : 0;
+        return thru != null ? (int) ((thru.getTime() - from.getTime()) / (24*60*60*1000)) : 0;
     }
 
     public static Timestamp addDaysToTimestamp(Timestamp start, int days) {
@@ -132,10 +132,10 @@ public class UtilDateTime {
 
         StringBuilder sb = new StringBuilder();
         for (int i = parts.size() - 1; i >= 0 && count > 0; i--) {
-            if (sb.length() > 0) sb.append(", ");
             Double D = parts.get(i);
             double d = D.doubleValue();
             if (d < 1) continue;
+            if (sb.length() > 0) sb.append(", ");
             count--;
             sb.append(count == 0 ? df.format(d) : Integer.toString(D.intValue()));
             sb.append(' ');
