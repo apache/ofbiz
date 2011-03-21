@@ -27,6 +27,7 @@ import org.ofbiz.entity.condition.EntityFunction;
 import org.ofbiz.entity.condition.EntityOperator;
 
 andExprs = [];
+fieldValue = null;
 entityName = context.entityName;
 searchFields = context.searchFields;
 displayFields = context.displayFields ?: searchFields;
