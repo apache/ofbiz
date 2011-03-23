@@ -204,14 +204,14 @@ var FieldLookupPopup = Class.create({
     initialize: function (target, viewName, lookupWidth, lookupHeight, position, fadeBackground, args) {
         if (args != null) {
             var argString = "";
-            if (args.length > 7) {
-                for (var i = 7; i < args.length; i++) {
-                    if ((viewName.indexOf("?") == -1) && (i - 6) == 1) {
+            if (args.length > 6) {
+                for (var i = 6; i < args.length; i++) {
+                    if ((viewName.indexOf("?") == -1) && (i - 5) == 1) {
                         sep = "?";
                     } else {
                         sep = "&";
                     }
-                    argString += sep + "parm" + (i - 6) + "=" + args[i];
+                    argString += sep + "parm" + (i - 5) + "=" + args[i];
                 }
             viewName += argString;
             }
