@@ -1233,7 +1233,7 @@ under the License.
 
                 <set field="productId" from-field="parameters.productId"/>
                 <entity-one entity-name="Product" value-field="product" auto-field-map="true"/>
-                <set field="productName" from-field="product.productName" default-value="product.internalName"/>
+                <set field="productName" from-field="product.productName" default-value="${product.internalName}"/>
             </actions>
             <widgets>
                 <platform-specific>
