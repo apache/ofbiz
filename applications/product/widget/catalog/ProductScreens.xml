@@ -1730,7 +1730,8 @@ under the License.
                 <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
 
                 <set field="productId" from-field="parameters.productId"/>
-                <set field="productName" from-field="parameters.productName"/>
+                <entity-one entity-name="Product" value-field="product" auto-field-map="true"/>
+                <set field="productName" from-field="product.productName" default-value="product.internalName"/>
             </actions>
             <widgets>
                 <platform-specific>
