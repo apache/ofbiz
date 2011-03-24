@@ -48,7 +48,12 @@ under the License.
 </#macro>
 <#macro renderHyperlinkField></#macro>
 
-<#macro renderTextField name className alert value textSize maxlength id event action disabled clientAutocomplete ajaxUrl ajaxEnabled>
+<#macro renderTextField name className alert value textSize maxlength id event action disabled clientAutocomplete ajaxUrl ajaxEnabled mask>
+    <#if mask?has_content>
+      <script type="text/javascript">
+        jQuery(function($){jQuery("#${id}").mask("${mask}");});
+      </script>
+    </#if>
     <input type="text" name="${name?default("")?html}"<#t/>
     <@renderClass className alert />
     <#if value?has_content> value="${value}"</#if><#rt/>
@@ -95,7 +100,7 @@ under the License.
     </#if>
 </#macro>
 
-<#macro renderDateTimeField name className alert title value size maxlength id dateType shortDateInput timeDropdownParamName defaultDateTimeString localizedIconTitle timeDropdown timeHourName classString hour1 hour2 timeMinutesName minutes isTwelveHour ampmName amSelected pmSelected compositeType formName event="" action="" step="" timeValues="">
+<#macro renderDateTimeField name className alert title value size maxlength id dateType shortDateInput timeDropdownParamName defaultDateTimeString localizedIconTitle timeDropdown timeHourName classString hour1 hour2 timeMinutesName minutes isTwelveHour ampmName amSelected pmSelected compositeType formName mask="" event="" action="" step="" timeValues="">
   <span class="view-calendar">
       <input type="text" name="${name}" <#if event?has_content && action?has_content> ${event}="${action}"</#if> <@renderClass className alert /><#rt/>
         <#if title?has_content> title="${title}"</#if>
@@ -120,7 +125,9 @@ under the License.
                     buttonText: '',
                     buttonImageOnly: false,
                     dateFormat: 'yy-mm-dd'
-                  });
+                  })
+              <#if mask?has_content>.mask("${mask}")</#if>
+              ;
           </script>
       </#if>
       <#if timeDropdown?has_content && timeDropdown=="time-dropdown">

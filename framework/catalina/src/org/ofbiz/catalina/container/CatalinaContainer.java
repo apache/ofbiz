@@ -376,7 +376,7 @@ public class CatalinaContainer implements Container {
     }
 
     protected Cluster createCluster(ContainerConfig.Container.Property clusterProps, Host host) throws ContainerException {
-        String defaultValveFilter = ".*.gif;.*.js;.*.jpg;.*.htm;.*.html;.*.txt;";
+        String defaultValveFilter = ".*\\.gif;.*\\.js;.*\\.jpg;.*\\.htm;.*\\.html;.*\\.txt;.*\\.png;.*\\.css;.*\\.ico;.*\\.htc;";
 
         ReplicationValve clusterValve = new ReplicationValve();
         clusterValve.setFilter(ContainerConfig.getPropertyValue(clusterProps, "rep-valve-filter", defaultValveFilter));
@@ -632,7 +632,8 @@ public class CatalinaContainer implements Container {
             for (int i = webResourceInfos.size(); i > 0; i--) {
                 ComponentConfig.WebappInfo appInfo = webResourceInfos.get(i - 1);
                 String mount = appInfo.getContextRoot();
-                if (!loadedMounts.contains(mount)) {
+                List<String> virtualHosts = appInfo.getVirtualHosts();
+                if (!loadedMounts.contains(mount) || UtilValidate.isNotEmpty(virtualHosts)) {
                     createContext(appInfo);
                     loadedMounts.add(mount);
                 } else {

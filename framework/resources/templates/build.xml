@@ -9,8 +9,8 @@
 
     <property environment="env"/>
     <property name="desc" value="@component-resource-name@ Component"/>
-    <property name="name" value="ofbiz-@component-name@"/>
-    <property name="component-name" value="ofbiz-@component-name@"/>
+    <property name="name" value="@component-name@"/>
+    <property name="component-name" value="@component-name@"/>
     <property name="ofbiz.home.dir" value="../.."/>
     <property name="src.dir" value="src"/>
     <property name="dtd.dir" value="dtd"/>
@@ -38,6 +38,10 @@
     <!-- ================================================================= -->
 
     <target name="create-ofbiz-patches" description="Creates patch for framework, application, specialpurpose components">
+        <exec executable="svn" output="patches/root.patch" dir="${ofbiz.home.dir}">
+            <arg value="diff"/>
+            <arg value="--depth=files"/>
+        </exec>
         <exec executable="svn" output="patches/framework.patch" dir="${ofbiz.home.dir}">
             <arg value="diff"/>
             <arg value="framework"/>
@@ -50,9 +54,16 @@
             <arg value="diff"/>
             <arg value="specialpurpose"/>
         </exec>
+        <!-- this allow to work correctly on Windows machines without issues on Linux machines -->
+        <fixcrlf srcdir="patches" includes="**/*.patch" eol="crlf" />
     </target>
 
     <target name="revert-ofbiz-patches" description="Remove any local change in the files or any previously applied local patch.">
+        <exec executable="svn" dir="${ofbiz.home.dir}">
+            <arg value="revert"/>
+          <arg value="--depth=files"/>
+            <arg value="${ofbiz.home.dir}"/>
+        </exec>
         <exec executable="svn" dir="${ofbiz.home.dir}">
             <arg value="revert"/>
             <arg value="-R"/>
@@ -76,13 +87,14 @@
                 <or>
                     <not><isset property="component-name"/></not>
                     <not>
-                        <resourcecount count="3">
+                        <resourcecount count="3" when="gt">
                             <fileset dir="patches" includes="*.patch"/>
                         </resourcecount>
                     </not>
                 </or>
             </condition>
         </fail>
+        <patch strip="0" patchfile="patches/root.patch" dir="${ofbiz.home.dir}"/>
         <patch strip="0" patchfile="patches/framework.patch" dir="${ofbiz.home.dir}"/>
         <patch strip="0" patchfile="patches/applications.patch" dir="${ofbiz.home.dir}"/>
         <patch strip="0" patchfile="patches/specialpurpose.patch" dir="${ofbiz.home.dir}"/>
@@ -94,7 +106,7 @@
                 <or>
                     <not><isset property="component-name"/></not>
                     <not>
-                        <resourcecount count="3">
+                        <resourcecount count="3" when="gt">
                             <fileset dir="patches" includes="*.patch"/>
                         </resourcecount>
                     </not>

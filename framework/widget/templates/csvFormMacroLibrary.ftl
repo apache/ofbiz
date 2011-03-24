@@ -24,11 +24,11 @@ under the License.
 </#macro>
 <#macro renderHyperlinkField></#macro>
 
-<#macro renderTextField name className alert value textSize maxlength id event action disabled clientAutocomplete ajaxUrl ajaxEnabled><@renderField value /></#macro>
+<#macro renderTextField name className alert value textSize maxlength id event action disabled clientAutocomplete ajaxUrl ajaxEnabled mask><@renderField value /></#macro>
 
 <#macro renderTextareaField name className alert cols rows id readonly value visualEditorEnable language buttons><@renderField value /></#macro>
 
-<#macro renderDateTimeField name className alert title value size maxlength step timeValues id dateType shortDateInput timeDropdownParamName defaultDateTimeString localizedIconTitle timeDropdown timeHourName classString hour1 hour2 timeMinutesName minutes isTwelveHour ampmName amSelected pmSelected compositeType formName><@renderField value /></#macro>
+<#macro renderDateTimeField name className alert title value size maxlength step timeValues id dateType shortDateInput timeDropdownParamName defaultDateTimeString localizedIconTitle timeDropdown timeHourName classString hour1 hour2 timeMinutesName minutes isTwelveHour ampmName amSelected pmSelected compositeType formName mask><@renderField value /></#macro>
 
 <#macro renderDropDownField name className alert id multiple formName otherFieldName event action size firstInList currentValue explicitDescription allowEmpty options fieldName otherFieldName otherValue otherFieldSize dDFCurrent ajaxEnabled noCurrentSelectedKey ajaxOptions frequency minChars choices autoSelect partialSearch partialChars ignoreCase fullSearch>
 <#if currentValue?has_content && firstInList?has_content>
@@ -116,4 +116,4 @@ under the License.
 <#macro renderSortField style title linkUrl ajaxEnabled><@renderFieldTitle style title /></#macro>
 <#macro formatBoundaryComment boundaryType widgetType widgetName></#macro>
 <#macro makeHiddenFormLinkAnchor linkStyle hiddenFormName event action imgSrc description><@renderField description /></#macro>
-<#macro makeHyperlinkString linkStyle hiddenFormName event action imgSrc title alternate linkUrl targetWindow description confirmation><@renderField description /></#macro>
+<#macro makeHyperlinkString linkStyle hiddenFormName event action imgSrc title alternate linkUrl targetWindow description confirmation><@renderField description />,<#rt/></#macro>

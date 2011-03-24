@@ -109,6 +109,7 @@ under the License.
                     <!-- jQuery part -->
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/asmselect/jquery.asmselect-1.0.4a-beta.js" global="true"/>
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/datetimepicker/jquery-ui-timepicker-addon-0.9.3.min.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/jquery.maskedinput-1.2.2.min.js" global="true"/>
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/ui/js/jquery-ui-1.8.6.custom.min.js" global="true"/>
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/jeditable/jquery.jeditable.js" global="true"/>
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/validate/jquery.validate.min.js" global="true"/>
@@ -125,7 +126,8 @@ under the License.
                 <set field="localeJsFile" type="String" value="${groovy: fileNameComplete ? localeFileNameComplete : localeFileName}"/>
                 <set field="layoutSettings.javaScripts[+0]" value="${localeJsFile}" global="true"/>
 
-                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/jquery-1.4.2.min.js" global="true"/>
+                
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/jquery-1.5.1.min.js" global="true"/>
                     <!-- jQuery CSSs -->
                 <set field="layoutSettings.styleSheets[+0]" value="/images/jquery/plugins/asmselect/jquery.asmselect-1.0.4a-beta.css" global="true"/>
 
@@ -209,7 +211,29 @@ under the License.
                 <!-- render content area -->
                 <container style="contentarea">
                     <decorator-section-include name="pre-body"/>
-                    <decorator-section-include name="body"/>
+                    <container id="column-container">
+                        <section>
+                            <condition>
+                                <if-empty-section section-name="left-column"/>
+                            </condition>
+                            <widgets>
+                                <container id="content-main-section">
+                                    <decorator-section-include name="body"/>
+                                </container>
+                            </widgets>
+                            <fail-widgets>
+                                <container style="left">
+                                    <decorator-section-include name="left-column"/>
+                                </container>
+                                <container id="content-main-section" style="leftonly">
+                                    <container style="no-clear">
+                                        <decorator-section-include name="body"/>
+                                    </container>
+                                </container>
+                            </fail-widgets>
+                        </section>
+                        <container style="clear"></container>
+                    </container>
                 </container>
 
                 <!-- render footer -->
@@ -254,12 +278,6 @@ under the License.
                         <set field="layoutSettings.javaScripts[]" value="/images/fieldlookup.js" global="true"/>                        
                         
                         <set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC[0]" default-value="component://common/webcommon/includes/messages.ftl"/>
-                        <property-to-field  field="defaultCurrencyUomId" property="currency.uom.id.default" resource="general"/>
-                        <set field="defaultOrganizationPartyId" from-field="userPreferences.ORGANIZATION_PARTY" global="true"/>
-                        <entity-one entity-name="PartyAcctgPrefAndGroup" value-field="orgParty">
-                            <field-map field-name="partyId" from-field="defaultOrganizationPartyId"/>
-                        </entity-one>
-                        <set field="defaultOrganizationPartyCurrencyUomId" from-field="orgParty.baseCurrencyUomId" default-value="${defaultCurrencyUomId}" global="true"/>
                     </actions>
                     <widgets>
                         <section>
@@ -338,7 +356,7 @@ under the License.
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/ui/development-bundle/ui/jquery.ui.datepicker.js" global="true"/>
                 <set field="initialLocale" type="String" value="${groovy:parameters?.userLogin?.lastLocale?.substring(0,2)}" default-value="${groovy:locale.toString()?.substring(0,2)?:'en'}"/>
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/ui/development-bundle/ui/i18n/jquery.ui.datepicker-${initialLocale}.js" global="true"/>
-                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/jquery-1.4.2.min.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/jquery-1.5.1.min.js" global="true"/>
                     <!-- jQuery CSSs -->
                 <set field="layoutSettings.styleSheets[+0]" value="/images/jquery/plugins/asmselect/jquery.asmselect-1.0.4a-beta.css" global="true"/>
 

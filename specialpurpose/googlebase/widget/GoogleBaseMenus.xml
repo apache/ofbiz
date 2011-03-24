@@ -21,5 +21,6 @@ under the License.
     <menu name="GoogleBaseAppBar" title="${uiLabelMap.GoogleBaseApplication}" extends="CommonAppBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
         <menu-item name="GoogleBaseConfigs" title="${uiLabelMap.GoogleBaseConfiguration}"><link target="EditGoogleBaseConfigs"/></menu-item>
         <menu-item name="googlebase" title="${uiLabelMap.GoogleBaseExportToGoogle}"><link target="advancedsearch"/></menu-item>
+        <menu-item name="GooglebaseAutoUpdate" title="${uiLabelMap.GoogleBaseAutoUpdate}"><link target="GooglebaseAutoUpdate"/></menu-item>
     </menu>
 </menus>

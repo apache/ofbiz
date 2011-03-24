@@ -333,6 +333,7 @@ public class MacroFormRenderer implements FormStringRenderer {
         String name = modelFormField.getParameterName(context);
         String className = "";
         String alert = "false";
+        String mask = "";
         if (UtilValidate.isNotEmpty(modelFormField.getWidgetStyle())) {
             className = modelFormField.getWidgetStyle();
             if (modelFormField.shouldBeRed(context)) {
@@ -355,6 +356,10 @@ public class MacroFormRenderer implements FormStringRenderer {
         boolean ajaxEnabled = updateAreas != null && this.javaScriptEnabled;
         if (!textField.getClientAutocompleteField() || ajaxEnabled) {
             clientAutocomplete = "true";
+        }
+
+        if (UtilValidate.isNotEmpty(textField.getMask())) {
+            mask = textField.getMask();
         }
 
         String ajaxUrl = createAjaxParamsFromUpdateAreas(updateAreas, null, context);
@@ -393,7 +398,9 @@ public class MacroFormRenderer implements FormStringRenderer {
         sr.append(ajaxUrl);
         sr.append("\" ajaxEnabled=");
         sr.append(Boolean.toString(ajaxEnabled));
-        sr.append(" />");
+        sr.append(" mask=\"");
+        sr.append(mask);
+        sr.append("\" />");
         executeMacro(writer, sr.toString());
 
         ModelFormField.SubHyperlink subHyperlink = textField.getSubHyperlink();
@@ -474,6 +481,7 @@ public class MacroFormRenderer implements FormStringRenderer {
         String className = "";
         String alert = "false";
         String name = "";
+        String formattedMask = "";
         String event = modelFormField.getEvent();
         String action = modelFormField.getAction(context);
         if (UtilValidate.isNotEmpty(modelFormField.getWidgetStyle())) {
@@ -610,6 +618,16 @@ public class MacroFormRenderer implements FormStringRenderer {
                 ampmName = UtilHttp.makeCompositeParam(paramName, "ampm");
             }
         }
+        String mask = dateTimeField.getMask();
+        if ("Y".equals(mask)) {
+            if ("date".equals(dateTimeField.getType())) {
+                formattedMask = "9999-99-99";
+            } else if ("time".equals(dateTimeField.getType())) {
+                formattedMask = "99:99:99";
+            } else if ("timestamp".equals(dateTimeField.getType())) {
+                formattedMask = "9999-99-99 99:99:99";
+            }
+        }
         StringWriter sr = new StringWriter();
         sr.append("<@renderDateTimeField ");
         sr.append("name=\"");
@@ -676,6 +694,8 @@ public class MacroFormRenderer implements FormStringRenderer {
         sr.append(compositeType);
         sr.append("\" formName=\"");
         sr.append(formName);
+        sr.append("\" mask=\"");
+        sr.append(formattedMask);
         sr.append("\" />");
         executeMacro(writer, sr.toString());
         this.addAsterisks(writer, context, modelFormField);
@@ -2214,7 +2234,7 @@ public class MacroFormRenderer implements FormStringRenderer {
 
         String anchor = "";
         String paginateAnchor = modelForm.getPaginateTargetAnchor();
-        if (paginateAnchor != null) anchor = "#" + paginateAnchor;
+        if (UtilValidate.isNotEmpty(paginateAnchor)) anchor = "#" + paginateAnchor;
 
         // Create separate url path String and request parameters String,
         // add viewIndex/viewSize parameters to request parameter String

@@ -97,12 +97,13 @@ under the License.
                                         <or>
                                             <not><if-empty field="product"/></not>
                                             <not><if-empty field="parameters.bypassIfNoProduct"/></not>
+                                            <if-empty field="productId"/>
                                         </or>
                                     </condition>
                                     <widgets>
                                         <decorator-section-include name="body"/>
                                     </widgets>
-                            <fail-widgets>
+                                    <fail-widgets>
                                         <label style="h3">${uiLabelMap.ProductNoExistingProductsFound}</label>
                                     </fail-widgets>
                                 </section>
@@ -983,6 +984,7 @@ under the License.
                 <entity-one entity-name="Product" value-field="product"/>
                 <entity-one entity-name="ProductContent" value-field="productContent"/>
                 <script location="component://product/webapp/catalog/WEB-INF/actions/product/EditProductContentContent.groovy"/>
+                <script location="component://product/webapp/catalog/WEB-INF/actions/product/EditProductSEO.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonProductDecorator" location="${parameters.productDecoratorLocation}">

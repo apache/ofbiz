@@ -378,7 +378,6 @@ function ajaxSubmitFormUpdateAreas(form, areaCsvString) {
        type: "POST",
        url: jQuery("#" + form).attr("action"),
        data: jQuery("#" + form).serialize(),
-       dataType: "json",
        success: function(data) {
                updateFunction(data);
        }
@@ -410,6 +409,9 @@ function ajaxAutoCompleter(areaCsvString, showDescription, defaultMinLength, for
                     async: false,
                     data: {term : request.term},
                     success: function(data) {
+                    	// reset the autocomp field
+                    	autocomp = undefined;
+                    	
                         //update the result div
                         jQuery("#" + div + "_auto").html(data);
                         if (typeof autocomp != 'undefined') {
@@ -654,7 +656,8 @@ function ajaxInPlaceEditDisplayField(element, url, options) {
 
     jElement.editable(function(value, settings){
         // removes all line breaks from the value param, because the parseJSON Function can't work with line breaks
-        value = value.replace("\n", " ");
+    	value = value.replace(/\n/g, " ");
+
         var resultField = jQuery.parseJSON('{"' + settings.name + '":"' + value + '"}');
         // merge both parameter objects together
         jQuery.extend(settings.submitdata, resultField);

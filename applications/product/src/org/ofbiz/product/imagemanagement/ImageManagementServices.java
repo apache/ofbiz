@@ -347,7 +347,7 @@ public class ImageManagementServices {
         
         /* ImageProperties.xml */
         String imgPropertyFullPath = System.getProperty("ofbiz.home") + "/applications/product/config/ImageProperties.xml";
-        resultXMLMap.putAll((Map<String, Object>) ImageTransform.getXMLValue(imgPropertyFullPath, locale));
+        resultXMLMap.putAll(ImageTransform.getXMLValue(imgPropertyFullPath, locale));
         if (resultXMLMap.containsKey("responseMessage") && resultXMLMap.get("responseMessage").equals("success")) {
             imgPropertyMap.putAll(UtilGenerics.<Map<String, Map<String, String>>>cast(resultXMLMap.get("xml")));
         } else {
@@ -682,7 +682,7 @@ public class ImageManagementServices {
         FileItem imageFi = null;
         byte[] imageBytes = {};
         for (int i=0; i < lst.size(); i++) {
-            fi = (FileItem)lst.get(i);
+            fi = lst.get(i);
             String fieldName = fi.getFieldName();
             if (fi.isFormField()) {
                 String fieldStr = fi.getString();
@@ -921,6 +921,7 @@ public class ImageManagementServices {
     public static Map<String, Object> resizeImageOfProduct(DispatchContext dctx, Map<String, ? extends Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
         String imageServerPath = FlexibleStringExpander.expandString(UtilProperties.getPropertyValue("catalog", "image.management.path"), context);
         String imageServerUrl = FlexibleStringExpander.expandString(UtilProperties.getPropertyValue("catalog", "image.management.url"), context);
         String productId = (String) context.get("productId");
@@ -969,6 +970,11 @@ public class ImageManagementServices {
                         Debug.logError(e, module);
                         return ServiceUtil.returnError(e.getMessage());
                     }
+                }
+                else{
+                    String errMsg = UtilProperties.getMessage(resource, "ImageManagementErrorMessageResizeImage", locale);
+                    Debug.logError(errMsg, module);
+                    return ServiceUtil.returnError(errMsg);
                 }
             }
         } catch (Exception e) {
@@ -1047,7 +1053,7 @@ public class ImageManagementServices {
                 List<GenericValue> contentAssocList = delegator.findByAnd("ContentAssoc", UtilMisc.toMap("contentId", contentId, "contentAssocTypeId", "IMAGE_THUMBNAIL"));
                 if (contentAssocList.size() > 0) {
                     for (int i = 0; i < contentAssocList.size(); i++) {
-                        GenericValue contentAssoc = (GenericValue) contentAssocList.get(i);
+                        GenericValue contentAssoc = contentAssocList.get(i);
                         
                         List<GenericValue> dataResourceAssocList = delegator.findByAnd("ContentDataResourceView", UtilMisc.toMap("contentId", contentAssoc.get("contentIdTo")));
                         GenericValue dataResourceAssoc = EntityUtil.getFirst(dataResourceAssocList);

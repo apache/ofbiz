@@ -32,6 +32,10 @@ if (parameters.productStoreId) {
     productStoreId = ProductStoreWorker.getProductStoreId(request);
 }
 googleBaseConfigList = delegator.findList("GoogleBaseConfig", null, null, null, null, false);
+if (!productStoreId) {
+    googleBaseProductStore = EntityUtil.getFirst(googleBaseConfigList);
+    productStoreId = googleBaseProductStore.productStoreId;
+}
 if (productStoreId) {
     productStoreCatalogs = CatalogWorker.getStoreCatalogs(delegator, productStoreId);
     if (productStoreCatalogs) {

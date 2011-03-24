@@ -24,10 +24,6 @@ under the License.
         <section>
             <actions>
                 <property-map resource="CommonExtUiLabels" map-name="uiLabelMap" global="true"/>
-                <service service-name="getUserPreferenceGroup" result-map="prefResult">
-                    <field-map field-name="userPrefGroupTypeId" value="GLOBAL_PREFERENCES"/>
-                </service>
-                <set field="userPreferences" from-field="prefResult.userPrefMap" global="true"/>
                 <entity-one entity-name="PartyNameView" value-field="partyNameView">
                     <field-map field-name="partyId" from-field="userLogin.partyId"/>
                 </entity-one>
@@ -47,6 +43,11 @@ under the License.
                 <set field="layoutSettings.middleTopLink2" value="${linkStart}${resultNote.lastSystemInfoNote2.moreInfoPortletId}&amp;amp;id=${resultNote.lastSystemInfoNote2.moreInfoItemId}"/>
                 <set field="layoutSettings.middleTopMessage3" value="${groovy:resultNote.lastSystemInfoNote3!=null?resultNote.lastSystemInfoNote3.noteDateTime.toString().substring(0,16) + &quot; &quot; + resultNote.lastSystemInfoNote3.noteInfo:&quot;&quot;}"/>
                 <set field="layoutSettings.middleTopLink3" value="${linkStart}${resultNote.lastSystemInfoNote3.moreInfoPortletId}&amp;amp;id=${resultNote.lastSystemInfoNote3.moreInfoItemId}"/>
+                <!-- Help link actions -->
+                <set field="helpTopic" value="${groovy: webSiteId + '_' + requestAttributes._CURRENT_VIEW_}"/>
+                <entity-and list="pageAvail" entity-name="ContentAssoc">
+                    <field-map field-name="mapKey" from-field="helpTopic"/>
+                </entity-and>
             </actions>
             <widgets>
                 <section>
@@ -77,36 +78,7 @@ under the License.
                     </actions>
                     <widgets/>
                 </section>
-                <decorator-screen name="GlobalDecorator" location="component://common/widget/CommonScreens.xml">
-                    <decorator-section name="pre-body">
-                        <decorator-section-include name="pre-body"/>
-                    </decorator-section>
-                    <decorator-section name="body">
-                        <container id="column-container">
-                            <section>
-                                <condition>
-                                    <if-empty-section section-name="left-column"/>
-                                </condition>
-                                <widgets>
-                                    <container id="content-main-section">
-                                        <decorator-section-include name="body"/>
-                                    </container>
-                                </widgets>
-                                <fail-widgets>
-                                    <container style="left">
-                                        <decorator-section-include name="left-column"/>
-                                    </container>
-                                    <container id="content-main-section" style="leftonly">
-                                        <container style="no-clear">
-                                            <decorator-section-include name="body"/>
-                                        </container>
-                                    </container>
-                                </fail-widgets>
-                            </section>
-                            <container style="clear"></container>
-                        </container>
-                    </decorator-section>
-                </decorator-screen>
+                <include-screen name="GlobalDecorator" location="component://common/widget/CommonScreens.xml"/>
             </widgets>
         </section>
     </screen>
