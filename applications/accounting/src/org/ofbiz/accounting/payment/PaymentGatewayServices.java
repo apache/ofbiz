@@ -2323,6 +2323,7 @@ public class PaymentGatewayServices {
             Debug.logError(e, "Problem refunding payment through processor", module);
             return ServiceUtil.returnError("Refund processor problems; see logs");
         }
+        refundResponse.putAll(ServiceUtil.returnSuccess("Payment #" + refundResponse.get("paymentId") +" is refunded successfully with amount " + refundResponse.get("refundAmount") +" for manual transaction."));
         return refundResponse;
     }
 
