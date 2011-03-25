@@ -523,8 +523,9 @@ under the License.
         <section>
             <actions>
                 <entity-one entity-name="PortalPage" value-field="portalPage" use-cache="true"/>
+                <set field="orderByList" value="columnSeqId" type="List"/>
                 <get-related value-field="portalPage" relation-name="PortalPageColumn" 
-                             order-by-list="columnSeqId" list="portalPageColumns" use-cache="true"/>
+                             order-by-list="orderByList" list="portalPageColumns" use-cache="true"/>
                 <entity-and entity-name="PortalPagePortletView" list="portalPagePortlets" use-cache="true">
                     <field-map field-name="portalPageId" from-field="portalPage.portalPageId"/>
                     <order-by field-name="columnSeqId"/>
