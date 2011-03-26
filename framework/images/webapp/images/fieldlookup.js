@@ -122,7 +122,7 @@ function lookup_popup2(view_name) {
     if (this.args != null) {
         if (this.args.length > 2) {
             for (var i = 2; i < this.args.length; i++) {
-                argString += "&parm" + (i - 2) + "=" + this.args[i];
+                argString += "&parm" + (i - 3) + "=" + this.args[i];
             }
         }
     }
@@ -206,12 +206,12 @@ var FieldLookupPopup = Class.create({
             var argString = "";
             if (args.length > 6) {
                 for (var i = 6; i < args.length; i++) {
-                    if ((viewName.indexOf("?") == -1) && (i - 5) == 1) {
+                    if ((viewName.indexOf("?") == -1) && (i - 6) == 0) {
                         sep = "?";
                     } else {
                         sep = "&";
                     }
-                    argString += sep + "parm" + (i - 5) + "=" + args[i];
+                    argString += sep + "parm" + (i - 6) + "=" + args[i];
                 }
             viewName += argString;
             }
