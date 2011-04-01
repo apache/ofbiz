@@ -312,7 +312,7 @@ under the License.
             </widgets>
         </section>
     </screen>
-    
+
     <screen name="ViewProjectTask">
         <section>
             <actions>
@@ -343,7 +343,7 @@ under the License.
             </widgets>
         </section>
     </screen>
-    
+
     <screen name="TaskView">
         <section>
             <actions>
@@ -515,6 +515,7 @@ under the License.
                         <section>
                             <condition>
                                 <or>
+                                    <if-has-permission permission="PROJECTMGR_ADMIN"/>
                                     <if-has-permission permission="PROJECTMGR_ROLE_ADMIN"/>
                                     <if-has-permission permission="PROJECTMGR_ROLE_TASK_CREATE"/>
                                     <if-has-permission permission="PROJECTMGR_ROLE_UPDATE"/>
