@@ -81,13 +81,15 @@ if (productId) {
         context.put("metaDescription", contentWrapper.get("DESCRIPTION"));
 
         keywords = [];
-        keywords.add(product.productName);
+        keywords.add(contentWrapper.get("PRODUCT_NAME"));
         keywords.add(catalogName);
         members = delegator.findByAndCache("ProductCategoryMember", [productId : productId]);
         members.each { member ->
             category = member.getRelatedOneCache("ProductCategory");
-            if (category.description) {
-                keywords.add(category.description);
+            categoryContentWrapper = new CategoryContentWrapper(category, request);
+            categoryDescription = categoryContentWrapper.DESCRIPTION;
+            if (categoryDescription) {
+                keywords.add(categoryDescription);
             }
         }
         context.metaKeywords = StringUtil.join(keywords, ", ");
