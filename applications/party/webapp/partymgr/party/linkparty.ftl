@@ -76,6 +76,9 @@ under the License.
               <span class="label">${uiLabelMap.CommonTo}</span>
               <@htmlTemplate.lookupField value="${partyIdTo?if_exists}" formName="linkpartycnf" name="partyIdTo" id="partyIdTo" fieldFormName="LookupPartyName"/>
             </div>
+            <div>
+              <input type="submit" class="smallSubmit" value="${uiLabelMap.CommonConfirm}" />
+            </div>
           </form>
         </#if>
     </div>
