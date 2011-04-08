@@ -27,7 +27,7 @@ under the License.
     <property name="memory.initial.param" value="-Xms128M"/>
     <property name="memory.max.param" value="-Xmx512M"/>
     <property name="pos.memory.max.param" value="-Xmx512M"/>
-    <property name="memory.maxpermsize.param" value="-XX:MaxPermSize=128m"/>
+    <property name="memory.maxpermsize.param" value="-XX:MaxPermSize=512m"/>
 
     <available file="applications/build.xml" property="applications.present"/>
     <available file="specialpurpose/build.xml" property="specialpurpose.present"/>
@@ -157,11 +157,11 @@ under the License.
             </fileset>
         </subant>
 
-        <subant target="clean"  failonerror="${specialpurpose.present}" 
+        <subant target="clean"  failonerror="${specialpurpose.present}"
           description="Use failonerror=false in case the specialpurpose directory is not there">
             <filelist dir="." files="specialpurpose/build.xml"/>
         </subant>
-        <subant target="clean" failonerror="${applications.present}" 
+        <subant target="clean" failonerror="${applications.present}"
           description="Use failonerror=false in case the applications directory is not there">
             <filelist dir="." files="applications/build.xml"/>
         </subant>
@@ -283,7 +283,7 @@ under the License.
     <!-- WebSite Targets                                                    -->
     <!-- ================================================================== -->
 
-    <target name="build-website" 
+    <target name="build-website"
             description="For committers : Update dtds and JavaDoc from OFBiz instance to site">
         <antcall target="copy-dtds"/>
         <antcall target="docs"/>
@@ -335,7 +335,7 @@ under the License.
     <!-- Start OFBiz                                                        -->
     <!-- ================================================================== -->
 
-    <target name="run" 
+    <target name="run"
             description="This will start OFBiz">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
@@ -343,7 +343,7 @@ under the License.
             <jvmarg value="${memory.maxpermsize.param}"/>
         </java>
     </target>
-    <target name="run-pos" 
+    <target name="run-pos"
             description="Start the POS (Point of sale) system">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
@@ -415,7 +415,7 @@ under the License.
         </java>
     </target>
     <target name="run-install-readers" depends="build"
-            description="This loads data using the command line argument 'data-readers' that takes a comma separated list of readers (seed, seed-initial, demo, ext, ext-test, ext-demo)">
+            description='This loads data using the command line argument data-readers that takes a comma separated list of readers (seed, seed-initial, demo, ext, ext-test, ext-demo). On Windows XP (at least) you need top wrap the parameters in double-quotes. For instance: ant run-install-readers "-Ddata-readers=seed,seed-initial,ext"'>
         <java jar="ofbiz.jar" fork="true" >
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -436,16 +436,16 @@ under the License.
         </java>
     </target>
 
-    <!-- ================================= 
-          target: run-create-tenant        
+    <!-- =================================
+          target: run-create-tenant
          ================================= -->
-    <target name="run-create-tenant" 
+    <target name="run-create-tenant"
         depends="create-tenant-on-Derby,create-tenant-on-MySQL,create-tenant-on-Oracle,create-tenant-on-PostgreSQL"
         description="Creates a new tenant in your environment, creates the delegator, loads initial data with admin-user and password (needs multitenant=Y in general.properties)">
         <tstamp/>
     </target>
 
-    <!-- description="This creates entity Tenant and TenantDataSource in default, installs data in the delegator and creates the admin-user and password for the tenant"  
+    <!-- description="This creates entity Tenant and TenantDataSource in default, installs data in the delegator and creates the admin-user and password for the tenant"
         sub-target of run-create-tenant, can't used alone => no description, to not clutter "ant -p" -->
     <target name="get-tenant-data">
         <input addproperty="tenantId" message="Enter Id for the tenant: "/>
@@ -473,7 +473,7 @@ under the License.
         </condition>
         <antcall target="tenant-data-entry"/>
     </target>
-    <!-- description="Creates tenant data and instance"  
+    <!-- description="Creates tenant data and instance"
         sub-target of run-create-tenant, can't used alone => no description, to not clutter "ant -p" -->
     <target name="create-tenant-on-Derby" depends="get-tenant-data" if="isDerby">
         <echo message="Installing on Derby"/>
@@ -493,7 +493,7 @@ under the License.
             <param name="delegatorId" value="default#${tenantId}"/>
         </antcall>
     </target>
-    <!-- description="Creates tenant data and instance. Don't forget db driver(s) and already created DBs in function of the entityengine.xml datasource-names"  
+    <!-- description="Creates tenant data and instance. Don't forget db driver(s) and already created DBs in function of the entityengine.xml datasource-names"
         sub-target of run-create-tenant, can't used alone => no description, to not clutter "ant -p" -->
     <target name="create-tenant-on-MySQL" depends="get-tenant-data" if="isMySQL">
         <echo message="Installing on MySQL"/>
@@ -516,7 +516,7 @@ under the License.
             <param name="delegatorId" value="default#${tenantId}"/>
         </antcall>
     </target>
-    <!-- description="Creates tenant data and instance. Don't forget db driver(s) and already created DBs in function of the entityengine.xml datasource-names"  
+    <!-- description="Creates tenant data and instance. Don't forget db driver(s) and already created DBs in function of the entityengine.xml datasource-names"
         sub-target of run-create-tenant, can't used alone => no description, to not clutter "ant -p" -->
     <target name="create-tenant-on-Oracle" depends="get-tenant-data" if="isOracle">
         <echo message="Installing on Oracle"/>
@@ -539,7 +539,7 @@ under the License.
             <param name="delegatorId" value="default#${tenantId}"/>
         </antcall>
     </target>
-    <!-- description="Creates tenant data and instance. Don't forget db driver(s) and already created DBs in function of the entityengine.xml datasource-names"  
+    <!-- description="Creates tenant data and instance. Don't forget db driver(s) and already created DBs in function of the entityengine.xml datasource-names"
         sub-target of run-create-tenant, can't used alone => no description, to not clutter "ant -p" -->
     <target name="create-tenant-on-PostgreSQL" depends="get-tenant-data" if="isPostgreSQL">
         <echo message="Installing on PostgreSQL"/>
@@ -577,7 +577,7 @@ under the License.
         <echo message="Please make sure that the driver of the platform is installed and that the databases have been created (Check names just above)"/>
         <echo>------------------------------------</echo>
         <input addproperty="continueYN" message="Continue Y or N" validargs="N,n,Y,y"/>
-        
+
     </target>
     <target name="load-tenant-admin-user-login"
         description="Creates the admin login for the tenant with admin privileges, and a temporay password equal to 'ofbiz'. Password must be changed on first login">
@@ -650,7 +650,7 @@ under the License.
         <antcall target="load-admin-user-login"/>
     </target>
 
-    <target name="run-debug" depends="build" 
+    <target name="run-debug" depends="build"
             description="Starts OFBiz in debugging mode">
         <java jar="ofbiz.jar"  fork="true">
             <jvmarg value="${memory.initial.param}"/>
@@ -663,12 +663,13 @@ under the License.
         </java>
     </target>
     <target name="run-tests" depends="download-cobertura, build"
-          description="Run OFBiz default tests, execute ant run-install before and see results in runtime/logs/test-results/html/all-tests.html">
+          description="Run OFBiz default tests, execute ant run-install before and see results in runtime/logs/test-results/html/all-tests.html. You will need a valid Internet connection to download cobertura">
         <java jar="ofbiz.jar" fork="true" resultproperty="test.result">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
             <jvmarg value="${memory.maxpermsize.param}"/>
             <arg value="test"/>
+            <env key="LC_ALL" value="C"/>
         </java>
         <mkdir dir="runtime/logs/test-results/html"/>
         <junitreport todir="runtime/logs/test-results">
@@ -697,6 +698,7 @@ under the License.
             <arg value="testlist"/>
             <arg file="runtime/test-list-build.xml"/>
             <arg value="-ant"/>
+            <env key="LC_ALL" value="C"/>
         </java>
     </target>
     <target name="run-single-test" depends="download-cobertura, build"
@@ -708,6 +710,7 @@ under the License.
             <arg value="test"/>
             <arg value="-component=${test.component}"/>
             <arg value="-case=${test.case}"/>
+            <env key="LC_ALL" value="C"/>
         </java>
         <delete dir="runtime/logs/test-results/${test.component}-${test.case}"/>
         <mkdir dir="runtime/logs/test-results/${test.component}-${test.case}"/>
@@ -723,7 +726,7 @@ under the License.
         </fail>
     </target>
     <target name="run-single-test-suite" depends="download-cobertura, build"
-            description="Run a single test suite, syntax eg: ant run-single-test-suite -Dtest.component=mycomponent -Dtest.suiteName=mytests">      
+            description="Run a single test suite, syntax eg: ant run-single-test-suite -Dtest.component=mycomponent -Dtest.suiteName=mytests">
         <java jar="ofbiz.jar" fork="true" resultproperty="test.result">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -731,6 +734,7 @@ under the License.
             <arg value="test"/>
             <arg value="-component=${test.component}"/>
             <arg value="-suitename=${test.suiteName}"/>
+            <env key="LC_ALL" value="C"/>
         </java>
         <fail message="Test run was unsuccessful">
             <condition>
@@ -740,13 +744,14 @@ under the License.
             </condition>
         </fail>
     </target>
-    <target name="run-test-list" depends="_setup-separated-test-run" 
+    <target name="run-test-list" depends="_setup-separated-test-run"
             description="Run all configured tests, stopping/starting ofbiz between each test">
         <delete dir="runtime/logs/test-results"/>
         <ant antfile="runtime/test-list-build.xml" target="all-tests"/>
     </target>
 
-    <target name="cobertura-report">
+    <target name="cobertura-report"
+            description="generates a HTML code coverage report with cobertura, can be found in runtime/logs/cobertura-report">
         <delete dir="runtime/logs/cobertura-report"/>
         <mkdir dir="runtime/logs/cobertura-report"/>
         <taskdef resource="tasks.properties">
@@ -773,38 +778,65 @@ under the License.
         </cobertura-report>
     </target>
 
-    <target name="sonar" depends="download-sonar-ant-task, sonar-init"
+    <target name="cobertura-report-xml"
+            description="generates a XML file from the cobertura report, this will be use by sonar">
+        <delete dir="runtime/logs/cobertura-report"/>
+        <mkdir dir="runtime/logs/cobertura-report"/>
+        <taskdef resource="tasks.properties">
+            <classpath>
+                <fileset dir="framework/base/lib">
+                    <include name="cobertura-1.9.3.jar" />
+                    <include name="log4j-1.2.15.jar" />
+                    <include name="scripting/asm*.jar" />
+                </fileset>
+            </classpath>
+        </taskdef>
+        <cobertura-merge datafile="runtime/logs/cobertura.dat">
+            <fileset dir="runtime/logs">
+                <include name="cobertura-base.dat"/>
+                <include name="cobertura-components.dat"/>
+            </fileset>
+        </cobertura-merge>
+        <cobertura-report format="xml" datafile="runtime/logs/cobertura.dat" destdir="runtime/logs/cobertura-report">
+            <dirset dir=".">
+                <include name="*/*/src"/>
+            </dirset>
+            <include name="**/*.java"/>
+        </cobertura-report>
+    </target>
+
+    <target name="sonar" depends="download-sonar-ant-task, sonar-init, cobertura-report-xml"
             description="Sonar code analysis. You need a Sonar instance running to use it. More info on http://www.sonarsource.org/">
         <exec executable="svn" dir="." output="runtime/svninfo_tmp.xml">
             <arg value="info"/>
             <arg value="--xml"/>
         </exec>
         <xmlproperty file="runtime/svninfo_tmp.xml"/>
-        <sonar:sonar workDir="." key="org.apache:ofbiz" version="${info.entry.commit(revision)}">
+        <sonar:sonar workDir="runtime/sonar" key="org.apache:ofbiz" version="${info.entry.commit(revision)}">
             <sources>
                 <!--framework-->
-                <path location="applications/appserver/src" />
-                <path location="applications/base/src" />
-                <path location="applications/bi/src" />
-                <path location="applications/catalina/src" />
-                <path location="applications/common/src" />
-                <path location="applications/datafile/src" />
-                <path location="applications/entity/src" />
-                <path location="applications/entityext/src" />
-                <path location="applications/example/src" />
-                <path location="applications/geronimo/src" />
-                <path location="applications/guiapp/src" />
-                <path location="applications/jetty/src" />
-                <path location="applications/minilang/src" />
-                <path location="applications/security/src" />
-                <path location="applications/service/src" />
-                <path location="applications/sql/src" />
-                <path location="applications/start/src" />
-                <path location="applications/testtools/src" />
-                <path location="applications/webapp/src" />
-                <path location="applications/webslinger/src" />
-                <path location="applications/webtools/src" />
-                <path location="applications/widget/src" />
+                <path location="framework/appserver/src" />
+                <path location="framework/base/src" />
+                <path location="framework/bi/src" />
+                <path location="framework/catalina/src" />
+                <path location="framework/common/src" />
+                <path location="framework/datafile/src" />
+                <path location="framework/entity/src" />
+                <path location="framework/entityext/src" />
+                <path location="framework/example/src" />
+                <path location="framework/geronimo/src" />
+                <path location="framework/guiapp/src" />
+                <path location="framework/jetty/src" />
+                <path location="framework/minilang/src" />
+                <path location="framework/security/src" />
+                <path location="framework/service/src" />
+                <path location="framework/sql/src" />
+                <path location="framework/start/src" />
+                <path location="framework/testtools/src" />
+                <path location="framework/webapp/src" />
+                <path location="framework/webslinger/src" />
+                <path location="framework/webtools/src" />
+                <path location="framework/widget/src" />
                 <!--applications-->
                 <path location="applications/accounting/src" />
                 <path location="applications/commonext/src" />
@@ -828,7 +860,10 @@ under the License.
                 <path location="specialpurpose/oagis/src" />
                 <path location="specialpurpose/pos/src" />
             </sources>
-            <property key="sonar.dynamicAnalysis" value="false" />
+            <property key="sonar.dynamicAnalysis" value="reuseReports" />
+            <property key="sonar.cobertura.reportPath" value="runtime/logs/cobertura-report/coverage.xml"/>
+            <property key="sonar.java.source" value="1.6" />
+            <property key="sonar.java.target" value="1.6" />
         </sonar:sonar>
     </target>
 
@@ -851,7 +886,7 @@ under the License.
     <!-- ================================================================== -->
     <!-- Create New Component. This target will create basic directory structure for an OFBiz component in hot-deploy directory. -->
     <!-- ================================================================== -->
-    
+
     <target name="create-component"
             description="Creates the layout of an OFBiz component in the hot-deploy folder.">
         <input addproperty="component-name" message="Component name: (e.g. mycomponent) [Mandatory]"/>

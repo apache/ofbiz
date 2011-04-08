@@ -38,6 +38,7 @@ under the License.
               <li><a href="javascript:document.OrderApproveOrder.submit()">${uiLabelMap.OrderApproveOrder}</a>
               <form name="OrderApproveOrder" method="post" action="<@ofbizUrl>changeOrderStatus/orderview</@ofbizUrl>">
                 <input type="hidden" name="statusId" value="ORDER_APPROVED"/>
+                <input type="hidden" name="newStatusId" value="ORDER_APPROVED"/>
                 <input type="hidden" name="setItemStatus" value="Y"/>
                 <input type="hidden" name="workEffortId" value="${workEffortId?if_exists}"/>
                 <input type="hidden" name="orderId" value="${orderId?if_exists}"/>
@@ -240,7 +241,7 @@ under the License.
                   <td align="right" valign="top" width="15%" class="label">&nbsp;${uiLabelMap.FormFieldTitle_priority}</td>
                   <td width="5%">&nbsp;</td>
                   <td valign="top" width="80%">
-                     <form action="setOrderReservationPriority" method="post" name="setOrderReservationPriority">
+                     <form name="setOrderReservationPriority" method="post" action="<@ofbizUrl>setOrderReservationPriority</@ofbizUrl>">
                      <input type = "hidden" name="orderId" value="${orderId}"/>
                     <select name="priority">
                       <option value="1" <#if (orderHeader.priority)?if_exists == "1">selected="selected" </#if>>${uiLabelMap.CommonHigh}</option>

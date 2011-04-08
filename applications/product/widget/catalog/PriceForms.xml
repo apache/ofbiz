@@ -58,8 +58,14 @@
         <field name="productPriceRuleId"><hidden/></field><!-- Users don't need this information there, the screen is already sufficiently complex! -->
         <field name="ruleName" title="${uiLabelMap.CommonName}"><text size="25"/></field>
         <field name="description" title="${uiLabelMap.CommonDescription}"><text size="60"/></field>
+        <field name="isSale" title="${uiLabelMap.ProductSaleRule}">
+            <drop-down>
+                <option key="Y" description="${uiLabelMap.CommonY}"/>
+                <option key="N" description="${uiLabelMap.CommonN}"/>
+            </drop-down>
+        </field>
         <field name="fromDate" title="${uiLabelMap.CommonFromDate}"><date-time type="timestamp"/></field>
-        <field name="thruDate" title="${uiLabelMap.CommonThruDate}"><date-time type="timestamp"/></field>        
+        <field name="thruDate" title="${uiLabelMap.CommonThruDate}"><date-time type="timestamp"/></field>
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit/></field>        
         <field use-when="org.ofbiz.base.util.UtilValidate.isEmpty(productPriceConds) &amp;&amp; org.ofbiz.base.util.UtilValidate.isEmpty(productPriceActions)"
             name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
@@ -74,12 +80,16 @@
         <field name="productPriceCondSeqId"><hidden/></field><!-- Users don't need this information there, the screen is already sufficiently complex! -->
         <field name="inputParamEnumId" title="${uiLabelMap.ProductInput}">
             <drop-down allow-empty="false" current="selected">
-                <list-options list-name="inputParamEnums" key-name="enumId" description="${description}"/>                
+                <entity-options entity-name="Enumeration" description="${description}" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="PROD_PRICE_IN_PARAM"/>
+                </entity-options>
             </drop-down>
         </field>        
         <field name="operatorEnumId" title="${uiLabelMap.ProductOperator}">
             <drop-down allow-empty="false" current="selected">
-                <list-options list-name="condOperEnums" key-name="enumId" description="${description}"/>                
+                <entity-options entity-name="Enumeration" description="${description}" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="PROD_PRICE_COND"/>
+                </entity-options>
             </drop-down>
         </field>        
         <field use-when="&quot;PRIP_QUANTITY&quot;.equals(inputParamEnumId) || &quot;PRIP_LIST_PRICE&quot;.equals(inputParamEnumId)" 
@@ -104,15 +114,19 @@
     <form name="AddProductPriceRulesCond" type="list" target="createProductPriceCond" title="" list-name="productPriceCondAdd" 
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar" separate-columns="true">
         <field name="productPriceRuleId"><hidden/></field><!-- Users don't need this information there, the screen is already sufficiently complex! -->
-        <field name="new"><display default-value="${uiLabelMap.ProductPriceRulesNewCond}"/></field>
+        <field name="new" title="${uiLabelMap.CommonNew}"><display default-value="${uiLabelMap.ProductPriceRulesNewCond}"/></field>
         <field name="inputParamEnumId" title="${uiLabelMap.ProductInput}">
             <drop-down allow-empty="false">
-                <list-options list-name="inputParamEnums" key-name="enumId" description="${description}"/>                
+                <entity-options entity-name="Enumeration" description="${description}" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="PROD_PRICE_IN_PARAM"/>
+                </entity-options>
             </drop-down>
         </field>        
         <field name="operatorEnumId" title="${uiLabelMap.ProductOperator}">
             <drop-down allow-empty="false">
-                <list-options list-name="condOperEnums" key-name="enumId" description="${description}"/>                
+                <entity-options entity-name="Enumeration" description="${description}" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="PROD_PRICE_COND"/>
+                </entity-options>
             </drop-down>
         </field>        
         <field name="condValueInput" title="${uiLabelMap.ProductValue}"><text size="10"/></field>
@@ -144,10 +158,10 @@
     <form name="AddProductPriceRulesAction" type="list" target="createProductPriceAction" title="" list-name="productPriceActionAdd" 
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar" separate-columns="true">            
         <field name="productPriceRuleId"><hidden/></field><!-- Users don't need this information there, the screen is already sufficiently complex! -->
-        <field name="new"><display default-value="${uiLabelMap.ProductPriceRulesNewAction}"/></field>
+        <field name="new" title="${uiLabelMap.CommonNew}"><display default-value="${uiLabelMap.ProductPriceRulesNewAction}"/></field>
         <field name="productPriceActionTypeId" title="${uiLabelMap.ProductActionType}">
             <drop-down allow-empty="false">
-                <list-options list-name="productPriceActionTypes" key-name="productPriceActionTypeId" description="${description}"/>                
+                <entity-options entity-name="ProductPriceActionType" description="${description}" key-field-name="productPriceActionTypeId"/>
             </drop-down>
         </field>        
         <field name="amount" title="${uiLabelMap.ProductValue}"><text/></field>

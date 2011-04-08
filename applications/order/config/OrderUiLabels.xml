@@ -1858,6 +1858,7 @@
     </property>
     <property key="OrderAssociatedProducts">
         <value xml:lang="en">Associated Products</value>
+        <value xml:lang="fr">Produits associés</value>
         <value xml:lang="pt_BR">Produtos relacionado</value>
         <value xml:lang="zh_TW">關連的產品</value>
     </property>
@@ -4261,7 +4262,7 @@
         <value xml:lang="de">Ist ein Aktionsartikel</value>
         <value xml:lang="en">Is A Promotional Item</value>
         <value xml:lang="es">es un ítem promocional</value>
-        <value xml:lang="fr">C'est un article en prommotion</value>
+        <value xml:lang="fr">C'est un article en promotion</value>
         <value xml:lang="hi_IN">एक प्रोत्साहन सामान है</value>
         <value xml:lang="it">E' una Voce Promozionale</value>
         <value xml:lang="ja">Is a Promotional Item</value>

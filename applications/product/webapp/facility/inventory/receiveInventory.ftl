@@ -207,7 +207,7 @@ under the License.
                     <#else>
                       <#assign LookupFacilityLocationView="LookupFacilityLocation">
                     </#if>
-                    <@htmlTemplate.lookupField formName="selectAllForm" name="locationSeqId_o_${rowCount}" id="locationSeqId_o_${rowCount}" fieldFormName="${LookupFacilityLocationView}"/>
+                    <@htmlTemplate.lookupField formName="selectAllForm" name="locationSeqId" id="locationSeqId" fieldFormName="${LookupFacilityLocationView}"/>
                   </#if>
                 </td>
               </tr>
@@ -459,7 +459,7 @@ under the License.
                           <td>&nbsp;</td>
                           <td align="right">${uiLabelMap.ProductFacilityOwner}:</td>
                           <td align="right"><input type="text" name="ownerPartyId_o_${rowCount}" size="20" maxlength="20" value="${facility.ownerPartyId}"/></td>
-                          <#if currencyUomId != orderCurrencyUomId>
+                          <#if currencyUomId?default('') != orderCurrencyUomId?default('')>
                             <td>${uiLabelMap.ProductPerUnitPriceOrder}:</td>
                             <td>
                               <input type="hidden" name="orderCurrencyUomId_o_${rowCount}" value="${orderCurrencyUomId?if_exists}" />

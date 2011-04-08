@@ -37,7 +37,11 @@
     <!-- Targets to create  patch files                                    -->
     <!-- ================================================================= -->
 
-    <target name="create-ofbiz-patches" description="Creates patch for framework, application, specialpurpose components">
+    <target name="create-ofbiz-patches" description="Creates patches for root, framework, application and specialpurpose components">
+        <exec executable="svn" output="patches/root.patch" dir="${ofbiz.home.dir}">
+            <arg value="diff"/>
+            <arg value="--depth=files"/>
+        </exec>
         <exec executable="svn" output="patches/root.patch" dir="${ofbiz.home.dir}">
             <arg value="diff"/>
             <arg value="--depth=files"/>
@@ -81,7 +85,7 @@
         </exec>
     </target>
 
-    <target name="apply-ofbiz-patches" description="Apply the patch to framework, application, specialpurpose components.">
+    <target name="apply-ofbiz-patches" description="Apply the patches to root, framework, application and specialpurpose components.">
         <fail message="Patch files not found.">
             <condition>
                 <or>
@@ -98,6 +102,9 @@
         <patch strip="0" patchfile="patches/framework.patch" dir="${ofbiz.home.dir}"/>
         <patch strip="0" patchfile="patches/applications.patch" dir="${ofbiz.home.dir}"/>
         <patch strip="0" patchfile="patches/specialpurpose.patch" dir="${ofbiz.home.dir}"/>
+        <delete>          
+            <fileset dir="${ofbiz.home.dir}" includes="**/*.rej"/>
+        </delete>
     </target>
 
     <target name="reapply-ofbiz-patches" description="First removes any previously applied patch and then applies the new patch">

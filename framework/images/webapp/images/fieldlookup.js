@@ -121,7 +121,7 @@ function lookup_popup2(view_name) {
     if (this.args != null) {
         if (this.args.length > 2) {
             for (var i = 2; i < this.args.length; i++) {
-                argString += "&parm" + (i - 2) + "=" + this.args[i];
+                argString += "&parm" + (i - 3) + "=" + this.args[i];
             }
         }
     }
