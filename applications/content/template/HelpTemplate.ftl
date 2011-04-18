@@ -35,7 +35,7 @@ under the License.
     <#elseif child?node_type = 'element' && child?node_name = "mediaobject">
       <@mediaobject node=child/>
     <#elseif child?node_type = 'element' && child?node_name = "emphasis">
-      <span class="${child["role"]}">${child}</span>
+      <span class="${child["@role"]}">${child}</span>
     <#elseif child?node_type = 'element' && child?node_name = "programlisting">
       <pre>${child}</pre>
     </#if>
@@ -54,7 +54,7 @@ under the License.
           </#if>
         <#else>
           <#if subTitle?node_name = "anchor">
-            <a name="${subTitle["@xml:id"]}" />
+            <span id="${subTitle["@xml:id"]}" />
           </#if>
         </#if>
       </#list>

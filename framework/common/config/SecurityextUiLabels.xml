@@ -90,7 +90,7 @@
         <value xml:lang="en">following error occurred during login: ${errorMessage}</value>
         <value xml:lang="es">Error al hacer login</value>
         <value xml:lang="fr">${errorMessage}</value>
-        <value xml:lang="it">Il seguente errore è accaduto durante l'autenticazione: ${errorMessage}</value>
+        <value xml:lang="it">${errorMessage}</value>
         <value xml:lang="nl">De volgende fout kwam voor tijdens het inloggen: ${errorMessage}</value>
         <value xml:lang="pt_BR"> ${errorMessage}</value>
         <value xml:lang="ro">A aparut urmatoarea eroare in timpul logarii: ${errorMessage}</value>
@@ -173,6 +173,7 @@
         <value xml:lang="de">Ihr Passwort wurde erfolgreich geändert</value>
         <value xml:lang="en">Your password has been changed successfully</value>
         <value xml:lang="fr">Votre mot de passe a été changé avec succès</value>
+        <value xml:lang="it">La password è stata cambiata con successo</value>
         <value xml:lang="nl">Uw wachtwoord is aangepast</value>
         <value xml:lang="pt_BR">Sua senha foi alterada com sucesso</value>
         <value xml:lang="zh_TW">你的密碼已成功變更。</value>
@@ -239,7 +240,7 @@
         <value xml:lang="zh_TW">此使用者已經登入。</value>
     </property>
     <property key="loginevents.user_with_the_username_not_found">
-        <value xml:lang="de">Ein User mit dem Usernamen "${userLoginId}" konnte nicht gefunden werden, bitte erneut eingeben.</value>
+        <value xml:lang="de">Ein Benutzer mit dem Namen "${userLoginId}" konnte nicht gefunden werden. Bitte erneut eingeben.</value>
         <value xml:lang="en">A user with the Username "${userLoginId}" was not found, please re-enter.</value>
         <value xml:lang="es">El usuario "${userLoginId}" no fue encontrado, por favor intente de nuevo.</value>
         <value xml:lang="fr">Le nom d'utilisateur "${userLoginId}" est inconnu, entrez le de nouveau SVP.</value>
@@ -253,7 +254,7 @@
         <value xml:lang="zh_TW">沒有名為 "${userLoginId}" 的使用者, 請重新輸入。</value>
     </property>
     <property key="loginevents.username_not_found_reenter">
-        <value xml:lang="de">Username konnte nicht gefunden werden, bitte erneut eingeben.</value>
+        <value xml:lang="de">Benutzername konnte nicht gefunden werden. Bitte erneut eingeben.</value>
         <value xml:lang="en">The Username was not found, please re-enter.</value>
         <value xml:lang="es">El usuario "${userLoginId}" no fue encontrado, por favor intente de nuevo.</value>
         <value xml:lang="fr">Le nom d'utilisateur est inconnu, entrez le de nouveau, SVP.</value>
@@ -355,7 +356,7 @@
         <value xml:lang="en">The account for user login id "${username}" has been disabled.</value>
         <value xml:lang="es">La cuenta  "${username}" ha sido deshabilitada</value>
         <value xml:lang="fr">Le compte de l'utilisateur "${username}" a été neutralisé.</value>
-        <value xml:lang="it">L'utente "${username}" è stato disabilitato.</value>
+        <value xml:lang="it">L'utente "${username}" è stato disabilitato</value>
         <value xml:lang="nl">De gebruikersnaam: "${username}" is geblokkeerd.</value>
         <value xml:lang="pt_BR">A conta de logon user id "$ {nome}" foi desativada.</value>
         <value xml:lang="ro">Utilizatorul "${username}" a fost dezactivat.</value>
@@ -751,7 +752,7 @@
         <value xml:lang="en">It will be re-enabled ${reEnableTime}.</value>
         <value xml:lang="es">Será reactivado en ${reEnableTime}.</value>
         <value xml:lang="fr">Il sera renouvellé : ${reEnableTime}.</value>
-        <value xml:lang="it">Sarà riabilitata ${reEnableTime}.</value>
+        <value xml:lang="it">Sarà riabilitato il ${reEnableTime}.</value>
         <value xml:lang="nl">Hij zal weer geactiveerd zijn op ${reEnableTime}.</value>
         <value xml:lang="pt_BR">Será reativado ${reEnableTime}.</value>
         <value xml:lang="ro">Aceasta a fost re-abilitata in ${reEnableTime}.</value>

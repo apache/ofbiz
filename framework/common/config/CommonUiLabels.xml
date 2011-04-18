@@ -1329,7 +1329,7 @@
         <value xml:lang="es">Limpiar</value>
         <value xml:lang="fr">Effacer</value>
         <value xml:lang="hi_IN">साफ़ करें</value>
-        <value xml:lang="it">Azzera</value>
+        <value xml:lang="it">Pulisci</value>
         <value xml:lang="nl">Wis</value>
         <value xml:lang="pt">Limpar</value>
         <value xml:lang="ro">Azereaza</value>
@@ -1345,7 +1345,7 @@
         <value xml:lang="es">Limpiar todo</value>
         <value xml:lang="fr">Tout effacer</value>
         <value xml:lang="hi_IN">सभी साफ करें</value>
-        <value xml:lang="it">Azzera tutto</value>
+        <value xml:lang="it">Pulisci tutto</value>
         <value xml:lang="pt">Limpar Tudo</value>
         <value xml:lang="ru">Отчистить все</value>
         <value xml:lang="th">เคลียร์ทั้งหมด</value>
@@ -1356,7 +1356,7 @@
         <value xml:lang="en">Clear Current</value>
         <value xml:lang="fr">Vider l'en cours</value>
         <value xml:lang="hi_IN">वर्तमान को साफ़ करें</value>
-        <value xml:lang="it">Pulisci Attuale</value>
+        <value xml:lang="it">Pulisci attuale</value>
         <value xml:lang="pt_BR">Limpar atual</value>
         <value xml:lang="th">ยกเลิกที่เป็นปัจจุบัน</value>
         <value xml:lang="zh">清除当前的</value>
@@ -2254,6 +2254,7 @@
         <value xml:lang="zh_TW">無效</value>
     </property>
     <property key="CommonDisplaying">
+        <value xml:lang="de">Zeige ${lowCount} - ${highCount} von ${total}</value>
         <value xml:lang="en">Displaying ${lowCount} - ${highCount} of ${total}</value>
         <value xml:lang="es">Mostrando ${lowCount} - ${highCount} de ${total}</value>
         <value xml:lang="fr">Affichage de ${lowCount} à ${highCount} sur ${total}</value>
@@ -3117,7 +3118,7 @@
         <value xml:lang="es">Los siguientes errores ocurrieron</value>
         <value xml:lang="fr">Erreur(s) </value>
         <value xml:lang="hi_IN">निम्नलिखित त्रुटियाँ घटित हुई</value>
-        <value xml:lang="it">Il seguente errore è accaduto</value>
+        <value xml:lang="it">Errore</value>
         <value xml:lang="nl">De volgende fouten kwamen voor</value>
         <value xml:lang="pt">Ocorreram os Seguintes Erros</value>
         <value xml:lang="pt_BR">Os seguintes erros ocorreram</value>
@@ -3135,7 +3136,7 @@
         <value xml:lang="es">Ocurrió lo siguiente</value>
         <value xml:lang="fr">Information sur l'action effectuée</value>
         <value xml:lang="hi_IN">निम्नलिखित हुआ</value>
-        <value xml:lang="it">Informazioni sul comando eseguito</value>
+        <value xml:lang="it">Informazione</value>
         <value xml:lang="nl">Het volgende gebeurde</value>
         <value xml:lang="pt">Ocorreu o seguinte</value>
         <value xml:lang="ro">S-au intamplat urmatoarele</value>
@@ -4159,6 +4160,7 @@
         <value xml:lang="zh_TW">明細</value>
     </property>
     <property key="CommonItemsPerPage">
+        <value xml:lang="de">Elemente pro Seite</value>
         <value xml:lang="en">Items per page</value>
         <value xml:lang="fr">Éléments par page</value>
         <value xml:lang="it">Righe per pagina</value>
@@ -9102,7 +9104,7 @@
         <value xml:lang="es">Código de usuario</value>
         <value xml:lang="fr">Identifiant de connexion</value>
         <value xml:lang="hi_IN">प्रयोक्ता लॉगिन क्रमांक</value>
-        <value xml:lang="it">Codice utente login</value>
+        <value xml:lang="it">Codice utente</value>
         <value xml:lang="nl">User Login Id</value>
         <value xml:lang="pt_BR">ID de nome de usuário</value>
         <value xml:lang="pt_PT">Identificação de Início de Secção</value>
@@ -10968,7 +10970,7 @@
         <value xml:lang="es">Participante</value>
         <value xml:lang="fr">Acteurs</value>
         <value xml:lang="hi_IN">पार्टी</value>
-        <value xml:lang="it">Soggetto</value>
+        <value xml:lang="it">Soggetti</value>
         <value xml:lang="nl">Partij</value>
         <value xml:lang="pt">Participante</value>
         <value xml:lang="ro">Subiecti</value>
@@ -11002,7 +11004,7 @@
         <value xml:lang="es">Proyecto</value>
         <value xml:lang="fr">Projets</value>
         <value xml:lang="hi_IN">परियोजना</value>
-        <value xml:lang="it">Progetto</value>
+        <value xml:lang="it">Progetti</value>
         <value xml:lang="pt_BR">Projeto</value>
         <value xml:lang="th">โปรเจค</value>
         <value xml:lang="zh">项目</value>
