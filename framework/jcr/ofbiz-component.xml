@@ -25,5 +25,7 @@ under the License.
     <classpath type="dir" location="config"/>
     <classpath type="jar" location="build/lib/*"/>
     <classpath type="jar" location="lib/*"/>
+
+    <test-suite loader="main" location="testdef/jcrtests.xml"/>
 </ofbiz-component>
 

@@ -157,6 +157,7 @@ under the License.
       <field name="dataResourceId" type="id"></field>
       <field name="templateDataResourceId" type="id"></field>
       <field name="dataSourceId" type="id"></field>
+      <field name="repositoryNode" type="long-varchar"></field>
       <field name="statusId" type="id"></field>
       <field name="privilegeEnumId" type="id"></field>
       <field name="serviceName" type="long-varchar"></field>

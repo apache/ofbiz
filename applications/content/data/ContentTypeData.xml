@@ -39,6 +39,7 @@ under the License.
     <ContentAssocType contentAssocTypeId="SUB_CONTENT" description="Sub-Content"/>
     <ContentAssocType contentAssocTypeId="TOPIC" description="Topic"/>
     <ContentAssocType contentAssocTypeId="DESCRIPTION" description="Description"/>
+    <ContentAssocType contentAssocTypeId="REPOSITORY" description="Repository Assoc"/>
 
     <ContentAssocType contentAssocTypeId="SUBSITE" description="SubSite"/>
     <ContentAssocType contentAssocTypeId="DEPARTMENT" description="Department"/>
@@ -67,6 +68,7 @@ under the License.
     <MetaDataPredicate metaDataPredicateId="event-person-name" description="The name of a person involved in the subject event."/>
 
     <ContentType contentTypeId="DOCUMENT" description="Document" hasTable="N" parentTypeId=""/>
+    <ContentType contentTypeId="REPOSITORY" description="Content Repository Data" hasTable="N" parentTypeId=""/>
     <ContentType contentTypeId="TEMPLATE" description="Template or Form" hasTable="N" parentTypeId=""/>
     <ContentType contentTypeId="DECORATOR" description="Decorator" hasTable="N" parentTypeId="TEMPLATE"/>
     <ContentType contentTypeId="ANNOTATION" description="Annotation" hasTable="N" parentTypeId=""/>

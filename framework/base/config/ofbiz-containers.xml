@@ -101,6 +101,7 @@ under the License.
         <property name="repHomeDir" value="runtime/data/jackrabbit/"/>
         <property name="configFilePath" value="framework/jcr/config/jackrabbit.xml"/>
         <property name="jndiName" value="jcr/local"/>
+        <property name="removeOnShutdown" value="false"></property>
     </container>
 
     <container name="catalina-container" class="org.ofbiz.catalina.container.CatalinaContainer">

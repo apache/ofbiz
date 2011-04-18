@@ -722,6 +722,10 @@
         <value xml:lang="th">แก้ไขสินค้าตัวอย่าง</value>
         <value xml:lang="zh">编辑样例明细</value>
     </property>
+    <property key="PageTitleExampleJackrabbit">
+        <value xml:lang="de">Jackrabbit Sandbox</value>
+        <value xml:lang="en">Jackrabbit Sandbox</value>
+    </property>
     <!-- Page Titles -->
     <property key="PageTitleFindExample">
         <value xml:lang="en">Find Example</value>
@@ -760,5 +764,65 @@
     <property key="YouChangedTheSelectBoxValue">
         <value xml:lang="de">Sie haben den Wert in der Select Box geändert.</value>
         <value xml:lang="en">You have changed the value in the select box</value>
+    </property>
+    <property key="ExampleAddNewContentEntry">
+        <value xml:lang="de">Einen neuen Content Eintrag hinzufügen</value>
+        <value xml:lang="en">Add a new content entry</value>
+    </property>
+    <property key="ExampleRepositoryNode">
+        <value xml:lang="de">Knoten</value>
+        <value xml:lang="en">Node</value>
+    </property>
+    <property key="ExampleRepositoryFolder">
+        <value xml:lang="de">Ordner</value>
+        <value xml:lang="en">Folder</value>
+    </property>
+    <property key="ExampleRepositoryFile">
+        <value xml:lang="de">Datei</value>
+        <value xml:lang="en">File</value>
+    </property>
+    <property key="ExampleRepositoryMessage">
+        <value xml:lang="de">Text Nachricht</value>
+        <value xml:lang="en">Text message</value>
+    </property>
+    <property key="ExampleScanRepositoryStrukture">
+        <value xml:lang="de">Repository Struktur überprüfen</value>
+        <value xml:lang="en">Scan repository structure</value>
+    </property>
+    <property key="ExampleJackrabbitUploadFileData">
+        <value xml:lang="de">Eine neue Datei speichern</value>
+        <value xml:lang="en">Upload a new file</value>
+    </property>
+    <property key="ExampleJackrabbitCleanRepository">
+        <value xml:lang="de">Repository aufräumen</value>
+        <value xml:lang="en">Clean repository</value>
+    </property>
+    <property key="ExampleJackrabbitShowUploadedFiles">
+        <value xml:lang="de">Dateien anzeigen</value>
+        <value xml:lang="en">Show uploaded Files</value>
+    </property>
+    <property key="ExampelsJackrabbitOpenFile">
+        <value xml:lang="de">Datei öffnen</value>
+        <value xml:lang="en">Open file</value>
+    </property>
+    <property key="ExampelsJackrabbitDownloadFile">
+        <value xml:lang="de">Datei herunterladen</value>
+        <value xml:lang="en">Download file</value>
+    </property>
+    <property key="ExampelsJackrabbitRemoveFile">
+        <value xml:lang="de">Datei löschen</value>
+        <value xml:lang="en">Remove file</value>
+    </property>
+    <property key="ExampleAddNewNodePath">
+        <value xml:lang="de">Füge einen neuen Node Pfad hinzu, z.B. /Foo/Baa speichert die Datei im Ordner "Baa"</value>
+        <value xml:lang="en">Add a (new) node path like /Foo/Baa will store the file under the folder "Baa"</value>
+    </property>
+    <property key="ExampleJackrabbitTryRightClick">
+        <value xml:lang="de">Wähle eine Datei und versuche einen Rechtklick</value>
+        <value xml:lang="en">Choose a file and try a 'right click'</value>
+    </property>
+    <property key="ExampleJackrabbitCleanRepositoryTooltip">
+        <value xml:lang="de">Löscht alle Nodes aus dem Repository, die keine Verkünpfung in der Content Tabelle haben.</value>
+        <value xml:lang="en">Removes all nodes which are not linked in the content table.</value>
     </property>
 </resource>

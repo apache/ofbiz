@@ -1,0 +1,704 @@
+package org.ofbiz.content.jcr.orm;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+
+import javax.jcr.Binary;
+import javax.jcr.Node;
+import javax.jcr.NodeIterator;
+import javax.jcr.PathNotFoundException;
+import javax.jcr.Property;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.nodetype.NodeType;
+
+import javolution.util.FastMap;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+import org.apache.tika.Tika;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilDateTime;
+import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
+
+public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping {
+
+    private static String module = OfbizRepositoryMappingJackrabbit.class.getName();
+
+    private enum PROPERTY_FIELDS {
+        MESSAGE("jcr:message"), FILE(NodeType.NT_FILE), FOLDER(NodeType.NT_FOLDER), RESOURCE(NodeType.NT_RESOURCE), DATA("jcr:data"), UNSTRUCTURED(
+                NodeType.NT_UNSTRUCTURED), MIMETYPE("jcr:mimetype"), REPROOT("rep:root");
+
+        String type = null;
+
+        PROPERTY_FIELDS(String type) {
+            this.type = type;
+        }
+
+        String getType() {
+            return this.type;
+        }
+
+    };
+
+    private Delegator delegator = null;
+    private GenericValue content = null;
+    // private GenericValue contentAssoc = null;
+    private Session session = null;
+    private Node node = null;
+
+    /**
+     * The OfbizContentMapping constructor loads the node and related content
+     * data from the DB. You can pass a contentId *OR* a node path. Primary the
+     * constructor will take a contentId, get the content information from the
+     * database and read the related repository node from the database. If you
+     * pass a repository node path, the method will look in the database for a
+     * related content entry.
+     *
+     * @param delegator
+     * @param session
+     * @param contentId
+     * @param repositoryNode
+     * @throws RepositoryException
+     * @throws GenericEntityException
+     */
+    public OfbizRepositoryMappingJackrabbit(Delegator delegator, Session session, String contentId, String repositoryNode) throws RepositoryException,
+            GenericEntityException {
+        if (session == null) {
+            Debug.logWarning("A repository session is needed to create an OfbizContentMapping Object.", module);
+            return;
+        } else if (UtilValidate.isEmpty(contentId) && UtilValidate.isEmpty(repositoryNode)) {
+            Debug.logWarning("There should be either a contentId or a repositoryNode", module);
+            return;
+        }
+
+        this.delegator = delegator;
+        this.session = session;
+
+        // check if the node path is an abolute path
+        if (!repositoryNode.startsWith("/")) {
+            repositoryNode = "/" + repositoryNode;
+        }
+
+        if (UtilValidate.isNotEmpty(contentId)) {
+            this.content = delegator.findOne("Content", true, UtilMisc.toMap("contentId", contentId));
+            this.node = getRepositoryNode(content.getString("repositoryNode"));
+
+        } else if (UtilValidate.isNotEmpty(repositoryNode)) {
+
+            List<GenericValue> contentList = delegator.findByAndCache("Content", UtilMisc.toMap("repositoryNode", repositoryNode));
+
+            // if the List is Empty there might be no repository node with
+            // this path information, so we have to create a new one
+            if (UtilValidate.isNotEmpty(contentList)) {
+                this.content = EntityUtil.getFirst(contentList);
+                this.node = getRepositoryNode(repositoryNode);
+            } else {
+                Map<String, Object> newRepositoryEntry = createNewRepositoryNode(repositoryNode);
+                this.node = (Node) newRepositoryEntry.get("node");
+                this.content = (GenericValue) newRepositoryEntry.get("content");
+                this.session.save();
+            }
+
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.orm.OfbizContentMapping#getDelegator()
+     */
+    @Override
+    public Delegator getDelegator() {
+        return delegator;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.orm.OfbizContentMapping#closeSession()
+     */
+    @Override
+    public void closeSession() {
+        if (session != null && session.isLive()) {
+            session.logout();
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.orm.OfbizContentMapping#updateTextData(java.lang.String)
+     */
+    @Override
+    public void updateOrStoreTextData(String message) throws RepositoryException {
+
+        this.node.setProperty(PROPERTY_FIELDS.MESSAGE.getType(), message);
+        this.session.save();
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.orm.OfbizContentMapping#getContent()
+     */
+    @Override
+    public GenericValue getContentObject() {
+        return content;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.orm.OfbizContentMapping#getNode()
+     */
+    @Override
+    public Node getNode() {
+        return node;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.orm.OfbizContentMapping#getContentId()
+     */
+    @Override
+    public String getContentId() {
+        if (content != null) {
+            return content.getString("contentId");
+        } else {
+            return new String();
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.orm.OfbizContentMapping#getNodePath()
+     */
+    @Override
+    public String getNodePath() {
+        try {
+            return node.getPath();
+        }
+        catch (RepositoryException e) {
+            return new String();
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.orm.OfbizContentMapping#removeRepositoryNode()
+     */
+    @Override
+    public void removeRepositoryNode() throws RepositoryException, GenericEntityException {
+        node.remove();
+        try {
+            GenericValue content = delegator.findOne("Content", false, UtilMisc.toMap("contentId", this.content.getString("contentId")));
+            List<GenericValue> relatedContents = getAllRelatedContents(content);
+            // TODO We should decide if we set a thru date or delete the
+            // resource
+            if (UtilValidate.isNotEmpty(relatedContents)) {
+                delegator.removeAll(relatedContents);
+            }
+            session.save();
+        }
+        catch (GenericEntityException e) {
+            throw new GenericEntityException(e);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.orm.OfbizContentMapping#getStringContent()
+     */
+    @Override
+    public String getStringContent() throws PathNotFoundException, RepositoryException {
+        Property property = getNodeContentProperty(PROPERTY_FIELDS.MESSAGE.getType());
+
+        if (property == null || property.getType() != 1) {
+            Debug.logWarning("The content from the node:" + node.getPath() + " is not a String content.", module);
+            return new String();
+        }
+
+        return property.getString();
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.orm.OfbizContentMapping#uploadFileData()
+     */
+    @Override
+    public void uploadFileData(InputStream file, String fileName) throws PathNotFoundException, RepositoryException, GenericEntityException {
+        try {
+            this.node.setPrimaryType(PROPERTY_FIELDS.FOLDER.getType());
+        }
+        catch (RepositoryException e) {
+            Debug.logError("Appanding a file to a text content is not allowed. Please create a folder which haven't a text node as parent.", module);
+            throw new RepositoryException("Appanding a file to a text content is not allowed. Please create a folder which haven't a text node as parent.", e);
+        }
+
+        Node folder = (Node) createNewRepositoryNode(this.node.getPath() + "/" + fileName, PROPERTY_FIELDS.FILE.getType()).get("node");
+
+        Node resource = (Node) createNewRepositoryNode(folder.getPath() + "/jcr:content", PROPERTY_FIELDS.RESOURCE.getType()).get("node");
+        Binary binary = this.session.getValueFactory().createBinary(file);
+
+        String mimeType = getMimeTypeFromInputStream(file);
+
+        resource.setProperty("jcr:mimeType", mimeType);
+        // resource.setProperty("jcr:encoding", "");
+
+        resource.setProperty(PROPERTY_FIELDS.DATA.getType(), binary);
+        this.session.save();
+
+        return;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.orm.OfbizContentMapping#getFileContent()
+     */
+    @Override
+    public InputStream getFileContent(String fileName) throws RepositoryException {
+        if (!this.node.getPrimaryNodeType().isNodeType(PROPERTY_FIELDS.FOLDER.getType())) {
+            Debug.logWarning("The Node: " + this.node.getPath() + " is not a node from type: " + PROPERTY_FIELDS.FOLDER.getType()
+                             + ". No OutputStream can retunred.", module);
+            return null;
+        }
+
+        if (!this.node.hasNode(fileName)) {
+            throw new RepositoryException("This file does not exists in the folder");
+        }
+
+        Node fileNode = this.node.getNode(fileName);
+
+        Node jcrContent = fileNode.getNode("jcr:content");
+        if (!jcrContent.hasProperty(PROPERTY_FIELDS.DATA.getType())) {
+            Debug.logWarning("No File Content found in repository node.", module);
+            return null;
+        }
+
+        return jcrContent.getProperty(PROPERTY_FIELDS.DATA.getType()).getBinary().getStream();
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.orm.OfbizContentMapping#getFileContent()
+     */
+    @Override
+    public InputStream getFileContent() throws RepositoryException {
+        if (!this.node.getPrimaryNodeType().isNodeType(PROPERTY_FIELDS.FILE.getType())) {
+            Debug.logWarning("The Node: " + this.node.getPath() + " is not a node from type: " + PROPERTY_FIELDS.FILE.getType()
+                             + ". No OutputStream can retunred.", module);
+            return null;
+        }
+
+        Node jcrContent = this.node.getNode("jcr:content");
+        if (!jcrContent.hasProperty(PROPERTY_FIELDS.DATA.getType())) {
+            Debug.logWarning("No File Content found in repository node.", module);
+            return null;
+        }
+
+        return jcrContent.getProperty(PROPERTY_FIELDS.DATA.getType()).getBinary().getStream();
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.orm.OfbizContentMapping#getJsonFileTree()
+     */
+    @Override
+    public JSONArray getJsonFileTree() throws RepositoryException {
+        return getJsonChildNodes(this.node);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.orm.OfbizContentMapping#getNodeName()
+     */
+    @Override
+    public String getNodeName() {
+        try {
+            return this.node.getName();
+        }
+        catch (RepositoryException e) {
+            Debug.logError(e, module);
+            return new String();
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.orm.OfbizContentMapping#getFileMimeType()
+     */
+    @Override
+    public String getFileMimeType() throws RepositoryException {
+        String mimeType = new String();
+
+        if (!this.node.getPrimaryNodeType().isNodeType(PROPERTY_FIELDS.FILE.getType())) {
+            Debug.logWarning("The Node: " + this.node.getPath() + " is not a node from type: " + PROPERTY_FIELDS.FILE.getType()
+                             + ". No OutputStream can retunred.", module);
+            return mimeType;
+        }
+
+        Node jcrContent = this.node.getNode("jcr:content");
+        if (!jcrContent.hasProperty(PROPERTY_FIELDS.DATA.getType())) {
+            Debug.logWarning("No File Content found in repository node.", module);
+            return mimeType;
+        }
+
+        if (jcrContent.hasProperty(PROPERTY_FIELDS.MIMETYPE.getType())) {
+            mimeType = jcrContent.getProperty(PROPERTY_FIELDS.MIMETYPE.getType()).getString();
+        }
+
+        return mimeType;
+    }
+
+    /**
+     * Returns a JSON Array with the repository folder structure. The JSON array
+     * is directly build for the jsTree jQuery plugin.
+     *
+     * @param startNode
+     * @return
+     * @throws RepositoryException
+     */
+    private JSONArray getJsonChildNodes(Node startNode) throws RepositoryException {
+        NodeIterator nodeIterator = startNode.getNodes();
+
+        JSONArray folderStrucutre = new JSONArray();
+        JSONObject attr = new JSONObject();
+
+        while (nodeIterator.hasNext()) {
+            JSONObject folder = new JSONObject();
+            Node node = nodeIterator.nextNode();
+
+            if (node.getPrimaryNodeType().isNodeType(PROPERTY_FIELDS.FOLDER.getType())) {
+                attr.element("title", node.getName());
+                folder.element("data", attr);
+
+                attr = new JSONObject();
+                attr.element("NodePath", node.getPath());
+                attr.element("NodeType", node.getPrimaryNodeType().getName());
+                folder.element("attr", attr);
+
+                folder.element("children", getJsonChildNodes(node).toString());
+
+                folderStrucutre.element(folder);
+            } else if (node.getPrimaryNodeType().isNodeType(PROPERTY_FIELDS.FILE.getType())) {
+                attr = new JSONObject();
+                attr.element("title", node.getName());
+                folder.element("data", attr);
+
+                attr = new JSONObject();
+                attr.element("NodePath", node.getPath());
+                attr.element("NodeType", node.getPrimaryNodeType().getName());
+                folder.element("attr", attr);
+
+                folderStrucutre.element(folder);
+            }
+
+        }
+
+        return folderStrucutre;
+    }
+
+    /**
+     * Get a property to a node, if this property not exist null will be
+     * returned.
+     *
+     * @return
+     * @throws PathNotFoundException
+     * @throws RepositoryException
+     */
+    private Property getNodeContentProperty(String type) throws PathNotFoundException, RepositoryException {
+        if (!node.hasProperty(type)) {
+            return null;
+        }
+
+        return node.getProperty(type);
+    }
+
+    /**
+     * Create a new node in the repository. The new node will be linked with an
+     * content object. The method can create recursive node structures.
+     * Recursive node associations will be stored in the ContentAssoc table
+     *
+     * @param newNodePath
+     *            - have to be an absolute path
+     * @return returned a map with the last created content and node object. The
+     *         objects are stored with the key "content" and "node"
+     * @throws RepositoryException
+     * @throws GenericEntityException
+     */
+    private Map<String, Object> createNewRepositoryNode(String newNodePath) throws RepositoryException, GenericEntityException {
+        return createNewRepositoryNode(newNodePath, null);
+    }
+
+    /**
+     * Create a new node in the repository. The new node will be linked with an
+     * content object. The method can create recursive node structures.
+     * Recursive node associations will be stored in the ContentAssoc table
+     *
+     * @param newNodePath
+     *            - have to be an absolute path
+     * @param type
+     *            - defines a primary type for the new node
+     * @return returned a map with the last created content and node object. The
+     *         objects are stored with the key "content" and "node"
+     * @throws RepositoryException
+     * @throws GenericEntityException
+     */
+    private Map<String, Object> createNewRepositoryNode(String newNodePath, String type) throws RepositoryException, GenericEntityException {
+        Map<String, Object> returnMap = createNodeStructure(newNodePath, type);
+        return returnMap;
+    }
+
+    /**
+     * Returns a list of all (recursive) related content to the base content.
+     * The return list contains the ContentAssoc Objects as well as the Content
+     * Objects.
+     *
+     * @param content
+     * @return
+     */
+    private List<GenericValue> getAllRelatedContents(GenericValue content) {
+        List<GenericValue> returnList = null;
+
+        try {
+            returnList = delegator.findByAnd("ContentAssoc", UtilMisc.toMap("contentId", content.getString("contentId")));
+
+            if (UtilValidate.isNotEmpty(returnList)) {
+                List<GenericValue> tmpReturnList = returnList;
+                for (GenericValue c : tmpReturnList) {
+                    returnList.addAll(getAllRelatedContents(delegator.findOne("Content", false, UtilMisc.toMap("contentId", c.getString("contentIdTo")))));
+                }
+            }
+            // find all content assoc links where the current content object is
+            // the child object
+            returnList.addAll(delegator.findByAnd("ContentAssoc", UtilMisc.toMap("contentIdTo", content.getString("contentId"))));
+            returnList.add(content);
+
+        }
+        catch (GenericEntityException e) {
+            Debug.logError(e, module);
+            return null;
+        }
+
+        return returnList;
+    }
+
+    /**
+     * Here we create a new node Structure, if you pass a node path like
+     * "/foo/baa/node" It will create first "/foo" and "/baa" as parent node and
+     * than node.
+     *
+     * @param newNode
+     *            Path
+     * @return returned a map with the last created content and node object. The
+     *         objects are stored with the key "content" and "node"
+     * @throws RepositoryException
+     * @throws GenericEntityException
+     */
+    private Map<String, Object> createNodeStructure(String newNodes, String type) throws RepositoryException, GenericEntityException {
+        Map<String, Object> returnMap = FastMap.newInstance();
+        Node newNodeParent = this.session.getRootNode();
+        String assocContentId = null;
+        String parentContentId = null;
+        String[] nodes = newNodes.split("/");
+        for (String node : nodes) {
+            if (UtilValidate.isEmpty(node)) {
+                continue;
+            } else if (newNodeParent.hasNode(node)) {
+                newNodeParent = newNodeParent.getNode(node);
+                continue;
+            }
+
+            // If the current node is not the root node and has a parent node
+            // search for the parent content id.
+            if (!newNodeParent.getPath().equals("/") && UtilValidate.isEmpty(parentContentId) && UtilValidate.isEmpty(assocContentId)
+                && (newNodeParent.getParent() != null)) {
+                parentContentId = getParentNodeContentId(newNodeParent);
+            }
+
+            if (UtilValidate.isEmpty(type)) {
+                // If the nodeType is empty, add a node with the same node type
+                // as the parent node.
+                // Only when the parent node is the overall repository root
+                // node, we have to create a node without parent type.
+                String parentNodeType = newNodeParent.getPrimaryNodeType().getName();
+                if (!PROPERTY_FIELDS.REPROOT.getType().equals(parentNodeType)) {
+                    newNodeParent = newNodeParent.addNode(node, newNodeParent.getPrimaryNodeType().getName());
+                } else {
+                    newNodeParent = newNodeParent.addNode(node);
+                }
+            } else {
+                newNodeParent = newNodeParent.addNode(node, type);
+            }
+            GenericValue newContent = nodeContentDatabaseConnection(newNodeParent);
+            returnMap.put("content", newContent);
+            assocContentId = newContent.getString("contentId");
+
+            // create the content assoc entry for the new node parent - child
+            // relation
+            if (UtilValidate.isNotEmpty(assocContentId) && UtilValidate.isNotEmpty(parentContentId)) {
+                nodeContentAssoc(assocContentId, parentContentId);
+                parentContentId = assocContentId;
+            }
+
+        }
+
+        // only the last node which is created will be returned
+        returnMap.put("node", newNodeParent);
+        return returnMap;
+    }
+
+    /**
+     * Creates the database relationship between two nodes.
+     *
+     * @param assocContentId
+     * @param parentContentId
+     */
+    private void nodeContentAssoc(String assocContentId, String parentContentId) {
+        GenericValue contentAssoc = delegator.makeValue("ContentAssoc");
+
+        contentAssoc.set("contentId", parentContentId);
+        contentAssoc.set("contentIdTo", assocContentId);
+        contentAssoc.set("contentAssocTypeId", "REPOSITORY");
+        contentAssoc.set("fromDate", UtilDateTime.nowTimestamp());
+
+        try {
+            this.delegator.createOrStore(contentAssoc);
+        }
+        catch (GenericEntityException e) {
+            Debug.logError(e, module);
+        }
+
+    }
+
+    /**
+     * Returns the contentId to a node.
+     *
+     * @param newNodeParent
+     * @return
+     */
+    private String getParentNodeContentId(Node newNodeParent) {
+        List<GenericValue> list = null;
+        String parentNodeContentId = null;
+        try {
+            list = delegator.findByAndCache("Content", UtilMisc.toMap("repositoryNode", newNodeParent.getPath()));
+            if (UtilValidate.isNotEmpty(list)) {
+                parentNodeContentId = EntityUtil.getFirst(list).getString("contentId");
+            }
+        }
+        catch (GenericEntityException e) {
+            Debug.logError(e, module);
+        }
+        catch (RepositoryException e) {
+            Debug.logError(e, module);
+        }
+
+        return parentNodeContentId;
+    }
+
+    /**
+     * Creates a database relation to a repository node. Returns the new
+     * contentId.
+     *
+     * @param newNode
+     * @return
+     * @throws RepositoryException
+     * @throws GenericEntityException
+     */
+    private GenericValue nodeContentDatabaseConnection(Node newNode) throws RepositoryException, GenericEntityException {
+        // create the content database connection
+        GenericValue content = null;
+        content = this.delegator.makeValue("Content");
+        String primaryKey = this.delegator.getNextSeqId("Content");
+        content.set("contentId", primaryKey);
+        content.set("contentTypeId", "REPOSITORY");
+
+        content.set("repositoryNode", newNode.getPath());
+
+        GenericValue newContent = null;
+        try {
+            newContent = this.delegator.createOrStore(content);
+            // only save the session when a new content value is created
+        }
+        catch (GenericEntityException e) {
+            throw new GenericEntityException(e);
+        }
+
+        return newContent;
+    }
+
+    /**
+     * Checks if the node is in the repository. An absolute path should be
+     * passed.
+     *
+     * @param absoluteNodePath
+     * @return
+     */
+    private Boolean isNodeInRepository(String absoluteNodePath) {
+        try {
+            if (this.session.nodeExists(absoluteNodePath)) {
+                return Boolean.TRUE;
+            }
+        }
+        catch (RepositoryException e) {
+            Debug.logError(e, module);
+            return Boolean.FALSE;
+        }
+
+        return Boolean.FALSE;
+    }
+
+    /**
+     * Get the node object from the repository. If an exceptions rasises null
+     * will be returned.
+     *
+     * @param nodePath
+     * @return
+     */
+    private Node getRepositoryNode(String nodePath) {
+        try {
+            return session.getNode(nodePath);
+        }
+        catch (PathNotFoundException e) {
+            Debug.logError(e, module);
+            return null;
+        }
+        catch (RepositoryException e) {
+            Debug.logError(e, module);
+            return null;
+        }
+    }
+
+    private String getMimeTypeFromInputStream(InputStream is) {
+        Tika tika = new Tika();
+        try {
+            return tika.detect(is);
+        }
+        catch (IOException e) {
+            Debug.logError(e, module);
+            return new String();
+        }
+    }
+
+}

@@ -56,6 +56,7 @@ public class JackrabbitContainer implements Container {
     private static File homeDir = null;
     private static File jackrabbitConfigFile = null;
     private static String jndiName;
+    private static String removeRepositoryOnShutdown = null;;
     protected static Repository repository;
     private static Session session;
 
@@ -66,6 +67,7 @@ public class JackrabbitContainer implements Container {
         try {
             homeDirURL = ContainerConfig.getPropertyValue(cc, "repHomeDir", "runtime/data/jackrabbit/");
             jndiName = ContainerConfig.getPropertyValue(cc, "jndiName", "jcr/local");
+            removeRepositoryOnShutdown = ContainerConfig.getPropertyValue(cc, "removeRepositoryOnShutdown", "false");
             homeDir = new File(homeDirURL);
             URL jackrabbitConfigUrl = FlexibleLocation.resolveLocation(ContainerConfig.getPropertyValue(cc, "configFilePath", "framework/jcr/config/jackrabbit.xml"));
             jackrabbitConfigFile = new File(jackrabbitConfigUrl.toURI());
@@ -117,7 +119,11 @@ public class JackrabbitContainer implements Container {
         }
         if (repository != null) {
             // Not needed - Jackrabbit shuts down when the session is closed
-//            repository.shutdown();
+            // repository.shutdown();
+        }
+
+        if ("true".equals(removeRepositoryOnShutdown)) {
+            homeDir.deleteOnExit();
         }
     }
 

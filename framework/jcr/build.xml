@@ -33,7 +33,9 @@ under the License.
         <fileset dir="${lib.dir}" includes="*.jar"/>
         <fileset dir="../../framework/base/lib" includes="*.jar"/>
         <fileset dir="../../framework/base/lib/commons" includes="*.jar"/>
+        <fileset dir="../../framework/base/lib/j2eespecs" includes="*.jar"/>
         <fileset dir="../../framework/base/build/lib" includes="*.jar"/>
+        <fileset dir="../../framework/webapp/lib" includes="*.jar"/>
         <fileset dir="../../framework/entity/build/lib" includes="*.jar"/>
         <fileset dir="../../framework/service/build/lib" includes="*.jar"/>
 
