@@ -1214,7 +1214,8 @@ height: auto !important;
 height: 1%;
 padding-bottom: 10px;
 margin-bottom:1em;
-background: transparent url(../images/screenlet_shadow1.png) repeat-x 0% 100%;
+background-color: #BFBFBF;
+overflow: auto;
 }
 
 .screenlet-title-bar {
@@ -1310,7 +1311,6 @@ cursor: pointer;
 }
 
 .screenlet-body {
-background: #bfbfbf;
 border-top:#ebe9db thin solid;
 border-left:#dad8cd thin solid;
 border-right:#9d9d9b thin solid;
@@ -1341,6 +1341,7 @@ margin:0;
 .login-screenlet {
 min-width: 25em;
 width: 25%;
+padding: 0px;
 }
 
 .login-screenlet .screenlet-title-bar {
