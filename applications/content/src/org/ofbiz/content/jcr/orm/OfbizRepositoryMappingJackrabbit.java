@@ -389,7 +389,7 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
             JSONObject folder = new JSONObject();
             Node node = nodeIterator.nextNode();
 
-            if (node.getPrimaryNodeType().isNodeType(PROPERTY_FIELDS.FOLDER.getType())) {
+            if (node.getPrimaryNodeType().isNodeType(PROPERTY_FIELDS.FOLDER.getType()) || node.getPrimaryNodeType().isNodeType(PROPERTY_FIELDS.UNSTRUCTURED.getType())) {
                 attr.element("title", node.getName());
                 folder.element("data", attr);
 
