@@ -190,7 +190,7 @@ public class MacroFormRenderer implements FormStringRenderer {
         }
         String description = displayField.getDescription(context);
         String type = displayField.getType();
-        String imageLocation = displayField.getImageLocation();
+        String imageLocation = displayField.getImageLocation(context);
         Integer size = Integer.valueOf("0");
         String title = "";
 
@@ -311,7 +311,7 @@ public class MacroFormRenderer implements FormStringRenderer {
     }
 
     public void renderHyperlinkField(Appendable writer, Map<String, Object> context, HyperlinkField hyperlinkField) throws IOException {
-        this.request.setAttribute("image", hyperlinkField.getImage());
+        this.request.setAttribute("image", hyperlinkField.getImageLocation(context));
         ModelFormField modelFormField = hyperlinkField.getModelFormField();
 
         String encodedAlternate = encode(hyperlinkField.getAlternate(context), modelFormField, context);
@@ -352,6 +352,14 @@ public class MacroFormRenderer implements FormStringRenderer {
         String id = modelFormField.getCurrentContainerId(context);
         String clientAutocomplete = "false";
 
+        //check for required field style on single forms
+        if ("single".equals(modelFormField.getModelForm().getType()) && modelFormField.getRequiredField()) {
+            String requiredStyle = modelFormField.getRequiredFieldStyle();
+            if (UtilValidate.isEmpty(requiredStyle)) requiredStyle = "required";            
+            if (UtilValidate.isEmpty(className)) className = requiredStyle;
+            else className = requiredStyle + " " + className;
+        }
+        
         List<ModelForm.UpdateArea> updateAreas = modelFormField.getOnChangeUpdateAreas();
         boolean ajaxEnabled = updateAreas != null && this.javaScriptEnabled;
         if (!textField.getClientAutocompleteField() || ajaxEnabled) {
@@ -425,6 +433,15 @@ public class MacroFormRenderer implements FormStringRenderer {
                 alert = "true";
             }
         }
+        
+        //check for required field style on single forms
+        if ("single".equals(modelFormField.getModelForm().getType()) && modelFormField.getRequiredField()) {
+            String requiredStyle = modelFormField.getRequiredFieldStyle();
+            if (UtilValidate.isEmpty(requiredStyle)) requiredStyle = "required";            
+            if (UtilValidate.isEmpty(className)) className = requiredStyle;
+            else className = requiredStyle + " " + className;
+        }
+        
         String visualEditorEnable = "";
         String buttons = "";
         if (textareaField.getVisualEditorEnable()) {
@@ -618,6 +635,15 @@ public class MacroFormRenderer implements FormStringRenderer {
                 ampmName = UtilHttp.makeCompositeParam(paramName, "ampm");
             }
         }
+        
+        //check for required field style on single forms
+        if ("single".equals(modelFormField.getModelForm().getType()) && modelFormField.getRequiredField()) {
+            String requiredStyle = modelFormField.getRequiredFieldStyle();
+            if (UtilValidate.isEmpty(requiredStyle)) requiredStyle = "required";            
+            if (UtilValidate.isEmpty(className)) className = requiredStyle;
+            else className = requiredStyle + " " + className;
+        }
+        
         String mask = dateTimeField.getMask();
         if ("Y".equals(mask)) {
             if ("date".equals(dateTimeField.getType())) {
@@ -745,6 +771,14 @@ public class MacroFormRenderer implements FormStringRenderer {
             }
         }
 
+        //check for required field style on single forms
+        if ("single".equals(modelFormField.getModelForm().getType()) && modelFormField.getRequiredField()) {
+            String requiredStyle = modelFormField.getRequiredFieldStyle();
+            if (UtilValidate.isEmpty(requiredStyle)) requiredStyle = "required";            
+            if (UtilValidate.isEmpty(className)) className = requiredStyle;
+            else className = requiredStyle + " " + className;
+        }
+        
         String currentDescription = null;
         if (UtilValidate.isNotEmpty(currentValue)) {
             for (ModelFormField.OptionValue optionValue : allOptionValues) {
@@ -1070,7 +1104,7 @@ public class MacroFormRenderer implements FormStringRenderer {
         String name = modelFormField.getParameterName(context);
         String buttonType =  submitField.getButtonType();
         String formName = modelForm.getCurrentFormName(context);
-        String imgSrc = submitField.getImageLocation();
+        String imgSrc = submitField.getImageLocation(context);
         String confirmation = submitField.getConfirmation(context);
         String className = "";
         String alert = "false";
@@ -1341,12 +1375,24 @@ public class MacroFormRenderer implements FormStringRenderer {
     public void renderFormClose(Appendable writer, Map<String, Object> context, ModelForm modelForm) throws IOException {
         String focusFieldName = modelForm.getfocusFieldName();
         String formName = modelForm.getCurrentFormName(context);
+        String containerId = modelForm.getCurrentContainerId(context);
+        String hasRequiredField = "";
+        for (ModelFormField formField : modelForm.getFieldList()) {
+            if (formField.getRequiredField()) {
+                hasRequiredField = "Y";
+                break;
+            }
+        }
         StringWriter sr = new StringWriter();
         sr.append("<@renderFormClose ");
         sr.append(" focusFieldName=\"");
         sr.append(focusFieldName);
         sr.append("\" formName=\"");
         sr.append(formName);
+        sr.append("\" containerId=\"");
+        sr.append(containerId);
+        sr.append("\" hasRequiredField=\"");
+        sr.append(hasRequiredField);
         sr.append("\" />");
         executeMacro(writer, sr.toString());
         renderEndingBoundaryComment(writer, "Form Widget - Form Element", modelForm);
@@ -1998,6 +2044,14 @@ public class MacroFormRenderer implements FormStringRenderer {
             if (modelFormField.shouldBeRed(context)) {
                 alert = "true";
             }
+        }
+        
+        //check for required field style on single forms
+        if ("single".equals(modelFormField.getModelForm().getType()) && modelFormField.getRequiredField()) {
+            String requiredStyle = modelFormField.getRequiredFieldStyle();
+            if (UtilValidate.isEmpty(requiredStyle)) requiredStyle = "required";            
+            if (UtilValidate.isEmpty(className)) className = requiredStyle;
+            else className = requiredStyle + " " + className;
         }
 
         String name = modelFormField.getParameterName(context);
