@@ -1,6 +1,7 @@
 package org.ofbiz.jcr.orm;
 
 import java.io.InputStream;
+import java.util.List;
 
 import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
@@ -14,123 +15,171 @@ import org.ofbiz.entity.GenericValue;
 
 public interface OfbizRepositoryMapping {
 
-	/**
-	 * Object delegator reference
-	 */
-	public Delegator getDelegator();
+    /**
+     * Object delegator reference
+     */
+    public Delegator getDelegator();
 
-	/**
-	 * Close the current repository session should be used when the operation
-	 * with this object are finished.
-	 */
-	public void closeSession();
+    /**
+     * Close the current repository session should be used when the operation
+     * with this object are finished.
+     */
+    public void closeSession();
 
-	/**
-	 * Updates only the node text property data
-	 *
-	 * @param message
-	 * @return
-	 * @throws RepositoryException
-	 */
-	public void updateOrStoreTextData(String message) throws RepositoryException;
+    /**
+     * Updates only the node text property data
+     *
+     * @param message
+     * @return
+     * @throws RepositoryException
+     * @throws GenericEntityException
+     */
+    public void updateOrStoreTextData(String message) throws RepositoryException, GenericEntityException;
 
-	/**
-	 * Returns the related Content Object
-	 *
-	 * @return
-	 */
-	public GenericValue getContentObject();
+    /**
+     * Updates only the node text property data
+     *
+     * @param message
+     * @param language
+     * @return
+     * @throws RepositoryException
+     * @throws GenericEntityException
+     */
+    public void updateOrStoreTextData(String message, String language) throws RepositoryException, GenericEntityException;
 
-	/**
-	 * Returns the related Repository Node
-	 *
-	 * @return
-	 */
-	public Node getNode();
+    /**
+     * Returns the related Content Object
+     *
+     * @return
+     */
+    public GenericValue getContentObject();
 
-	/**
-	 * Returns the contentId from the related content object. If the content
-	 * object is null, an empty string will be retunred.
-	 *
-	 * @return
-	 */
-	public String getContentId();
+    /**
+     * Returns the related Repository Node
+     *
+     * @return
+     */
+    public Node getNode();
 
-	/**
-	 * Returns the absolute path of the node.
-	 *
-	 * @return
-	 */
-	public String getNodePath();
+    /**
+     * Returns the contentId from the related content object. If the content
+     * object is null, an empty string will be retunred.
+     *
+     * @return
+     */
+    public String getContentId();
 
-	/**
-	 * Returns the name of the node.
-	 *
-	 * @return
-	 */
-	public String getNodeName();
+    /**
+     * Returns the absolute path of the node.
+     *
+     * @return
+     */
+    public String getNodePath();
 
-	/**
-	 * Remove a repository Node and the related database entry.
-	 *
-	 * @throws RepositoryException
-	 * @throws GenericEntityException
-	 */
-	public void removeRepositoryNode() throws RepositoryException, GenericEntityException;
+    /**
+     * Returns the name of the node.
+     *
+     * @return
+     */
+    public String getNodeName();
 
-	/**
-	 * Returns only the String Content of a node, if none exists an empty String
-	 * will be returned
-	 *
-	 * @return
-	 * @throws PathNotFoundException
-	 * @throws RepositoryException
-	 */
-	public String getStringContent() throws PathNotFoundException, RepositoryException;
+    /**
+     * Remove a repository Node and the related database entry.
+     *
+     * @throws RepositoryException
+     * @throws GenericEntityException
+     */
+    public void removeRepositoryNode() throws RepositoryException, GenericEntityException;
 
-	/**
-	 * Upload and store a file in the repository
-	 *
-	 * @param description
-	 * @param file
-	 * @return
-	 * @throws PathNotFoundException
-	 * @throws RepositoryException
-	 * @throws GenericEntityException
-	 */
-	public void uploadFileData(InputStream file, String fileName) throws PathNotFoundException, RepositoryException, GenericEntityException;
+    /**
+     * Returns only the String Content of a node, if none exists an empty String
+     * will be returned.
+     *
+     * @return
+     * @throws PathNotFoundException
+     * @throws RepositoryException
+     */
+    public String getStringContent() throws PathNotFoundException, RepositoryException;
 
-	/**
-	 * Return the file stream from the current node object.
-	 *
-	 * @param fileName
-	 * @return
-	 * @throws RepositoryException
-	 */
-	public InputStream getFileContent(String fileName) throws RepositoryException;
+    /**
+     * Returns only the String Content of a node, if none exists an empty String
+     * will be returned.
+     *
+     * @param language
+     * @return
+     * @throws PathNotFoundException
+     * @throws RepositoryException
+     */
+    String getStringContent(String language) throws PathNotFoundException, RepositoryException;
 
-	/**
-	 * Returns the content type of the file. An empty String will be returned if the node
-	 * is not a file node or no mimeType exists.
-	 *
-	 * @return
-	 * @throws RepositoryException
-	 */
-	public String getFileMimeType() throws RepositoryException;
+    /**
+     * Upload and store a file in the repository
+     *
+     * @param description
+     * @param file
+     * @return
+     * @throws PathNotFoundException
+     * @throws RepositoryException
+     * @throws GenericEntityException
+     */
+    public void uploadFileData(InputStream file, String fileName) throws PathNotFoundException, RepositoryException, GenericEntityException;
 
-	/**
-	 * Returns the repository file tree as Json Object.
-	 *
-	 * @return
-	 * @throws RepositoryException
-	 */
-	public JSONArray getJsonFileTree() throws RepositoryException;
+    /**
+     * Return the file stream from the current node object.
+     *
+     * @param fileName
+     * @return
+     * @throws RepositoryException
+     */
+    public InputStream getFileContent(String fileName) throws RepositoryException;
 
-	/**
-	 * Get the file stream from the current node.
-	 *
-	 * @return
-	 * @throws RepositoryException
-	 */
-	public InputStream getFileContent() throws RepositoryException;
+    /**
+     * Returns the content type of the file. An empty String will be returned if the node
+     * is not a file node or no mimeType exists.
+     *
+     * @return
+     * @throws RepositoryException
+     */
+    public String getFileMimeType() throws RepositoryException;
+
+    /**
+     * Returns the repository file tree as Json Object.
+     *
+     * @return
+     * @throws RepositoryException
+     */
+    public JSONArray getJsonFileTree() throws RepositoryException;
+
+    /**
+     * Returns the repository data (including all text content data) tree as Json Object.
+     *
+     * @return
+     * @throws RepositoryException
+     */
+	public JSONArray getJsonDataTree() throws RepositoryException;
+
+    /**
+     * Get the file stream from the current node.
+     *
+     * @return
+     * @throws RepositoryException
+     */
+    public InputStream getFileContent() throws RepositoryException;
+
+    /**
+     * Returns a List of available languages of the current node content
+     *
+     * @return
+     * @throws PathNotFoundException
+     * @throws RepositoryException
+     */
+    public List<String> getAvailableLanguages() throws PathNotFoundException, RepositoryException;
+
+    /**
+     * Get the current selected content language.
+     *
+     * @return
+     */
+    public String getSelctedLanguage();
+
 }

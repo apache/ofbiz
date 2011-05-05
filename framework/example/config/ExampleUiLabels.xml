@@ -40,7 +40,7 @@
         <value xml:lang="ru">Приложение Пример</value>
         <value xml:lang="th">ตัวอย่างโปรแกรมคอมพิวเตอร์</value>
         <value xml:lang="zh">样例应用</value>
-    </property>    
+    </property>
     <property key="ExampleAutocompleteDropdown">
         <value xml:lang="en">Autocomplete Dropdown</value>
         <value xml:lang="fr">Liste déroulante à auto complétion</value>
@@ -74,11 +74,11 @@
         <value xml:lang="ru">OFBiz: Пример</value>
         <value xml:lang="th">OFBiz: ตัวอย่าง</value>
         <value xml:lang="zh">OFBiz: 样例</value>
-    </property>    
+    </property>
     <property key="ExampleCalendarFromLayer">
         <value xml:lang="en">Calendar field (only test purp.)</value>
         <value xml:lang="fr">Calendrier (only test)</value>
-    </property>    
+    </property>
     <property key="ExampleCompanySubtitle">
         <!--value xml:lang="ar">جزء من عائلة أوفبيز للبرمجيات الحرة</value-->
         <value xml:lang="ar">جزء من عائلة أوفبيز للتطبيقات الحرة للتسيير</value>
@@ -239,7 +239,7 @@
         <value xml:lang="fr"> - voir la défintion avec la form de nom </value>
         <value xml:lang="it"> - vedi la definizione della form con il nome</value>
         <value xml:lang="zh"> - 参见表单定义，名称为</value>
-    </property>    
+    </property>
     <property key="ExampleDependentDropDowns">
         <value xml:lang="en">Dependent drop-downs</value>
         <value xml:lang="fr">liste déroulante dépendantes</value>
@@ -476,7 +476,7 @@
         <value xml:lang="en">Fields groups</value>
         <value xml:lang="it">Gruppi campi</value>
         <value xml:lang="zh">数据项组</value>
-    </property>    
+    </property>
     <property key="ExampleLongDescription">
         <value xml:lang="en">Long Description</value>
         <value xml:lang="it">Descrizione lunga</value>
@@ -513,11 +513,11 @@
     <property key="ExampleMultipleDropDowns">
         <value xml:lang="en">Multiple drop-downs</value>
         <value xml:lang="fr">liste déroulante avec choix multiples</value>
-    </property>    
+    </property>
     <property key="ExampleMultipleDropDownTooltip">
         <value xml:lang="en">Needs some fields to be set, see in FormWidgetExampleScreens.xml (begins with multipleSelect)</value>
         <value xml:lang="fr">Nécessite de définir certains champs, voir dans FormWidgetExampleScreens.xml (commence avec multipleSelect)</value>
-    </property>    
+    </property>
     <property key="ExampleNewExample">
         <value xml:lang="en">New Example</value>
         <value xml:lang="fr">Nouvel exemple</value>
@@ -781,6 +781,14 @@
         <value xml:lang="de">Knoten</value>
         <value xml:lang="en">Node</value>
     </property>
+    <property key="ExampleJackrabbitShowContentData">
+        <value xml:lang="de">(Text) Content anzeigen</value>
+        <value xml:lang="en">Show (text) content</value>
+    </property>
+    <property key="ExampleJackrabbitListNodes">
+        <value xml:lang="de">Liste alles Knoten</value>
+        <value xml:lang="en">List Nodes</value>
+    </property>
     <property key="ExampleRepositoryFolder">
         <value xml:lang="de">Ordner</value>
         <value xml:lang="en">Folder</value>
@@ -832,5 +840,13 @@
     <property key="ExampleJackrabbitCleanRepositoryTooltip">
         <value xml:lang="de">Löscht alle Nodes aus dem Repository, die keine Verkünpfung in der Content Tabelle haben.</value>
         <value xml:lang="en">Removes all nodes which are not linked in the content table.</value>
+    </property>
+    <property key="ExampelsJackrabbitRemoveData">
+        <value xml:lang="de">Content löschen.</value>
+        <value xml:lang="en">Remove content.</value>
+    </property>
+    <property key="ExampelsJackrabbitOpenData">
+        <value xml:lang="de">Content öffnen.</value>
+        <value xml:lang="en">Open content.</value>
     </property>
 </resource>

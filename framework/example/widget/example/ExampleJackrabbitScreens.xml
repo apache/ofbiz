@@ -25,7 +25,7 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="PageTitleExampleJackrabbit" />
-                <set field="tabButtonItem" value="ExampleJackrabbitMainPage" />
+                <set field="tabButtonItem" value="ExampleJackrabbitListNodes" />
                 <entity-condition list="repositoryContent" entity-name="Content">
                     <condition-expr field-name="contentTypeId" operator="equals" value="REPOSITORY"/>
                 </entity-condition>
@@ -42,11 +42,33 @@ under the License.
         </section>
     </screen>
 
+    <screen name="ExampleJackrabbitShowContentData">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleExampleJackrabbit" />
+                <set field="tabButtonItem" value="ExampleJackrabbitShowContentData" />
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonExampleJackrabbitDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <label>${uiLabelMap.ExampleJackrabbitTryRightClick}</label>
+                            <platform-specific>
+                                <html><html-template location="component://example/webapp/example/jackrabbit/JackrabbitDataTree.ftl"/></html>
+                            </platform-specific>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
     <screen name="ExampleJackrabbitAddData">
         <section>
             <actions>
                 <set field="titleProperty" value="PageTitleExampleJackrabbit" />
                 <set field="tabButtonItem" value="ExampleJackrabbitAddData" />
+                <script location="component://example/webapp/example/WEB-INF/actions/includes/PrepareLocalesForDropDown.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonExampleJackrabbitDecorator" location="${parameters.mainDecoratorLocation}">
@@ -88,9 +110,9 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonExampleJackrabbitDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                    	<container>
-                    		<link target="CleanJcrRepository" style="buttontext" text="${uiLabelMap.ExampleJackrabbitCleanRepository}"></link> <label>${uiLabelMap.ExampleJackrabbitCleanRepositoryTooltip}</label>
-                    	</container>
+                        <container>
+                            <link target="CleanJcrRepository" style="buttontext" text="${uiLabelMap.ExampleJackrabbitCleanRepository}"></link> <label>${uiLabelMap.ExampleJackrabbitCleanRepositoryTooltip}</label>
+                        </container>
                         <container>
                             <include-form location="component://example/widget/example/ExampleJackrabbitForms.xml" name="ScanRepositoryStructure" />
                         </container>
@@ -113,6 +135,7 @@ under the License.
                 <decorator-screen name="CommonExampleJackrabbitDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <container>
+                            <include-form location="component://example/widget/example/ExampleJackrabbitForms.xml" name="EditRepositoryDataChangeLanguage" />
                             <include-form location="component://example/widget/example/ExampleJackrabbitForms.xml" name="EditRepositoryData" />
                             <link target="RemoveRepositoryNode" text="remove" style="buttontext">
                                 <parameter param-name="repositoryNode" from-field="content.repositoryNode" />
@@ -135,10 +158,10 @@ under the License.
                 <decorator-screen name="CommonExampleJackrabbitDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <container>
-                        	<label>${uiLabelMap.ExampleJackrabbitTryRightClick}</label>
-                        	<platform-specific>
-                        		<html><html-template location="component://example/webapp/example/jackrabbit/JackrabbitFileTree.ftl"/></html>
-                        	</platform-specific>
+                            <label>${uiLabelMap.ExampleJackrabbitTryRightClick}</label>
+                            <platform-specific>
+                                <html><html-template location="component://example/webapp/example/jackrabbit/JackrabbitFileTree.ftl"/></html>
+                            </platform-specific>
                         </container>
                     </decorator-section>
                 </decorator-screen>

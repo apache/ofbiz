@@ -115,14 +115,7 @@ public class JcrTests extends OFBizTestCase {
         InputStream rs = uf.getFileContent(f.getName());
         assertNotNull(rs);
 
-        uf.removeRepositoryNode();
         uf.closeSession();
-    }
-
-    public void testRemoveRepositoryNode() throws Exception {
-        jh.removeRepositoryNode();
-
-        assertNotNull(jh);
     }
 
     public void testListRepositoryNodes() throws Exception {

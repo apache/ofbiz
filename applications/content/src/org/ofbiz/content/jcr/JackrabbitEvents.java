@@ -2,6 +2,8 @@ package org.ofbiz.content.jcr;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +25,7 @@ import org.ofbiz.base.util.FileUtil;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.content.jcr.helper.JcrFileHelperJackrabbit;
 import org.ofbiz.content.jcr.helper.JcrTextHelperJackrabbit;
 import org.ofbiz.entity.Delegator;
@@ -43,12 +46,13 @@ public class JackrabbitEvents {
 	 */
 	public static String addNewTextMessageToJcrRepository(HttpServletRequest request, HttpServletResponse response) {
 		String message = request.getParameter("message");
+		String language = request.getParameter("msgLocale");
 
 		JcrTextHelper jackrabbit = new JcrTextHelperJackrabbit(request);
 
 		String newContentId = null;
 		try {
-			newContentId = jackrabbit.storeNewTextData(message);
+			newContentId = jackrabbit.storeNewTextData(message, language);
 
 			if (newContentId == null) {
 				request.setAttribute("_ERROR_MESSAGE_", "Couldn't be created, maybe the node already exists. Use another node name to store you're content.");
@@ -63,6 +67,10 @@ public class JackrabbitEvents {
 			                                                         // locale)
 			return "error";
 		} catch (RepositoryException e) {
+			Debug.logError(e, module);
+			request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
+			return "error";
+		} catch (GenericEntityException e) {
 			Debug.logError(e, module);
 			request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
 			return "error";
@@ -101,10 +109,27 @@ public class JackrabbitEvents {
 	 */
 	public static String getNodeContent(HttpServletRequest request, HttpServletResponse response) {
 		JcrTextHelper jackrabbit = new JcrTextHelperJackrabbit(request);
+		String language = UtilValidate.isNotEmpty(request.getParameter("language")) ? request.getParameter("language") : (String) request.getAttribute("language");
 
 		try {
-			String textContent = jackrabbit.getTextData();
+			String textContent = null;
+			if (UtilValidate.isEmpty(language)) {
+				textContent = jackrabbit.getTextData();
+			} else {
+				textContent = jackrabbit.getTextData(language);
+			}
 			request.setAttribute("message", textContent);
+			List<String> availableLanguages = jackrabbit.getAvailableLanguages();
+			List<Map<String, String>> langMap = new ArrayList<Map<String, String>>();
+			for (String lang : availableLanguages) {
+				Map<String, String> tmp = new HashMap<String, String>();
+				tmp.put("localeId", lang);
+				langMap.add(tmp);
+			}
+
+			request.setAttribute("languageList", langMap);
+			request.setAttribute("selectedLanguage", jackrabbit.getSelctedLanguage());
+
 		} catch (PathNotFoundException e) {
 			Debug.logError(e, module);
 			request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
@@ -128,17 +153,28 @@ public class JackrabbitEvents {
 	 */
 	public static String updateRepositoryData(HttpServletRequest request, HttpServletResponse response) {
 		String message = request.getParameter("message");
+		String language = request.getParameter("selectedLanguage");
 
 		JcrTextHelper jackrabbit = new JcrTextHelperJackrabbit(request);
 
 		try {
-			String textContent = jackrabbit.updateTextData(message);
+			String textContent = null;
+			if (UtilValidate.isEmpty(language)) {
+				textContent = jackrabbit.updateTextData(message);
+			} else {
+				textContent = jackrabbit.updateTextData(message, language);
+				request.setAttribute("language", language);
+			}
 			request.setAttribute("message", textContent);
 		} catch (PathNotFoundException e) {
 			Debug.logError(e, module);
 			request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
 			return "error";
 		} catch (RepositoryException e) {
+			Debug.logError(e, module);
+			request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
+			return "error";
+		} catch (GenericEntityException e) {
 			Debug.logError(e, module);
 			request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
 			return "error";
@@ -288,6 +324,12 @@ public class JackrabbitEvents {
 		return "success";
 	}
 
+	/**
+	 * Creates the FILE Tree as JSON Object
+	 * @param request
+	 * @param response
+	 * @return
+	 */
 	public static String getRepositoryFileTree(HttpServletRequest request, HttpServletResponse response) {
 		GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
 		Delegator delegator = (Delegator) request.getAttribute("delegator");
@@ -297,6 +339,32 @@ public class JackrabbitEvents {
 		try {
 			JSONArray fileTree = jackrabbit.getJsonFileTree();
 			request.setAttribute("fileTree", StringUtil.wrapString(fileTree.toString()));
+		} catch (RepositoryException e) {
+			Debug.logError(e, module);
+			request.setAttribute("_ERROR_MESSAGE_", e.toString());
+			return "error";
+		} finally {
+			jackrabbit.closeSession();
+		}
+
+		return "success";
+	}
+
+	/**
+	 * Creates the DATA (TEXT) Tree as JSON Object
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	public static String getRepositoryDataTree(HttpServletRequest request, HttpServletResponse response) {
+		GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
+		Delegator delegator = (Delegator) request.getAttribute("delegator");
+
+		JcrTextHelper jackrabbit = new JcrTextHelperJackrabbit(userLogin, delegator, null, "/");
+
+		try {
+			JSONArray fileTree = jackrabbit.getJsonDataTree();
+			request.setAttribute("dataTree", StringUtil.wrapString(fileTree.toString()));
 		} catch (RepositoryException e) {
 			Debug.logError(e, module);
 			request.setAttribute("_ERROR_MESSAGE_", e.toString());

@@ -64,7 +64,7 @@ public class JcrFileHelperJackrabbit extends JcrFileHelperAbstract implements Jc
 		repositoryNode = addRepositoryFileHomeNode(repositoryNode);
 
 		try {
-			super.orm = new OfbizRepositoryMappingJackrabbit(delegator, session, contentId, repositoryNode);
+			super.orm = new OfbizRepositoryMappingJackrabbit(delegator, session, contentId, repositoryNode, OfbizRepositoryMappingJackrabbit.NODE_TYPE.FILE);
 		} catch (GenericEntityException e) {
 			Debug.logError(e, module);
 			return;
@@ -115,7 +115,7 @@ public class JcrFileHelperJackrabbit extends JcrFileHelperAbstract implements Jc
 
 		Delegator delegator = (Delegator) request.getAttribute("delegator");
 		try {
-			super.orm = new OfbizRepositoryMappingJackrabbit(delegator, session, contentId, repositoryNode);
+			super.orm = new OfbizRepositoryMappingJackrabbit(delegator, session, contentId, repositoryNode, OfbizRepositoryMappingJackrabbit.NODE_TYPE.FILE);
 		} catch (GenericEntityException e) {
 			Debug.logError(e, module);
 			return;
@@ -191,7 +191,7 @@ public class JcrFileHelperJackrabbit extends JcrFileHelperAbstract implements Jc
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see org.ofbiz.jcr.helper.JcrFileHelper#getJsonFileTree(java.lang.String)
+	 * @see org.ofbiz.jcr.helper.JcrFileHelper#getJsonFileTree()
 	 */
 	@Override
 	public JSONArray getJsonFileTree() throws RepositoryException {
