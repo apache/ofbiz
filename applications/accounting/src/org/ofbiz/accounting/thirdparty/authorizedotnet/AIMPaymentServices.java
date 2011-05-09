@@ -163,7 +163,9 @@ public class AIMPaymentServices {
         Properties props = buildAIMProperties(context, delegator);
         buildMerchantInfo(context, props, request);
         buildGatewayResponeConfig(context, props, request);
+        buildCustomerBillingInfo(context, props, request);
         buildEmailSettings(context, props, request);
+        buildInvoiceInfo(context, props, request);
         props.put("transType", "CREDIT");
         props.put("cardtype", (String)creditCard.get("cardType"));
         buildRefundTransaction(context, props, request);
@@ -475,6 +477,12 @@ public class AIMPaymentServices {
     private static void buildInvoiceInfo(Map<String, Object> params, Properties props, Map<String, Object> AIMRequest) {
         String description = UtilFormatOut.checkNull(props.getProperty("transDescription"));
         String orderId = UtilFormatOut.checkNull((String)params.get("orderId"));
+        if (UtilValidate.isEmpty(orderId)) {
+            GenericValue orderPaymentPreference = (GenericValue) params.get("orderPaymentPreference");
+            if (UtilValidate.isNotEmpty(orderPaymentPreference)) {
+                orderId = (String) orderPaymentPreference.get("orderId");
+            }
+        }
         AIMRequest.put("x_Invoice_Num", "Order " + orderId);
         AIMRequest.put("x_Description", description);
     }
