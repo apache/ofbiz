@@ -865,7 +865,7 @@ public class GenericDelegator implements Delegator {
 
             return value;
         } catch (GenericEntityException e) {
-            String errMsg = "Failure in create operation for entity [" + value.getEntityName() + "]: " + e.toString() + ". Rolling back transaction.";
+            String errMsg = "Failure in create operation for entity [" + (value != null ? value.getEntityName() : "null")  + "]: " + e.toString() + ". Rolling back transaction.";
             Debug.logError(e, errMsg, module);
             try {
                 // only rollback the transaction if we started one...
@@ -999,7 +999,9 @@ public class GenericDelegator implements Delegator {
             this.saveEntitySyncRemoveInfo(primaryKey);
 
             if (testMode) {
-                storeForTestRollback(new TestOperation(OperationType.DELETE, removedEntity));
+                if (removedEntity != null) {
+                    storeForTestRollback(new TestOperation(OperationType.DELETE, removedEntity));
+                }
             }
 
             ecaRunner.evalRules(EntityEcaHandler.EV_RETURN, EntityEcaHandler.OP_REMOVE, primaryKey, false);
@@ -1065,7 +1067,9 @@ public class GenericDelegator implements Delegator {
             int num = helper.removeByPrimaryKey(value.getPrimaryKey());
 
             if (testMode) {
-                storeForTestRollback(new TestOperation(OperationType.DELETE, removedValue));
+                if (removedValue != null) {
+                    storeForTestRollback(new TestOperation(OperationType.DELETE, removedValue));
+                }
             }
 
             this.saveEntitySyncRemoveInfo(value.getPrimaryKey());
