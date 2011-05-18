@@ -263,7 +263,7 @@ under the License.
         <security auth="true" https="true" />
         <event type="java" path="org.ofbiz.content.jcr.JackrabbitEvents" invoke="getNodeContent"/>
         <response name="success" type="view" value="ExampleJackrabbitEditRepositoryContent" />
-        <response name="error" type="view" value="ExampleJackrabbitEditeRepositoryContent" />
+        <response name="error" type="view" value="ExampleJackrabbitShowContentData" />
     </request-map>
     <request-map uri="UpdateRepositoryData">
         <security auth="true" https="true" />

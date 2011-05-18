@@ -849,4 +849,13 @@
         <value xml:lang="de">Content öffnen.</value>
         <value xml:lang="en">Open content.</value>
     </property>
+    <property key="ExampleLanguageTextVersion">
+        <value xml:lang="de">Verion der gewählten sprache</value>
+        <value xml:lang="en">Version of the choosen language</value>
+    </property>
+    <property key="ExampleBaseNodeVersion">
+        <value xml:lang="de">Verion des Content Knoten</value>
+        <value xml:lang="en">Version of the base content node</value>
+    </property>
+
 </resource>

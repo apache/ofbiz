@@ -35,7 +35,8 @@ public interface JcrTextHelper {
     public String storeNewTextData(String message, String language) throws RepositoryException, GenericEntityException;
 
     /**
-     * Get the String content to the current node, returns the system default language.
+     * Get the String content to the current node, returns the system default
+     * language.
      *
      * @return
      * @throws PathNotFoundException
@@ -52,6 +53,17 @@ public interface JcrTextHelper {
      * @throws RepositoryException
      */
     public String getTextData(String language) throws PathNotFoundException, RepositoryException;
+
+    /**
+     * Returns the text content in a defined language and a defined version
+     *
+     * @param language
+     * @param version
+     * @return
+     * @throws PathNotFoundException
+     * @throws RepositoryException
+     */
+    public String getTextData(String language, String version) throws PathNotFoundException, RepositoryException;
 
     /**
      * Update the text content of a current text node.
@@ -119,15 +131,41 @@ public interface JcrTextHelper {
      */
     public List<String> getAvailableLanguages() throws PathNotFoundException, RepositoryException;
 
-	/**
-	 * Get the current selected content language.
-	 *
-	 * @return
-	 */
-	public String getSelctedLanguage();
+    /**
+     * Get the current selected content language.
+     *
+     * @return
+     */
+    public String getSelctedLanguage();
 
     /**
-     * Returns the Repository Data (including all Text contents) Tree as JSON Object
+     * Returns the current version of the node. '0' if the node is not
+     * versioned. Only the version of the base directory is returned, not of the
+     * selected language.
+     *
+     * @return
+     */
+    public String getCurrentBaseVersion();
+
+    /**
+     * Returns the current version of the node. '0' if the node is not
+     * versioned. Returns the version of the selected language content.
+     *
+     * @return
+     */
+    public String getCurrentLanguageVersion();
+
+    /**
+     * Returns a list of all available Versions for the current selected
+     * language.
+     *
+     * @return
+     */
+    public List<String> getAllLanguageVersions();
+
+    /**
+     * Returns the Repository Data (including all Text contents) Tree as JSON
+     * Object
      *
      * @return
      * @throws RepositoryException

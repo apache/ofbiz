@@ -17,6 +17,8 @@ public abstract class JcrTextHelperAbstract extends JcrHelperAbstract {
 
     public abstract String getTextData(String language) throws PathNotFoundException, RepositoryException;
 
+    public abstract String getTextData(String language, String version) throws PathNotFoundException, RepositoryException;
+
     public abstract String updateTextData(String message) throws PathNotFoundException, RepositoryException, GenericEntityException;
 
     public abstract JcrTextHelper addNewNode(String newNode) throws RepositoryException, GenericEntityException;

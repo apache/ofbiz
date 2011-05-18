@@ -6,6 +6,7 @@ import java.util.List;
 import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
+import javax.jcr.version.Version;
 
 import net.sf.json.JSONArray;
 
@@ -34,7 +35,7 @@ public interface OfbizRepositoryMapping {
      * @throws RepositoryException
      * @throws GenericEntityException
      */
-    public void updateOrStoreTextData(String message) throws RepositoryException, GenericEntityException;
+    public Version updateOrStoreTextData(String message) throws RepositoryException, GenericEntityException;
 
     /**
      * Updates only the node text property data
@@ -45,7 +46,7 @@ public interface OfbizRepositoryMapping {
      * @throws RepositoryException
      * @throws GenericEntityException
      */
-    public void updateOrStoreTextData(String message, String language) throws RepositoryException, GenericEntityException;
+    public Version updateOrStoreTextData(String message, String language) throws RepositoryException, GenericEntityException;
 
     /**
      * Returns the related Content Object
@@ -110,7 +111,18 @@ public interface OfbizRepositoryMapping {
      * @throws PathNotFoundException
      * @throws RepositoryException
      */
-    String getStringContent(String language) throws PathNotFoundException, RepositoryException;
+    public String getStringContent(String language) throws PathNotFoundException, RepositoryException;
+
+    /**
+     * Returns the text content in a defined language and a defined version
+     *
+     * @param language
+     * @param version
+     * @return
+     * @throws PathNotFoundException
+     * @throws RepositoryException
+     */
+    public String getStringContent(String language, String version) throws PathNotFoundException, RepositoryException;
 
     /**
      * Upload and store a file in the repository
@@ -134,8 +146,8 @@ public interface OfbizRepositoryMapping {
     public InputStream getFileContent(String fileName) throws RepositoryException;
 
     /**
-     * Returns the content type of the file. An empty String will be returned if the node
-     * is not a file node or no mimeType exists.
+     * Returns the content type of the file. An empty String will be returned if
+     * the node is not a file node or no mimeType exists.
      *
      * @return
      * @throws RepositoryException
@@ -151,12 +163,13 @@ public interface OfbizRepositoryMapping {
     public JSONArray getJsonFileTree() throws RepositoryException;
 
     /**
-     * Returns the repository data (including all text content data) tree as Json Object.
+     * Returns the repository data (including all text content data) tree as
+     * Json Object.
      *
      * @return
      * @throws RepositoryException
      */
-	public JSONArray getJsonDataTree() throws RepositoryException;
+    public JSONArray getJsonDataTree() throws RepositoryException;
 
     /**
      * Get the file stream from the current node.
@@ -181,5 +194,28 @@ public interface OfbizRepositoryMapping {
      * @return
      */
     public String getSelctedLanguage();
+
+    /**
+     * Returns the current version of the node. If '0' is returned the node is
+     * not versinoed.
+     *
+     * @return
+     */
+    public String getCurrentBaseVersion();
+
+    /**
+     * Get the current version of the node. Returns the version of the
+     * currentliy selected language.
+     *
+     * @return
+     */
+    public String getCurrentLanguageVersion();
+
+    /**
+     * Returns a list of all versions to the current selected version.
+     *
+     * @return
+     */
+    public List<String> getAllLanguageVersions();
 
 }

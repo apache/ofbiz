@@ -1,6 +1,7 @@
 package org.ofbiz.jcr.helper;
 
 import java.io.InputStream;
+import java.util.List;
 
 import javax.jcr.RepositoryException;
 
@@ -105,12 +106,36 @@ public interface JcrFileHelper {
      */
     public String getFileMimeType() throws RepositoryException;
 
-	/**
-	 * Get the current selected content language.
-	 *
-	 * @return
-	 */
-	public String getSelctedLanguage();
+    /**
+     * Get the current selected content language.
+     *
+     * @return
+     */
+    public String getSelctedLanguage();
 
+    /**
+     * Returns the current version of the node. '0' if the node is not
+     * versioned. Only the version of the base directory is returned, not of the
+     * selected language.
+     *
+     * @return
+     */
+    public String getCurrentBaseVersion();
+
+    /**
+     * Returns the current version of the node. '0' if the node is not
+     * versioned. Returns the version of the selected language content.
+     *
+     * @return
+     */
+    public String getCurrentLanguageVersion();
+
+    /**
+     * Returns a list of all available Versions for the current selected
+     * language.
+     *
+     * @return
+     */
+    public List<String> getAllLanguageVersions();
 
 }

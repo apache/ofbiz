@@ -75,9 +75,13 @@ under the License.
         <field name="repositoryNode" title="${uiLabelMap.ExampleRepositoryNode}" map-name="content">
             <hidden />
         </field>
-        <field name="language" title="${uiLabelMap.CommonChooseLanguage}" event="onChange" action="javascript:jQuery('#EditRepositoryDataChangeLanguage').submit();">
+        <field name="language" title="${uiLabelMap.CommonChooseLanguage}" >
             <drop-down allow-empty="false" current="first-in-list" current-description="${parameters.selectedLanguage}"><list-options key-name="localeId" list-name="parameters.languageList" description="${localeId}"/></drop-down>
         </field>
+        <field name="version" >
+            <drop-down allow-empty="true" current="first-in-list" current-description="${parameters.currentLanguageVersion}"><list-options key-name="version" list-name="parameters.versionList" description="${version}"/></drop-down>
+        </field>
+        <field name="submit" ><submit/></field>
     </form>
 
     <form name="EditRepositoryData" type="single" target="UpdateRepositoryData" default-entity-name="Content">
@@ -85,7 +89,13 @@ under the License.
             <display />
         </field>
         <field name="selectedLanguage" title="${uiLabelMap.CommonLanguageTitle}">
-        	<display />
+            <display />
+        </field>
+        <field name="currentLanguageVersion" title="${uiLabelMap.ExampleLanguageTextVersion}">
+            <display />
+        </field>
+        <field name="currentBaseNodeVersion" title="${uiLabelMap.ExampleBaseNodeVersion}">
+            <display />
         </field>
         <field name="message" title="${uiLabelMap.ExampleRepositoryMessage}" map-name="content">
             <textarea visual-editor-enable="true" default-value="${parameters.message}"/>
