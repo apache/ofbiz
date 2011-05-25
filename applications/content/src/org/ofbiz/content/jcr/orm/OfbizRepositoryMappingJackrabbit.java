@@ -3,6 +3,7 @@ package org.ofbiz.content.jcr.orm;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -67,11 +68,11 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
     // private GenericValue contentAssoc = null;
     private Session session = null;
     private Node node = null;
-    private VersionManager versionManager = null;
-    private String selectedLanguage = UtilProperties.getPropertyValue("general", "locale.properties.fallback");
+    private volatile VersionManager versionManager = null;
+    private volatile String selectedLanguage = UtilProperties.getPropertyValue("general", "locale.properties.fallback");
     // a list for all checked out nodes during one transaction TODO THREAD SAFE
     // ??
-    private List<Node> checkedOutNodeStore = new ArrayList<Node>();
+    private List<Node> checkedOutNodeStore = Collections.synchronizedList(new ArrayList<Node>());
 
     /**
      * The OfbizContentMapping constructor loads the node and related content
