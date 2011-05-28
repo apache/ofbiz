@@ -13,7 +13,11 @@ public abstract class JcrFileHelperAbstract extends JcrHelperAbstract {
 
     public abstract GenericValue uploadFileData(byte[] file, String fileName) throws RepositoryException, GenericEntityException;
 
+    public abstract GenericValue uploadFileData(byte[] file, String fileName, String language, String description) throws RepositoryException, GenericEntityException;
+
     public abstract GenericValue uploadFileData(InputStream file, String fileName) throws RepositoryException, GenericEntityException;
+
+    public abstract GenericValue uploadFileData(InputStream file, String fileName, String language, String description) throws RepositoryException, GenericEntityException;
 
     public abstract InputStream getFileContent(String fileName) throws RepositoryException;
 

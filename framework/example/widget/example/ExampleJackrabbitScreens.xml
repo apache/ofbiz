@@ -87,6 +87,7 @@ under the License.
             <actions>
                 <set field="titleProperty" value="PageTitleExampleJackrabbit" />
                 <set field="tabButtonItem" value="ExampleJackrabbitUploadFileData" />
+                <script location="component://example/webapp/example/WEB-INF/actions/includes/PrepareLocalesForDropDown.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonExampleJackrabbitDecorator" location="${parameters.mainDecoratorLocation}">

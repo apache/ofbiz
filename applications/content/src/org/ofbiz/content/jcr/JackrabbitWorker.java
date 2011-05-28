@@ -36,11 +36,9 @@ public class JackrabbitWorker {
         try {
             session = JackrabbitContainer.getUserSession(userLogin);
             returnList = getRepositoryNodes(session, startNodePath);
-        }
-        catch (RepositoryException e) {
+        } catch (RepositoryException e) {
             throw new RepositoryException(e);
-        }
-        finally {
+        } finally {
             session.logout();
         }
 
@@ -86,20 +84,16 @@ public class JackrabbitWorker {
                 }
 
             }
-        }
-        catch (RepositoryException e) {
+        } catch (RepositoryException e) {
             Debug.logError(e, module);
             throw new RepositoryException(e);
-        }
-        catch (GenericEntityException e) {
+        } catch (GenericEntityException e) {
             Debug.logError(e, module);
             throw new GenericEntityException(e);
-        }
-        finally {
+        } finally {
             try {
                 session.save();
-            }
-            catch (RepositoryException e) {
+            } catch (RepositoryException e) {
                 Debug.logError(e, module);
                 throw new RepositoryException(e);
             }

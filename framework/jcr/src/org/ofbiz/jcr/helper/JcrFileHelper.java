@@ -28,11 +28,37 @@ public interface JcrFileHelper {
      *
      * @param file
      * @param fileName
+     * @param language
+     * @param description
+     * @return
+     * @throws RepositoryException
+     * @throws GenericEntityException
+     */
+    public GenericValue uploadFileData(byte[] file, String fileName, String language, String description) throws RepositoryException, GenericEntityException;
+
+    /**
+     * Upload a file to the repository file tree.
+     *
+     * @param file
+     * @param fileName
      * @return
      * @throws RepositoryException
      * @throws GenericEntityException
      */
     public GenericValue uploadFileData(InputStream file, String fileName) throws RepositoryException, GenericEntityException;
+
+    /**
+     * Upload a file to the repository file tree.
+     *
+     * @param file
+     * @param fileName
+     * @param language
+     * @param description
+     * @return
+     * @throws RepositoryException
+     * @throws GenericEntityException
+     */
+    public GenericValue uploadFileData(InputStream file, String fileName, String language, String description) throws RepositoryException, GenericEntityException;
 
     /**
      * Return the file passed file from the current folder node.

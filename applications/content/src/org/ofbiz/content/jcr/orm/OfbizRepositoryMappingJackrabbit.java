@@ -44,8 +44,8 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
     private static String module = OfbizRepositoryMappingJackrabbit.class.getName();
 
     private enum PROPERTY_FIELDS {
-        MESSAGE("jcr:message"), FILE(NodeType.NT_FILE), FOLDER(NodeType.NT_FOLDER), RESOURCE(NodeType.NT_RESOURCE), DATA("jcr:data"), UNSTRUCTURED(NodeType.NT_UNSTRUCTURED), MIMETYPE("jcr:mimetype"), REPROOT("rep:root"), LANGUAGE("mix:language"), VERSIONING(
-                "mix:versionable");
+        MESSAGE("jcr:message"), FILE(NodeType.NT_FILE), FOLDER(NodeType.NT_FOLDER), RESOURCE(NodeType.NT_RESOURCE), DATA("jcr:data"), UNSTRUCTURED(NodeType.NT_UNSTRUCTURED), MIMETYPE("jcr:mimeType"), REPROOT("rep:root"), mixInLANGUAGE("mix:language"), mixInVERSIONING(
+                "mix:versionable"), mixInTITLE("mix:title"), LANGUAGE("jcr:language"), TITLE("jcr:title"), DESCRIPTION("jcr:description");
 
         String type = null;
 
@@ -70,8 +70,6 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
     private Node node = null;
     private volatile VersionManager versionManager = null;
     private volatile String selectedLanguage = UtilProperties.getPropertyValue("general", "locale.properties.fallback");
-    // a list for all checked out nodes during one transaction TODO THREAD SAFE
-    // ??
     private List<Node> checkedOutNodeStore = Collections.synchronizedList(new ArrayList<Node>());
 
     /**
@@ -280,19 +278,19 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
         // language property
         // TODO Refactor code fragment
         Node languageNode = node;
-        if (!this.node.hasProperty(PROPERTY_FIELDS.LANGUAGE.getType())) {
+        if (!this.node.hasProperty(PROPERTY_FIELDS.mixInLANGUAGE.getType())) {
             if (session.nodeExists(this.node.getPath()) && session.nodeExists(this.node.getPath() + "/" + language)) {
                 languageNode = this.node.getNode(language);
                 checkOutNode(languageNode);
             } else {
                 languageNode = (Node) this.createNewRepositoryNode(this.node.getPath() + "/" + language).get("node");
-                languageNode.setProperty(PROPERTY_FIELDS.LANGUAGE.getType(), language);
+                languageNode.setProperty(PROPERTY_FIELDS.mixInLANGUAGE.getType(), language);
             }
         } else {
             checkOutNode(languageNode);
         }
         languageNode.setProperty(PROPERTY_FIELDS.MESSAGE.getType(), message);
-        languageNode.addMixin(PROPERTY_FIELDS.VERSIONING.getType());
+        languageNode.addMixin(PROPERTY_FIELDS.mixInVERSIONING.getType());
 
         saveSessionAndCheckinNode();
 
@@ -408,7 +406,7 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
         }
 
         Node langNode = null;
-        if (this.node.hasProperty(PROPERTY_FIELDS.LANGUAGE.getType())) {
+        if (this.node.hasProperty(PROPERTY_FIELDS.mixInLANGUAGE.getType())) {
             langNode = this.node;
         } else if (this.node.hasNode(language)) {
             // if a language is set check if the content exists in this
@@ -418,9 +416,11 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
             }
         } else if (!this.node.hasNode(language) && useDefaultLanguage) {
             // NOTE: This will only executed if we want to load the content by
-            // the (system) default language and if for this default language no node exist.
+            // the (system) default language and if for this default language no
+            // node exist.
 
-            // When the method is called with a specific language and this language is
+            // When the method is called with a specific language and this
+            // language is
             // not present the user should get a hint that he is looking for a
             // not existing language. In the other case the user looks for any
             // language first we try the default language and if the default not
@@ -429,7 +429,7 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
                 NodeIterator ni = this.node.getNodes();
                 while (ni.hasNext()) {
                     Node n = ni.nextNode();
-                    if (n.hasProperty(PROPERTY_FIELDS.LANGUAGE.getType())) {
+                    if (n.hasProperty(PROPERTY_FIELDS.mixInLANGUAGE.getType())) {
                         langNode = n;
                         break;
                     }
@@ -452,7 +452,7 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
         }
 
         // set the current language selection
-        selectedLanguage = langNode.getProperty(PROPERTY_FIELDS.LANGUAGE.getType()).getString();
+        selectedLanguage = langNode.getProperty(PROPERTY_FIELDS.mixInLANGUAGE.getType()).getString();
 
         Property property = null;
         if (langNode.hasProperty(PROPERTY_FIELDS.MESSAGE.getType())) {
@@ -479,8 +479,8 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
 
         while (ni.hasNext()) {
             Node subNode = (Node) ni.next();
-            if (subNode.hasProperty(PROPERTY_FIELDS.LANGUAGE.getType())) {
-                availableLanguages.add(subNode.getProperty(PROPERTY_FIELDS.LANGUAGE.getType()).getString());
+            if (subNode.hasProperty(PROPERTY_FIELDS.mixInLANGUAGE.getType())) {
+                availableLanguages.add(subNode.getProperty(PROPERTY_FIELDS.mixInLANGUAGE.getType()).getString());
             }
         }
 
@@ -494,19 +494,43 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
      */
     @Override
     public void uploadFileData(InputStream file, String fileName) throws PathNotFoundException, RepositoryException, GenericEntityException {
+        uploadFileData(file, fileName, null, null);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.orm.OfbizContentMapping#uploadFileData()
+     */
+    @Override
+    public void uploadFileData(InputStream file, String fileName, String language, String description) throws PathNotFoundException, RepositoryException, GenericEntityException {
+        // if no language is passed store the content under the ofbiz default
+        // language
+        if (UtilValidate.isEmpty(language)) {
+            language = UtilProperties.getPropertyValue("general", "locale.properties.fallback");
+        }
+
         Node folder = (Node) createNewRepositoryNode(this.node.getPath() + "/" + fileName, PROPERTY_FIELDS.FILE.getType()).get("node");
 
+        // set additional file informations
+        folder.addMixin(PROPERTY_FIELDS.mixInLANGUAGE.getType());
+        folder.addMixin(PROPERTY_FIELDS.mixInTITLE.getType());
+        folder.setProperty(PROPERTY_FIELDS.LANGUAGE.getType(), language);
+        folder.setProperty(PROPERTY_FIELDS.TITLE.getType(), fileName);
+        if (UtilValidate.isNotEmpty(description)) {
+            folder.setProperty(PROPERTY_FIELDS.DESCRIPTION.getType(), description);
+        }
+
         Node resource = (Node) createNewRepositoryNode(folder.getPath() + "/jcr:content", PROPERTY_FIELDS.RESOURCE.getType()).get("node");
-        // checkOutNode(resource);
         Binary binary = this.session.getValueFactory().createBinary(file);
 
         String mimeType = getMimeTypeFromInputStream(file);
 
-        resource.setProperty("jcr:mimeType", mimeType);
+        resource.setProperty(PROPERTY_FIELDS.MIMETYPE.getType(), mimeType);
         // resource.setProperty("jcr:encoding", "");
 
         resource.setProperty(PROPERTY_FIELDS.DATA.getType(), binary);
-        resource.addMixin(PROPERTY_FIELDS.VERSIONING.getType());
+        resource.addMixin(PROPERTY_FIELDS.mixInVERSIONING.getType());
         saveSessionAndCheckinNode();
 
         return;
@@ -716,7 +740,7 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
             Node node = nodeIterator.nextNode();
 
             //
-            if (node.getPrimaryNodeType().isNodeType(PROPERTY_FIELDS.UNSTRUCTURED.getType()) && !node.hasProperty(PROPERTY_FIELDS.LANGUAGE.getType())) {
+            if (node.getPrimaryNodeType().isNodeType(PROPERTY_FIELDS.UNSTRUCTURED.getType()) && !node.hasProperty(PROPERTY_FIELDS.mixInLANGUAGE.getType())) {
                 attr.element("title", node.getName());
                 folder.element("data", attr);
 
@@ -859,7 +883,7 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
             returnMap.put("content", newContent);
             assocContentId = newContent.getString("contentId");
 
-            newNodeParent.addMixin(PROPERTY_FIELDS.VERSIONING.getType());
+            newNodeParent.addMixin(PROPERTY_FIELDS.mixInVERSIONING.getType());
             // the new node should be add to the nodeStore List to check it in
             // when the session is stored.
             checkedOutNodeStore.add(newNodeParent);

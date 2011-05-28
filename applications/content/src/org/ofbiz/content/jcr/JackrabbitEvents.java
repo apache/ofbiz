@@ -291,7 +291,8 @@ public class JackrabbitEvents {
      * @return
      */
     public static String uploadFileData(HttpServletRequest request, HttpServletResponse response) {
-
+        String language = request.getParameter("fileLocale");
+        String description = request.getParameter("description");
         ServletFileUpload fu = new ServletFileUpload(new DiskFileItemFactory(10240, FileUtil.getFile("runtime/tmp")));
         List<FileItem> list = null;
         Map<String, String> passedParams = FastMap.newInstance();
@@ -321,7 +322,7 @@ public class JackrabbitEvents {
 
         if (file != null && file.length >= 1) {
             try {
-                jackrabbit.uploadFileData(file, passedParams.get("completeFileName"));
+                jackrabbit.uploadFileData(file, passedParams.get("completeFileName"), language, description);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
                 request.setAttribute("_ERROR_MESSAGE_", e.toString());

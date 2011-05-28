@@ -137,6 +137,19 @@ public interface OfbizRepositoryMapping {
     public void uploadFileData(InputStream file, String fileName) throws PathNotFoundException, RepositoryException, GenericEntityException;
 
     /**
+     * Upload and store a file in the repository und a givven language.
+     *
+     * @param file
+     * @param fileName
+     * @param language
+     * @param description
+     * @throws PathNotFoundException
+     * @throws RepositoryException
+     * @throws GenericEntityException
+     */
+    void uploadFileData(InputStream file, String fileName, String language, String description) throws PathNotFoundException, RepositoryException, GenericEntityException;
+
+    /**
      * Return the file stream from the current node object.
      *
      * @param fileName

@@ -66,6 +66,10 @@ under the License.
         <field name="fileData" title="${uiLabelMap.ExampleRepositoryFile}">
             <file size="28"></file>
         </field>
+        <field name="fileLocale" title="${uiLabelMap.CommonChooseLanguage}" >
+            <drop-down allow-empty="true" ><list-options key-name="localeId" list-name="parameters.localeList" description="${localeId}"/></drop-down>
+        </field>
+        <field name="description"><textarea cols="30"/></field>
         <field name="submit">
             <submit />
         </field>
