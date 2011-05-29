@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -870,7 +871,7 @@ public class ProductServices {
             Set<String> featureProductIds = FastSet.newInstance();
             featureProductIds.add(productId);
             featureProductIds.addAll(variantProductsById.keySet());
-            Set<String> productFeatureIds = FastSet.newInstance();
+            Set<String> productFeatureIds = new HashSet<String>();
             productFeatureIds.add(productFeatureIdOne);
             productFeatureIds.add(productFeatureIdTwo);
             productFeatureIds.add(productFeatureIdThree);
@@ -1224,9 +1225,8 @@ public class ProductServices {
 
     /**
      * Finds productId(s) corresponding to a product reference, productId or a GoodIdentification idValue
-     * @param dctx
-     * @param context
-     * @param context.productId use to search with productId or goodIdentification.idValue
+     * @param ctx the dispatch context
+     * @param context productId use to search with productId or goodIdentification.idValue
      * @return a GenericValue with a productId and a List of complementary productId found
      */
     public static Map<String, Object> findProductById(DispatchContext ctx, Map<String, Object> context) {

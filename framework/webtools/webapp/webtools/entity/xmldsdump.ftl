@@ -35,8 +35,7 @@ under the License.
   </div>
 </#macro>
 
-<h1>${uiLabelMap.PageTitleEntityExport}</h1>
-<br />
+<div class="page-title"><span>${uiLabelMap.PageTitleEntityExport}</span></div>
 <p>${uiLabelMap.WebtoolsXMLExportInfo}</p>
 <hr />
 

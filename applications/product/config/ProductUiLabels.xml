@@ -23,18 +23,6 @@
         <value xml:lang="de">Neues Merkmal für dieses Produkt erstellen</value>
         <value xml:lang="en">Add new Product Feature to current product</value>
     </property>
-    <property key="Approve">
-        <value xml:lang="en">Approve</value>
-        <value xml:lang="th">ยืนยัน</value>
-    </property>
-    <property key="Approved">
-        <value xml:lang="en">Approved</value>
-        <value xml:lang="th">ยืนยันแล้ว</value>
-    </property>
-    <property key="AutomaticResize">
-        <value xml:lang="en">Automatic Resize</value>
-        <value xml:lang="th">เปลี่ยนขนาดอัตโนมัติ</value>
-    </property>
     <property key="CatalogWebAnalytics">
         <value xml:lang="en">Web Analytics</value>
         <value xml:lang="it">Analisi Web</value>
@@ -49,18 +37,6 @@
         <value xml:lang="en">Web Analytics Types</value>
         <value xml:lang="it">Tipi di analisi Web</value>
         <value xml:lang="zh_TW">網站分析型態</value>
-    </property>
-    <property key="ChooseImageToReplace">
-        <value xml:lang="en">Choose Image to Replace</value>
-        <value xml:lang="th">เลือกภาพสำหรับแทนที่</value>
-    </property>
-    <property key="ChooseProductID">
-        <value xml:lang="en">Choose Product ID</value>
-        <value xml:lang="th">เลือกรหัสสินค้า</value>
-    </property>
-    <property key="ChooseReplacementImage">
-        <value xml:lang="en">Choose Replacement Image</value>
-        <value xml:lang="th">เลือกภาพที่จะแทนที่</value>
     </property>
     <property key="CreateNewProductFeatureType">
         <value xml:lang="de">Neuen Merkmaltyp erstellen</value>
@@ -3482,6 +3458,9 @@
         <value xml:lang="zh">上次价格</value>
         <value xml:lang="zh_TW">上次價格</value>
     </property>
+    <property key="FormFieldTitle_shippingPrice">
+        <value xml:lang="en">Shipping Price</value>
+    </property>
     <property key="FormFieldTitle_levelId">
         <value xml:lang="de">Ebene ID</value>
         <value xml:lang="en">Level Id</value>
@@ -4190,6 +4169,19 @@
         <value xml:lang="th">รหัสประเภทหมวดหมู่สินค้า</value>
         <value xml:lang="zh">产品目录分类类型标识</value>
         <value xml:lang="zh_TW">產品目錄分類類型ID</value>
+    </property>
+    <property key="FormFieldTitle_prodCatalogName">
+        <value xml:lang="de">Katalogname</value>
+        <value xml:lang="en">Catalog Name</value>
+        <value xml:lang="es">Nombre de Catálogo</value>
+        <value xml:lang="fr">Nom du catalogue</value>
+        <value xml:lang="it">Nome catalogo</value>
+        <value xml:lang="nl">Catalogusnaam</value>
+        <value xml:lang="ro">Nume Catalog</value>
+        <value xml:lang="ru">Имя каталога</value>
+        <value xml:lang="th">ชื่อหมวดหมู่</value>
+        <value xml:lang="zh">目录名称</value>
+        <value xml:lang="zh_TW">目錄名稱</value>
     </property>
     <property key="FormFieldTitle_prodSearchExcludeVariant">
         <value xml:lang="de">Produktsuche schliesst die Variante aus</value>
@@ -5396,7 +5388,7 @@
         <value xml:lang="zh">副标题</value>
         <value xml:lang="zh_TW">副標題</value>
     </property>
-    <property key="FormFieldTitle_supplierCommissionPerc">
+    <!-- property key="FormFieldTitle_supplierCommissionPerc">
         <value xml:lang="de">Lieferant Kommission Prozent</value>
         <value xml:lang="en">Supplier Commission Perc</value>
         <value xml:lang="es">Porcentaje de comisión del proveedor</value>
@@ -5407,7 +5399,7 @@
         <value xml:lang="th">เปอร์เซ็นต์ค่าคอมมิชชันของผู้จัดหาสิ่งของ</value>
         <value xml:lang="zh">供货商佣金百分比</value>
         <value xml:lang="zh_TW">供貨商佣金百分比</value>
-    </property>
+    </property-->
     <property key="FormFieldTitle_supplierPrefOrderId">
         <value xml:lang="de">Lieferant präferierte Auftragsnummer ID</value>
         <value xml:lang="en">Supplier Pref Order Id</value>
@@ -5795,59 +5787,188 @@
         <value xml:lang="zh">人工服务好的标准类型标识</value>
         <value xml:lang="zh_TW">工項成品規範類型ID</value>
     </property>
-    <property key="Gallery">
-        <value xml:lang="de">Gallerie</value>
-        <value xml:lang="en">Gallery</value>
-        <value xml:lang="th">แกลลอรี่</value>
-    </property>
-    <property key="ImageApprove">
-        <value xml:lang="de">Bestätigen</value>
-        <value xml:lang="en">Approve</value>
-        <value xml:lang="th">ยืนยันรูปภาพ</value>
-    </property>
-    <property key="ImageCropping">
-        <value xml:lang="en">Image Cropping</value>
-        <value xml:lang="th">ตัดภาพ</value>
-    </property>
-    <property key="ImageFrames">
-        <value xml:lang="en">Image Frames</value>
-        <value xml:lang="th">เฟรม</value>
-    </property>
     <property key="ImageManagement">
         <value xml:lang="en">Image Management</value>
         <value xml:lang="th">จัดการรูปภาพ</value>
+    </property>
+    <property key="ImageManagementAction">
+        <value xml:lang="en">Action</value>
+    </property>
+    <property key="ImageManagementAltForumCode">
+        <value xml:lang="en">Alt Forum Code</value>
+    </property>
+    <property key="ImageManagementAltForumThumbnail">
+        <value xml:lang="en">Alt Forum Thumbnail</value>
     </property>
     <property key="ImageManagementApplication">
         <value xml:lang="en">Image Management Application</value>
         <value xml:lang="th">โปรแกรมจัดการรูปภาพ</value>
     </property>
-    <property key="ImageRecentlyApproved">
-        <value xml:lang="en">Recently Approved</value>
-        <value xml:lang="th">รูปภาพยืนยันล่าสุด</value>
+    <property key="ImageManamentApprove">
+        <value xml:lang="de">Bestätigen</value>
+        <value xml:lang="en">Approve</value>
+        <value xml:lang="th">อนุมัติ</value>
     </property>
-    <property key="ImageRejected">
-        <value xml:lang="en">Rejected</value>
-        <value xml:lang="th">ปฏิเสธรูปภาพ</value>
+    <property key="ImageManamentApprovedDate">
+        <value xml:lang="en">Approved Date</value>
+        <value xml:lang="th">วันที่อนุมัติ</value>
     </property>
-    <property key="ImageRotating">
+    <property key="ImageManagementCaption">
+        <value xml:lang="en">Caption</value>
+        <value xml:lang="th">คำอธิบายภาพ</value>
+    </property>
+    <property key="ImageManagementChooseExistFrame">
+        <value xml:lang="en">Choose Exist Frame</value>
+        <value xml:lang="th">เลือกกรอกรูปภาพที่มีอยู่</value>
+    </property>
+    <property key="ImageManagementChooseImageToReplace">
+        <value xml:lang="en">Choose Image to Replace</value>
+        <value xml:lang="th">เลือกรูปภาพสำหรับแทนที่</value>
+    </property>
+    <property key="ImageManagementChooseProductID">
+        <value xml:lang="en">Choose Product ID</value>
+        <value xml:lang="th">เลือกรหัสสินค้า</value>
+    </property>
+    <property key="ImageManagementChooseReplacementImage">
+        <value xml:lang="en">Choose Replacement Image</value>
+        <value xml:lang="th">เลือกรูปภาพที่จะแทนที่</value>
+    </property>
+    <property key="ImageManagementCrop">
+        <value xml:lang="en">Crop</value>
+        <value xml:lang="th">ตัดรูปภาพ</value>
+    </property>
+    <property key="ImageManagementDefaultImage">
+        <value xml:lang="en">Default Image</value>
+    </property>
+    <property key="ImageManagementDirectLink">
+        <value xml:lang="en">Direct Link</value>
+        <value xml:lang="th">เชื่อมโยงโดยตรง</value>
+    </property>
+    <property key="ImageManagementFrame">
+        <value xml:lang="en">Frame</value>
+        <value xml:lang="th">กรอบรูปภาพ</value>
+    </property>
+    <property key="ImageManagementForumCode">
+        <value xml:lang="en">Forum Code</value>
+        <value xml:lang="th">รหัสฟอรั่ม</value>
+    </property>
+    <property key="ImageManagementForumThumbnail">
+        <value xml:lang="en">Forum Thumbnail</value>
+        <value xml:lang="th">รูปภาพย่อฟอรั่ม</value>
+    </property>
+    <property key="ImageManagementGallery">
+        <value xml:lang="de">Gallerie</value>
+        <value xml:lang="en">Gallery</value>
+        <value xml:lang="th">แกลลอรี่</value>
+    </property>
+    <property key="ImageManagementHTMLCode">
+        <value xml:lang="en">HTML Code</value>
+    </property>
+    <property key="ImageManagementHTMLThumbnail">
+        <value xml:lang="en">HTML Thumbnail</value>
+    </property>
+    <property key="ImageManagementImageCropping">
+        <value xml:lang="en">Image Cropping</value>
+        <value xml:lang="th">ตัดรูปภาพ</value>
+    </property>
+    <property key="ImageManagementImageFrames">
+        <value xml:lang="en">Image Frame</value>
+        <value xml:lang="th">กรอบรูปภาพ</value>
+    </property>
+    <property key="ImageManagementImageHeight">
+        <value xml:lang="en">Image Height</value>
+        <value xml:lang="th">ความสูงของรูปภาพ</value>
+    </property>
+    <property key="ImageManagementImageName">
+        <value xml:lang="en">Image Name</value>
+        <value xml:lang="th">ชื่อรูปภาพ</value>
+    </property>
+    <property key="ImageManagementImageRotating">
         <value xml:lang="en">Image Rotating</value>
-        <value xml:lang="th">หมุนภาพ</value>
+        <value xml:lang="th">หมุนรูปภาพ</value>
     </property>
-    <property key="ImageUpload">
-        <value xml:lang="en">Upload</value>
-        <value xml:lang="th">อัพโหลดรูป</value>
+    <property key="ImageManagementImageToReplace">
+        <value xml:lang="en">Image to Replace</value>
+        <value xml:lang="th">ภาพที่จะเปลี่ยน</value>
     </property>
-    <property key="ImageUploadList">
+    <property key="ImageManagementImageUploadList">
         <value xml:lang="en">Image Upload List</value>
         <value xml:lang="th">รูปภาพที่อัพโหลด</value>
     </property>
-    <property key="ImageWatermarking">
+    <property key="ImageManagementImageWatermarking">
         <value xml:lang="en">Image Watermarking</value>
+        <value xml:lang="th">ลายน้ำรูปภาพ</value>
+    </property>
+    <property key="ImageManagementImageWidth">
+        <value xml:lang="en">Image Width</value>
+        <value xml:lang="th">ความกว้างของรูปภาพ</value>
+    </property>
+    <property key="ImageManagementOpacity">
+        <value xml:lang="en">Opacity</value>
+        <value xml:lang="th">ความทึบแสง</value>
+    </property>
+    <property key="ImageManagementRecentlyApproved">
+        <value xml:lang="en">Recently Approved</value>
+        <value xml:lang="th">อนุมัติล่าสุด</value>
+    </property>
+    <property key="ImageManagementRejectedBy">
+        <value xml:lang="en">Rejected By</value>
+        <value xml:lang="th">ผู้ไม่ยอมรับ</value>
+    </property>
+    <property key="ImageManagementRejectedReason">
+        <value xml:lang="en">Rejected Reason</value>
+        <value xml:lang="th">เหตุผลที่ไม่ยอมรับ</value>
+    </property>
+    <property key="ImageManagementReplace">
+        <value xml:lang="en">Replace</value>
+        <value xml:lang="th">แทนที่</value>
+    </property>
+    <property key="ImageManagementReplacementImage">
+        <value xml:lang="en">Replacement Image</value>
+        <value xml:lang="th">เปลี่ยนรูปภาพ</value>
+    </property>
+    <property key="ImageManagementResize">
+        <value xml:lang="en">Resize</value>
+        <value xml:lang="th">เปลี่ยนขนาด</value>
+    </property>
+    <property key="ImageManagementRotate">
+        <value xml:lang="en">Rotate</value>
+        <value xml:lang="th">หมุนรูปภาพ</value>
+    </property>
+    <property key="ImageManagementSetDefault">
+        <value xml:lang="en">Set Default</value>
+    </property>
+    <property key="ImageManagementShare">
+        <value xml:lang="en">Share</value>
+        <value xml:lang="th">แบ่งบัน</value>
+    </property>
+    <property key="ImageManagementShareImage">
+        <value xml:lang="en">Share Image</value>
+        <value xml:lang="th">แบ่งบันรูปภาพ</value>
+    </property>
+    <property key="ImageManagementSortOrder">
+        <value xml:lang="en">Sort Order</value>
+        <value xml:lang="th">เรียงลำดับ</value>
+    </property>
+    <property key="ImageManagementTextColor">
+        <value xml:lang="en">Text Color</value>
+        <value xml:lang="th">สีตัวอักษร</value>
+    </property>
+    <property key="ImageManagementTextSize">
+        <value xml:lang="en">Text Size</value>
+        <value xml:lang="th">ขนาดตัวอักษร</value>
+    </property>
+    <property key="ImageManagementUploadNewFrame">
+        <value xml:lang="en">Upload New Frame</value>
+        <value xml:lang="th">อัพโหลดกรอกรูปภาพใหม่</value>
+    </property>
+    <property key="ImageManagementWatermark">
+        <value xml:lang="en">Watermark</value>
         <value xml:lang="th">ลายน้ำ</value>
     </property>
-    <property key="Manage">
-        <value xml:lang="en">Manage</value>
-        <value xml:lang="th">จัดการ</value>
+    <property key="ImageManagementWelcomeMessage">
+        <value xml:lang="en">Welcome to the Image Management</value>
+        <value xml:lang="th">ยินดีต้อนรับสู้รบบการจัดการรูปภาพ</value>
     </property>
     <property key="MetaDescription">
         <value xml:lang="en">Meta Description</value>
@@ -8032,6 +8153,9 @@
         <value xml:lang="zh">产品导出</value>
         <value xml:lang="zh_TW">產品導出</value>
     </property>
+    <property key="PageTitleProductPricesHistory">
+        <value xml:lang="en">Product Price History</value>
+    </property>
     <property key="PageTitleProductStocktake">
         <value xml:lang="en">Product Stocktake</value>
         <value xml:lang="fr">Inventaire d'un article</value>
@@ -8292,6 +8416,18 @@
         <value xml:lang="zh">账户</value>
         <value xml:lang="zh_TW">帳戶</value>
     </property>
+    <property key="ProductAction">
+        <value xml:lang="en">Action</value>
+    </property>
+    <property key="ProductActionsCategoriesForAction">
+        <value xml:lang="en">Actions Categories For Action</value>
+    </property>
+    <property key="ProductActionForRule">
+        <value xml:lang="en">Action For Rule</value>
+    </property>
+    <property key="ProductActionsProductsForAction">
+        <value xml:lang="en">Actions Products For Action</value>
+    </property>
     <property key="ProductActionType">
         <value xml:lang="de">Aktionstyp</value>
         <value xml:lang="en">Action Type</value>
@@ -8446,6 +8582,12 @@
         <value xml:lang="zh">实际运输</value>
         <value xml:lang="zh_TW">實際運輸</value>
     </property>
+    <property key="ProductAddActionCategory">
+        <value xml:lang="en">Add Action Category</value>
+    </property>
+    <property key="ProductAddActionProducts">
+        <value xml:lang="en">Add Action Products</value>
+    </property>
     <property key="ProductAddAdditionalImages">
         <value xml:lang="en">Add Additional Images</value>
     </property>
@@ -8506,6 +8648,12 @@
     <property key="ProductAddCommunicationEvent">
         <value xml:lang="en">Add Communication Event</value>
         <value xml:lang="it">Aggiungi evento comunicazione</value>
+    </property>
+    <property key="ProductAddConditionCategory">
+        <value xml:lang="en">Add Condition Category</value>
+    </property>
+    <property key="ProductAddConditionProducts">
+        <value xml:lang="en">Add Condition Products</value>
     </property>
     <property key="ProductAddContentCategory">
         <value xml:lang="de">Inhalt zu Kategorie hinzufügen</value>
@@ -9095,7 +9243,7 @@
         <value xml:lang="zh">地址</value>
         <value xml:lang="zh_TW">地址</value>
     </property>
-    <property key="ProductAdvancedSearch">
+    <property key="ProductAdvancedSearch">Product
         <value xml:lang="cs">Rozšířené hledání</value>
         <value xml:lang="de">Erweiterte Suche</value>
         <value xml:lang="en">Advanced Search</value>
@@ -10267,19 +10415,6 @@
         <value xml:lang="zh">这个应用程序主要用于维护产品目录相关信息</value>
         <value xml:lang="zh_TW">這個應用程式主要用于維護產品目錄相關資訊</value>
     </property>
-    <property key="ProductCatalogName">
-        <value xml:lang="de">Katalogname</value>
-        <value xml:lang="en">Catalog Name</value>
-        <value xml:lang="es">Nombre de Catálogo</value>
-        <value xml:lang="fr">Nom du catalogue</value>
-        <value xml:lang="it">Nome catalogo</value>
-        <value xml:lang="nl">Catalogusnaam</value>
-        <value xml:lang="ro">Nume Catalog</value>
-        <value xml:lang="ru">Имя каталога</value>
-        <value xml:lang="th">ชื่อหมวดหมู่</value>
-        <value xml:lang="zh">目录名称</value>
-        <value xml:lang="zh_TW">目錄名稱</value>
-    </property>
     <property key="ProductCatalogNameId">
         <value xml:lang="de">Katalogname [ID]</value>
         <value xml:lang="en">Catalog Name [Id]</value>
@@ -10300,6 +10435,9 @@
     <property key="ProductCatalogDeletePermissionError">
         <value xml:lang="en">Security Error: to run ${resourceDescription} you must have the CATALOG_DELETE or CATALOG_ADMIN permission</value>
         <value xml:lang="it">Errore di sicurezza: per eseguire ${resourceDescription} tu devi avere il permesso CATALOG_DELETE o CATALOG_ADMIN</value>
+    </property>
+    <property key="ProductCatalogSeoCreate">
+        <value xml:lang="en">Create SEO category/products</value>
     </property>
     <property key="ProductCatalogUpdatePermissionError">
         <value xml:lang="en">Security Error: to run ${resourceDescription} you must have the CATALOG_UPDATE or CATALOG_ADMIN permission</value>
@@ -10890,6 +11028,9 @@
         <value xml:lang="zh">组件</value>
         <value xml:lang="zh_TW">元件</value>
     </property>
+    <property key="ProductCondition">
+        <value xml:lang="en">Condition</value>
+    </property>
     <property key="ProductConditions">
         <value xml:lang="de">Bedingungen</value>
         <value xml:lang="en">Conditions</value>
@@ -10907,10 +11048,22 @@
         <value xml:lang="en">To remove a price rule, you must before remove all conditions and actions OR disable it by entering a Thru Date</value>
         <value xml:lang="fr">Pour supprimer une règle de prix, vous devez d'abord supprimer toutes les conditions et actions. Vous pouvez aussi la désactiver en entrant une date de fin appropriée</value>
     </property>
+    <property key="ProductConditionsCategoriesForCondition">
+        <value xml:lang="en">Conditions Categories For Condition</value>
+    </property>
+    <property key="ProductConditionsForRule">
+        <value xml:lang="en">Conditions For Rule</value>
+    </property>
+    <property key="ProductConditionsProductsForCondition">
+        <value xml:lang="en">Conditions Products For Condition</value>
+    </property>
     <property key="ProductConditionsThenActions">
         <value xml:lang="de">Wenn mehrere Bedingungen eingegeben wurde, sind sie logisch UND verknüpft. Daher müssen alle Bedingungen WAHR sein und die Preisregel auszuführen (gleiches für Aktionen)</value>
         <value xml:lang="en">If multiple conditions are entered they are tested logically as and AND statement. Therefore all Conditions must be TRUE for the price rule to execute (same for actions)</value>
         <value xml:lang="fr">Si toutes les conditions sont vérifiées, alors les actions sont exécutées (autrement dit ET logique entre conditions, de même pour les actions)</value>
+    </property>
+    <property key="ProductConditionValue">
+        <value xml:lang="en">Condition Value</value>
     </property>
     <property key="ProductConfigItem">
         <value xml:lang="de">Konfigurationsposition</value>
@@ -11306,6 +11459,9 @@
         <value xml:lang="en">Country of Origin</value>
         <value xml:lang="it">Paese di origine</value>
     </property>
+    <property key="ProductCreateAction">
+        <value xml:lang="en">Create Action</value>
+    </property>
     <property key="ProductCreateAProductFeatureCategory">
         <value xml:lang="de">Produktmerkmal Kategorie erstellen</value>
         <value xml:lang="en">Create a Product Feature Category</value>
@@ -11317,6 +11473,9 @@
         <value xml:lang="th">สร้างหมวดหมู่ลักษณะสินค้า</value>
         <value xml:lang="zh">创建一个产品特征分类</value>
         <value xml:lang="zh_TW">創建一個產品特性分類</value>
+    </property>
+    <property key="ProductCreateCondition">
+        <value xml:lang="en">Create Condition</value>
     </property>
     <property key="ProductCreateInformationNewSupplier">
         <value xml:lang="de">Informationen zu neuem Lieferant erstellen</value>
@@ -14087,6 +14246,9 @@
         <value xml:lang="zh"> 日期/时间记录表示当前时间在开始日期之前或结束日期之后。如果开始日期是红色， 那么关联还没有开始；如果结束日期是红色， 那么关联已经过期了 (并且可能应该删除)。</value>
         <value xml:lang="zh_TW"> 日期/時間記錄表示當前時間在開始日期之前或結束日期之後。如果開始日期是紅色， 那麼關聯還沒有開始；如果結束日期是紅色， 那麼關聯已經過期了 (並且可能應該刪除)。</value>
     </property>
+    <property key="ProductHistory">
+        <value xml:lang="en">History</value>
+    </property>
     <property key="ProductHost">
         <value xml:lang="de">Server</value>
         <value xml:lang="en">Host</value>
@@ -16650,6 +16812,12 @@
         <value xml:lang="zh">下次送货</value>
         <value xml:lang="zh_TW">下次送貨</value>
     </property>
+    <property key="ProductNoActionCategories">
+        <value xml:lang="en">No Action Categories</value>
+    </property>
+    <property key="ProductNoActionProducts">
+        <value xml:lang="en">No Action Products</value>
+    </property>
     <property key="ProductNoCategorySpecified">
         <value xml:lang="de">Keine Kategorie ausgewählt</value>
         <value xml:lang="en">No category specified</value>
@@ -16685,6 +16853,12 @@
         <value xml:lang="th">ไม่พบกลุ่มเด็ก</value>
         <value xml:lang="zh">没有找到下级组</value>
         <value xml:lang="zh_TW">沒有找到下級組</value>
+    </property>
+    <property key="ProductNoConditionCategories">
+        <value xml:lang="en">No Condition Categories</value>
+    </property>
+    <property key="ProductNoConditionProducts">
+        <value xml:lang="en">No Condition Products</value>
     </property>
     <property key="ProductNoDescription">
         <value xml:lang="de">Keine Beschreibung</value>
@@ -21333,6 +21507,9 @@
         <value xml:lang="zh">规则名称， 描述， 开始日期， 结束日期</value>
         <value xml:lang="zh_TW">規則名稱， 描述， 開始日期， 結束日期</value>
     </property>
+    <property key="ProductRule">
+        <value xml:lang="en">Rule</value>
+    </property>
     <property key="ProductRules">
         <value xml:lang="de">Regeln</value>
         <value xml:lang="en">Rules</value>
@@ -22913,6 +23090,10 @@
         <value xml:lang="zh">州</value>
         <value xml:lang="zh_TW">州</value>
     </property>
+    <property key="ProductStatus">
+        <value xml:lang="en">Product Status</value>
+        <value xml:lang="th">สถานะสินค้า</value>
+    </property>
     <property key="ProductStatusId">
         <value xml:lang="de">Status ID</value>
         <value xml:lang="en">Status Id</value>
@@ -24173,6 +24354,12 @@
         <value xml:lang="zh">更新产品变型</value>
         <value xml:lang="zh_TW">更新產品變體</value>
     </property>
+    <property key="ProductUpdateRelatedURLContentCategory">
+        <value xml:lang="en">Update Related URL Content for Category</value>
+    </property>
+    <property key="ProductUpdateSEOContentCategory">
+        <value xml:lang="en">Update SEO Content for Category</value>
+    </property>
     <property key="ProductUpdateShipping">
         <value xml:lang="de">Lieferung aktualisieren</value>
         <value xml:lang="en">Update Shipping</value>
@@ -24864,40 +25051,8 @@
         <value xml:lang="zh">你搜索</value>
         <value xml:lang="zh_TW">你所搜索的</value>
     </property>
-    <property key="RecentlyApproved">
-        <value xml:lang="en">Recently Approved</value>
-        <value xml:lang="th">แกลลอรี่</value>
-    </property>
-    <property key="Rejected">
-        <value xml:lang="en">Rejected</value>
-        <value xml:lang="th">ปฏิเสธ</value>
-    </property>
-    <property key="Rename">
-        <value xml:lang="en">Rename</value>
-        <value xml:lang="th">เปลี่ยนชื่อ</value>
-    </property>
-    <property key="Replace">
-        <value xml:lang="en">Replace</value>
-        <value xml:lang="th">แทนที่</value>
-    </property>
-    <property key="Resize">
-        <value xml:lang="en">Resize</value>
-        <value xml:lang="th">เปลี่ยนขนาด</value>
-    </property>
-    <property key="ShareImage">
-        <value xml:lang="en">Share Image</value>
-        <value xml:lang="th">แบ่งบันภาพ</value>
-    </property>
-    <property key="Upload">
-        <value xml:lang="en">Upload</value>
-        <value xml:lang="th">อัพโหลด</value>
-    </property>
     <property key="UseCartQuantity">
         <value xml:lang="en">Use cart quantity</value>
         <value xml:lang="fr">Utiliser la quantité du panier</value>
-    </property>
-    <property key="WelcomeMessage">
-        <value xml:lang="en">Welcome to the Image Management</value>
-        <value xml:lang="th">ยินดีต้อนรับสู้รบบการจัดการรูปภาพ</value>
     </property>
 </resource>

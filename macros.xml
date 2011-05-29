@@ -63,7 +63,6 @@ under the License.
   <pathelement location="${ofbiz.home.dir}/framework/base/lib/ant/ant-apache-bsf-1.7.1.jar"/>
  </path>
  <path id="local.class.path"/>
-
  <presetdef name="default-javac">
   <javac debug="on" deprecation="on" destdir="${build.dir}/classes" srcdir="${src.dir}" classpathref="local.class.path">
    <patternset refid="src.inc.set"/>
@@ -78,11 +77,42 @@ under the License.
  </presetdef>
 
  <presetdef name="default-javadoc">
-  <javadoc classpathref="local.class.path"
-           destdir="${build.dir}/javadocs"
-           Windowtitle="Open for Business - ${desc}">
-   <link href="http://java.sun.com/javase/6/docs/api/" offline="true" packagelistLoc="${ofbiz.home.dir}/tools/api-java16"/>
-  </javadoc>
+    <javadoc classpathref="local.class.path"
+             destdir="${build.dir}/javadocs"
+             windowtitle="Open for Business - ${desc}"
+             useexternalfile="yes"
+             maxmemory="256M"
+             encoding="UTF-8"
+             packagenames="org.ofbiz.*">
+      <fileset dir="${basedir}" defaultexcludes="yes">
+        <include name="**/*.java"/>
+        <exclude name="**/ControlApplet.java"/>
+        <exclude name="**/ShipmentScaleApplet.java"/>
+        <exclude name="**/test/"/>
+        <exclude name="**/cybersource/"/>
+        <exclude name="**/PayPalServices.java"/>
+        <exclude name="**/ideal/"/>
+        <exclude name="**/orbital/"/>
+        <exclude name="**/securepay/"/>
+        <exclude name="**/verisign/"/>
+        <exclude name="**/JREntityListIteratorDataSource.java"/>
+        <exclude name="**/JRMapCollectionDataSource.java"/>
+        <exclude name="**/openoffice/"/>
+        <exclude name="**/XaPoolConnectionFactory.java"/>
+        <exclude name="**/JasperReportsPdfViewHandler.java"/>
+        <exclude name="**/JasperReportsXmlViewHandler.java"/>
+        <exclude name="**/JasperReportsJXlsViewHandler.java"/>
+        <exclude name="**/JasperReportsPoiXlsViewHandler.java"/>
+        <exclude name="**/GenericViewRenderer.java"/>
+        <exclude name="**/JPublishViewHandler.java"/>
+        <exclude name="**/JPublishWrapper.java"/>
+        <exclude name="**/FopPdfViewHandler.java"/>
+        <exclude name="**/FreeMarkerViewRenderer.java"/>
+        <exclude name="**/JpCacheIncludeTransform.java"/>             
+        <exclude name="**/shark/"/>
+      </fileset>
+      <link href="http://java.sun.com/javase/6/docs/api/" offline="true" packagelistLoc="${ofbiz.home.dir}/tools/api-java16"/>
+    </javadoc>
  </presetdef>
 
  <macrodef name="main-jar">
@@ -153,12 +183,17 @@ under the License.
   </groovyc>
  </presetdef>
 
- <scriptdef name="if" language="javascript" classpathref="rhino.class.path" loaderref="rhino.class.path.loader" src="${ofbiz.home.dir}/tools/If-ant.py">
+ <!-- replaced by ant contrib version -->    
+ <!--scriptdef name="if" language="javascript" classpathref="rhino.class.path" loaderref="rhino.class.path.loader" src="${ofbiz.home.dir}/tools/If-ant.py">
   <element name="condition" classname="org.apache.tools.ant.taskdefs.condition.And"/>
   <element name="commands" classname="org.apache.tools.ant.taskdefs.Sequential"/>
   <element name="else" classname="org.apache.tools.ant.taskdefs.Sequential"/>
- </scriptdef>
-
+  </scriptdef-->
+  <taskdef resource="net/sf/antcontrib/antlib.xml">
+    <classpath>
+        <pathelement location="${ofbiz.home.dir}/framework/base/lib/ant/ant-contrib-1.0b3.jar"/>
+    </classpath>
+  </taskdef>
  <taskdef name="javacc" classname="org.apache.tools.ant.taskdefs.optional.javacc.JavaCC" classpath="${ofbiz.home.dir}/framework/base/lib/ant/ant-nodeps-1.7.1.jar"/>
  <taskdef name="jjtree" classname="org.apache.tools.ant.taskdefs.optional.javacc.JJTree" classpath="${ofbiz.home.dir}/framework/base/lib/ant/ant-nodeps-1.7.1.jar"/>
  <macrodef name="ofbiz-javacc">
@@ -167,25 +202,23 @@ under the License.
   <attribute name="prefix" default=""/>
   <sequential>
    <if>
-    <condition>
      <not>
       <uptodate
        srcfile="@{prefix}src/@{dir}/@{file}.jj"
        targetfile="@{prefix}build/gen-src/javacc/@{dir}/@{file}.java"/>
      </not>
-    </condition>
-    <commands>
-     <delete dir="@{prefix}build/gen-src/javacc/@{dir}"/>
-     <mkdir dir="@{prefix}build/gen-src/javacc/@{dir}"/>
-     <javacc target="@{prefix}src/@{dir}/@{file}.jj"
-      javacchome="${ofbiz.home.dir}/lib/build/javacc"
-      outputdirectory="@{prefix}build/gen-src/javacc/@{dir}"/>
-     <replace token="public class" 
-     	value='@SuppressWarnings("all") public class' 
-     	dir="@{prefix}build/gen-src/javacc/@{dir}"
-     	includes="*.java" />
-     <delete dir="@{prefix}build/classes/@{dir}"/>
-    </commands>
+     <then>
+       <delete dir="@{prefix}build/gen-src/javacc/@{dir}"/>
+       <mkdir dir="@{prefix}build/gen-src/javacc/@{dir}"/>
+       <javacc target="@{prefix}src/@{dir}/@{file}.jj"
+          javacchome="${ofbiz.home.dir}/lib/build/javacc"
+          outputdirectory="@{prefix}build/gen-src/javacc/@{dir}"/>
+       <replace token="public class" 
+           value='@SuppressWarnings("all") public class' 
+           dir="@{prefix}build/gen-src/javacc/@{dir}"
+           includes="*.java" />
+       <delete dir="@{prefix}build/classes/@{dir}"/>
+     </then>
    </if>
   </sequential>
  </macrodef>
@@ -196,37 +229,29 @@ under the License.
   <attribute name="prefix" default=""/>
   <sequential>
    <if>
-    <condition>
      <not>
       <uptodate
        srcfile="@{prefix}src/@{dir}/@{file}.jjt"
        targetfile="@{prefix}build/gen-src/jjtree/@{dir}/@{file}.jj"/>
      </not>
-    </condition>
-    <commands>
      <delete dir="@{prefix}build/gen-src/jjtree/@{dir}"/>
      <mkdir dir="@{prefix}build/gen-src/jjtree/@{dir}"/>
      <jjtree target="@{prefix}src/@{dir}/@{file}.jjt"
       javacchome="${ofbiz.home.dir}/lib/build/javacc"
       outputdirectory="@{prefix}build/gen-src/jjtree/@{dir}"/>
-    </commands>
    </if>
    <if>
-    <condition>
      <not>
       <uptodate
        srcfile="@{prefix}build/gen-src/jjtree/@{dir}/@{file}.jj"
        targetfile="@{prefix}build/gen-src/javacc/@{dir}/@{file}.java"/>
      </not>
-    </condition>
-    <commands>
      <delete dir="@{prefix}build/gen-src/javacc/@{dir}"/>
      <mkdir dir="@{prefix}build/gen-src/javacc/@{dir}"/>
      <javacc target="@{prefix}build/gen-src/jjtree/@{dir}/@{file}.jj"
       javacchome="${ofbiz.home.dir}/lib/build/javacc"
       outputdirectory="@{prefix}build/gen-src/javacc/@{dir}"/>
      <delete dir="@{prefix}build/classes/@{dir}"/>
-    </commands>
    </if>
   </sequential>
  </macrodef>

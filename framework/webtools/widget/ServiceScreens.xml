@@ -31,15 +31,11 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonServiceDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <section>
-                            <widgets>
-                                <platform-specific>
-                                    <html>
-                                        <html-template location="component://webtools/webapp/webtools/service/availableservices.ftl"/>
-                                    </html>
-                                </platform-specific>
-                            </widgets>
-                        </section>
+                        <platform-specific>
+                            <html>
+                                <html-template location="component://webtools/webapp/webtools/service/availableservices.ftl"/>
+                            </html>
+                        </platform-specific>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -52,6 +48,7 @@ under the License.
                 <set field="titleProperty" value="PageTitleJobList"/>
                 <set field="tabButtonItem" value="findJob"/>
                 <set field="jobCtx" from-field="parameters"/>
+                <set field="dummy" value="${groovy: if ('SERVICE_PENDING'.equals(jobCtx.statusId)) jobCtx.jobId = ''}"/> <!--  To more easily see current pending jobs and possibly cancel some others -->
             </actions>
             <widgets>
                 <decorator-screen name="CommonServiceDecorator" location="${parameters.mainDecoratorLocation}">
@@ -127,7 +124,7 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonServiceDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <screenlet title="${uiLabelMap.PageTitleRunService}">
+                        <screenlet>
                             <include-form name="runService" location="component://webtools/widget/ServiceForms.xml"/>
                         </screenlet>
                     </decorator-section>

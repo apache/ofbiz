@@ -17,12 +17,9 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<h1>${uiLabelMap.WebtoolsImportToDataSource}</h1>
-<br />
+<div class="page-title"><span>${uiLabelMap.WebtoolsImportToDataSource}</span></div>
 <p>${uiLabelMap.WebtoolsXMLImportInfo}</p>
 <hr />
-  <h2>${uiLabelMap.WebtoolsImport}:</h2>
-
   <form method="post" action="<@ofbizUrl>entityImportReaders</@ofbizUrl>">
     Enter Readers (comma separated, no spaces; from entityengine.xml and ofbiz-component.xml files; common ones include seed,ext,demo):<br />
     <input type="text" size="60" name="readers" value="${readers?default("seed")}"/><br />

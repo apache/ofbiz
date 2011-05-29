@@ -2086,7 +2086,7 @@ public class MacroFormRenderer implements FormStringRenderer {
 
         String event = modelFormField.getEvent();
         String action = modelFormField.getAction(context);
-        boolean disabled = lookupField.disabled;
+        boolean readonly = lookupField.readonly;
 
         // add lookup pop-up button
         String descriptionFieldName = lookupField.getDescriptionFieldName();
@@ -2173,8 +2173,8 @@ public class MacroFormRenderer implements FormStringRenderer {
         if (action != null) {
             sr.append(action);
         }
-        sr.append("\" disabled=");
-        sr.append(Boolean.toString(disabled));
+        sr.append("\" readonly=");
+        sr.append(Boolean.toString(readonly));
 
         sr.append(" autocomplete=\"");
         sr.append(autocomplete);
@@ -2910,17 +2910,16 @@ public class MacroFormRenderer implements FormStringRenderer {
             Map<String, String> parameters = updateArea.getParameterMap(ctx);
             String targetUrl = updateArea.getAreaTarget(context);
             String ajaxParams = getAjaxParamsFromTarget(targetUrl);
-            if (UtilValidate.isNotEmpty(extraParams)) {
-                if (ajaxParams.length() > 0 && !extraParams.startsWith("&")) {
-                    ajaxParams += "&";
-                }
-                ajaxParams += extraParams;
-            }
+            //add first parameters from updateArea parameters
             if(UtilValidate.isNotEmpty(parameters)){
                 if(UtilValidate.isEmpty(ajaxParams)){
                     ajaxParams = "";
                 }
                 for (String key : parameters.keySet()) {
+                    //test if ajax parameters are not already into extraParams, if so do not add it
+                    if(UtilValidate.isNotEmpty(extraParams) && extraParams.contains(parameters.get(key))){
+                        continue;
+                    }
                     if (ajaxParams.length() > 0 && ajaxParams.indexOf(key) < 0) {
                         ajaxParams += "&";
                     }
@@ -2928,6 +2927,13 @@ public class MacroFormRenderer implements FormStringRenderer {
                         ajaxParams += key + "=" + parameters.get(key);
                     }
                 }
+            }
+            //then add parameters from request. Those parameters could end with an anchor so we must set ajax parameters first
+            if (UtilValidate.isNotEmpty(extraParams)) {
+                if (ajaxParams.length() > 0 && !extraParams.startsWith("&")) {
+                    ajaxParams += "&";
+                }
+                ajaxParams += extraParams;
             }
             ajaxUrl += updateArea.getAreaId() + ",";
             ajaxUrl += this.rh.makeLink(this.request, this.response, UtilHttp.removeQueryStringFromTarget(targetUrl));

@@ -333,11 +333,11 @@ ${virtualVariantJavaScript?if_exists}
       <#if category?exists>
           <div id="paginationBox">
             <#if previousProductId?exists>
-              <a href="<@ofbizUrl>product/~category_id=${categoryId?if_exists}/~product_id=${previousProductId?if_exists}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonPrevious}</a>&nbsp;|&nbsp;
+              <a href="<@ofbizCatalogAltUrl productCategoryId=categoryId?if_exists productId=previousProductId?if_exists/>" class="buttontext">${uiLabelMap.CommonPrevious}</a>&nbsp;|&nbsp;
             </#if>
-            <a href="<@ofbizUrl>category/~category_id=${categoryId?if_exists}</@ofbizUrl>" class="linktext">${(category.categoryName)?default(category.description)?if_exists}</a>
+            <a href="<@ofbizCatalogAltUrl productCategoryId=categoryId?if_exists/>" class="linktext">${(category.categoryName)?default(category.description)?if_exists}</a>
             <#if nextProductId?exists>
-              &nbsp;|&nbsp;<a href="<@ofbizUrl>product/~category_id=${categoryId?if_exists}/~product_id=${nextProductId?if_exists}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonNext}</a>
+              &nbsp;|&nbsp;<a href="<@ofbizCatalogAltUrl productCategoryId=categoryId?if_exists productId=nextProductId?if_exists/>" class="buttontext">${uiLabelMap.CommonNext}</a>
             </#if>
           </div>
       </#if>
@@ -353,7 +353,7 @@ ${virtualVariantJavaScript?if_exists}
                     <#assign productLargeImageUrl = firstLargeImage />
                 </#if>
                 <#if productLargeImageUrl?string?has_content>
-                    <a href="javascript:popupDetail();"><img id="detailImage" src="<@ofbizContentUrl variant="200">${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" name="mainImage" vspace="5" hspace="5" width="200" alt="" /></a>
+                    <a href="javascript:popupDetail();"><img id="detailImage" src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" name="mainImage" vspace="5" hspace="5" width="200" alt="" /></a>
                     <input type="hidden" id="originalImage" name="originalImage" value="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" />
                 </#if>
                 <#if !productLargeImageUrl?string?has_content>
@@ -379,7 +379,7 @@ ${virtualVariantJavaScript?if_exists}
                     <#assign productLargeImageUrl = firstLargeImage />
                 </#if>
                 <#if productLargeImageUrl?string?has_content>
-                    <a href="javascript:popupDetail();"><img id="detailImage" src="<@ofbizContentUrl variant="200">${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" name="mainImage" vspace="5" hspace="5" width="200" alt="" /></a>
+                    <a href="javascript:popupDetail();"><img id="detailImage" src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" name="mainImage" vspace="5" hspace="5" width="200" alt="" /></a>
                     <input type="hidden" id="originalImage" name="originalImage" value="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" />
                 </#if>
                 <#if !productLargeImageUrl?string?has_content>
@@ -725,7 +725,7 @@ ${virtualVariantJavaScript?if_exists}
                     <#if !imageUrl?string?has_content>
                       <#assign imageUrl = "/images/defaultImage.jpg" />
                     </#if>
-                      <a href="javascript:getList('FT${featureOrderFirst}','${indexer}',1);"><img src="<@ofbizContentUrl variant="60">${contentPathPrefix?if_exists}${imageUrl}</@ofbizContentUrl>" width="60" height="60" alt="" /></a>
+                      <a href="javascript:getList('FT${featureOrderFirst}','${indexer}',1);"><img src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${imageUrl}</@ofbizContentUrl>" width="60" height="60" alt="" /></a>
                       <br />
                       <a href="javascript:getList('FT${featureOrderFirst}','${indexer}',1);" class="linktext">${key}</a>
                   </#if>

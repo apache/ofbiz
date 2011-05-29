@@ -8602,12 +8602,20 @@
         <value xml:lang="zh">询价</value>
         <value xml:lang="zh_TW">報價</value>
     </property>
+    <property key="OrderQuoteEmpty">
+        <value xml:lang="en">Empty for total quote</value>
+        <value xml:lang="it">Totale preventivo è vuoto</value>
+    </property>
     <property key="OrderQuotePricePermissionError">
         <value xml:lang="en">Quote Price Permission Error</value>
         <value xml:lang="it">Errore permesso prezzo preventivo</value>
         <value xml:lang="pt_BR">Erro de permissão para preço de cotação</value>
         <value xml:lang="zh">询价价格权限错误</value>
         <value xml:lang="zh_TW">報價價格權限錯誤</value>
+    </property>
+    <property key="OrderQuoteTermDescription">
+        <value xml:lang="en">Term Description</value>
+        <value xml:lang="it">Descrizione termini preventivo</value>
     </property>
     <property key="OrderRanking">
         <value xml:lang="cs">Pořadí</value>
@@ -10063,6 +10071,10 @@
         <value xml:lang="pt_BR">Busca por pedidos de venda falhou</value>
         <value xml:lang="zh">销售订单查找失败</value>
         <value xml:lang="zh_TW">銷售訂單查詢失敗</value>
+    </property>
+    <property key="OrderSalesReps">
+        <value xml:lang="en">Sales Reps</value>
+        <value xml:lang="it">Venditori</value>
     </property>
     <property key="OrderSalesTax">
         <value xml:lang="cs">DPH</value>
@@ -12762,44 +12774,5 @@
         <value xml:lang="th">แสดงการร้องขอ</value>
         <value xml:lang="zh">浏览请求</value>
         <value xml:lang="zh_TW">瀏覽要求</value>
-    </property>
-    <property key="ProjectMgrActualHours">
-        <value xml:lang="de">Ist-Stunden</value>
-        <value xml:lang="en">Actual Hours</value>
-        <value xml:lang="fr">Heures réelles</value>
-        <value xml:lang="it">Ore attuali</value>
-        <value xml:lang="nl">Werk. uren</value>
-        <value xml:lang="pt_BR">Horas efetivas</value>
-        <value xml:lang="th">ชั่วโมงจริง</value>
-        <value xml:lang="zh">实际工时</value>
-        <value xml:lang="zh_TW">實際工時</value>
-    </property>
-    <property key="ProjectMgrPlannedHours">
-        <value xml:lang="de">Geplante Stunden</value>
-        <value xml:lang="en">Planned Hours</value>
-        <value xml:lang="fr">Heures planifiées</value>
-        <value xml:lang="it">Ore pianificate</value>
-        <value xml:lang="nl">Gepl. uren</value>
-        <value xml:lang="pt_BR">Horas planejadas</value>
-        <value xml:lang="th">ชั่วโมงที่วางแผน</value>
-        <value xml:lang="zh">已计划工时</value>
-        <value xml:lang="zh_TW">已計劃工時</value>
-    </property>
-    <property key="ProjectMgrProjectName">
-        <value xml:lang="de">Projektname</value>
-        <value xml:lang="en">Project Name</value>
-        <value xml:lang="fr">Nom du projet</value>
-        <value xml:lang="it">Nome progetto</value>
-        <value xml:lang="nl">Naam</value>
-        <value xml:lang="pt_BR">Nome do projeto</value>
-        <value xml:lang="th">ชื่อโปรเจค</value>
-        <value xml:lang="zh">项目名称</value>
-        <value xml:lang="zh_TW">專案名稱</value>
-    </property>
-    <property key="QuoteEmpty">
-        <value xml:lang="en">Empty for total quote</value>
-    </property>
-    <property key="QuoteTermDescription">
-        <value xml:lang="en">Term Description</value>
     </property>
 </resource>

@@ -389,7 +389,7 @@ function ajaxSubmitFormUpdateAreas(form, areaCsvString) {
  * form of: areaId, target, target parameters [, areaId, target, target parameters...].
 */
 
-function ajaxAutoCompleter(areaCsvString, showDescription, defaultMinLength, formName){
+function ajaxAutoCompleter(areaCsvString, showDescription, defaultMinLength, defaultDelay, formName){
     var areaArray = areaCsvString.replace(/&amp;/g, '&').split(",");
     var numAreas = parseInt(areaArray.length / 3);
     
@@ -403,6 +403,7 @@ function ajaxAutoCompleter(areaCsvString, showDescription, defaultMinLength, for
         
         jQuery("#" + div).autocomplete({
             minLength: defaultMinLength,
+            delay: defaultDelay,
             source: function(request, response){
                 jQuery.ajax({
                     url: url,
@@ -603,19 +604,19 @@ function toggleCollapsiblePanel(link, areaId, expandTxt, collapseTxt){
 */
 function toggleScreenlet(link, areaId, saveCollapsed, expandTxt, collapseTxt){
    toggleCollapsiblePanel(link, areaId, expandTxt, collapseTxt);
-   var container = jQuery("#" + areaId);
-   var screenlet = jQuery(link).parents('div:first');;
-   if(container.is(':visible')){
-       var currentParam = screenlet.id + "_collapsed=false";
-       var newParam = screenlet.id + "_collapsed=true";
+   var screenlet = jQuery(link).parents('div:eq(1)').attr('id');
+   var title = jQuery(link).attr('title');
+   if(title == expandTxt){
+       var currentParam = screenlet + "_collapsed=false";
+       var newParam = screenlet + "_collapsed=true";
        if(saveCollapsed=='true'){
-           setUserLayoutPreferences('GLOBAL_PREFERENCES',screenlet.id+"_collapsed",'true');
+           setUserLayoutPreferences('GLOBAL_PREFERENCES',screenlet+"_collapsed",'true');
        }
    } else {
-       var currentParam = screenlet.id + "_collapsed=true";
-       var newParam = screenlet.id + "_collapsed=false";
+       var currentParam = screenlet + "_collapsed=true";
+       var newParam = screenlet + "_collapsed=false";
        if(saveCollapsed=='true'){
-           setUserLayoutPreferences('GLOBAL_PREFERENCES',screenlet.id+"_collapsed",'false');
+           setUserLayoutPreferences('GLOBAL_PREFERENCES',screenlet+"_collapsed",'false');
        }
    }
    var paginationMenus = jQuery('div.nav-pager');

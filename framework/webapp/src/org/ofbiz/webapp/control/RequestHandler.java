@@ -355,7 +355,12 @@ public class RequestHandler {
             if (!"success".equalsIgnoreCase(checkLoginReturnString)) {
                 // previous URL already saved by event, so just do as the return says...
                 eventReturn = checkLoginReturnString;
-                requestMap = requestMapMap.get("checkLogin");
+                // if the request is an ajax request we don't want to return the default login check
+                if (!"XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+                    requestMap = requestMapMap.get("checkLogin");
+                } else {
+                    requestMap = requestMapMap.get("ajaxCheckLogin");
+                }
             }
         }
 
@@ -902,10 +907,9 @@ public class RequestHandler {
     /**
      * Creates a query string based on the redirect parameters for a request response, if specified, or for all request parameters if no redirect parameters are specified.
      *
-     * @param request
-     * @param requestUri
-     * @param eventReturnString
-     * @return
+     * @param request the Http request
+     * @param requestResponse the RequestResponse Object
+     * @return return the query string
      */
     public String makeQueryString(HttpServletRequest request, ConfigXMLReader.RequestResponse requestResponse) {
         if (requestResponse == null || 

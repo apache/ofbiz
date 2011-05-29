@@ -1786,6 +1786,7 @@ under the License.
     </request-map>
 
     <!-- lookup other components -->
+    <request-map uri="LookupUserLoginAndPartyDetails"><security https="true" auth="true"/><response name="success" type="view" value="LookupUserLoginAndPartyDetails"/></request-map>
     <request-map uri="LookupPerson"><security auth="true" https="true"/><response name="success" type="view" value="LookupPerson"/></request-map>
     <request-map uri="LookupPartyAndUserLoginAndPerson"><security auth="true" https="true"/><response name="success" type="view" value="LookupPartyAndUserLoginAndPerson"/></request-map>
     <request-map uri="LookupProductFeature"><security auth="true" https="true"/><response name="success" type="view" value="LookupProductFeature"/></request-map>
@@ -1822,6 +1823,46 @@ under the License.
     <request-map uri="showContentPdf">
         <security auth="true" https="true"/>
         <response name="success" type="view" value="showContentPdf"/>
+    </request-map>
+    
+    <!-- ================ Content keyword Search Requests ================= -->
+    <request-map uri="ContentSearchOptions">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ContentSearchOptions"/>
+    </request-map>
+    <request-map uri="ContentSearchResults">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ContentSearchResults"/>
+    </request-map>
+    
+    <!-- Content Keyword -->
+    <request-map uri="EditContentKeywords">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditContentKeywords"/>
+    </request-map>
+    <request-map uri="createContentKeyword">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createContentKeyword"/>
+        <response name="success" type="view" value="EditContentKeywords"/>
+        <response name="error" type="view" value="EditContentKeywords"/>
+    </request-map>
+    <request-map uri="deleteContentKeyword">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteContentKeyword"/>
+        <response name="success" type="view" value="EditContentKeywords"/>
+        <response name="error" type="view" value="EditContentKeywords"/>
+    </request-map>
+    <request-map uri="createContentKeywords">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createContentKeywords"/>
+        <response name="success" type="view" value="EditContentKeywords"/>
+        <response name="error" type="view" value="EditContentKeywords"/>
+    </request-map>
+    <request-map uri="deleteContentKeywords">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteContentKeywords"/>
+        <response name="success" type="view" value="EditContentKeywords"/>
+        <response name="error" type="view" value="EditContentKeywords"/>
     </request-map>
     
     <!-- View Mappings -->
@@ -1880,6 +1921,7 @@ under the License.
     <view-map name="EditContentOperation" page="component://content/widget/contentsetup/ContentSetupScreens.xml#EditContentOperation" type="screen"/>
     <view-map name="EditContentPurposeOperation"  page="component://content/widget/contentsetup/ContentSetupScreens.xml#EditContentPurposeOperation" type="screen"/>
     <view-map name="EditContentWorkEfforts" page="component://content/widget/content/ContentScreens.xml#EditContentWorkEfforts" type="screen"/>
+    <view-map name="EditContentKeywords" type="screen" page="component://content/widget/content/ContentScreens.xml#EditContentKeywords"/>
 
     <view-map name="FindDataResource"  page="component://content/widget/content/DataResourceScreens.xml#FindDataResource" type="screen"/>
     <view-map name="findDataResourceSearchResults"  page="component://content/widget/content/DataResourceScreens.xml#findDataResourceSearchResults" type="screen"/>
@@ -1981,6 +2023,7 @@ under the License.
     <view-map name="LookupListLayout" page="component://content/widget/LookupScreens.xml#LookupListLayout" type="screen"/>
     <view-map name="LookupSubContent" page="component://content/widget/LookupScreens.xml#LookupSubContent" type="screen"/>
     <!-- lookup other components -->
+    <view-map name="LookupUserLoginAndPartyDetails" type="screen" page="component://party/widget/partymgr/LookupScreens.xml#LookupUserLoginAndPartyDetails"/>
     <view-map name="LookupPerson" page="component://party/widget/partymgr/LookupScreens.xml#LookupPerson" type="screen"/>
     <view-map name="LookupPartyAndUserLoginAndPerson" page="component://party/widget/partymgr/LookupScreens.xml#LookupPartyAndUserLoginAndPerson" type="screen"/>
     <view-map name="LookupProductFeature" page="component://product/widget/catalog/LookupScreens.xml#LookupProductFeature" type="screen"/>
@@ -1997,5 +2040,9 @@ under the License.
     <view-map name="showContent" type="screen" page="component://content/widget/content/ContentScreens.xml#ShowContent"/>
     <view-map name="showContentPdf" type="screen" page="component://content/widget/content/ContentScreens.xml#ShowContent"  content-type="application/pdf" encoding="none"/>
     
-        <!-- end of view mappings -->
+    <!-- content keyword search view -->
+    <view-map name="ContentSearchOptions" type="screen" page="component://content/widget/content/ContentScreens.xml#ContentSearchOptions"/>
+    <view-map name="ContentSearchResults" type="screen" page="component://content/widget/content/ContentScreens.xml#ContentSearchResults"/>
+    
+    <!-- end of view mappings -->
 </site-conf>

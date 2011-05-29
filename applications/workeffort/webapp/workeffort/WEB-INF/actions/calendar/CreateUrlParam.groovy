@@ -62,6 +62,13 @@ if (hideEvents) {
     urlParam = urlParam + "hideEvents=" + hideEvents;
 }
 
+if (parameters.portalPageId) {
+    if (urlParam) {
+        urlParam = urlParam + "&";
+    }
+    urlParam = urlParam + "portalPageId=" + parameters.portalPageId;
+}
+
 if (urlParam) {
     urlParam = "&" + urlParam;
 }

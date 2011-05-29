@@ -180,7 +180,7 @@ function initiallyCollapseDelayed() {
 /*************************************
 * Fieldlookup Class & Methods
 *************************************/
-function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalTarget, formName, width, height, position, modal, ajaxUrl, showDescription, presentation, defaultMinLength, args) {
+function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalTarget, formName, width, height, position, modal, ajaxUrl, showDescription, presentation, defaultMinLength, defaultDelay, args) {
     
     // add the presentation attribute to the request url to let the request know which decorator should be loaded
     if(!presentation) {
@@ -213,7 +213,7 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
          SHOW_DESCRIPTION = showDescription;
         //write the new input box id in the ajaxUrl Array
         ajaxUrl = ajaxUrl.replace(ajaxUrl.substring(0, ajaxUrl.indexOf(",")), newInputBoxId);
-        new ajaxAutoCompleter(ajaxUrl, showDescription, defaultMinLength, formName);
+        new ajaxAutoCompleter(ajaxUrl, showDescription, defaultMinLength, defaultDelay, formName);
     }
     
     var positioning = null;
@@ -540,7 +540,7 @@ function modifySubmitButton (lookupDiv) {
                                     var link = cellElement.href;
                                     var liSub = link.substring(link.lastIndexOf('/')+1,(link.length));
                                     if (liSub.indexOf("javascript:set_") != -1) {
-                                        cellElement.href = liSub;
+                                        cellElement.href = link;
                                     } else {
                                         cellElement.href = "javascript:lookupAjaxRequest('" + liSub + "&presentation=layer')";
                                     }
@@ -567,7 +567,7 @@ function modifySubmitButton (lookupDiv) {
                         var link = cellChild[child].href;
                         var liSub = link.substring(link.lastIndexOf('/')+1,(link.length));
                         if (liSub.indexOf("javascript:set_") != -1) {
-                            cellChild[child].href = liSub;
+                            cellChild[child].href = link;
                         } else {
                             cellChild[child].href = "javascript:lookupAjaxRequest('" + liSub + "&presentation=layer')";
                         }
@@ -588,10 +588,6 @@ function lookupAjaxRequest(request) {
     request = request.substring(0, request.indexOf('?'));
     lookupId = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).lookupId;
     jQuery("#" + lookupId).load(request, arg, function(data) {
-        if (data.search(/loginform/) != -1) {
-            window.location.href = window.location.href;
-            return;
-        }
         modifySubmitButton(lookupId);
     });
 }
@@ -607,10 +603,6 @@ function lookupFormAjaxRequest(formAction, form) {
     var data = jQuery("#" + form).serialize();
     data = data + "&presentation=" + GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).presentation;
     jQuery("#" + lookupId).load(formAction, data, function(data) {
-        if (data.search(/loginform/) != -1) {
-            window.location.href = window.location.href;
-            return;
-        }
         modifySubmitButton(lookupId);
     });
 }
@@ -621,10 +613,6 @@ function lookupPaginationAjaxRequest(navAction, type) {
 
     lookupId = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).lookupId;
     jQuery("#" + lookupId).load(navAction, function(data) {
-        if (data.search(/loginform/) != -1) {
-            window.location.href = window.location.href;
-            return;
-        }
         modifySubmitButton(lookupId);
     });
 }

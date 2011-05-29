@@ -273,12 +273,12 @@ public class ShoppingCartItem implements java.io.Serializable {
      *
      * @param cartLocation The location to place this item; null will place at the end
      * @param productId The primary key of the product being added
-     * @param selectedAmountDbl Optional. Defaults to 0.0. If a selectedAmount is needed (complements the quantity value), pass it in here.
+     * @param selectedAmount Optional. Defaults to 0.0. If a selectedAmount is needed (complements the quantity value), pass it in here.
      * @param quantity Required. The quantity to add.
-     * @param unitPriceDbl Optional. Defaults to 0.0, which causes calculation of price.
+     * @param unitPrice Optional. Defaults to 0.0, which causes calculation of price.
      * @param reservStart Optional. The start of the reservation.
-     * @param reservLengthDbl Optional. The length of the reservation.
-     * @param reservPersonsDbl Optional. The number of persons taking advantage of the reservation.
+     * @param reservLength Optional. The length of the reservation.
+     * @param reservPersons Optional. The number of persons taking advantage of the reservation.
      * @param shipBeforeDate Optional. The date to ship the order by.
      * @param shipAfterDate Optional. Wait until this date to ship.
      * @param additionalProductFeatureAndAppls Optional. Product feature/appls map.
@@ -371,12 +371,12 @@ public class ShoppingCartItem implements java.io.Serializable {
      *
      * @param cartLocation The location to place this item; null will place at the end
      * @param product The product entity relating to the product being added
-     * @param selectedAmountDbl Optional. Defaults to 0.0. If a selectedAmount is needed (complements the quantity value), pass it in here.
+     * @param selectedAmount Optional. Defaults to 0.0. If a selectedAmount is needed (complements the quantity value), pass it in here.
      * @param quantity Required. The quantity to add.
-     * @param unitPriceDbl Optional. Defaults to 0.0, which causes calculation of price.
+     * @param unitPrice Optional. Defaults to 0.0, which causes calculation of price.
      * @param reservStart Optional. The start of the reservation.
-     * @param reservLengthDbl Optional. The length of the reservation.
-     * @param reservPersonsDbl Optional. The number of persons taking advantage of the reservation.
+     * @param reservLength Optional. The length of the reservation.
+     * @param reservPersons Optional. The number of persons taking advantage of the reservation.
      * @param shipBeforeDate Optional. The date to ship the order by.
      * @param shipAfterDate Optional. Wait until this date to ship.
      * @param additionalProductFeatureAndAppls Optional. Product feature/appls map.
@@ -1110,7 +1110,6 @@ public class ShoppingCartItem implements java.io.Serializable {
         if (_product != null && isModifiedPrice == false) {
             try {
                 Map<String, Object> priceContext = FastMap.newInstance();
-                priceContext.put("currencyUomId", cart.getCurrency());
 
                 String partyId = cart.getPartyId();
                 if (partyId != null) {
@@ -1132,6 +1131,7 @@ public class ShoppingCartItem implements java.io.Serializable {
                 priceContext.put("amount", this.getSelectedAmount());
                 
                 if (cart.getOrderType().equals("PURCHASE_ORDER")) {
+                    priceContext.put("currencyUomId", cart.getCurrency());
                     Map<String, Object> priceResult = dispatcher.runSync("calculatePurchasePrice", priceContext);
                     if (ServiceUtil.isError(priceResult)) {
                         throw new CartItemModifyException("There was an error while calculating the price: " + ServiceUtil.getErrorMessage(priceResult));
@@ -1168,6 +1168,7 @@ public class ShoppingCartItem implements java.io.Serializable {
                             }
                         }
                     }
+                    priceContext.put("currencyUomIdTo", cart.getCurrency());
                     priceContext.put("prodCatalogId", this.getProdCatalogId());
                     priceContext.put("webSiteId", cart.getWebSiteId());
                     priceContext.put("productStoreId", cart.getProductStoreId());
