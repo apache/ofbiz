@@ -318,6 +318,12 @@ under the License.
         <response name="success" type="view" value="ExampleJackrabbitShowContentData"/>
         <response name="error" type="view" value="ExampleJackrabbitShowContentData"/>
     </request-map>
+    <request-map uri="OpenFileInformation">
+        <security auth="true" https="true" />
+        <event type="java" path="org.ofbiz.content.jcr.JackrabbitEvents" invoke="getFileInformation"/>
+        <response name="success" type="view" value="ExampleJackrabbitOpenFileInformation"/>
+        <response name="error" type="view" value="ExampleJackrabbitShowUploadedFiles"/>
+    </request-map>
 
     <!-- View Mappings -->
     <view-map name="main" type="screen" page="component://example/widget/example/CommonScreens.xml#main"/>
@@ -371,6 +377,7 @@ under the License.
     <view-map name="ExampleJackrabbitUploadFileData" page="component://example/widget/example/ExampleJackrabbitScreens.xml#ExampleJackrabbitUploadFileData" type="screen" />
     <view-map name="ExampleJackrabbitShowUploadedFiles" page="component://example/widget/example/ExampleJackrabbitScreens.xml#ExampleJackrabbitShowUploadedFiles" type="screen" />
     <view-map name="ExampleJackrabbitShowContentData" page="component://example/widget/example/ExampleJackrabbitScreens.xml#ExampleJackrabbitShowContentData" type="screen" />
+    <view-map name="ExampleJackrabbitOpenFileInformation" page="component://example/widget/example/ExampleJackrabbitScreens.xml#ExampleJackrabbitShowFileInformation" type="screen" />
 
 
     <!-- Supported Content Types -->

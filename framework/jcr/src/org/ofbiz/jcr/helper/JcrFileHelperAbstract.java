@@ -23,9 +23,13 @@ public abstract class JcrFileHelperAbstract extends JcrHelperAbstract {
 
     public abstract InputStream getFileContent() throws RepositoryException;
 
-    public abstract String getFileMimeType() throws RepositoryException;
+    public abstract String getFileMimeType();
 
     public abstract JSONArray getJsonFileTree() throws RepositoryException;
 
     public abstract JcrFileHelper addNewNode(String newNode) throws RepositoryException, GenericEntityException;
+
+    public abstract String getFileDescription();
+
+    public abstract String getSelctedLanguage();
 }

@@ -18,79 +18,92 @@ under the License.
 -->
 <script language="javascript" type="text/javascript" src="<@ofbizContentUrl>/images/jquery/plugins/jsTree/jquery.jstree.js</@ofbizContentUrl>"></script>
 
-<div id="jackrabbitFileTree">${parameters.fileTree!}</div>
+<div id="jackrabbitFileTree">${parameters.fileTree!""}</div>
 
 <script type="text/javascript">
-	var rawdata = ${parameters.fileTree!};
+    var rawdata = ${parameters.fileTree!};
 
     jQuery(function () {
-	    jQuery("#jackrabbitFileTree").jstree({
-	        "plugins" : [ "themes", "json_data", "ui", "contextmenu"],
-	        "json_data" : {
-	            "data" : rawdata
-	        },
-	        'contextmenu': {
+        jQuery("#jackrabbitFileTree").jstree({
+            "plugins" : [ "themes", "json_data", "ui", "contextmenu"],
+            "json_data" : {
+                "data" : rawdata
+            },
+            'contextmenu': {
                 'items': {
                     'ccp' : false,
                     'create' : false,
                     'rename' : false,
+                    'open' : {
+                        'label' : "${uiLabelMap.ExampelsJackrabbitOpenFile}",
+                        'action' : function(obj) {
+                            openFileFromRepository(obj.attr('nodepath'), obj.attr('nodetype'));
+                         }
+                    },
                     'remove' : {
                         'label' : "${uiLabelMap.ExampelsJackrabbitRemoveFile}",
                         'action' : function(obj) {
                             removeFileFromRepository(obj.attr('nodepath'), obj.attr('nodetype'));
                          }
                         },
-                    'open' : {
+                    'download' : {
                         'label' : "${uiLabelMap.ExampelsJackrabbitDownloadFile}",
                         'action' : function(obj) {
-                            openFileFromRepository(obj.attr('nodepath'), obj.attr('nodetype'));
+                            downloadFileFromRepository(obj.attr('nodepath'), obj.attr('nodetype'));
                         }
                    }
                  }
              }
-	    });
+        });
     });
 
-    function removeFileFromRepository(nodepath, nodetype) {
-    	var parameters = {"repositoryNode" : nodepath};
-    	var url = "RemoveRepositoryFile";
+    function openFileFromRepository(nodepath, nodetype) {
+        var parameters = {"repositoryNode" : nodepath};
+        var url = "OpenFileInformation";
 
-    	runPostRequest(url, parameters)
+        runPostRequest(url, parameters)
     }
 
-    function openFileFromRepository(nodepath, nodetype) {
-    	if ("nt:folder" == nodetype) { // the open function for foldes is not supported yet.
-    		return;
-    	}
+    function removeFileFromRepository(nodepath, nodetype) {
+        var parameters = {"repositoryNode" : nodepath};
+        var url = "RemoveRepositoryFile";
 
-    	var parameters = {"repositoryNode" : nodepath};
-    	var url = "GetFileFromRepository";
+        runPostRequest(url, parameters)
+    }
 
-    	runPostRequest(url, parameters)
+    function downloadFileFromRepository(nodepath, nodetype) {
+        if ("nt:folder" == nodetype) { // the open function for foldes is not supported yet.
+            return;
+        }
+
+        var parameters = {"repositoryNode" : nodepath};
+        var url = "GetFileFromRepository";
+
+        runPostRequest(url, parameters)
     }
 
     function runPostRequest(url, parameters) {
-    	// create a hidden form
-    	var form = jQuery('<form></form>');
+        // create a hidden form
+        var form = jQuery('<form></form>');
 
-	    form.attr("method", "POST");
-	    form.attr("action", url);
+        form.attr("method", "POST");
+        form.attr("action", url);
 
-	    jQuery.each(parameters, function(key, value) {
-	        var field = jQuery('<input></input>');
+        jQuery.each(parameters, function(key, value) {
+            var field = jQuery('<input></input>');
 
-	        field.attr("type", "hidden");
-	        field.attr("name", key);
-	        field.attr("value", value);
+            field.attr("type", "hidden");
+            field.attr("name", key);
+            field.attr("value", value);
 
-	        form.append(field);
-	    });
+            form.append(field);
+        });
 
-	    // The form needs to be apart of the document in
-	    // order for us to be able to submit it.
-	    jQuery(document.body).append(form);
-	    form.submit();
-	    form.remove();
+        // The form needs to be apart of the document in
+        // order for us to be able to submit it.
+        jQuery(document.body).append(form);
+        form.submit();
+        form.remove();
     }
 
 

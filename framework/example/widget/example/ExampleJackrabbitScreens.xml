@@ -170,4 +170,22 @@ under the License.
         </section>
     </screen>
 
+    <screen name="ExampleJackrabbitShowFileInformation">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleExampleJackrabbit" />
+                <set field="tabButtonItem" value="ExampleJackrabbitShowUploadedFiles" />
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonExampleJackrabbitDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <include-form location="component://example/widget/example/ExampleJackrabbitForms.xml" name="ExampleJackrabbitShowFileInformation" />
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
 </screens>

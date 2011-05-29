@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
+import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.version.Version;
 
@@ -61,6 +62,15 @@ public interface OfbizRepositoryMapping {
      * @return
      */
     public Node getNode();
+
+    /**
+     * Return the property of the current node. Return null if the property not
+     * exists or an exception is raised.
+     *
+     * @param propertyName
+     * @return
+     */
+    public Property getNodeProperty(String propertyName);
 
     /**
      * Returns the contentId from the related content object. If the content

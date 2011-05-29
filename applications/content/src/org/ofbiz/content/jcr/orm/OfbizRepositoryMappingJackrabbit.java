@@ -320,6 +320,24 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
     /*
      * (non-Javadoc)
      *
+     * @see
+     * org.ofbiz.jcr.orm.OfbizContentMapping#getNodeProperty(java.lang.String)
+     */
+    @Override
+    public Property getNodeProperty(String propertyName) {
+        try {
+            if (this.node.hasProperty(propertyName)) {
+                return this.node.getProperty(propertyName);
+            }
+        } catch (RepositoryException e) {
+            Debug.logError(e, module);
+        }
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
      * @see org.ofbiz.jcr.orm.OfbizContentMapping#getContentId()
      */
     @Override
@@ -352,6 +370,12 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
      */
     @Override
     public void removeRepositoryNode() throws RepositoryException, GenericEntityException {
+        if (node.hasNodes()) {
+            // make sure all child nodes are checked out before deleting them
+            checkOutChildNodes(node);
+        }
+        checkOutNode(node);
+
         node.remove();
         try {
             GenericValue content = delegator.findOne("Content", false, UtilMisc.toMap("contentId", this.content.getString("contentId")));
@@ -361,7 +385,7 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
             if (UtilValidate.isNotEmpty(relatedContents)) {
                 delegator.removeAll(relatedContents);
             }
-            session.save();
+            saveSessionAndCheckinNode();
         } catch (GenericEntityException e) {
             throw new GenericEntityException(e);
         }
@@ -553,6 +577,10 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
         }
 
         Node fileNode = this.node.getNode(fileName);
+        // read file language
+        if (fileNode.hasProperty(PROPERTY_FIELDS.LANGUAGE.getType())) {
+            selectedLanguage = fileNode.getProperty(PROPERTY_FIELDS.LANGUAGE.getType()).getString();
+        }
 
         Node jcrContent = fileNode.getNode("jcr:content");
         if (!jcrContent.hasProperty(PROPERTY_FIELDS.DATA.getType())) {
@@ -719,6 +747,25 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
         }
 
         return folderStrucutre;
+    }
+
+    /**
+     * Checks out recusivly all child nodes
+     *
+     * @param startNode
+     * @throws RepositoryException
+     */
+    private void checkOutChildNodes(Node startNode) throws RepositoryException {
+        NodeIterator ni = startNode.getNodes();
+        while (ni.hasNext()) {
+            Node nextNode = ni.nextNode();
+            checkOutNode(nextNode);
+            if (nextNode.hasNodes()) {
+                checkOutChildNodes(nextNode);
+            }
+        }
+
+        // checkOutNode(startNode);
     }
 
     /**

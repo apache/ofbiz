@@ -120,4 +120,19 @@ under the License.
             <display />
         </field>
     </form>
+
+    <form name="ExampleJackrabbitShowFileInformation" type="single" list-name="listIt" default-entity-name="Content" separate-columns="true" odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <field name="fileName">
+            <display />
+        </field>
+        <field name="fileLanguage">
+            <display />
+        </field>
+        <field name="fileMimeType">
+            <display />
+        </field>
+        <field name="fileDescription">
+            <display />
+        </field>
+    </form>
 </forms>

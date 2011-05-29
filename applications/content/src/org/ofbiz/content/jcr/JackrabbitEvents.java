@@ -291,8 +291,6 @@ public class JackrabbitEvents {
      * @return
      */
     public static String uploadFileData(HttpServletRequest request, HttpServletResponse response) {
-        String language = request.getParameter("fileLocale");
-        String description = request.getParameter("description");
         ServletFileUpload fu = new ServletFileUpload(new DiskFileItemFactory(10240, FileUtil.getFile("runtime/tmp")));
         List<FileItem> list = null;
         Map<String, String> passedParams = FastMap.newInstance();
@@ -322,7 +320,7 @@ public class JackrabbitEvents {
 
         if (file != null && file.length >= 1) {
             try {
-                jackrabbit.uploadFileData(file, passedParams.get("completeFileName"), language, description);
+                jackrabbit.uploadFileData(file, passedParams.get("completeFileName"), passedParams.get("fileLocale"), passedParams.get("description"));
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
                 request.setAttribute("_ERROR_MESSAGE_", e.toString());
@@ -422,6 +420,19 @@ public class JackrabbitEvents {
                 }
             }
         }
+
+        return "success";
+    }
+
+    public static String getFileInformation(HttpServletRequest request, HttpServletResponse resposne) {
+
+        JcrFileHelper jackrabbit = new JcrFileHelperJackrabbit(request);
+
+        request.setAttribute("fileName", jackrabbit.getNodeName());
+        request.setAttribute("fileLanguage", jackrabbit.getSelctedLanguage());
+        request.setAttribute("fileDescription", jackrabbit.getFileDescription());
+        request.setAttribute("fileMimeType", jackrabbit.getFileMimeType());
+        jackrabbit.closeSession();
 
         return "success";
     }

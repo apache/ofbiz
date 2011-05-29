@@ -3,6 +3,7 @@ package org.ofbiz.content.jcr.helper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.servlet.http.HttpServletRequest;
@@ -21,6 +22,7 @@ import org.ofbiz.jcr.helper.JcrFileHelperAbstract;
 
 public class JcrFileHelperJackrabbit extends JcrFileHelperAbstract implements JcrFileHelper {
 
+    private static String module = JcrFileHelperJackrabbit.class.getName();
     private static String fileRootNode = "/fileHome";
 
     /**
@@ -233,9 +235,57 @@ public class JcrFileHelperJackrabbit extends JcrFileHelperAbstract implements Jc
      * @see org.ofbiz.jcr.helper.JcrFileHelper#getFileMimeType()
      */
     @Override
-    public String getFileMimeType() throws RepositoryException {
-        return orm.getFileMimeType();
+    public String getFileMimeType() {
+        String ret = null;
+        try {
+            ret = orm.getFileMimeType();
+        } catch (RepositoryException e) {
+            Debug.logError(e, module);
+        }
+
+        return ret;
     }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.helper.JcrFileHelper#getFileDescription()
+     */
+    @Override
+    public String getFileDescription() {
+        String ret = null;
+        Property prop = orm.getNodeProperty("jcr:description");
+        if (prop != null) {
+            try {
+                ret = prop.getString();
+            } catch (RepositoryException e) {
+                Debug.logError(e, module);
+            }
+        }
+
+        return ret;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.helper.JcrFileHelper#getSelctedLanguage()
+     */
+    @Override
+    public String getSelctedLanguage() {
+        String ret = null;
+        Property prop = orm.getNodeProperty("jcr:language");
+        if (prop != null) {
+            try {
+                ret = prop.getString();
+            } catch (RepositoryException e) {
+                Debug.logError(e, module);
+            }
+        }
+
+        return ret;
+    }
+
 
     /**
      * Adds the file home node to the repository node, if not already exists.

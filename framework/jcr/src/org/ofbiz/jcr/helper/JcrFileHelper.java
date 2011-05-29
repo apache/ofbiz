@@ -130,7 +130,7 @@ public interface JcrFileHelper {
      * @return
      * @throws RepositoryException
      */
-    public String getFileMimeType() throws RepositoryException;
+    public String getFileMimeType();
 
     /**
      * Get the current selected content language.
@@ -164,4 +164,10 @@ public interface JcrFileHelper {
      */
     public List<String> getAllLanguageVersions();
 
+    /**
+     * Returns the description of the current file object.
+     *
+     * @return
+     */
+    public String getFileDescription();
 }

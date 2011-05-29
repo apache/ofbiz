@@ -857,5 +857,9 @@
         <value xml:lang="de">Verion des Content Knoten</value>
         <value xml:lang="en">Version of the base content node</value>
     </property>
+    <property key="ExampelsJackrabbitOpenFile">
+        <value xml:lang="de">Datei Informationen öffnen</value>
+        <value xml:lang="en">Open file information</value>
+    </property>
 
 </resource>

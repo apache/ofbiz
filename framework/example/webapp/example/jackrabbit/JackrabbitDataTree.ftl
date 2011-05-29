@@ -18,18 +18,18 @@ under the License.
 -->
 <script language="javascript" type="text/javascript" src="<@ofbizContentUrl>/images/jquery/plugins/jsTree/jquery.jstree.js</@ofbizContentUrl>"></script>
 
-<div id="jackrabbitDataTree">${parameters.dataTree!}</div>
+<div id="jackrabbitDataTree">${parameters.dataTree!""}</div>
 
 <script type="text/javascript">
-	var rawdata = ${parameters.dataTree!};
+    var rawdata = ${parameters.dataTree!};
 
     jQuery(function () {
-	    jQuery("#jackrabbitDataTree").jstree({
-	        "plugins" : [ "themes", "json_data", "ui", "contextmenu"],
-	        "json_data" : {
-	            "data" : rawdata
-	        },
-	        'contextmenu': {
+        jQuery("#jackrabbitDataTree").jstree({
+            "plugins" : [ "themes", "json_data", "ui", "contextmenu"],
+            "json_data" : {
+                "data" : rawdata
+            },
+            'contextmenu': {
                 'items': {
                     'ccp' : false,
                     'create' : false,
@@ -48,46 +48,46 @@ under the License.
                    }
                  }
              }
-	    });
+        });
     });
 
     function removeDataFromRepository(nodepath, nodetype) {
-    	var parameters = {"repositoryNode" : nodepath};
-    	var url = "RemoveRepositoryNode";
+        var parameters = {"repositoryNode" : nodepath};
+        var url = "RemoveRepositoryNode";
 
-    	runPostRequest(url, parameters)
+        runPostRequest(url, parameters)
     }
 
     function openDataFromRepository(nodepath, nodetype) {
 
-    	var parameters = {"repositoryNode" : nodepath};
-    	var url = "EditRepositoryContent";
+        var parameters = {"repositoryNode" : nodepath};
+        var url = "EditRepositoryContent";
 
-    	runPostRequest(url, parameters)
+        runPostRequest(url, parameters)
     }
 
     function runPostRequest(url, parameters) {
-    	// create a hidden form
-    	var form = jQuery('<form></form>');
+        // create a hidden form
+        var form = jQuery('<form></form>');
 
-	    form.attr("method", "POST");
-	    form.attr("action", url);
+        form.attr("method", "POST");
+        form.attr("action", url);
 
-	    jQuery.each(parameters, function(key, value) {
-	        var field = jQuery('<input></input>');
+        jQuery.each(parameters, function(key, value) {
+            var field = jQuery('<input></input>');
 
-	        field.attr("type", "hidden");
-	        field.attr("name", key);
-	        field.attr("value", value);
+            field.attr("type", "hidden");
+            field.attr("name", key);
+            field.attr("value", value);
 
-	        form.append(field);
-	    });
+            form.append(field);
+        });
 
-	    // The form needs to be apart of the document in
-	    // order for us to be able to submit it.
-	    jQuery(document.body).append(form);
-	    form.submit();
-	    form.remove();
+        // The form needs to be apart of the document in
+        // order for us to be able to submit it.
+        jQuery(document.body).append(form);
+        form.submit();
+        form.remove();
     }
 
 
