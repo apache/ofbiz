@@ -370,11 +370,7 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
      */
     @Override
     public void removeRepositoryNode() throws RepositoryException, GenericEntityException {
-        if (node.hasNodes()) {
-            // make sure all child nodes are checked out before deleting them
-            checkOutChildNodes(node);
-        }
-        checkOutNode(node);
+        checkOutRelatedNodes(node);
 
         node.remove();
         try {
@@ -750,22 +746,46 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
     }
 
     /**
-     * Checks out recusivly all child nodes
+     * Checks out recursively all related nodes (parent, all child's (if exists)
+     * and the node itself)
      *
      * @param startNode
      * @throws RepositoryException
      */
-    private void checkOutChildNodes(Node startNode) throws RepositoryException {
+    private void checkOutRelatedNodes(Node startNode) throws RepositoryException {
+        List<Node> nodesToCheckOut = new ArrayList<Node>();
+        nodesToCheckOut.add(startNode);
+        nodesToCheckOut.add(startNode.getParent());
+        if (startNode.hasNodes()) {
+            nodesToCheckOut.addAll(getAllChildNodes(startNode));
+        }
+
+        for (Node node : nodesToCheckOut) {
+            checkOutNode(node);
+        }
+
+    }
+
+    /**
+     * Return recursively all child nodes
+     *
+     * @param startNode
+     * @return
+     * @throws RepositoryException
+     */
+    private List<Node> getAllChildNodes(Node startNode) throws RepositoryException {
+        List<Node> nodes = new ArrayList<Node>();
         NodeIterator ni = startNode.getNodes();
         while (ni.hasNext()) {
             Node nextNode = ni.nextNode();
-            checkOutNode(nextNode);
             if (nextNode.hasNodes()) {
-                checkOutChildNodes(nextNode);
+                nodes.addAll(getAllChildNodes(nextNode));
             }
+
+            nodes.add(nextNode);
         }
 
-        // checkOutNode(startNode);
+        return nodes;
     }
 
     /**
@@ -852,6 +872,7 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
         List<GenericValue> returnList = null;
 
         try {
+            // find all content assoc links where the current content object is
             returnList = delegator.findByAnd("ContentAssoc", UtilMisc.toMap("contentId", content.getString("contentId")));
 
             if (UtilValidate.isNotEmpty(returnList)) {
@@ -860,11 +881,9 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
                     returnList.addAll(getAllRelatedContents(delegator.findOne("Content", false, UtilMisc.toMap("contentId", c.getString("contentIdTo")))));
                 }
             }
-            // find all content assoc links where the current content object is
-            // the child object
             returnList.addAll(delegator.findByAnd("ContentAssoc", UtilMisc.toMap("contentIdTo", content.getString("contentId"))));
+            returnList.addAll(delegator.findByAnd("ContentKeyword", UtilMisc.toMap("contentId", content.getString("contentId"))));
             returnList.add(content);
-
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return null;
