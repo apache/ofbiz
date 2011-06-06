@@ -23,7 +23,11 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.List;
 
+import javax.jcr.PathNotFoundException;
+import javax.jcr.RepositoryException;
+
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.content.jcr.JackrabbitWorker;
 import org.ofbiz.content.jcr.helper.JcrFileHelperJackrabbit;
@@ -71,6 +75,19 @@ public class JcrTests extends OFBizTestCase {
         jh.storeNewTextData("Hello World!");
 
         assertEquals("Hello World!", jh.getTextData());
+    }
+
+    public void testGetSelectedLanguage() throws PathNotFoundException, RepositoryException {
+        assertEquals(UtilProperties.getPropertyValue("general", "locale.properties.fallback"), jh.getSelctedLanguage());
+        assertEquals("Hello World!", jh.getTextData(UtilProperties.getPropertyValue("general", "locale.properties.fallback")));
+    }
+
+    public void testCheckVersioning() {
+        // should 1.1 because it was created (1.0) and a text content was
+        // appened (1.1)
+        assertEquals("1.1", jh.getCurrentBaseVersion());
+        // should be 1.0 because the text node is only created and not updated
+        assertEquals("1.0", jh.getCurrentLanguageVersion());
     }
 
     public void testCreateNewChildNodes() throws Exception {
