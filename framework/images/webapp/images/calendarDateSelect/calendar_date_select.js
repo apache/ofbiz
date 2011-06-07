@@ -360,6 +360,8 @@ CalendarDateSelect.prototype = {
   {
     var value = $F(this.target_element).strip()
     this.selection_made = (value != "");
+    var patt=/[-]/gi;
+    value = value.replace(patt,'/');    
     this.date = value=="" ? NaN : Date.parseFormattedString(this.options.get("date") || value);
     if (isNaN(this.date)) this.date = new Date();
     if (!this.validYear(this.date.getFullYear())) this.date.setYear( (this.date.getFullYear() < this.yearRange().start) ? this.yearRange().start : this.yearRange().end);
