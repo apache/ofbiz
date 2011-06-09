@@ -559,13 +559,12 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
             resource = folder.getNode("jcr:content");
             checkOutNode(resource);
         }
-        Binary binary = this.session.getValueFactory().createBinary(file);
 
         String mimeType = getMimeTypeFromInputStream(file);
-
         resource.setProperty(PROPERTY_FIELDS.MIMETYPE.getType(), mimeType);
         // resource.setProperty("jcr:encoding", "");
 
+        Binary binary = this.session.getValueFactory().createBinary(file);
         resource.setProperty(PROPERTY_FIELDS.DATA.getType(), binary);
         resource.addMixin(PROPERTY_FIELDS.mixInVERSIONING.getType());
         saveSessionAndCheckinNode();

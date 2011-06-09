@@ -119,7 +119,7 @@ public class JcrTests extends OFBizTestCase {
     }
 
     public void testUploadFileToRepository() throws Exception {
-        File f = new File("build.xml");
+        File f = new File("stopofbiz.sh");
         assertTrue(f.exists());
 
         InputStream file = new FileInputStream(f);
