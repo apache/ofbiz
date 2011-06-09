@@ -530,18 +530,35 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
             language = UtilProperties.getPropertyValue("general", "locale.properties.fallback");
         }
 
-        Node folder = (Node) createNewRepositoryNode(this.node.getPath() + "/" + fileName, PROPERTY_FIELDS.FILE.getType()).get("node");
+        Node folder = null;
+        // set an indicator if the file should be updated or not
+        Boolean update = Boolean.FALSE;
+        // check if the node already exists, if not create else update
+        if (!this.node.hasNode(fileName)) {
+            folder = (Node) createNewRepositoryNode(this.node.getPath() + "/" + fileName, PROPERTY_FIELDS.FILE.getType()).get("node");
+            folder.addMixin(PROPERTY_FIELDS.mixInLANGUAGE.getType());
+            folder.addMixin(PROPERTY_FIELDS.mixInTITLE.getType());
+        } else {
+            folder = this.node.getNode(fileName);
+            checkOutNode(folder);
+            update = Boolean.TRUE;
+        }
+
 
         // set additional file informations
-        folder.addMixin(PROPERTY_FIELDS.mixInLANGUAGE.getType());
-        folder.addMixin(PROPERTY_FIELDS.mixInTITLE.getType());
         folder.setProperty(PROPERTY_FIELDS.LANGUAGE.getType(), language);
         folder.setProperty(PROPERTY_FIELDS.TITLE.getType(), fileName);
         if (UtilValidate.isNotEmpty(description)) {
             folder.setProperty(PROPERTY_FIELDS.DESCRIPTION.getType(), description);
         }
 
-        Node resource = (Node) createNewRepositoryNode(folder.getPath() + "/jcr:content", PROPERTY_FIELDS.RESOURCE.getType()).get("node");
+        Node resource = null;
+        if(!update) {
+            resource = (Node) createNewRepositoryNode(folder.getPath() + "/jcr:content", PROPERTY_FIELDS.RESOURCE.getType()).get("node");
+        } else {
+            resource = folder.getNode("jcr:content");
+            checkOutNode(resource);
+        }
         Binary binary = this.session.getValueFactory().createBinary(file);
 
         String mimeType = getMimeTypeFromInputStream(file);
@@ -1044,7 +1061,7 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
     }
 
     /**
-     * Get the node object from the repository. If an exceptions rasises null
+     * Get the node object from the repository. If an exceptions raises null
      * will be returned.
      *
      * @param nodePath
