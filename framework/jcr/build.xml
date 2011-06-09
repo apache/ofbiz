@@ -38,7 +38,6 @@ under the License.
         <fileset dir="../../framework/webapp/lib" includes="*.jar"/>
         <fileset dir="../../framework/entity/build/lib" includes="*.jar"/>
         <fileset dir="../../framework/service/build/lib" includes="*.jar"/>
-
     </path>
 
     <target name="jar" depends="classes">
