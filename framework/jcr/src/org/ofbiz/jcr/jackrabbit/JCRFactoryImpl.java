@@ -67,6 +67,7 @@ public class JCRFactoryImpl implements JCRFactory {
      */
     @Override
     public void start() throws RepositoryException {
+        // Transient repositories closes automatically when the last session is closed
         repository = new TransientRepository(jackrabbitConfigFile, homeDir);
         createSession();
     }

@@ -65,6 +65,7 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
 
     private Delegator delegator = null;
     private GenericValue content = null;
+    private String rootNodePath = "/";
     // private GenericValue contentAssoc = null;
     private Session session = null;
     private Node node = null;
@@ -692,7 +693,7 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
 
             for (Node node : checkedOutNodeStore) {
                 // add the new resource content to the version history
-                if (versionManager.isCheckedOut(node.getPath())) {
+                if (session.nodeExists(node.getPath()) && versionManager.isCheckedOut(node.getPath())) {
                     versionManager.checkin(node.getPath());
                 }
             }
@@ -706,8 +707,11 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
 
     private void checkOutNode(Node node) {
         try {
-            versionManager.checkout(node.getPath());
-            checkedOutNodeStore.add(node);
+            // make sure we don't checkout the root node, because it's not versionable
+            if (!rootNodePath.equals(node.getPath())) {
+                versionManager.checkout(node.getPath());
+                checkedOutNodeStore.add(node);
+            }
         } catch (RepositoryException e) {
             Debug.logError(e, module);
         }

@@ -158,7 +158,9 @@ public class JackrabbitWorker {
 
         VersionManager vm = session.getWorkspace().getVersionManager();
         for (Node node : nodesToCheckOut) {
-            vm.checkout(node.getPath());
+            if (!"/".equals(node.getPath())) {
+                vm.checkout(node.getPath());
+            }
         }
 
     }
