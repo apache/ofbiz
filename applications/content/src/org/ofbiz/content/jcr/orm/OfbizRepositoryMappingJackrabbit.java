@@ -697,7 +697,7 @@ public class OfbizRepositoryMappingJackrabbit implements OfbizRepositoryMapping 
                 }
             }
 
-            // reset the node store after everythink is chcked in
+            // reset the node store after everything is checked in
             checkedOutNodeStore = new ArrayList<Node>();
         } catch (RepositoryException e) {
             Debug.logError(e, module);

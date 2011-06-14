@@ -132,6 +132,8 @@ public class JcrTests extends OFBizTestCase {
         InputStream rs = uf.getFileContent(f.getName());
         assertNotNull(rs);
 
+        uf.removeRepositoryNode();
+
         uf.closeSession();
     }
 

@@ -1,5 +1,6 @@
 package org.ofbiz.content.jcr;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.version.VersionManager;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
@@ -17,7 +19,7 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.jcr.JackrabbitContainer;
+import org.ofbiz.jcr.JCRFactoryUtil;
 
 public class JackrabbitWorker {
 
@@ -32,9 +34,8 @@ public class JackrabbitWorker {
      */
     public static List<Map<String, String>> getRepositoryNodes(GenericValue userLogin, String startNodePath) throws RepositoryException {
         List<Map<String, String>> returnList = null;
-        Session session = null;
+        Session session = JCRFactoryUtil.getSession();
         try {
-            session = JackrabbitContainer.getUserSession(userLogin);
             returnList = getRepositoryNodes(session, startNodePath);
         } catch (RepositoryException e) {
             throw new RepositoryException(e);
@@ -56,10 +57,9 @@ public class JackrabbitWorker {
      * @throws GenericEntityException
      */
     public static void cleanJcrRepository(Delegator delegator, GenericValue userLogin) throws RepositoryException, GenericEntityException {
-        Session session = null;
+        Session session = JCRFactoryUtil.getSession();
         List<Map<String, String>> nodesList = null;
         try {
-            session = JackrabbitContainer.getUserSession(userLogin);
             nodesList = getRepositoryNodes(session, null);
             for (Map<String, String> node : nodesList) {
                 String nodePath = node.get("repositoryNode");
@@ -80,6 +80,7 @@ public class JackrabbitWorker {
                 // will be deleted.
                 if (UtilValidate.isEmpty(contentList)) {
                     Node n = session.getNode(nodePath);
+                    checkOutRelatedNodes(n, session);
                     n.remove();
                 }
 
@@ -145,6 +146,36 @@ public class JackrabbitWorker {
         }
 
         return nodeList;
+    }
+
+    private static void checkOutRelatedNodes(Node startNode, Session session) throws RepositoryException {
+        List<Node> nodesToCheckOut = new ArrayList<Node>();
+        nodesToCheckOut.add(startNode);
+        nodesToCheckOut.add(startNode.getParent());
+        if (startNode.hasNodes()) {
+            nodesToCheckOut.addAll(getAllChildNodes(startNode));
+        }
+
+        VersionManager vm = session.getWorkspace().getVersionManager();
+        for (Node node : nodesToCheckOut) {
+            vm.checkout(node.getPath());
+        }
+
+    }
+
+    private static List<Node> getAllChildNodes(Node startNode) throws RepositoryException {
+        List<Node> nodes = new ArrayList<Node>();
+        NodeIterator ni = startNode.getNodes();
+        while (ni.hasNext()) {
+            Node nextNode = ni.nextNode();
+            if (nextNode.hasNodes()) {
+                nodes.addAll(getAllChildNodes(nextNode));
+            }
+
+            nodes.add(nextNode);
+        }
+
+        return nodes;
     }
 
 }

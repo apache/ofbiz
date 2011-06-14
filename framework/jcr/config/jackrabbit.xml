@@ -37,8 +37,10 @@
     <!--
         data store configuration
     -->
-    <DataStore class="org.apache.jackrabbit.core.data.FileDataStore"/>
-
+    <DataStore class="org.apache.jackrabbit.core.data.FileDataStore" >
+        <param name="path" value="${rep.home}/repository/datastore"/>
+        <param name="minRecordLength" value="0"/>
+    </DataStore>
     <!--
         security configuration
     -->

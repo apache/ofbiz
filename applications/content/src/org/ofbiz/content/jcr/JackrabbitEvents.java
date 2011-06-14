@@ -1,5 +1,6 @@
 package org.ofbiz.content.jcr;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
+import org.apache.tika.Tika;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.FileUtil;
 import org.ofbiz.base.util.StringUtil;
@@ -317,6 +319,16 @@ public class JackrabbitEvents {
         }
 
         JcrFileHelper jackrabbit = new JcrFileHelperJackrabbit((GenericValue) request.getSession().getAttribute("userLogin"), (Delegator) request.getAttribute("delegator"), null, passedParams.get("repositoryNode"));
+
+InputStream i = new ByteArrayInputStream(file);
+Tika tika = new Tika();
+try {
+    String mt = tika.detect(i);
+} catch (IOException e1) {
+    // TODO Auto-generated catch block
+    e1.printStackTrace();
+}
+
 
         if (file != null && file.length >= 1) {
             try {

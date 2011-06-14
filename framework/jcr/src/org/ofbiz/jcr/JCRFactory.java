@@ -18,13 +18,45 @@
  *******************************************************************************/
 package org.ofbiz.jcr;
 
-import javax.jcr.Repository;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 
-public interface JcrRepositoryFactory {
+import org.w3c.dom.Element;
+
+public interface JCRFactory {
+
     /**
      *
-     * @param repositoryName The name specified in the <code>jcr-repositories.xml</code> file
-     * @return
+     * @param configRootElement
+     * @throws RepositoryException
      */
-    Repository getInstance(String repositoryName);
+    public void initialize(Element configRootElement) throws RepositoryException;
+
+    /**
+     *
+     * @throws RepositoryException
+     */
+    public void start() throws RepositoryException;
+
+    /**
+     *
+     * @param removeRepositoryOnShutdown
+     * @throws RepositoryException
+     */
+    public void stop(boolean removeRepositoryOnShutdown) throws RepositoryException;
+
+    /**
+     *
+     * @param workspaceName
+     * @return
+     * @throws RepositoryException
+     */
+    public Session createSession() throws RepositoryException;
+
+    // public static final String WORKSPACE_NAME =
+    // PropsUtil.get(PropsKeys.JCR_WORKSPACE_NAME);
+    //
+    // public static final String NODE_DOCUMENTLIBRARY =
+    // PropsUtil.get(PropsKeys.JCR_NODE_DOCUMENTLIBRARY);
+
 }

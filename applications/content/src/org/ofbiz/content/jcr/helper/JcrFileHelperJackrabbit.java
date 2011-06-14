@@ -16,7 +16,7 @@ import org.ofbiz.content.jcr.orm.OfbizRepositoryMappingJackrabbit;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.jcr.JackrabbitContainer;
+import org.ofbiz.jcr.JCRFactoryUtil;
 import org.ofbiz.jcr.helper.JcrFileHelper;
 import org.ofbiz.jcr.helper.JcrFileHelperAbstract;
 
@@ -48,13 +48,7 @@ public class JcrFileHelperJackrabbit extends JcrFileHelperAbstract implements Jc
             return;
         }
 
-        Session session = null;
-        try {
-            session = JackrabbitContainer.getUserSession(userLogin);
-        } catch (RepositoryException re) {
-            Debug.logError(re, module);
-            return;
-        }
+        Session session = JCRFactoryUtil.getSession();
 
         // if neither a contentId nor a repositoryNode is set or the repository
         // node is set to the root node
@@ -96,13 +90,7 @@ public class JcrFileHelperJackrabbit extends JcrFileHelperAbstract implements Jc
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
         super.userLogin = userLogin;
 
-        Session session = null;
-        try {
-            session = JackrabbitContainer.getUserSession(userLogin);
-        } catch (RepositoryException re) {
-            Debug.logError(re, module);
-            return;
-        }
+        Session session = JCRFactoryUtil.getSession();
 
         String contentId = request.getParameter("contentId");
         String repositoryNode = request.getParameter("repositoryNode");

@@ -97,11 +97,9 @@ under the License.
 
     <!-- Load embedded Jackrabbit content repository. Since this container depends
          upon JNDI, it must be started after the naming-container container.-->
-    <container name="jcr-container" class="org.ofbiz.jcr.JackrabbitContainer">
-        <property name="repHomeDir" value="runtime/data/jackrabbit/"/>
-        <property name="configFilePath" value="framework/jcr/config/jackrabbit.xml"/>
-        <property name="jndiName" value="jcr/local"/>
-        <property name="removeOnShutdown" value="false"></property>
+    <container name="jcr-container" class="org.ofbiz.jcr.JCRContainer">
+        <property name="configFilePath" value="framework/jcr/config/jcr-config.xml"/>
+        <property name="removeOnShutdown" value="false"/>
     </container>
 
     <container name="catalina-container" class="org.ofbiz.catalina.container.CatalinaContainer">
