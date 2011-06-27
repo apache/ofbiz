@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.jcr;
 
+import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
@@ -59,4 +60,7 @@ public interface JCRFactory {
     // public static final String NODE_DOCUMENTLIBRARY =
     // PropsUtil.get(PropsKeys.JCR_NODE_DOCUMENTLIBRARY);
 
+    public Repository getInstance();
+
+    public Repository getRepository();
 }

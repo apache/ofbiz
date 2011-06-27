@@ -19,14 +19,23 @@
 package org.ofbiz.jcr;
 
 import javax.jcr.RepositoryException;
+import javax.jcr.RepositoryFactory;
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.naming.Reference;
+import javax.naming.StringRefAddr;
 
 import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.config.ResourceLoader;
 import org.ofbiz.base.container.Container;
 import org.ofbiz.base.container.ContainerConfig;
 import org.ofbiz.base.container.ContainerException;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.JNDIContextFactory;
 import org.ofbiz.base.util.UtilXml;
 import org.w3c.dom.Element;
+
+import com.sun.corba.se.spi.activation.Repository;
 
 /**
  * A container for a local JCR-compliant content repository. The default
@@ -37,13 +46,18 @@ public class JCRContainer implements Container {
     public static final String module = JCRContainer.class.getName();
 
     public static final String DEFAULT_JCR_CONFIG_PATH = "framework/jcr/config/jcr-config.xml";
+    public static final String REP_HOME_DIR = "0";
+    public static final String CONFIG_FILE_PATH = "1";
 
     private static String jndiName = null;
     private static String factoryClassName = null;
     private static String jcrContextName = null;
 
-    private String configFilePath = null;
+    private static String configFilePath = null;
     private boolean removeRepositoryOnShutdown = false;
+    private String homeDir = null;
+
+    Context jndiContext = null;
 
     /*
      * (non-Javadoc)
@@ -53,14 +67,13 @@ public class JCRContainer implements Container {
      */
     @Override
     public void init(String[] args, String configFile) throws ContainerException {
-        // get the container config
+        // get the container configuration
         ContainerConfig.Container cc = ContainerConfig.getContainer("jcr-container", configFile);
         if (cc == null) {
             throw new ContainerException("No jcr-container configuration found in container config!");
         }
 
         // embedded properties
-        jndiName = ContainerConfig.getPropertyValue(cc, "jndiName", "jcr/local");
         removeRepositoryOnShutdown = ContainerConfig.getPropertyValue(cc, "removeRepositoryOnShutdown", false);
         configFilePath = ContainerConfig.getPropertyValue(cc, "configFilePath", DEFAULT_JCR_CONFIG_PATH);
 
@@ -82,6 +95,8 @@ public class JCRContainer implements Container {
         for (Element curElement : UtilXml.childElementList(configRootElement, "jcr")) {
             if (jcrContextName.equals(curElement.getAttribute("name"))) {
                 factoryClassName = curElement.getAttribute("class");
+                homeDir = curElement.getAttribute("home-dir");
+                jndiName = curElement.getAttribute("jndi-name");
                 break;
             }
         }
@@ -118,6 +133,17 @@ public class JCRContainer implements Container {
             throw new ContainerException("Cannot start JCRFactory context", e);
         }
 
+        // get JNDI context
+        try {
+            jndiContext = JNDIContextFactory.getInitialContext("localjndi");
+        } catch (GenericConfigException e) {
+            Debug.logError(e, module);
+        }
+
+        bindRepository();
+        // Test JNDI bind
+        RepositoryLoader.getRepository();
+
         return true;
     }
 
@@ -147,5 +173,33 @@ public class JCRContainer implements Container {
      */
     public static String getFactoryClassName() {
         return factoryClassName;
+    }
+
+    public static String getConfigFilePath() {
+        return configFilePath;
+    }
+
+    protected void bindRepository() {
+        if (this.jndiContext != null) {
+            try {
+                Reference ref = new Reference(Repository.class.getName(), RepositoryFactory.class.getName(), null);
+                ref.add(new StringRefAddr(REP_HOME_DIR, homeDir));
+                ref.add(new StringRefAddr(CONFIG_FILE_PATH, configFilePath));
+                this.jndiContext.bind(jndiName, ref);
+                Debug.logInfo("Repository bound to JNDI as " + jndiName, module);
+            } catch (NamingException ne) {
+                Debug.logError(ne, module);
+            }
+        }
+    }
+
+    protected void unbindRepository(String name) {
+        if (this.jndiContext != null) {
+            try {
+                this.jndiContext.unbind(jndiName);
+            } catch (NamingException e) {
+                Debug.logError(e, module);
+            }
+        }
     }
 }

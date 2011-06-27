@@ -110,4 +110,24 @@ public class JCRFactoryImpl implements JCRFactory {
         }
         return session;
     }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.JCRFactory#getInstance()
+     */
+    @Override
+    public Repository getInstance() {
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.JCRFactory#getRepository()
+     */
+    @Override
+    public Repository getRepository() {
+        return repository;
+    }
 }
