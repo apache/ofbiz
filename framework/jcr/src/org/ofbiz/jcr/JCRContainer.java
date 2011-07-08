@@ -19,7 +19,6 @@
 package org.ofbiz.jcr;
 
 import javax.jcr.RepositoryException;
-import javax.jcr.RepositoryFactory;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.Reference;
@@ -88,6 +87,7 @@ public class JCRContainer implements Container {
             throw new ContainerException("No jcr configuration found in file " + configFilePath);
         }
 
+        homeDir = UtilXml.childElementAttribute(configRootElement, "home-dir", "path", "runtime/data/jcr/");
         Element childElement = UtilXml.firstChildElement(configRootElement, "jcr-context");
         jcrContextName = UtilXml.elementAttribute(childElement, "name", "default");
 
@@ -95,7 +95,6 @@ public class JCRContainer implements Container {
         for (Element curElement : UtilXml.childElementList(configRootElement, "jcr")) {
             if (jcrContextName.equals(curElement.getAttribute("name"))) {
                 factoryClassName = curElement.getAttribute("class");
-                homeDir = curElement.getAttribute("home-dir");
                 jndiName = curElement.getAttribute("jndi-name");
                 break;
             }
@@ -182,7 +181,7 @@ public class JCRContainer implements Container {
     protected void bindRepository() {
         if (this.jndiContext != null) {
             try {
-                Reference ref = new Reference(Repository.class.getName(), RepositoryFactory.class.getName(), null);
+                Reference ref = new Reference(Repository.class.getName(), org.ofbiz.jcr.RepositoryFactory.class.getName(), null);
                 ref.add(new StringRefAddr(REP_HOME_DIR, homeDir));
                 ref.add(new StringRefAddr(CONFIG_FILE_PATH, configFilePath));
                 this.jndiContext.bind(jndiName, ref);
