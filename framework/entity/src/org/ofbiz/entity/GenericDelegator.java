@@ -2411,7 +2411,7 @@ public class GenericDelegator implements Delegator {
                 synchronized (this) {
                     if (sequencer == null) {
                         ModelEntity seqEntity = this.getModelEntity("SequenceValueItem");
-                        sequencer = new SequenceUtil(this.getEntityHelperInfo("SequenceValueItem"), seqEntity, "seqName", "seqId");
+                        sequencer = new SequenceUtil(this, this.getEntityHelperInfo("SequenceValueItem"), seqEntity, "seqName", "seqId");
                     }
                 }
             }
@@ -2855,4 +2855,12 @@ public class GenericDelegator implements Delegator {
     public boolean getEnabledJMS() {
         return this.enableJMS;
     }
+    
+    /* (non-Javadoc)
+     * @see org.ofbiz.entity.Delegator#getEnableJMS()
+     */
+    public boolean useDistributedCacheClear() {
+        return this.getDelegatorInfo().useDistributedCacheClear;
+    }
+    
 }
