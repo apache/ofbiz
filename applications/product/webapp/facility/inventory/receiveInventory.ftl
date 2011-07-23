@@ -185,7 +185,12 @@ under the License.
                       <option value="">${uiLabelMap.ProductNoLocation}</option>
                     </select>
                   <#else>
-                      <@htmlTemplate.lookupField formName="selectAllForm" name="locationSeqId" id="locationSeqId" fieldFormName="LookupFacilityLocation<#if parameters.facilityId?exists>?facilityId=${facilityId}</#if>"/>
+                    <#if parameters.facilityId?exists>
+                      <#assign LookupFacilityLocationView="LookupFacilityLocation?facilityId=${facilityId}">
+                    <#else>
+                      <#assign LookupFacilityLocationView="LookupFacilityLocation">
+                    </#if>
+                    <@htmlTemplate.lookupField formName="selectAllForm" name="locationSeqId" id="locationSeqId" fieldFormName="${LookupFacilityLocationView}"/>
                   </#if>
                 </td>
               </tr>
