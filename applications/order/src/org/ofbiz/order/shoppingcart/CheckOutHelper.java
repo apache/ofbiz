@@ -558,7 +558,7 @@ public class CheckOutHelper {
     }
 
     public Map<String, Object> createOrder(GenericValue userLogin) {
-        return createOrder(userLogin, null, null, null, false, null, null);
+        return createOrder(userLogin, null, null, null, false, null, cart.getWebSiteId());
     }
 
     // Create order event - uses createOrder service for processing
@@ -1035,7 +1035,7 @@ public class CheckOutHelper {
                 Debug.logWarning(e, module);
                 throw new GeneralException("Error in authOrderPayments service: " + e.toString(), e.getNested());
             }
-            if (Debug.verboseOn()) Debug.logVerbose("Finsished w/ Payment Service", module);
+            if (Debug.verboseOn()) Debug.logVerbose("Finished w/ Payment Service", module);
 
             if (paymentResult != null && ServiceUtil.isError(paymentResult)) {
                 throw new GeneralException(ServiceUtil.getErrorMessage(paymentResult));

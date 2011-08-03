@@ -137,7 +137,7 @@ under the License.
                                                                 ${qohQuantity} (${uiLabelMap.ProductAtp}: ${atpQuantity})
                                                             </td>
                                                         </tr>
-                                                        <#if (product != null) && (product.productTypeId != null) && Static["org.ofbiz.entity.util.EntityTypeUtil"].hasParentType(delegator, "ProductType", "productTypeId", product.productTypeId, "parentTypeId", "MARKETING_PKG")>
+                                                        <#if (product?has_content) && (product.productTypeId?has_content) && Static["org.ofbiz.entity.util.EntityTypeUtil"].hasParentType(delegator, "ProductType", "productTypeId", product.productTypeId, "parentTypeId", "MARKETING_PKG")>
                                                             <tr>
                                                                 <td>${uiLabelMap.ProductMarketingPackageQOH}</td>
                                                                 <td style="padding-left: 15px; text-align: left;">
@@ -171,6 +171,16 @@ under the License.
                                             <div class="current-status">
                                                 <span class="label">${uiLabelMap.CommonCurrent}</span>&nbsp;${currentItemStatus.get("description",locale)?default(currentItemStatus.statusId)}
                                             </div>
+                                            <#if ("ITEM_CREATED" == (currentItemStatus.statusId) && "ORDER_APPROVED" == (orderHeader.statusId)) && (security.hasEntityPermission("ORDERMGR", "_UPDATE", session) || security.hasRolePermission("ORDERMGR", "_UPDATE", "", "", session))>
+                                                <div>
+                                                    <a href="javascript:document.OrderApproveOrderItem_${orderItem.orderItemSeqId?default("")}.submit()" class="buttontext">${uiLabelMap.OrderApproveOrder}</a>
+                                                    <form name="OrderApproveOrderItem_${orderItem.orderItemSeqId?default("")}" method="post" action="<@ofbizUrl>changeOrderItemStatus</@ofbizUrl>">
+                                                        <input type="hidden" name="statusId" value="ITEM_APPROVED"/>
+                                                        <input type="hidden" name="orderId" value="${orderId?if_exists}"/>
+                                                        <input type="hidden" name="orderItemSeqId" value="${orderItem.orderItemSeqId?if_exists}"/>
+                                                    </form>
+                                                </div>
+                                            </#if>
                                             <#assign orderItemStatuses = orderReadHelper.getOrderItemStatuses(orderItem)>
                                             <#list orderItemStatuses as orderItemStatus>
                                                 <#assign loopStatusItem = orderItemStatus.getRelatedOne("StatusItem")>
@@ -255,7 +265,7 @@ under the License.
                                                     <td><b>${uiLabelMap.OrderOutstanding}</b></td>
                                                     <td>
                                                         <#-- Make sure digital goods without shipments don't always remainn "outstanding": if item is completed, it must have no outstanding quantity.  -->
-                                                        <#if (orderItem.statusId != null) && (orderItem.statusId == "ITEM_COMPLETED")>
+                                                        <#if (orderItem.statusId?has_content) && (orderItem.statusId == "ITEM_COMPLETED")>
                                                             0
                                                         <#elseif orderHeader.orderTypeId == "PURCHASE_ORDER">
                                                             ${(orderItem.quantity?default(0) - orderItem.cancelQuantity?default(0)) - totalReceived?double}

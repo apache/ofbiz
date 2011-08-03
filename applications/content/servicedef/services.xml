@@ -1197,4 +1197,11 @@
         <permission-service service-name="genericContentPermission" main-action="CREATE"/>
         <attribute name="contentId" type="String" mode="IN" optional="false"/>
     </service>
+
+    <service name="createContentAlternativeUrl" engine="simple"
+            location="component://content/script/org/ofbiz/content/content/ContentServices.xml" invoke="createContentAlternativeUrl" auth="true" transaction-timeout="7200">
+        <description>Create Content Alternative URL</description>
+        <attribute name="contentId" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="contentCreated" mode="OUT" type="String" optional="true"></attribute>
+    </service>
 </services>

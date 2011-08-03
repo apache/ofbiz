@@ -1277,4 +1277,225 @@
         </call-class-method>
     </simple-method>
 
+    <simple-method method-name="createContentAlternativeUrl" short-description="Create Content Alternative URLs.">
+        <set field="defaultLocaleString" from-field="parameters.locale" default-value="en"/>
+        <set field="contents" type="List"/>
+        <if>
+            <condition>
+                <or>
+                    <if-empty field="parameters.contentId"/>
+                    <if-compare operator="equals" value="null" field="parameters.contentId"></if-compare>
+                </or>
+            </condition>
+            <then>
+                <entity-condition list="contents" entity-name="Content">
+                    <condition-list combine="and">
+                        <condition-expr field-name="contentName" operator="not-equals" from-field="nullField"/>
+                            <condition-list combine="or">
+                                <condition-expr field-name="contentTypeId" operator="equals" value="DOCUMENT"/>
+                                <condition-expr field-name="contentTypeId" operator="equals" value="WEB_SITE_PUB_PT"/>
+                            </condition-list>
+                    </condition-list>
+                    <select-field field-name="contentId"/>
+                    <select-field field-name="contentName"/>
+                    <select-field field-name="localeString"/>
+                </entity-condition>
+            </then>
+            <else>
+                <entity-condition list="contents" entity-name="Content">
+                    <condition-list combine="and">
+                        <condition-expr field-name="contentName" operator="not-equals" from-field="nullField"/>
+                        <condition-expr field-name="contentId" operator="equals" from-field="parameters.contentId"/>
+                        <condition-list combine="or">
+                            <condition-expr field-name="contentTypeId" operator="equals" value="DOCUMENT"/>
+                            <condition-expr field-name="contentTypeId" operator="equals" value="WEB_SITE_PUB_PT"/>
+                        </condition-list>
+                    </condition-list>
+                    <select-field field-name="contentId"/>
+                    <select-field field-name="contentName"/>
+                    <select-field field-name="localeString"/>
+                </entity-condition>
+            </else>
+        </if>
+        <iterate entry="content" list="contents">
+            <set field="localeString" from-field="content.localeString" default-value="${defaultLocaleString}"/>
+            <entity-condition list="contentAssocDataResources" entity-name="ContentAssocDataResourceViewTo">
+                <condition-list combine="and">
+                    <condition-expr field-name="caContentAssocTypeId" operator="equals" value="ALTERNATIVE_URL"/>
+                    <condition-expr field-name="contentIdStart" operator="equals" from-field="content.contentId"/>
+                    <condition-expr field-name="localeString" operator="equals" from-field="localeString"/>
+                </condition-list>
+                <select-field field-name="contentIdStart"/>
+                <select-field field-name="dataResourceId"/>
+                <select-field field-name="localeString"/>
+                <select-field field-name="drObjectInfo"/>
+                <select-field field-name="caFromDate"/>
+                <select-field field-name="caThruDate"/>
+            </entity-condition>
+            <filter-list-by-date list="contentAssocDataResources" from-field-name="caFromDate" thru-field-name="caThruDate"/>
+            <if-empty field="contentAssocDataResources">
+                <if-not-empty field="content.contentName">
+                    <call-class-method method-name="invalidCharacter" class-name="org.ofbiz.common.UrlServletHelper" ret-field="uri">
+                        <field field="content.contentName"/>
+                    </call-class-method>
+                    <if-not-empty field="uri">
+                        <sequenced-id sequence-name="DataResource" field="dataResourceCtx.dataResourceId"/>
+                        <set field="dataResourceCtx.dataResourceTypeId" value="URL_RESOURCE"/>
+                        <set field="dataResourceCtx.localeString" from-field="localeString"/>
+                        <set field="dataResourceCtx.objectInfo" value="/${uri}-${content.contentId}-content"/>
+                        <set field="dataResourceCtx.statusId" value="CTNT_IN_PROGRESS"/>
+                        <call-service service-name="createDataResource" in-map-name="dataResourceCtx" break-on-error="false" include-user-login="true">
+                            <result-to-field result-name="dataResourceId" field="dataResourceId"/>
+                        </call-service>
+                        <if-not-empty field="dataResourceId">
+                            <set field="contentCtx.dataResourceId" from-field="dataResourceId"/>
+                            <set field="contentCtx.statusId" value="CTNT_IN_PROGRESS"/>
+                            <set field="contentCtx.localeString" from-field="localeString"/>
+                            <call-service service-name="createContent" in-map-name="contentCtx" break-on-error="false" include-user-login="true">
+                                <result-to-field result-name="contentId" field="contentIdTo"/>
+                            </call-service>
+                            <if-not-empty field="contentIdTo">
+                                <set field="createContentAssocCtx.contentId" from-field="content.contentId"/>
+                                <set field="createContentAssocCtx.contentIdTo" from-field="contentIdTo"/>
+                                <set field="createContentAssocCtx.contentAssocTypeId" value="ALTERNATIVE_URL"/>
+                                <call-service service-name="createContentAssoc" in-map-name="createContentAssocCtx" include-user-login="true" break-on-error="false"/>
+                            </if-not-empty>
+                        </if-not-empty>
+                        <set field="contentCreated" value="Y"/>
+                        <field-to-result field="contentCreated" result-name="contentCreated"/>
+                    </if-not-empty>
+                </if-not-empty>
+            <else>
+                <if-empty field="contentAssocDataResources[0].drObjectInfo">
+                    <if-not-empty field="content.contentName">
+                        <call-class-method method-name="invalidCharacter" class-name="org.ofbiz.common.UrlServletHelper" ret-field="uri">
+                            <field field="content.contentName"/>
+                        </call-class-method>
+                        <if-not-empty field="uri">
+                            <set field="dataResourceCtx.dataResourceId" from-field="contentAssocDataResources[0].dataResourceId"/>
+                            <set field="dataResourceCtx.objectInfo" value="/${uri}-${content.contentId}-content"/>
+                            <call-service service-name="updateDataResource" in-map-name="dataResourceCtx" break-on-error="false" include-user-login="true"/>
+                            <set field="contentCreated" value="Y"/>
+                            <field-to-result field="contentCreated" result-name="contentCreated"/>
+                        </if-not-empty>
+                    </if-not-empty>
+                <else>
+                    <set field="contentCreated" value="N"/>
+                    <field-to-result field="contentCreated" result-name="contentCreated"/>
+                </else>
+                </if-empty>
+            </else>
+            </if-empty>
+        </iterate>
+    </simple-method>
+
+    <simple-method method-name="createMissingContentAltUrls" short-description="create missing content alternative urls.">
+        <now-timestamp field="now"/>
+        <set field="contentsNotUpdated" value="0" type="Integer"/>
+        <set field="contentsUpdated" value="0" type="Integer"/>
+        <entity-and list="prodCatalogCategoryList" entity-name="ProdCatalogCategory" filter-by-date="false">
+            <field-map field-name="prodCatalogId" from-field="parameters.prodCatalogId"/>
+        </entity-and>
+        
+        <!-- Get all categories -->
+        <call-class-method method-name="newInstance" class-name="javolution.util.FastList" ret-field="parameters.productCategories"/>
+        <iterate entry="prodCatalogCategory" list="prodCatalogCategoryList">
+            <set field="rootProductCategoryId" from-field="prodCatalogCategory.productCategoryId"/>
+            <entity-and list="productCategoryRollupList" entity-name="ProductCategoryRollup" filter-by-date="true">
+                <field-map field-name="parentProductCategoryId" from-field="rootProductCategoryId"/>
+            </entity-and>
+            <set field="parameters.parentProductCategoryId" from-field="rootProductCategoryId"/>
+            <call-simple-method method-name="createMissingCategoryContentAltUrlInline"/>
+        </iterate>
+        
+        <iterate entry="productCategoryList" list="parameters.productCategories">
+            <!-- Create Content Alternative URLs for Product Category -->
+            <entity-condition list="productCategoryContentAndInfoList" entity-name="ProductCategoryContentAndInfo" filter-by-date="true" use-cache="true">
+                <condition-list combine="and">
+                    <condition-expr field-name="productCategoryId" from-field="productCategoryList.productCategoryId"/>
+                    <condition-expr field-name="prodCatContentTypeId" operator="not-equals" value="ALTERNATIVE_URL"/>
+                </condition-list>
+                <order-by field-name="-fromDate"/>
+            </entity-condition>
+            <iterate entry="productCategoryContentAndInfo" list="productCategoryContentAndInfoList">
+                <set field="createMissingCategoryContentAltUrlsMap.contentId" from-field="productCategoryContentAndInfo.contentId"/>
+                <call-service service-name="createContentAlternativeUrl" in-map-name="createMissingCategoryContentAltUrlsMap">
+                    <result-to-field result-name="contentCreated" field="contentCreated"/>
+                </call-service>
+                <if-compare operator="equals" value="Y" field="contentCreated">
+                    <calculate field="contentsUpdated" type="Integer">
+                        <calcop operator="add" field="contentsUpdated">
+                            <number value="1"/>
+                        </calcop>
+                    </calculate>
+                </if-compare>
+                <if-compare operator="equals" value="N" field="contentCreated">
+                    <calculate field="contentsNotUpdated" type="Integer">
+                        <calcop operator="add" field="contentsNotUpdated">
+                            <number value="1"/>
+                        </calcop>
+                    </calculate>
+                </if-compare>
+            </iterate>
+            
+            <!-- Create Content Alternative URLs for Product -->
+            <entity-condition list="productCategoryMemberList" entity-name="ProductCategoryMember" filter-by-date="true" use-cache="true">
+                <condition-list combine="and">
+                    <condition-expr field-name="productCategoryId" from-field="productCategoryList.productCategoryId"/>
+                </condition-list>
+                <order-by field-name="-fromDate"/>
+            </entity-condition>
+            <iterate entry="productCategoryMember" list="productCategoryMemberList">
+                <set field="product.productId" from-field="productCategoryMember.productId"/>
+                <entity-condition list="productContentAndInfoList" entity-name="ProductContentAndInfo" filter-by-date="true" use-cache="true">
+                    <condition-list combine="and">
+                        <condition-expr field-name="productId" from-field="product.productId"/>
+                        <condition-expr field-name="productContentTypeId" operator="not-equals" value="ALTERNATIVE_URL"/>
+                    </condition-list>
+                    <order-by field-name="-fromDate"/>
+                </entity-condition>
+                <iterate entry="productContentAndInfo" list="productContentAndInfoList">
+                    <set field="createMissingProductContentAltUrlsMap.contentId" from-field="productContentAndInfo.contentId"/>
+                    <call-service service-name="createContentAlternativeUrl" in-map-name="createMissingProductContentAltUrlsMap">
+                        <result-to-field result-name="contentCreated" field="contentCreated"/>
+                    </call-service>
+                    <if-compare operator="equals" value="Y" field="contentCreated">
+                        <calculate field="contentsUpdated" type="Integer">
+                            <calcop operator="add" field="contentsUpdated">
+                                <number value="1"/>
+                            </calcop>
+                        </calculate>
+                    </if-compare>
+                    <if-compare operator="equals" value="N" field="contentCreated">
+                        <calculate field="contentsNotUpdated" type="Integer">
+                            <calcop operator="add" field="contentsNotUpdated">
+                                <number value="1"/>
+                            </calcop>
+                        </calculate>
+                    </if-compare>
+                </iterate>
+            </iterate>
+        </iterate>
+        <field-to-result field="contentsNotUpdated" result-name="contentsNotUpdated"/>
+        <field-to-result field="contentsUpdated" result-name="contentsUpdated"/>
+    </simple-method>
+
+    <simple-method method-name="createMissingCategoryContentAltUrlInline" short-description="create missing category alternative inline">
+        <entity-and list="productCategoryRollups" entity-name="ProductCategoryRollup" filter-by-date="true">
+            <field-map field-name="parentProductCategoryId" from-field="parameters.parentProductCategoryId"/>
+        </entity-and>
+        <iterate entry="productCategoryRollup" list="productCategoryRollups">
+            <!-- append product category to list -->
+            <entity-one value-field="productCategory" entity-name="ProductCategory">
+                <field-map field-name="productCategoryId" from-field="productCategoryRollup.productCategoryId"/>
+            </entity-one>
+            <field-to-list list="parameters.productCategories" field="productCategory"/>
+            
+            <!-- find rollup product categories -->
+            <set field="parameters.parentProductCategoryId" from-field="productCategoryRollup.productCategoryId"/>
+            <call-simple-method method-name="createMissingCategoryContentAltUrlInline"/>
+            <check-errors/>
+        </iterate>
+    </simple-method>
 </simple-methods>
+

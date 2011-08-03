@@ -16,7 +16,6 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-
 <#assign extInfo = parameters.extInfo?default("N")>
 <#assign inventoryItemId = parameters.inventoryItemId?default("")>
 <#assign serialNumber = parameters.serialNumber?default("")>
@@ -44,19 +43,6 @@ under the License.
       <li class="collapsed"><a href="<@ofbizUrl>findparty?hideFields=N${paramList}</@ofbizUrl>" title="${uiLabelMap.CommonShowLookupFields}">&nbsp;</a></li>
   <#else>
       <li class="expanded"><a href="<@ofbizUrl>findparty?hideFields=Y${paramList}</@ofbizUrl>" title="${uiLabelMap.CommonHideFields}">&nbsp;</a></li>
-  </#if>
-  <#if (partyListSize > 0)>
-    <#if (partyListSize > highIndex)>
-      <li><a class="nav-next" href="<@ofbizUrl>findparty?VIEW_SIZE=${viewSize}&amp;VIEW_INDEX=${viewIndex+1}&amp;hideFields=${hideFields}${paramList}</@ofbizUrl>">${uiLabelMap.CommonNext}</a></li>
-    <#else>
-      <li class="disabled">${uiLabelMap.CommonNext}</li>
-    </#if>
-      <li>${lowIndex} - ${highIndex} ${uiLabelMap.CommonOf} ${partyListSize}</li>
-    <#if (viewIndex > 0)>
-      <li><a class="nav-previous" href="<@ofbizUrl>findparty?VIEW_SIZE=${viewSize}&amp;VIEW_INDEX=${viewIndex-1}&amp;hideFields=${hideFields}${paramList}</@ofbizUrl>">${uiLabelMap.CommonPrevious}</a></li>
-    <#else>
-      <li class="disabled">${uiLabelMap.CommonPrevious}</li>
-    </#if>
   </#if>
     </ul>
     <br class="clear"/>
@@ -220,6 +206,16 @@ under the License.
       <h2>${uiLabelMap.CommonSearchResults}</h2>
     </div>
   <#if partyList?has_content>
+    <#-- Pagination -->
+    <#include "component://common/webcommon/includes/htmlTemplate.ftl"/>
+    <#assign commonUrl = "findparty?hideFields=" + hideFields + paramList + "&"/>
+    <#assign viewIndexFirst = 0/>
+    <#assign viewIndexPrevious = viewIndex - 1/>
+    <#assign viewIndexNext = viewIndex + 1/>
+    <#assign viewIndexLast = Static["java.lang.Math"].floor(partyListSize/viewSize)/>
+    <#assign messageMap = Static["org.ofbiz.base.util.UtilMisc"].toMap("lowCount", lowIndex, "highCount", highIndex, "total", partyListSize)/>
+    <#assign commonDisplaying = Static["org.ofbiz.base.util.UtilProperties"].getMessage("CommonUiLabels", "CommonDisplaying", messageMap, locale)/>
+    <@nextPrev commonUrl=commonUrl ajaxEnabled=false javaScriptEnabled=false paginateStyle="nav-pager" paginateFirstStyle="nav-first" viewIndex=viewIndex highIndex=highIndex listSize=partyListSize viewSize=viewSize ajaxFirstUrl="" firstUrl="" paginateFirstLabel="" paginatePreviousStyle="nav-previous" ajaxPreviousUrl="" previousUrl="" paginatePreviousLabel="" pageLabel="" ajaxSelectUrl="" selectUrl="" ajaxSelectSizeUrl="" selectSizeUrl="" commonDisplaying=commonDisplaying paginateNextStyle="nav-next" ajaxNextUrl="" nextUrl="" paginateNextLabel="" paginateLastStyle="nav-last" ajaxLastUrl="" lastUrl="" paginateLastLabel="" paginateViewSizeLabel="" />
     <table class="basic-table hover-bar" cellspacing="0">
       <tr class="header-row-2">
         <td>${uiLabelMap.PartyPartyId}</td>

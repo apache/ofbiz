@@ -37,7 +37,7 @@ import org.w3c.dom.Element;
  * EntityEcaRule
  */
 @SuppressWarnings("serial")
-public class EntityEcaRule implements java.io.Serializable {
+public final class EntityEcaRule implements java.io.Serializable {
 
     public static final String module = EntityEcaRule.class.getName();
 
@@ -47,15 +47,13 @@ public class EntityEcaRule implements java.io.Serializable {
         nameSet.add("action");
     }
 
-    protected String entityName = null;
-    protected String operationName = null;
-    protected String eventName = null;
-    protected boolean runOnError = false;
-    protected List<EntityEcaCondition> conditions = FastList.newInstance();
-    protected List<Object> actionsAndSets = FastList.newInstance();
+    protected final String entityName;
+    protected final String operationName;
+    protected final String eventName;
+    protected final boolean runOnError;
+    protected final List<EntityEcaCondition> conditions = FastList.newInstance();
+    protected final List<Object> actionsAndSets = FastList.newInstance();
     protected boolean enabled = true;
-
-    protected EntityEcaRule() {}
 
     public EntityEcaRule(Element eca) {
         this.entityName = eca.getAttribute("entity");
@@ -71,7 +69,9 @@ public class EntityEcaRule implements java.io.Serializable {
             conditions.add(new EntityEcaCondition(element, false));
         }
 
-        if (Debug.verboseOn()) Debug.logVerbose("Conditions: " + conditions, module);
+        if (Debug.verboseOn()) {
+            Debug.logVerbose("Conditions: " + conditions, module);
+        }
 
         for (Element actionOrSetElement: UtilXml.childElementList(eca, nameSet)) {
             if ("action".equals(actionOrSetElement.getNodeName())) {
@@ -81,7 +81,25 @@ public class EntityEcaRule implements java.io.Serializable {
             }
         }
 
-        if (Debug.verboseOn()) Debug.logVerbose("actions and sets (intermixed): " + actionsAndSets, module);
+        if (Debug.verboseOn()) {
+            Debug.logVerbose("actions and sets (intermixed): " + actionsAndSets, module);
+        }
+    }
+
+    public String getEntityName() {
+        return this.entityName;
+    }
+
+    public String getOperationName() {
+        return this.operationName;
+    }
+
+    public String getEventName() {
+        return this.eventName;
+    }
+
+    public boolean getRunOnError() {
+        return this.runOnError;
     }
 
     public void eval(String currentOperation, DispatchContext dctx, GenericEntity value, boolean isError, Set<String> actionsRun) throws GenericEntityException {
@@ -117,7 +135,9 @@ public class EntityEcaRule implements java.io.Serializable {
                     // in order to enable OR logic without multiple calls to the given service,
                     //only execute a given service name once per service call phase
                     if (actionsRun.add(ea.serviceName)) {
-                        if (Debug.infoOn()) Debug.logInfo("Running Entity ECA Service: " + ea.serviceName + ", triggered by rule on Entity: " + value.getEntityName(), module);
+                        if (Debug.infoOn()) {
+                            Debug.logInfo("Running Entity ECA Service: " + ea.serviceName + ", triggered by rule on Entity: " + value.getEntityName(), module);
+                        }
                         ea.runAction(dctx, context, value);
                     }
                 } else {

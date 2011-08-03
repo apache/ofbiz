@@ -23,11 +23,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Start - OFBiz Container(s) Startup Class
@@ -38,42 +41,87 @@ public class Start {
     private static final String SHUTDOWN_COMMAND = "SHUTDOWN";
     private static final String STATUS_COMMAND = "STATUS";
 
-    public static void main(String[] args) throws IOException {
-        String firstArg = args.length > 0 ? args[0] : "";
-        Start start = new Start();
+    private static void help(PrintStream out) {
+        out.println("");
+        out.println("Usage: java -jar ofbiz.jar [command] [arguments]");
+        out.println("-both    -----> Run simultaneously the POS (Point of Sales) application and OFBiz standard");
+        out.println("-help, -? ----> This screen");
+        out.println("-install -----> Run install (create tables/load data)");
+        out.println("-pos     -----> Run the POS (Point of Sales) application");
+        out.println("-setup -------> Run external application server setup");
+        out.println("-start -------> Start the server");
+        out.println("-status ------> Status of the server");
+        out.println("-shutdown ----> Shutdown the server");
+        out.println("-test --------> Run the JUnit test script");
+        out.println("[no config] --> Use default config");
+        out.println("[no command] -> Start the server w/ default config");
+    }
 
-        if (firstArg.equals("-help") || firstArg.equals("-?")) {
-            System.out.println("");
-            System.out.println("Usage: java -jar ofbiz.jar [command] [arguments]");
-            System.out.println("-both    -----> Run simultaneously the POS (Point of Sales) application and OFBiz standard");
-            System.out.println("-help, -? ----> This screen");
-            System.out.println("-install -----> Run install (create tables/load data)");
-            System.out.println("-pos     -----> Run the POS (Point of Sales) application");
-            System.out.println("-setup -------> Run external application server setup");
-            System.out.println("-start -------> Start the server");
-            System.out.println("-status ------> Status of the server");
-            System.out.println("-shutdown ----> Shutdown the server");
-            System.out.println("-test --------> Run the JUnit test script");
-            System.out.println("[no config] --> Use default config");
-            System.out.println("[no command] -> Start the server w/ default config");
+    private enum Command {
+        HELP, HELP_ERROR, STATUS, SHUTDOWN, COMMAND
+    }
+
+    private static Command checkCommand(Command command, Command wanted) {
+        if (wanted == Command.HELP || wanted.equals(command)) {
+            return wanted;
+        } else if (command == null) {
+            return wanted;
         } else {
-            // hack for the status and shutdown commands
-            if (firstArg.equals("-status")) {
-                start.init(args, false);
-                System.out.println("Current Status : " + start.status());
-            } else if (firstArg.equals("-shutdown")) {
-                start.init(args, false);
-                System.out.println("Shutting down server : " + start.shutdown());
+            System.err.println("Duplicate command detected(was " + command + ", wanted " + wanted);
+            return Command.HELP_ERROR;
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        Command command = null;
+        List<String> loaderArgs = new ArrayList<String>(args.length);
+        System.err.println("debug: args=" + java.util.Arrays.asList(args));
+        for (String arg: args) {
+            if (arg.equals("-help") || arg.equals("-?")) {
+                command = checkCommand(command, Command.HELP);
+            } else if (arg.equals("-status")) {
+                command = checkCommand(command, Command.STATUS);
+            } else if (arg.equals("-shutdown")) {
+                command = checkCommand(command, Command.SHUTDOWN);
+            } else if (arg.startsWith("-")) {
+                command = checkCommand(command, Command.COMMAND);
+                loaderArgs.add(arg.substring(1));
             } else {
-                // general start
-                start.init(args, true);
-                start.start();
+                command = checkCommand(command, Command.COMMAND);
+                if (command == Command.COMMAND) {
+                    loaderArgs.add(arg);
+                } else {
+                    command = Command.HELP_ERROR;
+                }
             }
+        }
+        System.err.println("debug: command=" + command);
+        System.err.println("debug: loaderArgs=" + loaderArgs);
+        if (command == null) {
+            command = Command.COMMAND;
+            loaderArgs.add("start");
+        }
+        if (command == Command.HELP) {
+            help(System.out);
+            return;
+        } else if (command == Command.HELP_ERROR) {
+            help(System.err);
+            System.exit(1);
+        }
+        Start start = new Start();
+        start.init(args, command == Command.COMMAND);
+        if (command == Command.STATUS) {
+            System.out.println("Current Status : " + start.status());
+        } else if (command == Command.SHUTDOWN) {
+            System.out.println("Shutting down server : " + start.shutdown());
+        } else {
+            // general start
+            start.start();
         }
     }
 
     private Config config = null;
-    private String[] loaderArgs = null;
+    private List<String> loaderArgs = new ArrayList<String>();
     private final ArrayList<StartupLoader> loaders = new ArrayList<StartupLoader>();
     private boolean serverStarted = false;
     private boolean serverStopping = false;
@@ -111,34 +159,33 @@ public class Start {
             }
         }
         this.config = Config.getInstance(args);
-
         // parse the startup arguments
-        if (args.length > 0) {
-            this.loaderArgs = new String[args.length];
-            System.arraycopy(args, 0, this.loaderArgs, 0, this.loaderArgs.length);
+        if (args.length > 1) {
+            this.loaderArgs.addAll(Arrays.asList(args).subList(1, args.length));
         }
 
-        if (fullInit) {
-            // initialize the classpath
-            initClasspath();
+        if (!fullInit) {
+            return;
+        }
+        // initialize the classpath
+        initClasspath();
 
-            // create the log directory
-            createLogDirectory();
+        // create the log directory
+        createLogDirectory();
 
-            // create the listener thread
-            createListenerThread();
+        // create the listener thread
+        createListenerThread();
 
-            // set the shutdown hook
-            if (config.useShutdownHook) {
-                Runtime.getRuntime().addShutdownHook(new Thread() { public void run() { shutdownServer(); } });
-            } else {
-                System.out.println("Shutdown hook disabled");
-            }
+        // set the shutdown hook
+        if (config.useShutdownHook) {
+            Runtime.getRuntime().addShutdownHook(new Thread() { public void run() { shutdownServer(); } });
+        } else {
+            System.out.println("Shutdown hook disabled");
+        }
 
-            // initialize the startup loaders
-            if (!initStartLoaders()) {
-                System.exit(99);
-            }
+        // initialize the startup loaders
+        if (!initStartLoaders()) {
+            System.exit(99);
         }
     }
 
@@ -166,8 +213,8 @@ public class Start {
                 try {
                     Class<?> loaderClass = classloader.loadClass(loaderClassName);
                     StartupLoader loader = (StartupLoader) loaderClass.newInstance();
-                    loader.load(config, loaderArgs);
-                    this.loaders.add(loader);
+                    loader.load(config, loaderArgs.toArray(new String[loaderArgs.size()]));
+                    loaders.add(loader);
                 } catch (Exception e) {
                     e.printStackTrace();
                     return false;
@@ -256,15 +303,13 @@ public class Start {
     }
 
     public String status() throws IOException {
-        String status = null;
         try {
-            status = sendSocketCommand(Start.STATUS_COMMAND);
+            return sendSocketCommand(Start.STATUS_COMMAND);
         } catch (ConnectException e) {
             return "Not Running";
         } catch (IOException e) {
             throw e;
         }
-        return status;
     }
 
     public void stopServer() {

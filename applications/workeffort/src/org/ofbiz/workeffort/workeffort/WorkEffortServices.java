@@ -622,15 +622,14 @@ public class WorkEffortServices {
         entityExprList.addAll(periodCheckAndlList);
 
         // (non cancelled) recurring events
+        /* Commenting this out. This condition adds ALL recurring events to ALL calendars.
         List<EntityCondition> recurringEvents = UtilMisc.<EntityCondition>toList(EntityCondition.makeCondition("tempExprId", EntityOperator.NOT_EQUAL, null));
         if (filterOutCanceledEvents.booleanValue()) {
             recurringEvents.addAll(cancelledCheckAndList);
         }
+        */
 
-        EntityCondition eclTotal = EntityCondition.makeCondition(UtilMisc.toList(
-                EntityCondition.makeCondition(entityExprList, EntityJoinOperator.AND),
-                EntityCondition.makeCondition(recurringEvents, EntityJoinOperator.AND)
-                ), EntityJoinOperator.OR);
+        EntityCondition eclTotal = EntityCondition.makeCondition(entityExprList, EntityJoinOperator.AND);
 
         List<String> orderByList = UtilMisc.toList("estimatedStartDate");
         try {
@@ -669,7 +668,7 @@ public class WorkEffortServices {
                 for (GenericValue workEffort : validWorkEfforts) {
                     if (UtilValidate.isNotEmpty(workEffort.getString("tempExprId"))) {
                         // check if either the workeffort is public or the requested party is a member
-                        if (UtilValidate.isNotEmpty(partyIdsToUse) && !workEffort.getString("scopeEnumId").equals("WES_PUBLIC") && !partyIdsToUse.contains(workEffort.getString("partyId"))) {
+                        if (UtilValidate.isNotEmpty(partyIdsToUse) && !"WES_PUBLIC".equals(workEffort.getString("scopeEnumId")) && !partyIdsToUse.contains(workEffort.getString("partyId"))) {
                             continue;
                         }
                         TemporalExpression tempExpr = TemporalExpressionWorker.getTemporalExpression(delegator, workEffort.getString("tempExprId"));

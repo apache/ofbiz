@@ -25,6 +25,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -60,6 +63,7 @@ import org.apache.catalina.valves.RequestDumperValve;
 import org.apache.coyote.ProtocolHandler;
 import org.apache.coyote.http11.Http11Protocol;
 import org.ofbiz.base.component.ComponentConfig;
+import org.ofbiz.base.concurrent.ExecutionPool;
 import org.ofbiz.base.container.ClassLoaderContainer;
 import org.ofbiz.base.container.Container;
 import org.ofbiz.base.container.ContainerConfig;
@@ -136,6 +140,7 @@ public class CatalinaContainer implements Container {
     public static final String J2EE_APP = "OFBiz";
     public static final String module = CatalinaContainer.class.getName();
     protected static Map<String, String> mimeTypes = new HashMap<String, String>();
+    private static final ThreadGroup CATALINA_THREAD_GROUP = new ThreadGroup("CatalinaContainer");
 
     // load the JSSE propertes (set the trust store)
     static {
@@ -202,9 +207,6 @@ public class CatalinaContainer implements Container {
             createEngine(engineProp);
         }
 
-        // load the web applications
-        loadComponents();
-
         // create the connectors
         List<ContainerConfig.Container.Property> connectorProps = cc.getPropertiesWithValue("connector");
         if (UtilValidate.isEmpty(connectorProps)) {
@@ -228,6 +230,9 @@ public class CatalinaContainer implements Container {
         } catch (LifecycleException e) {
             throw new ContainerException(e);
         }
+
+        // load the web applications
+        loadComponents();
 
         for (Connector con: embedded.findConnectors()) {
             ProtocolHandler ph = con.getProtocolHandler();
@@ -361,13 +366,15 @@ public class CatalinaContainer implements Container {
     }
 
     protected Host createHost(Engine engine, String hostName) throws ContainerException {
+        Debug.logInfo("createHost(" + engine + ", " + hostName + ")", module);
         if (embedded == null) {
             throw new ContainerException("Cannot create Host without Embedded instance!");
         }
 
         Host host = embedded.createHost(hostName, CATALINA_HOSTS_HOME);
-        host.setDeployOnStartup(true);
-        host.setAutoDeploy(true);
+        host.setDeployOnStartup(false);
+        host.setBackgroundProcessorDelay(5);
+        host.setAutoDeploy(false);
         host.setRealm(engine.getRealm());
         engine.addChild(host);
         hosts.put(engine.getName() + hostName, host);
@@ -499,15 +506,51 @@ public class CatalinaContainer implements Container {
         return connector;
     }
 
-    protected Context createContext(ComponentConfig.WebappInfo appInfo) throws ContainerException {
-        // webapp settings
-        Map<String, String> initParameters = appInfo.getInitParameters();
-        List<String> virtualHosts = appInfo.getVirtualHosts();
-        Engine engine = engines.get(appInfo.server);
+    protected Callable<Context> createContext(final ComponentConfig.WebappInfo appInfo) throws ContainerException {
+        Debug.logInfo("createContext(" + appInfo.name + ")", module);
+        final Engine engine = engines.get(appInfo.server);
         if (engine == null) {
             Debug.logWarning("Server with name [" + appInfo.server + "] not found; not mounting [" + appInfo.name + "]", module);
             return null;
         }
+        List<String> virtualHosts = appInfo.getVirtualHosts();
+        final Host host;
+        if (UtilValidate.isEmpty(virtualHosts)) {
+            host = hosts.get(engine.getName() + "._DEFAULT");
+        } else {
+            // assume that the first virtual-host will be the default; additional virtual-hosts will be aliases
+            Iterator<String> vhi = virtualHosts.iterator();
+            String hostName = vhi.next();
+
+            boolean newHost = false;
+            if (hosts.containsKey(engine.getName() + "." + hostName)) {
+                host = hosts.get(engine.getName() + "." + hostName);
+            } else {
+                host = createHost(engine, hostName);
+                newHost = true;
+            }
+            while (vhi.hasNext()) {
+                host.addAlias(vhi.next());
+            }
+
+            if (newHost) {
+                hosts.put(engine.getName() + "." + hostName, host);
+            }
+        }
+
+        return new Callable<Context>() {
+            public Context call() throws ContainerException, LifecycleException {
+                StandardContext context = configureContext(engine, host, appInfo);
+                context.setParent(host);
+                context.start();
+                return context;
+            }
+        };
+    }
+
+    private StandardContext configureContext(Engine engine, Host host, ComponentConfig.WebappInfo appInfo) throws ContainerException {
+        // webapp settings
+        Map<String, String> initParameters = appInfo.getInitParameters();
 
         // set the root location (make sure we set the paths correctly)
         String location = appInfo.componentConfig.getRootLocation() + appInfo.location;
@@ -539,6 +582,9 @@ public class CatalinaContainer implements Container {
 
         // create the web application context
         StandardContext context = (StandardContext) embedded.createContext(mount, location);
+        Debug.logInfo("host[" + host + "].addChild(" + context + ")", module);
+        //context.setDeployOnStartup(false);
+        //context.setBackgroundProcessorDelay(5);
         context.setJ2EEApplication(J2EE_APP);
         context.setJ2EEServer(J2EE_SERVER);
         context.setLoader(embedded.createLoader(ClassLoaderContainer.getClassLoader()));
@@ -589,33 +635,9 @@ public class CatalinaContainer implements Container {
             context.addParameter(entry.getKey(), entry.getValue());
         }
 
-        if (UtilValidate.isEmpty(virtualHosts)) {
-            Host host = hosts.get(engine.getName() + "._DEFAULT");
-            context.setRealm(host.getRealm());
-            host.addChild(context);
-            context.getMapper().setDefaultHostName(host.getName());
-        } else {
-            // assume that the first virtual-host will be the default; additional virtual-hosts will be aliases
-            Iterator<String> vhi = virtualHosts.iterator();
-            String hostName = vhi.next();
-
-            boolean newHost = false;
-            Host host = hosts.get(engine.getName() + "." + hostName);
-            if (host == null) {
-                host = createHost(engine, hostName);
-                newHost = true;
-            }
-            while (vhi.hasNext()) {
-                host.addAlias(vhi.next());
-            }
-            context.setRealm(host.getRealm());
-            host.addChild(context);
-            context.getMapper().setDefaultHostName(host.getName());
-
-            if (newHost) {
-                hosts.put(engine.getName() + "." + hostName, host);
-            }
-        }
+        context.setRealm(host.getRealm());
+        host.addChild(context);
+        context.getMapper().setDefaultHostName(host.getName());
 
         return context;
     }
@@ -628,19 +650,43 @@ public class CatalinaContainer implements Container {
         // load the applications
         List<ComponentConfig.WebappInfo> webResourceInfos = ComponentConfig.getAllWebappResourceInfos();
         List<String> loadedMounts = FastList.newInstance();
-        if (webResourceInfos != null) {
+        if (webResourceInfos == null) {
+            return;
+        }
+
+        ScheduledExecutorService executor = ExecutionPool.getExecutor(CATALINA_THREAD_GROUP, "catalina-startup", -1, true);
+        try {
+            List<Future<Context>> futures = FastList.newInstance();
+
             for (int i = webResourceInfos.size(); i > 0; i--) {
                 ComponentConfig.WebappInfo appInfo = webResourceInfos.get(i - 1);
-                String mount = appInfo.getContextRoot();
+                String engineName = appInfo.server;
                 List<String> virtualHosts = appInfo.getVirtualHosts();
-                if (!loadedMounts.contains(mount) || UtilValidate.isNotEmpty(virtualHosts)) {
-                    createContext(appInfo);
-                    loadedMounts.add(mount);
+                String mount = appInfo.getContextRoot();
+                List<String> keys = FastList.newInstance();
+                if (UtilValidate.isEmpty(virtualHosts)) {
+                    keys.add(engineName + ":DEFAULT:" + mount);
+                } else {
+                    for (String virtualHost: virtualHosts) {
+                        keys.add(engineName + ":" + virtualHost + ":" + mount);
+                    }
+                }
+                if (!keys.removeAll(loadedMounts)) {
+                    // nothing was removed from the new list of keys; this
+                    // means there are no existing loaded entries that overlap
+                    // with the new set
+                    if (appInfo.location != null) {
+                        futures.add(executor.submit(createContext(appInfo)));
+                    }
+                    loadedMounts.addAll(keys);
                 } else {
                     appInfo.appBarDisplay = false; // disable app bar display on overrided apps
                     Debug.logInfo("Duplicate webapp mount; not loading : " + appInfo.getName() + " / " + appInfo.getLocation(), module);
                 }
             }
+            ExecutionPool.getAllFutures(futures);
+        } finally {
+            executor.shutdown();
         }
     }
 

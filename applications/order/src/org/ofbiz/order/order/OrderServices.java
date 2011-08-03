@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
 
 import javax.transaction.Transaction;
 
@@ -5550,7 +5551,7 @@ public class OrderServices {
     }
 
     public static Map<String, Object> createAlsoBoughtProductAssocs(DispatchContext dctx, Map<String, ? extends Object> context) {
-        Delegator delegator = dctx.getDelegator();
+        final Delegator delegator = dctx.getDelegator();
         LocalDispatcher dispatcher = dctx.getDispatcher();
         // All orders with an entryDate > orderEntryFromDateTime will be processed
         Timestamp orderEntryFromDateTime = (Timestamp) context.get("orderEntryFromDateTime");
@@ -5586,33 +5587,42 @@ public class OrderServices {
                 Debug.logError(e, module);
             }
         }
-        EntityListIterator eli = null;
+        List<EntityExpr> orderCondList = UtilMisc.toList(EntityCondition.makeCondition("orderTypeId", "SALES_ORDER"));
+        if (!processAllOrders && orderEntryFromDateTime != null) {
+            orderCondList.add(EntityCondition.makeCondition("entryDate", EntityOperator.GREATER_THAN, orderEntryFromDateTime));
+        }
+        final EntityCondition cond = EntityCondition.makeCondition(orderCondList);
+        List<String> orderIds;
         try {
-            List<EntityExpr> orderCondList = UtilMisc.toList(EntityCondition.makeCondition("orderTypeId", "SALES_ORDER"));
-            if (!processAllOrders && orderEntryFromDateTime != null) {
-                orderCondList.add(EntityCondition.makeCondition("entryDate", EntityOperator.GREATER_THAN, orderEntryFromDateTime));
-            }
-            EntityCondition cond = EntityCondition.makeCondition(orderCondList);
-            eli = delegator.find("OrderHeader", cond, null, null, UtilMisc.toList("entryDate ASC"), null);
+            orderIds = TransactionUtil.doNewTransaction(new Callable<List<String>>() {
+                public List<String> call() throws Exception {
+                    List<String> orderIds = new LinkedList<String>();
+                    EntityListIterator eli = null;
+                    try {
+                        eli = delegator.find("OrderHeader", cond, null, UtilMisc.toSet("orderId"), UtilMisc.toList("entryDate ASC"), null);
+                        GenericValue orderHeader;
+                        while ((orderHeader = eli.next()) != null) {
+                            orderIds.add(orderHeader.getString("orderId"));
+                        }
+                    } finally {
+                        if (eli != null) {
+                            eli.close();
+                        }
+                    }
+                    return orderIds;
+                }
+            }, "getSalesOrderIds", 0, true);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(e.getMessage());
         }
-        if (eli != null) {
-            GenericValue orderHeader = null;
-            while ((orderHeader = eli.next()) != null) {
-                Map<String, Object> svcIn = FastMap.newInstance();
-                svcIn.put("userLogin", context.get("userLogin"));
-                svcIn.put("orderId", orderHeader.get("orderId"));
-                try {
-                    dispatcher.runSync("createAlsoBoughtProductAssocsForOrder", svcIn);
-                } catch (GenericServiceException e) {
-                    Debug.logError(e, module);
-                }
-            }
+        for (String orderId: orderIds) {
+            Map<String, Object> svcIn = FastMap.newInstance();
+            svcIn.put("userLogin", context.get("userLogin"));
+            svcIn.put("orderId", orderId);
             try {
-                eli.close();
-            } catch (GenericEntityException e) {
+                dispatcher.runSync("createAlsoBoughtProductAssocsForOrder", svcIn);
+            } catch (GenericServiceException e) {
                 Debug.logError(e, module);
             }
         }

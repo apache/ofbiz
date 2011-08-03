@@ -72,7 +72,7 @@
                 </entity-options>
             </drop-down>
         </field>
-        <field name="parentProjectName" parameter-name="workEffortParentId">
+        <field name="parentProjectName" entry-name="parentProjectId" parameter-name="workEffortParentId">
             <drop-down allow-empty="true">
                 <entity-options entity-name="WorkEffort" description="${workEffortName}" key-field-name="workEffortId">
                     <entity-constraint name="workEffortTypeId" value="PROJECT"/>
@@ -233,8 +233,8 @@
         <field name="priority" title="${uiLabelMap.CommonPriority}"><display/></field>
         <field name="parentProjectId" title="${uiLabelMap.ProjectMgrParentProjectName}">
             <display-entity entity-name="WorkEffort" description="${workEffortName} ${workEffortId}" key-field-name="workEffortId">
-                <sub-hyperlink target="projectView" description="${workEffortId}" link-style="buttontext">
-                    <parameter param-name="projectId" from-field="workEffortId"/>
+                <sub-hyperlink target="projectView" description="${project.parentProjectId}" link-style="buttontext">
+                    <parameter param-name="projectId" from-field="project.parentProjectId"/>
                 </sub-hyperlink>
             </display-entity>
         </field>
@@ -386,7 +386,7 @@
         odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
         <field name="projectId"><hidden value="${parameters.projectId}"/></field>
         <field name="phaseId" parameter-name="workEffortId"><hidden/></field>
-        <field name="phaseSeqNum" parameter-name="sequenceNum"><text size="3"/></field>
+        <field name="phaseSeqNum" parameter-name="sequenceNum" title="${uiLabelMap.FormFieldTitle_sequenceNum}"><text size="3"/></field>
         <field name="phaseName" parameter-name="workEffortName" title="${uiLabelMap.CommonName}*"><text/></field>
         <field name="currentStatusId" title="${uiLabelMap.CommonStatus}" parameter-name="dummy"><display-entity entity-name="StatusItem" key-field-name="statusId"/></field>
         <field name="priority" title="${uiLabelMap.CommonPriority}"><display/></field>

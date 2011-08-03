@@ -1951,6 +1951,9 @@
         <value xml:lang="zh">自动批准评价</value>
         <value xml:lang="zh_TW">自動核准評論</value>
     </property>
+    <property key="FormFieldTitle_automaticExtend">
+        <value xml:lang="en">Automatic Extend</value>
+    </property>
     <property key="FormFieldTitle_autoInvoiceDigitalItems">
         <value xml:lang="de">Automatische Rechnungsstellung Digitaler Produkte</value>
         <value xml:lang="en">Auto Invoice Digital Items</value>
@@ -7597,6 +7600,9 @@
         <value xml:lang="en">Find Category</value>
         <value xml:lang="th">ค้นหาหมวดหมู่</value>
     </property>
+    <property key="PageTitleFindCatalog">
+        <value xml:lang="en">Find Catalog</value>
+    </property>
     <property key="PageTitleFindConfigItems">
         <value xml:lang="de">Konfigurationsposition suchen</value>
         <value xml:lang="en">Find Config Items</value>
@@ -9243,7 +9249,7 @@
         <value xml:lang="zh">地址</value>
         <value xml:lang="zh_TW">地址</value>
     </property>
-    <property key="ProductAdvancedSearch">Product
+    <property key="ProductAdvancedSearch">
         <value xml:lang="cs">Rozšířené hledání</value>
         <value xml:lang="de">Erweiterte Suche</value>
         <value xml:lang="en">Advanced Search</value>
@@ -24359,6 +24365,10 @@
     </property>
     <property key="ProductUpdateSEOContentCategory">
         <value xml:lang="en">Update SEO Content for Category</value>
+    </property>
+    <property key="ProductUpdateDownloadContentCategory">
+        <value xml:lang="en">Update Download Content for Category</value>
+        <value xml:lang="th">อัพเดทวิดีโอสำหรับหมวดหมู่</value>
     </property>
     <property key="ProductUpdateShipping">
         <value xml:lang="de">Lieferung aktualisieren</value>

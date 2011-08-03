@@ -193,8 +193,8 @@ under the License.
     </request-map>
     <request-map uri="updateInvoiceItem">
         <security https="true" auth="true"/>
-        <event type="service" invoke="updateInvoiceItem"/>
-        <response name="success" type="view" value="listInvoiceItems"/>
+        <event type="service-multi" invoke="updateInvoiceItem"/>
+        <response name="success" type="request-redirect" value="listInvoiceItems"/>
         <response name="error" type="view" value="listInvoiceItems"/>
     </request-map>
     <request-map uri="removeInvoiceItem">
@@ -2487,6 +2487,12 @@ under the License.
 
     <request-map uri="CommissionRun">
         <security https="true" auth="true"/>
+        <response name="success" type="view" value="CommissionRun"/>
+    </request-map>
+    
+    <request-map uri="processCommissionRun">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createCommissionInvoices"/>
         <response name="success" type="view" value="CommissionRun"/>
     </request-map>
 

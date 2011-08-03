@@ -1,6 +1,7 @@
 tools/build
 applications/accounting/build/
 applications/content/build/
+applications/content/index/
 applications/humanres/build/
 applications/manufacturing/build/
 applications/marketing/build/
@@ -63,7 +64,7 @@ runtime/logs/*.log*
 runtime/logs/*.html*
 runtime/logs/test-results/*
 runtime/data/derby/*
-runtime/data/jackrabbit/*
+runtime/data/utilcache.*
 runtime/catalina/work/*
 runtime/tempfiles/*
 debian/EncryptPassword.class

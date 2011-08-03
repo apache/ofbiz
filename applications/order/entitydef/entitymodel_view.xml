@@ -146,9 +146,9 @@ under the License.
       <alias entity-alias="ORLE" name="partyId" group-by="true"/>
       <alias entity-alias="ORLE" name="roleTypeId" group-by="true"/>
       <alias entity-alias="OH" name="orderId"/>
-      <alias entity-alias="OH" name="orderTypeId"/>
+      <alias entity-alias="OH" name="orderTypeId" group-by="true"/>
       <alias entity-alias="OH" name="orderDate"/>
-      <alias entity-alias="OH" name="statusId"/>
+      <alias entity-alias="OH" name="statusId" group-by="true"/>
       <alias entity-alias="OH" name="totalGrandAmount" field="grandTotal" function="sum"/>
       <alias entity-alias="OH" name="totalSubRemainingAmount" field="remainingSubTotal" function="sum"/>
       <alias entity-alias="OH" name="totalOrders" field="orderId" function="count"/>
@@ -1543,7 +1543,7 @@ under the License.
     </view-entity>
     <view-entity entity-name="RequirementPartyProductCount"
             package-name="org.ofbiz.order.request"
-            title="A join on Requirement and RequirementRole to count number of distinict products required from a supplier party">
+            title="A join on Requirement and RequirementRole to count number of distinct products required from a supplier party">
       <member-entity entity-alias="RQ" entity-name="Requirement"/>
       <member-entity entity-alias="RQR" entity-name="RequirementRole"/>
       <alias entity-alias="RQ" name="requirementTypeId" group-by="false"/>

@@ -103,12 +103,14 @@ under the License.
 
 <#macro renderDateTimeField name className alert title value size maxlength id dateType shortDateInput timeDropdownParamName defaultDateTimeString localizedIconTitle timeDropdown timeHourName classString hour1 hour2 timeMinutesName minutes isTwelveHour ampmName amSelected pmSelected compositeType formName mask="" event="" action="" step="" timeValues="">
   <span class="view-calendar">
+    <#if dateType!="time" >
       <input type="text" name="${name}_i18n" <@renderClass className alert /><#rt/>
         <#if title?has_content> title="${title}"</#if>
         <#if value?has_content> value="${value}"</#if>
         <#if size?has_content> size="${size}"</#if><#rt/>
         <#if maxlength?has_content>  maxlength="${maxlength}"</#if>
         <#if id?has_content> id="${id}_i18n"</#if>/><#rt/>
+    </#if>
         <#-- the style attribute is a little bit messy but when using disply:none the timepicker is shown on a wrong place -->
         <input type="text" name="${name}" style="height:1px;width:1px;border:none;background-color:transparent" <#if event?has_content && action?has_content> ${event}="${action}"</#if> <@renderClass className alert /><#rt/>
         <#if title?has_content> title="${title}"</#if>
@@ -127,20 +129,23 @@ under the License.
                       if (initDate.indexOf('.') != -1) {
                           initDate = initDate.substring(0, initDate.indexOf('.'));
                       }
-                      var dateObj = Date.parse(initDate);
+                      var ofbizTime = "<#if shortDateInput?exists && shortDateInput>yyyy-MM-dd<#else>yyyy-MM-dd HH:mm:ss</#if>";
+                      var dateObj = Date.parseExact(initDate, ofbizTime);
                       var formatedObj = dateObj.toString(dateFormat);
                       jQuery("#${id}_i18n").val(formatedObj);
                   }
 
                   jQuery("#${id}").change(function() {
+                      var ofbizTime = "<#if shortDateInput?exists && shortDateInput>yyyy-MM-dd<#else>yyyy-MM-dd HH:mm:ss</#if>";
+                      var dateObj = Date.parseExact(this.value, ofbizTime);
                       var dateFormat = Date.CultureInfo.formatPatterns.shortDate<#if shortDateInput?exists && !shortDateInput> + " " + Date.CultureInfo.formatPatterns.longTime</#if>;
-                      var dateObj = Date.parse(this.value);
                       var formatedObj = dateObj.toString(dateFormat);
                       jQuery("#${id}_i18n").val(formatedObj);
                   });
                   jQuery("#${id}_i18n").change(function() {
+                      var dateFormat = Date.CultureInfo.formatPatterns.shortDate<#if shortDateInput?exists && !shortDateInput> + " " + Date.CultureInfo.formatPatterns.longTime</#if>;
+                      var dateObj = Date.parseExact(this.value, dateFormat);
                       var ofbizTime = "<#if shortDateInput?exists && shortDateInput>yyyy-MM-dd<#else>yyyy-MM-dd HH:mm:ss</#if>";
-                      var dateObj = Date.parse(this.value);
                       var formatedObj = dateObj.toString(ofbizTime);
                       jQuery("#${id}").val(formatedObj);
                   });
@@ -543,7 +548,55 @@ ${item.description}</span>
 </#if>
 </#macro>
 
-<#macro renderLookupField className alert name value size maxlength id event action readonly autocomplete descriptionFieldName formName fieldFormName targetParameterIter imgSrc ajaxUrl ajaxEnabled presentation width height position fadeBackground clearText showDescription initiallyCollapsed>
+<#--
+@renderLookupField
+
+Description: Renders a text input field as a lookup field.
+
+Parameter: name, String, required - The name of the lookup field.
+Parameter: formName, String, required - The name of the form that contains the lookup field.
+Parameter: fieldFormName, String, required - Contains the lookup window form name.
+Parameter: className, String, optional - The CSS class name for the lookup field.
+Parameter: alert, String, optional - If "true" then the "alert" CSS class will be added to the lookup field.
+Parameter: value, Object, optional - The value of the lookup field.
+Parameter: size, String, optional - The size of the lookup field.
+Parameter: maxlength, String or Integer, optional - The max length of the lookup field.
+Parameter: id, String, optional - The ID of the lookup field.
+Parameter: event, String, optional - The lookup field event that invokes "action". If the event parameter is not empty, then the action parameter must be specified as well.
+Parameter: action, String, optional - The action that is invoked on "event". If action parameter is not empty, then the event parameter must be specified as well.
+Parameter: readonly, boolean, optional - If true, the lookup field is made read-only.
+Parameter: autocomplete, String, optional - If not empty, autocomplete is turned off for the lookup field.
+Parameter: descriptionFieldName, String, optional - If not empty and the presentation parameter contains "window", specifies an alternate input field for updating.
+Parameter: targetParameterIter, List, optional - Contains a list of form field names whose values will be passed to the lookup window.
+Parameter: imgSrc, Not used.
+Parameter: ajaxUrl, String, optional - Contains the Ajax URL, used only when the ajaxEnabled parameter contains true.
+Parameter: ajaxEnabled, boolean, optional - If true, invokes the Ajax auto-completer.
+Parameter: presentation, String, optional - Contains the lookup window type, either "layer" or "window".
+Parameter: width, String or Integer, optional - The width of the lookup field.
+Parameter: height, String or Integer, optional - The height of the lookup field.
+Parameter: position, String, optional - The position style of the lookup field.
+Parameter: fadeBackground, ?
+Parameter: clearText, String, optional - If the readonly parameter is true, clearText contains the text to be displayed in the field.
+Parameter: showDescription, String, optional - ? (contains "true" or "false").
+Parameter: initiallyCollapsed, Not used.
+Parameter: lastViewName, String, optional - If the ajaxEnabled parameter is true, the contents of lastViewName will be appended to the Ajax URL.
+-->
+<#macro renderLookupField name formName fieldFormName className="" alert="false" value="" size="" maxlength="" id="" event="" action="" readonly=false autocomplete="" descriptionFieldName="" targetParameterIter="" imgSrc="" ajaxUrl="" ajaxEnabled=javaScriptEnabled presentation="layer" width="" height="" position="" fadeBackground="true" clearText="" showDescription="" initiallyCollapsed="" lastViewName="main" >
+<#if Static["org.ofbiz.widget.ModelWidget"].widgetBoundaryCommentsEnabled(context)>
+<!-- @renderLookupField -->
+</#if>
+<#if (!ajaxUrl?has_content) && ajaxEnabled>
+    <#local ajaxUrl = requestAttributes._REQUEST_HANDLER_.makeLink(request, response, fieldFormName)/>
+    <#local ajaxUrl = id + "," + ajaxUrl + ",ajaxLookup=Y" />
+</#if>
+<#if (!showDescription?has_content)>
+    <#local showDescriptionProp = Static["org.ofbiz.base.util.UtilProperties"].getPropertyValue("widget.properties", "widget.lookup.showDescription", "N")>
+    <#if "Y" == showDescriptionProp>
+        <#local showDescription = "true" />
+    <#else>
+        <#local showDescription = "false" />
+    </#if>
+</#if>
 <#if ajaxEnabled?has_content && ajaxEnabled>
     <script type="text/javascript">
     jQuery(document).ready(function(){
@@ -575,11 +628,7 @@ ${item.description}</span>
     <#if ajaxEnabled?has_content && ajaxEnabled>
       <#assign defaultMinLength = Static["org.ofbiz.base.util.UtilProperties"].getPropertyValue("widget.properties", "widget.autocompleter.defaultMinLength")>
       <#assign defaultDelay = Static["org.ofbiz.base.util.UtilProperties"].getPropertyValue("widget.properties", "widget.autocompleter.defaultDelay")>
-      <#if parameters?has_content && parameters._LAST_VIEW_NAME_?has_content>
-        <#local ajaxUrl = ajaxUrl + "&amp;_LAST_VIEW_NAME_=" + parameters._LAST_VIEW_NAME_ />
-      <#else>
-        <#local ajaxUrl = ajaxUrl + "&amp;_LAST_VIEW_NAME_=main"/>
-      </#if>      
+      <#local ajaxUrl = ajaxUrl + "&amp;_LAST_VIEW_NAME_=" + lastViewName />
       <#if !ajaxUrl?contains("searchValueFieldName=")>
           <#if descriptionFieldName?has_content && showDescription == "true">
             <#local ajaxUrl = ajaxUrl + "&amp;searchValueFieldName=" + descriptionFieldName />
@@ -590,7 +639,7 @@ ${item.description}</span>
     </#if>
     <script type="text/javascript">
         jQuery(document).ready(function(){
-            new ConstructLookup("${fieldFormName}", "${id}", document.${formName?html}.${name?html}, <#if descriptionFieldName?has_content>document.${formName?html}.${descriptionFieldName}<#else>null</#if>, "${formName?html}", "${width}", "${height}", "${position}", "${fadeBackground}", <#if ajaxEnabled?has_content && ajaxEnabled>"${ajaxUrl}", "${showDescription}"<#else>"", ""</#if>, "${presentation!}", "${defaultMinLength!2}", "${defaultDelay!300}"<#rt/>
+            new ConstructLookup("${fieldFormName}", "${id}", document.${formName?html}.${name?html}, <#if descriptionFieldName?has_content>document.${formName?html}.${descriptionFieldName}<#else>null</#if>, "${formName?html}", "${width}", "${height}", "${position}", "${fadeBackground}", <#if ajaxEnabled?has_content && ajaxEnabled>"${ajaxUrl}", ${showDescription}<#else>"", false</#if>, "${presentation!}", "${defaultMinLength!2}", "${defaultDelay!300}"<#rt/>
     <#if targetParameterIter?has_content>
       <#assign isFirst = true>
       <#lt/>, [<#rt/>
@@ -611,10 +660,8 @@ ${item.description}</span>
 <#if readonly?has_content && readonly><a id="${id}_clear" style="background:none;margin-left:5px;margin-right:15px;" class="clearField" href="javascript:void();" onclick="javascript:document.${formName}.${name}.value='';<#if descriptionFieldName?has_content>document.${formName}.${descriptionFieldName}.value='';</#if>">${clearText}</a></#if>
 </span>
 <#if ajaxEnabled?has_content && ajaxEnabled>
-      <#if parameters?has_content && parameters._LAST_VIEW_NAME_?has_content && ajaxUrl?index_of("_LAST_VIEW_NAME_") < 0>
-        <#local ajaxUrl = ajaxUrl + "&amp;_LAST_VIEW_NAME_=" + parameters._LAST_VIEW_NAME_ />
-      <#elseif ajaxUrl?index_of("_LAST_VIEW_NAME_") < 0>
-        <#local ajaxUrl = ajaxUrl + "&amp;_LAST_VIEW_NAME_=main"/>
+      <#if ajaxUrl?index_of("_LAST_VIEW_NAME_") < 0>
+        <#local ajaxUrl = ajaxUrl + "&amp;_LAST_VIEW_NAME_=" + lastViewName />
       </#if>      
     <script language="JavaScript" type="text/javascript">ajaxAutoCompleter('${ajaxUrl}', ${showDescription}, ${defaultMinLength!2}, ${defaultDelay!300});</script><#t/>
 </#if>

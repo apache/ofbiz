@@ -89,9 +89,8 @@ public class CommonWorkers {
 
     public static List<GenericValue> getStateList(Delegator delegator) {
         List<GenericValue> geoList = FastList.newInstance();
-        EntityCondition condition = EntityCondition.makeCondition(EntityOperator.OR,
-                EntityCondition.makeCondition("geoTypeId", "STATE"), EntityCondition.makeCondition("geoTypeId", "PROVINCE"),
-                EntityCondition.makeCondition("geoTypeId", "TERRITORY"), EntityCondition.makeCondition("geoTypeId", "MUNICIPALITY"));
+        EntityCondition condition = EntityCondition.makeCondition(EntityOperator.OR, EntityCondition.makeCondition("geoTypeId", "STATE"), EntityCondition.makeCondition("geoTypeId", "PROVINCE"), EntityCondition.makeCondition("geoTypeId", "TERRITORY"),
+                EntityCondition.makeCondition("geoTypeId", "MUNICIPALITY"));
         List<String> sortList = UtilMisc.toList("geoName");
         try {
             geoList = delegator.findList("Geo", condition, null, sortList, null, true);
@@ -113,14 +112,6 @@ public class CommonWorkers {
             // Load the system default country
             country = UtilProperties.getPropertyValue("general.properties", "country.geo.id.default");
         }
-        EntityCondition stateProvinceFindCond = EntityCondition.makeCondition(
-                EntityCondition.makeCondition("geoIdFrom", country),
-                EntityCondition.makeCondition("geoAssocTypeId", "REGIONS"),
-                EntityCondition.makeCondition(EntityOperator.OR,
-                        EntityCondition.makeCondition("geoTypeId", "STATE"),
-                        EntityCondition.makeCondition("geoTypeId", "PROVINCE"),
-                        EntityCondition.makeCondition("geoTypeId", "MUNICIPALITY"),
-                        EntityCondition.makeCondition("geoTypeId", "COUNTY")));
 
         if (UtilValidate.isEmpty(listOrderBy)) {
             listOrderBy = "geoId";
@@ -129,7 +120,26 @@ public class CommonWorkers {
 
         List<GenericValue> geoList = FastList.newInstance();
         try {
-            geoList = delegator.findList("GeoAssocAndGeoTo", stateProvinceFindCond, null, sortList, null, true);
+            // Check if the country is a country group and get recursively the
+            // states
+            EntityCondition stateRegionFindCond = EntityCondition.makeCondition(EntityCondition.makeCondition("geoIdFrom", country), EntityCondition.makeCondition("geoAssocTypeId", "GROUP_MEMBER"), EntityCondition.makeCondition("geoTypeId", "GROUP"));
+            List<GenericValue> regionList = delegator.findList("GeoAssocAndGeoToWithState", stateRegionFindCond, null, sortList, null, true);
+            if (regionList.size() == 1) {
+                for (GenericValue region : regionList) {
+                    List<GenericValue> tmpState = delegator.findList("GeoAssocAndGeoTo", EntityCondition.makeCondition("geoId", region.getString("geoIdFrom")), null, sortList, null, true);
+                    for (GenericValue state : tmpState) {
+                        geoList.addAll(getAssociatedStateList(delegator, state.getString("geoIdFrom"), listOrderBy));
+                    }
+                }
+            }
+
+            // get all related states
+            EntityCondition stateProvinceFindCond = EntityCondition.makeCondition(
+                    EntityCondition.makeCondition("geoIdFrom", country),
+                    EntityCondition.makeCondition("geoAssocTypeId", "REGIONS"),
+                    EntityCondition.makeCondition(EntityOperator.OR, EntityCondition.makeCondition("geoTypeId", "STATE"), EntityCondition.makeCondition("geoTypeId", "PROVINCE"), EntityCondition.makeCondition("geoTypeId", "MUNICIPALITY"),
+                            EntityCondition.makeCondition("geoTypeId", "COUNTY")));
+            geoList.addAll(delegator.findList("GeoAssocAndGeoToWithState", stateProvinceFindCond, null, sortList, null, true));
         } catch (GenericEntityException e) {
             Debug.logError(e, "Cannot lookup Geo", module);
         }

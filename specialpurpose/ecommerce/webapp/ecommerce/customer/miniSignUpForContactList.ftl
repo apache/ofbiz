@@ -34,6 +34,12 @@ under the License.
         document.getElementById("statusId").value = "CLPT_UNSUBS_PENDING";
         form.submit();
     }
+    function unsubscribeByContactMech() {
+        var form = document.getElementById("signUpForContactListForm");
+        form.action = "<@ofbizUrl>unsubscribeContactListPartyContachMech</@ofbizUrl>"
+        document.getElementById("statusId").value = "CLPT_UNSUBS_PENDING";
+        form.submit();
+    }
 </script>
 
 <div id="miniSignUpForContactList" class="screenlet">
@@ -50,6 +56,8 @@ under the License.
     <#-- They are logged in so lets present the form to sign up with their email address -->
       <form method="post" action="<@ofbizUrl>createContactListParty</@ofbizUrl>" name="signUpForContactListForm" id="signUpForContactListForm">
         <fieldset>
+          <#assign contextPath = request.getContextPath()>
+          <input type="hidden" name="baseLocation" value="${contextPath}"/>
           <input type="hidden" name="partyId" value="${partyId}"/>
           <input type="hidden" id="statusId" name="statusId" value="CLPT_PENDING"/>
           <p>${uiLabelMap.EcommerceSignUpForContactListComments}</p>
@@ -65,7 +73,7 @@ under the License.
           </div>
           <div>
             <input type="submit" value="${uiLabelMap.EcommerceSubscribe}"/>
-            <input type="button" value="${uiLabelMap.EcommerceUnsubscribe}" onclick="javascript:unsubscribe();"/>
+            <input type="button" value="${uiLabelMap.EcommerceUnsubscribe}" onclick="javascript:unsubscribeByContactMech();"/>
           </div>
         </fieldset>
       </form>
@@ -79,6 +87,8 @@ under the License.
   <#-- There is no party info so just offer an anonymous (non-partyId) related newsletter sign up -->
     <form method="post" action="<@ofbizUrl>signUpForContactList</@ofbizUrl>" name="signUpForContactListForm" id="signUpForContactListForm">
       <fieldset>
+        <#assign contextPath = request.getContextPath()>
+        <input type="hidden" name="baseLocation" value="${contextPath}"/>
         <input type="hidden" id="statusId" name="statusId"/>
         <div>
           <label>${uiLabelMap.EcommerceSignUpForContactListComments}</label>

@@ -37,7 +37,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 
 import javolution.util.FastList;
 
@@ -127,7 +126,7 @@ public class ContextFilter implements Filter {
      */
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
-        HttpServletResponseWrapper wrapper = new HttpServletResponseWrapper((HttpServletResponse) response);
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
 
         // Debug.logInfo("Running ContextFilter.doFilter", module);
 
@@ -139,7 +138,7 @@ public class ContextFilter implements Filter {
         }
 
         // set the ServletContext in the request for future use
-        request.setAttribute("servletContext", config.getServletContext());
+        httpRequest.setAttribute("servletContext", config.getServletContext());
 
         // set the webSiteId in the session
         if (UtilValidate.isEmpty(httpRequest.getSession().getAttribute("webSiteId"))){
@@ -147,11 +146,11 @@ public class ContextFilter implements Filter {
         }
 
         // set the filesystem path of context root.
-        request.setAttribute("_CONTEXT_ROOT_", config.getServletContext().getRealPath("/"));
+        httpRequest.setAttribute("_CONTEXT_ROOT_", config.getServletContext().getRealPath("/"));
 
         // set the server root url
         StringBuffer serverRootUrl = UtilHttp.getServerRootUrl(httpRequest);
-        request.setAttribute("_SERVER_ROOT_URL_", serverRootUrl.toString());
+        httpRequest.setAttribute("_SERVER_ROOT_URL_", serverRootUrl.toString());
 
         // request attributes from redirect call
         String reqAttrMapHex = (String) httpRequest.getSession().getAttribute("_REQ_ATTR_MAP_");
@@ -160,7 +159,7 @@ public class ContextFilter implements Filter {
             Map<String, Object> reqAttrMap = checkMap(UtilObject.getObject(reqAttrMapBytes), String.class, Object.class);
             if (reqAttrMap != null) {
                 for (Map.Entry<String, Object> entry: reqAttrMap.entrySet()) {
-                    request.setAttribute(entry.getKey(), entry.getValue());
+                    httpRequest.setAttribute(entry.getKey(), entry.getValue());
                 }
             }
             httpRequest.getSession().removeAttribute("_REQ_ATTR_MAP_");
@@ -170,7 +169,7 @@ public class ContextFilter implements Filter {
         // check if we are disabled
         String disableSecurity = config.getInitParameter("disableContextSecurity");
         if (disableSecurity != null && "Y".equalsIgnoreCase(disableSecurity)) {
-            chain.doFilter(request, response);
+            chain.doFilter(httpRequest, httpResponse);
             return;
         }
 
@@ -185,11 +184,11 @@ public class ContextFilter implements Filter {
                 if (!redirectAllTo.toLowerCase().startsWith("http")) {
                     redirectAllTo = httpRequest.getContextPath() + redirectAllTo;
                 }
-                wrapper.sendRedirect(redirectAllTo);
+                httpResponse.sendRedirect(redirectAllTo);
                 return;
             } else {
                 httpRequest.getSession().removeAttribute("_FORCE_REDIRECT_");
-                chain.doFilter(request, response);
+                chain.doFilter(httpRequest, httpResponse);
                 return;
             }
         }
@@ -197,7 +196,7 @@ public class ContextFilter implements Filter {
         // test to see if we have come through the control servlet already, if not do the processing
         String requestPath = null;
         String contextUri = null;
-        if (request.getAttribute(ContextFilter.FORWARDED_FROM_SERVLET) == null) {
+        if (httpRequest.getAttribute(ContextFilter.FORWARDED_FROM_SERVLET) == null) {
             // Debug.logInfo("In ContextFilter.doFilter, FORWARDED_FROM_SERVLET is NOT set", module);
             String allowedPath = config.getInitParameter("allowedPaths");
             String redirectPath = config.getInitParameter("redirectPath");
@@ -207,7 +206,7 @@ public class ContextFilter implements Filter {
             allowList.add("/");  // No path is allowed.
             allowList.add("");   // No path is allowed.
 
-            if (debug) Debug.log("[Request]: " + httpRequest.getRequestURI(), module);
+            if (debug) Debug.log("[Domain]: " + httpRequest.getServerName() + " [Request]: " + httpRequest.getRequestURI(), module);
 
             requestPath = httpRequest.getServletPath();
             if (requestPath == null) requestPath = "";
@@ -261,24 +260,24 @@ public class ContextFilter implements Filter {
                         }
                     }
                     filterMessage = filterMessage + " (" + error + ")";
-                    wrapper.sendError(error, contextUri);
+                    httpResponse.sendError(error, contextUri);
                 } else {
                     filterMessage = filterMessage + " (" + redirectPath + ")";
                     if (!redirectPath.toLowerCase().startsWith("http")) {
                         redirectPath = httpRequest.getContextPath() + redirectPath;
                     }
-                    wrapper.sendRedirect(redirectPath);
+                    httpResponse.sendRedirect(redirectPath);
                 }
                 Debug.logWarning(filterMessage, module);
                 return;
             }
         }
-        
+
         // check if multi tenant is enabled
         String useMultitenant = UtilProperties.getPropertyValue("general.properties", "multitenant");
         if ("Y".equals(useMultitenant)) {
             // get tenant delegator by domain name
-            String serverName = request.getServerName();
+            String serverName = httpRequest.getServerName();
             try {
                 // if tenant was specified, replace delegator with the new per-tenant delegator and set tenantId to session attribute
                 Delegator delegator = getDelegator(config.getServletContext());
@@ -286,7 +285,7 @@ public class ContextFilter implements Filter {
                 if (UtilValidate.isNotEmpty(tenants)) {
                     GenericValue tenant = EntityUtil.getFirst(tenants);
                     String tenantId = tenant.getString("tenantId");
-                    
+
                     // if the request path is a root mount then redirect to the initial path
                     if (UtilValidate.isNotEmpty(requestPath) && requestPath.equals(contextUri)) {
                         String initialPath = tenant.getString("initialPath");
@@ -295,34 +294,34 @@ public class ContextFilter implements Filter {
                             return;
                         }
                     }
-                    
+
                     // make that tenant active, setup a new delegator and a new dispatcher
                     String tenantDelegatorName = delegator.getDelegatorBaseName() + "#" + tenantId;
                     httpRequest.getSession().setAttribute("delegatorName", tenantDelegatorName);
-                
+
                     // after this line the delegator is replaced with the new per-tenant delegator
                     delegator = DelegatorFactory.getDelegator(tenantDelegatorName);
                     config.getServletContext().setAttribute("delegator", delegator);
-                    
+
                     // clear web context objects
                     config.getServletContext().setAttribute("authorization", null);
                     config.getServletContext().setAttribute("security", null);
                     config.getServletContext().setAttribute("dispatcher", null);
-                    
+
                     // initialize authorizer
                     getAuthz();
                     // initialize security
                     Security security = getSecurity();
                     // initialize the services dispatcher
                     LocalDispatcher dispatcher = getDispatcher(config.getServletContext());
-                    
+
                     // set web context objects
                     httpRequest.getSession().setAttribute("dispatcher", dispatcher);
                     httpRequest.getSession().setAttribute("security", security);
                     
-                    request.setAttribute("tenantId", tenantId);
+                    httpRequest.setAttribute("tenantId", tenantId);
                 }
-                
+
                 // NOTE DEJ20101130: do NOT always put the delegator name in the user's session because the user may 
                 // have logged in and specified a tenant, and even if no Tenant record with a matching domainName field 
                 // is found this will change the user's delegator back to the base one instead of the one for the 
@@ -334,7 +333,7 @@ public class ContextFilter implements Filter {
         }
 
         // we're done checking; continue on
-        chain.doFilter(request, response);
+        chain.doFilter(httpRequest, httpResponse);
 
         // reset thread local security
         AbstractAuthorization.clearThreadLocal();
@@ -362,7 +361,7 @@ public class ContextFilter implements Filter {
         }
         return dispatcher;
     }
-    
+
     /** This method only sets up a dispatcher for the current webapp and passed in delegator, it does not save it to the ServletContext or anywhere else, just returns it */
     public static LocalDispatcher makeWebappDispatcher(ServletContext servletContext, Delegator delegator) {
         if (delegator == null) {
@@ -392,12 +391,12 @@ public class ContextFilter implements Filter {
             Debug.logError("No localDispatcherName specified in the web.xml file", module);
             dispatcherName = delegator.getDelegatorName();
         }
-        
+
         LocalDispatcher dispatcher = GenericDispatcher.getLocalDispatcher(dispatcherName, delegator, readers, null);
         if (dispatcher == null) {
             Debug.logError("[ContextFilter.init] ERROR: dispatcher could not be initialized.", module);
         }
-        
+
         return dispatcher;
     }
 

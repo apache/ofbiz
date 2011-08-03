@@ -19,6 +19,7 @@
 package org.ofbiz.entity.jdbc;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -32,12 +33,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import org.ofbiz.base.concurrent.ExecutionPool;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilTimer;
 import org.ofbiz.base.util.UtilValidate;
@@ -76,12 +82,18 @@ public class DatabaseUtil {
     protected String password = null;
 
     boolean isLegacy = false;
+    protected ExecutorService executor;
 
     // OFBiz DatabaseUtil
     public DatabaseUtil(GenericHelperInfo helperInfo) {
+        this(helperInfo, null);
+    }
+
+    public DatabaseUtil(GenericHelperInfo helperInfo, ExecutorService executor) {
         this.helperInfo = helperInfo;
         this.modelFieldTypeReader = ModelFieldTypeReader.getModelFieldTypeReader(helperInfo.getHelperBaseName());
         this.datasourceInfo = EntityConfigUtil.getDatasourceInfo(helperInfo.getHelperBaseName());
+        this.executor = executor;
     }
 
     // Legacy DatabaseUtil
@@ -91,6 +103,31 @@ public class DatabaseUtil {
         this.userName = userName;
         this.password = password;
         this.isLegacy = true;
+    }
+
+    protected <T> Future<T> submitWork(Callable<T> callable) {
+        if (this.executor == null) {
+            FutureTask<T> task = new FutureTask<T>(callable);
+            task.run();
+            return task;
+        }
+        return this.executor.submit(callable);
+    }
+
+    protected <T> List<Future<T>> submitAll(Collection<? extends Callable<T>> tasks) {
+        List<Future<T>> futures = new ArrayList<Future<T>>(tasks.size());
+        if (this.executor == null) {
+            for (Callable<T> callable: tasks) {
+                FutureTask<T> task = new FutureTask<T>(callable);
+                task.run();
+                futures.add(task);
+            }
+            return futures;
+        }
+        for (Callable<T> callable: tasks) {
+            futures.add(this.executor.submit(callable));
+        }
+        return futures;
     }
 
     protected Connection getConnection() throws SQLException, GenericEntityException {
@@ -197,6 +234,7 @@ public class DatabaseUtil {
             Debug.logError(message, module);
             return;
         }
+        List<Future<CreateTableCallable>> tableFutures = FastList.newInstance();
         for (ModelEntity entity: modelEntityList) {
             curEnt++;
 
@@ -385,19 +423,12 @@ public class DatabaseUtil {
 
                 if (addMissing) {
                     // create the table
-                    String errMsg = createTable(entity, modelEntities, false);
-                    if (UtilValidate.isNotEmpty(errMsg)) {
-                        message = "Could not create table [" + tableName + "]: " + errMsg;
-                        Debug.logError(message, module);
-                        if (messages != null) messages.add(message);
-                    } else {
-                        entitiesAdded.add(entity);
-                        message = "Created table [" + tableName + "]";
-                        Debug.logImportant(message, module);
-                        if (messages != null) messages.add(message);
-                    }
+                    tableFutures.add(submitWork(new CreateTableCallable(entity, modelEntities, tableName)));
                 }
             }
+        }
+        for (CreateTableCallable tableCallable: ExecutionPool.getAllFutures(tableFutures)) {
+            tableCallable.updateData(messages, entitiesAdded);
         }
 
         timer.timerString("After Individual Table/Column Check");
@@ -412,10 +443,19 @@ public class DatabaseUtil {
         // for each newly added table, add fk indices
         if (datasourceInfo.useFkIndices) {
             int totalFkIndices = 0;
+            List<Future<AbstractCountingCallable>> fkIndicesFutures = FastList.newInstance();
             for (ModelEntity curEntity: entitiesAdded) {
                 if (curEntity.getRelationsOneSize() > 0) {
-                    totalFkIndices += this.createForeignKeyIndices(curEntity, datasourceInfo.constraintNameClipLength, messages);
+                    fkIndicesFutures.add(submitWork(new AbstractCountingCallable(curEntity, modelEntities) {
+                        public AbstractCountingCallable call() throws Exception {
+                            count = createForeignKeyIndices(entity, datasourceInfo.constraintNameClipLength, messages);
+                            return this;
+                        }
+                    }));
                 }
+            }
+            for (AbstractCountingCallable fkIndicesCallable: ExecutionPool.getAllFutures(fkIndicesFutures)) {
+                totalFkIndices += fkIndicesCallable.updateData(messages);
             }
             if (totalFkIndices > 0) Debug.logImportant("==== TOTAL Foreign Key Indices Created: " + totalFkIndices, module);
         }
@@ -432,10 +472,20 @@ public class DatabaseUtil {
         // for each newly added table, add declared indexes
         if (datasourceInfo.useIndices) {
             int totalDis = 0;
+            List<Future<AbstractCountingCallable>> disFutures = FastList.newInstance();
             for (ModelEntity curEntity: entitiesAdded) {
                 if (curEntity.getIndexesSize() > 0) {
-                    totalDis += this.createDeclaredIndices(curEntity, messages);
+                    disFutures.add(submitWork(new AbstractCountingCallable(curEntity,  modelEntities) {
+                    public AbstractCountingCallable call() throws Exception {
+                        count = createDeclaredIndices(entity, messages);
+                        return this;
+                    }
+                }));
+
                 }
+            }
+            for (AbstractCountingCallable disCallable: ExecutionPool.getAllFutures(disFutures)) {
+                totalDis += disCallable.updateData(messages);
             }
             if (totalDis > 0) Debug.logImportant("==== TOTAL Declared Indices Created: " + totalDis, module);
         }
@@ -798,6 +848,80 @@ public class DatabaseUtil {
         return dbData;
     }
 
+    private static final List<Detection> detections = new ArrayList<Detection>();
+    private static final String goodFormatStr;
+    private static final String badFormatStr;
+
+    private static class Detection {
+        protected final String name;
+        protected final boolean required;
+        protected final Method method;
+        protected final Object[] params;
+
+        protected Detection(String name, boolean required, String methodName, Object... params) throws NoSuchMethodException {
+            this.name = name;
+            this.required = required;
+            Class[] paramTypes = new Class[params.length];
+            for (int i = 0; i < params.length; i++) {
+                Class<?> paramType = params[i].getClass();
+                if (paramType == Integer.class) {
+                    paramType = Integer.TYPE;
+                }
+                paramTypes[i] = paramType;
+            }
+            method = DatabaseMetaData.class.getMethod(methodName, paramTypes);
+            this.params = params;
+        }
+    }
+
+    static {
+        try {
+            detections.add(new Detection("supports transactions", true, "supportsTransactions"));
+            detections.add(new Detection("isolation None", false, "supportsTransactionIsolationLevel", Connection.TRANSACTION_NONE));
+            detections.add(new Detection("isolation ReadCommitted", false, "supportsTransactionIsolationLevel", Connection.TRANSACTION_READ_COMMITTED));
+            detections.add(new Detection("isolation ReadUncommitted", false, "supportsTransactionIsolationLevel", Connection.TRANSACTION_READ_UNCOMMITTED));
+            detections.add(new Detection("isolation RepeatableRead", false, "supportsTransactionIsolationLevel", Connection.TRANSACTION_REPEATABLE_READ));
+            detections.add(new Detection("isolation Serializable", false, "supportsTransactionIsolationLevel", Connection.TRANSACTION_SERIALIZABLE));
+            detections.add(new Detection("forward only type", false, "supportsResultSetType", ResultSet.TYPE_FORWARD_ONLY));
+            detections.add(new Detection("scroll sensitive type", false, "supportsResultSetType", ResultSet.TYPE_SCROLL_SENSITIVE));
+            detections.add(new Detection("scroll insensitive type", false, "supportsResultSetType", ResultSet.TYPE_SCROLL_INSENSITIVE));
+            detections.add(new Detection("is case sensitive", false, "supportsMixedCaseIdentifiers"));
+            detections.add(new Detection("stores LowerCase", false, "storesLowerCaseIdentifiers"));
+            detections.add(new Detection("stores MixedCase", false, "storesMixedCaseIdentifiers"));
+            detections.add(new Detection("stores UpperCase", false, "storesUpperCaseIdentifiers"));
+            detections.add(new Detection("max table name length", false, "getMaxTableNameLength"));
+            detections.add(new Detection("max column name length", false, "getMaxColumnNameLength"));
+            detections.add(new Detection("concurrent connections", false, "getMaxConnections"));
+            detections.add(new Detection("concurrent statements", false, "getMaxStatements"));
+            detections.add(new Detection("ANSI SQL92 Entry", false, "supportsANSI92EntryLevelSQL"));
+            detections.add(new Detection("ANSI SQL92 Intermediate", false, "supportsANSI92IntermediateSQL"));
+            detections.add(new Detection("ANSI SQL92 Full", false, "supportsANSI92FullSQL"));
+            detections.add(new Detection("ODBC SQL Grammar Core", false, "supportsCoreSQLGrammar"));
+            detections.add(new Detection("ODBC SQL Grammar Extended", false, "supportsExtendedSQLGrammar"));
+            detections.add(new Detection("ODBC SQL Grammar Minimum", false, "supportsMinimumSQLGrammar"));
+            detections.add(new Detection("outer joins", true, "supportsOuterJoins"));
+            detections.add(new Detection("limited outer joins", false, "supportsLimitedOuterJoins"));
+            detections.add(new Detection("full outer joins", false, "supportsFullOuterJoins"));
+            detections.add(new Detection("group by", true, "supportsGroupBy"));
+            detections.add(new Detection("group by not in select", false, "supportsGroupByUnrelated"));
+            detections.add(new Detection("column aliasing", false, "supportsColumnAliasing"));
+            detections.add(new Detection("order by not in select", false, "supportsOrderByUnrelated"));
+            detections.add(new Detection("alter table add column", true, "supportsAlterTableWithAddColumn"));
+            detections.add(new Detection("non-nullable column", true, "supportsNonNullableColumns"));
+            //detections.add(new Detection("", false, "", ));
+        } catch (NoSuchMethodException e) {
+            throw (InternalError) new InternalError(e.getMessage()).initCause(e);
+        }
+        int maxWidth = 0;
+        for (Detection detection: detections) {
+            if (detection.name.length() > maxWidth) {
+                maxWidth = detection.name.length();
+            }
+        }
+        goodFormatStr = "- %-" + maxWidth + "s [%s]%s";
+        badFormatStr = "- %-" + maxWidth + "s [ DETECTION FAILED ]%s";
+    }
+
     public void printDbMiscData(DatabaseMetaData dbData, Connection con) {
         if (dbData == null) {
             return;
@@ -826,197 +950,22 @@ public class DatabaseUtil {
         // Db/Driver support settings
         if (Debug.infoOn()) {
                 Debug.logInfo("Database Setting/Support Information (those with a * should be true):", module);
-            try {
-                Debug.logInfo("- supports transactions    [" + dbData.supportsTransactions() + "]*", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- supports transactions    [ DETECTION FAILED ]*", module);
-            }
-            try {
-                Debug.logInfo("- isolation None           [" + dbData.supportsTransactionIsolationLevel(Connection.TRANSACTION_NONE) + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- isolation None           [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- isolation ReadCommitted  [" + dbData.supportsTransactionIsolationLevel(Connection.TRANSACTION_READ_COMMITTED) + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- isolation ReadCommitted  [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- isolation ReadUncommitted[" + dbData.supportsTransactionIsolationLevel(Connection.TRANSACTION_READ_UNCOMMITTED) + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- isolation ReadUncommitted[ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- isolation RepeatableRead [" + dbData.supportsTransactionIsolationLevel(Connection.TRANSACTION_REPEATABLE_READ) + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- isolation RepeatableRead [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- isolation Serializable   [" + dbData.supportsTransactionIsolationLevel(Connection.TRANSACTION_SERIALIZABLE) + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- isolation Serializable   [ DETECTION FAILED ]", module);
+            for (Detection detection: detections) {
+                String requiredFlag = detection.required ? "*" : "";
+                try {
+                    Object result = detection.method.invoke(dbData, detection.params);
+                    Debug.logInfo(String.format(goodFormatStr, detection.name, result, requiredFlag), module);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Debug.logVerbose(e, module);
+                    Debug.logWarning(String.format(badFormatStr, detection.name, requiredFlag), module);
+                }
             }
             try {
                 Debug.logInfo("- default fetchsize        [" + con.createStatement().getFetchSize() + "]", module);
             } catch (Exception e) {
                 Debug.logVerbose(e, module);
                 Debug.logWarning("- default fetchsize        [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- forward only type        [" + dbData.supportsResultSetType(ResultSet.TYPE_FORWARD_ONLY) + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- forward only type        [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- scroll sensitive type    [" + dbData.supportsResultSetType(ResultSet.TYPE_SCROLL_SENSITIVE) + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- scroll sensitive type    [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- scroll insensitive type  [" + dbData.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE) + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- scroll insensitive type  [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- is case sensitive        [" + dbData.supportsMixedCaseIdentifiers() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- is case sensitive        [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- stores LowerCase         [" + dbData.storesLowerCaseIdentifiers() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- stores LowerCase         [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- stores MixedCase         [" + dbData.storesMixedCaseIdentifiers() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- stores MixedCase         [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- stores UpperCase         [" + dbData.storesUpperCaseIdentifiers() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- stores UpperCase         [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- max table name length    [" + dbData.getMaxTableNameLength() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- max table name length    [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- max column name length   [" + dbData.getMaxColumnNameLength() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- max column name length   [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- max schema name length   [" + dbData.getMaxSchemaNameLength() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- max schema name length   [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- concurrent connections   [" + dbData.getMaxConnections() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- concurrent connections   [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- concurrent statements    [" + dbData.getMaxStatements() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- concurrent statements    [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- ANSI SQL92 Entry         [" + dbData.supportsANSI92EntryLevelSQL() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- ANSI SQL92 Entry         [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- ANSI SQL92 Intermediate  [" + dbData.supportsANSI92IntermediateSQL() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- ANSI SQL92 Intermediate  [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- ANSI SQL92 Full          [" + dbData.supportsANSI92FullSQL() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- ANSI SQL92 Full          [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- ODBC SQL Grammar Core    [" + dbData.supportsCoreSQLGrammar() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- ODBC SQL Grammar Core    [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- ODBC SQL Grammar Extended[" + dbData.supportsExtendedSQLGrammar() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- ODBC SQL Grammar Extended[ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- ODBC SQL Grammar Minimum [" + dbData.supportsMinimumSQLGrammar() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- ODBC SQL Grammar Minimum [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- outer joins              [" + dbData.supportsOuterJoins() + "]*", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- outer joins              [ DETECTION FAILED]*", module);
-            }
-            try {
-                Debug.logInfo("- limited outer joins      [" + dbData.supportsLimitedOuterJoins() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- limited outer joins      [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- full outer joins         [" + dbData.supportsFullOuterJoins() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- full outer joins         [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- group by                 [" + dbData.supportsGroupBy() + "]*", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- group by                 [ DETECTION FAILED ]*", module);
-            }
-            try {
-                Debug.logInfo("- group by not in select   [" + dbData.supportsGroupByUnrelated() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- group by not in select   [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- column aliasing          [" + dbData.supportsColumnAliasing() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- column aliasing          [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- order by not in select   [" + dbData.supportsOrderByUnrelated() + "]", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- order by not in select   [ DETECTION FAILED ]", module);
             }
             try {
                 //this doesn't work in HSQLDB, other databases?
@@ -1026,18 +975,6 @@ public class DatabaseUtil {
             } catch (Exception e) {
                 Debug.logVerbose(e, module);
                 Debug.logWarning("- named parameters JDBC-3  [ DETECTION FAILED ]", module);
-            }
-            try {
-                Debug.logInfo("- alter table add column   [" + dbData.supportsAlterTableWithAddColumn() + "]*", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- alter table add column   [ DETECTION FAILED ]*", module);
-            }
-            try {
-                Debug.logInfo("- non-nullable column      [" + dbData.supportsNonNullableColumns() + "]*", module);
-            } catch (Exception e) {
-                Debug.logVerbose(e, module);
-                Debug.logWarning("- non-nullable column      [ DETECTION FAILED ]*", module);
             }
         }
     }
@@ -1151,6 +1088,17 @@ public class DatabaseUtil {
             }
         }
         return tableNames;
+    }
+
+    private AbstractCountingCallable createPrimaryKeyFetcher(final DatabaseMetaData dbData, final String lookupSchemaName, final boolean needsUpperCase, final Map<String, Map<String, ColumnCheckInfo>> colInfo, final Collection<String> messages, final String curTable) {
+        return new AbstractCountingCallable(null, null) {
+            public AbstractCountingCallable call() throws Exception {
+                Debug.logInfo("Fetching primary keys for " + curTable, module);
+                ResultSet rsPks = dbData.getPrimaryKeys(null, lookupSchemaName, curTable);
+                count = checkPrimaryKeyInfo(rsPks, lookupSchemaName, needsUpperCase, colInfo, messages);
+                return this;
+            }
+        };
     }
 
     public Map<String, Map<String, ColumnCheckInfo>> getColumnInfo(Set<String> tableNames, boolean getPks, Collection<String> messages) {
@@ -1282,10 +1230,13 @@ public class DatabaseUtil {
                     }
                     if (pkCount == 0) {
                         Debug.logInfo("Searching in " + tableNames.size() + " tables for primary key fields ...", module);
+                        List<Future<AbstractCountingCallable>> pkFetcherFutures = FastList.newInstance();
                         for (String curTable: tableNames) {
                             curTable = curTable.substring(curTable.indexOf('.') + 1); //cut off schema name
-                            ResultSet rsPks = dbData.getPrimaryKeys(null, lookupSchemaName, curTable);
-                            pkCount += checkPrimaryKeyInfo(rsPks, lookupSchemaName, needsUpperCase, colInfo, messages);
+                            pkFetcherFutures.add(submitWork(createPrimaryKeyFetcher(dbData, lookupSchemaName, needsUpperCase, colInfo, messages, curTable)));
+                        }
+                        for (AbstractCountingCallable pkFetcherCallable: ExecutionPool.getAllFutures(pkFetcherFutures)) {
+                            pkCount += pkFetcherCallable.updateData(messages);
                         }
                     }
 
@@ -1625,6 +1576,66 @@ public class DatabaseUtil {
             }
         }
         return indexInfo;
+    }
+
+    private class CreateTableCallable implements Callable<CreateTableCallable> {
+        private final ModelEntity entity;
+        private final Map<String, ModelEntity> modelEntities;
+        private final String tableName;
+        private String message;
+        private boolean success;
+
+        protected CreateTableCallable(ModelEntity entity, Map<String, ModelEntity> modelEntities, String tableName) {
+            this.entity = entity;
+            this.modelEntities = modelEntities;
+            this.tableName = tableName;
+        }
+
+        public CreateTableCallable call() throws Exception {
+            String errMsg = createTable(entity, modelEntities, false);
+            if (UtilValidate.isNotEmpty(errMsg)) {
+                this.success = false;
+                this.message = "Could not create table [" + tableName + "]: " + errMsg;
+                Debug.logError(this.message, module);
+            } else {
+                this.success = true;
+                this.message = "Created table [" + tableName + "]";
+                Debug.logImportant(this.message, module);
+            }
+            return this;
+        }
+
+        protected void updateData(Collection<String> messages, List<ModelEntity> entitiesAdded) {
+            if (this.success) {
+                entitiesAdded.add(entity);
+                if (messages != null) {
+                    messages.add(this.message);
+                }
+            } else {
+                if (messages != null) {
+                    messages.add(this.message);
+                }
+            }
+        }
+    }
+
+    private abstract class AbstractCountingCallable implements Callable<AbstractCountingCallable> {
+        protected final ModelEntity entity;
+        protected final Map<String, ModelEntity> modelEntities;
+        protected final List<String> messages = FastList.newInstance();
+        protected int count;
+
+        protected AbstractCountingCallable(ModelEntity entity, Map<String, ModelEntity> modelEntities) {
+            this.entity = entity;
+            this.modelEntities = modelEntities;
+        }
+
+        protected int updateData(Collection<String> messages) {
+            if (messages != null && UtilValidate.isNotEmpty(this.messages)) {
+                messages.addAll(messages);
+            }
+            return count;
+        }
     }
 
     /* ====================================================================== */

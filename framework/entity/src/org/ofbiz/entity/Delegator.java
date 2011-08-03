@@ -1209,4 +1209,23 @@ public interface Delegator {
      */
     public int storeByCondition(String entityName, Map<String, ? extends Object> fieldsToSet, EntityCondition condition, boolean doCacheClear) throws GenericEntityException;
 
+    /**
+     * Enables/Disables the JMS listeners globally
+     * (this will not effect any dispatchers already running)
+     * @param enable
+     */
+    public void enableJMS(boolean enable);
+
+    /**
+     * Get Enabled/Disabled JMS listeners status
+     * @return boolean true is JMS listeners are enabled
+     */
+    public boolean getEnabledJMS();
+    
+    /**
+     * Get use of Distributed Cache Clear mechanism status
+     * @return boolean true if this delegator uses a Distributed Cache Clear mechanism 
+     */
+    public boolean useDistributedCacheClear();
+    
 }

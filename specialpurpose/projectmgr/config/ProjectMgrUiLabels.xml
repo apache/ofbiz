@@ -644,7 +644,7 @@
     <property key="PageTitleTaskAssignedToMe">
         <value xml:lang="de">Öffne die mir zugeordneten Aufgaben</value>
         <value xml:lang="en">Open Tasks Assigned to me.</value>
-        <value xml:lang="fr">Ouvrir les tâches qui me sont affectées</value>
+        <value xml:lang="fr">Tâches qui me sont affectées</value>
         <value xml:lang="it">Compiti aperti assegnati a me.</value>
         <value xml:lang="nl">Openstaande taken voor mij</value>
         <value xml:lang="th">งานที่มอบหมายให้ฉัน</value>
@@ -1042,11 +1042,11 @@
     </property>
     <property key="ProjectMgrActualCompletionDateAbbr">
         <value xml:lang="en">Act.Compl.</value>
-        <value xml:lang="fr">Date fin réelle</value>
+        <value xml:lang="fr">Fin réelle</value>
     </property>
     <property key="ProjectMgrEstimatedCompletionDateAbbr">
         <value xml:lang="en">Est.Compl.</value>
-        <value xml:lang="fr">Date fin est.</value>
+        <value xml:lang="fr">Fin est.</value>
     </property>
     <property key="ProjectMgrFilterOn">
         <value xml:lang="de">Filter aktivieren</value>
@@ -1324,6 +1324,7 @@
     </property>
     <property key="ProjectMgrProrityAbbr">
         <value xml:lang="en">Prio.</value>
+        <value xml:lang="en">P.</value>
     </property>
     <property key="ProjectMgrPrivateOrPublic">
         <value xml:lang="de">Privat/Öffentlich</value>
@@ -1569,7 +1570,7 @@
     <property key="ProjectMgrSkillStandards">
         <value xml:lang="de">Qualifikationsstandards</value>
         <value xml:lang="en">Skill Standards</value>
-        <value xml:lang="fr">Compétences standards</value>
+        <value xml:lang="fr">Compétences</value>
         <value xml:lang="it">Abilità standard</value>
         <value xml:lang="nl">Competentie-standaarden</value>
         <value xml:lang="th">ชั่วโมงที่วางแผน</value>

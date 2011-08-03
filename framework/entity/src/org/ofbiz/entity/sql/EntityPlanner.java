@@ -74,25 +74,38 @@ public class EntityPlanner extends Planner<EntityPlanner, EntityCondition, Entit
     public EntitySelectPlan planSelect(SQLSelect selectStatement) {
         DynamicViewEntity dve = new DynamicViewEntity();
         Unioned unioned = selectStatement.getUnioned();
-        if (unioned.getOperator() != null || unioned.getNext() != null) {
+        if (unioned != null) {
             throw new IllegalArgumentException("union views not yet supported");
         }
         SelectGroup selectGroup = unioned.getGroup();
         Table table = selectGroup.getTable();
         addMember(dve, table.getTableName());
         addJoined(dve, table.getTableName().getAlias(), table.getJoined());
-        for (FieldAll fieldAll: selectGroup.getFieldAlls()) {
-            dve.addAliasAll(fieldAll.getAlias(), null);
+        if (selectGroup.getFieldAlls() != null) {
+            for (FieldAll fieldAll: selectGroup.getFieldAlls()) {
+                List<String> excludes = FastList.newInstance();
+                for (String exclude: fieldAll) {
+                    excludes.add(exclude);
+                }
+                if (excludes.isEmpty()) {
+                    excludes = null;
+                }
+                dve.addAliasAll(fieldAll.getAlias(), null, excludes);
+            }
         }
-        for (Relation relation: selectStatement.getRelations().values()) {
-            dve.addRelation(relation.getType(), relation.getTitle(), relation.getEntityName(), buildKeyMaps(relation));
+        if (selectStatement.getRelations() != null) {
+            for (Relation relation: selectStatement.getRelations().values()) {
+                dve.addRelation(relation.getType(), relation.getTitle(), relation.getEntityName(), buildKeyMaps(relation));
+            }
         }
         List<String> groupBy = selectGroup.getGroupBy();
         if (groupBy == null) {
             groupBy = Collections.emptyList();
         }
-        for (FieldDef fieldDef: selectGroup.getFieldDefs()) {
-            addFieldDef(dve, groupBy, fieldDef.getAlias(), fieldDef);
+        if (selectGroup.getFieldDefs() != null) {
+            for (FieldDef fieldDef: selectGroup.getFieldDefs()) {
+                addFieldDef(dve, groupBy, fieldDef.getAlias(), fieldDef);
+            }
         }
         List<String> orderBy;
         if (selectStatement.getOrderBy() == null) {
