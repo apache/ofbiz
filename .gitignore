@@ -51,6 +51,7 @@ specialpurpose/oagis/build/
 specialpurpose/pos/build/
 specialpurpose/projectmgr/build/
 specialpurpose/webpos/build/
+specialpurpose/scrum/build/
 specialpurpose/shark/build/
 ofbiz.jar
 changelog
@@ -87,3 +88,4 @@ debian/ofbiz/
 debian/stamps/
 debian/orig-work
 .pc
+.DS_Store
