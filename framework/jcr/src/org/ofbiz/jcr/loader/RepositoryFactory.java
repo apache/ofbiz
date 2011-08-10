@@ -1,4 +1,4 @@
-package org.ofbiz.jcr;
+package org.ofbiz.jcr.loader;
 
 import java.io.File;
 import java.util.Hashtable;

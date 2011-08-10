@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.jcr;
+package org.ofbiz.jcr.loader;
 
 import javax.jcr.Repository;
 import javax.jcr.RepositoryException;

@@ -108,7 +108,6 @@ under the License.
         <menu-item name="ExampleJackrabbitAddData" title="${uiLabelMap.ExampleAddNewContentEntry}"><link target="ExampleJackrabbitAddData"/></menu-item>
         <menu-item name="ExampleJackrabbitUploadFileData" title="${uiLabelMap.ExampleJackrabbitUploadFileData}"><link target="ExampleJackrabbitUploadFileData"/></menu-item>
         <menu-item name="ExampleJackrabbitShowUploadedFiles" title="${uiLabelMap.ExampleJackrabbitShowUploadedFiles}"><link target="ExampleJackrabbitShowUploadedFiles"/></menu-item>
-        <menu-item name="ExampleJackrabbitListNodes" title="${uiLabelMap.ExampleJackrabbitListNodes}"><link target="ExampleJackrabbit"/></menu-item>
         <menu-item name="ExampleJackrabbitScanRepositoryStrukture" title="${uiLabelMap.ExampleScanRepositoryStrukture}"><link target="ExampleJackrabbitScanRepositoryStructure"/></menu-item>
     </menu>
 </menus>

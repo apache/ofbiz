@@ -249,7 +249,7 @@ under the License.
     </request-map>
     <request-map uri="StoreNewRepositoryData">
         <security auth="true" https="true" />
-        <event type="java" path="org.ofbiz.content.jcr.JackrabbitEvents" invoke="addNewTextMessageToJcrRepository"/>
+        <event type="java" path="org.ofbiz.content.jcr.JackrabbitEvents" invoke="addNewTextMessageToJcrRepository" />
         <response name="success" type="request" value="ExampleJackrabbitShowContentData" />
         <response name="error" type="view" value="ExampleJackrabbitAddData" />
     </request-map>
@@ -279,15 +279,9 @@ under the License.
     </request-map>
     <request-map uri="RemoveRepositoryFile">
         <security auth="true" https="true" />
-        <event type="java" path="org.ofbiz.content.jcr.JackrabbitEvents" invoke="removeRepositoryFileNode"/>
+        <event type="java" path="org.ofbiz.content.jcr.JackrabbitEvents" invoke="removeRepositoryNode"/>
         <response name="success" type="request" value="ExampleJackrabbitShowUploadedFiles" />
         <response name="error" type="request" value="ExampleJackrabbitShowUploadedFiles" />
-    </request-map>
-    <request-map uri="CleanJcrRepository">
-        <security auth="true" https="true" />
-        <event type="java" path="org.ofbiz.content.jcr.JackrabbitEvents" invoke="cleanJcrRepository"/>
-        <response name="success" type="request-redirect-noparam" value="ExampleJackrabbitScanRepositoryStructure" />
-        <response name="error" type="request-redirect-noparam" value="ExampleJackrabbitScanRepositoryStructure" />
     </request-map>
     <request-map uri="ExampleJackrabbitUploadFileData">
         <security auth="true" https="true" />

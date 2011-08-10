@@ -18,27 +18,17 @@ under the License.
  */
 package org.ofbiz.content.test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.List;
-
-import javax.jcr.PathNotFoundException;
-import javax.jcr.RepositoryException;
-
-import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.UtilProperties;
-import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.content.jcr.JackrabbitWorker;
-import org.ofbiz.content.jcr.helper.JcrFileHelperJackrabbit;
-import org.ofbiz.content.jcr.helper.JcrTextHelperJackrabbit;
-import org.ofbiz.entity.GenericValue;
-import org.ofbiz.jcr.helper.JcrFileHelper;
-import org.ofbiz.jcr.helper.JcrTextHelper;
 import org.ofbiz.service.testtools.OFBizTestCase;
 
 public class JcrTests extends OFBizTestCase {
 
+    public JcrTests(String name) {
+        super(name);
+        // TODO Auto-generated constructor stub
+    }
+
+// TODO create new tests :-)
+/*
     protected GenericValue userLogin = null;
     protected JcrTextHelper jh = null;
 
@@ -144,4 +134,5 @@ public class JcrTests extends OFBizTestCase {
     public void testCleanRepositoryStructure() throws Exception {
         JackrabbitWorker.cleanJcrRepository(delegator, userLogin);
     }
+    */
 }

@@ -9,7 +9,7 @@
     <jcr-context name="default" />
 
     <!-- This is the default implementation and uses the JackRabbit implementation as its default -->
-    <jcr name="default" class="org.ofbiz.jcr.jackrabbit.JCRFactoryImpl" jndi-name="jcr/local" />
+    <jcr name="default" class="org.ofbiz.jcr.loader.jackrabbit.JCRFactoryImpl" jndi-name="jcr/local" />
 
     <!-- This is an example custom implementation and uses the class name specified as jcr implementation -->
     <!-- <jcr name="myCustom" class="com.mycompany.jcr.MyCustomJCR"/> -->

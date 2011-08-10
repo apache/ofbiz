@@ -112,9 +112,6 @@ under the License.
                 <decorator-screen name="CommonExampleJackrabbitDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <container>
-                            <link target="CleanJcrRepository" style="buttontext" text="${uiLabelMap.ExampleJackrabbitCleanRepository}"></link> <label>${uiLabelMap.ExampleJackrabbitCleanRepositoryTooltip}</label>
-                        </container>
-                        <container>
                             <include-form location="component://example/widget/example/ExampleJackrabbitForms.xml" name="ScanRepositoryStructure" />
                         </container>
                     </decorator-section>
@@ -128,9 +125,6 @@ under the License.
             <actions>
                 <set field="titleProperty" value="PageTitleExampleJackrabbit" />
                 <set field="tabButtonItem" value="ExampleJackrabbitMainPage" />
-                <entity-one value-field="content" entity-name="Content">
-                    <field-map field-name="contentId" from-field="parameters.contentId"/>
-                </entity-one>
             </actions>
             <widgets>
                 <decorator-screen name="CommonExampleJackrabbitDecorator" location="${parameters.mainDecoratorLocation}">

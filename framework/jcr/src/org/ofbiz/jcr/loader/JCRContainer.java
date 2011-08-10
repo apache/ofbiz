@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.jcr;
+package org.ofbiz.jcr.loader;
 
+import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.naming.Context;
 import javax.naming.NamingException;
@@ -33,8 +34,6 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.JNDIContextFactory;
 import org.ofbiz.base.util.UtilXml;
 import org.w3c.dom.Element;
-
-import com.sun.corba.se.spi.activation.Repository;
 
 /**
  * A container for a local JCR-compliant content repository. The default
@@ -181,7 +180,7 @@ public class JCRContainer implements Container {
     protected void bindRepository() {
         if (this.jndiContext != null) {
             try {
-                Reference ref = new Reference(Repository.class.getName(), org.ofbiz.jcr.RepositoryFactory.class.getName(), null);
+                Reference ref = new Reference(Repository.class.getName(), org.ofbiz.jcr.loader.RepositoryFactory.class.getName(), null);
                 ref.add(new StringRefAddr(REP_HOME_DIR, homeDir));
                 ref.add(new StringRefAddr(CONFIG_FILE_PATH, configFilePath));
                 this.jndiContext.bind(jndiName, ref);

@@ -52,7 +52,7 @@ under the License.
     });
 
     function removeDataFromRepository(nodepath, nodetype) {
-        var parameters = {"repositoryNode" : nodepath};
+        var parameters = {"path" : nodepath};
         var url = "RemoveRepositoryNode";
 
         runPostRequest(url, parameters)
@@ -60,7 +60,7 @@ under the License.
 
     function openDataFromRepository(nodepath, nodetype) {
 
-        var parameters = {"repositoryNode" : nodepath};
+        var parameters = {"path" : nodepath};
         var url = "EditRepositoryContent";
 
         runPostRequest(url, parameters)

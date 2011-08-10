@@ -16,26 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.jcr.jackrabbit;
+package org.ofbiz.jcr.loader.jackrabbit;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import javax.jcr.Credentials;
 import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
+import javax.jcr.Workspace;
+import javax.jcr.nodetype.NoSuchNodeTypeException;
+import javax.jcr.nodetype.NodeTypeManager;
 
 import org.apache.jackrabbit.core.TransientRepository;
+import org.apache.jackrabbit.core.nodetype.InvalidNodeTypeDefException;
+import org.apache.jackrabbit.core.nodetype.NodeTypeManagerImpl;
+import org.apache.jackrabbit.core.nodetype.NodeTypeRegistry;
+import org.apache.jackrabbit.core.nodetype.xml.NodeTypeReader;
+import org.apache.jackrabbit.ocm.nodemanagement.impl.RepositoryUtil;
+import org.apache.jackrabbit.spi.QNodeTypeDefinition;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
-import org.ofbiz.jcr.JCRFactory;
+import org.ofbiz.jcr.loader.JCRFactory;
 import org.w3c.dom.Element;
 
 public class JCRFactoryImpl implements JCRFactory {
 
     public static final String module = JCRFactoryImpl.class.getName();
+
+    private static String CUSTOM_NODE_TYPES = "framework/jcr/config/custom-jackrabbit-nodetypes.xml";
 
     private static String homeDir = null;
     private static String jackrabbitConfigFile = null;
@@ -67,7 +81,8 @@ public class JCRFactoryImpl implements JCRFactory {
      */
     @Override
     public void start() throws RepositoryException {
-        // Transient repositories closes automatically when the last session is closed
+        // Transient repositories closes automatically when the last session is
+        // closed
         repository = new TransientRepository(jackrabbitConfigFile, homeDir);
         createSession();
     }
@@ -102,6 +117,17 @@ public class JCRFactoryImpl implements JCRFactory {
             Credentials credentials = new SimpleCredentials(CREDENTIALS_USERNAME, CREDENTIALS_PASSWORD);
             try {
                 session = repository.login(credentials);
+                // register NameSpaces
+                RepositoryUtil.setupSession(session);
+                try {
+                    // register the cool new noteTypes
+                    registerNodeTypes(session);
+                } catch (InvalidNodeTypeDefException e) {
+                    Debug.logError(e, module);
+                } catch (IOException e) {
+                    Debug.logError(e, module);
+                }
+
             } catch (RepositoryException e) {
                 Debug.logError(e, "Could not login to the workspace");
                 throw e;
@@ -129,5 +155,32 @@ public class JCRFactoryImpl implements JCRFactory {
     @Override
     public Repository getRepository() {
         return repository;
+    }
+
+    /*
+     * Register some new node types
+     */
+    protected void registerNodeTypes(Session session) throws InvalidNodeTypeDefException, javax.jcr.RepositoryException, IOException {
+        InputStream xml = new FileInputStream(CUSTOM_NODE_TYPES);
+
+        // HINT: throws InvalidNodeTypeDefException, IOException
+        QNodeTypeDefinition[] types = NodeTypeReader.read(xml);
+
+        Workspace workspace = session.getWorkspace();
+        NodeTypeManager ntMgr = workspace.getNodeTypeManager();
+        NodeTypeRegistry ntReg = ((NodeTypeManagerImpl) ntMgr).getNodeTypeRegistry();
+
+        for (int j = 0; j < types.length; j++) {
+            QNodeTypeDefinition def = types[j];
+
+            try {
+                ntReg.getNodeTypeDef(def.getName());
+            } catch (NoSuchNodeTypeException nsne) {
+                // HINT: if not already registered than register custom node
+                // type
+                ntReg.registerNodeType(def);
+            }
+
+        }
     }
 }

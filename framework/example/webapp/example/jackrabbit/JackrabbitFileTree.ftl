@@ -58,14 +58,14 @@ under the License.
     });
 
     function openFileFromRepository(nodepath, nodetype) {
-        var parameters = {"repositoryNode" : nodepath};
+        var parameters = {"path" : nodepath};
         var url = "OpenFileInformation";
 
         runPostRequest(url, parameters)
     }
 
     function removeFileFromRepository(nodepath, nodetype) {
-        var parameters = {"repositoryNode" : nodepath};
+        var parameters = {"path" : nodepath};
         var url = "RemoveRepositoryFile";
 
         runPostRequest(url, parameters)
@@ -76,7 +76,7 @@ under the License.
             return;
         }
 
-        var parameters = {"repositoryNode" : nodepath};
+        var parameters = {"path" : nodepath};
         var url = "GetFileFromRepository";
 
         runPostRequest(url, parameters)

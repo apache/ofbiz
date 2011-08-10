@@ -1,4 +1,4 @@
-package org.ofbiz.jcr;
+package org.ofbiz.jcr.loader;
 
 import java.util.Map;
 
