@@ -18,72 +18,73 @@ import org.ofbiz.jcr.util.JcrUtil;
 
 public class JcrUtilJackrabbit implements JcrUtil {
 
-    public static final String module = JcrUtilJackrabbit.class.getName();
+	public static final String module = JcrUtilJackrabbit.class.getName();
 
-    /**
-     * Just a dummy method to list all nodes in the repository.
-     *
-     * @param startNodePath
-     * @return
-     * @throws RepositoryException
-     */
-    public static List<Map<String, String>> getRepositoryNodes(GenericValue userLogin, String startNodePath) throws RepositoryException {
-        List<Map<String, String>> returnList = null;
-        Session session = JCRFactoryUtil.getSession();
+	/**
+	 * A method to list all nodes in the repository. The result List contains
+	 * the node path and the node type.
+	 * 
+	 * @param startNodePath
+	 * @return
+	 * @throws RepositoryException
+	 */
+	public static List<Map<String, String>> getRepositoryNodes(GenericValue userLogin, String startNodePath) throws RepositoryException {
+		List<Map<String, String>> returnList = null;
+		Session session = JCRFactoryUtil.getSession();
 
-        try {
-            returnList = getRepositoryNodes(session, startNodePath);
-        } catch (RepositoryException e) {
-            throw new RepositoryException(e);
-        } finally {
-            session.logout();
-        }
+		try {
+			returnList = getRepositoryNodes(session, startNodePath);
+		} catch (RepositoryException e) {
+			throw new RepositoryException(e);
+		} finally {
+			session.logout();
+		}
 
-        return returnList;
-    }
+		return returnList;
+	}
 
-    /**
-     * Just a dummy method to list all nodes in the repository.
-     *
-     * @param startNodePath
-     * @return
-     * @throws RepositoryException
-     */
-    private static List<Map<String, String>> getRepositoryNodes(Session session, String startNodePath) throws RepositoryException {
-        Node node = null;
+	/**
+	 * Just a dummy method to list all nodes in the repository.
+	 * 
+	 * @param startNodePath
+	 * @return
+	 * @throws RepositoryException
+	 */
+	private static List<Map<String, String>> getRepositoryNodes(Session session, String startNodePath) throws RepositoryException {
+		Node node = null;
 
-        List<Map<String, String>> nodeList = FastList.newInstance();
-        if (UtilValidate.isEmpty(startNodePath)) {
-            node = session.getRootNode();
-        } else {
-            node = session.getNode(startNodePath);
-        }
+		List<Map<String, String>> nodeList = FastList.newInstance();
+		if (UtilValidate.isEmpty(startNodePath)) {
+			node = session.getRootNode();
+		} else {
+			node = session.getNode(startNodePath);
+		}
 
-        NodeIterator nodeIterator = node.getNodes();
-        Map<String, String> nodeEntry = null;
-        while (nodeIterator.hasNext()) {
-            Node n = nodeIterator.nextNode();
+		NodeIterator nodeIterator = node.getNodes();
+		Map<String, String> nodeEntry = null;
+		while (nodeIterator.hasNext()) {
+			Node n = nodeIterator.nextNode();
 
-            // recursion - get all subnodes and add the results to our nodeList
-            if (n.getNodes().hasNext()) {
-                nodeList.addAll(getRepositoryNodes(session, n.getPath()));
-            }
+			// recursion - get all subnodes and add the results to our nodeList
+			if (n.getNodes().hasNext()) {
+				nodeList.addAll(getRepositoryNodes(session, n.getPath()));
+			}
 
-            nodeEntry = FastMap.newInstance();
+			nodeEntry = FastMap.newInstance();
 
-            // if the node path is a jcr:system node than ignore this
-            // entry
-            if (n.getPath().startsWith("/jcr:system")) {
-                continue;
-            }
+			// if the node path is a jcr:system node than ignore this
+			// entry
+			if (n.getPath().startsWith("/jcr:system")) {
+				continue;
+			}
 
-            nodeEntry.put("path", n.getPath());
+			nodeEntry.put("path", n.getPath());
 
-            nodeEntry.put("primaryNodeType", n.getPrimaryNodeType().getName());
+			nodeEntry.put("primaryNodeType", n.getPrimaryNodeType().getName());
 
-            nodeList.add(nodeEntry);
-        }
+			nodeList.add(nodeEntry);
+		}
 
-        return nodeList;
-    }
+		return nodeList;
+	}
 }

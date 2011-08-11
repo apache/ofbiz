@@ -79,7 +79,7 @@ public class RepositoryAccessJackrabbit implements RepositoryAccess {
      */
     @Override
     public void closeAccess() {
-        if (this.ocm != null) {
+        if (this.ocm != null && this.ocm.getSession().isLive()) {
             this.ocm.logout();
         }
         this.ocm = null;

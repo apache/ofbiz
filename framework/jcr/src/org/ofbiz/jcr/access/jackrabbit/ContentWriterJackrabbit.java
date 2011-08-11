@@ -17,10 +17,18 @@ public class ContentWriterJackrabbit implements ContentWriter {
 
     private ObjectContentManager ocm = null;
 
+    /**
+     *
+     * @param ocm
+     */
     public ContentWriterJackrabbit(ObjectContentManager ocm) {
         this.ocm = ocm;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.ofbiz.jcr.access.ContentWriter#storeContentObject(org.ofbiz.jcr.orm.OfbizRepositoryMapping)
+     */
     @Override
     public void storeContentObject(OfbizRepositoryMapping orm) throws ObjectContentManagerException {
         if (orm == null) {
@@ -83,12 +91,20 @@ public class ContentWriterJackrabbit implements ContentWriter {
         this.saveState();
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.ofbiz.jcr.access.ContentWriter#updateContentObject(org.ofbiz.jcr.orm.OfbizRepositoryMapping)
+     */
     @Override
     public void updateContentObject(OfbizRepositoryMapping orm) throws ObjectContentManagerException {
         ocm.update(orm);
         this.saveState();
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.ofbiz.jcr.access.ContentWriter#removeContentObject(java.lang.String)
+     */
     @Override
     public void removeContentObject(String nodePath) throws ObjectContentManagerException {
         ocm.remove(nodePath);
