@@ -1,5 +1,6 @@
 package org.ofbiz.jcr.access;
 
+import javax.jcr.ItemExistsException;
 import javax.jcr.RepositoryException;
 
 import net.sf.json.JSONArray;
@@ -28,8 +29,9 @@ public interface RepositoryAccess {
      *
      * @param orm
      * @throws ObjectContentManagerException
+     * @throws ItemExistsException
      */
-    void storeContentObject(OfbizRepositoryMapping orm) throws ObjectContentManagerException;
+    void storeContentObject(OfbizRepositoryMapping orm) throws ObjectContentManagerException, ItemExistsException;
 
     /**
      * Update the passed content object.

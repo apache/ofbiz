@@ -5,8 +5,6 @@ import java.util.GregorianCalendar;
 
 import org.apache.jackrabbit.ocm.mapper.impl.annotation.Field;
 import org.apache.jackrabbit.ocm.mapper.impl.annotation.Node;
-import org.ofbiz.base.util.UtilProperties;
-import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 
@@ -15,26 +13,19 @@ public abstract class OfbizRepositoryMappingJackrabbitUnstructured implements Of
 
     protected static String module = OfbizRepositoryMappingJackrabbitUnstructured.class.getName();
 
-    @Field(path = true)
-    private String path;
-    @Field
-    private String language;
-    @Field
-    private String version;
-    @Field(jcrName = "jcr:created")
-    private Calendar creationDate;
+    @Field(path = true) private String path;
+    @Field private String version;
+    @Field(jcrName = "jcr:created") private Calendar creationDate;
+    @Field private boolean localized;
 
     protected OfbizRepositoryMappingJackrabbitUnstructured() {
         // create an empty object
     }
 
-    protected OfbizRepositoryMappingJackrabbitUnstructured(String nodePath, String language) {
+    protected OfbizRepositoryMappingJackrabbitUnstructured(String nodePath) {
         this.setPath(nodePath);
         this.creationDate = new GregorianCalendar();
-        if (UtilValidate.isEmpty(language)) {
-            language = UtilProperties.getPropertyValue("general", "locale.properties.fallback");
-        }
-        this.language = language;
+        this.localized = false;
     }
 
     public String getPath() {
@@ -58,14 +49,6 @@ public abstract class OfbizRepositoryMappingJackrabbitUnstructured implements Of
         this.path = nodePath;
     }
 
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
-    }
-
     public String getVersion() {
         return version;
     }
@@ -73,4 +56,13 @@ public abstract class OfbizRepositoryMappingJackrabbitUnstructured implements Of
     public void setVersion(String version) {
         this.version = version;
     }
+
+    public boolean getLocalized() {
+        return localized;
+    }
+
+    public void setLocalized(boolean isLocalized) {
+        this.localized = isLocalized;
+    }
+
 }

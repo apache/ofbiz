@@ -1,5 +1,6 @@
 package org.ofbiz.jcr.access.jackrabbit;
 
+import javax.jcr.ItemExistsException;
 import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
@@ -27,11 +28,27 @@ public class ContentWriterJackrabbit implements ContentWriter {
 
     /*
      * (non-Javadoc)
-     * @see org.ofbiz.jcr.access.ContentWriter#storeContentObject(org.ofbiz.jcr.orm.OfbizRepositoryMapping)
+     *
+     * @see
+     * org.ofbiz.jcr.access.ContentWriter#storeContentObject(org.ofbiz.jcr.orm
+     * .OfbizRepositoryMapping)
      */
     @Override
-    public void storeContentObject(OfbizRepositoryMapping orm) throws ObjectContentManagerException {
+    public void storeContentObject(OfbizRepositoryMapping orm) throws ObjectContentManagerException, ItemExistsException {
         if (orm == null) {
+            return;
+        }
+
+        // we want to avoid same name sibling (SnS) for each node Type
+        try {
+            if (this.ocm.getSession().itemExists(orm.getPath())) {
+                // we could either throw an exception or call the update method
+                throw new ItemExistsException("There already exists an object stored at " + orm.getPath() + ". Please use update if you want to change it.");
+            }
+        } catch (ItemExistsException e) {
+            throw (e);
+        } catch (RepositoryException e) {
+            Debug.logError(e, module);
             return;
         }
 
@@ -93,7 +110,10 @@ public class ContentWriterJackrabbit implements ContentWriter {
 
     /*
      * (non-Javadoc)
-     * @see org.ofbiz.jcr.access.ContentWriter#updateContentObject(org.ofbiz.jcr.orm.OfbizRepositoryMapping)
+     *
+     * @see
+     * org.ofbiz.jcr.access.ContentWriter#updateContentObject(org.ofbiz.jcr.
+     * orm.OfbizRepositoryMapping)
      */
     @Override
     public void updateContentObject(OfbizRepositoryMapping orm) throws ObjectContentManagerException {
@@ -103,7 +123,9 @@ public class ContentWriterJackrabbit implements ContentWriter {
 
     /*
      * (non-Javadoc)
-     * @see org.ofbiz.jcr.access.ContentWriter#removeContentObject(java.lang.String)
+     *
+     * @see
+     * org.ofbiz.jcr.access.ContentWriter#removeContentObject(java.lang.String)
      */
     @Override
     public void removeContentObject(String nodePath) throws ObjectContentManagerException {

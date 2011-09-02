@@ -1,5 +1,7 @@
 package org.ofbiz.jcr.access;
 
+import javax.jcr.ItemExistsException;
+
 import org.apache.jackrabbit.ocm.exception.ObjectContentManagerException;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 
@@ -10,8 +12,9 @@ public interface ContentWriter {
      *
      * @param orm
      * @throws ObjectContentManagerException
+     * @throws ItemExistsException
      */
-    public void storeContentObject(OfbizRepositoryMapping orm) throws ObjectContentManagerException;
+    public void storeContentObject(OfbizRepositoryMapping orm) throws ObjectContentManagerException, ItemExistsException;
 
     /**
      * Update the OfbizRepositoryMapping Class in the content repository.

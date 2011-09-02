@@ -3,6 +3,7 @@ package org.ofbiz.jcr.access.jackrabbit;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.jcr.ItemExistsException;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
@@ -19,6 +20,8 @@ import org.ofbiz.jcr.access.ContentWriter;
 import org.ofbiz.jcr.access.RepositoryAccess;
 import org.ofbiz.jcr.loader.JCRFactoryUtil;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
+import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle;
+import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitLocalizedContent;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFile;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFolder;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitHierarchyNode;
@@ -65,6 +68,8 @@ public class RepositoryAccessJackrabbit implements RepositoryAccess {
         classes.add(OfbizRepositoryMappingJackrabbitFile.class);
         classes.add(OfbizRepositoryMappingJackrabbitFolder.class);
         classes.add(OfbizRepositoryMappingJackrabbitResource.class);
+        classes.add(OfbizRepositoryMappingJackrabbitLocalizedContent.class);
+        classes.add(OfbizRepositoryMappingJackrabbitArticle.class);
 
         Mapper mapper = new AnnotationMapperImpl(classes);
         this.ocm = new ObjectContentManagerImpl(session, mapper);
@@ -105,7 +110,7 @@ public class RepositoryAccessJackrabbit implements RepositoryAccess {
      * .OfbizRepositoryMapping)
      */
     @Override
-    public void storeContentObject(OfbizRepositoryMapping orm) throws ObjectContentManagerException {
+    public void storeContentObject(OfbizRepositoryMapping orm) throws ObjectContentManagerException, ItemExistsException {
         ContentWriter contentWriter = new ContentWriterJackrabbit(this.ocm);
         contentWriter.storeContentObject(orm);
 

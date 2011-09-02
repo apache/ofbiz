@@ -6,7 +6,7 @@ import org.apache.jackrabbit.ocm.mapper.impl.annotation.Field;
 import org.apache.jackrabbit.ocm.mapper.impl.annotation.Node;
 
 @Node(extend = OfbizRepositoryMappingJackrabbitUnstructured.class)
-public class OfbizRepositoryMappingJackrabbitNews extends OfbizRepositoryMappingJackrabbitUnstructured {
+public class OfbizRepositoryMappingJackrabbitNews extends OfbizRepositoryMappingJackrabbitLocalizedContent {
 
     @Field(id = true) String title = null;
     @Field(jcrType = "Date") Calendar pubDate = null;

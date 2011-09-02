@@ -8,6 +8,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 
+import javax.jcr.ItemExistsException;
 import javax.jcr.RepositoryException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,6 +33,8 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.RepositoryAccess;
 import org.ofbiz.jcr.access.jackrabbit.RepositoryAccessJackrabbit;
+import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle;
+import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitLocalizedContent;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFile;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFolder;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitNews;
@@ -57,15 +60,19 @@ public class JackrabbitEvents {
         Calendar pubDate = new GregorianCalendar(); // TODO
         String content = request.getParameter("message");
 
-        OfbizRepositoryMappingJackrabbitNews orm = new OfbizRepositoryMappingJackrabbitNews(nodePath, language, title, pubDate, content);
+        OfbizRepositoryMappingJackrabbitArticle ormArticle = new OfbizRepositoryMappingJackrabbitArticle(nodePath, language, title, content);
 
         RepositoryAccess repositoryAccess = null;
         try {
             repositoryAccess = new RepositoryAccessJackrabbit(userLogin);
-            repositoryAccess.storeContentObject(orm);
+            repositoryAccess.storeContentObject(ormArticle);
         } catch (ObjectContentManagerException ocme) {
             Debug.logError(ocme, module);
             request.setAttribute("_ERROR_MESSAGE_", ocme.toString());
+            return "error";
+        } catch (ItemExistsException e) {
+            Debug.logError(e, module);
+            request.setAttribute("_ERROR_MESSAGE_", e.toString());
             return "error";
         } finally {
             repositoryAccess.closeAccess();
@@ -113,16 +120,15 @@ public class JackrabbitEvents {
         }
 
         RepositoryAccess repositoryAccess = new RepositoryAccessJackrabbit(userLogin);
-        OfbizRepositoryMappingJackrabbitNews news = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject(node);
+        OfbizRepositoryMappingJackrabbitArticle ormArticle = (OfbizRepositoryMappingJackrabbitArticle) repositoryAccess.getContentObject(node);
 
-        request.setAttribute("contentObject", news);
-        request.setAttribute("path", news.getPath());
-        request.setAttribute("language", news.getLanguage());
-        request.setAttribute("pubDate", news.getPubDate());
-        request.setAttribute("title", news.getTitle());
-        request.setAttribute("version", news.getVersion());
-        request.setAttribute("createDate", news.getCreationDate());
-        request.setAttribute("content", news.getContent());
+        request.setAttribute("contentObject", ormArticle);
+        request.setAttribute("path", ormArticle.getPath());
+        request.setAttribute("language", ormArticle.getLanguage());
+        request.setAttribute("title", ormArticle.getTitle());
+        request.setAttribute("version", ormArticle.getVersion());
+        request.setAttribute("createDate", ormArticle.getCreationDate());
+        request.setAttribute("content", ormArticle.getContent());
 
         return "success";
     }
@@ -139,15 +145,15 @@ public class JackrabbitEvents {
         String path = request.getParameter("path");
 
         RepositoryAccess repositoryAccess = new RepositoryAccessJackrabbit(userLogin);
-        OfbizRepositoryMappingJackrabbitNews news = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject(path);
+        OfbizRepositoryMappingJackrabbitArticle ormArticle = (OfbizRepositoryMappingJackrabbitArticle) repositoryAccess.getContentObject(path);
 
-        news.setLanguage(request.getParameter("language"));
-        news.setTitle(request.getParameter("title"));
-        news.setContent(request.getParameter("content"));
+        // news.setLanguage(request.getParameter("language"));
+        ormArticle.setTitle(request.getParameter("title"));
+        ormArticle.setContent(request.getParameter("content"));
         // request.getParameter("pubDate")
         // request.getParameter("createDate")
 
-        repositoryAccess.updateContentObject(news);
+        repositoryAccess.updateContentObject(ormArticle);
         repositoryAccess.closeAccess();
 
         return "success";
@@ -233,7 +239,15 @@ public class JackrabbitEvents {
         ormFolder.setPath(passedParams.get("path"));
 
         RepositoryAccess repositoryAcces = new RepositoryAccessJackrabbit(userLogin);
-        repositoryAcces.storeContentObject(ormFolder);
+        try {
+            repositoryAcces.storeContentObject(ormFolder);
+        } catch (ObjectContentManagerException e) {
+            Debug.logError(e, module);
+            request.setAttribute("_ERROR_MESSAGE_", e.toString());
+        } catch (ItemExistsException e) {
+            Debug.logError(e, module);
+            request.setAttribute("_ERROR_MESSAGE_", e.toString());
+        }
 
         return "success";
     }
