@@ -57,14 +57,12 @@ public class CheckOutEvents {
     public static final String resource_error = "OrderErrorUiLabels";
 
     public static String cartNotEmpty(HttpServletRequest request, HttpServletResponse response) {
-        ShoppingCart cart = (ShoppingCart) request.getSession().getAttribute("shoppingCart");
-        //Locale locale = UtilHttp.getLocale(request);
-        String errMsg = null;
+        ShoppingCart cart = ShoppingCartEvents.getCartObject(request);
 
-        if (cart != null && cart.size() > 0) {
+        if (cart != null && UtilValidate.isNotEmpty(cart.items())) {
             return "success";
         } else {
-            errMsg = UtilProperties.getMessage(resource_error, "checkevents.cart_empty", (cart != null ? cart.getLocale() : Locale.getDefault()));
+            String errMsg = UtilProperties.getMessage(resource_error, "checkevents.cart_empty", (cart != null ? cart.getLocale() : UtilHttp.getLocale(request)));
             request.setAttribute("_ERROR_MESSAGE_", errMsg);
             return "error";
         }
