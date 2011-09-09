@@ -336,52 +336,6 @@ under the License.
         <response name="error" type="view" value="EditCategoryParties"/>
     </request-map>
 
- <!-- ================ Category Content Requests ================= -->
-    <request-map uri="EditCategoryContent">
-        <security https="true" auth="true"/>
-        <response name="success" type="view" value="EditCategoryContent"/>
-    </request-map>
-    <request-map uri="updateCategoryContent">
-        <security https="true" auth="true"/>
-        <event type="service" path="" invoke="updateCategory"/>
-        <response name="success" type="view" value="EditCategoryContent"/>
-        <response name="error" type="view" value="EditCategoryContent"/>
-    </request-map>
-
- <!-- ================ Category Content Assoc Requests ================= -->
-    <request-map uri="EditCategoryContentContent">
-        <security https="true" auth="true"/>
-        <response name="success" type="view" value="EditCategoryContentContent"/>
-    </request-map>
-    <request-map uri="prepareAddContentToCategory">
-        <security https="true" auth="true"/>
-        <response name="success" type="view" value="EditCategoryContentContent"/>
-    </request-map>
-    <request-map uri="addContentToCategory">
-        <security https="true" auth="true"/>
-        <event type="service" path="" invoke="createCategoryContent"/>
-        <response name="success" type="view" value="EditCategoryContent"/>
-        <response name="error" type="view" value="EditCategoryContent"/>
-    </request-map>
-    <request-map uri="updateContentToCategory">
-        <security https="true" auth="true"/>
-        <event type="service" path="" invoke="updateCategoryContent"/>
-        <response name="success" type="view" value="EditCategoryContent"/>
-        <response name="error" type="view" value="EditCategoryContent"/>
-    </request-map>
-    <request-map uri="removeContentFromCategory">
-        <security https="true" auth="true"/>
-        <event type="service" path="" invoke="removeCategoryContent"/>
-        <response name="success" type="view" value="EditCategoryContent"/>
-        <response name="error" type="view" value="EditCategoryContent"/>
-    </request-map>
-    <request-map uri="createSimpleTextContentForAlternateLocaleInCategory">
-        <security https="true" auth="true"/>
-        <event type="service" path="" invoke="createSimpleTextContentForAlternateLocale"/>
-        <response name="success" type="view" value="EditCategoryContent"/>
-        <response name="error" type="view" value="EditCategoryContentContent"/>
-    </request-map>
-
     <!-- ================ Product Category Attribute Requests ================= -->
     <request-map uri="EditCategoryAttributes">
         <security https="true" auth="true"/>
@@ -618,6 +572,12 @@ under the License.
     <request-map uri="UploadProductImage">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="EditProductContent"/>
+    </request-map>
+    <request-map uri="createSimpleTextContentForAlternateLocaleInCategory">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="createSimpleTextContentForAlternateLocale"/>
+        <response name="success" type="view" value="EditCategoryContent"/>
+        <response name="error" type="view" value="EditCategoryContentContent"/>
     </request-map>
 
     <!-- ================ Product Content Assoc Requests ================= -->
