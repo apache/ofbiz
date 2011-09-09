@@ -8,15 +8,19 @@ import org.apache.jackrabbit.ocm.mapper.impl.annotation.Node;
 import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 
-@Node(isAbstract = true)
+@Node(isAbstract = true, jcrMixinTypes = "mix:versionable")
 public abstract class OfbizRepositoryMappingJackrabbitUnstructured implements OfbizRepositoryMapping {
 
     protected static String module = OfbizRepositoryMappingJackrabbitUnstructured.class.getName();
 
-    @Field(path = true) private String path;
-    @Field private String version;
-    @Field(jcrName = "jcr:created") private Calendar creationDate;
-    @Field private boolean localized;
+    @Field(path = true)
+    private String path;
+    @Field
+    private String version;
+    @Field(jcrName = "jcr:created")
+    private Calendar creationDate;
+    @Field
+    private boolean localized;
 
     protected OfbizRepositoryMappingJackrabbitUnstructured() {
         // create an empty object

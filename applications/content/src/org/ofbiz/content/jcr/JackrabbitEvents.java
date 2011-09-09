@@ -120,13 +120,16 @@ public class JackrabbitEvents {
         }
 
         RepositoryAccess repositoryAccess = new RepositoryAccessJackrabbit(userLogin);
+
+        List<String> list = repositoryAccess.getVersionList(node);
+
         OfbizRepositoryMappingJackrabbitArticle ormArticle = (OfbizRepositoryMappingJackrabbitArticle) repositoryAccess.getContentObject(node);
 
         request.setAttribute("contentObject", ormArticle);
         request.setAttribute("path", ormArticle.getPath());
         request.setAttribute("language", ormArticle.getLanguage());
         request.setAttribute("title", ormArticle.getTitle());
-        request.setAttribute("version", ormArticle.getVersion());
+        request.setAttribute("version", list.get(list.size() - 1));
         request.setAttribute("createDate", ormArticle.getCreationDate());
         request.setAttribute("content", ormArticle.getContent());
 

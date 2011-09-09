@@ -10,6 +10,7 @@ import org.apache.jackrabbit.ocm.manager.ObjectContentManager;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.jcr.access.ContentWriter;
+import org.ofbiz.jcr.access.VersioningManager;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 
 public class ContentWriterJackrabbit implements ContentWriter {
@@ -17,6 +18,7 @@ public class ContentWriterJackrabbit implements ContentWriter {
     private static String module = ContentWriterJackrabbit.class.getName();
 
     private ObjectContentManager ocm = null;
+    VersioningManager versioningManager = null;
 
     /**
      *
@@ -24,6 +26,7 @@ public class ContentWriterJackrabbit implements ContentWriter {
      */
     public ContentWriterJackrabbit(ObjectContentManager ocm) {
         this.ocm = ocm;
+        versioningManager = new VersioningManagerJackrabbit(ocm);
     }
 
     /*
@@ -85,7 +88,10 @@ public class ContentWriterJackrabbit implements ContentWriter {
                     }
                     newNode.setPath(parentNodePath + node);
 
+                    versioningManager.checkOutContentObject(parentNode.getPath());
+
                     ocm.insert(newNode);
+                    versioningManager.addContentToCheckInList(newNode.getPath());
                     parentNode = parentNode.getNode(node);
                 }
             } catch (PathNotFoundException e) {
@@ -105,6 +111,8 @@ public class ContentWriterJackrabbit implements ContentWriter {
         }
 
         ocm.insert(orm);
+        versioningManager.addContentToCheckInList(orm.getPath());
+
         this.saveState();
     }
 
@@ -117,6 +125,7 @@ public class ContentWriterJackrabbit implements ContentWriter {
      */
     @Override
     public void updateContentObject(OfbizRepositoryMapping orm) throws ObjectContentManagerException {
+        versioningManager.checkOutContentObject(orm.getPath());
         ocm.update(orm);
         this.saveState();
     }
@@ -129,13 +138,13 @@ public class ContentWriterJackrabbit implements ContentWriter {
      */
     @Override
     public void removeContentObject(String nodePath) throws ObjectContentManagerException {
+        versioningManager.checkOutContentObject(nodePath, true);
+
         ocm.remove(nodePath);
         this.saveState();
     }
 
     private void saveState() {
-        if (ocm != null) {
-            ocm.save();
-        }
+        versioningManager.checkInContentAndSaveState();
     }
 }

@@ -23,8 +23,6 @@ public class ContentReaderJackrabbit implements ContentReader {
 
     @Override
     public OfbizRepositoryMapping getContentObject(String nodePath) {
-        // OfbizRepositoryMappingJackrabbit ofbizRepositoryMapping =
-        // (OfbizRepositoryMappingJackrabbit) ocm.getObject(nodePath);
         return (OfbizRepositoryMapping) ocm.getObject(nodePath);
     }
 

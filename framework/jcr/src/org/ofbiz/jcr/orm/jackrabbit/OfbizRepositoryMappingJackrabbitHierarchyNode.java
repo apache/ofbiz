@@ -7,7 +7,7 @@ import org.apache.jackrabbit.ocm.mapper.impl.annotation.Node;
 import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 
-@Node(jcrType = "nt:hierarchyNode")
+@Node(jcrType = "nt:hierarchyNode", jcrMixinTypes="mix:versionable")
 public class OfbizRepositoryMappingJackrabbitHierarchyNode implements OfbizRepositoryMapping {
     @Field(path = true, id = true, jcrProtected = true)
     protected String path;

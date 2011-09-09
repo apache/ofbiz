@@ -18,6 +18,7 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.ContentReader;
 import org.ofbiz.jcr.access.ContentWriter;
 import org.ofbiz.jcr.access.RepositoryAccess;
+import org.ofbiz.jcr.access.VersioningManager;
 import org.ofbiz.jcr.loader.JCRFactoryUtil;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle;
@@ -156,6 +157,16 @@ public class RepositoryAccessJackrabbit implements RepositoryAccess {
     @Override
     public void removeContentObject(OfbizRepositoryMapping orm) throws ObjectContentManagerException {
         removeContentObject(orm.getPath());
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.ofbiz.jcr.access.RepositoryAccess#getVersionList(java.lang.String)
+     */
+    @Override
+    public List<String> getVersionList(String nodePath) {
+        VersioningManager versioningnManager = new VersioningManagerJackrabbit(this.ocm);
+        return versioningnManager.getVersionList(nodePath);
     }
 
     /*

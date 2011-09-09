@@ -1,5 +1,7 @@
 package org.ofbiz.jcr.access;
 
+import java.util.List;
+
 import javax.jcr.ItemExistsException;
 import javax.jcr.RepositoryException;
 
@@ -72,4 +74,12 @@ public interface RepositoryAccess {
      * @throws RepositoryException
      */
     JSONArray getJsonFileTree() throws RepositoryException;
+
+    /**
+     * Returns a list of the available versions.
+     *
+     * @param nodePath
+     * @return
+     */
+    public List<String> getVersionList(String nodePath);
 }
