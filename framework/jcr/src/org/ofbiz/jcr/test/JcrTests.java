@@ -21,6 +21,7 @@ package org.ofbiz.jcr.test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.GregorianCalendar;
 
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.entity.GenericValue;
@@ -58,18 +59,16 @@ public class JcrTests extends OFBizTestCase {
     }
 
     public void testCreateRepositoryNewsNode() throws Exception {
-        OfbizRepositoryMappingJackrabbitNews orm = new OfbizRepositoryMappingJackrabbitNews();
+        // Create New Object
+        // path, language, title, publication date, content string
+         OfbizRepositoryMappingJackrabbitNews orm = new OfbizRepositoryMappingJackrabbitNews("/news/today", "en", "News of Today", new GregorianCalendar(), "Hello World");
         assertNotNull(orm);
-        orm.setPath("/news/today");
-        orm.setLanguage("en");
-        orm.setContent("Hello World");
-        orm.setTitle("News of Today");
 
         repositoryAccess.storeContentObject(orm);
     }
 
     public void testReadRepositoryNewsNode() throws Exception {
-        OfbizRepositoryMappingJackrabbitNews orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today");
+        OfbizRepositoryMappingJackrabbitNews orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today/en");
         assertNotNull(orm);
 
         assertEquals(orm.getContent(), "Hello World");
