@@ -18,11 +18,14 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<test-suite suite-name="shopingcarttests"
+<test-suite suite-name="shoppingcarttests"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/test-suite.xsd">
 
     <test-case case-name="shoppingCart-test">
         <simple-method-test location="component://order/script/org/ofbiz/order/test/ShoppingCartTests.xml" name="testCreateShoppingCart"/>
+    </test-case>
+    <test-case case-name="loadCartFromQuote-test">
+        <simple-method-test location="component://order/script/org/ofbiz/order/test/ShoppingCartTests.xml" name="testLoadCartFromQuote"/>
     </test-case>
 </test-suite>
