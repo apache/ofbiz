@@ -383,11 +383,15 @@ under the License.
             location="component://product/script/org/ofbiz/shipment/issuance/IssuanceServices.xml" invoke="createItemIssuanceRole" auth="true">
         <description>Create ItemIssuanceRole</description>
         <auto-attributes include="pk" mode="IN" optional="false"/>
+        <!-- Will check if OK to change status of shipment, so Shipment PK is needed -->
+        <auto-attributes entity-name="Shipment" include="pk" mode="IN" optional="false"/>
     </service>
     <service name="deleteItemIssuanceRole" default-entity-name="ItemIssuanceRole" engine="simple"
             location="component://product/script/org/ofbiz/shipment/issuance/IssuanceServices.xml" invoke="deleteItemIssuanceRole" auth="true">
         <description>Delete ItemIssuanceRole</description>
         <auto-attributes include="pk" mode="IN" optional="false"/>
+        <!-- Will check if OK to change status of shipment, so Shipment PK is needed -->
+        <auto-attributes entity-name="Shipment" include="pk" mode="IN" optional="false"/>
     </service>
 
     <service name="issueOrderItemToShipment" engine="simple"

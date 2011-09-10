@@ -228,6 +228,7 @@ under the License.
         </if-compare>
 
         <!--<call-simple-method method-name="findCreateIssueShipmentItem"/>-->
+        <set field="shipmentId" from-field="parameters.shipmentId"/>
         <call-simple-method method-name="findCreateItemIssuance"/>
         <call-simple-method method-name="associateIssueRoles"/>
 
@@ -369,6 +370,7 @@ under the License.
             <set from-field="itemIssuanceId" field="itemIssuanceRoleCreate.itemIssuanceId"/>
             <set from-field="userLogin.partyId" field="itemIssuanceRoleCreate.partyId"/>
             <set value="PACKER" field="itemIssuanceRoleCreate.roleTypeId"/>
+            <set from-field="shipmentId" field="itemIssuanceRoleCreate.shipmentId"/>
             <call-service service-name="createItemIssuanceRole" in-map-name="itemIssuanceRoleCreate"/>
         </if-empty>
     </simple-method>
