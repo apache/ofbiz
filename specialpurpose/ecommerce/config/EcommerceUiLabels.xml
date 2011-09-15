@@ -3567,6 +3567,10 @@
         <value xml:lang="pt_BR">Seu cartão de presente recarregado tem</value>
         <value xml:lang="zh">你充值的礼品卡有</value>
     </property>
+    <property key="EcommerceYourNamePhoneAndEmail">
+        <value xml:lang="de">Ihr Name, Telefon und E-Mail</value>
+        <value xml:lang="en">Your Name, Phone Number and E-Mail</value>
+    </property>
     <property key="EcommerceYourPinNumber">
         <value xml:lang="da">Deres PIN kode</value>
         <value xml:lang="de">Ihre Pin-Nummer</value>
