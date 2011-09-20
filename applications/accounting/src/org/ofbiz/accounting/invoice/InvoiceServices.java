@@ -713,8 +713,9 @@ public class InvoiceServices {
             if (prorateTaxes == null) {
                 prorateTaxes = "Y";
             }
-            for (GenericValue adj : taxAdjustments.keySet()) {
-                BigDecimal adjAlreadyInvoicedAmount = taxAdjustments.get(adj);
+            for (Map.Entry<GenericValue, BigDecimal> entry : taxAdjustments.entrySet()) {
+                GenericValue adj = entry.getKey();
+                BigDecimal adjAlreadyInvoicedAmount = entry.getValue();
                 BigDecimal adjAmount = null;
 
                 if ("N".equalsIgnoreCase(prorateTaxes)) {
@@ -1063,23 +1064,47 @@ public class InvoiceServices {
 
     public static Map<String, Object> createInvoicesFromShipment(DispatchContext dctx, Map<String, Object> context) {
         //Delegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         LocalDispatcher dispatcher = dctx.getDispatcher();
         String shipmentId = (String) context.get("shipmentId");
         Locale locale = (Locale) context.get("locale");
         List<String> invoicesCreated = FastList.newInstance();
-
-        Map<String, Object> serviceContext = UtilMisc.toMap("shipmentIds", UtilMisc.toList(shipmentId), "eventDate", context.get("eventDate"), "userLogin", context.get("userLogin"));
-        try {
-            Map<String, Object> result = dispatcher.runSync("createInvoicesFromShipments", serviceContext);
-            invoicesCreated = UtilGenerics.checkList(result.get("invoicesCreated"));
-        } catch (GenericServiceException e) {
-            Debug.logError(e, "Trouble calling createInvoicesFromShipment service; invoice not created for shipment [" + shipmentId + "]", module);
-            return ServiceUtil.returnError(UtilProperties.getMessage(resource,
-                    "AccountingTroubleCallingCreateInvoicesFromShipmentService",
-                    UtilMisc.toMap("shipmentId", shipmentId), locale));
-        }
         Map<String, Object> response = ServiceUtil.returnSuccess();
-        response.put("invoicesCreated", invoicesCreated);
+        List<GenericValue> orderShipments = FastList.newInstance();
+        String invoicePerShipment = null;
+
+        try {
+            orderShipments = delegator.findByAnd("OrderShipment", UtilMisc.toMap("shipmentId", shipmentId));
+        } catch (GenericEntityException e) {
+            return ServiceUtil.returnError(e.getMessage());
+        }
+
+        GenericValue orderShipment = EntityUtil.getFirst(orderShipments);
+        if (orderShipment != null) {
+            String orderId = orderShipment.getString("orderId");
+            try {
+                GenericValue orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+                invoicePerShipment = orderHeader.getString("invoicePerShipment");
+            } catch (GenericEntityException e) {
+                return ServiceUtil.returnError(e.getMessage());
+            }
+        } else {
+            invoicePerShipment = UtilProperties.getPropertyValue("AccountingConfig","create.invoice.per.shipment");
+        }
+
+        if ("Y".equals(invoicePerShipment)) {
+            Map<String, Object> serviceContext = UtilMisc.toMap("shipmentIds", UtilMisc.toList(shipmentId), "eventDate", context.get("eventDate"), "userLogin", context.get("userLogin"));
+            try {
+                Map<String, Object> result = dispatcher.runSync("createInvoicesFromShipments", serviceContext);
+                invoicesCreated = UtilGenerics.checkList(result.get("invoicesCreated"));
+            } catch (GenericServiceException e) {
+                Debug.logError(e, "Trouble calling createInvoicesFromShipment service; invoice not created for shipment [" + shipmentId + "]", module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource,
+                        "AccountingTroubleCallingCreateInvoicesFromShipmentService",
+                        UtilMisc.toMap("shipmentId", shipmentId), locale));
+            }
+            response.put("invoicesCreated", invoicesCreated);
+        }
         return response;
     }
 
@@ -1121,7 +1146,7 @@ public class InvoiceServices {
         // The orders can now be placed in separate groups, each for
         // 1. The group of orders for which payment is already captured. No grouping and action required.
         // 2. The group of orders for which invoice is IN-Process status.
-        Map<String, Object> ordersWithInProcessInvoice = FastMap.newInstance();
+        Map<String, GenericValue> ordersWithInProcessInvoice = FastMap.newInstance();
 
         for (GenericValue itemIssuance : itemIssuances) {
             String orderId = itemIssuance.getString("orderId");
@@ -1157,9 +1182,7 @@ public class InvoiceServices {
         }
 
      // For In-Process invoice, move the status to ready and capture the payment
-        Set<String> invoicesInProcess = ordersWithInProcessInvoice.keySet();
-        for (String orderId : invoicesInProcess) {
-            GenericValue invoice = (GenericValue) ordersWithInProcessInvoice.get(orderId);
+        for (GenericValue invoice : ordersWithInProcessInvoice.values()) {
             String invoiceId = invoice.getString("invoiceId");
             Map<String, Object> setInvoiceStatusResult = FastMap.newInstance();
             try {
@@ -1495,9 +1518,10 @@ public class InvoiceServices {
                 if (totalAdditionalShippingCharges.signum() == 1) {
 
                     // Add an OrderAdjustment to the order for each additional shipping charge
-                    for (GenericValue shipment : additionalShippingCharges.keySet()) {
+                    for (Map.Entry<GenericValue, BigDecimal> entry : additionalShippingCharges.entrySet()) {
+                        GenericValue shipment = entry.getKey();
+                        BigDecimal additionalShippingCharge = entry.getValue();
                         String shipmentId = shipment.getString("shipmentId");
-                        BigDecimal additionalShippingCharge = additionalShippingCharges.get(shipment);
                         Map<String, Object> createOrderAdjustmentContext = FastMap.newInstance();
                         createOrderAdjustmentContext.put("orderId", orderId);
                         createOrderAdjustmentContext.put("orderAdjustmentTypeId", "SHIPPING_CHARGES");
@@ -1793,8 +1817,9 @@ public class InvoiceServices {
             }
 
             // loop through the returnId keys in the map and invoke the createInvoiceFromReturn service for each
-            for (String returnId : itemsShippedGroupedByReturn.keySet()) {
-                List<GenericValue> billItems = itemsShippedGroupedByReturn.get(returnId);
+            for (Map.Entry<String, List<GenericValue>> entry : itemsShippedGroupedByReturn.entrySet()) {
+                String returnId = entry.getKey();
+                List<GenericValue> billItems = entry.getValue();
                 if (Debug.verboseOn()) {
                     Debug.logVerbose("Creating invoice for return [" + returnId + "] with items: " + billItems.toString(), module);
                 }
@@ -2154,8 +2179,7 @@ public class InvoiceServices {
         }
 
         BigDecimal totalPayments = ZERO;
-        for (String paymentId : payments.keySet()) {
-            BigDecimal amount = payments.get(paymentId);
+        for (BigDecimal amount : payments.values()) {
             if (amount == null) amount = ZERO;
             totalPayments = totalPayments.add(amount).setScale(DECIMALS, ROUNDING);
         }
@@ -2353,7 +2377,6 @@ public class InvoiceServices {
         if (amountApplied != null) {
             context.put("amountApplied", amountApplied);
         } else {
-            amountApplied = ZERO;
             context.put("amountApplied", ZERO);
         }
 

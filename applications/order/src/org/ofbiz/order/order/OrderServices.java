@@ -558,6 +558,11 @@ public class OrderServices {
             orderHeader.set("createdBy", userLogin.getString("userLoginId"));
         }
 
+        String invoicePerShipment = UtilProperties.getPropertyValue("AccountingConfig","create.invoice.per.shipment");
+        if (UtilValidate.isNotEmpty(invoicePerShipment)) {
+            orderHeader.set("invoicePerShipment", invoicePerShipment);
+        }
+
         // first try to create the OrderHeader; if this does not fail, continue.
         try {
             delegator.create(orderHeader);
@@ -1125,8 +1130,64 @@ public class OrderServices {
             // store line items, etc so that they will be there for the foreign key checks
             delegator.storeAll(toBeStored);
 
-            // START inventory reservation
             List<String> resErrorMessages = new LinkedList<String>();
+
+            // add a product service to inventory 
+            if (UtilValidate.isNotEmpty(orderItems)) {
+                for (GenericValue orderItem: orderItems) {
+                    String productId = (String) orderItem.get("productId");
+                    GenericValue product = delegator.getRelatedOne("Product", orderItem);
+                    
+                    if("SERVICE_PRODUCT".equals(product.get("productTypeId"))){
+                        String inventoryFacilityId = null;
+                        if ("Y".equals(productStore.getString("oneInventoryFacility"))) {
+                            inventoryFacilityId = productStore.getString("inventoryFacilityId");
+
+                            if (UtilValidate.isEmpty(inventoryFacilityId)) {
+                                Debug.logWarning("ProductStore with id " + productStoreId + " has Y for oneInventoryFacility but inventoryFacilityId is empty, returning false for inventory check", module);
+                            }
+                        } else {
+                            List<GenericValue> productFacilities = null;
+                            GenericValue productFacility = null;
+
+                            try {
+                                productFacilities = delegator.getRelatedCache("ProductFacility", product);
+                            } catch (GenericEntityException e) {
+                                Debug.logWarning(e, "Error invoking getRelatedCache in isCatalogInventoryAvailable", module);
+                            }
+
+                            if (UtilValidate.isNotEmpty(productFacilities)) {
+                                productFacility = EntityUtil.getFirst(productFacilities);
+                                inventoryFacilityId = (String) productFacility.get("facilityId");
+                            }
+                        }
+
+                        Map<String, Object> ripCtx = FastMap.newInstance();
+                        if (UtilValidate.isNotEmpty(inventoryFacilityId) && UtilValidate.isNotEmpty(productId) && orderItem.getBigDecimal("quantity").compareTo(BigDecimal.ZERO) > 0) {
+                            // do something tricky here: run as the "system" user
+                            GenericValue permUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+                            ripCtx.put("productId", productId);
+                            ripCtx.put("facilityId", inventoryFacilityId);
+                            ripCtx.put("inventoryItemTypeId", "SERIALIZED_INV_ITEM");
+                            ripCtx.put("statusId","INV_AVAILABLE");
+                            ripCtx.put("quantityAccepted", orderItem.getBigDecimal("quantity"));
+                            ripCtx.put("quantityRejected", 0.0);
+                            ripCtx.put("userLogin", permUserLogin);
+                            try {
+                                Map<String, Object> ripResult = dispatcher.runSync("receiveInventoryProduct", ripCtx);
+                                if (ServiceUtil.isError(ripResult)) {
+                                    String errMsg = ServiceUtil.getErrorMessage(ripResult);
+                                    resErrorMessages.addAll((Collection<? extends String>) UtilMisc.<String, String>toMap("reasonCode", "ReceiveInventoryServiceError", "description", errMsg));
+                                }
+                            } catch (GenericServiceException e) {
+                                Debug.logWarning(e, "Error invoking receiveInventoryProduct service in createOrder", module);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // START inventory reservation
             try {
                 reserveInventory(delegator, dispatcher, userLogin, locale, orderItemShipGroupInfo, dropShipGroupIds, itemValuesBySeqId,
                         orderTypeId, productStoreId, resErrorMessages);
@@ -1278,6 +1339,105 @@ public class OrderServices {
                                 Map<String, Object> prunResult = dispatcher.runSync("createProductionRunForMktgPkg", inputMap);
                                 if (ServiceUtil.isError(prunResult)) {
                                     Debug.logError(ServiceUtil.getErrorMessage(prunResult) + " for input:" + inputMap, module);
+                                }
+                            }
+                        } catch (GenericServiceException e) {
+                            String errMsg = "Fatal error calling reserveStoreInventory service: " + e.toString();
+                            Debug.logError(e, errMsg, module);
+                            resErrorMessages.add(errMsg);
+                        }
+                    }
+                    
+                    // rent item
+                    if (UtilValidate.isNotEmpty(orderItem.getString("productId")) && "RENTAL_ORDER_ITEM".equals(orderItem.getString("orderItemTypeId"))) {
+                        try {
+                            // get the product of the order item
+                            GenericValue product = orderItem.getRelatedOne("Product");
+                            if (product == null) {
+                                Debug.logError("Error when looking up product in reserveInventory service", module);
+                                resErrorMessages.add("Error when looking up product in reserveInventory service");
+                                continue;
+                            }
+                            
+                            // check product type for rent
+                            String productType = (String) product.get("productTypeId");
+                            if ("ASSET_USAGE_OUT_IN".equals(productType)) {
+                                if (reserveInventory) {
+                                    // for MARKETING_PKG_PICK reserve the components
+                                    if (EntityTypeUtil.hasParentType(delegator, "ProductType", "productTypeId", product.getString("productTypeId"), "parentTypeId", "MARKETING_PKG_PICK")) {
+                                        Map<String, Object> componentsRes = dispatcher.runSync("getAssociatedProducts", UtilMisc.toMap("productId", orderItem.getString("productId"), "type", "PRODUCT_COMPONENT"));
+                                        if (ServiceUtil.isError(componentsRes)) {
+                                            resErrorMessages.add((String)componentsRes.get(ModelService.ERROR_MESSAGE));
+                                            continue;
+                                        } else {
+                                            List<GenericValue> assocProducts = UtilGenerics.checkList(componentsRes.get("assocProducts"));
+                                            Iterator<GenericValue> assocProductsIter = assocProducts.iterator();
+                                            while (assocProductsIter.hasNext()) {
+                                                GenericValue productAssoc = assocProductsIter.next();
+                                                BigDecimal quantityOrd = productAssoc.getBigDecimal("quantity");
+                                                BigDecimal quantityKit = orderItemShipGroupAssoc.getBigDecimal("quantity");
+                                                BigDecimal quantity = quantityOrd.multiply(quantityKit);
+                                                Map<String, Object> reserveInput = new HashMap<String, Object>();
+                                                reserveInput.put("productStoreId", productStoreId);
+                                                reserveInput.put("productId", productAssoc.getString("productIdTo"));
+                                                reserveInput.put("orderId", orderItem.getString("orderId"));
+                                                reserveInput.put("orderItemSeqId", orderItem.getString("orderItemSeqId"));
+                                                reserveInput.put("shipGroupSeqId", orderItemShipGroupAssoc.getString("shipGroupSeqId"));
+                                                reserveInput.put("quantity", quantity);
+                                                reserveInput.put("userLogin", userLogin);
+                                                reserveInput.put("facilityId", shipGroupFacilityId);
+                                                Map<String, Object> reserveResult = dispatcher.runSync("reserveStoreInventory", reserveInput);
+    
+                                                if (ServiceUtil.isError(reserveResult)) {
+                                                    String invErrMsg = "The product ";
+                                                    if (product != null) {
+                                                        invErrMsg += getProductName(product, orderItem);
+                                                    }
+                                                    invErrMsg += " with ID " + orderItem.getString("productId") + " is no longer in stock. Please try reducing the quantity or removing the product from this order.";
+                                                    resErrorMessages.add(invErrMsg);
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        // reserve the product
+                                        Map<String, Object> reserveInput = new HashMap<String, Object>();
+                                        reserveInput.put("productStoreId", productStoreId);
+                                        reserveInput.put("productId", orderItem.getString("productId"));
+                                        reserveInput.put("orderId", orderItem.getString("orderId"));
+                                        reserveInput.put("orderItemSeqId", orderItem.getString("orderItemSeqId"));
+                                        reserveInput.put("shipGroupSeqId", orderItemShipGroupAssoc.getString("shipGroupSeqId"));
+                                        reserveInput.put("facilityId", shipGroupFacilityId);
+                                        // use the quantity from the orderItemShipGroupAssoc, NOT the orderItem, these are reserved by item-group assoc
+                                        reserveInput.put("quantity", orderItemShipGroupAssoc.getBigDecimal("quantity"));
+                                        reserveInput.put("userLogin", userLogin);
+                                        Map<String, Object> reserveResult = dispatcher.runSync("reserveStoreInventory", reserveInput);
+    
+                                        if (ServiceUtil.isError(reserveResult)) {
+                                            String invErrMsg = "The product ";
+                                            if (product != null) {
+                                                invErrMsg += getProductName(product, orderItem);
+                                            }
+                                            invErrMsg += " with ID " + orderItem.getString("productId") + " is no longer in stock. Please try reducing the quantity or removing the product from this order.";
+                                            resErrorMessages.add(invErrMsg);
+                                        }
+                                    }
+                                }
+                                
+                                if (EntityTypeUtil.hasParentType(delegator, "ProductType", "productTypeId", product.getString("productTypeId"), "parentTypeId", "MARKETING_PKG_AUTO")) {
+                                    GenericValue permUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+                                    Map<String, Object> inputMap = new HashMap<String, Object>();
+                                    if (UtilValidate.isNotEmpty(shipGroupFacilityId)) {
+                                        inputMap.put("facilityId", shipGroupFacilityId);
+                                    } else {
+                                        inputMap.put("facilityId", productStore.getString("inventoryFacilityId"));
+                                    }
+                                    inputMap.put("orderId", orderItem.getString("orderId"));
+                                    inputMap.put("orderItemSeqId", orderItem.getString("orderItemSeqId"));
+                                    inputMap.put("userLogin", permUserLogin);
+                                    Map<String, Object> prunResult = dispatcher.runSync("createProductionRunForMktgPkg", inputMap);
+                                    if (ServiceUtil.isError(prunResult)) {
+                                        Debug.logError(ServiceUtil.getErrorMessage(prunResult) + " for input:" + inputMap, module);
+                                    }
                                 }
                             }
                         } catch (GenericServiceException e) {

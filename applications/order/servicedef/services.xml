@@ -521,8 +521,8 @@ under the License.
         <attribute name="orderId" type="String" mode="IN" optional="false"/>
         <attribute name="shippingAmount" type="BigDecimal" mode="OUT" optional="false"/>
     </service>
-    <service name="getOrderStatus" engine="simple" export="true"
-            location="component://order/script/org/ofbiz/order/order/OrderServices.xml" invoke="getOrderStatus" auth="false">
+    <service name="getOrderStatus" engine="simple" location="component://order/script/org/ofbiz/order/order/OrderServices.xml"
+            invoke="getOrderStatus" auth="false">
         <description>Gets the order status</description>
         <attribute name="orderId" type="String" mode="IN" optional="false"/>
         <attribute name="statusId" type="String" mode="OUT" optional="false"/>
@@ -1121,5 +1121,10 @@ under the License.
             location="component://order/script/org/ofbiz/order/order/OrderServices.xml" invoke="createOrderPaymentApplication">
         <description>Create Order Payment Application</description>
         <attribute name="paymentId" type="String" mode="IN" optional="false"/>
+    </service>
+    
+    <service name="createTestOrderRentalProduct" engine="simple" auth="true"
+         location="component://order/script/org/ofbiz/order/test/ShoppingCartTests.xml" invoke="testCreateOrderRentalProduct">
+         <description>Create Test Order Rental of an asset which is shipped from and returned to inventory</description>
     </service>
 </services>

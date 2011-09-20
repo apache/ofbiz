@@ -814,7 +814,7 @@ public class GenericDAO {
         }
 
         List<EntityCondition> conditions = FastList.newInstance();
-        if (whereEntityCondition != null && !whereEntityCondition.isEmpty()) {
+        if (UtilValidate.isNotEmpty(whereEntityCondition)) {
             conditions.add(whereEntityCondition);
         }
 

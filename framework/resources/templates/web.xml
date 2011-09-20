@@ -3,11 +3,11 @@
     <display-name>Open For Business - @component-resource-name@ Component</display-name>
     <description>@component-resource-name@ Component of the Open For Business Project</description>
 
-    <context-param>
+    <!-- context-param>
         <param-name>webSiteId</param-name>
         <param-value>@component-name@Site</param-value>
         <description>A unique ID used to look up the WebSite entity</description>
-    </context-param>
+    </context-param-->
     <context-param>
         <param-name>localDispatcherName</param-name><param-value>@component-name@</param-value>
         <description>A unique name used to identify/recognize the local dispatcher for the Service Engine</description>
@@ -21,11 +21,13 @@
         <param-value>component://@component-name@/widget/CommonScreens.xml</param-value>
         <description>The location of the main-decorator screen to use for this webapp; referred to as a context variable in screen def XML files.</description>
     </context-param>
+    <!--
     <context-param>
         <param-name>widgetVerbose</param-name>
         <param-value>false</param-value>
         <description>Enable widget boundary comments. See org.ofbiz.widget.ModelWidget.widgetBoundaryCommentsEnabled().</description>
     </context-param>
+    -->
     <context-param>
         <param-name>compressHTML</param-name>
         <param-value>false</param-value>

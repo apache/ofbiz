@@ -206,32 +206,32 @@ public class UtilValidate {
 
     /** Check whether string s is empty. */
     public static boolean isEmpty(String s) {
-        return ((s == null) || (s.length() == 0));
+        return (s == null) || s.length() == 0;
     }
 
     /** Check whether collection c is empty. */
     public static <E> boolean isEmpty(Collection<E> c) {
-        return ((c == null) || (c.size() == 0));
+        return (c == null) || c.isEmpty();
     }
 
     /** Check whether map m is empty. */
     public static <K,E> boolean isEmpty(Map<K,E> m) {
-        return ((m == null) || (m.size() == 0));
+        return (m == null) || m.isEmpty();
     }
 
     /** Check whether charsequence c is empty. */
     public static <E> boolean isEmpty(CharSequence c) {
-        return ((c == null) || (c.length() == 0));
+        return (c == null) || c.length() == 0;
     }
 
     /** Check whether string s is NOT empty. */
     public static boolean isNotEmpty(String s) {
-        return ((s != null) && (s.length() > 0));
+        return (s != null) && s.length() > 0;
     }
 
     /** Check whether collection c is NOT empty. */
     public static <E> boolean isNotEmpty(Collection<E> c) {
-        return ((c != null) && (c.size() > 0));
+        return (c != null) && !c.isEmpty();
     }
 
     /** Check whether charsequence c is NOT empty. */
@@ -264,31 +264,31 @@ public class UtilValidate {
     /** Removes all characters which appear in string bag from string s. */
     public static String stripCharsInBag(String s, String bag) {
         int i;
-        String returnString = "";
+        StringBuilder stringBuilder = new StringBuilder("");
 
         // Search through string's characters one by one.
         // If character is not in bag, append to returnString.
         for (i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
 
-            if (bag.indexOf(c) == -1) returnString += c;
+            if (bag.indexOf(c) == -1) stringBuilder.append(c);
         }
-        return returnString;
+        return stringBuilder.toString();
     }
 
     /** Removes all characters which do NOT appear in string bag from string s. */
     public static String stripCharsNotInBag(String s, String bag) {
         int i;
-        String returnString = "";
+        StringBuilder stringBuilder = new StringBuilder("");
 
         // Search through string's characters one by one.
         // If character is in bag, append to returnString.
         for (i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
 
-            if (bag.indexOf(c) != -1) returnString += c;
+            if (bag.indexOf(c) != -1) stringBuilder.append(c);
         }
-        return returnString;
+        return stringBuilder.toString();
     }
 
     /** Removes all whitespace characters from s.

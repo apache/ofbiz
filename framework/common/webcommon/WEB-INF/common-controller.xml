@@ -197,6 +197,11 @@ under the License.
         <response name="success" type="view" value="showHelp"/>
     </request-map>
 
+    <request-map uri="showHelpPublic">
+        <security https="false" auth="false"/>
+        <response name="success" type="view" value="showHelp"/>
+    </request-map>
+
     <request-map uri="authview">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="main"/>

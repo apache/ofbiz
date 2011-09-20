@@ -440,7 +440,7 @@ public class CategoryServices {
                     childOfCats = EntityUtil.filterByDate(delegator.findByAnd("ProdCatalogCategory", UtilMisc.toMap("prodCatalogId", productCategoryId)));
                 }
                 if (UtilValidate.isNotEmpty(childOfCats)) {
-                	
+                        
                     for (GenericValue childOfCat : childOfCats ) {
                         
                         Object catId = null;
@@ -506,12 +506,14 @@ public class CategoryServices {
 
     @SuppressWarnings("unchecked")
     public static void toJsonObjectList(List attrList, HttpServletResponse response){
-        String jsonStr = "[";
+        StringBuilder jsonBuilder = new StringBuilder("[");
         for (Object attrMap : attrList) {
             JSONObject json = JSONObject.fromObject(attrMap);
-            jsonStr = jsonStr + json.toString() + ',';
+            jsonBuilder.append(json.toString());
+            jsonBuilder.append(',');
         }
-        jsonStr = jsonStr + "{ } ]";
+        jsonBuilder.append("{ } ]");
+        String jsonStr = jsonBuilder.toString();
         if (UtilValidate.isEmpty(jsonStr)) {
             Debug.logError("JSON Object was empty; fatal error!",module);
         }
