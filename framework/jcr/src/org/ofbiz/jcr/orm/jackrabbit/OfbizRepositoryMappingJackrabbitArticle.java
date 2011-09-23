@@ -1,5 +1,7 @@
 package org.ofbiz.jcr.orm.jackrabbit;
 
+import java.util.Calendar;
+
 import org.apache.jackrabbit.ocm.mapper.impl.annotation.Field;
 import org.apache.jackrabbit.ocm.mapper.impl.annotation.Node;
 
@@ -10,6 +12,8 @@ public class OfbizRepositoryMappingJackrabbitArticle extends OfbizRepositoryMapp
     String title = null;
     @Field
     String content = null;
+    @Field
+    Calendar pubDate = null;
 
     /**
      *
@@ -17,18 +21,24 @@ public class OfbizRepositoryMappingJackrabbitArticle extends OfbizRepositoryMapp
      * @param language
      * @param title
      * @param content
+     * @param pubDate
      */
-    public OfbizRepositoryMappingJackrabbitArticle(String nodePath, String language, String title, String content) {
+    public OfbizRepositoryMappingJackrabbitArticle(String nodePath, String language, String title, String content, Calendar pubDate) {
         super(nodePath, language);
 
         this.title = title;
         this.content = content;
+        this.pubDate = pubDate;
     }
 
+    /**
+     *
+     */
     public OfbizRepositoryMappingJackrabbitArticle() {
         super();
-        // create an empty object
+        // create empty instance
     }
+
 
     public String getTitle() {
         return title;
@@ -44,5 +54,13 @@ public class OfbizRepositoryMappingJackrabbitArticle extends OfbizRepositoryMapp
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public Calendar getPubDate() {
+        return pubDate;
+    }
+
+    public void setPubDate(Calendar pubDate) {
+        this.pubDate = pubDate;
     }
 }

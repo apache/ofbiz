@@ -18,6 +18,16 @@ public interface ContentReader {
     OfbizRepositoryMapping getContentObject(String nodePath);
 
     /**
+     * Return an OfbizRepositoryMapping Object in the specified language and version from the JCR Repository.
+     *
+     * @param nodePath
+     * @param language
+     * @param version
+     * @return
+     */
+    OfbizRepositoryMapping getContentObject(String nodePath, String version);
+
+    /**
      * Returns a tree of all content nodes (except folders and files) in the repository.
      *
      * @return

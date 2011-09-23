@@ -78,6 +78,15 @@ public class RepositoryAccessJackrabbit implements RepositoryAccess {
         return;
     }
 
+    /**
+     * Returns the Jackrabbit session object.
+     *
+     * @return
+     */
+    public Session getSession() {
+        return this.session;
+    }
+
     /*
      * (non-Javadoc)
      *
@@ -101,6 +110,19 @@ public class RepositoryAccessJackrabbit implements RepositoryAccess {
     public OfbizRepositoryMapping getContentObject(String nodePath) {
         ContentReader contentReader = new ContentReaderJackrabbit(this.ocm);
         return contentReader.getContentObject(nodePath);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.access.RepositoryAccess#getContentObject(java.lang.String,
+     * java.lang.String)
+     */
+    @Override
+    public OfbizRepositoryMapping getContentObject(String nodePath, String version) {
+        ContentReader contentReader = new ContentReaderJackrabbit(this.ocm);
+        return contentReader.getContentObject(nodePath, version);
     }
 
     /*
@@ -161,12 +183,38 @@ public class RepositoryAccessJackrabbit implements RepositoryAccess {
 
     /*
      * (non-Javadoc)
-     * @see org.ofbiz.jcr.access.RepositoryAccess#getVersionList(java.lang.String)
+     *
+     * @see
+     * org.ofbiz.jcr.access.RepositoryAccess#getVersionList(java.lang.String)
      */
     @Override
     public List<String> getVersionList(String nodePath) {
         VersioningManager versioningnManager = new VersioningManagerJackrabbit(this.ocm);
         return versioningnManager.getVersionList(nodePath);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.access.RepositoryAccess#getBaseVersion(java.lang.String)
+     */
+    @Override
+    public String getBaseVersion(String nodePath) {
+        VersioningManager versioningnManager = new VersioningManagerJackrabbit(this.ocm);
+        return versioningnManager.getBaseVersion(nodePath);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.access.RepositoryAccess#getRootVersion(java.lang.String)
+     */
+    @Override
+    public String getRootVersion(String nodePath) {
+        VersioningManager versioningnManager = new VersioningManagerJackrabbit(this.ocm);
+        return versioningnManager.getRootVersion(nodePath);
     }
 
     /*
@@ -182,6 +230,7 @@ public class RepositoryAccessJackrabbit implements RepositoryAccess {
 
     /*
      * (non-Javadoc)
+     *
      * @see org.ofbiz.jcr.access.RepositoryAccess#getJsonFileTree()
      */
     @Override

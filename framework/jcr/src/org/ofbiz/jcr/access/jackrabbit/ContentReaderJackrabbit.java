@@ -2,6 +2,7 @@ package org.ofbiz.jcr.access.jackrabbit;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
+import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 
 import net.sf.json.JSONArray;
@@ -21,9 +22,33 @@ public class ContentReaderJackrabbit implements ContentReader {
         this.ocm = ocm;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.ofbiz.jcr.access.ContentReader#getContentObject(java.lang.String)
+     */
     @Override
     public OfbizRepositoryMapping getContentObject(String nodePath) {
+        Node n = null;
+        try {
+            n = ocm.getSession().getNode(nodePath);
+        } catch (PathNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (RepositoryException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
         return (OfbizRepositoryMapping) ocm.getObject(nodePath);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.ofbiz.jcr.access.ContentReader#getContentObject(java.lang.String, java.lang.String, java.lang.String)
+     */
+    @Override
+    public OfbizRepositoryMapping getContentObject(String nodePath, String version) {
+        return (OfbizRepositoryMapping) ocm.getObject(nodePath, version);
     }
 
     /*

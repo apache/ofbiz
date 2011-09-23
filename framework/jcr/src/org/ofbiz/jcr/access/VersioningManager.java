@@ -14,6 +14,22 @@ public interface VersioningManager {
     public List<String> getVersionList(String nodePath);
 
     /**
+     * Returns the last checked in version.
+     *
+     * @param nodePath
+     * @return
+     */
+    public String getBaseVersion(String nodePath);
+
+    /**
+     * Returns the first checked in version.
+     *
+     * @param nodePath
+     * @return
+     */
+    public String getRootVersion(String nodePath);
+
+    /**
      * Check Out a node from a repository
      *
      * @param nodePath

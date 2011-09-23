@@ -27,6 +27,17 @@ public interface RepositoryAccess {
     OfbizRepositoryMapping getContentObject(String nodePath);
 
     /**
+     * Return an OfbizRepositoryMapping Object in the specified version from the
+     * JCR Repository.
+     *
+     * @param nodePath
+     * @param language
+     * @param version
+     * @return
+     */
+    OfbizRepositoryMapping getContentObject(String nodePath, String version);
+
+    /**
      * Stores the OfbizRepositoryMapping Class in the content repository.
      *
      * @param orm
@@ -60,7 +71,8 @@ public interface RepositoryAccess {
     public void removeContentObject(OfbizRepositoryMapping orm) throws ObjectContentManagerException;
 
     /**
-     * Returns a tree of all content nodes (except folders and files) in the repository.
+     * Returns a tree of all content nodes (except folders and files) in the
+     * repository.
      *
      * @return
      * @throws RepositoryException
@@ -82,4 +94,20 @@ public interface RepositoryAccess {
      * @return
      */
     public List<String> getVersionList(String nodePath);
+
+    /**
+     * Returns the last checked in version.
+     *
+     * @param nodePath
+     * @return
+     */
+    public String getBaseVersion(String nodePath);
+
+    /**
+     * Returns the first checked in version.
+     *
+     * @param nodePath
+     * @return
+     */
+    public String getRootVersion(String nodePath);
 }

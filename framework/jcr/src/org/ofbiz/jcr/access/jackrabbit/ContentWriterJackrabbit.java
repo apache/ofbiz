@@ -11,6 +11,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.jcr.access.ContentWriter;
 import org.ofbiz.jcr.access.VersioningManager;
+import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit.PROPERTY_FIELDS;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 
 public class ContentWriterJackrabbit implements ContentWriter {
@@ -70,40 +71,29 @@ public class ContentWriterJackrabbit implements ContentWriter {
         // We loop only over the sub nodes.
         for (int i = 0; i < (nodeStructure.length - 1); i++) {
             String node = nodeStructure[i];
-            if (UtilValidate.isEmail(node)) {
+            if (UtilValidate.isEmpty(node)) {
                 continue;
             }
 
             try {
                 if (parentNode.hasNode(node)) {
                     parentNode = parentNode.getNode(node);
-                } else {
-                    // create new sub node based on the passed
-                    // OrfbizRepositoryMapping object.
-                    OfbizRepositoryMapping newNode = orm.getClass().newInstance();
-                    String parentNodePath = parentNode.getPath();
-
-                    if (!parentNodePath.endsWith("/")) {
-                        parentNodePath = parentNodePath + "/";
-                    }
-                    newNode.setPath(parentNodePath + node);
-
                     versioningManager.checkOutContentObject(parentNode.getPath());
+                } else {
+                    versioningManager.checkOutContentObject(parentNode.getPath());
+                    Node newNode = parentNode.addNode(node);
+                    newNode.addMixin(PROPERTY_FIELDS.mixInVERSIONING.getType());
+                    if (!ConstantsJackrabbit.ROOTPATH.equals(parentNode.getPath())) {
+                        newNode.setPrimaryType(parentNode.getPrimaryNodeType().getName());
+                    }
 
-                    ocm.insert(newNode);
                     versioningManager.addContentToCheckInList(newNode.getPath());
-                    parentNode = parentNode.getNode(node);
+                    parentNode = newNode;
                 }
             } catch (PathNotFoundException e) {
                 Debug.logError(e, "The new node could not be created: " + orm.getPath(), module);
                 return;
             } catch (RepositoryException e) {
-                Debug.logError(e, "The new node could not be created: " + orm.getPath(), module);
-                return;
-            } catch (InstantiationException e) {
-                Debug.logError(e, "The new node could not be created: " + orm.getPath(), module);
-                return;
-            } catch (IllegalAccessException e) {
                 Debug.logError(e, "The new node could not be created: " + orm.getPath(), module);
                 return;
             }

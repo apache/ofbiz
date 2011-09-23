@@ -51,7 +51,11 @@ public class VersioningManagerJackrabbit implements VersioningManager {
         // write the versions to the array list.
         while (versionIterator.hasNext()) {
             Version version = (Version) versionIterator.next();
-            result.add(version.getName());
+            // filter the root version string, because it's not needed each node
+            // starts with the version number 1.0
+            if (!"jcr:rootVersion".equals(version.getName())) {
+                result.add(version.getName());
+            }
         }
 
         return result;
@@ -73,7 +77,7 @@ public class VersioningManagerJackrabbit implements VersioningManager {
         }
 
         try {
-            if (this.ocm.getSession().nodeExists(nodePath) && !this.ocm.getSession().getWorkspace().getVersionManager().isCheckedOut(nodePath)) {
+            if (this.ocm.getSession().nodeExists(nodePath) && !this.ocm.getSession().getWorkspace().getVersionManager().isCheckedOut(nodePath) && !checkedOutNodeStore.contains(nodePath)) {
                 this.ocm.checkout(nodePath);
                 this.addContentToCheckInList(nodePath);
             }
@@ -139,6 +143,36 @@ public class VersioningManagerJackrabbit implements VersioningManager {
             Debug.logError(e, module);
         }
 
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.access.VersioningManager#getBaseVersion(java.lang.String)
+     */
+    public String getBaseVersion(String nodePath) {
+        try {
+            return ocm.getBaseVersion(nodePath).getName();
+        } catch (VersionException e) {
+            Debug.logError(e, module);
+            return "0.0";
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.access.VersioningManager#getRootVersion(java.lang.String)
+     */
+    public String getRootVersion(String nodePath) {
+        try {
+            return ocm.getRootVersion(nodePath).getName();
+        } catch (VersionException e) {
+            Debug.logError(e, module);
+            return "0.0";
+        }
     }
 
     /**

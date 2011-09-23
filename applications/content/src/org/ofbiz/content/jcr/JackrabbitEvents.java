@@ -30,14 +30,13 @@ import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.content.jcr.helper.JcrArticleHelper;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.RepositoryAccess;
 import org.ofbiz.jcr.access.jackrabbit.RepositoryAccessJackrabbit;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitLocalizedContent;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFile;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFolder;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitNews;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitResource;
 import org.ofbiz.jcr.util.jackrabbit.JcrUtilJackrabbit;
 
@@ -52,30 +51,27 @@ public class JackrabbitEvents {
      * @return
      */
     public static String addNewTextMessageToJcrRepository(HttpServletRequest request, HttpServletResponse response) {
-        GenericValue userLogin = (GenericValue) request.getAttribute("userLogin");
+        GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
+        JcrArticleHelper articleHelper = new JcrArticleHelper(userLogin);
 
-        String nodePath = request.getParameter("path");
+        String contentPath = request.getParameter("path");
         String language = request.getParameter("msgLocale");
         String title = request.getParameter("title");
         Calendar pubDate = new GregorianCalendar(); // TODO
         String content = request.getParameter("message");
 
-        OfbizRepositoryMappingJackrabbitArticle ormArticle = new OfbizRepositoryMappingJackrabbitArticle(nodePath, language, title, content);
-
-        RepositoryAccess repositoryAccess = null;
         try {
-            repositoryAccess = new RepositoryAccessJackrabbit(userLogin);
-            repositoryAccess.storeContentObject(ormArticle);
-        } catch (ObjectContentManagerException ocme) {
-            Debug.logError(ocme, module);
-            request.setAttribute("_ERROR_MESSAGE_", ocme.toString());
+            articleHelper.storeContentInRepository(contentPath, language, title, content, pubDate);
+        } catch (ObjectContentManagerException e) {
+            Debug.logError(e, module);
+            request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
             return "error";
         } catch (ItemExistsException e) {
             Debug.logError(e, module);
-            request.setAttribute("_ERROR_MESSAGE_", e.toString());
+            request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
             return "error";
         } finally {
-            repositoryAccess.closeAccess();
+            articleHelper.closeContentSession();
         }
 
         return "success";
@@ -108,28 +104,30 @@ public class JackrabbitEvents {
      * @return
      */
     public static String getNodeContent(HttpServletRequest request, HttpServletResponse response) {
-        GenericValue userLogin = (GenericValue) request.getAttribute("userLogin");
+        GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
 
-        String node = request.getParameter("path");
+        String contentPath = request.getParameter("path");
 
-        if (UtilValidate.isEmpty(node)) {
+        String version = request.getParameter("versions");
+        String language = request.getParameter("language");
+
+        if (UtilValidate.isEmpty(contentPath)) {
             String msg = "A node path is missing, please pass the path to the node which should be read from the repository."; // TODO
             Debug.logError(msg, module);
             request.setAttribute("_ERROR_MESSAGE_", msg);
             return "error";
         }
 
-        RepositoryAccess repositoryAccess = new RepositoryAccessJackrabbit(userLogin);
+        JcrArticleHelper articleHelper = new JcrArticleHelper(userLogin);
+        OfbizRepositoryMappingJackrabbitArticle ormArticle = articleHelper.readContentFromRepository(contentPath, language);
 
-        List<String> list = repositoryAccess.getVersionList(node);
-
-        OfbizRepositoryMappingJackrabbitArticle ormArticle = (OfbizRepositoryMappingJackrabbitArticle) repositoryAccess.getContentObject(node);
 
         request.setAttribute("contentObject", ormArticle);
         request.setAttribute("path", ormArticle.getPath());
         request.setAttribute("language", ormArticle.getLanguage());
         request.setAttribute("title", ormArticle.getTitle());
-        request.setAttribute("version", list.get(list.size() - 1));
+        request.setAttribute("version", ormArticle.getVersion());
+        request.setAttribute("versionList", articleHelper.getVersionListForCurrentArticle());
         request.setAttribute("createDate", ormArticle.getCreationDate());
         request.setAttribute("content", ormArticle.getContent());
 
@@ -143,7 +141,7 @@ public class JackrabbitEvents {
      * @return
      */
     public static String updateRepositoryData(HttpServletRequest request, HttpServletResponse response) {
-        GenericValue userLogin = (GenericValue) request.getAttribute("userLogin");
+        GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
 
         String path = request.getParameter("path");
 
@@ -169,7 +167,7 @@ public class JackrabbitEvents {
      * @return
      */
     public static String removeRepositoryNode(HttpServletRequest request, HttpServletResponse response) {
-        GenericValue userLogin = (GenericValue) request.getAttribute("userLogin");
+        GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
 
         String path = request.getParameter("path");
 
@@ -197,7 +195,7 @@ public class JackrabbitEvents {
      * @return
      */
     public static String uploadFileData(HttpServletRequest request, HttpServletResponse response) {
-        GenericValue userLogin = (GenericValue) request.getAttribute("userLogin");
+        GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
         ServletFileUpload fu = new ServletFileUpload(new DiskFileItemFactory(10240, FileUtil.getFile("runtime/tmp")));
         List<FileItem> list = null;
         Map<String, String> passedParams = FastMap.newInstance();
@@ -263,7 +261,7 @@ public class JackrabbitEvents {
      * @return
      */
     public static String getRepositoryFileTree(HttpServletRequest request, HttpServletResponse response) {
-        GenericValue userLogin = (GenericValue) request.getAttribute("userLogin");
+        GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
 
         RepositoryAccess repositoryAccess = new RepositoryAccessJackrabbit(userLogin);
         try {
@@ -287,7 +285,7 @@ public class JackrabbitEvents {
      * @return
      */
     public static String getRepositoryDataTree(HttpServletRequest request, HttpServletResponse response) {
-        GenericValue userLogin = (GenericValue) request.getAttribute("userLogin");
+        GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
 
         RepositoryAccess repositoryAccess = new RepositoryAccessJackrabbit(userLogin);
         try {
@@ -304,7 +302,7 @@ public class JackrabbitEvents {
     }
 
     public static String getFileFromRepository(HttpServletRequest request, HttpServletResponse response) {
-        GenericValue userLogin = (GenericValue) request.getAttribute("userLogin");
+        GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
 
         String node = request.getParameter("path");
 

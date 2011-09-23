@@ -85,8 +85,8 @@ under the License.
         <field name="language" title="${uiLabelMap.CommonChooseLanguage}" >
             <drop-down allow-empty="false" current="first-in-list" current-description="${parameters.selectedLanguage}"><list-options key-name="localeId" list-name="parameters.languageList" description="${localeId}"/></drop-down>
         </field>
-        <field name="version" >
-            <drop-down allow-empty="true" current="first-in-list" current-description="${parameters.currentLanguageVersion}"><list-options key-name="version" list-name="parameters.versionList" description="${version}"/></drop-down>
+        <field name="versions" >
+            <drop-down allow-empty="false" current="selected" no-current-selected-key="${parameters.version}"><list-options key-name="versionList" description="${versionList}" list-name="parameters.versionList" list-entry-name="versionList"/></drop-down>
         </field>
         <field name="submit" ><submit/></field>
     </form>
