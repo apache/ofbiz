@@ -779,6 +779,8 @@ public class InvoiceServices {
                 // apply these payments to the invoice if they have any remaining amount to apply
                 Iterator cpi = currentPayments.iterator();
                 while (cpi.hasNext()) {
+                    if ("PMNT_VOID".equals(payment.getString("statusId")) || "PMNT_CANCELLED".equals(payment.getString("statusId")))  continue;
+                    
                     GenericValue payment = (GenericValue) cpi.next();
                     BigDecimal notApplied = PaymentWorker.getPaymentNotApplied(payment);
                     if (notApplied.signum() > 0) {
