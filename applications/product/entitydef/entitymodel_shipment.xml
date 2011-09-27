@@ -93,9 +93,36 @@ under the License.
         <member-entity entity-alias="IISS" entity-name="ItemIssuance"/>
         <member-entity entity-alias="IITM" entity-name="InventoryItem"/>
         <alias-all entity-alias="IISS"/>
-        <alias-all entity-alias="IITM"/>
+        <alias entity-alias="IITM" name="inventoryItemId"/>
+        <alias entity-alias="IITM" name="inventoryItemTypeId"/>
+        <alias entity-alias="IITM" name="productId"/>
+        <alias entity-alias="IITM" name="partyId"/>
+        <alias entity-alias="IITM" name="ownerPartyId"/>
+        <alias entity-alias="IITM" name="statusId"/>
+        <alias entity-alias="IITM" name="datetimeReceived"/>
+        <alias entity-alias="IITM" name="datetimeManufactured"/>
+        <alias entity-alias="IITM" name="expireDate"/>
+        <alias entity-alias="IITM" name="facilityId"/>
+        <alias entity-alias="IITM" name="containerId"/>
+        <alias entity-alias="IITM" name="lotId"/>
+        <alias entity-alias="IITM" name="uomId"/>
+        <alias entity-alias="IITM" name="binNumber"/>
+        <alias entity-alias="IITM" name="locationSeqId"/>
+        <alias entity-alias="IITM" name="comments"/>
+        <alias entity-alias="IITM" name="quantityOnHandTotal"/>
+        <alias entity-alias="IITM" name="availableToPromiseTotal"/>
+        <alias entity-alias="IITM" name="accountingQuantityTotal"/>
+        <alias entity-alias="IITM" name="oldQuantityOnHand"/>
+        <alias entity-alias="IITM" name="oldAvailableToPromise"/>
+        <alias entity-alias="IITM" name="serialNumber"/>
+        <alias entity-alias="IITM" name="softIdentifier"/>
+        <alias entity-alias="IITM" name="activationNumber"/>
+        <alias entity-alias="IITM" name="activationValidThru"/>
+        <alias entity-alias="IITM" name="unitCost"/>
+        <alias entity-alias="IITM" name="currencyUomId"/>
+        <alias entity-alias="IITM" name="inventoryItemFixedAssetId" field="fixedAssetId"/>
         <view-link entity-alias="IISS" rel-entity-alias="IITM">
-        <key-map field-name="inventoryItemId"/>
+          <key-map field-name="inventoryItemId"/>
         </view-link>
     </view-entity>
     <entity entity-name="ItemIssuanceRole"
