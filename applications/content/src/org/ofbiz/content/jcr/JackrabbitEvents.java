@@ -1,6 +1,5 @@
 package org.ofbiz.content.jcr;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
@@ -22,8 +21,6 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
 import org.apache.jackrabbit.ocm.exception.ObjectContentManagerException;
-import org.apache.tika.Tika;
-import org.apache.tika.io.TikaInputStream;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.FileUtil;
 import org.ofbiz.base.util.StringUtil;
@@ -31,13 +28,12 @@ import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.content.jcr.helper.JcrArticleHelper;
+import org.ofbiz.content.jcr.helper.JcrFileHelper;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.RepositoryAccess;
 import org.ofbiz.jcr.access.jackrabbit.RepositoryAccessJackrabbit;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFile;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFolder;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitResource;
 import org.ofbiz.jcr.util.jackrabbit.JcrUtilJackrabbit;
 
 public class JackrabbitEvents {
@@ -120,7 +116,6 @@ public class JackrabbitEvents {
 
         JcrArticleHelper articleHelper = new JcrArticleHelper(userLogin);
         OfbizRepositoryMappingJackrabbitArticle ormArticle = articleHelper.readContentFromRepository(contentPath, language);
-
 
         request.setAttribute("contentObject", ormArticle);
         request.setAttribute("path", ormArticle.getPath());
@@ -221,33 +216,20 @@ public class JackrabbitEvents {
             }
         }
 
-        OfbizRepositoryMappingJackrabbitResource ormResource = new OfbizRepositoryMappingJackrabbitResource();
-        ormResource.setData(new ByteArrayInputStream(file));
-        ormResource.setMimeType(getMimeTypeFromInputStream(new ByteArrayInputStream(file)));
-        ormResource.setLastModified(new GregorianCalendar());
+        JcrFileHelper fileHelper = new JcrFileHelper(userLogin);
 
-        OfbizRepositoryMappingJackrabbitFile ormFile = new OfbizRepositoryMappingJackrabbitFile();
-        ormFile.setCreationDate(new GregorianCalendar());
-        ormFile.setResource(ormResource);
-
-        // ormFile.setPath(passedParams.get("path") + "/" +
-        // passedParams.get("completeFileName"));
-        ormFile.setPath(passedParams.get("completeFileName"));
-        // ormFile.setFileName(passedParams.get("completeFileName"));
-
-        OfbizRepositoryMappingJackrabbitFolder ormFolder = new OfbizRepositoryMappingJackrabbitFolder();
-        ormFolder.addChild(ormFile);
-        ormFolder.setPath(passedParams.get("path"));
-
-        RepositoryAccess repositoryAcces = new RepositoryAccessJackrabbit(userLogin);
         try {
-            repositoryAcces.storeContentObject(ormFolder);
+
+            fileHelper.storeContentInRepository(file, passedParams.get("completeFileName"), passedParams.get("path"));
+
         } catch (ObjectContentManagerException e) {
             Debug.logError(e, module);
             request.setAttribute("_ERROR_MESSAGE_", e.toString());
         } catch (ItemExistsException e) {
             Debug.logError(e, module);
             request.setAttribute("_ERROR_MESSAGE_", e.toString());
+        } finally {
+            fileHelper.closeContentSession();
         }
 
         return "success";
@@ -304,17 +286,17 @@ public class JackrabbitEvents {
     public static String getFileFromRepository(HttpServletRequest request, HttpServletResponse response) {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
 
-        String node = request.getParameter("path");
+        String contentPath = request.getParameter("path");
 
-        if (UtilValidate.isEmpty(node)) {
+        if (UtilValidate.isEmpty(contentPath)) {
             String msg = "A node path is missing, please pass the path to the node which should be read from the repository."; // TODO
             Debug.logError(msg, module);
             request.setAttribute("_ERROR_MESSAGE_", msg);
             return "error";
         }
 
-        RepositoryAccess repositoryAccess = new RepositoryAccessJackrabbit(userLogin);
-        OfbizRepositoryMappingJackrabbitFile file = (OfbizRepositoryMappingJackrabbitFile) repositoryAccess.getContentObject(node);
+        JcrFileHelper fileHelper = new JcrFileHelper(userLogin);
+        OfbizRepositoryMappingJackrabbitFile file = fileHelper.getRepositoryContent(contentPath);
 
         InputStream fileStream = file.getResource().getData();
 
@@ -334,21 +316,4 @@ public class JackrabbitEvents {
         return "success";
     }
 
-    public static String getFileInformation(HttpServletRequest request, HttpServletResponse resposne) {
-
-        return "success";
-    }
-
-    private static String getMimeTypeFromInputStream(InputStream is) {
-        if (!TikaInputStream.isTikaInputStream(is)) {
-            is = TikaInputStream.get(is);
-        }
-        Tika tika = new Tika();
-        try {
-            return tika.detect(is);
-        } catch (IOException e) {
-            Debug.logError(e, module);
-            return "application/octet-stream";
-        }
-    }
 }

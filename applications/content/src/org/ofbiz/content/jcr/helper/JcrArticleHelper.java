@@ -33,11 +33,10 @@ import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle;
  * in the Framework.
  *
  */
-public class JcrArticleHelper {
+public class JcrArticleHelper extends AbstractJcrHelper {
 
     private final static String module = JcrArticleHelper.class.getName();
 
-    private static RepositoryAccessJackrabbit access = null;
     private static OfbizRepositoryMappingJackrabbitArticle article = null;
 
     private static List<String> possibleLocales = null;
@@ -60,22 +59,14 @@ public class JcrArticleHelper {
     }
 
     /**
-     * This will close the connection to the content repository and make sure
-     * that all changes a stored successfully.
-     */
-    public void closeContentSession() {
-        access.closeAccess();
-        access = null;
-    }
-
-    /**
      * Read the article content object from the repository. Throws an Exception
      * when the read content type is not an article content type.
      *
      * @param contentPath
      * @return content article object
+     * @throws
      */
-    public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath) {
+    public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath) throws ClassCastException{
         OfbizRepositoryMapping orm = access.getContentObject(contentPath);
 
         if (orm instanceof OfbizRepositoryMappingJackrabbitArticle) {
@@ -95,8 +86,9 @@ public class JcrArticleHelper {
      *
      * @param contentPath
      * @return content article object
+     * @throws
      */
-    public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath, String language) {
+    public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath, String language) throws ClassCastException{
         contentPath = determineContentLanguagePath(contentPath, language);
         return readContentFromRepository(contentPath);
     }
@@ -111,8 +103,9 @@ public class JcrArticleHelper {
      * @param language
      * @param version
      * @return
+     * @throws
      */
-    public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath, String language, String version) {
+    public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath, String language, String version) throws ClassCastException{
         contentPath = determineContentLanguagePath(contentPath, language);
         OfbizRepositoryMapping orm = access.getContentObject(contentPath, version);
 
