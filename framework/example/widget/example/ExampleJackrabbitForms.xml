@@ -131,13 +131,13 @@ under the License.
         <field name="fileName">
             <display />
         </field>
-        <field name="fileLanguage">
+        <field name="fileMimeType" use-when="parameters.get(&quot;fileMimeType&quot;)!=null">
             <display />
         </field>
-        <field name="fileMimeType">
+        <field name="fileLastModified" use-when="parameters.get(&quot;fileLastModified&quot;)!=null">
             <display />
         </field>
-        <field name="fileDescription">
+        <field name="fileCreationDate">
             <display />
         </field>
     </form>

@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.jcr.Credentials;
 import javax.jcr.Repository;
@@ -37,12 +39,22 @@ import org.apache.jackrabbit.core.nodetype.InvalidNodeTypeDefException;
 import org.apache.jackrabbit.core.nodetype.NodeTypeManagerImpl;
 import org.apache.jackrabbit.core.nodetype.NodeTypeRegistry;
 import org.apache.jackrabbit.core.nodetype.xml.NodeTypeReader;
+import org.apache.jackrabbit.ocm.mapper.Mapper;
+import org.apache.jackrabbit.ocm.mapper.impl.annotation.AnnotationMapperImpl;
 import org.apache.jackrabbit.ocm.nodemanagement.impl.RepositoryUtil;
 import org.apache.jackrabbit.spi.QNodeTypeDefinition;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.jcr.loader.JCRFactory;
+import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle;
+import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFile;
+import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFolder;
+import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitHierarchyNode;
+import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitLocalizedContent;
+import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitNews;
+import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitResource;
+import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitUnstructured;
 import org.w3c.dom.Element;
 
 public class JCRFactoryImpl implements JCRFactory {
@@ -58,6 +70,7 @@ public class JCRFactoryImpl implements JCRFactory {
 
     protected static Repository repository = null;
     protected Session session = null;
+    protected static Mapper mapper = null;
 
     /*
      * (non-Javadoc)
@@ -85,6 +98,20 @@ public class JCRFactoryImpl implements JCRFactory {
         // closed
         repository = new TransientRepository(jackrabbitConfigFile, homeDir);
         createSession();
+
+        List<Class> classes = new ArrayList<Class>();
+        // put this in an xml configuration file
+        // should the ocm classes be loaded in during the container startup?
+        classes.add(OfbizRepositoryMappingJackrabbitUnstructured.class);
+        classes.add(OfbizRepositoryMappingJackrabbitHierarchyNode.class);
+        classes.add(OfbizRepositoryMappingJackrabbitNews.class);
+        classes.add(OfbizRepositoryMappingJackrabbitFile.class);
+        classes.add(OfbizRepositoryMappingJackrabbitFolder.class);
+        classes.add(OfbizRepositoryMappingJackrabbitResource.class);
+        classes.add(OfbizRepositoryMappingJackrabbitLocalizedContent.class);
+        classes.add(OfbizRepositoryMappingJackrabbitArticle.class);
+
+        mapper = new AnnotationMapperImpl(classes);
     }
 
     /*
@@ -155,6 +182,10 @@ public class JCRFactoryImpl implements JCRFactory {
     @Override
     public Repository getRepository() {
         return repository;
+    }
+
+    public static Mapper getMapper() {
+        return mapper;
     }
 
     /*

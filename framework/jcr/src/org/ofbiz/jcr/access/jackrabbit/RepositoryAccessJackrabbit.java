@@ -1,6 +1,5 @@
 package org.ofbiz.jcr.access.jackrabbit;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.jcr.ItemExistsException;
@@ -11,8 +10,6 @@ import net.sf.json.JSONArray;
 
 import org.apache.jackrabbit.ocm.exception.ObjectContentManagerException;
 import org.apache.jackrabbit.ocm.manager.impl.ObjectContentManagerImpl;
-import org.apache.jackrabbit.ocm.mapper.Mapper;
-import org.apache.jackrabbit.ocm.mapper.impl.annotation.AnnotationMapperImpl;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.ContentReader;
@@ -20,15 +17,8 @@ import org.ofbiz.jcr.access.ContentWriter;
 import org.ofbiz.jcr.access.RepositoryAccess;
 import org.ofbiz.jcr.access.VersioningManager;
 import org.ofbiz.jcr.loader.JCRFactoryUtil;
+import org.ofbiz.jcr.loader.jackrabbit.JCRFactoryImpl;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitLocalizedContent;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFile;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFolder;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitHierarchyNode;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitNews;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitResource;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitUnstructured;
 
 public class RepositoryAccessJackrabbit implements RepositoryAccess {
 
@@ -60,20 +50,7 @@ public class RepositoryAccessJackrabbit implements RepositoryAccess {
 
         this.session = session;
 
-        List<Class> classes = new ArrayList<Class>();
-        // put this in an xml configuration file
-        // should the ocm classes be loaded in during the container startup?
-        classes.add(OfbizRepositoryMappingJackrabbitUnstructured.class);
-        classes.add(OfbizRepositoryMappingJackrabbitHierarchyNode.class);
-        classes.add(OfbizRepositoryMappingJackrabbitNews.class);
-        classes.add(OfbizRepositoryMappingJackrabbitFile.class);
-        classes.add(OfbizRepositoryMappingJackrabbitFolder.class);
-        classes.add(OfbizRepositoryMappingJackrabbitResource.class);
-        classes.add(OfbizRepositoryMappingJackrabbitLocalizedContent.class);
-        classes.add(OfbizRepositoryMappingJackrabbitArticle.class);
-
-        Mapper mapper = new AnnotationMapperImpl(classes);
-        this.ocm = new ObjectContentManagerImpl(session, mapper);
+        this.ocm = new ObjectContentManagerImpl(session, JCRFactoryImpl.getMapper());
 
         return;
     }

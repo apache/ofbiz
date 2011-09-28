@@ -16,6 +16,7 @@ import org.ofbiz.jcr.access.jackrabbit.RepositoryAccessJackrabbit;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFile;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFolder;
+import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitHierarchyNode;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitResource;
 
 /**
@@ -34,6 +35,8 @@ public class JcrFileHelper extends AbstractJcrHelper {
 
     private final static String module = JcrFileHelper.class.getName();
 
+    private OfbizRepositoryMappingJackrabbitHierarchyNode hierarchy = null;
+
     public JcrFileHelper(GenericValue userLogin) {
         access = new RepositoryAccessJackrabbit(userLogin);
     }
@@ -46,11 +49,16 @@ public class JcrFileHelper extends AbstractJcrHelper {
      * @return
      * @throws
      */
-    public OfbizRepositoryMappingJackrabbitFile getRepositoryContent(String contentPath) throws ClassCastException {
+    public OfbizRepositoryMappingJackrabbitHierarchyNode getRepositoryContent(String contentPath) throws ClassCastException {
         OfbizRepositoryMapping orm = access.getContentObject(contentPath);
 
         if (orm instanceof OfbizRepositoryMappingJackrabbitFile) {
             OfbizRepositoryMappingJackrabbitFile fileObj = (OfbizRepositoryMappingJackrabbitFile) orm;
+            hierarchy = fileObj;
+            return fileObj;
+        } else if (orm instanceof OfbizRepositoryMappingJackrabbitFolder) {
+            OfbizRepositoryMappingJackrabbitFolder fileObj = (OfbizRepositoryMappingJackrabbitFolder) orm;
+            hierarchy = fileObj;
             return fileObj;
         }
 
@@ -66,11 +74,16 @@ public class JcrFileHelper extends AbstractJcrHelper {
      * @return
      * @throws
      */
-    public OfbizRepositoryMappingJackrabbitFile getRepositoryContent(String contentPath, String version) throws ClassCastException {
+    public OfbizRepositoryMappingJackrabbitHierarchyNode getRepositoryContent(String contentPath, String version) throws ClassCastException {
         OfbizRepositoryMapping orm = access.getContentObject(contentPath, version);
 
         if (orm instanceof OfbizRepositoryMappingJackrabbitFile) {
             OfbizRepositoryMappingJackrabbitFile fileObj = (OfbizRepositoryMappingJackrabbitFile) orm;
+            hierarchy = fileObj;
+            return fileObj;
+        } else if (orm instanceof OfbizRepositoryMappingJackrabbitFolder) {
+            OfbizRepositoryMappingJackrabbitFile fileObj = (OfbizRepositoryMappingJackrabbitFile) orm;
+            hierarchy = fileObj;
             return fileObj;
         }
 
@@ -107,6 +120,22 @@ public class JcrFileHelper extends AbstractJcrHelper {
         ormFolder.setPath(folderPath);
 
         access.storeContentObject(ormFolder);
+    }
+
+    /**
+     * Returns TRUE if the current content is a file content (Type: OfbizRepositoryMappingJackrabbitFile)
+     * @return
+     */
+    public boolean isFileContent() {
+        return (hierarchy instanceof OfbizRepositoryMappingJackrabbitFile);
+    }
+
+    /**
+     * Returns TRUE if the current content is a folder content (Type: OfbizRepositoryMappingJackrabbitFolder)
+     * @return
+     */
+    public boolean isFolderContent() {
+        return (hierarchy instanceof OfbizRepositoryMappingJackrabbitFolder);
     }
 
     private static String getMimeTypeFromInputStream(InputStream is) {

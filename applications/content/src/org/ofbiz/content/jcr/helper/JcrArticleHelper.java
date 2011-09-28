@@ -66,7 +66,7 @@ public class JcrArticleHelper extends AbstractJcrHelper {
      * @return content article object
      * @throws
      */
-    public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath) throws ClassCastException{
+    public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath) throws ClassCastException {
         OfbizRepositoryMapping orm = access.getContentObject(contentPath);
 
         if (orm instanceof OfbizRepositoryMappingJackrabbitArticle) {
@@ -88,7 +88,7 @@ public class JcrArticleHelper extends AbstractJcrHelper {
      * @return content article object
      * @throws
      */
-    public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath, String language) throws ClassCastException{
+    public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath, String language) throws ClassCastException {
         contentPath = determineContentLanguagePath(contentPath, language);
         return readContentFromRepository(contentPath);
     }
@@ -105,13 +105,14 @@ public class JcrArticleHelper extends AbstractJcrHelper {
      * @return
      * @throws
      */
-    public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath, String language, String version) throws ClassCastException{
+    public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath, String language, String version) throws ClassCastException {
         contentPath = determineContentLanguagePath(contentPath, language);
         OfbizRepositoryMapping orm = access.getContentObject(contentPath, version);
 
         if (orm instanceof OfbizRepositoryMappingJackrabbitArticle) {
             article = (OfbizRepositoryMappingJackrabbitArticle) orm;
             article.setVersion(version);
+            article.setPath(contentPath); // the content path must be manipulated because, the jackrabbit orm returns a full blown path with version information.
             return article;
         } else {
             throw new ClassCastException("The content object for the path: " + contentPath + " is not an article content object. This Helper can only handle content objects with the type: " + OfbizRepositoryMappingJackrabbitArticle.class.getName());
@@ -125,11 +126,11 @@ public class JcrArticleHelper extends AbstractJcrHelper {
      * @param language
      * @param title
      * @param content
-     * @param pubDate
+     * @param publicationDate
      * @throws ObjectContentManagerException
      * @throws ItemExistsException
      */
-    public void storeContentInRepository(String contentPath, String language, String title, String content, Calendar pubDate) throws ObjectContentManagerException, ItemExistsException {
+    public void storeContentInRepository(String contentPath, String language, String title, String content, Calendar publicationDate) throws ObjectContentManagerException, ItemExistsException {
         if (UtilValidate.isEmpty(language)) {
             language = determindeTheDefaultLanguage();
         }
@@ -145,10 +146,28 @@ public class JcrArticleHelper extends AbstractJcrHelper {
         }
 
         // construct the content article object
-        article = new OfbizRepositoryMappingJackrabbitArticle(contentPath, language, title, content, pubDate);
+        article = new OfbizRepositoryMappingJackrabbitArticle(contentPath, language, title, content, publicationDate);
 
         access.storeContentObject(article);
 
+    }
+
+    /**
+     * Update an existing content article object in the repository.
+     *
+     * @param updatedArticle
+     * @throws RepositoryException
+     * @throws ObjectContentManagerException
+     */
+    public void updateContentInRepository(OfbizRepositoryMappingJackrabbitArticle updatedArticle) throws RepositoryException, ObjectContentManagerException {
+        // if the item not already exist create it.
+        if (!access.getSession().itemExists(updatedArticle.getPath())) {
+            Debug.logWarning("This content object with the path: " + updatedArticle.getPath() + " doesn't exist in the repository. It will now created.", module);
+            this.storeContentInRepository(updatedArticle.getPath(), updatedArticle.getLanguage(), updatedArticle.getTitle(), updatedArticle.getContent(), updatedArticle.getPubDate());
+            return;
+        }
+
+        access.updateContentObject(updatedArticle);
     }
 
     /**

@@ -24,16 +24,21 @@ import org.apache.jackrabbit.ocm.exception.ObjectContentManagerException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.FileUtil;
 import org.ofbiz.base.util.StringUtil;
+import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.content.jcr.helper.JcrArticleHelper;
+import org.ofbiz.content.jcr.helper.JcrContentHelper;
 import org.ofbiz.content.jcr.helper.JcrFileHelper;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.RepositoryAccess;
 import org.ofbiz.jcr.access.jackrabbit.RepositoryAccessJackrabbit;
+import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFile;
+import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFolder;
+import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitHierarchyNode;
 import org.ofbiz.jcr.util.jackrabbit.JcrUtilJackrabbit;
 
 public class JackrabbitEvents {
@@ -115,9 +120,13 @@ public class JackrabbitEvents {
         }
 
         JcrArticleHelper articleHelper = new JcrArticleHelper(userLogin);
-        OfbizRepositoryMappingJackrabbitArticle ormArticle = articleHelper.readContentFromRepository(contentPath, language);
+        OfbizRepositoryMappingJackrabbitArticle ormArticle = null;
+        if (UtilValidate.isEmpty(version)) {
+            ormArticle = articleHelper.readContentFromRepository(contentPath, language);
+        } else {
+            ormArticle = articleHelper.readContentFromRepository(contentPath, language, version);
+        }
 
-        request.setAttribute("contentObject", ormArticle);
         request.setAttribute("path", ormArticle.getPath());
         request.setAttribute("language", ormArticle.getLanguage());
         request.setAttribute("title", ormArticle.getTitle());
@@ -138,10 +147,10 @@ public class JackrabbitEvents {
     public static String updateRepositoryData(HttpServletRequest request, HttpServletResponse response) {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
 
-        String path = request.getParameter("path");
+        String contentPath = request.getParameter("path");
+        JcrArticleHelper articleHelper = new JcrArticleHelper(userLogin);
 
-        RepositoryAccess repositoryAccess = new RepositoryAccessJackrabbit(userLogin);
-        OfbizRepositoryMappingJackrabbitArticle ormArticle = (OfbizRepositoryMappingJackrabbitArticle) repositoryAccess.getContentObject(path);
+        OfbizRepositoryMappingJackrabbitArticle ormArticle = articleHelper.readContentFromRepository(contentPath);
 
         // news.setLanguage(request.getParameter("language"));
         ormArticle.setTitle(request.getParameter("title"));
@@ -149,8 +158,17 @@ public class JackrabbitEvents {
         // request.getParameter("pubDate")
         // request.getParameter("createDate")
 
-        repositoryAccess.updateContentObject(ormArticle);
-        repositoryAccess.closeAccess();
+        try {
+            articleHelper.updateContentInRepository(ormArticle);
+        } catch (ObjectContentManagerException e) {
+            Debug.logError(e, module);
+            request.setAttribute("_ERROR_MESSAGE_", e.toString());
+        } catch (RepositoryException e) {
+            Debug.logError(e, module);
+            request.setAttribute("_ERROR_MESSAGE_", e.toString());
+        } finally {
+            articleHelper.closeContentSession();
+        }
 
         return "success";
     }
@@ -164,21 +182,10 @@ public class JackrabbitEvents {
     public static String removeRepositoryNode(HttpServletRequest request, HttpServletResponse response) {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
 
-        String path = request.getParameter("path");
+        String contentPath = request.getParameter("path");
 
-        RepositoryAccess repositoryAccess = new RepositoryAccessJackrabbit(userLogin);
-        repositoryAccess.removeContentObject(path);
-        repositoryAccess.closeAccess();
-        return "success";
-    }
-
-    /**
-     *
-     * @param request
-     * @param response
-     * @return
-     */
-    public static String cleanJcrRepository(HttpServletRequest request, HttpServletResponse response) {
+        JcrContentHelper helper = new JcrContentHelper(userLogin);
+        helper.removeContentObject(contentPath);
 
         return "success";
     }
@@ -296,21 +303,48 @@ public class JackrabbitEvents {
         }
 
         JcrFileHelper fileHelper = new JcrFileHelper(userLogin);
-        OfbizRepositoryMappingJackrabbitFile file = fileHelper.getRepositoryContent(contentPath);
+        OfbizRepositoryMappingJackrabbitHierarchyNode orm = fileHelper.getRepositoryContent(contentPath);
 
-        InputStream fileStream = file.getResource().getData();
+        if (fileHelper.isFileContent()) {
+            OfbizRepositoryMappingJackrabbitFile file = (OfbizRepositoryMappingJackrabbitFile) orm;
+            InputStream fileStream = file.getResource().getData();
 
-        String fileName = file.getPath();
-        if (fileName.indexOf("/") != -1) {
-            fileName = fileName.substring(fileName.indexOf("/") + 1);
+            String fileName = file.getPath();
+            if (fileName.indexOf("/") != -1) {
+                fileName = fileName.substring(fileName.indexOf("/") + 1);
+            }
+
+            try {
+                UtilHttp.streamContentToBrowser(response, IOUtils.toByteArray(fileStream), file.getResource().getMimeType(), fileName);
+            } catch (IOException e) {
+                Debug.logError(e, module);
+                request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
+                return "error";
+            }
+        } else {
+            Debug.logWarning("This content is no file content, the content is from the type: " + orm.getClass().getName(), module);
         }
+        return "success";
+    }
 
-        try {
-            UtilHttp.streamContentToBrowser(response, IOUtils.toByteArray(fileStream), file.getResource().getMimeType(), fileName);
-        } catch (IOException e) {
-            Debug.logError(e, module);
-            request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
-            return "error";
+    public static String getFileInformation(HttpServletRequest request, HttpServletResponse response) {
+        GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
+        String contentPath = request.getParameter("path");
+
+        JcrFileHelper fileHelper = new JcrFileHelper(userLogin);
+        OfbizRepositoryMapping orm = fileHelper.getRepositoryContent(contentPath);
+
+        // Here we can differentiate between a file or folder content
+        if (fileHelper.isFileContent()) {
+            OfbizRepositoryMappingJackrabbitFile file = (OfbizRepositoryMappingJackrabbitFile) orm;
+            request.setAttribute("fileName", file.getPath());
+            request.setAttribute("fileLastModified", file.getResource().getLastModified().getTime());
+            request.setAttribute("fileMimeType", file.getResource().getMimeType());
+            request.setAttribute("fileCreationDate", file.getCreationDate().getTime());
+        } else if (fileHelper.isFolderContent()) {
+            OfbizRepositoryMappingJackrabbitFolder folder = (OfbizRepositoryMappingJackrabbitFolder) orm;
+            request.setAttribute("fileName", folder.getPath());
+            request.setAttribute("fileCreationDate", folder.getCreationDate().getTime());
         }
 
         return "success";

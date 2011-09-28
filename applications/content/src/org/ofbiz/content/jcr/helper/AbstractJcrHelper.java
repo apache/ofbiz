@@ -14,4 +14,13 @@ public abstract class AbstractJcrHelper {
         access.closeAccess();
         access = null;
     }
+
+    /**
+     * Remove the passed node from the content repository.
+     *
+     * @param contentPath
+     */
+    public void removeContentObject(String contentPath) {
+        access.removeContentObject(contentPath);
+    }
 }

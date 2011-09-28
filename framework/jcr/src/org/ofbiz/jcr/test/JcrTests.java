@@ -68,7 +68,7 @@ public class JcrTests extends OFBizTestCase {
     }
 
     public void testReadRepositoryNewsNode() throws Exception {
-        OfbizRepositoryMappingJackrabbitNews orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today/en");
+        OfbizRepositoryMappingJackrabbitNews orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today");
         assertNotNull(orm);
 
         assertEquals(orm.getContent(), "Hello World");
@@ -80,6 +80,17 @@ public class JcrTests extends OFBizTestCase {
 
         orm.setContent("Hello Visitors");
         repositoryAccess.updateContentObject(orm);
+    }
+
+    public void testVersionning() throws Exception {
+        assertEquals("1.1", repositoryAccess.getBaseVersion("/news/today"));
+
+        OfbizRepositoryMappingJackrabbitNews orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today");
+        orm.setContent("May the force be with you!");
+        repositoryAccess.updateContentObject(orm);
+
+        orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today");
+        assertEquals("1.2", repositoryAccess.getBaseVersion("/news/today"));
     }
 
     public void testRemoveRepositoryNewsNode() throws Exception {

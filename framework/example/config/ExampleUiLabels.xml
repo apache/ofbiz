@@ -858,8 +858,8 @@
         <value xml:lang="en">Version of the base content node</value>
     </property>
     <property key="ExampelsJackrabbitOpenFile">
-        <value xml:lang="de">Datei Informationen öffnen</value>
-        <value xml:lang="en">Open file information</value>
+        <value xml:lang="de">Informationen öffnen</value>
+        <value xml:lang="en">Open information</value>
     </property>
 
 </resource>
