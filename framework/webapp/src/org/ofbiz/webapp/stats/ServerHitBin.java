@@ -111,10 +111,9 @@ public class ServerHitBin {
     }
 
     protected static void countHit(String baseId, int type, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin, boolean isOriginal) {
-        String delegatorName = (String) request.getSession().getAttribute("delegatorName");
-        Delegator delegator = null;
-        if (UtilValidate.isNotEmpty(delegatorName)) {
-            delegator = DelegatorFactory.getDelegator(delegatorName);
+        Delegator delegator = (Delegator)request.getAttribute("delegator");
+        if (delegator == null){
+            delegator = DelegatorFactory.getDelegator("default");
         }
         if (delegator == null) {
             throw new IllegalArgumentException("In countHit could not find a delegator or delegatorName to work from");
