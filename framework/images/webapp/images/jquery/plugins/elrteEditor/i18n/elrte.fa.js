@@ -1,10 +1,12 @@
 /**
- * Persian translation
+ * Persian (farsi) translation
  * @author Saleh soozanchi <info@soozanchi.ir>
  * @version 2010-09-18
  */
 (function($) {
 elRTE.prototype.i18Messages.fa = {
+	'_translator'    : 'Saleh soozanchi &lt;info@soozanchi.ir&gt;',
+	'_translation'   : 'Persian (farsi) translation',
 	'Editor' : 'ویراستار',
 	'Source' : 'کد منبع',
 	// Panel Name

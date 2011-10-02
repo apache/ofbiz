@@ -5,6 +5,8 @@
  */
 (function($) {
 elRTE.prototype.i18Messages.es = {
+	'_translator'    : 'Ricardo Obregón &lt;robregonm@gmail.com&gt;',
+	'_translation'   : 'Spanish translation',
 	'Editor' : 'Editor',
 	'Source' : 'Código Fuente',
 	// Panel Name

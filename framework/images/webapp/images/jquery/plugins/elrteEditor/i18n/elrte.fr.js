@@ -5,6 +5,8 @@
  */
 (function($) {
 elRTE.prototype.i18Messages.fr = {
+	'_translator'    : 'Francois Mazerolle &lt;fmaz008@gmail.com&gt;',
+	'_translation'   : 'French translation',
 	'Editor' : 'Editeur',
 	'Source' : 'Code Source',
 	// Panel Name

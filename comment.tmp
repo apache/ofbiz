@@ -1,0 +1,9 @@
+"Applied fix from trunk for revision: 1178175" 
+------------------------------------------------------------------------
+r1178175 | jleroux | 2011-10-02 12:42:39 +0200 (dim., 02 oct. 2011) | 3 lines
+
+Closes "i18n for elrte editor" https://issues.apache.org/jira/browse/OFBIZ-4051
+
+Fixes the i18n elrte Editor issue in Freemarker templates (Content and Ebay)
+------------------------------------------------------------------------
+

@@ -5,6 +5,8 @@
  */
 (function($) {
 elRTE.prototype.i18Messages.lv = {
+	'_translator'    : 'Uldis Plotiņš &lt;uldis.plotins@gmail.com&gt;',
+	'_translation'   : 'Latvian translation',
 	'Editor' : 'Redaktors',
 	'Source' : 'Izejas kods',
 	// panel names

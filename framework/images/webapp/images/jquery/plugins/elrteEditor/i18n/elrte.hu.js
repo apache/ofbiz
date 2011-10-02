@@ -5,6 +5,8 @@
  */
  (function($) {
 elRTE.prototype.i18Messages.hu = {
+    '_translator'    : 'Viktor Tamas &lt;tamas.viktor@totalstudio.hu&gt;',
+    '_translation'   : 'Hungarian translation',
     'Editor' : 'Szerkesztő',
     'Source' : 'Forrás',
     // названия панелей

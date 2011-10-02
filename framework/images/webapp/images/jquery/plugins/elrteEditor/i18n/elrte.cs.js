@@ -5,6 +5,8 @@
  */
 (function($) {
 elRTE.prototype.i18Messages.cs = {
+	'_translator'    : 'Michal Marek &lt;mich.marek@gmail.com&gt;',
+	'_translation'   : 'Czech translation',
 	'Editor' : 'Editor',
 	'Source' : 'Kód',
 	// Panel Name

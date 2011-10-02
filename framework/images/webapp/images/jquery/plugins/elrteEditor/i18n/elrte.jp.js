@@ -5,6 +5,8 @@
  */
 (function($) {
 elRTE.prototype.i18Messages.jp = {
+	'_translator'    : 'Tomoaki Yoshida &lt;info@yoshida-studio.jp&gt;',
+	'_translation'   : 'Japanese translation',
 	'Editor' : 'エディター',
 	'Source' : 'ソース',
 	// Panel Name

@@ -5,6 +5,8 @@
  */
 (function($) {
 elRTE.prototype.i18Messages.ru = {
+	'_translator'    : 'Dmitry (dio) Levashov &lt;dio@std42.ru&gt;',
+	'_translation'   : 'Русский перевод',
 	'Editor' : 'Редактор',
 	'Source' : 'Исходник',
 	// названия панелей

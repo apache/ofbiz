@@ -5,6 +5,8 @@
  */
 (function($) {
 elRTE.prototype.i18Messages.de = {
+	'_translator'    : 'Vasiliy Razumnyh &lt;rvn@std42.ru&gt;',
+	'_translation'   : 'German translation',
 	'Editor' : 'Editor',
 	'Source' : 'Quellcode',
 	// Panel Name

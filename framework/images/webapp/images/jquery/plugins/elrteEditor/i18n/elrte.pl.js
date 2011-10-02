@@ -5,6 +5,8 @@
  */
 (function($) {
 elRTE.prototype.i18Messages.pl = {
+	'_translator'    : 'Andrzej Borowicz',
+	'_translation'   : 'Polish translation',
 	'Editor' : 'Edytor',
 	'Source' : 'Kod źródłowy',
 	// Panel Name

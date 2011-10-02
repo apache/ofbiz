@@ -5,6 +5,8 @@
  */
 (function($) {
 elRTE.prototype.i18Messages.it = {
+	'_translator'    : 'Ugo Punzolo &lt;sadraczerouno@gmail.com&gt;',
+	'_translation'   : 'Italian translation',
 	'Editor' : 'Editor',
 	'Source' : 'Codice Sorgente',
 	// Panel Name

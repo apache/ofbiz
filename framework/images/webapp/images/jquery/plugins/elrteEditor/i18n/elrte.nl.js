@@ -6,6 +6,8 @@
  */
 (function($) {
 elRTE.prototype.i18Messages.nl = {
+	'_translator'    : 'Kurt Aerts',
+	'_translation'   : 'Dutch translation',
 	'Editor' : 'Editor',
 	'Source' : 'Broncode',
 // Panel names

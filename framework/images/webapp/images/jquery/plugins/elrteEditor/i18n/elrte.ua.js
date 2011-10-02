@@ -5,6 +5,8 @@
  */
 (function($) {
 elRTE.prototype.i18Messages.ua = {
+	'_translator'    : 'Artem Vasilyev',
+	'_translation'   : 'Ukranian translation',
 	'Editor' : 'Редактор',
 	'Source' : 'Джерело',
 // Назви панелей
