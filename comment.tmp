@@ -1,9 +1,12 @@
-"Applied fix from trunk for revision: 1178175" 
+"Applied fix from trunk for revision: 1163533" 
 ------------------------------------------------------------------------
-r1178175 | jleroux | 2011-10-02 12:42:39 +0200 (dim., 02 oct. 2011) | 3 lines
+r1163533 | sascharodekamp | 2011-08-31 10:57:29 +0200 (mer., 31 août 2011) | 6 lines
 
-Closes "i18n for elrte editor" https://issues.apache.org/jira/browse/OFBIZ-4051
+A patch from Leon to get the correct "jquery.ui.datepicker-xx-XX.js" (https://issues.apache.org/jira/browse/OFBIZ-4377)
 
-Fixes the i18n elrte Editor issue in Freemarker templates (Content and Ebay)
+It uses "locale" (e.g. zh_TW) to form the jquery.ui.datepicker file name in method JsLanguageFileMappingCreator.createJsLanguageFileMapping, but jquery uses dash ("-") instead of underscore ("_") to concat the language code and country code, such as zh-TW vs. zh_TW.
+
+A very trivial update to JsLanguageFileMappingCreator.java, and after that, update the JsLanguageFileMapping.java file by running service "createJsLanguageFileMapping". In attached, contains both of patches to these two files.
+
 ------------------------------------------------------------------------
 
