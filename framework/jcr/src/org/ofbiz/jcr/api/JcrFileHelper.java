@@ -1,4 +1,4 @@
-package org.ofbiz.content.jcr.helper;
+package org.ofbiz.jcr.api;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package org.ofbiz.content.jcr.helper;
+package org.ofbiz.jcr.api;
 
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.jackrabbit.RepositoryAccessJackrabbit;
