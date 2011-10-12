@@ -6,7 +6,6 @@ import net.sf.json.JSONArray;
 
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 
-
 public interface ContentReader {
 
     /**
@@ -18,7 +17,10 @@ public interface ContentReader {
     OfbizRepositoryMapping getContentObject(String nodePath);
 
     /**
-     * Return an OfbizRepositoryMapping Object in the specified language and version from the JCR Repository.
+     * Return an OfbizRepositoryMapping Object in the specified language and
+     * version from the JCR Repository. The Method checks if the requested
+     * version for this node exist. If not the latest version of the node will
+     * be returned.
      *
      * @param nodePath
      * @param language
@@ -28,7 +30,8 @@ public interface ContentReader {
     OfbizRepositoryMapping getContentObject(String nodePath, String version);
 
     /**
-     * Returns a tree of all content nodes (except folders and files) in the repository.
+     * Returns a tree of all content nodes (except folders and files) in the
+     * repository.
      *
      * @return
      * @throws RepositoryException

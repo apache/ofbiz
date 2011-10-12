@@ -8,6 +8,7 @@ import java.util.Locale;
 import javax.jcr.ItemExistsException;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
+import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
@@ -112,7 +113,10 @@ public class JcrArticleHelper extends AbstractJcrHelper {
         if (orm instanceof OfbizRepositoryMappingJackrabbitArticle) {
             article = (OfbizRepositoryMappingJackrabbitArticle) orm;
             article.setVersion(version);
-            article.setPath(contentPath); // the content path must be manipulated because, the jackrabbit orm returns a full blown path with version information.
+            article.setPath(contentPath); // the content path must be
+                                          // manipulated because, the jackrabbit
+                                          // orm returns a full blown path with
+                                          // version information.
             return article;
         } else {
             throw new ClassCastException("The content object for the path: " + contentPath + " is not an article content object. This Helper can only handle content objects with the type: " + OfbizRepositoryMappingJackrabbitArticle.class.getName());
@@ -173,10 +177,41 @@ public class JcrArticleHelper extends AbstractJcrHelper {
             versions = access.getVersionList(article.getPath());
         } else {
             Debug.logWarning("No Article is loaded from the repository, please load an article first before requesting the version list.", module);
-            versions = new ArrayList<String>();
+            versions = new ArrayList<String>(1);
         }
 
         return versions;
+    }
+
+    public List<String> getAvailableLanguageList() {
+        List<String> languages = null;
+
+        if (article != null && article.getLocalized()) {
+            Session session = access.getSession();
+
+            try {
+                languages = new ArrayList<String>();
+                Node node = session.getNode(article.getPath()).getParent();
+                NodeIterator nodes = node.getNodes();
+                while (nodes.hasNext()) {
+                    String l = nodes.nextNode().getPath();
+                    languages.add(l.substring(l.lastIndexOf("/") + 1));
+                }
+
+            } catch (PathNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (RepositoryException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+        } else {
+            Debug.logWarning("No Article is loaded from the repository, please load an article first before requesting the version list.", module);
+            languages = new ArrayList<String>(1);
+        }
+
+        return languages;
     }
 
     /**

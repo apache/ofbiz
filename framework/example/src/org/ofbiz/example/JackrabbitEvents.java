@@ -1,4 +1,4 @@
-package org.ofbiz.content.jcr;
+package org.ofbiz.example;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -131,6 +131,7 @@ public class JackrabbitEvents {
         request.setAttribute("title", ormArticle.getTitle());
         request.setAttribute("version", ormArticle.getVersion());
         request.setAttribute("versionList", articleHelper.getVersionListForCurrentArticle());
+        request.setAttribute("languageList", articleHelper.getAvailableLanguageList());
         request.setAttribute("createDate", ormArticle.getCreationDate());
         request.setAttribute("content", ormArticle.getContent());
 

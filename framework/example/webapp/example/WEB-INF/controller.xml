@@ -249,37 +249,37 @@ under the License.
     </request-map>
     <request-map uri="StoreNewRepositoryData">
         <security auth="true" https="true" />
-        <event type="java" path="org.ofbiz.content.jcr.JackrabbitEvents" invoke="addNewTextMessageToJcrRepository" />
+        <event type="java" path="org.ofbiz.example.JackrabbitEvents" invoke="addNewTextMessageToJcrRepository" />
         <response name="success" type="request" value="ExampleJackrabbitShowContentData" />
         <response name="error" type="view" value="ExampleJackrabbitAddData" />
     </request-map>
     <request-map uri="ExampleJackrabbitScanRepositoryStructure">
         <security auth="true" https="true" />
-        <event type="java" path="org.ofbiz.content.jcr.JackrabbitEvents" invoke="scanRepositoryStructure"/>
+        <event type="java" path="org.ofbiz.example.JackrabbitEvents" invoke="scanRepositoryStructure"/>
         <response name="success" type="view" value="ExampleJackrabbitScanRepositoryStructure" />
         <response name="error" type="view" value="ExampleJackrabbitScanRepositoryStructure" />
     </request-map>
     <request-map uri="EditRepositoryContent">
         <security auth="true" https="true" />
-        <event type="java" path="org.ofbiz.content.jcr.JackrabbitEvents" invoke="getNodeContent"/>
+        <event type="java" path="org.ofbiz.example.JackrabbitEvents" invoke="getNodeContent"/>
         <response name="success" type="view" value="ExampleJackrabbitEditRepositoryContent" />
         <response name="error" type="view" value="ExampleJackrabbitShowContentData" />
     </request-map>
     <request-map uri="UpdateRepositoryData">
         <security auth="true" https="true" />
-        <event type="java" path="org.ofbiz.content.jcr.JackrabbitEvents" invoke="updateRepositoryData"/>
+        <event type="java" path="org.ofbiz.example.JackrabbitEvents" invoke="updateRepositoryData"/>
         <response name="success" type="request" value="EditRepositoryContent" />
         <response name="error" type="request" value="EditRepositoryContent" />
     </request-map>
     <request-map uri="RemoveRepositoryNode">
         <security auth="true" https="true" />
-        <event type="java" path="org.ofbiz.content.jcr.JackrabbitEvents" invoke="removeRepositoryNode"/>
+        <event type="java" path="org.ofbiz.example.JackrabbitEvents" invoke="removeRepositoryNode"/>
         <response name="success" type="request" value="ExampleJackrabbitShowContentData" />
         <response name="error" type="request" value="ExampleJackrabbitShowContentData" />
     </request-map>
     <request-map uri="RemoveRepositoryFile">
         <security auth="true" https="true" />
-        <event type="java" path="org.ofbiz.content.jcr.JackrabbitEvents" invoke="removeRepositoryNode"/>
+        <event type="java" path="org.ofbiz.example.JackrabbitEvents" invoke="removeRepositoryNode"/>
         <response name="success" type="request" value="ExampleJackrabbitShowUploadedFiles" />
         <response name="error" type="request" value="ExampleJackrabbitShowUploadedFiles" />
     </request-map>
@@ -290,31 +290,31 @@ under the License.
     </request-map>
     <request-map uri="StoreNewRepositoryFileData">
         <security auth="true" https="true" />
-        <event type="java" path="org.ofbiz.content.jcr.JackrabbitEvents" invoke="uploadFileData"/>
+        <event type="java" path="org.ofbiz.example.JackrabbitEvents" invoke="uploadFileData"/>
         <response name="success" type="request" value="ExampleJackrabbitShowUploadedFiles" />
         <response name="error" type="view" value="ExampleJackrabbitUploadFileData" />
     </request-map>
     <request-map uri="ExampleJackrabbitShowUploadedFiles">
         <security auth="true" https="true" />
-        <event type="java" path="org.ofbiz.content.jcr.JackrabbitEvents" invoke="getRepositoryFileTree"/>
+        <event type="java" path="org.ofbiz.example.JackrabbitEvents" invoke="getRepositoryFileTree"/>
         <response name="success" type="view" value="ExampleJackrabbitShowUploadedFiles" />
         <response name="error" type="view" value="ExampleJackrabbitShowUploadedFiles" />
     </request-map>
     <request-map uri="GetFileFromRepository">
         <security auth="true" https="true" />
-        <event type="java" path="org.ofbiz.content.jcr.JackrabbitEvents" invoke="getFileFromRepository"/>
+        <event type="java" path="org.ofbiz.example.JackrabbitEvents" invoke="getFileFromRepository"/>
         <response name="success" type="none" />
         <response name="error" type="none" />
     </request-map>
     <request-map uri="ExampleJackrabbitShowContentData">
         <security auth="true" https="true" />
-        <event type="java" path="org.ofbiz.content.jcr.JackrabbitEvents" invoke="getRepositoryDataTree"/>
+        <event type="java" path="org.ofbiz.example.JackrabbitEvents" invoke="getRepositoryDataTree"/>
         <response name="success" type="view" value="ExampleJackrabbitShowContentData"/>
         <response name="error" type="view" value="ExampleJackrabbitShowContentData"/>
     </request-map>
     <request-map uri="OpenFileInformation">
         <security auth="true" https="true" />
-        <event type="java" path="org.ofbiz.content.jcr.JackrabbitEvents" invoke="getFileInformation"/>
+        <event type="java" path="org.ofbiz.example.JackrabbitEvents" invoke="getFileInformation"/>
         <response name="success" type="view" value="ExampleJackrabbitOpenFileInformation"/>
         <response name="error" type="view" value="ExampleJackrabbitShowUploadedFiles"/>
     </request-map>

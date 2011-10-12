@@ -65,7 +65,7 @@ public class JcrTests extends OFBizTestCase {
     public void testCreateRepositoryNewsNode() throws Exception {
         // Create New Object
         // path, language, title, publication date, content string
-         OfbizRepositoryMappingJackrabbitNews orm = new OfbizRepositoryMappingJackrabbitNews("/news/today", "en", "News of Today", new GregorianCalendar(), "Hello World");
+        OfbizRepositoryMappingJackrabbitNews orm = new OfbizRepositoryMappingJackrabbitNews("/news/today", "en", "News of Today", new GregorianCalendar(), "Hello World");
         assertNotNull(orm);
 
         repositoryAccess.storeContentObject(orm);

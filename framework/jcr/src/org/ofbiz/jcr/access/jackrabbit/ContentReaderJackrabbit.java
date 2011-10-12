@@ -2,14 +2,15 @@ package org.ofbiz.jcr.access.jackrabbit;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
-import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.apache.jackrabbit.ocm.manager.ObjectContentManager;
+import org.ofbiz.base.util.Debug;
 import org.ofbiz.jcr.access.ContentReader;
+import org.ofbiz.jcr.access.VersioningManager;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 
 public class ContentReaderJackrabbit implements ContentReader {
@@ -24,30 +25,30 @@ public class ContentReaderJackrabbit implements ContentReader {
 
     /*
      * (non-Javadoc)
-     * @see org.ofbiz.jcr.access.ContentReader#getContentObject(java.lang.String)
+     *
+     * @see
+     * org.ofbiz.jcr.access.ContentReader#getContentObject(java.lang.String)
      */
     @Override
     public OfbizRepositoryMapping getContentObject(String nodePath) {
-        Node n = null;
-        try {
-            n = ocm.getSession().getNode(nodePath);
-        } catch (PathNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (RepositoryException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
         return (OfbizRepositoryMapping) ocm.getObject(nodePath);
     }
 
     /*
      * (non-Javadoc)
-     * @see org.ofbiz.jcr.access.ContentReader#getContentObject(java.lang.String, java.lang.String, java.lang.String)
+     *
+     * @see
+     * org.ofbiz.jcr.access.ContentReader#getContentObject(java.lang.String,
+     * java.lang.String, java.lang.String)
      */
     @Override
     public OfbizRepositoryMapping getContentObject(String nodePath, String version) {
+        VersioningManager vm = new VersioningManagerJackrabbit(ocm);
+        if (!vm.checkIfVersionExist(nodePath, version)) {
+            Debug.logWarning("The version: " + version + " for content object: " + nodePath + " does not exist, the latest version for this object will be returned.", module);
+            return getContentObject(nodePath);
+        }
+
         return (OfbizRepositoryMapping) ocm.getObject(nodePath, version);
     }
 

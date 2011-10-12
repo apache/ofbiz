@@ -14,6 +14,15 @@ public interface VersioningManager {
     public List<String> getVersionList(String nodePath);
 
     /**
+     * Returns true if the passed node exist in the requested version.
+     *
+     * @param nodePath
+     * @param version
+     * @return
+     */
+    public boolean checkIfVersionExist(String nodePath, String version);
+
+    /**
      * Returns the last checked in version.
      *
      * @param nodePath

@@ -63,6 +63,15 @@ public class VersioningManagerJackrabbit implements VersioningManager {
 
     /*
      * (non-Javadoc)
+     * @see org.ofbiz.jcr.access.VersioningManager#checkIfVersionExist(java.lang.String, java.lang.String)
+     */
+    @Override
+    public boolean checkIfVersionExist(String nodePath, String version) {
+        return getVersionList(nodePath).contains(version);
+    }
+
+    /*
+     * (non-Javadoc)
      *
      * @see
      * org.ofbiz.jcr.access.VersioningManager#checkOutContentObject(java.lang
