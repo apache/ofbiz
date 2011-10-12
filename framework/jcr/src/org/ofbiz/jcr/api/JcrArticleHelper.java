@@ -135,16 +135,6 @@ public class JcrArticleHelper extends AbstractJcrHelper {
             language = determindeTheDefaultLanguage();
         }
 
-        // the content path should contain the language information
-        // TODO this have to be a little bit more intelligent in the future
-        if (!contentPath.endsWith(language)) {
-            if (contentPath.endsWith("/")) {
-                contentPath = contentPath + language;
-            } else {
-                contentPath = contentPath + "/" + language;
-            }
-        }
-
         // construct the content article object
         article = new OfbizRepositoryMappingJackrabbitArticle(contentPath, language, title, content, publicationDate);
 

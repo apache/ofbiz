@@ -28,6 +28,7 @@ public abstract class OfbizRepositoryMappingJackrabbitLocalizedContent extends O
         super(nodePath);
         this.language = language;
 
+        super.setPath(createLanguagePath(nodePath));
         // define this node as a localized node
         super.setLocalized(true);
     }
@@ -38,6 +39,18 @@ public abstract class OfbizRepositoryMappingJackrabbitLocalizedContent extends O
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    private String createLanguagePath(String contentPath) {
+        // the content path should contain the language information
+        // TODO this have to be a little bit more intelligent in the future
+        if (contentPath.endsWith("/")) {
+            contentPath = contentPath + language;
+        } else {
+            contentPath = contentPath + "/" + language;
+        }
+
+        return contentPath;
     }
 
 }

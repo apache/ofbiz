@@ -22,6 +22,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.GregorianCalendar;
+import java.util.Map;
+
+import javolution.util.FastMap;
 
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.entity.GenericValue;
@@ -32,6 +35,7 @@ import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFolder;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitNews;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitResource;
 import org.ofbiz.jcr.util.jackrabbit.JcrUtilJackrabbit;
+import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.service.testtools.OFBizTestCase;
 
 public class JcrTests extends OFBizTestCase {
@@ -68,14 +72,14 @@ public class JcrTests extends OFBizTestCase {
     }
 
     public void testReadRepositoryNewsNode() throws Exception {
-        OfbizRepositoryMappingJackrabbitNews orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today");
+        OfbizRepositoryMappingJackrabbitNews orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today/en");
         assertNotNull(orm);
 
         assertEquals(orm.getContent(), "Hello World");
     }
 
     public void testUpdateRepositoryNewsNode() throws Exception {
-        OfbizRepositoryMappingJackrabbitNews orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today");
+        OfbizRepositoryMappingJackrabbitNews orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today/en");
         assertNotNull(orm);
 
         orm.setContent("Hello Visitors");
@@ -83,14 +87,14 @@ public class JcrTests extends OFBizTestCase {
     }
 
     public void testVersionning() throws Exception {
-        assertEquals("1.1", repositoryAccess.getBaseVersion("/news/today"));
+        assertEquals("1.1", repositoryAccess.getBaseVersion("/news/today/en"));
 
-        OfbizRepositoryMappingJackrabbitNews orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today");
+        OfbizRepositoryMappingJackrabbitNews orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today/en");
         orm.setContent("May the force be with you!");
         repositoryAccess.updateContentObject(orm);
 
-        orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today");
-        assertEquals("1.2", repositoryAccess.getBaseVersion("/news/today"));
+        orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today/en");
+        assertEquals("1.2", repositoryAccess.getBaseVersion("/news/today/en"));
     }
 
     public void testRemoveRepositoryNewsNode() throws Exception {
@@ -123,6 +127,21 @@ public class JcrTests extends OFBizTestCase {
 
     public void testRemoveRepositoryFileNode() throws Exception {
         repositoryAccess.removeContentObject("/fileHome");
+    }
+
+    public void testSpeedTestService() throws Exception {
+        Map<String, Object> context = FastMap.newInstance();
+        context.put("maxNodes", new Integer(10));
+        context.put("userLogin", dispatcher.getDelegator().findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system")));
+
+        Map<String, Object> serviceResult = this.dispatcher.runSync("determineJackrabbitRepositorySpeed", context);
+
+        if (ServiceUtil.isError(serviceResult)) {
+            assertFalse(true);
+        } else {
+            assertTrue(true);
+        }
+
     }
 
     public void testListRepositoryNodes() throws Exception {
