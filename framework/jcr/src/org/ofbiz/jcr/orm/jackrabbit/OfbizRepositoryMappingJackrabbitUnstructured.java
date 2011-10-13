@@ -32,18 +32,22 @@ public abstract class OfbizRepositoryMappingJackrabbitUnstructured implements Of
         this.localized = false;
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.orm.OfbizRepositoryMapping#getPath()
+     */
+    @Override
     public String getPath() {
         return path;
     }
 
-    public Calendar getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Calendar creationDate) {
-        this.creationDate = creationDate;
-    }
-
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.orm.OfbizRepositoryMapping#setPath(java.lang.String)
+     */
+    @Override
     public void setPath(String nodePath) {
         // check if the node path is an absolute path
         if (!nodePath.startsWith(ConstantsJackrabbit.ROOTPATH)) {
@@ -53,12 +57,33 @@ public abstract class OfbizRepositoryMappingJackrabbitUnstructured implements Of
         this.path = nodePath;
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.ofbiz.jcr.orm.OfbizRepositoryMapping#getVersion()
+     */
+    @Override
     public String getVersion() {
         return version;
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.orm.OfbizRepositoryMapping#setVersion(java.lang.String)
+     */
+    @Override
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public Calendar getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Calendar creationDate) {
+        this.creationDate = creationDate;
     }
 
     public boolean getLocalized() {

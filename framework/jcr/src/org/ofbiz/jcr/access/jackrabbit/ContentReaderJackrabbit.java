@@ -3,6 +3,7 @@ package org.ofbiz.jcr.access.jackrabbit;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
+import javax.jcr.version.VersionException;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -31,7 +32,15 @@ public class ContentReaderJackrabbit implements ContentReader {
      */
     @Override
     public OfbizRepositoryMapping getContentObject(String nodePath) {
-        return (OfbizRepositoryMapping) ocm.getObject(nodePath);
+        OfbizRepositoryMapping orm = (OfbizRepositoryMapping) ocm.getObject(nodePath);
+        try {
+            orm.setVersion(ocm.getBaseVersion(nodePath).getName());
+        } catch (VersionException e) {
+            // -0.0 means we have no version information
+            orm.setVersion("-0.0");
+            Debug.logError(e, module);
+        }
+        return orm;
     }
 
     /*
@@ -49,7 +58,9 @@ public class ContentReaderJackrabbit implements ContentReader {
             return getContentObject(nodePath);
         }
 
-        return (OfbizRepositoryMapping) ocm.getObject(nodePath, version);
+        OfbizRepositoryMapping orm = (OfbizRepositoryMapping) ocm.getObject(nodePath, version);
+        orm.setVersion(version);
+        return orm;
     }
 
     /*

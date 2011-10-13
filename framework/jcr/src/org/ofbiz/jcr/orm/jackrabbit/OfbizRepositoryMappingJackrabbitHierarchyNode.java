@@ -11,6 +11,7 @@ import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 public class OfbizRepositoryMappingJackrabbitHierarchyNode implements OfbizRepositoryMapping {
     @Field(path = true, id = true, jcrProtected = true)
     protected String path;
+    private String version;
     @Field(jcrName = "jcr:created")
     private Calendar creationDate;
 
@@ -34,4 +35,15 @@ public class OfbizRepositoryMappingJackrabbitHierarchyNode implements OfbizRepos
     public void setCreationDate(Calendar creationDate) {
         this.creationDate = creationDate;
     }
+
+    @Override
+    public String getVersion() {
+        return version;
+    }
+
+    @Override
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
 }

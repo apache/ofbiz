@@ -112,7 +112,6 @@ public class JcrArticleHelper extends AbstractJcrHelper {
 
         if (orm instanceof OfbizRepositoryMappingJackrabbitArticle) {
             article = (OfbizRepositoryMappingJackrabbitArticle) orm;
-            article.setVersion(version);
             article.setPath(contentPath); // the content path must be
                                           // manipulated because, the jackrabbit
                                           // orm returns a full blown path with
@@ -171,7 +170,8 @@ public class JcrArticleHelper extends AbstractJcrHelper {
      * @return
      */
     public List<String> getVersionListForCurrentArticle() {
-        List<String> versions = null;
+        List<String> versions = new ArrayList<String>();
+        ;
 
         if (article != null) {
             versions = access.getVersionList(article.getPath());
@@ -184,31 +184,31 @@ public class JcrArticleHelper extends AbstractJcrHelper {
     }
 
     public List<String> getAvailableLanguageList() {
-        List<String> languages = null;
+        List<String> languages = new ArrayList<String>();
 
         if (article != null && article.getLocalized()) {
             Session session = access.getSession();
 
             try {
-                languages = new ArrayList<String>();
                 Node node = session.getNode(article.getPath()).getParent();
                 NodeIterator nodes = node.getNodes();
                 while (nodes.hasNext()) {
-                    String l = nodes.nextNode().getPath();
-                    languages.add(l.substring(l.lastIndexOf("/") + 1));
+                    Node tmpNode = nodes.nextNode();
+                    // only use nodes which have the language mix in
+                    if (tmpNode.hasProperty("localized") && tmpNode.getProperty("localized").getBoolean()) {
+                        String l = tmpNode.getPath();
+                        languages.add(l.substring(l.lastIndexOf("/") + 1));
+                    }
                 }
 
             } catch (PathNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                Debug.logError(e, module);
             } catch (RepositoryException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                Debug.logError(e, module);
             }
 
         } else {
             Debug.logWarning("No Article is loaded from the repository, please load an article first before requesting the version list.", module);
-            languages = new ArrayList<String>(1);
         }
 
         return languages;
@@ -242,6 +242,9 @@ public class JcrArticleHelper extends AbstractJcrHelper {
         // chunk if the last chunk contains a language flag
         StringBuffer canonicalizedContentPath = new StringBuffer("/");
         if (possibleLocales.contains(path[path.length - 1])) {
+            if (UtilValidate.isEmpty(language)) {
+                language = path[path.length - 1];
+            }
             for (int i = 0; i < path.length - 1; i++) {
                 if (UtilValidate.isNotEmpty(path[i])) {
                     canonicalizedContentPath.append(path[i]).append("/");
