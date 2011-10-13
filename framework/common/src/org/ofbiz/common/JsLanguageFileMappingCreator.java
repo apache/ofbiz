@@ -50,8 +50,10 @@ public class JsLanguageFileMappingCreator {
         for (Locale locale : localeList) {
             String displayCountry = locale.toString();
             String modifiedDisplayCountry = null;
+            String modifiedDisplayCountryForValidation = null;
             if (displayCountry.indexOf('_') != -1) {
                 modifiedDisplayCountry = displayCountry.replace("_", "-");
+                modifiedDisplayCountryForValidation = displayCountry.replace("_", "").toLowerCase(); // fun: in validate plugin we have also ptpt and ptbr for instance...
             } else {
                 modifiedDisplayCountry = displayCountry;
             }
@@ -88,11 +90,19 @@ public class JsLanguageFileMappingCreator {
              */
             fileName = componentRoot + validateRelPath + validateLocalePrefix + strippedLocale + jsFilePostFix;
             file = FileUtil.getFile(fileName);
+
             if (file.exists()) {
                 fileUrl = validateRelPath + validateLocalePrefix + strippedLocale + jsFilePostFix;
             } else {
-                // use default language en
-                fileUrl = validateRelPath + validateLocalePrefix + defaultLocaleJquery + jsFilePostFix;
+                // Try to guess a language (fun: in validate plugin we have also ptpt and ptbr for instance....)
+                fileName = componentRoot + validateRelPath + validateLocalePrefix + modifiedDisplayCountryForValidation + jsFilePostFix;
+                file = FileUtil.getFile(fileName);
+                if (file.exists()) {
+                    fileUrl = validateRelPath + validateLocalePrefix + modifiedDisplayCountryForValidation + jsFilePostFix;
+                } else {
+                    // use default language en
+                    fileUrl = validateRelPath + validateLocalePrefix + defaultLocaleJquery + jsFilePostFix;
+                }
             }
             validationLocaleFile.put(displayCountry, fileUrl);
 
