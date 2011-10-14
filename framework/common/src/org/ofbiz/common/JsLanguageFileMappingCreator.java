@@ -1,10 +1,8 @@
 package org.ofbiz.common;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -22,26 +20,30 @@ import org.ofbiz.service.ServiceUtil;
 
 // Use the createJsLanguageFileMapping service to create or update the JsLanguageFilesMapping.java. You will still need to compile thereafter
 
-import freemarker.template.TemplateException;
-
 public class JsLanguageFileMappingCreator {
 
     private static final String module = JsLanguageFileMappingCreator.class.getName();
 
     public static Map<String, Object> createJsLanguageFileMapping(DispatchContext ctx, Map<String, ?> context) {
         Map<String, Object> result = ServiceUtil.returnSuccess();
+        String encoding = (String) context.get("encoding"); // default value: UTF-8
+
         List<Locale> localeList = UtilMisc.availableLocales();
         Map<String, Object> jQueryLocaleFile = FastMap.newInstance();
         Map<String, String> dateJsLocaleFile = FastMap.newInstance();
+        Map<String, String> validationLocaleFile = FastMap.newInstance();
         Map<String, String> dateTimePickerLocaleFile = FastMap.newInstance();
 
         // setup some variables to locate the js files
         String componentRoot = "component://images/webapp";
         String jqueryUiLocaleRelPath = "/images/jquery/ui/development-bundle/ui/i18n/";
         String dateJsLocaleRelPath = "/images/jquery/plugins/datejs/";
+        String validateRelPath = "/images/jquery/plugins/validate/localization/";
         String dateTimePickerJsLocaleRelPath = "/images/jquery/plugins/datetimepicker/localization/";
         String jsFilePostFix = ".js";
         String dateJsLocalePrefix = "date-";
+        String validateLocalePrefix = "messages_";
+        //String validateMethLocalePrefix = "methods__";
         String jqueryUiLocalePrefix = "jquery.ui.datepicker-";
         String dateTimePickerPrefix = "jquery-ui-timepicker-";
         String defaultLocaleDateJs = "en-US";
@@ -155,6 +157,7 @@ public class JsLanguageFileMappingCreator {
         Map<String, Object> mapWrapper = new HashMap<String, Object>();
         mapWrapper.put("datejs", dateJsLocaleFile);
         mapWrapper.put("jquery", jQueryLocaleFile);
+        mapWrapper.put("validation", validationLocaleFile);
         mapWrapper.put("dateTime", dateTimePickerLocaleFile);
 
         // some magic to create a new java file
@@ -162,32 +165,13 @@ public class JsLanguageFileMappingCreator {
         Writer writer = new StringWriter();
         try {
             FreeMarkerWorker.renderTemplateAtLocation(template, mapWrapper, writer);
+            // write it as a Java file
+            File file = new File(output);
+            FileUtils.writeStringToFile(file, writer.toString(), encoding);
         }
-        catch (MalformedURLException e) {
+        catch (Exception e) {
             Debug.logError(e, module);
-            return result = ServiceUtil.returnError("The Outputfile could not be created: " + e.getMessage());
-        }
-        catch (TemplateException e) {
-            Debug.logError(e, module);
-            return result = ServiceUtil.returnError("The Outputfile could not be created: " + e.getMessage());
-        }
-        catch (IOException e) {
-            Debug.logError(e, module);
-            return result = ServiceUtil.returnError("The Outputfile could not be created: " + e.getMessage());
-        }
-        catch (IllegalArgumentException e) {
-            Debug.logError(e, module);
-            return result = ServiceUtil.returnError("The Outputfile could not be created: " + e.getMessage());
-        }
-
-        // write it as a Java file
-        File file = new File(output);
-        try {
-            FileUtils.writeStringToFile(file, writer.toString(), "UTF-8");
-        }
-        catch (IOException e) {
-            Debug.logError(e, module);
-            return result = ServiceUtil.returnError("The Outputfile could not be created: " + e.getMessage());
+            return ServiceUtil.returnError("The Outputfile could not be created: " + e.getMessage());
         }
 
         return result;

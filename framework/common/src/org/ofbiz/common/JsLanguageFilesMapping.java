@@ -515,15 +515,15 @@ public final class JsLanguageFilesMapping {
             localeFiles.put("es_VE", "/images/jquery/plugins/validate/localization/messages_es.js");
             localeFiles.put("sv", "/images/jquery/plugins/validate/localization/messages_en.js");
             localeFiles.put("sv_SE", "/images/jquery/plugins/validate/localization/messages_en.js");
-            localeFiles.put("th", "/images/jquery/plugins/validate/localization/messages_th.js");
-            localeFiles.put("th_TH", "/images/jquery/plugins/validate/localization/messages_th.js");
-            localeFiles.put("th_TH_TH", "/images/jquery/plugins/validate/localization/messages_th.js");
+            localeFiles.put("th", "/images/jquery/plugins/validate/localization/messages_en.js");
+            localeFiles.put("th_TH", "/images/jquery/plugins/validate/localization/messages_en.js");
+            localeFiles.put("th_TH_TH", "/images/jquery/plugins/validate/localization/messages_en.js");
             localeFiles.put("tr", "/images/jquery/plugins/validate/localization/messages_tr.js");
             localeFiles.put("tr_TR", "/images/jquery/plugins/validate/localization/messages_tr.js");
             localeFiles.put("uk", "/images/jquery/plugins/validate/localization/messages_en.js");
             localeFiles.put("uk_UA", "/images/jquery/plugins/validate/localization/messages_en.js");
-            localeFiles.put("vi", "/images/jquery/plugins/validate/localization/messages_vi.js");
-            localeFiles.put("vi_VN", "/images/jquery/plugins/validate/localization/messages_vi.js");
+            localeFiles.put("vi", "/images/jquery/plugins/validate/localization/messages_en.js");
+            localeFiles.put("vi_VN", "/images/jquery/plugins/validate/localization/messages_en.js");
         }
 
         public static String getFilePath(String locale) {
