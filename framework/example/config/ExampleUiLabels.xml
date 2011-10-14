@@ -861,5 +861,9 @@
         <value xml:lang="de">Informationen öffnen</value>
         <value xml:lang="en">Open information</value>
     </property>
+    <property key="ExampleJackrabbitQuickContentSelect">
+        <value xml:lang="de">Content Schnellauswahl - Content Node auswählen und Sprache bestimmen.</value>
+        <value xml:lang="en">Content quick select - Choose your content node and select a language.</value>
+    </property>
 
 </resource>

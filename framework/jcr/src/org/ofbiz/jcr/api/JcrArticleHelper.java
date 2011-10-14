@@ -261,7 +261,10 @@ public class JcrArticleHelper extends AbstractJcrHelper {
         // check if this language exist in the repository
         Session session = access.getSession();
         try {
-            if (!session.itemExists(canonicalizedContentPath.toString() + language)) {
+            // check if the node exist OR if the node has NO localized flag OR
+            // the localized flag is set to false
+            if (!session.itemExists(canonicalizedContentPath.toString() + language)
+                    || (!session.getNode(canonicalizedContentPath.toString() + language).hasProperty("localized") || !session.getNode(canonicalizedContentPath.toString() + language).getProperty("localized").getBoolean())) {
                 // check for default language
                 if (!session.itemExists(canonicalizedContentPath.toString() + determindeTheDefaultLanguage())) {
                     // return the first available language

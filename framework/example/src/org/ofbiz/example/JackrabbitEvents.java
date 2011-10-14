@@ -2,18 +2,26 @@ package org.ofbiz.example;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 
 import javax.jcr.ItemExistsException;
+import javax.jcr.Node;
+import javax.jcr.NodeIterator;
+import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.ValueFormatException;
+import javax.jcr.nodetype.NodeType;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import javolution.util.FastMap;
 import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -261,6 +269,8 @@ public class JackrabbitEvents {
             request.setAttribute("dataTree", new JSONArray());
             request.setAttribute("_ERROR_MESSAGE_", e.toString());
             return "error";
+        } finally {
+            repositoryAccess.closeAccess();
         }
 
         return "success";
@@ -276,7 +286,7 @@ public class JackrabbitEvents {
     public static String getRepositoryDataTree(HttpServletRequest request, HttpServletResponse response) {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
 
-        RepositoryAccess repositoryAccess = new RepositoryAccessJackrabbit(userLogin);
+        RepositoryAccessJackrabbit repositoryAccess = new RepositoryAccessJackrabbit(userLogin);
         try {
             JSONArray fileTree = repositoryAccess.getJsonDataTree();
             request.setAttribute("dataTree", StringUtil.wrapString(fileTree.toString()));
@@ -284,8 +294,53 @@ public class JackrabbitEvents {
             Debug.logError(e, module);
             request.setAttribute("dataTree", new JSONArray());
             request.setAttribute("_ERROR_MESSAGE_", e.toString());
+            repositoryAccess.closeAccess();
             return "error";
         }
+
+        List<String> contentList = new ArrayList<String>();
+        Map<String, List<String>> languageList = FastMap.newInstance();
+        Session session = repositoryAccess.getSession();
+        Node root;
+        try {
+            root = session.getRootNode();
+            getContentList(root, contentList);
+        } catch (RepositoryException e) {
+            Debug.logError(e, module);
+            request.setAttribute("_ERROR_MESSAGE_", e.toString());
+            repositoryAccess.closeAccess();
+            return "error";
+        } finally {
+        }
+
+        try {
+        for (String path : contentList) {
+            Node parent = session.getNode(path);
+            NodeIterator ni = parent.getNodes();
+            List<String> language = new ArrayList<String>();
+            while (ni.hasNext()) {
+                Node t = ni.nextNode();
+                    if (t.hasProperty("localized") && t.getProperty("localized").getBoolean()) {
+                        String l = t.getPath();
+                        language.add(l.substring(l.lastIndexOf("/") + 1));
+                    }
+            }
+            languageList.put(path, language);
+        }
+        } catch (ValueFormatException e) {
+            Debug.logError(e, module);
+        } catch (PathNotFoundException e) {
+            Debug.logError(e, module);
+        } catch (RepositoryException e) {
+            Debug.logError(e, module);
+        } finally {
+            repositoryAccess.closeAccess();
+        }
+
+        request.setAttribute("contentList", contentList);
+        JSONObject jo = new JSONObject();
+        jo.putAll(languageList);
+        request.setAttribute("languageList", jo);
 
         return "success";
     }
@@ -350,4 +405,16 @@ public class JackrabbitEvents {
         return "success";
     }
 
+    private static void getContentList(Node startNode, List<String> contentList) throws RepositoryException {
+        NodeIterator ni = startNode.getNodes();
+        while (ni.hasNext()) {
+            Node tmpNode = ni.nextNode();
+            if (tmpNode.getPrimaryNodeType().isNodeType(NodeType.NT_UNSTRUCTURED) && (!tmpNode.hasProperty("localized") || !tmpNode.getProperty("localized").getBoolean())) {
+                contentList.add(tmpNode.getPath());
+                if (tmpNode.hasNodes()) {
+                    getContentList(tmpNode, contentList);
+                }
+            }
+        }
+    }
 }

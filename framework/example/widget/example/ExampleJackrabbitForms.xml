@@ -20,7 +20,7 @@ under the License.
 
 <forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
 
-    <form name="ListRepositoryData" type="list" list-name="repositoryContent" default-entity-name="Content" separate-columns="true" odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+    <form name="ListRepositoryData" type="list" list-name="repositoryContent" separate-columns="true" odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
         <field name="path">
             <hyperlink target="EditRepositoryContent" description="${path}">
                 <parameter param-name="contentId" from-field="contentId" />
@@ -42,6 +42,19 @@ under the License.
         <field name="statusId">
             <display />
         </field>
+    </form>
+
+    <form name="SelectContentObject" type="single" target="">
+        <field name="contentDropDown" position="1">
+            <drop-down ><list-options key-name="contentList" description="${contentList}" list-name="parameters.contentList" list-entry-name="contentList"/></drop-down>
+        </field>
+        
+        <!--
+        <field name="languageDropDown" position="2" title="">
+            <drop-down><list-options key-name="languageList" list-name="parameters.languageList"/></drop-down>
+        </field>
+        -->
+        <field name="submit" position="2"><submit/></field>
     </form>
 
     <form name="AddRepositoryData" type="single" target="StoreNewRepositoryData">

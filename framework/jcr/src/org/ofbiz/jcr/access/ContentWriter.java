@@ -25,7 +25,7 @@ public interface ContentWriter {
     public void updateContentObject(OfbizRepositoryMapping orm) throws ObjectContentManagerException;
 
     /**
-     * Remove the passed node from the content repository
+     * Remove the passed node from the content repository. The node path should be absolute.
      *
      * @param nodePath
      * @throws ObjectContentManagerException

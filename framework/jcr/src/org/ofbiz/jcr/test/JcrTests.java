@@ -30,6 +30,7 @@ import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.RepositoryAccess;
 import org.ofbiz.jcr.access.jackrabbit.RepositoryAccessJackrabbit;
+import org.ofbiz.jcr.api.JcrArticleHelper;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFile;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFolder;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitNews;
@@ -95,6 +96,24 @@ public class JcrTests extends OFBizTestCase {
 
         orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today/en");
         assertEquals("1.2", repositoryAccess.getBaseVersion("/news/today/en"));
+    }
+
+    public void testLanguageDetermination() throws Exception{
+        JcrArticleHelper helper = new JcrArticleHelper(userLogin);
+
+        helper.storeContentInRepository("news/tomorrow", "en", "The news for tomorrow.", "Content.", new GregorianCalendar());
+        helper.storeContentInRepository("superhero", "de", "Batman", "The best superhero!", new GregorianCalendar());
+
+        assertEquals("en", helper.readContentFromRepository("/news/tomorrow", "").getLanguage());
+        assertEquals("en", helper.readContentFromRepository("/news/tomorrow", "de").getLanguage());
+        assertEquals("en", helper.readContentFromRepository("/news/tomorrow", "en").getLanguage());
+
+        assertEquals("de", helper.readContentFromRepository("/superhero", "de").getLanguage());
+        assertEquals("de", helper.readContentFromRepository("/superhero", "").getLanguage());
+        assertEquals("de", helper.readContentFromRepository("/superhero", "fr").getLanguage());
+
+        helper.removeContentObject("/superhero");
+        helper.closeContentSession();
     }
 
     public void testRemoveRepositoryNewsNode() throws Exception {
