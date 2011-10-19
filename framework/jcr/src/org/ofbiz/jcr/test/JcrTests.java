@@ -98,7 +98,7 @@ public class JcrTests extends OFBizTestCase {
         assertEquals("1.2", repositoryAccess.getBaseVersion("/news/today/en"));
     }
 
-    public void testLanguageDetermination() throws Exception{
+    public void testLanguageDetermination() throws Exception {
         JcrArticleHelper helper = new JcrArticleHelper(userLogin);
 
         helper.storeContentInRepository("news/tomorrow", "en", "The news for tomorrow.", "Content.", new GregorianCalendar());
@@ -125,7 +125,8 @@ public class JcrTests extends OFBizTestCase {
      */
     public void testCreateRepositoryFileNode() throws Exception {
         File f = new File("stopofbiz.sh");
-        assertTrue(f.exists());
+        File f2 = new File("README");
+        assertTrue(f.exists() && f2.exists());
 
         InputStream file = new FileInputStream(f);
 
@@ -142,6 +143,31 @@ public class JcrTests extends OFBizTestCase {
         ormFolder.addChild(ormFile);
 
         repositoryAccess.storeContentObject(ormFolder);
+    }
+
+    /*
+     * Test the File upload - Add a second file to the same folder
+     */
+    public void testCreateRepositoryFileNode_2() throws Exception {
+        File f = new File("README");
+        assertTrue(f.exists());
+
+        InputStream file = new FileInputStream(f);
+
+        OfbizRepositoryMappingJackrabbitResource ormResource = new OfbizRepositoryMappingJackrabbitResource();
+        ormResource.setData(file);
+
+        OfbizRepositoryMappingJackrabbitFile ormFile = new OfbizRepositoryMappingJackrabbitFile();
+        ormFile.setResource(ormResource);
+        // have to be relative
+        ormFile.setPath(f.getName());
+
+        OfbizRepositoryMappingJackrabbitFolder ormFolder = (OfbizRepositoryMappingJackrabbitFolder) repositoryAccess.getContentObject("/fileHome");
+        ormFolder.addChild(ormFile);
+
+        // When we add a file to an existing folder we have to use the update
+        // method - this is something the FileHelper Api is doing for you.
+        repositoryAccess.updateContentObject(ormFolder);
     }
 
     public void testRemoveRepositoryFileNode() throws Exception {

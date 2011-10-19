@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.GregorianCalendar;
 
-import javax.jcr.ItemExistsException;
+import javax.jcr.RepositoryException;
 
 import org.apache.jackrabbit.ocm.exception.ObjectContentManagerException;
 import org.apache.tika.Tika;
@@ -18,6 +18,7 @@ import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFile;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFolder;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitHierarchyNode;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitResource;
+import org.ofbiz.jcr.util.jackrabbit.JcrUtilJackrabbit;
 
 /**
  * This Helper class encapsulate the jcr file content bean. it provide all
@@ -98,9 +99,9 @@ public class JcrFileHelper extends AbstractJcrHelper {
      * @param folderPath
      * @param mimeType
      * @throws ObjectContentManagerException
-     * @throws ItemExistsException
+     * @throws RepositoryException
      */
-    public void storeContentInRepository(byte[] fileData, String fileName, String folderPath) throws ObjectContentManagerException, ItemExistsException {
+    public void storeContentInRepository(byte[] fileData, String fileName, String folderPath) throws ObjectContentManagerException, RepositoryException {
 
         // create an ORM Resource Object
         OfbizRepositoryMappingJackrabbitResource ormResource = new OfbizRepositoryMappingJackrabbitResource();
@@ -114,12 +115,25 @@ public class JcrFileHelper extends AbstractJcrHelper {
         ormFile.setResource(ormResource);
         ormFile.setPath(fileName);
 
-        // create the ORM folder Object
-        OfbizRepositoryMappingJackrabbitFolder ormFolder = new OfbizRepositoryMappingJackrabbitFolder();
-        ormFolder.addChild(ormFile);
-        ormFolder.setPath(folderPath);
+        // Create the folder if necessary, otherwise we just update the folder content
+        folderPath = JcrUtilJackrabbit.createAbsoluteNodePath(folderPath);
+        if (access.getSession().itemExists(folderPath)) {
+            OfbizRepositoryMapping orm = access.getContentObject(folderPath);
+            if (orm instanceof OfbizRepositoryMappingJackrabbitFolder) {
+                OfbizRepositoryMappingJackrabbitFolder ormFolder = (OfbizRepositoryMappingJackrabbitFolder) orm;
+                ormFolder.addChild(ormFile);
+                access.updateContentObject(ormFolder);
+            }
+        } else {
+            // create the ORM folder Object
+            OfbizRepositoryMappingJackrabbitFolder ormFolder = new OfbizRepositoryMappingJackrabbitFolder();
+            ormFolder.addChild(ormFile);
+            ormFolder.setPath(folderPath);
 
-        access.storeContentObject(ormFolder);
+            access.storeContentObject(ormFolder);
+        }
+
+
     }
 
     /**

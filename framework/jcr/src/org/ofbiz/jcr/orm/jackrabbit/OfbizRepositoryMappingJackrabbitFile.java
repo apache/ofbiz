@@ -26,7 +26,7 @@ public class OfbizRepositoryMappingJackrabbitFile extends OfbizRepositoryMapping
 
         // check that it is a relative path
         if (nodePath.indexOf("/") != -1) {
-            nodePath = nodePath.substring(nodePath.indexOf("/") + 1);
+            nodePath = nodePath.substring(nodePath.lastIndexOf("/") + 1);
         }
 
         super.path = nodePath;

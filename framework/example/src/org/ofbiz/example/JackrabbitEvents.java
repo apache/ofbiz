@@ -243,6 +243,9 @@ public class JackrabbitEvents {
         } catch (ItemExistsException e) {
             Debug.logError(e, module);
             request.setAttribute("_ERROR_MESSAGE_", e.toString());
+        } catch (RepositoryException e) {
+            Debug.logError(e, module);
+            request.setAttribute("_ERROR_MESSAGE_", e.toString());
         } finally {
             fileHelper.closeContentSession();
         }

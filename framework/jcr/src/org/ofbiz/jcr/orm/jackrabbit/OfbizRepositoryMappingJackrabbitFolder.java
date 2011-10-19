@@ -9,7 +9,7 @@ import org.apache.jackrabbit.ocm.mapper.impl.annotation.Node;
 
 @Node(jcrType = "nt:folder", extend = OfbizRepositoryMappingJackrabbitHierarchyNode.class)
 public class OfbizRepositoryMappingJackrabbitFolder extends OfbizRepositoryMappingJackrabbitHierarchyNode {
-    @Collection(autoUpdate = false, elementClassName = OfbizRepositoryMappingJackrabbitHierarchyNode.class, collectionConverter = NTCollectionConverterImpl.class)
+    @Collection(autoUpdate = true, jcrSameNameSiblings = false, elementClassName = OfbizRepositoryMappingJackrabbitHierarchyNode.class, collectionConverter = NTCollectionConverterImpl.class)
     private List<OfbizRepositoryMappingJackrabbitHierarchyNode> children;
 
     public List<OfbizRepositoryMappingJackrabbitHierarchyNode> getChildren() {
