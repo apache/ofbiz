@@ -101,7 +101,7 @@ public class ContentReaderJackrabbit implements ContentReader {
             JSONObject folder = new JSONObject();
             Node node = nodeIterator.nextNode();
 
-            if (node.getPrimaryNodeType().isNodeType(ConstantsJackrabbit.PROPERTY_FIELDS.FOLDER.getType())) {
+            if (node.getPrimaryNodeType().isNodeType(ConstantsJackrabbit.FOLDER)) {
                 attr.element("title", node.getName());
                 folder.element("data", attr);
 
@@ -113,7 +113,7 @@ public class ContentReaderJackrabbit implements ContentReader {
                 folder.element("children", getJsonFileChildNodes(node).toString());
 
                 folderStrucutre.element(folder);
-            } else if (node.getPrimaryNodeType().isNodeType(ConstantsJackrabbit.PROPERTY_FIELDS.FILE.getType())) {
+            } else if (node.getPrimaryNodeType().isNodeType(ConstantsJackrabbit.FILE)) {
                 attr = new JSONObject();
                 attr.element("title", node.getName());
                 folder.element("data", attr);
@@ -150,7 +150,7 @@ public class ContentReaderJackrabbit implements ContentReader {
             Node node = nodeIterator.nextNode();
 
             //
-            if (node.getPrimaryNodeType().isNodeType(ConstantsJackrabbit.PROPERTY_FIELDS.UNSTRUCTURED.getType()) && !node.hasProperty(ConstantsJackrabbit.PROPERTY_FIELDS.mixInLANGUAGE.getType())) {
+            if (node.getPrimaryNodeType().isNodeType(ConstantsJackrabbit.UNSTRUCTURED) && !node.hasProperty(ConstantsJackrabbit.MIXIN_LANGUAGE)) {
                 attr.element("title", node.getName());
                 folder.element("data", attr);
 

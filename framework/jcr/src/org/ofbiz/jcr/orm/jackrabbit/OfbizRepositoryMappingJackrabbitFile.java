@@ -21,12 +21,12 @@ public class OfbizRepositoryMappingJackrabbitFile extends OfbizRepositoryMapping
     public void setPath(String nodePath) {
         // check that the path don't end with a /
         if (nodePath.endsWith(ConstantsJackrabbit.ROOTPATH)) {
-            nodePath = nodePath.substring(0, nodePath.indexOf("/"));
+            nodePath = nodePath.substring(0, nodePath.indexOf(ConstantsJackrabbit.NODEPATHDELIMITER));
         }
 
         // check that it is a relative path
-        if (nodePath.indexOf("/") != -1) {
-            nodePath = nodePath.substring(nodePath.lastIndexOf("/") + 1);
+        if (nodePath.indexOf(ConstantsJackrabbit.NODEPATHDELIMITER) != -1) {
+            nodePath = nodePath.substring(nodePath.lastIndexOf(ConstantsJackrabbit.NODEPATHDELIMITER) + 1);
         }
 
         super.path = nodePath;

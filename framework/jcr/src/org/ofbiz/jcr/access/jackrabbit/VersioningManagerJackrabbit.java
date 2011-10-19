@@ -25,6 +25,7 @@ public class VersioningManagerJackrabbit implements VersioningManager {
     ObjectContentManager ocm = null;
 
     private Set<String> checkedOutNodeStore = Collections.synchronizedSet(new HashSet<String>());
+    private static String NOVERSION = "-0.0";
 
     VersioningManagerJackrabbit(ObjectContentManager ocm) {
         this.ocm = ocm;
@@ -53,7 +54,7 @@ public class VersioningManagerJackrabbit implements VersioningManager {
             Version version = (Version) versionIterator.next();
             // filter the root version string, because it's not needed each node
             // starts with the version number 1.0
-            if (!"jcr:rootVersion".equals(version.getName())) {
+            if (!ConstantsJackrabbit.ROOTVERSION.equals(version.getName())) {
                 result.add(version.getName());
             }
         }
@@ -63,7 +64,10 @@ public class VersioningManagerJackrabbit implements VersioningManager {
 
     /*
      * (non-Javadoc)
-     * @see org.ofbiz.jcr.access.VersioningManager#checkIfVersionExist(java.lang.String, java.lang.String)
+     *
+     * @see
+     * org.ofbiz.jcr.access.VersioningManager#checkIfVersionExist(java.lang.
+     * String, java.lang.String)
      */
     @Override
     public boolean checkIfVersionExist(String nodePath, String version) {
@@ -165,7 +169,7 @@ public class VersioningManagerJackrabbit implements VersioningManager {
             return ocm.getBaseVersion(nodePath).getName();
         } catch (VersionException e) {
             Debug.logError(e, module);
-            return "0.0";
+            return NOVERSION;
         }
     }
 
@@ -180,7 +184,7 @@ public class VersioningManagerJackrabbit implements VersioningManager {
             return ocm.getRootVersion(nodePath).getName();
         } catch (VersionException e) {
             Debug.logError(e, module);
-            return "0.0";
+            return NOVERSION;
         }
     }
 

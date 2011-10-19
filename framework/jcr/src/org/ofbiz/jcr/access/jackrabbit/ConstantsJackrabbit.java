@@ -5,22 +5,20 @@ import javax.jcr.nodetype.NodeType;
 import org.ofbiz.jcr.access.Constants;
 
 public class ConstantsJackrabbit implements Constants {
-    protected enum PROPERTY_FIELDS {
-        MESSAGE("jcr:message"), FILE(NodeType.NT_FILE), FOLDER(NodeType.NT_FOLDER), RESOURCE(NodeType.NT_RESOURCE), DATA("jcr:data"), UNSTRUCTURED(NodeType.NT_UNSTRUCTURED), MIMETYPE("jcr:mimeType"), REPROOT("rep:root"), mixInLANGUAGE("mix:language"), mixInVERSIONING(
-                "mix:versionable"), mixInTITLE("mix:title"), LANGUAGE("jcr:language"), TITLE("jcr:title"), DESCRIPTION("jcr:description");
+    // JCR Variables
+    public static String MESSAGE = "jcr:message";
+    public static String FILE = NodeType.NT_FILE;
+    public static String FOLDER = NodeType.NT_FOLDER;
+    public static String RESOURCE = NodeType.NT_RESOURCE;
+    public static String DATA = "jcr:data";
+    public static String UNSTRUCTURED = NodeType.NT_UNSTRUCTURED;
+    public static String MIMETYPE = "jcr:mimeType";
+    public static String MIXIN_LANGUAGE = "mix:language";
+    public static String MIXIN_VERSIONING = "mix:versionable";
+    public static String ROOTVERSION = "jcr:rootVersion";
 
-        String type = null;
-
-        PROPERTY_FIELDS(String type) {
-            this.type = type;
-        }
-
-        String getType() {
-            return this.type;
-        }
-
-    };
-
+    //
     public static String ROOTPATH = "/";
     public static String FILEROOT = ROOTPATH + "fileHome";
+    public static String NODEPATHDELIMITER = "/";
 }

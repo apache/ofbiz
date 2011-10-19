@@ -197,7 +197,7 @@ public class JcrArticleHelper extends AbstractJcrHelper {
                     // only use nodes which have the language mix in
                     if (tmpNode.hasProperty("localized") && tmpNode.getProperty("localized").getBoolean()) {
                         String l = tmpNode.getPath();
-                        languages.add(l.substring(l.lastIndexOf("/") + 1));
+                        languages.add(l.substring(l.lastIndexOf(ConstantsJackrabbit.NODEPATHDELIMITER) + 1));
                     }
                 }
 
@@ -237,23 +237,23 @@ public class JcrArticleHelper extends AbstractJcrHelper {
         // equal to the passed language
 
         // we split the path string in chunks
-        String[] path = contentPath.split("/");
+        String[] path = contentPath.split(ConstantsJackrabbit.NODEPATHDELIMITER);
 
         // chunk if the last chunk contains a language flag
-        StringBuffer canonicalizedContentPath = new StringBuffer("/");
+        StringBuffer canonicalizedContentPath = new StringBuffer(ConstantsJackrabbit.NODEPATHDELIMITER);
         if (possibleLocales.contains(path[path.length - 1])) {
             if (UtilValidate.isEmpty(language)) {
                 language = path[path.length - 1];
             }
             for (int i = 0; i < path.length - 1; i++) {
                 if (UtilValidate.isNotEmpty(path[i])) {
-                    canonicalizedContentPath.append(path[i]).append("/");
+                    canonicalizedContentPath.append(path[i]).append(ConstantsJackrabbit.NODEPATHDELIMITER);
                 }
             }
         } else {
             for (String p : path) {
                 if (UtilValidate.isNotEmpty(p)) {
-                    canonicalizedContentPath.append(p).append("/");
+                    canonicalizedContentPath.append(p).append(ConstantsJackrabbit.NODEPATHDELIMITER);
                 }
             }
         }

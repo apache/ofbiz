@@ -113,8 +113,6 @@ public class RepositoryAccessJackrabbit implements RepositoryAccess {
     public void storeContentObject(OfbizRepositoryMapping orm) throws ObjectContentManagerException, ItemExistsException {
         ContentWriter contentWriter = new ContentWriterJackrabbit(this.ocm);
         contentWriter.storeContentObject(orm);
-
-        return;
     }
 
     /*

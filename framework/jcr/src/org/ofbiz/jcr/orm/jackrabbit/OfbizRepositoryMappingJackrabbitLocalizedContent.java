@@ -4,6 +4,7 @@ import java.util.GregorianCalendar;
 
 import org.apache.jackrabbit.ocm.mapper.impl.annotation.Field;
 import org.apache.jackrabbit.ocm.mapper.impl.annotation.Node;
+import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit;
 
 @Node(isAbstract = true, extend = OfbizRepositoryMappingJackrabbitUnstructured.class)
 public abstract class OfbizRepositoryMappingJackrabbitLocalizedContent extends OfbizRepositoryMappingJackrabbitUnstructured {
@@ -44,10 +45,10 @@ public abstract class OfbizRepositoryMappingJackrabbitLocalizedContent extends O
     private String createLanguagePath(String contentPath) {
         // the content path should contain the language information
         // TODO this have to be a little bit more intelligent in the future
-        if (contentPath.endsWith("/")) {
+        if (contentPath.endsWith(ConstantsJackrabbit.NODEPATHDELIMITER)) {
             contentPath = contentPath + language;
         } else {
-            contentPath = contentPath + "/" + language;
+            contentPath = contentPath + ConstantsJackrabbit.NODEPATHDELIMITER + language;
         }
 
         return contentPath;

@@ -11,7 +11,6 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.jcr.access.ContentWriter;
 import org.ofbiz.jcr.access.VersioningManager;
-import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit.PROPERTY_FIELDS;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 
 public class ContentWriterJackrabbit implements ContentWriter {
@@ -59,7 +58,7 @@ public class ContentWriterJackrabbit implements ContentWriter {
         // We have to check if the node structure (the sub nodes of the passed
         // ORM Object) exist, otherwise they will be created.
         String path = orm.getPath();
-        String[] nodeStructure = path.split("/");
+        String[] nodeStructure = path.split(ConstantsJackrabbit.NODEPATHDELIMITER);
         Node parentNode = null;
         try {
             parentNode = this.ocm.getSession().getRootNode();
@@ -82,7 +81,7 @@ public class ContentWriterJackrabbit implements ContentWriter {
                 } else {
                     versioningManager.checkOutContentObject(parentNode.getPath());
                     Node newNode = parentNode.addNode(node);
-                    newNode.addMixin(PROPERTY_FIELDS.mixInVERSIONING.getType());
+                    newNode.addMixin(ConstantsJackrabbit.MIXIN_VERSIONING);
                     if (!ConstantsJackrabbit.ROOTPATH.equals(parentNode.getPath())) {
                         newNode.setPrimaryType(parentNode.getPrimaryNodeType().getName());
                     }
