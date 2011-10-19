@@ -1,7 +1,6 @@
 package org.ofbiz.jcr.access;
 
 import java.util.List;
-import java.util.Set;
 
 public interface VersioningManager {
 
