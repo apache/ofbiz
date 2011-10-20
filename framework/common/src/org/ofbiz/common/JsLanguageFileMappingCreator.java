@@ -18,6 +18,8 @@ import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.ServiceUtil;
 
+// Use the createJsLanguageFileMapping service to create or update the JsLanguageFilesMapping.java. You will still need to compile thereafter
+
 public class JsLanguageFileMappingCreator {
 
     private static final String module = JsLanguageFileMappingCreator.class.getName();
@@ -30,25 +32,30 @@ public class JsLanguageFileMappingCreator {
         Map<String, Object> jQueryLocaleFile = FastMap.newInstance();
         Map<String, String> dateJsLocaleFile = FastMap.newInstance();
         Map<String, String> validationLocaleFile = FastMap.newInstance();
+        Map<String, String> dateTimePickerLocaleFile = FastMap.newInstance();
 
         // setup some variables to locate the js files
         String componentRoot = "component://images/webapp";
         String jqueryUiLocaleRelPath = "/images/jquery/ui/development-bundle/ui/i18n/";
         String dateJsLocaleRelPath = "/images/jquery/plugins/datejs/";
         String validateRelPath = "/images/jquery/plugins/validate/localization/";
+        String dateTimePickerJsLocaleRelPath = "/images/jquery/plugins/datetimepicker/localization/";
         String jsFilePostFix = ".js";
         String dateJsLocalePrefix = "date-";
         String validateLocalePrefix = "messages_";
         //String validateMethLocalePrefix = "methods__";
         String jqueryUiLocalePrefix = "jquery.ui.datepicker-";
+        String dateTimePickerPrefix = "jquery-ui-timepicker-";
         String defaultLocaleDateJs = "en-US";
         String defaultLocaleJquery = "en";
 
         for (Locale locale : localeList) {
             String displayCountry = locale.toString();
             String modifiedDisplayCountry = null;
+            String modifiedDisplayCountryForValidation = null;
             if (displayCountry.indexOf('_') != -1) {
                 modifiedDisplayCountry = displayCountry.replace("_", "-");
+                modifiedDisplayCountryForValidation = displayCountry.replace("_", "").toLowerCase(); // fun: in validate plugin we have also ptpt and ptbr for instance...
             } else {
                 modifiedDisplayCountry = displayCountry;
             }
@@ -66,26 +73,19 @@ public class JsLanguageFileMappingCreator {
 
             if (file.exists()) {
                 fileUrl = dateJsLocaleRelPath + dateJsLocalePrefix + modifiedDisplayCountry + jsFilePostFix;
-            }
-
-            if (fileUrl == null) {
+            } else {
                 // Try to guess a language
                 String tmpLocale = strippedLocale + "-" + strippedLocale.toUpperCase();
                 fileName = componentRoot + dateJsLocaleRelPath + dateJsLocalePrefix + tmpLocale + jsFilePostFix;
                 file = FileUtil.getFile(fileName);
                 if (file.exists()) {
                     fileUrl = dateJsLocaleRelPath + dateJsLocalePrefix + tmpLocale + jsFilePostFix;
+                } else {
+                    // use default language en-US
+                    fileUrl = dateJsLocaleRelPath + dateJsLocalePrefix + defaultLocaleDateJs + jsFilePostFix;                    
                 }
             }
-
-            if (fileUrl == null) {
-                // use default language en-US
-                fileUrl = dateJsLocaleRelPath + dateJsLocalePrefix + defaultLocaleDateJs + jsFilePostFix;
-            }
-
             dateJsLocaleFile.put(displayCountry, fileUrl);
-
-            fileUrl = null;
 
             /*
              * Try to open the jquery validation language file
@@ -95,40 +95,60 @@ public class JsLanguageFileMappingCreator {
 
             if (file.exists()) {
                 fileUrl = validateRelPath + validateLocalePrefix + strippedLocale + jsFilePostFix;
-            }
-
-            if (fileUrl == null) {
-                fileUrl = validateRelPath + validateLocalePrefix + defaultLocaleJquery + jsFilePostFix;
+            } else {
+                // Try to guess a language (fun: in validate plugin we have also ptpt and ptbr for instance....)
+                fileName = componentRoot + validateRelPath + validateLocalePrefix + modifiedDisplayCountryForValidation + jsFilePostFix;
+                file = FileUtil.getFile(fileName);
+                if (file.exists()) {
+                    fileUrl = validateRelPath + validateLocalePrefix + modifiedDisplayCountryForValidation + jsFilePostFix;
+                } else {
+                    // use default language en
+                    fileUrl = validateRelPath + validateLocalePrefix + defaultLocaleJquery + jsFilePostFix;
+                }
             }
             validationLocaleFile.put(displayCountry, fileUrl);
-
-            fileUrl = null;
 
             /*
              * Try to open the jquery timepicker language file
              */
-            file = null;
-            fileUrl = null;
-
             fileName = componentRoot + jqueryUiLocaleRelPath + jqueryUiLocalePrefix + strippedLocale + jsFilePostFix;
             file = FileUtil.getFile(fileName);
 
             if (file.exists()) {
                 fileUrl = jqueryUiLocaleRelPath + jqueryUiLocalePrefix + strippedLocale + jsFilePostFix;
             } else {
+                // Try to guess a language
                 fileName = componentRoot + jqueryUiLocaleRelPath + jqueryUiLocalePrefix + modifiedDisplayCountry + jsFilePostFix;
                 file = FileUtil.getFile(fileName);
-
                 if (file.exists()) {
                     fileUrl = jqueryUiLocaleRelPath + jqueryUiLocalePrefix + modifiedDisplayCountry + jsFilePostFix;
+                } else {
+                    // use default language en
+                    fileUrl = jqueryUiLocaleRelPath + jqueryUiLocalePrefix + defaultLocaleJquery + jsFilePostFix;
                 }
             }
-
-            if (fileUrl == null) {
-                fileUrl = jqueryUiLocaleRelPath + jqueryUiLocalePrefix + defaultLocaleJquery + jsFilePostFix;
-            }
-
             jQueryLocaleFile.put(displayCountry, fileUrl);
+
+            /*
+             * Try to open the datetimepicker language file
+             */
+            fileName = componentRoot + dateTimePickerJsLocaleRelPath + dateTimePickerPrefix + strippedLocale + jsFilePostFix;
+            file = FileUtil.getFile(fileName);
+
+            if (file.exists()) {
+                fileUrl = dateTimePickerJsLocaleRelPath + dateTimePickerPrefix + strippedLocale + jsFilePostFix;
+            } else {
+                // Try to guess a language
+                fileName = componentRoot + dateTimePickerJsLocaleRelPath + dateTimePickerPrefix + modifiedDisplayCountry + jsFilePostFix;
+                file = FileUtil.getFile(fileName);
+                if (file.exists()) {
+                    fileUrl = dateTimePickerJsLocaleRelPath + dateTimePickerPrefix + modifiedDisplayCountry + jsFilePostFix;
+                } else {
+                    // use default language en
+                    fileUrl = dateTimePickerJsLocaleRelPath + dateTimePickerPrefix + defaultLocaleJquery + jsFilePostFix;                    
+                }
+            }
+            dateTimePickerLocaleFile.put(displayCountry, fileUrl);
         }
 
         // check the template file
@@ -138,6 +158,7 @@ public class JsLanguageFileMappingCreator {
         mapWrapper.put("datejs", dateJsLocaleFile);
         mapWrapper.put("jquery", jQueryLocaleFile);
         mapWrapper.put("validation", validationLocaleFile);
+        mapWrapper.put("dateTime", dateTimePickerLocaleFile);
 
         // some magic to create a new java file
         // render it as FTL

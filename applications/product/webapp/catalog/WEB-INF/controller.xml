@@ -826,7 +826,9 @@ under the License.
     <request-map uri="UpdateProductAssoc">
         <security https="true" auth="true"/>
         <event type="java" path="org.ofbiz.product.product.ProductEvents" invoke="updateProductAssoc"/>
-        <response name="success" type="view" value="EditProductAssoc"/>
+        <response name="success" type="request-redirect" value="EditProductAssoc">
+            <redirect-parameter name="productId"/>
+        </response>
         <response name="error" type="view" value="EditProductAssoc"/>
     </request-map>
 
@@ -1102,8 +1104,7 @@ under the License.
     <request-map uri="UpdateFeatureCategory">
         <security https="true" auth="true"/>
         <event type="service" path="" invoke="updateProductFeatureCategory"/>
-        <response name="success" type="view" value="EditFeatureCategories"/>
-        <response name="error" type="view" value="EditFeatureCategories"/>
+        <response name="success" type="request-redirect-noparam" value="EditFeatureCategories"/>
     </request-map>
 
     <request-map uri="EditFeatureCategoryFeatures">

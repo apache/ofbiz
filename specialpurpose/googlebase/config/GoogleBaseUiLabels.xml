@@ -88,7 +88,7 @@
     </property>
     <property key="GoogleBaseExportCountryCode">
         <value xml:lang="en">Select your country destination</value>
-        <value xml:lang="fr">Sélectionner votre pays de destination</value>
+        <value xml:lang="fr">Sélectionnez votre pays de destination</value>
         <value xml:lang="it">Seleziona il paese di destinazione</value>
         <value xml:lang="th">เลือกประเทศเป้าหมายของคุณ</value>
         <value xml:lang="zh">选择你的国家和目标</value>
@@ -275,6 +275,10 @@
         <value xml:lang="it">Parametro productCategoryId mancante</value>
         <value xml:lang="th">ไม่พบพารามิเตอร์รหัสหมวดหมู่สินค้า</value>
         <value xml:lang="zh">缺少productCategoryId参数</value>
+    </property>
+    <property key="productsExportToGoogle.missingProduct">
+        <value xml:lang="en">You have to choose any product(s)</value>
+        <value xml:lang="fr">Vous devez choisir un ou des produits</value>
     </property>
     <property key="productsExportToGoogle.noProductsAvailableInProductCategory">
         <value xml:lang="en">No products available in the selected productCategoryId</value>
