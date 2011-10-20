@@ -97,7 +97,9 @@ public class JcrUtilJackrabbit implements JcrUtil {
      * @return
      */
     public static String createAbsoluteNodePath(String nodePath) {
-        if (!checkIfNodePathIsAbsolute(nodePath)) {
+        if (UtilValidate.isEmpty(nodePath)) {
+            nodePath = ConstantsJackrabbit.ROOTPATH;
+        } else if (!checkIfNodePathIsAbsolute(nodePath)) {
             nodePath = ConstantsJackrabbit.ROOTPATH + nodePath;
         }
 

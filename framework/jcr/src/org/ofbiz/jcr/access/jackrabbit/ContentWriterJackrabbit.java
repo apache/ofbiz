@@ -67,6 +67,12 @@ public class ContentWriterJackrabbit implements ContentWriter {
             return;
         }
 
+        // Read a primary node type from the mapping annotation class
+        // TODO Check for a better solution because here we have a cross
+        // reference to the Jackrabbit ORM Package.
+        org.apache.jackrabbit.ocm.mapper.impl.annotation.Node annotationNode = orm.getClass().getAnnotation(org.apache.jackrabbit.ocm.mapper.impl.annotation.Node.class);
+        String primNodeType = annotationNode.jcrType();
+
         // We loop only over the sub nodes.
         for (int i = 0; i < (nodeStructure.length - 1); i++) {
             String node = nodeStructure[i];
@@ -80,7 +86,8 @@ public class ContentWriterJackrabbit implements ContentWriter {
                     versioningManager.checkOutContentObject(parentNode.getPath());
                 } else {
                     versioningManager.checkOutContentObject(parentNode.getPath());
-                    Node newNode = parentNode.addNode(node);
+
+                    Node newNode = parentNode.addNode(node, primNodeType);
                     newNode.addMixin(ConstantsJackrabbit.MIXIN_VERSIONING);
                     if (!ConstantsJackrabbit.ROOTPATH.equals(parentNode.getPath())) {
                         newNode.setPrimaryType(parentNode.getPrimaryNodeType().getName());

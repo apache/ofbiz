@@ -11,7 +11,9 @@ import org.apache.jackrabbit.ocm.exception.ObjectContentManagerException;
 import org.apache.tika.Tika;
 import org.apache.tika.io.TikaInputStream;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit;
 import org.ofbiz.jcr.access.jackrabbit.RepositoryAccessJackrabbit;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFile;
@@ -102,6 +104,11 @@ public class JcrFileHelper extends AbstractJcrHelper {
      * @throws RepositoryException
      */
     public void storeContentInRepository(byte[] fileData, String fileName, String folderPath) throws ObjectContentManagerException, RepositoryException {
+        if (UtilValidate.isEmpty(folderPath)) {
+            throw new ObjectContentManagerException("Please specify a folder path, the folder path should not be empty!");
+        } else if (ConstantsJackrabbit.ROOTPATH.equals(folderPath)){
+            throw new ObjectContentManagerException("Please specify a folder, a file content can't be stored directly under root.");
+        }
 
         // create an ORM Resource Object
         OfbizRepositoryMappingJackrabbitResource ormResource = new OfbizRepositoryMappingJackrabbitResource();
