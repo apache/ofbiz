@@ -226,6 +226,9 @@ public class ShoppingCart implements Serializable {
         while (itIt.hasNext()) {
             cartLines.add(new ShoppingCartItem((ShoppingCartItem) itIt.next()));
         }
+        
+        this.facilityId = cart.facilityId;
+        this.webSiteId = cart.webSiteId;
     }
 
     /** Creates new empty ShoppingCart object. */
@@ -253,6 +256,7 @@ public class ShoppingCart implements Serializable {
         String storeViewCartOnAdd = productStore.getString("viewCartOnAdd");
         if (storeViewCartOnAdd != null && "Y".equalsIgnoreCase(storeViewCartOnAdd)) {
             this.viewCartOnAdd = true;
+            this.facilityId = productStore.getString("inventoryFacilityId");
         }
 
         if (billFromVendorPartyId == null) {
