@@ -231,6 +231,9 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         while (itIt.hasNext()) {
             cartLines.add(new ShoppingCartItem(itIt.next()));
         }
+        
+        this.facilityId = cart.facilityId;
+        this.webSiteId = cart.webSiteId;
     }
 
     /** Creates new empty ShoppingCart object. */
@@ -262,6 +265,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
                 // since default cart is of type SALES_ORDER, set to store's payToPartyId
                 this.billFromVendorPartyId = productStore.getString("payToPartyId");
             }
+            this.facilityId = productStore.getString("inventoryFacilityId");
         }
 
     }
@@ -3531,17 +3535,17 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
                 if (UtilValidate.isEmpty(item.getOrderItemSeqId())) {
                     String orderItemSeqId = UtilFormatOut.formatPaddedNumber(nextItemSeq, 5);
                     item.setOrderItemSeqId(orderItemSeqId);
+                    nextItemSeq++;
                 } else {
                     try {
                         int thisSeqId = Integer.parseInt(item.getOrderItemSeqId());
                         if (thisSeqId > nextItemSeq) {
-                            nextItemSeq = thisSeqId;
+                            nextItemSeq = thisSeqId + 1;
                         }
                     } catch (NumberFormatException e) {
                         Debug.logError(e, module);
                     }
                 }
-                nextItemSeq++;
 
                 // the initial status for all item types
                 String initialStatus = "ITEM_CREATED";

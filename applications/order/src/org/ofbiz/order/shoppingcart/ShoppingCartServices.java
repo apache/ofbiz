@@ -503,6 +503,7 @@ public class ShoppingCartServices {
                 cartItem.setShoppingList(item.getString("shoppingListId"), item.getString("shoppingListItemSeqId"));
                 cartItem.setIsModifiedPrice("Y".equals(item.getString("isModifiedPrice")));
                 cartItem.setName(item.getString("itemDescription"));
+                cartItem.setExternalId(item.getString("externalId"));
 
                 // load order item attributes
                 List<GenericValue> orderItemAttributesList = null;
@@ -614,7 +615,7 @@ public class ShoppingCartServices {
             // set the item seq in the cart
             if (nextItemSeq > 0) {
                 try {
-                    cart.setNextItemSeq(nextItemSeq);
+                    cart.setNextItemSeq(nextItemSeq+1);
                 } catch (GeneralException e) {
                     Debug.logError(e, module);
                     return ServiceUtil.returnError(e.getMessage());
@@ -929,7 +930,7 @@ public class ShoppingCartServices {
         // set the item seq in the cart
         if (nextItemSeq > 0) {
             try {
-                cart.setNextItemSeq(nextItemSeq);
+                cart.setNextItemSeq(nextItemSeq+1);
             } catch (GeneralException e) {
                 Debug.logError(e, module);
                 return ServiceUtil.returnError(e.getMessage());
@@ -1076,7 +1077,7 @@ public class ShoppingCartServices {
         // set the item seq in the cart
         if (nextItemSeq > 0) {
             try {
-                cart.setNextItemSeq(nextItemSeq);
+                cart.setNextItemSeq(nextItemSeq+1);
             } catch (GeneralException e) {
                 Debug.logError(e, module);
                 return ServiceUtil.returnError(e.getMessage());
