@@ -307,6 +307,12 @@ public class FindServices {
             } else if ("not-like".equals(operation) || "notLike".equals(operation)) {
                 fieldOp = EntityOperator.NOT_LIKE;
                 fieldValue = fieldValue + "%";
+            } else if ("opLessThan".equals(operation)) {
+                fieldOp = EntityOperator.LESS_THAN;
+            } else if ("upToDay".equals(operation)) {
+                fieldOp = EntityOperator.LESS_THAN;
+            } else if ("upThruDay".equals(operation)) {
+                fieldOp = EntityOperator.LESS_THAN_EQUAL_TO;
             } else if (operation.equals("greaterThanFromDayStart")) {
                 String timeStampString = (String) fieldValue;
                 Object startValue = modelField.getModelEntity().convertFieldValue(modelField, dayStart(timeStampString, 0), delegator, context);
@@ -519,7 +525,7 @@ public class FindServices {
      * This is a generic method that expects entity data affixed with special suffixes
      * to indicate their purpose in formulating an SQL query statement.
      */
-    public static Map prepareFind(DispatchContext dctx, Map<String, ?> context) {
+    public static Map<String, Object> prepareFind(DispatchContext dctx, Map<String, ?> context) {
         String entityName = (String) context.get("entityName");
         String orderBy = (String) context.get("orderBy");
         Map<String, ?> inputFields = checkMap(context.get("inputFields"), String.class, Object.class); // Input
@@ -562,7 +568,7 @@ public class FindServices {
             }
         }
 
-        EntityConditionList exprList = null;
+        EntityConditionList<EntityCondition> exprList = null;
         if (tmpList.size() > 0) {
             exprList = EntityCondition.makeCondition(tmpList);
         }
