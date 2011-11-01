@@ -142,3 +142,4 @@ if (templatePathPrefix) {
 
 // set the template for the view
 context.detailScreen = detailScreen;
+}
