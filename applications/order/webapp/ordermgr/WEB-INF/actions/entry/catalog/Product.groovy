@@ -119,6 +119,7 @@ if (productId) {
                             keywords.add(categoryDescription);
                     }
                 }
+            }
             context.metaKeywords = StringUtil.join(keywords, ", ");
         }
 
@@ -142,4 +143,3 @@ if (templatePathPrefix) {
 
 // set the template for the view
 context.detailScreen = detailScreen;
-}
