@@ -48,6 +48,8 @@
         <attribute name="fromDate" type="Timestamp" mode="IN" optional="true"/>
         <attribute name="sequenceNum" type="Long" mode="IN" optional="true"/>
         <override name="contentTypeId" default-value="DOCUMENT"/>
+        <override name="contentName" allow-html="safe"/>
+        <override name="description" allow-html="safe"/>
     </service>
 
     <service name="createTextAndUploadedContent" engine="simple" auth="true"
@@ -129,6 +131,8 @@
         <attribute mode="IN" name="displayFailCond" optional="true" type="Boolean"/>
         <attribute mode="INOUT" name="roleTypeList" optional="true" type="List"/>
         <!-- end of depricated fields -->
+        <override name="contentName" allow-html="safe"/>
+        <override name="description" allow-html="safe"/>
     </service>
 
     <service name="updateTextContent" engine="group" auth="true">
@@ -341,6 +345,7 @@
                 location="component://content/script/org/ofbiz/content/content/ContentServices.xml" invoke="createMissingContentAltUrls" auth="true" use-transaction="false">
         <description>Create missing Content Alternative URLs</description>
         <attribute name="prodCatalogId" mode="IN" type="String" optional="false"/>
+        <attribute name="webSiteId" mode="IN" type="String" optional="true"/>
         <attribute name="contentsNotUpdated" mode="OUT" type="Integer" optional="true"/>
         <attribute name="contentsUpdated" mode="OUT" type="Integer" optional="true"/>
     </service>
