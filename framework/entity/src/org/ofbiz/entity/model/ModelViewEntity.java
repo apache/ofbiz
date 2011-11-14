@@ -1230,8 +1230,18 @@ public class ModelViewEntity extends ModelEntity {
 
             this.operator = UtilFormatOut.checkEmpty(conditionExprElement.getAttribute("operator"), "equals");
             this.relEntityAlias = conditionExprElement.getAttribute("rel-entity-alias");
-            this.relFieldName = conditionExprElement.getAttribute("rel-field-name");
-            this.value = conditionExprElement.getAttribute("value");
+            String relFieldNameStr = conditionExprElement.getAttribute("rel-field-name");
+            if (UtilValidate.isEmpty(relFieldNameStr)) {
+                this.relFieldName = null;
+            } else {
+                this.relFieldName = relFieldNameStr;
+            }
+            String valueStr = conditionExprElement.getAttribute("value");
+            if (UtilValidate.isEmpty(valueStr)) {
+                this.value = null;
+            } else {
+                this.value = valueStr;
+            }
             this.ignoreCase = "true".equals(conditionExprElement.getAttribute("ignore-case"));
 
             // if we are in a view-link, default to the entity-alias and rel-entity-alias there
