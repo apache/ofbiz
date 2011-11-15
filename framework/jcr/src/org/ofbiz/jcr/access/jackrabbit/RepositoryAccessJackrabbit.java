@@ -5,6 +5,7 @@ import java.util.List;
 import javax.jcr.ItemExistsException;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.query.QueryResult;
 
 import net.sf.json.JSONArray;
 
@@ -212,5 +213,15 @@ public class RepositoryAccessJackrabbit implements RepositoryAccess {
     public JSONArray getJsonFileTree() throws RepositoryException {
         ContentReader contentReader = new ContentReaderJackrabbit(this.ocm);
         return contentReader.getJsonFileTree();
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.ofbiz.jcr.access.RepositoryAccess#queryForRepositoryData(java.lang.String)
+     */
+    @Override
+    public QueryResult queryForRepositoryData(String query) throws RepositoryException{
+        ContentReader contentReader = new ContentReaderJackrabbit(this.ocm);
+        return contentReader.queryRepositoryData(query);
     }
 }

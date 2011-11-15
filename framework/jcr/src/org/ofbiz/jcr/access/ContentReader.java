@@ -1,6 +1,7 @@
 package org.ofbiz.jcr.access;
 
 import javax.jcr.RepositoryException;
+import javax.jcr.query.QueryResult;
 
 import net.sf.json.JSONArray;
 
@@ -45,4 +46,14 @@ public interface ContentReader {
      * @throws RepositoryException
      */
     JSONArray getJsonFileTree() throws RepositoryException;
+
+    /**
+     * Query for Data in the JCR Repository using the SQL2 or JQOM Query
+     * language. Returns the Query Result.
+     *
+     * @param query
+     *            either a SQL2 or JQOM statement.
+     * @return
+     */
+    QueryResult queryRepositoryData(String query) throws RepositoryException;
 }

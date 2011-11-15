@@ -3,6 +3,9 @@ package org.ofbiz.jcr.access.jackrabbit;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
+import javax.jcr.query.Query;
+import javax.jcr.query.QueryManager;
+import javax.jcr.query.QueryResult;
 import javax.jcr.version.VersionException;
 
 import net.sf.json.JSONArray;
@@ -81,6 +84,17 @@ public class ContentReaderJackrabbit implements ContentReader {
     @Override
     public JSONArray getJsonFileTree() throws RepositoryException {
         return getJsonFileChildNodes(ocm.getSession().getRootNode());
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.access.ContentReader#queryRepositoryData(java.lang.String)
+     */
+    @Override
+    public QueryResult queryRepositoryData(String query) throws RepositoryException {
+        return executeQuery(query);
     }
 
     /**
@@ -166,5 +180,26 @@ public class ContentReaderJackrabbit implements ContentReader {
         }
 
         return folderStrucutre;
+    }
+
+    /**
+     * Executes the query specified by <code>statement</code> and returns the
+     * query result.
+     *
+     * @param statement
+     *            either a SQL2 or JQOM statement.
+     * @return the query result.
+     * @throws RepositoryException
+     *             if an error occurs.
+     */
+    protected QueryResult executeQuery(String statement) throws RepositoryException {
+        // TODO create a query manager which uses the OCM Layer.
+        QueryManager qm = ocm.getSession().getWorkspace().getQueryManager();
+
+        if (statement.trim().toLowerCase().startsWith("select")) {
+            return qm.createQuery(statement, Query.JCR_SQL2).execute();
+        } else {
+            return qm.createQuery(statement, Query.JCR_JQOM).execute();
+        }
     }
 }

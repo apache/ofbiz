@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.jcr.ItemExistsException;
 import javax.jcr.RepositoryException;
+import javax.jcr.query.QueryResult;
 
 import net.sf.json.JSONArray;
 
@@ -110,4 +111,14 @@ public interface RepositoryAccess {
      * @return
      */
     public String getRootVersion(String nodePath);
+
+    /**
+     * Query for Data in the JCR Repository using the SQL2 or JQOM Query
+     * language. Returns the Query result.
+     *
+     * @param query
+     *            either a SQL2 or JQOM statement.
+     * @return
+     */
+    public QueryResult queryForRepositoryData(String query) throws RepositoryException;
 }

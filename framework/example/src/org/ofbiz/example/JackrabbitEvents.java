@@ -317,19 +317,19 @@ public class JackrabbitEvents {
         }
 
         try {
-        for (String path : contentList) {
-            Node parent = session.getNode(path);
-            NodeIterator ni = parent.getNodes();
-            List<String> language = new ArrayList<String>();
-            while (ni.hasNext()) {
-                Node t = ni.nextNode();
+            for (String path : contentList) {
+                Node parent = session.getNode(path);
+                NodeIterator ni = parent.getNodes();
+                List<String> language = new ArrayList<String>();
+                while (ni.hasNext()) {
+                    Node t = ni.nextNode();
                     if (t.hasProperty("localized") && t.getProperty("localized").getBoolean()) {
                         String l = t.getPath();
                         language.add(l.substring(l.lastIndexOf("/") + 1));
                     }
+                }
+                languageList.put(path, language);
             }
-            languageList.put(path, language);
-        }
         } catch (ValueFormatException e) {
             Debug.logError(e, module);
         } catch (PathNotFoundException e) {
@@ -403,6 +403,24 @@ public class JackrabbitEvents {
             OfbizRepositoryMappingJackrabbitFolder folder = (OfbizRepositoryMappingJackrabbitFolder) orm;
             request.setAttribute("fileName", folder.getPath());
             request.setAttribute("fileCreationDate", folder.getCreationDate().getTime());
+        }
+
+        return "success";
+    }
+
+    public static String queryRepositoryData(HttpServletRequest request, HttpServletResponse response) {
+        GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
+
+        String searchQuery = request.getParameter("queryData");
+
+        JcrContentHelper helper = new JcrContentHelper(userLogin);
+
+        try {
+            request.setAttribute("queryResult", helper.queryData(searchQuery));
+        } catch (RepositoryException e) {
+            Debug.logError(e, module);
+            request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
+            return "error";
         }
 
         return "success";

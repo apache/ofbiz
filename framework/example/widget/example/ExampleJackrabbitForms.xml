@@ -48,7 +48,7 @@ under the License.
         <field name="contentDropDown" position="1">
             <drop-down ><list-options key-name="contentList" description="${contentList}" list-name="parameters.contentList" list-entry-name="contentList"/></drop-down>
         </field>
-        
+
         <!--
         <field name="languageDropDown" position="2" title="">
             <drop-down><list-options key-name="languageList" list-name="parameters.languageList"/></drop-down>
@@ -153,5 +153,15 @@ under the License.
         <field name="fileCreationDate">
             <display />
         </field>
+    </form>
+
+    <form name="QueryRepositoryDataForm" type="single" target="QueryRepositoryData">
+        <field name="queryData" ><text /></field>
+        <field name="submit"><submit/></field>
+    </form>
+
+    <form name="ExampleJackrabbitShowQueryResults" type="list" target="EditRepositoryContent" list-name="queryResult" separate-columns="true" odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <field name="path" title="${uiLabelMap.ExampleRepositoryNode}" ><hyperlink target="EditRepositoryContent" description="${path}"><parameter param-name="path"/></hyperlink></field>
+        <field name="score" ><display /></field>
     </form>
 </forms>

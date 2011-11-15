@@ -865,5 +865,9 @@
         <value xml:lang="de">Content Schnellauswahl - Content Node auswählen und Sprache bestimmen.</value>
         <value xml:lang="en">Content quick select - Choose your content node and select a language.</value>
     </property>
+    <property key="ExampleJackrabbitQueryForContent">
+        <value xml:lang="de">Das Repository kann mit Hilfe der SQL2 oder JQOM Query Language durchsucht werden: z.B. SELECT * FROM [nt:unstructured] gibt alle nodes vom Typ nt:unstructured zurück.</value>
+        <value xml:lang="en">You can search the repository by using SQL2 or JQOM query syntax: i.e. SELECT * FROM [nt:unstructured] gives all nodes with the typ nt:unstructured.</value>
+    </property>
 
 </resource>

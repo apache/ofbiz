@@ -57,6 +57,10 @@ under the License.
                             </platform-specific>
                         </container>
                         <container>
+                            <label>${uiLabelMap.ExampleJackrabbitQueryForContent}</label>
+                            <include-form location="component://example/widget/example/ExampleJackrabbitForms.xml" name="QueryRepositoryDataForm" />
+                        </container>
+                        <container>
                             <label>${uiLabelMap.ExampleJackrabbitTryRightClick}</label>
                             <platform-specific>
                                 <html><html-template location="component://example/webapp/example/jackrabbit/JackrabbitDataTree.ftl"/></html>
@@ -180,6 +184,25 @@ under the License.
                     <decorator-section name="body">
                         <container>
                             <include-form location="component://example/widget/example/ExampleJackrabbitForms.xml" name="ExampleJackrabbitShowFileInformation" />
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ExampleJackrabbitShowQueryResult">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleExampleJackrabbit" />
+                <set field="tabButtonItem" value="ExampleJackrabbitShowContentData" />
+                <set field="queryResult" from-field="parameters.queryResult"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonExampleJackrabbitDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <include-form location="component://example/widget/example/ExampleJackrabbitForms.xml" name="ExampleJackrabbitShowQueryResults" />
                         </container>
                     </decorator-section>
                 </decorator-screen>
