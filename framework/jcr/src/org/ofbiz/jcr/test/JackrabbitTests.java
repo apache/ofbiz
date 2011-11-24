@@ -28,7 +28,7 @@ import javolution.util.FastMap;
 
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.jcr.access.RepositoryAccess;
+import org.ofbiz.jcr.access.JcrRepositoryAccessor;
 import org.ofbiz.jcr.access.jackrabbit.RepositoryAccessJackrabbit;
 import org.ofbiz.jcr.api.JcrArticleHelper;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFile;
@@ -39,12 +39,12 @@ import org.ofbiz.jcr.util.jackrabbit.JcrUtilJackrabbit;
 import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.service.testtools.OFBizTestCase;
 
-public class JcrTests extends OFBizTestCase {
+public class JackrabbitTests extends OFBizTestCase {
 
     protected GenericValue userLogin = null;
-    RepositoryAccess repositoryAccess = null;
+    JcrRepositoryAccessor repositoryAccess = null;
 
-    public JcrTests(String name) {
+    public JackrabbitTests(String name) {
         super(name);
     }
 

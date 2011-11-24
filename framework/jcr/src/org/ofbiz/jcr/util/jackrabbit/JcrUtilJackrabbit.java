@@ -15,9 +15,8 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit;
 import org.ofbiz.jcr.loader.JCRFactoryUtil;
-import org.ofbiz.jcr.util.JcrUtil;
 
-public class JcrUtilJackrabbit implements JcrUtil {
+public class JcrUtilJackrabbit {
 
     public static final String module = JcrUtilJackrabbit.class.getName();
 

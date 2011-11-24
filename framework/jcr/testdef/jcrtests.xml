@@ -29,8 +29,8 @@
     -->
 
 
-    <test-case case-name="jcr-tests">
-        <junit-test-suite class-name="org.ofbiz.jcr.test.JcrTests"/>
+    <test-case case-name="jackrabbit-tests">
+        <junit-test-suite class-name="org.ofbiz.jcr.test.JackrabbitTests"/>
     </test-case>
 
 </test-suite>

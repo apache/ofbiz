@@ -15,13 +15,13 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.ContentReader;
 import org.ofbiz.jcr.access.ContentWriter;
-import org.ofbiz.jcr.access.RepositoryAccess;
+import org.ofbiz.jcr.access.JcrRepositoryAccessor;
 import org.ofbiz.jcr.access.VersioningManager;
 import org.ofbiz.jcr.loader.JCRFactoryUtil;
 import org.ofbiz.jcr.loader.jackrabbit.JCRFactoryImpl;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 
-public class RepositoryAccessJackrabbit implements RepositoryAccess {
+public class RepositoryAccessJackrabbit implements JcrRepositoryAccessor {
 
     private static String module = RepositoryAccessJackrabbit.class.getName();
 

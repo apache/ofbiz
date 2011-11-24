@@ -53,19 +53,7 @@ public class JcrFileHelper extends AbstractJcrHelper {
      * @throws
      */
     public OfbizRepositoryMappingJackrabbitHierarchyNode getRepositoryContent(String contentPath) throws ClassCastException {
-        OfbizRepositoryMapping orm = access.getContentObject(contentPath);
-
-        if (orm instanceof OfbizRepositoryMappingJackrabbitFile) {
-            OfbizRepositoryMappingJackrabbitFile fileObj = (OfbizRepositoryMappingJackrabbitFile) orm;
-            hierarchy = fileObj;
-            return fileObj;
-        } else if (orm instanceof OfbizRepositoryMappingJackrabbitFolder) {
-            OfbizRepositoryMappingJackrabbitFolder fileObj = (OfbizRepositoryMappingJackrabbitFolder) orm;
-            hierarchy = fileObj;
-            return fileObj;
-        }
-
-        throw new ClassCastException("The content object for the path: " + contentPath + " is not a file content object. This Helper can only handle content objects with the type: " + OfbizRepositoryMappingJackrabbitFile.class.getName());
+        return getRepositoryContent(contentPath, null);
     }
 
     /**
@@ -78,7 +66,12 @@ public class JcrFileHelper extends AbstractJcrHelper {
      * @throws
      */
     public OfbizRepositoryMappingJackrabbitHierarchyNode getRepositoryContent(String contentPath, String version) throws ClassCastException {
-        OfbizRepositoryMapping orm = access.getContentObject(contentPath, version);
+        OfbizRepositoryMapping orm = null;
+        if (version != null) {
+            orm = access.getContentObject(contentPath, version);
+        } else {
+            orm = access.getContentObject(contentPath);
+        }
 
         if (orm instanceof OfbizRepositoryMappingJackrabbitFile) {
             OfbizRepositoryMappingJackrabbitFile fileObj = (OfbizRepositoryMappingJackrabbitFile) orm;
@@ -106,7 +99,7 @@ public class JcrFileHelper extends AbstractJcrHelper {
     public void storeContentInRepository(byte[] fileData, String fileName, String folderPath) throws ObjectContentManagerException, RepositoryException {
         if (UtilValidate.isEmpty(folderPath)) {
             throw new ObjectContentManagerException("Please specify a folder path, the folder path should not be empty!");
-        } else if (ConstantsJackrabbit.ROOTPATH.equals(folderPath)){
+        } else if (ConstantsJackrabbit.ROOTPATH.equals(folderPath)) {
             throw new ObjectContentManagerException("Please specify a folder, a file content can't be stored directly under root.");
         }
 
@@ -122,7 +115,8 @@ public class JcrFileHelper extends AbstractJcrHelper {
         ormFile.setResource(ormResource);
         ormFile.setPath(fileName);
 
-        // Create the folder if necessary, otherwise we just update the folder content
+        // Create the folder if necessary, otherwise we just update the folder
+        // content
         folderPath = JcrUtilJackrabbit.createAbsoluteNodePath(folderPath);
         if (access.getSession().itemExists(folderPath)) {
             OfbizRepositoryMapping orm = access.getContentObject(folderPath);
@@ -140,11 +134,12 @@ public class JcrFileHelper extends AbstractJcrHelper {
             access.storeContentObject(ormFolder);
         }
 
-
     }
 
     /**
-     * Returns TRUE if the current content is a file content (Type: OfbizRepositoryMappingJackrabbitFile)
+     * Returns TRUE if the current content is a file content (Type:
+     * OfbizRepositoryMappingJackrabbitFile)
+     *
      * @return
      */
     public boolean isFileContent() {
@@ -152,7 +147,9 @@ public class JcrFileHelper extends AbstractJcrHelper {
     }
 
     /**
-     * Returns TRUE if the current content is a folder content (Type: OfbizRepositoryMappingJackrabbitFolder)
+     * Returns TRUE if the current content is a folder content (Type:
+     * OfbizRepositoryMappingJackrabbitFolder)
+     *
      * @return
      */
     public boolean isFolderContent() {

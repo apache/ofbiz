@@ -2,9 +2,7 @@ package org.ofbiz.jcr.access.jackrabbit;
 
 import javax.jcr.nodetype.NodeType;
 
-import org.ofbiz.jcr.access.Constants;
-
-public class ConstantsJackrabbit implements Constants {
+public class ConstantsJackrabbit {
     // JCR Variables
     public static String MESSAGE = "jcr:message";
     public static String FILE = NodeType.NT_FILE;

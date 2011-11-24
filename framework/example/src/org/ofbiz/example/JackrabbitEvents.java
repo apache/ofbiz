@@ -36,7 +36,7 @@ import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.jcr.access.RepositoryAccess;
+import org.ofbiz.jcr.access.JcrRepositoryAccessor;
 import org.ofbiz.jcr.access.jackrabbit.RepositoryAccessJackrabbit;
 import org.ofbiz.jcr.api.JcrArticleHelper;
 import org.ofbiz.jcr.api.JcrContentHelper;
@@ -263,7 +263,7 @@ public class JackrabbitEvents {
     public static String getRepositoryFileTree(HttpServletRequest request, HttpServletResponse response) {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
 
-        RepositoryAccess repositoryAccess = new RepositoryAccessJackrabbit(userLogin);
+        JcrRepositoryAccessor repositoryAccess = new RepositoryAccessJackrabbit(userLogin);
         try {
             JSONArray fileTree = repositoryAccess.getJsonFileTree();
             request.setAttribute("fileTree", StringUtil.wrapString(fileTree.toString()));

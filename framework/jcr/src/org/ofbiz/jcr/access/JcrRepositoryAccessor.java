@@ -11,7 +11,7 @@ import net.sf.json.JSONArray;
 import org.apache.jackrabbit.ocm.exception.ObjectContentManagerException;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 
-public interface RepositoryAccess {
+public interface JcrRepositoryAccessor {
 
     /**
      * Close the current repository session should be used when the operation
