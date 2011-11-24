@@ -13,7 +13,7 @@ import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.jcr.access.jackrabbit.RepositoryAccessJackrabbit;
+import org.ofbiz.jcr.access.jackrabbit.JackrabbitRepositoryAccessor;
 
 /**
  * This Helper class encapsulate the jcr content access. It provide all
@@ -37,7 +37,7 @@ public class JcrContentHelper extends AbstractJcrHelper {
      * @param userLogin
      */
     public JcrContentHelper(GenericValue userLogin) {
-        access = new RepositoryAccessJackrabbit(userLogin);
+        access = new JackrabbitRepositoryAccessor(userLogin);
     }
 
     public List<Map<String, String>> queryData(String query) throws RepositoryException {

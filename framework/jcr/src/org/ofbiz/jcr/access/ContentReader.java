@@ -10,7 +10,8 @@ import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 public interface ContentReader {
 
     /**
-     * Return an OfbizRepositoryMapping Object from the JCR Repository.
+     * Return an OfbizRepositoryMapping Object from the JCR Repository. The node
+     * path have to be an absolute path.
      *
      * @param nodePath
      * @return
@@ -21,7 +22,7 @@ public interface ContentReader {
      * Return an OfbizRepositoryMapping Object in the specified language and
      * version from the JCR Repository. The Method checks if the requested
      * version for this node exist. If not the latest version of the node will
-     * be returned.
+     * be returned. The node path have to be an absolute path.
      *
      * @param nodePath
      * @param language

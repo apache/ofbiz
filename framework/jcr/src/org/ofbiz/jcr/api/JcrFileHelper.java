@@ -14,7 +14,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit;
-import org.ofbiz.jcr.access.jackrabbit.RepositoryAccessJackrabbit;
+import org.ofbiz.jcr.access.jackrabbit.JackrabbitRepositoryAccessor;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFile;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFolder;
@@ -41,7 +41,7 @@ public class JcrFileHelper extends AbstractJcrHelper {
     private OfbizRepositoryMappingJackrabbitHierarchyNode hierarchy = null;
 
     public JcrFileHelper(GenericValue userLogin) {
-        access = new RepositoryAccessJackrabbit(userLogin);
+        access = new JackrabbitRepositoryAccessor(userLogin);
     }
 
     /**
@@ -97,6 +97,20 @@ public class JcrFileHelper extends AbstractJcrHelper {
      * @throws RepositoryException
      */
     public void storeContentInRepository(byte[] fileData, String fileName, String folderPath) throws ObjectContentManagerException, RepositoryException {
+        storeContentInRepository(new ByteArrayInputStream(fileData), fileName, folderPath);
+    }
+
+    /**
+     * Stores a new file content object in the repository.
+     *
+     * @param fileData
+     * @param fileName
+     * @param folderPath
+     * @param mimeType
+     * @throws ObjectContentManagerException
+     * @throws RepositoryException
+     */
+    public void storeContentInRepository(InputStream fileData, String fileName, String folderPath) throws ObjectContentManagerException, RepositoryException {
         if (UtilValidate.isEmpty(folderPath)) {
             throw new ObjectContentManagerException("Please specify a folder path, the folder path should not be empty!");
         } else if (ConstantsJackrabbit.ROOTPATH.equals(folderPath)) {
@@ -105,8 +119,8 @@ public class JcrFileHelper extends AbstractJcrHelper {
 
         // create an ORM Resource Object
         OfbizRepositoryMappingJackrabbitResource ormResource = new OfbizRepositoryMappingJackrabbitResource();
-        ormResource.setData(new ByteArrayInputStream(fileData));
-        ormResource.setMimeType(getMimeTypeFromInputStream(new ByteArrayInputStream(fileData)));
+        ormResource.setData(fileData);
+        ormResource.setMimeType(getMimeTypeFromInputStream(fileData));
         ormResource.setLastModified(new GregorianCalendar());
 
         // create an ORM File Object

@@ -12,6 +12,7 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.jcr.access.ContentWriter;
 import org.ofbiz.jcr.access.VersioningManager;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
+import org.ofbiz.jcr.util.jackrabbit.JcrUtilJackrabbit;
 
 public class ContentWriterJackrabbit implements ContentWriter {
 
@@ -134,6 +135,7 @@ public class ContentWriterJackrabbit implements ContentWriter {
      */
     @Override
     public void removeContentObject(String nodePath) throws ObjectContentManagerException {
+        nodePath = JcrUtilJackrabbit.createAbsoluteNodePath(nodePath);
         versioningManager.checkOutContentObject(nodePath, true);
 
         ocm.remove(nodePath);

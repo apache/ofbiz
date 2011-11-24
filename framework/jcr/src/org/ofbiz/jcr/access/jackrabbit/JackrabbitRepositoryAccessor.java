@@ -21,9 +21,9 @@ import org.ofbiz.jcr.loader.JCRFactoryUtil;
 import org.ofbiz.jcr.loader.jackrabbit.JCRFactoryImpl;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 
-public class RepositoryAccessJackrabbit implements JcrRepositoryAccessor {
+public class JackrabbitRepositoryAccessor implements JcrRepositoryAccessor {
 
-    private static String module = RepositoryAccessJackrabbit.class.getName();
+    private static String module = JackrabbitRepositoryAccessor.class.getName();
 
     Session session = null;
     ObjectContentManagerImpl ocm = null;
@@ -33,7 +33,7 @@ public class RepositoryAccessJackrabbit implements JcrRepositoryAccessor {
      *
      * @param userLogin
      */
-    public RepositoryAccessJackrabbit(GenericValue userLogin) {
+    public JackrabbitRepositoryAccessor(GenericValue userLogin) {
         // TODO pass the userLogin to the getSession() method and perform some
         this(JCRFactoryUtil.getSession());
     }
@@ -43,7 +43,7 @@ public class RepositoryAccessJackrabbit implements JcrRepositoryAccessor {
      *
      * @param userLogin
      */
-    public RepositoryAccessJackrabbit(Session session) {
+    public JackrabbitRepositoryAccessor(Session session) {
         if (session == null) {
             Debug.logWarning("A repository session is needed to create an OfbizContentMapping Object.", module);
             return;

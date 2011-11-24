@@ -29,168 +29,135 @@ import javolution.util.FastMap;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.JcrRepositoryAccessor;
-import org.ofbiz.jcr.access.jackrabbit.RepositoryAccessJackrabbit;
+import org.ofbiz.jcr.access.jackrabbit.JackrabbitRepositoryAccessor;
 import org.ofbiz.jcr.api.JcrArticleHelper;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFile;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFolder;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitNews;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitResource;
+import org.ofbiz.jcr.api.JcrFileHelper;
+import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle;
 import org.ofbiz.jcr.util.jackrabbit.JcrUtilJackrabbit;
 import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.service.testtools.OFBizTestCase;
 
 public class JackrabbitTests extends OFBizTestCase {
 
-    protected GenericValue userLogin = null;
-    JcrRepositoryAccessor repositoryAccess = null;
+	protected GenericValue userLogin = null;
 
-    public JackrabbitTests(String name) {
-        super(name);
-    }
+	public JackrabbitTests(String name) {
+		super(name);
+	}
 
-    @Override
-    protected void setUp() throws Exception {
-        userLogin = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
-        repositoryAccess = new RepositoryAccessJackrabbit(userLogin);
-    }
+	@Override
+	protected void setUp() throws Exception {
+		userLogin = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
 
-    @Override
-    protected void tearDown() throws Exception {
-        repositoryAccess.closeAccess();
-    }
+	}
 
-    public void testRepositoryConstructor() throws Exception {
-        assertNotNull(repositoryAccess);
-    }
+	@Override
+	protected void tearDown() throws Exception {
+	}
 
-    public void testCreateRepositoryNewsNode() throws Exception {
-        // Create New Object
-        // path, language, title, publication date, content string
-        OfbizRepositoryMappingJackrabbitNews orm = new OfbizRepositoryMappingJackrabbitNews("/news/today", "en", "News of Today", new GregorianCalendar(), "Hello World");
-        assertNotNull(orm);
+	public void testRepositoryConstructor() throws Exception {
+		JcrRepositoryAccessor repositoryAccess = new JackrabbitRepositoryAccessor(userLogin);
+		assertNotNull(repositoryAccess);
+	}
 
-        repositoryAccess.storeContentObject(orm);
-    }
+	public void testCrudArticleNode() throws Exception {
+		// Create New Object
+		JcrArticleHelper helper = new JcrArticleHelper(userLogin);
+		helper.storeContentInRepository("news/article", "en", "News Of Today", "Hello World", new GregorianCalendar());
 
-    public void testReadRepositoryNewsNode() throws Exception {
-        OfbizRepositoryMappingJackrabbitNews orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today/en");
-        assertNotNull(orm);
+		OfbizRepositoryMappingJackrabbitArticle content = helper.readContentFromRepository("news/article");
+		assertEquals("Hello World", content.getContent());
 
-        assertEquals(orm.getContent(), "Hello World");
-    }
+		content.setContent("New World!");
 
-    public void testUpdateRepositoryNewsNode() throws Exception {
-        OfbizRepositoryMappingJackrabbitNews orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today/en");
-        assertNotNull(orm);
+		helper.updateContentInRepository(content);
 
-        orm.setContent("Hello Visitors");
-        repositoryAccess.updateContentObject(orm);
-    }
+		OfbizRepositoryMappingJackrabbitArticle updatedContent = helper.readContentFromRepository("news/article");
+		assertEquals("New World!", updatedContent.getContent());
 
-    public void testVersionning() throws Exception {
-        assertEquals("1.1", repositoryAccess.getBaseVersion("/news/today/en"));
+		helper.removeContentObject("news/article");
 
-        OfbizRepositoryMappingJackrabbitNews orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today/en");
-        orm.setContent("May the force be with you!");
-        repositoryAccess.updateContentObject(orm);
+		helper.closeContentSession();
+	}
 
-        orm = (OfbizRepositoryMappingJackrabbitNews) repositoryAccess.getContentObject("/news/today/en");
-        assertEquals("1.2", repositoryAccess.getBaseVersion("/news/today/en"));
-    }
+	public void testVersionning() throws Exception {
+		JcrArticleHelper helper = new JcrArticleHelper(userLogin);
+		helper.storeContentInRepository("news/versionArticle", "en", "News Of Today", "Hello World", new GregorianCalendar());
 
-    public void testLanguageDetermination() throws Exception {
-        JcrArticleHelper helper = new JcrArticleHelper(userLogin);
+		OfbizRepositoryMappingJackrabbitArticle content = helper.readContentFromRepository("news/versionArticle");
+		assertEquals("1.0", content.getVersion());
 
-        helper.storeContentInRepository("news/tomorrow", "en", "The news for tomorrow.", "Content.", new GregorianCalendar());
-        helper.storeContentInRepository("superhero", "de", "Batman", "The best superhero!", new GregorianCalendar());
+		content.setTitle("New Title");
+		helper.updateContentInRepository(content);
 
-        assertEquals("en", helper.readContentFromRepository("/news/tomorrow", "").getLanguage());
-        assertEquals("en", helper.readContentFromRepository("/news/tomorrow", "de").getLanguage());
-        assertEquals("en", helper.readContentFromRepository("/news/tomorrow", "en").getLanguage());
+		content = helper.readContentFromRepository("news/versionArticle");
+		assertEquals("1.1", content.getVersion());
 
-        assertEquals("de", helper.readContentFromRepository("/superhero", "de").getLanguage());
-        assertEquals("de", helper.readContentFromRepository("/superhero", "").getLanguage());
-        assertEquals("de", helper.readContentFromRepository("/superhero", "fr").getLanguage());
+		helper.closeContentSession();
+	}
 
-        helper.removeContentObject("/superhero");
-        helper.closeContentSession();
-    }
+	public void testLanguageDetermination() throws Exception {
+		JcrArticleHelper helper = new JcrArticleHelper(userLogin);
 
-    public void testRemoveRepositoryNewsNode() throws Exception {
-        repositoryAccess.removeContentObject("/news/today");
-    }
+		helper.storeContentInRepository("news/tomorrow", "en", "The news for tomorrow.", "Content.", new GregorianCalendar());
+		helper.storeContentInRepository("superhero", "de", "Batman", "The best superhero!", new GregorianCalendar());
 
-    /*
-     * Test the File upload
-     */
-    public void testCreateRepositoryFileNode() throws Exception {
-        File f = new File("stopofbiz.sh");
-        File f2 = new File("README");
-        assertTrue(f.exists() && f2.exists());
+		assertEquals("en", helper.readContentFromRepository("/news/tomorrow", "").getLanguage());
+		assertEquals("en", helper.readContentFromRepository("/news/tomorrow", "de").getLanguage());
+		assertEquals("en", helper.readContentFromRepository("/news/tomorrow", "en").getLanguage());
 
-        InputStream file = new FileInputStream(f);
+		assertEquals("de", helper.readContentFromRepository("/superhero", "de").getLanguage());
+		assertEquals("de", helper.readContentFromRepository("/superhero", "").getLanguage());
+		assertEquals("de", helper.readContentFromRepository("/superhero", "fr").getLanguage());
 
-        OfbizRepositoryMappingJackrabbitResource ormResource = new OfbizRepositoryMappingJackrabbitResource();
-        ormResource.setData(file);
+		helper.removeContentObject("/superhero");
+		helper.closeContentSession();
+	}
 
-        OfbizRepositoryMappingJackrabbitFile ormFile = new OfbizRepositoryMappingJackrabbitFile();
-        ormFile.setResource(ormResource);
-        // have to be relative
-        ormFile.setPath("testFile");
+	/*
+	 * Test the File upload
+	 */
+	public void testCreateRepositoryFileNode() throws Exception {
+		File f = new File("stopofbiz.sh");
+		File f2 = new File("README");
+		assertTrue(f.exists() && f2.exists());
 
-        OfbizRepositoryMappingJackrabbitFolder ormFolder = new OfbizRepositoryMappingJackrabbitFolder();
-        ormFolder.setPath("/fileHome");
-        ormFolder.addChild(ormFile);
+		InputStream file = new FileInputStream(f);
 
-        repositoryAccess.storeContentObject(ormFolder);
-    }
+		JcrFileHelper helper = new JcrFileHelper(userLogin);
+		helper.storeContentInRepository(file, f.getName(), "/fileHome");
 
-    /*
-     * Test the File upload - Add a second file to the same folder
-     */
-    public void testCreateRepositoryFileNode_2() throws Exception {
-        File f = new File("README");
-        assertTrue(f.exists());
+		assertNotNull(helper.getRepositoryContent("/fileHome/" + f.getName()));
 
-        InputStream file = new FileInputStream(f);
+		// add a second file to the same folder
+		file = new FileInputStream(f2);
 
-        OfbizRepositoryMappingJackrabbitResource ormResource = new OfbizRepositoryMappingJackrabbitResource();
-        ormResource.setData(file);
+		helper.storeContentInRepository(file, f2.getName(), "/fileHome");
+		assertNotNull(helper.getRepositoryContent("/fileHome/" + f2.getName()));
 
-        OfbizRepositoryMappingJackrabbitFile ormFile = new OfbizRepositoryMappingJackrabbitFile();
-        ormFile.setResource(ormResource);
-        // have to be relative
-        ormFile.setPath(f.getName());
+		// remove all files in folder
+		helper.removeContentObject("/fileHome");
 
-        OfbizRepositoryMappingJackrabbitFolder ormFolder = (OfbizRepositoryMappingJackrabbitFolder) repositoryAccess.getContentObject("/fileHome");
-        ormFolder.addChild(ormFile);
+		helper.closeContentSession();
+	}
 
-        // When we add a file to an existing folder we have to use the update
-        // method - this is something the FileHelper Api is doing for you.
-        repositoryAccess.updateContentObject(ormFolder);
-    }
+	public void testSpeedTestService() throws Exception {
+		Map<String, Object> context = FastMap.newInstance();
+		context.put("maxNodes", new Integer(10));
+		context.put("userLogin", dispatcher.getDelegator().findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system")));
 
-    public void testRemoveRepositoryFileNode() throws Exception {
-        repositoryAccess.removeContentObject("/fileHome");
-    }
+		Map<String, Object> serviceResult = this.dispatcher.runSync("determineJackrabbitRepositorySpeed", context);
 
-    public void testSpeedTestService() throws Exception {
-        Map<String, Object> context = FastMap.newInstance();
-        context.put("maxNodes", new Integer(10));
-        context.put("userLogin", dispatcher.getDelegator().findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system")));
+		if (ServiceUtil.isError(serviceResult)) {
+			assertFalse(true);
+		} else {
+			assertTrue(true);
+		}
 
-        Map<String, Object> serviceResult = this.dispatcher.runSync("determineJackrabbitRepositorySpeed", context);
+	}
 
-        if (ServiceUtil.isError(serviceResult)) {
-            assertFalse(true);
-        } else {
-            assertTrue(true);
-        }
-
-    }
-
-    public void testListRepositoryNodes() throws Exception {
-        assertNotNull(JcrUtilJackrabbit.getRepositoryNodes(userLogin, null));
-    }
+	public void testListRepositoryNodes() throws Exception {
+		assertNotNull(JcrUtilJackrabbit.getRepositoryNodes(userLogin, null));
+	}
 
 }

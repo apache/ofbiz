@@ -18,7 +18,7 @@ import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit;
-import org.ofbiz.jcr.access.jackrabbit.RepositoryAccessJackrabbit;
+import org.ofbiz.jcr.access.jackrabbit.JackrabbitRepositoryAccessor;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle;
 
@@ -56,7 +56,7 @@ public class JcrArticleHelper extends AbstractJcrHelper {
      * Setup my content Object
      */
     public JcrArticleHelper(GenericValue userLogin) {
-        access = new RepositoryAccessJackrabbit(userLogin);
+        access = new JackrabbitRepositoryAccessor(userLogin);
     }
 
     /**
@@ -68,15 +68,7 @@ public class JcrArticleHelper extends AbstractJcrHelper {
      * @throws
      */
     public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath) throws ClassCastException {
-        OfbizRepositoryMapping orm = access.getContentObject(contentPath);
-
-        if (orm instanceof OfbizRepositoryMappingJackrabbitArticle) {
-            article = (OfbizRepositoryMappingJackrabbitArticle) orm;
-            article.setVersion(access.getBaseVersion(contentPath));
-            return article;
-        } else {
-            throw new ClassCastException("The content object for the path: " + contentPath + " is not an article content object. This Helper can only handle content objects with the type: " + OfbizRepositoryMappingJackrabbitArticle.class.getName());
-        }
+        return readContentFromRepository(contentPath, "");
     }
 
     /**
@@ -91,7 +83,16 @@ public class JcrArticleHelper extends AbstractJcrHelper {
      */
     public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath, String language) throws ClassCastException {
         contentPath = determineContentLanguagePath(contentPath, language);
-        return readContentFromRepository(contentPath);
+
+        OfbizRepositoryMapping orm = access.getContentObject(contentPath);
+
+        if (orm instanceof OfbizRepositoryMappingJackrabbitArticle) {
+            article = (OfbizRepositoryMappingJackrabbitArticle) orm;
+            article.setVersion(access.getBaseVersion(contentPath));
+            return article;
+        } else {
+            throw new ClassCastException("The content object for the path: " + contentPath + " is not an article content object. This Helper can only handle content objects with the type: " + OfbizRepositoryMappingJackrabbitArticle.class.getName());
+        }
     }
 
     /**

@@ -16,6 +16,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.jcr.access.ContentReader;
 import org.ofbiz.jcr.access.VersioningManager;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
+import org.ofbiz.jcr.util.jackrabbit.JcrUtilJackrabbit;
 
 public class ContentReaderJackrabbit implements ContentReader {
 
@@ -35,9 +36,12 @@ public class ContentReaderJackrabbit implements ContentReader {
      */
     @Override
     public OfbizRepositoryMapping getContentObject(String nodePath) {
+        nodePath = JcrUtilJackrabbit.createAbsoluteNodePath(nodePath);
         OfbizRepositoryMapping orm = (OfbizRepositoryMapping) ocm.getObject(nodePath);
         try {
-            orm.setVersion(ocm.getBaseVersion(nodePath).getName());
+            if (orm != null) {
+                orm.setVersion(ocm.getBaseVersion(nodePath).getName());
+            }
         } catch (VersionException e) {
             // -0.0 means we have no version information
             orm.setVersion("-0.0");
@@ -55,6 +59,7 @@ public class ContentReaderJackrabbit implements ContentReader {
      */
     @Override
     public OfbizRepositoryMapping getContentObject(String nodePath, String version) {
+        nodePath = JcrUtilJackrabbit.createAbsoluteNodePath(nodePath);
         VersioningManager vm = new VersioningManagerJackrabbit(ocm);
         if (!vm.checkIfVersionExist(nodePath, version)) {
             Debug.logWarning("The version: " + version + " for content object: " + nodePath + " does not exist, the latest version for this object will be returned.", module);
@@ -202,4 +207,5 @@ public class ContentReaderJackrabbit implements ContentReader {
             return qm.createQuery(statement, Query.JCR_JQOM).execute();
         }
     }
+
 }
