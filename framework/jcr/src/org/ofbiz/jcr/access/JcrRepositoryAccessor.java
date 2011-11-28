@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.jcr.ItemExistsException;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import javax.jcr.query.QueryResult;
 
 import net.sf.json.JSONArray;
@@ -121,4 +122,11 @@ public interface JcrRepositoryAccessor {
      * @return
      */
     public QueryResult queryForRepositoryData(String query) throws RepositoryException;
+
+    /**
+     * Returns a JCR Session object
+     *
+     * @return
+     */
+    public Session getSession();
 }

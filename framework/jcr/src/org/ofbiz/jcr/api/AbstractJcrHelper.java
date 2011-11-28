@@ -1,10 +1,10 @@
 package org.ofbiz.jcr.api;
 
-import org.ofbiz.jcr.access.jackrabbit.JackrabbitRepositoryAccessor;
+import org.ofbiz.jcr.access.JcrRepositoryAccessor;
 
 public abstract class AbstractJcrHelper {
 
-    protected static JackrabbitRepositoryAccessor access = null;
+    protected static JcrRepositoryAccessor access = null;
 
     /**
      * This will close the connection to the content repository and make sure
