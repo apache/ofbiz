@@ -20,7 +20,6 @@ package org.ofbiz.content.search;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -78,11 +77,9 @@ public class ContentDocument {
         doc = new Document();
         String contentId = content.getString("contentId");
         doc.add(new Field("contentId", contentId, Store.YES, Index.NOT_ANALYZED, TermVector.NO));
-        // Add the last modified date of the file a field named "modified". Use
-        // a
+        // Add the last modified date of the file a field named "modified". Use a
         // Keyword field, so that it's searchable, but so that no attempt is
-        // made
-        // to tokenize the field into words.
+        // made to tokenize the field into words.
         Timestamp modDate = (Timestamp) content.get("lastModifiedDate");
         if (modDate == null) {
             modDate = (Timestamp) content.get("createdDate");
@@ -180,9 +177,7 @@ public class ContentDocument {
             return false;
         }
         List<String> featureList = FastList.newInstance();
-        Iterator<GenericValue> iter = featureDataResourceList.iterator();
-        while (iter.hasNext()) {
-            GenericValue productFeatureDataResource = iter .next();
+        for (GenericValue productFeatureDataResource : featureDataResourceList) {
             String feature = productFeatureDataResource.getString("productFeatureId");
             featureList.add(feature);
         }
