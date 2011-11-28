@@ -41,7 +41,7 @@ public class JcrFileHelper extends AbstractJcrHelper {
     private OfbizRepositoryMappingJackrabbitHierarchyNode hierarchy = null;
 
     public JcrFileHelper(GenericValue userLogin) {
-        access = new JackrabbitRepositoryAccessor(userLogin);
+        super(new JackrabbitRepositoryAccessor(userLogin));
     }
 
     /**
@@ -68,9 +68,9 @@ public class JcrFileHelper extends AbstractJcrHelper {
     public OfbizRepositoryMappingJackrabbitHierarchyNode getRepositoryContent(String contentPath, String version) throws ClassCastException {
         OfbizRepositoryMapping orm = null;
         if (version != null) {
-            orm = access.getContentObject(contentPath, version);
+            orm = super.access.getContentObject(contentPath, version);
         } else {
-            orm = access.getContentObject(contentPath);
+            orm = super.access.getContentObject(contentPath);
         }
 
         if (orm instanceof OfbizRepositoryMappingJackrabbitFile) {
@@ -132,12 +132,12 @@ public class JcrFileHelper extends AbstractJcrHelper {
         // Create the folder if necessary, otherwise we just update the folder
         // content
         folderPath = JcrUtilJackrabbit.createAbsoluteNodePath(folderPath);
-        if (access.getSession().itemExists(folderPath)) {
-            OfbizRepositoryMapping orm = access.getContentObject(folderPath);
+        if (super.access.getSession().itemExists(folderPath)) {
+            OfbizRepositoryMapping orm = super.access.getContentObject(folderPath);
             if (orm instanceof OfbizRepositoryMappingJackrabbitFolder) {
                 OfbizRepositoryMappingJackrabbitFolder ormFolder = (OfbizRepositoryMappingJackrabbitFolder) orm;
                 ormFolder.addChild(ormFile);
-                access.updateContentObject(ormFolder);
+                super.access.updateContentObject(ormFolder);
             }
         } else {
             // create the ORM folder Object
@@ -145,7 +145,7 @@ public class JcrFileHelper extends AbstractJcrHelper {
             ormFolder.addChild(ormFile);
             ormFolder.setPath(folderPath);
 
-            access.storeContentObject(ormFolder);
+            super.access.storeContentObject(ormFolder);
         }
 
     }

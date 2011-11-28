@@ -37,11 +37,11 @@ public class JcrContentHelper extends AbstractJcrHelper {
      * @param userLogin
      */
     public JcrContentHelper(GenericValue userLogin) {
-        access = new JackrabbitRepositoryAccessor(userLogin);
+        super(new JackrabbitRepositoryAccessor(userLogin));
     }
 
     public List<Map<String, String>> queryData(String query) throws RepositoryException {
-        QueryResult qr = access.queryForRepositoryData(query);
+        QueryResult qr = super.access.queryForRepositoryData(query);
 
         List<Map<String, String>> resultNodePaths = new ArrayList<Map<String, String>>();
         RowIterator rows = qr.getRows();

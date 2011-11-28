@@ -160,11 +160,8 @@ public class JackrabbitEvents {
 
         OfbizRepositoryMappingJackrabbitArticle ormArticle = articleHelper.readContentFromRepository(contentPath);
 
-        // news.setLanguage(request.getParameter("language"));
         ormArticle.setTitle(request.getParameter("title"));
         ormArticle.setContent(request.getParameter("content"));
-        // request.getParameter("pubDate")
-        // request.getParameter("createDate")
 
         try {
             articleHelper.updateContentInRepository(ormArticle);

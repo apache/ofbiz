@@ -4,7 +4,11 @@ import org.ofbiz.jcr.access.JcrRepositoryAccessor;
 
 public abstract class AbstractJcrHelper {
 
-    protected static JcrRepositoryAccessor access = null;
+    protected JcrRepositoryAccessor access = null;
+
+    public AbstractJcrHelper (JcrRepositoryAccessor accessor) {
+        this.access = accessor;
+    }
 
     /**
      * This will close the connection to the content repository and make sure

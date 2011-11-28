@@ -731,8 +731,8 @@
         <value xml:lang="zh">编辑样例明细</value>
     </property>
     <property key="PageTitleExampleJackrabbit">
-        <value xml:lang="de">Jackrabbit Sandbox</value>
-        <value xml:lang="en">Jackrabbit Sandbox</value>
+        <value xml:lang="de">Jackrabbit</value>
+        <value xml:lang="en">Jackrabbit</value>
     </property>
     <!-- Page Titles -->
     <property key="PageTitleFindExample">

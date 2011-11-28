@@ -56,7 +56,7 @@ public class JcrArticleHelper extends AbstractJcrHelper {
      * Setup my content Object
      */
     public JcrArticleHelper(GenericValue userLogin) {
-        access = new JackrabbitRepositoryAccessor(userLogin);
+        super(new JackrabbitRepositoryAccessor(userLogin));
     }
 
     /**
@@ -84,11 +84,11 @@ public class JcrArticleHelper extends AbstractJcrHelper {
     public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath, String language) throws ClassCastException {
         contentPath = determineContentLanguagePath(contentPath, language);
 
-        OfbizRepositoryMapping orm = access.getContentObject(contentPath);
+        OfbizRepositoryMapping orm = super.access.getContentObject(contentPath);
 
         if (orm instanceof OfbizRepositoryMappingJackrabbitArticle) {
             article = (OfbizRepositoryMappingJackrabbitArticle) orm;
-            article.setVersion(access.getBaseVersion(contentPath));
+            article.setVersion(super.access.getBaseVersion(contentPath));
             return article;
         } else {
             throw new ClassCastException("The content object for the path: " + contentPath + " is not an article content object. This Helper can only handle content objects with the type: " + OfbizRepositoryMappingJackrabbitArticle.class.getName());
@@ -109,7 +109,7 @@ public class JcrArticleHelper extends AbstractJcrHelper {
      */
     public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath, String language, String version) throws ClassCastException {
         contentPath = determineContentLanguagePath(contentPath, language);
-        OfbizRepositoryMapping orm = access.getContentObject(contentPath, version);
+        OfbizRepositoryMapping orm = super.access.getContentObject(contentPath, version);
 
         if (orm instanceof OfbizRepositoryMappingJackrabbitArticle) {
             article = (OfbizRepositoryMappingJackrabbitArticle) orm;
@@ -142,7 +142,7 @@ public class JcrArticleHelper extends AbstractJcrHelper {
         // construct the content article object
         article = new OfbizRepositoryMappingJackrabbitArticle(contentPath, language, title, content, publicationDate);
 
-        access.storeContentObject(article);
+        super.access.storeContentObject(article);
 
     }
 
@@ -155,13 +155,13 @@ public class JcrArticleHelper extends AbstractJcrHelper {
      */
     public void updateContentInRepository(OfbizRepositoryMappingJackrabbitArticle updatedArticle) throws RepositoryException, ObjectContentManagerException {
         // if the item not already exist create it.
-        if (!access.getSession().itemExists(updatedArticle.getPath())) {
+        if (!super.access.getSession().itemExists(updatedArticle.getPath())) {
             Debug.logWarning("This content object with the path: " + updatedArticle.getPath() + " doesn't exist in the repository. It will now created.", module);
             this.storeContentInRepository(updatedArticle.getPath(), updatedArticle.getLanguage(), updatedArticle.getTitle(), updatedArticle.getContent(), updatedArticle.getPubDate());
             return;
         }
 
-        access.updateContentObject(updatedArticle);
+        super.access.updateContentObject(updatedArticle);
     }
 
     /**
@@ -175,7 +175,7 @@ public class JcrArticleHelper extends AbstractJcrHelper {
         ;
 
         if (article != null) {
-            versions = access.getVersionList(article.getPath());
+            versions = super.access.getVersionList(article.getPath());
         } else {
             Debug.logWarning("No Article is loaded from the repository, please load an article first before requesting the version list.", module);
             versions = new ArrayList<String>(1);
@@ -188,7 +188,7 @@ public class JcrArticleHelper extends AbstractJcrHelper {
         List<String> languages = new ArrayList<String>();
 
         if (article != null && article.getLocalized()) {
-            Session session = access.getSession();
+            Session session = super.access.getSession();
 
             try {
                 Node node = session.getNode(article.getPath()).getParent();
@@ -260,7 +260,7 @@ public class JcrArticleHelper extends AbstractJcrHelper {
         }
 
         // check if this language exist in the repository
-        Session session = access.getSession();
+        Session session = super.access.getSession();
         try {
             // check if the node exist OR if the node has NO localized flag OR
             // the localized flag is set to false
