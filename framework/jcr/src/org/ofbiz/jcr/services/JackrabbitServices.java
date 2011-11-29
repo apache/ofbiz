@@ -13,7 +13,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.jackrabbit.JackrabbitRepositoryAccessor;
 import org.ofbiz.jcr.loader.JCRFactoryUtil;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitNews;
+import org.ofbiz.jcr.orm.jackrabbit.JackrabbitNews;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.ServiceUtil;
 
@@ -58,7 +58,7 @@ public class JackrabbitServices {
         start = new Date().getTime();
         for (int i = 0; i <= maxNodes; i++) {
             try {
-                OfbizRepositoryMappingJackrabbitNews news = new OfbizRepositoryMappingJackrabbitNews("/__Speedtest_Node-" + i, "de", "", null, "");
+                JackrabbitNews news = new JackrabbitNews("/__Speedtest_Node-" + i, "de", "", null, "");
                 access.storeContentObject(news);
                 access.removeContentObject("/__Speedtest_Node-" + i);
             } catch (Exception e) {

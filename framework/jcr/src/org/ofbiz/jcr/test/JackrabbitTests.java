@@ -31,10 +31,11 @@ import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.JcrRepositoryAccessor;
 import org.ofbiz.jcr.access.jackrabbit.JackrabbitRepositoryAccessor;
-import org.ofbiz.jcr.api.JcrArticleHelper;
-import org.ofbiz.jcr.api.JcrContentHelper;
+import org.ofbiz.jcr.api.JcrDataHelper;
 import org.ofbiz.jcr.api.JcrFileHelper;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle;
+import org.ofbiz.jcr.api.jackrabbit.JackrabbitArticleHelper;
+import org.ofbiz.jcr.api.jackrabbit.JackrabbitFileHelper;
+import org.ofbiz.jcr.orm.jackrabbit.JackrabbitArticle;
 import org.ofbiz.jcr.util.jackrabbit.JcrUtilJackrabbit;
 import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.service.testtools.OFBizTestCase;
@@ -64,17 +65,17 @@ public class JackrabbitTests extends OFBizTestCase {
 
     public void testCrudArticleNode() throws Exception {
         // Create New Object
-        JcrArticleHelper helper = new JcrArticleHelper(userLogin);
+        JcrDataHelper helper = new JackrabbitArticleHelper(userLogin);
         helper.storeContentInRepository("news/article", "en", "News Of Today", "Hello World", new GregorianCalendar());
 
-        OfbizRepositoryMappingJackrabbitArticle content = helper.readContentFromRepository("news/article");
+        JackrabbitArticle content = helper.readContentFromRepository("news/article");
         assertEquals("Hello World", content.getContent());
 
         content.setContent("New World!");
 
         helper.updateContentInRepository(content);
 
-        OfbizRepositoryMappingJackrabbitArticle updatedContent = helper.readContentFromRepository("news/article");
+        JackrabbitArticle updatedContent = helper.readContentFromRepository("news/article");
         assertEquals("New World!", updatedContent.getContent());
 
         helper.removeContentObject("news");
@@ -83,10 +84,10 @@ public class JackrabbitTests extends OFBizTestCase {
     }
 
     public void testVersionning() throws Exception {
-        JcrArticleHelper helper = new JcrArticleHelper(userLogin);
+        JcrDataHelper helper = new JackrabbitArticleHelper(userLogin);
         helper.storeContentInRepository("news/versionArticle", "en", "News Of Today", "Hello World", new GregorianCalendar());
 
-        OfbizRepositoryMappingJackrabbitArticle content = helper.readContentFromRepository("news/versionArticle");
+        JackrabbitArticle content = helper.readContentFromRepository("news/versionArticle");
         assertEquals("1.0", content.getVersion());
 
         content.setTitle("New Title");
@@ -101,7 +102,7 @@ public class JackrabbitTests extends OFBizTestCase {
     }
 
     public void testLanguageDetermination() throws Exception {
-        JcrArticleHelper helper = new JcrArticleHelper(userLogin);
+        JcrDataHelper helper = new JackrabbitArticleHelper(userLogin);
 
         helper.storeContentInRepository("news/tomorrow", "en", "The news for tomorrow.", "Content.", new GregorianCalendar());
         helper.storeContentInRepository("superhero", "de", "Batman", "The best superhero!", new GregorianCalendar());
@@ -129,7 +130,7 @@ public class JackrabbitTests extends OFBizTestCase {
 
         InputStream file = new FileInputStream(f);
 
-        JcrFileHelper helper = new JcrFileHelper(userLogin);
+        JcrFileHelper helper = new JackrabbitFileHelper(userLogin);
         helper.storeContentInRepository(file, f.getName(), "/fileHome");
 
         assertNotNull(helper.getRepositoryContent("/fileHome/" + f.getName()));
@@ -147,15 +148,11 @@ public class JackrabbitTests extends OFBizTestCase {
     }
 
     public void testQuery() throws Exception {
-        JcrArticleHelper article = new JcrArticleHelper(userLogin);
+        JcrDataHelper helper = new JackrabbitArticleHelper(userLogin);
 
-        article.storeContentInRepository("/query", "en", "query", "query test", new GregorianCalendar());
+        helper.storeContentInRepository("/query", "en", "query", "query test", new GregorianCalendar());
 
-        article.closeContentSession();
-
-        JcrContentHelper content = new JcrContentHelper(userLogin);
-
-        List<Map<String, String>> queryResult = content.queryData("SELECT * FROM [nt:unstructured]");
+        List<Map<String, String>> queryResult = helper.queryData("SELECT * FROM [nt:unstructured]");
 
         assertEquals(3, queryResult.size()); // the list should contain 3 result sets
 
@@ -163,9 +160,9 @@ public class JackrabbitTests extends OFBizTestCase {
         assertEquals("/query", queryResult.get(1).get("path"));
         assertEquals("/query/en", queryResult.get(2).get("path"));
 
-        content.removeContentObject("query");
+        helper.removeContentObject("query");
 
-        content.closeContentSession();
+        helper.closeContentSession();
 
     }
 

@@ -7,7 +7,7 @@ import org.apache.jackrabbit.ocm.mapper.impl.annotation.Field;
 import org.apache.jackrabbit.ocm.mapper.impl.annotation.Node;
 
 @Node(jcrType = "nt:resource")
-public class OfbizRepositoryMappingJackrabbitResource {
+public class JackrabbitResource {
 
     @Field(jcrName = "jcr:mimeType")
     private String mimeType;

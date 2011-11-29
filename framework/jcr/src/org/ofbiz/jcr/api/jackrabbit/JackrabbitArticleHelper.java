@@ -1,4 +1,4 @@
-package org.ofbiz.jcr.api;
+package org.ofbiz.jcr.api.jackrabbit;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -19,8 +19,9 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit;
 import org.ofbiz.jcr.access.jackrabbit.JackrabbitRepositoryAccessor;
+import org.ofbiz.jcr.api.JcrDataHelper;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle;
+import org.ofbiz.jcr.orm.jackrabbit.JackrabbitArticle;
 
 /**
  * This Helper class encapsulate the jcr article content bean. it provide all
@@ -34,11 +35,11 @@ import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle;
  * in the Framework.
  *
  */
-public class JcrArticleHelper extends AbstractJcrHelper {
+public class JackrabbitArticleHelper extends JackrabbitAbstractHelper implements JcrDataHelper {
 
-    private final static String module = JcrArticleHelper.class.getName();
+    private final static String module = JackrabbitArticleHelper.class.getName();
 
-    private static OfbizRepositoryMappingJackrabbitArticle article = null;
+    private static JackrabbitArticle article = null;
 
     private static List<String> possibleLocales = null;
 
@@ -55,105 +56,77 @@ public class JcrArticleHelper extends AbstractJcrHelper {
     /**
      * Setup my content Object
      */
-    public JcrArticleHelper(GenericValue userLogin) {
+    public JackrabbitArticleHelper(GenericValue userLogin) {
         super(new JackrabbitRepositoryAccessor(userLogin));
     }
 
-    /**
-     * Read the article content object from the repository. Throws an Exception
-     * when the read content type is not an article content type.
-     *
-     * @param contentPath
-     * @return content article object
-     * @throws
+    /* (non-Javadoc)
+     * @see org.ofbiz.jcr.api.jackrabbit.DataHelper#readContentFromRepository(java.lang.String)
      */
-    public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath) throws ClassCastException {
+    @Override
+    public JackrabbitArticle readContentFromRepository(String contentPath) throws ClassCastException {
         return readContentFromRepository(contentPath, "");
     }
 
-    /**
-     * Read the article content object, in the passed language, from the
-     * repository. if the language is not available, the default language will
-     * be choose. Throws an Exception when the read content type is not an
-     * article content type.
-     *
-     * @param contentPath
-     * @return content article object
-     * @throws
+    /* (non-Javadoc)
+     * @see org.ofbiz.jcr.api.jackrabbit.DataHelper#readContentFromRepository(java.lang.String, java.lang.String)
      */
-    public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath, String language) throws ClassCastException {
+    @Override
+    public JackrabbitArticle readContentFromRepository(String contentPath, String language) throws ClassCastException {
         contentPath = determineContentLanguagePath(contentPath, language);
 
         OfbizRepositoryMapping orm = super.access.getContentObject(contentPath);
 
-        if (orm instanceof OfbizRepositoryMappingJackrabbitArticle) {
-            article = (OfbizRepositoryMappingJackrabbitArticle) orm;
+        if (orm instanceof JackrabbitArticle) {
+            article = (JackrabbitArticle) orm;
             article.setVersion(super.access.getBaseVersion(contentPath));
             return article;
         } else {
-            throw new ClassCastException("The content object for the path: " + contentPath + " is not an article content object. This Helper can only handle content objects with the type: " + OfbizRepositoryMappingJackrabbitArticle.class.getName());
+            throw new ClassCastException("The content object for the path: " + contentPath + " is not an article content object. This Helper can only handle content objects with the type: " + JackrabbitArticle.class.getName());
         }
     }
 
-    /**
-     * Read the article content object, in the passed language and version, from
-     * the repository. if the language is not available, the default language
-     * will be choose. Throws an Exception when the read content type is not an
-     * article content type.
-     *
-     * @param contentPath
-     * @param language
-     * @param version
-     * @return
-     * @throws
+    /* (non-Javadoc)
+     * @see org.ofbiz.jcr.api.jackrabbit.DataHelper#readContentFromRepository(java.lang.String, java.lang.String, java.lang.String)
      */
-    public OfbizRepositoryMappingJackrabbitArticle readContentFromRepository(String contentPath, String language, String version) throws ClassCastException {
+    @Override
+    public JackrabbitArticle readContentFromRepository(String contentPath, String language, String version) throws ClassCastException {
         contentPath = determineContentLanguagePath(contentPath, language);
         OfbizRepositoryMapping orm = super.access.getContentObject(contentPath, version);
 
-        if (orm instanceof OfbizRepositoryMappingJackrabbitArticle) {
-            article = (OfbizRepositoryMappingJackrabbitArticle) orm;
+        if (orm instanceof JackrabbitArticle) {
+            article = (JackrabbitArticle) orm;
             article.setPath(contentPath); // the content path must be
                                           // manipulated because, the jackrabbit
                                           // orm returns a full blown path with
                                           // version information.
             return article;
         } else {
-            throw new ClassCastException("The content object for the path: " + contentPath + " is not an article content object. This Helper can only handle content objects with the type: " + OfbizRepositoryMappingJackrabbitArticle.class.getName());
+            throw new ClassCastException("The content object for the path: " + contentPath + " is not an article content object. This Helper can only handle content objects with the type: " + JackrabbitArticle.class.getName());
         }
     }
 
-    /**
-     * Stores a new article content object in the repository.
-     *
-     * @param contentPath
-     * @param language
-     * @param title
-     * @param content
-     * @param publicationDate
-     * @throws ObjectContentManagerException
-     * @throws ItemExistsException
+    /* (non-Javadoc)
+     * @see org.ofbiz.jcr.api.jackrabbit.DataHelper#storeContentInRepository(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Calendar)
      */
+    @Override
     public void storeContentInRepository(String contentPath, String language, String title, String content, Calendar publicationDate) throws ObjectContentManagerException, ItemExistsException {
         if (UtilValidate.isEmpty(language)) {
             language = determindeTheDefaultLanguage();
         }
 
         // construct the content article object
-        article = new OfbizRepositoryMappingJackrabbitArticle(contentPath, language, title, content, publicationDate);
+        article = new JackrabbitArticle(contentPath, language, title, content, publicationDate);
 
         super.access.storeContentObject(article);
 
     }
 
-    /**
-     * Update an existing content article object in the repository.
-     *
-     * @param updatedArticle
-     * @throws RepositoryException
-     * @throws ObjectContentManagerException
+    /* (non-Javadoc)
+     * @see org.ofbiz.jcr.api.jackrabbit.DataHelper#updateContentInRepository(org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle)
      */
-    public void updateContentInRepository(OfbizRepositoryMappingJackrabbitArticle updatedArticle) throws RepositoryException, ObjectContentManagerException {
+    @Override
+    public void updateContentInRepository(JackrabbitArticle updatedArticle) throws RepositoryException, ObjectContentManagerException {
         // if the item not already exist create it.
         if (!super.access.getSession().itemExists(updatedArticle.getPath())) {
             Debug.logWarning("This content object with the path: " + updatedArticle.getPath() + " doesn't exist in the repository. It will now created.", module);
@@ -164,12 +137,10 @@ public class JcrArticleHelper extends AbstractJcrHelper {
         super.access.updateContentObject(updatedArticle);
     }
 
-    /**
-     * Returns a list of versions which are available for the current article.
-     * If no article is loaded before, the list will be empty.
-     *
-     * @return
+    /* (non-Javadoc)
+     * @see org.ofbiz.jcr.api.jackrabbit.DataHelper#getVersionListForCurrentArticle()
      */
+    @Override
     public List<String> getVersionListForCurrentArticle() {
         List<String> versions = new ArrayList<String>();
         ;
@@ -184,6 +155,10 @@ public class JcrArticleHelper extends AbstractJcrHelper {
         return versions;
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.jcr.api.jackrabbit.DataHelper#getAvailableLanguageList()
+     */
+    @Override
     public List<String> getAvailableLanguageList() {
         List<String> languages = new ArrayList<String>();
 

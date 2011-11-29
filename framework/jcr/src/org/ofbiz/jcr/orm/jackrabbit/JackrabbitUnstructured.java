@@ -9,9 +9,9 @@ import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 
 @Node(isAbstract = true, jcrMixinTypes = "mix:versionable")
-public abstract class OfbizRepositoryMappingJackrabbitUnstructured implements OfbizRepositoryMapping {
+public abstract class JackrabbitUnstructured implements OfbizRepositoryMapping {
 
-    protected static String module = OfbizRepositoryMappingJackrabbitUnstructured.class.getName();
+    protected static String module = JackrabbitUnstructured.class.getName();
 
     @Field(path = true)
     private String path;
@@ -22,11 +22,11 @@ public abstract class OfbizRepositoryMappingJackrabbitUnstructured implements Of
     @Field
     private boolean localized;
 
-    protected OfbizRepositoryMappingJackrabbitUnstructured() {
+    protected JackrabbitUnstructured() {
         // create an empty object
     }
 
-    protected OfbizRepositoryMappingJackrabbitUnstructured(String nodePath) {
+    protected JackrabbitUnstructured(String nodePath) {
         this.setPath(nodePath);
         this.creationDate = new GregorianCalendar();
         this.localized = false;

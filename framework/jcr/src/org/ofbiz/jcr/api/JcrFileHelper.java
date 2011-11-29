@@ -1,48 +1,13 @@
 package org.ofbiz.jcr.api;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.GregorianCalendar;
 
 import javax.jcr.RepositoryException;
 
 import org.apache.jackrabbit.ocm.exception.ObjectContentManagerException;
-import org.apache.tika.Tika;
-import org.apache.tika.io.TikaInputStream;
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericValue;
-import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit;
-import org.ofbiz.jcr.access.jackrabbit.JackrabbitRepositoryAccessor;
-import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFile;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFolder;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitHierarchyNode;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitResource;
-import org.ofbiz.jcr.util.jackrabbit.JcrUtilJackrabbit;
+import org.ofbiz.jcr.orm.jackrabbit.JackrabbitHierarchyNode;
 
-/**
- * This Helper class encapsulate the jcr file content bean. it provide all
- * attributes and operations which are necessary to work with the content
- * repository.
- *
- * The concrete implementations covers the different content use case related
- * workflows. I.E. Different behavior for File/Folder or Text content.
- *
- * The Helper classes should be build on top of the generic JCR implementation
- * in the Framework.
- *
- */
-public class JcrFileHelper extends AbstractJcrHelper {
-
-    private final static String module = JcrFileHelper.class.getName();
-
-    private OfbizRepositoryMappingJackrabbitHierarchyNode hierarchy = null;
-
-    public JcrFileHelper(GenericValue userLogin) {
-        super(new JackrabbitRepositoryAccessor(userLogin));
-    }
+public interface JcrFileHelper extends JcrHelper{
 
     /**
      * Returns a content file object from the repository. Throws an Exception
@@ -52,9 +17,7 @@ public class JcrFileHelper extends AbstractJcrHelper {
      * @return
      * @throws
      */
-    public OfbizRepositoryMappingJackrabbitHierarchyNode getRepositoryContent(String contentPath) throws ClassCastException {
-        return getRepositoryContent(contentPath, null);
-    }
+    public abstract JackrabbitHierarchyNode getRepositoryContent(String contentPath) throws ClassCastException;
 
     /**
      * Returns a content file object in the passed version from the repository.
@@ -65,26 +28,7 @@ public class JcrFileHelper extends AbstractJcrHelper {
      * @return
      * @throws
      */
-    public OfbizRepositoryMappingJackrabbitHierarchyNode getRepositoryContent(String contentPath, String version) throws ClassCastException {
-        OfbizRepositoryMapping orm = null;
-        if (version != null) {
-            orm = super.access.getContentObject(contentPath, version);
-        } else {
-            orm = super.access.getContentObject(contentPath);
-        }
-
-        if (orm instanceof OfbizRepositoryMappingJackrabbitFile) {
-            OfbizRepositoryMappingJackrabbitFile fileObj = (OfbizRepositoryMappingJackrabbitFile) orm;
-            hierarchy = fileObj;
-            return fileObj;
-        } else if (orm instanceof OfbizRepositoryMappingJackrabbitFolder) {
-            OfbizRepositoryMappingJackrabbitFile fileObj = (OfbizRepositoryMappingJackrabbitFile) orm;
-            hierarchy = fileObj;
-            return fileObj;
-        }
-
-        throw new ClassCastException("The content object for the path: " + contentPath + " is not a file content object. This Helper can only handle content objects with the type: " + OfbizRepositoryMappingJackrabbitFile.class.getName());
-    }
+    public abstract JackrabbitHierarchyNode getRepositoryContent(String contentPath, String version) throws ClassCastException;
 
     /**
      * Stores a new file content object in the repository.
@@ -96,9 +40,7 @@ public class JcrFileHelper extends AbstractJcrHelper {
      * @throws ObjectContentManagerException
      * @throws RepositoryException
      */
-    public void storeContentInRepository(byte[] fileData, String fileName, String folderPath) throws ObjectContentManagerException, RepositoryException {
-        storeContentInRepository(new ByteArrayInputStream(fileData), fileName, folderPath);
-    }
+    public abstract void storeContentInRepository(byte[] fileData, String fileName, String folderPath) throws ObjectContentManagerException, RepositoryException;
 
     /**
      * Stores a new file content object in the repository.
@@ -110,45 +52,7 @@ public class JcrFileHelper extends AbstractJcrHelper {
      * @throws ObjectContentManagerException
      * @throws RepositoryException
      */
-    public void storeContentInRepository(InputStream fileData, String fileName, String folderPath) throws ObjectContentManagerException, RepositoryException {
-        if (UtilValidate.isEmpty(folderPath)) {
-            throw new ObjectContentManagerException("Please specify a folder path, the folder path should not be empty!");
-        } else if (ConstantsJackrabbit.ROOTPATH.equals(folderPath)) {
-            throw new ObjectContentManagerException("Please specify a folder, a file content can't be stored directly under root.");
-        }
-
-        // create an ORM Resource Object
-        OfbizRepositoryMappingJackrabbitResource ormResource = new OfbizRepositoryMappingJackrabbitResource();
-        ormResource.setData(fileData);
-        ormResource.setMimeType(getMimeTypeFromInputStream(fileData));
-        ormResource.setLastModified(new GregorianCalendar());
-
-        // create an ORM File Object
-        OfbizRepositoryMappingJackrabbitFile ormFile = new OfbizRepositoryMappingJackrabbitFile();
-        ormFile.setCreationDate(new GregorianCalendar());
-        ormFile.setResource(ormResource);
-        ormFile.setPath(fileName);
-
-        // Create the folder if necessary, otherwise we just update the folder
-        // content
-        folderPath = JcrUtilJackrabbit.createAbsoluteNodePath(folderPath);
-        if (super.access.getSession().itemExists(folderPath)) {
-            OfbizRepositoryMapping orm = super.access.getContentObject(folderPath);
-            if (orm instanceof OfbizRepositoryMappingJackrabbitFolder) {
-                OfbizRepositoryMappingJackrabbitFolder ormFolder = (OfbizRepositoryMappingJackrabbitFolder) orm;
-                ormFolder.addChild(ormFile);
-                super.access.updateContentObject(ormFolder);
-            }
-        } else {
-            // create the ORM folder Object
-            OfbizRepositoryMappingJackrabbitFolder ormFolder = new OfbizRepositoryMappingJackrabbitFolder();
-            ormFolder.addChild(ormFile);
-            ormFolder.setPath(folderPath);
-
-            super.access.storeContentObject(ormFolder);
-        }
-
-    }
+    public abstract void storeContentInRepository(InputStream fileData, String fileName, String folderPath) throws ObjectContentManagerException, RepositoryException;
 
     /**
      * Returns TRUE if the current content is a file content (Type:
@@ -156,9 +60,7 @@ public class JcrFileHelper extends AbstractJcrHelper {
      *
      * @return
      */
-    public boolean isFileContent() {
-        return (hierarchy instanceof OfbizRepositoryMappingJackrabbitFile);
-    }
+    public abstract boolean isFileContent();
 
     /**
      * Returns TRUE if the current content is a folder content (Type:
@@ -166,21 +68,6 @@ public class JcrFileHelper extends AbstractJcrHelper {
      *
      * @return
      */
-    public boolean isFolderContent() {
-        return (hierarchy instanceof OfbizRepositoryMappingJackrabbitFolder);
-    }
-
-    private static String getMimeTypeFromInputStream(InputStream is) {
-        if (!TikaInputStream.isTikaInputStream(is)) {
-            is = TikaInputStream.get(is);
-        }
-        Tika tika = new Tika();
-        try {
-            return tika.detect(is);
-        } catch (IOException e) {
-            Debug.logError(e, module);
-            return "application/octet-stream";
-        }
-    }
+    public abstract boolean isFolderContent();
 
 }

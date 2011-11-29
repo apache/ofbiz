@@ -4,17 +4,17 @@ import org.apache.jackrabbit.ocm.mapper.impl.annotation.Bean;
 import org.apache.jackrabbit.ocm.mapper.impl.annotation.Node;
 import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit;
 
-@Node(jcrType = "nt:file", extend = OfbizRepositoryMappingJackrabbitHierarchyNode.class)
-public class OfbizRepositoryMappingJackrabbitFile extends OfbizRepositoryMappingJackrabbitHierarchyNode {
+@Node(jcrType = "nt:file", extend = JackrabbitHierarchyNode.class)
+public class JackrabbitFile extends JackrabbitHierarchyNode {
 
     @Bean(jcrName = "jcr:content")
-    private OfbizRepositoryMappingJackrabbitResource resource;
+    private JackrabbitResource resource;
 
-    public OfbizRepositoryMappingJackrabbitResource getResource() {
+    public JackrabbitResource getResource() {
         return resource;
     }
 
-    public void setResource(OfbizRepositoryMappingJackrabbitResource resource) {
+    public void setResource(JackrabbitResource resource) {
         this.resource = resource;
     }
 

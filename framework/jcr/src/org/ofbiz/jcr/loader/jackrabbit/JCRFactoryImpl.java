@@ -47,14 +47,14 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.jcr.loader.JCRFactory;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFile;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFolder;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitHierarchyNode;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitLocalizedContent;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitNews;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitResource;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitUnstructured;
+import org.ofbiz.jcr.orm.jackrabbit.JackrabbitArticle;
+import org.ofbiz.jcr.orm.jackrabbit.JackrabbitFile;
+import org.ofbiz.jcr.orm.jackrabbit.JackrabbitFolder;
+import org.ofbiz.jcr.orm.jackrabbit.JackrabbitHierarchyNode;
+import org.ofbiz.jcr.orm.jackrabbit.JackrabbitLocalizedContent;
+import org.ofbiz.jcr.orm.jackrabbit.JackrabbitNews;
+import org.ofbiz.jcr.orm.jackrabbit.JackrabbitResource;
+import org.ofbiz.jcr.orm.jackrabbit.JackrabbitUnstructured;
 import org.w3c.dom.Element;
 
 public class JCRFactoryImpl implements JCRFactory {
@@ -102,14 +102,14 @@ public class JCRFactoryImpl implements JCRFactory {
         List<Class> classes = new ArrayList<Class>();
         // put this in an xml configuration file
         // should the ocm classes be loaded in during the container startup?
-        classes.add(OfbizRepositoryMappingJackrabbitUnstructured.class);
-        classes.add(OfbizRepositoryMappingJackrabbitHierarchyNode.class);
-        classes.add(OfbizRepositoryMappingJackrabbitNews.class);
-        classes.add(OfbizRepositoryMappingJackrabbitFile.class);
-        classes.add(OfbizRepositoryMappingJackrabbitFolder.class);
-        classes.add(OfbizRepositoryMappingJackrabbitResource.class);
-        classes.add(OfbizRepositoryMappingJackrabbitLocalizedContent.class);
-        classes.add(OfbizRepositoryMappingJackrabbitArticle.class);
+        classes.add(JackrabbitUnstructured.class);
+        classes.add(JackrabbitHierarchyNode.class);
+        classes.add(JackrabbitNews.class);
+        classes.add(JackrabbitFile.class);
+        classes.add(JackrabbitFolder.class);
+        classes.add(JackrabbitResource.class);
+        classes.add(JackrabbitLocalizedContent.class);
+        classes.add(JackrabbitArticle.class);
 
         mapper = new AnnotationMapperImpl(classes);
     }

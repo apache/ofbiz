@@ -8,7 +8,7 @@ import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 import org.ofbiz.jcr.util.jackrabbit.JcrUtilJackrabbit;
 
 @Node(jcrType = "nt:hierarchyNode", jcrMixinTypes="mix:versionable")
-public class OfbizRepositoryMappingJackrabbitHierarchyNode implements OfbizRepositoryMapping {
+public class JackrabbitHierarchyNode implements OfbizRepositoryMapping {
     @Field(path = true, id = true, jcrProtected = true)
     protected String path;
     private String version;

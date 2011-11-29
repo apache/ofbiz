@@ -5,8 +5,8 @@ import java.util.Calendar;
 import org.apache.jackrabbit.ocm.mapper.impl.annotation.Field;
 import org.apache.jackrabbit.ocm.mapper.impl.annotation.Node;
 
-@Node(extend = OfbizRepositoryMappingJackrabbitLocalizedContent.class)
-public class OfbizRepositoryMappingJackrabbitArticle extends OfbizRepositoryMappingJackrabbitLocalizedContent {
+@Node(extend = JackrabbitLocalizedContent.class)
+public class JackrabbitArticle extends JackrabbitLocalizedContent {
 
     @Field(id = true)
     String title = null;
@@ -23,7 +23,7 @@ public class OfbizRepositoryMappingJackrabbitArticle extends OfbizRepositoryMapp
      * @param content
      * @param pubDate
      */
-    public OfbizRepositoryMappingJackrabbitArticle(String nodePath, String language, String title, String content, Calendar pubDate) {
+    public JackrabbitArticle(String nodePath, String language, String title, String content, Calendar pubDate) {
         super(nodePath, language);
 
         this.title = title;
@@ -34,7 +34,7 @@ public class OfbizRepositoryMappingJackrabbitArticle extends OfbizRepositoryMapp
     /**
      *
      */
-    public OfbizRepositoryMappingJackrabbitArticle() {
+    public JackrabbitArticle() {
         super();
         // create empty instance
     }

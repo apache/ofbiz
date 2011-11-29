@@ -38,14 +38,15 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.JcrRepositoryAccessor;
 import org.ofbiz.jcr.access.jackrabbit.JackrabbitRepositoryAccessor;
-import org.ofbiz.jcr.api.JcrArticleHelper;
-import org.ofbiz.jcr.api.JcrContentHelper;
+import org.ofbiz.jcr.api.JcrDataHelper;
 import org.ofbiz.jcr.api.JcrFileHelper;
+import org.ofbiz.jcr.api.jackrabbit.JackrabbitArticleHelper;
+import org.ofbiz.jcr.api.jackrabbit.JackrabbitFileHelper;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFile;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitFolder;
-import org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitHierarchyNode;
+import org.ofbiz.jcr.orm.jackrabbit.JackrabbitArticle;
+import org.ofbiz.jcr.orm.jackrabbit.JackrabbitFile;
+import org.ofbiz.jcr.orm.jackrabbit.JackrabbitFolder;
+import org.ofbiz.jcr.orm.jackrabbit.JackrabbitHierarchyNode;
 import org.ofbiz.jcr.util.jackrabbit.JcrUtilJackrabbit;
 
 public class JackrabbitEvents {
@@ -60,7 +61,7 @@ public class JackrabbitEvents {
      */
     public static String addNewTextMessageToJcrRepository(HttpServletRequest request, HttpServletResponse response) {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
-        JcrArticleHelper articleHelper = new JcrArticleHelper(userLogin);
+        JcrDataHelper articleHelper = new JackrabbitArticleHelper(userLogin);
 
         String contentPath = request.getParameter("path");
         String language = request.getParameter("msgLocale");
@@ -126,8 +127,8 @@ public class JackrabbitEvents {
             return "error";
         }
 
-        JcrArticleHelper articleHelper = new JcrArticleHelper(userLogin);
-        OfbizRepositoryMappingJackrabbitArticle ormArticle = null;
+        JcrDataHelper articleHelper = new JackrabbitArticleHelper(userLogin);
+        JackrabbitArticle ormArticle = null;
         if (UtilValidate.isEmpty(version)) {
             ormArticle = articleHelper.readContentFromRepository(contentPath, language);
         } else {
@@ -156,9 +157,9 @@ public class JackrabbitEvents {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
 
         String contentPath = request.getParameter("path");
-        JcrArticleHelper articleHelper = new JcrArticleHelper(userLogin);
+        JcrDataHelper articleHelper = new JackrabbitArticleHelper(userLogin);
 
-        OfbizRepositoryMappingJackrabbitArticle ormArticle = articleHelper.readContentFromRepository(contentPath);
+        JackrabbitArticle ormArticle = articleHelper.readContentFromRepository(contentPath);
 
         ormArticle.setTitle(request.getParameter("title"));
         ormArticle.setContent(request.getParameter("content"));
@@ -189,7 +190,7 @@ public class JackrabbitEvents {
 
         String contentPath = request.getParameter("path");
 
-        JcrContentHelper helper = new JcrContentHelper(userLogin);
+        JcrDataHelper helper = new JackrabbitArticleHelper(userLogin);
         helper.removeContentObject(contentPath);
 
         return "success";
@@ -228,7 +229,7 @@ public class JackrabbitEvents {
             }
         }
 
-        JcrFileHelper fileHelper = new JcrFileHelper(userLogin);
+        JcrFileHelper fileHelper = new JackrabbitFileHelper(userLogin);
 
         try {
 
@@ -357,11 +358,11 @@ public class JackrabbitEvents {
             return "error";
         }
 
-        JcrFileHelper fileHelper = new JcrFileHelper(userLogin);
-        OfbizRepositoryMappingJackrabbitHierarchyNode orm = fileHelper.getRepositoryContent(contentPath);
+        JcrFileHelper fileHelper = new JackrabbitFileHelper(userLogin);
+        JackrabbitHierarchyNode orm = fileHelper.getRepositoryContent(contentPath);
 
         if (fileHelper.isFileContent()) {
-            OfbizRepositoryMappingJackrabbitFile file = (OfbizRepositoryMappingJackrabbitFile) orm;
+            JackrabbitFile file = (JackrabbitFile) orm;
             InputStream fileStream = file.getResource().getData();
 
             String fileName = file.getPath();
@@ -386,18 +387,18 @@ public class JackrabbitEvents {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
         String contentPath = request.getParameter("path");
 
-        JcrFileHelper fileHelper = new JcrFileHelper(userLogin);
+        JcrFileHelper fileHelper = new JackrabbitFileHelper(userLogin);
         OfbizRepositoryMapping orm = fileHelper.getRepositoryContent(contentPath);
 
         // Here we can differentiate between a file or folder content
         if (fileHelper.isFileContent()) {
-            OfbizRepositoryMappingJackrabbitFile file = (OfbizRepositoryMappingJackrabbitFile) orm;
+            JackrabbitFile file = (JackrabbitFile) orm;
             request.setAttribute("fileName", file.getPath());
             request.setAttribute("fileLastModified", file.getResource().getLastModified().getTime());
             request.setAttribute("fileMimeType", file.getResource().getMimeType());
             request.setAttribute("fileCreationDate", file.getCreationDate().getTime());
         } else if (fileHelper.isFolderContent()) {
-            OfbizRepositoryMappingJackrabbitFolder folder = (OfbizRepositoryMappingJackrabbitFolder) orm;
+            JackrabbitFolder folder = (JackrabbitFolder) orm;
             request.setAttribute("fileName", folder.getPath());
             request.setAttribute("fileCreationDate", folder.getCreationDate().getTime());
         }
@@ -410,7 +411,7 @@ public class JackrabbitEvents {
 
         String searchQuery = request.getParameter("queryData");
 
-        JcrContentHelper helper = new JcrContentHelper(userLogin);
+        JcrDataHelper helper = new JackrabbitArticleHelper(userLogin);
 
         try {
             request.setAttribute("queryResult", helper.queryData(searchQuery));

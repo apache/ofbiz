@@ -6,13 +6,13 @@ import org.apache.jackrabbit.ocm.mapper.impl.annotation.Field;
 import org.apache.jackrabbit.ocm.mapper.impl.annotation.Node;
 import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit;
 
-@Node(isAbstract = true, extend = OfbizRepositoryMappingJackrabbitUnstructured.class)
-public abstract class OfbizRepositoryMappingJackrabbitLocalizedContent extends OfbizRepositoryMappingJackrabbitUnstructured {
+@Node(isAbstract = true, extend = JackrabbitUnstructured.class)
+public abstract class JackrabbitLocalizedContent extends JackrabbitUnstructured {
 
     @Field
     private String language;
 
-    public OfbizRepositoryMappingJackrabbitLocalizedContent() {
+    public JackrabbitLocalizedContent() {
         super();
         this.language = "";
         super.setLocalized(true);
@@ -25,7 +25,7 @@ public abstract class OfbizRepositoryMappingJackrabbitLocalizedContent extends O
      * @param nodePath
      * @param language
      */
-    public OfbizRepositoryMappingJackrabbitLocalizedContent(String nodePath, String language) {
+    public JackrabbitLocalizedContent(String nodePath, String language) {
         super(nodePath);
         this.language = language;
 
