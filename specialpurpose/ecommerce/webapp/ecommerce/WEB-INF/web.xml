@@ -70,19 +70,25 @@ under the License.
             <param-name>allowedPaths</param-name>
             <param-value>/error:/control:/products:/select:/index.html:/index.jsp:/default.html:/default.jsp:/images</param-value>
         </init-param>
-        <init-param>
+        <!-- replaced by a 404 handling -->
+        <!--init-param>
             <param-name>errorCode</param-name>
             <param-value>403</param-value>
         </init-param>
         <init-param>
             <param-name>redirectPath</param-name>
             <param-value>/control/main</param-value>
-        </init-param>
+        </init-param-->
     </filter>
     <filter-mapping>
         <filter-name>ContextFilter</filter-name>
             <url-pattern>/*</url-pattern>
     </filter-mapping>
+
+    <error-page>
+        <error-code>404</error-code>
+        <location>/error/404.jsp</location>
+    </error-page>
 
     <listener><listener-class>org.ofbiz.webapp.control.ControlEventListener</listener-class></listener>
     <!-- NOTE: not all app servers support mounting implementations of the HttpSessionActivationListener interface -->
