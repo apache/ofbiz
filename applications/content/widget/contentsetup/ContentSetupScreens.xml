@@ -183,4 +183,26 @@ under the License.
             </widgets>
         </section>
     </screen>
+
+    <screen name="EditEmailTemplateSetting">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditEmailTemplateSetup" />
+                <set field="headerItem" value="ContentSetupMenu" />
+                <set field="currentMenuItemName" to-scope="user" value="email"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonContentSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleEditEmailTemplateSetup}">
+                            <include-form name="UpdateEmailTemplateSettings" location="component://content/widget/contentsetup/ContentSetupForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.PageTitleAddEmailTemplateSetup}">
+                            <include-form name="CreateEmailTemplateSetting" location="component://content/widget/contentsetup/ContentSetupForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
 </screens>

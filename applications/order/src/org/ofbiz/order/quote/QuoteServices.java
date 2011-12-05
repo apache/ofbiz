@@ -77,20 +77,20 @@ public class QuoteServices {
 
         GenericValue productStoreEmail = null;
         try {
-            productStoreEmail = delegator.findByPrimaryKey("ProductStoreEmailSetting", UtilMisc.toMap("productStoreId", quote.get("productStoreId"), "emailType", emailType));
+            productStoreEmail = delegator.findByPrimaryKey("OldProdStoreEmailSetting", UtilMisc.toMap("productStoreId", quote.get("productStoreId"), "emailType", emailType));
         } catch (GenericEntityException e) {
-            Debug.logError(e, "Problem getting the ProductStoreEmailSetting for productStoreId=" + quote.get("productStoreId") + " and emailType=" + emailType, module);
+            Debug.logError(e, "Problem getting the OldProdStoreEmailSetting for productStoreId=" + quote.get("productStoreId") + " and emailType=" + emailType, module);
         }
         if (productStoreEmail == null) {
             return ServiceUtil.returnFailure(UtilProperties.getMessage(resourceProduct, 
-                    "ProductProductStoreEmailSettingsNotValid", 
+                    "ProductOldProdStoreEmailSettingsNotValid", 
                     UtilMisc.toMap("productStoreId", quote.get("productStoreId"), 
                             "emailType", emailType), locale));
         }
         String bodyScreenLocation = productStoreEmail.getString("bodyScreenLocation");
         if (UtilValidate.isEmpty(bodyScreenLocation)) {
             return ServiceUtil.returnFailure(UtilProperties.getMessage(resourceProduct, 
-                    "ProductProductStoreEmailSettingsNotValidBodyScreenLocation", 
+                    "ProductOldProdStoreEmailSettingsNotValidBodyScreenLocation", 
                     UtilMisc.toMap("productStoreId", quote.get("productStoreId"), 
                             "emailType", emailType), locale));
         }
@@ -100,7 +100,7 @@ public class QuoteServices {
 
         if ((sendTo == null) || !UtilValidate.isEmail(sendTo)) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resourceProduct, 
-                    "ProductProductStoreEmailSettingsNoSendToFound", locale));
+                    "ProductOldProdStoreEmailSettingsNoSendToFound", locale));
         }
 
         Map<String, Object> bodyParameters = UtilMisc.<String, Object>toMap("quoteId", quoteId, "userLogin", userLogin, "locale", locale);

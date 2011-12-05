@@ -264,9 +264,9 @@ public class LoginEvents {
         // get the ProductStore email settings
         GenericValue productStoreEmail = null;
         try {
-            productStoreEmail = delegator.findOne("ProductStoreEmailSetting", false, "productStoreId", productStoreId, "emailType", "PRDS_PWD_RETRIEVE");
+            productStoreEmail = delegator.findOne("OldProdStoreEmailSetting", false, "productStoreId", productStoreId, "emailType", "PRDS_PWD_RETRIEVE");
         } catch (GenericEntityException e) {
-            Debug.logError(e, "Problem getting ProductStoreEmailSetting", module);
+            Debug.logError(e, "Problem getting OldProdStoreEmailSetting", module);
         }
 
         if (productStoreEmail == null) {

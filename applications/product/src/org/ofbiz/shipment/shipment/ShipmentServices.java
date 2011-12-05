@@ -1148,13 +1148,13 @@ public class ShipmentServices {
         }
         GenericValue productStoreEmail = null;
         try {
-            productStoreEmail = delegator.findByPrimaryKey("ProductStoreEmailSetting", UtilMisc.toMap("productStoreId", orderHeader.get("productStoreId"), "emailType", "PRDS_ODR_SHIP_COMPLT"));
+            productStoreEmail = delegator.findByPrimaryKey("OldProdStoreEmailSetting", UtilMisc.toMap("productStoreId", orderHeader.get("productStoreId"), "emailType", "PRDS_ODR_SHIP_COMPLT"));
         } catch (GenericEntityException e) {
-            Debug.logError(e, "Problem getting the ProductStoreEmailSetting for productStoreId =" + orderHeader.get("productStoreId") + " and emailType = PRDS_ODR_SHIP_COMPLT", module);
+            Debug.logError(e, "Problem getting the OldProdStoreEmailSetting for productStoreId =" + orderHeader.get("productStoreId") + " and emailType = PRDS_ODR_SHIP_COMPLT", module);
         }
         if (productStoreEmail == null) {
             return ServiceUtil.returnFailure(UtilProperties.getMessage(resource, 
-                    "ProductProductStoreEmailSettingsNotValid", 
+                    "ProductOldProdStoreEmailSettingsNotValid", 
                     UtilMisc.toMap("productStoreId", orderHeader.get("productStoreId"), 
                             "emailType", "PRDS_ODR_SHIP_COMPLT"), localePar));
         }
@@ -1176,7 +1176,7 @@ public class ShipmentServices {
         }
         if (UtilValidate.isEmpty(emailString)) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
-                    "ProductProductStoreEmailSettingsNoSendToFound", localePar));
+                    "ProductOldProdStoreEmailSettingsNoSendToFound", localePar));
         }
 
         Locale locale = PartyWorker.findPartyLastLocale(partyId, delegator);

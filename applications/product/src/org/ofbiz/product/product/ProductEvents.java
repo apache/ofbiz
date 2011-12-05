@@ -998,7 +998,7 @@ public class ProductEvents {
 
         GenericValue productStoreEmail = null;
         try {
-            productStoreEmail = delegator.findByPrimaryKey("ProductStoreEmailSetting",
+            productStoreEmail = delegator.findByPrimaryKey("OldProdStoreEmailSetting",
                     UtilMisc.toMap("productStoreId", productStoreId, "emailType", emailType));
         } catch (GenericEntityException e) {
             String errMsg = "Unable to get product store email setting for tell-a-friend: " + e.toString();

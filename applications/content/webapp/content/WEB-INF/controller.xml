@@ -1360,6 +1360,27 @@ under the License.
         <response name="error" type="view" value="EditContentRevisionItem"/>
     </request-map>
 
+    <!-- ================ Email Template Setting Requests ================= -->
+    <request-map uri="EditEmailTemplateSetting"><security auth="true" https="true"/><response name="success" type="view" value="EditEmailTemplateSetting"/></request-map>
+    <request-map uri="CreateEmailTemplateSetting">
+        <security auth="true" https="true"/>
+        <event invoke="createEmailTemplateSetting" type="service"/>
+        <response name="success" type="view" value="EditEmailTemplateSetting"/>
+        <response name="error" type="view" value="EditEmailTemplateSetting"/>
+    </request-map>
+    <request-map uri="UpdateEmailTemplateSetting">
+        <security auth="true" https="true"/>
+        <event invoke="updateEmailTemplateSetting" type="service"/>
+        <response name="success" type="view" value="EditEmailTemplateSetting"/>
+        <response name="error" type="view" value="EditEmailTemplateSetting"/>
+    </request-map>
+    <request-map uri="RemoveEmailTemplateSetting">
+        <security auth="true" https="true"/>
+        <event invoke="removeEmailTemplateSetting" type="service"/>
+        <response name="success" type="view" value="EditEmailTemplateSetting"/>
+        <response name="error" type="view" value="EditEmailTemplateSetting"/>
+    </request-map>
+
     <!-- ================ Survey Requests ================= -->
     <request-map uri="FindSurvey"><security auth="true" https="true"/><response name="success" type="view" value="FindSurvey"/></request-map>
     <request-map uri="ListFindSurveySearchResults">
@@ -2006,7 +2027,8 @@ under the License.
     <view-map name="EditContentTypeAttr" page="component://content/widget/contentsetup/ContentSetupScreens.xml#EditContentTypeAttr" type="screen"/>
     <view-map name="EditContentAssocPredicate" page="component://content/widget/contentsetup/ContentSetupScreens.xml#EditContentAssocPredicate" type="screen"/>
     <view-map name="EditContentOperation" page="component://content/widget/contentsetup/ContentSetupScreens.xml#EditContentOperation" type="screen"/>
-    <view-map name="EditContentPurposeOperation"  page="component://content/widget/contentsetup/ContentSetupScreens.xml#EditContentPurposeOperation" type="screen"/>
+    <view-map name="EditContentPurposeOperation" page="component://content/widget/contentsetup/ContentSetupScreens.xml#EditContentPurposeOperation" type="screen"/>
+    <view-map name="EditEmailTemplateSetting" page="component://content/widget/contentsetup/ContentSetupScreens.xml#EditEmailTemplateSetting" type="screen"/>
     <view-map name="EditContentWorkEfforts" page="component://content/widget/content/ContentScreens.xml#EditContentWorkEfforts" type="screen"/>
     <view-map name="EditContentKeywords" type="screen" page="component://content/widget/content/ContentScreens.xml#EditContentKeywords"/>
 

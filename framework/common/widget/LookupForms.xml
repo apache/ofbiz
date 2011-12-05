@@ -115,6 +115,27 @@ under the License.
         </field>
     </form>
 
+    <form name="LookupEmailTemplateSetting" type="single" target="LookupEmailTemplateSetting">
+        <auto-fields-entity entity-name="EmailTemplateSetting" default-field-type="find"/>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListEmailTemplateSettings" type="list" list-name="listIt" paginate-target="LookupEmailTemplateSetting"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="orderBy" value="emailTemplateSettingId"/>
+                <field-map field-name="entityName" value="EmailTemplateSetting"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="EmailTemplateSetting" default-field-type="display"/>
+        <field name="emailTemplateSettingId" widget-style="smallSubmit">
+            <hyperlink also-hidden="false" target-type="plain" description="${description} [${emailTemplateSettingId}]" target="javascript:set_value('${emailTemplateSettingId}')"/>
+        </field>
+    </form>
+
     <form name="LookupLocale" type="single" target="LookupLocale">
         <field name="localeString"><text-find/></field>
         <field name="localeName" title="${uiLabelMap.CommonLanguageTitle}"><text-find/></field>

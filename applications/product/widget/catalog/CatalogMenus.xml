@@ -239,6 +239,11 @@ under the License.
                 <parameter param-name="productStoreId"/>
             </link>
         </menu-item>
+        <menu-item name="EditOldProductStoreEmails" title="${uiLabelMap.ProductOldProductStoreEmails}">
+            <link target="EditOldProductStoreEmails">
+                <parameter param-name="productStoreId"/>
+            </link>
+        </menu-item>
         <menu-item name="EditProductStoreSurveys" title="${uiLabelMap.CommonSurveys}">
             <link target="EditProductStoreSurveys">
                 <parameter param-name="productStoreId"/>

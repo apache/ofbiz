@@ -2571,7 +2571,7 @@ public class OrderServices {
         return sendOrderNotificationScreen(ctx, context, "PRDS_ODR_PAYRETRY");
     }
 
-    protected static Map<String, Object> sendOrderNotificationScreen(DispatchContext dctx, Map<String, ? extends Object> context, String emailType) {
+    protected static Map<String, Object> sendOrderNotificationScreen(DispatchContext dctx, Map<String, ? extends Object> context, String emailTypeEnumId) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
         Delegator delegator = dctx.getDelegator();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
@@ -2589,7 +2589,16 @@ public class OrderServices {
         }
 
         // prepare the order information
-        Map<String, Object> sendMap = FastMap.newInstance();
+        Map<String, Object> sendMap = null;
+        try {
+            sendMap = dctx.makeValidContext("sendMailFromTemplateSetting", "IN", context);
+        } catch (Exception e) {
+            Debug.logError(e, module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource_error, 
+                    "OrderServiceExceptionSeeLogs", localePar));
+        }
+
+        
 
         // get the order header and store
         GenericValue orderHeader = null;
@@ -2604,38 +2613,28 @@ public class OrderServices {
                     "OrderOrderNotFound", UtilMisc.toMap("orderId", orderId), localePar));
         }
 
-        if (orderHeader.get("webSiteId") == null) {
-            return ServiceUtil.returnFailure(UtilProperties.getMessage(resource, 
-                    "OrderOrderWithoutWebSite", UtilMisc.toMap("orderId", orderId), localePar));
-        }
 
-        GenericValue productStoreEmail = null;
+        List<GenericValue> productStoreEmails = null;
+        EntityCondition mainCond = EntityCondition.makeCondition(UtilMisc.toList(
+                EntityExpr.makeCondition("productStoreId", orderHeader.get("productStoreId")),
+                EntityExpr.makeCondition("emailTypeEnumId", emailTypeEnumId),
+                EntityExpr.makeConditionDate("fromDate", "thruDate")));
         try {
-            productStoreEmail = delegator.findByPrimaryKey("ProductStoreEmailSetting", UtilMisc.toMap("productStoreId", orderHeader.get("productStoreId"), "emailType", emailType));
+            productStoreEmails = delegator.findList("ProdStoreEmailAndTemplateSettingView", mainCond, UtilMisc.toSet("emailTemplateSettingId", "bodyScreenLocation"), null, null, true);
         } catch (GenericEntityException e) {
-            Debug.logError(e, "Problem getting the ProductStoreEmailSetting for productStoreId=" + orderHeader.get("productStoreId") + " and emailType=" + emailType, module);
+            Debug.logError(e, "Problem getting EmailTemplateSettings for productStoreId = " + orderHeader.get("productStoreId") + " and emailType = " + emailTypeEnumId, module);
         }
-        if (productStoreEmail == null) {
+        if (UtilValidate.isEmpty(productStoreEmails)) {
             return ServiceUtil.returnFailure(UtilProperties.getMessage(resourceProduct, 
-                    "ProductProductStoreEmailSettingsNotValid", 
+                    "ProductProdStoreEmailSettingsNotValid", 
                     UtilMisc.toMap("productStoreId", orderHeader.get("productStoreId"), 
-                            "emailType", emailType), localePar));
-        }
-
-        // the override screenUri
-        if (UtilValidate.isEmpty(screenUri)) {
-            String bodyScreenLocation = productStoreEmail.getString("bodyScreenLocation");
-            if (UtilValidate.isEmpty(bodyScreenLocation)) {
-                bodyScreenLocation = ProductStoreWorker.getDefaultProductStoreEmailScreenLocation(emailType);
-            }
-            sendMap.put("bodyScreenUri", bodyScreenLocation);
-            String xslfoAttachScreenLocation = productStoreEmail.getString("xslfoAttachScreenLocation");
-            sendMap.put("xslfoAttachScreenLocation", xslfoAttachScreenLocation);
-        } else {
-            sendMap.put("bodyScreenUri", screenUri);
+                            "emailType", emailTypeEnumId), localePar));
         }
 
         // website
+        if (orderHeader.get("webSiteId") == null) {
+            Debug.logWarning(UtilProperties.getMessage(resource, "OrderOrderWithoutWebSite", UtilMisc.toMap("orderId", orderId), localePar), module);
+        }
         sendMap.put("webSiteId", orderHeader.get("webSiteId"));
 
         OrderReadHelper orh = new OrderReadHelper(orderHeader);
@@ -2675,42 +2674,44 @@ public class OrderServices {
         Map<String, Object> bodyParameters = UtilMisc.<String, Object>toMap("orderId", orderId, "orderItemSeqId", orderItemSeqId, "userLogin", placingUserLogin, "locale", locale);
         if (placingParty!= null) {
             bodyParameters.put("partyId", placingParty.get("partyId"));
+            sendMap.put("partyIdTo", placingParty.get("partyId"));
         }
         bodyParameters.put("note", note);
         sendMap.put("bodyParameters", bodyParameters);
         sendMap.put("userLogin",userLogin);
 
-        String subjectString = productStoreEmail.getString("subject");
-        sendMap.put("subject", subjectString);
-
-        sendMap.put("contentType", productStoreEmail.get("contentType"));
-        sendMap.put("sendFrom", productStoreEmail.get("fromAddress"));
-        sendMap.put("sendCc", productStoreEmail.get("ccAddress"));
-        sendMap.put("sendBcc", productStoreEmail.get("bccAddress"));
-        if ((sendTo != null) && UtilValidate.isEmail(sendTo)) {
-            sendMap.put("sendTo", sendTo);
-        } else {
+        if (sendTo == null || ! UtilValidate.isEmail(sendTo)) {
             sendMap.put("sendTo", emailString);
         }
-        if ((sendCc != null) && UtilValidate.isEmail(sendCc)) {
-            sendMap.put("sendCc", sendCc);
-        } else {
-            sendMap.put("sendCc", productStoreEmail.get("ccAddress"));
-        }
 
-        // send the notification
         Map<String, Object> sendResp = null;
-        try {
-            sendResp = dispatcher.runSync("sendMailFromScreen", sendMap);
-        } catch (Exception e) {
-            Debug.logError(e, module);
-            return ServiceUtil.returnError(UtilProperties.getMessage(resource_error, 
-                    "OrderServiceExceptionSeeLogs",locale));
+        for (GenericValue productStoreEmail : productStoreEmails) {
+            sendMap.put("emailTemplateSettingId", productStoreEmail.getString("emailTemplateSettingId"));
+            // the override screenUri
+            if (UtilValidate.isEmpty(screenUri)) {
+                String bodyScreenLocation = productStoreEmail.getString("bodyScreenLocation");
+                if (UtilValidate.isEmpty(bodyScreenLocation)) {
+                    bodyScreenLocation = ProductStoreWorker.getDefaultProductStoreEmailScreenLocation(emailTypeEnumId);
+                }
+                sendMap.put("bodyScreenUri", bodyScreenLocation);
+            } else {
+                sendMap.put("bodyScreenUri", screenUri);
+            }
+
+            // send the notification
+            try {
+                sendResp = dispatcher.runSync("sendMailFromTemplateSetting", sendMap);
+            } catch (Exception e) {
+                Debug.logError(e, module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource_error, 
+                        "OrderServiceExceptionSeeLogs", localePar));
+            }
+            if (ServiceUtil.isError(sendResp)) break;
         }
 
         // check for errors
         if (sendResp != null && !ServiceUtil.isError(sendResp)) {
-            sendResp.put("emailType", emailType);
+            sendResp.put("emailType", emailTypeEnumId);
         }
         if (UtilValidate.isNotEmpty(orderId)) {
             sendResp.put("orderId", orderId);

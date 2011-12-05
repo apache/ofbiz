@@ -545,7 +545,7 @@ under the License.
             </entity-one>
             <set field="productStoreId" from-field="webSite.productStoreId"/>
         </if-empty>
-        <entity-one entity-name="ProductStoreEmailSetting" value-field="storeEmail" auto-field-map="false">
+        <entity-one entity-name="OldProdStoreEmailSetting" value-field="storeEmail" auto-field-map="false">
             <field-map field-name="productStoreId" from-field="productStoreId"/>
             <field-map field-name="emailType" value="SUB_CONT_LIST_NOTI"/>
         </entity-one>
@@ -609,7 +609,7 @@ under the License.
             </entity-one>
             <set field="productStoreId" from-field="webSite.productStoreId"/>
         </if-empty>
-        <entity-one entity-name="ProductStoreEmailSetting" value-field="storeEmail" auto-field-map="false">
+        <entity-one entity-name="OldProdStoreEmailSetting" value-field="storeEmail" auto-field-map="false">
             <field-map field-name="productStoreId" from-field="productStoreId"/>
             <field-map field-name="emailType" value="UNSUB_CONT_LIST_VERI"/>
         </entity-one>
@@ -658,7 +658,7 @@ under the License.
             </entity-one>
             <set field="productStoreId" from-field="webSite.productStoreId"/>
         </if-empty>
-        <entity-one entity-name="ProductStoreEmailSetting" value-field="storeEmail" auto-field-map="false">
+        <entity-one entity-name="OldProdStoreEmailSetting" value-field="storeEmail" auto-field-map="false">
             <field-map field-name="productStoreId" from-field="productStoreId"/>
             <field-map field-name="emailType" value="UNSUB_CONT_LIST_NOTI"/>
         </entity-one>

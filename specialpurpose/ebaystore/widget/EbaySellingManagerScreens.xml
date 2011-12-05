@@ -407,7 +407,7 @@
                 </service>
                 <set field="userLoginId" from-field="result.userLoginId"/>
                 <set field="emailType" from-field="parameters.emailType"/>
-                <entity-one value-field="emailSetting" entity-name="ProductStoreEmailSetting">
+                <entity-one value-field="emailSetting" entity-name="OldProdStoreEmailSetting">
                     <field-map field-name="productStoreId" from-field="parameters.productStoreId"/>
                     <field-map field-name="emailType" from-field="emailType"/>
                 </entity-one>

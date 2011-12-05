@@ -253,7 +253,7 @@ public class OagisInventoryServices {
 
                 if (UtilValidate.isNotEmpty(sendToEmail)) {
                     String productStoreId = UtilProperties.getPropertyValue("oagis.properties", "Oagis.Warehouse.SyncInventoryProductStoreId");
-                    GenericValue productStoreEmail = delegator.findByPrimaryKey("ProductStoreEmailSetting", UtilMisc.toMap("productStoreId", productStoreId, "emailType", "PRDS_OAGIS_CONFIRM"));
+                    GenericValue productStoreEmail = delegator.findByPrimaryKey("OldProdStoreEmailSetting", UtilMisc.toMap("productStoreId", productStoreId, "emailType", "PRDS_OAGIS_CONFIRM"));
                     if (productStoreEmail != null) {
                         String bodyScreenLocation = productStoreEmail.getString("bodyScreenLocation");
                         sendMap.put("bodyScreenUri", bodyScreenLocation);

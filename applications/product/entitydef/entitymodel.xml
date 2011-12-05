@@ -3858,9 +3858,10 @@ under the License.
         <key-map field-name="prodCatalogId"/>
       </relation>
     </entity>
-    <entity entity-name="ProductStoreEmailSetting"
+    <entity entity-name="OldProdStoreEmailSetting" table-name="PRODUCT_STORE_EMAIL_SETTING"
             package-name="org.ofbiz.product.store"
-            title="Product Store Email Settings Entity">
+            title="Old Product Store Email Settings Entity">
+            <description>Deprecated entity to manage email setting on a ProductStore. Now use ProdStoreEmailSettingType and EmailTemplateSettingId entities</description>
       <field name="productStoreId" type="id-ne"></field>
       <field name="emailType" type="id-ne"></field>
       <field name="bodyScreenLocation" type="long-varchar"><description>if empty defaults to a screen based on the emailType</description></field>
@@ -3877,6 +3878,29 @@ under the License.
       </relation>
       <relation type="one" fk-name="PRDSTREM_ENUM" rel-entity-name="Enumeration">
         <key-map field-name="emailType" rel-field-name="enumId"/>
+      </relation>
+    </entity>
+    <entity entity-name="ProdStoreEmailTplSetting"
+            package-name="org.ofbiz.product.store"
+            title="Product Store Email Settings Entity">
+      <field name="emailTemplateSettingId" type="id-ne"/>
+      <field name="productStoreId" type="id-ne"/>
+      <field name="emailTypeEnumId" type="id-ne"/>
+      <field name="description" type="description"/>
+      <field name="fromDate" type="date-time"/>
+      <field name="thruDate" type="date-time"/>
+      <prim-key field="emailTemplateSettingId"/>
+      <prim-key field="productStoreId"/>
+      <prim-key field="emailTypeEnumId"/>
+      <prim-key field="fromDate"/>
+      <relation type="one" fk-name="PRDSTREMTS_PRDS" rel-entity-name="ProductStore">
+        <key-map field-name="productStoreId"/>
+      </relation>
+      <relation type="one" fk-name="PRDSTREMTS_ETS" rel-entity-name="EmailTemplateSetting">
+        <key-map field-name="emailTemplateSettingId"/>
+      </relation>
+      <relation type="one" fk-name="PRDSTREMTS_ENUM" rel-entity-name="Enumeration">
+        <key-map field-name="emailTypeEnumId" rel-field-name="enumId"/>
       </relation>
     </entity>
     <entity entity-name="ProductStoreFinActSetting"
@@ -3908,7 +3932,7 @@ under the License.
         <description>Field name on the purchase survey with the send to email address</description>
       </field>
       <field name="purchSurveyCopyMe" type="id">
-        <description>Whether the BCC on ProductStoreEmailSetting should be copied for email notifications</description>
+        <description>Whether the BCC on OldProdStoreEmailSetting should be copied for email notifications</description>
       </field>
       <field name="allowAuthToNegative" type="indicator"></field>
       <field name="minBalance" type="currency-amount"></field>

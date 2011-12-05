@@ -41,5 +41,12 @@ under the License.
             The field Facility.squareFootageSince has been deprecated since revision 929912 (2010-04-01)
         </description>
     </service>
+    <service name="migrateProductStoreEmailSetting" engine="simple"
+            location="component://product/script/org/ofbiz/product/UpgradeServices.xml" invoke="migrateProductStoreEmailSetting">
+        <description>
+            Migrate data from OldProductStoreEmailSetting to ProdStoreEmailTplSetting and EmailTemplateSetting
+            The entity ProductStoreEmailSetting has been deprecated since revision XXX (2011-XX-XX) (FIXME)
+        </description>
+    </service>
 
 </services>

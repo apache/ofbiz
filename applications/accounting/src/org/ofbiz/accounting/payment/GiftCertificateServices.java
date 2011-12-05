@@ -885,7 +885,7 @@ public class GiftCertificateServices {
             GenericValue productStoreEmail = null;
             String emailType = "PRDS_GC_PURCHASE";
             try {
-                productStoreEmail = delegator.findByPrimaryKey("ProductStoreEmailSetting", 
+                productStoreEmail = delegator.findByPrimaryKey("OldProdStoreEmailSetting", 
                         UtilMisc.toMap("productStoreId", productStoreId, "emailType", emailType));
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Unable to get product store email setting for gift card purchase", module);
@@ -1133,7 +1133,7 @@ public class GiftCertificateServices {
         GenericValue productStoreEmail = null;
         String emailType = "PRDS_GC_RELOAD";
         try {
-            productStoreEmail = delegator.findByPrimaryKey("ProductStoreEmailSetting", UtilMisc.toMap("productStoreId", productStoreId, "emailType", emailType));
+            productStoreEmail = delegator.findByPrimaryKey("OldProdStoreEmailSetting", UtilMisc.toMap("productStoreId", productStoreId, "emailType", emailType));
         } catch (GenericEntityException e) {
             Debug.logError(e, "Unable to get product store email setting for gift card purchase", module);
         }

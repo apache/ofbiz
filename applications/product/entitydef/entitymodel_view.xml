@@ -19,7 +19,7 @@ under the License.
 -->
 <entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
-    
+
     <view-entity entity-name="ContentApprovalProductContentAndInfo"
             package-name="org.ofbiz.content.content"
             title="ContentApproval, ProductContent, Content and DataResource View Entity">
@@ -61,7 +61,7 @@ under the License.
         <key-map field-name="contentId" rel-field-name="contentIdStart"/>
       </relation>
     </view-entity>
-    
+
     <view-entity entity-name="ProductCategoryMemberAndPrice" package-name="org.ofbiz.product.category" title="ProductCategoryMember And ProductPrice View Entiry">
         <member-entity entity-alias="PCM" entity-name="ProductCategoryMember"/>
         <member-entity entity-alias="PD" entity-name="Product"/>
@@ -78,6 +78,17 @@ under the License.
         </view-link>
         <view-link entity-alias="PD" rel-entity-alias="PP">
             <key-map field-name="productId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="ProdStoreEmailAndTemplateSettingView" package-name="org.ofbiz.product.store"
+                 title="ProdStoreEmailTplSetting And EmailTemplateSetting View">
+        <member-entity entity-alias="PSES" entity-name="ProdStoreEmailTplSetting"/>
+        <member-entity entity-alias="ETS" entity-name="EmailTemplateSetting"/>
+        <alias-all entity-alias="PSES"/>
+        <alias-all entity-alias="ETS"><exclude field="description"/></alias-all>
+        <view-link entity-alias="PSES" rel-entity-alias="ETS">
+            <key-map field-name="emailTemplateSettingId"/>
         </view-link>
     </view-entity>
 </entitymodel>

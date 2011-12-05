@@ -2222,21 +2222,43 @@ under the License.
     </request-map>
     <request-map uri="createProductStoreEmail">
         <security https="true" auth="true"/>
-        <event type="service" path="" invoke="createProductStoreEmailSetting"/>
+        <event type="service" path="" invoke="createProdStoreEmailTplSetting"/>
         <response name="success" type="view" value="EditProductStoreEmails"/>
         <response name="error" type="view" value="EditProductStoreEmails"/>
     </request-map>
     <request-map uri="updateProductStoreEmail">
         <security https="true" auth="true"/>
-        <event type="service" path="" invoke="updateProductStoreEmailSetting"/>
+        <event type="service" path="" invoke="updateProdStoreEmailTplSetting"/>
         <response name="success" type="view" value="EditProductStoreEmails"/>
         <response name="error" type="view" value="EditProductStoreEmails"/>
     </request-map>
     <request-map uri="removeProductStoreEmail">
         <security https="true" auth="true"/>
-        <event type="service" path="" invoke="removeProductStoreEmailSetting"/>
+        <event type="service" path="" invoke="removeProdStoreEmailTplSetting"/>
         <response name="success" type="view" value="EditProductStoreEmails"/>
         <response name="error" type="view" value="EditProductStoreEmails"/>
+    </request-map>
+    <request-map uri="EditOldProductStoreEmails">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditOldProductStoreEmails"/>
+    </request-map>
+    <request-map uri="createOldProductStoreEmail">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="createOldProdStoreEmailSetting"/>
+        <response name="success" type="view" value="EditOldProductStoreEmails"/>
+        <response name="error" type="view" value="EditOldProductStoreEmails"/>
+    </request-map>
+    <request-map uri="updateOldProductStoreEmail">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="updateOldProdStoreEmailSetting"/>
+        <response name="success" type="view" value="EditOldProductStoreEmails"/>
+        <response name="error" type="view" value="EditOldProductStoreEmails"/>
+    </request-map>
+    <request-map uri="removeOldProductStoreEmail">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="removeOldProdStoreEmailSetting"/>
+        <response name="success" type="view" value="EditOldProductStoreEmails"/>
+        <response name="error" type="view" value="EditOldProductStoreEmails"/>
     </request-map>
 
     <!-- ================ Product Store Keyword Override ============= -->
@@ -3142,6 +3164,7 @@ under the License.
     <view-map name="EditProductStore" type="screen" page="component://product/widget/catalog/StoreScreens.xml#EditProductStore"/>
     <view-map name="FindProductStoreRoles" type="screen" page="component://product/widget/catalog/StoreScreens.xml#FindProductStoreRoles"/>
     <view-map name="EditProductStoreEmails" type="screen" page="component://product/widget/catalog/StoreScreens.xml#EditProductStoreEmails"/>
+    <view-map name="EditOldProductStoreEmails" type="screen" page="component://product/widget/catalog/StoreScreens.xml#EditOldProductStoreEmails"/>
     <view-map name="EditProductStorePromos" type="screen" page="component://product/widget/catalog/StoreScreens.xml#EditProductStorePromos"/>
     <view-map name="EditProductStoreCatalogs" type="screen" page="component://product/widget/catalog/StoreScreens.xml#EditProductStoreCatalogs"/>
     <view-map name="EditProductStoreShipSetup" type="screen" page="component://product/widget/catalog/StoreScreens.xml#EditProductStoreShipSetup"/>

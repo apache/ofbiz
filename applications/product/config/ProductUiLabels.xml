@@ -9842,6 +9842,7 @@
         <value xml:lang="zh">承诺有效/现货数量或序列#</value>
         <value xml:lang="zh_TW">承諾有效/現貨數量或序列#</value>
     </property>
+    <!-- deprecated pass to FormFieldTitle_bodyScreenLocation on CommonUilabels.xml
     <property key="ProductAttachmentScreenLocation">
         <value xml:lang="de">Anhang Screen Pfad (XSL-FO)</value>
         <value xml:lang="en">Attachment Screen Location (XSL-FO)</value>
@@ -9854,6 +9855,7 @@
         <value xml:lang="zh">附件屏幕位置 (XSL-FO)</value>
         <value xml:lang="zh_TW">附件螢幕位置 (XSL-FO)</value>
     </property>
+    -->
     <property key="ProductAttributes">
         <value xml:lang="de">Attribute</value>
         <value xml:lang="en">Attributes</value>
@@ -10087,6 +10089,7 @@
         <value xml:lang="zh">箱号</value>
         <value xml:lang="zh_TW">箱號</value>
     </property>
+    <!-- deprecated pass to FormFieldTitle_bodyScreenLocation on CommonUilabels.xml
     <property key="ProductBodyScreenLocation">
         <value xml:lang="de">Body Screen Pfad</value>
         <value xml:lang="en">Body Screen Location</value>
@@ -10099,6 +10102,7 @@
         <value xml:lang="zh">主体屏幕位置</value>
         <value xml:lang="zh_TW">主體螢幕位置</value>
     </property>
+    -->
     <property key="ProductBox">
         <value xml:lang="de">Kiste</value>
         <value xml:lang="en">Box</value>
@@ -12079,6 +12083,10 @@
         <value xml:lang="th">ลบคีย์เวิร์ดทั้งหมด</value>
         <value xml:lang="zh">删除全部关键字</value>
         <value xml:lang="zh_TW">刪除全部關鍵字</value>
+    </property>
+    <property key="ProductDeprecatedProductStoreEmailScreen">
+        <value xml:lang="en">Deprecated Screen, use it only for old email send process that not be migrate on template email system !</value>
+        <value xml:lang="fr">Écran déprécié, utilisez cet écran que pour les processus d'envoie de mél qui n'aurait pas migrés vers le nouveau système de modèle de mél !</value>
     </property>
     <property key="ProductDepth">
         <value xml:lang="de">Tiefe</value>
@@ -17785,6 +17793,10 @@
         <value xml:lang="zh">制造商给的标识 </value>
         <value xml:lang="zh_TW">製造商給的ID </value>
     </property>
+    <property key="ProductOldProductStoreEmails">
+        <value xml:lang="en">(Old) Emails</value>
+        <value xml:lang="fr">(Déprécié)Adr. Courriel</value>
+    </property>
     <property key="ProductOneInventoryFacility">
         <value xml:lang="de">Eine Lagereinrichtung</value>
         <value xml:lang="en">One Inventory Facility</value>
@@ -19632,7 +19644,7 @@
         <value xml:lang="zh">产品店铺</value>
         <value xml:lang="zh_TW">產品商店</value>
     </property>
-    <property key="ProductProductStoreEmailSettings">
+    <property key="ProductOldProdStoreEmailSettings">
         <value xml:lang="de">Laden E-Mail Einstellungen</value>
         <value xml:lang="en">Product Store Email Settings</value>
         <value xml:lang="es">Configuración de Email de la tienda</value>
@@ -19644,15 +19656,15 @@
         <value xml:lang="zh">产品店铺电子邮件设置</value>
         <value xml:lang="zh_TW">產品商店電子郵件設置</value>
     </property>
-    <property key="ProductProductStoreEmailSettingsNotValid">
+    <property key="ProductOldProdStoreEmailSettingsNotValid">
         <value xml:lang="en">No valid email setting for store with productStoreId ${productStoreId} and emailType ${emailType}</value>
         <value xml:lang="it">Nessuna configurazione email valida per il negozio ${productStoreId} e tipo email ${emailType}</value>
     </property>
-    <property key="ProductProductStoreEmailSettingsNotValidBodyScreenLocation">
+    <property key="ProductOldProdStoreEmailSettingsNotValidBodyScreenLocation">
         <value xml:lang="en">No valid bodyScreenLocation in email setting for store with productStoreId ${productStoreId} and emailType ${emailType}</value>
         <value xml:lang="it">Nessun bodyScreenLocation valida nella configurazione email per il negozio ${productStoreId} e tipo email ${emailType}</value>
     </property>
-    <property key="ProductProductStoreEmailSettingsNoSendToFound">
+    <property key="ProductOldProdStoreEmailSettingsNoSendToFound">
         <value xml:lang="en">No sendTo email address found</value>
         <value xml:lang="it">Nessun indirizzo destinatario email trovato</value>
     </property>
@@ -23270,6 +23282,10 @@
         <value xml:lang="th">ชื่อคลังสินค้า</value>
         <value xml:lang="zh">店铺名称</value>
         <value xml:lang="zh_TW">商店名稱</value>
+    </property>
+    <property key="ProductStoreEmailSettingMigration">
+        <value xml:lang="en">Migrate from old email setting system on productStore: ${productStoreId}</value>
+        <value xml:lang="fr">Depuis la migration de l'ancien system de mail du centre de profit : ${productStoreId}</value>
     </property>
     <property key="ProductStoreNameId">
         <value xml:lang="de">Laden Namen [ID]</value>

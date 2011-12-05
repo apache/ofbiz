@@ -264,15 +264,15 @@
             <result-to-field result-name="contentId"/>
         </call-service>
         
-        <!-- create ProductStoreEmailSetting -->
+        <!-- create OldProdStoreEmailSetting -->
         <if-not-empty field="parameters.includePayment">
             <set field="parameters.subject" value="${parameters.subject} INCLUDE_PAYMENT"/>
         </if-not-empty>
         <if-not-empty field="parameters.includeCrossPromotions">
             <set field="parameters.subject" value="${parameters.includeCrossPromotions} INCLUDE_CROSS_PROMOTIONS"/>
         </if-not-empty>
-        <set-service-fields service-name="createProductStoreEmailSetting" to-map="newEmailSetting" map="parameters"/>
-        <call-service service-name="createProductStoreEmailSetting" in-map-name="newEmailSetting" >
+        <set-service-fields service-name="createOldProdStoreEmailSetting" to-map="newEmailSetting" map="parameters"/>
+        <call-service service-name="createOldProdStoreEmailSetting" in-map-name="newEmailSetting" >
             <result-to-field result-name="contentId"/>
         </call-service>
     </simple-method>
@@ -284,15 +284,15 @@
             <result-to-field result-name="dataResourceId" field="parameters.dataResourceId"/>
         </call-service>
 
-        <!-- update ProductStoreEmailSetting -->
+        <!-- update OldProdStoreEmailSetting -->
         <!--if-not-empty field="parameters.includePayment">
             <set field="parameters.subject" value="${parameters.subject} INCLUDE_PAYMENT"/>
         </if-not-empty>
         <if-not-empty field="parameters.includeCrossPromotions">
             <set field="parameters.subject" value="${parameters.subject} INCLUDE_CROSS_PROMOTIONS"/>
         </if-not-empty-->
-        <set-service-fields service-name="updateProductStoreEmailSetting" to-map="updateEmailSetting" map="parameters"/>
-        <call-service service-name="updateProductStoreEmailSetting" in-map-name="updateEmailSetting" >
+        <set-service-fields service-name="updateOldProdStoreEmailSetting" to-map="updateEmailSetting" map="parameters"/>
+        <call-service service-name="updateOldProdStoreEmailSetting" in-map-name="updateEmailSetting" >
             <result-to-field result-name="contentId"/>
         </call-service>
     </simple-method>

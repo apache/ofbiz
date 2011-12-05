@@ -24,28 +24,26 @@ under the License.
         <!-- if partyIdTo provided but no emailAddress, get it from the partyContactMech -->
         <if-empty field="parameters.sendTo">
             <if-empty field="parameters.partyIdTo">
-                <log level="error" message="PartyId or SendTo should be specified!"></log>
+                <log level="error" message="PartyId or SendTo should be specified!"/>
                 <add-error>
                     <fail-property resource="CommonUiLabels" property="CommonEmailShouldBeSpecified"/>
                 </add-error>
             <check-errors/>
             </if-empty>
         </if-empty>
-        <if-not-empty field="parameters.partyIdTo">
+        <if-empty field="parameters.sendTo">
+            <set field="getEmail.partyId" from-field="parameters.partyIdTo"/>
+            <call-service service-name="getPartyEmail" in-map-name="getEmail">
+                <result-to-field result-name="emailAddress" field="parameters.sendTo"/>
+            </call-service>
             <if-empty field="parameters.sendTo">
-                <set field="getEmail.partyId" from-field="parameters.partyIdTo"/>
-                <call-service service-name="getPartyEmail" in-map-name="getEmail">
-                    <result-to-field result-name="emailAddress" field="parameters.sendTo"/>
-                </call-service>
-                <if-empty field="parameters.sendTo">
-                    <log level="error" message="PartyId: ${parameters.partyIdTo} has no valid email address!"></log>
-                    <add-error>
-                        <fail-property resource="CommonUiLabels" property="CommonEmailNotValid"/>
-                    </add-error>
-                    <check-errors/>
-                </if-empty>
+                <log level="error" message="PartyId: ${parameters.partyIdTo} has no valid email address!"></log>
+                <add-error>
+                    <fail-property resource="CommonUiLabels" property="CommonEmailNotValid"/>
+                </add-error>
+                <check-errors/>
             </if-empty>
-        </if-not-empty>
+        </if-empty>
         <entity-one entity-name="EmailTemplateSetting" value-field="emailTemplateSetting"/>
         <if-not-empty field="emailTemplateSetting">
             <set field="emailParams.bodyScreenUri" from-field="emailTemplateSetting.bodyScreenLocation"/>
@@ -54,7 +52,7 @@ under the License.
             <if-not-empty field="emailTemplateSetting.fromAddress">
                 <set field="emailParams.sendFrom" from-field="emailTemplateSetting.fromAddress"/>
                 <else>
-                    <property-to-field resource="general" property="defaultFromEmailAddress" field="emailParams.sendFrom" default="ofbiztest@example.com"/>                    
+                    <property-to-field resource="general" property="defaultFromEmailAddress" field="emailParams.sendFrom" default="ofbiztest@example.com"/>
                 </else>
             </if-not-empty>
             <set field="emailParams.sendCc" from-field="emailTemplateSetting.ccAddress"/>
@@ -72,7 +70,7 @@ under the License.
                 <result-to-result result-name="communicationEventId"/>
             </call-service>
             <else>
-                <log level="error" message="sendMailFromTemplateSetting service could not find the emailTemplateSettingId: ${parameters.emailTemplateSettingId}"></log>
+                <log level="error" message="sendMailFromTemplateSetting service could not find the emailTemplateSettingId: ${parameters.emailTemplateSettingId}"/>
             </else>
         </if-not-empty>
     </simple-method>

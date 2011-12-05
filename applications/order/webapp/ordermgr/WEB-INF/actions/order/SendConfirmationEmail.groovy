@@ -34,10 +34,10 @@ context.sendTo = sendTo;
 donePage = request.getParameter("DONE_PAGE") ?: "orderview";
 context.donePage = donePage;
 
-// Provide the correct order confirmation ProductStoreEmailSetting, if one exists
+// Provide the correct order confirmation OldProdStoreEmailSetting, if one exists
 orderHeader = delegator.findByPrimaryKey("OrderHeader", [orderId : orderId]);
 if (orderHeader.productStoreId) {
-    productStoreEmailSetting = delegator.findByPrimaryKeyCache("ProductStoreEmailSetting", [productStoreId : orderHeader.productStoreId, emailType : emailType]);
+    productStoreEmailSetting = delegator.findByPrimaryKeyCache("OldProdStoreEmailSetting", [productStoreId : orderHeader.productStoreId, emailType : emailType]);
     if (productStoreEmailSetting) {
         context.productStoreEmailSetting = productStoreEmailSetting;
     }

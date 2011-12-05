@@ -1124,6 +1124,47 @@ under the License.
     </entity>
 
   <!-- ========================================================= -->
+  <!-- org.ofbiz.content.email -->
+  <!-- ========================================================= -->
+
+    <entity entity-name="EmailTemplateContent"
+            package-name="org.ofbiz.content.email"
+            title="Email Template And Content Association Entity">
+        <field name="emailTemplateSettingId" type="id-ne"/>
+        <field name="contentId" type="id-ne"/>
+        <field name="emailTemplateContentTypeId" type="id-ne"/>
+        <field name="fromDate" type="date-time"/>
+        <field name="thruDate" type="date-time"/>
+        <field name="description" type="description"/>
+        <prim-key field="emailTemplateContentTypeId"/>
+        <prim-key field="emailTemplateSettingId"/>
+        <prim-key field="contentId"/>
+        <prim-key field="fromDate"/>
+        <relation type="one" rel-entity-name="EmailTemplateSetting" fk-name="ETCONTENT_EMA">
+            <key-map field-name="emailTemplateSettingId"/>
+        </relation>
+        <relation type="one" rel-entity-name="EmailTemplateContentType" fk-name="ETCONTENT_TYP">
+            <key-map field-name="emailTemplateContentTypeId"/>
+        </relation>
+        <relation type="one" rel-entity-name="Content" fk-name="ETCONTENT_CON">
+            <key-map field-name="contentId"/>
+        </relation>
+    </entity>
+
+    <entity entity-name="EmailTemplateContentType"
+            package-name="org.ofbiz.content.email"
+            title="Email Template Content Type Entity">
+        <field name="emailTemplateContentTypeId" type="id-ne"/>
+        <field name="parentTypeId" type="id-ne"/>
+        <field name="hasTable" type="indicator"/>
+        <field name="description" type="description"/>
+        <prim-key field="emailTemplateContentTypeId"/>
+        <relation type="one" fk-name="PARENT_ETCT" title="Parent" rel-entity-name="EmailTemplateContentType">
+            <key-map field-name="parentTypeId" rel-field-name="emailTemplateContentTypeId"/>
+        </relation>
+    </entity>
+
+  <!-- ========================================================= -->
   <!-- org.ofbiz.content.preference -->
   <!-- ========================================================= -->
 

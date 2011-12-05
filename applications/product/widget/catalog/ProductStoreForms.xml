@@ -507,7 +507,48 @@
 
     <form name="createProductStoreEmail" type="single" target="createProductStoreEmail" title=""
         header-row-style="header-row" default-table-style="basic-table">
-        <auto-fields-service service-name="createProductStoreEmailSetting"/>
+        <auto-fields-service service-name="createProdStoreEmailTplSetting"/>
+        <field name="productStoreId" map-name="productStore"><hidden/></field>
+        <field name="emailTypeEnumId" title="${uiLabelMap.CommonEmailType}">
+            <drop-down>
+                <entity-options entity-name="Enumeration" key-field-name="enumId" description="${description}">
+                    <entity-constraint name="enumTypeId" operator="in" value="PRDS_EMAIL,PARTY_EMAIL"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="emailTemplateSettingId"><lookup target-form-name="LookupEmailTemplateSetting"/></field>
+        <field name="fromDate"><date-time default-value="${nowTimestamp}"/></field>
+        <field name="thruDate"><date-time/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="updateProductStoreEmail" type="list" target="updateProductStoreEmail" title="" list-name="productStoreEmailSettings"
+        odd-row-style="alternate-row" default-table-style="basic-table">
+        <auto-fields-service service-name="updateProdStoreEmailTplSetting"/>
+        <auto-fields-entity entity-name="EmailTemplateSetting" default-field-type="display"/>
+        <field name="productStoreId"><hidden/></field>
+        <field name="emailTemplateSettingId">
+            <display-entity entity-name="EmailTemplateSetting" description=" ">
+                <sub-hyperlink target="/content/control/EditEmailTemplateSetting" target-type="inter-app" description="[${emailTemplateSettingId}] ${description}"/>
+            </display-entity>
+        </field>
+        <field name="fromDate"><display type="date"/></field>
+        <field name="emailTypeEnumId" title="${uiLabelMap.CommonEmailType}">
+            <display-entity entity-name="Enumeration" key-field-name="enumId" description="${description}"/>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <field name="deleteLink" title="${uiLabelMap.CommonDelete}" widget-style="buttontext">
+            <hyperlink target="removeProductStoreEmail" description="${uiLabelMap.CommonDelete}" also-hidden="false">
+                <parameter param-name="productStoreId"/>
+                <parameter param-name="emailTemplateSettingId"/>
+                <parameter param-name="emailTypeEnumId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="createOldProductStoreEmail" type="single" target="createOldProductStoreEmail" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createOldProdStoreEmailSetting"/>
         <field name="productStoreId" map-name="productStore"><hidden/></field>
         <field name="emailType" title="${uiLabelMap.CommonEmailType}">
             <drop-down>
@@ -517,22 +558,16 @@
                 </entity-options>
             </drop-down>
         </field>
-        <field name="bodyScreenLocation" title="${uiLabelMap.ProductBodyScreenLocation}"></field>
-        <field name="xslfoAttachScreenLocation" title="${uiLabelMap.ProductAttachmentScreenLocation}"></field>
-        <field name="subject" title="${uiLabelMap.ProductSubject}"></field>
         <field name="fromAddress" title="${uiLabelMap.CommonFromAddress}"></field>
         <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
-    <form name="updateProductStoreEmail" type="list" target="updateProductStoreEmail" title="" list-name="productStoreEmailSettings"
+    <form name="updateOldProductStoreEmail" type="list" target="updateOldProductStoreEmail" title="" list-name="productStoreEmailSettings"
         odd-row-style="alternate-row" default-table-style="basic-table">
-        <auto-fields-service service-name="updateProductStoreEmailSetting"/>
+        <auto-fields-service service-name="updateOldProdStoreEmailSetting"/>
         <field name="productStoreId"><hidden/></field>
         <field name="emailType" title="${uiLabelMap.CommonEmailType}">
             <display-entity entity-name="Enumeration" key-field-name="enumId" description="${description}" cache="true" also-hidden="true"/>
         </field>
-        <field name="bodyScreenLocation" title="${uiLabelMap.ProductBodyScreenLocation}"></field>
-        <field name="xslfoAttachScreenLocation" title="${uiLabelMap.ProductAttachmentScreenLocation}"></field>
-        <field name="subject" title="${uiLabelMap.ProductSubject}"></field>
         <field name="fromAddress" title="${uiLabelMap.CommonFromAddress}"></field>
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
         <field name="deleteLink" title="${uiLabelMap.CommonDelete}" widget-style="buttontext">

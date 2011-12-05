@@ -398,7 +398,7 @@ public class CommunicationEventServices {
                         if (UtilValidate.isNotEmpty(webSite)) {
                             GenericValue productStore = webSite.getRelatedOne("ProductStore");
                             if (UtilValidate.isNotEmpty(productStore)) {
-                                List<GenericValue> productStoreEmailSettings = productStore.getRelatedByAnd("ProductStoreEmailSetting", UtilMisc.toMap("emailType", "CONT_EMAIL_TEMPLATE"));
+                                List<GenericValue> productStoreEmailSettings = productStore.getRelatedByAnd("OldProdStoreEmailSetting", UtilMisc.toMap("emailType", "CONT_EMAIL_TEMPLATE"));
                                 GenericValue productStoreEmailSetting = EntityUtil.getFirst(productStoreEmailSettings);
                                 if (UtilValidate.isNotEmpty(productStoreEmailSetting)) {
                                     // send e-mail using screen template

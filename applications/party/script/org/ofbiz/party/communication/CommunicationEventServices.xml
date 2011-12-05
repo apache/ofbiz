@@ -662,7 +662,7 @@ under the License.
             <result-to-field result-name="emailAddress"/>
         </call-service>
         
-        <entity-one entity-name="ProductStoreEmailSetting" value-field="productStoreEmailSetting"/>
+        <entity-one entity-name="OldProdStoreEmailSetting" value-field="productStoreEmailSetting"/>
         <set field="bodyParameters.partyId" from-field="parameters.partyIdTo"/>
         <set field="bodyParameters.email" from-field="parameters.emailAddress"/>
         <set field="bodyParameters.firstName" from-field="parameters.firstName"/>

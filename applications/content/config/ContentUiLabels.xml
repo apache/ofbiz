@@ -5197,6 +5197,10 @@
         <value xml:lang="zh">新建数据资源网址</value>
         <value xml:lang="zh_TW">新建資料資源網址</value>
     </property>
+    <property key="PageTitleAddEmailTemplateSetup">
+        <value xml:lang="en">Add Email Template Setting</value>
+        <value xml:lang="fr">Ajouter un template de mél</value>
+    </property>
     <property key="PageTitleAddForumMessage">
         <value xml:lang="ar">إضافة رسالة إلى المنتدى</value>
         <value xml:lang="da">Tilføj en besked til forum: </value>
@@ -5831,6 +5835,10 @@
         <value xml:lang="th">แก้ไขตัวอักษรอิเล็กทรอนิกส์</value>
         <value xml:lang="zh">编辑电子文本</value>
         <value xml:lang="zh_TW">編輯電子文本</value>
+    </property>
+    <property key="PageTitleEditEmailTemplateSetup">
+        <value xml:lang="en">Edit Email Template Setting</value>
+        <value xml:lang="fr">Modifier les modèles de mèl</value>
     </property>
     <property key="PageTitleEditForumMessage">
         <value xml:lang="ar">تحرير رسالة</value>

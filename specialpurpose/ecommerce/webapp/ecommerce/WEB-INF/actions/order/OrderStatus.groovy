@@ -147,7 +147,7 @@ if (orderHeader) {
         }
     }
 
-    webSiteId = orderHeader.webSiteId ?: CatalogWorker.getWebSiteId(request);
+    webSiteId = orderHeader.webSiteId ?: CatalogWorker.getStoreCatalogs(delegator, orderHeader.productStoreId);
 
     payToPartyId = productStore.payToPartyId;
     paymentAddress =  PaymentWorker.getPaymentAddress(delegator, payToPartyId);

@@ -250,7 +250,7 @@ public class OrderReturnServices {
 
             GenericValue productStoreEmail = null;
             try {
-                productStoreEmail = delegator.findByPrimaryKey("ProductStoreEmailSetting", UtilMisc.toMap("productStoreId", productStoreId, "emailType", emailType));
+                productStoreEmail = delegator.findByPrimaryKey("OldProdStoreEmailSetting", UtilMisc.toMap("productStoreId", productStoreId, "emailType", emailType));
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
             }
@@ -301,7 +301,7 @@ public class OrderReturnServices {
         }
 
         return ServiceUtil.returnFailure(UtilProperties.getMessage(resourceProduct, 
-                "ProductProductStoreEmailSettingsNotValid", 
+                "ProductOldProdStoreEmailSettingsNotValid", 
                     UtilMisc.toMap("productStoreId", productStoreId, 
                             "emailType", emailType), locale));
     }

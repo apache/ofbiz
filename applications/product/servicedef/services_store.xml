@@ -149,28 +149,43 @@ under the License.
     </service>
 
     <!-- Product Store Email Services -->
-    <service name="createProductStoreEmailSetting" engine="simple"
-            location="component://product/script/org/ofbiz/product/store/ProductStoreServices.xml" invoke="createProductStoreEmail" auth="true">
+    <service name="createProdStoreEmailTplSetting" engine="entity-auto" invoke="create"
+             auth="true" default-entity-name="ProdStoreEmailTplSetting">
+        <description>Create a Product Store Email Template Setting</description>
+        <required-permissions join-type="AND"><check-permission permission="CATALOG" action="_CREATE"/></required-permissions>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateProdStoreEmailTplSetting" engine="entity-auto" invoke="update"
+             auth="true" default-entity-name="ProdStoreEmailTplSetting">
+        <description>Update a Product Store Email Template Setting</description>
+        <required-permissions join-type="AND"><check-permission permission="CATALOG" action="_UPDATE"/></required-permissions>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeProdStoreEmailTplSetting" engine="entity-auto" invoke="delete"
+             auth="true" default-entity-name="ProdStoreEmailTplSetting">
+        <description>Remove a Product Store Email Template Setting</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="createOldProdStoreEmailSetting" engine="entity-auto" invoke="create"
+             auth="true" default-entity-name="OldProdStoreEmailSetting">
         <description>Create a Product Store Email Setting</description>
-        <auto-attributes entity-name="ProductStoreEmailSetting" include="all" mode="IN" optional="false"/>
-        <override name="xslfoAttachScreenLocation" optional="true"/>
-        <override name="ccAddress" optional="true"/>
-        <override name="bccAddress" optional="true"/>
-        <override name="contentType" optional="true"/>
+        <required-permissions join-type="AND"><check-permission permission="CATALOG" action="_CREATE"/></required-permissions>
+        <auto-attributes entity-name="OldProdStoreEmailSetting" include="pk" mode="IN" optional="false"/>
+        <auto-attributes entity-name="OldProdStoreEmailSetting" include="nonpk" mode="IN" optional="true"/>
     </service>
-    <service name="updateProductStoreEmailSetting" engine="simple"
-            location="component://product/script/org/ofbiz/product/store/ProductStoreServices.xml" invoke="updateProductStoreEmail" auth="true">
+    <service name="updateOldProdStoreEmailSetting" engine="entity-auto" invoke="update"
+             auth="true" default-entity-name="OldProdStoreEmailSetting">
         <description>Update a Product Store Email Setting</description>
-        <auto-attributes entity-name="ProductStoreEmailSetting" include="all" mode="IN" optional="false"/>
-        <override name="xslfoAttachScreenLocation" optional="true"/>
-        <override name="ccAddress" optional="true"/>
-        <override name="bccAddress" optional="true"/>
-        <override name="contentType" optional="true"/>
+        <required-permissions join-type="AND"><check-permission permission="CATALOG" action="_UPDATE"/></required-permissions>
+        <auto-attributes entity-name="OldProdStoreEmailSetting" include="pk" mode="IN" optional="false"/>
+        <auto-attributes entity-name="OldProdStoreEmailSetting" include="nonpk" mode="IN" optional="true"/>
     </service>
-    <service name="removeProductStoreEmailSetting" engine="simple"
+    <service name="removeOldProdStoreEmailSetting" engine="simple"
             location="component://product/script/org/ofbiz/product/store/ProductStoreServices.xml" invoke="removeProductStoreEmail" auth="true">
         <description>Remove a Product Store Email Setting</description>
-        <auto-attributes entity-name="ProductStoreEmailSetting" include="pk" mode="IN" optional="false"/>
+        <auto-attributes entity-name="OldProdStoreEmailSetting" include="pk" mode="IN" optional="false"/>
     </service>
 
     <!-- Product Store Shipping Method Services -->

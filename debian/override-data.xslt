@@ -107,7 +107,7 @@ under the License.
  </xsl:template>
 
  <xsl:template mode="data" match="
-  ProductStoreEmailSetting[
+  OldProdStoreEmailSetting[
    @bccAddress='ofbiztest@example.com' or
    @fromAddress='ofbiztest@example.com']|ContactList[
    @verifyEmailFrom='ofbiztest@example.com'
@@ -123,7 +123,7 @@ under the License.
   </xsl:element>
  </xsl:template>
 
- <xsl:template mode="match" match="ProductStoreEmailSetting/@bccAddress|ProductStoreEmailSetting/@fromAddress|ProductStoreEmailSetting/@verifyEmailFrom|ContactMech/@infoString|ContactList/@verifyEmailFrom|WorkflowDataField/@initialValue">
+ <xsl:template mode="match" match="OldProdStoreEmailSetting/@bccAddress|OldProdStoreEmailSetting/@fromAddress|OldProdStoreEmailSetting/@verifyEmailFrom|ContactMech/@infoString|ContactList/@verifyEmailFrom|WorkflowDataField/@initialValue">
   <xsl:attribute name="{name()}">
    <xsl:choose>
     <xsl:when test=". = 'ofbiztest@example.com'"><xsl:value-of select="$fromemail"/></xsl:when>

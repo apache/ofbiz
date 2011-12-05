@@ -56,4 +56,28 @@ under the License.
         </iterate>
     </simple-method>
 
+    <simple-method method-name="migrateProductStoreEmailSetting" short-description="Migrate data from OldProductStoreEmailSetting to ProdStoreEmailTplSetting and EmailTemplateSetting">
+        <entity-condition entity-name="ProdStoreEmailTplSetting" list="migrationAlreadyDone"/>
+        <if-not-empty field="migrationAlreadyDone">
+            <add-error><fail-message message="Migrate data already done, nothing to do ! if it's not the case, flush ProdStoreEmailTplSetting entity, check your EmailTemplateSetting and restart this service"/></add-error>
+            <check-errors/>
+        </if-not-empty>
+        <entity-condition entity-name="OldProdStoreEmailSetting" list="oldProductStoreEmailSettings"/>
+        <iterate list="oldProductStoreEmailSettings" entry="oldProductStoreEmailSetting">
+            <make-value value-field="emailTemplateSetting" entity-name="EmailTemplateSetting"/>
+            <sequenced-id sequence-name="EmailTemplateSetting" field="emailTemplateSetting.emailTemplateSettingId"/>
+            <set-nonpk-fields value-field="emailTemplateSetting" map="oldProductStoreEmailSetting"/>
+            <property-to-field resource="ProductUiLabels" property="ProductStoreEmailSettingMigration" field="emailTemplateSetting.description"/>
+            <string-append string=" ${oldProductStoreEmailSetting.productStoreId}" field="emailTemplateSetting.description"/>
+            <make-value value-field="prodStoreEmailTplSetting" entity-name="ProdStoreEmailTplSetting"/>
+            <set field="prodStoreEmailTplSetting.emailTemplateSettingId" from-field="emailTemplateSetting.emailTemplateSettingId"/>
+            <set field="prodStoreEmailTplSetting.productStoreId" from-field="oldProductStoreEmailSetting.productStoreId"/>
+            <set field="prodStoreEmailTplSetting.emailTypeEnumId" from-field="oldProductStoreEmailSetting.emailType"/>
+            <set field="prodStoreEmailTplSetting.fromDate" value="2001-01-01 00:00:00.000" type="Timestamp"/>
+            <field-to-list list="toStore" field="emailTemplateSetting"/>
+            <field-to-list list="toStore" field="prodStoreEmailTplSetting"/>
+        </iterate>
+        <store-list list="toStore"/>
+    </simple-method>
+
 </simple-methods>

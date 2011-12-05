@@ -10258,6 +10258,18 @@
         <value xml:lang="es">Comando a llamar</value>
         <value xml:lang="fr">Cmd d'appel</value>
     </property>
+    <property key="FormFieldTitle_bodyScreenLocation">
+        <value xml:lang="de">Body Screen Pfad</value>
+        <value xml:lang="en">Body Screen Location</value>
+        <value xml:lang="es">Ubicación de la Pantalla Principal</value>
+        <value xml:lang="fr">Emplacement de l'écran</value>
+        <value xml:lang="it">Posizione Corpo Videata</value>
+        <value xml:lang="ro">Pozitie Corp Videata</value>
+        <value xml:lang="ru">Путь к экрану содержания</value>
+        <value xml:lang="th">Body Screen Location</value>
+        <value xml:lang="zh">主体屏幕位置</value>
+        <value xml:lang="zh_TW">主體螢幕位置</value>
+    </property>
     <property key="FormFieldTitle_comments">
         <value xml:lang="ar">تعاليق</value>
         <value xml:lang="de">Anmerkungen</value>
@@ -10507,6 +10519,14 @@
         <value xml:lang="en">External Device Purpose Action Id</value>
         <value xml:lang="es">Código acción dispositivo externo</value>
         <value xml:lang="fr">Obj. de l'action</value>
+    </property>
+    <property key="FormFieldTitle_emailTemplateSettingId">
+        <value xml:lang="en">ID email template</value>
+        <value xml:lang="fr">Réf. Modèle mél</value>
+    </property>
+    <property key="FormFieldTitle_fromAddress">
+        <value xml:lang="en">From Address</value>
+        <value xml:lang="fr">Addresse d'envoi</value>
     </property>
     <property key="FormFieldTitle_fromDate">
         <value xml:lang="ar">تاريخ البدء</value>
@@ -10914,6 +10934,18 @@
         <value xml:lang="zh">更新</value>
         <value xml:lang="zh_TW">更新</value>
     </property>
+    <property key="FormFieldTitle_xslfoAttachScreenLocation">
+        <value xml:lang="de">Anhang Screen Pfad (XSL-FO)</value>
+        <value xml:lang="en">Attachment Screen Location (XSL-FO)</value>
+        <value xml:lang="es">Ubicación de la pantalla de Adjuntos (XSL-FO)</value>
+        <value xml:lang="fr">Emplacement de l'écran rattaché (XSL-FO)</value>
+        <value xml:lang="it">Allegato Locazione Videata (XSL-FO)</value>
+        <value xml:lang="ro">Anexa Locatie Videata (XSL-FO)</value>
+        <value xml:lang="ru">Путь к экрану присоединенного файла (XSL-FO)</value>
+        <value xml:lang="th">ที่ตั้งการเชื่อมต่อหน้าจอ (XSL-FO)</value>
+        <value xml:lang="zh">附件屏幕位置 (XSL-FO)</value>
+        <value xml:lang="zh_TW">附件螢幕位置 (XSL-FO)</value>
+    </property>
     <property key="Google Base">
         <value xml:lang="de">Google Base</value>
         <value xml:lang="en">Google Base</value>
@@ -11221,6 +11253,10 @@
         <value xml:lang="th">เข้าสู่ระบบ</value>
         <value xml:lang="zh">登录</value>
         <value xml:lang="zh_TW">登入</value>
+    </property>
+    <property key="PageTitleLookupEmailTemplateSetting">
+        <value xml:lang="en">Lookup Email Template Setting</value>
+        <value xml:lang="fr">Recherche d'un modèle de mél</value>
     </property>
     <property key="PageTitleLookupGeo">
         <value xml:lang="en">Lookup Geo</value>

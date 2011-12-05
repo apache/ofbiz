@@ -73,7 +73,7 @@ under the License.
                 <!-- required: fields to search a match -->
                 <!-- the first element from searchFields is returned after user selection --> 
                 <!-- it might be hidden based on widget.autocompleter.displayReturnField property in widget.properties -->                
-                <set field="searchFields" value="[geoName, geoId, geoCode]"/>                
+                <set field="searchFields" value="[geoName, geoId, geoCode]"/>
 
                 <!-- optional: fields to display in the given order, default is searchFields -->
                 <set field="displayFields" value="[geoId, geoName, geoCode]"/>
@@ -220,6 +220,24 @@ under the License.
                     </decorator-section>
                     <decorator-section name="search-results">
                         <include-form name="ListPortalPages" location="component://common/widget/LookupForms.xml"/>
+                    </decorator-section>
+              </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="LookupEmailTemplateSetting">
+        <section>
+            <actions>
+                <set field="title" value="${uiLabelMap.PageTitleLookupEmailTemplateSetting}"/>
+            </actions>
+            <widgets>
+               <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="search-options">
+                        <include-form name="LookupEmailTemplateSetting" location="component://common/widget/LookupForms.xml"/>
+                    </decorator-section>
+                    <decorator-section name="search-results">
+                        <include-form name="ListEmailTemplateSettings" location="component://common/widget/LookupForms.xml"/>
                     </decorator-section>
               </decorator-screen>
             </widgets>

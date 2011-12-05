@@ -52,6 +52,10 @@ under the License.
             <link target="EditContentType" target-window="_top" style="tabButton"/>
         </menu-item>
 
+        <menu-item name="email" title="${uiLabelMap.PageTitleEditEmailTemplateSetup}" >
+            <link target="EditEmailTemplateSetting" target-window="_top" style="tabButton"/>
+        </menu-item>
+
         <menu-item name="userpermissions" title="${uiLabelMap.PageTitleEditContentUserPermissions}" >
             <link name="UserPermissions" target="UserPermissions" target-window="_top" style="tabButton"/>
         </menu-item>

@@ -325,7 +325,7 @@ under the License.
                 <set field="paymentMethodTypeId" from-field="parameters.paymentMethodTypeId"/>
                 <set field="paymentServiceTypeEnumId" from-field="parameters.paymentServiceTypeEnumId"/>
                 <entity-one entity-name="ProductStorePaymentSetting" value-field="productStorePaymentSetting" auto-field-map="true"/>
-                
+
                 <script location="component://product/webapp/catalog/WEB-INF/actions/store/EditProductStorePaySetup.groovy"/>
             </actions>
             <widgets>
@@ -349,20 +349,52 @@ under the License.
             </widgets>
        </section>
     </screen>
+    <!-- TODO Remove this screen when all send email system will be converted -->
+    <screen name="EditOldProductStoreEmails">
+       <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditProductStoreEmailSetup"/>
+                <set field="headerItem" value="store"/>
+                <set field="tabButtonItem" value="EditOldProductStoreEmails"/>
+                <set field="labelTitleProperty" value="ProductOldProdStoreEmailSettings"/>
+
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+                <entity-one entity-name="ProductStore" value-field="productStore" auto-field-map="true"/>
+
+                <entity-condition entity-name="OldProdStoreEmailSetting" list="productStoreEmailSettings">
+                    <condition-expr field-name="productStoreId" from-field="productStoreId"/>
+                    <order-by field-name="emailType"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProductStoreDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <label style="h3">${uiLabelMap.ProductDeprecatedProductStoreEmailScreen}</label>
+                        <screenlet title="${uiLabelMap.PageTitleEditProductStoreEmailSetup}">
+                            <include-form name="updateOldProductStoreEmail" location="component://product/widget/catalog/ProductStoreForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.PageTitleAddProductStoreEmailSetup}">
+                            <include-form name="createOldProductStoreEmail" location="component://product/widget/catalog/ProductStoreForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
     <screen name="EditProductStoreEmails">
        <section>
             <actions>
                 <set field="titleProperty" value="PageTitleEditProductStoreEmailSetup"/>
                 <set field="headerItem" value="store"/>
                 <set field="tabButtonItem" value="EditProductStoreEmails"/>
-                <set field="labelTitleProperty" value="ProductProductStoreEmailSettings"/>
+                <set field="labelTitleProperty" value="ProductProdStoreEmailSettings"/>
 
                 <set field="productStoreId" from-field="parameters.productStoreId"/>
                 <entity-one entity-name="ProductStore" value-field="productStore" auto-field-map="true"/>
 
-                <entity-condition entity-name="ProductStoreEmailSetting" list="productStoreEmailSettings">
+                <entity-condition entity-name="ProdStoreEmailAndTemplateSettingView" list="productStoreEmailSettings" filter-by-date="true">
                     <condition-expr field-name="productStoreId" from-field="productStoreId"/>
-                    <order-by field-name="emailType"/>
+                    <order-by field-name="emailTypeEnumId"/>
                 </entity-condition>
             </actions>
             <widgets>

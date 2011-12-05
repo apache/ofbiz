@@ -353,7 +353,7 @@ public class EbayStoreAutoPreferences {
                         for (SellingManagerSoldOrderType item : items) {
                             // call send
                             Map<String, Object> sendMap = FastMap.newInstance();
-                            GenericValue productStoreEmail = delegator.findByPrimaryKey("ProductStoreEmailSetting", UtilMisc.toMap("productStoreId", productStoreId, "emailType", "EBAY_FEEBACK_REMIN"));
+                            GenericValue productStoreEmail = delegator.findByPrimaryKey("OldProdStoreEmailSetting", UtilMisc.toMap("productStoreId", productStoreId, "emailType", "EBAY_FEEBACK_REMIN"));
                             String bodyScreenLocation = productStoreEmail.getString("bodyScreenLocation");
                             sendMap.put("bodyScreenUri", bodyScreenLocation);
                             String subjectString = productStoreEmail.getString("subject");
@@ -687,7 +687,7 @@ public class EbayStoreAutoPreferences {
                         for (SellingManagerSoldOrderType item : items) {
                             // call send
                             Map<String, Object> sendMap = FastMap.newInstance();
-                            GenericValue productStoreEmail = delegator.findByPrimaryKey("ProductStoreEmailSetting", UtilMisc.toMap("productStoreId", productStoreId, "emailType", "EBAY_PAY_RECIEVED"));
+                            GenericValue productStoreEmail = delegator.findByPrimaryKey("OldProdStoreEmailSetting", UtilMisc.toMap("productStoreId", productStoreId, "emailType", "EBAY_PAY_RECIEVED"));
                             String bodyScreenLocation = productStoreEmail.getString("bodyScreenLocation");
                             sendMap.put("bodyScreenUri", bodyScreenLocation);
                             String subjectString = productStoreEmail.getString("subject");
@@ -941,7 +941,7 @@ public class EbayStoreAutoPreferences {
                                 String buyerUserId = bidder.get("userId").toString();
 
                                 Map<String, Object> sendMap = FastMap.newInstance();
-                                GenericValue productStoreEmail = delegator.findByPrimaryKey("ProductStoreEmailSetting", UtilMisc.toMap("productStoreId", productStoreId, "emailType", "EBAY_WIN_BUYER_NOTI"));
+                                GenericValue productStoreEmail = delegator.findByPrimaryKey("OldProdStoreEmailSetting", UtilMisc.toMap("productStoreId", productStoreId, "emailType", "EBAY_WIN_BUYER_NOTI"));
                                 String bodyScreenLocation = productStoreEmail.getString("bodyScreenLocation");
                                 sendMap.put("bodyScreenUri", bodyScreenLocation);
                                 String subjectString = productStoreEmail.getString("subject");
@@ -1001,7 +1001,7 @@ public class EbayStoreAutoPreferences {
                         String buyerEmail = item.get("buyerEmail").toString();
 
                          Map<String, Object> sendMap = FastMap.newInstance();
-                         GenericValue productStoreEmail = delegator.findByPrimaryKey("ProductStoreEmailSetting", UtilMisc.toMap("productStoreId", productStoreId, "emailType", "EBAY_ITEM_DISPATCH"));
+                         GenericValue productStoreEmail = delegator.findByPrimaryKey("OldProdStoreEmailSetting", UtilMisc.toMap("productStoreId", productStoreId, "emailType", "EBAY_ITEM_DISPATCH"));
                          String bodyScreenLocation = productStoreEmail.getString("bodyScreenLocation");
                          sendMap.put("bodyScreenUri", bodyScreenLocation);
                          String subjectString = productStoreEmail.getString("subject");
