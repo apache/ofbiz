@@ -137,17 +137,23 @@ under the License.
 
                   jQuery("#${id}").change(function() {
                       var ofbizTime = "<#if shortDateInput?exists && shortDateInput>yyyy-MM-dd<#else>yyyy-MM-dd HH:mm:ss</#if>";
-                      var dateObj = Date.parseExact(this.value, ofbizTime);
-                      var dateFormat = Date.CultureInfo.formatPatterns.shortDate<#if shortDateInput?exists && !shortDateInput> + " " + Date.CultureInfo.formatPatterns.longTime</#if>;
-                      var formatedObj = dateObj.toString(dateFormat);
-                      jQuery("#${id}_i18n").val(formatedObj);
+                      var newValue = ""
+                      if (this.value != "") {
+                          var dateObj = Date.parseExact(this.value, ofbizTime);
+                          var dateFormat = Date.CultureInfo.formatPatterns.shortDate<#if shortDateInput?exists && !shortDateInput> + " " + Date.CultureInfo.formatPatterns.longTime</#if>;
+                          newValue = dateObj.toString(dateFormat);
+                      }
+                      jQuery("#${id}_i18n").val(newValue);
                   });
                   jQuery("#${id}_i18n").change(function() {
                       var dateFormat = Date.CultureInfo.formatPatterns.shortDate<#if shortDateInput?exists && !shortDateInput> + " " + Date.CultureInfo.formatPatterns.longTime</#if>;
-                      var dateObj = Date.parseExact(this.value, dateFormat);
-                      var ofbizTime = "<#if shortDateInput?exists && shortDateInput>yyyy-MM-dd<#else>yyyy-MM-dd HH:mm:ss</#if>";
-                      var formatedObj = dateObj.toString(ofbizTime);
-                      jQuery("#${id}").val(formatedObj);
+                      var newValue = ""
+                      if (this.value != "") {
+                          var dateObj = Date.parseExact(this.value, dateFormat);
+                          var ofbizTime = "<#if shortDateInput?exists && shortDateInput>yyyy-MM-dd<#else>yyyy-MM-dd HH:mm:ss</#if>";
+                          newValue = dateObj.toString(ofbizTime);
+                      }
+                      jQuery("#${id}").val(newValue);
                   });
               } else {
                   <#-- fallback if no language specific js date file is found -->
@@ -691,9 +697,9 @@ Parameter: lastViewName, String, optional - If the ajaxEnabled parameter is true
 <li class="${paginateNextStyle}<#if highIndex lt listSize>"><a href="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxNextUrl}')<#else>${nextUrl}</#if>">${paginateNextLabel}</a><#else>-disabled"><span>${paginateNextLabel}</span></#if></li>
 <li class="${paginateLastStyle}<#if highIndex lt listSize>"><a href="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxLastUrl}')<#else>${lastUrl}</#if>">${paginateLastLabel}</a><#else>-disabled"><span>${paginateLastLabel}</span></#if></li>
 <#if javaScriptEnabled><li class="nav-pagesize"><select name="pageSize" size="1" onchange="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxSelectSizeUrl}')<#else>location.href='${selectSizeUrl}';</#if>"><#rt/>
-<#assign availPageSizes = [20, 30, 50, 100, 200]>
+<#assign availPageSizes = [viewSize, 20, 30, 50, 100, 200]>
 <#list availPageSizes as ps>
-  <option <#if viewSize == ps>selected="selected" </#if> value="${ps}">${ps}</option>
+  <option<#if viewSize == ps> selected="selected" </#if> value="${ps}">${ps}</option>
 </#list>
 </select> ${paginateViewSizeLabel}</li></#if>
 <li class="nav-displaying">${commonDisplaying}</li>
