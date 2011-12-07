@@ -101,6 +101,11 @@ public class IterateSectionWidget extends ModelScreenWidget {
     }
 
     @Override
+    public void accept(ScreenWidgetVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
     public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
 
         boolean isEntrySet = false;

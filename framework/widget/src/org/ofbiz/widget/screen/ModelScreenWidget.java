@@ -81,6 +81,8 @@ public abstract class ModelScreenWidget extends ModelWidget {
         if (Debug.verboseOn()) Debug.logVerbose("Reading Screen sub-widget with name: " + widgetElement.getNodeName(), module);
     }
 
+    public abstract void accept(ScreenWidgetVisitor visitor);
+
     public abstract void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException;
 
     public abstract String rawString();
@@ -169,6 +171,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
+        }
+
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
             // check the condition, if there is one
             boolean condTrue = true;
@@ -249,6 +256,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
             // read sub-widgets
             List<? extends Element> subElementList = UtilXml.childElementList(containerElement);
             this.subWidgets = ModelScreenWidget.readSubWidgets(this.modelScreen, subElementList);
+        }
+
+        @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
         }
 
         @Override
@@ -355,6 +367,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
+        }
+
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
             boolean collapsed = getInitiallyCollapsed(context);
             if (this.collapsible) {
@@ -448,6 +465,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
+        }
+
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
             screenStringRenderer.renderHorizontalSeparator(writer, context, this);
         }
@@ -477,6 +499,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
             this.nameExdr = FlexibleStringExpander.getInstance(includeScreenElement.getAttribute("name"));
             this.locationExdr = FlexibleStringExpander.getInstance(includeScreenElement.getAttribute("location"));
             this.shareScopeExdr = FlexibleStringExpander.getInstance(includeScreenElement.getAttribute("share-scope"));
+        }
+
+        @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
         }
 
         @Override
@@ -556,6 +583,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
+        }
+
+        @Override
         @SuppressWarnings("unchecked")
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
             // isolate the scope
@@ -608,6 +640,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
+        }
+
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
             // render sub-widgets
             renderSubWidgetsString(this.subWidgets, writer, context, screenStringRenderer);
@@ -624,6 +661,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
 
         public DecoratorSectionInclude(ModelScreen modelScreen, Element decoratorSectionElement) {
             super(modelScreen, decoratorSectionElement);
+        }
+
+        @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
         }
 
         @Override
@@ -674,6 +716,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
+        }
+
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) {
             try {
                 screenStringRenderer.renderLabel(writer, context, this);
@@ -720,6 +767,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
             this.nameExdr = FlexibleStringExpander.getInstance(formElement.getAttribute("name"));
             this.locationExdr = FlexibleStringExpander.getInstance(formElement.getAttribute("location"));
             this.shareScopeExdr = FlexibleStringExpander.getInstance(formElement.getAttribute("share-scope"));
+        }
+
+        @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
         }
 
         @Override
@@ -808,6 +860,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
             this.nameExdr = FlexibleStringExpander.getInstance(treeElement.getAttribute("name"));
             this.locationExdr = FlexibleStringExpander.getInstance(treeElement.getAttribute("location"));
             this.shareScopeExdr = FlexibleStringExpander.getInstance(treeElement.getAttribute("share-scope"));
+        }
+
+        @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
         }
 
         @Override
@@ -903,6 +960,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
+        }
+
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
             ModelScreenWidget subWidget = null;
             subWidget = subWidgets.get(screenStringRenderer.getRendererName());
@@ -955,6 +1017,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
             this.height = subContentElement.getAttribute("height");
             if (UtilValidate.isEmpty(this.height)) this.width="400px";
             this.border = subContentElement.getAttribute("border");
+        }
+
+        @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
         }
 
         @Override
@@ -1178,6 +1245,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
+        }
+
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) {
             try {
                 screenStringRenderer.renderSubContentBegin(writer, context, this);
@@ -1231,6 +1303,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
 
             this.nameExdr = FlexibleStringExpander.getInstance(menuElement.getAttribute("name"));
             this.locationExdr = FlexibleStringExpander.getInstance(menuElement.getAttribute("location"));
+        }
+
+        @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
         }
 
         @Override
@@ -1329,6 +1406,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
 
             this.width = linkElement.getAttribute("width");
             this.height = linkElement.getAttribute("height");
+        }
+
+        @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
         }
 
         @Override
@@ -1514,6 +1596,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
+        }
+
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) {
             try {
                 screenStringRenderer.renderImage(writer, context, this);
@@ -1608,6 +1695,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
             this.idExdr = FlexibleStringExpander.getInstance(portalPageElement.getAttribute("id"));
             this.confModeExdr = FlexibleStringExpander.getInstance(portalPageElement.getAttribute("conf-mode"));
             this.usePrivate = !("false".equals(portalPageElement.getAttribute("use-private")));
+        }
+
+        @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
         }
 
         @Override

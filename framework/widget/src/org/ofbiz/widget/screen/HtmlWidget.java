@@ -246,6 +246,11 @@ public class HtmlWidget extends ModelScreenWidget {
         }
 
         @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
+        }
+
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) {
             renderHtmlTemplate(writer, this.locationExdr, context);
         }
@@ -269,6 +274,11 @@ public class HtmlWidget extends ModelScreenWidget {
                 String name = htmlTemplateDecoratorSectionElement.getAttribute("name");
                 this.sectionMap.put(name, new HtmlTemplateDecoratorSection(modelScreen, htmlTemplateDecoratorSectionElement));
             }
+        }
+
+        @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
         }
 
         @Override
@@ -314,6 +324,11 @@ public class HtmlWidget extends ModelScreenWidget {
         }
 
         @Override
+        public void accept(ScreenWidgetVisitor visitor) {
+            visitor.visit(this);
+        }
+
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
             // render sub-widgets
             renderSubWidgetsString(this.subWidgets, writer, context, screenStringRenderer);
@@ -323,5 +338,10 @@ public class HtmlWidget extends ModelScreenWidget {
         public String rawString() {
             return "<html-template-decorator-section name=\"" + this.name + "\"/>";
         }
+    }
+
+    @Override
+    public void accept(ScreenWidgetVisitor visitor) {
+        visitor.visit(this);
     }
 }
