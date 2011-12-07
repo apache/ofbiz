@@ -1286,6 +1286,8 @@ under the License.
                 <set field="labelTitleProperty" value="PartyVendor"/>
 
                 <set field="productId" from-field="parameters.productId"/>
+                <entity-one entity-name="Product" value-field="product"/>
+
                 <entity-condition entity-name="VendorProduct" list="vendorProductList">
                     <condition-expr field-name="productId" from-field="productId"/>
                 </entity-condition>
