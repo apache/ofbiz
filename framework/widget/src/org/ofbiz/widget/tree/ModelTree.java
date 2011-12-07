@@ -85,10 +85,9 @@ public class ModelTree extends ModelWidget {
 
 // ===== CONSTRUCTORS =====
     /** Default Constructor */
-
-    /** XML Constructor */
     public ModelTree() {}
 
+    /** XML Constructor */
     public ModelTree(Element treeElement, Delegator delegator, LocalDispatcher dispatcher) {
         super(treeElement);
         this.rootNodeName = treeElement.getAttribute("root-node-name");
@@ -129,6 +128,10 @@ public class ModelTree extends ModelWidget {
             throw new IllegalArgumentException("No node elements found for the tree definition with name: " + this.name);
         }
 
+    }
+
+    public void accept(TreeWidgetVisitor visitor) {
+        visitor.visit(this);
     }
 
     public void setDefaultEntityName(String name) {
@@ -362,6 +365,10 @@ public class ModelTree extends ModelWidget {
             }
 
 
+        }
+
+        public void accept(TreeWidgetVisitor visitor) {
+            visitor.visit(this);
         }
 
         public void renderNodeString(Appendable writer, Map<String, Object> context,
@@ -725,6 +732,10 @@ public class ModelTree extends ModelWidget {
 
             }
 
+            public void accept(TreeWidgetVisitor visitor) {
+                visitor.visit(this);
+            }
+
             public ModelTree.ModelNode getNode() {
                 return this.rootNode;
             }
@@ -761,6 +772,10 @@ public class ModelTree extends ModelWidget {
 
                 this.idExdr = FlexibleStringExpander.getInstance(labelElement.getAttribute("id"));
                 this.styleExdr = FlexibleStringExpander.getInstance(labelElement.getAttribute("style"));
+            }
+
+            public void accept(TreeWidgetVisitor visitor) {
+                visitor.visit(this);
             }
 
             public void renderLabelString(Appendable writer, Map<String, Object> context, TreeStringRenderer treeStringRenderer) {
@@ -847,6 +862,10 @@ public class ModelTree extends ModelWidget {
                 for (Element parameterElement: parameterElementList) {
                     this.parameterList.add(new WidgetWorker.Parameter(parameterElement));
                 }
+            }
+
+            public void accept(TreeWidgetVisitor visitor) {
+                visitor.visit(this);
             }
 
             public void renderLinkString(Appendable writer, Map<String, Object> context, TreeStringRenderer treeStringRenderer) {
@@ -1035,6 +1054,10 @@ public class ModelTree extends ModelWidget {
                 setBorder(UtilFormatOut.checkEmpty(imageElement.getAttribute("border"), "0"));
                 setUrlMode(UtilFormatOut.checkEmpty(imageElement.getAttribute("url-mode"), "content"));
 
+            }
+
+            public void accept(TreeWidgetVisitor visitor) {
+                visitor.visit(this);
             }
 
             public void renderImageString(Appendable writer, Map<String, Object> context, TreeStringRenderer treeStringRenderer) {
