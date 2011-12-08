@@ -4,6 +4,10 @@ import javax.jcr.ItemExistsException;
 import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
+import javax.jcr.lock.LockException;
+import javax.jcr.nodetype.ConstraintViolationException;
+import javax.jcr.nodetype.NoSuchNodeTypeException;
+import javax.jcr.version.VersionException;
 
 import org.apache.jackrabbit.ocm.exception.ObjectContentManagerException;
 import org.apache.jackrabbit.ocm.manager.ObjectContentManager;
@@ -56,55 +60,15 @@ public class ContentWriterJackrabbit implements ContentWriter {
             return;
         }
 
-        // We have to check if the node structure (the sub nodes of the passed
-        // ORM Object) exist, otherwise they will be created.
-        String path = orm.getPath();
-        String[] nodeStructure = path.split(ConstantsJackrabbit.NODEPATHDELIMITER);
-        Node parentNode = null;
+        // create all nodes in the node structure which do not exist yet
         try {
-            parentNode = this.ocm.getSession().getRootNode();
+            createNodeStructure(orm.getPath(), orm.getClass().getAnnotation(org.apache.jackrabbit.ocm.mapper.impl.annotation.Node.class).jcrType());
+        } catch (PathNotFoundException e) {
+            Debug.logError(e, "The new node could not be created: " + orm.getPath(), module);
+            return;
         } catch (RepositoryException e) {
             Debug.logError(e, "The new node could not be created: " + orm.getPath(), module);
             return;
-        }
-
-        // Read a primary node type from the mapping annotation class
-        // TODO Check for a better solution because here we have a cross
-        // reference to the Jackrabbit ORM Package.
-        org.apache.jackrabbit.ocm.mapper.impl.annotation.Node annotationNode = orm.getClass().getAnnotation(org.apache.jackrabbit.ocm.mapper.impl.annotation.Node.class);
-        String primNodeType = annotationNode.jcrType();
-
-        // We loop only over the sub nodes.
-        for (int i = 0; i < (nodeStructure.length - 1); i++) {
-            String node = nodeStructure[i];
-            if (UtilValidate.isEmpty(node)) {
-                continue;
-            }
-
-            try {
-                if (parentNode.hasNode(node)) {
-                    parentNode = parentNode.getNode(node);
-                    versioningManager.checkOutContentObject(parentNode.getPath());
-                } else {
-                    versioningManager.checkOutContentObject(parentNode.getPath());
-
-                    Node newNode = parentNode.addNode(node, primNodeType);
-                    newNode.addMixin(ConstantsJackrabbit.MIXIN_VERSIONING);
-                    if (!ConstantsJackrabbit.ROOTPATH.equals(parentNode.getPath())) {
-                        newNode.setPrimaryType(parentNode.getPrimaryNodeType().getName());
-                    }
-
-                    versioningManager.addContentToCheckInList(newNode.getPath());
-                    parentNode = newNode;
-                }
-            } catch (PathNotFoundException e) {
-                Debug.logError(e, "The new node could not be created: " + orm.getPath(), module);
-                return;
-            } catch (RepositoryException e) {
-                Debug.logError(e, "The new node could not be created: " + orm.getPath(), module);
-                return;
-            }
-
         }
 
         ocm.insert(orm);
@@ -144,5 +108,96 @@ public class ContentWriterJackrabbit implements ContentWriter {
 
     private void saveState() {
         versioningManager.checkInContentAndSaveState();
+    }
+
+    /**
+     * Create the new Node structure.
+     *
+     * @param completeNodePath
+     * @param primaryNodeType
+     *            a primary node type from the mapping annotation class, that
+     *            will be used as primary type for the created nodes
+     * @throws PathNotFoundException
+     * @throws RepositoryException
+     */
+    private void createNodeStructure(String completeNodePath, String primaryNodeType) throws PathNotFoundException, RepositoryException {
+        // We have to check if the node structure (the sub nodes of the passed
+        // ORM Object) exist, otherwise they will be created.
+        String[] nodeStructure = completeNodePath.split(ConstantsJackrabbit.NODEPATHDELIMITER);
+        Node parentNode = null;
+        try {
+            parentNode = this.ocm.getSession().getRootNode();
+        } catch (RepositoryException e) {
+            Debug.logError(e, "The new node could not be created: " + completeNodePath, module);
+            return;
+        }
+
+        // We loop only over the sub nodes.
+        for (int i = 0; i < (nodeStructure.length - 1); i++) {
+            String node = nodeStructure[i];
+            if (UtilValidate.isEmpty(node)) {
+                continue;
+            }
+
+            parentNode = createNewSubNodeIfNotExist(primaryNodeType, parentNode, node);
+        }
+    }
+
+    /**
+     * Checks if the new node already exist, otherwise it will be created.
+     *
+     * @param primaryNodeType
+     * @param parentNode
+     * @param node
+     * @return
+     * @throws RepositoryException
+     * @throws PathNotFoundException
+     * @throws ItemExistsException
+     * @throws NoSuchNodeTypeException
+     * @throws LockException
+     * @throws VersionException
+     * @throws ConstraintViolationException
+     */
+    private Node createNewSubNodeIfNotExist(String primaryNodeType, Node parentNode, String node) throws RepositoryException, PathNotFoundException, ItemExistsException, NoSuchNodeTypeException, LockException, VersionException,
+            ConstraintViolationException {
+
+        if (parentNode.hasNode(node)) {
+            parentNode = parentNode.getNode(node);
+            versioningManager.checkOutContentObject(parentNode.getPath());
+        } else {
+            versioningManager.checkOutContentObject(parentNode.getPath());
+
+            Node newNode = addNewNode(primaryNodeType, parentNode, node);
+
+            versioningManager.addContentToCheckInList(newNode.getPath());
+            parentNode = newNode;
+        }
+
+        return parentNode;
+    }
+
+    /**
+     * The method adds a new node to its parent, write the versioning mixin and
+     * set the primary node type.
+     *
+     * @param primaryNodeType
+     * @param parentNode
+     * @param node
+     * @return
+     * @throws ItemExistsException
+     * @throws PathNotFoundException
+     * @throws NoSuchNodeTypeException
+     * @throws LockException
+     * @throws VersionException
+     * @throws ConstraintViolationException
+     * @throws RepositoryException
+     */
+    private Node addNewNode(String primaryNodeType, Node parentNode, String node) throws ItemExistsException, PathNotFoundException, NoSuchNodeTypeException, LockException, VersionException, ConstraintViolationException, RepositoryException {
+        Node newNode = parentNode.addNode(node, primaryNodeType);
+        newNode.addMixin(ConstantsJackrabbit.MIXIN_VERSIONING);
+        if (!ConstantsJackrabbit.ROOTPATH.equals(parentNode.getPath())) {
+            newNode.setPrimaryType(parentNode.getPrimaryNodeType().getName());
+        }
+        return newNode;
     }
 }

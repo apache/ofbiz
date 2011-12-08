@@ -25,16 +25,29 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 
-import javolution.util.FastMap;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.query.QueryResult;
 
+import javolution.util.FastMap;
+import net.sf.json.JSONArray;
+
+import org.apache.jackrabbit.ocm.manager.ObjectContentManager;
+import org.apache.jackrabbit.ocm.manager.impl.ObjectContentManagerImpl;
+import org.apache.jackrabbit.ocm.mapper.Mapper;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.jcr.access.ContentWriter;
 import org.ofbiz.jcr.access.JcrRepositoryAccessor;
+import org.ofbiz.jcr.access.jackrabbit.ContentWriterJackrabbit;
 import org.ofbiz.jcr.access.jackrabbit.JackrabbitRepositoryAccessor;
 import org.ofbiz.jcr.api.JcrDataHelper;
 import org.ofbiz.jcr.api.JcrFileHelper;
 import org.ofbiz.jcr.api.jackrabbit.JackrabbitArticleHelper;
 import org.ofbiz.jcr.api.jackrabbit.JackrabbitFileHelper;
+import org.ofbiz.jcr.loader.JCRFactory;
+import org.ofbiz.jcr.loader.JCRFactoryUtil;
+import org.ofbiz.jcr.loader.jackrabbit.JCRFactoryImpl;
 import org.ofbiz.jcr.orm.jackrabbit.JackrabbitArticle;
 import org.ofbiz.jcr.util.jackrabbit.JcrUtilJackrabbit;
 import org.ofbiz.service.ServiceUtil;
@@ -62,6 +75,87 @@ public class JackrabbitTests extends OFBizTestCase {
         JcrRepositoryAccessor repositoryAccess = new JackrabbitRepositoryAccessor(userLogin);
         assertNotNull(repositoryAccess);
     }
+
+    /*
+     * Base Method Tests
+     */
+    public void testFactoryGetMapper() {
+        assertNotNull(JCRFactoryImpl.getMapper());
+        assertTrue(JCRFactoryImpl.getMapper() instanceof Mapper);
+    }
+
+    public void testFactoryUtilGetJcrFactory() {
+        JCRFactory factory = JCRFactoryUtil.getJCRFactory();
+        assertNotNull(factory);
+        assertTrue((factory instanceof JCRFactoryImpl));
+    }
+
+    public void testUtilGetSession() {
+        Session session = JCRFactoryUtil.getSession();
+        assertNotNull(session);
+        assertTrue((session instanceof Session));
+    }
+
+    //
+    // Jackrabbit Accessor tests
+    //
+
+    public void testAccessorConstructor() throws RepositoryException {
+        JcrRepositoryAccessor accessor = new JackrabbitRepositoryAccessor(userLogin);
+
+        assertNotNull(accessor);
+        assertEquals("/", accessor.getSession().getRootNode().getPath());
+
+        accessor.closeAccess();
+    }
+
+    public void testAccessorDataTree() throws RepositoryException {
+        JcrRepositoryAccessor accessor = new JackrabbitRepositoryAccessor(userLogin);
+
+        JSONArray array = accessor.getJsonDataTree();
+        assertEquals(0, array.size()); // should be 0 because there are no
+                                       // entries in the repository yet
+
+        accessor.closeAccess();
+    }
+
+    public void testAccessorFileTree() throws RepositoryException {
+        JcrRepositoryAccessor accessor = new JackrabbitRepositoryAccessor(userLogin);
+
+        JSONArray array = accessor.getJsonFileTree();
+        assertEquals(0, array.size()); // should be 0 because there are no
+                                       // entries in the repository yet
+        accessor.closeAccess();
+    }
+
+    public void testAccessorQuery() throws RepositoryException {
+        JcrRepositoryAccessor accessor = new JackrabbitRepositoryAccessor(userLogin);
+        QueryResult results = accessor.queryForRepositoryData("SELECT * FROM [rep:root]");
+
+        assertNotNull(results);
+        assertEquals(1, results.getNodes().getSize());
+
+        accessor.closeAccess();
+    }
+
+    //
+    // Content Writer
+    //
+
+    public void testWriterConsturctor() {
+
+        Session session = JCRFactoryUtil.getSession();
+        ObjectContentManager ocm = new ObjectContentManagerImpl(session, JCRFactoryImpl.getMapper());
+        ContentWriter writer = new ContentWriterJackrabbit(ocm);
+
+        assertNotNull(writer);
+
+        ocm.logout();
+    }
+
+    /*
+     * Functional Integration Tests
+     */
 
     public void testCrudArticleNode() throws Exception {
         // Create New Object
@@ -154,7 +248,8 @@ public class JackrabbitTests extends OFBizTestCase {
 
         List<Map<String, String>> queryResult = helper.queryData("SELECT * FROM [nt:unstructured]");
 
-        assertEquals(3, queryResult.size()); // the list should contain 3 result sets
+        assertEquals(3, queryResult.size()); // the list should contain 3 result
+                                             // sets
 
         assertEquals("/", queryResult.get(0).get("path"));
         assertEquals("/query", queryResult.get(1).get("path"));

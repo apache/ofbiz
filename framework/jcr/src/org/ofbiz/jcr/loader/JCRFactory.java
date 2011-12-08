@@ -54,13 +54,11 @@ public interface JCRFactory {
      */
     public Session createSession() throws RepositoryException;
 
-    // public static final String WORKSPACE_NAME =
-    // PropsUtil.get(PropsKeys.JCR_WORKSPACE_NAME);
-    //
-    // public static final String NODE_DOCUMENTLIBRARY =
-    // PropsUtil.get(PropsKeys.JCR_NODE_DOCUMENTLIBRARY);
-
+    /**
+     * Should return an instance of the repository implementation.
+     *
+     * @return
+     */
     public Repository getInstance();
 
-    public Repository getRepository();
 }

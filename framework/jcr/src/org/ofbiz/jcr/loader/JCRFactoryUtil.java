@@ -18,7 +18,6 @@
  *******************************************************************************/
 package org.ofbiz.jcr.loader;
 
-import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
@@ -70,9 +69,5 @@ public class JCRFactoryUtil {
         }
 
         return session;
-    }
-
-    public static Repository getRepository() {
-        return getJCRFactory().getRepository();
     }
 }

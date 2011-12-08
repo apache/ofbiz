@@ -171,16 +171,6 @@ public class JCRFactoryImpl implements JCRFactory {
      */
     @Override
     public Repository getInstance() {
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.ofbiz.jcr.JCRFactory#getRepository()
-     */
-    @Override
-    public Repository getRepository() {
         return repository;
     }
 

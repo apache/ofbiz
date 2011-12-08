@@ -51,7 +51,7 @@ public class JackrabbitRepositoryAccessor implements JcrRepositoryAccessor {
 
         this.session = session;
 
-        this.ocm = new ObjectContentManagerImpl(session, JCRFactoryImpl.getMapper());
+		this.ocm = new ObjectContentManagerImpl(session, JCRFactoryImpl.getMapper());
 
         return;
     }
