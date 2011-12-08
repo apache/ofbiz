@@ -4,7 +4,7 @@
  * distributed with this work for additional information
  * regarding copyright ownership.  The ASF licenses this file
  * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
+ * "License") throws IOException, GeneralException; you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
@@ -18,6 +18,9 @@
  *******************************************************************************/
 package org.ofbiz.widget.screen;
 
+import java.io.IOException;
+
+import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.widget.screen.HtmlWidget.HtmlTemplate;
 import org.ofbiz.widget.screen.HtmlWidget.HtmlTemplateDecorator;
 import org.ofbiz.widget.screen.HtmlWidget.HtmlTemplateDecoratorSection;
@@ -45,51 +48,52 @@ import org.ofbiz.widget.screen.ModelScreenWidget.Tree;
  */
 public interface ScreenWidgetVisitor {
 
-    void visit(Container container);
+    void visit(Container container) throws IOException, GeneralException;
 
-    void visit(Content content);
+    void visit(Content content) throws IOException, GeneralException;
 
-    void visit(DecoratorScreen decoratorScreen);
+    void visit(DecoratorScreen decoratorScreen) throws IOException, GeneralException;
 
-    void visit(DecoratorSection decoratorSection);
+    void visit(DecoratorSection decoratorSection) throws IOException, GeneralException;
 
-    void visit(DecoratorSectionInclude decoratorSectionInclude);
+    void visit(DecoratorSectionInclude decoratorSectionInclude) throws IOException, GeneralException;
 
-    void visit(Form form);
+    void visit(Form form) throws IOException, GeneralException;
 
-    void visit(HorizontalSeparator horizontalSeparator);
+    void visit(HorizontalSeparator horizontalSeparator) throws IOException, GeneralException;
 
-    void visit(HtmlTemplate htmlTemplate);
+    void visit(HtmlTemplate htmlTemplate) throws IOException, GeneralException;
 
-    void visit(HtmlTemplateDecorator htmlTemplateDecorator);
+    void visit(HtmlTemplateDecorator htmlTemplateDecorator) throws IOException, GeneralException;
 
-    void visit(HtmlTemplateDecoratorSection htmlTemplateDecoratorSection);
+    void visit(HtmlTemplateDecoratorSection htmlTemplateDecoratorSection) throws IOException, GeneralException;
 
-    void visit(HtmlWidget htmlWidget);
+    void visit(HtmlWidget htmlWidget) throws IOException, GeneralException;
 
-    void visit(Image image);
+    void visit(Image image) throws IOException, GeneralException;
 
-    void visit(IncludeScreen includeScreen);
+    void visit(IncludeScreen includeScreen) throws IOException, GeneralException;
 
-    void visit(IterateSectionWidget iterateSectionWidget);
+    void visit(IterateSectionWidget iterateSectionWidget) throws IOException, GeneralException;
 
-    void visit(Label label);
+    void visit(Label label) throws IOException, GeneralException;
 
-    void visit(Link link);
+    void visit(Link link) throws IOException, GeneralException;
 
-    void visit(Menu menu);
+    void visit(Menu menu) throws IOException, GeneralException;
 
-    void visit(ModelScreen modelScreen);
+    void visit(ModelScreen modelScreen) throws IOException, GeneralException;
 
-    void visit(PlatformSpecific platformSpecific);
+    void visit(PlatformSpecific platformSpecific) throws IOException, GeneralException;
 
-    void visit(PortalPage portalPage);
+    void visit(PortalPage portalPage) throws IOException, GeneralException;
 
-    void visit(Screenlet screenlet);
+    void visit(Screenlet screenlet) throws IOException, GeneralException;
 
-    void visit(Section section);
+    void visit(Section section) throws IOException, GeneralException;
 
-    void visit(SubContent subContent);
+    void visit(SubContent subContent) throws IOException, GeneralException;
 
-    void visit(Tree tree);
+    void visit(Tree tree) throws IOException, GeneralException;
+
 }

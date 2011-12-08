@@ -81,7 +81,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         if (Debug.verboseOn()) Debug.logVerbose("Reading Screen sub-widget with name: " + widgetElement.getNodeName(), module);
     }
 
-    public abstract void accept(ScreenWidgetVisitor visitor);
+    public abstract void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException;
 
     public abstract void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException;
 
@@ -171,7 +171,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
-        public void accept(ScreenWidgetVisitor visitor) {
+        public void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 
@@ -259,7 +259,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
-        public void accept(ScreenWidgetVisitor visitor) {
+        public void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 
@@ -367,7 +367,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
-        public void accept(ScreenWidgetVisitor visitor) {
+        public void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 
@@ -465,7 +465,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
-        public void accept(ScreenWidgetVisitor visitor) {
+        public void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 
@@ -502,7 +502,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
-        public void accept(ScreenWidgetVisitor visitor) {
+        public void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 
@@ -583,7 +583,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
-        public void accept(ScreenWidgetVisitor visitor) {
+        public void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 
@@ -640,7 +640,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
-        public void accept(ScreenWidgetVisitor visitor) {
+        public void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 
@@ -664,7 +664,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
-        public void accept(ScreenWidgetVisitor visitor) {
+        public void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 
@@ -716,7 +716,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
-        public void accept(ScreenWidgetVisitor visitor) {
+        public void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 
@@ -770,7 +770,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
-        public void accept(ScreenWidgetVisitor visitor) {
+        public void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 
@@ -863,7 +863,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
-        public void accept(ScreenWidgetVisitor visitor) {
+        public void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 
@@ -960,7 +960,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
-        public void accept(ScreenWidgetVisitor visitor) {
+        public void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 
@@ -1020,7 +1020,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
-        public void accept(ScreenWidgetVisitor visitor) {
+        public void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 
@@ -1245,7 +1245,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
-        public void accept(ScreenWidgetVisitor visitor) {
+        public void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 
@@ -1306,7 +1306,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
-        public void accept(ScreenWidgetVisitor visitor) {
+        public void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 
@@ -1409,7 +1409,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
-        public void accept(ScreenWidgetVisitor visitor) {
+        public void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 
@@ -1596,7 +1596,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
-        public void accept(ScreenWidgetVisitor visitor) {
+        public void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 
@@ -1698,7 +1698,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         @Override
-        public void accept(ScreenWidgetVisitor visitor) {
+        public void accept(ScreenWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 

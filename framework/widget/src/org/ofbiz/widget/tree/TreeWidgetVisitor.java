@@ -18,6 +18,9 @@
  *******************************************************************************/
 package org.ofbiz.widget.tree;
 
+import java.io.IOException;
+
+import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.widget.tree.ModelTree.ModelNode;
 import org.ofbiz.widget.tree.ModelTree.ModelNode.ModelSubNode;
 
@@ -26,15 +29,16 @@ import org.ofbiz.widget.tree.ModelTree.ModelNode.ModelSubNode;
  */
 public interface TreeWidgetVisitor {
 
-    void visit(ModelNode modelNode);
+    void visit(ModelNode modelNode) throws IOException, GeneralException;
 
-    void visit(ModelNode.Image image);
+    void visit(ModelNode.Image image) throws IOException, GeneralException;
 
-    void visit(ModelSubNode modelSubNode);
+    void visit(ModelSubNode modelSubNode) throws IOException, GeneralException;
 
-    void visit(ModelTree modelTree);
+    void visit(ModelTree modelTree) throws IOException, GeneralException;
 
-    void visit(ModelTree.ModelNode.Label label);
+    void visit(ModelTree.ModelNode.Label label) throws IOException, GeneralException;
 
-    void visit(ModelTree.ModelNode.Link link);
+    void visit(ModelTree.ModelNode.Link link) throws IOException, GeneralException;
+
 }

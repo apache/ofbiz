@@ -130,7 +130,7 @@ public class ModelTree extends ModelWidget {
 
     }
 
-    public void accept(TreeWidgetVisitor visitor) {
+    public void accept(TreeWidgetVisitor visitor) throws IOException, GeneralException {
         visitor.visit(this);
     }
 
@@ -367,7 +367,7 @@ public class ModelTree extends ModelWidget {
 
         }
 
-        public void accept(TreeWidgetVisitor visitor) {
+        public void accept(TreeWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
         }
 
@@ -732,7 +732,7 @@ public class ModelTree extends ModelWidget {
 
             }
 
-            public void accept(TreeWidgetVisitor visitor) {
+            public void accept(TreeWidgetVisitor visitor) throws IOException, GeneralException {
                 visitor.visit(this);
             }
 
@@ -774,7 +774,7 @@ public class ModelTree extends ModelWidget {
                 this.styleExdr = FlexibleStringExpander.getInstance(labelElement.getAttribute("style"));
             }
 
-            public void accept(TreeWidgetVisitor visitor) {
+            public void accept(TreeWidgetVisitor visitor) throws IOException, GeneralException {
                 visitor.visit(this);
             }
 
@@ -864,7 +864,7 @@ public class ModelTree extends ModelWidget {
                 }
             }
 
-            public void accept(TreeWidgetVisitor visitor) {
+            public void accept(TreeWidgetVisitor visitor) throws IOException, GeneralException {
                 visitor.visit(this);
             }
 
@@ -1056,7 +1056,7 @@ public class ModelTree extends ModelWidget {
 
             }
 
-            public void accept(TreeWidgetVisitor visitor) {
+            public void accept(TreeWidgetVisitor visitor) throws IOException, GeneralException {
                 visitor.visit(this);
             }
 
