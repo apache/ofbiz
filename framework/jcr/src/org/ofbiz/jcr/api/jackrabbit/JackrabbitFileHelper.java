@@ -45,16 +45,24 @@ public class JackrabbitFileHelper extends JackrabbitAbstractHelper implements Jc
         super(new JackrabbitRepositoryAccessor(userLogin));
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.jcr.api.jackrabbit.FileHelper#getRepositoryContent(java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.api.jackrabbit.FileHelper#getRepositoryContent(java.lang
+     * .String)
      */
     @Override
     public JackrabbitHierarchyNode getRepositoryContent(String contentPath) throws ClassCastException {
         return getRepositoryContent(contentPath, null);
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.jcr.api.jackrabbit.FileHelper#getRepositoryContent(java.lang.String, java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.api.jackrabbit.FileHelper#getRepositoryContent(java.lang
+     * .String, java.lang.String)
      */
     @Override
     public JackrabbitHierarchyNode getRepositoryContent(String contentPath, String version) throws ClassCastException {
@@ -78,16 +86,24 @@ public class JackrabbitFileHelper extends JackrabbitAbstractHelper implements Jc
         throw new ClassCastException("The content object for the path: " + contentPath + " is not a file content object. This Helper can only handle content objects with the type: " + JackrabbitFile.class.getName());
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.jcr.api.jackrabbit.FileHelper#storeContentInRepository(byte[], java.lang.String, java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.api.jackrabbit.FileHelper#storeContentInRepository(byte[],
+     * java.lang.String, java.lang.String)
      */
     @Override
     public void storeContentInRepository(byte[] fileData, String fileName, String folderPath) throws ObjectContentManagerException, RepositoryException {
         storeContentInRepository(new ByteArrayInputStream(fileData), fileName, folderPath);
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.jcr.api.jackrabbit.FileHelper#storeContentInRepository(java.io.InputStream, java.lang.String, java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.api.jackrabbit.FileHelper#storeContentInRepository(java
+     * .io.InputStream, java.lang.String, java.lang.String)
      */
     @Override
     public void storeContentInRepository(InputStream fileData, String fileName, String folderPath) throws ObjectContentManagerException, RepositoryException {
@@ -97,22 +113,14 @@ public class JackrabbitFileHelper extends JackrabbitAbstractHelper implements Jc
             throw new ObjectContentManagerException("Please specify a folder, a file content can't be stored directly under root.");
         }
 
-        // create an ORM Resource Object
-        JackrabbitResource ormResource = new JackrabbitResource();
-        ormResource.setData(fileData);
-        ormResource.setMimeType(getMimeTypeFromInputStream(fileData));
-        ormResource.setLastModified(new GregorianCalendar());
+        JackrabbitResource ormResource = createResource(fileData);
 
-        // create an ORM File Object
-        JackrabbitFile ormFile = new JackrabbitFile();
-        ormFile.setCreationDate(new GregorianCalendar());
-        ormFile.setResource(ormResource);
-        ormFile.setPath(fileName);
+        JackrabbitFile ormFile = createFile(fileName, ormResource);
 
         // Create the folder if necessary, otherwise we just update the folder
         // content
         folderPath = JcrUtilJackrabbit.createAbsoluteNodePath(folderPath);
-        if (super.access.getSession().itemExists(folderPath)) {
+        if (super.access.checkIfNodeExist(folderPath)) {
             OfbizRepositoryMapping orm = super.access.getContentObject(folderPath);
             if (orm instanceof JackrabbitFolder) {
                 JackrabbitFolder ormFolder = (JackrabbitFolder) orm;
@@ -120,17 +128,15 @@ public class JackrabbitFileHelper extends JackrabbitAbstractHelper implements Jc
                 super.access.updateContentObject(ormFolder);
             }
         } else {
-            // create the ORM folder Object
-            JackrabbitFolder ormFolder = new JackrabbitFolder();
-            ormFolder.addChild(ormFile);
-            ormFolder.setPath(folderPath);
-
+            JackrabbitFolder ormFolder = createFolder(folderPath, ormFile);
             super.access.storeContentObject(ormFolder);
         }
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     *
      * @see org.ofbiz.jcr.api.jackrabbit.FileHelper#isFileContent()
      */
     @Override
@@ -138,7 +144,9 @@ public class JackrabbitFileHelper extends JackrabbitAbstractHelper implements Jc
         return (hierarchy instanceof JackrabbitFile);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     *
      * @see org.ofbiz.jcr.api.jackrabbit.FileHelper#isFolderContent()
      */
     @Override
@@ -157,6 +165,55 @@ public class JackrabbitFileHelper extends JackrabbitAbstractHelper implements Jc
             Debug.logError(e, module);
             return "application/octet-stream";
         }
+    }
+
+    /**
+     * Creates a Jackrabbit Folder Object which should be stored in the
+     * repository.
+     *
+     * @param folderPath
+     * @param ormFile
+     * @return
+     */
+    private JackrabbitFolder createFolder(String folderPath, JackrabbitFile ormFile) {
+        // create the ORM folder Object
+        JackrabbitFolder ormFolder = new JackrabbitFolder();
+        ormFolder.addChild(ormFile);
+        ormFolder.setPath(folderPath);
+        return ormFolder;
+    }
+
+    /**
+     * Creates a Jackrabbit File Object which is needed for a Jackrabbit Folder
+     * Object.
+     *
+     * @param fileName
+     * @param ormResource
+     * @return
+     */
+    private JackrabbitFile createFile(String fileName, JackrabbitResource ormResource) {
+        // create an ORM File Object
+        JackrabbitFile ormFile = new JackrabbitFile();
+        ormFile.setCreationDate(new GregorianCalendar());
+        ormFile.setResource(ormResource);
+        ormFile.setPath(fileName);
+        return ormFile;
+    }
+
+    /**
+     * Creates a Jackrabbit Resource Object which is needed for a Jackrabbit
+     * File Object.
+     *
+     * @param fileData
+     * @return
+     */
+    private JackrabbitResource createResource(InputStream fileData) {
+        // create an ORM Resource Object
+        JackrabbitResource ormResource = new JackrabbitResource();
+        ormResource.setData(fileData);
+        ormResource.setMimeType(getMimeTypeFromInputStream(fileData));
+        ormResource.setLastModified(new GregorianCalendar());
+        return ormResource;
     }
 
 }

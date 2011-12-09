@@ -36,6 +36,7 @@ import org.apache.jackrabbit.ocm.manager.ObjectContentManager;
 import org.apache.jackrabbit.ocm.manager.impl.ObjectContentManagerImpl;
 import org.apache.jackrabbit.ocm.mapper.Mapper;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.ContentWriter;
 import org.ofbiz.jcr.access.JcrRepositoryAccessor;
@@ -117,6 +118,10 @@ public class JackrabbitTests extends OFBizTestCase {
         assertNotNull(JcrUtilJackrabbit.getRepositoryNodes(userLogin, null));
     }
 
+    public void testDefaultLanguage() {
+        assertEquals(UtilProperties.getPropertyValue("general", "locale.properties.fallback"), JcrUtilJackrabbit.determindeTheDefaultLanguage());
+    }
+
     //
     // Jackrabbit Accessor tests
     //
@@ -155,6 +160,14 @@ public class JackrabbitTests extends OFBizTestCase {
 
         assertNotNull(results);
         assertEquals(1, results.getNodes().getSize());
+
+        accessor.closeAccess();
+    }
+
+    public void testAccessorNodeExist() throws RepositoryException {
+        JcrRepositoryAccessor accessor = new JackrabbitRepositoryAccessor(userLogin);
+        assertTrue(accessor.checkIfNodeExist("/"));
+        assertFalse(accessor.checkIfNodeExist("/test"));
 
         accessor.closeAccess();
     }

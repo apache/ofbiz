@@ -51,7 +51,7 @@ public class JackrabbitRepositoryAccessor implements JcrRepositoryAccessor {
 
         this.session = session;
 
-		this.ocm = new ObjectContentManagerImpl(session, JCRFactoryImpl.getMapper());
+        this.ocm = new ObjectContentManagerImpl(session, JCRFactoryImpl.getMapper());
 
         return;
     }
@@ -217,11 +217,31 @@ public class JackrabbitRepositoryAccessor implements JcrRepositoryAccessor {
 
     /*
      * (non-Javadoc)
-     * @see org.ofbiz.jcr.access.RepositoryAccess#queryForRepositoryData(java.lang.String)
+     *
+     * @see
+     * org.ofbiz.jcr.access.RepositoryAccess#queryForRepositoryData(java.lang
+     * .String)
      */
     @Override
-    public QueryResult queryForRepositoryData(String query) throws RepositoryException{
+    public QueryResult queryForRepositoryData(String query) throws RepositoryException {
         ContentReader contentReader = new ContentReaderJackrabbit(this.ocm);
         return contentReader.queryRepositoryData(query);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.access.JcrRepositoryAccessor#checkIfNodeExist(java.lang
+     * .String)
+     */
+    @Override
+    public boolean checkIfNodeExist(String nodePathToCheck) {
+        try {
+            return getSession().itemExists(nodePathToCheck);
+        } catch (RepositoryException e) {
+            Debug.logError(e, module);
+            return false;
+        }
     }
 }

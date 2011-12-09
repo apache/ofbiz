@@ -11,6 +11,7 @@ import javax.jcr.Session;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit;
@@ -114,5 +115,14 @@ public class JcrUtilJackrabbit {
      */
     public static boolean checkIfNodePathIsAbsolute(String nodePath) {
         return nodePath.startsWith(ConstantsJackrabbit.ROOTPATH);
+    }
+
+    /**
+     * Return default language from property file.
+     *
+     * @return
+     */
+    public static String determindeTheDefaultLanguage() {
+        return UtilProperties.getPropertyValue("general", "locale.properties.fallback");
     }
 }

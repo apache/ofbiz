@@ -129,4 +129,13 @@ public interface JcrRepositoryAccessor {
      * @return
      */
     public Session getSession();
+
+    /**
+     * Returns true if the node with the passed node path exist, if not or if an
+     * exception occurs false will be returned.
+     *
+     * @param nodePathToCheck
+     * @return
+     */
+    public boolean checkIfNodeExist(String nodePathToCheck);
 }
