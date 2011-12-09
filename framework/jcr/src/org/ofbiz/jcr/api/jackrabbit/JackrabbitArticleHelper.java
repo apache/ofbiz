@@ -11,6 +11,7 @@ import javax.jcr.NodeIterator;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.ValueFormatException;
 
 import org.apache.jackrabbit.ocm.exception.ObjectContentManagerException;
 import org.ofbiz.base.util.Debug;
@@ -60,16 +61,24 @@ public class JackrabbitArticleHelper extends JackrabbitAbstractHelper implements
         super(new JackrabbitRepositoryAccessor(userLogin));
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.jcr.api.jackrabbit.DataHelper#readContentFromRepository(java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.api.jackrabbit.DataHelper#readContentFromRepository(java
+     * .lang.String)
      */
     @Override
     public JackrabbitArticle readContentFromRepository(String contentPath) throws ClassCastException {
         return readContentFromRepository(contentPath, "");
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.jcr.api.jackrabbit.DataHelper#readContentFromRepository(java.lang.String, java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.api.jackrabbit.DataHelper#readContentFromRepository(java
+     * .lang.String, java.lang.String)
      */
     @Override
     public JackrabbitArticle readContentFromRepository(String contentPath, String language) throws ClassCastException {
@@ -77,8 +86,7 @@ public class JackrabbitArticleHelper extends JackrabbitAbstractHelper implements
 
         OfbizRepositoryMapping orm = super.access.getContentObject(contentPath);
 
-        if (orm instanceof JackrabbitArticle) {
-            article = (JackrabbitArticle) orm;
+        if (checkAndSetArticleContentObject(orm)) {
             article.setVersion(super.access.getBaseVersion(contentPath));
             return article;
         } else {
@@ -86,28 +94,35 @@ public class JackrabbitArticleHelper extends JackrabbitAbstractHelper implements
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.jcr.api.jackrabbit.DataHelper#readContentFromRepository(java.lang.String, java.lang.String, java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.api.jackrabbit.DataHelper#readContentFromRepository(java
+     * .lang.String, java.lang.String, java.lang.String)
      */
     @Override
     public JackrabbitArticle readContentFromRepository(String contentPath, String language, String version) throws ClassCastException {
         contentPath = determineContentLanguagePath(contentPath, language);
         OfbizRepositoryMapping orm = super.access.getContentObject(contentPath, version);
 
-        if (orm instanceof JackrabbitArticle) {
-            article = (JackrabbitArticle) orm;
-            article.setPath(contentPath); // the content path must be
-                                          // manipulated because, the jackrabbit
-                                          // orm returns a full blown path with
-                                          // version information.
+        if (checkAndSetArticleContentObject(orm)) {
+            // the content path must be manipulated because, the jackrabbit orm
+            // returns a full blown path with version information.
+            article.setPath(contentPath);
             return article;
         } else {
             throw new ClassCastException("The content object for the path: " + contentPath + " is not an article content object. This Helper can only handle content objects with the type: " + JackrabbitArticle.class.getName());
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.jcr.api.jackrabbit.DataHelper#storeContentInRepository(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Calendar)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.api.jackrabbit.DataHelper#storeContentInRepository(java
+     * .lang.String, java.lang.String, java.lang.String, java.lang.String,
+     * java.util.Calendar)
      */
     @Override
     public void storeContentInRepository(String contentPath, String language, String title, String content, Calendar publicationDate) throws ObjectContentManagerException, ItemExistsException {
@@ -119,11 +134,14 @@ public class JackrabbitArticleHelper extends JackrabbitAbstractHelper implements
         article = new JackrabbitArticle(contentPath, language, title, content, publicationDate);
 
         super.access.storeContentObject(article);
-
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.jcr.api.jackrabbit.DataHelper#updateContentInRepository(org.ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.api.jackrabbit.DataHelper#updateContentInRepository(org
+     * .ofbiz.jcr.orm.jackrabbit.OfbizRepositoryMappingJackrabbitArticle)
      */
     @Override
     public void updateContentInRepository(JackrabbitArticle updatedArticle) throws RepositoryException, ObjectContentManagerException {
@@ -137,13 +155,15 @@ public class JackrabbitArticleHelper extends JackrabbitAbstractHelper implements
         super.access.updateContentObject(updatedArticle);
     }
 
-    /* (non-Javadoc)
-     * @see org.ofbiz.jcr.api.jackrabbit.DataHelper#getVersionListForCurrentArticle()
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ofbiz.jcr.api.jackrabbit.DataHelper#getVersionListForCurrentArticle()
      */
     @Override
     public List<String> getVersionListForCurrentArticle() {
         List<String> versions = new ArrayList<String>();
-        ;
 
         if (article != null) {
             versions = super.access.getVersionList(article.getPath());
@@ -155,39 +175,42 @@ public class JackrabbitArticleHelper extends JackrabbitAbstractHelper implements
         return versions;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     *
      * @see org.ofbiz.jcr.api.jackrabbit.DataHelper#getAvailableLanguageList()
      */
     @Override
     public List<String> getAvailableLanguageList() {
-        List<String> languages = new ArrayList<String>();
+        List<String> availableLanguages = new ArrayList<String>();
 
-        if (article != null && article.getLocalized()) {
-            Session session = super.access.getSession();
-
-            try {
-                Node node = session.getNode(article.getPath()).getParent();
-                NodeIterator nodes = node.getNodes();
-                while (nodes.hasNext()) {
-                    Node tmpNode = nodes.nextNode();
-                    // only use nodes which have the language mix in
-                    if (tmpNode.hasProperty("localized") && tmpNode.getProperty("localized").getBoolean()) {
-                        String l = tmpNode.getPath();
-                        languages.add(l.substring(l.lastIndexOf(ConstantsJackrabbit.NODEPATHDELIMITER) + 1));
-                    }
-                }
-
-            } catch (PathNotFoundException e) {
-                Debug.logError(e, module);
-            } catch (RepositoryException e) {
-                Debug.logError(e, module);
-            }
-
-        } else {
+        if (article == null || !article.getLocalized()) {
             Debug.logWarning("No Article is loaded from the repository, please load an article first before requesting the version list.", module);
+            return availableLanguages;
         }
 
-        return languages;
+        Session session = super.access.getSession();
+
+        try {
+            Node node = session.getNode(article.getPath()).getParent();
+            NodeIterator nodeList = node.getNodes();
+
+            while (nodeList.hasNext()) {
+                Node currentNodeToExtractLanguage = nodeList.nextNode();
+                // only use nodes which have the language mix in
+                if (checkIfNodeHaveValidLanguageMixIn(currentNodeToExtractLanguage)) {
+                    String languageFlag = extractLanguageFlagFromNodePath(currentNodeToExtractLanguage.getPath());
+                    availableLanguages.add(languageFlag);
+                }
+            }
+
+        } catch (PathNotFoundException e) {
+            Debug.logError(e, module);
+        } catch (RepositoryException e) {
+            Debug.logError(e, module);
+        }
+
+        return availableLanguages;
     }
 
     /**
@@ -199,65 +222,42 @@ public class JackrabbitArticleHelper extends JackrabbitAbstractHelper implements
      * node which will be found will be choose.
      *
      * @param contentPath
-     * @param language
+     * @param contentLanguage
      * @return
      */
-    private String determineContentLanguagePath(String contentPath, String language) {
+    private String determineContentLanguagePath(String contentPath, String contentLanguage) {
         // return if only the root node path is requested
         if (ConstantsJackrabbit.ROOTPATH.equals(contentPath)) {
             return contentPath;
         }
 
-        // we have to check if the content path already contains a language and
-        // if the language is already in the path we have to check if it is
-        // equal to the passed language
+        String canonicalizedContentPath = canonicalizeContentPath(contentPath);
 
-        // we split the path string in chunks
-        String[] path = contentPath.split(ConstantsJackrabbit.NODEPATHDELIMITER);
-
-        // chunk if the last chunk contains a language flag
-        StringBuffer canonicalizedContentPath = new StringBuffer(ConstantsJackrabbit.NODEPATHDELIMITER);
-        if (possibleLocales.contains(path[path.length - 1])) {
-            if (UtilValidate.isEmpty(language)) {
-                language = path[path.length - 1];
-            }
-            for (int i = 0; i < path.length - 1; i++) {
-                if (UtilValidate.isNotEmpty(path[i])) {
-                    canonicalizedContentPath.append(path[i]).append(ConstantsJackrabbit.NODEPATHDELIMITER);
-                }
-            }
-        } else {
-            for (String p : path) {
-                if (UtilValidate.isNotEmpty(p)) {
-                    canonicalizedContentPath.append(p).append(ConstantsJackrabbit.NODEPATHDELIMITER);
-                }
-            }
-        }
-
-        // check if this language exist in the repository
+        // check if this language already exist in the repository
         Session session = super.access.getSession();
         try {
             // check if the node exist OR if the node has NO localized flag OR
             // the localized flag is set to false
-            if (!session.itemExists(canonicalizedContentPath.toString() + language)
-                    || (!session.getNode(canonicalizedContentPath.toString() + language).hasProperty("localized") || !session.getNode(canonicalizedContentPath.toString() + language).getProperty("localized").getBoolean())) {
+            if (!session.itemExists(canonicalizedContentPath + contentLanguage)
+                    || (!session.getNode(canonicalizedContentPath + contentLanguage).hasProperty("localized")
+                            || !session.getNode(canonicalizedContentPath + contentLanguage).getProperty("localized").getBoolean())) {
                 // check for default language
-                if (!session.itemExists(canonicalizedContentPath.toString() + determindeTheDefaultLanguage())) {
+                if (!session.itemExists(canonicalizedContentPath + determindeTheDefaultLanguage())) {
                     // return the first available language
-                    NodeIterator ni = session.getNode(canonicalizedContentPath.toString()).getNodes();
-                    while (ni.hasNext()) {
-                        Node n = ni.nextNode();
-                        if (possibleLocales.contains(n.getName())) {
-                            contentPath = n.getPath();
+                    NodeIterator childNodes = session.getNode(canonicalizedContentPath).getNodes();
+                    while (childNodes.hasNext()) {
+                        Node child = childNodes.nextNode();
+                        if (possibleLocales.contains(child.getName())) {
+                            contentPath = child.getPath();
                             break;
                         }
                     }
-                    ni = null;
+                    childNodes = null;
                 } else {
-                    contentPath = canonicalizedContentPath.toString() + determindeTheDefaultLanguage();
+                    contentPath = canonicalizedContentPath + determindeTheDefaultLanguage();
                 }
             } else {
-                contentPath = canonicalizedContentPath.toString() + language;
+                contentPath = canonicalizedContentPath + contentLanguage;
             }
         } catch (RepositoryException e) {
             Debug.logError(e, module);
@@ -266,7 +266,106 @@ public class JackrabbitArticleHelper extends JackrabbitAbstractHelper implements
         return contentPath;
     }
 
+    /**
+     * We check if the content path already contains a language. If a language
+     * is found it will be removed from the path string.
+     *
+     * @param contentPath
+     * @return
+     */
+    private String canonicalizeContentPath(String contentPath) {
+        // we split the path string in chunks
+        String[] splitContentPath = contentPath.split(ConstantsJackrabbit.NODEPATHDELIMITER);
+
+        String canonicalizedCotnentPath = "";
+        // check if the last chunk contains a language which is part of our
+        // locale list
+        if (possibleLocales.contains(splitContentPath[splitContentPath.length - 1])) {
+            // this local field should not be part of our path string
+            canonicalizedCotnentPath = buildCanonicalizeContentPath(splitContentPath, splitContentPath.length - 1);
+        } else {
+            // make sure the passed content path is absolute and ends with a
+            // slash "/"
+            canonicalizedCotnentPath = buildCanonicalizeContentPath(splitContentPath, splitContentPath.length);
+        }
+
+        return canonicalizedCotnentPath;
+    }
+
+    /**
+     * Build a new path string from the split content path. A loop iterates
+     * throw the array until lastFieldWhichShouldBeAddedToTheNewPathString is
+     * reached. That means if you want to avoid that the last field of the array
+     * is added to the string lastFieldWhichShouldBeAddedToTheNewPathString
+     * should be array.length -1.
+     *
+     * @param splitContentPath
+     * @param lastFieldWhichShouldBeAddedToTheNewPathString
+     * @return
+     */
+    private String buildCanonicalizeContentPath(String[] splitContentPath, int lastFieldWhichShouldBeAddedToTheNewPathString) {
+        StringBuffer canonicalizedContentPath = new StringBuffer(ConstantsJackrabbit.ROOTPATH);
+
+        for (int i = 0; i < lastFieldWhichShouldBeAddedToTheNewPathString; i++) {
+            if (UtilValidate.isNotEmpty(splitContentPath[i])) {
+                canonicalizedContentPath.append(splitContentPath[i]).append(ConstantsJackrabbit.NODEPATHDELIMITER);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Return default language from property file.
+     *
+     * @return
+     */
     private String determindeTheDefaultLanguage() {
         return UtilProperties.getPropertyValue("general", "locale.properties.fallback");
+    }
+
+    /**
+     * This extract the language flag from the node path, normally the language
+     * should be the substring after the last / (slash).
+     *
+     * @param nodePathWithLanguageFlag
+     * @return
+     */
+    private String extractLanguageFlagFromNodePath(String nodePathWithLanguageFlag) {
+        int startPointAfterLastSlash = nodePathWithLanguageFlag.lastIndexOf(ConstantsJackrabbit.NODEPATHDELIMITER) + 1;
+
+        return nodePathWithLanguageFlag.substring(startPointAfterLastSlash);
+    }
+
+    /**
+     * Checks if a node have the property <code>localized</code> and if this
+     * property is be <code>true</code>
+     *
+     * @param tmpNode
+     * @return
+     * @throws RepositoryException
+     * @throws ValueFormatException
+     * @throws PathNotFoundException
+     */
+    private boolean checkIfNodeHaveValidLanguageMixIn(Node tmpNode) throws RepositoryException, ValueFormatException, PathNotFoundException {
+        return tmpNode.hasProperty("localized") && tmpNode.getProperty("localized").getBoolean();
+    }
+
+    /**
+     * Checks if the <code>orm</code> Object is an instance of
+     * <code>JackrabbitArticle</code>, set the class variable and return true,
+     * otherwise false will be returned and the class variable is det to null.
+     *
+     * @param orm
+     * @return
+     */
+    private boolean checkAndSetArticleContentObject(OfbizRepositoryMapping orm) {
+        if (orm != null && orm instanceof JackrabbitArticle) {
+            article = (JackrabbitArticle) orm;
+            return true;
+        } else {
+            article = null;
+        }
+
+        return false;
     }
 }

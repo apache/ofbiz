@@ -97,6 +97,27 @@ public class JackrabbitTests extends OFBizTestCase {
     }
 
     //
+    // Test JcrJackrabbitUtil
+    //
+
+    public void testCreateAbsoluteAndNormalizedNodePath() {
+        String result = JcrUtilJackrabbit.createAbsoluteNodePath("foo/baa");
+
+        assertEquals("/foo/baa", result);
+    }
+
+    public void testCheckIfNodePathIsAbsoluteAndNormalized() {
+        assertFalse(JcrUtilJackrabbit.checkIfNodePathIsAbsolute("foo/baa"));
+        assertFalse(JcrUtilJackrabbit.checkIfNodePathIsAbsolute("foo/baa/"));
+        assertTrue(JcrUtilJackrabbit.checkIfNodePathIsAbsolute("/foo/baa/"));
+        assertTrue(JcrUtilJackrabbit.checkIfNodePathIsAbsolute("/foo/baa"));
+    }
+
+    public void testListRepositoryNodes() throws Exception {
+        assertNotNull(JcrUtilJackrabbit.getRepositoryNodes(userLogin, null));
+    }
+
+    //
     // Jackrabbit Accessor tests
     //
 
@@ -274,10 +295,6 @@ public class JackrabbitTests extends OFBizTestCase {
             assertTrue(true);
         }
 
-    }
-
-    public void testListRepositoryNodes() throws Exception {
-        assertNotNull(JcrUtilJackrabbit.getRepositoryNodes(userLogin, null));
     }
 
 }

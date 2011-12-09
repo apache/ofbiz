@@ -89,8 +89,8 @@ public class JcrUtilJackrabbit {
     }
 
     /**
-     * If the past node path is no absolute path, an absolute path will be
-     * created.
+     * If the node path is not absolute (means starts with <code>/</code>), an
+     * absolute path will be created.
      *
      * @param nodePath
      * @return
@@ -106,7 +106,8 @@ public class JcrUtilJackrabbit {
     }
 
     /**
-     * Returns true if the passed node path is an absolute node path.
+     * Returns true if the passed node path is an absolute path (starts with a
+     * <code>/<code>).
      *
      * @param nodePath
      * @return
