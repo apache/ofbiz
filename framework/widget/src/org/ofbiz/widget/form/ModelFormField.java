@@ -208,6 +208,10 @@ public class ModelFormField {
         }
     }
 
+    public void accept(FormWidgetVisitor visitor) throws IOException, GeneralException {
+        visitor.visit(this);
+    }
+
     public void addOnEventUpdateArea(UpdateArea updateArea) {
         // Event types are sorted as a convenience for the rendering classes
         Debug.logInfo(this.modelForm.getName() + ":" + this.name + " adding UpdateArea type " + updateArea.getEventType(), module);
@@ -1333,6 +1337,8 @@ public class ModelFormField {
             this.modelFormField = modelFormField;
         }
 
+        public abstract void accept(FormWidgetVisitor visitor) throws IOException, GeneralException;
+
         public ModelFormField getModelFormField() {
             return modelFormField;
         }
@@ -1936,6 +1942,11 @@ public class ModelFormField {
         }
 
         @Override
+        public void accept(FormWidgetVisitor visitor) throws IOException, GeneralException {
+            visitor.visit(this);
+        }
+
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderDisplayField(writer, context, this);
         }
@@ -2243,6 +2254,11 @@ public class ModelFormField {
             for (Element parameterElement: parameterElementList) {
                 this.parameterList.add(new WidgetWorker.Parameter(parameterElement));
             }
+        }
+
+        @Override
+        public void accept(FormWidgetVisitor visitor) throws IOException, GeneralException {
+            visitor.visit(this);
         }
 
         @Override
@@ -2721,6 +2737,11 @@ public class ModelFormField {
         }
 
         @Override
+        public void accept(FormWidgetVisitor visitor) throws IOException, GeneralException {
+            visitor.visit(this);
+        }
+
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderTextField(writer, context, this);
         }
@@ -2846,6 +2867,11 @@ public class ModelFormField {
         }
 
         @Override
+        public void accept(FormWidgetVisitor visitor) throws IOException, GeneralException {
+            visitor.visit(this);
+        }
+
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderTextareaField(writer, context, this);
         }
@@ -2950,6 +2976,11 @@ public class ModelFormField {
             mask = element.getAttribute("mask");
             if (UtilValidate.isNotEmpty(element.getAttribute("step"))) this.setStep(element.getAttribute("step"));
             else this.setStep("1");
+        }
+
+        @Override
+        public void accept(FormWidgetVisitor visitor) throws IOException, GeneralException {
+            visitor.visit(this);
         }
 
         @Override
@@ -3087,6 +3118,11 @@ public class ModelFormField {
         }
 
         @Override
+        public void accept(FormWidgetVisitor visitor) throws IOException, GeneralException {
+            visitor.visit(this);
+        }
+
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderDropDownField(writer, context, this);
         }
@@ -3188,6 +3224,11 @@ public class ModelFormField {
         }
 
         @Override
+        public void accept(FormWidgetVisitor visitor) throws IOException, GeneralException {
+            visitor.visit(this);
+        }
+
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderRadioField(writer, context, this);
         }
@@ -3212,6 +3253,11 @@ public class ModelFormField {
         public CheckField(Element element, ModelFormField modelFormField) {
             super(element, modelFormField);
             allChecked = FlexibleStringExpander.getInstance(element.getAttribute("all-checked"));
+        }
+
+        @Override
+        public void accept(FormWidgetVisitor visitor) throws IOException, GeneralException {
+            visitor.visit(this);
         }
 
         @Override
@@ -3252,6 +3298,11 @@ public class ModelFormField {
             this.backgroundSubmitRefreshTargetExdr = FlexibleStringExpander.getInstance(element.getAttribute("background-submit-refresh-target"));
             setRequestConfirmation("true".equals(element.getAttribute("request-confirmation")));
             setConfirmationMsg(element.getAttribute("confirmation-message"));
+        }
+
+        @Override
+        public void accept(FormWidgetVisitor visitor) throws IOException, GeneralException {
+            visitor.visit(this);
         }
 
         @Override
@@ -3332,6 +3383,11 @@ public class ModelFormField {
         }
 
         @Override
+        public void accept(FormWidgetVisitor visitor) throws IOException, GeneralException {
+            visitor.visit(this);
+        }
+
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderResetField(writer, context, this);
         }
@@ -3355,6 +3411,11 @@ public class ModelFormField {
         public HiddenField(Element element, ModelFormField modelFormField) {
             super(element, modelFormField);
             this.setValue(element.getAttribute("value"));
+        }
+
+        @Override
+        public void accept(FormWidgetVisitor visitor) throws IOException, GeneralException {
+            visitor.visit(this);
         }
 
         @Override
@@ -3395,6 +3456,11 @@ public class ModelFormField {
 
         public IgnoredField(Element element, ModelFormField modelFormField) {
             super(element, modelFormField);
+        }
+
+        @Override
+        public void accept(FormWidgetVisitor visitor) throws IOException, GeneralException {
+            visitor.visit(this);
         }
 
         @Override
@@ -3720,6 +3786,11 @@ public class ModelFormField {
         }
 
         @Override
+        public void accept(FormWidgetVisitor visitor) throws IOException, GeneralException {
+            visitor.visit(this);
+        }
+
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderImageField(writer, context, this);
         }
@@ -3801,6 +3872,11 @@ public class ModelFormField {
 
         public ContainerField(int fieldSource, int fieldType, ModelFormField modelFormField) {
             super(fieldSource, fieldType, modelFormField);
+        }
+
+        @Override
+        public void accept(FormWidgetVisitor visitor) throws IOException, GeneralException {
+            visitor.visit(this);
         }
 
         @Override

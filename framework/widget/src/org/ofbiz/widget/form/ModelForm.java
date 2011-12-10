@@ -222,6 +222,10 @@ public class ModelForm extends ModelWidget {
         initForm(formElement);
     }
 
+    public void accept(FormWidgetVisitor visitor) throws IOException, GeneralException {
+        visitor.visit(this);
+    }
+
     public void initForm(Element formElement) {
 
         setDefaultViewSize(UtilProperties.getPropertyValue("widget.properties", "widget.form.defaultViewSize"));

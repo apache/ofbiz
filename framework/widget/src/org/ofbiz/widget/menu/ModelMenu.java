@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
@@ -250,6 +251,11 @@ public class ModelMenu extends ModelWidget {
     public ModelMenu(Element menuElement, Delegator delegator, LocalDispatcher dispatcher) {
         this(menuElement);
     }
+
+    public void accept(MenuWidgetVisitor visitor) throws IOException, GeneralException {
+        visitor.visit(this);
+    }
+
     /**
      * add/override modelMenuItem using the menuItemList and menuItemMap
      *

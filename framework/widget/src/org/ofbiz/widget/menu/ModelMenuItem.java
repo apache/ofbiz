@@ -31,6 +31,7 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilProperties;
@@ -104,6 +105,10 @@ public class ModelMenuItem {
 
     public ModelMenuItem(Element fieldElement, ModelMenu modelMenu) {
         loadMenuItem(fieldElement, modelMenu);
+    }
+
+    public void accept(MenuWidgetVisitor visitor) throws IOException, GeneralException {
+        visitor.visit(this);
     }
 
     public void loadMenuItem(Element fieldElement, ModelMenu modelMenu) {
@@ -627,6 +632,10 @@ public class ModelMenuItem {
             setConfirmationMsg("");
         }
 
+        public void accept(MenuWidgetVisitor visitor) throws IOException, GeneralException {
+            visitor.visit(this);
+        }
+
         public void renderLinkString(Appendable writer, Map<String, Object> context, MenuStringRenderer menuStringRenderer) throws IOException {
             menuStringRenderer.renderLink(writer, context, this);
         }
@@ -837,6 +846,10 @@ public class ModelMenuItem {
             setBorder(UtilFormatOut.checkEmpty(imageElement.getAttribute("border"), "0"));
             setUrlMode(UtilFormatOut.checkEmpty(imageElement.getAttribute("url-mode"), "content"));
 
+        }
+
+        public void accept(MenuWidgetVisitor visitor) throws IOException, GeneralException {
+            visitor.visit(this);
         }
 
         public void renderImageString(Appendable writer, Map<String, Object> context, MenuStringRenderer menuStringRenderer) throws IOException {
