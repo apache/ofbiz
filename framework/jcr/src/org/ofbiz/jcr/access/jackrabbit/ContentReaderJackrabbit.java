@@ -2,6 +2,7 @@ package org.ofbiz.jcr.access.jackrabbit;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
+import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
@@ -35,7 +36,7 @@ public class ContentReaderJackrabbit implements ContentReader {
      * org.ofbiz.jcr.access.ContentReader#getContentObject(java.lang.String)
      */
     @Override
-    public OfbizRepositoryMapping getContentObject(String nodePath) {
+    public OfbizRepositoryMapping getContentObject(String nodePath) throws PathNotFoundException{
         nodePath = JcrUtilJackrabbit.createAbsoluteNodePath(nodePath);
         OfbizRepositoryMapping orm = (OfbizRepositoryMapping) ocm.getObject(nodePath);
         try {
@@ -58,7 +59,7 @@ public class ContentReaderJackrabbit implements ContentReader {
      * java.lang.String, java.lang.String)
      */
     @Override
-    public OfbizRepositoryMapping getContentObject(String nodePath, String version) {
+    public OfbizRepositoryMapping getContentObject(String nodePath, String version) throws PathNotFoundException {
         nodePath = JcrUtilJackrabbit.createAbsoluteNodePath(nodePath);
         VersioningManager vm = new VersioningManagerJackrabbit(ocm);
         if (!vm.checkIfVersionExist(nodePath, version)) {

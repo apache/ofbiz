@@ -25,6 +25,8 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 
+import javax.jcr.ItemExistsException;
+import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.query.QueryResult;
@@ -32,6 +34,7 @@ import javax.jcr.query.QueryResult;
 import javolution.util.FastMap;
 import net.sf.json.JSONArray;
 
+import org.apache.jackrabbit.ocm.exception.ObjectContentManagerException;
 import org.apache.jackrabbit.ocm.manager.ObjectContentManager;
 import org.apache.jackrabbit.ocm.manager.impl.ObjectContentManagerImpl;
 import org.apache.jackrabbit.ocm.mapper.Mapper;
@@ -236,6 +239,7 @@ public class JackrabbitTests extends OFBizTestCase {
         helper.storeContentInRepository("superhero", "de", "Batman", "The best superhero!", new GregorianCalendar());
 
         assertEquals("en", helper.readContentFromRepository("/news/tomorrow", "").getLanguage());
+        assertEquals("en", helper.readContentFromRepository("/news/tomorrow/en", "").getLanguage());
         assertEquals("en", helper.readContentFromRepository("/news/tomorrow", "de").getLanguage());
         assertEquals("en", helper.readContentFromRepository("/news/tomorrow", "en").getLanguage());
 
@@ -244,6 +248,23 @@ public class JackrabbitTests extends OFBizTestCase {
         assertEquals("de", helper.readContentFromRepository("/superhero", "fr").getLanguage());
 
         helper.removeContentObject("/superhero");
+        helper.removeContentObject("/news");
+        helper.closeContentSession();
+    }
+
+    public void testLanguageDeterminationExpectedPathNotFoundException() throws ObjectContentManagerException, ItemExistsException {
+        JcrDataHelper helper = new JackrabbitArticleHelper(userLogin);
+        helper.storeContentInRepository("news/tomorrow", "en", "The news for tomorrow.", "Content.", new GregorianCalendar());
+
+        try {
+            helper.readContentFromRepository("/news/tomorrow/fr", "").getLanguage();
+            // if no exception is thrown, the test should fail
+            assertTrue("A PathNotFoundException is thrown as expected", false);
+        } catch (PathNotFoundException pnf) {
+            // check if the right excpetion is thrown (in jUnit 4 this could be replaced by annotations)
+            assertTrue("A PathNotFoundException is catched as expected.", true);
+        }
+
         helper.removeContentObject("/news");
         helper.closeContentSession();
     }

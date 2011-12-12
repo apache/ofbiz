@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import javax.jcr.ItemExistsException;
+import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 
 import org.apache.jackrabbit.ocm.exception.ObjectContentManagerException;
@@ -17,11 +18,13 @@ public interface JcrDataHelper extends JcrHelper{
      *
      * @param contentPath
      * @return content article object
-     * @throws
+     * @throws PathNotFoundException
+     * @throws ClassCastException
      */
-    public abstract JackrabbitArticle readContentFromRepository(String contentPath) throws ClassCastException;
+    public abstract JackrabbitArticle readContentFromRepository(String contentPath) throws ClassCastException, PathNotFoundException;
 
     /**
+     * @throws PathNotFoundException
      * Read the article content object, in the passed language, from the
      * repository. if the language is not available, the default language will
      * be choose. Throws an Exception when the read content type is not an
@@ -29,11 +32,13 @@ public interface JcrDataHelper extends JcrHelper{
      *
      * @param contentPath
      * @return content article object
-     * @throws
+     * @throws PathNotFoundException
+     * @throws ClassCastException
      */
-    public abstract JackrabbitArticle readContentFromRepository(String contentPath, String language) throws ClassCastException;
+    public abstract JackrabbitArticle readContentFromRepository(String contentPath, String language) throws ClassCastException, PathNotFoundException;
 
     /**
+     * @throws PathNotFoundException
      * Read the article content object, in the passed language and version, from
      * the repository. if the language is not available, the default language
      * will be choose. Throws an Exception when the read content type is not an
@@ -43,9 +48,10 @@ public interface JcrDataHelper extends JcrHelper{
      * @param language
      * @param version
      * @return
-     * @throws
+     * @throws PathNotFoundException
+     * @throws ClassCastException
      */
-    public abstract JackrabbitArticle readContentFromRepository(String contentPath, String language, String version) throws ClassCastException;
+    public abstract JackrabbitArticle readContentFromRepository(String contentPath, String language, String version) throws ClassCastException, PathNotFoundException;
 
     /**
      * Stores a new article content object in the repository.

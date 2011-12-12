@@ -3,6 +3,7 @@ package org.ofbiz.jcr.access.jackrabbit;
 import java.util.List;
 
 import javax.jcr.ItemExistsException;
+import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.query.QueryResult;
@@ -85,7 +86,7 @@ public class JackrabbitRepositoryAccessor implements JcrRepositoryAccessor {
      * org.ofbiz.jcr.orm.RepositoryAccess#getContentObject(java.lang.String)
      */
     @Override
-    public OfbizRepositoryMapping getContentObject(String nodePath) {
+    public OfbizRepositoryMapping getContentObject(String nodePath) throws PathNotFoundException {
         ContentReader contentReader = new ContentReaderJackrabbit(this.ocm);
         return contentReader.getContentObject(nodePath);
     }
@@ -98,7 +99,7 @@ public class JackrabbitRepositoryAccessor implements JcrRepositoryAccessor {
      * java.lang.String)
      */
     @Override
-    public OfbizRepositoryMapping getContentObject(String nodePath, String version) {
+    public OfbizRepositoryMapping getContentObject(String nodePath, String version) throws PathNotFoundException {
         ContentReader contentReader = new ContentReaderJackrabbit(this.ocm);
         return contentReader.getContentObject(nodePath, version);
     }

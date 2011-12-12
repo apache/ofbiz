@@ -3,6 +3,7 @@ package org.ofbiz.jcr.access;
 import java.util.List;
 
 import javax.jcr.ItemExistsException;
+import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.query.QueryResult;
@@ -25,8 +26,9 @@ public interface JcrRepositoryAccessor {
      *
      * @param nodePath
      * @return
+     * @throws PathNotFoundException
      */
-    OfbizRepositoryMapping getContentObject(String nodePath);
+    OfbizRepositoryMapping getContentObject(String nodePath) throws PathNotFoundException;
 
     /**
      * Return an OfbizRepositoryMapping Object in the specified version from the
@@ -36,8 +38,9 @@ public interface JcrRepositoryAccessor {
      * @param language
      * @param version
      * @return
+     * @throws PathNotFoundException
      */
-    OfbizRepositoryMapping getContentObject(String nodePath, String version);
+    OfbizRepositoryMapping getContentObject(String nodePath, String version) throws PathNotFoundException;
 
     /**
      * Stores the OfbizRepositoryMapping Class in the content repository.

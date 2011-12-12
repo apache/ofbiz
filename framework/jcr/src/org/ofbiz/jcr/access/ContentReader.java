@@ -1,5 +1,6 @@
 package org.ofbiz.jcr.access;
 
+import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 import javax.jcr.query.QueryResult;
 
@@ -15,8 +16,9 @@ public interface ContentReader {
      *
      * @param nodePath
      * @return
+     * @throws PathNotFoundException
      */
-    OfbizRepositoryMapping getContentObject(String nodePath);
+    OfbizRepositoryMapping getContentObject(String nodePath) throws PathNotFoundException;
 
     /**
      * Return an OfbizRepositoryMapping Object in the specified language and
@@ -28,8 +30,9 @@ public interface ContentReader {
      * @param language
      * @param version
      * @return
+     * @throws PathNotFoundException
      */
-    OfbizRepositoryMapping getContentObject(String nodePath, String version);
+    OfbizRepositoryMapping getContentObject(String nodePath, String version) throws PathNotFoundException;
 
     /**
      * Returns a tree of all content nodes (except folders and files) in the

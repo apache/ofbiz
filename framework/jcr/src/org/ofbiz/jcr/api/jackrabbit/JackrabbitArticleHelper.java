@@ -69,7 +69,7 @@ public class JackrabbitArticleHelper extends JackrabbitAbstractHelper implements
      * .lang.String)
      */
     @Override
-    public JackrabbitArticle readContentFromRepository(String contentPath) throws ClassCastException {
+    public JackrabbitArticle readContentFromRepository(String contentPath) throws ClassCastException, PathNotFoundException {
         return readContentFromRepository(contentPath, "");
     }
 
@@ -81,7 +81,7 @@ public class JackrabbitArticleHelper extends JackrabbitAbstractHelper implements
      * .lang.String, java.lang.String)
      */
     @Override
-    public JackrabbitArticle readContentFromRepository(String contentPath, String language) throws ClassCastException {
+    public JackrabbitArticle readContentFromRepository(String contentPath, String language) throws ClassCastException, PathNotFoundException {
         contentPath = determineContentLanguagePath(contentPath, language);
 
         OfbizRepositoryMapping orm = super.access.getContentObject(contentPath);
@@ -102,7 +102,7 @@ public class JackrabbitArticleHelper extends JackrabbitAbstractHelper implements
      * .lang.String, java.lang.String, java.lang.String)
      */
     @Override
-    public JackrabbitArticle readContentFromRepository(String contentPath, String language, String version) throws ClassCastException {
+    public JackrabbitArticle readContentFromRepository(String contentPath, String language, String version) throws ClassCastException, PathNotFoundException {
         contentPath = determineContentLanguagePath(contentPath, language);
         OfbizRepositoryMapping orm = super.access.getContentObject(contentPath, version);
 
@@ -224,8 +224,9 @@ public class JackrabbitArticleHelper extends JackrabbitAbstractHelper implements
      * @param contentPath
      * @param contentLanguage
      * @return
+     * @throws PathNotFoundException
      */
-    private String determineContentLanguagePath(String contentPath, String contentLanguage) {
+    private String determineContentLanguagePath(String contentPath, String contentLanguage) throws PathNotFoundException {
         // return if only the root node path is requested
         if (ConstantsJackrabbit.ROOTPATH.equals(contentPath)) {
             return contentPath;
@@ -263,8 +264,9 @@ public class JackrabbitArticleHelper extends JackrabbitAbstractHelper implements
      *
      * @param canonicalizedContentPath
      * @return
+     * @throws PathNotFoundException
      */
-    private String determineFirstAvailableLanguageNode(String canonicalizedContentPath) {
+    private String determineFirstAvailableLanguageNode(String canonicalizedContentPath) throws PathNotFoundException {
         String contentPath = "";
 
         try {
@@ -278,6 +280,8 @@ public class JackrabbitArticleHelper extends JackrabbitAbstractHelper implements
                 }
             }
             childNodes = null;
+        } catch(PathNotFoundException pnf) {
+            throw new PathNotFoundException(pnf);
         } catch (RepositoryException e) {
             Debug.logError(e, module);
         }
