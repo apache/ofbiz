@@ -1,4 +1,5 @@
-###############################################################################
+#!/bin/sh
+#####################################################################
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,14 +16,27 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-###############################################################################
+#####################################################################
+#
+# This shell script will will run ./ant apply patches on all components
+#              present in the hot-deploy directory
 
-# Days Till Cancel Replacement Order
-daysTillCancelReplacementOrder=30
+    if [ -f "../ofbiz.patch" ]; then
+	patch -p0 <../ofbiz.patch
+    fi
 
-# Maximum age of auto-save shopping list for anonymous users (in days)
-autosave.max.age=14
+    for f in hot-deploy/*
+    do
+        if [ "$f" != "hot-deploy/README.txt" ]; then
+	    if [ -f "$f/patches/applications.patch" ]; then
+            	echo apply patches for component $f
+            	cd $f
+	    	../../ant apply-ofbiz-patches
+	    	echo return code $?
+		cd ../../
+	    fi
+        fi
+    done
 
-# Order Item Attribute
-order.item.attr.prefix=order_item_attr_
-order.item.comment.enable=Y
+exit;
+
