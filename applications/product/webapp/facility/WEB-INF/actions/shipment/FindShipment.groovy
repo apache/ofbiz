@@ -90,13 +90,14 @@ if (maxDate && maxDate.length() > 8) {
     paramListBuffer.append(maxDate);
     findShipmentExprs.add(EntityCondition.makeCondition("estimatedShipDate", EntityOperator.LESS_THAN_EQUAL_TO, ObjectType.simpleTypeConvert(maxDate, "Timestamp", null, null)));
 }
-
 if ("Y".equals(lookupFlag)) {
     context.paramList = paramListBuffer.toString();
 
-    if (findShipmentExprs.size() > 0) {
         findOpts = new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, true);
-        mainCond = EntityCondition.makeCondition(findShipmentExprs, EntityOperator.AND);
+        mainCond = null;
+        if (findShipmentExprs.size() > 0) {
+            mainCond = EntityCondition.makeCondition(findShipmentExprs, EntityOperator.AND);
+        }
         orderBy = ['-estimatedShipDate'];
 
         beganTransaction = false;
@@ -107,8 +108,8 @@ if ("Y".equals(lookupFlag)) {
             orli = delegator.find("Shipment", mainCond, null, null, orderBy, findOpts);
 
             // get the indexes for the partial list
-            lowIndex = (((viewIndex - 1) * viewSize) + 1);
-            highIndex = viewIndex * viewSize;
+            lowIndex = viewIndex * viewSize + 1;
+            highIndex = (viewIndex + 1) * viewSize;
 
             // attempt to get the full size
             orli.last();
@@ -142,12 +143,6 @@ if ("Y".equals(lookupFlag)) {
             // only commit the transaction if we started one... this will throw an exception if it fails
             TransactionUtil.commit(beganTransaction);
         }
-    } else {
-        shipmentList = [] as ArrayList;
-        shipmentListSize = 0;
-        highIndex = 0;
-        lowIndex = 0;
-    }
 
     context.shipmentList = shipmentList;
     context.listSize = shipmentListSize;
