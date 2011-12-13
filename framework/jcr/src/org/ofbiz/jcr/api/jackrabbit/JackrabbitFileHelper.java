@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.GregorianCalendar;
 
+import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 
 import org.apache.jackrabbit.ocm.exception.ObjectContentManagerException;
@@ -53,7 +54,7 @@ public class JackrabbitFileHelper extends JackrabbitAbstractHelper implements Jc
      * .String)
      */
     @Override
-    public JackrabbitHierarchyNode getRepositoryContent(String contentPath) throws ClassCastException {
+    public JackrabbitHierarchyNode getRepositoryContent(String contentPath) throws ClassCastException, PathNotFoundException {
         return getRepositoryContent(contentPath, null);
     }
 
@@ -65,7 +66,7 @@ public class JackrabbitFileHelper extends JackrabbitAbstractHelper implements Jc
      * .String, java.lang.String)
      */
     @Override
-    public JackrabbitHierarchyNode getRepositoryContent(String contentPath, String version) throws ClassCastException {
+    public JackrabbitHierarchyNode getRepositoryContent(String contentPath, String version) throws ClassCastException, PathNotFoundException {
         OfbizRepositoryMapping orm = null;
         if (version != null) {
             orm = super.access.getContentObject(contentPath, version);

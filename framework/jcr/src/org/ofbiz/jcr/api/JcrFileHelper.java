@@ -2,6 +2,7 @@ package org.ofbiz.jcr.api;
 
 import java.io.InputStream;
 
+import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 
 import org.apache.jackrabbit.ocm.exception.ObjectContentManagerException;
@@ -15,9 +16,10 @@ public interface JcrFileHelper extends JcrHelper{
      *
      * @param contentPath
      * @return
-     * @throws
+     * @throws ClassCastException
+     * @throws PathNotFoundException
      */
-    public abstract JackrabbitHierarchyNode getRepositoryContent(String contentPath) throws ClassCastException;
+    public abstract JackrabbitHierarchyNode getRepositoryContent(String contentPath) throws ClassCastException, PathNotFoundException;
 
     /**
      * Returns a content file object in the passed version from the repository.
@@ -26,9 +28,10 @@ public interface JcrFileHelper extends JcrHelper{
      *
      * @param contentPath
      * @return
-     * @throws
+     * @throws ClassCastException
+     * @throws PathNotFoundException
      */
-    public abstract JackrabbitHierarchyNode getRepositoryContent(String contentPath, String version) throws ClassCastException;
+    public abstract JackrabbitHierarchyNode getRepositoryContent(String contentPath, String version) throws ClassCastException, PathNotFoundException;
 
     /**
      * Stores a new file content object in the repository.

@@ -129,10 +129,20 @@ public class JackrabbitEvents {
 
         JcrDataHelper articleHelper = new JackrabbitArticleHelper(userLogin);
         JackrabbitArticle ormArticle = null;
-        if (UtilValidate.isEmpty(version)) {
-            ormArticle = articleHelper.readContentFromRepository(contentPath, language);
-        } else {
-            ormArticle = articleHelper.readContentFromRepository(contentPath, language, version);
+        try {
+            if (UtilValidate.isEmpty(version)) {
+                ormArticle = articleHelper.readContentFromRepository(contentPath, language);
+            } else {
+                ormArticle = articleHelper.readContentFromRepository(contentPath, language, version);
+            }
+        } catch (ClassCastException e) {
+            Debug.logError(e, module);
+            request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
+            return "error";
+        } catch (PathNotFoundException e) {
+            Debug.logError(e, module);
+            request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
+            return "error";
         }
 
         request.setAttribute("path", ormArticle.getPath());
@@ -159,7 +169,18 @@ public class JackrabbitEvents {
         String contentPath = request.getParameter("path");
         JcrDataHelper articleHelper = new JackrabbitArticleHelper(userLogin);
 
-        JackrabbitArticle ormArticle = articleHelper.readContentFromRepository(contentPath);
+        JackrabbitArticle ormArticle = null;
+        try {
+            ormArticle = articleHelper.readContentFromRepository(contentPath);
+        } catch (ClassCastException e1) {
+            Debug.logError(e1, module);
+            request.setAttribute("_ERROR_MESSAGE_", e1.getMessage());
+            return "error";
+        } catch (PathNotFoundException e1) {
+            Debug.logError(e1, module);
+            request.setAttribute("_ERROR_MESSAGE_", e1.getMessage());
+            return "error";
+        }
 
         ormArticle.setTitle(request.getParameter("title"));
         ormArticle.setContent(request.getParameter("content"));
@@ -359,7 +380,18 @@ public class JackrabbitEvents {
         }
 
         JcrFileHelper fileHelper = new JackrabbitFileHelper(userLogin);
-        JackrabbitHierarchyNode orm = fileHelper.getRepositoryContent(contentPath);
+        JackrabbitHierarchyNode orm = null;
+        try {
+            orm = fileHelper.getRepositoryContent(contentPath);
+        } catch (ClassCastException e1) {
+            Debug.logError(e1, module);
+            request.setAttribute("_ERROR_MESSAGE_", e1.getMessage());
+            return "error";
+        } catch (PathNotFoundException e1) {
+            Debug.logError(e1, module);
+            request.setAttribute("_ERROR_MESSAGE_", e1.getMessage());
+            return "error";
+        }
 
         if (fileHelper.isFileContent()) {
             JackrabbitFile file = (JackrabbitFile) orm;
@@ -388,7 +420,18 @@ public class JackrabbitEvents {
         String contentPath = request.getParameter("path");
 
         JcrFileHelper fileHelper = new JackrabbitFileHelper(userLogin);
-        OfbizRepositoryMapping orm = fileHelper.getRepositoryContent(contentPath);
+        OfbizRepositoryMapping orm;
+        try {
+            orm = fileHelper.getRepositoryContent(contentPath);
+        } catch (ClassCastException e) {
+            Debug.logError(e, module);
+            request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
+            return "error";
+        } catch (PathNotFoundException e) {
+            Debug.logError(e, module);
+            request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
+            return "error";
+        }
 
         // Here we can differentiate between a file or folder content
         if (fileHelper.isFileContent()) {
