@@ -19,6 +19,59 @@ under the License.
 -->
 
 <screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="CommonCommunicationEventDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="comm"/>
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/communication/GetMyCommunicationEventRole.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission action="_VIEW" permission="PARTYMGR"/>
+                            </condition>
+                            <widgets>
+                                <include-menu location="component://party/widget/partymgr/PartyMenus.xml" name="CommEventTabBar"/>
+                                <include-menu location="component://party/widget/partymgr/PartyMenus.xml" name="CommSubTabBar"/>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.PartyMgrViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CommonMyCommunicationEventDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="mycomm"/>
+                <set field="my" value="My" global="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission action="_VIEW" permission="PARTYMGR"/>
+                            </condition>
+                            <widgets>
+                                <include-menu name="MyCommSubTabBar" location="component://party/widget/partymgr/PartyMenus.xml"/>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.PartyMgrViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
     <screen name="PendingCommunications">
         <section>
             <actions>
@@ -83,7 +136,7 @@ under the License.
                 </entity-condition>
             </actions>
             <widgets>
-                <decorator-screen name="CommonCommunicationEventDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonCommunicationEventDecorator" location="${parameters.communicationEventDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
                             <condition>
@@ -110,7 +163,7 @@ under the License.
                 <set field="tabButtonItem" value="ListUnknownPartyComms"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonCommunicationEventDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonCommunicationEventDecorator" location="${parameters.communicationEventDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
                             <condition>
@@ -184,7 +237,7 @@ under the License.
                         <if-empty field="parameters.my"/>
                     </condition>
                     <widgets>
-                        <decorator-screen name="CommonCommunicationEventDecorator" location="${parameters.mainDecoratorLocation}">
+                        <decorator-screen name="CommonCommunicationEventDecorator" location="${parameters.communicationEventDecoratorLocation}">
                             <decorator-section name="body">
                                 <include-screen name="commOverview"/>
                             </decorator-section>
@@ -387,7 +440,7 @@ under the License.
                 <set field="parameters.communicationEventTypeId" from-field="parameters.communicationEventTypeId" default-value="${communicationEvent.communicationEventTypeId}"/>
             </actions>
             <widgets>
-                <decorator-screen name="Common${my}CommunicationEventDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="Common${my}CommunicationEventDecorator" location="${parameters.communicationEventDecoratorLocation}">
                     <decorator-section name="body">
                         <section><!-- Email -->
                             <condition>
@@ -497,7 +550,7 @@ under the License.
             </actions>
             <widgets>
                 <decorator-screen name="Common${my}CommunicationEventDecorator"
-                    location="${parameters.mainDecoratorLocation}">
+                    location="${parameters.communicationEventDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet  title="${uiLabelMap.PartyEditCustomerRequest}">
                             <include-form
@@ -528,7 +581,7 @@ under the License.
             </actions>
             <widgets>
                 <decorator-screen name="CommonCommunicationEventDecorator"
-                    location="${parameters.mainDecoratorLocation}">
+                    location="${parameters.communicationEventDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PartyCommEventRoles}">
                             <include-form
@@ -562,7 +615,7 @@ under the License.
                 <entity-one entity-name="CommunicationEvent" value-field="communicationEvent"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonCommunicationEventDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonCommunicationEventDecorator" location="${parameters.communicationEventDecoratorLocation}">
                     <decorator-section name="body">
                             <screenlet title="${uiLabelMap.PartyCommEventPurposes}">
                                 <container style="button-bar">
@@ -591,7 +644,7 @@ under the License.
                 <entity-one entity-name="CommunicationEvent" value-field="communicationEvent"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonCommunicationEventDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonCommunicationEventDecorator" location="${parameters.communicationEventDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PartyCommWorkEfforts}">
                             <container style="button-bar">
@@ -619,7 +672,7 @@ under the License.
                 <entity-one entity-name="WorkEffort" value-field="workEffort"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonCommunicationEventDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonCommunicationEventDecorator" location="${parameters.communicationEventDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PartyCommWorkEfforts}">
                             <include-form location="component://party/webapp/partymgr/communication/CommForms.xml" name="AddCommEventWorkEffort"/>
@@ -639,7 +692,7 @@ under the License.
                 <set field="workEffortId" from-field="parameters.workEffortId"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonCommunicationEventDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonCommunicationEventDecorator" location="${parameters.communicationEventDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PartyCommWorkEfforts}">
                             <include-form location="component://party/webapp/partymgr/communication/CommForms.xml" name="AddCommEventWorkEffort"/>
@@ -662,7 +715,7 @@ under the License.
                 <entity-one entity-name="CommunicationEvent" value-field="communicationEvent"/>
             </actions>
             <widgets>
-                <decorator-screen  name="CommonCommunicationEventDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen  name="CommonCommunicationEventDecorator" location="${parameters.communicationEventDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
                             <condition>
@@ -701,7 +754,7 @@ under the License.
                 <set field="communicationEventId" value="${parameters.communicationEventId}"/>
             </actions>
             <widgets>
-                <decorator-screen  name="CommonCommunicationEventDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen  name="CommonCommunicationEventDecorator" location="${parameters.communicationEventDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
                             <condition>
@@ -738,7 +791,7 @@ under the License.
                 </entity-one>
             </actions>
             <widgets>
-                <decorator-screen  name="CommonCommunicationEventDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen  name="CommonCommunicationEventDecorator" location="${parameters.communicationEventDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
                             <condition>
