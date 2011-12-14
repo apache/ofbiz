@@ -19,6 +19,7 @@
 
 package org.ofbiz.hhfacility;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -106,7 +107,7 @@ public class FacilityServices {
         String facilityId = (String) context.get("facilityId");
         String productId = (String) context.get("productId");
         String locationSeqId = (String) context.get("locationSeqId");
-        Double quantity = (Double) context.get("quantity");
+        BigDecimal quantity = (BigDecimal) context.get("quantity");
         if (UtilValidate.isEmpty(productId) || UtilValidate.isEmpty(facilityId)) {
             return ServiceUtil.returnError("productId or facilityId not found");
         }
@@ -126,7 +127,7 @@ public class FacilityServices {
             Debug.logError(e, "updateProductStocktake failed getting inventory counts", module);
             return ServiceUtil.returnError("updateProductStocktake failed getting inventory counts");
         }
-        int qoh = ((Double)invAvailability.get("quantityOnHandTotal")).intValue();
+        int qoh = ((BigDecimal)invAvailability.get("quantityOnHandTotal")).intValue();
         if (quantity.intValue() == qoh) {
             // No change required.
             Debug.logInfo("updateProductStocktake No change required quantity("+quantity+") = qoh("+qoh+")", module);
