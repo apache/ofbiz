@@ -40,8 +40,7 @@ public class JackrabbitArticleHelper extends JackrabbitAbstractHelper implements
 
     private final static String module = JackrabbitArticleHelper.class.getName();
 
-    private static JackrabbitArticle article = null;
-
+    private JackrabbitArticle article = null;
     private static List<String> possibleLocales = null;
 
     static {

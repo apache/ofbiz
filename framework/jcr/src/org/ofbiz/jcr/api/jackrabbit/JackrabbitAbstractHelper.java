@@ -19,7 +19,7 @@ public abstract class JackrabbitAbstractHelper implements JcrHelper {
 
     private static String module = JackrabbitAbstractHelper.class.getName();
 
-    protected JcrRepositoryAccessor access = null;
+    protected final JcrRepositoryAccessor access;
 
     public JackrabbitAbstractHelper(JcrRepositoryAccessor accessor) {
         this.access = accessor;
@@ -31,7 +31,6 @@ public abstract class JackrabbitAbstractHelper implements JcrHelper {
     @Override
     public void closeContentSession() {
         access.closeAccess();
-        access = null;
     }
 
     /* (non-Javadoc)

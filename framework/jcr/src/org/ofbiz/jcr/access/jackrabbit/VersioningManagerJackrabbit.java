@@ -20,12 +20,12 @@ import org.ofbiz.jcr.access.VersioningManager;
 
 public class VersioningManagerJackrabbit implements VersioningManager {
 
-    private static String module = VersioningManagerJackrabbit.class.getName();
+    private final static String module = VersioningManagerJackrabbit.class.getName();
 
-    ObjectContentManager ocm = null;
+    private final ObjectContentManager ocm;
 
-    private Set<String> checkedOutNodeStore = Collections.synchronizedSet(new HashSet<String>());
-    private static String NOVERSION = "-0.0";
+    private final Set<String> checkedOutNodeStore = Collections.synchronizedSet(new HashSet<String>());
+    private final static String NOVERSION = "-0.0";
 
     VersioningManagerJackrabbit(ObjectContentManager ocm) {
         this.ocm = ocm;

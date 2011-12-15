@@ -20,10 +20,10 @@ import org.ofbiz.jcr.util.jackrabbit.JcrUtilJackrabbit;
 
 public class ContentWriterJackrabbit implements ContentWriter {
 
-    private static String module = ContentWriterJackrabbit.class.getName();
+    private final static String module = ContentWriterJackrabbit.class.getName();
 
-    private ObjectContentManager ocm = null;
-    VersioningManager versioningManager = null;
+    private final ObjectContentManager ocm;
+    private final VersioningManager versioningManager;
 
     /**
      *

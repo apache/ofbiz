@@ -24,10 +24,10 @@ import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
 
 public class JackrabbitRepositoryAccessor implements JcrRepositoryAccessor {
 
-    private static String module = JackrabbitRepositoryAccessor.class.getName();
+    private final static String module = JackrabbitRepositoryAccessor.class.getName();
 
-    Session session = null;
-    ObjectContentManagerImpl ocm = null;
+    private final Session session;
+    private final ObjectContentManagerImpl ocm;
 
     /**
      * Create a repository Access object based on the userLogin.
@@ -45,13 +45,7 @@ public class JackrabbitRepositoryAccessor implements JcrRepositoryAccessor {
      * @param userLogin
      */
     public JackrabbitRepositoryAccessor(Session session) {
-        if (session == null) {
-            Debug.logWarning("A repository session is needed to create an OfbizContentMapping Object.", module);
-            return;
-        }
-
         this.session = session;
-
         this.ocm = new ObjectContentManagerImpl(session, JCRFactoryImpl.getMapper());
 
         return;
@@ -76,7 +70,6 @@ public class JackrabbitRepositoryAccessor implements JcrRepositoryAccessor {
         if (this.ocm != null && this.ocm.getSession().isLive()) {
             this.ocm.logout();
         }
-        this.ocm = null;
     }
 
     /*

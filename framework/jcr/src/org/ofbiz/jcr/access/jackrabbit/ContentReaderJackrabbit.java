@@ -21,9 +21,9 @@ import org.ofbiz.jcr.util.jackrabbit.JcrUtilJackrabbit;
 
 public class ContentReaderJackrabbit implements ContentReader {
 
-    private static String module = ContentReaderJackrabbit.class.getName();
+    private final static String module = ContentReaderJackrabbit.class.getName();
 
-    private ObjectContentManager ocm = null;
+    private final ObjectContentManager ocm;
 
     public ContentReaderJackrabbit(ObjectContentManager ocm) {
         this.ocm = ocm;
