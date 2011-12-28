@@ -25,6 +25,7 @@
 import java.text.NumberFormat;
 
 import org.ofbiz.base.util.*;
+import org.ofbiz.common.CommonWorkers;
 import org.ofbiz.entity.*;
 import org.ofbiz.entity.condition.*;
 import org.ofbiz.entity.util.*;
@@ -92,7 +93,7 @@ if (product) {
     context.product_id = productId;
     productTypeId = product.productTypeId;
 
-    boolean isMarketingPackage = EntityTypeUtil.hasParentType(delegator, "ProductType", "productTypeId", product.productTypeId, "parentTypeId", "MARKETING_PKG");
+    boolean isMarketingPackage = CommonWorkers.hasParentType(delegator, "ProductType", "productTypeId", product.productTypeId, "parentTypeId", "MARKETING_PKG");
     context.isMarketingPackage = (isMarketingPackage? "true": "false");
 
     featureTypes = [:];
