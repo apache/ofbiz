@@ -944,6 +944,8 @@ public class GenericEntity extends Observable implements Map, LocalizedMap, Seri
                 } else {
                     element.setAttribute(name, value);
                 }
+            } else {
+                element.setAttribute(name, GenericEntity.NULL_FIELD.toString());
             }
         }
 
