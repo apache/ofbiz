@@ -27,7 +27,20 @@ under the License.
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>${title?if_exists}</title>
-    <script language="javascript" src="<@ofbizContentUrl>/images/jquery/jquery-1.7.min.js</@ofbizContentUrl>" type="text/javascript"></script>
+    <#-- the trick "<scr" + "ipt below is because browsers should not parse the contents of CDATA elements, but apparently they do. -->
+    <script language="JavaScript" type="text/javascript">//<![CDATA[
+    var jQueryLibLoaded = false;
+    function initJQuery() {
+        if (typeof(jQuery) == 'undefined') {
+            if (!jQueryLibLoaded) {
+                jQueryLibLoaded = true;
+                document.write("<scr" + "ipt type=\"text/javascript\" src=\"<@ofbizContentUrl>/images/jquery/jquery-1.7.min.js</@ofbizContentUrl>\"></scr" + "ipt>");
+            }
+            setTimeout("initJQuery()", 50);
+        }
+    }
+    initJQuery(); 
+    //]]></script>
     <script language="javascript" src="<@ofbizContentUrl>/images/selectall.js</@ofbizContentUrl>" type="text/javascript"></script>
     <#if layoutSettings.javaScripts?has_content>
         <#--layoutSettings.javaScripts is a list of java scripts. -->
