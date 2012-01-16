@@ -414,6 +414,7 @@ function ajaxAutoCompleter(areaCsvString, showDescription, defaultMinLength, for
             source: function(request, response){
                 jQuery.ajax({
                     url: url,
+                    type: "post",
                     async: false,
                     data: {term : request.term},
                     success: function(data) {
