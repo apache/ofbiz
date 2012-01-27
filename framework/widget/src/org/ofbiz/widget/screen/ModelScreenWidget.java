@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.ListIterator;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,16 +45,17 @@ import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.widget.ModelWidget;
 import org.ofbiz.widget.ModelWidgetAction;
+import org.ofbiz.widget.PortalPageWorker;
 import org.ofbiz.widget.WidgetFactory;
 import org.ofbiz.widget.WidgetWorker;
-import org.ofbiz.widget.PortalPageWorker;
 import org.ofbiz.widget.form.FormFactory;
 import org.ofbiz.widget.form.FormStringRenderer;
 import org.ofbiz.widget.form.ModelForm;
 import org.ofbiz.widget.html.HtmlFormRenderer;
-import org.ofbiz.widget.html.HtmlMenuRenderer;
+import org.ofbiz.widget.html.HtmlMenuWidgetVisitor;
 import org.ofbiz.widget.menu.MenuFactory;
 import org.ofbiz.widget.menu.MenuStringRenderer;
 import org.ofbiz.widget.menu.ModelMenu;
@@ -63,7 +64,6 @@ import org.ofbiz.widget.tree.TreeFactory;
 import org.ofbiz.widget.tree.TreeStringRenderer;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-import org.ofbiz.entity.condition.*;
 
 
 /**
@@ -1312,23 +1312,19 @@ public abstract class ModelScreenWidget extends ModelWidget {
 
         @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws IOException {
+            ModelMenu modelMenu = getModelMenu(context);
             // try finding the menuStringRenderer by name in the context in case one was prepared and put there
             MenuStringRenderer menuStringRenderer = (MenuStringRenderer) context.get("menuStringRenderer");
             // if there was no menuStringRenderer put in place, now try finding the request/response in the context and creating a new one
             if (menuStringRenderer == null) {
-                HttpServletRequest request = (HttpServletRequest) context.get("request");
-                HttpServletResponse response = (HttpServletResponse) context.get("response");
-                if (request != null && response != null) {
-                    menuStringRenderer = new HtmlMenuRenderer(request, response);
+                try {
+                    modelMenu.accept(new HtmlMenuWidgetVisitor(writer, context));
+                } catch (GeneralException e) {
+                    throw new IOException(e);
                 }
+                return;
             }
-            // still null, throw an error
-            if (menuStringRenderer == null) {
-                throw new IllegalArgumentException("Could not find a menuStringRenderer in the context, and could not find HTTP request/response objects need to create one.");
-            }
-
-            ModelMenu modelMenu = getModelMenu(context);
-            modelMenu.renderMenuString(writer, context, menuStringRenderer);
+            throw new IllegalArgumentException("Could not find a menuStringRenderer in the context, and could not find HTTP request/response objects need to create one.");
         }
 
         public ModelMenu getModelMenu(Map<String, Object> context) {

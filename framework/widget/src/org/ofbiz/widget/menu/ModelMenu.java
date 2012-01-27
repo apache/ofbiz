@@ -94,8 +94,7 @@ public class ModelMenu extends ModelWidget {
 
     protected List<ModelMenuAction> actions;
 
-
-   // ===== CONSTRUCTORS =====
+    // ===== CONSTRUCTORS =====
     /** Default Constructor */
     public ModelMenu() {}
 
@@ -666,4 +665,7 @@ public class ModelMenu extends ModelWidget {
         return menuItemList;
     }
 
+    public List<ModelMenuAction> getActions() {
+        return actions;
+    }
 }

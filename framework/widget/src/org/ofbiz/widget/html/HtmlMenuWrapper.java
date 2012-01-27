@@ -31,6 +31,7 @@ import javax.servlet.http.HttpSession;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilValidate;
@@ -103,21 +104,13 @@ public class HtmlMenuWrapper {
     }
 
     public String renderMenuString() throws IOException {
-        HttpServletRequest req = ((HtmlMenuRenderer)renderer).request;
-        ServletContext ctx = (ServletContext) req.getAttribute("servletContext");
-        if (ctx == null) {
-            if (Debug.infoOn()) Debug.logInfo("in renderMenuString, ctx is null(0)" , "");
-        }
-
         Writer writer = new StringWriter();
-        modelMenu.renderMenuString(writer, context, renderer);
-
-        HttpServletRequest req2 = ((HtmlMenuRenderer)renderer).request;
-        ServletContext ctx2 = (ServletContext) req2.getAttribute("servletContext");
-        if (ctx2 == null) {
-            if (Debug.infoOn()) Debug.logInfo("in renderMenuString, ctx is null(2)" , "");
+        try {
+            HtmlMenuWidgetVisitor.render(modelMenu, writer, context);
+        } catch (GeneralException e) {
+            throw new IOException(e);
         }
-
+        modelMenu.renderMenuString(writer, context, renderer);
         return writer.toString();
     }
 
