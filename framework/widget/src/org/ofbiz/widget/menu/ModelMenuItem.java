@@ -590,10 +590,6 @@ public class ModelMenuItem {
             visitor.visit(this);
         }
 
-        public void renderLinkString(Appendable writer, Map<String, Object> context, MenuStringRenderer menuStringRenderer) throws IOException {
-            menuStringRenderer.renderLink(writer, context, this);
-        }
-
         public String getText(Map<String, Object> context) {
             String txt = this.textExdr.expandString(context);
             if (UtilValidate.isEmpty(txt)) txt = linkMenuItem.getTitle(context);
@@ -808,10 +804,6 @@ public class ModelMenuItem {
 
         public void accept(MenuWidgetVisitor visitor) throws IOException, GeneralException {
             visitor.visit(this);
-        }
-
-        public void renderImageString(Appendable writer, Map<String, Object> context, MenuStringRenderer menuStringRenderer) throws IOException {
-            menuStringRenderer.renderImage(writer, context, this);
         }
 
         public String getSrc(Map<String, Object> context) {

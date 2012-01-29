@@ -56,7 +56,6 @@ import org.ofbiz.widget.form.FormStringRenderer;
 import org.ofbiz.widget.form.ModelForm;
 import org.ofbiz.widget.html.HtmlFormRenderer;
 import org.ofbiz.widget.html.HtmlMenuRenderer;
-import org.ofbiz.widget.menu.MenuStringRenderer;
 import org.ofbiz.widget.menu.MenuWidgetVisitor;
 import org.ofbiz.widget.menu.ModelMenuAction;
 import org.ofbiz.widget.menu.ModelMenuItem;

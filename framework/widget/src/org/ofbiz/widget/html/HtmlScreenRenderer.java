@@ -49,7 +49,6 @@ import org.ofbiz.widget.WidgetDataResourceWorker;
 import org.ofbiz.widget.WidgetWorker;
 import org.ofbiz.widget.form.FormStringRenderer;
 import org.ofbiz.widget.form.ModelForm;
-import org.ofbiz.widget.menu.MenuStringRenderer;
 import org.ofbiz.widget.menu.*;
 import org.ofbiz.widget.menu.ModelMenuAction;
 import org.ofbiz.widget.menu.ModelMenuItem;
