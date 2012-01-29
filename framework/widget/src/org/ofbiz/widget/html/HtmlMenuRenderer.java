@@ -129,13 +129,13 @@ public final class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuWi
         writer.append("</div>");
         appendWhitespace(writer);
         if (ModelWidget.widgetBoundaryCommentsEnabled(context)) {
-            renderEndingBoundaryComment(writer, "Menu Widget", modelMenu);
+            writer.append(buildBoundaryComment("End", "Menu Widget", modelMenu.getBoundaryCommentName()));
         }
     }
 
     private void renderMenuOpen(Appendable writer, Map<String, Object> context, ModelMenu modelMenu) throws IOException {
         if (ModelWidget.widgetBoundaryCommentsEnabled(context)) {
-            renderBeginningBoundaryComment(writer, "Menu Widget", modelMenu);
+            writer.append(buildBoundaryComment("Begin", "Menu Widget", modelMenu.getBoundaryCommentName()));
         }
         writer.append("<div");
         String menuId = modelMenu.getId();
