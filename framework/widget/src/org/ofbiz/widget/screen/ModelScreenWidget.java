@@ -55,10 +55,11 @@ import org.ofbiz.widget.form.FormFactory;
 import org.ofbiz.widget.form.FormStringRenderer;
 import org.ofbiz.widget.form.ModelForm;
 import org.ofbiz.widget.html.HtmlFormRenderer;
-import org.ofbiz.widget.html.HtmlMenuWidgetVisitor;
+import org.ofbiz.widget.html.HtmlMenuRenderer;
 import org.ofbiz.widget.menu.MenuFactory;
-import org.ofbiz.widget.menu.MenuStringRenderer;
+import org.ofbiz.widget.menu.MenuWidgetVisitor;
 import org.ofbiz.widget.menu.ModelMenu;
+import org.ofbiz.widget.menu.ModelMenuAction;
 import org.ofbiz.widget.tree.ModelTree;
 import org.ofbiz.widget.tree.TreeFactory;
 import org.ofbiz.widget.tree.TreeStringRenderer;
@@ -1313,18 +1314,15 @@ public abstract class ModelScreenWidget extends ModelWidget {
         @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws IOException {
             ModelMenu modelMenu = getModelMenu(context);
-            // try finding the menuStringRenderer by name in the context in case one was prepared and put there
-            MenuStringRenderer menuStringRenderer = (MenuStringRenderer) context.get("menuStringRenderer");
-            // if there was no menuStringRenderer put in place, now try finding the request/response in the context and creating a new one
+            MenuWidgetVisitor menuStringRenderer = (MenuWidgetVisitor) context.get("menuStringRenderer");
             if (menuStringRenderer == null) {
-                try {
-                    modelMenu.accept(new HtmlMenuWidgetVisitor(writer, context));
-                } catch (GeneralException e) {
-                    throw new IOException(e);
-                }
-                return;
+                menuStringRenderer = new HtmlMenuRenderer(writer, context);
             }
-            throw new IllegalArgumentException("Could not find a menuStringRenderer in the context, and could not find HTTP request/response objects need to create one.");
+            try {
+                modelMenu.accept(new HtmlMenuRenderer(writer, context));
+            } catch (GeneralException e) {
+                throw new IOException(e);
+            }
         }
 
         public ModelMenu getModelMenu(Map<String, Object> context) {
@@ -1352,6 +1350,10 @@ public abstract class ModelScreenWidget extends ModelWidget {
         @Override
         public String rawString() {
             return "<include-menu name=\"" + this.nameExdr.getOriginal() + "\" location=\"" + this.locationExdr.getOriginal() + "\"/>";
+        }
+
+        public List<ModelMenuAction> getActions(Map<String, Object> context) {
+            return getModelMenu(context).getActions();
         }
     }
 

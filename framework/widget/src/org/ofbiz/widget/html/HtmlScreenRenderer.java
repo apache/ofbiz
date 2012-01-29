@@ -50,7 +50,9 @@ import org.ofbiz.widget.WidgetWorker;
 import org.ofbiz.widget.form.FormStringRenderer;
 import org.ofbiz.widget.form.ModelForm;
 import org.ofbiz.widget.menu.MenuStringRenderer;
-import org.ofbiz.widget.menu.ModelMenu;
+import org.ofbiz.widget.menu.*;
+import org.ofbiz.widget.menu.ModelMenuAction;
+import org.ofbiz.widget.menu.ModelMenuItem;
 import org.ofbiz.widget.screen.ModelScreenWidget;
 import org.ofbiz.widget.screen.ScreenStringRenderer;
 
@@ -224,11 +226,20 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
             }
             if (!collapsed) {
                 if (navMenu != null) {
-                    MenuStringRenderer savedRenderer = (MenuStringRenderer) context.get("menuStringRenderer");
-                    MenuStringRenderer renderer = new ScreenletMenuRenderer(request, response);
-                    context.put("menuStringRenderer", renderer);
-                    navMenu.renderWidgetString(writer, context, this);
-                    context.put("menuStringRenderer", savedRenderer);
+                    MenuWidgetVisitor htmlMenuRenderer = (MenuWidgetVisitor) context.get("htmlMenuRenderer");
+                    if (htmlMenuRenderer == null) {
+                        htmlMenuRenderer = new HtmlMenuRenderer(writer, context);
+                        context.put("htmlMenuRenderer", htmlMenuRenderer);
+                    }
+                    org.ofbiz.widget.menu.ModelMenu modelMenu = navMenu.getModelMenu(context);
+                    ModelMenuAction.runSubActions(modelMenu.getActions(), context);
+                    for (ModelMenuItem item : modelMenu.getMenuItemList()) {
+                        try {
+                            item.accept(htmlMenuRenderer);
+                        } catch (GeneralException e) {
+                            throw new IOException(e);
+                        }
+                    }
                 } else if (navForm != null) {
                     renderScreenletPaginateMenu(writer, context, navForm);
                 }
@@ -421,16 +432,6 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
         appendWhitespace(writer);
         writer.append("</div>");
         appendWhitespace(writer);
-    }
-
-    public static class ScreenletMenuRenderer extends HtmlMenuRenderer {
-        public ScreenletMenuRenderer(HttpServletRequest request, HttpServletResponse response) {
-            super(request, response);
-        }
-        @Override
-        public void renderMenuOpen(Appendable writer, Map<String, Object> context, ModelMenu modelMenu) {}
-        @Override
-        public void renderMenuClose(Appendable writer, Map<String, Object> context, ModelMenu modelMenu) {}
     }
 
     public void renderLabel(Appendable writer, Map<String, Object> context, ModelScreenWidget.Label label) throws IOException {

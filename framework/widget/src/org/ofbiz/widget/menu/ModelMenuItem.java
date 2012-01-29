@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -39,10 +38,8 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
-import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entityext.permission.EntityPermissionChecker;
 import org.ofbiz.widget.WidgetWorker;
-import org.ofbiz.widget.PortalPageWorker;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
@@ -270,49 +267,6 @@ public class ModelMenuItem {
         return passed;
     }
     
-    public void renderMenuItemString(Appendable writer, Map<String, Object> context, MenuStringRenderer menuStringRenderer) throws IOException {
-
-        boolean passed = true;
-        if (this.condition != null) {
-            if (!this.condition.eval(context)) {
-                passed = false;
-            }
-        }
-        Locale locale = (Locale) context.get("locale");
-           //Debug.logInfo("in ModelMenu, name:" + this.getName(), module);
-        if (passed) {
-            ModelMenuAction.runSubActions(this.actions, context);
-            String parentPortalPageId = this.getParentPortalPageId(context);
-            if (UtilValidate.isNotEmpty(parentPortalPageId)) {
-                List<GenericValue> portalPages = PortalPageWorker.getPortalPages(parentPortalPageId, context);
-                if (UtilValidate.isNotEmpty(portalPages)) {
-                    for (GenericValue portalPage : portalPages) {
-                        if (UtilValidate.isNotEmpty(portalPage.getString("portalPageName"))) {
-                            ModelMenuItem localItem = new ModelMenuItem(this.getModelMenu());
-                            localItem.name =  portalPage.getString("portalPageId");
-                            localItem.setTitle((String) portalPage.get("portalPageName", locale));
-                            localItem.link = new Link(this);
-                            List<WidgetWorker.Parameter> linkParams = localItem.link.getParameterList();
-                            linkParams.add(new WidgetWorker.Parameter("portalPageId", portalPage.getString("portalPageId"), false));
-                            linkParams.add(new WidgetWorker.Parameter("parentPortalPageId", parentPortalPageId, false));
-                            if (link != null) {
-                                localItem.link.setTarget(link.targetExdr.getOriginal());
-                                linkParams.addAll(link.parameterList);
-                            } else {
-                                localItem.link.setTarget("showPortalPage");
-                            }
-                            localItem.link.setText((String)portalPage.get("portalPageName", locale));
-                            menuStringRenderer.renderMenuItem(writer, context, localItem);
-                        }
-                    }
-                }
-            } else {
-                menuStringRenderer.renderMenuItem(writer, context, this);
-            }
-        }
-    }
-
-
     public ModelMenu getModelMenu() {
         return modelMenu;
     }
@@ -405,7 +359,7 @@ public class ModelMenuItem {
     }
 
     public String getParentPortalPageId(Map<String, Object> context) {
-        return this.parentPortalPageId.expandString(context);
+        return this.parentPortalPageId == null ? null : this.parentPortalPageId.expandString(context);
     }
 
     public String getWidgetStyle() {
@@ -824,6 +778,10 @@ public class ModelMenuItem {
             return linkMenuItem;
         }
 
+        public String getTarget() {
+            return this.targetExdr.getOriginal();
+        }
+
     }
 
     public static class Image {
@@ -916,5 +874,16 @@ public class ModelMenuItem {
                 this.urlMode = val;
         }
 
+    }
+
+    public boolean evaluateConditions(Map<String, Object> context) {
+        if (this.condition != null) {
+            return this.condition.eval(context);
+        }
+        return true;
+    }
+
+    public void setLink(Link link) {
+        this.link = link;
     }
 }

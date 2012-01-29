@@ -295,72 +295,7 @@ public class ModelMenu extends ModelWidget {
         }
             return existingMenuItem;
     }
-
-    /**
-     * Renders this menu to a String, i.e. in a text format, as defined with the
-     * MenuStringRenderer implementation.
-     *
-     * @param writer The Writer that the menu text will be written to
-     * @param context Map containing the menu context; the following are
-     *   reserved words in this context: parameters (Map), isError (Boolean),
-     *   itemIndex (Integer, for lists only, otherwise null), bshInterpreter,
-     *   menuName (String, optional alternate name for menu, defaults to the
-     *   value of the name attribute)
-     * @param menuStringRenderer An implementation of the MenuStringRenderer
-     *   interface that is responsible for the actual text generation for
-     *   different menu elements; implementing you own makes it possible to
-     *   use the same menu definitions for many types of menu UIs
-     */
-    public void renderMenuString(Appendable writer, Map<String, Object> context, MenuStringRenderer menuStringRenderer) throws IOException {
-
-        boolean passed = true;
-
-            //Debug.logInfo("in ModelMenu, name:" + this.getName(), module);
-        if (passed) {
-            ModelMenuAction.runSubActions(this.actions, context);
-            if ("simple".equals(this.type)) {
-                this.renderSimpleMenuString(writer, context, menuStringRenderer);
-            } else {
-                throw new IllegalArgumentException("The type " + this.getType() + " is not supported for menu with name " + this.getName());
-            }
-        }
-            //Debug.logInfo("in ModelMenu, buffer:" + buffer.toString(), module);
-    }
-
-    public int renderedMenuItemCount(Map<String, Object> context)
-    {
-        int count = 0;    	
-        for (ModelMenuItem item : this.menuItemList) {
-            if (item.shouldBeRendered(context))
-            	count++;        	
-        }
-        return count;
-    }
     
-    public void renderSimpleMenuString(Appendable writer, Map<String, Object> context, MenuStringRenderer menuStringRenderer) throws IOException {
-        //Iterator menuItemIter = null;
-        //Set alreadyRendered = new TreeSet();
-
-        // render menu open
-        menuStringRenderer.renderMenuOpen(writer, context, this);
-
-        // render formatting wrapper open
-        menuStringRenderer.renderFormatSimpleWrapperOpen(writer, context, this);
-
-        //Debug.logInfo("in ModelMenu, menuItemList:" + menuItemList, module);
-        // render each menuItem row, except hidden & ignored rows
-        // include portal pages if specified
-        //menuStringRenderer.renderFormatSimpleWrapperRows(writer, context, this);
-        for (ModelMenuItem item : this.menuItemList) {
-                item.renderMenuItemString(writer, context, menuStringRenderer);
-        }
-        // render formatting wrapper close
-        menuStringRenderer.renderFormatSimpleWrapperClose(writer, context, this);
-
-        // render menu close
-        menuStringRenderer.renderMenuClose(writer, context, this);
-    }
-
     /**
      * @deprecated Use getDispatcher(Map<String, Object>) instead, this method will throw an {@link UnsupportedOperationException} if used
      */

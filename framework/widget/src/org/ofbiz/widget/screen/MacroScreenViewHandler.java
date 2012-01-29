@@ -98,7 +98,6 @@ public class MacroScreenViewHandler extends AbstractViewHandler {
             // this is the object used to render forms from their definitions
             screens.getContext().put("formStringRenderer", formStringRenderer);
             screens.getContext().put("treeStringRenderer", treeStringRenderer);
-            //screens.getContext().put("menuStringRenderer", menuStringRenderer);
             screens.getContext().put("simpleEncoder", StringUtil.getEncoder(UtilProperties.getPropertyValue("widget", getName() + ".encoder")));
             screenStringRenderer.renderScreenBegin(writer, screens.getContext());
             screens.render(page);

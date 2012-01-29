@@ -31,13 +31,14 @@ import javax.servlet.http.HttpSession;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.webapp.ftl.LoopWriter;
 import org.ofbiz.widget.WidgetContentWorker;
-import org.ofbiz.widget.html.HtmlMenuWrapper;
+import org.ofbiz.widget.html.HtmlMenuRenderer;
 
 import freemarker.core.Environment;
 import freemarker.template.TemplateModelException;
@@ -69,6 +70,8 @@ public class MenuWrapTransform implements TemplateTransformModel {
     public static final String module = MenuWrapTransform.class.getName();
     public static final String [] upSaveKeyNames = {"globalNodeTrail"};
     public static final String [] saveKeyNames = {"contentId", "subContentId", "subDataResourceTypeId", "mimeTypeId", "whenMap", "locale",  "wrapTemplateId", "encloseWrapText", "nullThruDatesOnly", "renderOnStart", "renderOnClose", "menuDefFile", "menuName", "associatedContentId", "wrapperClassName"};
+
+    // TODO: This class does not appear to be used anywhere
 
     @SuppressWarnings("unchecked")
     public Writer getWriter(final Writer out, Map args) {
@@ -177,22 +180,44 @@ public class MenuWrapTransform implements TemplateTransformModel {
             }
 
             public void renderMenu() throws IOException {
-
-                String menuDefFile = (String)templateCtx.get("menuDefFile");
-                String menuName = (String)templateCtx.get("menuName");
-                String menuWrapperClassName = (String)templateCtx.get("menuWrapperClassName");
-                HtmlMenuWrapper menuWrapper = HtmlMenuWrapper.getMenuWrapper(request, response, session, menuDefFile, menuName, menuWrapperClassName);
-
-                if (menuWrapper == null) {
-                    throw new IOException("HtmlMenuWrapper with def file:" + menuDefFile + " menuName:" + menuName + " and HtmlMenuWrapper class:" + menuWrapperClassName + " could not be instantiated.");
+                String location = (String)templateCtx.get("menuDefFile");
+                String name = (String)templateCtx.get("menuName");
+                ModelMenu modelMenu = null;
+                try {
+                    modelMenu = MenuFactory.getMenuFromLocation(location, name);
+                } catch (Exception e) {
+                    String errMsg = "Error rendering included menu named [" + name + "] at location [" + location + "]: ";
+                    Debug.logError(e, errMsg, module);
+                    throw new IOException(errMsg + e);
                 }
-
                 String associatedContentId = (String)templateCtx.get("associatedContentId");
-                menuWrapper.putInContext("defaultAssociatedContentId", associatedContentId);
-                menuWrapper.putInContext("currentValue", view);
-
-                String menuStr = menuWrapper.renderMenuString();
-                out.write(menuStr);
+                Map<String, Object> context = createContext();
+                context.put("defaultAssociatedContentId", associatedContentId);
+                context.put("currentValue", view);
+                try {
+                    HtmlMenuRenderer.render(modelMenu, out, context);
+                } catch (GeneralException e) {
+                    throw new IOException(e);
+                }
+            }
+            
+            private Map<String, Object> createContext() {
+                Map<String, Object> context = new HashMap<String, Object>();
+                Map<String, Object> parameterMap = UtilHttp.getParameterMap(request);
+                context.put("parameters", parameterMap);
+                HttpSession session = request.getSession();
+                GenericValue userLogin = (GenericValue)session.getAttribute("userLogin");
+                context.put("userLogin", userLogin);
+                context.put("locale", UtilHttp.getLocale(request));
+                if (UtilValidate.isNotEmpty(request.getAttribute("_ERROR_MESSAGE_"))) {
+                    context.put("isError", Boolean.TRUE);
+                } else {
+                    context.put("isError", Boolean.FALSE);
+                }
+                if ("true".equals(parameterMap.get("isError"))) {
+                    context.put("isError", Boolean.TRUE);
+                }
+                return context;
             }
 
         };

@@ -55,8 +55,11 @@ import org.ofbiz.widget.WidgetWorker;
 import org.ofbiz.widget.form.FormStringRenderer;
 import org.ofbiz.widget.form.ModelForm;
 import org.ofbiz.widget.html.HtmlFormRenderer;
-import org.ofbiz.widget.html.HtmlScreenRenderer.ScreenletMenuRenderer;
+import org.ofbiz.widget.html.HtmlMenuRenderer;
 import org.ofbiz.widget.menu.MenuStringRenderer;
+import org.ofbiz.widget.menu.MenuWidgetVisitor;
+import org.ofbiz.widget.menu.ModelMenuAction;
+import org.ofbiz.widget.menu.ModelMenuItem;
 import org.ofbiz.widget.screen.ModelScreenWidget;
 import org.ofbiz.widget.screen.ScreenStringRenderer;
 
@@ -615,11 +618,21 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
             }
             StringWriter sb = new StringWriter();
             if (navMenu != null) {
-                MenuStringRenderer savedRenderer = (MenuStringRenderer) context.get("menuStringRenderer");
-                MenuStringRenderer renderer = new ScreenletMenuRenderer(request, response);
-                context.put("menuStringRenderer", renderer);
-                navMenu.renderWidgetString(sb, context, this);
-                context.put("menuStringRenderer", savedRenderer);
+                MenuWidgetVisitor macroMenuRenderer = (MenuWidgetVisitor) context.get("macroMenuRenderer");
+                if (macroMenuRenderer == null) {
+                    // TODO: Implement macro renderer
+                    macroMenuRenderer = new HtmlMenuRenderer(sb, context);
+                    context.put("macroMenuRenderer", macroMenuRenderer);
+                }
+                org.ofbiz.widget.menu.ModelMenu modelMenu = navMenu.getModelMenu(context);
+                ModelMenuAction.runSubActions(modelMenu.getActions(), context);
+                for (ModelMenuItem item : modelMenu.getMenuItemList()) {
+                    try {
+                        item.accept(macroMenuRenderer);
+                    } catch (GeneralException e) {
+                        throw new IOException(e);
+                    }
+                }
             } else if (navForm != null) {
                 renderScreenletPaginateMenu(sb, context, navForm);
             }
