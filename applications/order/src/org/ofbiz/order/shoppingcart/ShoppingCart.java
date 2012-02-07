@@ -1381,6 +1381,8 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         this.contactMechIdsMap.clear();
         this.internalOrderNotes.clear();
         this.orderNotes.clear();
+        this.attributes.clear();
+        this.orderAttributes.clear();
 
         // clear the additionalPartyRole Map
         Iterator it = this.additionalPartyRole.entrySet().iterator();
