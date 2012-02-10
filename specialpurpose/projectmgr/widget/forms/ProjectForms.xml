@@ -124,7 +124,7 @@
             </entity-condition>
         </actions>
         <row-actions>
-            <set field="showPosition1" value="${bsh:String prev=(String)previousItem.get(&quot;workEffortId&quot;);return !(prev!=null&amp;&amp;prev.equals(workEffortId));}" type="Boolean"/>
+            <set field="showPosition1" value="${groovy:String prev=(String)previousItem.get(&quot;workEffortId&quot;);return !(prev!=null&amp;&amp;prev.equals(workEffortId));}" type="Boolean"/>
         </row-actions>
         <field name="workEffortId"><hidden/></field>
         <field name="phaseName" position="1" use-when="showPosition1"><display description="${phaseName}[${phaseId}]"/></field>
@@ -194,7 +194,7 @@
         <field name="actualCompletionDate" title="${uiLabelMap.FormFieldTitle_actualCompletionDate}"><display type="date"/></field>
         <field name="plannedHours" title="${uiLabelMap.ProjectMgrPlannedHours}"><display/></field>
         <field name="actualHours" title="${uiLabelMap.ProjectMgrActualHours}"><display/></field>
-        <field name="actualNonBilledTotalHours" title="${uiLabelMap.ProjectMgrNonBilledActualHours}"><display description="${bsh:isBillable&amp;&amp;actualNonBilledTotalHours!=void?actualNonBilledTotalHours:&quot;&quot;}"/></field>
+        <field name="actualNonBilledTotalHours" title="${uiLabelMap.ProjectMgrNonBilledActualHours}"><display description="${groovy:isBillable&amp;&amp;actualNonBilledTotalHours!=void?actualNonBilledTotalHours:&quot;&quot;}"/></field>
         <field name="createdStamp" title="${uiLabelMap.FormFieldTitle_createdDate}"><display type="date"/></field>
     </form>
     <form name="EditSubProjects" list-name="projects" type="list" target="RemoveSubProject"
@@ -525,8 +525,8 @@
         <row-actions>
             <entity-one entity-name="PartyAcctgPreference" value-field="orgParty"/>
             <entity-one entity-name="Party" value-field="clientParty"/>
-            <set field="currencyUomId" value="${bsh:orgParty!=null&amp;&amp;orgParty.getString(&quot;baseCurrencyUomId&quot;)!=null?orgParty.getString(&quot;baseCurrencyUomId&quot;):&quot;&quot;}"/>
-            <set field="currencyUomId" value="${bsh:clientParty!=null&amp;&amp;clientParty.getString(&quot;preferredCurrencyUomId&quot;)!=null?clientParty.getString(&quot;preferredCurrencyUomId&quot;):currencyUomId}"/>
+            <set field="currencyUomId" value="${groovy:orgParty!=null&amp;&amp;orgParty.getString(&quot;baseCurrencyUomId&quot;)!=null?orgParty.getString(&quot;baseCurrencyUomId&quot;):&quot;&quot;}"/>
+            <set field="currencyUomId" value="${groovy:clientParty!=null&amp;&amp;clientParty.getString(&quot;preferredCurrencyUomId&quot;)!=null?clientParty.getString(&quot;preferredCurrencyUomId&quot;):currencyUomId}"/>
         </row-actions>
         <field name="projectId"><hidden/></field>
         <field name="partyName" title="${uiLabelMap.CommonName}">

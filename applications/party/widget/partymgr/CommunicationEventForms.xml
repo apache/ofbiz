@@ -124,7 +124,7 @@ under the License.
     </form>
     <form name="EditEmail" type="single" target="createCommunicationEvent" default-map-name="communicationEvent" id="EditEmail">
         <actions>
-            <set field="nowDate" value="${bsh:org.ofbiz.base.util.UtilDateTime.nowDateString(&quot;yyyy-MM-dd HH:mm:ss.S&quot;)}" type="String"/>
+            <set field="nowDate" value="${groovy:org.ofbiz.base.util.UtilDateTime.nowDateString(&quot;yyyy-MM-dd HH:mm:ss.S&quot;)}" type="String"/>
             <entity-condition entity-name="PartyContactWithPurpose" list="emailAddresses">
                 <condition-list combine="and">
                     <condition-expr field-name="partyId" from-field="partyIdFrom"/>
@@ -184,7 +184,7 @@ under the License.
     </form>
     <form name="EditInternalNote" type="single" target="createCommunicationEvent" default-map-name="communicationEvent">
         <actions>
-            <set field="nowDate" value="${bsh:org.ofbiz.base.util.UtilDateTime.nowDateString(&quot;yyyy-MM-dd HH:mm:ss.S&quot;)}" type="String"/>
+            <set field="nowDate" value="${groovy:org.ofbiz.base.util.UtilDateTime.nowDateString(&quot;yyyy-MM-dd HH:mm:ss.S&quot;)}" type="String"/>
             <script location="component://party/webapp/partymgr/WEB-INF/actions/communication/recentVisitor.groovy"/>
         </actions>
         <alt-target use-when="communicationEvent!=null" target="updateCommunicationEvent"/>
@@ -505,7 +505,7 @@ under the License.
             </service>
         </actions>
         <row-actions>
-            <set field="toComplete" value="${bsh:&quot;COM_ROLE_READ&quot;.equals(roleStatusId)?&quot;PartyToComplete&quot;:&quot;CommonEmptyHeader&quot;}"/>
+            <set field="toComplete" value="${groovy:&quot;COM_ROLE_READ&quot;.equals(roleStatusId)?&quot;PartyToComplete&quot;:&quot;CommonEmptyHeader&quot;}"/>
         </row-actions>
         <field name="deleteCommEventIfLast"><hidden value="Y"/></field>
         <field name="delContentDataResource"><hidden value="Y"/></field>
