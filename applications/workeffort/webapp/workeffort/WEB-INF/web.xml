@@ -40,11 +40,6 @@ under the License.
     <description>Configuration File(s) For The Service Dispatcher</description>
   </context-param>
   <context-param>
-    <param-name>scriptLocationPath</param-name>
-    <param-value>/WEB-INF/bsh</param-value>
-    <description>BeanShell Script Location</description>
-  </context-param>
-  <context-param>
       <param-name>mainDecoratorLocation</param-name>
       <param-value>component://workeffort/widget/CommonScreens.xml</param-value>
       <description>The location of the main-decorator screen to use for this webapp; referred to as a context variable in screen def XML files.</description>
