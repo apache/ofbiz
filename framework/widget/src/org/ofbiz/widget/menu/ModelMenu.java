@@ -24,19 +24,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ofbiz.base.util.BshUtil;
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.UtilXml;
+import groovy.lang.GroovyShell;
+import org.codehaus.groovy.control.CompilationFailedException;
+import org.ofbiz.base.util.*;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.widget.ModelWidget;
 import org.w3c.dom.Element;
-
-import bsh.EvalError;
-import bsh.Interpreter;
 
 /**
  * Widget Library - Menu model class
@@ -446,13 +442,13 @@ public class ModelMenu extends ModelWidget {
         return menuLocation + "#" + name;
     }
 
-    public Interpreter getBshInterpreter(Map<String, Object> context) throws EvalError {
-        Interpreter bsh = (Interpreter) context.get("bshInterpreter");
-        if (bsh == null) {
-            bsh = BshUtil.makeInterpreter(context);
-            context.put("bshInterpreter", bsh);
+    public GroovyShell getGroovyShell(Map<String, Object> context) throws CompilationFailedException {
+        GroovyShell shell = (GroovyShell) context.get("groovyShell");
+        if (shell == null) {
+            shell = new GroovyShell(GroovyUtil.getBinding(context));
+            context.put("groovyShell", shell);
         }
-        return bsh;
+        return shell;
     }
 
     /**

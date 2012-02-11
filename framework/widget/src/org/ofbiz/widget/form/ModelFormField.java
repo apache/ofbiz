@@ -32,24 +32,15 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
+import groovy.lang.GroovyShell;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.codehaus.groovy.control.CompilationFailedException;
 import org.ofbiz.base.conversion.ConversionException;
 import org.ofbiz.base.conversion.DateTimeConverters;
 import org.ofbiz.base.conversion.DateTimeConverters.StringToTimestamp;
-import org.ofbiz.base.util.BshUtil;
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.ObjectType;
-import org.ofbiz.base.util.StringUtil;
-import org.ofbiz.base.util.UtilDateTime;
-import org.ofbiz.base.util.UtilFormatOut;
-import org.ofbiz.base.util.UtilGenerics;
-import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.UtilProperties;
-import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.base.util.*;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.collections.MapStack;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
@@ -70,9 +61,6 @@ import org.ofbiz.service.ModelService;
 import org.ofbiz.widget.WidgetWorker;
 import org.ofbiz.widget.form.ModelForm.UpdateArea;
 import org.w3c.dom.Element;
-
-import bsh.EvalError;
-import bsh.Interpreter;
 
 /**
  * Widget Library - Form model class
@@ -1014,8 +1002,8 @@ public class ModelFormField {
         if (UtilValidate.isEmpty(useWhenStr)) return true;
         
         try {
-            Interpreter bsh = this.modelForm.getBshInterpreter(context);
-            Object retVal = bsh.eval(StringUtil.convertOperatorSubstitutions(useWhenStr));
+            GroovyShell shell = this.modelForm.getGroovyShell(context);
+            Object retVal = shell.evaluate(StringUtil.convertOperatorSubstitutions(useWhenStr));
             boolean condTrue = false;
             // retVal should be a Boolean, if not something weird is up...
             if (retVal instanceof Boolean) {
@@ -1027,7 +1015,7 @@ public class ModelFormField {
             }
 
             return condTrue;
-        } catch (EvalError e) {
+        } catch (CompilationFailedException e) {
             String errMsg = "Error evaluating BeanShell use-when condition [" + useWhenStr + "] on the field "
                     + this.name + " of form " + this.modelForm.getName() + ": " + e.toString();
             Debug.logError(e, errMsg, module);
@@ -2508,13 +2496,13 @@ public class ModelFormField {
             String useWhen = this.getUseWhen(context);
             if (UtilValidate.isNotEmpty(useWhen)) {
                 try {
-                    Interpreter bsh = (Interpreter) context.get("bshInterpreter");
-                    if (bsh == null) {
-                        bsh = BshUtil.makeInterpreter(context);
-                        context.put("bshInterpreter", bsh);
+                    GroovyShell shell = (GroovyShell) context.get("groovyShell");
+                    if (shell == null) {
+                        shell = new GroovyShell(GroovyUtil.getBinding(context));
+                        context.put("groovyShell", shell);
                     }
 
-                    Object retVal = bsh.eval(StringUtil.convertOperatorSubstitutions(useWhen));
+                    Object retVal = shell.evaluate(StringUtil.convertOperatorSubstitutions(useWhen));
 
                     // retVal should be a Boolean, if not something weird is up...
                     if (retVal instanceof Boolean) {
@@ -2524,7 +2512,7 @@ public class ModelFormField {
                         throw new IllegalArgumentException(
                             "Return value from target condition eval was not a Boolean: " + retVal.getClass().getName() + " [" + retVal + "]");
                     }
-                } catch (EvalError e) {
+                } catch (CompilationFailedException e) {
                     String errmsg = "Error evaluating BeanShell target conditions";
                     Debug.logError(e, errmsg, module);
                     throw new IllegalArgumentException(errmsg);

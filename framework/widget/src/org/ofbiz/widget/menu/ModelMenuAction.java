@@ -364,15 +364,7 @@ public abstract class ModelMenuAction {
 
         @Override
         public void runAction(Map<String, Object> context) {
-            if (location.endsWith(".bsh")) {
-                try {
-                    BshUtil.runBshAtLocation(location, context);
-                } catch (GeneralException e) {
-                    String errMsg = "Error running BSH script at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new IllegalArgumentException(errMsg);
-                }
-            } else if (location.endsWith(".groovy")) {
+            if (location.endsWith(".groovy")) {
                 try {
                     groovy.lang.Script script = InvokerHelper.createScript(GroovyUtil.getScriptClassFromLocation(location), GroovyUtil.getBinding(context));
                     if (UtilValidate.isEmpty(method)) {

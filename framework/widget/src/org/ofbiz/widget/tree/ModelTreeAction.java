@@ -28,14 +28,8 @@ import java.util.regex.PatternSyntaxException;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.ofbiz.base.util.BshUtil;
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.ObjectType;
-import org.ofbiz.base.util.UtilFormatOut;
-import org.ofbiz.base.util.UtilGenerics;
-import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.UtilXml;
+import org.codehaus.groovy.runtime.InvokerHelper;
+import org.ofbiz.base.util.*;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.entity.finder.ByAndFinder;
@@ -45,6 +39,7 @@ import org.ofbiz.entity.finder.PrimaryKeyFinder;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ModelService;
+import org.ofbiz.widget.WidgetWorker;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -173,24 +168,35 @@ public abstract class ModelTreeAction {
     }
 
     public static class Script extends ModelTreeAction {
+        protected static final Object[] EMPTY_ARGS = {};
         protected String location;
+        protected String method;
 
         public Script(ModelTree.ModelNode modelNode, Element scriptElement) {
             super (modelNode, scriptElement);
-            this.location = scriptElement.getAttribute("location");
+            String scriptLocation = scriptElement.getAttribute("location");
+            this.location = WidgetWorker.getScriptLocation(scriptLocation);
+            this.method = WidgetWorker.getScriptMethodName(scriptLocation);
         }
 
         public Script(ModelTree.ModelNode.ModelSubNode modelSubNode, Element scriptElement) {
             super (modelSubNode, scriptElement);
-            this.location = scriptElement.getAttribute("location");
+            String scriptLocation = scriptElement.getAttribute("location");
+            this.location = WidgetWorker.getScriptLocation(scriptLocation);
+            this.method = WidgetWorker.getScriptMethodName(scriptLocation);
         }
 
         @Override
         public void runAction(Map<String, Object> context) {
-            if (location.endsWith(".bsh")) {
+            if (location.endsWith(".groovy")) {
                 try {
                     context.put("_LIST_ITERATOR_", null);
-                    BshUtil.runBshAtLocation(location, context);
+                    groovy.lang.Script script = InvokerHelper.createScript(GroovyUtil.getScriptClassFromLocation(location), GroovyUtil.getBinding(context));
+                    if (UtilValidate.isEmpty(method)) {
+                        script.run();
+                    } else {
+                        script.invokeMethod(method, EMPTY_ARGS);
+                    }
                     Object obj = context.get("_LIST_ITERATOR_");
                     if (this.modelSubNode != null) {
                         if (obj != null && (obj instanceof EntityListIterator || obj instanceof ListIterator<?>)) {
@@ -204,7 +210,7 @@ public abstract class ModelTreeAction {
                         }
                     }
                 } catch (GeneralException e) {
-                    String errMsg = "Error running BSH script at location [" + location + "]: " + e.toString();
+                    String errMsg = "Error running Groovy script at location [" + location + "]: " + e.toString();
                     Debug.logError(e, errMsg, module);
                     throw new IllegalArgumentException(errMsg);
                 }

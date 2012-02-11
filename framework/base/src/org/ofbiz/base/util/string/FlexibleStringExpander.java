@@ -266,10 +266,7 @@ public abstract class FlexibleStringExpander implements Serializable, IsEmpty {
                 // append everything from the current index to the start of the expression
                 strElems.add(new ConstOffsetElem(chars, currentInd, (escapedExpression ? start -1 : start) - currentInd));
             }
-            if (expression.indexOf("bsh:", start + 2) == start + 2 && !escapedExpression) {
-                // checks to see if this starts with a "bsh:", if so treat the rest of the expression as a bsh scriptlet
-                strElems.add(new BshElem(chars, start, Math.min(end + 1, start + length) - start, start + 6, end - start - 6));
-            } else if (expression.indexOf("groovy:", start + 2) == start + 2 && !escapedExpression) {
+            if (expression.indexOf("groovy:", start + 2) == start + 2 && !escapedExpression) {
                 // checks to see if this starts with a "groovy:", if so treat the rest of the expression as a groovy scriptlet
                 strElems.add(new GroovyElem(chars, start, Math.min(end + 1, start + length) - start, start + 9, end - start - 9));
             } else {
@@ -485,35 +482,6 @@ public abstract class FlexibleStringExpander implements Serializable, IsEmpty {
         @Override
         public String getOriginal() {
             return new String(this.chars, this.offset, this.length);
-        }
-    }
-
-    /** An object that represents a <code>${bsh:}</code> expression. */
-    protected static class BshElem extends ArrayOffsetString {
-        private final int parseStart;
-        private final int parseLength;
-
-        protected BshElem(char[] chars, int offset, int length, int parseStart, int parseLength) {
-            super(chars, offset, length);
-            this.parseStart = parseStart;
-            this.parseLength = parseLength;
-        }
-
-        @Override
-        protected Object get(Map<String, ? extends Object> context, TimeZone timeZone, Locale locale) {
-            try {
-                Object obj = BshUtil.eval(new String(this.chars, this.parseStart, this.parseLength), UtilMisc.makeMapWritable(context));
-                if (obj != null) {
-                    return obj;
-                } else {
-                    if (Debug.verboseOn()) {
-                        Debug.logVerbose("BSH scriptlet evaluated to null [" + this + "], got no return so inserting nothing.", module);
-                    }
-                }
-            } catch (EvalError e) {
-                Debug.logWarning(e, "Error evaluating BSH scriptlet [" + this + "], inserting nothing; error was: " + e, module);
-            }
-            return null;
         }
     }
 

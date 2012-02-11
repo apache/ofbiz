@@ -30,19 +30,13 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import groovy.lang.GroovyShell;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 import javolution.util.FastSet;
 
-import org.ofbiz.base.util.BshUtil;
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.StringUtil;
-import org.ofbiz.base.util.UtilGenerics;
-import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.UtilProperties;
-import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.UtilXml;
+import org.codehaus.groovy.control.CompilationFailedException;
+import org.ofbiz.base.util.*;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.collections.MapStack;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
@@ -59,9 +53,6 @@ import org.ofbiz.webapp.control.ConfigXMLReader;
 import org.ofbiz.widget.ModelWidget;
 import org.ofbiz.widget.WidgetWorker;
 import org.w3c.dom.Element;
-
-import bsh.EvalError;
-import bsh.Interpreter;
 
 /**
  * Widget Library - Form model class
@@ -1490,7 +1481,7 @@ public class ModelForm extends ModelWidget {
                 }
 
                 // reset/remove the BshInterpreter now as well as later because chances are there is an interpreter at this level of the stack too
-                this.resetBshInterpreter(localContext);
+                this.resetGroovyShell(localContext);
                 localContext.push();
                 localContext.put("previousItem", previousItem);
                 previousItem = FastMap.newInstance();
@@ -1503,7 +1494,7 @@ public class ModelForm extends ModelWidget {
                     localContext.put("formUniqueId", "_"+context.get("renderFormSeqNumber"));
                 }
 
-                this.resetBshInterpreter(localContext);
+                this.resetGroovyShell(localContext);
 
                 if (Debug.verboseOn()) Debug.logVerbose("In form got another row, context is: " + localContext, module);
 
@@ -2025,9 +2016,9 @@ public class ModelForm extends ModelWidget {
 
         try {
             // use the same Interpreter (ie with the same context setup) for all evals
-            Interpreter bsh = this.getBshInterpreter(context);
+            GroovyShell shell = this.getGroovyShell(context);
             for (AltTarget altTarget: this.altTargets) {
-                Object retVal = bsh.eval(StringUtil.convertOperatorSubstitutions(altTarget.useWhen));
+                Object retVal = shell.evaluate(StringUtil.convertOperatorSubstitutions(altTarget.useWhen));
                 boolean condTrue = false;
                 // retVal should be a Boolean, if not something weird is up...
                 if (retVal instanceof Boolean) {
@@ -2042,7 +2033,7 @@ public class ModelForm extends ModelWidget {
                     return altTarget.targetExdr.expandString(expanderContext);
                 }
             }
-        } catch (EvalError e) {
+        } catch (CompilationFailedException e) {
             String errmsg = "Error evaluating BeanShell target conditions on form " + this.name;
             Debug.logError(e, errmsg, module);
             throw new IllegalArgumentException(errmsg);
@@ -2098,17 +2089,17 @@ public class ModelForm extends ModelWidget {
         return formLocation + "#" + name;
     }
 
-    public void resetBshInterpreter(Map<String, Object> context) {
-        context.remove("bshInterpreter");
+    public void resetGroovyShell(Map<String, Object> context) {
+        context.remove("groovyShell");
     }
 
-    public Interpreter getBshInterpreter(Map<String, Object> context) throws EvalError {
-        Interpreter bsh = (Interpreter) context.get("bshInterpreter");
-        if (bsh == null) {
-            bsh = BshUtil.makeInterpreter(context);
-            context.put("bshInterpreter", bsh);
+    public GroovyShell getGroovyShell(Map<String, Object> context) throws CompilationFailedException {
+        GroovyShell shell = (GroovyShell) context.get("groovyShell");
+        if (shell == null) {
+            shell = new GroovyShell(GroovyUtil.getBinding(context));
+            context.put("groovyShell", shell);
         }
-        return bsh;
+        return shell;
     }
 
     /**
@@ -2754,9 +2745,9 @@ public class ModelForm extends ModelWidget {
         String styles = "";
         try {
             // use the same Interpreter (ie with the same context setup) for all evals
-            Interpreter bsh = this.getBshInterpreter(context);
+            GroovyShell shell = this.getGroovyShell(context);
             for (AltRowStyle altRowStyle : this.altRowStyles) {
-                Object retVal = bsh.eval(StringUtil.convertOperatorSubstitutions(altRowStyle.useWhen));
+                Object retVal = shell.evaluate(StringUtil.convertOperatorSubstitutions(altRowStyle.useWhen));
                 // retVal should be a Boolean, if not something weird is up...
                 if (retVal instanceof Boolean) {
                     Boolean boolVal = (Boolean) retVal;
@@ -2768,7 +2759,7 @@ public class ModelForm extends ModelWidget {
                         "Return value from style condition eval was not a Boolean: " + retVal.getClass().getName() + " [" + retVal + "] of form " + this.name);
                 }
             }
-        } catch (EvalError e) {
+        } catch (CompilationFailedException e) {
             String errmsg = "Error evaluating BeanShell style conditions on form " + this.name;
             Debug.logError(e, errmsg, module);
             throw new IllegalArgumentException(errmsg);

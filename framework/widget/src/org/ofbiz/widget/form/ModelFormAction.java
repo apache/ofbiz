@@ -32,7 +32,6 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.codehaus.groovy.runtime.InvokerHelper;
-import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.GroovyUtil;
@@ -285,15 +284,7 @@ public abstract class ModelFormAction {
 
         @Override
         public void runAction(Map<String, Object> context) {
-            if (location.endsWith(".bsh")) {
-                try {
-                    BshUtil.runBshAtLocation(location, context);
-                } catch (GeneralException e) {
-                    String errMsg = "Error running BSH script at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new IllegalArgumentException(errMsg);
-                }
-            } else if (location.endsWith(".groovy")) {
+            if (location.endsWith(".groovy")) {
                 try {
                     groovy.lang.Script script = InvokerHelper.createScript(GroovyUtil.getScriptClassFromLocation(location), GroovyUtil.getBinding(context));
                     if (UtilValidate.isEmpty(method)) {

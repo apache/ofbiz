@@ -73,13 +73,7 @@ public class CallScript extends MethodOperation {
         }
 
         Map<String, Object> context = methodContext.getEnvMap();        
-        if (location.endsWith(".bsh")) {
-            try {
-                BshUtil.runBshAtLocation(location, context);
-            } catch (GeneralException e) {
-                messages.add("Error running BSH script at location [" + location + "]: " + e.getMessage());
-            }
-        } else if (location.endsWith(".groovy")) {
+        if (location.endsWith(".groovy")) {
             try {
                 groovy.lang.Script script = InvokerHelper.createScript(GroovyUtil.getScriptClassFromLocation(location), GroovyUtil.getBinding(context));
                 if (UtilValidate.isEmpty(method)) {

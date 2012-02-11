@@ -403,13 +403,7 @@ public abstract class ModelWidgetAction implements Serializable {
 
         @Override
         public void runAction(Map<String, Object> context) throws GeneralException {
-            if (location.endsWith(".bsh")) {
-                try {
-                    BshUtil.runBshAtLocation(location, context);
-                } catch (GeneralException e) {
-                    throw new GeneralException("Error running BSH script at location [" + location + "]", e);
-                }
-            } else if (location.endsWith(".groovy")) {
+            if (location.endsWith(".groovy")) {
                 try {
                     groovy.lang.Script script = InvokerHelper.createScript(GroovyUtil.getScriptClassFromLocation(location), GroovyUtil.getBinding(context));
                     if (UtilValidate.isEmpty(method)) {
