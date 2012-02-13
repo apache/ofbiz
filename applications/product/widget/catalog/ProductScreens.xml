@@ -615,6 +615,7 @@ under the License.
                 <set field="productId" from-field="parameters.productId"/>
                 <set field="orderByList[]" value="-relevancyWeight"/>
                 <set field="orderByList[]" value="keyword"/>
+                <entity-one entity-name="Product" value-field="product"/>
                 <get-related value-field="product" relation-name="ProductKeyword" list="productKeywords" order-by-list="orderByList"/>
             </actions>
             <widgets>
