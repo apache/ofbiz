@@ -2238,7 +2238,7 @@ public class MacroFormRenderer implements FormStringRenderer {
         if (questionIndex == -1) {
             result += sessionId;
         } else {
-            result.replace("?", sessionId + "?");
+            result = result.replace("?", sessionId + "?");
         }
         return result;
     }
