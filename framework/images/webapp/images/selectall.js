@@ -436,7 +436,6 @@ function ajaxAutoCompleter(areaCsvString, showDescription, defaultMinLength, for
             select: function(event, ui){
                 //jQuery("#" + areaArray[0]).html(ui.item);
                 jQuery("#" + areaArray[0]).val(ui.item.value); // setting a text field   
-                jQuery("#" + areaArray[0]).trigger("lookup:changed"); // notify the field has changed
                 if (showDescription) {
                     setLookDescription(areaArray[0], ui.item.label, areaArray[2], formName)
                 }
