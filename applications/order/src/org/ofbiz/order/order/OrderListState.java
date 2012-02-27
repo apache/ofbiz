@@ -18,13 +18,26 @@
  */
 package org.ofbiz.order.order;
 
-import java.util.*;
-import javax.servlet.http.*;
-import javolution.util.*;
-import org.ofbiz.base.util.*;
-import org.ofbiz.entity.*;
-import org.ofbiz.entity.condition.*;
-import org.ofbiz.entity.util.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import javolution.util.FastMap;
+
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.util.EntityFindOptions;
+import org.ofbiz.entity.util.EntityListIterator;
 
 /**
  * Session object for keeping track of the list of orders.
@@ -40,7 +53,8 @@ import org.ofbiz.entity.util.*;
  * objects, including Pagination. Think about design
  * patterns in Fowler.
  */
-public class OrderListState {
+@SuppressWarnings("serial")
+public class OrderListState implements Serializable {
 
     public static final String module = OrderListState.class.getName();
     public static final String SESSION_KEY = "__ORDER_LIST_STATUS__";
