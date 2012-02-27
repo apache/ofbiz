@@ -18,6 +18,7 @@
  */
 package org.ofbiz.order.order;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.*;
 import javax.servlet.http.*;
@@ -41,7 +42,8 @@ import org.ofbiz.entity.util.*;
  * objects, including Pagination. Think about design
  * patterns in Fowler.
  */
-public class OrderListState {
+@SuppressWarnings("serial")
+public class OrderListState implements Serializable {
 
     public static final String module = OrderListState.class.getName();
     public static final String SESSION_KEY = "__ORDER_LIST_STATUS__";
