@@ -262,7 +262,7 @@ public class PaymentWorker {
     }
 
     /**
-     * Method to return the total amount of an payment which is applied to a payment
+     * Method to return the total amount of a payment which is applied to a payment
      * @param payment GenericValue object of the Payment
      * @param false for currency of the payment, true for the actual currency
      * @return the applied total as BigDecimal in the currency of the payment
@@ -297,7 +297,10 @@ public class PaymentWorker {
     }
 
     public static BigDecimal getPaymentNotApplied(GenericValue payment) {
-        return payment.getBigDecimal("amount").subtract(getPaymentApplied(payment)).setScale(decimals,rounding);
+        if (payment != null) { 
+            return payment.getBigDecimal("amount").subtract(getPaymentApplied(payment)).setScale(decimals,rounding);
+        } 
+        return BigDecimal.ZERO;
     }
 
     public static BigDecimal getPaymentNotApplied(GenericValue payment, Boolean actual) {
