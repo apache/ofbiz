@@ -2746,10 +2746,10 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     public int getAdjustmentPromoIndex(String productPromoId) {
         int index = adjustments.size();
         while (index > 0) {
+            index--;
             if (adjustments.get(index).getString("productPromoId").equals(productPromoId)) {
                 return(index);
             }
-            index++;
         }
         return -1;
     }
