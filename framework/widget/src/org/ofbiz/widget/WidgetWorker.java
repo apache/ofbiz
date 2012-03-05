@@ -20,7 +20,10 @@ package org.ofbiz.widget;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.util.Map;
 import java.util.TimeZone;
@@ -104,10 +107,10 @@ public class WidgetWorker {
                     parameterValue = parameter.getValue();
                 } else {
                     Object parameterObject = parameter.getValue();
-                    
+
                     // skip null values
                     if (parameterObject == null) continue;
-                    
+
                     if (parameterObject instanceof String[]) {
                         // it's probably a String[], just get the first value
                         String[] parameterArray = (String[]) parameterObject;
@@ -118,7 +121,7 @@ public class WidgetWorker {
                         parameterValue = parameterObject.toString();
                     }
                 }
-                
+
                 if (needsAmp) {
                     externalWriter.append("&amp;");
                 } else {
@@ -337,9 +340,14 @@ public class WidgetWorker {
 
         public String getValue(Map<String, Object> context) {
             if (this.value != null) {
-                return this.value.expandString(context);
+                try {
+                    return URLEncoder.encode(this.value.expandString(context), Charset.forName("UTF-8").displayName());
+                } catch (UnsupportedEncodingException e) {
+                    Debug.logError(e, module);
+                    return this.value.expandString(context);
+                }
             }
-            
+
             Object retVal = null;
             if (this.fromField != null && this.fromField.get(context) != null) {
                 retVal = this.fromField.get(context);
@@ -350,7 +358,7 @@ public class WidgetWorker {
             if (retVal != null) {
                 TimeZone timeZone = (TimeZone) context.get("timeZone");
                 if (timeZone == null) timeZone = TimeZone.getDefault();
-                
+
                 String returnValue = null;
                 // format string based on the user's time zone (not locale because these are parameters)
                 if (retVal instanceof Double || retVal instanceof Float || retVal instanceof BigDecimal) {
@@ -368,7 +376,11 @@ public class WidgetWorker {
                     DateFormat df = UtilDateTime.toDateTimeFormat("EEE MMM dd hh:mm:ss z yyyy", timeZone, null);
                     returnValue = df.format((java.util.Date) retVal);
                 } else {
-                    returnValue = retVal.toString();
+                    try {
+                        returnValue = URLEncoder.encode(retVal.toString(), Charset.forName("UTF-8").displayName());
+                    } catch (UnsupportedEncodingException e) {
+                        Debug.logError(e, module);
+                    }
                 }
                 return returnValue;
             } else {
@@ -399,7 +411,7 @@ public class WidgetWorker {
 
     /** Returns the script location based on a script combined name:
      * <code>location#methodName</code>.
-     * 
+     *
      * @param combinedName The combined location/method name
      * @return The script location
      */
@@ -414,7 +426,7 @@ public class WidgetWorker {
     /** Returns the script method name based on a script combined name:
      * <code>location#methodName</code>. Returns <code>null</code> if
      * no method name is found.
-     * 
+     *
      * @param combinedName The combined location/method name
      * @return The method name or <code>null</code>
      */
