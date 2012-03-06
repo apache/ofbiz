@@ -24,8 +24,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 import java.util.List;
@@ -914,7 +912,7 @@ public class RequestHandler {
      * @return
      */
     public String makeQueryString(HttpServletRequest request, ConfigXMLReader.RequestResponse requestResponse) {
-        if (requestResponse == null ||
+        if (requestResponse == null || 
                 (requestResponse.redirectParameterMap.size() == 0 && requestResponse.redirectParameterValueMap.size() == 0)) {
             Map<String, Object> urlParams = UtilHttp.getUrlOnlyParameterMap(request);
             String queryString = UtilHttp.urlEncodeArgs(urlParams, false);
@@ -1099,12 +1097,7 @@ public class RequestHandler {
                         newURL.insert(questionIndex, sessionId);
                     }
                 }
-                try {
-                    encodedUrl = URLEncoder.encode(newURL.toString(), Charset.forName("UTF-8").displayName());
-                } catch (UnsupportedEncodingException e) {
-                    Debug.logError(e, module);
-                    encodedUrl = newURL.toString();
-                }
+                encodedUrl = newURL.toString();
             }
         } else {
             encodedUrl = newURL.toString();
