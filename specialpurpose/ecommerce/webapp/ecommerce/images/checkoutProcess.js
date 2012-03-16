@@ -414,7 +414,7 @@ function addPromoCode() {
             var serverError = getServerError(data);
             if(serverError != "") {
                 Effect.Appear('cartFormServerError');
-                $('cartFormServerError').update(serverError);
+                $('cartFormServerError').update(serverError.escapeHTML());
             } else {
                 Effect.Fade('cartFormServerError');
                 updateCartData();
