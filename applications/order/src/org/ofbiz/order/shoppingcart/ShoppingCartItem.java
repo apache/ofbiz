@@ -1586,7 +1586,7 @@ public class ShoppingCartItem implements java.io.Serializable {
     }
 
     public void setOrderItemSeqId(String orderItemSeqId) {
-        Debug.log("Setting orderItemSeqId - " + orderItemSeqId, module);
+        Debug.logInfo("Setting orderItemSeqId - " + orderItemSeqId, module);
         this.orderItemSeqId = orderItemSeqId;
     }
 
@@ -2044,7 +2044,7 @@ public class ShoppingCartItem implements java.io.Serializable {
             }
         }
         rentalValue = rentalValue.add(new BigDecimal("100"));    // add final 100 percent for first person
-        //     Debug.log("rental parameters....Nbr of persons:" + getReservPersons() + " extra% 2nd person:" + getReserv2ndPPPerc()+ " extra% Nth person:" + getReservNthPPPerc() + "  total rental adjustment:" + rentalValue/100 * getReservLength());
+        //     Debug.logInfo("rental parameters....Nbr of persons:" + getReservPersons() + " extra% 2nd person:" + getReserv2ndPPPerc()+ " extra% Nth person:" + getReservNthPPPerc() + "  total rental adjustment:" + rentalValue/100 * getReservLength());
         return rentalValue.movePointLeft(2).multiply(getReservLength()); // return total rental adjustment
     }
 

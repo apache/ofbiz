@@ -2183,7 +2183,7 @@ public class InvoiceServices {
                 }
             }
         } else {
-            Debug.log("No payments found for Invoice #" + invoiceId, module);
+            Debug.logInfo("No payments found for Invoice #" + invoiceId, module);
         }
 
         return ServiceUtil.returnSuccess();

@@ -1508,7 +1508,7 @@ public class PartyServices {
         try {
             partyTo = delegator.findByPrimaryKey("Party", UtilMisc.toMap("partyId", partyIdTo));
         } catch (GenericEntityException e) {
-            Debug.log(e, module);
+            Debug.logInfo(e, module);
             return ServiceUtil.returnError(e.getMessage());
         }
         if (partyTo == null) {
@@ -1524,7 +1524,7 @@ public class PartyServices {
         try {
             party = delegator.findByPrimaryKey("Party", UtilMisc.toMap("partyId", partyId));
         } catch (GenericEntityException e) {
-            Debug.log(e, module);
+            Debug.logInfo(e, module);
             return ServiceUtil.returnError(e.getMessage());
         }
         if (party == null) {
@@ -1774,7 +1774,7 @@ public class PartyServices {
                     }
 
                     addrMap.put("sequenceNum", Long.valueOf(seq));
-                    Debug.log("Creating map entry: " + addrMap, module);
+                    Debug.logInfo("Creating map entry: " + addrMap, module);
                     try {
                         delegator.create(addrMap);
                     } catch (GenericEntityException e) {

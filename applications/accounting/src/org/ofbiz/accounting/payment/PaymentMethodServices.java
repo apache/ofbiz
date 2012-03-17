@@ -301,14 +301,14 @@ public class PaymentMethodServices {
         if (updatedCardNumber.startsWith("*")) {
             // get the masked card number from the db
             String origCardNumber = creditCard.getString("cardNumber");
-            Debug.log("CCInfo: " + creditCard.toString(), module);
+            Debug.logInfo("CCInfo: " + creditCard.toString(), module);
             String origMaskedNumber = "";
             int cardLength = origCardNumber.length() - 4;
             for (int i = 0; i < cardLength; i++) {
                 origMaskedNumber = origMaskedNumber + "*";
             }
             origMaskedNumber = origMaskedNumber + origCardNumber.substring(cardLength);
-            Debug.log(origMaskedNumber);
+            Debug.logInfo(origMaskedNumber, module);
 
             // compare the two masked numbers
             if (updatedCardNumber.equals(origMaskedNumber)) {
@@ -590,7 +590,7 @@ public class PaymentMethodServices {
         if (cardNumber.startsWith("*")) {
             // get the masked card number from the db
             String origCardNumber = giftCard.getString("cardNumber");
-            //Debug.log(origCardNumber);
+            //Debug.logInfo(origCardNumber);
             String origMaskedNumber = "";
             int cardLength = origCardNumber.length() - 4;
             if (cardLength > 0) {
