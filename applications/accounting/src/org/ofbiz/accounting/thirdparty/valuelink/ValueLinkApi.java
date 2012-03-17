@@ -102,9 +102,9 @@ public class ValueLinkApi {
         }
 
         if (debug) {
-            Debug.log("New ValueLinkApi instance created", module);
-            Debug.log("Merchant ID : " + merchantId, module);
-            Debug.log("Terminal ID : " + terminalId, module);
+            Debug.logInfo("New ValueLinkApi instance created", module);
+            Debug.logInfo("Merchant ID : " + merchantId, module);
+            Debug.logInfo("Terminal ID : " + terminalId, module);
         }
     }
 
@@ -192,7 +192,7 @@ public class ValueLinkApi {
         }
 
         if (debug) {
-            Debug.log("encryptPin : " + pin + " / " + encryptedEanHex, module);
+            Debug.logInfo("encryptPin : " + pin + " / " + encryptedEanHex, module);
         }
 
         return encryptedEanHex;
@@ -222,7 +222,7 @@ public class ValueLinkApi {
         }
 
         if (debug) {
-            Debug.log("decryptPin : " + pin + " / " + decryptedPinString, module);
+            Debug.logInfo("decryptPin : " + pin + " / " + decryptedPinString, module);
         }
 
         return decryptedPinString;
@@ -247,7 +247,7 @@ public class ValueLinkApi {
      */
     public Map send(String url, Map request) throws HttpClientException {
         if (debug) {
-            Debug.log("Request : " + url + " / " + request, module);
+            Debug.logInfo("Request : " + url + " / " + request, module);
         }
 
         // read the timeout value
@@ -312,7 +312,7 @@ public class ValueLinkApi {
                     return this.outputKeyCreation(loop, kekOnly, kekTest);
                 }
             } else {
-                Debug.log("Returned a null KeyPair", module);
+                Debug.logInfo("Returned a null KeyPair", module);
                 return this.outputKeyCreation(loop, kekOnly, kekTest);
             }
         } else {
@@ -409,7 +409,7 @@ public class ValueLinkApi {
         // initialize the parameter spec
         DHPublicKey publicKey = (DHPublicKey) this.getValueLinkPublicKey();
         DHParameterSpec dhParamSpec = publicKey.getParams();
-        //Debug.log(dhParamSpec.getP().toString() + " / " + dhParamSpec.getG().toString(), module);
+        //Debug.logInfo(dhParamSpec.getP().toString() + " / " + dhParamSpec.getG().toString(), module);
 
         // create the public/private key pair using parameters defined by valuelink
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DH");
@@ -438,7 +438,7 @@ public class ValueLinkApi {
         byte[] secretKey = ka.generateSecret();
 
         if (debug) {
-            Debug.log("Secret Key : " + StringUtil.toHexString(secretKey) + " / " + secretKey.length,  module);
+            Debug.logInfo("Secret Key : " + StringUtil.toHexString(secretKey) + " / " + secretKey.length,  module);
         }
 
         // generate 3DES from secret key using VL algorithm (KEK)
@@ -449,7 +449,7 @@ public class ValueLinkApi {
         byte[] kek = copyBytes(des2, first8, 0);
 
         if (debug) {
-            Debug.log("Generated KEK : " + StringUtil.toHexString(kek) + " / " + kek.length, module);
+            Debug.logInfo("Generated KEK : " + StringUtil.toHexString(kek) + " / " + kek.length, module);
         }
 
         return kek;
@@ -530,7 +530,7 @@ public class ValueLinkApi {
             byte[] des3 = copyBytes(desByte1, copyBytes(desByte2, desByte3, 0), 0);
             return generateMwk(des3);
         } else {
-            Debug.log("Null DES keys returned", module);
+            Debug.logInfo("Null DES keys returned", module);
         }
 
         return null;
@@ -543,7 +543,7 @@ public class ValueLinkApi {
      */
     public byte[] generateMwk(byte[] desBytes) {
         if (debug) {
-            Debug.log("DES Key : " + StringUtil.toHexString(desBytes) + " / " + desBytes.length, module);
+            Debug.logInfo("DES Key : " + StringUtil.toHexString(desBytes) + " / " + desBytes.length, module);
         }
         SecretKeyFactory skf1 = null;
         SecretKey mwk = null;
@@ -607,10 +607,10 @@ public class ValueLinkApi {
         newMwk = copyBytes(random, newMwk, 0);
 
         if (debug) {
-            Debug.log("Random 8 byte : " + StringUtil.toHexString(random), module);
-            Debug.log("Encrypted 0's : " + StringUtil.toHexString(encryptedZeros), module);
-            Debug.log("Decrypted MWK : " + StringUtil.toHexString(mwkdes3.getEncoded()) + " / " + mwkdes3.getEncoded().length, module);
-            Debug.log("Encrypted MWK : " + StringUtil.toHexString(newMwk) + " / " + newMwk.length, module);
+            Debug.logInfo("Random 8 byte : " + StringUtil.toHexString(random), module);
+            Debug.logInfo("Encrypted 0's : " + StringUtil.toHexString(encryptedZeros), module);
+            Debug.logInfo("Decrypted MWK : " + StringUtil.toHexString(mwkdes3.getEncoded()) + " / " + mwkdes3.getEncoded().length, module);
+            Debug.logInfo("Encrypted MWK : " + StringUtil.toHexString(newMwk) + " / " + newMwk.length, module);
         }
 
         return newMwk;
@@ -658,7 +658,7 @@ public class ValueLinkApi {
         }
 
         if (debug) {
-            Debug.log("Current Working Key Index : " + this.mwkIndex, module);
+            Debug.logInfo("Current Working Key Index : " + this.mwkIndex, module);
         }
 
         return this.mwkIndex;
@@ -729,7 +729,7 @@ public class ValueLinkApi {
         request.put("EncryptID", this.getWorkingKeyIndex());
 
         if (debug) {
-            Debug.log("Created Initial Request Map : " + request, module);
+            Debug.logInfo("Created Initial Request Map : " + request, module);
         }
 
         return request;
@@ -841,8 +841,8 @@ public class ValueLinkApi {
         }
 
         if (debug) {
-            Debug.log("Raw MWK : " + StringUtil.toHexString(getMwk()), module);
-            Debug.log("MWK : " + StringUtil.toHexString(mwk.getEncoded()), module);
+            Debug.logInfo("Raw MWK : " + StringUtil.toHexString(getMwk()), module);
+            Debug.logInfo("MWK : " + StringUtil.toHexString(mwk.getEncoded()), module);
         }
 
         return mwk;
@@ -854,8 +854,8 @@ public class ValueLinkApi {
         }
 
         if (debug) {
-            Debug.log("Raw KEK : " + StringUtil.toHexString(getKek()), module);
-            Debug.log("KEK : " + StringUtil.toHexString(kek.getEncoded()), module);
+            Debug.logInfo("Raw KEK : " + StringUtil.toHexString(getKek()), module);
+            Debug.logInfo("KEK : " + StringUtil.toHexString(kek.getEncoded()), module);
         }
 
         return kek;
@@ -908,7 +908,7 @@ public class ValueLinkApi {
 
     protected Map parseResponse(String response) {
         if (debug) {
-            Debug.log("Raw Response : " + response, module);
+            Debug.logInfo("Raw Response : " + response, module);
         }
 
         // covert to all lowercase and trim off the html header
@@ -956,7 +956,7 @@ public class ValueLinkApi {
         }
 
         if (debug) {
-            Debug.log("Response Map : " + responseMap, module);
+            Debug.logInfo("Response Map : " + responseMap, module);
         }
 
         return responseMap;
@@ -964,7 +964,7 @@ public class ValueLinkApi {
 
     private List parseHistoryResponse(String response) {
         if (debug) {
-            Debug.log("Raw History : " + response, module);
+            Debug.logInfo("Raw History : " + response, module);
         }
 
         // covert to all lowercase and trim off the html header
@@ -984,7 +984,7 @@ public class ValueLinkApi {
         testResponse = testResponse.trim();
         if (testResponse.length() == 0) {
             if (debug) {
-                Debug.log("History did not contain any fields, returning null", module);
+                Debug.logInfo("History did not contain any fields, returning null", module);
             }
             return null;
         }
@@ -1005,7 +1005,7 @@ public class ValueLinkApi {
         }
 
         if (debug) {
-            Debug.log("History Map : " + valueMap, module);
+            Debug.logInfo("History Map : " + valueMap, module);
         }
 
         return valueMap;

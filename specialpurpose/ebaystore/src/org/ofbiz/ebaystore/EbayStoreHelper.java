@@ -692,7 +692,7 @@ public class EbayStoreHelper {
                             addReq.setOrder(newOrder);
                             addResp = (AddOrderResponseType) addOrderCall.execute(addReq);
                             if (addResp != null && "SUCCESS".equals(addResp.getAck().toString())) {
-                                Debug.log("Upload tracking code to eBay success...");
+                                Debug.logInfo("Upload tracking code to eBay success...", module);
                             } else {
                                 createErrorLogMessage(userLogin, dctx.getDispatcher(), productStoreId, addResp.getAck().toString(), "Update order : uploadTrackingInfoBackToEbay", addResp.getErrors(0).getLongMessage());
                             }
@@ -721,7 +721,7 @@ public class EbayStoreHelper {
                 newMap.put("userLogin", userLogin);
                 dispatcher.runSync("insertErrorMessagesFromEbay", newMap);
             } catch (Exception ex) {
-                Debug.log("Error from create error log messages : "+ex.getMessage());
+                Debug.logError("Error from create error log messages : "+ex.getMessage(), module);
             }
         }
     }
@@ -738,7 +738,7 @@ public class EbayStoreHelper {
                 }
             }
         } catch (Exception ex) {
-            Debug.log("Error from get eBay Inventory data : "+ ex.getMessage());
+            Debug.logInfo("Error from get eBay Inventory data : "+ ex.getMessage(), module);
         }
         return isReserve;
     }

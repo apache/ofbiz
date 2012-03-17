@@ -623,7 +623,7 @@ public class FinAccountPaymentServices {
         if ((finAccount.getTimestamp("thruDate") != null) && (finAccount.getTimestamp("thruDate").before(UtilDateTime.nowTimestamp()))) {
             return ServiceUtil.returnError("Financial account has expired as of " + finAccount.getTimestamp("thruDate"));
         }
-        Debug.log("Deposit into financial account #" + finAccountId + " [" + amount + "]", module);
+        Debug.logInfo("Deposit into financial account #" + finAccountId + " [" + amount + "]", module);
 
         // get the previous balance
         BigDecimal previousBalance = finAccount.getBigDecimal("actualBalance");

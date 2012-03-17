@@ -397,7 +397,7 @@ public class DhlServices {
 
         try {
             requestString = UtilXml.writeXmlDocument(requestDocument);
-            Debug.log("AccessRequest XML Document:" + requestString);
+            Debug.logInfo("AccessRequest XML Document:" + requestString, module);
         } catch (IOException e) {
             String ioeErrMsg = "Error writing the AccessRequest XML Document to a String: "
                 + e.toString();
@@ -408,8 +408,8 @@ public class DhlServices {
         String registerResponseString = null;
         try {
             registerResponseString = sendDhlRequest(requestString);
-            Debug.log("DHL request for DHL Register Account:"
-                    + registerResponseString);
+            Debug.logInfo("DHL request for DHL Register Account:"
+                    + registerResponseString, module);
         } catch (DhlConnectException e) {
             String uceErrMsg = "Error sending DHL request for DHL Register Account: "
                 + e.toString();
@@ -422,8 +422,8 @@ public class DhlServices {
             registerResponseDocument = UtilXml.readXmlDocument(
                     registerResponseString, false);
             result = handleDhlRegisterResponse(registerResponseDocument);
-            Debug.log("DHL response for DHL Register Account:"
-                    + registerResponseString);
+            Debug.logInfo("DHL response for DHL Register Account:"
+                    + registerResponseString, module);
         } catch (SAXException e2) {
             String excErrMsg = "Error parsing the RegisterAccountServiceSelectionResponse: "
                 + e2.toString();
@@ -807,7 +807,7 @@ public class DhlServices {
             // store in db blob
             shipmentPackageRouteSeg.setBytes("labelImage", labelBytes);
         } else {
-            Debug.log("Failed to either decode returned DHL label or no data found in eCommerce/Shipment/Label/Image.");
+            Debug.logInfo("Failed to either decode returned DHL label or no data found in eCommerce/Shipment/Label/Image.", module);
             // TODO: VOID
         }
 

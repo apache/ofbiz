@@ -553,7 +553,7 @@ public class OrderLookupServices {
         }
 
         if (Debug.verboseOn()) {
-            Debug.log("Find order query: " + cond.toString());
+            Debug.logInfo("Find order query: " + cond.toString(), module);
         }
 
         List orderList = FastList.newInstance();

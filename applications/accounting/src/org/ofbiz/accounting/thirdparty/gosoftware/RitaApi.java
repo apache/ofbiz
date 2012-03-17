@@ -176,7 +176,7 @@ public class RitaApi {
 
         if (mode == MODE_IN) {
             String stream = this.toString() + "..\r\n";
-            Debug.log("Sending - \n" + stream, module);
+            Debug.logInfo("Sending - \n" + stream, module);
             String urlString = "http://" + host + ":" + port;
             HttpClient http = new HttpClient(urlString);
             http.setDebug(true);
@@ -204,7 +204,7 @@ public class RitaApi {
 
             // read the response
             while ((line = br.readLine()) != null) {
-                Debug.log(line, module);
+                Debug.logInfo(line, module);
                 if (!line.trim().equals(".")) {
                     String[] lineSplit = line.trim().split(" ");
                     if (lineSplit != null && lineSplit.length == 2) {
@@ -216,7 +216,7 @@ public class RitaApi {
                     break;
                 }
             }
-            Debug.log("Reading finished.", module);
+            Debug.logInfo("Reading finished.", module);
 
             // send session finished signal
             ps.print("..\r\n");
@@ -238,7 +238,7 @@ public class RitaApi {
 
             String[] lines = resp.split("\n");
             for (int i = 0; i < lines.length; i++) {
-                Debug.log(lines[i], module);
+                Debug.logInfo(lines[i], module);
                 if (!lines[i].trim().equals(".")) {
                     String[] lineSplit = lines[i].trim().split(" ", 2);
                     if (lineSplit != null && lineSplit.length == 2) {

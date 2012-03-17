@@ -305,7 +305,7 @@ public class ShippingEvents {
                 // invoke the service
                 Map serviceResp = null;
                 try {
-                    Debug.log("Service : " + serviceName + " / " + configProps + " -- " + context, module);
+                    Debug.logInfo("Service : " + serviceName + " / " + configProps + " -- " + context, module);
                     // because we don't want to blow up too big or rollback the transaction when this happens, always have it run in its own transaction...
                     serviceResp = dispatcher.runSync(serviceName, context, 0, true);
                 } catch (GenericServiceException e) {

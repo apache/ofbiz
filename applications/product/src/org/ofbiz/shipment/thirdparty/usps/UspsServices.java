@@ -218,7 +218,7 @@ public class UspsServices {
         try {
             responseDocument = sendUspsRequest("RateV2", requestDocument);
         } catch (UspsRequestException e) {
-            Debug.log(e, module);
+            Debug.logInfo(e, module);
             return ServiceUtil.returnError("Error sending request for USPS Domestic Rate Calculation service: " + e.getMessage());
         }
 
@@ -238,7 +238,7 @@ public class UspsServices {
                 BigDecimal packageAmount = new BigDecimal(UtilXml.childElementValue(postageElement, "Rate"));
                 estimateAmount = estimateAmount.add(packageAmount);
             } catch (NumberFormatException e) {
-                Debug.log(e, module);
+                Debug.logInfo(e, module);
             }
         }
 
@@ -364,7 +364,7 @@ public class UspsServices {
         try {
             responseDocument = sendUspsRequest("IntlRate", requestDocument);
         } catch (UspsRequestException e) {
-            Debug.log(e, module);
+            Debug.logInfo(e, module);
             return ServiceUtil.returnError("Error sending request for USPS International Rate Calculation service: " + e.getMessage());
         }
 
@@ -382,7 +382,7 @@ public class UspsServices {
             Element errorElement = UtilXml.firstChildElement(packageElement, "Error");
             if (errorElement != null) {
                 String errorDescription = UtilXml.childElementValue(errorElement, "Description");
-                Debug.log("USPS International Rate Calculation returned a package error: " + errorDescription);
+                Debug.logInfo("USPS International Rate Calculation returned a package error: " + errorDescription, module);
                 return ServiceUtil.returnError("No rate available at this time");
             }
             List<? extends Element> serviceElements = UtilXml.childElementList(packageElement, "Service");
@@ -395,7 +395,7 @@ public class UspsServices {
                     BigDecimal packageAmount = new BigDecimal(UtilXml.childElementValue(serviceElement, "Postage"));
                     estimateAmount = estimateAmount.add(packageAmount);
                 } catch (NumberFormatException e) {
-                    Debug.log("USPS International Rate Calculation returned an unparsable postage amount: " + UtilXml.childElementValue(serviceElement, "Postage"));
+                    Debug.logInfo("USPS International Rate Calculation returned an unparsable postage amount: " + UtilXml.childElementValue(serviceElement, "Postage"), module);
                     return ServiceUtil.returnError("No rate available at this time");
                 }
             }
@@ -439,7 +439,7 @@ public class UspsServices {
         try {
             responseDocument = sendUspsRequest("TrackV2", requestDocument);
         } catch (UspsRequestException e) {
-            Debug.log(e, module);
+            Debug.logInfo(e, module);
             return ServiceUtil.returnError("Error sending request for USPS Tracking service: " + e.getMessage());
         }
 
@@ -532,7 +532,7 @@ public class UspsServices {
         try {
             responseDocument = sendUspsRequest("Verify", requestDocument);
         } catch (UspsRequestException e) {
-            Debug.log(e, module);
+            Debug.logInfo(e, module);
             return ServiceUtil.returnFailure("Error sending request for USPS Address Validation service: " + e.getMessage());
         }
 
@@ -613,7 +613,7 @@ public class UspsServices {
         try {
             responseDocument = sendUspsRequest("CityStateLookup", requestDocument);
         } catch (UspsRequestException e) {
-            Debug.log(e, module);
+            Debug.logInfo(e, module);
             return ServiceUtil.returnFailure("Error sending request for USPS City/State Lookup service: " + e.getMessage());
         }
 
@@ -715,7 +715,7 @@ public class UspsServices {
         try {
             responseDocument = sendUspsRequest(type, requestDocument);
         } catch (UspsRequestException e) {
-            Debug.log(e, module);
+            Debug.logInfo(e, module);
             return ServiceUtil.returnError("Error sending request for USPS " + type + " Service Standards service: " +
                     e.getMessage());
         }
@@ -814,7 +814,7 @@ public class UspsServices {
         try {
             responseDocument = sendUspsRequest("Rate", requestDocument);
         } catch (UspsRequestException e) {
-            Debug.log(e, module);
+            Debug.logInfo(e, module);
             return ServiceUtil.returnError("Error sending request for USPS Domestic Rate Calculation service: " + e.getMessage());
         }
 
@@ -1041,7 +1041,7 @@ public class UspsServices {
                 try {
                     responseDocument = sendUspsRequest("Rate", requestDocument);
                 } catch (UspsRequestException e) {
-                    Debug.log(e, module);
+                    Debug.logInfo(e, module);
                     return ServiceUtil.returnError("Error sending request for USPS Domestic Rate Calculation service: " +
                             e.getMessage());
                 }
@@ -1093,7 +1093,7 @@ public class UspsServices {
             shipmentRouteSegment.store();
 
         } catch (GenericEntityException gee) {
-            Debug.log(gee, module);
+            Debug.logInfo(gee, module);
             return ServiceUtil.returnError("Error reading or writing shipment data for the USPS " +
                     "Domestic Rate Calculation service: " + gee.getMessage());
         }
@@ -1288,7 +1288,7 @@ public class UspsServices {
                 try {
                     responseDocument = sendUspsRequest("DeliveryConfirmationV2", requestDocument);
                 } catch (UspsRequestException e) {
-                    Debug.log(e, module);
+                    Debug.logInfo(e, module);
                     return ServiceUtil.returnError("Error sending request for USPS Delivery Confirmation service: " +
                             e.getMessage());
                 }
@@ -1317,7 +1317,7 @@ public class UspsServices {
             }
 
         } catch (GenericEntityException gee) {
-            Debug.log(gee, module);
+            Debug.logInfo(gee, module);
             return ServiceUtil.returnError("Error reading or writing shipment data for the USPS " +
                     "Delivery Confirmation service: " + gee.getMessage());
         }
@@ -1357,10 +1357,10 @@ public class UspsServices {
             }
 
         } catch (GenericEntityException e) {
-            Debug.log(e, module);
+            Debug.logInfo(e, module);
             return ServiceUtil.returnError(e.getMessage());
         } catch (IOException e) {
-            Debug.log(e, module);
+            Debug.logInfo(e, module);
             return ServiceUtil.returnError(e.getMessage());
         }
 
@@ -1519,7 +1519,7 @@ public class UspsServices {
                     product = shipmentItem.getRelatedOne("Product");
                     originGeo = product.getRelatedOne("OriginGeo");
                 } catch (GenericEntityException e) {
-                    Debug.log(e, module);
+                    Debug.logInfo(e, module);
                 }
 
                 UtilXml.addChildElementValue(itemDetail, "Description", product.getString("productName"), packageDocument);
@@ -1540,7 +1540,7 @@ public class UspsServices {
             try {
                 responseDocument = sendUspsRequest(api, requestDocument);
             } catch (UspsRequestException e) {
-                Debug.log(e, module);
+                Debug.logInfo(e, module);
                 return ServiceUtil.returnError("Error sending request for USPS Priority Mail International service: " +
                         e.getMessage());
             }

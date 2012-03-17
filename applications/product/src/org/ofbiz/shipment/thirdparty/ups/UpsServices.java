@@ -608,7 +608,7 @@ public class UpsServices {
                     fileOut.flush();
                     fileOut.close();
                 } catch (IOException e) {
-                    Debug.log(e, "Could not save UPS XML file: [[[" + xmlString.toString() + "]]] to file: " + outFileName, module);
+                    Debug.logInfo(e, "Could not save UPS XML file: [[[" + xmlString.toString() + "]]] to file: " + outFileName, module);
                 }
             }
 
@@ -628,7 +628,7 @@ public class UpsServices {
                     fileOut.flush();
                     fileOut.close();
                 } catch (IOException e) {
-                    Debug.log(e, "Could not save UPS XML file: [[[" + xmlString.toString() + "]]] to file: " + outFileName, module);
+                    Debug.logInfo(e, "Could not save UPS XML file: [[[" + xmlString.toString() + "]]] to file: " + outFileName, module);
                 }
             }
 
@@ -867,7 +867,7 @@ public class UpsServices {
                     fileOut.flush();
                     fileOut.close();
                 } catch (IOException e) {
-                    Debug.log(e, "Could not save UPS XML file: [[[" + xmlString.toString() + "]]] to file: " + outFileName, module);
+                    Debug.logInfo(e, "Could not save UPS XML file: [[[" + xmlString.toString() + "]]] to file: " + outFileName, module);
                 }
             }
 
@@ -887,7 +887,7 @@ public class UpsServices {
                     fileOut.flush();
                     fileOut.close();
                 } catch (IOException e) {
-                    Debug.log(e, "Could not save UPS XML file: [[[" + xmlString.toString() + "]]] to file: " + outFileName, module);
+                    Debug.logInfo(e, "Could not save UPS XML file: [[[" + xmlString.toString() + "]]] to file: " + outFileName, module);
                 }
             }
 
@@ -1079,7 +1079,7 @@ public class UpsServices {
                             fileOut.flush();
                             fileOut.close();
                         } catch (IOException e) {
-                            Debug.log(e, "Could not save UPS LabelImage GIF file: [[[" + packageLabelGraphicImageString + "]]] to file: " + outFileName, module);
+                            Debug.logInfo(e, "Could not save UPS LabelImage GIF file: [[[" + packageLabelGraphicImageString + "]]] to file: " + outFileName, module);
                         }
                     }
                     if (labelInternationalSignatureGraphicImageBytes != null) {
@@ -1090,7 +1090,7 @@ public class UpsServices {
                             fileOut.flush();
                             fileOut.close();
                         } catch (IOException e) {
-                            Debug.log(e, "Could not save UPS IntlSign LabelImage GIF file: [[[" + packageLabelInternationalSignatureGraphicImageString + "]]] to file: " + outFileName, module);
+                            Debug.logInfo(e, "Could not save UPS IntlSign LabelImage GIF file: [[[" + packageLabelInternationalSignatureGraphicImageString + "]]] to file: " + outFileName, module);
                         }
                     }
                     if (packageLabelHTMLImageStringDecoded != null) {
@@ -1101,7 +1101,7 @@ public class UpsServices {
                             fileOut.flush();
                             fileOut.close();
                         } catch (IOException e) {
-                            Debug.log(e, "Could not save UPS LabelImage HTML file: [[[" + packageLabelHTMLImageStringDecoded + "]]] to file: " + outFileName, module);
+                            Debug.logInfo(e, "Could not save UPS LabelImage HTML file: [[[" + packageLabelHTMLImageStringDecoded + "]]] to file: " + outFileName, module);
                         }
                     }
                 }
@@ -1127,7 +1127,7 @@ public class UpsServices {
                         file.flush();
                         file.close();
                     } catch (IOException e) {
-                        Debug.log(e, "Could not save UPS International Invoice: [[[" + imgStringDecoded + "]]] to file: " + outFile, module);
+                        Debug.logInfo(e, "Could not save UPS International Invoice: [[[" + imgStringDecoded + "]]] to file: " + outFile, module);
                     }
                 }
                 String formGroupId = UtilXml.childElementValue(formElement, "FormGroupId");
@@ -1158,7 +1158,7 @@ public class UpsServices {
                         fileOut.flush();
                         fileOut.close();
                     } catch (IOException e) {
-                        Debug.log(e, "Could not save UPS High Value Report data: [[[" + fileStringDecoded + "]]] to file: " + outFileName, module);
+                        Debug.logInfo(e, "Could not save UPS High Value Report data: [[[" + fileStringDecoded + "]]] to file: " + outFileName, module);
                     }
                 }
             }
@@ -1270,7 +1270,7 @@ public class UpsServices {
                     fileOut.flush();
                     fileOut.close();
                 } catch (IOException e) {
-                    Debug.log(e, "Could not save UPS XML file: [[[" + xmlString.toString() + "]]] to file: " + outFileName, module);
+                    Debug.logInfo(e, "Could not save UPS XML file: [[[" + xmlString.toString() + "]]] to file: " + outFileName, module);
                 }
             }
 
@@ -1290,7 +1290,7 @@ public class UpsServices {
                     fileOut.flush();
                     fileOut.close();
                 } catch (IOException e) {
-                    Debug.log(e, "Could not save UPS XML file: [[[" + xmlString.toString() + "]]] to file: " + outFileName, module);
+                    Debug.logInfo(e, "Could not save UPS XML file: [[[" + xmlString.toString() + "]]] to file: " + outFileName, module);
                 }
             }
 
@@ -1459,7 +1459,7 @@ public class UpsServices {
                     fileOut.flush();
                     fileOut.close();
                 } catch (IOException e) {
-                    Debug.log(e, "Could not save UPS XML file: [[[" + xmlString.toString() + "]]] to file: " + outFileName, module);
+                    Debug.logInfo(e, "Could not save UPS XML file: [[[" + xmlString.toString() + "]]] to file: " + outFileName, module);
                 }
             }
 
@@ -1479,7 +1479,7 @@ public class UpsServices {
                     fileOut.flush();
                     fileOut.close();
                 } catch (IOException e) {
-                    Debug.log(e, "Could not save UPS XML file: [[[" + xmlString.toString() + "]]] to file: " + outFileName, module);
+                    Debug.logInfo(e, "Could not save UPS XML file: [[[" + xmlString.toString() + "]]] to file: " + outFileName, module);
                 }
             }
 
@@ -1761,7 +1761,7 @@ public class UpsServices {
                 }
             }
 
-            Debug.log("UPS Rate Map : " + rateMap, module);
+            Debug.logInfo("UPS Rate Map : " + rateMap, module);
 
             Map<String, Object> resp = ServiceUtil.returnSuccess();
             resp.put("upsRateCodeMap", rateMap);
@@ -1876,8 +1876,8 @@ public class UpsServices {
             Debug.logError(e, "Unable to set timeout to " + timeOutStr + " using default " + timeout);
         }
 
-        //Debug.log("UPS Connect URL : " + conStr, module);
-        //Debug.log("UPS XML String : " + xmlString, module);
+        //Debug.logInfo("UPS Connect URL : " + conStr, module);
+        //Debug.logInfo("UPS XML String : " + xmlString, module);
 
         HttpClient http = new HttpClient(conStr);
         http.setTimeout(timeout * 1000);
@@ -2595,7 +2595,7 @@ public class UpsServices {
                     fileOut.flush();
                     fileOut.close();
                 } catch (IOException e) {
-                    Debug.log(e, "Could not save UPS XML file: [[[" + xmlString.toString() + "]]] to file: " + outFileName, module);
+                    Debug.logInfo(e, "Could not save UPS XML file: [[[" + xmlString.toString() + "]]] to file: " + outFileName, module);
                 }
             }
             try {
@@ -2983,7 +2983,7 @@ public class UpsServices {
                     rateMap.put(serviceCode, new BigDecimal(totalRates));
                 }
             }
-            Debug.log("UPS Rate Map : " + rateMap, module);
+            Debug.logInfo("UPS Rate Map : " + rateMap, module);
             Map<String, Object> resp = ServiceUtil.returnSuccess();
             resp.put("upsRateCodeMap", rateMap);
             return resp;

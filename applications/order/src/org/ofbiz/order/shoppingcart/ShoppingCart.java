@@ -4815,8 +4815,8 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
                                 opp.set("statusId", "PAYMENT_RECEIVED");
                             }
                         }
-                        Debug.log("ShipGroup [" + csi.getShipGroupSeqId() +"]", module);
-                        Debug.log("Creating OrderPaymentPreference - " + opp, module);
+                        Debug.logInfo("ShipGroup [" + csi.getShipGroupSeqId() +"]", module);
+                        Debug.logInfo("Creating OrderPaymentPreference - " + opp, module);
                         values.add(opp);
                     }
                 } else if ("N".equals(splitPayPrefPerShpGrp)) {
@@ -4854,7 +4854,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
                             opp.set("statusId", "PAYMENT_RECEIVED");
                         }
                     }
-                    Debug.log("Creating OrderPaymentPreference - " + opp, module);
+                    Debug.logInfo("Creating OrderPaymentPreference - " + opp, module);
                     values.add(opp);
                 }
             }

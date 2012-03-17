@@ -536,7 +536,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
             latestDir = makeNewDirectory(parent);
         }
 
-        Debug.log("Directory Name : " + latestDir.getName(), module);
+        Debug.logInfo("Directory Name : " + latestDir.getName(), module);
         return latestDir.getAbsolutePath().replace('\\','/');
     }
 

@@ -502,7 +502,7 @@ public class GoogleRequestServices {
         String orderId = (String) context.get("orderId");
         GenericValue order = findGoogleOrder(delegator, orderId);
         if (order != null) {
-            Debug.log("Returning FAILURE; this IS an Google Checkout order and cannot be modified as requested!", module);
+            Debug.logInfo("Returning FAILURE; this IS an Google Checkout order and cannot be modified as requested!", module);
             return ServiceUtil.returnFailure("Google Checkout orders cannot be modified. You may cancel orders/items only!");
         }
         return ServiceUtil.returnSuccess();

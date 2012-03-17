@@ -148,7 +148,7 @@ public class GiftCertificateServices {
         result.put("processResult", Boolean.TRUE);
         result.put("responseCode", "1");
         result.put("referenceNum", refNum);
-        Debug.log("Create GC Result - " + result, module);
+        Debug.logInfo("Create GC Result - " + result, module);
         return result;
     }
 
@@ -230,7 +230,7 @@ public class GiftCertificateServices {
         result.put("processResult", Boolean.TRUE);
         result.put("responseCode", "1");
         result.put("referenceNum", refNum);
-        Debug.log("Add Funds GC Result - " + result, module);
+        Debug.logInfo("Add Funds GC Result - " + result, module);
         return result;
     }
 
@@ -307,7 +307,7 @@ public class GiftCertificateServices {
         result.put("processResult", procResult);
         result.put("responseCode", "2");
         result.put("referenceNum", refNum);
-        Debug.log("Redeem GC Result - " + result, module);
+        Debug.logInfo("Redeem GC Result - " + result, module);
         return result;
     }
 
@@ -335,7 +335,7 @@ public class GiftCertificateServices {
 
         Map result = ServiceUtil.returnSuccess();
         result.put("balance", balance);
-        Debug.log("GC Balance Result - " + result, module);
+        Debug.logInfo("GC Balance Result - " + result, module);
         return result;
     }
 
@@ -1257,7 +1257,7 @@ public class GiftCertificateServices {
         }
         if (finAccount != null) {
             String dbPin = finAccount.getString("finAccountCode");
-            Debug.log("GC Pin Validation: [Sent: " + pinNumber + "] [Actual: " + dbPin + "]", module);
+            Debug.logInfo("GC Pin Validation: [Sent: " + pinNumber + "] [Actual: " + dbPin + "]", module);
             if (dbPin != null && dbPin.equals(pinNumber)) {
                 return true;
             }

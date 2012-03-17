@@ -133,7 +133,7 @@ public class OrderReturnServices {
         if (delegator == null || returnId == null || returnItemSeqId == null) {
             throw new IllegalArgumentException("Method parameters cannot contain nulls");
         }
-        Debug.log("Finding the initial item cost for return item : " + returnId + " / " + returnItemSeqId, module);
+        Debug.logInfo("Finding the initial item cost for return item : " + returnId + " / " + returnItemSeqId, module);
 
         // the cost holder
         BigDecimal itemCost = BigDecimal.ZERO;
@@ -146,14 +146,14 @@ public class OrderReturnServices {
             Debug.logError(e, module);
             throw new GeneralRuntimeException(e.getMessage());
         }
-        Debug.log("Return item value object - " + returnItem, module);
+        Debug.logInfo("Return item value object - " + returnItem, module);
 
         // check for an orderItem association
         if (returnItem != null) {
             String orderId = returnItem.getString("orderId");
             String orderItemSeqId = returnItem.getString("orderItemSeqId");
             if (orderItemSeqId != null && orderId != null) {
-                Debug.log("Found order item reference", module);
+                Debug.logInfo("Found order item reference", module);
                 // locate the item issuance(s) for this order item
                 List itemIssue = null;
                 try {
@@ -163,7 +163,7 @@ public class OrderReturnServices {
                     throw new GeneralRuntimeException(e.getMessage());
                 }
                 if (UtilValidate.isNotEmpty(itemIssue)) {
-                    Debug.log("Found item issuance reference", module);
+                    Debug.logInfo("Found item issuance reference", module);
                     // just use the first one for now; maybe later we can find a better way to determine which was the
                     // actual item being returned; maybe by serial number
                     GenericValue issue = EntityUtil.getFirst(itemIssue);
@@ -175,7 +175,7 @@ public class OrderReturnServices {
                         throw new GeneralRuntimeException(e.getMessage());
                     }
                     if (inventoryItem != null) {
-                        Debug.log("Located inventory item - " + inventoryItem.getString("inventoryItemId"), module);
+                        Debug.logInfo("Located inventory item - " + inventoryItem.getString("inventoryItemId"), module);
                         if (inventoryItem.get("unitCost") != null) {
                             itemCost = inventoryItem.getBigDecimal("unitCost");
                         } else {
@@ -186,7 +186,7 @@ public class OrderReturnServices {
             }
         }
 
-        Debug.log("Initial item cost - " + itemCost, module);
+        Debug.logInfo("Initial item cost - " + itemCost, module);
         return itemCost;
     }
 
@@ -1442,7 +1442,7 @@ public class OrderReturnServices {
                                 GenericValue item = (GenericValue) itemsIter.next();
 
                                 Map returnItemMap = UtilMisc.toMap("returnItemResponseId", responseId, "returnId", item.get("returnId"), "returnItemSeqId", item.get("returnItemSeqId"), "statusId", returnItemStatusId, "userLogin", userLogin);
-                                //Debug.log("Updating item status", module);
+                                //Debug.logInfo("Updating item status", module);
                                 try {
                                     serviceResults = dispatcher.runSync("updateReturnItem", returnItemMap);
                                     if (ServiceUtil.isError(serviceResults)) {
@@ -1453,7 +1453,7 @@ public class OrderReturnServices {
                                     return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,"OrderProblemUpdatingReturnItemReturnItemResponseId", locale));
                                 }
 
-                                //Debug.log("Item status and return status history created", module);
+                                //Debug.logInfo("Item status and return status history created", module);
                             }
 
                             // Create the payment applications for the return invoice
@@ -2401,7 +2401,7 @@ public class OrderReturnServices {
                 if ((returnItemSeqId != null) && !("_NA_".equals(returnItemSeqId))) {
                     returnItem = delegator.findByPrimaryKey("ReturnItem",
                             UtilMisc.toMap("returnId", returnId, "returnItemSeqId", returnItemSeqId));
-                    Debug.log("returnId:" + returnId + ",returnItemSeqId:" + returnItemSeqId);
+                    Debug.logInfo("returnId:" + returnId + ",returnItemSeqId:" + returnItemSeqId, module);
                     orderItem = returnItem.getRelatedOne("OrderItem");
                 } else {
                     // we don't have the returnItemSeqId but before we consider this
