@@ -840,7 +840,6 @@ under the License.
                 <path location="framework/start/src" />
                 <path location="framework/testtools/src" />
                 <path location="framework/webapp/src" />
-                <path location="framework/webslinger/src" />
                 <path location="framework/webtools/src" />
                 <path location="framework/widget/src" />
                 <!--applications-->
