@@ -143,12 +143,13 @@ function getServerError(data) {
     var serverError = "";
     if (data._ERROR_MESSAGE_LIST_ != undefined) {
         serverErrorHash = data._ERROR_MESSAGE_LIST_;
-        serverErrorHash.each(function(error) {
-            serverError += error.message;
+        jQuery.each(serverErrorHash, function(i, error) {
+            var encodedErrorMessage = jQuery('<div/>').text(error.message).html();
+            serverError += encodedErrorMessage + '<br/>';
         });
     }
     if (data._ERROR_MESSAGE_ != undefined) {
-        serverError = data._ERROR_MESSAGE_;
+        serverError = jQuery('<div/>').text(data._ERROR_MESSAGE_).html();
     }
     return serverError;
 }
