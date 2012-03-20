@@ -33,8 +33,8 @@ under the License.
     </#if>
 <#else>
 <script type="text/javascript">
-    <#if autocompleteOptions?exists>
   var autocomp = [
+      <#if autocompleteOptions?has_content>
         <#assign displayReturnField = Static["org.ofbiz.base.util.UtilProperties"].getPropertyValue("widget.properties", "widget.autocompleter.displayReturnField")>
         <#list autocompleteOptions as autocompleteOption>
             {
@@ -53,12 +53,18 @@ under the License.
             <#if ("Y" == displayReturnField)>
                 <#assign displayString = displayString +  "[" + returnField + "]">
             </#if>
-            "id": " ${returnField}",
+            "id": "${returnField}",
             "label": "<#if (displayString?trim?has_content )>${displayString?trim}<#else>${returnField}</#if>",
             "value": "${returnField}"
             }<#if autocompleteOption_has_next>,</#if>
         </#list>
-  ];
+    <#else>
+      {
+         "id": "",
+         "label": "${uiLabelMap.CommonNoRecordFound}",
+         "value": ""
+      }
     </#if>
+];
 </script>
 </#if>

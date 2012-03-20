@@ -436,7 +436,7 @@ function ajaxAutoCompleter(areaCsvString, showDescription, defaultMinLength, for
             select: function(event, ui){
                 //jQuery("#" + areaArray[0]).html(ui.item);
                 jQuery("#" + areaArray[0]).val(ui.item.value); // setting a text field   
-                if (showDescription) {
+                if (showDescription && (ui.item.value != undefined && ui.item.value != '') {
                     setLookDescription(areaArray[0], ui.item.label, areaArray[2], formName)
                 }
             }
