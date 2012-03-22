@@ -132,7 +132,7 @@ public class PayflowPro {
         params.append("&" + parseContext(data));
 
         // transmit the request
-        if (Debug.verboseOn()) Debug.logVerbose("Sending to Verisign: " + params.toString(), module);
+        //if (Debug.verboseOn()) Debug.logVerbose("Sending to Verisign: " + params.toString(), module);
         String resp = pn.SubmitTransaction(params.toString());
 
         if (Debug.verboseOn()) Debug.logVerbose("Response from Verisign: " + resp, module);
