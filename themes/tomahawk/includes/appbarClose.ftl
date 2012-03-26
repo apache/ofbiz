@@ -45,7 +45,7 @@ under the License.
     <#assign portalPage = delegator.findByPrimaryKeyCache("PortalPage", findMap)>
     <#if portalPage?has_content>
       <div id="app-nav-selected-item">
-        ${portalPage.portalPageName?if_exists}
+        ${portalPage.get("portalPageName", locale)?if_exists}
       </div>
     </#if>
 </#if>
@@ -88,7 +88,7 @@ under the License.
         <li class="org">${orgName}</li>
       </#if>
       <#if userLogin.partyId?exists>
-        <li class="user"><a href="passwordChange">${userName}</a></li>
+        <li class="user"><a href="<@ofbizUrl>passwordChange</@ofbizUrl>">${userName}</a></li>
       <#else>
         <li class="user">${userName}</li>
       </#if>

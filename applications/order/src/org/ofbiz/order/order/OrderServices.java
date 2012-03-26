@@ -261,16 +261,12 @@ public class OrderServices {
         Map<String, BigDecimal> normalizedItemQuantities = FastMap.newInstance();
         Map<String, String> normalizedItemNames = FastMap.newInstance();
         Map<String, GenericValue> itemValuesBySeqId = FastMap.newInstance();
-        Iterator<GenericValue> itemIter = orderItems.iterator();
         Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
 
-        //
         // need to run through the items combining any cases where multiple lines refer to the
         // same product so the inventory check will work correctly
         // also count quantities ordered while going through the loop
-        while (itemIter.hasNext()) {
-            GenericValue orderItem = itemIter.next();
-
+        for(GenericValue orderItem : orderItems) {
             // start by putting it in the itemValuesById Map
             itemValuesBySeqId.put(orderItem.getString("orderItemSeqId"), orderItem);
 
@@ -303,11 +299,9 @@ public class OrderServices {
         }
 
         Timestamp orderDate = (Timestamp) context.get("orderDate");
-        
-        Iterator<String> normalizedIter = normalizedItemQuantities.keySet().iterator();
-        while (normalizedIter.hasNext()) {
+
+        for(String currentProductId : normalizedItemQuantities.keySet()) {
             // lookup the product entity for each normalized item; error on products not found
-            String currentProductId = normalizedIter.next();
             BigDecimal currentQuantity = normalizedItemQuantities.get(currentProductId);
             String itemName = normalizedItemNames.get(currentProductId);
             GenericValue product = null;
@@ -382,9 +376,7 @@ public class OrderServices {
 
         // add the fixedAsset id to the workefforts map by obtaining the fixed Asset number from the FixedAssetProduct table
         List<GenericValue> workEfforts = UtilGenerics.checkList(context.get("workEfforts")); // is an optional parameter from this service but mandatory for rental items
-        Iterator<GenericValue> orderItemIter = orderItems.iterator();
-        while (orderItemIter.hasNext()) {
-            GenericValue orderItem = orderItemIter.next();
+        for(GenericValue orderItem : orderItems) {
             if ("RENTAL_ORDER_ITEM".equals(orderItem.getString("orderItemTypeId"))) {
                 // check to see if workefforts are available for this order type.
                 if (UtilValidate.isEmpty(workEfforts))    {
@@ -394,10 +386,9 @@ public class OrderServices {
                     return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
                             "OrderRentalOrderItems",locale));
                 }
-                Iterator<GenericValue> we = workEfforts.iterator();  // find the related workEffortItem (workEffortId = orderSeqId)
-                while (we.hasNext()) {
+                for(GenericValue workEffort : workEfforts) {
+                    // find the related workEffortItem (workEffortId = orderSeqId)
                     // create the entity maps required.
-                    GenericValue workEffort = we.next();
                     if (workEffort.getString("workEffortId").equals(orderItem.getString("orderItemSeqId")))    {
                         List<GenericValue> selFixedAssetProduct = null;
                         try {
@@ -584,18 +575,14 @@ public class OrderServices {
         // before processing orderItems process orderItemGroups so that they'll be in place for the foreign keys and what not
         List<GenericValue> orderItemGroups = UtilGenerics.checkList(context.get("orderItemGroups"));
         if (UtilValidate.isNotEmpty(orderItemGroups)) {
-            Iterator<GenericValue> orderItemGroupIter = orderItemGroups.iterator();
-            while (orderItemGroupIter.hasNext()) {
-                GenericValue orderItemGroup = orderItemGroupIter.next();
+            for (GenericValue orderItemGroup : orderItemGroups){
                 orderItemGroup.set("orderId", orderId);
                 toBeStored.add(orderItemGroup);
             }
         }
 
         // set the order items
-        Iterator<GenericValue> oi = orderItems.iterator();
-        while (oi.hasNext()) {
-            GenericValue orderItem = oi.next();
+        for(GenericValue orderItem : orderItems) {
             orderItem.set("orderId", orderId);
             toBeStored.add(orderItem);
 
@@ -613,9 +600,7 @@ public class OrderServices {
         // set the order attributes
         List<GenericValue> orderAttributes = UtilGenerics.checkList(context.get("orderAttributes"));
         if (UtilValidate.isNotEmpty(orderAttributes)) {
-            Iterator<GenericValue> oattr = orderAttributes.iterator();
-            while (oattr.hasNext()) {
-                GenericValue oatt = oattr.next();
+            for(GenericValue oatt : orderAttributes) {
                 oatt.set("orderId", orderId);
                 toBeStored.add(oatt);
             }
@@ -624,9 +609,7 @@ public class OrderServices {
         // set the order item attributes
         List<GenericValue> orderItemAttributes = UtilGenerics.checkList(context.get("orderItemAttributes"));
         if (UtilValidate.isNotEmpty(orderItemAttributes)) {
-            Iterator<GenericValue> oiattr = orderItemAttributes.iterator();
-            while (oiattr.hasNext()) {
-                GenericValue oiatt = oiattr.next();
+            for(GenericValue oiatt : orderAttributes) {
                 oiatt.set("orderId", orderId);
                 toBeStored.add(oiatt);
             }
@@ -635,9 +618,7 @@ public class OrderServices {
         // create the order internal notes
         List<String> orderInternalNotes = UtilGenerics.checkList(context.get("orderInternalNotes"));
         if (UtilValidate.isNotEmpty(orderInternalNotes)) {
-            Iterator<String> orderInternalNotesIt = orderInternalNotes.iterator();
-            while (orderInternalNotesIt.hasNext()) {
-                String orderInternalNote = orderInternalNotesIt.next();
+            for(String orderInternalNote : orderInternalNotes) {
                 try {
                     Map<String, Object> noteOutputMap = dispatcher.runSync("createOrderNote", UtilMisc.<String, Object>toMap("orderId", orderId,
                                                                                              "internalNote", "Y",
@@ -659,9 +640,7 @@ public class OrderServices {
         // create the order public notes
         List<String> orderNotes = UtilGenerics.checkList(context.get("orderNotes"));
         if (UtilValidate.isNotEmpty(orderNotes)) {
-            Iterator<String> orderNotesIt = orderNotes.iterator();
-            while (orderNotesIt.hasNext()) {
-                String orderNote = orderNotesIt.next();
+            for(String orderNote : orderNotes) {
                 try {
                     Map<String, Object> noteOutputMap = dispatcher.runSync("createOrderNote", UtilMisc.<String, Object>toMap("orderId", orderId,
                                                                                              "internalNote", "N",
@@ -685,10 +664,8 @@ public class OrderServices {
         // create also the techData calendars to keep track of availability of the fixed asset.
         if (UtilValidate.isNotEmpty(workEfforts)) {
             List<GenericValue> tempList = new LinkedList<GenericValue>();
-            Iterator<GenericValue> we = workEfforts.iterator();
-            while (we.hasNext()) {
+            for(GenericValue workEffort : workEfforts) {
                 // create the entity maps required.
-                GenericValue workEffort = we.next();
                 GenericValue workOrderItemFulfillment = delegator.makeValue("WorkOrderItemFulfillment");
                 // find fixed asset supplied on the workeffort map
                 GenericValue fixedAsset = null;
@@ -715,17 +692,13 @@ public class OrderServices {
                     Debug.logInfo("TechData calendar does not exist yet so create for fixedAsset: " + fixedAsset.get("fixedAssetId") ,module);
                 }
                 if (techDataCalendar == null) {
-                    Iterator<GenericValue> fai = tempList.iterator();
-                    while (fai.hasNext()) {
-                        GenericValue currentValue = fai.next();
+                    for(GenericValue currentValue : tempList) {
                         if ("FixedAsset".equals(currentValue.getEntityName()) && currentValue.getString("fixedAssetId").equals(workEffort.getString("fixedAssetId"))) {
                             fixedAsset = currentValue;
                             break;
                         }
                     }
-                    Iterator<GenericValue> tdci = tempList.iterator();
-                    while (tdci.hasNext()) {
-                        GenericValue currentValue = tdci.next();
+                    for (GenericValue currentValue : tempList) {
                         if ("TechDataCalendar".equals(currentValue.getEntityName()) && currentValue.getString("calendarId").equals(fixedAsset.getString("calendarId"))) {
                             techDataCalendar = currentValue;
                             break;
@@ -772,9 +745,7 @@ public class OrderServices {
                         Debug.logInfo(" techData excday record not found so creating........", module);
                     }
                     if (techDataCalendarExcDay == null) {
-                        Iterator<GenericValue> tdcedi = tempList.iterator();
-                        while (tdcedi.hasNext()) {
-                            GenericValue currentValue = tdcedi.next();
+                        for(GenericValue currentValue : tempList) {
                             if ("TechDataCalendarExcDay".equals(currentValue.getEntityName()) && currentValue.getString("calendarId").equals(fixedAsset.getString("calendarId"))
                                     && currentValue.getTimestamp("exceptionDateStartTime").equals(exceptionDateStartTime)) {
                                 techDataCalendarExcDay = currentValue;
@@ -823,10 +794,7 @@ public class OrderServices {
         // set the orderId on all adjustments; this list will include order and
         // item adjustments...
         if (UtilValidate.isNotEmpty(orderAdjustments)) {
-            Iterator<GenericValue>iter = orderAdjustments.iterator();
-
-            while (iter.hasNext()) {
-                GenericValue orderAdjustment = iter.next();
+            for(GenericValue orderAdjustment : orderAdjustments) {
                 try {
                     orderAdjustment.set("orderAdjustmentId", delegator.getNextSeqId("OrderAdjustment"));
                 } catch (IllegalArgumentException e) {
@@ -851,10 +819,7 @@ public class OrderServices {
         // set the order contact mechs
         List<GenericValue> orderContactMechs = UtilGenerics.checkList(context.get("orderContactMechs"));
         if (UtilValidate.isNotEmpty(orderContactMechs)) {
-            Iterator<GenericValue> ocmi = orderContactMechs.iterator();
-
-            while (ocmi.hasNext()) {
-                GenericValue ocm = ocmi.next();
+            for(GenericValue ocm : orderContactMechs) {
                 ocm.set("orderId", orderId);
                 toBeStored.add(ocm);
             }
@@ -863,10 +828,7 @@ public class OrderServices {
         // set the order item contact mechs
         List<GenericValue> orderItemContactMechs = UtilGenerics.checkList(context.get("orderItemContactMechs"));
         if (UtilValidate.isNotEmpty(orderItemContactMechs)) {
-            Iterator<GenericValue> oicmi = orderItemContactMechs.iterator();
-
-            while (oicmi.hasNext()) {
-                GenericValue oicm = oicmi.next();
+            for(GenericValue oicm : orderItemContactMechs) {
                 oicm.set("orderId", orderId);
                 toBeStored.add(oicm);
             }
@@ -875,9 +837,7 @@ public class OrderServices {
         // set the order item ship groups
         List<String> dropShipGroupIds = FastList.newInstance(); // this list will contain the ids of all the ship groups for drop shipments (no reservations)
         if (UtilValidate.isNotEmpty(orderItemShipGroupInfo)) {
-            Iterator<GenericValue> osiInfos = orderItemShipGroupInfo.iterator();
-            while (osiInfos.hasNext()) {
-                GenericValue valueObj = osiInfos.next();
+            for(GenericValue valueObj : orderItemShipGroupInfo) {
                 valueObj.set("orderId", orderId);
                 if ("OrderItemShipGroup".equals(valueObj.getEntityName())) {
                     // ship group
@@ -907,9 +867,7 @@ public class OrderServices {
                 String additionalRoleTypeId = entry.getKey();
                 List<String> parties = entry.getValue();
                 if (parties != null) {
-                    Iterator<String> apIt = parties.iterator();
-                    while (apIt.hasNext()) {
-                        String additionalPartyId = apIt.next();
+                    for(String additionalPartyId : parties) {
                         toBeStored.add(delegator.makeValue("PartyRole", UtilMisc.toMap("partyId", additionalPartyId, "roleTypeId", additionalRoleTypeId)));
                         toBeStored.add(delegator.makeValue("OrderRole", UtilMisc.toMap("orderId", orderId, "partyId", additionalPartyId, "roleTypeId", additionalRoleTypeId)));
                     }
@@ -920,9 +878,7 @@ public class OrderServices {
         // set the item survey responses
         List<GenericValue> surveyResponses = UtilGenerics.checkList(context.get("orderItemSurveyResponses"));
         if (UtilValidate.isNotEmpty(surveyResponses)) {
-            Iterator<GenericValue> oisr = surveyResponses.iterator();
-            while (oisr.hasNext()) {
-                GenericValue surveyResponse = oisr.next();
+            for(GenericValue surveyResponse : surveyResponses) {
                 surveyResponse.set("orderId", orderId);
                 toBeStored.add(surveyResponse);
             }
@@ -930,10 +886,7 @@ public class OrderServices {
 
         // set the item price info; NOTE: this must be after the orderItems are stored for referential integrity
         if (UtilValidate.isNotEmpty(orderItemPriceInfo)) {
-            Iterator<GenericValue> oipii = orderItemPriceInfo.iterator();
-
-            while (oipii.hasNext()) {
-                GenericValue oipi = oipii.next();
+            for(GenericValue oipi : orderItemPriceInfo) {
                 try {
                     oipi.set("orderItemPriceInfoId", delegator.getNextSeqId("OrderItemPriceInfo"));
                 } catch (IllegalArgumentException e) {
@@ -949,9 +902,7 @@ public class OrderServices {
         // set the item associations
         List<GenericValue> orderItemAssociations = UtilGenerics.checkList(context.get("orderItemAssociations"));
         if (UtilValidate.isNotEmpty(orderItemAssociations)) {
-            Iterator<GenericValue> oia = orderItemAssociations.iterator();
-            while (oia.hasNext()) {
-                GenericValue orderItemAssociation = oia.next();
+            for(GenericValue orderItemAssociation : orderItemAssociations) {
                 if (orderItemAssociation.get("toOrderId") == null) {
                     orderItemAssociation.set("toOrderId", orderId);
                 } else if (orderItemAssociation.get("orderId") == null) {
@@ -964,9 +915,7 @@ public class OrderServices {
         // store the orderProductPromoUseInfos
         List<GenericValue> orderProductPromoUses = UtilGenerics.checkList(context.get("orderProductPromoUses"));
         if (UtilValidate.isNotEmpty(orderProductPromoUses)) {
-            Iterator<GenericValue> orderProductPromoUseIter = orderProductPromoUses.iterator();
-            while (orderProductPromoUseIter.hasNext()) {
-                GenericValue productPromoUse = orderProductPromoUseIter.next();
+            for(GenericValue productPromoUse  : orderProductPromoUses) {
                 productPromoUse.set("orderId", orderId);
                 toBeStored.add(productPromoUse);
             }
@@ -976,11 +925,10 @@ public class OrderServices {
         Set<String> orderProductPromoCodes = UtilGenerics.checkSet(context.get("orderProductPromoCodes"));
         if (UtilValidate.isNotEmpty(orderProductPromoCodes)) {
             GenericValue orderProductPromoCode = delegator.makeValue("OrderProductPromoCode");
-            Iterator<String> orderProductPromoCodeIter = orderProductPromoCodes.iterator();
-            while (orderProductPromoCodeIter.hasNext()) {
+            for(String productPromoCodeId : orderProductPromoCodes) {
                 orderProductPromoCode.clear();
                 orderProductPromoCode.set("orderId", orderId);
-                orderProductPromoCode.set("productPromoCodeId", orderProductPromoCodeIter.next());
+                orderProductPromoCode.set("productPromoCodeId", productPromoCodeId);
                 toBeStored.add(orderProductPromoCode);
             }
         }
@@ -1073,9 +1021,7 @@ public class OrderServices {
         // set the order payment info
         List<GenericValue> orderPaymentInfos = UtilGenerics.checkList(context.get("orderPaymentInfo"));
         if (UtilValidate.isNotEmpty(orderPaymentInfos)) {
-            Iterator<GenericValue> oppIter = orderPaymentInfos.iterator();
-            while (oppIter.hasNext()) {
-                GenericValue valueObj = oppIter.next();
+            for(GenericValue valueObj : orderPaymentInfos) {
                 valueObj.set("orderId", orderId);
                 if ("OrderPaymentPreference".equals(valueObj.getEntityName())) {
                     if (valueObj.get("orderPaymentPreferenceId") == null) {
@@ -1094,9 +1040,7 @@ public class OrderServices {
         // store the trackingCodeOrder entities
         List<GenericValue> trackingCodeOrders = UtilGenerics.checkList(context.get("trackingCodeOrders"));
         if (UtilValidate.isNotEmpty(trackingCodeOrders)) {
-            Iterator<GenericValue> tkcdordIter = trackingCodeOrders.iterator();
-            while (tkcdordIter.hasNext()) {
-                GenericValue trackingCodeOrder = tkcdordIter.next();
+            for(GenericValue trackingCodeOrder : trackingCodeOrders) {
                 trackingCodeOrder.set("orderId", orderId);
                 toBeStored.add(trackingCodeOrder);
             }
@@ -1106,9 +1050,7 @@ public class OrderServices {
 
        List<GenericValue> orderTerms = UtilGenerics.checkList(context.get("orderTerms"));
        if (UtilValidate.isNotEmpty(orderTerms)) {
-           Iterator<GenericValue> orderTermIter = orderTerms.iterator();
-           while (orderTermIter.hasNext()) {
-               GenericValue orderTerm = orderTermIter.next();
+           for(GenericValue orderTerm : orderTerms) {
                orderTerm.set("orderId", orderId);
                if (orderTerm.get("orderItemSeqId") == null) {
                    orderTerm.set("orderItemSeqId", "_NA_");
@@ -1138,7 +1080,7 @@ public class OrderServices {
                     String productId = (String) orderItem.get("productId");
                     GenericValue product = delegator.getRelatedOne("Product", orderItem);
                     
-                    if("SERVICE_PRODUCT".equals(product.get("productTypeId"))){
+                    if("SERVICE_PRODUCT".equals(product.get("productTypeId")) || "AGGREGATEDSERV_CONF".equals(product.get("productTypeId"))){
                         String inventoryFacilityId = null;
                         if ("Y".equals(productStore.getString("oneInventoryFacility"))) {
                             inventoryFacilityId = productStore.getString("inventoryFacilityId");
@@ -1235,9 +1177,7 @@ public class OrderServices {
         // START inventory reservation
         // decrement inventory available for each OrderItemShipGroupAssoc, within the same transaction
         if (UtilValidate.isNotEmpty(orderItemShipGroupInfo)) {
-            Iterator<GenericValue> osiInfos = orderItemShipGroupInfo.iterator();
-            while (osiInfos.hasNext()) {
-                GenericValue orderItemShipGroupAssoc = osiInfos.next();
+            for(GenericValue orderItemShipGroupAssoc : orderItemShipGroupInfo) {
                 if ("OrderItemShipGroupAssoc".equals(orderItemShipGroupAssoc.getEntityName())) {
                     if (dropShipGroupIds != null && dropShipGroupIds.contains(orderItemShipGroupAssoc.getString("shipGroupSeqId"))) {
                         // the items in the drop ship groups are not reserved
@@ -1270,9 +1210,7 @@ public class OrderServices {
                                         continue;
                                     } else {
                                         List<GenericValue> assocProducts = UtilGenerics.checkList(componentsRes.get("assocProducts"));
-                                        Iterator<GenericValue> assocProductsIter = assocProducts.iterator();
-                                        while (assocProductsIter.hasNext()) {
-                                            GenericValue productAssoc = assocProductsIter.next();
+                                        for(GenericValue productAssoc : assocProducts) {
                                             BigDecimal quantityOrd = productAssoc.getBigDecimal("quantity");
                                             BigDecimal quantityKit = orderItemShipGroupAssoc.getBigDecimal("quantity");
                                             BigDecimal quantity = quantityOrd.multiply(quantityKit);
@@ -1371,9 +1309,7 @@ public class OrderServices {
                                             continue;
                                         } else {
                                             List<GenericValue> assocProducts = UtilGenerics.checkList(componentsRes.get("assocProducts"));
-                                            Iterator<GenericValue> assocProductsIter = assocProducts.iterator();
-                                            while (assocProductsIter.hasNext()) {
-                                                GenericValue productAssoc = assocProductsIter.next();
+                                            for(GenericValue productAssoc : assocProducts) {
                                                 BigDecimal quantityOrd = productAssoc.getBigDecimal("quantity");
                                                 BigDecimal quantityKit = orderItemShipGroupAssoc.getBigDecimal("quantity");
                                                 BigDecimal quantity = quantityOrd.multiply(quantityKit);
@@ -1647,9 +1583,7 @@ public class OrderServices {
 
         // Accumulate the total existing tax adjustment
         BigDecimal totalExistingOrderTax = ZERO;
-        Iterator<GenericValue> otait = UtilMisc.toIterator(orderTaxAdjustments);
-        while (otait != null && otait.hasNext()) {
-            GenericValue orderTaxAdjustment = otait.next();
+        for(GenericValue orderTaxAdjustment : orderTaxAdjustments) {
             if (orderTaxAdjustment.get("amount") != null) {
                 totalExistingOrderTax = totalExistingOrderTax.add(orderTaxAdjustment.getBigDecimal("amount").setScale(taxDecimals, taxRounding));
             }
@@ -1660,9 +1594,7 @@ public class OrderServices {
         OrderReadHelper orh = new OrderReadHelper(orderHeader);
         List<GenericValue> shipGroups = orh.getOrderItemShipGroups();
         if (shipGroups != null) {
-            Iterator<GenericValue> itr = shipGroups.iterator();
-            while (itr.hasNext()) {
-                GenericValue shipGroup = itr.next();
+            for(GenericValue shipGroup : shipGroups) {
                 String shipGroupSeqId = shipGroup.getString("shipGroupSeqId");
 
                 List<GenericValue> validOrderItems = orh.getValidOrderItems(shipGroupSeqId);
@@ -1763,14 +1695,10 @@ public class OrderServices {
 
                     // Accumulate the new tax total from the recalculated header adjustments
                     if (UtilValidate.isNotEmpty(orderAdj)) {
-                        Iterator<GenericValue> oai = orderAdj.iterator();
-                        while (oai.hasNext()) {
-                            GenericValue oa = oai.next();
+                        for(GenericValue oa : orderAdj) {
                             if (oa.get("amount") != null) {
                                 totalNewOrderTax = totalNewOrderTax.add(oa.getBigDecimal("amount").setScale(taxDecimals, taxRounding));
                             }
-
-
                         }
                     }
 
@@ -1778,9 +1706,7 @@ public class OrderServices {
                     if (UtilValidate.isNotEmpty(itemAdj)) {
                         for (int i = 0; i < itemAdj.size(); i++) {
                             List<GenericValue> itemAdjustments = itemAdj.get(i);
-                            Iterator<GenericValue> ida = itemAdjustments.iterator();
-                            while (ida.hasNext()) {
-                                GenericValue ia = ida.next();
+                            for(GenericValue ia : itemAdjustments) {
                                 if (ia.get("amount") != null) {
                                     totalNewOrderTax = totalNewOrderTax.add(ia.getBigDecimal("amount").setScale(taxDecimals, taxRounding));
                                 }
@@ -1855,9 +1781,7 @@ public class OrderServices {
         OrderReadHelper orh = new OrderReadHelper(orderHeader);
         List<GenericValue> shipGroups = orh.getOrderItemShipGroups();
         if (shipGroups != null) {
-            Iterator<GenericValue> i = shipGroups.iterator();
-            while (i.hasNext()) {
-                GenericValue shipGroup = i.next();
+            for(GenericValue shipGroup : shipGroups) {
                 String shipGroupSeqId = shipGroup.getString("shipGroupSeqId");
 
                 if (shipGroup.get("contactMechId") == null || shipGroup.get("shipmentMethodTypeId") == null) {
@@ -1869,21 +1793,21 @@ public class OrderServices {
                 BigDecimal shippingTotal = null;
                 if (UtilValidate.isEmpty(orh.getValidOrderItems(shipGroupSeqId))) {
                     shippingTotal = ZERO;
-                    Debug.log("No valid order items found - " + shippingTotal, module);
+                    Debug.logInfo("No valid order items found - " + shippingTotal, module);
                 } else {
                     shippingTotal = UtilValidate.isEmpty(shippingEstMap.get("shippingTotal")) ? ZERO : (BigDecimal)shippingEstMap.get("shippingTotal");
                     shippingTotal = shippingTotal.setScale(orderDecimals, orderRounding);
-                    Debug.log("Got new shipping estimate - " + shippingTotal, module);
+                    Debug.logInfo("Got new shipping estimate - " + shippingTotal, module);
                 }
                 if (Debug.infoOn()) {
-                    Debug.log("New Shipping Total [" + orderId + " / " + shipGroupSeqId + "] : " + shippingTotal, module);
+                    Debug.logInfo("New Shipping Total [" + orderId + " / " + shipGroupSeqId + "] : " + shippingTotal, module);
                 }
 
                 BigDecimal currentShipping = OrderReadHelper.getAllOrderItemsAdjustmentsTotal(orh.getOrderItemAndShipGroupAssoc(shipGroupSeqId), orh.getAdjustments(), false, false, true);
                 currentShipping = currentShipping.add(OrderReadHelper.calcOrderAdjustments(orh.getOrderHeaderAdjustments(shipGroupSeqId), orh.getOrderItemsSubTotal(), false, false, true));
 
                 if (Debug.infoOn()) {
-                    Debug.log("Old Shipping Total [" + orderId + " / " + shipGroupSeqId + "] : " + currentShipping, module);
+                    Debug.logInfo("Old Shipping Total [" + orderId + " / " + shipGroupSeqId + "] : " + currentShipping, module);
                 }
 
                 List<String> errorMessageList = UtilGenerics.checkList(shippingEstMap.get(ModelService.ERROR_MESSAGE_LIST));
@@ -1969,19 +1893,17 @@ public class OrderServices {
         boolean allComplete = true;
         boolean allApproved = true;
         if (orderItems != null) {
-            Iterator<GenericValue> itemIter = orderItems.iterator();
-            while (itemIter.hasNext()) {
-                GenericValue item = itemIter.next();
+            for(GenericValue item : orderItems) {
                 String statusId = item.getString("statusId");
-                //Debug.log("Item Status: " + statusId, module);
+                //Debug.logInfo("Item Status: " + statusId, module);
                 if (!"ITEM_CANCELLED".equals(statusId)) {
-                    //Debug.log("Not set to cancel", module);
+                    //Debug.logInfo("Not set to cancel", module);
                     allCanceled = false;
                     if (!"ITEM_COMPLETED".equals(statusId)) {
-                        //Debug.log("Not set to complete", module);
+                        //Debug.logInfo("Not set to complete", module);
                         allComplete = false;
                         if (!"ITEM_APPROVED".equals(statusId)) {
-                            //Debug.log("Not set to approve", module);
+                            //Debug.logInfo("Not set to approve", module);
                             allApproved = false;
                             break;
                         }
@@ -2104,9 +2026,7 @@ public class OrderServices {
         }
 
         if (orderItemShipGroupAssocs != null) {
-            Iterator<GenericValue> i = orderItemShipGroupAssocs.iterator();
-            while (i.hasNext()) {
-                GenericValue orderItemShipGroupAssoc = i.next();
+            for(GenericValue orderItemShipGroupAssoc : orderItemShipGroupAssocs) {
                 GenericValue orderItem = null;
                 try {
                     orderItem = orderItemShipGroupAssoc.getRelatedOne("OrderItem");
@@ -2268,9 +2188,7 @@ public class OrderServices {
 
         if (UtilValidate.isNotEmpty(orderItems)) {
             List<GenericValue> toBeStored = new ArrayList<GenericValue>();
-            Iterator<GenericValue> itemsIterator = orderItems.iterator();
-            while (itemsIterator.hasNext()) {
-                GenericValue orderItem = itemsIterator.next();
+            for(GenericValue orderItem : orderItems) {
                 if (orderItem == null) {
                     return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
                             "OrderErrorCannotChangeItemStatusItemNotFound", locale));
@@ -2781,9 +2699,7 @@ public class OrderServices {
 
         StringBuilder emailList = new StringBuilder();
         if (assignedToEmails != null) {
-            Iterator<GenericValue> aei = assignedToEmails.iterator();
-            while (aei.hasNext()) {
-                GenericValue ct = aei.next();
+            for(GenericValue ct : assignedToEmails) {
                 if (ct != null && ct.get("infoString") != null) {
                     if (emailList.length() > 1)
                         emailList.append(",");
@@ -3096,9 +3012,7 @@ public class OrderServices {
         }
 
         Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
-        Iterator<GenericValue> i = ordersToCheck.iterator();
-        while (i.hasNext()) {
-            GenericValue orderHeader = i.next();
+        for(GenericValue orderHeader : ordersToCheck) {
             String orderId = orderHeader.getString("orderId");
             String orderStatus = orderHeader.getString("statusId");
 
@@ -3129,8 +3043,8 @@ public class OrderServices {
                     cal.add(Calendar.DAY_OF_YEAR, daysTillCancel);
                     Date cancelDate = cal.getTime();
                     Date nowDate = new Date();
-                    //Debug.log("Cancel Date : " + cancelDate, module);
-                    //Debug.log("Current Date : " + nowDate, module);
+                    //Debug.logInfo("Cancel Date : " + cancelDate, module);
+                    //Debug.logInfo("Current Date : " + nowDate, module);
                     if (cancelDate.equals(nowDate) || nowDate.after(cancelDate)) {
                         // cancel the order item(s)
                         Map<String, Object> svcCtx = UtilMisc.<String, Object>toMap("orderId", orderId, "statusId", "ITEM_CANCELLED", "userLogin", userLogin);
@@ -3163,9 +3077,7 @@ public class OrderServices {
                     Debug.logError(e, "Problem getting order item records", module);
                 }
                 if (UtilValidate.isNotEmpty(orderItems)) {
-                    Iterator<GenericValue> oii = orderItems.iterator();
-                    while (oii.hasNext()) {
-                        GenericValue orderItem = oii.next();
+                    for(GenericValue orderItem : orderItems) {
                         String orderItemSeqId = orderItem.getString("orderItemSeqId");
                         Timestamp autoCancelDate = orderItem.getTimestamp("autoCancelDate");
 
@@ -3223,9 +3135,7 @@ public class OrderServices {
         Map<GenericValue, GenericValue> digitalProducts = new HashMap<GenericValue, GenericValue>();
 
         if (UtilValidate.isNotEmpty(orderItems)) {
-            Iterator<GenericValue> i = orderItems.iterator();
-            while (i.hasNext()) {
-                GenericValue item = i.next();
+            for(GenericValue item : orderItems) {
                 GenericValue product = null;
                 try {
                     product = item.getRelatedOne("Product");
@@ -3301,10 +3211,8 @@ public class OrderServices {
                 }
 
                 // update the status of digital goods to COMPLETED; leave physical/digital as APPROVED for pick/ship
-                Iterator<GenericValue> dii = itemsToInvoice.iterator();
-                while (dii.hasNext()) {
+                for(GenericValue item : itemsToInvoice) {
                     GenericValue productType = null;
-                    GenericValue item = dii.next();
                     GenericValue product = digitalProducts.get(item);
                     boolean markComplete = false;
 
@@ -3377,10 +3285,7 @@ public class OrderServices {
 
         if (UtilValidate.isNotEmpty(orderItems)) {
             // loop through the digital items to fulfill
-            Iterator<GenericValue> itemsIterator = orderItems.iterator();
-            while (itemsIterator.hasNext()) {
-                GenericValue orderItem = itemsIterator.next();
-
+            for(GenericValue orderItem : orderItems) {
                 // make sure we have a valid item
                 if (orderItem == null) {
                     return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
@@ -3423,9 +3328,7 @@ public class OrderServices {
 
                 // now use the ProductContent to fulfill the item
                 if (UtilValidate.isNotEmpty(productContent)) {
-                    Iterator<GenericValue> prodcontentIterator = productContent.iterator();
-                    while (prodcontentIterator.hasNext()) {
-                        GenericValue productContentItem = prodcontentIterator.next();
+                    for(GenericValue productContentItem : productContent) {
                         GenericValue content = null;
                         try {
                             content = productContentItem.getRelatedOne("Content");
@@ -3720,9 +3623,7 @@ public class OrderServices {
 
         // go through the item map and obtain the totals per item
         Map<String, BigDecimal> itemTotals = new HashMap<String, BigDecimal>();
-        Iterator<String> i = itemQtyMap.keySet().iterator();
-        while (i.hasNext()) {
-            String key = i.next();
+        for(String key : itemQtyMap.keySet()) {
             String quantityStr = itemQtyMap.get(key);
             BigDecimal groupQty = BigDecimal.ZERO;
             try {
@@ -3748,9 +3649,7 @@ public class OrderServices {
         }
 
         // set the items amount/price
-        Iterator<String> iai = itemTotals.keySet().iterator();
-        while (iai.hasNext()) {
-            String itemSeqId = iai.next();
+        for(String itemSeqId : itemTotals.keySet()) {
             ShoppingCartItem cartItem = cart.findCartItem(itemSeqId);
 
             if (cartItem != null) {
@@ -3764,7 +3663,7 @@ public class OrderServices {
                     Debug.logError(e, module);
                     return ServiceUtil.returnError(e.getMessage());
                 }
-                Debug.log("Set item quantity: [" + itemSeqId + "] " + qty, module);
+                Debug.logInfo("Set item quantity: [" + itemSeqId + "] " + qty, module);
 
                 if (cartItem.getIsModifiedPrice()) // set price
                     cartItem.setBasePrice(priceSave);
@@ -3776,7 +3675,7 @@ public class OrderServices {
                         price = new BigDecimal(priceStr).setScale(orderDecimals, orderRounding);
                         cartItem.setBasePrice(price);
                         cartItem.setIsModifiedPrice(true);
-                        Debug.log("Set item price: [" + itemSeqId + "] " + price, module);
+                        Debug.logInfo("Set item price: [" + itemSeqId + "] " + price, module);
                     }
 
                 }
@@ -3786,7 +3685,7 @@ public class OrderServices {
                     String description = itemDescriptionMap.get(itemSeqId);
                     if (UtilValidate.isNotEmpty(description)) {
                         cartItem.setName(description);
-                        Debug.log("Set item description: [" + itemSeqId + "] " + description, module);
+                        Debug.logInfo("Set item description: [" + itemSeqId + "] " + description, module);
                     } else {
                         return ServiceUtil.returnError(UtilProperties.getMessage(resource,
                                 "OrderItemDescriptionCannotBeEmpty", locale));
@@ -3800,7 +3699,7 @@ public class OrderServices {
                         attrValue = itemAttributesMap.get(attrName + ":" + itemSeqId);
                         if (UtilValidate.isNotEmpty(attrName)) {
                             cartItem.setOrderItemAttribute(attrName, attrValue);
-                            Debug.log("Set item attribute Name: [" + itemSeqId + "] " + attrName + " , Value:" + attrValue, module);
+                            Debug.logInfo("Set item attribute Name: [" + itemSeqId + "] " + attrName + " , Value:" + attrValue, module);
                         }
                     }
                 }
@@ -3833,9 +3732,7 @@ public class OrderServices {
         }
 
         // update the group amounts
-        Iterator<String> gai = itemQtyMap.keySet().iterator();
-        while (gai.hasNext()) {
-            String key = gai.next();
+        for(String key : itemQtyMap.keySet()) {
             String quantityStr = itemQtyMap.get(key);
             BigDecimal groupQty = BigDecimal.ZERO;
             try {
@@ -3857,10 +3754,10 @@ public class OrderServices {
             // set the group qty
             ShoppingCartItem cartItem = cart.findCartItem(itemInfo[0]);
             if (cartItem != null) {
-                Debug.log("Shipping info (before) for group #" + (groupIdx-1) + " [" + cart.getShipmentMethodTypeId(groupIdx-1) + " / " + cart.getCarrierPartyId(groupIdx-1) + "]", module);
+                Debug.logInfo("Shipping info (before) for group #" + (groupIdx-1) + " [" + cart.getShipmentMethodTypeId(groupIdx-1) + " / " + cart.getCarrierPartyId(groupIdx-1) + "]", module);
                 cart.setItemShipGroupQty(cartItem, groupQty, groupIdx - 1);
-                Debug.log("Set ship group qty: [" + itemInfo[0] + " / " + itemInfo[1] + " (" + (groupIdx-1) + ")] " + groupQty, module);
-                Debug.log("Shipping info (after) for group #" + (groupIdx-1) + " [" + cart.getShipmentMethodTypeId(groupIdx-1) + " / " + cart.getCarrierPartyId(groupIdx-1) + "]", module);
+                Debug.logInfo("Set ship group qty: [" + itemInfo[0] + " / " + itemInfo[1] + " (" + (groupIdx-1) + ")] " + groupQty, module);
+                Debug.logInfo("Shipping info (after) for group #" + (groupIdx-1) + " [" + cart.getShipmentMethodTypeId(groupIdx-1) + " / " + cart.getCarrierPartyId(groupIdx-1) + "]", module);
             }
         }
 
@@ -3960,9 +3857,7 @@ public class OrderServices {
         }
         // cancel existing inventory reservations
         if (shipGroupAssocs != null) {
-            Iterator<GenericValue> iri = shipGroupAssocs.iterator();
-            while (iri.hasNext()) {
-                GenericValue shipGroupAssoc = iri.next();
+            for(GenericValue shipGroupAssoc : shipGroupAssocs) {
                 String orderItemSeqId = shipGroupAssoc.getString("orderItemSeqId");
                 String shipGroupSeqId = shipGroupAssoc.getString("shipGroupSeqId");
 
@@ -3992,9 +3887,7 @@ public class OrderServices {
             throw new GeneralException(e.getMessage());
         }
         if (promoItems != null) {
-            Iterator<GenericValue> pii = promoItems.iterator();
-            while (pii.hasNext()) {
-                GenericValue promoItem = pii.next();
+            for(GenericValue promoItem : promoItems) {
                 // Skip if the promo is already cancelled
                 if ("ITEM_CANCELLED".equals(promoItem.get("statusId"))) {
                     continue;
@@ -4043,9 +3936,7 @@ public class OrderServices {
             throw new GeneralException(e.getMessage());
         }
         if (paymentPrefsToCancel != null) {
-            Iterator<GenericValue> oppi = paymentPrefsToCancel.iterator();
-            while (oppi.hasNext()) {
-                GenericValue opp = oppi.next();
+            for(GenericValue opp : paymentPrefsToCancel) {
                 try {
                     opp.set("statusId", "PAYMENT_CANCELLED");
                     opp.store();
@@ -4115,7 +4006,7 @@ public class OrderServices {
         for (int gi = 0; gi < shipGroups; gi++) {
             String shipmentMethodTypeId = cart.getShipmentMethodTypeId(gi);
             String carrierPartyId = cart.getCarrierPartyId(gi);
-            Debug.log("Getting ship estimate for group #" + gi + " [" + shipmentMethodTypeId + " / " + carrierPartyId + "]", module);
+            Debug.logInfo("Getting ship estimate for group #" + gi + " [" + shipmentMethodTypeId + " / " + carrierPartyId + "]", module);
             Map<String, Object> result = ShippingEvents.getShipGroupEstimate(dispatcher, delegator, cart, gi);
             if (("SALES_ORDER".equals(cart.getOrderType())) && (ServiceUtil.isError(result))) {
                 Debug.logError(ServiceUtil.getErrorMessage(result), module);
@@ -4258,9 +4149,7 @@ public class OrderServices {
                         
         // set the orderId & other information on all new value objects
         List<String> dropShipGroupIds = FastList.newInstance(); // this list will contain the ids of all the ship groups for drop shipments (no reservations)
-        Iterator<GenericValue> tsi = toStore.iterator();
-        while (tsi.hasNext()) {
-            GenericValue valueObj = tsi.next();
+        for(GenericValue valueObj : toStore) {
             valueObj.set("orderId", orderId);
             if ("OrderItemShipGroup".equals(valueObj.getEntityName())) {
                 // ship group
@@ -4418,9 +4307,7 @@ public class OrderServices {
         // make the order item object map & the ship group assoc list
         List<GenericValue> orderItemShipGroupAssoc = new LinkedList<GenericValue>();
         Map<String, GenericValue> itemValuesBySeqId = new HashMap<String, GenericValue>();
-        Iterator<GenericValue> oii = toStore.iterator();
-        while (oii.hasNext()) {
-            GenericValue v = oii.next();
+        for(GenericValue v : toStore) {
             if ("OrderItem".equals(v.getEntityName())) {
                 itemValuesBySeqId.put(v.getString("orderItemSeqId"), v);
             } else if ("OrderItemShipGroupAssoc".equals(v.getEntityName())) {
@@ -4433,7 +4320,7 @@ public class OrderServices {
         String orderTypeId = cart.getOrderType();
         List<String> resErrorMessages = new LinkedList<String>();
         try {
-            Debug.log("Calling reserve inventory...", module);
+            Debug.logInfo("Calling reserve inventory...", module);
             reserveInventory(delegator, dispatcher, userLogin, locale, orderItemShipGroupAssoc, dropShipGroupIds, itemValuesBySeqId,
                     orderTypeId, productStoreId, resErrorMessages);
         } catch (GeneralException e) {
@@ -4469,7 +4356,7 @@ public class OrderServices {
             GenericValue productStore = ProductStoreWorker.getProductStore(productStoreId, delegator);
             Map<String, Object> paymentResp = null;
             try {
-                Debug.log("Calling process payments...", module);
+                Debug.logInfo("Calling process payments...", module);
                 //Debug.set(Debug.VERBOSE, true);
                 paymentResp = CheckOutHelper.processPayment(orderId, orh.getOrderGrandTotal(), orh.getCurrency(), productStore, userLogin, false, false, dispatcher, delegator);
                 //Debug.set(Debug.VERBOSE, false);
@@ -4512,7 +4399,7 @@ public class OrderServices {
 
     public static Map<String, Object> shoppingCartRemoteTest(DispatchContext dctx, Map<String, ? extends Object> context) {
         ShoppingCart cart = (ShoppingCart) context.get("cart");
-        Debug.log("Product ID : " + cart.findCartItem(0).getProductId(), module);
+        Debug.logInfo("Product ID : " + cart.findCartItem(0).getProductId(), module);
         return ServiceUtil.returnSuccess();
     }
 
@@ -4644,9 +4531,7 @@ public class OrderServices {
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         List<String> orderIds = UtilGenerics.checkList(context.get("orderIdList"));
         Locale locale = (Locale) context.get("locale");
-        Iterator<String> i = orderIds.iterator();
-        while (i.hasNext()) {
-            String orderId = i.next();
+        for(String orderId : orderIds) {
             if (UtilValidate.isEmpty(orderId)) {
                 continue;
             }
@@ -4688,9 +4573,7 @@ public class OrderServices {
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         List<String> orderIds = UtilGenerics.checkList(context.get("orderIdList"));
         Locale locale = (Locale) context.get("locale");
-        Iterator<String> i = orderIds.iterator();
-        while (i.hasNext()) {
-            String orderId = i.next();
+        for(String orderId : orderIds) {
             if (UtilValidate.isEmpty(orderId)) {
                 continue;
             }
@@ -4763,9 +4646,7 @@ public class OrderServices {
 
         // make the list per facility
         List<String> orderIds = UtilGenerics.checkList(context.get("orderIdList"));
-        Iterator<String> i = orderIds.iterator();
-        while (i.hasNext()) {
-            String orderId = i.next();
+        for(String orderId : orderIds) {
             if (UtilValidate.isEmpty(orderId)) {
                 continue;
             }
@@ -4778,9 +4659,7 @@ public class OrderServices {
                 return ServiceUtil.returnError(e.getMessage());
             }
             if (invInfo != null) {
-                Iterator<GenericValue> ii = invInfo.iterator();
-                while (ii.hasNext()) {
-                    GenericValue inv = ii.next();
+                for(GenericValue inv : invInfo) {
                     String facilityId = inv.getString("facilityId");
                     List<String> orderIdsByFacility = facilityOrdersMap.get(facilityId);
                     if (orderIdsByFacility == null) {
@@ -4793,9 +4672,7 @@ public class OrderServices {
         }
 
         // now create the pick lists for each facility
-        Iterator<String> fi = facilityOrdersMap.keySet().iterator();
-        while (fi.hasNext()) {
-            String facilityId = fi.next();
+        for(String facilityId : facilityOrdersMap.keySet()) {
             List<String> orderIdList = facilityOrdersMap.get(facilityId);
 
             Map<String, Object> ctx = FastMap.newInstance();
@@ -4827,9 +4704,7 @@ public class OrderServices {
 
         // make the list per facility
         List<String> orderIds = UtilGenerics.checkList(context.get("orderIdList"));
-        Iterator<String> i = orderIds.iterator();
-        while (i.hasNext()) {
-            String orderId = i.next();
+        for(String orderId : orderIds) {
             if (UtilValidate.isEmpty(orderId)) {
                 continue;
             }
@@ -4858,9 +4733,7 @@ public class OrderServices {
 
         // make the list per facility
         List<String> orderIds = UtilGenerics.checkList(context.get("orderIdList"));
-        Iterator<String> i = orderIds.iterator();
-        while (i.hasNext()) {
-            String orderId = i.next();
+        for(String orderId : orderIds) {
             if (UtilValidate.isEmpty(orderId)) {
                 continue;
             }
@@ -4933,9 +4806,7 @@ public class OrderServices {
             // if sales order
             if ("SALES_ORDER".equals(orh.getOrderTypeId())) {
                 // get the order's ship groups
-                Iterator<GenericValue> shipGroups = orh.getOrderItemShipGroups().iterator();
-                while (shipGroups.hasNext()) {
-                    GenericValue shipGroup = shipGroups.next();
+                for(GenericValue shipGroup : orh.getOrderItemShipGroups()) {
                     if (!UtilValidate.isEmpty(shipGroup.getString("supplierPartyId"))) {
                         // This ship group is a drop shipment: we create a purchase order for it
                         String supplierPartyId = shipGroup.getString("supplierPartyId");
@@ -4948,9 +4819,7 @@ public class OrderServices {
                         // Get the items associated to it and create po
                         List<GenericValue> items = orh.getValidOrderItems(shipGroup.getString("shipGroupSeqId"));
                         if (!UtilValidate.isEmpty(items)) {
-                            Iterator<GenericValue> itemsIt = items.iterator();
-                            while (itemsIt.hasNext()) {
-                                GenericValue item = itemsIt.next();
+                            for(GenericValue item : items) {
                                 try {
                                     int itemIndex = cart.addOrIncreaseItem(item.getString("productId"),
                                                                            null, // amount
@@ -4965,7 +4834,6 @@ public class OrderServices {
                                     sci.setAssociatedOrderId(orderId);
                                     sci.setAssociatedOrderItemSeqId(item.getString("orderItemSeqId"));
                                     sci.setOrderItemAssocTypeId("DROP_SHIPMENT");
-                                    // TODO: we should consider also the ship group in the association between sales and purchase orders
                                 } catch (Exception e) {
                                     return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
                                             "OrderOrderCreatingDropShipmentsError", 
@@ -4981,11 +4849,12 @@ public class OrderServices {
                             cart.setDefaultCheckoutOptions(dispatcher);
                             // the shipping address is the one of the customer
                             cart.setShippingContactMechId(shipGroup.getString("contactMechId"));
+                            // associate ship groups of sales and purchase orders
+                            ShoppingCart.CartShipInfo cartShipInfo = cart.getShipGroups().get(0);
+                            cartShipInfo.setAssociatedShipGroupSeqId(shipGroup.getString("shipGroupSeqId"));
                             // create the order
                             CheckOutHelper coh = new CheckOutHelper(dispatcher, delegator, cart);
                             coh.createOrder(userLogin);
-                            
-                            // TODO: associate the new purchase order with the sales order (ship group)
                         } else {
                             // if there are no items to drop ship, then clear out the supplier partyId
                             Debug.logWarning("No drop ship items found for order [" + shipGroup.getString("orderId") + "] and ship group [" + shipGroup.getString("shipGroupSeqId") + "] and supplier party [" + shipGroup.getString("supplierPartyId") + "].  Supplier party information will be cleared for this ship group", module);
@@ -5022,8 +4891,7 @@ public class OrderServices {
             // the original method did a "\d+" regexp to decide which is the case, this version is more explicit with its lookup of PaymentMethodType
             if (checkOutPaymentId != null) {
                 List<GenericValue> paymentMethodTypes = delegator.findList("PaymentMethodType", null, null, null, null, true);
-                for (Iterator<GenericValue> iter = paymentMethodTypes.iterator(); iter.hasNext();) {
-                    GenericValue type = iter.next();
+                for (GenericValue type : paymentMethodTypes) {
                     if (type.get("paymentMethodTypeId").equals(checkOutPaymentId)) {
                         paymentMethodTypeId = (String) type.get("paymentMethodTypeId");
                         break;
@@ -5097,9 +4965,7 @@ public class OrderServices {
             // Build a map of productId -> quantity cancelled over all order items
             Map<String, Object> productRequirementQuantities = new HashMap<String, Object>();
             List<GenericValue> orderItems = orderHeader.getRelated("OrderItem");
-            Iterator<GenericValue> oiit = orderItems.iterator();
-            while (oiit.hasNext()) {
-                GenericValue orderItem = oiit.next();
+            for(GenericValue orderItem : orderItems) {
                 if (! "PRODUCT_ORDER_ITEM".equals(orderItem.getString("orderItemTypeId"))) continue;
 
                 // Get the cancelled quantity for the item
@@ -5119,9 +4985,7 @@ public class OrderServices {
             }
 
             // Generate requirements for each of the product quantities
-            Iterator<String> cqit = productRequirementQuantities.keySet().iterator();
-            while (cqit.hasNext()) {
-                String productId = cqit.next();
+            for(String productId : productRequirementQuantities.keySet()) {
                 BigDecimal requiredQuantity = (BigDecimal) productRequirementQuantities.get(productId);
                 Map<String, Object> createRequirementResult = dispatcher.runSync("createRequirement", UtilMisc.<String, Object>toMap("requirementTypeId", "PRODUCT_REQUIREMENT", "facilityId", facilityId, "productId", productId, "quantity", requiredQuantity, "userLogin", userLogin));
                 if (ServiceUtil.isError(createRequirementResult)) return createRequirementResult;
@@ -5171,9 +5035,7 @@ public class OrderServices {
             }
 
             List<GenericValue> orderItems = orderHeader.getRelated("OrderItem");
-            Iterator<GenericValue> oiit = orderItems.iterator();
-            while (oiit.hasNext()) {
-                GenericValue orderItem = oiit.next();
+            for(GenericValue orderItem : orderItems) {
                 if (! "PRODUCT_ORDER_ITEM".equals(orderItem.getString("orderItemTypeId"))) continue;
 
                 // Get the ordered quantity for the item
@@ -5189,9 +5051,7 @@ public class OrderServices {
                 // Get the received quantity for the order item - ignore the quantityRejected, since rejected items should be reordered
                 List<GenericValue> shipmentReceipts = orderItem.getRelated("ShipmentReceipt");
                 BigDecimal receivedQuantity = BigDecimal.ZERO;
-                Iterator<GenericValue> srit = shipmentReceipts.iterator();
-                while (srit.hasNext()) {
-                    GenericValue shipmentReceipt = srit.next();
+                for(GenericValue shipmentReceipt : shipmentReceipts) {
                     if (! UtilValidate.isEmpty(shipmentReceipt.get("quantityAccepted"))) {
                         receivedQuantity = receivedQuantity.add(shipmentReceipt.getBigDecimal("quantityAccepted"));
                     }
@@ -5246,9 +5106,7 @@ public class OrderServices {
         cart.setOrderType("SALES_ORDER");
         cart.setOrderPartyId(partyId);
 
-        Iterator<String> i = itemMap.keySet().iterator();
-        while (i.hasNext()) {
-            String item = i.next();
+        for(String item : itemMap.keySet()) {
             BigDecimal price = itemMap.get(item);
             try {
                 cart.addNonProductItem("BULK_ORDER_ITEM", item, null, price, BigDecimal.ONE, null, null, null, dispatcher);
@@ -5409,15 +5267,10 @@ public class OrderServices {
 
             // Aggregate the order items subtotal
             List<GenericValue> orderItems = orderHeader.getRelated("OrderItem", UtilMisc.toList("orderItemSeqId"));
-            Iterator<GenericValue> oit = orderItems.iterator();
-            while (oit.hasNext()) {
-                GenericValue orderItem = oit.next();
-
+            for(GenericValue orderItem : orderItems) {
                 // Look at the orderItemBillings to discover the amount and quantity ever invoiced for this order item
                 List<GenericValue> orderItemBillings = delegator.findByAnd("OrderItemBilling", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", orderItem.get("orderItemSeqId")));
-                Iterator<GenericValue> oibit = orderItemBillings.iterator();
-                while (oibit.hasNext()) {
-                    GenericValue orderItemBilling = oibit.next();
+                for(GenericValue orderItemBilling : orderItemBillings) {
                     BigDecimal quantity = orderItemBilling.getBigDecimal("quantity");
                     BigDecimal amount = orderItemBilling.getBigDecimal("amount").setScale(orderDecimals, orderRounding);
                     if (UtilValidate.isEmpty(invoicedQuantity) || UtilValidate.isEmpty(amount)) continue;
@@ -5434,16 +5287,12 @@ public class OrderServices {
 
                 // Retrieve the adjustments for this item
                 List<GenericValue> orderAdjustments = delegator.findByAnd("OrderAdjustment", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", orderItem.get("orderItemSeqId")));
-                Iterator<GenericValue> oait = orderAdjustments.iterator();
-                while (oait.hasNext()) {
-                    GenericValue orderAdjustment = oait.next();
+                for(GenericValue orderAdjustment : orderAdjustments) {
                     String orderAdjustmentTypeId = orderAdjustment.getString("orderAdjustmentTypeId");
 
                     // Look at the orderAdjustmentBillings to discove the amount ever invoiced for this order adjustment
                     List<GenericValue> orderAdjustmentBillings = delegator.findByAnd("OrderAdjustmentBilling", UtilMisc.toMap("orderAdjustmentId", orderAdjustment.get("orderAdjustmentId")));
-                    Iterator<GenericValue> oabit = orderAdjustmentBillings.iterator();
-                    while (oabit.hasNext()) {
-                        GenericValue orderAjustmentBilling = oabit.next();
+                    for(GenericValue orderAjustmentBilling : orderAdjustmentBillings) {
                         BigDecimal amount = orderAjustmentBilling.getBigDecimal("amount").setScale(orderDecimals, orderRounding);
                         if (UtilValidate.isEmpty(amount)) continue;
 
@@ -5470,13 +5319,9 @@ public class OrderServices {
             // Total the order-header-level adjustments for the order
             BigDecimal orderHeaderAdjustmentsTotalValue = ZERO;
             List<GenericValue> orderHeaderAdjustments = delegator.findByAnd("OrderAdjustment", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", "_NA_"));
-            Iterator<GenericValue> ohait = orderHeaderAdjustments.iterator();
-            while (ohait.hasNext()) {
-                GenericValue orderHeaderAdjustment = ohait.next();
+            for(GenericValue orderHeaderAdjustment : orderHeaderAdjustments) {
                 List<GenericValue> orderHeaderAdjustmentBillings = delegator.findByAnd("OrderAdjustmentBilling", UtilMisc.toMap("orderAdjustmentId", orderHeaderAdjustment.get("orderAdjustmentId")));
-                Iterator<GenericValue> ohabit = orderHeaderAdjustmentBillings.iterator();
-                while (ohabit.hasNext()) {
-                    GenericValue orderHeaderAdjustmentBilling = ohabit.next();
+                for(GenericValue orderHeaderAdjustmentBilling : orderHeaderAdjustmentBillings) {
                     BigDecimal amount = orderHeaderAdjustmentBilling.getBigDecimal("amount").setScale(orderDecimals, orderRounding);
                     if (UtilValidate.isEmpty(amount)) continue;
                     orderHeaderAdjustmentsTotalValue = orderHeaderAdjustmentsTotalValue.add(amount);
@@ -5611,9 +5456,7 @@ public class OrderServices {
 
                     // only keep the orderitem with the related product.
                     List<ShoppingCartItem> cartItems = cart.items();
-                    Iterator<ShoppingCartItem> ci = cartItems.iterator();
-                    while (ci.hasNext()) {
-                        ShoppingCartItem shoppingCartItem = ci.next();
+                    for(ShoppingCartItem shoppingCartItem : cartItems) {
                         if (!subscription.get("productId").equals(shoppingCartItem.getProductId())) {
                             cart.removeCartItem(shoppingCartItem, dispatcher);
                         }

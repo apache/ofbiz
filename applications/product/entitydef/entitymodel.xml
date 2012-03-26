@@ -1045,10 +1045,15 @@ under the License.
     <view-entity entity-name="FacilityAndContactMech" package-name="org.ofbiz.product.facility" title="Facility and Contact Mech View Entity">
         <member-entity entity-alias="FA" entity-name="Facility"/>
         <member-entity entity-alias="CM" entity-name="FacilityContactMech"/>
+        <member-entity entity-alias="MC" entity-name="ContactMech"/>
         <alias-all entity-alias="FA"/>
         <alias-all entity-alias="CM"/>
+        <alias-all entity-alias="MC"/>
         <view-link entity-alias="FA" rel-entity-alias="CM">
             <key-map field-name="facilityId"/>
+        </view-link>
+        <view-link entity-alias="CM" rel-entity-alias="MC">
+            <key-map field-name="contactMechId"/>
         </view-link>
     </view-entity>
     <entity entity-name="FacilityAttribute" package-name="org.ofbiz.product.facility" title="Facility Attribute Entity">
@@ -1485,6 +1490,7 @@ under the License.
 
     <entity entity-name="ProductFeature"
             package-name="org.ofbiz.product.feature"
+            default-resource-name="ProductEntityLabels"
             title="Product Feature Entity">
       <field name="productFeatureId" type="id-ne"></field>
       <field name="productFeatureTypeId" type="id-ne"></field>
@@ -3079,39 +3085,28 @@ under the License.
             <key-map field-name="productId"/>
         </view-link>
     </view-entity>
-    <entity entity-name="ProductKeyword" package-name="org.ofbiz.product.product" title="Product Keyword Entity" never-cache="true">
+    <entity entity-name="ProductKeyword" table-name="PRODUCT_KEYWORD_NEW"
+            package-name="org.ofbiz.product.product" title="Product Keyword Entity" never-cache="true">
       <field name="productId" type="id-ne"></field>
       <field name="keyword" type="short-varchar"></field>
+      <field name="keywordTypeId" type="id-ne"></field>
       <field name="relevancyWeight" type="numeric"></field>
+      <field name="statusId" type="id-ne"></field>
       <prim-key field="productId"/>
       <prim-key field="keyword"/>
-      <relation type="one" fk-name="PROD_KWD_PROD" rel-entity-name="Product">
+      <prim-key field="keywordTypeId"/>
+      <relation type="one" fk-name="PROD_KWD_PROD_NEW" rel-entity-name="Product">
         <key-map field-name="productId"/>
       </relation>
-      <index name="PROD_KWD_KWD">
+      <relation type="one" fk-name="PROD_KWD_TYPE" rel-entity-name="Enumeration">
+        <key-map field-name="keywordTypeId" rel-field-name="enumId"/>
+      </relation>
+      <relation type="one" fk-name="PROD_KWD_STTS" rel-entity-name="StatusItem">
+        <key-map field-name="statusId"/>
+      </relation>
+      <index name="PROD_KWD_KWD_NEW">
         <index-field name="keyword"/>
       </index>
-    </entity>
-    <entity entity-name="OldProductKeywordResult" table-name="PRODUCT_KEYWORD_RESULT"
-            package-name="org.ofbiz.product.product"
-            never-cache="true"
-            title="Product Keyword Result Entity">
-      <field name="productKeywordResultId" type="id-ne"></field>
-      <field name="visitId" type="id"></field>
-      <field name="productCategoryId" type="id"></field>
-      <field name="searchString" type="short-varchar"></field>
-      <field name="intraKeywordOperator" type="very-short"></field>
-      <field name="anyPrefix" type="indicator"></field>
-      <field name="anySuffix" type="indicator"></field>
-      <field name="removeStems" type="indicator"></field>
-      <field name="numResults" type="numeric"></field>
-      <prim-key field="productKeywordResultId"/>
-      <relation type="one" fk-name="PROD_KWDRES_VST" rel-entity-name="Visit">
-        <key-map field-name="visitId"/>
-      </relation>
-      <relation type="one-nofk" rel-entity-name="ProductCategory">
-        <key-map field-name="productCategoryId"/>
-      </relation>
     </entity>
     <entity entity-name="ProductMeter" package-name="org.ofbiz.product.product" title="Product Meter Entity">
         <field name="productId" type="id-ne"></field>

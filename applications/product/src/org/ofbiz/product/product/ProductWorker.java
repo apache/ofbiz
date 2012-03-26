@@ -41,6 +41,7 @@ import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.util.EntityTypeUtil;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.product.config.ProductConfigWrapper;
 import org.ofbiz.product.config.ProductConfigWrapper.ConfigOption;
@@ -57,6 +58,8 @@ public class ProductWorker {
     public static final String resource = "ProductUiLabels";
 
     public static final MathContext generalRounding = new MathContext(10);
+
+    private ProductWorker () {}
 
     public static boolean shippingApplies(GenericValue product) {
         String errMsg = "";
@@ -146,7 +149,7 @@ public class ProductWorker {
     public static String getInstanceAggregatedId(Delegator delegator, String instanceProductId) throws GenericEntityException {
         GenericValue instanceProduct = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", instanceProductId));
 
-        if (UtilValidate.isNotEmpty(instanceProduct) && "AGGREGATED_CONF".equals(instanceProduct.getString("productTypeId"))) {
+        if (UtilValidate.isNotEmpty(instanceProduct) && EntityTypeUtil.hasParentType(delegator, "ProductType", "productTypeId", instanceProduct.getString("productTypeId"), "parentTypeId", "AGGREGATED")) {
             GenericValue productAssoc = EntityUtil.getFirst(EntityUtil.filterByDate(instanceProduct.getRelatedByAnd("AssocProductAssoc",
                     UtilMisc.toMap("productAssocTypeId", "PRODUCT_CONF"))));
             if (UtilValidate.isNotEmpty(productAssoc)) {
@@ -172,7 +175,7 @@ public class ProductWorker {
     public static List<GenericValue> getAggregatedAssocs(Delegator delegator, String  aggregatedProductId) throws GenericEntityException {
         GenericValue aggregatedProduct = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", aggregatedProductId));
 
-        if (UtilValidate.isNotEmpty(aggregatedProduct) && "AGGREGATED".equals(aggregatedProduct.getString("productTypeId"))) {
+        if (UtilValidate.isNotEmpty(aggregatedProduct) && ("AGGREGATED".equals(aggregatedProduct.getString("productTypeId")) || "AGGREGATED_SERVICE".equals(aggregatedProduct.getString("productTypeId")))) {
             List<GenericValue> productAssocs = EntityUtil.filterByDate(aggregatedProduct.getRelatedByAnd("MainProductAssoc",
                     UtilMisc.toMap("productAssocTypeId", "PRODUCT_CONF")));
             return productAssocs;
@@ -1029,7 +1032,7 @@ public class ProductWorker {
                 }
             }
             // find variant
-            // Debug.log("=====try to find variant for product: " + productId + " and features: " + selectedFeatures);
+            // Debug.logInfo("=====try to find variant for product: " + productId + " and features: " + selectedFeatures);
             List<GenericValue> productAssocs = EntityUtil.filterByDate(delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", productId, "productAssocTypeId","PRODUCT_VARIANT")));
             boolean productFound = false;
 nextProd:
@@ -1045,7 +1048,7 @@ nextProd:
                 break;
             }
 //          if (productFound)
-//              Debug.log("=====product found:" + productId + " and features: " + selectedFeatures);
+//              Debug.logInfo("=====product found:" + productId + " and features: " + selectedFeatures);
 
             /**
              * 1. variant not found so create new variant product and use the virtual product as basis, new one  is a variant type and not a virtual type.
@@ -1099,7 +1102,7 @@ nextProd:
                 GenericValue productAssoc = delegator.makeValue("ProductAssoc", UtilMisc.toMap("productId", productId, "productIdTo", product.getString("productId"), "productAssocTypeId", "PRODUCT_VARIANT"));
                 productAssoc.put("fromDate", UtilDateTime.nowTimestamp());
                 productAssoc.create();
-                Debug.log("set the productId to: " + product.getString("productId"));
+                Debug.logInfo("set the productId to: " + product.getString("productId"), module);
 
                 // copy the supplier
                 List<GenericValue> supplierProducts = delegator.findByAndCache("SupplierProduct", UtilMisc.toMap("productId", productId));
@@ -1193,4 +1196,16 @@ nextProd:
         return Boolean.TRUE;
     }
 
+    public static boolean isAggregateService(Delegator delegator, String aggregatedProductId) {
+        try {
+            GenericValue aggregatedProduct = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", aggregatedProductId));
+            if (UtilValidate.isNotEmpty(aggregatedProduct) && "AGGREGATED_SERVICE".equals(aggregatedProduct.getString("productTypeId"))) {
+                return true;
+            }
+        } catch (GenericEntityException e) {
+            Debug.logWarning(e.getMessage(), module);
+        }
+
+        return false;
+    }
 }

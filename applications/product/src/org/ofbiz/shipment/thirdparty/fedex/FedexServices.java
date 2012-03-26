@@ -49,6 +49,7 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.party.party.PartyHelper;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
@@ -350,7 +351,7 @@ public class FedexServices {
             String fDXSubscriptionReplyString = null;
             try {
                 fDXSubscriptionReplyString = sendFedexRequest(fDXSubscriptionRequestString, delegator, shipmentGatewayConfigId, resource, locale);
-                Debug.log("Fedex response for FDXSubscriptionRequest:" + fDXSubscriptionReplyString);
+                Debug.logInfo("Fedex response for FDXSubscriptionRequest:" + fDXSubscriptionReplyString, module);
             } catch (FedexConnectException e) {
                 String errorMessage = "Error sending Fedex request for FDXSubscriptionRequest: " + e.toString();
                 Debug.logError(e, errorMessage, module);
@@ -362,7 +363,7 @@ public class FedexServices {
             Document fDXSubscriptionReplyDocument = null;
             try {
                 fDXSubscriptionReplyDocument = UtilXml.readXmlDocument(fDXSubscriptionReplyString, false);
-                Debug.log("Fedex response for FDXSubscriptionRequest:" + fDXSubscriptionReplyString);
+                Debug.logInfo("Fedex response for FDXSubscriptionRequest:" + fDXSubscriptionReplyString, module);
             } catch (SAXException se) {
                 String errorMessage = "Error parsing the FDXSubscriptionRequest response: " + se.toString();
                 Debug.logError(se, errorMessage, module);
@@ -538,7 +539,7 @@ public class FedexServices {
             } else if (UtilValidate.isNotEmpty(shipmentRouteSegment.getString("currencyUomId"))) {
                 currencyCode = shipment.getString("currencyUomId");
             } else {
-                currencyCode = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+                currencyCode = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
             }
 
             // Get and validate origin postal address
@@ -1044,7 +1045,7 @@ public class FedexServices {
             // Store in db blob
             shipmentPackageRouteSeg.setBytes("labelImage", labelBytes);
         } else {
-            Debug.log("Failed to either decode returned FedEx label or no data found in Labels/OutboundLabel.");
+            Debug.logInfo("Failed to either decode returned FedEx label or no data found in Labels/OutboundLabel.", module);
             // TODO: Cancel the package
         }
 

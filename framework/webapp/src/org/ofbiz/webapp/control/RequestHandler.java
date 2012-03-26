@@ -139,6 +139,18 @@ public class RequestHandler {
                 requestMap = requestMapMap.get(defaultRequest);
             }
         }
+
+        // check for override view
+        if (overrideViewUri != null) {
+            ConfigXMLReader.ViewMap viewMap = getControllerConfig().getViewMapMap().get(overrideViewUri);
+            if (viewMap == null) {
+                String defaultRequest = controllerConfig.getDefaultRequest();
+                if (defaultRequest != null) { // required! to avoid a null pointer exception and generate a requesthandler exception if default request not found.
+                    requestMap = requestMapMap.get(defaultRequest);
+                }
+            }
+        }
+
         // still not found so stop
         if (requestMap == null) {
             throw new RequestHandlerException(requestMissingErrorMessage);
@@ -916,7 +928,7 @@ public class RequestHandler {
      * @return return the query string
      */
     public String makeQueryString(HttpServletRequest request, ConfigXMLReader.RequestResponse requestResponse) {
-        if (requestResponse == null || 
+        if (requestResponse == null ||
                 (requestResponse.redirectParameterMap.size() == 0 && requestResponse.redirectParameterValueMap.size() == 0)) {
             Map<String, Object> urlParams = UtilHttp.getUrlOnlyParameterMap(request);
             String queryString = UtilHttp.urlEncodeArgs(urlParams, false);
@@ -1101,6 +1113,7 @@ public class RequestHandler {
                         newURL.insert(questionIndex, sessionId);
                     }
                 }
+
                 encodedUrl = newURL.toString();
             }
         } else {

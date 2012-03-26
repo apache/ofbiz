@@ -20,11 +20,12 @@ package org.ofbiz.order.shoppinglist;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -226,9 +227,7 @@ public class ShoppingListEvents {
             // include all items of child lists if flagged to do so
             if (includeChild) {
                 List<GenericValue> childShoppingLists = shoppingList.getRelated("ChildShoppingList");
-                Iterator<GenericValue> ci = childShoppingLists.iterator();
-                while (ci.hasNext()) {
-                    GenericValue v = ci.next();
+                for(GenericValue v : childShoppingLists) {
                     List<GenericValue> items = v.getRelated("ShoppingListItem");
                     shoppingListItems.addAll(items);
                 }
@@ -258,9 +257,7 @@ public class ShoppingListEvents {
 
         // add the items
         StringBuilder eventMessage = new StringBuilder();
-        Iterator<GenericValue> i = shoppingListItems.iterator();
-        while (i.hasNext()) {
-            GenericValue shoppingListItem = i.next();
+        for(GenericValue shoppingListItem : shoppingListItems) {
             String productId = shoppingListItem.getString("productId");
             BigDecimal quantity = shoppingListItem.getBigDecimal("quantity");
             Timestamp reservStart = shoppingListItem.getTimestamp("reservStart");
@@ -554,10 +551,8 @@ public class ShoppingListEvents {
      */
     public static int makeListItemSurveyResp(Delegator delegator, GenericValue item, List<String> surveyResps) throws GenericEntityException {
         if (UtilValidate.isNotEmpty(surveyResps)) {
-            Iterator<String> i = surveyResps.iterator();
             int count = 0;
-            while (i.hasNext()) {
-                String responseId = i.next();
+            for(String responseId : surveyResps) {
                 GenericValue listResp = delegator.makeValue("ShoppingListItemSurvey");
                 listResp.set("shoppingListId", item.getString("shoppingListId"));
                 listResp.set("shoppingListItemSeqId", item.getString("shoppingListItemSeqId"));
@@ -576,9 +571,7 @@ public class ShoppingListEvents {
     public static Map<String, List<String>> getItemSurveyInfos(List<GenericValue> items) {
         Map<String, List<String>> surveyInfos = FastMap.newInstance();
         if (UtilValidate.isNotEmpty(items)) {
-            Iterator<GenericValue> itemIt = items.iterator();
-            while (itemIt.hasNext()) {
-                GenericValue item = itemIt.next();
+            for(GenericValue item : items) {
                 String listId = item.getString("shoppingListId");
                 String itemId = item.getString("shoppingListItemSeqId");
                 surveyInfos.put(listId + "." + itemId, getItemSurveyInfo(item));
@@ -601,9 +594,7 @@ public class ShoppingListEvents {
         }
 
         if (UtilValidate.isNotEmpty(surveyResp)) {
-            Iterator<GenericValue> respIt = surveyResp.iterator();
-            while (respIt.hasNext()) {
-                GenericValue resp = respIt.next();
+            for(GenericValue resp : surveyResp) {
                 responseIds.add(resp.getString("surveyResponseId"));
             }
         }
@@ -626,5 +617,81 @@ public class ShoppingListEvents {
             arr[i] = Integer.toString(i);
         }
         return arr;
+    }
+    
+    /**
+     * Create the guest cookies for a shopping list
+     */
+    public static String createGuestShoppingListCookies (HttpServletRequest request, HttpServletResponse response){
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
+        LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
+        HttpSession session = request.getSession(true);
+        ShoppingCart cart = (ShoppingCart) session.getAttribute("shoppingCart");
+        GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
+        Properties systemProps = System.getProperties();
+        String guestShoppingUserName = "GuestShoppingListId_" + systemProps.getProperty("user.name").replace(" ", "_");
+        String productStoreId = ProductStoreWorker.getProductStoreId(request);
+        int cookieAge = (60 * 60 * 24 * 30);
+        String autoSaveListId = null;
+        Cookie[] cookies = request.getCookies();
+        
+        // check userLogin
+        if (UtilValidate.isNotEmpty(userLogin)) {
+            String partyId = userLogin.getString("partyId");
+            if (UtilValidate.isEmpty(partyId)) {
+                return "success";
+            }
+        }
+        
+        // find shopping list ID
+        if (cookies != null) {
+            for (Cookie cookie: cookies) {
+                if (cookie.getName().equals(guestShoppingUserName)) {
+                    autoSaveListId = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        
+        // clear the auto-save info
+        if (ProductStoreWorker.autoSaveCart(delegator, productStoreId)) {
+            if (UtilValidate.isEmpty(autoSaveListId)) {
+                try {
+                    Map<String, Object> listFields = UtilMisc.<String, Object>toMap("userLogin", userLogin, "productStoreId", productStoreId, "shoppingListTypeId", "SLT_SPEC_PURP", "listName", PERSISTANT_LIST_NAME);
+                    Map<String, Object> newListResult = dispatcher.runSync("createShoppingList", listFields);
+                    if (newListResult != null) {
+                        autoSaveListId = (String) newListResult.get("shoppingListId");
+                    }
+                } catch (GeneralException e) {
+                    Debug.logError(e, module);
+                }
+                Cookie guestShoppingListCookie = new Cookie(guestShoppingUserName, autoSaveListId);
+                guestShoppingListCookie.setMaxAge(cookieAge);
+                guestShoppingListCookie.setPath("/");
+                response.addCookie(guestShoppingListCookie);
+            } 
+        }
+        if (UtilValidate.isNotEmpty(autoSaveListId)) {
+            if (UtilValidate.isNotEmpty(cart)) {
+                cart.setAutoSaveListId(autoSaveListId);
+            } else {
+                cart = ShoppingCartEvents.getCartObject(request);
+                cart.setAutoSaveListId(autoSaveListId);
+            }
+        }
+        return "success";
+    }
+    
+    /**
+     * Clear the guest cookies for a shopping list
+     */
+    public static String clearGuestShoppingListCookies (HttpServletRequest request, HttpServletResponse response){
+        Properties systemProps = System.getProperties();
+        String guestShoppingUserName = "GuestShoppingListId_" + systemProps.getProperty("user.name").replace(" ", "_");
+        Cookie guestShoppingListCookie = new Cookie(guestShoppingUserName, null);
+        guestShoppingListCookie.setMaxAge(0);
+        guestShoppingListCookie.setPath("/");
+        response.addCookie(guestShoppingListCookie);
+        return "success";
     }
 }

@@ -97,7 +97,7 @@ public class ProductConfigWrapper implements Serializable {
 
     private void init(Delegator delegator, LocalDispatcher dispatcher, String productId, String productStoreId, String catalogId, String webSiteId, String currencyUomId, Locale locale, GenericValue autoUserLogin) throws Exception {
         product = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", productId));
-        if (product == null || !product.getString("productTypeId").equals("AGGREGATED")) {
+        if (product == null || !product.getString("productTypeId").equals("AGGREGATED") && !product.getString("productTypeId").equals("AGGREGATED_SERVICE")) {
             throw new ProductConfigWrapperException("Product " + productId + " is not an AGGREGATED product.");
         }
         this.dispatcher = dispatcher;
@@ -123,7 +123,7 @@ public class ProductConfigWrapper implements Serializable {
             basePrice = price;
         }
         questions = FastList.newInstance();
-        if ("AGGREGATED".equals(product.getString("productTypeId"))) {
+        if ("AGGREGATED".equals(product.getString("productTypeId")) || "AGGREGATED_SERVICE".equals(product.getString("productTypeId"))) {
             List<GenericValue> questionsValues = delegator.findByAnd("ProductConfig", UtilMisc.toMap("productId", productId), UtilMisc.toList("sequenceNum"));
             questionsValues = EntityUtil.filterByDate(questionsValues);
             Set<String> itemIds = FastSet.newInstance();
@@ -662,6 +662,15 @@ public class ProductConfigWrapper implements Serializable {
                 optionListPrice = optionListPrice.add(listPrice.multiply(mult));
                 optionPrice = optionPrice.add(price.multiply(mult));
             }
+        }
+
+        public String getOptionName() {
+            return (configOption.getString("configOptionName") != null? configOption.getString("configOptionName"): "no option name");
+        }
+
+        public String getOptionName(Locale locale) {
+        	
+            return (configOption.getString("configOptionName") != null? (String) configOption.get("configOptionName", locale): "no option name");
         }
 
         public String getDescription() {

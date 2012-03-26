@@ -33,6 +33,11 @@ under the License.
 
     <screen name="CommonDecorator">
         <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="applicationTitle" value="mFacility"/>
+            </actions>
             <widgets>
                 <include-screen name="GlobalDecorator"/>
             </widgets>
@@ -48,10 +53,17 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonDecorator">
                     <decorator-section name="body">
-                        <container>
-                            <label style="h2">${parameters.facility.facilityName}</label>
-                        </container>
-                        <decorator-section-include name="body"/>
+                        <section>
+                            <condition>
+                                <not><if-empty field="parameters.facilityId"/></not>
+                            </condition>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <include-screen name="facilities"/>
+                            </fail-widgets>
+                        </section>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -60,6 +72,9 @@ under the License.
 
     <screen name="login">
         <section>
+            <actions>
+                <set field="title" value="Login Page"/>
+            </actions>
             <widgets>
                 <decorator-screen name="CommonDecorator">
                     <decorator-section name="body">
@@ -74,6 +89,9 @@ under the License.
 
     <screen name="menu">
         <section>
+            <actions>
+                <set field="title" value="Select Activity"/>
+            </actions>
             <widgets>
                 <decorator-screen name="FacilityDecorator">
                     <decorator-section name="body">
@@ -86,12 +104,12 @@ under the License.
 
     <screen name="receipt">
         <section>
+            <actions>
+                <set field="title" value="${uiLabelMap.ProductGoodsReceipt}"/>
+            </actions>
             <widgets>
                 <decorator-screen name="FacilityDecorator">
                     <decorator-section name="body">
-                        <container>
-                            <label style="h1">${uiLabelMap.ProductGoodsReceipt}</label>
-                        </container>
                         <platform-specific><html><html-template location="component://hhfacility/webapp/hhfacility/receipt.ftl"/></html></platform-specific>
                     </decorator-section>
                 </decorator-screen>
@@ -101,12 +119,12 @@ under the License.
 
     <screen name="poreceipt">
         <section>
+            <actions>
+                <set field="title" value="${uiLabelMap.ProductReceiptPurchaseOrder}"/>
+            </actions>
             <widgets>
                 <decorator-screen name="FacilityDecorator">
                     <decorator-section name="body">
-                        <container>
-                            <label style="h1">${uiLabelMap.ProductReceiptPurchaseOrder}</label>
-                        </container>
                         <include-form name="POEnter" location="component://hhfacility/widget/hhfacility/FacilityForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
@@ -131,14 +149,12 @@ under the License.
     <screen name="productreceipt">
         <section>
             <actions>
+                <set field="title" value="${uiLabelMap.ProductReceipt}"/>
                 <set field="focusField" value="productId"/>
             </actions>
             <widgets>
                 <decorator-screen name="FacilityDecorator">
                     <decorator-section name="body">
-                        <container>
-                            <label style="h1">${uiLabelMap.ProductReceipt}</label>
-                        </container>
                         <include-form name="ProductEnter" location="component://hhfacility/widget/hhfacility/FacilityForms.xml"/>
                         <platform-specific><html><html-template location="component://hhfacility/webapp/hhfacility/setFocusOnField.ftl"/></html></platform-specific>
                     </decorator-section>
@@ -210,15 +226,13 @@ under the License.
     <screen name="stocktake">
         <section>
             <actions>
+                <set field="title" value="${uiLabelMap.PageTitleFindProductStocktake}"/>
                 <set field="idValue" from-field="parameters.idValue"/>
                 <script location="component://hhfacility/webapp/hhfacility/WEB-INF/actions/ProductList.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="FacilityDecorator">
                     <decorator-section name="body">
-                        <container>
-                            <label style="h1">${uiLabelMap.PageTitleFindProductStocktake}</label>
-                        </container>
                         <include-form name="FindProductStock" location="component://hhfacility/widget/hhfacility/FacilityForms.xml"/>
                         <platform-specific><html><html-template location="component://hhfacility/webapp/hhfacility/stocktake.ftl"/></html></platform-specific>
                     </decorator-section>
@@ -230,6 +244,7 @@ under the License.
     <screen name="productstocktake">
         <section>
             <actions>
+                <set field="title" value="${uiLabelMap.PageTitleProductStocktake}"/>
                 <script location="component://hhfacility/webapp/hhfacility/WEB-INF/actions/ProductStockTake.groovy"/>
 
                 <set field="locationSeqId" from-field="productFacilityLocations"/>
@@ -237,9 +252,6 @@ under the License.
             <widgets>
                 <decorator-screen name="FacilityDecorator">
                     <decorator-section name="body">
-                        <container>
-                            <label style="h1">${uiLabelMap.PageTitleProductStocktake}</label>
-                        </container>
                         <include-form name="ProductStocktake" location="component://hhfacility/widget/hhfacility/FacilityForms.xml"/>
                         <include-form name="UpdateProductStocktake" location="component://hhfacility/widget/hhfacility/FacilityForms.xml"/>
                         <platform-specific><html><html-template location="component://hhfacility/webapp/hhfacility/productstocktake.ftl"/></html></platform-specific>
@@ -252,19 +264,15 @@ under the License.
     <screen name="facilities">
         <section>
             <actions>
+                <set field="title" value="Select Facility"/>
                 <entity-condition entity-name="Facility" list="facilities">
                     <condition-expr field-name="facilityTypeId" value="WAREHOUSE"/>
                     <order-by field-name="facilityId"/>
                 </entity-condition>
             </actions>
             <widgets>
-                <decorator-screen name="CommonDecorator">
-                    <decorator-section name="body">
-                        <include-form name="ListFacilities" location="component://hhfacility/widget/hhfacility/FacilityForms.xml"/>
-                    </decorator-section>
-                </decorator-screen>
+                <platform-specific><html><html-template location="component://hhfacility/webapp/hhfacility/facilities.ftl"/></html></platform-specific>
             </widgets>
         </section>
     </screen>
-
 </screens>

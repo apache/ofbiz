@@ -42,6 +42,14 @@ under the License.
                     <fail-property resource="CommonUiLabels" property="CommonEmailNotValid"/>
                 </add-error>
                 <check-errors/>
+                <set field="getEmail.partyId" from-field="parameters.partyIdTo"/>
+                <call-service service-name="getPartyEmail" in-map-name="getEmail">
+                    <result-to-field result-name="emailAddress" field="parameters.sendTo"/>
+                </call-service>
+                <if-empty field="parameters.sendTo">
+                    <log level="info" message="PartyId: ${parameters.partyIdTo} has no valid email address, not sending email"></log>
+                    <return/>
+                </if-empty>
             </if-empty>
         </if-empty>
         <entity-one entity-name="EmailTemplateSetting" value-field="emailTemplateSetting"/>

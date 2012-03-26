@@ -96,15 +96,15 @@ function insertImageName(type,nameValue) {
                     <td>&nbsp;</td>
                     <td width="74%">
                         <select name="productCategoryTypeId" size="1">
-                        	<#assign selectedKey = "">
-	                    	<#list productCategoryTypes as productCategoryTypeData>
-                        		<#if requestParameters.productCategoryTypeId?has_content>
-                        			<#assign selectedKey = requestParameters.productCategoryTypeId>
-                        		<#elseif (productCategory?has_content && productCategory.productCategoryTypeId?if_exists == productCategoryTypeData.productCategoryTypeId)>
-                        			<#assign selectedKey = productCategory.productCategoryTypeId>
-	                        	</#if>
-                        		<option <#if selectedKey == productCategoryTypeData.productCategoryTypeId?if_exists>selected="selected"</#if> value="${productCategoryTypeData.productCategoryTypeId}">${productCategoryTypeData.get("description",locale)}</option>
-                        	</#list>
+                            <#assign selectedKey = "">
+                            <#list productCategoryTypes as productCategoryTypeData>
+                                <#if requestParameters.productCategoryTypeId?has_content>
+                                    <#assign selectedKey = requestParameters.productCategoryTypeId>
+                                <#elseif (productCategory?has_content && productCategory.productCategoryTypeId?if_exists == productCategoryTypeData.productCategoryTypeId)>
+                                    <#assign selectedKey = productCategory.productCategoryTypeId>
+                                </#if>
+                                <option <#if selectedKey == productCategoryTypeData.productCategoryTypeId?if_exists>selected="selected"</#if> value="${productCategoryTypeData.productCategoryTypeId}">${productCategoryTypeData.get("description",locale)}</option>
+                            </#list>
                         </select>
                     </td>
                 </tr>
@@ -122,7 +122,7 @@ function insertImageName(type,nameValue) {
                     <td width="20%" align="right" valign="top" class="label">
                         ${uiLabelMap.ProductCategoryImageUrl}
                         <#if (productCategory.categoryImageUrl)?exists>
-                            <a href="<@ofbizContentUrl>${(productCategory.categoryImageUrl)?if_exists}</@ofbizContentUrl>" target="_blank"><img alt="Category Image" src="<@ofbizContentUrl>${(productCategory.categoryImageUrl)?if_exists}</@ofbizContentUrl>" height="40" width="40" /></a>
+                            <a href="<@ofbizContentUrl>${(productCategory.categoryImageUrl)?if_exists}</@ofbizContentUrl>" target="_blank"><img alt="Category Image" src="<@ofbizContentUrl>${(productCategory.categoryImageUrl)?if_exists}</@ofbizContentUrl>" class="cssImgSmall" /></a>
                         </#if>
                     </td>
                     <td>&nbsp;</td>
@@ -142,7 +142,7 @@ function insertImageName(type,nameValue) {
                     <td width="20%" align="right" valign="top" class="label">
                         ${uiLabelMap.ProductLinkOneImageUrl}
                         <#if (productCategory.linkOneImageUrl)?exists>
-                            <a href="<@ofbizContentUrl>${(productCategory.linkOneImageUrl)?if_exists}</@ofbizContentUrl>" target="_blank"><img alt="Link One Image" src="<@ofbizContentUrl>${(productCategory.linkOneImageUrl)?if_exists}</@ofbizContentUrl>" height="40" width="40" /></a>
+                            <a href="<@ofbizContentUrl>${(productCategory.linkOneImageUrl)?if_exists}</@ofbizContentUrl>" target="_blank"><img alt="Link One Image" src="<@ofbizContentUrl>${(productCategory.linkOneImageUrl)?if_exists}</@ofbizContentUrl>" class="cssImgSmall" /></a>
                         </#if>
                     </td>
                     <td>&nbsp;</td>
@@ -162,7 +162,7 @@ function insertImageName(type,nameValue) {
                     <td width="20%" align="right" valign="top" class="label">
                         ${uiLabelMap.ProductLinkTwoImageUrl}
                         <#if (productCategory.linkTwoImageUrl)?exists>
-                            <a href="<@ofbizContentUrl>${(productCategory.linkTwoImageUrl)?if_exists}</@ofbizContentUrl>" target="_blank"><img alt="Link One Image" src="<@ofbizContentUrl>${(productCategory.linkTwoImageUrl)?if_exists}</@ofbizContentUrl>" height="40" width="40" /></a>
+                            <a href="<@ofbizContentUrl>${(productCategory.linkTwoImageUrl)?if_exists}</@ofbizContentUrl>" target="_blank"><img alt="Link One Image" src="<@ofbizContentUrl>${(productCategory.linkTwoImageUrl)?if_exists}</@ofbizContentUrl>" class="cssImgSmall" /></a>
                         </#if>
                     </td>
                     <td>&nbsp;</td>

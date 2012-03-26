@@ -43,6 +43,7 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.util.EntityTypeUtil;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.order.order.OrderReadHelper;
 import org.ofbiz.order.shoppingcart.ShoppingCart.CartShipInfo;
@@ -76,7 +77,7 @@ public class ShoppingCartServices {
             clearEmptyGroups = Boolean.TRUE;
         }
 
-        Debug.log("From Group - " + fromGroupIndex + " To Group - " + toGroupIndex + "Item - " + itemIndex + "(" + quantity + ")", module);
+        Debug.logInfo("From Group - " + fromGroupIndex + " To Group - " + toGroupIndex + "Item - " + itemIndex + "(" + quantity + ")", module);
         if (fromGroupIndex.equals(toGroupIndex)) {
             // nothing to do
             return ServiceUtil.returnSuccess();
@@ -84,7 +85,7 @@ public class ShoppingCartServices {
 
         cart.positionItemToGroup(itemIndex.intValue(), quantity,
                 fromGroupIndex.intValue(), toGroupIndex.intValue(), clearEmptyGroups.booleanValue());
-        Debug.log("Called cart.positionItemToGroup()", module);
+        Debug.logInfo("Called cart.positionItemToGroup()", module);
 
         return ServiceUtil.returnSuccess();
     }
@@ -288,10 +289,10 @@ public class ShoppingCartServices {
 
                 if ((overflow == null || !"Y".equals(overflow)) && oppi.hasNext()) {
                     cpi = cart.addPaymentAmount(paymentId, maxAmount);
-                    Debug.log("Added Payment: " + paymentId + " / " + maxAmount, module);
+                    Debug.logInfo("Added Payment: " + paymentId + " / " + maxAmount, module);
                 } else {
                     cpi = cart.addPayment(paymentId);
-                    Debug.log("Added Payment: " + paymentId + " / [no max]", module);
+                    Debug.logInfo("Added Payment: " + paymentId + " / [no max]", module);
                 }
                 // for finance account the finAccountId needs to be set
                 if ("FIN_ACCOUNT".equals(paymentId)) {
@@ -301,7 +302,7 @@ public class ShoppingCartServices {
                 cart.setBillingAccount(orderHeader.getString("billingAccountId"), orh.getBillingAccountMaxAmount());
             }
         } else {
-            Debug.log("No payment preferences found for order #" + orderId, module);
+            Debug.logInfo("No payment preferences found for order #" + orderId, module);
         }
 
         List<GenericValue> orderItemShipGroupList = orh.getOrderItemShipGroups();
@@ -449,7 +450,7 @@ public class ShoppingCartServices {
                     String configId = null;
                     try {
                         product = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", productId));
-                        if ("AGGREGATED_CONF".equals(product.getString("productTypeId"))) {
+                        if (EntityTypeUtil.hasParentType(delegator, "ProductType", "productTypeId", product.getString("productTypeId"), "parentTypeId", "AGGREGATED")) {
                             List<GenericValue>productAssocs = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productAssocTypeId", "PRODUCT_CONF", "productIdTo", product.getString("productId")));
                             productAssocs = EntityUtil.filterByDate(productAssocs);
                             if (UtilValidate.isNotEmpty(productAssocs)) {
@@ -903,9 +904,7 @@ public class ShoppingCartServices {
 
             // The cart item adjustments, derived from quote item adjustments, are added to the cart
             if (quoteItems != null) {
-                Iterator<ShoppingCartItem> i = cart.iterator();
-                while (i.hasNext()) {
-                    ShoppingCartItem item = i.next();
+                for(ShoppingCartItem item : cart) {
                     String orderItemSeqId = item.getOrderItemSeqId();
                     if (orderItemSeqId != null) {
                         adjs = orderAdjsMap.get(orderItemSeqId);
@@ -1107,10 +1106,8 @@ public class ShoppingCartServices {
             result.put("displayGrandTotalCurrencyFormatted",org.ofbiz.base.util.UtilFormatOut.formatCurrency(shoppingCart.getDisplayGrandTotal(), isoCode, locale));
             BigDecimal orderAdjustmentsTotal = OrderReadHelper.calcOrderAdjustments(OrderReadHelper.getOrderHeaderAdjustments(shoppingCart.getAdjustments(), null), shoppingCart.getSubTotal(), true, true, true);
             result.put("displayOrderAdjustmentsTotalCurrencyFormatted", org.ofbiz.base.util.UtilFormatOut.formatCurrency(orderAdjustmentsTotal, isoCode, locale));
-            Iterator<ShoppingCartItem> i = shoppingCart.iterator();
             Map<String, Object> cartItemData = FastMap.newInstance();
-            while (i.hasNext()) {
-                ShoppingCartItem cartLine = i.next();
+            for(ShoppingCartItem cartLine : shoppingCart) {
                 int cartLineIndex = shoppingCart.getItemIndex(cartLine);
                 cartItemData.put("displayItemQty_" + cartLineIndex, cartLine.getQuantity());
                 cartItemData.put("displayItemPrice_" + cartLineIndex, org.ofbiz.base.util.UtilFormatOut.formatCurrency(cartLine.getDisplayPrice(), isoCode, locale));
@@ -1141,9 +1138,7 @@ public class ShoppingCartServices {
     public static Map<String, Object>resetShipGroupItems(DispatchContext dctx, Map<String, Object> context) {
         Map<String, Object> result = ServiceUtil.returnSuccess();
         ShoppingCart cart = (ShoppingCart) context.get("shoppingCart");
-        Iterator<ShoppingCartItem> sciIter = cart.iterator();
-        while (sciIter.hasNext()) {
-            ShoppingCartItem item = sciIter.next();
+        for(ShoppingCartItem item : cart) {
             cart.clearItemShipInfo(item);
             cart.setItemShipGroupQty(item, item.getQuantity(), 0);
         }
@@ -1165,9 +1160,7 @@ public class ShoppingCartServices {
             return ServiceUtil.returnError(e.toString());
         }
         Map<String, Object> vendorMap = FastMap.newInstance();
-        Iterator<ShoppingCartItem> sciIter = cart.iterator();
-        while (sciIter.hasNext()) {
-            ShoppingCartItem item = sciIter.next();
+        for(ShoppingCartItem item : cart) {
             GenericValue vendorProduct = null;
             String productId = item.getParentProductId();
             if (productId == null) {

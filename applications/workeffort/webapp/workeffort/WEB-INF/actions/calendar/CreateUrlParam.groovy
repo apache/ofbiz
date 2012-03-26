@@ -17,60 +17,18 @@
  * under the License.
  */
 
-facilityId = parameters.facilityId;
-fixedAssetId = parameters.fixedAssetId;
-partyId = parameters.partyId;
-workEffortTypeId = parameters.workEffortTypeId;
-calendarType = parameters.calendarType;
-hideEvents = parameters.hideEvents;
+import java.util.*;
+import org.ofbiz.base.util.*;
 
-urlParam = "";
-if (facilityId) {
-    urlParam = "facilityId=" + facilityId;
+// Allow containing screens to specify URL parameters to be included in calendar navigation links
+List urlParameterNames = context.urlParameterNames;
+if (urlParameterNames == null) {
+    urlParameterNames = UtilMisc.toList("fixedAssetId", "partyId", "workEffortTypeId", "calendarType", "hideEvents", "portalPageId");
 }
-if (fixedAssetId) {
-    if (urlParam) {
-        urlParam = urlParam + "&";
+StringBuilder sb = new StringBuilder();
+for (entry in parameters.entrySet()) {
+    if (urlParameterNames.contains(entry.getKey())) {
+        sb.append("&").append(entry.getKey()).append("=").append(entry.getValue());
     }
-    urlParam = urlParam + "fixedAssetId=" + fixedAssetId;
 }
-if (partyId) {
-    if (urlParam) {
-        urlParam = urlParam + "&";
-    }
-    urlParam = urlParam + "partyId=" + partyId;
-}
-
-if (workEffortTypeId) {
-    if (urlParam) {
-        urlParam = urlParam + "&";
-    }
-    urlParam = urlParam + "workEffortTypeId=" + workEffortTypeId;
-}
-
-if (calendarType) {
-    if (urlParam) {
-        urlParam = urlParam + "&";
-    }
-    urlParam = urlParam + "calendarType=" + calendarType;
-}
-
-if (hideEvents) {
-    if (urlParam) {
-        urlParam = urlParam + "&";
-    }
-    urlParam = urlParam + "hideEvents=" + hideEvents;
-}
-
-if (parameters.portalPageId) {
-    if (urlParam) {
-        urlParam = urlParam + "&";
-    }
-    urlParam = urlParam + "portalPageId=" + parameters.portalPageId;
-}
-
-if (urlParam) {
-    urlParam = "&" + urlParam;
-}
-
-context.put("urlParam", urlParam);
+context.put("urlParam", sb.toString());

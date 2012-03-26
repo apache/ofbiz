@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javolution.util.FastMap;
@@ -44,6 +45,7 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityTypeUtil;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.order.order.OrderReadHelper;
 import org.ofbiz.order.shoppingcart.product.ProductPromoWorker;
@@ -207,10 +209,8 @@ public class ShoppingCartHelper {
 
         // Get the additional features selected for the product (if any)
         Map<String, Object> selectedFeatures = UtilHttp.makeParamMapWithPrefix(context, null, "FT", null);
-        Iterator<String> selectedFeaturesTypes = selectedFeatures.keySet().iterator();
         Map<String, GenericValue> additionalFeaturesMap = FastMap.newInstance();
-        while (selectedFeaturesTypes.hasNext()) {
-            String selectedFeatureType = selectedFeaturesTypes.next();
+        for(String selectedFeatureType : selectedFeatures.keySet()) {
             String selectedFeatureValue = (String)selectedFeatures.get(selectedFeatureType);
             if (UtilValidate.isNotEmpty(selectedFeatureValue)) {
                 GenericValue productFeatureAndAppl = null;
@@ -229,6 +229,15 @@ public class ShoppingCartHelper {
             }
         }
 
+        // get order item attributes
+        Map<String, String> orderItemAttributes = FastMap.newInstance();
+        String orderItemAttributePrefix = UtilProperties.getPropertyValue("order.properties", "order.item.attr.prefix");
+        for (Entry<String, ? extends Object> entry : context.entrySet()) {
+            if (entry.getKey().toString().contains(orderItemAttributePrefix) && UtilValidate.isNotEmpty(entry.getValue())) {
+                orderItemAttributes.put(entry.getKey().replaceAll(orderItemAttributePrefix, ""), entry.getValue().toString());
+            }
+        }
+
         // add or increase the item to the cart
         int itemId = -1;
         try {
@@ -236,7 +245,7 @@ public class ShoppingCartHelper {
 
                        itemId = cart.addOrIncreaseItem(productId, amount, quantity, reservStart, reservLength,
                                                 reservPersons, accommodationMapId, accommodationSpotId, shipBeforeDate, shipAfterDate, additionalFeaturesMap, attributes,
-                                                catalogId, configWrapper, itemType, itemGroupNumber, pProductId, dispatcher);
+                                                orderItemAttributes, catalogId, configWrapper, itemType, itemGroupNumber, pProductId, dispatcher);
 
             } else {
                 itemId = cart.addNonProductItem(itemType, itemDescription, productCategoryId, price, quantity, attributes, catalogId, itemGroupNumber, dispatcher);
@@ -317,7 +326,7 @@ public class ShoppingCartHelper {
                     BigDecimal amount = orderItem.getBigDecimal("selectedAmount");
                     ProductConfigWrapper configWrapper = null;
                     String aggregatedProdId = null;
-                    if ("AGGREGATED_CONF".equals(ProductWorker.getProductTypeId(delegator, productId))) {
+                    if (EntityTypeUtil.hasParentType(delegator, "ProductType", "productTypeId", ProductWorker.getProductTypeId(delegator, productId), "parentTypeId", "AGGREGATED")) {
                         try {
                             GenericValue instanceProduct = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", productId));
                             String configId = instanceProduct.getString("configId");
@@ -577,10 +586,7 @@ public class ShoppingCartHelper {
         }
 
         BigDecimal totalQuantity = BigDecimal.ZERO;
-        Iterator<GenericValue> pcmIter = prodCatMemberCol.iterator();
-
-        while (pcmIter.hasNext()) {
-            GenericValue productCategoryMember = pcmIter.next();
+        for(GenericValue productCategoryMember : prodCatMemberCol) {
             BigDecimal quantity = productCategoryMember.getBigDecimal("quantity");
 
             if (quantity != null && quantity.compareTo(BigDecimal.ZERO) > 0) {
@@ -610,13 +616,8 @@ public class ShoppingCartHelper {
     /** Delete an item from the shopping cart. */
     public Map<String, Object> deleteFromCart(Map<String, ? extends Object> context) {
         Map<String, Object> result = null;
-        Set<String> names = context.keySet();
-        Iterator<String> i = names.iterator();
         ArrayList<String> errorMsgs = new ArrayList<String>();
-
-        while (i.hasNext()) {
-            String o = i.next();
-
+        for(String o : context.keySet()) {
             if (o.toUpperCase().startsWith("DELETE")) {
                 try {
                     String indexStr = o.substring(o.lastIndexOf('_') + 1);
@@ -651,9 +652,6 @@ public class ShoppingCartHelper {
         ArrayList<ShoppingCartItem> deleteList = new ArrayList<ShoppingCartItem>();
         ArrayList<String> errorMsgs = new ArrayList<String>();
 
-        Set<String> parameterNames = context.keySet();
-        Iterator<String> parameterNameIter = parameterNames.iterator();
-
         BigDecimal oldQuantity = BigDecimal.ONE.negate();
         String oldDescription = "";
         BigDecimal oldPrice = BigDecimal.ONE.negate();
@@ -666,8 +664,7 @@ public class ShoppingCartHelper {
         }
 
         // TODO: This should be refactored to use UtilHttp.parseMultiFormData(parameters)
-        while (parameterNameIter.hasNext()) {
-            String parameterName = parameterNameIter.next();
+        for(String parameterName : context.keySet()) {
             int underscorePos = parameterName.lastIndexOf('_');
 
             if (underscorePos >= 0) {
@@ -870,10 +867,7 @@ public class ShoppingCartHelper {
             }
         }
 
-        Iterator<ShoppingCartItem> di = deleteList.iterator();
-
-        while (di.hasNext()) {
-            ShoppingCartItem item = di.next();
+        for(ShoppingCartItem item : deleteList) {
             int itemIndex = this.cart.getItemIndex(item);
 
             if (Debug.infoOn())

@@ -20,7 +20,6 @@ package org.ofbiz.order.shoppinglist;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Date;
@@ -42,6 +41,7 @@ import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.entity.util.EntityListIterator;
+import org.ofbiz.entity.util.EntityTypeUtil;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.order.order.OrderReadHelper;
 import org.ofbiz.order.shoppingcart.CartItemModifyException;
@@ -112,7 +112,7 @@ public class ShoppingListServices {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,"OrderUnableToCreateShoppingListRecurrenceInformation",locale));
         }
 
-        Debug.log("Next Recurrence - " + UtilDateTime.getTimestamp(recInfo.next()), module);
+        Debug.logInfo("Next Recurrence - " + UtilDateTime.getTimestamp(recInfo.next()), module);
         Map<String, Object> result = ServiceUtil.returnSuccess();
         result.put("recurrenceInfoId", recInfo.getID());
 
@@ -325,15 +325,12 @@ public class ShoppingListServices {
             }
 
             List<GenericValue> orderItems = orh.getOrderItems();
-            Iterator<GenericValue> i = orderItems.iterator();
-            String productId = null;
-            while (i.hasNext()) {
-                GenericValue orderItem = i.next();
-                productId = orderItem.getString("productId");
+            for(GenericValue orderItem : orderItems) {
+                String productId = orderItem.getString("productId");
                 if (UtilValidate.isNotEmpty(productId)) {
                     Map<String, Object> ctx = UtilMisc.<String, Object>toMap("userLogin", userLogin, "shoppingListId", shoppingListId, "productId",
                             orderItem.get("productId"), "quantity", orderItem.get("quantity"));
-                    if ("AGGREGATED_CONF".equals(ProductWorker.getProductTypeId(delegator, productId))) {
+                    if (EntityTypeUtil.hasParentType(delegator, "ProductType", "productTypeId", ProductWorker.getProductTypeId(delegator, productId), "parentTypeId", "AGGREGATED")) {
                         try {
                             GenericValue instanceProduct = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", productId));
                             String configId = instanceProduct.getString("configId");
@@ -470,10 +467,8 @@ public class ShoppingListServices {
                 }
 
 
-                Iterator<GenericValue> i = items.iterator();
                 ProductConfigWrapper configWrapper = null;
-                while (i.hasNext()) {
-                    GenericValue shoppingListItem = i.next();
+                for(GenericValue shoppingListItem : items) {
                     String productId = shoppingListItem.getString("productId");
                     BigDecimal quantity = shoppingListItem.getBigDecimal("quantity");
                     Timestamp reservStart = shoppingListItem.getTimestamp("reservStart");
@@ -564,9 +559,7 @@ public class ShoppingListServices {
         String orderId = (String) context.get("orderId");
         try {
             List<GenericValue> orderItems = delegator.findByAnd("OrderItem", UtilMisc.toMap("orderId", orderId));
-            Iterator<GenericValue> iter = orderItems.iterator();
-            while (iter.hasNext()) {
-                GenericValue orderItem = iter.next();
+            for(GenericValue orderItem : orderItems) {
                 String shoppingListId = orderItem.getString("shoppingListId");
                 String shoppingListItemSeqId = orderItem.getString("shoppingListItemSeqId");
                 if (UtilValidate.isNotEmpty(shoppingListId)) {
@@ -585,7 +578,7 @@ public class ShoppingListServices {
                 }
             }
         } catch (Exception e) {
-            Debug.log("updateShoppingListQuantitiesFromOrder error:"+e.getMessage());
+            Debug.logInfo("updateShoppingListQuantitiesFromOrder error:"+e.getMessage(), module);
         }
         return result;
     }

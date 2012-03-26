@@ -55,6 +55,7 @@ import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.FileUtil;
 import org.ofbiz.base.util.GeneralException;
+import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilIO;
@@ -62,6 +63,7 @@ import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.base.util.StringUtil.StringWrapper;
 import org.ofbiz.base.util.collections.MapStack;
 import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.base.util.template.XslTransform;
@@ -70,6 +72,7 @@ import org.ofbiz.content.content.UploadContentAndImage;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.widget.screen.MacroScreenRenderer;
@@ -542,7 +545,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
             latestDir = makeNewDirectory(parent);
         }
 
-        Debug.log("Directory Name : " + latestDir.getName(), module);
+        Debug.logInfo("Directory Name : " + latestDir.getName(), module);
         if (absolute) {
             return latestDir.getAbsolutePath().replace('\\','/');
         } else {
@@ -585,12 +588,18 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
     public static String renderDataResourceAsText(Delegator delegator, String dataResourceId, Map<String, Object> templateContext,
              Locale locale, String targetMimeTypeId, boolean cache) throws GeneralException, IOException {
         Writer writer = new StringWriter();
-        renderDataResourceAsText(delegator, dataResourceId, writer, templateContext, locale, targetMimeTypeId, cache);
+        renderDataResourceAsText(delegator, dataResourceId, writer, templateContext, locale, targetMimeTypeId, cache, null);
         return writer.toString();
     }
 
-    public static void renderDataResourceAsText(Delegator delegator, String dataResourceId, Appendable out,
+    public static String renderDataResourceAsText(Delegator delegator, String dataResourceId, Appendable out,
             Map<String, Object> templateContext, Locale locale, String targetMimeTypeId, boolean cache) throws GeneralException, IOException {
+       renderDataResourceAsText(delegator, dataResourceId, out, templateContext, locale, targetMimeTypeId, cache, null);
+       return out.toString();
+   }
+
+    public static void renderDataResourceAsText(Delegator delegator, String dataResourceId, Appendable out,
+            Map<String, Object> templateContext, Locale locale, String targetMimeTypeId, boolean cache, List<GenericValue> webAnalytics) throws GeneralException, IOException {
         if (dataResourceId == null) {
             throw new GeneralException("Cannot lookup data resource with for a null dataResourceId");
         }
@@ -655,6 +664,19 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
                     // get the template data for rendering
                     String templateText = getDataResourceText(dataResource, targetMimeTypeId, locale, templateContext, delegator, cache);
 
+                    // if use web analytics.
+                    if (UtilValidate.isNotEmpty(webAnalytics)) {
+                        StringBuffer newTemplateText = new StringBuffer(templateText);
+                        String webAnalyticsCode = "<script language=\"JavaScript\" type=\"text/javascript\">";
+                        for (GenericValue webAnalytic : webAnalytics) {
+                            StringWrapper wrapString = StringUtil.wrapString((String) webAnalytic.get("webAnalyticsCode"));
+                            webAnalyticsCode += wrapString.toString();
+                        }
+                        webAnalyticsCode += "</script>";
+                        newTemplateText.insert(templateText.lastIndexOf("</head>"), webAnalyticsCode);
+                        templateText = newTemplateText.toString();
+                    }
+
                     // render the FTL template
                     FreeMarkerWorker.renderTemplate("DataResource:" + dataResourceId, templateText, templateContext, out);
                 } catch (TemplateException e) {
@@ -673,7 +695,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
                 if (sourceFileLocation != null && sourceFileLocation.exists()) {
                     UtilMisc.copyFile(sourceFileLocation,targetFileLocation);
                 } else {
-                    String defaultVisualThemeId = UtilProperties.getPropertyValue("general", "VISUAL_THEME");
+                    String defaultVisualThemeId = EntityUtilProperties.getPropertyValue("general", "VISUAL_THEME", delegator);
                     if (defaultVisualThemeId != null) {
                         GenericValue themeValue = delegator.findOne("VisualThemeResource", UtilMisc.toMap("visualThemeId", defaultVisualThemeId, "resourceTypeEnumId", "VT_DOCBOOKSTYLESHEET", "sequenceId", "01"), true);
                         sourceFileLocation = new File(System.getProperty("ofbiz.home") + "/themes" + themeValue.get("resourceValue"));

@@ -78,6 +78,7 @@ public class ModelForm extends ModelWidget {
     protected String formLocation;
     protected String parentFormName;
     protected String parentFormLocation;
+    protected ModelForm parentModelForm;
     protected String type;
     protected FlexibleStringExpander target;
     protected String targetType;
@@ -132,7 +133,7 @@ public class ModelForm extends ModelWidget {
     protected List<AltTarget> altTargets = FastList.newInstance();
     protected List<AutoFieldsService> autoFieldsServices = FastList.newInstance();
     protected List<AutoFieldsEntity> autoFieldsEntities = FastList.newInstance();
-    protected List<String> sortOrderFields = FastList.newInstance();
+    protected List<SortField> sortOrderFields = FastList.newInstance();
     protected List<AltRowStyle> altRowStyles = FastList.newInstance();
 
     /** This List will contain one copy of each field for each field name in the order
@@ -261,6 +262,7 @@ public class ModelForm extends ModelWidget {
             }
 
             if (parent != null) {
+                this.parentModelForm = parent;
                 this.type = parent.type;
                 this.target = parent.target;
                 this.containerId = parent.containerId;
@@ -538,7 +540,8 @@ public class ModelForm extends ModelWidget {
                 String tagName = sortFieldElement.getTagName();
                 if (tagName.equals("sort-field")) {
                     String fieldName = sortFieldElement.getAttribute("name");
-                    this.sortOrderFields.add(fieldName);
+                    String position = sortFieldElement.getAttribute("position");
+                    this.sortOrderFields.add(new SortField(fieldName, position));
                     this.fieldGroupMap.put(fieldName, lastFieldGroup);
                 } else if (tagName.equals("banner")) {
                     Banner thisBanner = new Banner(sortFieldElement, this);
@@ -559,7 +562,8 @@ public class ModelForm extends ModelWidget {
         // reorder fields according to sort order
         if (sortOrderFields.size() > 0) {
             List<ModelFormField> sortedFields = FastList.newInstance();
-            for (String fieldName: this.sortOrderFields) {
+            for (SortField sortField: this.sortOrderFields) {
+                String fieldName = sortField.getFieldName();
                 if (UtilValidate.isEmpty(fieldName)) {
                     continue;
                 }
@@ -570,6 +574,9 @@ public class ModelForm extends ModelWidget {
                     ModelFormField modelFormField = fieldIter.next();
                     if (fieldName.equals(modelFormField.getName())) {
                         // matched the name; remove from the original last and add to the sorted list
+                        if (UtilValidate.isNotEmpty(sortField.getPosition())) {
+                            modelFormField.setPosition(sortField.getPosition());
+                        }
                         fieldIter.remove();
                         sortedFields.add(modelFormField);
                     }
@@ -1892,6 +1899,10 @@ public class ModelForm extends ModelWidget {
         return this.parentFormLocation;
     }
 
+    public ModelForm getParentModelForm() {
+        return parentModelForm;
+    }
+
     public String getDefaultEntityName() {
         return this.defaultEntityName;
     }
@@ -2894,6 +2905,35 @@ public class ModelForm extends ModelWidget {
         }
     }
 
+    public static class SortField {
+        protected String fieldName;
+        protected Integer position = null;
+
+        public SortField(String name, String position) {
+            this.fieldName = name;
+            if (UtilValidate.isNotEmpty(position)){
+                Integer posParam = null;
+                try {
+                    posParam = Integer.valueOf(position);
+                }
+                catch(Exception e) {/* just ignore the exception*/}
+                this.position = posParam;
+            }
+        }
+
+        public SortField(String name) {
+            this(name, null);
+        }
+
+        public String getFieldName() {
+            return this.fieldName;
+        }
+
+        public Integer getPosition() {
+            return this.position;
+        }
+    }
+
     public static interface FieldGroupBase {}
 
     public static class FieldGroup implements FieldGroupBase {
@@ -2923,7 +2963,7 @@ public class ModelForm extends ModelWidget {
                 }
 
                 for (Element sortFieldElement: UtilXml.childElementList(sortOrderElement, "sort-field")) {
-                    modelForm.sortOrderFields.add(sortFieldElement.getAttribute("name"));
+                    modelForm.sortOrderFields.add(new SortField(sortFieldElement.getAttribute("name"),sortFieldElement.getAttribute("position")));
                     modelForm.fieldGroupMap.put(sortFieldElement.getAttribute("name"), this);
                 }
             } else {

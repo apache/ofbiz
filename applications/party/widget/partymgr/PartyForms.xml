@@ -134,7 +134,7 @@ under the License.
 
     <form name="ViewPartyGroup" type="single" default-map-name="lookupGroup">
         <auto-fields-entity entity-name="PartyGroup" default-field-type="display"/>
-        <field name="logo" use-when="partyGroupLogoLinkUrl!=null" title="${uiLabelMap.CommonOrganizationLogo}"><image alternate="${uiLabelMap.CommonOrganizationLogo}" value="${partyGroupLogoLinkUrl}"/></field>
+        <field name="logo" use-when="partyGroupLogoLinkUrl!=null" title="${uiLabelMap.CommonOrganizationLogo}"><image alternate="${uiLabelMap.CommonOrganizationLogo}" value="${partyGroupLogoLinkUrl}" style="cssImgStandard"/></field>
         <field name="partyTypeId"><ignored/></field>
         <field name="comments"><ignored/></field>
         <field name="logoImageUrl"><ignored/></field>
@@ -159,6 +159,7 @@ under the License.
     </form>
 
     <form name="ViewPartyPerson" type="single" default-map-name="lookupPerson">
+        <field name="personalImage" use-when="partyContentId!=null" title="${uiLabelMap.FormFieldTitle_personalImage}"><image value="${personalImage}" style="cssImgStandard"/></field>
         <field name="partyId"><display/></field>
         <field name="name" title="${uiLabelMap.PartyName}"><display description="${lookupPerson.personalTitle} ${lookupPerson.firstName} ${lookupPerson.middleName} ${lookupPerson.lastName}"/></field>
         <field name="comments" title="${uiLabelMap.PartyComments}"><display/></field>
@@ -486,7 +487,7 @@ under the License.
         <field use-when="displayPassword!=null" name="USERNAME" title="${uiLabelMap.CommonUsername}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="30" maxlength="250"/></field>
         <field use-when="displayPassword!=null" name="PASSWORD" title="${uiLabelMap.CommonPassword}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><password size="15" maxlength="250"/></field>
         <field use-when="displayPassword!=null" name="CONFIRM_PASSWORD" title="${uiLabelMap.CommonPassword}" tooltip="* ${uiLabelMap.CommonConfirm}" widget-style="required"><password size="15" maxlength="250"/></field>
-        <field name="USERNAME" title="${uiLabelMap.CommonUsername}" tooltip="* ${uiLabelMap.PartyTemporaryPassword}"><text size="30" maxlength="250"/></field>
+        <field name="USERNAME" title="${uiLabelMap.CommonUsername}" tooltip="* ${uiLabelMap.PartyTemporaryPassword}" widget-style="required"><text size="30" maxlength="250"/></field>
         <!--<field name="RequiredNote" title="${uiLabelMap.CommonEmptyHeader}"><display description="${uiLabelMap.PartyRequiredNote}" also-hidden="false"/></field> -->
 
         <field name="PRODUCT_STORE_ID" title="Product Store" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
@@ -865,7 +866,7 @@ under the License.
         <field name="fromDate"><date-time/></field>
         <field name="thruDate"><date-time/></field>
         <field name="groupId" title="${uiLabelMap.CommonSecurityGroupId}">
-            <drop-down allow-empty="true">
+            <drop-down allow-empty="true" text-size="60">
                 <entity-options entity-name="SecurityGroup" description="${description}">
                     <entity-order-by field-name="description"/>
                 </entity-options>

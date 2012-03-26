@@ -39,6 +39,7 @@ import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.order.finaccount.FinAccountHelper;
 import org.ofbiz.order.order.OrderReadHelper;
 import org.ofbiz.product.store.ProductStoreWorker;
@@ -74,7 +75,7 @@ public class GiftCertificateServices {
         }
         String currencyUom = (String) context.get("currency");
         if (UtilValidate.isEmpty(currencyUom)) {
-            currencyUom = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+            currencyUom = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
         }
 
         String cardNumber = null;
@@ -153,7 +154,7 @@ public class GiftCertificateServices {
         result.put("processResult", Boolean.TRUE);
         result.put("responseCode", "1");
         result.put("referenceNum", refNum);
-        Debug.log("Create GC Result - " + result, module);
+        Debug.logInfo("Create GC Result - " + result, module);
         return result;
     }
 
@@ -175,7 +176,7 @@ public class GiftCertificateServices {
         }
         String currencyUom = (String) context.get("currency");
         if (UtilValidate.isEmpty(currencyUom)) {
-            currencyUom = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+            currencyUom = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
         }
 
         String finAccountId = null;
@@ -242,7 +243,7 @@ public class GiftCertificateServices {
         result.put("processResult", Boolean.TRUE);
         result.put("responseCode", "1");
         result.put("referenceNum", refNum);
-        Debug.log("Add Funds GC Result - " + result, module);
+        Debug.logInfo("Add Funds GC Result - " + result, module);
         return result;
     }
 
@@ -263,7 +264,7 @@ public class GiftCertificateServices {
         }
         String currencyUom = (String) context.get("currency");
         if (UtilValidate.isEmpty(currencyUom)) {
-            currencyUom = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+            currencyUom = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
         }
 
         // validate the amount
@@ -325,7 +326,7 @@ public class GiftCertificateServices {
         result.put("processResult", procResult);
         result.put("responseCode", "2");
         result.put("referenceNum", refNum);
-        Debug.log("Redeem GC Result - " + result, module);
+        Debug.logInfo("Redeem GC Result - " + result, module);
         return result;
     }
 
@@ -350,13 +351,13 @@ public class GiftCertificateServices {
         }
 
         // TODO: get the real currency from context
-        //String currencyUom = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+        //String currencyUom = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
         // get the balance
         BigDecimal balance = finAccount.get("availableBalance") == null ? BigDecimal.ZERO : finAccount.getBigDecimal("availableBalance");
 
         Map<String, Object> result = ServiceUtil.returnSuccess();
         result.put("balance", balance);
-        Debug.log("GC Balance Result - " + result, module);
+        Debug.logInfo("GC Balance Result - " + result, module);
         return result;
     }
 
@@ -370,7 +371,7 @@ public class GiftCertificateServices {
         String currency = (String) context.get("currency");
         // make sure we have a currency
         if (currency == null) {
-            currency = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+            currency = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
         }
 
         // get the authorizations
@@ -469,7 +470,7 @@ public class GiftCertificateServices {
 
         // make sure we have a currency
         if (currency == null) {
-            currency = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+            currency = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
         }
 
         // obtain the order information
@@ -647,7 +648,7 @@ public class GiftCertificateServices {
 
         // make sure we have a currency
         if (currency == null) {
-            currency = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+            currency = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
         }
 
         Map<String, Object> refundCtx = FastMap.newInstance();
@@ -714,7 +715,7 @@ public class GiftCertificateServices {
 
         // make sure we have a currency
         if (currency == null) {
-            currency = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+            currency = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
         }
 
         // get the product store
@@ -798,9 +799,7 @@ public class GiftCertificateServices {
         // make a map of answer info
         Map<String, Object> answerMap = FastMap.newInstance();
         if (responseAnswers != null) {
-            Iterator<GenericValue> rai = responseAnswers.iterator();
-            while (rai.hasNext()) {
-                GenericValue answer = rai.next();
+            for(GenericValue answer : responseAnswers) {
                 GenericValue question = null;
                 try {
                     question = answer.getRelatedOne("SurveyQuestion");
@@ -971,7 +970,7 @@ public class GiftCertificateServices {
 
         // make sure we have a currency
         if (currency == null) {
-            currency = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+            currency = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
         }
 
         // get the product store
@@ -1036,9 +1035,7 @@ public class GiftCertificateServices {
         // make a map of answer info
         Map<String, Object> answerMap = FastMap.newInstance();
         if (responseAnswers != null) {
-            Iterator<GenericValue> rai = responseAnswers.iterator();
-            while (rai.hasNext()) {
-                GenericValue answer = rai.next();
+            for(GenericValue answer : responseAnswers) {
                 GenericValue question = null;
                 try {
                     question = answer.getRelatedOne("SurveyQuestion");
@@ -1355,7 +1352,7 @@ public class GiftCertificateServices {
         }
         if (finAccount != null) {
             String dbPin = finAccount.getString("finAccountCode");
-            Debug.log("GC Pin Validation: [Sent: " + pinNumber + "] [Actual: " + dbPin + "]", module);
+            Debug.logInfo("GC Pin Validation: [Sent: " + pinNumber + "] [Actual: " + dbPin + "]", module);
             if (dbPin != null && dbPin.equals(pinNumber)) {
                 return true;
             }

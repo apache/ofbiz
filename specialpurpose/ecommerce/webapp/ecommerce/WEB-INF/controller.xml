@@ -30,12 +30,6 @@ under the License.
     <handler name="service-multi" type="request" class="org.ofbiz.webapp.event.ServiceMultiEventHandler"/>
     <handler name="simple" type="request" class="org.ofbiz.webapp.event.SimpleEventHandler"/>
     <handler name="rome" type="request" class="org.ofbiz.webapp.event.RomeEventHandler"/>
-    <!-- These event handlers have been deprecated, if you need to send json responses then chain
-         the json request from this controller after calling your event
-    <handler name="jsonsimple" type="request" class="org.ofbiz.webapp.event.JSONSimpleEventHandler"/>
-    <handler name="jsonservice" type="request" class="org.ofbiz.webapp.event.JSONServiceEventHandler"/>
-    <handler name="jsonjava" type="request" class="org.ofbiz.webapp.event.JSONJavaEventHandler"/>
-    -->
 
     <handler name="jsp" type="view" class="org.ofbiz.webapp.view.JspViewHandler"/>
     <handler name="http" type="view" class="org.ofbiz.webapp.view.HttpViewHandler"/>
@@ -48,6 +42,7 @@ under the License.
         <event name="autoLoginCheck" type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="autoLoginCheck"/>
         <event name="checkTrackingCodeCookies" type="java" path="org.ofbiz.marketing.tracking.TrackingCodeEvents" invoke="checkTrackingCodeCookies"/>
         <event name="setDefaultStoreSettings" type="java" path="org.ofbiz.product.product.ProductEvents" invoke="setDefaultStoreSettings"/>
+        <event name="createGuestShoppingListCookies" type="java" path="org.ofbiz.order.shoppinglist.ShoppingListEvents" invoke="createGuestShoppingListCookies"/>
         <event name="restoreAutoSaveList" type="java" path="org.ofbiz.order.shoppinglist.ShoppingListEvents" invoke="restoreAutoSaveList"/>
     </firstvisit>
 
@@ -75,6 +70,7 @@ under the License.
         <event name="restoreAutoSaveList" type="java" path="org.ofbiz.order.shoppinglist.ShoppingListEvents" invoke="restoreAutoSaveList"/>
         <!-- after login and restoring from the auto-save list, save everything to the auto-save list to handle anything that may have already been in the cart before login -->
         <event name="saveCartToAutoSaveList" type="java" path="org.ofbiz.order.shoppinglist.ShoppingListEvents" invoke="saveCartToAutoSaveList"/>
+        <event name="clearGuestShoppingListCookies" type="java" path="org.ofbiz.order.shoppinglist.ShoppingListEvents" invoke="clearGuestShoppingListCookies"/>
     </after-login>
 
     <!-- default request; call into CMS -->
@@ -906,6 +902,12 @@ under the License.
         <response name="success" type="view" value="keywordsearch"/>
         <response name="none" type="none" value=""/>
     </request-map>
+    <request-map uri="tagsearch">
+        <security https="false" auth="false"/>
+        <event type="java" path="org.ofbiz.product.product.ProductSearchSession" invoke="checkDoKeywordOverride"/>
+        <response name="success" type="view" value="tagsearch"/>
+        <response name="none" type="none" value=""/>
+    </request-map>
     <request-map uri="clearSearchOptionsHistoryList">
         <security https="false" auth="false"/>
         <event type="java" path="org.ofbiz.product.product.ProductSearchSession" invoke="clearSearchOptionsHistoryList"/>
@@ -1490,6 +1492,12 @@ under the License.
         <security https="true" auth="false"/>
         <response name="success" type="view" value="viewcontent"/>
     </request-map>
+    <request-map uri="img">
+        <security auth="false" https="false"/>
+        <event type="java" path="org.ofbiz.content.data.DataEvents" invoke="serveImage"/>
+        <response name="success" type="none"/>
+        <response name="error" type="view" value="main"/>
+    </request-map>
 
     <!-- TO BE REMOVED
     <request-map uri="createforumarticle">
@@ -1998,7 +2006,24 @@ under the License.
         <security https="true" auth="false"/>
         <response name="success" type="view" value="showShoppingList" save-current-view="true"/>
     </request-map>
-    
+
+    <!-- Product Tags -->
+    <request-map uri="addProductTags">
+        <security https="false" auth="false"/>
+        <event type="java" path="org.ofbiz.product.product.ProductEvents" invoke="addProductTags"/>
+        <response name="success" type="view-last" save-current-view="true"/>
+        <response name="error" type="view-last" save-current-view="true"/>
+    </request-map>
+
+    <!-- ============== Janrain Engage ============== -->
+    <request-map uri="janrainCheckLogin">
+        <security https="true" auth="false"/>
+        <event type="java" path="org.ofbiz.ecommerce.janrain.JanrainHelper" invoke="janrainCheckLogin"/>
+        <response name="success" type="view" value="main"/>
+        <response name="error" type="view" value="login"/>
+        <response name="userLoginMissing" type="request" value="newcustomer"/>
+    </request-map>
+
     <!-- End of Request Mappings -->
 
     <!-- View Mappings -->
@@ -2025,6 +2050,7 @@ under the License.
     <view-map name="productReview" type="screen" page="component://ecommerce/widget/CatalogScreens.xml#productreview"/>
 
     <view-map name="keywordsearch" type="screen" page="component://ecommerce/widget/CatalogScreens.xml#keywordsearch"/>
+    <view-map name="tagsearch" type="screen" page="component://ecommerce/widget/CatalogScreens.xml#tagsearch"/>
     <view-map name="advancedsearch" type="screen" page="component://ecommerce/widget/CatalogScreens.xml#advancedsearch"/>
 
     <view-map name="tellafriend" type="screen" page="component://ecommerce/widget/CatalogScreens.xml#tellafriend"/>

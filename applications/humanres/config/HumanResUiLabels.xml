@@ -786,7 +786,7 @@
     <property key="HumanResAddPersonTraining">
         <value xml:lang="de">Personenschulung hinzufügen</value>
         <value xml:lang="en">Add Person Training</value>
-        <value xml:lang="fr">Ajouter la formation de la personne</value>
+        <value xml:lang="fr">Ajouter une formation</value>
         <value xml:lang="it">Aggiungi corsi persona</value>
         <value xml:lang="pt_BR">Adicionar treinamento para pessoa</value>
         <value xml:lang="zh">新建个人培训</value>
@@ -918,7 +918,7 @@
     </property>
     <property key="HumanResCurrentEmploymentData">
         <value xml:lang="en">Current Employment information</value>
-        <value xml:lang="fr">Information actuelles sur l'emploi</value>
+        <value xml:lang="fr">Informations actuelles sur l'emploi</value>
         <value xml:lang="it">Informazioni attuali sull'impiego</value>
         <value xml:lang="pt_BR">Informação atual de empregado</value>
         <value xml:lang="zh">当前雇佣关系信息</value>
@@ -1486,6 +1486,10 @@
         <value xml:lang="pt_BR">Licença</value>
         <value xml:lang="zh">离职</value>
     </property>
+    <property key="HumanResLeaveCreationSuccess">
+        <value xml:lang="en">Leave request created successfully</value>
+        <value xml:lang="fr">Demande de congés créée avec succès</value>
+    </property>
     <property key="HumanResListEmployments">
         <value xml:lang="en">List Employment</value>
         <value xml:lang="fr">Liste d'emplois</value>
@@ -1734,6 +1738,14 @@
         <value xml:lang="th">โปรแกรมประยุกต์ใช้การจัดการบุคคล</value>
         <value xml:lang="zh">人力资源管理系统</value>
         <value xml:lang="zh_TW">人力資源管理系統</value>
+    </property>
+    <property key="HumanResMyLeaves">
+        <value xml:lang="en">My Leaves</value>
+        <value xml:lang="fr">Mes congés</value>
+    </property>
+    <property key="HumanResMyTrainings">
+        <value xml:lang="en">My Trainings</value>
+        <value xml:lang="fr">Mes formations</value>
     </property>
     <property key="HumanResNewEmplPosition">
         <value xml:lang="de">Stelle anlegen</value>
@@ -2089,6 +2101,7 @@
     </property>
     <property key="HumanResPayRollHistory">
         <value xml:lang="en">PayRoll History</value>
+        <value xml:lang="fr">Historiques des paiements</value>
         <value xml:lang="zh">薪水支付历史</value>
     </property>
     <property key="HumanResPayRollPreferences">
@@ -2539,6 +2552,10 @@
         <value xml:lang="fr">Rechercher des accords de formation</value>
         <value xml:lang="pt_BR">Procurar aprovações de treinamento</value>
         <value xml:lang="zh">查找培训批准</value>
+    </property>
+    <property key="PageTitleFindTrainingCalendar">
+        <value xml:lang="en">Find Training Calendar</value>
+        <value xml:lang="fr">Calendrier de formation</value>
     </property>
     <property key="PageTitleFindTrainingStatus">
         <value xml:lang="en">Find Training Status</value>

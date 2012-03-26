@@ -329,7 +329,6 @@
 
                 2. call a recursive java function to set all the dependant tasks.
         -->
-
         <field-to-result field="parameters.projectId" result-name="projectId"/>
 
         <!-- find a starting point being either the estimated start date of a project or the earliest actual start date. -->
@@ -425,7 +424,6 @@
                 </if-not-empty>
             </then>
         </while>
-
 
         <!-- create the tasklist -->
         <entity-one entity-name="WorkEffort" value-field="project">
@@ -720,32 +718,6 @@
             <set field="highInfo.emailAddress" from-field="emailAddress.infoString"/>
         </if-not-empty>
 
-        <!-- translate squenceId back into statusId -->
-        <entity-and entity-name="StatusItem" list="statusses">
-            <field-map field-name="sequenceId" from-field="highInfo.sequenceId"/>
-            <field-map field-name="statusTypeId" value="PROJECT_TASK_STATUS"/>
-        </entity-and>
-        <first-from-list entry="status" list="statusses"/>
-        <set field="highInfo.currentStatusId" from-field="status.statusId"/>
-
-        <!-- make sure these statusvalues do not influence the total status if there are other active ones -->
-        <if>
-            <condition>
-                <and>
-                    <or>
-                        <if-compare field="highInfo.currentStatusId" value="PTS_COMPLETED" operator="equals"/>
-                        <if-compare field="highInfo.currentStatusId" value="PTS_ON_HOLD" operator="equals"/>
-                        <if-compare field="highInfo.currentStatusId" value="PTS_CANCELLED" operator="equals"/>
-                    </or>
-                    <not>
-                        <if-empty field="allTaskStatus"/>
-                    </not>
-                </and>
-            </condition>
-            <then>
-                <set field="highInfo.currentStatusId" value="PTS_CREATED_IP"/>
-            </then>
-        </if>
         <!-- closed overrules everything -->
         <if-compare field="project.currentStatusId" value="PRJ_CLOSED" operator="equals">
             <set field="highInfo.currentStatusId" value="PRJ_CLOSED"/>
@@ -788,33 +760,6 @@
             <!-- merge estimated and actual dates -->
             <call-simple-method method-name="createDates"/>
 
-            <!-- translate sequenceId back into statusId -->
-            <entity-and entity-name="StatusItem" list="statusses">
-                <field-map field-name="sequenceId" from-field="highInfo.sequenceId"/>
-                <field-map field-name="statusTypeId" value="PROJECT_TASK_STATUS"/>
-            </entity-and>
-            <first-from-list entry="status" list="statusses"/>
-            <clear-field field="highInfo.sequenceId"/>
-            <set field="highInfo.currentStatusId" from-field="status.statusId"/>
-
-            <!-- however the status 'completed' can only be 'completed' when all related tasks are completed -->
-            <if>
-                <condition>
-                    <and>
-                        <or>
-                            <if-compare field="highInfo.currentStatusId" value="PTS_COMPLETED" operator="equals"/>
-                            <if-compare field="highInfo.currentStatusId" value="PTS_ON_HOLD" operator="equals"/>
-                        </or>
-                        <not>
-                            <if-empty field="allTaskStatus"/>
-                        </not>
-                    </and>
-                </condition>
-                <then>
-                    <set field="highInfo.currentStatusId" value="PTS_CREATED_IP"/>
-                </then>
-            </if>
-
             <field-to-list field="highInfo" list="phaseList"/>
         </iterate>
         </if-not-empty>
@@ -839,11 +784,10 @@
             <iterate entry="lowInfo" list="tasks">
                 <set field="highInfo.phaseName" from-field="lowInfo.phaseName"/>
                 <set field="highInfo.phaseSeqNum" from-field="lowInfo.phaseSeqNum"/>
+                <set field="highInfo.taskId" from-field="lowInfo.workEffortId"/>
                 <call-simple-method method-name="combineInfo"/>
                 <clear-field field="highInfo.sequenceId"/>
-                <set field="highInfo.currentStatusId" from-field="lowInfo.currentStatusId"/>
                 <call-simple-method method-name="createDates"/>
-                <call-simple-method method-name="getHours" xml-resource="component://workeffort/script/org/ofbiz/workeffort/workeffort/WorkEffortSimpleServices.xml"/>
                 <set field="highInfo.workEffortId" from-field="lowInfo.workEffortId"/>
                 <set field="highInfo.workEffortName" from-field="lowInfo.workEffortName"/>
                 <set field="highInfo.sequenceNum" from-field="lowInfo.sequenceNum"/>
@@ -915,7 +859,6 @@
                 <call-simple-method method-name="getHours" xml-resource="component://workeffort/script/org/ofbiz/workeffort/workeffort/WorkEffortSimpleServices.xml"/>
                 <set field="projectParty.plannedHours" from-field="highInfo.plannedHours" type="Double"/>
                 <set field="projectParty.actualHours" from-field="highInfo.actualHours" type="Double"/>
-
             </iterate>
             <if-not-empty field="projectParty">
                 <field-to-list field="projectParty" list="projectParties"/>
@@ -976,7 +919,6 @@
                 <set field="taskParty.plannedHours" from-field="highInfo.plannedHours" type="Double"/>
                 <set field="taskParty.actualHours" from-field="highInfo.actualHours" type="Double"/>
                 <set field="taskParty.originalActualHours" from-field="highInfo.originalActualHours" type="Double"/>
-
             </iterate>
             <if-not-empty field="taskParty">
                 <field-to-list field="taskParty" list="taskParties"/>
@@ -997,6 +939,22 @@
          IN_PROGRESS if it has at least one resource and at least a time entry
          ASSIGNED if it has at least one resource but no time entry associated
          -->
+        <!-- if lowlevel type equals TASK then get create the status first -->
+        <if-compare field="lowInfo.workEffortTypeId" value="TASK" operator="equals">
+            <set field="highInfo.currentStatusId" from-field="lowInfo.currentStatusId"/>
+            <if-compare field="lowInfo.currentStatusId" value="PTS_CREATED" operator="equals">
+                <get-related value-field="lowInfo" relation-name="WorkEffortPartyAssignment" list="assignsAll"/>
+                <filter-list-by-date list="assignsAll" to-list="assigns"/>
+                <if-not-empty field="assigns">
+                    <set field="highInfo.currentStatusId" value="PTS_CREATED_AS"/><!-- task is ASSIGNED -->
+                </if-not-empty>
+                <get-related value-field="lowInfo" relation-name="TimeEntry" list="entries"/>
+                <if-not-empty field="entries">
+                    <set field="highInfo.currentStatusId" value="PTS_CREATED_IP"/><!-- task is IN_PROGRESS -->
+                </if-not-empty>
+            </if-compare>
+            <return/>
+        </if-compare>
         <entity-count count-field="tasksCount" entity-name="ProjectPhaseTaskAssignmentView">
             <condition-list>
                 <condition-expr field-name="projectId" from-field="highInfo.projectId" ignore-if-empty="true"/>
@@ -1072,7 +1030,7 @@
     </simple-method>
 
     <simple-method method-name="combineDatesAndPlannedHoursInfo" short-description="combine lower level start end dates and planned hours for a project, phase or task">
-        <entity-condition  entity-name="ProjectPhaseTaskSummaryView" list="summaryInfos">
+        <entity-condition  entity-name="ProjectPhaseTaskSklSumView" list="summaryInfos">
             <condition-list>
                 <condition-expr field-name="projectId" from-field="highInfo.projectId" ignore-if-empty="true"/>
                 <condition-expr field-name="phaseId" from-field="highInfo.phaseId" ignore-if-empty="true"/>
@@ -1080,15 +1038,14 @@
             </condition-list>
             <select-field field-name="projectId"/>
             <select-field field-name="estimatedStartDate"/>
-            <select-field field-name="actualEntryStartDate"/>
             <select-field field-name="actualStartDate"/>
             <select-field field-name="estimatedCompletionDate"/>
             <select-field field-name="actualCompletionDate"/>
-            <select-field field-name="actualEntryCompletionDate"/>
             <select-field field-name="plannedHours"/>
             <select-field field-name="priority"/>
         </entity-condition>
 
+        <!-- Now used TimeEntries to update (or not) actual start and end Date -->
         <first-from-list entry="summaryInfo" list="summaryInfos"/>
         <set field="highInfo.estimatedStartDate" from-field="summaryInfo.estimatedStartDate"/>
         <set field="highInfo.estimatedCompletionDate" from-field="summaryInfo.estimatedCompletionDate"/>
@@ -1096,35 +1053,32 @@
         <set field="highInfo.actualCompletionDate" from-field="summaryInfo.actualCompletionDate"/>
         <set field="highInfo.priority" from-field="summaryInfo.priority"/>
         <set field="highInfo.plannedHours" from-field="summaryInfo.plannedHours"/>
-        <!-- update actual start date by the min date form sub tasks associated entries 
+        <!-- <log level="info" message="projectId=${highInfo.projectId} phaseId=${highInfo.phaseId} taskId=${highInfo.taskId} highInfo.plannedHours=${highInfo.plannedHours}"/>-->
+        <!-- update actual start date by the min date form sub tasks associated TimeEntries 
         (if before actualStartDate field) -->
-        <if-not-empty field="summaryInfo.actualEntryStartDate">
+        <entity-condition  entity-name="ProjectPhaseTaskActualEntrySumView" list="summaryEntriesInfos">
+            <condition-list>
+                <condition-expr field-name="projectId" from-field="highInfo.projectId" ignore-if-empty="true"/>
+                <condition-expr field-name="phaseId" from-field="highInfo.phaseId" ignore-if-empty="true"/>
+                <condition-expr field-name="taskId" from-field="highInfo.taskId" ignore-if-empty="true"/>
+            </condition-list>
+            <select-field field-name="actualEntryStartDate"/>
+        </entity-condition>
+        <first-from-list entry="timeEntriesInfo" list="summaryEntriesInfos"/>
+        <if-not-empty field="timeEntriesInfo">
+          <if-not-empty field="timeEntriesInfo.actualEntryStartDate">
             <if>
                 <condition>
                     <or>
                         <if-empty field="highInfo.actualStartDate"/>
-                        <if-compare-field field="highInfo.actualStartDate" operator="greater" type="Timestamp" to-field="summaryInfo.actualEntryStartDate"/>
+                        <if-compare-field field="highInfo.actualStartDate" operator="greater" type="Timestamp" to-field="timeEntriesInfo.actualEntryStartDate"/>
                     </or>
                 </condition>
                 <then>
-                    <set field="highInfo.actualStartDate" from-field="summaryInfo.actualEntryStartDate"/>
+                    <set field="highInfo.actualStartDate" from-field="timeEntriesInfo.actualEntryStartDate"/>
                 </then>
             </if>
-        </if-not-empty>
-        <!-- update actual completion date by the max date form sub tasks associated entries 
-        (if after actualCompletionDate field) -->
-        <if-not-empty field="summaryInfo.actualEntryCompletionDate">
-            <if>
-                <condition>
-                    <or>
-                        <if-empty field="highInfo.actualCompletionDate"/>
-                        <if-compare-field field="highInfo.actualCompletionDate" operator="less" type="Timestamp" to-field="summaryInfo.actualEntryCompletionDate"/>
-                    </or>
-                </condition>
-                <then>
-                    <set field="highInfo.actualCompletionDate" from-field="summaryInfo.actualEntryCompletionDate"/>
-                </then>
-            </if>
+          </if-not-empty>
         </if-not-empty>
     </simple-method>
 
@@ -1133,6 +1087,7 @@
         <call-simple-method method-name="combineDatesAndPlannedHoursInfo"/>
         <call-simple-method method-name="combineActualHours"/>
     </simple-method>
+
     <simple-method method-name="combineActualHours" short-description="combine lower level Actual hours info.">
         <!-- 
         -to calculate actual hours : the declared number of hours in time entry should be multiplied by the 
@@ -1140,6 +1095,9 @@
          the timesheet associated to this time entry and has the same rateType as this timeEntry 
         -actualHoursOriginal is the total of hours in time entries without application of percentage declared in partyRate
          -->
+        <clear-field field="originalHours"/>
+        <clear-field field="actualHours"/>
+        <clear-field field="originalActualHours"/>
 
         <!-- I- get timeEntries for which there is no rate  (originalHours)-->
         <entity-condition list="notRatedValues" entity-name="ProjectPhaseTaskActualNotRatedHoursView">
@@ -1147,6 +1105,7 @@
                 <condition-expr field-name="projectId" from-field="highInfo.projectId" ignore-if-empty="true"/>
                 <condition-expr field-name="phaseId" from-field="highInfo.phaseId" ignore-if-empty="true"/>
                 <condition-expr field-name="taskId" from-field="highInfo.taskId" ignore-if-empty="true"/>
+                <condition-expr field-name="hoursPartyId" from-field="parameters.hoursPartyId" ignore-if-empty="true"/>
             </condition-list>
             <select-field field-name="totalOriginalHours"/>
         </entity-condition>
@@ -1161,11 +1120,13 @@
                 <condition-expr field-name="projectId" from-field="highInfo.projectId" ignore-if-empty="true"/>
                 <condition-expr field-name="phaseId" from-field="highInfo.phaseId" ignore-if-empty="true"/>
                 <condition-expr field-name="taskId" from-field="highInfo.taskId" ignore-if-empty="true"/>
+                <condition-expr field-name="hoursPartyId" from-field="parameters.hoursPartyId" ignore-if-empty="true"/>
             </condition-list>
             <select-field field-name="totalOriginalHours"/>
             <select-field field-name="totalRatedHours"/>
         </entity-condition>
         <first-from-list list="ratedValues" entry="ratedValue"/>
+        <!-- not used ratedValue.totalRatedHours  because not works, reason seem to be totalRatedHours is a calculated field ??? -->
         <call-object-method method-name="getDouble" obj-field="ratedValue" ret-field="actualHours">
             <string value="totalRatedHours"/>
         </call-object-method>
@@ -1201,6 +1162,7 @@
                 <condition-expr field-name="projectId" from-field="highInfo.projectId" ignore-if-empty="true"/>
                 <condition-expr field-name="phaseId" from-field="highInfo.phaseId" ignore-if-empty="true"/>
                 <condition-expr field-name="taskId" from-field="highInfo.taskId" ignore-if-empty="true"/>
+                <condition-expr field-name="hoursPartyId" from-field="parameters.hoursPartyId" ignore-if-empty="true"/>
                 <condition-expr field-name="invoiceId" from-field="nullField"/>
             </condition-list>
             <select-field field-name="totalOriginalHours"/>
@@ -1213,6 +1175,7 @@
                 <condition-expr field-name="projectId" from-field="highInfo.projectId" ignore-if-empty="true"/>
                 <condition-expr field-name="phaseId" from-field="highInfo.phaseId" ignore-if-empty="true"/>
                 <condition-expr field-name="taskId" from-field="highInfo.taskId" ignore-if-empty="true"/>
+                <condition-expr field-name="hoursPartyId" from-field="parameters.hoursPartyId" ignore-if-empty="true"/>
                 <condition-expr field-name="invoiceId" from-field="nullField"/>
             </condition-list>
             <select-field field-name="totalOriginalHours"/>
@@ -1333,13 +1296,10 @@
                 </if>
             </else>
         </if-empty>
-
     </simple-method>
 
     <simple-method method-name="createDates" short-description="merge the estimated and actual dates">
-
         <!-- input/output is 'highInfo map -->
-
         <!-- create dates taking the last known one to save space on the list -->
         <if-not-empty field="highInfo.actualStartDate">
             <set field="highInfo.startDate" from-field="highInfo.actualStartDate"/>
@@ -1414,14 +1374,16 @@
             </if-empty>
         </if-not-empty>
         <!-- get role for this party in this project -->
-        <entity-and entity-name="ProjectPartyAndPhaseAndTask" list="taskRoles" filter-by-date="true">
-            <field-map field-name="partyId" from-field="parameters.partyId"/>
-            <field-map field-name="workEffortId" from-field="parameters.workEffortId"/>
-        </entity-and>
-        <first-from-list entry="taskRole" list="taskRoles"/>
-        <set field="parameters.roleTypeId" from-field="taskRole.roleTypeId"/>
-        <set field="parameters.statusId" value="PAS_ASSIGNED"/>
-        <call-simple-method method-name="assignPartyToWorkEffort" xml-resource="component://workeffort/script/org/ofbiz/workeffort/workeffort/WorkEffortSimpleServices.xml"/>
+        <if-empty field="parameters.roleTypeId">
+          <entity-and entity-name="ProjectPartyAndPhaseAndTask" list="taskRoles" filter-by-date="true">
+              <field-map field-name="partyId" from-field="parameters.partyId"/>
+              <field-map field-name="workEffortId" from-field="parameters.workEffortId"/>
+          </entity-and>
+          <first-from-list entry="taskRole" list="taskRoles"/>
+          <set field="parameters.roleTypeId" from-field="taskRole.roleTypeId"/>
+          <set field="parameters.statusId" value="PAS_ASSIGNED"/>
+          <call-simple-method method-name="assignPartyToWorkEffort" xml-resource="component://workeffort/script/org/ofbiz/workeffort/workeffort/WorkEffortSimpleServices.xml"/>
+        </if-empty>
         <call-simple-method method-name="createTimeEntry" xml-resource="component://workeffort/script/org/ofbiz/workeffort/timesheet/TimesheetServices.xml"/>
     </simple-method>
 
@@ -1543,11 +1505,11 @@
                     <create-value value-field="newAssign"/>
                 </iterate>
                 <else>
-                    <log level="info" message="No validation parties defined in this project: no validation parties added...."></log>
+                    <log level="info" message="No validation parties defined in this project: no validation parties added...."/>
                 </else>
             </if-not-empty>
             <else>
-                <log level="info" message="Not the last party who completes his task: validation parties not added...."></log>
+                <log level="info" message="Not the last party who completes his task: validation parties not added...."/>
             </else>
         </if-empty>
     </simple-method>

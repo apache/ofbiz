@@ -52,6 +52,8 @@ public class PartyWorker {
 
     public static String module = PartyWorker.class.getName();
 
+    private PartyWorker() {}
+
     public static Map<String, GenericValue> getPartyOtherValues(ServletRequest request, String partyId, String partyAttr, String personAttr, String partyGroupAttr) {
         Delegator delegator = (Delegator) request.getAttribute("delegator");
         Map<String, GenericValue> result = FastMap.newInstance();
@@ -357,7 +359,7 @@ public class PartyWorker {
         List<String> sort = UtilMisc.toList("-fromDate");
         EntityCondition addrCond = EntityCondition.makeCondition(addrExprs, EntityOperator.AND);
         List<GenericValue> addresses = EntityUtil.filterByDate(delegator.findList("PartyAndPostalAddress", addrCond, null, sort, null, false));
-        //Debug.log("Checking for matching address: " + addrCond.toString() + "[" + addresses.size() + "]", module);
+        //Debug.logInfo("Checking for matching address: " + addrCond.toString() + "[" + addresses.size() + "]", module);
 
         if (UtilValidate.isEmpty(addresses)) {
             // No address matches, return an empty list
@@ -372,7 +374,7 @@ public class PartyWorker {
             String addr1Target = PartyWorker.makeMatchingString(delegator, address.getString("address1"));
 
             if (addr1Target != null) {
-                Debug.log("Comparing address1 : " + addr1Source + " / " + addr1Target, module);
+                Debug.logInfo("Comparing address1 : " + addr1Source + " / " + addr1Target, module);
                 if (addr1Target.equals(addr1Source)) {
 
                     // address 2 field
@@ -380,17 +382,17 @@ public class PartyWorker {
                         String addr2Source = PartyWorker.makeMatchingString(delegator, address2);
                         String addr2Target = PartyWorker.makeMatchingString(delegator, address.getString("address2"));
                         if (addr2Target != null) {
-                            Debug.log("Comparing address2 : " + addr2Source + " / " + addr2Target, module);
+                            Debug.logInfo("Comparing address2 : " + addr2Source + " / " + addr2Target, module);
 
                             if (addr2Source.equals(addr2Target)) {
-                                Debug.log("Matching address2; adding valid address", module);
+                                Debug.logInfo("Matching address2; adding valid address", module);
                                 validFound.add(address);
                                 //validParty.put(address.getString("partyId"), address.getString("contactMechId"));
                             }
                         }
                     } else {
                         if (address.get("address2") == null) {
-                            Debug.log("No address2; adding valid address", module);
+                            Debug.logInfo("No address2; adding valid address", module);
                             validFound.add(address);
                             //validParty.put(address.getString("partyId"), address.getString("contactMechId"));
                         }

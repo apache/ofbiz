@@ -1544,9 +1544,10 @@ under the License.
         <attribute name="partyId" mode="IN" type="String" optional="false"/>
     </service>
     
-    <service name="resizeAllImageOfProduct" engine="simple"
-        location="component://product/script/org/ofbiz/product/imagemanagement/ImageManagementServices.xml" invoke="resizeAllImageOfProduct" auth="true">
-        <description>Resize All Image Of Product.</description>
+    <service name="resizeImages" engine="simple"
+        location="component://product/script/org/ofbiz/product/imagemanagement/ImageManagementServices.xml" invoke="resizeImages" auth="true">
+        <description>Resize Images.</description>
+        <attribute name="resizeOption" mode="IN" type="String" optional="false"/>
         <attribute name="productId" mode="IN" type="String" optional="false"/>
         <attribute name="size" mode="IN" type="String" optional="false"/>
     </service>
@@ -1555,10 +1556,18 @@ under the License.
         location="org.ofbiz.product.imagemanagement.ImageManagementServices" invoke="resizeImageOfProduct" auth="true">
         <description>Resize Image Of Product.</description>
         <attribute name="productId" mode="IN" type="String" optional="false"/>
+        <attribute name="dataResourceName" mode="IN" type="String" optional="false"/>
+        <attribute name="resizeWidth" mode="IN" type="String" optional="false"/>
+    </service>
+    
+    <service name="createNewImageThumbnail" engine="java"
+        location="org.ofbiz.product.imagemanagement.ImageManagementServices" invoke="createNewImageThumbnail" auth="true">
+        <description>Create New Image Thumbnail.</description>
+        <attribute name="productId" mode="IN" type="String" optional="false"/>
         <attribute name="contentId" mode="IN" type="String" optional="false"/>
         <attribute name="dataResourceName" mode="IN" type="String" optional="false"/>
         <attribute name="drObjectInfo" mode="IN" type="String" optional="false"/>
-        <attribute name="resizeWidth" mode="IN" type="String" optional="false"/>
+        <attribute name="sizeWidth" mode="IN" type="String" optional="false"/>
     </service>
     
     <service name="removeImageBySize" engine="simple"
@@ -1698,7 +1707,7 @@ under the License.
 
     <service name="checkOrderItemForProductGroupOrder" engine="simple"
         location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="checkOrderItemForProductGroupOrder" auth="true">
-        <description>Check Order Item For ProductGroupOrder</description>
+        <description>Check OrderItem For ProductGroupOrder</description>
         <attribute name="orderId" mode="IN" type="String" optional="false"/>
     </service>
 
@@ -1706,6 +1715,15 @@ under the License.
         location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="checkProductGroupOrderExpired" auth="true">
         <description>Check ProductGroupOrder Expired</description>
         <attribute name="groupOrderId" mode="IN" type="String" optional="false"/>
+    </service>
+
+    <service name="findOrderItemForProductGroupOrder" engine="simple"
+        location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="findOrderItemForProductGroupOrder" auth="true">
+        <description>Find OrderItem For ProductGroupOrder</description>
+        <attribute name="productId" mode="IN" type="String" optional="false"/>
+        <attribute name="newItemStatusId" mode="IN" type="String" optional="false"/>
+        <attribute name="fromDate" mode="IN" type="Timestamp" optional="false"/>
+        <attribute name="thruDate" mode="IN" type="Timestamp" optional="false"/>
     </service>
 
 </services>

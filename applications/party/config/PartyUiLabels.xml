@@ -1196,6 +1196,9 @@
         <value xml:lang="zh">称谓</value>
         <value xml:lang="zh_TW">稱謂</value>
     </property>
+    <property key="FormFieldTitle_personalImage">
+        <value xml:lang="en">Personal Image</value>
+    </property>
     <property key="FormFieldTitle_preferredContactMechId">
         <value xml:lang="de">Bevorzugter Kontaktmechanismus ID</value>
         <value xml:lang="en">Preferred Contact Mech Id</value>
@@ -7795,6 +7798,7 @@
     <property key="PartyNoProductStoreFoundForThisParty">
         <value xml:lang="de">Kein Laden für diesen Akteur gefunden.</value>
         <value xml:lang="en">No product store(s) found for this party.</value>
+        <value xml:lang="fr">Aucun centre de profit trouvé pour cet acteur</value>
         <value xml:lang="zh_TW">此成員沒有產品商店。</value>
     </property>
     <property key="PartyNoServerHitsFound">

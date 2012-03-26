@@ -430,6 +430,29 @@ under the License.
         </section>
     </screen>
 
+    <screen name="tagsearch">
+        <section>
+            <actions>
+                <set field="leftbarScreenName" value="leftbar"/>
+                <set field="rightbarScreenName" value="rightbar"/>
+                <set field="MainColumnStyle" value="center"/>
+
+                <set field="productsummaryScreen" value="component://ecommerce/widget/CatalogScreens.xml#productsummary"/>
+
+                <set field="titleProperty" value="PageTitleTagResults"/>
+                <set field="parameters.VIEW_SIZE" from-field="parameters.VIEW_SIZE" default-value="10"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/catalog/KeywordSearch.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/catalog/tagsearch.ftl"/></html></platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
     <screen name="advancedsearch">
         <section>
             <actions>
@@ -490,7 +513,7 @@ under the License.
             </widgets>
         </section>
     </screen>
-    <screen name="productCatagories">
+    <screen name="productCategories">
         <section>
             <actions>
                 <set field="tabButtonItem" value="LookupProductCategories"/>
@@ -505,7 +528,7 @@ under the License.
     <screen name="productCategoryList">
         <section>
             <condition>
-                <if-empty field="parameters.mainSubmited"/>
+                <if-empty field="parameters.mainSubmitted"/>
             </condition>
             <actions>
                 <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
@@ -562,6 +585,18 @@ under the License.
                 <platform-specific>
                     <html><html-template location="component://ecommerce/webapp/ecommerce/catalog/ajaxbreadcrumbs.ftl"/></html>
                 </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="populartags">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <script location="component://ecommerce/webapp/ecommerce/WEB-INF/actions/catalog/PopularTags.groovy"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://ecommerce/webapp/ecommerce/catalog/populartags.ftl"/></html></platform-specific>
             </widgets>
         </section>
     </screen>

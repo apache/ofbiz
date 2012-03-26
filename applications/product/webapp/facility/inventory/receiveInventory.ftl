@@ -19,12 +19,12 @@ under the License.
 <script language="JavaScript" type="text/javascript">
     function setNow(field) { eval('document.selectAllForm.' + field + '.value="${nowTimestamp}"'); }
 </script>
-<h1>${title}</h1>
+<div class="page-title">${title}</div>
         <#if invalidProductId?exists>
             <div class="errorMessage">${invalidProductId}</div>
         </#if>
-        <div class="button-bar">
-          <a href="<@ofbizUrl>EditFacility</@ofbizUrl>" class="buttontext create">${uiLabelMap.ProductNewFacility}</a>
+        <div class="button-bar button-style-1">
+          <a href="<@ofbizUrl>EditFacility</@ofbizUrl>" class="create">${uiLabelMap.ProductNewFacility}</a>
         </div>
         <#-- Receiving Results -->
         <#if receivedItems?has_content>
@@ -92,8 +92,8 @@ under the License.
                 <td width="6%">&nbsp;</td>
                 <td width="74%">
                   <b>${purchaseOrder.orderId}</b>&nbsp;/&nbsp;<b>${firstOrderItem.orderItemSeqId}</b>
-                  <#if 1 < purchaseOrderItemsSize>
-                    (${uiLabelMap.ProductMultipleOrderItemsProduct} - ${purchaseOrderItemsSize}:1 ${uiLabelMap.ProductItemProduct})
+                  <#if 1 < purchaseOrderItems.size()>
+                    (${uiLabelMap.ProductMultipleOrderItemsProduct} - ${purchaseOrderItems.size()}:1 ${uiLabelMap.ProductItemProduct})
                   <#else>
                     (${uiLabelMap.ProductSingleOrderItemProduct} - 1:1 ${uiLabelMap.ProductItemProduct})
                   </#if>
@@ -332,7 +332,7 @@ under the License.
             <input type="hidden" name="_useRowSubmit" value="Y"/>
             <#assign rowCount = 0/>
             <table class="basic-table" cellspacing="0">
-              <#if !purchaseOrderItems?exists || purchaseOrderItemsSize == 0>
+              <#if !purchaseOrderItems?exists || purchaseOrderItems.size() == 0>
                 <tr>
                   <td colspan="2">${uiLabelMap.ProductNoItemsPoReceive}.</td>
                 </tr>

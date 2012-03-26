@@ -305,6 +305,17 @@ ${virtualVariantJavaScript?if_exists}
         }
     }
 //]]>
+$(function(){
+    $('a[id^=productTag_]').click(function(){
+        var id = $(this).attr('id');
+        var ids = id.split('_');
+        var productTagStr = ids[1];
+        if (productTagStr) {
+            $('#productTagStr').val(productTagStr);
+            $('#productTagsearchform').submit();
+        }
+    });
+})
  </script>
 
 <#macro showUnavailableVarients>
@@ -353,7 +364,7 @@ ${virtualVariantJavaScript?if_exists}
                     <#assign productLargeImageUrl = firstLargeImage />
                 </#if>
                 <#if productLargeImageUrl?string?has_content>
-                    <a href="javascript:popupDetail();"><img id="detailImage" src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" name="mainImage" vspace="5" hspace="5" width="200" alt="" /></a>
+                    <a href="javascript:popupDetail();"><img id="detailImage" src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" name="mainImage" vspace="5" hspace="5" class="cssImgXLarge" alt="" /></a>
                     <input type="hidden" id="originalImage" name="originalImage" value="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" />
                 </#if>
                 <#if !productLargeImageUrl?string?has_content>
@@ -379,7 +390,7 @@ ${virtualVariantJavaScript?if_exists}
                     <#assign productLargeImageUrl = firstLargeImage />
                 </#if>
                 <#if productLargeImageUrl?string?has_content>
-                    <a href="javascript:popupDetail();"><img id="detailImage" src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" name="mainImage" vspace="5" hspace="5" width="200" alt="" /></a>
+                    <a href="javascript:popupDetail();"><img id="detailImage" src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" name="mainImage" vspace="5" hspace="5" class="cssImgXLarge" alt="" /></a>
                     <input type="hidden" id="originalImage" name="originalImage" value="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" />
                 </#if>
                 <#if !productLargeImageUrl?string?has_content>
@@ -389,22 +400,22 @@ ${virtualVariantJavaScript?if_exists}
             <div id="additionalImageBox">
                 <#if productAdditionalImage1?string?has_content>
                     <div class="additionalImage">
-                        <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage1}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage1}</@ofbizContentUrl>" vspace="5" hspace="5" width="200" alt="" /></a>
+                        <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage1}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage1}</@ofbizContentUrl>" vspace="5" hspace="5" class="cssImgXLarge" alt="" /></a>
                     </div>
                 </#if>
                 <#if productAdditionalImage2?string?has_content>
                     <div class="additionalImage">
-                        <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage2}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage2}</@ofbizContentUrl>" vspace="5" hspace="5" width="200" alt="" /></a>
+                        <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage2}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage2}</@ofbizContentUrl>" vspace="5" hspace="5" class="cssImgXLarge" alt="" /></a>
                     </div>
                 </#if>
                 <#if productAdditionalImage3?string?has_content>
                     <div class="additionalImage">
-                        <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage3}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage3}</@ofbizContentUrl>" vspace="5" hspace="5" width="200" alt="" /></a>
+                        <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage3}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage3}</@ofbizContentUrl>" vspace="5" hspace="5" class="cssImgXLarge" alt="" /></a>
                     </div>
                 </#if>
                 <#if productAdditionalImage4?string?has_content>
                     <div class="additionalImage">
-                        <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage4}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage4}</@ofbizContentUrl>" vspace="5" hspace="5" width="200" alt="" /></a>
+                        <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage4}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage4}</@ofbizContentUrl>" vspace="5" hspace="5" class="cssImgXLarge" alt="" /></a>
                     </div>
                 </#if>
             </div>
@@ -541,6 +552,11 @@ ${virtualVariantJavaScript?if_exists}
           <form method="post" action="<@ofbizUrl>additem</@ofbizUrl>" name="addform"  style="margin: 0;">
           <fieldset>
             <#assign inStock = true />
+            <#assign commentEnable = Static["org.ofbiz.base.util.UtilProperties"].getPropertyValue("order.properties", "order.item.comment.enable")>
+            <#if commentEnable.equals("Y")>
+                <#assign orderItemAttr = Static["org.ofbiz.base.util.UtilProperties"].getPropertyValue("order.properties", "order.item.attr.prefix")>
+                ${uiLabelMap.CommonComment}&nbsp;<input type="text" name="${orderItemAttr}comment"/>
+            </#if>
             <#-- Variant Selection -->
             <#if product.isVirtual?if_exists?upper_case == "Y">
               <#if product.virtualVariantMethodEnum?if_exists == "VV_FEATURETREE" && featureLists?has_content>
@@ -730,7 +746,7 @@ ${virtualVariantJavaScript?if_exists}
                     <#if !imageUrl?string?has_content>
                       <#assign imageUrl = "/images/defaultImage.jpg" />
                     </#if>
-                      <a href="javascript:getList('FT${featureOrderFirst}','${indexer}',1);"><img src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${imageUrl}</@ofbizContentUrl>" width="60" height="60" alt="" /></a>
+                      <a href="javascript:getList('FT${featureOrderFirst}','${indexer}',1);"><img src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${imageUrl}</@ofbizContentUrl>" class="cssImgSmall" alt="" /></a>
                       <br />
                       <a href="javascript:getList('FT${featureOrderFirst}','${indexer}',1);" class="linktext">${key}</a>
                   </#if>
@@ -860,5 +876,44 @@ ${virtualVariantJavaScript?if_exists}
             </#list>
         </div>
     </#if>
+    <div class="product-tags">
+        <p class="titleProductTags"><h3>${uiLabelMap.EcommerceProductTags}</h3></p>
+        <#if productTags?exists>
+            <p class="titleAddTags"><strong>${uiLabelMap.EcommerceProductTagsDetail}:</strong></p>
+            <p>
+                <ul>
+                    <li>
+                    <#assign no = 0 />
+                    <#list productTags?keys?sort as productTag>
+                        <#assign tagValue = productTags.get(productTag)?if_exists/>
+                        <#if tagValue?has_content>
+                              <span><a href="javascript:void(0);" id="productTag_${productTag}">${productTag}</a> (${tagValue}) <#if no < (productTags.size() - 1)> | </#if></span>
+                              <#assign no = no + 1 />
+                        </#if>
+                    </#list>
+                    </li>
+                </ul>
+            </p>
+        </#if>
+        
+        <p class="titleAddTags"><strong>${uiLabelMap.EcommerceAddYourTags}:</strong></p>
+        <p>
+            <form method="post" action="<@ofbizUrl>addProductTags</@ofbizUrl>" name="addProductTags">
+                <input type="hidden" name="productId" value="${product.productId?if_exists}"/>
+                <input class="inputProductTags" type="text" value="" name="productTags" id="productTags" size="40"/>
+                <input class="buttonProductTags" type="submit" value="${uiLabelMap.EcommerceAddTags}" name="addTag"/>
+            </form>
+            <span>${uiLabelMap.EcommerceAddTagsDetail}</span>
+        </p>
+    </div>
+    <hr />
+    <form action="<@ofbizUrl>tagsearch</@ofbizUrl>" method="post" name="productTagsearchform" id="productTagsearchform">
+        <input type="hidden" name="keywordTypeId" value="KWT_TAG"/>
+        <input type="hidden" name="statusId" value="KW_APPROVED"/>
+        <input type="hidden" name="clearSearch" value="Y"/>
+        <input type="hidden" name="VIEW_SIZE" value="10"/>
+        <input type="hidden" name="PAGING" value="Y"/>
+        <input type="hidden" name="SEARCH_STRING" id="productTagStr"/>
+    </form>
     </div>
 </div>

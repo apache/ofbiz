@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <!--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -33,7 +34,8 @@
         <junit-test-suite class-name="org.ofbiz.base.conversion.test.MiscTests"/>
         <junit-test-suite class-name="org.ofbiz.base.concurrent.test.DependencyPoolTests"/>
         <junit-test-suite class-name="org.ofbiz.base.json.test.JSONTests"/>
-        <junit-test-suite class-name="org.ofbiz.base.util.test.UtilIOTests"/>
+        <!--junit-test-suite class-name="org.ofbiz.base.util.test.UtilIOTests"/-->
         <junit-test-suite class-name="org.ofbiz.base.test.BaseUnitTests"/>
+        <junit-test-suite class-name="org.ofbiz.base.util.test.UtilPropertiesTests"/>
     </test-group>
 </test-suite>

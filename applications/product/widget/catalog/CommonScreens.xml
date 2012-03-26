@@ -43,7 +43,6 @@ under the License.
                 <set field="applicationTitle" value="${uiLabelMap.ProductCatalogManagerApplication}" global="true"/>
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/ui/development-bundle/external/jquery.cookie.js" global="true"/>
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/jsTree/jquery.jstree.js" global="true"/>
-                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/jquery-1.8.13.custom.min.js" global="true"/>
             </actions>
             <widgets>
                 <include-screen name="ApplicationDecorator" location="component://commonext/widget/CommonScreens.xml"/>
@@ -135,18 +134,11 @@ under the License.
                                     <widgets>
                                         <container>
                                             <include-menu name="ProductStoreTabBar" location="component://product/widget/catalog/CatalogMenus.xml"/>
-                                            <include-menu name="ProductStoreSubTabBar" location="component://product/widget/catalog/CatalogMenus.xml"/>
                                             <label style="h1">${uiLabelMap[labelTitleProperty]} ${uiLabelMap.CommonFor}: ${productStore.storeName} [${uiLabelMap.CommonId}:${productStoreId}]  ${${extraFunctionName}}</label>
                                         </container>
                                         <section>
-                                            <condition>
-                                                <if-compare operator="equals" value="EditProductStore" field="tabButtonItem"/>
-                                            </condition>
                                             <widgets>
-                                                <container style="button-bar">
-                                                    <link target="javascript:expandAll(true);"  text="${uiLabelMap.CommonExpandAll}" style="buttontext" url-mode="plain"/>
-                                                    <link target="javascript:expandAll(false);" text="${uiLabelMap.CommonCollapseAll}" style="buttontext" url-mode="plain"/>
-                                                </container>                                                
+                                                <include-menu name="ProductStoreSubTabBar" location="component://product/widget/catalog/CatalogMenus.xml"/>
                                             </widgets>
                                         </section>
                                     </widgets>
@@ -156,7 +148,9 @@ under the License.
                                                 <if-compare operator="not-equals" value="EditProductStore" field="tabButtonItem"/>
                                             </condition>
                                             <widgets>
-	                                            <include-menu name="ProductStoreSubTabBar" location="component://product/widget/catalog/CatalogMenus.xml"/>
+                                                <container style="button-bar button-style-2">
+                                                    <link target="EditProductStore"  text="${uiLabelMap.ProductNewProductStore}" style="buttontext create" url-mode="plain"/>
+                                                </container>
                                             </widgets>
                                         </section>
                                     </fail-widgets>
@@ -319,7 +313,7 @@ under the License.
     <screen name="categorytree">
         <section>
             <actions>
-                <script location="component://product/webapp/catalog/WEB-INF/actions/category/CategoryTree.groovy"></script>
+                <script location="component://product/webapp/catalog/WEB-INF/actions/category/CategoryTree.groovy"/>
             </actions>
             <widgets>
                 <screenlet id="ProductBrowseCategoriesPanel" title="${uiLabelMap.ProductBrowseCatalogeAndCategories}" collapsible="true">
@@ -353,18 +347,17 @@ under the License.
             </widgets>
         </section>
      </screen>
-    
+
     <screen name="ImageManagementDecorator">
         <section>
             <actions>
-                <set field="headerItem" value="Imagemanagement"/><!-- this highlights the selected menu-item with name "main" -->
-                <set field="userTabButtonMainAppBar" value="Imagemanagement"/>
+                <set field="headerItem" value="Imagemanagement"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="left-column">
                         <include-screen name="leftbar"/>
-                    </decorator-section>                    
+                    </decorator-section>
                     <decorator-section name="body">
                         <section>
                             <condition>
@@ -372,20 +365,18 @@ under the License.
                             </condition>
                             <widgets>
                                 <include-menu name="ImageManagementTabBar" location="component://product/widget/catalog/CatalogMenus.xml"/>
-                                <container style="h1">
-                                <label text=" "/>
-                                </container>
+                                <decorator-section-include name="body"/>
                             </widgets>
                             <fail-widgets>
                                 <label style="h3">${uiLabelMap.ProductCatalogViewPermissionError}</label>
                             </fail-widgets>
                         </section>
-                        <decorator-section-include name="body"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
         </section>
     </screen>
+
     <screen name="listMiniproduct">
         <section>
             <actions>
@@ -398,6 +389,38 @@ under the License.
             </actions>
             <widgets>
                     <platform-specific><html><html-template location="component://product/webapp/catalog/find/miniproductlist.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ProductStoreFacilities">
+        <section>
+            <actions>
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+                <entity-one entity-name="ProductStore" value-field="productStore"/>
+                <set field="tabButtonItem" value="EditProductStoreFacilities"/>
+                <set field="labelTitleProperty" value="ProductFacility"/>
+                <set field="headerItem" value="store"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator">
+                    <decorator-section name="left-column">
+                        <include-screen name="leftbar"/>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <condition><not><if-empty field="productStore"/></not></condition>
+                            <widgets>
+                                <container>
+                                    <include-menu name="ProductStoreTabBar" location="component://product/widget/catalog/CatalogMenus.xml"/>
+                                    <include-menu name="ProductStoreSubTabBar" location="component://product/widget/catalog/CatalogMenus.xml"/>
+                                    <label style="h1">${uiLabelMap[labelTitleProperty]} ${uiLabelMap.CommonFor}: ${productStore.storeName} [${uiLabelMap.CommonId}:${productStoreId}]  ${${extraFunctionName}}</label>
+                                </container>
+                                <include-portal-page id="ProductStoreFacility"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
             </widgets>
         </section>
     </screen>

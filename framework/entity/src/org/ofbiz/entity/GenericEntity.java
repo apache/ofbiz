@@ -461,7 +461,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         }
 
         boolean isNullString = false;
-        if ("null".equals(value)) {
+        if ("null".equals(value) || "[null-field]".equals(value)) {
             // count this as a null too, but only for numbers and stuff, not for Strings
             isNullString = true;
         }
@@ -840,8 +840,10 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
             }
             // read value with modelEntity name of pkNames
             for (String pkName : pkNamesToUse) {
-                keyBuffer.append('.');
-                keyBuffer.append(this.get(pkName));
+                if (this.containsKey(pkName)) {
+                    keyBuffer.append('.');
+                    keyBuffer.append(this.get(pkName));
+                }
             }
         } else {
             Iterator<ModelField> iter = modelEntity.getPksIterator();
@@ -1076,6 +1078,8 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
                 } else {
                     element.setAttribute(name, value);
                 }
+            } else {
+                element.setAttribute(name, GenericEntity.NULL_FIELD.toString());
             }
         }
 

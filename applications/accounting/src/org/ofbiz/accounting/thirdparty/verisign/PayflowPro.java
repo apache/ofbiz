@@ -163,7 +163,7 @@ public class PayflowPro {
         params.append("&").append(parseContext(data));
 
         // transmit the request
-        if (Debug.verboseOn()) Debug.logVerbose("Sending to Verisign: " + params.toString(), module);
+        //if (Debug.verboseOn()) Debug.logVerbose("Sending to Verisign: " + params.toString(), module);
         String resp;
         if (!comparePaymentGatewayConfigValue(delegator, paymentGatewayConfigId, "enableTransmit", configString, "payment.verisign.enable_transmit",  "false")) {
             resp = pfp.submitTransaction(params.toString(), pfp.generateRequestId());
@@ -671,11 +671,7 @@ public class PayflowPro {
         Debug.logInfo("Verisign response string: " + resp, module);
         Map<String, String> parameters = FastMap.newInstance();
         List<String> params = StringUtil.split(resp, "&");
-        Iterator<String> i = params.iterator();
-
-        while (i.hasNext()) {
-            String str = (String) i.next();
-
+        for(String str : params) {
             if (str.length() > 0) {
                 List<String> kv = StringUtil.split(str, "=");
                 String k = kv.get(0);

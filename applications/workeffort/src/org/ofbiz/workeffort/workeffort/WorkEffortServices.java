@@ -508,13 +508,15 @@ public class WorkEffortServices {
 
         String calendarType = (String) context.get("calendarType");
         if (UtilValidate.isEmpty(calendarType)) {
+            // This is a bad idea. This causes the service to return only those work efforts that are assigned
+            // to the current user even when the service parameters have nothing to do with the current user.
             calendarType = "CAL_PERSONAL";
         }
         String partyId = (String) context.get("partyId");
         Collection<String> partyIds = UtilGenerics.checkCollection(context.get("partyIds"));
         String facilityId = (String) context.get("facilityId");
         String fixedAssetId = (String) context.get("fixedAssetId");
-        // Debug.log("======by period for fixedAsset: " + fixedAssetId + " facilityId: " + facilityId + "partyId: " + partyId + " entityExprList:" + (List) context.get("entityExprList"));
+        // Debug.logInfo("======by period for fixedAsset: " + fixedAssetId + " facilityId: " + facilityId + "partyId: " + partyId + " entityExprList:" + (List) context.get("entityExprList"));
         String workEffortTypeId = (String) context.get("workEffortTypeId");
         Boolean filterOutCanceledEvents = (Boolean) context.get("filterOutCanceledEvents");
         if (filterOutCanceledEvents == null) {
@@ -536,7 +538,9 @@ public class WorkEffortServices {
         }
 
         // get a timestamp (date) for the beginning of today and for beginning of numDays+1 days from now
-        Timestamp startStamp = UtilDateTime.getDayStart(startDay, timeZone, locale);
+        // Commenting this out because it interferes with periods that do not start at the beginning of the day
+        // Timestamp startStamp = UtilDateTime.getDayStart(startDay, timeZone, locale);
+        Timestamp startStamp = startDay;
         Timestamp endStamp = UtilDateTime.adjustTimestamp(startStamp, periodType, 1, timeZone, locale);
         long periodLen = endStamp.getTime() - startStamp.getTime();
         endStamp = UtilDateTime.adjustTimestamp(startStamp, periodType, numPeriods, timeZone, locale);
@@ -635,7 +639,7 @@ public class WorkEffortServices {
         try {
             List<GenericValue> tempWorkEfforts = null;
             if (UtilValidate.isNotEmpty(partyIdsToUse)) {
-                // Debug.log("=====conditions for party: " + eclTotal);
+                // Debug.logInfo("=====conditions for party: " + eclTotal);
                 tempWorkEfforts = EntityUtil.filterByDate(delegator.findList("WorkEffortAndPartyAssignAndType", eclTotal, null, orderByList, null, false));
             } else {
                 tempWorkEfforts = delegator.findList("WorkEffort", eclTotal, null, orderByList, null, false);
@@ -721,6 +725,9 @@ public class WorkEffortServices {
                         calEntry.put("workEffort", workEffort);
                         long length = ((weRange.end().after(endStamp) ? endStamp.getTime() : weRange.end().getTime()) - (weRange.start().before(startStamp) ? startStamp.getTime() : weRange.start().getTime()));
                         int periodSpan = (int) Math.ceil((double) length / periodLen);
+                        if (length % periodLen == 0 && startDate.getTime() > periodRange.start().getTime()) {
+                            periodSpan++;
+                        }
                         calEntry.put("periodSpan", Integer.valueOf(periodSpan));
                         DateRange calEntryRange = new DateRange((weRange.start().before(startStamp) ? startStamp : weRange.start()), (weRange.end().after(endStamp) ? endStamp : weRange.end()));
                         calEntry.put("calEntryRange", calEntryRange);

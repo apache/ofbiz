@@ -53,6 +53,7 @@ import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.order.order.OrderChangeHelper;
 import org.ofbiz.order.order.OrderReadHelper;
 import org.ofbiz.party.contact.ContactHelper;
@@ -236,10 +237,7 @@ public class PaymentGatewayServices {
                                     }
 
                                     if (UtilValidate.isNotEmpty(otherPaymentMethodAndCreditCardList)) {
-                                        Iterator<GenericValue> otherPaymentMethodAndCreditCardIter = otherPaymentMethodAndCreditCardList.iterator();
-                                        while (otherPaymentMethodAndCreditCardIter.hasNext()) {
-                                            GenericValue otherPaymentMethodAndCreditCard = otherPaymentMethodAndCreditCardIter.next();
-
+                                        for (GenericValue otherPaymentMethodAndCreditCard : otherPaymentMethodAndCreditCardList) {
                                             // change OrderPaymentPreference in memory only and call auth service
                                             orderPaymentPreference.set("paymentMethodId", otherPaymentMethodAndCreditCard.getString("paymentMethodId"));
                                             Map<String, Object> authRetryResult = authPayment(dispatcher, userLogin, orh, orderPaymentPreference, totalRemaining, reAuth, transAmount);
@@ -367,9 +365,7 @@ public class PaymentGatewayServices {
         int finished = 0;
         int hadError = 0;
         List<String> messages = FastList.newInstance();
-        Iterator<GenericValue> payments = paymentPrefs.iterator();
-        while (payments.hasNext()) {
-            GenericValue paymentPref = payments.next();
+        for(GenericValue paymentPref : paymentPrefs) {
             if (reAuth && "PAYMENT_AUTHORIZED".equals(paymentPref.getString("statusId"))) {
                 String paymentConfig = null;
                 // get the payment settings i.e. serviceName and config properties file name
@@ -765,10 +761,8 @@ public class PaymentGatewayServices {
 
         // iterate over the prefs and release each one
         List<GenericValue> finished = FastList.newInstance();
-        Iterator<GenericValue> payments = paymentPrefs.iterator();
-        while (payments.hasNext()) {
-            paymentPref = payments.next();
-            Map<String, Object> releaseContext = UtilMisc.toMap("userLogin", userLogin, "orderPaymentPreferenceId", paymentPref.getString("orderPaymentPreferenceId"));
+        for(GenericValue pPref : paymentPrefs) {
+            Map<String, Object> releaseContext = UtilMisc.toMap("userLogin", userLogin, "orderPaymentPreferenceId", pPref.getString("orderPaymentPreferenceId"));
             Map<String, Object> releaseResult = null;
             try {
                 releaseResult = dispatcher.runSync("releaseOrderPaymentPreference", releaseContext);
@@ -826,11 +820,9 @@ public class PaymentGatewayServices {
         List<GenericValue> messageEntities = FastList.newInstance();
         List<String> messages = UtilGenerics.cast(context.get("internalRespMsgs"));
         if (UtilValidate.isNotEmpty(messages)) {
-            Iterator<String> i = messages.iterator();
-            while (i.hasNext()) {
+            for(String message : messages) {
                 GenericValue respMsg = delegator.makeValue("PaymentGatewayRespMsg");
                 String respMsgId = delegator.getNextSeqId("PaymentGatewayRespMsg");
-                String message = i.next();
                 respMsg.set("paymentGatewayRespMsgId", respMsgId);
                 respMsg.set("paymentGatewayResponseId", responseId);
                 respMsg.set("pgrMessage", message);
@@ -2158,9 +2150,9 @@ public class PaymentGatewayServices {
         }
         if (amount.compareTo(ZERO) == 0) {
             amount = paymentPreference.getBigDecimal("maxAmount");
-            Debug.log("resetting payment amount from 0.00 to correctMax amount", module);
+            Debug.logInfo("resetting payment amount from 0.00 to correctMax amount", module);
         }
-        Debug.log("reauth with amount: " + amount, module);
+        Debug.logInfo("reauth with amount: " + amount, module);
 
         // first re-auth the card
         Map<String, Object> authPayRes = authPayment(dispatcher, userLogin, orh, paymentPreference, amount, true, null);
@@ -2620,7 +2612,7 @@ public class PaymentGatewayServices {
                 return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
                         "AccountingPaymentCreationError", locale));
             }
-            //Debug.log("Payment created : " + paymentId, module);
+            //Debug.logInfo("Payment created : " + paymentId, module);
 
             if (paymentId == null) {
                 return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
@@ -3089,7 +3081,7 @@ public class PaymentGatewayServices {
         // this record is not to be stored, just passed to the service for use
 
         // get the default currency
-        String currency = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+        String currency = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
 
         // prepare the auth context
         Map<String, Object> authContext = FastMap.newInstance();
@@ -3254,7 +3246,7 @@ public class PaymentGatewayServices {
             requestContext.put("billToParty", orh.getBillToParty());
             requestContext.put("billToEmail", billToEmail);
             requestContext.put("referenceCode", referenceCode);
-            String currency = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+            String currency = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
             requestContext.put("currency", currency);
             requestContext.put("creditAmount", context.get("amount"));
         } else {
@@ -3693,7 +3685,7 @@ public class PaymentGatewayServices {
         cal.setTimeInMillis(txStamp.getTime());
         cal.add(Calendar.MINUTE, 2);
         Timestamp twoMinAfter = new Timestamp(cal.getTimeInMillis());
-        Debug.log("Re-Auth Capture Test : Tx Date - " + txStamp + " : 2 Min - " + twoMinAfter + " : Now - " + nowStamp, module);
+        Debug.logInfo("Re-Auth Capture Test : Tx Date - " + txStamp + " : 2 Min - " + twoMinAfter + " : Now - " + nowStamp, module);
 
         if (nowStamp.after(twoMinAfter)) {
             result.put("captureResult", Boolean.FALSE);

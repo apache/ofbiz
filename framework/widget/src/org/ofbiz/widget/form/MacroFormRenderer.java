@@ -843,13 +843,11 @@ public class MacroFormRenderer implements FormStringRenderer {
             options.append(key);
             options.append("'");
             options.append(",'description':'");
-            String description = encode(optionValue.getDescription(), modelFormField, context);
-            String unescaped = StringEscapeUtils.unescapeHtml(description);
-            if (textSize > 0 && unescaped.length() > textSize ) {
-                String reduced = unescaped.substring(0, textSize - 8) + "..." + unescaped.substring(unescaped.length() - 5);
-                description = StringEscapeUtils.escapeJavaScript(StringEscapeUtils.escapeHtml(reduced));
+            String description = optionValue.getDescription();
+            if (textSize > 0 && description.length() > textSize ) {
+                description = description.substring(0, textSize - 8) + "..." + description.substring(description.length() - 5);
             }
-            options.append(description);
+            options.append(encode(description, modelFormField, context));
 
             if (UtilValidate.isNotEmpty(currentValueList)) {
                 options.append("'");
@@ -1424,7 +1422,7 @@ public class MacroFormRenderer implements FormStringRenderer {
         Iterator<ModelFormField> submitFields = modelForm.getMultiSubmitFields().iterator();
         while (submitFields.hasNext()) {
             ModelFormField submitField = submitFields.next();
-            if (submitField != null) {
+            if (submitField != null && submitField.shouldUse(context)) {
 
                 // Threw this in that as a hack to keep the submit button from expanding the first field
                 // Needs a more rugged solution
@@ -2258,7 +2256,7 @@ public class MacroFormRenderer implements FormStringRenderer {
         if (questionIndex == -1) {
             result += sessionId;
         } else {
-            result.replace("?", sessionId + "?");
+            result = result.replace("?", sessionId + "?");
         }
         return result;
     }
@@ -2622,20 +2620,19 @@ public class MacroFormRenderer implements FormStringRenderer {
 
     public void renderImageField(Appendable writer, Map<String, Object> context, ImageField imageField) throws IOException {
         ModelFormField modelFormField = imageField.getModelFormField();
-
-        String border = Integer.toString(imageField.getBorder());
         String value = modelFormField.getEntry(context, imageField.getValue(context));
-        String width = "";
-        String height = "";
         String description = imageField.getDescription(context);
         String alternate = imageField.getAlternate(context);
+        String style = imageField.getStyle(context);
 
         if(UtilValidate.isEmpty(description)){
             description = imageField.getModelFormField().getTitle(context);
         }
+
         if(UtilValidate.isEmpty(alternate)){
             alternate = description;
         }
+
         if (UtilValidate.isNotEmpty(value)) {
             if (!value.startsWith("http")) {
                 StringBuilder buffer = new StringBuilder();
@@ -2645,14 +2642,6 @@ public class MacroFormRenderer implements FormStringRenderer {
             }
         } else if (value == null) {
             value = "";
-        }
-
-        if (imageField.getWidth() != null) {
-            width = Integer.toString(imageField.getWidth());
-        }
-
-        if (imageField.getHeight() != null) {
-            height = Integer.toString(imageField.getHeight());
         }
 
         String event = modelFormField.getEvent();
@@ -2666,12 +2655,8 @@ public class MacroFormRenderer implements FormStringRenderer {
         sr.append(encode(description, modelFormField, context));
         sr.append("\" alternate=\"");
         sr.append(encode(alternate, modelFormField, context));
-        sr.append("\" border=\"");
-        sr.append(border);
-        sr.append("\" width=\"");
-        sr.append(width);
-        sr.append("\" height=\"");
-        sr.append(height);
+        sr.append("\" style=\"");
+        sr.append(style);
         sr.append("\" event=\"");
         sr.append(event==null?"":event);
         sr.append("\" action=\"");

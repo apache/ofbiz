@@ -61,7 +61,7 @@ function getInvoiceRunningTotal() {
             type: 'POST',
             data: jQuery('#listPurchaseInvoices').serialize(),
             async: false,
-            succes: function(data) {
+            success: function(data) {
                 jQuery('#showInvoiceRunningTotal').html(data.invoiceRunningTotal);
             }
         });
@@ -71,7 +71,7 @@ function getInvoiceRunningTotal() {
         }
 
     } else {
-        jQuery('#submitButton').attr('disabled', 'disabled');
+        jQuery('#submitButton').attr('disabled', true);
         jQuery('#showInvoiceRunningTotal').html("");
     }
 }

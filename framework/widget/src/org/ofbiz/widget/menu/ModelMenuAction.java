@@ -31,13 +31,10 @@ import javax.servlet.http.HttpSession;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.codehaus.groovy.runtime.InvokerHelper;
-
-import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.GroovyUtil;
 import org.ofbiz.base.util.ObjectType;
+import org.ofbiz.base.util.ScriptUtil;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilProperties;
@@ -49,6 +46,7 @@ import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.entity.finder.ByAndFinder;
 import org.ofbiz.entity.finder.ByConditionFinder;
 import org.ofbiz.entity.finder.PrimaryKeyFinder;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.widget.WidgetWorker;
@@ -326,9 +324,9 @@ public abstract class ModelMenuAction {
 
             String value = null;
             if (noLocale) {
-                value = UtilProperties.getPropertyValue(resource, property);
+                value = EntityUtilProperties.getPropertyValue(resource, property, WidgetWorker.getDelegator(context));
             } else {
-                value = UtilProperties.getMessage(resource, property, locale);
+                value = EntityUtilProperties.getMessage(resource, property, locale, WidgetWorker.getDelegator(context));
             }
             if (UtilValidate.isEmpty(value)) {
                 value = this.defaultExdr.expandString(context);
@@ -351,7 +349,6 @@ public abstract class ModelMenuAction {
     }
 
     public static class Script extends ModelMenuAction {
-        protected static final Object[] EMPTY_ARGS = {};
         protected String location;
         protected String method;
 
@@ -364,30 +361,7 @@ public abstract class ModelMenuAction {
 
         @Override
         public void runAction(Map<String, Object> context) {
-            if (location.endsWith(".bsh")) {
-                try {
-                    BshUtil.runBshAtLocation(location, context);
-                } catch (GeneralException e) {
-                    String errMsg = "Error running BSH script at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new IllegalArgumentException(errMsg);
-                }
-            } else if (location.endsWith(".groovy")) {
-                try {
-                    groovy.lang.Script script = InvokerHelper.createScript(GroovyUtil.getScriptClassFromLocation(location), GroovyUtil.getBinding(context));
-                    if (UtilValidate.isEmpty(method)) {
-                        script.run();
-                    } else {
-                        script.invokeMethod(method, EMPTY_ARGS);
-                    }
-                } catch (GeneralException e) {
-                    String errMsg = "Error running Groovy script at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new IllegalArgumentException(errMsg);
-                }
-            } else {
-                throw new IllegalArgumentException("For screen script actions the script type is not yet support for location:" + location);
-            }
+            ScriptUtil.executeScript(this.location, this.method, context);
         }
     }
 

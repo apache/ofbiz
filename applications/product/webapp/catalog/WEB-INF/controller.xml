@@ -800,6 +800,12 @@ under the License.
         <response name="success" type="view" value="EditProductKeyword"/>
         <response name="error" type="view" value="EditProductKeyword"/>
     </request-map>
+    <request-map uri="updateProductKeyword">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="updateProductKeyword"/>
+        <response name="success" type="view" value="EditProductKeyword"/>
+        <response name="error" type="view" value="EditProductKeyword"/>
+    </request-map>
     <request-map uri="deleteProductKeyword">
         <security https="true" auth="true"/>
         <event type="service" path="" invoke="deleteProductKeyword"/>
@@ -2056,7 +2062,7 @@ under the License.
     </request-map>
     <request-map uri="prepareCreateShipMeth">
         <security https="true" auth="true"/>
-        <event type="groovy" path="component://product/webapp/catalog/store/" invoke="prepareCreateShipMeth.groovy"/>
+        <event type="groovy" path="component://product/webapp/catalog/store/prepareCreateShipMeth.groovy"/>
         <response name="success" type="view" value="EditProductStoreShipSetup"/>
         <response name="error" type="view" value="EditProductStoreShipSetup"/>
     </request-map>
@@ -2840,7 +2846,7 @@ under the License.
     </request-map>
     <request-map uri="checkAction">
         <security https="true" auth="true"/>
-        <event type="groovy" path="component://product/webapp/catalog/WEB-INF/actions/imagemanagement/" invoke="checkAction.groovy"/>
+        <event type="groovy" path="component://product/webapp/catalog/WEB-INF/actions/imagemanagement/checkAction.groovy"/>
         <response name="frame" type="request" value="ImageFrames"/>
         <response name="watermark" type="request" value="ImageWatermarking"/>
         <response name="crop" type="request" value="ImageCropping"/>
@@ -2849,7 +2855,7 @@ under the License.
     </request-map>
     <request-map uri="checkRejected">
         <security https="true" auth="true"/>
-        <event type="groovy" path="component://product/webapp/catalog/WEB-INF/actions/imagemanagement/" invoke="checkRejected.groovy"/>
+        <event type="groovy" path="component://product/webapp/catalog/WEB-INF/actions/imagemanagement/checkRejected.groovy"/>
         <response name="approved" type="view" value="ImageApprove"/>
         <response name="rejected" type="view" value="ListPeopleRejected"/>
     </request-map>
@@ -2923,9 +2929,9 @@ under the License.
         <security https="true" auth="true"/>
         <response name="success" type="view" value="ImageResize"/>
     </request-map>
-    <request-map uri="resizeAllImageOfProduct">
+    <request-map uri="resizeImages">
         <security https="true" auth="true"/>
-        <event type="service" path="" invoke="resizeAllImageOfProduct"/>
+        <event type="service" path="" invoke="resizeImages"/>
         <response name="success" type="view" value="ImageResize"/>
         <response name="error" type="view" value="ImageResize"/>
     </request-map>
@@ -3041,6 +3047,19 @@ under the License.
         <event type="service" invoke="deleteProductGroupOrder"/>
         <response name="success" type="view" value="ViewProductGroupOrder"/>
         <response name="error" type="view" value="ViewProductGroupOrder"/>
+    </request-map>
+    
+    <!-- ================ Product Tag Requests ================= -->
+    <request-map uri="EditProductTag">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditProductTag"/>
+    </request-map>
+
+    <request-map uri="updateProductTag">
+        <security https="true" auth="true"/>
+        <event type="service-multi" path="" invoke="updateProductKeyword"/>
+        <response name="success" type="request-redirect" value="EditProductTag"/>
+        <response name="error" type="view" value="EditProductTag"/>
     </request-map>
     <!-- end of request mappings -->
 
@@ -3177,7 +3196,7 @@ under the License.
     <view-map name="EditProductStoreFinAccountSettings" type="screen" page="component://product/widget/catalog/StoreScreens.xml#EditProductStoreFinAccountSettings"/>
     <view-map name="EditProductStoreVendorPayments" type="screen" page="component://product/widget/catalog/StoreScreens.xml#EditProductStoreVendorPayments"/>
     <view-map name="EditProductStoreVendorShipments" type="screen" page="component://product/widget/catalog/StoreScreens.xml#EditProductStoreVendorShipments"/>
-    <view-map name="ProductStoreFacilities" page="component://product/widget/catalog/StoreScreens.xml#ProductStoreFacilities" type="screen"/>
+    <view-map name="ProductStoreFacilities" page="component://product/widget/catalog/CommonScreens.xml#ProductStoreFacilities" type="screen"/>
     <view-map name="ListProductStoreFacility" page="component://product/widget/catalog/StoreScreens.xml#ListProductStoreFacility" type="screen"/>
     <view-map name="ListProductStoreFacilityFormOnly" page="component://product/widget/catalog/StoreScreens.xml#ListProductStoreFacilityFormOnly" type="screen"/>
     <view-map name="EditProductStoreFacility" page="component://product/widget/catalog/StoreScreens.xml#EditProductStoreFacility" type="screen"/>
@@ -3205,6 +3224,8 @@ under the License.
     <view-map name="ListQuantityBreaks" type="screen" page="component://product/widget/catalog/ShippingScreens.xml#ListQuantityBreaks"/>
     <view-map name="ListShipmentMethodTypes" type="screen" page="component://product/widget/catalog/ShippingScreens.xml#ListShipmentMethodTypes"/>
     <view-map name="ListCarrierShipmentMethods" type="screen" page="component://product/widget/catalog/ShippingScreens.xml#ListCarrierShipmentMethods"/>
+
+    <view-map name="EditProductTag" type="screen" page="component://product/widget/catalog/ProductScreens.xml#EditProductTag"/>
 
     <!-- Lookup request mappings -->
     <view-map name="LookupContent" page="component://content/widget/content/ContentScreens.xml#LookupContent" type="screen"/>

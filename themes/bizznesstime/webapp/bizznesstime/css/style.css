@@ -1429,7 +1429,13 @@ div.autocomplete ul li {
   height:16px;
   border: none;
 }
-
+.screenlet-title-bar .indicator img {
+  float:right;
+  margin:0 3px;
+  width:16px;
+  height:16px;
+  display:inline;
+}
 /***********************************************
 Webtools
 ***********************************************/
@@ -1541,6 +1547,30 @@ width:10%
 
 .quickaddtable span.qty {
 width:10%
+}
+
+img.cssImgXLarge {
+	/*border: 1px black solid;*/
+	max-width: 200px;
+	max-height: 150px;
+}
+
+img.cssImgLarge {
+	/*border: 1px black solid;*/
+	max-width: 100px;
+	max-height: 75px;
+}
+
+img.cssImgStandard {
+	/*border: 1px black solid;*/
+	max-width: 70px;
+	max-height: 52px;
+}
+
+img.cssImgSmall {
+	/*border: 1px black solid;*/
+	max-width: 50px;
+	max-height: 37px;
 }
 
 /* ========================================================= */
@@ -1907,6 +1937,7 @@ width:10%
  *
  * http://docs.jquery.com/UI/Menu#theming
  */
+.ui-autocomplete-loading { background: white url('../images/ui-anim_basic_16x16.gif') right center no-repeat !important; }
 .ui-menu {
     list-style:none;
     padding: 2px;

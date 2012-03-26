@@ -23,7 +23,7 @@ under the License.
     
     <simple-method method-name="UploadProductImages" short-description="Method to upload multiple images for product">
         <set-service-fields service-name="addMultipleuploadForProduct" map="parameters" to-map="addAdditionalViewForProductMap"/>
-        <if-not-empty field="parameters.additionalImageOne">
+        <if-not-empty field="parameters._additionalImageOne_fileName">
             <set field="addAdditionalViewForProductMap.productId" from-field="parameters.productId"/>
             <set field="addAdditionalViewForProductMap.imageResize" from-field="parameters.imageResize"/>
             <set field="addAdditionalViewForProductMap.uploadedFile" from-field="parameters.additionalImageOne"/>
@@ -33,7 +33,7 @@ under the License.
             <call-service service-name="addMultipleuploadForProduct" in-map-name="addAdditionalViewForProductMap"/>
             <clear-field field="addAdditionalViewForProductMap"/>
         </if-not-empty>
-        <if-not-empty field="parameters.additionalImageTwo">
+        <if-not-empty field="parameters._additionalImageTwo_fileName">
             <set field="addAdditionalViewForProductMap.productId" from-field="parameters.productId"/>
             <set field="addAdditionalViewForProductMap.imageResize" from-field="parameters.imageResize"/>
             <set field="addAdditionalViewForProductMap.uploadedFile" from-field="parameters.additionalImageTwo"/>
@@ -43,7 +43,7 @@ under the License.
             <call-service service-name="addMultipleuploadForProduct" in-map-name="addAdditionalViewForProductMap"/>
             <clear-field field="addAdditionalViewForProductMap"/>
         </if-not-empty>
-        <if-not-empty field="parameters.additionalImageThree">
+        <if-not-empty field="parameters._additionalImageThree_fileName">
             <set field="addAdditionalViewForProductMap.productId" from-field="parameters.productId"/>
             <set field="addAdditionalViewForProductMap.imageResize" from-field="parameters.imageResize"/>
             <set field="addAdditionalViewForProductMap.uploadedFile" from-field="parameters.additionalImageThree"/>
@@ -53,7 +53,7 @@ under the License.
             <call-service service-name="addMultipleuploadForProduct" in-map-name="addAdditionalViewForProductMap"/>
             <clear-field field="addAdditionalViewForProductMap"/>
         </if-not-empty>
-        <if-not-empty field="parameters.additionalImageFour">
+        <if-not-empty field="parameters._additionalImageFour_fileName">
             <set field="addAdditionalViewForProductMap.productId" from-field="parameters.productId"/>
             <set field="addAdditionalViewForProductMap.imageResize" from-field="parameters.imageResize"/>
             <set field="addAdditionalViewForProductMap.uploadedFile" from-field="parameters.additionalImageFour"/>
@@ -63,7 +63,7 @@ under the License.
             <call-service service-name="addMultipleuploadForProduct" in-map-name="addAdditionalViewForProductMap"/>
             <clear-field field="addAdditionalViewForProductMap"/>
         </if-not-empty>
-        <if-not-empty field="parameters.additionalImageFive">
+        <if-not-empty field="parameters._additionalImageFive_fileName">
             <set field="addAdditionalViewForProductMap.productId" from-field="parameters.productId"/>
             <set field="addAdditionalViewForProductMap.imageResize" from-field="parameters.imageResize"/>
             <set field="addAdditionalViewForProductMap.uploadedFile" from-field="parameters.additionalImageFive"/>
@@ -73,7 +73,7 @@ under the License.
             <call-service service-name="addMultipleuploadForProduct" in-map-name="addAdditionalViewForProductMap"/>
             <clear-field field="addAdditionalViewForProductMap"/>
         </if-not-empty>
-        <if-not-empty field="parameters.additionalImageSix">
+        <if-not-empty field="parameters._additionalImageSix_fileName">
             <set field="addAdditionalViewForProductMap.productId" from-field="parameters.productId"/>
             <set field="addAdditionalViewForProductMap.imageResize" from-field="parameters.imageResize"/>
             <set field="addAdditionalViewForProductMap.uploadedFile" from-field="parameters.additionalImageSix"/>
@@ -83,7 +83,7 @@ under the License.
             <call-service service-name="addMultipleuploadForProduct" in-map-name="addAdditionalViewForProductMap"/>
             <clear-field field="addAdditionalViewForProductMap"/>
         </if-not-empty>
-        <if-not-empty field="parameters.additionalImageSeven">
+        <if-not-empty field="parameters._additionalImageSeven_fileName">
             <set field="addAdditionalViewForProductMap.productId" from-field="parameters.productId"/>
             <set field="addAdditionalViewForProductMap.imageResize" from-field="parameters.imageResize"/>
             <set field="addAdditionalViewForProductMap.uploadedFile" from-field="parameters.additionalImageSeven"/>
@@ -93,7 +93,7 @@ under the License.
             <call-service service-name="addMultipleuploadForProduct" in-map-name="addAdditionalViewForProductMap"/>
             <clear-field field="addAdditionalViewForProductMap"/>
         </if-not-empty>
-        <if-not-empty field="parameters.additionalImageEight">
+        <if-not-empty field="parameters._additionalImageEight_fileName">
             <set field="addAdditionalViewForProductMap.productId" from-field="parameters.productId"/>
             <set field="addAdditionalViewForProductMap.imageResize" from-field="parameters.imageResize"/>
             <set field="addAdditionalViewForProductMap.uploadedFile" from-field="parameters.additionalImageEight"/>
@@ -103,7 +103,7 @@ under the License.
             <call-service service-name="addMultipleuploadForProduct" in-map-name="addAdditionalViewForProductMap"/>
             <clear-field field="addAdditionalViewForProductMap"/>
         </if-not-empty>
-        <if-not-empty field="parameters.additionalImageNine">
+        <if-not-empty field="parameters._additionalImageNine_fileName">
             <set field="addAdditionalViewForProductMap.productId" from-field="parameters.productId"/>
             <set field="addAdditionalViewForProductMap.imageResize" from-field="parameters.imageResize"/>
             <set field="addAdditionalViewForProductMap.uploadedFile" from-field="parameters.additionalImageNine"/>
@@ -113,7 +113,7 @@ under the License.
             <call-service service-name="addMultipleuploadForProduct" in-map-name="addAdditionalViewForProductMap"/>
             <clear-field field="addAdditionalViewForProductMap"/>
         </if-not-empty>
-        <if-not-empty field="parameters.additionalImageTen">
+        <if-not-empty field="parameters._additionalImageTen_fileName">
             <set field="addAdditionalViewForProductMap.productId" from-field="parameters.productId"/>
             <set field="addAdditionalViewForProductMap.imageResize" from-field="parameters.imageResize"/>
             <set field="addAdditionalViewForProductMap.uploadedFile" from-field="parameters.additionalImageTen"/>
@@ -245,16 +245,29 @@ under the License.
         statusId = StringUtil.split(checkStatusVal, &quot;/&quot;);
         if (statusId) return statusId[0];
         }"/>
-        <entity-and entity-name="ContentApproval" list="contentApprovals">
-            <field-map field-name="partyId" from-field="userLogin.partyId"/>
-            <field-map field-name="contentId" from-field="parameters.contentId"/>
-            <field-map field-name="roleTypeId" value="IMAGEAPPROVER"/>
-        </entity-and>
-        <first-from-list entry="contentApproval" list="contentApprovals"/>
-        <if-not-empty field="parameters.checkStatusId">
+        
+        <property-to-field resource="catalog.properties" property="image.management.autoApproveImage" field="autoApproveImage"/>
+        <property-to-field resource="catalog.properties" property="image.management.multipleApproval" field="multipleApproval"/>
+        <if-compare field="autoApproveImage" operator="equals" value="Y">
+            <entity-and entity-name="ContentApproval" list="contentApprovals">
+                <field-map field-name="contentId" from-field="parameters.contentId"/>
+                <field-map field-name="roleTypeId" value="IMAGEAPPROVER"/>
+            </entity-and>
+            <iterate entry="contentApproval" list="contentApprovals">
+                <set field="contentApproval.approvalStatusId" from-field="parameters.checkStatusId"/>
+                <store-value value-field="contentApproval"/>
+            </iterate>
+        <else>
+            <entity-and entity-name="ContentApproval" list="contentApprovals">
+                <field-map field-name="partyId" from-field="userLogin.partyId"/>
+                <field-map field-name="contentId" from-field="parameters.contentId"/>
+                <field-map field-name="roleTypeId" value="IMAGEAPPROVER"/>
+            </entity-and>
+            <first-from-list entry="contentApproval" list="contentApprovals"/>
             <set field="contentApproval.approvalStatusId" from-field="parameters.checkStatusId"/>
-        </if-not-empty>
-        <store-value value-field="contentApproval"/>
+            <store-value value-field="contentApproval"/>
+        </else>
+        </if-compare>
         
         <if-compare field="parameters.checkStatusId" operator="equals" value="IM_REJECTED">
             <entity-condition entity-name="ContentApproval" list="checkRejects">
@@ -271,8 +284,9 @@ under the License.
             <set field="content.statusId" value="IM_REJECTED"/>
             <set field="content.createdByUserLogin" from-field="userLogin.userLoginId"/>
             <store-value value-field="content"/>
-            <else>
-                <if-compare field="parameters.checkStatusId" operator="equals" value="IM_APPROVED">
+        <else>
+            <if-compare field="parameters.checkStatusId" operator="equals" value="IM_APPROVED">
+                <if-compare field="multipleApproval" operator="equals" value="Y">
                     <entity-count entity-name="ContentApproval" count-field="countParty">
                         <condition-list combine="and">
                             <condition-expr field-name="contentId" operator="equals" from-field="parameters.contentId"/>
@@ -291,42 +305,67 @@ under the License.
                         <first-from-list entry="productContent" list="productContents"/>
                         <set field="productContent.purchaseFromDate" from-field="nowTimestamp"/>
                         <store-value value-field="productContent"/>
-                        <else>
-                            <entity-count entity-name="ContentApproval" count-field="countApprove">
-                                 <condition-list combine="and">
+                    <else>
+                        <entity-count entity-name="ContentApproval" count-field="countApprove">
+                             <condition-list combine="and">
+                                <condition-expr field-name="contentId" operator="equals" from-field="parameters.contentId"/>
+                                <condition-expr field-name="roleTypeId" operator="equals" value="IMAGEAPPROVER"/>
+                                <condition-expr field-name="approvalStatusId" operator="equals" value="IM_APPROVED"/>
+                            </condition-list>
+                        </entity-count>
+                        <if-compare field="countApprove" operator="greater-equals" value="2">
+                            <entity-one entity-name="Content" value-field="content"/>
+                            <set field="content.statusId" value="IM_APPROVED"/>
+                            <store-value value-field="content"/>
+                            
+                            <entity-and entity-name="ProductContent" list="productContents">
+                                <field-map field-name="contentId" from-field="parameters.contentId"/>
+                                <field-map field-name="productContentTypeId" value="IMAGE"/>
+                            </entity-and>
+                            <first-from-list entry="productContent" list="productContents"/>
+                            <set field="productContent.purchaseFromDate" from-field="nowTimestamp"/>
+                            <store-value value-field="productContent"/>
+                            
+                            <entity-condition entity-name="ContentApproval" list="checkApproveList">
+                                <condition-list combine="and">
                                     <condition-expr field-name="contentId" operator="equals" from-field="parameters.contentId"/>
                                     <condition-expr field-name="roleTypeId" operator="equals" value="IMAGEAPPROVER"/>
-                                    <condition-expr field-name="approvalStatusId" operator="equals" value="IM_APPROVED"/>
                                 </condition-list>
-                            </entity-count>
-                            <if-compare field="countApprove" operator="greater-equals" value="2">
-                                <entity-one entity-name="Content" value-field="content"/>
-                                <set field="content.statusId" value="IM_APPROVED"/>
-                                <store-value value-field="content"/>
-                                
-                                <entity-and entity-name="ProductContent" list="productContents">
-                                    <field-map field-name="contentId" from-field="parameters.contentId"/>
-                                    <field-map field-name="productContentTypeId" value="IMAGE"/>
-                                </entity-and>
-                                <first-from-list entry="productContent" list="productContents"/>
-                                <set field="productContent.purchaseFromDate" from-field="nowTimestamp"/>
-                                <store-value value-field="productContent"/>
-                                
-                                <entity-condition entity-name="ContentApproval" list="checkApproveList">
-                                    <condition-list combine="and">
-                                        <condition-expr field-name="contentId" operator="equals" from-field="parameters.contentId"/>
-                                        <condition-expr field-name="roleTypeId" operator="equals" value="IMAGEAPPROVER"/>
-                                    </condition-list>
-                                </entity-condition>
-                                <iterate entry="checkApprove" list="checkApproveList">
-                                    <set field="checkApprove.approvalStatusId" value="IM_APPROVED"/>
-                                    <store-value value-field="checkApprove"/>
-                                </iterate>
-                            </if-compare>
-                        </else>
+                            </entity-condition>
+                            <iterate entry="checkApprove" list="checkApproveList">
+                                <set field="checkApprove.approvalStatusId" value="IM_APPROVED"/>
+                                <store-value value-field="checkApprove"/>
+                            </iterate>
+                        </if-compare>
+                    </else>
                     </if-compare>
+                <else>
+                    <entity-one entity-name="Content" value-field="content"/>
+                    <set field="content.statusId" value="IM_APPROVED"/>
+                    <store-value value-field="content"/>
+                    
+                    <entity-and entity-name="ProductContent" list="productContents">
+                        <field-map field-name="contentId" from-field="parameters.contentId"/>
+                        <field-map field-name="productContentTypeId" value="IMAGE"/>
+                    </entity-and>
+                    <first-from-list entry="productContent" list="productContents"/>
+                    <set field="productContent.purchaseFromDate" from-field="nowTimestamp"/>
+                    <store-value value-field="productContent"/>
+                    
+                    <entity-condition entity-name="ContentApproval" list="checkApproveList">
+                        <condition-list combine="and">
+                            <condition-expr field-name="contentId" operator="equals" from-field="parameters.contentId"/>
+                            <condition-expr field-name="roleTypeId" operator="equals" value="IMAGEAPPROVER"/>
+                        </condition-list>
+                    </entity-condition>
+                    <iterate entry="checkApprove" list="checkApproveList">
+                        <set field="checkApprove.approvalStatusId" value="IM_APPROVED"/>
+                        <store-value value-field="checkApprove"/>
+                    </iterate>
+                </else>
                 </if-compare>
-            </else>
+            </if-compare>
+        </else>
         </if-compare>
     </simple-method>
     
@@ -383,24 +422,39 @@ under the License.
         </iterate>
     </simple-method>
     
-    <simple-method method-name="resizeAllImageOfProduct" short-description="Resize All Image Of Product">
-        <set field="removeImageBySizeMap.productId" from-field="parameters.productId"/>
-        <set field="removeImageBySizeMap.mapKey" from-field="parameters.size"/>
-        <call-service service-name="removeImageBySize" in-map-name="removeImageBySizeMap"/>
-        
-        <entity-and entity-name="ProductContentAndInfo" list="productContentAndInfos">
-            <field-map field-name="productId" from-field="parameters.productId"/>
-            <field-map field-name="productContentTypeId" value="IMAGE"/>
-            <!--<field-map field-name="statusId" value="IM_APPROVED"/>-->
-        </entity-and>
-        <iterate list="productContentAndInfos" entry="productContentAndInfo">
-            <set field="resizeImageMap.productId" from-field="productContentAndInfo.productId"/>
-            <set field="resizeImageMap.contentId" from-field="productContentAndInfo.contentId"/>
-            <set field="resizeImageMap.dataResourceName" from-field="productContentAndInfo.drDataResourceName"/>
-            <set field="resizeImageMap.drObjectInfo" from-field="productContentAndInfo.drObjectInfo"/>
-            <set field="resizeImageMap.resizeWidth" from-field="parameters.size"/>
-            <call-service service-name="resizeImageOfProduct" in-map-name="resizeImageMap"/>
-        </iterate>
+    <simple-method method-name="resizeImages" short-description="Resize Images">
+        <if-compare field="parameters.resizeOption" operator="equals" value="resizeAllImages">
+            <entity-and entity-name="ProductContentAndInfo" list="productContentAndInfos">
+                <field-map field-name="productId" from-field="parameters.productId"/>
+                <field-map field-name="productContentTypeId" value="IMAGE"/>
+                <!--<field-map field-name="statusId" value="IM_APPROVED"/>-->
+            </entity-and>
+            <iterate list="productContentAndInfos" entry="productContentAndInfo">
+                <set field="resizeImageMap.productId" from-field="productContentAndInfo.productId"/>
+                <set field="resizeImageMap.dataResourceName" from-field="productContentAndInfo.drDataResourceName"/>
+                <set field="resizeImageMap.resizeWidth" from-field="parameters.size"/>
+                <call-service service-name="resizeImageOfProduct" in-map-name="resizeImageMap"/>
+            </iterate>
+        </if-compare>
+        <if-compare field="parameters.resizeOption" operator="equals" value="createNewThumbnail">
+            <set field="removeImageBySizeMap.productId" from-field="parameters.productId"/>
+            <set field="removeImageBySizeMap.mapKey" from-field="parameters.size"/>
+            <call-service service-name="removeImageBySize" in-map-name="removeImageBySizeMap"/>
+            
+            <entity-and entity-name="ProductContentAndInfo" list="productContentAndInfos">
+                <field-map field-name="productId" from-field="parameters.productId"/>
+                <field-map field-name="productContentTypeId" value="IMAGE"/>
+                <!--<field-map field-name="statusId" value="IM_APPROVED"/>-->
+            </entity-and>
+            <iterate list="productContentAndInfos" entry="productContentAndInfo">
+                <set field="createNewImageThumbnailMap.productId" from-field="productContentAndInfo.productId"/>
+                <set field="createNewImageThumbnailMap.contentId" from-field="productContentAndInfo.contentId"/>
+                <set field="createNewImageThumbnailMap.dataResourceName" from-field="productContentAndInfo.drDataResourceName"/>
+                <set field="createNewImageThumbnailMap.drObjectInfo" from-field="productContentAndInfo.drObjectInfo"/>
+                <set field="createNewImageThumbnailMap.sizeWidth" from-field="parameters.size"/>
+                <call-service service-name="createNewImageThumbnail" in-map-name="createNewImageThumbnailMap"/>
+            </iterate>
+        </if-compare>
     </simple-method>
     
     <simple-method method-name="removeImageBySize" short-description="Remove Image By Size">

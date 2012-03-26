@@ -31,12 +31,10 @@ import java.util.regex.PatternSyntaxException;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.codehaus.groovy.runtime.InvokerHelper;
-import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.GroovyUtil;
 import org.ofbiz.base.util.ObjectType;
+import org.ofbiz.base.util.ScriptUtil;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
@@ -47,6 +45,7 @@ import org.ofbiz.entity.finder.ByAndFinder;
 import org.ofbiz.entity.finder.ByConditionFinder;
 import org.ofbiz.entity.finder.EntityFinderUtil;
 import org.ofbiz.entity.finder.PrimaryKeyFinder;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.MethodContext;
@@ -92,6 +91,8 @@ public abstract class ModelFormAction {
                 actions.add(new EntityAnd(modelForm, actionElement));
             } else if ("entity-condition".equals(actionElement.getNodeName())) {
                 actions.add(new EntityCondition(modelForm, actionElement));
+            } else if ("call-parent-actions".equals(actionElement.getNodeName())) {
+                actions.add(new CallParentActions(modelForm, actionElement));
             } else {
                 throw new IllegalArgumentException("Action element not supported with name: " + actionElement.getNodeName());
             }
@@ -247,9 +248,9 @@ public abstract class ModelFormAction {
 
             String value = null;
             if (noLocale) {
-                value = UtilProperties.getPropertyValue(resource, property);
+                value = EntityUtilProperties.getPropertyValue(resource, property, WidgetWorker.getDelegator(context));
             } else {
-                value = UtilProperties.getMessage(resource, property, locale);
+                value = EntityUtilProperties.getMessage(resource, property, locale, WidgetWorker.getDelegator(context));
             }
             if (UtilValidate.isEmpty(value)) {
                 value = this.defaultExdr.expandString(context);
@@ -272,7 +273,6 @@ public abstract class ModelFormAction {
     }
 
     public static class Script extends ModelFormAction {
-        protected static final Object[] EMPTY_ARGS = {};
         protected String location;
         protected String method;
 
@@ -285,28 +285,7 @@ public abstract class ModelFormAction {
 
         @Override
         public void runAction(Map<String, Object> context) {
-            if (location.endsWith(".bsh")) {
-                try {
-                    BshUtil.runBshAtLocation(location, context);
-                } catch (GeneralException e) {
-                    String errMsg = "Error running BSH script at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new IllegalArgumentException(errMsg);
-                }
-            } else if (location.endsWith(".groovy")) {
-                try {
-                    groovy.lang.Script script = InvokerHelper.createScript(GroovyUtil.getScriptClassFromLocation(location), GroovyUtil.getBinding(context));
-                    if (UtilValidate.isEmpty(method)) {
-                        script.run();
-                    } else {
-                        script.invokeMethod(method, EMPTY_ARGS);
-                    }
-                } catch (GeneralException e) {
-                    String errMsg = "Error running Groovy script at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new IllegalArgumentException(errMsg);
-                }
-            } else if (location.endsWith(".xml")) {
+            if (location.endsWith(".xml")) {
                 Map<String, Object> localContext = FastMap.newInstance();
                 localContext.putAll(context);
                 DispatchContext ctx = this.modelForm.dispatchContext;
@@ -318,7 +297,7 @@ public abstract class ModelFormAction {
                     throw new IllegalArgumentException("Error running simple method at location [" + location + "]", e);
                 }
             } else {
-                throw new IllegalArgumentException("For screen script actions the script type is not yet support for location:" + location);
+                ScriptUtil.executeScript(this.location, this.method, context);
             }
         }
     }
@@ -371,7 +350,12 @@ public abstract class ModelFormAction {
             try {
                 Map<String, Object> serviceContext = null;
                 if (autoFieldMapBool) {
-                    serviceContext = WidgetWorker.getDispatcher(context).getDispatchContext().makeValidContext(serviceNameExpanded, ModelService.IN_PARAM, context);
+                    if (! "true".equals(autoFieldMapString)) {
+                        Map<String, Object> autoFieldMap = UtilGenerics.checkMap(context.get(autoFieldMapString));
+                        serviceContext = WidgetWorker.getDispatcher(context).getDispatchContext().makeValidContext(serviceNameExpanded, ModelService.IN_PARAM, autoFieldMap);
+                    } else {
+                        serviceContext = WidgetWorker.getDispatcher(context).getDispatchContext().makeValidContext(serviceNameExpanded, ModelService.IN_PARAM, context);
+                    }
                 } else {
                     serviceContext = new HashMap<String, Object>();
                 }
@@ -537,6 +521,45 @@ public abstract class ModelFormAction {
                 String errMsg = "Error doing entity query by condition: " + e.toString();
                 Debug.logError(e, errMsg, module);
                 throw new IllegalArgumentException(errMsg);
+            }
+        }
+    }
+
+    public static class CallParentActions extends ModelFormAction {
+        protected static enum ActionsKind {
+            ACTIONS,
+            ROW_ACTIONS
+        };
+
+        protected ActionsKind kind;
+
+        public CallParentActions(ModelForm modelForm, Element callParentActionsElement) {
+            super(modelForm, callParentActionsElement);
+            String parentName = callParentActionsElement.getParentNode().getNodeName();
+            if ("actions".equals(parentName)) {
+                kind = ActionsKind.ACTIONS;
+            } else if ("row-actions".equals(parentName)) {
+                kind = ActionsKind.ROW_ACTIONS;
+            } else {
+                throw new IllegalArgumentException("Action element not supported for call-parent-actions : " + parentName);
+            }
+
+            ModelForm parentModel = modelForm.getParentModelForm();
+            if (parentModel == null) {
+                throw new IllegalArgumentException("call-parent-actions can only be used with form extending another form");
+            }
+        }
+
+        @Override
+        public void runAction(Map<String, Object> context) {
+            ModelForm parentModel = modelForm.getParentModelForm();
+            switch (kind) {
+                case ACTIONS:
+                    parentModel.runFormActions(context);
+                    break;
+                case ROW_ACTIONS:
+                    ModelFormAction.runSubActions(parentModel.rowActions, context);
+                    break;
             }
         }
     }

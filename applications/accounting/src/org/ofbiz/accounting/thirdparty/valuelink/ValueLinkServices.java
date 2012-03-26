@@ -41,6 +41,7 @@ import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.order.order.OrderReadHelper;
 import org.ofbiz.product.store.ProductStoreWorker;
 import org.ofbiz.service.DispatchContext;
@@ -69,11 +70,11 @@ public class ValueLinkServices {
 
         Boolean kekOnly = context.get("kekOnly") != null ? (Boolean) context.get("kekOnly") : Boolean.FALSE;
         String kekTest = (String) context.get("kekTest");
-        Debug.log("KEK Only : " + kekOnly.booleanValue(), module);
+        Debug.logInfo("KEK Only : " + kekOnly.booleanValue(), module);
 
         StringBuffer buf = vl.outputKeyCreation(kekOnly.booleanValue(), kekTest);
         String output = buf.toString();
-        Debug.log(":: Key Generation Output ::\n\n" + output, module);
+        Debug.logInfo(":: Key Generation Output ::\n\n" + output, module);
 
         Map<String, Object> result = ServiceUtil.returnSuccess();
         result.put("output", output);
@@ -123,7 +124,7 @@ public class ValueLinkServices {
         buf.append("======== End Test Bytes ").append(desc).append(" ========\n\n");
 
         String output = buf.toString();
-        Debug.log(":: KEK Test Output ::\n\n" + output, module);
+        Debug.logInfo(":: KEK Test Output ::\n\n" + output, module);
 
         Map<String, Object> result = ServiceUtil.returnSuccess();
         result.put("output", output);
@@ -170,7 +171,7 @@ public class ValueLinkServices {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
                     "AccountingValueLinkCannotUpdateWorkingKey", locale));
         }
-        Debug.log("Response : " + response, module);
+        Debug.logInfo("Response : " + response, module);
 
         // on success update the database / reload the cached api
         if (response != null) {
@@ -274,7 +275,7 @@ public class ValueLinkServices {
             result.put("expireDate", response.get("expiredate"));
             result.put("cardClass", response.get("cardclass"));
             result.put("referenceNum", response.get("traceno"));
-            Debug.log("Activate Result : " + result, module);
+            Debug.logInfo("Activate Result : " + result, module);
             return result;
         } else {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
@@ -333,7 +334,7 @@ public class ValueLinkServices {
             result.put("expireDate", response.get("expiredate"));
             result.put("cardClass", response.get("cardclass"));
             result.put("referenceNum", response.get("traceno"));
-            Debug.log("Link Result : " + result, module);
+            Debug.logInfo("Link Result : " + result, module);
             return result;
         } else {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
@@ -393,7 +394,7 @@ public class ValueLinkServices {
             result.put("expireDate", response.get("expiredate"));
             result.put("cardClass", response.get("cardclass"));
             result.put("referenceNum", response.get("traceno"));
-            Debug.log("Disable Result : " + result, module);
+            Debug.logInfo("Disable Result : " + result, module);
             return result;
         } else {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
@@ -463,7 +464,7 @@ public class ValueLinkServices {
             result.put("cardClass", response.get("cardclass"));
             result.put("cashBack", vl.getAmount((String) response.get("cashback")));
             result.put("referenceNum", response.get("traceno"));
-            Debug.log("Redeem Result : " + result, module);
+            Debug.logInfo("Redeem Result : " + result, module);
             return result;
         } else {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
@@ -532,7 +533,7 @@ public class ValueLinkServices {
             result.put("expireDate", response.get("expiredate"));
             result.put("cardClass", response.get("cardclass"));
             result.put("referenceNum", response.get("traceno"));
-            Debug.log("Reload Result : " + result, module);
+            Debug.logInfo("Reload Result : " + result, module);
             return result;
         } else {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
@@ -591,7 +592,7 @@ public class ValueLinkServices {
             result.put("expireDate", response.get("expiredate"));
             result.put("cardClass", response.get("cardclass"));
             result.put("referenceNum", response.get("traceno"));
-            Debug.log("Balance Result : " + result, module);
+            Debug.logInfo("Balance Result : " + result, module);
             return result;
         } else {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
@@ -649,7 +650,7 @@ public class ValueLinkServices {
             result.put("expireDate", response.get("expiredate"));
             result.put("cardClass", response.get("cardclass"));
             result.put("referenceNum", response.get("traceno"));
-            Debug.log("History Result : " + result, module);
+            Debug.logInfo("History Result : " + result, module);
             return result;
         } else {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
@@ -718,7 +719,7 @@ public class ValueLinkServices {
             result.put("expireDate", response.get("expiredate"));
             result.put("cardClass", response.get("cardclass"));
             result.put("referenceNum", response.get("traceno"));
-            Debug.log("Refund Result : " + result, module);
+            Debug.logInfo("Refund Result : " + result, module);
             return result;
         } else {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
@@ -749,7 +750,7 @@ public class ValueLinkServices {
     public static Map<String, Object> timeOutReversal(DispatchContext dctx, Map<String, Object> context) {
         String vlInterface = (String) context.get("Interface");
         Locale locale = (Locale) context.get("locale");
-        Debug.log("704 Interface : " + vlInterface, module);
+        Debug.logInfo("704 Interface : " + vlInterface, module);
         if (vlInterface != null) {
             if (vlInterface.startsWith("Activate")) {
                 if (vlInterface.equals("Activate/Rollback")) {
@@ -795,7 +796,7 @@ public class ValueLinkServices {
             ServiceXaWrapper xaw = new ServiceXaWrapper(dctx);
             xaw.setRollbackService("vlTimeOutReversal", context);
             //xaw.setCommitService("vlTimeOutReversal", context);
-            Debug.log("Set 704 context : " + context, module);
+            Debug.logInfo("Set 704 context : " + context, module);
             try {
                 xaw.enlist();
             } catch (XAException e) {
@@ -816,6 +817,7 @@ public class ValueLinkServices {
     // payment processing wrappers (process/release/refund)
 
     public static Map<String, Object> giftCardProcessor(DispatchContext dctx, Map<String, Object> context) {
+        Delegator delegator = dctx.getDelegator();
         LocalDispatcher dispatcher = dctx.getDispatcher();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         Locale locale = (Locale) context.get("locale");
@@ -828,7 +830,7 @@ public class ValueLinkServices {
 
         // make sure we have a currency
         if (currency == null) {
-            currency = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+            currency = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
         }
 
         Map<String, Object> redeemCtx = FastMap.newInstance();
@@ -892,6 +894,7 @@ public class ValueLinkServices {
     }
 
     public static Map<String, Object> giftCardRelease(DispatchContext dctx, Map<String, Object> context) {
+        Delegator delegator = dctx.getDelegator();
         LocalDispatcher dispatcher = dctx.getDispatcher();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         Locale locale = (Locale) context.get("locale");
@@ -920,7 +923,7 @@ public class ValueLinkServices {
 
         // make sure we have a currency
         if (currency == null) {
-            currency = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+            currency = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
         }
 
         Map<String, Object> redeemCtx = FastMap.newInstance();
@@ -956,6 +959,7 @@ public class ValueLinkServices {
     }
 
     public static Map<String, Object> giftCardRefund(DispatchContext dctx, Map<String, Object> context) {
+        Delegator delegator = dctx.getDelegator();
         LocalDispatcher dispatcher = dctx.getDispatcher();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         Locale locale = (Locale) context.get("locale");
@@ -984,7 +988,7 @@ public class ValueLinkServices {
 
         // make sure we have a currency
         if (currency == null) {
-            currency = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+            currency = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
         }
 
         Map<String, Object> refundCtx = FastMap.newInstance();
@@ -1050,7 +1054,7 @@ public class ValueLinkServices {
 
         // make sure we have a currency
         if (currency == null) {
-            currency = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+            currency = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
         }
 
         // get the product store
@@ -1155,9 +1159,7 @@ public class ValueLinkServices {
         // make a map of answer info
         Map<String, Object> answerMap = FastMap.newInstance();
         if (responseAnswers != null) {
-            Iterator<GenericValue> rai = responseAnswers.iterator();
-            while (rai.hasNext()) {
-                GenericValue answer = rai.next();
+            for(GenericValue answer : responseAnswers) {
                 GenericValue question = null;
                 try {
                     question = answer.getRelatedOne("SurveyQuestion");
@@ -1346,7 +1348,7 @@ public class ValueLinkServices {
 
         // make sure we have a currency
         if (currency == null) {
-            currency = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+            currency = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
         }
 
         // get the product store
@@ -1412,9 +1414,7 @@ public class ValueLinkServices {
         // make a map of answer info
         Map<String, Object> answerMap = FastMap.newInstance();
         if (responseAnswers != null) {
-            Iterator<GenericValue> rai = responseAnswers.iterator();
-            while (rai.hasNext()) {
-                GenericValue answer = rai.next();
+            for(GenericValue answer : responseAnswers) {
                 GenericValue question = null;
                 try {
                     question = answer.getRelatedOne("SurveyQuestion");

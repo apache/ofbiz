@@ -406,6 +406,7 @@ under the License.
             <fail-widgets>
                 <section>
                     <actions>
+                        <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
                         <set field="searchType" from-field="parameters.searchType" default-value="${searchType}"/>
                         <script location="component://common/webcommon/WEB-INF/actions/includes/FindAutocompleteOptions.groovy"/>
                     </actions>
@@ -523,6 +524,9 @@ under the License.
 
     <screen name="login">
         <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleLogin" />
+            </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
@@ -540,7 +544,7 @@ under the License.
             <widgets>
                 <decorator-screen name="LookupDecorator">
                     <decorator-section name="body">
-                        <label>${uiLabelMap.CommonSessionTimeoutPleaseLogIn}</label>
+                        <link target="checkLogin" text="${uiLabelMap.CommonSessionTimeoutPleaseLogIn}"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

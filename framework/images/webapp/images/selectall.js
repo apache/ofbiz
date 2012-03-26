@@ -394,7 +394,11 @@ function ajaxAutoCompleter(areaCsvString, showDescription, defaultMinLength, def
     var numAreas = parseInt(areaArray.length / 3);
     
     for (var i = 0; i < numAreas * 3; i = i + 3) {
-        var url = areaArray[i + 1] + "?" + areaArray[i + 2];
+        var initUrl = areaArray[i + 1];
+        if (initUrl.indexOf("?") > -1)
+            var url = initUrl + "&" + areaArray[i + 2];
+        else 
+            var url = initUrl + "?" + areaArray[i + 2];
         var div = areaArray[i];
         // create a separated div where the result JSON Opbject will be placed
         if ((jQuery("#" + div + "_auto")).length < 1) {
@@ -407,6 +411,7 @@ function ajaxAutoCompleter(areaCsvString, showDescription, defaultMinLength, def
             source: function(request, response){
                 jQuery.ajax({
                     url: url,
+                    type: "post",
                     async: false,
                     data: {term : request.term},
                     success: function(data) {
@@ -428,8 +433,7 @@ function ajaxAutoCompleter(areaCsvString, showDescription, defaultMinLength, def
             select: function(event, ui){
                 //jQuery("#" + areaArray[0]).html(ui.item);
                 jQuery("#" + areaArray[0]).val(ui.item.value); // setting a text field   
-                jQuery("#" + areaArray[0]).trigger("lookup:changed"); // notify the field has changed
-                if (showDescription) {
+                if (showDescription && (ui.item.value != undefined && ui.item.value != '')) { 
                     setLookDescription(areaArray[0], ui.item.label, areaArray[2], formName, showDescription)
                 }
             }
@@ -726,26 +730,33 @@ function submitFormEnableButton(button) {
     button.value = button.value.substring(0, button.value.length - 1);
 }
 
-function expandAll(expanded) {
-  var divs,divs1,i,j,links,groupbody;
+/**
+ * Expands or collapses all groups of one portlet
+ * 
+ * @param bool <code>true</code> to expand, <code>false</code> otherwise
+ * @param portalPortletId The id of the portlet
+ */
+function expandAllP(bool, portalPortletId) {
+    jQuery('#scrlt_'+portalPortletId+' .fieldgroup').each(function() {
+        var titleBar = $(this).children('.fieldgroup-title-bar'), body = $(this).children('.fieldgroup-body');
+        if (titleBar.children().length > 0 && body.is(':visible') != bool) {
+            toggleCollapsiblePanel(titleBar.find('a'), body.attr('id'), 'expand', 'collapse');
+        }
+    });
+}
 
-  divs=document.getElementsByTagName('div');
-  for(i=0;i<divs.length;i++) {
-    if(/fieldgroup$/.test(divs[i].className)) {
-      links=divs[i].getElementsByTagName('a');
-      if(links.length>0) {
-        divs1=divs[i].getElementsByTagName('div');
-        for(j=0;j<divs1.length;j++){
-          if(/fieldgroup-body/.test(divs1[j].className)) {
-            groupbody=divs1[j];
-          }
+/**
+ * Expands or collapses all groups of the page
+ * 
+ * @param bool <code>true</code> to expand, <code>false</code> otherwise
+ */
+function expandAll(bool) {
+    jQuery('.fieldgroup').each(function() {
+        var titleBar = $(this).children('.fieldgroup-title-bar'), body = $(this).children('.fieldgroup-body');
+        if (titleBar.children().length > 0 && body.is(':visible') != bool) {
+            toggleCollapsiblePanel(titleBar.find('a'), body.attr('id'), 'expand', 'collapse');
         }
-        if(jQuery(groupbody).is(':visible') != expanded) {
-          toggleCollapsiblePanel(links[0], groupbody.id, 'expand', 'collapse');
-        }
-      }
-    }
-  }
+    });
 }
 
 //calls ajax request for storing user layout preferences

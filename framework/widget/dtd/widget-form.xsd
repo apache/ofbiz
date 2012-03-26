@@ -356,6 +356,7 @@ under the License.
     <xs:element name="sort-field">
         <xs:complexType>
             <xs:attributeGroup ref="attlist.sort-field"/>
+            <xs:attribute name="position" type="xs:positiveInteger"/>
         </xs:complexType>
     </xs:element>
     <xs:attributeGroup name="attlist.sort-field">
@@ -932,9 +933,7 @@ under the License.
         </xs:complexType>
     </xs:element>
     <xs:attributeGroup name="attlist.image">
-        <xs:attribute type="xs:nonNegativeInteger" name="border" default="0"/>
-        <xs:attribute type="xs:positiveInteger" name="width"/>
-        <xs:attribute type="xs:positiveInteger" name="height"/>
+        <xs:attribute type="xs:string" name="style"/>
         <xs:attribute type="xs:string" name="value"/>
         <xs:attribute type="xs:string" name="default-value"/>
         <xs:attribute type="xs:string" name="description"/>
@@ -1992,4 +1991,8 @@ under the License.
     <xs:attributeGroup name="attlist.select-field">
         <xs:attribute type="xs:string" name="field-name" use="required"/>
     </xs:attributeGroup>
+
+    <xs:element name="call-parent-actions" substitutionGroup="AllActions">
+        <xs:complexType/>
+    </xs:element>
 </xs:schema>

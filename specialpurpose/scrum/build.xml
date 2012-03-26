@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
 
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
 <project name="OFBiz - scrum Component" default="jar" basedir=".">
     <import file="../../common.xml"/>
 
@@ -31,76 +48,4 @@
         <fileset dir="../../framework/webapp/lib" includes="*.jar"/>
         <fileset dir="../../framework/webapp/build/lib" includes="*.jar"/>
     </path>
-
-    <!-- ================================================================= -->
-    <!-- Targets to create  patch files                                    -->
-    <!-- ================================================================= -->
-
-    <target name="create-ofbiz-patches" description="Creates patch for framework, application, specialpurpose components">
-        <exec executable="svn" output="patches/framework.patch" dir="${ofbiz.home.dir}">
-            <arg value="diff"/>
-            <arg value="framework"/>
-        </exec>
-        <exec executable="svn" output="patches/applications.patch" dir="${ofbiz.home.dir}">
-            <arg value="diff"/>
-            <arg value="applications"/>
-        </exec>
-        <exec executable="svn" output="patches/specialpurpose.patch" dir="${ofbiz.home.dir}">
-            <arg value="diff"/>
-            <arg value="specialpurpose"/>
-        </exec>
-    </target>
-
-    <target name="revert-ofbiz-patches" description="Remove any local change in the files or any previously applied local patch.">
-        <exec executable="svn" dir="${ofbiz.home.dir}">
-            <arg value="revert"/>
-            <arg value="-R"/>
-            <arg value="framework"/>
-        </exec>
-        <exec executable="svn" dir="${ofbiz.home.dir}">
-            <arg value="revert"/>
-            <arg value="-R"/>
-            <arg value="applications"/>
-        </exec>
-        <exec executable="svn" dir="${ofbiz.home.dir}">
-            <arg value="revert"/>
-            <arg value="-R"/>
-            <arg value="specialpurpose"/>
-        </exec>
-    </target>
-
-    <target name="apply-ofbiz-patches" description="Apply the patch to framework, application, specialpurpose components.">
-        <fail message="Patch files not found.">
-            <condition>
-                <or>
-                    <not><isset property="component-name"/></not>
-                    <not>
-                        <resourcecount count="3">
-                            <fileset dir="patches" includes="*.patch"/>
-                        </resourcecount>
-                    </not>
-                </or>
-            </condition>
-        </fail>
-        <patch strip="0" patchfile="patches/framework.patch" dir="${ofbiz.home.dir}"/>
-        <patch strip="0" patchfile="patches/applications.patch" dir="${ofbiz.home.dir}"/>
-        <patch strip="0" patchfile="patches/specialpurpose.patch" dir="${ofbiz.home.dir}"/>
-    </target>
-
-    <target name="reapply-ofbiz-patches" description="First removes any previously applied patch and then applies the new patch">
-        <fail message="Patch files not found.">
-            <condition>
-                <or>
-                    <not><isset property="component-name"/></not>
-                    <not>
-                        <resourcecount count="3">
-                            <fileset dir="patches" includes="*.patch"/>
-                        </resourcecount>
-                    </not>
-                </or>
-            </condition>
-        </fail>
-        <antcall target="revert-ofbiz-patches"/>
-        <antcall target="apply-ofbiz-patches"/>
-    </target>
 </project>

@@ -146,7 +146,7 @@ public class ZipSalesServices {
                 }
 
                 // console log
-                Debug.log(newValue.get("zipCode") + "/" + newValue.get("stateCode") + "/" + newValue.get("city") + "/" + newValue.get("county") + "/" + newValue.get("fromDate"));
+                Debug.logInfo(newValue.get("zipCode") + "/" + newValue.get("stateCode") + "/" + newValue.get("city") + "/" + newValue.get("county") + "/" + newValue.get("fromDate"), module);
             }
         }
 
@@ -202,7 +202,7 @@ public class ZipSalesServices {
                     }
 
                     // console log
-                    Debug.log(newValue.get("stateCode") + "/" + newValue.get("city") + "/" + newValue.get("county") + "/" + newValue.get("fromDate"));
+                    Debug.logInfo(newValue.get("stateCode") + "/" + newValue.get("city") + "/" + newValue.get("county") + "/" + newValue.get("fromDate"), module);
                 }
             }
         }
@@ -362,13 +362,11 @@ public class ZipSalesServices {
         }
 
         if (ruleLookup != null) {
-            Iterator<GenericValue> ruleIterator = ruleLookup.iterator();
-            while (ruleIterator.hasNext()) {
+            for(GenericValue rule : ruleLookup) {
                 if (!taxShipping) {
                     // if we found an rule which passes no need to contine (all rules are ||)
                     break;
                 }
-                GenericValue rule = ruleIterator.next();
                 String idCode = rule.getString("idCode");
                 String taxable = rule.getString("taxable");
                 String condition = rule.getString("shipCond");
@@ -468,10 +466,10 @@ public class ZipSalesServices {
 
         BigDecimal taxableAmount = itemAmount;
         if (taxShipping) {
-            //Debug.log("Taxing shipping", module);
+            //Debug.logInfo("Taxing shipping", module);
             taxableAmount = taxableAmount.add(shippingAmount);
         } else {
-            Debug.log("Shipping is not taxable", module);
+            Debug.logInfo("Shipping is not taxable", module);
         }
 
         // calc tax amount

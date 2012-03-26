@@ -64,11 +64,11 @@ under the License.
             });
 
             if(jQuery('#serviceName').val() != "") {
-                jQuery('#submitButton').attr('disabled', '');
+                jQuery('#submitButton').removeAttr('disabled');
             }
 
         } else {
-            jQuery('#submitButton').attr('disabled', 'disabled');
+            jQuery('#submitButton').attr('disabled', true);
             jQuery('#showInvoiceRunningTotal').html("");
         }
     }
@@ -104,7 +104,9 @@ under the License.
         });
 
         if(anyChecked && (jQuery('#serviceName').val() != "")) {
-            jQuery('#submitButton').attr('disabled' , '');
+            jQuery('#submitButton').removeAttr('disabled');
+        } else {
+            jQuery('#submitButton').attr('disabled', true);
         }
     }
 //]]>
