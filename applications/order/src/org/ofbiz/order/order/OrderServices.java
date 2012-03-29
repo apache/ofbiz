@@ -5447,6 +5447,10 @@ public class OrderServices {
                     result = dispatcher.runSync("loadCartFromOrder", UtilMisc.toMap("orderId", subscription.get("orderId"), "userLogin", userLogin));
                     ShoppingCart cart = (ShoppingCart) result.get("shoppingCart");
 
+                    // remove former orderId from cart (would cause duplicate entry).
+                    // orderId is set by order-creation services (including store-specific prefixes, e.g.)
+                    cart.setOrderId(null);
+
                     // only keep the orderitem with the related product.
                     List<ShoppingCartItem> cartItems = cart.items();
                     Iterator<ShoppingCartItem> ci = cartItems.iterator();
