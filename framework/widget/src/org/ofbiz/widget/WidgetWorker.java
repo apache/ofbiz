@@ -37,6 +37,7 @@ import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
+import org.ofbiz.base.util.UtilURL;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
@@ -45,6 +46,8 @@ import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.webapp.control.ConfigXMLReader;
 import org.ofbiz.webapp.control.RequestHandler;
 import org.ofbiz.webapp.taglib.ContentUrlTag;
+import org.ofbiz.widget.ModelWidget.ShowPortletItemData;
+import org.ofbiz.widget.ModelWidget.ShowPortletLinkData;
 import org.ofbiz.widget.form.ModelForm;
 import org.ofbiz.widget.form.ModelFormField;
 import org.w3c.dom.Element;
@@ -140,6 +143,12 @@ public class WidgetWorker {
             externalWriter.append(localWriter.toString());
         }
     }
+
+    //#Bam# portletWidget
+    public static void buildShowPortletUrl(Appendable externalWriter, String target, Map<String, String> parameterMap,
+            String prefix, boolean fullPath, boolean secure, boolean encode, HttpServletRequest request, HttpServletResponse response, Map<String, Object> context) throws IOException {
+    }
+    //#Eam# portletWidget
 
     public static void appendContentUrl(Appendable writer, String location, HttpServletRequest request) throws IOException {
         StringBuilder buffer = new StringBuilder();
@@ -319,12 +328,14 @@ public class WidgetWorker {
     public static class Parameter {
         protected String name;
         protected FlexibleStringExpander value;
+        protected FlexibleStringExpander sendIfEmpty; //#Eam# portletWidget
         protected FlexibleMapAccessor<Object> fromField;
 
         public Parameter(Element element) {
             this.name = element.getAttribute("param-name");
             this.value = UtilValidate.isNotEmpty(element.getAttribute("value")) ? FlexibleStringExpander.getInstance(element.getAttribute("value")) : null;
             this.fromField = UtilValidate.isNotEmpty(element.getAttribute("from-field")) ? FlexibleMapAccessor.getInstance(element.getAttribute("from-field")) : null;
+            this.sendIfEmpty = UtilValidate.isNotEmpty(element.getAttribute("send-if-empty")) ? FlexibleStringExpander.getInstance(element.getAttribute("send-if-empty")) : null; //#Eam# portletWidget
         }
 
         public Parameter(String paramName, String paramValue, boolean isField) {
@@ -389,6 +400,13 @@ public class WidgetWorker {
                 return null;
             }
         }
+        //#Bam# portletWidget
+        public boolean sendIfEmpty(Map<String, Object> context) {
+            if (this.sendIfEmpty != null)
+              return "true".equals(this.sendIfEmpty.expandString(context));
+            else return false;
+        }
+        //#Eam# portletWidget
     }
 
     public static String determineAutoLinkType(String linkType, String target, String targetType, HttpServletRequest request) {
@@ -476,4 +494,115 @@ public class WidgetWorker {
         Delegator delegator = (Delegator) context.get("delegator");
         return delegator;
     }
+    //#Bam# portletWidget
+    /**
+     * Prepare data for Form and Menu show-portlet
+     */
+    public static ShowPortletLinkData prepareShowPortletLinkData(ModelWidget.ShowPortletLink showPortletLink, Map<String, Object> context) {
+        ShowPortletLinkData splData = new ShowPortletLinkData();
+        splData.imgSrc = showPortletLink.getImage(context);
+        if (UtilValidate.isEmpty(splData.imgSrc)) {
+            splData.imgSrc  = "";
+        }
+        splData.imgTitle = showPortletLink.getImageTitle(context);
+        if (UtilValidate.isEmpty(splData.imgTitle)) {
+            splData.imgTitle = "";
+        }
+        splData.alt = showPortletLink.getAlternate(context);
+        if (UtilValidate.isEmpty(splData.alt)) {
+            splData.alt = "";
+        }
+        splData.description = showPortletLink.getDescription(context);
+        if(UtilValidate.isEmpty(splData.description)) {
+            splData.description = "";
+        }
+        return splData;
+    }
+    public static ShowPortletItemData prepareShowPortletItemsData(ModelWidget.ShowPortletItem showPortletItem, Map<String, Object> context) {
+        ShowPortletItemData spiData = new ShowPortletItemData();
+        spiData.portalPageId = showPortletItem.getPortalPageId(context);
+        spiData.portletId = showPortletItem.getPortletId(context);
+        spiData.portletSeqId = showPortletItem.getPortletSeqId(context);
+        if (UtilValidate.isEmpty(spiData.portalPageId) && context.containsKey("portalPageId")) {
+            spiData.portalPageId = (String) context.get("portalPageId");
+        }
+        // portletID is mandatory in show-portlet so, if value is null it's a choice
+        //if (UtilValidate.isEmpty(portletId) && context.containsKey("portalPortletId"))
+        //    portletId = (String) context.get("portalPortletId");
+        if (UtilValidate.isEmpty(spiData.portletSeqId) && context.containsKey("portletSeqId")) {
+            spiData.portletSeqId = (String) context.get("portletSeqId");
+        }
+        spiData.areaId = showPortletItem.getAreaId(context);
+        if (UtilValidate.isEmpty(spiData.areaId)) {
+            if (UtilValidate.isNotEmpty(spiData.portalPageId) && UtilValidate.isNotEmpty(spiData.portletId) && UtilValidate.isNotEmpty(spiData.portletSeqId)) {
+                spiData.areaId = "PP_" + spiData.portalPageId + spiData.portletId + spiData.portletSeqId;
+            }
+            else {
+                //Debug.logWarning("The form [" + modelFormField.getModelForm().getFormLocation() + "#" + modelFormField.getModelForm().getName() +"] has a show-portlet field that should define a target-area  or must have target-page-id, target-portlet-id and target-seq_id attributes", module);
+            }
+        }
+        spiData.target = "showPortlet";
+        if (UtilValidate.isNotEmpty(showPortletItem.getTarget(context))) {
+            spiData.target = showPortletItem.getTarget(context);
+        }
+
+        StringBuilder params = new StringBuilder();
+        Map<String, String> parameters = showPortletItem.getParameterMap(context);
+        for (String key : parameters.keySet()) {
+            WidgetWorker.addToParams(params, key, parameters.get(key));
+        }
+
+        if (UtilValidate.isNotEmpty(spiData.portalPageId)) {
+            WidgetWorker.addToParams(params, "portalPageId", spiData.portalPageId);
+        } else {
+            WidgetWorker.addToParamsIfInContext(params, context, "portalPageId", parameters);
+        }
+
+        if (UtilValidate.isNotEmpty(spiData.portletId)) {
+            WidgetWorker.addToParams(params, "portalPortletId", spiData.portletId);
+        }
+
+        if (UtilValidate.isNotEmpty(spiData.portletSeqId)) {
+            WidgetWorker.addToParams(params, "portletSeqId", spiData.portletSeqId);
+        } else {
+            WidgetWorker.addToParamsIfInContext(params, context, "portletSeqId", parameters);
+        }
+
+        WidgetWorker.addToParamsIfInContext(params, context, "areaId", parameters);
+        WidgetWorker.addToParamsIfInContext(params, context, "idDescription", parameters);
+        spiData.params = params;
+        return spiData;
+    }
+
+    /**
+     * if context.get(key) not empty or context.get(parameters.key) not empty and not already in parameters add key=keyValue in params
+     * @param params
+     * @param context
+     * @param key
+     * @param parameters
+     */
+    public static void addToParamsIfInContext(StringBuilder params, Map<String, Object> context, String key, Map<String, String> parameters) {
+        if (parameters.containsKey(key)) return;
+
+        String paramValue = (String) context.get(key);
+        if (UtilValidate.isEmpty(paramValue)) {
+            Map<String, Object> contextParameters = UtilGenerics.checkMap(context.get("parameters"));
+            paramValue = (String) contextParameters.get(key);
+        }
+        if (UtilValidate.isNotEmpty(paramValue)) {
+            if ("idDescription".equals(key)) {
+                addToParams(params, key, UtilURL.removeBadCharForUrl(paramValue));
+            }
+            else {
+                addToParams(params, key, paramValue);
+            }
+        }
+    }
+    public static void addToParams(StringBuilder params, String key, String oneParam) {
+        if (UtilValidate.isNotEmpty(params)) {
+            params.append("&");
+        }
+        params.append(key).append("=").append(oneParam);
+    }
+    //#Eam# portletWidget
 }

@@ -48,6 +48,7 @@ import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.UtilURL;// #Eam# portletWidget
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
@@ -67,6 +68,7 @@ import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ModelParam;
 import org.ofbiz.service.ModelService;
+import org.ofbiz.widget.ModelWidget; // #Eam# portletWidget
 import org.ofbiz.widget.WidgetWorker;
 import org.ofbiz.widget.form.ModelForm.UpdateArea;
 import org.w3c.dom.Element;
@@ -116,6 +118,7 @@ public class ModelFormField {
     protected Boolean sortField = null;
     protected String headerLink;
     protected String headerLinkStyle;
+    protected ShowPortletLink showPortletLink = null;// #Eam# portletWidget
 
     /** On Change Event areas to be updated. */
     protected List<UpdateArea> onChangeUpdateAreas;
@@ -204,6 +207,15 @@ public class ModelFormField {
             else if ("image".equals(subElementName)) this.fieldInfo = new ImageField(subElement, this);
             else if ("container".equals(subElementName)) this.fieldInfo = new ContainerField(subElement, this);
             else if ("on-field-event-update-area".equals(subElementName)) addOnEventUpdateArea(new UpdateArea(subElement));
+            // #Bam# portletWidget
+            else if ("show-portlet".equals(subElementName)) {
+                if (this.showPortletLink == null) {
+                    this.showPortletLink = new ShowPortletLink(subElement, this);
+                    this.fieldInfo = this.showPortletLink;
+                }
+                addShowPortletTolink(subElement, this);
+            }
+            // #Eam# portletWidget
             else throw new IllegalArgumentException("The field sub-element with name " + subElementName + " is not supported");
         }
     }
@@ -214,6 +226,13 @@ public class ModelFormField {
         if ("change".equals(updateArea.getEventType()))  addOnChangeUpdateArea(updateArea);
         else if ("click".equals(updateArea.getEventType())) addOnClickUpdateArea(updateArea);
     }
+
+    // #Bam# portletWidget
+    public void addShowPortletTolink(Element element, ModelFormField modelFormField) {
+        ShowPortletLink showLink = modelFormField.getShowPortletLink();
+        showLink.addShowPorletTolink(element);
+    }
+    // #Eam# portletWidget
 
     protected void addOnChangeUpdateArea(UpdateArea updateArea) {
         if (onChangeUpdateAreas == null) onChangeUpdateAreas = FastList.newInstance();        
@@ -257,6 +276,11 @@ public class ModelFormField {
         if (overrideFormField.onChangeUpdateAreas != null) this.onChangeUpdateAreas = overrideFormField.onChangeUpdateAreas;
         if (overrideFormField.onClickUpdateAreas != null) this.onClickUpdateAreas = overrideFormField.onClickUpdateAreas;
         this.encodeOutput = overrideFormField.encodeOutput;
+        // #Bam# portletWidget
+        if (overrideFormField.showPortletLink != null) {
+            this.showPortletLink = overrideFormField.showPortletLink;
+        }
+        // #Eam# portletWidget
     }
 
     public boolean induceFieldInfo(String defaultFieldType) {
@@ -530,6 +554,12 @@ public class ModelFormField {
     public List<UpdateArea> getOnClickUpdateAreas() {
         return onClickUpdateAreas;
     }
+
+    // #Bam# portletWidget
+    public ShowPortletLink getShowPortletLink() {
+        return showPortletLink;
+    }
+    // #Eam# portletWidget
 
     public FieldInfo getFieldInfo() {
         return fieldInfo;
@@ -1277,6 +1307,7 @@ public class ModelFormField {
         public static final int PASSWORD = 18;
         public static final int IMAGE = 19;
         public static final int DISPLAY_ENTITY = 20;
+        public static final int SHOW_PORTLET = 22; // #Eam# portletWidget
 
         // the numbering here represents the priority of the source;
         //when setting a new fieldInfo on a modelFormField it will only set
@@ -1310,6 +1341,7 @@ public class ModelFormField {
             fieldTypeByName.put("image", Integer.valueOf(19));
             fieldTypeByName.put("display-entity", Integer.valueOf(20));
             fieldTypeByName.put("container", Integer.valueOf(21));
+            fieldTypeByName.put("show-portlet", Integer.valueOf(22));// #Eam# portletWidget
         }
 
         protected int fieldType;
@@ -2388,6 +2420,367 @@ public class ModelFormField {
             this.confirmationMsgExdr = FlexibleStringExpander.getInstance(val);
         }
     }
+
+    // #Bam# portletWidget
+    public static class ShowPortletLink extends FieldInfo implements ModelWidget.ShowPortletLink {
+
+        protected FlexibleStringExpander description;
+        protected FlexibleStringExpander imageTitle;
+        protected FlexibleStringExpander alternate;
+        protected FlexibleStringExpander collapseScreenlet;
+        protected FlexibleStringExpander markSelected;
+        protected FlexibleStringExpander image;
+        protected String size;
+        protected List<ShowPortletItem> showPortletItems = FastList.newInstance();
+
+        public String listToString(List<String> list) {
+            String result = "";
+            for(String s : list) {
+                if (UtilValidate.isNotEmpty(s)) {
+                    result = result.concat(s).concat(";");
+                }
+            }
+            if (result.endsWith(";"))
+                return result.substring(0, result.length()-1);
+            return result;
+        }
+
+        public ShowPortletLink(Element element, ModelFormField modelFormField) {
+            super(element, modelFormField);
+        }
+
+        public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
+            formStringRenderer.renderShowPortletLink(writer, context, this);
+        }
+
+        public void addShowPorletTolink(Element element) {
+            showPortletItems.add(new ShowPortletItem(element, this));
+        }
+
+        /**
+         * @param string
+         */
+        public void setDescription(String string) {
+            if(UtilValidate.isNotEmpty(string)) {
+                this.description = FlexibleStringExpander.getInstance(string);
+            }
+        }
+
+        /**
+         * @param string
+         */
+        public void setImageTitle(String string) {
+            if(UtilValidate.isNotEmpty(string)) {
+                this.imageTitle = FlexibleStringExpander.getInstance(string);
+            }
+        }
+
+        public List<ShowPortletItem> getShowPortletItems(){
+            return showPortletItems;
+        }
+
+        /**
+         * @param string
+         */
+        public void setAlternate(String string) {
+            if(UtilValidate.isNotEmpty(string)) {
+                this.alternate = FlexibleStringExpander.getInstance(string);
+            }
+        }
+
+        public String getDescription(Map<String, Object> context) {
+            if (UtilValidate.isNotEmpty(description)) {
+                return this.description.expandString(context);
+            }
+            return "";
+        }
+
+        public String getAlternate(Map<String, Object> context) {
+            if (UtilValidate.isNotEmpty(alternate)) {
+                return this.alternate.expandString(context);
+            }
+            return "";
+        }
+
+        public String getImageTitle(Map<String, Object> context) {
+            if (UtilValidate.isNotEmpty(imageTitle)) {
+                return this.imageTitle.expandString(context);
+            }
+            return "";
+        }
+        public String getImage(Map<String, Object> context) {
+            if (UtilValidate.isNotEmpty(imageTitle)) {
+                return this.image.expandString(context);
+            }
+            return "";
+        }
+
+        public String getSize() {
+            return this.size;
+        }
+
+        public String setSize(String size) {
+            return this.size = size;
+        }
+
+        public void setCollapseScreenlet(String collapseScreenlet) {
+            this.collapseScreenlet = FlexibleStringExpander.getInstance(collapseScreenlet);
+        }
+
+        public void setMarkSelected(String markSelected) {
+            this.markSelected = FlexibleStringExpander.getInstance(markSelected);
+        }
+
+        public String getCollapseScreenlet(Map<String, Object> context) {
+            String areaIdValue =  "";
+            if (UtilValidate.isNotEmpty(collapseScreenlet)) {
+                areaIdValue = this.collapseScreenlet.expandString(context);
+            }
+            return areaIdValue;
+        }
+
+        public String getMarkSelected(Map<String, Object> context) {
+            String value =  "";
+            if (UtilValidate.isNotEmpty(markSelected)) {
+                value = this.markSelected.expandString(context);
+            }
+            return value;
+        }
+    }
+
+    public static class ShowPortletItem implements ModelWidget.ShowPortletItem {
+
+        protected FlexibleStringExpander areaId;
+        protected FlexibleStringExpander target;
+        protected ShowPortletLink showPortletLink;
+        protected FlexibleStringExpander portletId;
+        protected boolean requireConfirmation;
+        protected FlexibleStringExpander confirmationMessage;
+        protected FlexibleStringExpander portalPageId;
+        protected FlexibleStringExpander portletSeqId;
+        protected List<String> formsToSerialize = FastList.newInstance();
+        protected List<WidgetWorker.Parameter> parameterList = FastList.newInstance();
+
+        public ShowPortletItem(Element element, ShowPortletLink showPortletLink) {
+            this.showPortletLink = showPortletLink;
+            this.setConfirmationMessage(element.getAttribute("confirmation-message"));
+            this.setRequireConfirmation(("true".equals(element.getAttribute("request-confirmation"))));
+            this.setAreaId(element.getAttribute("area-id"));
+            this.setPortletId(element.getAttribute("portlet-id"));
+            this.setPortalPageId(element.getAttribute("portal-page-id"));
+            this.setPortletSeqId(element.getAttribute("portlet-seq-id"));
+            this.setDescription(element.getAttribute("description"));
+            this.setAlternate(element.getAttribute("alternate"));
+            this.setImageTitle(element.getAttribute("image-title"));
+            this.setTarget(element.getAttribute("target"));
+            this.setImage (element.getAttribute("image-location"));
+            this.setSize(element.getAttribute("size"));
+            this.setCollapseScreenlet(element.getAttribute("collapse-screenlet"));
+            this.setMarkSelected(element.getAttribute("mark-selected"));
+            
+            List<? extends Element> parameterElementList = UtilXml.childElementList(element, "parameter");
+            for (Element parameterElement: parameterElementList) {
+                this.parameterList.add(new WidgetWorker.Parameter(parameterElement));
+            }
+            List<? extends Element> parametersFroms = UtilXml.childElementList(element, "parameters-form");
+            for (Element parameterForm: parametersFroms) {
+                String formName = parameterForm.getAttribute("form-name");
+                if (UtilValidate.isEmpty(formName)) {
+                    formName = this.getModelFormField().getModelForm().getName();
+                }
+                if (!formsToSerialize.contains(formName)) {
+                    formsToSerialize.add(formName);
+                }
+            }
+        }
+
+        public ModelFormField getModelFormField() {
+            return showPortletLink.getModelFormField();
+        }
+
+//        public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
+//            formStringRenderer.renderShowPortletLink(writer, context, this);
+//        }
+
+        public List<String> getFormsToSerialize() {
+            return this.formsToSerialize;
+        }
+ 
+        public String getDescription(Map<String, Object> context) {
+            return showPortletLink.getDescription(context);
+        }
+
+        public String getPortalPageId(Map<String, Object> context) {
+            if (UtilValidate.isNotEmpty(portalPageId)) {
+                return this.portalPageId.expandString(context);
+            }
+            return "";
+        }
+
+        public String getPortletId(Map<String, Object> context) {
+            if (UtilValidate.isNotEmpty(portletId)) {
+                return this.portletId.expandString(context);
+            }
+            return "";
+        }
+
+        public String getPortletSeqId(Map<String, Object> context) {
+            if (UtilValidate.isNotEmpty(portletSeqId)) {
+                return this.portletSeqId.expandString(context);
+            }
+            return "";
+        }
+
+        public String getConfirmationMessage(Map<String, Object> context) {
+            String areaIdValue =  "";
+            if (UtilValidate.isNotEmpty(confirmationMessage)) {
+                areaIdValue = this.confirmationMessage.expandString(context);
+            }
+            return areaIdValue;
+        }
+
+        public void setRequireConfirmation(boolean reqConfirm) {
+            requireConfirmation = reqConfirm;
+        }
+
+        public boolean getRequireConfirmation() {
+            return requireConfirmation;
+        }
+
+        public String getAreaId(Map<String, Object> context) {
+            String areaIdValue =  "";
+            if (UtilValidate.isNotEmpty(areaId)) {
+                areaIdValue = this.areaId.expandString(context);
+            }
+            return areaIdValue;
+        }
+        public String getCollapseScreenlet(Map<String, Object> context) {
+            return showPortletLink.getCollapseScreenlet(context);
+        }
+
+        public String getAlternate(Map<String, Object> context) {
+            return showPortletLink.getAlternate(context);
+        }
+
+        public String getImageTitle(Map<String, Object> context) {
+            return showPortletLink.getImageTitle(context);
+        }
+
+        public String getTarget(Map<String, Object> context) {
+            if (UtilValidate.isNotEmpty(target)) {
+                return this.target.expandString(context);
+            }
+            return "";
+        }
+
+        public Map<String, String> getParameterMap(Map<String, Object> context) {
+            Map<String, String> fullParameterMap = FastMap.newInstance();
+            for (WidgetWorker.Parameter parameter: this.parameterList) {
+                String paramValue = parameter.getValue(context);
+                if (UtilValidate.isNotEmpty(paramValue) || parameter.sendIfEmpty(context)){
+                    if ("idDescription".equals(parameter.getName())) {
+                        if (UtilValidate.isNotEmpty(paramValue)) {
+                            paramValue = UtilURL.removeBadCharForUrl(paramValue);
+                            fullParameterMap.put(parameter.getName(), paramValue);
+                        }
+                    }
+                    else {
+                        fullParameterMap.put(parameter.getName(), paramValue);
+                    }
+                }
+            }
+            return fullParameterMap;
+        }
+
+        public String getImage(Map<String, Object> context) {
+            if (UtilValidate.isNotEmpty(target)) {
+                return this.showPortletLink.image.expandString(context);
+            }
+            return "";
+        }
+
+        public void setImage(String image) {
+            showPortletLink.image = FlexibleStringExpander.getInstance(image);
+        }
+
+        public String getSize() {
+            return showPortletLink.size;
+        }
+
+        public void setSize(String size) {
+            showPortletLink.setSize(size);
+        }
+
+        /**
+         * @param string
+         */
+        public void setAreaId(String areaId) {
+            this.areaId = FlexibleStringExpander.getInstance(areaId);
+        }
+
+        /**
+         * @param string
+         */
+        public void setPortletId(String portletId) {
+            this.portletId = FlexibleStringExpander.getInstance(portletId);
+        }
+
+        /**
+         * @param string
+         */
+        public void setPortletSeqId(String portletSeqId) {
+            this.portletSeqId = FlexibleStringExpander.getInstance(portletSeqId);
+        }
+
+        public void setCollapseScreenlet(String collapseScreenlet) {
+            if(UtilValidate.isEmpty(showPortletLink.collapseScreenlet) && UtilValidate.isNotEmpty(collapseScreenlet))
+            showPortletLink.setCollapseScreenlet(collapseScreenlet);
+        }
+
+        public void setMarkSelected(String markSelected) {
+            if(UtilValidate.isEmpty(showPortletLink.markSelected) && UtilValidate.isNotEmpty(markSelected))
+            showPortletLink.setMarkSelected(markSelected);
+        }
+
+        /**
+         * @param string
+         */
+        public void setPortalPageId(String portalPageId) {
+            this.portalPageId = FlexibleStringExpander.getInstance(portalPageId);
+        }
+
+        /**
+         * @param string
+         */
+        public void setDescription(String string) {
+            showPortletLink.setDescription(string);
+        }
+
+        /**
+         * @param string
+         */
+        public void setImageTitle(String string) {
+            showPortletLink.setImageTitle(string);
+        }
+
+        /**
+         * @param string
+         */
+        public void setAlternate(String string) {
+            showPortletLink.setAlternate(string);
+        }
+
+        /**
+         * @param string
+         */
+        public void setTarget(String string) {
+            this.target = FlexibleStringExpander.getInstance(string);
+        }
+        public void setConfirmationMessage(String string) {
+            this.confirmationMessage = FlexibleStringExpander.getInstance(string);
+        }
+    }
+    // #Eam# portletWidget
 
     public static class SubHyperlink {
         protected FlexibleStringExpander useWhen;

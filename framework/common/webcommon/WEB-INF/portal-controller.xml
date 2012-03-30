@@ -29,7 +29,7 @@ under the License.
     </request-map>
     <request-map uri="refreshPortlet">
         <security https="true" auth="true"/>
-        <response name="success" type="view" value="showPortletUiLabelDecorator"/>
+        <response name="success" type="view" value="showPortlet"/>
     </request-map>
     <request-map uri="showPortletMainDecorator">
         <security https="true" auth="true"/>

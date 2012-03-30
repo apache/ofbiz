@@ -19,6 +19,121 @@
     under the License.
 -->
 <resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    
+    <!--#Bam# portletWidget -->
+    <property key="FieldDescription.component">
+        <value xml:lang="en">Portlet component, used for search and classification and generate default value for other Portlet field (most of them, not mandatory but strongly recommended if portletType is used) </value>
+        <value xml:lang="fr">Le composant de référence pour cette portlet, utilisé pour rechercher et classifier les portlet et générer des valeur par défaut pour les autres champs (beaucoup, pas obligatoire mais fortement recommandé si un type de portlet est utilisé)</value>
+    </property>
+    <property key="FieldDescription.editAreaDivId">
+        <value xml:lang="en">Used by some portlet template, to define an area where show via ajax, in addition to content already present, a portlet (for edition most of time); default value is {portletLongId}_EditArea</value>
+        <value xml:lang="fr">Utilisé par certain modèle de portlet, pour définir une zone où pouvoir afficher via ajax, en plus du contenu déja présent, une portlet (d'édition le plus souvent); la valeur par défaut est {portletLongId}_EditArea</value>
+    </property>
+    <property key="FieldDescription.editFormLocation">
+        <value xml:lang="en">look at editFormName; default value is component://{component}/widget/({webapp}/ if webapp not empty){subComponent}Forms.xml</value>
+        <value xml:lang="fr">voir form d'édition; la valeur par défaut est component://{component}/widget/({webapp}/ si webapp non vide){subComponent}Forms.xml</value>
+    </property>
+    <property key="FieldDescription.editFormName">
+        <value xml:lang="en">If portlet is customizable, form name to edit portlet parameters; default value is EditParam_{portletLongId}</value>
+        <value xml:lang="fr">Si la portlet est paramétrable, nom de la form pour éditer les paramètres; la valeur par défaut est EditParam_{portletLongId}</value>
+    </property>
+    <property key="FieldDescription.formLocation">
+        <value xml:lang="en">look at formName; default value is component://{component}/widget/({webapp}/ if webapp not empty){subComponent}Forms.xml</value>
+        <value xml:lang="fr">voir nom de la form; la valeur par défaut est component://{component}/widget/({webapp}/ si webapp non vide){subComponent}Forms.xml</value>
+    </property>
+    <property key="FieldDescription.formName">
+        <value xml:lang="en">Used by some portlet template, to define the form used (ex: SimpleScreenlet ); default value is {portletLongId}</value>
+        <value xml:lang="fr">Utilisé par certain modèle de portlet, pour définir la nom de la form utilisé (par ex: dans SimpleScreenlet); la valeur par défaut est le {portletLongId}</value>
+    </property>
+    <property key="FieldDescription.helpContentId">
+        <value xml:lang="en">Used to give contentId which will be shown, on top before links to each portlet Help, when help on this page will be call</value>
+        <value xml:lang="fr">permet de préciser l'identifant d'un élément de contenu qui sera affiché dans l'écran de d'aide de cette page portail au-dessus des liens vers l'aide de chacune des portlets.</value>
+    </property>
+    <property key="FieldDescription.helpName">
+        <value xml:lang="en">Id used to show help text about this portlet; default value is HELP_{portalPortletId}; if helpName is not empty and start with DETAIL_ the end is a user context field which contain last selected portletId to show in this place, so it's its helpName which will be used</value>
+        <value xml:lang="fr">identifiant utilisé afficher le help de cette portlet; la valeur par défaut est HELP_{portalPortletId}; si ce champ est non vide et commence par DETAIL_ alors la fin de ce champ représente le nom d'une variable du contexte utilisateur qui contient l'identifiant de la portlet dernièrement affiché à cet emplacement, c'est donc l'aide de celle-ci qui affiché.</value>
+    </property>
+    <property key="FieldDescription.menuLocation">
+        <value xml:lang="en">look at menuName; default value is component://{component}/widget/({webapp}/ if webapp not empty){subComponent}Menus.xml</value>
+        <value xml:lang="fr">voir nom menu; la valeur par défaut est component://{component}/widget/({webapp}/ si webapp non vide){subComponent}Menus.xml</value>
+    </property>
+    <property key="FieldDescription.menuName">
+        <value xml:lang="en">Used by some portlet template, to define menuName used (ex: in screenlet top); default value is {portletLongId}</value>
+        <value xml:lang="fr">Utilisé par certain modèle de portlet, pour définir la nom du menu utilisé (par ex: dans la barre du screenlet); la valeur par défaut est {portletLongId}</value>
+    </property>
+    <property key="FieldDescription.pkIdName">
+        <value xml:lang="en">Used by some portlet template, to define field name to test in condition to show or not portlet; no default value </value>
+        <value xml:lang="fr">Utilisé par certain modèle de portlet, pour définir la nom du champ à tester pour savoir si on affiche ou non la portlet; il n'y a pas de valeur par défaut</value>
+    </property>
+    <property key="FieldDescription.portletLongId">
+        <value xml:lang="en">Sometime portletId is too short to be readable, so a id more long, for generate default value for other field this field will be used; default value {portletLongId}</value>
+        <value xml:lang="fr">L'id de la portlet est quelque fois trop court pour être lisible, celui-ci est plus long, il sera utilisé pour la génération des valeur par défaut pour les autres champs; la valeur par défaut est {portletLongId}</value>
+    </property>
+    <property key="FieldDescription.portletName">
+        <value xml:lang="en">Short description</value>
+        <value xml:lang="fr">Description courte</value>
+    </property>
+    <property key="FieldDescription.portletTypeId">
+        <value xml:lang="en">Can be empty, define a portlet template name (enumCode): a screen in PortletTypeScreens.xml in common</value>
+        <value xml:lang="fr">Peux être vide, défini le modèle de portlet, le nom (enumCode) correspond à un screen dans PortletTypeScreens.xml dans common</value>
+    </property>
+    <property key="FieldDescription.screenLocation">
+        <value xml:lang="en">look at screenName; default value is component://{component}/widget/({webapp}/ if webapp not empty){subComponent}Screens.xml</value>
+        <value xml:lang="fr">voir nom de screen; la valeur par défaut est component://{component}/widget/({webapp}/ si webapp non vide){subComponent}Screens.xml</value>
+    </property>
+    <property key="FieldDescription.screenName">
+        <value xml:lang="en">if portletType is empty, it's the screen which will be used, otherwise it will include in template (if template need a screen); default value is {portletLongId}</value>
+        <value xml:lang="fr">Si portletTypeId est vide c'est le screen qui sera utilisé, sinon c'est celui qui sera inclus dans le modèle (si le modèle en a besoin); la valeur par défaut est le {portletLongId}</value>
+    </property>
+    <property key="FieldDescription.scriptName">
+        <value xml:lang="en">Used by some portlet template (portletType not empty), to define the script to used (ex: SFScreenlet ); default value is {portletLongId} in file component://{component}/script/org/ofbiz/{component}/({webapp}/ if webapp not empty){subComponent}Wscripts.xml</value>
+        <value xml:lang="fr">Utilisé par certain modèle de portlet (portletType non vide), pour définir la nom du script à utiliser (par ex: dans SimpleScreenlet); la valeur par défaut est le {portletLongId} dans le  fichier component://{component}/script/org/ofbiz/{component}/({webapp}/ if webapp not empty){subComponent}Wscripts.xml</value>
+    </property>
+    <property key="FieldDescription.securityMainAction">
+        <value xml:lang="en">Can be empty, the main action which can be done with this portlet, possible values: CREATE UPDATE VIEW DELETE</value>
+        <value xml:lang="fr">Peux être vide, l'action principale réalisé par cette portlet, les valeurs possible sont CREATE UPDATE VIEW DELETE</value>
+    </property>
+    <property key="FieldDescription.securityPermission">
+        <value xml:lang="en">Can be empty, if not, Permission needed to see Portlet (permission_mainAction)</value>
+        <value xml:lang="fr">Peux être vide, sinon, Permission que l'utilisateur doit avoir (avec l'action) pour pouvoir accéder à cette portlet</value>
+    </property>
+    <property key="FieldDescription.securityServiceName">
+        <value xml:lang="en">Can be empty, the service named here is used to see if current user can see the portlet on the list of available portlets; the screen that the portlet calls should also call this service to check permission and not render; the service named here must implement the "permissionInterface" service just like services used for service permissions</value>
+        <value xml:lang="fr">Peux être vide, ce nom du service est utilisé pour valider si l'utilisateur actuel peut voir la portlet dans la liste des portlets disponibles; le screen que cette portlet appelle peut aussi appeler ce service pour verifier la permission et donc s'afficher ou non; Le service nomé ici doit implémenter l'interface du service "permissionInterface" comme tous les services de validation des permissions</value>
+    </property>
+    <property key="FieldDescription.subAreaDivId">
+        <value xml:lang="en">Used by some portlet template, to define an area where show via ajax, a portlet (ex: for multiple tab); default value is {portletLongId}_SubArea</value>
+        <value xml:lang="fr">Utilisé par certain modèle de portlet, pour définir une zone où pouvoir afficher via ajax, une portlet (par ex: pour différent onglet); la valeur par défaut est {portletLongId}_SubArea</value>
+    </property>
+    <property key="FieldDescription.subComponent">
+        <value xml:lang="en">same as component but to give main Entity (ex: Party, Communication, Classification, ...) (strongly recommended if portletType is used)</value>
+        <value xml:lang="fr">idem composant mais pour préciser l'entité majeur concerné (ex: Party, Communication, Classification, ...) (fortement recommandé si un type de portlet est utilisé)</value>
+    </property>
+    <property key="FieldDescription.titleLabel">
+        <value xml:lang="en">Used by some portlet template, to define title used (ex: in screenlet top); default value is PageTitle{portletLongId}</value>
+        <value xml:lang="fr">Utilisé par certain modèle de portlet, pour définir le titre utilisé (par ex: dans la barre du screenlet); la valeur par défaut est PageTitle{portletLongId}</value>
+    </property>
+    <property key="FieldDescription.useMenu">
+        <value xml:lang="en">Default value is N so portlet template will not use menuName, if Y it use menuName which is locate in MenuLocation. Not used if portletType is empty.</value>
+        <value xml:lang="fr">Par défaut est égale à N donc le modéle de portlet n'utilisera pas le menu, si =Y alors il utilisera menuName qui se trouve à menuLocation. Non utilisé si portletType est vide</value>
+    </property>
+    <property key="FieldDescription.useScreen">
+        <value xml:lang="en">Default value is N so portlet template will use formName, if Y portlet will use screenName (which is in screenLocation). Not used if portletType is empty.</value>
+        <value xml:lang="fr">Par défaut est égale à N donc le modéle de portlet utilisera directement la form, si =Y alors c'est le screenName qui se trouve à screenLocation qui est utilisé. Non utilisé si portletType est vide</value>
+    </property>
+    <property key="FieldDescription.useScript">
+        <value xml:lang="en">Default value is N so portlet template will not use scriptName in portlet template, if Y portlet will use scriptName. Not used if portletType is empty.</value>
+        <value xml:lang="fr">Par défaut est égale à N donc le modéle de portlet n'utilisera pas le scriptName, si =Y alors le scrpitName sera appelé. Non utilisé si portletType est vide</value>
+    </property>
+    <property key="FieldDescription.uiLabelLocation">
+        <value xml:lang="en">Used by most of portlet template, to define portletUiLabelDecorator decorator location; default value is component://{component}/widget/({webapp}/ if webapp not empty)CommonScreens.xml</value>
+        <value xml:lang="fr">Utilisé par la plupart des modèles, pour définir le champ location du decorator portletUiLabelDecorator; la valeur par défaut est component://{component}/widget/({webapp}/ si webapp non vide)CommonScreens.xml</value>
+    </property>
+    <property key="FieldDescription.webapp">
+        <value xml:lang="en">same as component, to group subComponent (ex : all file in a sub directory) (optional)</value>
+        <value xml:lang="fr">idem component, il représente un groupe de subComponent (par ex : pour regrouper les fichiers dans un sous répertoire) (optionnel)</value>
+    </property>
+    <!--#Eam# portletWidget -->
     <property key="PortalPage.portalPageName.MYPORTAL_EMPLOYEE">
         <value xml:lang="en">Main</value>
         <value xml:lang="es">Principal</value>

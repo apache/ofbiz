@@ -160,4 +160,18 @@ public class UtilURL {
 
         return buf.toString();
     }
+
+    //#Bam# portletWidget, used by addToParamsIfInContext for idDescription which is "user text"
+    /**This method can be used to remove all characters that may break a URL in the application
+     * @param in
+     * @return string after removing ', ", / and \ characters
+     */
+    public static String removeBadCharForUrl(String in){
+        if(UtilValidate.isNotEmpty(in))
+            return in.replace("<", "").replace(">", "").replace("'", "").replace("/", "").replace("\\", "").replace("\"", "").replace("&", "");
+        else 
+            return ""; 
+    }
+    //#Eam# portletWidget
+
 }

@@ -237,10 +237,17 @@ ${menuString}
   </td>
 </#macro>
 
+<#--#Bam# portletWidget -->
+<#--
 <#macro renderPortalPagePortletBegin originalPortalPageId portalPageId portalPortletId portletSeqId prevPortletId="" prevPortletSeqId="" nextPortletId="" nextPortletSeqId="" columnSeqId="" prevColumnSeqId="" nextColumnSeqId="" confMode="false" delPortletHint="Remove this portlet" editAttribute="false" editAttributeHint="Edit portlet parameters">
+-->
+<#macro renderPortalPagePortletBegin originalPortalPageId portalPageId portalPortletId portletSeqId includedInPage prevPortletId="" prevPortletSeqId="" nextPortletId="" nextPortletSeqId="" columnSeqId="" prevColumnSeqId="" nextColumnSeqId="" confMode="false" delPortletHint="Remove this portlet" editAttribute="false" editAttributeHint="Edit portlet parameters">
+<#--#Eam# portletWidget  -->
   <#assign portletKey = portalPageId+portalPortletId+portletSeqId>
   <#assign portletKeyFields = '<input name="portalPageId" value="' + portalPageId + '" type="hidden"/><input name="portalPortletId" value="' + portalPortletId + '" type="hidden"/><input name="portletSeqId" value="' + portletSeqId  + '" type="hidden"/>'>
+  <#if includedInPage=="Y"><#--#Bam# portletWidget -->
   <div id="PP_${portletKey}" name="portalPortlet" class="noClass" portalPageId="${portalPageId}" portalPortletId="${portalPortletId}" columnSeqId="${columnSeqId}" portletSeqId="${portletSeqId}">
+  </#if><#--#Bam# portletWidget -->
     <#if confMode == "true">
       <div class="portlet-config" id="PPCFG_${portletKey}">
         <div class="portlet-config-title-bar">
@@ -314,8 +321,14 @@ ${menuString}
       </#if>
 </#macro>
 
+<#--#Bam# portletWidget
 <#macro renderPortalPagePortletEnd confMode="false">
+-->
+<#macro renderPortalPagePortletEnd includedInPage confMode="false">
+<#--#Bam# portletWidget -->
+  <#if includedInPage=="Y"> <#--#Eam# portletWidget -->
   </div>
+  </#if> <#--#Eam# portletWidget -->
   <#if confMode == "true">
     </div>
   </#if>

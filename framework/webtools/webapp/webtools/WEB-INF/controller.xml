@@ -527,6 +527,8 @@ under the License.
         <security https="true" auth="true"/>
         <response name="success" type="view" value="FindPortalPage"/>
     </request-map>
+    <request-map uri="ShowPortalPortlet"><security https="true" auth="true"/><response name="success" type="view" value="ShowPortalPortlet"/></request-map>
+    <request-map uri="ShowPortalPortletHelp"><security https="true" auth="true"/><response name="success" type="view" value="ShowPortalPortletHelp"/></request-map>
     <request-map uri="EditPortalPage">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="EditPortalPage"/>
@@ -683,6 +685,8 @@ under the License.
 
     <!-- PortalPage administration  -->
     <view-map name="FindPortalPage" type="screen" page="component://webtools/widget/PortalAdmScreens.xml#FindPortalPage"/>
+    <view-map name="ShowPortalPortlet" type="screen" page="component://webtools/widget/PortalAdmScreens.xml#ShowPortalPortlet"/>
+    <view-map name="ShowPortalPortletHelp" type="screen" page="component://webtools/widget/PortalAdmScreens.xml#ShowPortalPortletHelp"/>
     <view-map name="CreatePortalPage" type="screen" page="component://webtools/widget/PortalAdmScreens.xml#CreatePortalPage"/>
     <view-map name="EditPortalPage" type="screen" page="component://webtools/widget/PortalAdmScreens.xml#EditPortalPage"/>
 

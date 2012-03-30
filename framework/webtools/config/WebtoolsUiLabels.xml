@@ -3888,6 +3888,12 @@
         <value xml:lang="it">Set</value>
         <value xml:lang="pt">Definir</value>
     </property>
+    <!--#Bam# portletWidget -->
+    <property key="WebtoolsShowPortalPortlet">
+        <value xml:lang="en">Show Portlet field</value>
+        <value xml:lang="fr">Montrer les champs d'une portlet</value>
+    </property>
+    <!--#Eam# portletWidget -->
     <property key="WebtoolsShowShowWSDL">
         <value xml:lang="de">WSDL zeigen</value>
         <value xml:lang="en">Show wsdl</value>

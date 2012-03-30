@@ -21,28 +21,24 @@ under the License.
 <screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
 
+    
+    
+    <!--#Bam# portletWidget  replace call showPortlet.ftl -->
     <screen name="showPortlet">
         <section>
             <widgets>
                 <section>
                     <actions>
-                        <entity-one entity-name="PortalPortlet" value-field="portlet" />
+                        <set field="portalPortletId" from-field="portalPortletId" default-value="${parameters.portalPortletId}"/>
                     </actions>
                     <widgets>
-                        <!--
-                            label text=" id: ${parameters.portalPortletId} location:
-                            ${portlet.screenLocation} screen: ${portlet.screenName}"></label
-                        -->
-                        <platform-specific>
-                            <html>
-                                <html-template location="component://common/webcommon/portal/showPortlet.ftl" />
-                            </html>
-                        </platform-specific>
+                        <include-portal-page id="${parameters.portalPageId}" portalPortletId="${portalPortletId}" portletSeqId="${parameters.portletSeqId}"/>
                     </widgets>
                 </section>
             </widgets>
         </section>
     </screen>
+    <!--#Eam# portletWidget  -->
     <screen name="showPortletMainDecorator">
         <section>
             <widgets>

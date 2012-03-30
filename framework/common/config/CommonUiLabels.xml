@@ -11996,6 +11996,37 @@
         <value xml:lang="zh">你不拥有页面'${portalPage.portalPageName}' [${portalPage.portalPageId}]，所以你不能修改它！</value>
         <value xml:lang="zh_TW">你不擁有頁面'${portalPage.portalPageName}' [${portalPage.portalPageId}]，所以你不能修改它！</value>
     </property>
+    <!--#Bam# portletWidget -->
+    <property key="PortalPortletFieldActionsBefore">
+        <value xml:lang="en">Actions, before showing </value>
+        <value xml:lang="fr">Actions, avant l'affichage</value>
+    </property>
+    <property key="PortalPortletFieldAjaxEditArea">
+        <value xml:lang="en">Ajax update area (cf portletType) </value>
+        <value xml:lang="fr">Zones de mise à jours de contenu en ajax (cf types de portlets)</value>
+    </property>
+    <property key="PortalPortletFieldAttributeMgmt">
+        <value xml:lang="en">To manage attributes (edit it, if there are some) </value>
+        <value xml:lang="fr">Pour gérer les attribues (les éditer, s'il y en a)</value>
+    </property>
+    <property key="PortalPortletFieldContent">
+        <value xml:lang="en">portlet technical content (default value, look to portletType) </value>
+        <value xml:lang="fr">Contenu technique de la portlet (valeurs par défaut, voir les types de portlets)</value>
+    </property>
+    <property key="PortalPortletFieldFunctions">
+        <value xml:lang="en">Portlet field showing its function</value>
+        <value xml:lang="fr">Champs liés à la fonction de la portlet</value>
+    </property>
+    <property key="PortalPortletFieldHelp">
+        <value xml:lang="en">Associated Help (not mandatory)</value>
+        <value xml:lang="fr">Gestion de l'aide (non obligatoire)</value>
+    </property>
+    <property key="PortalPortletFieldSecurity">
+        <value xml:lang="en">Security (not mandatory, no default value)</value>
+        <value xml:lang="fr">Sécurité (non obligatoire, pas de valeurs par défaut)</value>
+    </property>
+    <!--#Eam# portletWidget -->
+
     <property key="Project">
         <value xml:lang="de">Projekt</value>
         <value xml:lang="en">Project</value>

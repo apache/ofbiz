@@ -47,6 +47,8 @@ import org.ofbiz.webapp.control.RequestHandler;
 import org.ofbiz.webapp.taglib.ContentUrlTag;
 import org.ofbiz.widget.ModelWidget;
 import org.ofbiz.widget.WidgetWorker;
+import org.ofbiz.widget.ModelWidget.ShowPortletItemData; //#Eam# portletWidget
+import org.ofbiz.widget.ModelWidget.ShowPortletLinkData; //#Eam# portletWidget
 import org.ofbiz.widget.form.FormStringRenderer;
 import org.ofbiz.widget.form.ModelForm;
 import org.ofbiz.widget.form.ModelFormField;
@@ -67,6 +69,8 @@ import org.ofbiz.widget.form.ModelFormField.PasswordField;
 import org.ofbiz.widget.form.ModelFormField.RadioField;
 import org.ofbiz.widget.form.ModelFormField.RangeFindField;
 import org.ofbiz.widget.form.ModelFormField.ResetField;
+import org.ofbiz.widget.form.ModelFormField.ShowPortletItem; //#Eam# portletWidget
+import org.ofbiz.widget.form.ModelFormField.ShowPortletLink; //#Eam# portletWidget
 import org.ofbiz.widget.form.ModelFormField.SubmitField;
 import org.ofbiz.widget.form.ModelFormField.TextField;
 import org.ofbiz.widget.form.ModelFormField.TextFindField;
@@ -1605,7 +1609,7 @@ public class HtmlFormRenderer extends HtmlWidgetRenderer implements FormStringRe
     public void renderFormatItemRowOpen(Appendable writer, Map<String, Object> context, ModelForm modelForm) throws IOException {
         Integer itemIndex = (Integer)context.get("itemIndex");
 
-        writer.append("  <tr");
+        writer.append("  <tr id=\"" + modelForm.getName() + "_row_" +itemIndex+"\""); //#Eam# portletWidget : add id
         if (itemIndex!=null) {
 
             String altRowStyles = modelForm.getStyleAltRowStyle(context);
@@ -2988,4 +2992,119 @@ public class HtmlFormRenderer extends HtmlWidgetRenderer implements FormStringRe
         }
         return ajaxUrl.toString();
     }
+    //#Bam# portletWidget
+    // same as MacroFormRenderer except when populate writer
+    public void renderShowPortletLink(Appendable writer, Map<String, Object> context, ShowPortletLink showPortletLink) throws IOException {
+        ModelFormField modelFormField = showPortletLink.getModelFormField();
+        String linkStyle = "";
+        //prepare show link properties 
+        String id = "";
+        
+        if (UtilValidate.isNotEmpty(modelFormField.getIdName())) {
+            id = modelFormField.getIdName();
+        }
+        if (UtilValidate.isNotEmpty(context.get("itemIndex"))) {
+            id = id + "_" + context.get("itemIndex");
+        }
+        String markSelected = showPortletLink.getMarkSelected(context);
+        String event = "";
+        if (UtilValidate.isNotEmpty(modelFormField.getEvent())) {
+            event = modelFormField.getEvent();
+        }
+        String action = "";
+        if (UtilValidate.isNotEmpty(modelFormField.getAction(context))) {
+            action = modelFormField.getAction(context);
+        }
+        String collapseScreenlet = showPortletLink.getCollapseScreenlet(context);
+
+        String formName = modelFormField.getModelForm().getName();
+        List<String> areasList = FastList.newInstance();
+        List<String> targetList = FastList.newInstance();
+        List<String> paramsList = FastList.newInstance();
+        List<String> formList = FastList.newInstance();
+        List<String> collapseLis = FastList.newInstance();
+
+        ShowPortletLinkData splData = WidgetWorker.prepareShowPortletLinkData(showPortletLink, context);
+
+        for(ShowPortletItem showPortletItem : showPortletLink.getShowPortletItems()){
+
+            ShowPortletItemData spiData = WidgetWorker.prepareShowPortletItemsData(showPortletItem, context);
+            
+            if (UtilValidate.isEmpty(spiData.areaId) && 
+                 (UtilValidate.isEmpty(spiData.portalPageId) || UtilValidate.isEmpty(spiData.portletId) || UtilValidate.isEmpty(spiData.portletSeqId))) {
+                    Debug.logWarning("The form [" + modelFormField.getModelForm().getFormLocation() + "#" + modelFormField.getModelForm().getName() +"] has a show-portlet field that should define a target-area  or must have target-page-id, target-portlet-id and target-seq_id attributes", module);
+            }
+
+            if (UtilValidate.isNotEmpty(modelFormField.getWidgetStyle())) {
+                linkStyle = modelFormField.getWidgetStyle();
+            }
+            collapseScreenlet = showPortletItem.getCollapseScreenlet(context);
+            
+            //check whether the current form field values should be appended to request parameters or not
+            List<String> appendFormParams = showPortletItem.getFormsToSerialize();
+            areasList.add(spiData.areaId);
+            targetList.add(spiData.target);
+            paramsList.add(spiData.params.toString());
+            String formParamsString = "";
+            if(UtilValidate.isNotEmpty(appendFormParams) && appendFormParams.size() > 0){
+                formParamsString = appendFormParams.toString();
+                if (formParamsString.startsWith("{"))
+                    formParamsString = formParamsString.replace("{", "");
+                if (formParamsString.endsWith("}"))
+                    formParamsString = formParamsString.replace("}", "");
+                formParamsString = formParamsString.replace(", ", ",");
+            }
+            formList.add(formParamsString);
+            collapseLis.add(collapseScreenlet);
+        }
+        if (areasList.size() != targetList.size() 
+                || areasList.size() != paramsList.size()) {
+            Debug.logWarning("The form Field [" + modelFormField.getModelForm().getFormLocation() + "#" + modelFormField.getModelForm().getName() +"] has define a target and arameters list for each area it is going to refresh", module);
+        }
+        if(UtilValidate.isNotEmpty(id)) {
+            writer.append("<div id=\"" + id +"_div\"");
+        }
+        writer.append(">\n");
+        writer.append("    <a ");
+        if(UtilValidate.isNotEmpty(linkStyle)) {
+            writer.append(" class=\"" + linkStyle +"\"");
+        }
+        writer.append(" href='javascript:refrshPortlet(\"" + showPortletLink.listToString(targetList) +"\", ");
+        writer.append("\"" + showPortletLink.listToString(areasList) + "\", ");
+        writer.append("\"" + showPortletLink.listToString(paramsList) + "\", ");
+        writer.append("\"" + formName +"\", ");
+        writer.append("\"" + showPortletLink.listToString(formList) + "\", ");
+        if (UtilValidate.isNotEmpty(showPortletLink.getCollapseScreenlet(context))) {
+            writer.append("\"" + showPortletLink.getCollapseScreenlet(context) + "\", ");
+            writer.append("\"" + id + "_div\", ");
+        }
+        else {
+            writer.append("\"\", ");
+            writer.append("\"\", ");
+        }
+        if (UtilValidate.isNotEmpty(showPortletLink.getCollapseScreenlet(context))) {
+            writer.append("\"" + markSelected + "\")'");
+        }
+        else {
+            writer.append("\"\")' ");
+        }
+        if(UtilValidate.isNotEmpty(event) && UtilValidate.isNotEmpty(action)) {
+            writer.append(event + "=\"" + action + "\" ");
+        }
+        if(UtilValidate.isNotEmpty(splData.imgSrc) && UtilValidate.isNotEmpty(splData.imgTitle)) {
+            writer.append("title=\"" + splData.imgTitle+ "\"");
+        }
+        writer.append(">");
+        if(UtilValidate.isNotEmpty(splData.imgSrc)) {
+            writer.append("<img src=\"" + splData.imgSrc +"\" alt=\"" + splData.alt + "\" title=\"" + splData.imgTitle +"\"/>");
+        }
+        writer.append(splData.description);
+        writer.append("</a>");
+        if(UtilValidate.isNotEmpty(id)) {
+            writer.append("</div>");
+        }
+
+        this.appendTooltip(writer, context, modelFormField);
+    }
+    //#Eam# portletWidget
 }

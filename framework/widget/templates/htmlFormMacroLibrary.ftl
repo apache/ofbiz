@@ -47,6 +47,13 @@ under the License.
     </#if>
 </#macro>
 <#macro renderHyperlinkField></#macro>
+<#macro makeShowPortletString linkStyle id event action target targetArea targetPortletId description parameterForm parameterList collapse>
+<div <#if id?has_content>id="${id}_div"</#if>><a href="javascript:ajaxUpdateArea('${targetArea}','${target}',<#if parameterForm?has_content> jQuery('#${parameterForm}').serialize()<#elseif parameterList?has_content>${parameterList}<#else>'portalPortletId=${targetPortletId}'</#if>); <#if collapse?has_content>toggleParentScreenlet('${collapse}');</#if>">${description}</a></div>
+</#macro>
+<#macro rerenderRefreshPortlet linkStyle event action areaId id formName imgSrc title alternate target appendFormParams description params collapse markSelected>
+<#if id?has_content><div id="${id}_div"></#if>
+<a <#if linkStyle?has_content>class="${linkStyle}"</#if> href='javascript:refrshPortlet("${target}", "${areaId}", "${params}", "${formName}", "${appendFormParams}", "${collapse}", <#if (collapse== "true"  || markSelected=="true" ) && id?has_content>"${id}_div"<#else>""</#if>,"${markSelected}" )' <#if action?has_content && event?has_content> ${event}="${action}"</#if><#if imgSrc?length == 0 && title?has_content> title="${title}"</#if>><#if imgSrc?has_content><img src="${imgSrc}" alt="${alternate}" title="${title}"/></#if>${description}</a><#if id?has_content></div></#if>
+</#macro>
 
 <#macro renderTextField name className alert value textSize maxlength id event action disabled clientAutocomplete ajaxUrl ajaxEnabled mask>
     <#if mask?has_content>
@@ -276,13 +283,15 @@ ${item.description}</span>
 </#list>
 </#macro>
 
-<#macro renderSubmitField buttonType className alert formName title name event action imgSrc confirmation containerId ajaxUrl>
+<#-- <#macro renderSubmitField buttonType className alert formName title name event action imgSrc confirmation containerId ajaxUrl> -->
+<#macro renderSubmitField buttonType className alert formName title name event action imgSrc confirmation containerId ajaxUrl returnParams>
 <#if buttonType=="text-link">
  <a <@renderClass className alert /> href="javascript:document.${formName}.submit()" <#if confirmation?has_content>onclick="return confirm('${confirmation?js_string}');"</#if>><#if title?has_content>${title}</#if> </a>
 <#elseif buttonType=="image">
  <input type="image" src="${imgSrc}" <@renderClass className alert /><#if name?has_content> name="${name}"</#if><#if title?has_content> alt="${title}"</#if><#if event?has_content> ${event}="${action}"</#if> <#if confirmation?has_content>onclick="return confirm('${confirmation?js_string}');"</#if>/>
 <#else>
-<input type="<#if containerId?has_content>button<#else>submit</#if>" <@renderClass className alert /><#if name?exists> name="${name}"</#if><#if title?has_content> value="${title}"</#if><#if event?has_content> ${event}="${action}"</#if><#if containerId?has_content> onclick="<#if confirmation?has_content>if (confirm('${confirmation?js_string}')) </#if>ajaxSubmitFormUpdateAreas('${containerId}', '${ajaxUrl}')"<#else><#if confirmation?has_content> onclick="return confirm('${confirmation?js_string}');"</#if></#if>/></#if>
+<#--<input type="<#if containerId?has_content>button<#else>submit</#if>" <@renderClass className alert /><#if name?exists> name="${name}"</#if><#if title?has_content> value="${title}"</#if><#if event?has_content> ${event}="${action}"</#if><#if containerId?has_content> onclick="<#if confirmation?has_content>if (confirm('${confirmation?js_string}')) </#if>ajaxSubmitFormUpdateAreas('${containerId}', '${ajaxUrl}')"<#else><#if confirmation?has_content> onclick="return confirm('${confirmation?js_string}');"</#if></#if>/></#if>-->
+<input type="<#if containerId?has_content>button<#else>submit</#if>" <@renderClass className alert /><#if name?exists> name="${name}"</#if><#if title?has_content> value="${title}"</#if><#if event?has_content> ${event}="${action}"</#if><#if containerId?has_content> onclick="<#if confirmation?has_content>if (confirm('${confirmation?js_string}')) </#if><#if returnParams?has_content>ajaxSubmitFormUpdateAreasWithReturn('${containerId}', '${ajaxUrl}', ${returnParams})"<#else>ajaxSubmitFormUpdateAreas('${containerId}', '${ajaxUrl}')"</#if><#else><#if confirmation?has_content> onclick="return confirm('${confirmation?js_string}');"</#if></#if>/></#if>
 </#macro>
 
 <#macro renderResetField className alert name title>
@@ -376,7 +385,7 @@ ${item.description}</span>
 </#macro>
 
 <#macro renderFormatItemRowOpen formName itemIndex altRowStyles evenRowStyle oddRowStyle>
-    <tr <#if itemIndex?has_content><#if itemIndex%2==0><#if evenRowStyle?has_content>class="${evenRowStyle}<#if altRowStyles?has_content> ${altRowStyles}</#if>"<#elseif altRowStyles?has_content>class="${altRowStyles}"</#if><#else><#if oddRowStyle?has_content>class="${oddRowStyle}<#if altRowStyles?has_content> ${altRowStyles}</#if>"<#elseif altRowStyles?has_content>class="${altRowStyles}"</#if></#if></#if> >
+    <tr <#if itemIndex?has_content>id="${formName}_row_${itemIndex}" </#if><#if itemIndex?has_content><#if itemIndex%2==0><#if evenRowStyle?has_content>class="${evenRowStyle}<#if altRowStyles?has_content> ${altRowStyles}</#if>"<#elseif altRowStyles?has_content>class="${altRowStyles}"</#if><#else><#if oddRowStyle?has_content>class="${oddRowStyle}<#if altRowStyles?has_content> ${altRowStyles}</#if>"<#elseif altRowStyles?has_content>class="${altRowStyles}"</#if></#if></#if> >
 </#macro>
 <#macro renderFormatItemRowClose formName>
     </tr>

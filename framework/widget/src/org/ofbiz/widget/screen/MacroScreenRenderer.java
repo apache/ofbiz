@@ -45,6 +45,7 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.service.DispatchContext;//#Eam# : portletWidget
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.webapp.control.RequestHandler;
 import org.ofbiz.webapp.taglib.ContentUrlTag;
@@ -65,6 +66,10 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
+//#Bam# portletWidget
+import java.util.List;
+import org.ofbiz.base.util.string.FlexibleStringExpander;
+//#Eam# portletWidget
 
 public class MacroScreenRenderer implements ScreenStringRenderer {
 
@@ -788,6 +793,81 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         executeMacro(writer, "renderScreenletPaginateMenu", parameters);
     }
 
+    /** Create an ajaxXxxx JavaScript CSV string from a list of UpdateArea objects. See 
+     * <code>selectall.js</code>. 
+     * @param updateAreas 
+     * @param extraParams Renderer-supplied additional target parameters 
+     * @param context 
+     * @return Parameter string or empty string if no UpdateArea objects were found 
+     */ 
+    public String createAjaxParamsFromUpdateAreas(RequestHandler rh,HttpServletRequest request, HttpServletResponse response, List<ModelForm.UpdateArea> updateAreas, String extraParams, Map<String, ? extends Object> context) { 
+        //FIXME copy from HtmlFormRenderer.java 
+        if (updateAreas == null) { 
+            return ""; 
+        } 
+        String ajaxUrl = ""; 
+        boolean firstLoop = true; 
+        for (ModelForm.UpdateArea updateArea : updateAreas) { 
+            if (firstLoop) { 
+                firstLoop = false; 
+            } else { 
+                ajaxUrl += ","; 
+            } 
+            Map<String, Object> ctx = UtilGenerics.checkMap(context); 
+            Map<String, String> parameters = updateArea.getParameterMap(ctx); 
+            String targetUrl = updateArea.getAreaTarget(context); 
+            String ajaxParams = getAjaxParamsFromTarget(targetUrl); 
+            if (UtilValidate.isNotEmpty(extraParams)) { 
+                if (ajaxParams.length() > 0 && !extraParams.startsWith("&")) { 
+                    ajaxParams += "&"; 
+                } 
+                ajaxParams += extraParams; 
+            } 
+            if(UtilValidate.isNotEmpty(parameters)){ 
+                if(UtilValidate.isEmpty(ajaxParams)){ 
+                    ajaxParams = ""; 
+                } 
+                for (String key : parameters.keySet()) { 
+                    if (ajaxParams.length() > 0 && ajaxParams.indexOf(key) < 0) { 
+                        ajaxParams += "&"; 
+                    } 
+                    if (ajaxParams.indexOf(key) < 0) { 
+                        ajaxParams += key + "=" + parameters.get(key); 
+                    } 
+                } 
+                StringBuilder params = new StringBuilder(); 
+                params.append(ajaxParams); 
+                List<String> addingParams = UtilMisc.toList("portalPageId", "portalPortletId", "portletSeqId", "areaId", "idDescription"); 
+                for (String addingParam : addingParams) { 
+                    if (UtilValidate.isNotEmpty(ajaxParams) && ajaxParams.contains(addingParam + "=")) { 
+                        continue; 
+                    } 
+                    WidgetWorker.addToParamsIfInContext(params, ctx, addingParam, parameters); 
+                } 
+                ajaxParams = params.toString(); 
+            } 
+            ajaxUrl += updateArea.getAreaId() + ","; 
+            ajaxUrl += rh.makeLink(request, response, UtilHttp.removeQueryStringFromTarget(targetUrl)); 
+            ajaxUrl += "," + ajaxParams; 
+        } 
+        Locale locale = UtilMisc.ensureLocale(context.get("locale")); 
+        return FlexibleStringExpander.expandString(ajaxUrl, context, locale); 
+    } 
+ 
+    /** Extracts parameters from a target URL string, prepares them for an Ajax 
+     * JavaScript call. This method is currently set to return a parameter string 
+     * suitable for the Prototype.js library. 
+     * @param target Target URL string 
+     * @return Parameter string 
+     */ 
+    public static String getAjaxParamsFromTarget(String target) { 
+        String targetParams = UtilHttp.getQueryStringFromTarget(target); 
+        targetParams = targetParams.replace("?", ""); 
+        targetParams = targetParams.replace("&amp;", "&"); 
+        return targetParams;
+     }
+    //#Eam# portletWidget
+
     public void renderPortalPageBegin(Appendable writer, Map<String, Object> context, ModelScreenWidget.PortalPage portalPage) throws GeneralException, IOException {
         String portalPageId = portalPage.getActualPortalPageId();
         String originalPortalPageId = portalPage.getOriginalPortalPageId();
@@ -899,8 +979,18 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         String portalPageId = portalPage.getActualPortalPageId();
         String originalPortalPageId = portalPage.getOriginalPortalPageId();
         String portalPortletId = portalPortlet.getString("portalPortletId");
+       //#Bam# portletWidget
+        /*
         String portletSeqId = portalPortlet.getString("portletSeqId");
         String columnSeqId = portalPortlet.getString("columnSeqId");
+        */
+        String portletSeqId = null;
+        String columnSeqId = null;
+        if (! portalPortlet.getEntityName().equals("PortalPortlet")){
+            portletSeqId = portalPortlet.getString("portletSeqId");
+            columnSeqId = portalPortlet.getString("columnSeqId");
+        }
+        //#Eam# portletWidget
         String confMode = portalPage.getConfMode(context);
         String editFormName = portalPortlet.getString("editFormName");
         String editFormLocation = portalPortlet.getString("editFormLocation");
@@ -921,6 +1011,7 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
             delPortletHint = uiLabelMap.get("CommonDeleteThisPortlet");
             editAttributeHint = uiLabelMap.get("CommonEditPortletAttributes");
         }
+        String includedInPage = (String) context.get("includedInPage");//#Eam# : portletWidget
 
         StringWriter sr = new StringWriter();
         sr.append("<@renderPortalPagePortletBegin ");
@@ -952,6 +1043,10 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         sr.append(editAttributeHint);
         sr.append("\" confMode=\"");
         sr.append(confMode);
+        //#Bam# : portletWidget
+        sr.append("\" includedInPage=\"");
+        sr.append(includedInPage);
+        //#Eam# : portletWidget
         sr.append("\"");
         if (UtilValidate.isNotEmpty(editFormName) && UtilValidate.isNotEmpty(editFormLocation)) {
             sr.append(" editAttribute=\"true\"");
@@ -967,6 +1062,11 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         sr.append("<@renderPortalPagePortletEnd ");
         sr.append(" confMode=\"");
         sr.append(confMode);
+        //#Bam# : portletWidget
+        String includedInPage = (String) context.get("includedInPage");
+        sr.append("\" includedInPage=\"");
+        sr.append(includedInPage);
+        //#Eam# : portletWidget
         sr.append("\" />");
         executeMacro(writer, sr.toString());
     }
@@ -975,11 +1075,49 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         String portalPortletId = portalPortlet.getString("portalPortletId");
         String screenName = portalPortlet.getString("screenName");
         String screenLocation = portalPortlet.getString("screenLocation");
+        //#Bam# : portletWidget
+        if (UtilValidate.isEmpty(screenName) || UtilValidate.isEmpty(screenLocation)){
+            Debug.logError("Impossible to show portalPortletId="+portalPortletId+" screenName="+screenName+" screenLocation="+screenLocation, module);
+            return;
+        }
+
+        LocalDispatcher dispatcher = (LocalDispatcher) context.get("dispatcher");
+        DispatchContext dctx = dispatcher.getDispatchContext();
+        Boolean hasPermission = true;
+        if (UtilValidate.isNotEmpty(portalPortlet.get("securityServiceName")) && UtilValidate.isNotEmpty(portalPortlet.get("securityMainAction"))) {
+            String serviceName = portalPortlet.getString("securityServiceName");
+                Map<String, Object> inMap = UtilMisc.toMap("mainAction", portalPortlet.get("securityMainAction"),
+                                                           "resourceDescription", portalPortletId,
+                                                           "userLogin",context.get("userLogin"));
+                //Add request parameters to service context
+                Map<String, Object> inputFields = UtilGenerics.checkMap(context.get("requestParameters"));
+                for (String name: inputFields.keySet()) {
+                    inMap.put(name, inputFields.get(name));
+                }
+                inMap = dctx.makeValidContext(serviceName, "IN", inMap);
+                Map<String, Object> result = dispatcher.runSync(serviceName, inMap);
+                if (UtilValidate.isNotEmpty(result)) {
+                    hasPermission = (Boolean) result.get("hasPermission");
+
+                    //Add service result parameters to context
+                    for (String name: result.keySet()) {
+                        context.put(name, result.get(name));
+                    }
+                }
+        }
+        //#Eam# : portletWidget
 
         ModelScreen modelScreen = null;
         if (UtilValidate.isNotEmpty(screenName) && UtilValidate.isNotEmpty(screenLocation)) {
             try {
+            if (hasPermission) {//#Eam# : portletWidget
                 modelScreen = ScreenFactory.getScreenFromLocation(screenLocation, screenName);
+            //#Bam# : portletWidget
+            } else {
+                //Display permission error screen
+                modelScreen = ScreenFactory.getScreenFromLocation("component://common/widget/PortalPageScreens.xml","PermissionErrorScreen");
+            }
+            //#Eam# : portletWidget
             } catch (IOException e) {
                 String errMsg = "Error rendering portlet ID [" + portalPortletId + "]: " + e.toString();
                 Debug.logError(e, errMsg, module);
