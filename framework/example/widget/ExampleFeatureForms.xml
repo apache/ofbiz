@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <!-- ExampleFeature : Form used directly by a portlet, with portlet type "Screenlet" (no screen including it) -->
+    <form name="FindExampleFeature" type="single" target="FindExampleFeature" default-entity-name="ExampleFeature" ><!-- validate-link-on-enter="true" -->
+        <actions>
+            <set field="parameters.portalPageId" value="ExampleFeatureNew"/>
+        </actions>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="exampleFeatureId" title="${uiLabelMap.ExampleExampleFeatureId}"><text-find/></field>
+        <field name="featureSourceEnumId" title="${uiLabelMap.ExampleFeatureSource}">
+          <drop-down allow-empty="true">
+            <entity-options entity-name="Enumeration" key-field-name="enumId" description="${description}">
+                <entity-constraint name="enumTypeId" operator="equals" value="EXMPL_FEAT_SOURCE"/>
+                <entity-order-by field-name="enumCode"/>
+                <entity-order-by field-name="sequenceId"/>
+            </entity-options>
+          </drop-down>
+        </field>
+        <field name="description"><text-find/></field>
+        <field name="portalPageId"><hidden value="ExampleFeatureNew"/></field>
+        <field name="searchButton" title=" " widget-style="smallSubmit" id-name="submit">
+          <!-- target-area is not mandatory but present because bug-->
+          <show-portlet portlet-id="ListExampleFeature" area-id="PP_${portalPageId}ListExampleFeature${portletSeqId}" description="${uiLabelMap.CommonSearch}">
+            <parameters-form/>
+          </show-portlet>
+        </field>
+    </form>
+
+    <!-- ExampleFeature : form used directly by a portlet (no screen including it) -->
+    <form name="ListExampleFeature" type="list"  list-name="listIt" 
+          odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="ExampleFeature"/>
+                <field-map field-name="orderBy" from-field="exampleFeatureId"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <field name="exampleFeatureId" title="${uiLabelMap.ExampleExampleFeatureId}">
+            <show-portlet portlet-id="${portalPortletId}" target="editExampleFeaturePortlet" area-id="${editAreaDivId}" mark-selected="true" 
+                          description="${exampleFeatureId}"  also-hidden="false">
+                <parameter param-name="exampleFeatureId"/>
+                <parameter param-name="areaId" from-field="currentAreaId"/>
+            </show-portlet>
+        </field>
+        <field name="featureSourceEnumId" title="${uiLabelMap.ExampleFeatureSource}">
+            <display-entity entity-name="Enumeration" key-field-name="enumId" description="${description}"/>
+        </field>
+        <field name="description"><display/></field>
+        <field name="deleteLink" title=" ">
+            <show-portlet portlet-id="${portalPortletId}" target="deleteExampleFeaturePortlet" area-id="${areaId}"
+                          image-location="${iconsPurpose.Delete}" image-title="${uiLabelMap.IconsTooltips_Delete}"
+                          request-confirmation="true" confirmation-message="${uiLabelMap.CommonConfirmDelete}">
+                <parameter param-name="exampleFeatureId"/>
+            </show-portlet>
+        </field>
+    </form>
+
+    <!-- ExampleFeature : Form used by a screen by controller entry (not used directly by a portlet) : use for entity edition in edit area -->
+    <form name="EditExampleFeature" type="single" target="createExampleFeatureJs" title="" default-map-name="exampleFeature">
+        <alt-target use-when="exampleFeature!=null" target="updateExampleFeatureJs"/>
+<!--        <auto-fields-service service-name="createExampleFeature"/>-->
+<!--        <field name="exampleFeatureId" use-when="exampleFeature==null" title="${uiLabelMap.ExampleExampleFeatureId}" required-field="true"><text/></field>-->
+        <field name="exampleFeatureId" use-when="exampleFeature!=null" title="${uiLabelMap.ExampleExampleFeatureId}"><display/></field>
+        <field name="description" use-when="exampleFeature==null" required-field="true"><text/></field>
+        <field name="description" use-when="exampleFeature!=null"><text/></field>
+        <field name="featureSourceEnumId" title="${uiLabelMap.ExampleFeatureSource}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Enumeration" key-field-name="enumId" description="${description}">
+                    <entity-constraint name="enumTypeId" operator="equals" value="EXMPL_FEAT_SOURCE"/>
+                    <entity-order-by field-name="enumCode"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${groovy: exampleFeature == null ? uiLabelMap.CommonAdd : uiLabelMap.CommonSave}">
+           <submit button-type="button"/>
+        </field>
+        <field name="back" title=" " position="2" widget-style="buttontext">  <!-- Back button that refresh portlet with edit area-->
+           <show-portlet portlet-id="${parameters.portalPortletId}" area-id="${parameters.areaId}" description="${uiLabelMap.CommonBack}" />
+        </field>
+        <on-event-update-area area-target="showPortlet" event-type="submit" area-id="${parameters.areaId}"> <!-- is it necessary to give area-id, maybe remove mandatory from xsd-->
+          <parameter param-name="portalPortletId" from-field="parameters.portalPortletId"/>
+        </on-event-update-area>
+    </form>
+
+    <!-- ExampleFeatureAppl : Form used directly by a portlet (no screen including it) -->
+    <form name="ExampleFeatureAppls" type="list"  list-name="exampleFeatureAppls" 
+          odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <set field="exampleId" from-field="parameters.exampleId"/>
+            <entity-condition entity-name="ExampleFeatureAppl">
+                <condition-expr field-name="exampleId" from-field="exampleId"/>
+                <order-by field-name="sequenceNum"/>
+                <order-by field-name="exampleFeatureId"/>
+            </entity-condition>
+        </actions>
+        <row-actions>
+          <entity-one entity-name="ExampleFeature" value-field="exampleFeature" use-cache="true"/>
+        </row-actions>
+        <field name="exampleId"><hidden/></field>
+        <field name="sequenceNum"><display/></field>
+        <field name="exampleFeatureId" title="${uiLabelMap.ExampleExampleFeatureId}">
+            <show-portlet portlet-id="${portalPortletId}" target="editExampleFeatureApplPortlet" area-id="${editAreaDivId}" mark-selected="true" 
+                          description="${exampleFeature.description}" also-hidden="false">
+                <parameter param-name="exampleId"/>
+                <parameter param-name="exampleFeatureId"/>
+                <parameter param-name="fromDate"/>
+            </show-portlet>
+        </field>
+        <field name="exampleFeatureApplTypeId" title="${uiLabelMap.CommonType}">
+            <display-entity entity-name="ExampleFeatureApplType" key-field-name="exampleFeatureApplTypeId" description="${description}"/>
+        </field>
+        <field name="fromDate"><display type="date"/></field>
+        <field name="thruDate"><display type="date"/></field>
+        <field name="deleteLink" title=" ">
+            <show-portlet portlet-id="${portalPortletId}" target="deleteExampleFeatApplPortlet" area-id="${areaId}"
+                          image-location="${iconsPurpose.Delete}" image-title="${uiLabelMap.IconsTooltips_Delete}"
+                          request-confirmation="true" confirmation-message="${uiLabelMap.CommonConfirmDelete}">
+                <parameter param-name="exampleId"/>
+                <parameter param-name="exampleFeatureId"/>
+                <parameter param-name="fromDate"/>
+            </show-portlet>
+        </field>
+    </form>
+
+    <!-- ExampleFeatureAppl : Form used by a screen by controller entry (not used directly by a portlet) : use for entity edition in edit area -->
+    <form name="EditExampleFeatureAppl" type="single" target="createExampleFeatureApplJs" title="" default-map-name="exampleFeatureAppl">
+        <alt-target use-when="exampleFeatureAppl!=null" target="updateExampleFeatureApplJs"/>
+        <auto-fields-service service-name="createExampleFeatureAppl"/>
+        <field name="exampleId"><hidden/></field>
+        <field name="exampleFeatureId" title="${uiLabelMap.ExampleFeature}" use-when="exampleFeatureAppl==null" required-field="true">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="ExampleFeature" key-field-name="exampleFeatureId" description="${description}">
+                    <entity-order-by field-name="exampleFeatureId"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="exampleFeatureId" title="${uiLabelMap.ExampleFeature}" use-when="exampleFeatureAppl!=null">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="ExampleFeature" key-field-name="exampleFeatureId" description="${description}">
+                    <entity-order-by field-name="exampleFeatureId"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="exampleFeatureApplTypeId" title="${uiLabelMap.CommonType}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="ExampleFeatureApplType" key-field-name="exampleFeatureApplTypeId" description="${description}">
+                    <entity-order-by field-name="exampleFeatureApplTypeId"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromDate" use-when="exampleFeatureAppl==null" required-field="true"><date-time/></field>
+        <field name="fromDate" use-when="exampleFeatureAppl!=null"><date-time/></field>
+        <field name="thruDate"><date-time/></field>
+        <field name="submitButton" title="${groovy: exampleFeatureAppl == null ? uiLabelMap.CommonAdd : uiLabelMap.CommonSave}">
+           <submit button-type="button"/>
+        </field>
+        <field name="back" title=" " position="2" widget-style="buttontext">  <!-- Back button that refresh portlet with edit area-->
+           <show-portlet portlet-id="${parameters.portalPortletId}" area-id="${parameters.areaId}" description="${uiLabelMap.CommonBack}" >
+               <parameter param-name="exampleId" from-field="parameters.previousExampleId"/><!-- parameters idDescription, areaId, portalPageId, portletSeqId will be add automatically -->
+           </show-portlet>
+        </field>
+        <on-event-update-area area-target="showPortlet" event-type="submit" area-id="${parameters.areaId}"> <!-- is it necessary to give area-id, maybe remove mandatory from xsd-->
+          <parameter param-name="exampleId"/>
+        </on-event-update-area>
+    </form>
+
+</forms>

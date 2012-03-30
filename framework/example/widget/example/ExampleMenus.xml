@@ -34,6 +34,7 @@ under the License.
             <link target="authview/findExampleAjax"/>
         </menu-item>
         <menu-item name="portalPage" parent-portal-page-value="EXAMPLE"/>
+        <menu-item name="portalPageWithType" parent-portal-page-value="ExampleMgmt"/>
         <menu-item name="Dashboard" title="${uiLabelMap.ExampleDashboard}" align-style="opposed">
             <link target="ManagePortalPages">
                 <parameter param-name="parentPortalPageId" value="EXAMPLE"/>

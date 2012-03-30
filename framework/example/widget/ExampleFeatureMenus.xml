@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<menus xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-menu.xsd">
+
+    <!-- Screenlets menus : used on portal portlets and shown in screenlet header, used purpose icons (refresh, edit, add,...), used TabBar Menu style -->
+    <menu name="ListExampleFeature" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <actions>
+          <set field="areaId" from-field="parameters.areaId" default-value="PP_${portalPageId}${portalPortletId}00001"/>
+        </actions>
+        <menu-item name="refreshExampleFeature">
+            <show-portlet portlet-id="${portalPortletId}" area-id="${areaId}" image-location="${iconsPurpose.Refresh}" image-title="${uiLabelMap.IconsTooltips_Refresh}">
+            </show-portlet>
+        </menu-item>
+        <menu-item name="addExampleFeature">
+            <show-portlet portlet-id="${portalPortletId}" target="editExampleFeaturePortlet" area-id="ListExampleFeature_EditArea" image-location="${iconsPurpose.Add}" image-title="${uiLabelMap.IconsTooltips_Add}">
+            </show-portlet>
+        </menu-item>
+    </menu>
+
+    <menu name="ExampleFeatureAppls" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <actions>
+          <set field="areaId" from-field="parameters.areaId" default-value="PP_${portalPageId}${portalPortletId}00001"/>
+        </actions>
+        <menu-item name="refreshExampleFeatureAppl">
+            <show-portlet portlet-id="${portalPortletId}" area-id="${areaId}" image-location="${iconsPurpose.Refresh}" image-title="${uiLabelMap.IconsTooltips_Refresh}">
+              <parameter param-name="exampleId" from-field="parameters.exampleId"/>
+            </show-portlet>
+        </menu-item>
+        <menu-item name="addExampleFeatureAppl">
+            <show-portlet portlet-id="${portalPortletId}" target="editExampleFeatureApplPortlet" area-id="ExampleFeatureAppls_EditArea" image-location="${iconsPurpose.Add}" image-title="${uiLabelMap.IconsTooltips_Add}">
+              <parameter param-name="exampleId" from-field="parameters.exampleId"/>
+            </show-portlet>
+        </menu-item>
+    </menu>
+
+    <!-- External menus : use for actions witch drive you on another portal page, not in screenlet header, used in a screen, used purpose icons, used ButtonBar Menu style-->
+    <menu name="ExampleFeatureExternalMenu" extends="CommonButtonBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <!-- Add title in order to have both icon and text -->
+        <menu-item name="newExampleFeature" title="${uiLabelMap.ExampleNewExampleFeature}">
+            <link target="showPortalPage">
+                <parameter param-name="portalPageId" from-field="newPageId" value="ExampleFeatureNew"/>
+                <image src="${iconsPurpose.Add}" title="${uiLabelMap.ExampleNewExampleFeature}"/>
+            </link>
+        </menu-item>
+    </menu>
+
+</menus>

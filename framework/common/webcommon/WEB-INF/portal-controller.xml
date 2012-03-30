@@ -39,6 +39,8 @@ under the License.
         <security https="true" auth="true"/>
         <response name="success" type="view" value="showPortletSimpleDecorator"/>
     </request-map>
+    <request-map uri="showCommonDetailPortlet"><security https="true" auth="true"/><response name="success" type="view" value="showCommonDetailPortlet"/></request-map><!--#Eam# portletExample can be use for all portalPage build like exampleMgmt -->
+
     <!-- Portlet editing requests -->
     <request-map uri="editPortalPortletAttributes">
         <security https="true" auth="true"/>
@@ -173,6 +175,8 @@ under the License.
     <view-map name="showPortletUiLabelDecorator" type="screen" page="component://common/widget/PortalPageScreens.xml#showPortletUiLabelDecorator"/>
     <view-map name="showPortletMainDecorator" type="screen" page="component://common/widget/PortalPageScreens.xml#showPortletMainDecorator"/>
     <view-map name="showPortletSimpleDecorator" type="screen" page="component://common/widget/PortalPageScreens.xml#showPortletSimpleDecorator"/>
+    <view-map name="showCommonDetailPortlet" type="screen" page="component://common/widget/CommonScreens.xml#ShowCommonDetailPortlet"/> <!--#Eam# portletExample can be use for all portalPage build like exampleMgmt -->
+
     <view-map name="ManagePortalPages" type="screen" page="component://common/widget/PortalPageScreens.xml#ManagePortalPages"/>
     <view-map name="NewPortalPage" type="screen" page="component://common/widget/PortalPageScreens.xml#NewPortalPage"/>
     <view-map name="addPortlet" type="screen" page="component://common/widget/PortalPageScreens.xml#AddPortlet"/>

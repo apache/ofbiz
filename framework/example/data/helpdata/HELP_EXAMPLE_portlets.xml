@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements. See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to you under the Apache License, Version
+2.0 (the "License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+applicable law or agreed to in writing, software distributed under the
+License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for
+the specific language governing permissions and limitations under the
+License.
+-->
+<section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    version="5.0" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
+    xsi:schemaLocation="http://docbook.org/ns/docbook"
+    xmlns="http://docbook.org/ns/docbook">
+    <title>The PortalPortlets usage.</title>
+
+    <section>
+      <title></title>
+      <para>
+        After Portlet type selection, We can proceed to its configuration depending on our screen needs
+        <itemizedlist>
+          <listitem><para>Configure portlet title</para> </listitem>
+          <listitem><para>Configure the widget to be used (screen or form)</para></listitem>
+          <listitem><para>Configure whether it should call a script, before rendering process start. For example : get some data, check passed parameters or any action that may be needed to get portlet working</para> </listitem>
+          <listitem><para>Configure wheter it shoud should incllud a menu on its screenlet title bar</para> </listitem>
+          <listitem><para>Is there a variable to must be checked do decide if the portlet should be rendered or not(For example : a workEffort resume portlet may chek that it gets a workEffortId otherwise it does show anything to avoid a form with field labels only rendered)</para></listitem>
+          <listitem><para>...</para></listitem>
+        </itemizedlist>
+      </para>
+      <para>&amp;nbsp;</para>
+      <para>Most of portlet cofigurable elements has default values deduced by renderers to facilitate portlet creation process.</para>
+      <para>So looking at a portlet définition file like  ExempleExamplePortletData.xml, we can see that very litlle of theme are set, 
+            mainly portlet own field.
+      </para>
+      <para>&amp;nbsp;</para>
+      <para>here are some excerpts:
+        <programlisting>
+          &amp;lt;PortalPortlet portalPortletId="FindExample"
+             portletName="Find Example (with portletType and showPortlet)" description="portlet to define search criteria for Example list"
+             portletTypeId="Screenlet"  component="example" subComponent="Example" helpName="HELP_Screenlet"/>
+          &amp;lt;PortalPortlet portalPortletId="ListExample"
+             portletName="List Examples (with portletType and showPortlet)" description="portlet to list example depending on search criteria, this portlet is call by FindExample"
+             portletTypeId="ScreenletList" component="example" subComponent="Example" helpName="HELP_ScreenletList"/>
+        </programlisting>
+      </para>
+      <para>&amp;nbsp;</para>
+      <para>To ensure this portal page quality, its important to take care of translation files (CommonPortalEntityLabels.xml) :
+        <programlisting>
+    &amp;lt;property key="PortalPortlet.portletName.FindExample">
+        &amp;lt;value xml:lang="en">Find Example &amp;lt;/value>
+        &amp;lt;value xml:lang="fr">Rechercher un exemple &amp;lt;/value>
+    &amp;lt;/property>
+    &amp;lt;property key="PortalPortlet.description.FindExample">
+        &amp;lt;value xml:lang="en">portlet to define search criteria for Example list &amp;lt;/value>
+        &amp;lt;value xml:lang="fr">portlet (type Screenlet) de critères de recherche pour la liste des exemples &amp;lt;/value>
+    &amp;lt;/property>
+        </programlisting>
+      </para>
+    </section>
+    
+</section>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements. See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to you under the Apache License, Version
+2.0 (the "License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+applicable law or agreed to in writing, software distributed under the
+License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for
+the specific language governing permissions and limitations under the
+License.
+-->
+<section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    version="5.0" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
+    xsi:schemaLocation="http://docbook.org/ns/docbook"
+    xmlns="http://docbook.org/ns/docbook">
+    <title>The Portlet Attribute page.</title>
+
+      <para>PortalPortlet use PortalAttribute to be able to configure a portlet for different usage.</para>
+      <para>There are several types of attributes, like standard ones, and user ones, like an type id.</para>
+      <para>&amp;nbsp;</para>
+
+    <section>
+      <title>Attribute management</title>
+      <para>See a standard attribute used by Screenlet and ScreenletList portlet types for reducing or not screenlet :
+        <programlisting>
+          &amp;lt;PortletAttribute portalPageId="ExampleNew" portalPortletId="FindExample" attrName="initiallyCollapsed" attrValue="true" portletSeqId="00001"/>
+        </programlisting>
+      </para>
+      <para>Here, a personal use to configure portlet with a parameted list (role type configuration) :
+        <programlisting>
+          &amp;lt;PortletAttribute portalPageId="ExampleMgmt" portalPortletId="ListExample" attrName="roleTypeId" attrValue="VENDOR" portletSeqId="00001"/>
+        </programlisting>
+      </para>
+    </section>
+</section>

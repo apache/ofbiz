@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements. See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to you under the Apache License, Version
+2.0 (the "License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+applicable law or agreed to in writing, software distributed under the
+License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for
+the specific language governing permissions and limitations under the
+License.
+-->
+<section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    version="5.0" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
+    xsi:schemaLocation="http://docbook.org/ns/docbook"
+    xmlns="http://docbook.org/ns/docbook">
+   <title> Portlet Type : screenlet </title>
+  
+   <para> <emphasis role="warning"> This is the most common type of portlet. </emphasis> It can manage with screens or forms and menu editing area (injection or substitution). </para>
+   <para> can also executed a script before loading the portlet to retrieve entity, lists, ... </para>
+
+   <para> When creating a new portlet, you must define a number of fields to ensure its operation and its reuse. </para>
+   <para> It's important to consider which component relates this portlet and its features. Once the component and subcomponent identified,
+          you should describe the function of the portlet as well as possible. </para>
+  <para>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="/example/images/Screenlet.png"/>
+      </imageobject>
+      <textobject><phrase>Screenlet</phrase></textobject>
+    </mediaobject>
+  </para>
+
+  <section>
+     <title>Main entity Field  in PortalPortlet </title>
+     <itemizedlist>
+       <listitem> <para> portalPortletId: identifier of the portlet, max. 20 characters. </para> </listitem>
+       <listitem> <para> portletLongId: identifying complementary, max. 60 char. </para> </listitem>
+       <listitem> <para> portletTypeId: chosen type here screenlet </para> </listitem>
+       <listitem> <para> portletName: short description, don't forget labels in CommonPortalEntityLabels.xml for translations in other language</para> </listitem>
+       <listitem> <para> description:  long description, don't forget labels in CommonPortalEntityLabels.xml translations in other language</para> </listitem>
+       <listitem> <para> component: component name, very important to generate the default values of other fields ​​used by this type of portlet </para> </listitem>
+       <listitem> <para> subComponent: name of the subcomponent, very important to generate the default values of other fields ​​used by this type of portlet </para> </listitem>
+       <listitem> <para> webapp: to filled in when sub-directory under the component must be used</para> </listitem>
+       <listitem> <para> screenshot: png image of the portlet </para> </listitem>
+     </itemizedlist>
+     <para>complementary or optional fields could be used. </para>
+    <tip>
+      <para>With component and subcomponent fields filled in, there will be default values ​​for many other fields. </para>
+    </tip>
+  </section>
+ 
+  <section>
+    <title> Field of the entity type used PortalPortlet screenlet (to be completed only if specific value) </title>
+    <itemizedlist>
+      <listitem> <para> titleLabel: title to be displayed </para> </listitem>
+      <listitem> <para> formName: optional, depends on the field useScreen, used if useScreen is empty or N </para> </listitem>
+      <listitem> <para> formLocation: see above </para> </listitem>
+      <listitem> <para> useScreen </para> </listitem>
+      <listitem> <para> screenName: optional, is used if there is useScreen </para> </listitem>
+      <listitem> <para> screenLocation: see above </para> </listitem>
+      <listitem> <para> useMenu </para> </listitem>
+      <listitem> <para> MenuName: Adding a menu at the top right of the screenlet, used if useMenu is Y</para> </listitem>
+      <listitem> <para> menuLocation: see above </para> </listitem>
+      <listitem> <para> editAreaDivId: edit box at the top of the screen or form used, available to inject content (via the menu, for example) </para> </listitem>
+      <listitem> <para> subAreaDivId: the area containing the form or screen used, available to replace the content of this field (via the menu, for example) </para> </listitem>
+      <listitem> <para> useScript </para> </listitem>
+      <listitem> <para> scriptName, used if useScript is Y </para> </listitem>
+      <listitem> <para> pkIdname </para> </listitem>
+    </itemizedlist>
+    <para> By default this type of portlet is reducible with save-collapsed = "true" </para>
+    <tip>
+      <para> For more information see Help Detailed <link xl:href="showHelp?helpTopic=portletfields"> fields of a portlet </link> </para>
+      <para> When making a portlet, when in doubt, it is possible to display the default values ​​generated through page
+         <link xl:href="/webtools/control/ShowPortalPortlet"> ShowPortalPortlet </link> in Adm. Sys </para>
+    </tip>
+  </section>
+ 
+  <section>
+     <title>Possible generic attributed </title>
+     <itemizedlist>
+       <listitem> <para> collapsible: true if it is empty <emphasis role="warning"> not operational: currently always true</emphasis> </para> </listitem>
+       <listitem> <para> saveCollapsed: empty if this is true <emphasis role="warning"> not operational: currently always true</emphasis> </para> </listitem>
+       <listitem> <para> initiallyCollapsed: false if empty</para> </listitem>
+     </itemizedlist>
+  </section>
+
+  <section>
+     <title> Additional Links </title>
+    <itemizedlist>
+      <listitem><para>See <link  xl:href="showHelp?helpTopic=AllPortletType"> all portlet types and fields </link> </para></listitem>
+      <listitem><para>See <link xl:href="showHelp?helpTopic=portletfields"> complete list of portalPortlet fields and their descriptions </link> </para></listitem>
+    </itemizedlist>
+  </section>
+  
+</section>

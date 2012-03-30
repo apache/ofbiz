@@ -36,4 +36,102 @@ under the License.
     <PortletPortletCategory portalPortletId="EXAMPLE_1" portletCategoryId="EXAMPLE"/>
     <PortletPortletCategory portalPortletId="EXAMPLE_2" portletCategoryId="EXAMPLE"/>
     <PortletPortletCategory portalPortletId="EXAMPLE_3" portletCategoryId="EXAMPLE"/>
+    <!--#Bam# icons-purpose -->
+    <PortalPortlet portalPortletId="IconsList" portletName="List all icons usable in portlet with iconsPurpose and IconsTooltips_" 
+                   description="List all icons usable in portlet with iconsPurpose and IconsTooltips_"
+       portletTypeId="Screenlet" component="example" subComponent="Example" />
+    <PortletPortletCategory portalPortletId="IconsList" portletCategoryId="EXAMPLE"/>
+
+
+     <!-- Begin Addon modification portletExample -->
+    <PortletCategory portletCategoryId="EXAMPLE_PORTLET_TYPE" description="Example Portlet(s) using portletType"/>
+
+    <PortalPortlet portalPortletId="FindExample"
+       portletName="Find Example (with portletType and showPortlet)" description="portlet to define search criteria for Example list"
+       portletTypeId="Screenlet"  component="example" subComponent="Example" helpName="HELP_Screenlet"/>
+    <PortalPortlet portalPortletId="SelectExample"
+       portletName="Select one Example" description="portlet to select one Example for the current portal page"
+       portletTypeId="Screenlet"  component="example" subComponent="Example" helpName="HELP_Screenlet"/>
+
+    <!-- Use directly a form (no screen for default value, only form, see ShowPortalPortlet view) -->
+    <PortalPortlet portalPortletId="ListExample"
+       portletName="List Examples (with portletType and showPortlet)" description="portlet to list example depending on search criteria, this portlet is call by FindExample"
+       portletTypeId="ScreenletList" component="example" subComponent="Example" useScript="Y" helpName="HELP_ScreenletList"/>
+
+    <!-- Use a screen (default value name, see ShowPortalPortlet view) -->
+    <PortalPortlet portalPortletId="ExampleDetailsMenu" 
+       portletName="Example summary and details menu (with portletType and showPortlet)" description="Example summary and menu to see all details portlet in the ExampleDetail contener"
+       portletTypeId="Screenlet" component="example" subComponent="Example" useMenu="Y" useScreen="Y" useScript="Y"
+       titleLabel="CommonEmptyHeader" pkIdName="exampleId" scriptName="component://example/script/org/ofbiz/example/ExampleWactions.xml#EditExample" helpName="HELP_Screenlet"/>
+
+    <!-- Empty area for portlet injected by DetailMenu -->
+    <PortalPortlet portalPortletId="ExampleDetail" 
+       portletName="Container to show Example portlet detail (with portletType and showPortlet)" description="Use this portlet to say where detail portlet call from a menu will be show"
+       portletTypeId="Empty" component="example" subComponent="Example" helpName="DETAIL_dtExampleId"/>
+
+    <!-- Use a screen (default value name, see ShowPortalPortlet view) -->
+    <PortalPortlet portalPortletId="ShowExample"
+       portletName="Display Example (all fields) (with portletType and showPortlet)" description="Same as Edit but with only display field, if necessary could show some informations coming from link entities"
+       portletTypeId="Screenlet" component="example" subComponent="Example" 
+       useMenu="Y" helpName="HELP_Screenlet"/>
+
+    <!-- Use directly a form (no screen for default value, only form, see ShowPortalPortlet view) -->
+    <PortalPortlet portalPortletId="CreateExample"
+       portletName="Create Example Form (with portletType and showPortlet)" description="Used to add Example"
+       portletTypeId="Screenlet" component="example" subComponent="Example" helpName="HELP_Screenlet"/>
+
+    <!-- edit is not call by portlet but directly by uri
+    <PortalPortlet portalPortletId="EditExample" portletName="Edit Example Form" 
+                   description="Used to modify or add Example"
+       screenName="EditExample"
+       screenLocation="component://example/widget/example/PortletScreens.xml"/> -->
+
+    <PortletPortletCategory portalPortletId="FindExample" portletCategoryId="EXAMPLE_PORTLET_TYPE"/>
+    <PortletPortletCategory portalPortletId="SelectExample" portletCategoryId="EXAMPLE_PORTLET_TYPE"/>
+    <PortletPortletCategory portalPortletId="ListExample" portletCategoryId="EXAMPLE_PORTLET_TYPE"/>
+    <PortletPortletCategory portalPortletId="ExampleDetailsMenu" portletCategoryId="EXAMPLE_PORTLET_TYPE"/>
+    <PortletPortletCategory portalPortletId="ExampleDetail" portletCategoryId="EXAMPLE_PORTLET_TYPE"/>
+    <PortletPortletCategory portalPortletId="ShowExample" portletCategoryId="EXAMPLE_PORTLET_TYPE"/>
+    <PortletPortletCategory portalPortletId="CreateExample" portletCategoryId="EXAMPLE_PORTLET_TYPE"/>
+
+    <PortalPortlet portalPortletId="ExampleItems"
+       portletName="List and manage exampleItems (with portletType and showPortlet)" description="List all exampleItems for one example, subportlet simple"
+       portletTypeId="ScreenletList" component="example" subComponent="Example" 
+       editFormName="GenericEditEditOrShowParam" editFormLocation="component://common/widget/PortletEditForms.xml"
+       pkIdName="exampleId" useMenu="Y" helpName="HELP_ScreenletList"/>
+    <!-- Other portlets : don't appear on a portal page (can done), but used by other portlets for detail information (managed by a menu) -->
+    <PortalPortlet portalPortletId="ExampleStatus"
+       portletName="List ExampleStatus" description="List all ExampleStatus for one example (portlet which use portletType and showPortlet)"
+       portletTypeId="ScreenletList" component="example" subComponent="Example"  
+       editFormName="GenericEditEditOrShowParam" editFormLocation="component://common/widget/PortletEditForms.xml"
+       pkIdName="exampleId" helpName="HELP_ScreenletList"/>
+    <!-- Use a screen (need to add an external menu above the list, so use a screen instead of a form) -->
+    <PortalPortlet portalPortletId="ExampleFeatureAppls"
+       portletName="List and manage ExampleFeatureAppls (with portletType and showPortlet)" description="List all ExampleFeatureAppls for one example, subportlet simple"
+       portletTypeId="Screenlet" component="example" subComponent="ExampleFeature" useScreen="Y"
+       editFormName="GenericEditEditOrShowParam" editFormLocation="component://common/widget/PortletEditForms.xml"
+       pkIdName="exampleId" useMenu="Y" helpName="HELP_Screenlet"/>
+
+    <PortletPortletCategory portalPortletId="ExampleStatus" portletCategoryId="EXAMPLE_PORTLET_TYPE"/>
+    <PortletPortletCategory portalPortletId="ExampleItems" portletCategoryId="EXAMPLE_PORTLET_TYPE"/>
+    <PortletPortletCategory portalPortletId="ExampleFeatureAppls" portletCategoryId="EXAMPLE_PORTLET_TYPE"/>
+
+
+    <!-- Use directly a form (no screen for default value, only form, see ShowPortalPortlet view) -->
+    <PortalPortlet portalPortletId="FindExampleFeature"
+       portletName="Find ExampleFeature (with portletType and showPortlet)" description="portlet to define search criteria for ExampleFeature list"
+       portletTypeId="Screenlet"  component="example" subComponent="ExampleFeature" helpName="HELP_Screenlet"/>
+    <!-- Use directly a form (no screen for default value, only form, see ShowPortalPortlet view) -->
+    <PortalPortlet portalPortletId="ListExampleFeature"
+       portletName="List ExampleFeatures (with portletType and showPortlet)" description="portlet to list example features depending on search criteria"
+       portletTypeId="ScreenletList" component="example" subComponent="ExampleFeature" 
+       useMenu="Y" helpName="HELP_ScreenletList"/>
+
+    <PortletPortletCategory portalPortletId="FindExampleFeature" portletCategoryId="EXAMPLE_PORTLET_TYPE"/>
+    <PortletPortletCategory portalPortletId="ListExampleFeature" portletCategoryId="EXAMPLE_PORTLET_TYPE"/>
+     <!-- End Addon modification portletExample -->
+
+<!--#Bam# portletExample can be use for all portal page build like exampleMgmt-->
+<PortalPortlet portalPortletId="CommonDetail" portletName="Common detail portlet place" description="Use this portlet to say where detail portlet call from a menu will be show" portletTypeId="Empty" component="common" subComponent="Common" securityServiceName="" securityMainAction="VIEW"/>
+<!--#Eam# portletExample -->
 </entity-engine-xml>

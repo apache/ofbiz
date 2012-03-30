@@ -25,13 +25,15 @@ under the License.
     <version>1.0</version>
 
     <!-- Example & Related Services -->
-    <service name="createExample" default-entity-name="Example" engine="entity-auto" invoke="create" auth="true">
+    <!--#Bam# portletExample change from engine entity-auto to simple to be able to generate some success or error message  -->
+    <service name="createExample" default-entity-name="Example" engine="simple" invoke="createExample" auth="true"
+        location="component://example/script/org/ofbiz/example/example/ExampleServices.xml">
         <description>Create a Example</description>
         <permission-service service-name="exampleGenericPermission" main-action="CREATE"/>
         <auto-attributes include="pk" mode="OUT" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
-        <override name="exampleTypeId" optional="false"/>
-        <override name="statusId" optional="false"/>
+        <override name="exampleTypeId" optional="true"/><!--#Bam# portletExample it's mandatory but Test if present will be done in service -->
+        <override name="statusId" optional="true"/><!--#Bam# portletExample it's mandatory but Test will be done in service -->
         <override name="exampleName" optional="false"/>
     </service>
     <service name="updateExample" default-entity-name="Example" engine="entity-auto" invoke="update" auth="true">

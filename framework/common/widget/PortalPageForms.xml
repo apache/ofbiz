@@ -123,10 +123,18 @@ under the License.
                 <field-map field-name="portalPageId" from-field="parameters.portalPageId"/>
             </entity-and>
         </actions>
-        <field name="portletName">
-            <hyperlink also-hidden="false" target="showHelp?helpTopic=HELP_${portalPortletId}" description="${portletName}" ></hyperlink>
+        <!--#Bam# exampleHelp -->
+        <row-actions>
+           <entity-one entity-name="PortalPortlet" value-field="portlet"></entity-one>
+           <set field="helpTopicName" from-field="helpName" default-value="HELP_${portalPortletId}"/>
+        </row-actions>
+        <field name="portletName" >
+            <hyperlink also-hidden="false" target="showHelp?helpTopic=${helpTopicName}" description="${portlet.portletName}"></hyperlink>
         </field>
-        <field name="description"><display/></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"><display description="${portlet.description}"/></field>
+        <!--#Eam# exampleHelp -->
+        
+        
     </form>
 
     <form name="FindGenericEntity" type="single" target="list${entity}" title="" focus-field-name="idName">
