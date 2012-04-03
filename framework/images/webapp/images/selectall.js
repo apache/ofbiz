@@ -17,6 +17,9 @@
  * under the License.
  */
 
+//Define global variable to store last auto-completer request object (jqXHR).
+var LAST_AUTOCOMP_REF = null;
+
 // Check Box Select/Toggle Functions for Select/Toggle All
 
 function toggle(e) {
@@ -415,8 +418,15 @@ function ajaxAutoCompleter(areaCsvString, showDescription, defaultMinLength, for
                 jQuery.ajax({
                     url: url,
                     type: "post",
-                    async: false,
                     data: {term : request.term},
+                    beforeSend: function (jqXHR, settings) {
+                        //If LAST_AUTOCOMP_REF is not null means an existing ajax auto-completer request is in progress, so need to abort them to prevent inconsistent behavior of autocompleter
+                        if (LAST_AUTOCOMP_REF != null) {
+                            var oldRef = LAST_AUTOCOMP_REF;
+                            oldRef.abort();
+                        }
+                        LAST_AUTOCOMP_REF= jqXHR;
+                    },
                     success: function(data) {
                     	// reset the autocomp field
                     	autocomp = undefined;
