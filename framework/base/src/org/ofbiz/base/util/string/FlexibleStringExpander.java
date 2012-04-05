@@ -60,6 +60,26 @@ public abstract class FlexibleStringExpander implements Serializable {
     protected static final UtilCache<Key, FlexibleStringExpander> exprCache = UtilCache.createUtilCache("flexibleStringExpander.ExpressionCache");
     protected static final FlexibleStringExpander nullExpr = new ConstSimpleElem(new char[0]);
 
+    /**
+     * Returns <code>true</code> if <code>fse</code> contains a script.
+     * @param fse The <code>FlexibleStringExpander</code> to test
+     * @return <code>true</code> if <code>fse</code> contains a script
+     */
+    public static boolean containsScript(FlexibleStringExpander fse) {
+        if (fse instanceof BshElem || fse instanceof GroovyElem) {
+            return true;
+        }
+        if (fse instanceof Elements) {
+            Elements fseElements = (Elements) fse;
+            for (FlexibleStringExpander childElement : fseElements.childElems) {
+                if (containsScript(childElement)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /** Evaluate an expression and return the result as a <code>String</code>.
      * Null expressions return <code>null</code>.
      * A null <code>context</code> argument will return the original expression.
@@ -701,6 +721,9 @@ public abstract class FlexibleStringExpander implements Serializable {
                     String str = (String) obj;
                     if (str.contains(openBracket)) {
                         FlexibleStringExpander fse = FlexibleStringExpander.getInstance(str);
+                        if (containsScript(fse)) {
+                            throw new UnsupportedOperationException("Nested scripts are not supported");
+                        }
                         return fse.get(context, timeZone, locale);
                     }
                 } catch (ClassCastException e) {}
