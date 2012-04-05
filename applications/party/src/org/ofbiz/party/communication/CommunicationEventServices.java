@@ -671,8 +671,9 @@ public class CommunicationEventServices {
             String messageId = wrapper.getMessageId();
 
             String aboutThisEmail = "message [" + messageId + "] from [" +
-                (addressesFrom[0] == null? "not found" : addressesFrom[0].toString()) + "] to [" +
-                (addressesTo[0] == null? "not found" : addressesTo[0].toString()) + "]";
+                    ((addressesFrom == null || addressesFrom[0] == null) ? "not found" : addressesFrom[0].toString()) + "] to [" +
+                    ((addressesTo == null || addressesTo[0] == null) ? "not found" : addressesTo[0].toString()) + "]";
+
             if (Debug.verboseOn()) Debug.logVerbose("Processing Incoming Email " + aboutThisEmail, module);
 
             // ignore the message when the spam status = yes
@@ -1042,7 +1043,7 @@ public class CommunicationEventServices {
             }
         }
 
-        if (!UtilValidate.isEmpty(emailAddress)) {
+        if (emailAddress != null) {
             map = FastMap.newInstance();
             map.put("address", emailAddress.getAddress());
             map.put("userLogin", userLogin);
@@ -1065,7 +1066,7 @@ public class CommunicationEventServices {
                 if (addr instanceof InternetAddress) {
                     emailAddress = (InternetAddress)addr;
 
-                    if (!UtilValidate.isEmpty(emailAddress)) {
+                    if (emailAddress != null) {
                         result = dispatcher.runSync("findPartyFromEmailAddress",
                                 UtilMisc.toMap("address", emailAddress.getAddress(), "userLogin", userLogin));
                         if (result.get("partyId") != null) {
@@ -1092,7 +1093,7 @@ public class CommunicationEventServices {
                 if (addr instanceof InternetAddress) {
                     emailAddress = (InternetAddress)addr;
 
-                    if (!UtilValidate.isEmpty(emailAddress)) {
+                    if (emailAddress != null) {
                         Map<String, String> inputFields = FastMap.newInstance();
                         inputFields.put("infoString", emailAddress.getAddress());
                         inputFields.put("infoString_ic", caseInsensitiveEmail);
