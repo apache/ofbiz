@@ -20,6 +20,9 @@
 //Define global variable to store last auto-completer request object (jqXHR).
 var LAST_AUTOCOMP_REF = null;
 
+//default ajax request timeout in milliseconds
+var AJAX_REQUEST_TIMEOUT = 5000;
+
 // Check Box Select/Toggle Functions for Select/Toggle All
 
 function toggle(e) {
@@ -430,9 +433,9 @@ function ajaxAutoCompleter(areaCsvString, showDescription, defaultMinLength, for
                         LAST_AUTOCOMP_REF= jqXHR;
                     },
                     success: function(data) {
-                    	// reset the autocomp field
-                    	autocomp = undefined;
-                    	
+                    // reset the autocomp field
+                        autocomp = undefined;
+
                         //update the result div
                         jQuery("#" + div + "_auto").html(data);
                         if (typeof autocomp != 'undefined') {
@@ -441,9 +444,15 @@ function ajaxAutoCompleter(areaCsvString, showDescription, defaultMinLength, for
                             })
                             // autocomp is the JSON Object which will be used for the autocomplete box
                             response(autocomp);
+                        } else {
+                            response([]);
                         }
-                    }
-                })
+                   },
+                    error: function(xhr, reason, exception) {
+                        //TODO ... need to localize the following error message.
+                        alert("An error occurred while communicating with the server:\n\n\nreason=" + reason + "\n\nexception=" + exception);
+                    },
+                });
             },
             select: function(event, ui){
                 //jQuery("#" + areaArray[0]).html(ui.item);
