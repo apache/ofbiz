@@ -102,17 +102,27 @@ public class GroovyUtil {
 
     public static Class<?> getScriptClassFromLocation(String location) throws GeneralException {
         try {
-            Class<?> scriptClass = parsedScripts.get(location);
+            Class<?> scriptClass = null;
+            synchronized (parsedScripts) {
+                scriptClass = parsedScripts.get(location);
+            }
             if (scriptClass == null) {
                 URL scriptUrl = FlexibleLocation.resolveLocation(location);
                 if (scriptUrl == null) {
                     throw new GeneralException("Script not found at location [" + location + "]");
                 }
                 scriptClass = parseClass(scriptUrl.openStream(), location);
-                if (Debug.verboseOn()) {
-                    Debug.logVerbose("Caching Groovy script at: " + location, module);
+                synchronized (parsedScripts) {
+                    Class<?> scriptClassCached = parsedScripts.get(location);
+                    if (scriptClassCached == null) {
+                        if (Debug.verboseOn()) {
+                            Debug.logVerbose("Caching Groovy script at: " + location, module);
+                        }
+                        parsedScripts.put(location, scriptClass);
+                    } else {
+                        scriptClass = scriptClassCached;
+                    }
                 }
-                parsedScripts.put(location, scriptClass);
             }
             return scriptClass;
         } catch (Exception e) {
@@ -142,13 +152,24 @@ public class GroovyUtil {
 
     public static Object runScriptFromClasspath(String script, Map<String,Object> context) throws GeneralException {
         try {
-            Class<?> scriptClass = parsedScripts.get(script);
+            Class<?> scriptClass = null;
+            synchronized (parsedScripts) {
+                parsedScripts.get(script);
+            }
             if (scriptClass == null) {
                 scriptClass = loadClass(script);
-                if (Debug.verboseOn()) Debug.logVerbose("Caching Groovy script: " + script, module);
-                parsedScripts.put(script, scriptClass);
+                synchronized (parsedScripts) {
+                    Class<?> scriptClassCached = parsedScripts.get(script);
+                    if (scriptClassCached == null) {
+                        if (Debug.verboseOn()) {
+                            Debug.logVerbose("Caching Groovy script: " + script, module);
+                        }
+                        parsedScripts.put(script, scriptClass);
+                    } else {
+                        scriptClass = scriptClassCached;
+                    }
+                }
             }
-
             return InvokerHelper.createScript(scriptClass, getBinding(context)).run();
         } catch (CompilationFailedException e) {
             String errMsg = "Error loading Groovy script [" + script + "]: " + e.toString();
