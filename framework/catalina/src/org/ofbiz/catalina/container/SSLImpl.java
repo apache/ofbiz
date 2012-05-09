@@ -44,7 +44,7 @@ public class SSLImpl extends JSSEImplementation {
         super();
         this.ssFactory = (new JSSEFactory()).getSocketFactory();
         this.allow =  new TrustManager[] { new AllowTrustManager() };
-        Debug.log("SSLImpl loaded; using custom ServerSocketFactory", module);
+        Debug.logInfo("SSLImpl loaded; using custom ServerSocketFactory", module);
     }
 
     @Override

@@ -224,7 +224,7 @@ public class JobManager {
                 int rescheduled = 0;
                 for (GenericValue job: crashed) {
                     Timestamp now = UtilDateTime.nowTimestamp();
-                    Debug.log("Scheduling Job : " + job, module);
+                    Debug.logInfo("Scheduling Job : " + job, module);
 
                     String pJobId = job.getString("parentJobId");
                     if (pJobId == null) {

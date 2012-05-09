@@ -118,7 +118,7 @@ public class DataFile2EntityXml {
                 dataFile = DataFile.readFile(dataFileUrl, definitionUrl, definitionName);
             } catch (Exception e) {
                 //messages.add(e.toString());
-                //Debug.log(e);
+                //Debug.logInfo(e);
             }
         }
 

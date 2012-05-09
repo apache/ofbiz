@@ -211,7 +211,7 @@ public class ContainerLoader implements StartupLoader {
                 }
             }
         }
-        Debug.log(writer.toString(), module);
+        Debug.logInfo(writer.toString(), module);
     }
 
     /**
