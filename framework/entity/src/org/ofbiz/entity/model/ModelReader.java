@@ -386,7 +386,7 @@ public class ModelReader implements Serializable {
                         Debug.logInfo(message, module);
                     }
 
-                    Debug.log("FINISHED LOADING ENTITIES - ALL FILES; #Entities=" + numEntities + " #ViewEntities=" +
+                    Debug.logInfo("FINISHED LOADING ENTITIES - ALL FILES; #Entities=" + numEntities + " #ViewEntities=" +
                         numViewEntities + " #Fields=" + numFields + " #Relationships=" + numRelations + " #AutoRelationships=" + numAutoRelations, module);
                 }
             }

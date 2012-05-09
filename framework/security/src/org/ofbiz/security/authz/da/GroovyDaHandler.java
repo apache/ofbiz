@@ -44,7 +44,7 @@ public class GroovyDaHandler implements DynamicAccessHandler {
         bindings.put("userId", userId);
         bindings.put("permissionContext", context);
 
-        Debug.log("Attempting to call groovy script : " + accessString, module);
+        Debug.logInfo("Attempting to call groovy script : " + accessString, module);
         Object result = null;
 
         if (accessString.startsWith("component://")) {

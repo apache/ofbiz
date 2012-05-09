@@ -211,7 +211,7 @@ public class SOAPEventHandler implements EventHandler {
                             // log the response message
                             if (Debug.verboseOn()) {
                                 try {
-                                    Debug.log("Response Message:\n" + resEnv + "\n", module);
+                                    Debug.logInfo("Response Message:\n" + resEnv + "\n", module);
                                 } catch (Throwable t) {
                                 }
                             }
@@ -257,7 +257,7 @@ public class SOAPEventHandler implements EventHandler {
             // log the response message
             if (Debug.verboseOn()) {
                 try {
-                    Debug.log("Response Message:\n" + resEnv + "\n", module);
+                    Debug.logInfo("Response Message:\n" + resEnv + "\n", module);
                 } catch (Throwable t) {
                 }
             }

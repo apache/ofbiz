@@ -46,7 +46,7 @@ public class JunitContainer implements Container {
         // get the tests to run
         Iterator<ContainerConfig.Container.Property> ti = jc.properties.values().iterator();
         if (ti == null) {
-            Debug.log("No tests to load", module);
+            Debug.logInfo("No tests to load", module);
             return true;
         }
 
@@ -70,29 +70,29 @@ public class JunitContainer implements Container {
         suite.run(results);
 
         // dispay the results
-        Debug.log("[JUNIT] Pass: " + results.wasSuccessful() + " | # Tests: " + results.runCount() + " | # Failed: " +
+        Debug.logInfo("[JUNIT] Pass: " + results.wasSuccessful() + " | # Tests: " + results.runCount() + " | # Failed: " +
                 results.failureCount() + " # Errors: " + results.errorCount(), module);
         if (Debug.infoOn()) {
-            Debug.log("[JUNIT] ----------------------------- ERRORS ----------------------------- [JUNIT]", module);
+            Debug.logInfo("[JUNIT] ----------------------------- ERRORS ----------------------------- [JUNIT]", module);
             Enumeration<?> err = results.errors();
             if (!err.hasMoreElements()) {
-                Debug.log("None");
+                Debug.logInfo("None", module);
             } else {
                 while (err.hasMoreElements()) {
-                    Debug.log("--> " + err.nextElement(), module);
+                    Debug.logInfo("--> " + err.nextElement(), module);
                 }
             }
-            Debug.log("[JUNIT] ------------------------------------------------------------------ [JUNIT]", module);
-            Debug.log("[JUNIT] ---------------------------- FAILURES ---------------------------- [JUNIT]", module);
+            Debug.logInfo("[JUNIT] ------------------------------------------------------------------ [JUNIT]", module);
+            Debug.logInfo("[JUNIT] ---------------------------- FAILURES ---------------------------- [JUNIT]", module);
             Enumeration<?> fail = results.failures();
             if (!fail.hasMoreElements()) {
-                Debug.log("None");
+                Debug.logInfo("None", module);
             } else {
                 while (fail.hasMoreElements()) {
-                    Debug.log("--> " + fail.nextElement(), module);
+                    Debug.logInfo("--> " + fail.nextElement(), module);
                 }
             }
-            Debug.log("[JUNIT] ------------------------------------------------------------------ [JUNIT]", module);
+            Debug.logInfo("[JUNIT] ------------------------------------------------------------------ [JUNIT]", module);
         }
 
         return true;
