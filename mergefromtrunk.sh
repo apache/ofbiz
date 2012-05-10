@@ -94,7 +94,7 @@ case "$cmd" in
 		;;
 	(test)
 		ant clean-all
-		ant run-install
+		ant load-demo
 		ant run-tests
 		;;
 	(commit)

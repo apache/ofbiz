@@ -56,7 +56,7 @@ goto exit
 :tests
 echo on
 ant clean-all
-ant run-install
+ant load-demo
 ant run-tests
 echo off
 
