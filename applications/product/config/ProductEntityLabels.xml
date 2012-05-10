@@ -3120,8 +3120,7 @@
         <value xml:lang="en">If the site allows users to enter product reviews, this controls whether the reviews must be approved, or whether they are automatically shown on the site.</value>
     </property>
     <property key="FieldDescription.ProductStore.isDemoStore">
-        <value xml:lang="en">If Yes, any orders created will not be sent, credit card charges will not be made, etc.
-        </value>
+        <value xml:lang="en">If Yes, any orders created will not be sent, credit card charges will not be made, etc.</value>
     </property>
     <property key="FieldDescription.ProductStore.isImmediatelyFulfilled">
         <value xml:lang="en">If Yes, the order will be immediately fulfilled through system-generated processes in ofbiz (e.g. for POS sales).  If no, it will be held for manual review.</value>
