@@ -47,7 +47,7 @@ under the License.
         <call-object-method obj-field="parameters.PASSWORD" method-name="toLowerCase" ret-field="parameters.PASSWORD"/>
         <call-object-method obj-field="parameters.CONFIRM_PASSWORD" method-name="toLowerCase" ret-field="parameters.CONFIRM_PASSWORD"/>
         <call-object-method obj-field="parameters.captcha" method-name="toLowerCase" ret-field="submittedCaptcha"/>
-        <script>groovy: context.actualCaptcha = request.getSession().getAttribute("_CAPTCHA_CODE_")?.toLowerCase()</script>
+        <set field="actualCaptcha" value="${groovy: request.getSession().getAttribute('_CAPTCHA_CODE_')?.toLowerCase()}"/>
         <if-compare field="parameters.PASSWORD" value="${parameters.CONFIRM_PASSWORD}" operator="equals">
             <if-compare-field operator="equals" field="submittedCaptcha" to-field="actualCaptcha">
 
