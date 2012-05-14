@@ -450,7 +450,9 @@ function ajaxAutoCompleter(areaCsvString, showDescription, defaultMinLength, for
                    },
                     error: function(xhr, reason, exception) {
                         //TODO ... need to localize the following error message.
-                        alert("An error occurred while communicating with the server:\n\n\nreason=" + reason + "\n\nexception=" + exception);
+                        if(exception != 'abort') {
+                            alert("An error occurred while communicating with the server:\n\n\nreason=" + reason + "\n\nexception=" + exception);
+                        }
                     },
                 });
             },
