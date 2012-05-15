@@ -1600,7 +1600,7 @@ public class UspsServices {
         OutputStream os = new ByteArrayOutputStream();
 
         try {
-            UtilXml.writeXmlDocument(requestDocument, os, "UTF-8", true, false, 0);
+            UtilXml.writeXmlDocument(requestDocument, os, "UTF-8", true, false, 0, false);
         } catch (TransformerException e) {
             throw new UspsRequestException("Error serializing requestDocument: " + e.getMessage());
         }
