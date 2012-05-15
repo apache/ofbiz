@@ -36,4 +36,12 @@ under the License.
     <xs:attributeGroup name="attlist.property">
         <xs:attribute type="xs:string" name="key" use="required"/>
     </xs:attributeGroup>
+    <xs:complexType name="valueType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute ref="xml:lang"/>
+                <xs:attribute ref="xml:space"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
 </xs:schema>
