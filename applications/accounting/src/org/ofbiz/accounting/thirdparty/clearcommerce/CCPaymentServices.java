@@ -891,7 +891,7 @@ public class CCPaymentServices {
         OutputStream os = new ByteArrayOutputStream();
 
         try {
-            UtilXml.writeXmlDocument(requestDocument, os, "UTF-8", true, false, 0, false);
+            UtilXml.writeXmlDocument(requestDocument, os, "UTF-8", true, false, 0);
         } catch (TransformerException e) {
             throw new ClearCommerceException("Error serializing requestDocument: " + e.getMessage());
         }
