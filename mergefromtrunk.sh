@@ -93,9 +93,9 @@ case "$cmd" in
 		svn merge -r "$prevRev:$rev" https://svn.apache.org/repos/asf/ofbiz/trunk 
 		;;
 	(test)
-		ant clean-all
-		ant run-install
-		ant run-tests
+		./ant clean-all
+		./ant load-demo
+		./ant run-tests
 		;;
 	(commit)
 		svn commit -F runtime/merge-state/log-message
