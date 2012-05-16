@@ -2178,7 +2178,6 @@
         <value xml:lang="zh_CN">电子邮件</value>
     </property>
     <property key="CommonEmptyHeader">
-        <!-- do not  remove this! -->
         <value xml:lang="en" xml:space="preserve"> </value>
     </property>
     <property key="CommonEnabled">
