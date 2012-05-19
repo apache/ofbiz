@@ -73,7 +73,7 @@ public class FinAccountProductServices {
         GenericValue featureAndAppl;
         try {
             List<GenericValue> featureAndAppls = delegator.findByAnd("ProductFeatureAndAppl", UtilMisc.toMap("productId", productId,
-                    "productFeatureTypeId", "TYPE", "productFeatureApplTypeId", "STANDARD_FEATURE"));
+                    "productFeatureTypeId", "TYPE", "productFeatureApplTypeId", "STANDARD_FEATURE"), null, false);
             featureAndAppls = EntityUtil.filterByDate(featureAndAppls);
             featureAndAppl = EntityUtil.getFirst(featureAndAppls);
         } catch (GenericEntityException e) {
@@ -96,7 +96,7 @@ public class FinAccountProductServices {
         // locate the financial account type
         GenericValue finAccountType;
         try {
-            finAccountType = delegator.findByPrimaryKey("FinAccountType", UtilMisc.toMap("finAccountTypeId", finAccountTypeId));
+            finAccountType = delegator.findOne("FinAccountType", UtilMisc.toMap("finAccountTypeId", finAccountTypeId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(e.getMessage());

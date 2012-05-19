@@ -20,6 +20,7 @@ package org.ofbiz.catalina.container;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -75,8 +76,9 @@ import org.ofbiz.base.concurrent.ExecutionPool;
 import org.ofbiz.base.container.ClassLoaderContainer;
 import org.ofbiz.base.container.Container;
 import org.ofbiz.base.container.ContainerConfig;
-import org.ofbiz.base.container.ContainerException;
 import org.ofbiz.base.container.ContainerConfig.Container.Property;
+import org.ofbiz.base.container.ContainerException;
+import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.SSLUtil;
 import org.ofbiz.base.util.UtilURL;
@@ -537,7 +539,7 @@ public class CatalinaContainer implements Container {
             } catch (Exception e) {
                 Debug.logError(e, "Couldn't create connector.", module);
             }
-            
+
             try {
                 for (ContainerConfig.Container.Property prop: connectorProp.properties.values()) {
                     connector.setProperty(prop.name, prop.value);
@@ -583,7 +585,7 @@ public class CatalinaContainer implements Container {
                 engine.addChild(host);
             }
         }
-        
+
         if (host instanceof StandardHost) {
             // set the catalina's work directory to the host
             StandardHost standardHost = (StandardHost) host;
@@ -618,11 +620,29 @@ public class CatalinaContainer implements Container {
             mount = mount.substring(0, mount.length() - 2);
         }
 
+        final String webXmlFilePath = new StringBuilder().append("file:///").append(location).append("/WEB-INF/web.xml").toString();
+
+        URL webXmlUrl;
+        try {
+            webXmlUrl = FlexibleLocation.resolveLocation(webXmlFilePath);
+        } catch (MalformedURLException e) {
+            throw new ContainerException(e);
+        }
+        Document webXmlDoc = null;
+        try {
+            webXmlDoc = UtilXml.readXmlDocument(webXmlUrl);
+        } catch (Exception e) {
+            throw new ContainerException(e);
+        }
+
+        boolean appIsDistributable = webXmlDoc.getElementsByTagName("distributable").getLength() > 0;
+        final boolean contextIsDistributable = distribute && appIsDistributable;
+
         // configure persistent sessions
         Property clusterProp = clusterConfig.get(engine.getName());
 
         Manager sessionMgr = null;
-        if (clusterProp != null) {
+        if (clusterProp != null && contextIsDistributable) {
             String mgrClassName = ContainerConfig.getPropertyValue(clusterProp, "manager-class", "org.apache.catalina.ha.session.DeltaManager");
             try {
                 sessionMgr = (Manager)Class.forName(mgrClassName).newInstance();
@@ -639,16 +659,16 @@ public class CatalinaContainer implements Container {
         context.setDocBase(location);
         context.setPath(mount);
         context.addLifecycleListener(new ContextConfig());
-        
+
         JarScanner jarScanner = context.getJarScanner();
         if (jarScanner instanceof StandardJarScanner) {
             StandardJarScanner standardJarScanner = (StandardJarScanner) jarScanner;
             standardJarScanner.setScanClassPath(false);
         }
-        
+
         Engine egn = (Engine) context.getParent().getParent();
         egn.setService(tomcat.getService());
-        
+
         Debug.logInfo("host[" + host + "].addChild(" + context + ")", module);
         //context.setDeployOnStartup(false);
         //context.setBackgroundProcessorDelay(5);
@@ -664,7 +684,9 @@ public class CatalinaContainer implements Container {
         context.setAllowLinking(true);
 
         context.setReloadable(contextReloadable);
-        context.setDistributable(distribute);
+
+        context.setDistributable(contextIsDistributable);
+
         context.setCrossContext(crossContext);
         context.setPrivileged(appInfo.privileged);
         context.setManager(sessionMgr);

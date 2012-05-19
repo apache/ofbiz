@@ -18,21 +18,150 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.conditional;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.MiniLangValidate;
 import org.ofbiz.minilang.SimpleMethod;
+import org.ofbiz.minilang.artifact.ArtifactInfoContext;
 import org.ofbiz.minilang.method.MethodContext;
+import org.ofbiz.minilang.method.MethodOperation;
 import org.ofbiz.security.Security;
 import org.ofbiz.security.authz.Authorization;
 import org.w3c.dom.Element;
 
 /**
- * Implements compare to a constant condition.
+ * Implements the &lt;if-has-permission&gt; element.
  */
-public class HasPermissionCondition implements Conditional {
-    public static final class HasPermissionConditionFactory extends ConditionalFactory<HasPermissionCondition> {
+public final class HasPermissionCondition extends MethodOperation implements Conditional {
+
+    private final FlexibleStringExpander actionFse;
+    private final FlexibleStringExpander permissionFse;
+    // Sub-operations are used only when this is a method operation.
+    private final List<MethodOperation> elseSubOps;
+    private final List<MethodOperation> subOps;
+
+    public HasPermissionCondition(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+        super(element, simpleMethod);
+        if (MiniLangValidate.validationOn()) {
+            MiniLangValidate.attributeNames(simpleMethod, element, "permission", "action");
+            MiniLangValidate.requiredAttributes(simpleMethod, element, "permission");
+            MiniLangValidate.constantPlusExpressionAttributes(simpleMethod, element, "permission", "action");
+        }
+        this.permissionFse = FlexibleStringExpander.getInstance(element.getAttribute("permission"));
+        this.actionFse = FlexibleStringExpander.getInstance(element.getAttribute("action"));
+        Element childElement = UtilXml.firstChildElement(element);
+        if (childElement != null && !"else".equals(childElement.getTagName())) {
+            this.subOps = Collections.unmodifiableList(SimpleMethod.readOperations(element, simpleMethod));
+        } else {
+            this.subOps = null;
+        }
+        Element elseElement = UtilXml.firstChildElement(element, "else");
+        if (elseElement != null) {
+            this.elseSubOps = Collections.unmodifiableList(SimpleMethod.readOperations(elseElement, simpleMethod));
+        } else {
+            this.elseSubOps = null;
+        }
+    }
+
+    @Override
+    public boolean checkCondition(MethodContext methodContext) throws MiniLangException {
+        GenericValue userLogin = methodContext.getUserLogin();
+        if (userLogin != null) {
+            String permission = permissionFse.expandString(methodContext.getEnvMap());
+            String action = actionFse.expandString(methodContext.getEnvMap());
+            if (!action.isEmpty()) {
+                Security security = methodContext.getSecurity();
+                if (security.hasEntityPermission(permission, action, userLogin)) {
+                    return true;
+                }
+            } else {
+                Authorization authz = methodContext.getAuthz();
+                if (authz.hasPermission(userLogin.getString("userLoginId"), permission, methodContext.getEnvMap())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
+        if (checkCondition(methodContext)) {
+            if (this.subOps != null) {
+                return SimpleMethod.runSubOps(subOps, methodContext);
+            }
+        } else {
+            if (elseSubOps != null) {
+                return SimpleMethod.runSubOps(elseSubOps, methodContext);
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public String expandedString(MethodContext methodContext) {
+        return FlexibleStringExpander.expandString(toString(), methodContext.getEnvMap());
+    }
+
+    @Override
+    public void gatherArtifactInfo(ArtifactInfoContext aic) {
+        if (this.subOps != null) {
+            for (MethodOperation method : this.subOps) {
+                method.gatherArtifactInfo(aic);
+            }
+        }
+        if (this.elseSubOps != null) {
+            for (MethodOperation method : this.elseSubOps) {
+                method.gatherArtifactInfo(aic);
+            }
+        }
+    }
+
+    public void prettyPrint(StringBuilder messageBuffer, MethodContext methodContext) {
+        messageBuffer.append("has-permission[");
+        messageBuffer.append(this.permissionFse);
+        if (UtilValidate.isNotEmpty(this.actionFse)) {
+            messageBuffer.append(":");
+            messageBuffer.append(this.actionFse);
+        }
+        messageBuffer.append("]");
+    }
+
+    @Override
+    public String rawString() {
+        return toString();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("<if-has-permission ");
+        if (!this.permissionFse.isEmpty()) {
+            sb.append("permission=\"").append(this.permissionFse).append("\" ");
+        }
+        if (!this.actionFse.isEmpty()) {
+            sb.append("action=\"").append(this.actionFse).append("\" ");
+        }
+        sb.append("/>");
+        return sb.toString();
+    }
+
+    /**
+     * A &lt;if-has-permission&gt; element factory. 
+     */
+    public static final class HasPermissionConditionFactory extends ConditionalFactory<HasPermissionCondition> implements Factory<HasPermissionCondition> {
         @Override
-        public HasPermissionCondition createCondition(Element element, SimpleMethod simpleMethod) {
+        public HasPermissionCondition createCondition(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new HasPermissionCondition(element, simpleMethod);
+        }
+
+        @Override
+        public HasPermissionCondition createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
             return new HasPermissionCondition(element, simpleMethod);
         }
 
@@ -40,56 +169,5 @@ public class HasPermissionCondition implements Conditional {
         public String getName() {
             return "if-has-permission";
         }
-    }
-
-
-    SimpleMethod simpleMethod;
-
-    String permission;
-    String action;
-
-    public HasPermissionCondition(Element element, SimpleMethod simpleMethod) {
-        this.simpleMethod = simpleMethod;
-
-        this.permission = element.getAttribute("permission");
-        this.action = element.getAttribute("action");
-    }
-
-    public boolean checkCondition(MethodContext methodContext) {
-        // only run subOps if element is empty/null
-        boolean runSubOps = false;
-
-        // if no user is logged in, treat as if the user does not have permission: do not run subops
-        GenericValue userLogin = methodContext.getUserLogin();
-        if (userLogin != null) {
-            String permission = methodContext.expandString(this.permission);
-            String action = methodContext.expandString(this.action);
-
-            Authorization authz = methodContext.getAuthz();
-            Security security = methodContext.getSecurity();
-            if (UtilValidate.isNotEmpty(action)) {
-                // run hasEntityPermission
-                if (security.hasEntityPermission(permission, action, userLogin)) {
-                    runSubOps = true;
-                }
-            } else {
-                // run hasPermission
-                if (authz.hasPermission(userLogin.getString("userLoginId"), permission, methodContext.getEnvMap())) {
-                    runSubOps = true;
-                }
-            }
-        }
-
-        return runSubOps;
-    }
-
-    public void prettyPrint(StringBuilder messageBuffer, MethodContext methodContext) {
-        messageBuffer.append("has-permission[");
-        messageBuffer.append(this.permission);
-        if (UtilValidate.isNotEmpty(this.action)) {
-            messageBuffer.append(":");
-            messageBuffer.append(this.action);
-        }
-        messageBuffer.append("]");
     }
 }

@@ -43,6 +43,7 @@ import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.MethodContext;
 import org.ofbiz.webapp.control.ConfigXMLReader.Event;
@@ -108,7 +109,7 @@ public class WfsEventHandler implements EventHandler {
             // run simple method script to get a list of entities
             Document simpleDoc = UtilXml.readXmlDocument(xmlScript);
             Element simpleElem = simpleDoc.getDocumentElement();
-            SimpleMethod meth = new SimpleMethod(simpleElem, null, null);
+            SimpleMethod meth = new SimpleMethod(simpleElem, null);
             MethodContext methodContext = new MethodContext(request, response, null);
             meth.exec(methodContext); //Need to check return string
             List<GenericValue> entityList = UtilGenerics.cast(request.getAttribute("entityList"));
@@ -132,6 +133,9 @@ public class WfsEventHandler implements EventHandler {
         } catch (IOException ioe) {
             sendError(response, "Problem handling event");
             throw new EventHandlerException("Cannot read the input stream", ioe);
+        } catch (MiniLangException e) {
+            sendError(response, "Problem handling event");
+            throw new EventHandlerException("Error encountered while running simple method", e);
         }
 
 

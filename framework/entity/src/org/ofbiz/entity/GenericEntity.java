@@ -461,7 +461,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         }
 
         boolean isNullString = false;
-        if ("null".equals(value) || "[null-field]".equals(value)) {
+        if ("null".equals(value) || "[null-field]".equals(value)) { // keep [null-field] but it'not used now
             // count this as a null too, but only for numbers and stuff, not for Strings
             isNullString = true;
         }
@@ -1078,8 +1078,8 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
                 } else {
                     element.setAttribute(name, value);
                 }
-            } else {
-                element.setAttribute(name, GenericEntity.NULL_FIELD.toString());
+                // } else {
+                // element.setAttribute(name, GenericEntity.NULL_FIELD.toString());
             }
         }
 
@@ -1132,15 +1132,9 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
                     // check each character, if line-feed or carriage-return is found set needsCdata to true; also look for invalid characters
                     for (int i = 0; i < value.length(); i++) {
                         char curChar = value.charAt(i);
-                        /* Some common character for these invalid values, have seen these are mostly from MS Word, but may be part of some standard:
-                         5 = ...
-                         18 = apostrophe
-                         19 = left quotation mark
-                         20 = right quotation mark
-                         22 = –
-                         23 = -
-                         25 = tm
-                         *
+                        /*
+                         * Some common character for these invalid values, have seen these are mostly from MS Word, but may be part of some standard:
+                         * 5 = ... 18 = apostrophe 19 = left quotation mark 20 = right quotation mark 22 = – 23 = - 25 = tm
                          */
 
                         switch (curChar) {
@@ -1294,9 +1288,13 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         for (String curKey: new TreeSet<String>(fields.keySet())) {
             Object curValue = fields.get(curKey);
             ModelField field = this.getModelEntity().getField(curKey);
-            if (field.getEncrypt()) {
+            if (field.getEncrypt() && curValue instanceof String) {
                 String encryptField = (String) curValue;
-                curValue = HashCrypt.getDigestHash(encryptField);
+                // the encryptField may not actually be UTF8, it could be any
+                // random encoding; just treat it as a series of raw bytes.
+                // This won't give the same output as the value stored in the
+                // database, but should be good enough for printing
+                curValue = HashCrypt.cryptBytes(null, null, encryptField.getBytes());
             }
             theString.append('[');
             theString.append(curKey);

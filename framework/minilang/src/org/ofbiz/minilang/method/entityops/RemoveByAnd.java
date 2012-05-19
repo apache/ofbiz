@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.ContextAccessor;
 import org.ofbiz.minilang.method.MethodContext;
@@ -32,23 +33,14 @@ import org.w3c.dom.Element;
  * Uses the delegator to remove entity values constrained by anding the map fields
  */
 public class RemoveByAnd extends MethodOperation {
-    public static final class RemoveByAndFactory implements Factory<RemoveByAnd> {
-        public RemoveByAnd createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new RemoveByAnd(element, simpleMethod);
-        }
-
-        public String getName() {
-            return "remove-by-and";
-        }
-    }
 
     public static final String module = RemoveByAnd.class.getName();
 
+    String doCacheClearStr;
     String entityName;
     ContextAccessor<Map<String, ? extends Object>> mapAcsr;
-    String doCacheClearStr;
 
-    public RemoveByAnd(Element element, SimpleMethod simpleMethod) {
+    public RemoveByAnd(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
         entityName = element.getAttribute("entity-name");
         mapAcsr = new ContextAccessor<Map<String, ? extends Object>>(element.getAttribute("map"), element.getAttribute("map-name"));
@@ -56,16 +48,14 @@ public class RemoveByAnd extends MethodOperation {
     }
 
     @Override
-    public boolean exec(MethodContext methodContext) {
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
         boolean doCacheClear = !"false".equals(doCacheClearStr);
         String entityName = methodContext.expandString(this.entityName);
-
         try {
             methodContext.getDelegator().removeByAnd(entityName, mapAcsr.get(methodContext), doCacheClear);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             String errMsg = "ERROR: Could not complete the " + simpleMethod.getShortDescription() + " process [problem removing the " + entityName + " entity by and: " + e.getMessage() + "]";
-
             if (methodContext.getMethodType() == MethodContext.EVENT) {
                 methodContext.putEnv(simpleMethod.getEventErrorMessageName(), errMsg);
                 methodContext.putEnv(simpleMethod.getEventResponseCodeName(), simpleMethod.getDefaultErrorCode());
@@ -79,13 +69,24 @@ public class RemoveByAnd extends MethodOperation {
     }
 
     @Override
+    public String expandedString(MethodContext methodContext) {
+        // TODO: something more than a stub/dummy
+        return this.rawString();
+    }
+
+    @Override
     public String rawString() {
         // TODO: something more than the empty tag
         return "<remove-by-and/>";
     }
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    public static final class RemoveByAndFactory implements Factory<RemoveByAnd> {
+        public RemoveByAnd createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new RemoveByAnd(element, simpleMethod);
+        }
+
+        public String getName() {
+            return "remove-by-and";
+        }
     }
 }

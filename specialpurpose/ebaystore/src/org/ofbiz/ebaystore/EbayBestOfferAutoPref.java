@@ -90,7 +90,7 @@ public class EbayBestOfferAutoPref {
                 Map<String, Object> ebayCondition11 = UtilMisc.<String, Object>toMap("userLogin", userLogin);
                 ebayCondition11.put("acceptanceCondition", condition11);
 
-            GenericValue productStorePref = delegator.findByPrimaryKey("EbayProductStorePref", UtilMisc.toMap("productStoreId", productStoreId, "autoPrefEnumId", "EBAY_AUTO_BEST_OFFER"));
+            GenericValue productStorePref = delegator.findOne("EbayProductStorePref", UtilMisc.toMap("productStoreId", productStoreId, "autoPrefEnumId", "EBAY_AUTO_BEST_OFFER"), false);
             if (UtilValidate.isEmpty(productStorePref)) {
                  String prefCondId1 = delegator.getNextSeqId("EbayProductStorePrefCond");
                  String parentPrefCondId = prefCondId1;
@@ -174,7 +174,7 @@ public class EbayBestOfferAutoPref {
                 dispatcher.runSync("updateEbayProductStorePref",ebayPref);
 
                 String parentPrefCondId = productStorePref.getString("parentPrefCondId");
-                List<GenericValue> productPref = delegator.findByAnd("EbayProductStorePrefCond", UtilMisc.toMap("parentPrefCondId",parentPrefCondId));
+                List<GenericValue> productPref = delegator.findByAnd("EbayProductStorePrefCond", UtilMisc.toMap("parentPrefCondId",parentPrefCondId), null, false);
                 if (productPref.size() != 0) {
                     String[] condition = {condition1, condition2, condition3, condition4, condition5, condition6, condition7, condition8, condition9, condition10, condition11};
                     Map<String, Object> ebayPrefCond = UtilMisc.<String, Object>toMap("userLogin", userLogin);

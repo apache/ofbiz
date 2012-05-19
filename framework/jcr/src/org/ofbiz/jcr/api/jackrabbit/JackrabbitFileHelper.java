@@ -18,11 +18,11 @@ import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit;
 import org.ofbiz.jcr.access.jackrabbit.JackrabbitRepositoryAccessor;
 import org.ofbiz.jcr.api.JcrFileHelper;
 import org.ofbiz.jcr.orm.OfbizRepositoryMapping;
-import org.ofbiz.jcr.orm.jackrabbit.JackrabbitFile;
-import org.ofbiz.jcr.orm.jackrabbit.JackrabbitFolder;
-import org.ofbiz.jcr.orm.jackrabbit.JackrabbitHierarchyNode;
-import org.ofbiz.jcr.orm.jackrabbit.JackrabbitResource;
-import org.ofbiz.jcr.util.jackrabbit.JcrUtilJackrabbit;
+import org.ofbiz.jcr.orm.jackrabbit.file.JackrabbitFile;
+import org.ofbiz.jcr.orm.jackrabbit.file.JackrabbitFolder;
+import org.ofbiz.jcr.orm.jackrabbit.file.JackrabbitHierarchyNode;
+import org.ofbiz.jcr.orm.jackrabbit.file.JackrabbitResource;
+import org.ofbiz.jcr.util.jackrabbit.JackrabbitUtils;
 
 /**
  * This Helper class encapsulate the jcr file content bean. it provide all
@@ -75,16 +75,14 @@ public class JackrabbitFileHelper extends JackrabbitAbstractHelper implements Jc
         }
 
         if (orm instanceof JackrabbitFile) {
-            JackrabbitFile fileObj = (JackrabbitFile) orm;
-            hierarchy = fileObj;
-            return fileObj;
+            hierarchy = (JackrabbitFile) orm;
         } else if (orm instanceof JackrabbitFolder) {
-            JackrabbitFolder fileObj = (JackrabbitFolder) orm;
-            hierarchy = fileObj;
-            return fileObj;
+            hierarchy = (JackrabbitFolder) orm;
+        } else {
+            throw new ClassCastException("The content object for the path: " + contentPath + " is not a file content object. This Helper can only handle content objects with the type: " + JackrabbitFile.class.getName());
         }
 
-        throw new ClassCastException("The content object for the path: " + contentPath + " is not a file content object. This Helper can only handle content objects with the type: " + JackrabbitFile.class.getName());
+        return hierarchy;
     }
 
     /*
@@ -120,7 +118,7 @@ public class JackrabbitFileHelper extends JackrabbitAbstractHelper implements Jc
 
         // Create the folder if necessary, otherwise we just update the folder
         // content
-        folderPath = JcrUtilJackrabbit.createAbsoluteNodePath(folderPath);
+        folderPath = JackrabbitUtils.createAbsoluteNodePath(folderPath);
         if (super.access.checkIfNodeExist(folderPath)) {
             OfbizRepositoryMapping orm = super.access.getContentObject(folderPath);
             if (orm instanceof JackrabbitFolder) {

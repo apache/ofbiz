@@ -343,7 +343,6 @@ public class Config {
         String serverHost = getProp(props, "ofbiz.admin.host", "127.0.0.1");
 
         String adminPortStr = getProp(props, "ofbiz.admin.port", "0");
-
         // set the admin key
         adminKey = getProp(props, "ofbiz.admin.key", "NA");
 

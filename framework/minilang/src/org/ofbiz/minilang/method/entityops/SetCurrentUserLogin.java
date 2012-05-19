@@ -20,6 +20,7 @@ package org.ofbiz.minilang.method.entityops;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.ContextAccessor;
 import org.ofbiz.minilang.method.MethodContext;
@@ -30,35 +31,31 @@ import org.w3c.dom.Element;
  * Uses the delegator to create the specified value object entity in the datasource
  */
 public class SetCurrentUserLogin extends MethodOperation {
-    public static final class SetCurrentUserLoginFactory implements Factory<SetCurrentUserLogin> {
-        public SetCurrentUserLogin createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new SetCurrentUserLogin(element, simpleMethod);
-        }
-
-        public String getName() {
-            return "set-current-user-login";
-        }
-    }
 
     public static final String module = SetCurrentUserLogin.class.getName();
 
     ContextAccessor<GenericValue> valueAcsr;
 
-    public SetCurrentUserLogin(Element element, SimpleMethod simpleMethod) {
+    public SetCurrentUserLogin(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
         valueAcsr = new ContextAccessor<GenericValue>(element.getAttribute("value-field"), element.getAttribute("value-name"));
     }
 
     @Override
-    public boolean exec(MethodContext methodContext) {
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
         GenericValue userLogin = valueAcsr.get(methodContext);
         if (userLogin == null) {
             Debug.logWarning("In SetCurrentUserLogin a value was not found with the specified valueName: " + valueAcsr + ", not setting", module);
             return true;
         }
-
         methodContext.setUserLogin(userLogin, this.simpleMethod.getUserLoginEnvName());
         return true;
+    }
+
+    @Override
+    public String expandedString(MethodContext methodContext) {
+        // TODO: something more than a stub/dummy
+        return this.rawString();
     }
 
     @Override
@@ -66,9 +63,14 @@ public class SetCurrentUserLogin extends MethodOperation {
         // TODO: something more than the empty tag
         return "<set-current-user-login/>";
     }
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    public static final class SetCurrentUserLoginFactory implements Factory<SetCurrentUserLogin> {
+        public SetCurrentUserLogin createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new SetCurrentUserLogin(element, simpleMethod);
+        }
+
+        public String getName() {
+            return "set-current-user-login";
+        }
     }
 }

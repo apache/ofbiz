@@ -21,6 +21,7 @@ package org.ofbiz.minilang.method.entityops;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.ContextAccessor;
 import org.ofbiz.minilang.method.MethodContext;
@@ -31,31 +32,21 @@ import org.w3c.dom.Element;
  * Uses the delegator to refresh the specified value object entity from the datasource
  */
 public class RefreshValue extends MethodOperation {
-    public static final class RefreshValueFactory implements Factory<RefreshValue> {
-        public RefreshValue createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new RefreshValue(element, simpleMethod);
-        }
-
-        public String getName() {
-            return "refresh-value";
-        }
-    }
 
     public static final String module = RemoveValue.class.getName();
 
-    ContextAccessor<GenericValue> valueAcsr;
     String doCacheClearStr;
+    ContextAccessor<GenericValue> valueAcsr;
 
-    public RefreshValue(Element element, SimpleMethod simpleMethod) {
+    public RefreshValue(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
         valueAcsr = new ContextAccessor<GenericValue>(element.getAttribute("value-field"), element.getAttribute("value-name"));
         doCacheClearStr = element.getAttribute("do-cache-clear");
     }
 
     @Override
-    public boolean exec(MethodContext methodContext) {
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
         boolean doCacheClear = !"false".equals(methodContext.expandString(doCacheClearStr));
-
         GenericValue value = valueAcsr.get(methodContext);
         if (value == null) {
             String errMsg = "In remove-value a value was not found with the specified valueAcsr: " + valueAcsr + ", not removing";
@@ -63,7 +54,6 @@ public class RefreshValue extends MethodOperation {
             methodContext.setErrorReturn(errMsg, simpleMethod);
             return false;
         }
-
         try {
             methodContext.getDelegator().refresh(value, doCacheClear);
         } catch (GenericEntityException e) {
@@ -76,13 +66,24 @@ public class RefreshValue extends MethodOperation {
     }
 
     @Override
+    public String expandedString(MethodContext methodContext) {
+        // TODO: something more than a stub/dummy
+        return this.rawString();
+    }
+
+    @Override
     public String rawString() {
         // TODO: something more than the empty tag
         return "<refresh-value/>";
     }
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    public static final class RefreshValueFactory implements Factory<RefreshValue> {
+        public RefreshValue createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new RefreshValue(element, simpleMethod);
+        }
+
+        public String getName() {
+            return "refresh-value";
+        }
     }
 }

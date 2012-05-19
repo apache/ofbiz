@@ -72,8 +72,8 @@ public class OrderManagerEvents {
             List<GenericValue> paymentPrefs = null;
             GenericValue placingCustomer = null;
             try {
-                paymentPrefs = delegator.findByAnd("OrderPaymentPreference", UtilMisc.toMap("orderId", orderId));
-                List<GenericValue> pRoles = delegator.findByAnd("OrderRole", UtilMisc.toMap("orderId", orderId, "roleTypeId", "PLACING_CUSTOMER"));
+                paymentPrefs = delegator.findByAnd("OrderPaymentPreference", UtilMisc.toMap("orderId", orderId), null, false);
+                List<GenericValue> pRoles = delegator.findByAnd("OrderRole", UtilMisc.toMap("orderId", orderId, "roleTypeId", "PLACING_CUSTOMER"), null, false);
                 if (UtilValidate.isNotEmpty(pRoles))
                     placingCustomer = EntityUtil.getFirst(pRoles);
             } catch (GenericEntityException e) {
@@ -135,7 +135,7 @@ public class OrderManagerEvents {
         // get the order header & payment preferences
         GenericValue orderHeader = null;
         try {
-            orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+            orderHeader = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Problems reading order header from datasource.", module);
             request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"OrderProblemsReadingOrderHeaderInformation", locale));
@@ -167,7 +167,7 @@ public class OrderManagerEvents {
         List<GenericValue> toBeStored = FastList.newInstance();
         GenericValue placingCustomer = null;
         try {
-            List<GenericValue> pRoles = delegator.findByAnd("OrderRole", UtilMisc.toMap("orderId", orderId, "roleTypeId", "PLACING_CUSTOMER"));
+            List<GenericValue> pRoles = delegator.findByAnd("OrderRole", UtilMisc.toMap("orderId", orderId, "roleTypeId", "PLACING_CUSTOMER"), null, false);
             if (UtilValidate.isNotEmpty(pRoles))
                 placingCustomer = EntityUtil.getFirst(pRoles);
         } catch (GenericEntityException e) {

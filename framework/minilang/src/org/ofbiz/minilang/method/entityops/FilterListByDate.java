@@ -25,6 +25,7 @@ import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.ContextAccessor;
 import org.ofbiz.minilang.method.MethodContext;
@@ -35,24 +36,15 @@ import org.w3c.dom.Element;
  * Uses the delegator to find entity values by anding the map fields
  */
 public class FilterListByDate extends MethodOperation {
-    public static final class FilterListByDateFactory implements Factory<FilterListByDate> {
-        public FilterListByDate createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new FilterListByDate(element, simpleMethod);
-        }
 
-        public String getName() {
-            return "filter-list-by-date";
-        }
-    }
-
+    String allSameStr;
+    String fromFieldName;
     ContextAccessor<List<GenericEntity>> listAcsr;
+    String thruFieldName;
     ContextAccessor<List<GenericEntity>> toListAcsr;
     ContextAccessor<Timestamp> validDateAcsr;
-    String fromFieldName;
-    String thruFieldName;
-    String allSameStr;
 
-    public FilterListByDate(Element element, SimpleMethod simpleMethod) {
+    public FilterListByDate(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
         listAcsr = new ContextAccessor<List<GenericEntity>>(element.getAttribute("list"), element.getAttribute("list-name"));
         toListAcsr = new ContextAccessor<List<GenericEntity>>(element.getAttribute("to-list"), element.getAttribute("to-list-name"));
@@ -60,18 +52,17 @@ public class FilterListByDate extends MethodOperation {
             toListAcsr = listAcsr;
         }
         validDateAcsr = new ContextAccessor<Timestamp>(element.getAttribute("valid-date"), element.getAttribute("valid-date-name"));
-
         fromFieldName = element.getAttribute("from-field-name");
-        if (UtilValidate.isEmpty(fromFieldName)) fromFieldName = "fromDate";
+        if (UtilValidate.isEmpty(fromFieldName))
+            fromFieldName = "fromDate";
         thruFieldName = element.getAttribute("thru-field-name");
-        if (UtilValidate.isEmpty(thruFieldName)) thruFieldName = "thruDate";
-
+        if (UtilValidate.isEmpty(thruFieldName))
+            thruFieldName = "thruDate";
         allSameStr = element.getAttribute("all-same");
     }
 
     @Override
-    public boolean exec(MethodContext methodContext) {
-
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
         if (!validDateAcsr.isEmpty()) {
             toListAcsr.put(methodContext, EntityUtil.filterByDate(listAcsr.get(methodContext), validDateAcsr.get(methodContext), fromFieldName, thruFieldName, true));
         } else {
@@ -81,14 +72,24 @@ public class FilterListByDate extends MethodOperation {
     }
 
     @Override
-    public String rawString() {
-        // TODO: something more than the empty tag
-        return "<filter-list-by-date/>";
-    }
-    @Override
     public String expandedString(MethodContext methodContext) {
         // TODO: something more than a stub/dummy
         return this.rawString();
     }
-}
 
+    @Override
+    public String rawString() {
+        // TODO: something more than the empty tag
+        return "<filter-list-by-date/>";
+    }
+
+    public static final class FilterListByDateFactory implements Factory<FilterListByDate> {
+        public FilterListByDate createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new FilterListByDate(element, simpleMethod);
+        }
+
+        public String getName() {
+            return "filter-list-by-date";
+        }
+    }
+}

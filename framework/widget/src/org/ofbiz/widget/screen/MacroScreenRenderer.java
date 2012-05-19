@@ -32,6 +32,7 @@ import java.util.WeakHashMap;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.ParserConfigurationException;
 
 import javolution.util.FastMap;
 
@@ -41,6 +42,7 @@ import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.entity.Delegator;
@@ -54,18 +56,15 @@ import org.ofbiz.widget.WidgetContentWorker;
 import org.ofbiz.widget.WidgetDataResourceWorker;
 import org.ofbiz.widget.WidgetWorker;
 import org.ofbiz.widget.form.FormStringRenderer;
+import org.ofbiz.widget.form.MacroFormRenderer;
 import org.ofbiz.widget.form.ModelForm;
-import org.ofbiz.widget.html.HtmlFormRenderer;
 import org.ofbiz.widget.html.HtmlScreenRenderer.ScreenletMenuRenderer;
 import org.ofbiz.widget.menu.MenuStringRenderer;
-import org.ofbiz.widget.screen.ModelScreenWidget;
-import org.ofbiz.widget.screen.ScreenStringRenderer;
+import org.xml.sax.SAXException;
 
 import freemarker.core.Environment;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import org.xml.sax.SAXException;
-import javax.xml.parsers.ParserConfigurationException;
 //#Bam# portletWidget
 import java.util.List;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
@@ -79,6 +78,7 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
     private String rendererName;
     private int elementId = 999;
     protected boolean widgetCommentsEnabled = false;
+    private static final String formrenderer = UtilProperties.getPropertyValue("widget", "screen.formrenderer");
 
     public MacroScreenRenderer(String name, String macroLibraryPath) throws TemplateException, IOException {
         macroLibrary = FreeMarkerWorker.getTemplate(macroLibraryPath);
@@ -656,7 +656,12 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
                 Map<String, Object> globalCtx = UtilGenerics.checkMap(context.get("globalContext"));
                 globalCtx.put("NO_PAGINATOR", true);
                 FormStringRenderer savedRenderer = (FormStringRenderer) context.get("formStringRenderer");
-                HtmlFormRenderer renderer = new HtmlFormRenderer(request, response);
+                MacroFormRenderer renderer = null;
+                try {
+                    renderer = new MacroFormRenderer(formrenderer, request, response);
+                } catch (TemplateException e) {
+                    Debug.logError("Not rendering content, error on MacroFormRenderer creation.", module);
+                }
                 renderer.setRenderPagination(false);
                 context.put("formStringRenderer", renderer);
                 subWidget.renderWidgetString(writer, context, this);

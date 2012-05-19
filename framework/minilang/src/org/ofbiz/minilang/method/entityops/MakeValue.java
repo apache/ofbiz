@@ -18,32 +18,27 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.entityops;
 
-import java.util.*;
+import java.util.Map;
 
-import org.w3c.dom.*;
+import org.ofbiz.minilang.artifact.ArtifactInfoContext;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.minilang.*;
-import org.ofbiz.minilang.method.*;
+import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.SimpleMethod;
+import org.ofbiz.minilang.method.ContextAccessor;
+import org.ofbiz.minilang.method.MethodContext;
+import org.ofbiz.minilang.method.MethodOperation;
+import org.w3c.dom.Element;
 
 /**
  * Uses the delegator to find entity values by anding the map fields
  */
 public class MakeValue extends MethodOperation {
-    public static final class MakeValueFactory implements Factory<MakeValue> {
-        public MakeValue createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new MakeValue(element, simpleMethod);
-        }
 
-        public String getName() {
-            return "make-value";
-        }
-    }
-
-    ContextAccessor<GenericValue> valueAcsr;
     String entityName;
     ContextAccessor<Map<String, ? extends Object>> mapAcsr;
+    ContextAccessor<GenericValue> valueAcsr;
 
-    public MakeValue(Element element, SimpleMethod simpleMethod) {
+    public MakeValue(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
         valueAcsr = new ContextAccessor<GenericValue>(element.getAttribute("value-field"), element.getAttribute("value-name"));
         entityName = element.getAttribute("entity-name");
@@ -51,15 +46,22 @@ public class MakeValue extends MethodOperation {
     }
 
     @Override
-    public boolean exec(MethodContext methodContext) {
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
         String entityName = methodContext.expandString(this.entityName);
         Map<String, ? extends Object> ctxMap = (mapAcsr.isEmpty() ? null : mapAcsr.get(methodContext));
         valueAcsr.put(methodContext, methodContext.getDelegator().makeValidValue(entityName, ctxMap));
         return true;
     }
 
-    public String getEntityName() {
-        return this.entityName;
+    @Override
+    public String expandedString(MethodContext methodContext) {
+        // TODO: something more than a stub/dummy
+        return this.rawString();
+    }
+
+    @Override
+    public void gatherArtifactInfo(ArtifactInfoContext aic) {
+        aic.addEntityName(entityName);
     }
 
     @Override
@@ -67,9 +69,14 @@ public class MakeValue extends MethodOperation {
         // TODO: something more than the empty tag
         return "<make-value/>";
     }
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    public static final class MakeValueFactory implements Factory<MakeValue> {
+        public MakeValue createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new MakeValue(element, simpleMethod);
+        }
+
+        public String getName() {
+            return "make-value";
+        }
     }
 }

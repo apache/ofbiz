@@ -44,7 +44,7 @@ Timestamp fromDate = null;
 if (fromDateStr) fromDate = Timestamp.valueOf(fromDateStr) ?: (Timestamp)request.getAttribute("ProductAssocCreateFromDate");;
 context.fromDate = fromDate;
 
-productAssoc = delegator.findByPrimaryKey("ProductAssoc", [productId : productId, productIdTo : productIdTo, productAssocTypeId : productAssocTypeId, fromDate : fromDate]);
+productAssoc = delegator.findOne("ProductAssoc", [productId : productId, productIdTo : productIdTo, productAssocTypeId : productAssocTypeId, fromDate : fromDate], false);
 if (updateMode) {
     productAssoc = [:];
     context.remove("productIdTo");
@@ -58,10 +58,10 @@ if (!productAssoc) useValues = false;
 
 context.useValues = useValues;
 
-Collection assocTypes = delegator.findByAnd("ProductAssocType", [parentTypeId : "PRODUCT_COMPONENT"], ["productAssocTypeId", "description"]);
+Collection assocTypes = delegator.findByAnd("ProductAssocType", [parentTypeId : "PRODUCT_COMPONENT"], ["productAssocTypeId", "description"], false);
 context.assocTypes = assocTypes;
 
-Collection formulae = delegator.findByAnd("CustomMethod", [customMethodTypeId : "BOM_FORMULA"], ["customMethodId", "description"]);
+Collection formulae = delegator.findByAnd("CustomMethod", [customMethodTypeId : "BOM_FORMULA"], ["customMethodId", "description"], false);
 context.formulae = formulae;
 
 if (product) {

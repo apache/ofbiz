@@ -83,7 +83,7 @@ if (phases) {
                 } else {
                     taskInfo.resource = taskInfo.actualHours + " Hrs";
                 }
-                double duration = resultTaskInfo.plannedHours;
+                Double duration = resultTaskInfo.plannedHours;
                 if (taskInfo.currentStatusId.equals("PTS_COMPLETED")) {
                     taskInfo.completion = 100;
                 } else {
@@ -117,7 +117,7 @@ if (phases) {
                 }
 
                 // dependency can only show one in the ganttchart, so onl show the latest one..
-                preTasks = delegator.findByAnd("WorkEffortAssoc", ["workEffortIdTo" : task.workEffortId], ["workEffortIdFrom"]);
+                preTasks = delegator.findByAnd("WorkEffortAssoc", ["workEffortIdTo" : task.workEffortId], ["workEffortIdFrom"], false);
                 latestTaskIds = new LinkedList();
                 preTasks.each { preTask ->
                     wf = preTask.getRelatedOne("FromWorkEffort");

@@ -21,9 +21,11 @@ package org.ofbiz.minilang.method.entityops;
 import java.util.List;
 import java.util.Map;
 
+import org.ofbiz.minilang.artifact.ArtifactInfoContext;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.ContextAccessor;
 import org.ofbiz.minilang.method.MethodContext;
@@ -34,42 +36,31 @@ import org.w3c.dom.Element;
  * Gets a list of related entity instance according to the specified relation-name
  */
 public class GetRelated extends MethodOperation {
-    public static final class GetRelatedFactory implements Factory<GetRelated> {
-        public GetRelated createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new GetRelated(element, simpleMethod);
-        }
-
-        public String getName() {
-            return "get-related";
-        }
-    }
 
     public static final String module = GetRelated.class.getName();
 
-    ContextAccessor<GenericValue> valueAcsr;
+    ContextAccessor<List<GenericValue>> listAcsr;
     ContextAccessor<Map<String, ? extends Object>> mapAcsr;
     ContextAccessor<List<String>> orderByListAcsr;
     String relationName;
     String useCacheStr;
-    ContextAccessor<List<GenericValue>> listAcsr;
+    ContextAccessor<GenericValue> valueAcsr;
 
-    public GetRelated(Element element, SimpleMethod simpleMethod) {
+    public GetRelated(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
         valueAcsr = new ContextAccessor<GenericValue>(element.getAttribute("value-field"), element.getAttribute("value-name"));
         relationName = element.getAttribute("relation-name");
         listAcsr = new ContextAccessor<List<GenericValue>>(element.getAttribute("list"), element.getAttribute("list-name"));
         mapAcsr = new ContextAccessor<Map<String, ? extends Object>>(element.getAttribute("map"), element.getAttribute("map-name"));
         orderByListAcsr = new ContextAccessor<List<String>>(element.getAttribute("order-by-list"), element.getAttribute("order-by-list-name"));
-
         useCacheStr = element.getAttribute("use-cache");
     }
 
     @Override
-    public boolean exec(MethodContext methodContext) {
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
         String relationName = methodContext.expandString(this.relationName);
         String useCacheStr = methodContext.expandString(this.useCacheStr);
         boolean useCache = "true".equals(useCacheStr);
-
         List<String> orderByNames = null;
         if (!orderByListAcsr.isEmpty()) {
             orderByNames = orderByListAcsr.get(methodContext);
@@ -78,7 +69,6 @@ public class GetRelated extends MethodOperation {
         if (!mapAcsr.isEmpty()) {
             constraintMap = mapAcsr.get(methodContext);
         }
-
         GenericValue value = valueAcsr.get(methodContext);
         if (value == null) {
             Debug.logWarning("Value not found with name: " + valueAcsr + ", not getting related...", module);
@@ -99,17 +89,30 @@ public class GetRelated extends MethodOperation {
         return true;
     }
 
-    public String getRelationName() {
-        return this.relationName;
+    @Override
+    public String expandedString(MethodContext methodContext) {
+        // TODO: something more than a stub/dummy
+        return this.rawString();
     }
+
+    @Override
+    public void gatherArtifactInfo(ArtifactInfoContext aic) {
+        aic.addEntityName(relationName);
+    }
+
     @Override
     public String rawString() {
         // TODO: something more than the empty tag
         return "<get-related/>";
     }
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    public static final class GetRelatedFactory implements Factory<GetRelated> {
+        public GetRelated createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new GetRelated(element, simpleMethod);
+        }
+
+        public String getName() {
+            return "get-related";
+        }
     }
 }

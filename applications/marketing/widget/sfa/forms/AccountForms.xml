@@ -38,7 +38,7 @@ under the License.
         <field name="city" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
             <text size="30" maxlength="60"/>
         </field>
-        <field name="state" title="${uiLabelMap.CommonState}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+        <field name="stateProvinceGeoId" title="${uiLabelMap.CommonState}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
             <drop-down allow-empty="true">
                 <entity-options entity-name="Geo" key-field-name="geoId" description="${geoName} - ${geoId}">
                     <entity-constraint name="geoTypeId" operator="in" value="STATE,PROVINCE"/>
@@ -49,14 +49,18 @@ under the License.
         <field name="postalCode" title="${uiLabelMap.CommonZipPostalCode}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
             <text size="10" maxlength="30"/>
         </field>
-        <field name="country" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
-            <drop-down allow-empty="false" no-current-selected-key="${defaultCountryGeoId}">
+       <field name="stateProvinceGeoId" title="${uiLabelMap.CommonState}" widget-style="required"><drop-down allow-empty="false"/></field>       
+
+        <field name="countryGeoId" title="${uiLabelMap.CommonCountry}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+            <drop-down no-current-selected-key="${defaultCountryGeoId}">
                 <entity-options entity-name="Geo" key-field-name="geoId" description="${geoName} - ${geoId}">
                     <entity-constraint name="geoTypeId" value="COUNTRY"/>
                     <entity-order-by field-name="geoName"/>
                 </entity-options>
             </drop-down>
         </field>
+
+
         <field name="phoneTitle" title="${uiLabelMap.PartyPrimaryPhone}" title-area-style="group-label"><display/></field>
         <field name="countryCode" title="${uiLabelMap.PartyCountryCode}"><text size="4" maxlength="10"/></field>
         <field name="areaCode" title="${uiLabelMap.PartyAreaCode}"><text size="4" maxlength="10"/></field>
@@ -218,7 +222,7 @@ under the License.
             </drop-down>
         </field>
         <field name="paPostalCode"><text-find/></field>
-        <field name="paCountryGeoId" title="${uiLabelMap.PartyCountry}">
+        <field name="paCountryGeoId" title="${uiLabelMap.CommonCountry}">
             <drop-down allow-empty="true">
                 <list-options key-name="geoId" description="${geoName}" list-name="countries"/>
             </drop-down>

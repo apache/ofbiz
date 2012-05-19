@@ -33,7 +33,7 @@ roleTypes = delegator.findList("RoleType", null, null, ["description"], null, fa
 context.roleTypes = roleTypes;
 
 // get the order statuses
-orderStatuses = delegator.findByAnd("StatusItem", [statusTypeId : "ORDER_STATUS"], ["sequenceId", "description"]);
+orderStatuses = delegator.findByAnd("StatusItem", [statusTypeId : "ORDER_STATUS"], ["sequenceId", "description"], false);
 context.orderStatuses = orderStatuses;
 
 // get websites
@@ -45,44 +45,48 @@ stores = delegator.findList("ProductStore", null, null, ["storeName"], null, fal
 context.productStores = stores;
 
 // get the channels
-channels = delegator.findByAnd("Enumeration", [enumTypeId : "ORDER_SALES_CHANNEL"], ["sequenceId"]);
+channels = delegator.findByAnd("Enumeration", [enumTypeId : "ORDER_SALES_CHANNEL"], ["sequenceId"], false);
 context.salesChannels = channels;
 
 // get the Shipping Methods
 carrierShipmentMethods = delegator.findList("CarrierShipmentMethod", null, null, null, null, false);
 context.carrierShipmentMethods = carrierShipmentMethods;
 
+// get the Payment Status
+paymentStatusList = delegator.findByAnd("StatusItem", [statusTypeId : "PAYMENT_PREF_STATUS"], ["description"], false);
+context.paymentStatusList = paymentStatusList;
+
 // current role type
 currentRoleTypeId = request.getParameter("roleTypeId");
 if (currentRoleTypeId) {
-    currentRole = delegator.findByPrimaryKeyCache("RoleType", [roleTypeId : currentRoleTypeId]);
+    currentRole = delegator.findOne("RoleType", [roleTypeId : currentRoleTypeId], true);
     context.currentRole = currentRole;
 }
 
 // current selected type
 currentTypeId = request.getParameter("orderTypeId");
 if (currentTypeId) {
-    currentType = delegator.findByPrimaryKeyCache("OrderType", [orderTypeId : currentTypeId]);
+    currentType = delegator.findOne("OrderType", [orderTypeId : currentTypeId], true);
     context.currentType = currentType;
 }
 // current selected status
 currentStatusId = request.getParameter("orderStatusId");
 if (currentStatusId) {
-    currentStatus = delegator.findByPrimaryKeyCache("StatusItem", [statusId : currentStatusId]);
+    currentStatus = delegator.findOne("StatusItem", [statusId : currentStatusId], true);
     context.currentStatus = currentStatus;
 }
 
 // current website
 currentWebSiteId = request.getParameter("orderWebSiteId");
 if (currentWebSiteId) {
-    currentWebSite = delegator.findByPrimaryKeyCache("WebSite", [webSiteId : currentWebSiteId]);
+    currentWebSite = delegator.findOne("WebSite", [webSiteId : currentWebSiteId], true);
     context.currentWebSite = currentWebSite;
 }
 
 // current store
 currentProductStoreId = request.getParameter("productStoreId");
 if (currentProductStoreId) {
-    currentProductStore = delegator.findByPrimaryKeyCache("ProductStore", [productStoreId : currentProductStoreId]);
+    currentProductStore = delegator.findOne("ProductStore", [productStoreId : currentProductStoreId], true);
     context.currentProductStore = currentProductStore;
 }
 
@@ -92,7 +96,7 @@ if (shipmentMethod) {
     carrierPartyId = shipmentMethod.substring(0, shipmentMethod.indexOf("@"));
     shipmentMethodTypeId = shipmentMethod.substring(shipmentMethod.indexOf("@")+1);
     if (carrierPartyId && shipmentMethodTypeId) {
-        currentCarrierShipmentMethod = delegator.findByAnd("CarrierShipmentMethod", [partyId : carrierPartyId, shipmentMethodTypeId : shipmentMethodTypeId]);
+        currentCarrierShipmentMethod = delegator.findByAnd("CarrierShipmentMethod", [partyId : carrierPartyId, shipmentMethodTypeId : shipmentMethodTypeId], null, false);
         context.currentCarrierShipmentMethod = currentCarrierShipmentMethod;
     }
 }
@@ -100,7 +104,7 @@ if (shipmentMethod) {
 // current channel
 currentSalesChannelId = request.getParameter("salesChannelEnumId");
 if (currentSalesChannelId) {
-    currentSalesChannel = delegator.findByPrimaryKey("Enumeration", [enumId : currentSalesChannelId]);
+    currentSalesChannel = delegator.findOne("Enumeration", [enumId : currentSalesChannelId], false);
     context.currentSalesChannel = currentSalesChannel;
 }
 

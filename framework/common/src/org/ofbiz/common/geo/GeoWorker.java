@@ -42,7 +42,7 @@ public class GeoWorker {
     public static List<GenericValue> expandGeoGroup(String geoId, Delegator delegator) {
         GenericValue geo = null;
         try {
-            geo = delegator.findByPrimaryKeyCache("Geo", UtilMisc.toMap("geoId", geoId));
+            geo = delegator.findOne("Geo", UtilMisc.toMap("geoId", geoId), true);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Unable to look up Geo from geoId : " + geoId, module);
         }
@@ -57,7 +57,7 @@ public class GeoWorker {
             return UtilMisc.toList(geo);
         }
 
-        //Debug.log("Expanding geo : " + geo, module);
+        //Debug.logInfo("Expanding geo : " + geo, module);
 
         List<GenericValue> geoList = FastList.newInstance();
         List<GenericValue> thisGeoAssoc = null;
@@ -77,10 +77,10 @@ public class GeoWorker {
                 geoList.addAll(expandGeoGroup(nextGeo));
             }
         } else {
-            //Debug.log("No associated geos with this group", module);
+            //Debug.logInfo("No associated geos with this group", module);
         }
 
-        //Debug.log("Expanded to : " + geoList, module);
+        //Debug.logInfo("Expanded to : " + geoList, module);
 
         return geoList;
     }
@@ -91,7 +91,7 @@ public class GeoWorker {
         }
         Map<String, String> geoIdByTypeMapTemp = FastMap.newInstance();
         for (Map.Entry<String, String> geoIdByTypeEntry: geoIdByTypeMapOrig.entrySet()) {
-            List<GenericValue> geoAssocList = delegator.findByAndCache("GeoAssoc", UtilMisc.toMap("geoIdTo", geoIdByTypeEntry.getValue(), "geoAssocTypeId", "REGIONS"));
+            List<GenericValue> geoAssocList = delegator.findByAnd("GeoAssoc", UtilMisc.toMap("geoIdTo", geoIdByTypeEntry.getValue(), "geoAssocTypeId", "REGIONS"), null, true);
             for (GenericValue geoAssoc: geoAssocList) {
                 GenericValue newGeo = delegator.findOne("Geo", true, "geoId", geoAssoc.getString("geoId"));
                 geoIdByTypeMapTemp.put(newGeo.getString("geoTypeId"), newGeo.getString("geoId"));
@@ -108,7 +108,7 @@ public class GeoWorker {
     public static boolean containsGeo(List<GenericValue> geoList, String geoId, Delegator delegator) {
         GenericValue geo = null;
         try {
-            geo = delegator.findByPrimaryKeyCache("Geo", UtilMisc.toMap("geoId", geoId));
+            geo = delegator.findOne("Geo", UtilMisc.toMap("geoId", geoId), true);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Unable to look up Geo from geoId : " + geoId, module);
         }
@@ -119,7 +119,7 @@ public class GeoWorker {
         if (geoList == null || geo == null) {
             return false;
         }
-        //Debug.log("Contains Geo : " + geoList.contains(geo));
+        //Debug.logInfo("Contains Geo : " + geoList.contains(geo));
         return geoList.contains(geo);
     }
 
@@ -127,13 +127,13 @@ public class GeoWorker {
         List<GenericValue> gptList = null;
         if (UtilValidate.isNotEmpty(secondId) && UtilValidate.isNotEmpty(secondValueId)) {
             try {
-                gptList = delegator.findByAnd(entityName, UtilMisc.toMap(mainId, mainValueId, secondId, secondValueId), UtilMisc.toList("-fromDate"));
+                gptList = delegator.findByAnd(entityName, UtilMisc.toMap(mainId, mainValueId, secondId, secondValueId), UtilMisc.toList("-fromDate"), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error while finding latest GeoPoint for " + mainId + " with Id [" + mainValueId + "] and " + secondId + " Id [" + secondValueId + "] " + e.toString(), module);
             }
         } else {
             try {
-                gptList = delegator.findByAnd(entityName, UtilMisc.toMap(mainId, mainValueId), UtilMisc.toList("-fromDate"));
+                gptList = delegator.findByAnd(entityName, UtilMisc.toMap(mainId, mainValueId), UtilMisc.toList("-fromDate"), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error while finding latest GeoPoint for " + mainId + " with Id [" + mainValueId + "] " + e.toString(), module);
             }

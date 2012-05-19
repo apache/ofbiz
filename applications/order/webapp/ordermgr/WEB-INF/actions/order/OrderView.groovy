@@ -57,7 +57,7 @@ orderItems = null;
 orderAdjustments = null;
 
 if (orderId) {
-    orderHeader = delegator.findByPrimaryKey("OrderHeader", [orderId : orderId]);
+    orderHeader = delegator.findOne("OrderHeader", [orderId : orderId], false);
 }
 
 if (orderHeader) {
@@ -170,7 +170,7 @@ if (orderHeader) {
     context.itemIssuancesPerItem = itemIssuancesPerItem;
 
     // get a list of all invoices
-    orderBilling = delegator.findByAnd("OrderItemBilling", [orderId : orderId], ["invoiceId"]);
+    orderBilling = delegator.findByAnd("OrderItemBilling", [orderId : orderId], ["invoiceId"], false);
     context.invoices = orderBilling*.invoiceId.unique();
 
     ecl = EntityCondition.makeCondition([
@@ -181,7 +181,7 @@ if (orderHeader) {
     context.orderPaymentPreferences = orderPaymentPreferences;
 
     // ship groups
-    shipGroups = delegator.findByAnd("OrderItemShipGroup", [orderId : orderId], ["shipGroupSeqId"]);
+    shipGroups = delegator.findByAnd("OrderItemShipGroup", [orderId : orderId], ["shipGroupSeqId"], false);
     context.shipGroups = shipGroups;
 
     // get Shipment tracking info
@@ -202,7 +202,7 @@ if (orderHeader) {
     }
     context.customerPoNumber = customerPoNumber;
 
-    statusChange = delegator.findByAnd("StatusValidChange", [statusId : orderHeader.statusId]);
+    statusChange = delegator.findByAnd("StatusValidChange", [statusId : orderHeader.statusId], null, false);
     context.statusChange = statusChange;
 
     currentStatus = orderHeader.getRelatedOne("StatusItem");
@@ -214,7 +214,7 @@ if (orderHeader) {
     adjustmentTypes = delegator.findList("OrderAdjustmentType", null, null, ["description"], null, false);
     context.orderAdjustmentTypes = adjustmentTypes;
 
-    notes = delegator.findByAnd("OrderHeaderNoteView", [orderId : orderId], ["-noteDateTime"]);
+    notes = delegator.findByAnd("OrderHeaderNoteView", [orderId : orderId], ["-noteDateTime"], false);
     context.orderNotes = notes;
 
     showNoteHeadingOnPDF = false;
@@ -226,7 +226,7 @@ if (orderHeader) {
     cmvm = ContactMechWorker.getOrderContactMechValueMaps(delegator, orderId);
     context.orderContactMechValueMaps = cmvm;
 
-    orderItemChangeReasons = delegator.findByAnd("Enumeration", [enumTypeId : "ODR_ITM_CH_REASON"], ["sequenceId"]);
+    orderItemChangeReasons = delegator.findByAnd("Enumeration", [enumTypeId : "ODR_ITM_CH_REASON"], ["sequenceId"], false);
     context.orderItemChangeReasons = orderItemChangeReasons;
 
     if ("PURCHASE_ORDER".equals(orderType)) {
@@ -250,6 +250,9 @@ if (orderHeader) {
                 }
             }
         }
+        // get purchase order item types
+        purchaseOrderItemTypeList = delegator.findByAnd("OrderItemType", [parentTypeId : "PURCHASE_SPECIFIC"], null, true);
+        context.purchaseOrderItemTypeList = purchaseOrderItemTypeList;
     }
 
     // see if an approved order with all items completed exists
@@ -294,7 +297,7 @@ if (orderHeader) {
                 if (shipGroup.contactMechId) {
                     lookupMap.contactMechId = shipGroup.contactMechId;
                 }
-                facilities = delegator.findByAndCache("FacilityAndContactMech", lookupMap);
+                facilities = delegator.findByAnd("FacilityAndContactMech", lookupMap, null, true);
                 facilitiesForShipGroup[shipGroup.shipGroupSeqId] = facilities;
                 facilities.each { facility ->
                     ownedFacilities[facility.facilityId] = facility;
@@ -369,10 +372,10 @@ context.paramString = paramString;
 workEffortStatus = null;
 if (workEffortId && assignPartyId && assignRoleTypeId && fromDate) {
     fields = [workEffortId : workEffortId, partyId : assignPartyId, roleTypeId : assignRoleTypeId, fromDate : fromDate];
-    wepa = delegator.findByPrimaryKey("WorkEffortPartyAssignment", fields);
+    wepa = delegator.findOne("WorkEffortPartyAssignment", fields, false);
 
     if ("CAL_ACCEPTED".equals(wepa?.statusId)) {
-        workEffort = delegator.findByPrimaryKey("WorkEffort", [workEffortId : workEffortId]);
+        workEffort = delegator.findOne("WorkEffort", [workEffortId : workEffortId], false);
         workEffortStatus = workEffort.currentStatusId;
         if (workEffortStatus) {
             context.workEffortStatus = workEffortStatus;
@@ -383,7 +386,7 @@ if (workEffortId && assignPartyId && assignRoleTypeId && fromDate) {
         if (workEffort) {
             if ("true".equals(delegate) || "WF_RUNNING".equals(workEffortStatus)) {
                 actFields = [packageId : workEffort.workflowPackageId, packageVersion : workEffort.workflowPackageVersion, processId : workEffort.workflowProcessId, processVersion : workEffort.workflowProcessVersion, activityId : workEffort.workflowActivityId];
-                activity = delegator.findByPrimaryKey("WorkflowActivity", actFields);
+                activity = delegator.findOne("WorkflowActivity", actFields, false);
                 if (activity) {
                     transitions = activity.getRelated("FromWorkflowTransition", null, ["-transitionId"]);
                     context.wfTransitions = transitions;
@@ -395,13 +398,13 @@ if (workEffortId && assignPartyId && assignRoleTypeId && fromDate) {
 
 if (orderHeader) {
     // list to find all the POSTAL_ADDRESS for the shipment party.
-    orderParty = delegator.findByPrimaryKey("Party", [partyId : partyId]);
+    orderParty = delegator.findOne("Party", [partyId : partyId], false);
     shippingContactMechList = ContactHelper.getContactMech(orderParty, "SHIPPING_LOCATION", "POSTAL_ADDRESS", false);
     context.shippingContactMechList = shippingContactMechList;
 
     // list to find all the shipmentMethods from the view named "ProductStoreShipmentMethView".
     if (productStore) {
-        context.productStoreShipmentMethList = delegator.findByAndCache('ProductStoreShipmentMethView', [productStoreId: productStore.productStoreId], ['sequenceNumber']);
+        context.productStoreShipmentMethList = delegator.findByAnd('ProductStoreShipmentMethView', [productStoreId: productStore.productStoreId], ['sequenceNumber'], true);
     }
 
     // Get a map of returnable items
@@ -431,7 +434,7 @@ if (orderHeader) {
 
 if (orderHeader) {
    // list to find all the POSTAL_ADDRESS for the party.
-   orderParty = delegator.findByPrimaryKey("Party", [partyId : partyId]);
+   orderParty = delegator.findOne("Party", [partyId : partyId], false);
    postalContactMechList = ContactHelper.getContactMechByType(orderParty,"POSTAL_ADDRESS", false);
    context.postalContactMechList = postalContactMechList;
 
@@ -471,7 +474,7 @@ if (orderItems) {
                     shippingMethodAndRate = [:];
                     serviceCodes = shippingRate.keySet();
                     serviceCodes.each { serviceCode ->
-                        carrierShipmentMethod = EntityUtil.getFirst(delegator.findByAnd("CarrierShipmentMethod", [partyId : "UPS", carrierServiceCode : serviceCode]));
+                        carrierShipmentMethod = EntityUtil.getFirst(delegator.findByAnd("CarrierShipmentMethod", [partyId : "UPS", carrierServiceCode : serviceCode], null, false));
                         shipmentMethodTypeId = carrierShipmentMethod.shipmentMethodTypeId;
                         rate = shippingRate.get(serviceCode);
                         shipmentMethodDescription = EntityUtil.getFirst(carrierShipmentMethod.getRelated("ShipmentMethodType")).description;

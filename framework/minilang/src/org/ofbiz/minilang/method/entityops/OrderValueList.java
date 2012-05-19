@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.ContextAccessor;
 import org.ofbiz.minilang.method.MethodContext;
@@ -32,21 +33,12 @@ import org.w3c.dom.Element;
  * Order the given list of GenericValue objects
  */
 public class OrderValueList extends MethodOperation {
-    public static final class OrderValueListFactory implements Factory<OrderValueList> {
-        public OrderValueList createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new OrderValueList(element, simpleMethod);
-        }
-
-        public String getName() {
-            return "order-value-list";
-        }
-    }
 
     ContextAccessor<List<? extends GenericEntity>> listAcsr;
-    ContextAccessor<List<? extends GenericEntity>> toListAcsr;
     ContextAccessor<List<String>> orderByListAcsr;
+    ContextAccessor<List<? extends GenericEntity>> toListAcsr;
 
-    public OrderValueList(Element element, SimpleMethod simpleMethod) {
+    public OrderValueList(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
         listAcsr = new ContextAccessor<List<? extends GenericEntity>>(element.getAttribute("list"), element.getAttribute("list-name"));
         toListAcsr = new ContextAccessor<List<? extends GenericEntity>>(element.getAttribute("to-list"), element.getAttribute("to-list-name"));
@@ -57,9 +49,8 @@ public class OrderValueList extends MethodOperation {
     }
 
     @Override
-    public boolean exec(MethodContext methodContext) {
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
         List<String> orderByList = null;
-
         if (!orderByListAcsr.isEmpty()) {
             orderByList = orderByListAcsr.get(methodContext);
         }
@@ -68,13 +59,24 @@ public class OrderValueList extends MethodOperation {
     }
 
     @Override
+    public String expandedString(MethodContext methodContext) {
+        // TODO: something more than a stub/dummy
+        return this.rawString();
+    }
+
+    @Override
     public String rawString() {
         // TODO: something more than the empty tag
         return "<order-value-list/>";
     }
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    public static final class OrderValueListFactory implements Factory<OrderValueList> {
+        public OrderValueList createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new OrderValueList(element, simpleMethod);
+        }
+
+        public String getName() {
+            return "order-value-list";
+        }
     }
 }

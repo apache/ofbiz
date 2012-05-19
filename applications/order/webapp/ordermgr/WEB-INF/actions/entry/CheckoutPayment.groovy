@@ -28,7 +28,7 @@ cart = session.getAttribute("shoppingCart");
 currencyUomId = cart.getCurrency();
 userLogin = session.getAttribute("userLogin");
 partyId = cart.getPartyId();
-party = delegator.findByPrimaryKeyCache("Party", [partyId : partyId]);
+party = delegator.findOne("Party", [partyId : partyId], true);
 productStoreId = ProductStoreWorker.getProductStoreId(request);
 
 checkOutPaymentId = "";
@@ -40,7 +40,7 @@ if (cart) {
     }
 }
 
-finAccounts = delegator.findByAnd("FinAccountAndRole", [partyId : partyId, roleTypeId : "OWNER"]);
+finAccounts = delegator.findByAnd("FinAccountAndRole", [partyId : partyId, roleTypeId : "OWNER"], null, false);
 finAccounts = EntityUtil.filterByDate(finAccounts, UtilDateTime.nowTimestamp(), "roleFromDate", "roleThruDate", true);
 finAccounts = EntityUtil.filterByDate(finAccounts);
 context.finAccounts = finAccounts;

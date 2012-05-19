@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.ContextAccessor;
 import org.ofbiz.minilang.method.MethodContext;
@@ -32,23 +33,14 @@ import org.w3c.dom.Element;
  * Looks for each PK field in the named map and if it exists there it will copy it into the named value object.
  */
 public class SetPkFields extends MethodOperation {
-    public static final class SetPkFieldsFactory implements Factory<SetPkFields> {
-        public SetPkFields createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new SetPkFields(element, simpleMethod);
-        }
-
-        public String getName() {
-            return "set-pk-fields";
-        }
-    }
 
     public static final String module = SetPkFields.class.getName();
 
-    ContextAccessor<GenericValue> valueAcsr;
     ContextAccessor<Map<String, ? extends Object>> mapAcsr;
     String setIfNullStr;
+    ContextAccessor<GenericValue> valueAcsr;
 
-    public SetPkFields(Element element, SimpleMethod simpleMethod) {
+    public SetPkFields(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
         valueAcsr = new ContextAccessor<GenericValue>(element.getAttribute("value-field"), element.getAttribute("value-name"));
         mapAcsr = new ContextAccessor<Map<String, ? extends Object>>(element.getAttribute("map"), element.getAttribute("map-name"));
@@ -56,10 +48,9 @@ public class SetPkFields extends MethodOperation {
     }
 
     @Override
-    public boolean exec(MethodContext methodContext) {
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
         // if anything but false it will be true
         boolean setIfNull = !"false".equals(methodContext.expandString(setIfNullStr));
-
         GenericValue value = valueAcsr.get(methodContext);
         if (value == null) {
             String errMsg = "In set-pk-fields a value was not found with the specified valueAcsr: " + valueAcsr + ", not setting fields";
@@ -74,7 +65,6 @@ public class SetPkFields extends MethodOperation {
             }
             return false;
         }
-
         Map<String, ? extends Object> theMap = mapAcsr.get(methodContext);
         if (theMap == null) {
             Debug.logWarning("In set-pk-fields could not find map with name " + mapAcsr + ", not setting any fields", module);
@@ -85,13 +75,24 @@ public class SetPkFields extends MethodOperation {
     }
 
     @Override
+    public String expandedString(MethodContext methodContext) {
+        // TODO: something more than a stub/dummy
+        return this.rawString();
+    }
+
+    @Override
     public String rawString() {
         // TODO: something more than the empty tag
         return "<set-pk-fields/>";
     }
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    public static final class SetPkFieldsFactory implements Factory<SetPkFields> {
+        public SetPkFields createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new SetPkFields(element, simpleMethod);
+        }
+
+        public String getName() {
+            return "set-pk-fields";
+        }
     }
 }

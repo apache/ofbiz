@@ -18,55 +18,66 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.entityops;
 
-import org.w3c.dom.*;
-
-import org.ofbiz.minilang.*;
-import org.ofbiz.minilang.method.*;
+import org.ofbiz.base.util.collections.FlexibleMapAccessor;
+import org.ofbiz.base.util.string.FlexibleStringExpander;
+import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.MiniLangValidate;
+import org.ofbiz.minilang.SimpleMethod;
+import org.ofbiz.minilang.method.MethodContext;
+import org.ofbiz.minilang.method.MethodOperation;
+import org.w3c.dom.Element;
 
 /**
- * Creates a java.sql.Date with the current date and puts it in the env
+ * Creates a <code>java.sql.Date</code> object that is set to the current system time.
  */
 public class NowDateToEnv extends MethodOperation {
+
+    private final FlexibleMapAccessor<Object> fieldFma;
+
+    public NowDateToEnv(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+        super(element, simpleMethod);
+        if (MiniLangValidate.validationOn()) {
+            MiniLangValidate.handleError("Deprecated - use <now>", simpleMethod, element);
+            MiniLangValidate.attributeNames(simpleMethod, element, "field");
+            MiniLangValidate.requiredAttributes(simpleMethod, element, "field");
+            MiniLangValidate.noChildElements(simpleMethod, element);
+        }
+        this.fieldFma = FlexibleMapAccessor.getInstance(element.getAttribute("field"));
+    }
+
+    @Override
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
+        this.fieldFma.put(methodContext.getEnvMap(), new java.sql.Date(System.currentTimeMillis()));
+        return true;
+    }
+
+    @Override
+    public String expandedString(MethodContext methodContext) {
+        return FlexibleStringExpander.expandString(toString(), methodContext.getEnvMap());
+    }
+
+    @Override
+    public String rawString() {
+        return toString();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("<now-date-to-env ");
+        if (!this.fieldFma.isEmpty()) {
+            sb.append("field=\"").append(this.fieldFma).append("\" ");
+        }
+        sb.append("/>");
+        return sb.toString();
+    }
+
     public static final class NowDateToEnvFactory implements Factory<NowDateToEnv> {
-        public NowDateToEnv createMethodOperation(Element element, SimpleMethod simpleMethod) {
+        public NowDateToEnv createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
             return new NowDateToEnv(element, simpleMethod);
         }
 
         public String getName() {
             return "now-date-to-env";
         }
-    }
-    public static final class NowDateFactory implements Factory<NowDateToEnv> {
-        public NowDateToEnv createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new NowDateToEnv(element, simpleMethod);
-        }
-
-        public String getName() {
-            return "now-date";
-        }
-    }
-
-    ContextAccessor<java.sql.Date> envAcsr;
-
-    public NowDateToEnv(Element element, SimpleMethod simpleMethod) {
-        super(element, simpleMethod);
-        envAcsr = new ContextAccessor<java.sql.Date>(element.getAttribute("field"), element.getAttribute("env-name"));
-    }
-
-    @Override
-    public boolean exec(MethodContext methodContext) {
-        envAcsr.put(methodContext, new java.sql.Date(System.currentTimeMillis()));
-        return true;
-    }
-
-    @Override
-    public String rawString() {
-        // TODO: something more than the empty tag
-        return "<now-date-to-env/>";
-    }
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
     }
 }

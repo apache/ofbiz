@@ -995,7 +995,7 @@
         <value xml:lang="zh_TW">應付賬戶管理應用程式</value>
     </property>
     <property key="AccountingApPageTitleEditVendor">
-        <value xml:lang="de">Lieferant bearbeiten</value>
+        <value xml:lang="de">Verkäufer bearbeiten</value>
         <value xml:lang="en">Edit Vendor</value>
         <value xml:lang="fr">Modifier le vendeur</value>
         <value xml:lang="hi_IN">विक्रेता को संपादित करें</value>
@@ -1006,7 +1006,7 @@
         <value xml:lang="zh_TW">編輯供應商</value>
     </property>
     <property key="AccountingApPageTitleFindVendorResults">
-        <value xml:lang="de">Ergebnis der Lieferantensuche</value>
+        <value xml:lang="de">Ergebnis der Verkäufersuche</value>
         <value xml:lang="en">Find Vendor Results</value>
         <value xml:lang="fr">Chercher des résultats de vendeurs</value>
         <value xml:lang="hi_IN">विक्रेता के परिणाम खोजें</value>
@@ -1017,7 +1017,7 @@
         <value xml:lang="zh_TW">查找供應商結果</value>
     </property>
     <property key="AccountingApPageTitleFindVendors">
-        <value xml:lang="de">Lieferanten suchen</value>
+        <value xml:lang="de">Verkäufer suchen</value>
         <value xml:lang="en">Find Vendors</value>
         <value xml:lang="fr">Chercher des vendeurs</value>
         <value xml:lang="hi_IN">विक्रेताओं को खोजें</value>
@@ -1028,7 +1028,7 @@
         <value xml:lang="zh_TW">查找供應商</value>
     </property>
     <property key="AccountingApPageTitleListVendors">
-        <value xml:lang="de">Lieferanten auflisten</value>
+        <value xml:lang="de">Verkäufer auflisten</value>
         <value xml:lang="en">List Vendors</value>
         <value xml:lang="fr">Liste des vendeurs</value>
         <value xml:lang="hi_IN">विक्रेताओं की सूची</value>
@@ -3468,6 +3468,10 @@
         <value xml:lang="th">Date Filter</value>
         <value xml:lang="zh">日期过滤器</value>
         <value xml:lang="zh_TW">日期過濾器</value>
+    </property>
+    <property key="AccountingDateOpened">
+        <value xml:lang="en">Date opened</value>
+        <value xml:lang="fr">Date d'ouverture</value>
     </property>
     <property key="AccountingDebitAmount">
         <value xml:lang="de">Sollbetrag</value>
@@ -6852,7 +6856,7 @@
     </property>
     <property key="AccountingInvoicesDueSoon">
         <value xml:lang="en">Invoices Due Soon</value>
-        <value xml:lang="fr">Factures à régler prochainementvend</value>
+        <value xml:lang="fr">Factures à régler prochainement</value>
         <value xml:lang="pt">Faturas devidas em breve</value>
         <value xml:lang="zh">即将到期的发票</value>
     </property>
@@ -11523,6 +11527,7 @@
         <value xml:lang="zh">期金额</value>
     </property>
     <property key="AccountingTermTypeId">
+        <value xml:lang="de">Vereinbarungsart</value>
         <value xml:lang="en">Term Type Id</value>
         <value xml:lang="es">Id TipoTérmino</value>
         <value xml:lang="fr">Type de terme</value>
@@ -13593,7 +13598,7 @@
         <value xml:lang="zh_TW">折舊總帳科目</value>
     </property>
     <property key="FormFieldTitle_depreciation">
-        <value xml:lang="de_DE">Abschreibung</value>
+        <value xml:lang="de">Abschreibung</value>
         <value xml:lang="en">Depreciation</value>
         <value xml:lang="fr">Dépréciation</value>
         <value xml:lang="hi_IN">मूल्यह्रास</value>
@@ -16042,6 +16047,7 @@
         <value xml:lang="zh_TW">條件天數</value>
     </property>
     <property key="FormFieldTitle_termTypeId">
+        <value xml:lang="de">Vereinbarungsart</value>
         <value xml:lang="en">Term Type Id</value>
         <value xml:lang="fr">Réf. de type de terme</value>
         <value xml:lang="hi_IN">शर्त प्रकार क्रमांक</value>

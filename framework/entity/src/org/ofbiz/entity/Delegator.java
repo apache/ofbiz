@@ -297,7 +297,9 @@ public interface Delegator {
      *            The fields of the named entity to query by with their
      *            corresponding values
      * @return List of GenericValue instances that match the query
+     * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Deprecated
     public List<GenericValue> findByAnd(String entityName, Map<String, ? extends Object> fields) throws GenericEntityException;
 
     /**
@@ -314,7 +316,9 @@ public interface Delegator {
      *            optionally add a " ASC" for ascending or " DESC" for
      *            descending
      * @return List of GenericValue instances that match the query
+     * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Deprecated
     public List<GenericValue> findByAnd(String entityName, Map<String, ? extends Object> fields, List<String> orderBy) throws GenericEntityException;
 
     /**
@@ -327,7 +331,9 @@ public interface Delegator {
      *            The fields of the named entity to query by with their
      *            corresponding values
      * @return List of GenericValue instances that match the query
+     * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Deprecated
     public List<GenericValue> findByAnd(String entityName, Object... fields) throws GenericEntityException;
 
     /**
@@ -341,7 +347,9 @@ public interface Delegator {
      *            The fields of the named entity to query by with their
      *            corresponding values
      * @return List of GenericValue instances that match the query
+     * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Deprecated
     public List<GenericValue> findByAndCache(String entityName, Map<String, ? extends Object> fields) throws GenericEntityException;
 
     /**
@@ -359,8 +367,30 @@ public interface Delegator {
      *            optionally add a " ASC" for ascending or " DESC" for
      *            descending
      * @return List of GenericValue instances that match the query
+     * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Deprecated
     public List<GenericValue> findByAndCache(String entityName, Map<String, ? extends Object> fields, List<String> orderBy) throws GenericEntityException;
+
+    /**
+     * Finds Generic Entity records by all of the specified fields (ie: combined
+     * using AND), looking first in the cache; uses orderBy for lookup, but only
+     * keys results on the entityName and fields
+     *
+     * @param entityName
+     *            The Name of the Entity as defined in the entity XML file
+     * @param fields
+     *            The fields of the named entity to query by with their
+     *            corresponding values
+     * @param orderBy
+     *            The fields of the named entity to order the query by;
+     *            optionally add a " ASC" for ascending or " DESC" for
+     *            descending
+     * @param useCache
+     *            Whether to cache the results
+     * @return List of GenericValue instances that match the query
+     */
+    public List<GenericValue> findByAnd(String entityName, Map<String, ? extends Object> fields, List<String> orderBy, boolean useCache) throws GenericEntityException;
 
     /**
      * Find a Generic Entity by its Primary Key NOTE 20080502: 550 references
@@ -373,7 +403,9 @@ public interface Delegator {
      *            The fields of the named entity to query by with their
      *            corresponding values
      * @return The GenericValue corresponding to the primaryKey
+     * @deprecated use {@link #findOne(String, Map, boolean)}
      */
+    @Deprecated
     public GenericValue findByPrimaryKey(String entityName, Map<String, ? extends Object> fields) throws GenericEntityException;
 
     /**
@@ -386,7 +418,9 @@ public interface Delegator {
      *            The fields of the named entity to query by with their
      *            corresponding values
      * @return The GenericValue corresponding to the primaryKey
+     * @deprecated use {@link #findOne(String, Map, boolean)}
      */
+    @Deprecated
     public GenericValue findByPrimaryKeyCache(String entityName, Map<String, ? extends Object> fields) throws GenericEntityException;
 
     /**
@@ -399,7 +433,9 @@ public interface Delegator {
      *            The fields of the named entity to query by with their
      *            corresponding values
      * @return The GenericValue corresponding to the primaryKey
+     * @deprecated use {@link #findOne(String, boolean, Object...)}
      */
+    @Deprecated
     public GenericValue findByPrimaryKeyCache(String entityName, Object... fields) throws GenericEntityException;
 
     /**

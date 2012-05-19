@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <!-- ========= GlAccount methods ========= -->
     <simple-method method-name="createGlAccount" short-description="Create an GlAccount">
@@ -598,6 +598,18 @@ under the License.
                 </and>
             </condition>
             <then>
+                <call-simple-method method-name="getInvoiceItemTypeGlAccountInline"/>
+                <if-not-empty field="invoiceItemTypeGlAccount.glAccountId">
+                    <field-to-result field="invoiceItemTypeGlAccount.glAccountId" result-name="glAccountId"/>
+                    <return/>
+                </if-not-empty>
+                <entity-one entity-name="InvoiceItemType" value-field="invoiceItemType">
+                    <field-map field-name="invoiceItemTypeId" from-field="parameters.glAccountTypeId"/>
+                </entity-one>
+                <if-not-empty field="invoiceItemType.defaultGlAccountId">
+                    <field-to-result field="invoiceItemType.defaultGlAccountId" result-name="glAccountId"/>
+                    <return/>
+                </if-not-empty>
 
                 <if-not-empty field="parameters.productId">
                     <if-compare field="parameters.acctgTransTypeId" operator="equals" value="PURCHASE_INVOICE">
@@ -619,18 +631,6 @@ under the License.
                         <field-to-result field="glAccountTypeDefault.glAccountId" result-name="glAccountId"/>
                         <return/>
                     </if-not-empty>
-                </if-not-empty>
-                <call-simple-method method-name="getInvoiceItemTypeGlAccountInline"/>
-                <if-not-empty field="invoiceItemTypeGlAccount.glAccountId">
-                    <field-to-result field="invoiceItemTypeGlAccount.glAccountId" result-name="glAccountId"/>
-                    <return/>
-                </if-not-empty>
-                <entity-one entity-name="InvoiceItemType" value-field="invoiceItemType">
-                    <field-map field-name="invoiceItemTypeId" from-field="parameters.glAccountTypeId"/>
-                </entity-one>
-                <if-not-empty field="invoiceItemType.defaultGlAccountId">
-                    <field-to-result field="invoiceItemType.defaultGlAccountId" result-name="glAccountId"/>
-                    <return/>
                 </if-not-empty>
                 <return/>
             </then>

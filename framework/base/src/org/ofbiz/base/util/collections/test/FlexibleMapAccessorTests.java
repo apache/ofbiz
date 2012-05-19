@@ -124,7 +124,7 @@ public class FlexibleMapAccessorTests extends GenericTestCaseBase {
         assertTrue(label + ":map-isEmpty-null", testMap.isEmpty());
         assertSame(label + ":same-null", fmaNull, fma);
         assertSame(label + ":same-empty", fmaEmpty, fma);
-        assertNull(label + ":original-name", fma.getOriginalName());
+        assertEquals(label + ":original-name", "", fma.getOriginalName());
         assertNull(label + ":remove", fma.remove(testMap));
         assertNotNull(label + ":toString", fma.toString());
     }
@@ -133,12 +133,14 @@ public class FlexibleMapAccessorTests extends GenericTestCaseBase {
     // should follow the FlexibleStringExpander tests.
     public void testFlexibleMapAccessor() {
         fmaEmptyTest("fmaEmpty", "");
-        fmaEmptyTest("fmaNull", "");
+        fmaEmptyTest("fmaNull", null);
         fmaEmptyTest("fma\"null\"", "null");
         fmaTest("UEL auto-vivify Map", "parameters.var", "Hello ${parameters.var}!", "World", "Hello World!");
         fmaTest("UEL auto-vivify List", "parameters.someList[0]", "parameters.someList[+0]", "Hello ${parameters.someList[0]}!", null, "World", "Hello World!");
         fmaTest("fse", "para${'meter'}s.var", "Hello ${parameters.var}!", "World", "Hello World!");
         fmaTest("foo", "'The total is ${total?currency(USD)}.'", "total", "The total is ${total?currency(USD)}.", localeToTest, new BigDecimal("12345678.90"), "The total is $12,345,678.90.");
+        assertTrue("containsNestedExpression method returns true", FlexibleMapAccessor.getInstance("Hello ${parameters.var}!").containsNestedExpression());
+        assertFalse("containsNestedExpression method returns false", FlexibleMapAccessor.getInstance("Hello World!").containsNestedExpression());
     }
 
     public static class ThrowException {

@@ -18,13 +18,16 @@
  *******************************************************************************/
 package org.ofbiz.base.util;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.net.MalformedURLException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -69,36 +72,39 @@ public final class ScriptUtil {
     private static final UtilCache<String, CompiledScript> parsedScripts = UtilCache.createUtilCache("script.ParsedScripts", 0, 0, false);
     private static final Object[] EMPTY_ARGS = {};
     private static ScriptHelperFactory helperFactory = null;
+    /** A set of script names - derived from the JSR-223 scripting engines. */
+    public static final Set<String> SCRIPT_NAMES;
 
     static {
-        if (Debug.infoOn()) {
-            ScriptEngineManager manager = new ScriptEngineManager();
-            List<ScriptEngineFactory> engines = manager.getEngineFactories();
-            if (engines.isEmpty()) {
-                Debug.logInfo("No scripting engines were found.", module);
-            } else {
-                Debug.logInfo("The following " + engines.size() + " scripting engines were found:", module);
-                for (ScriptEngineFactory engine : engines) {
-                    Debug.logInfo("Engine name: " + engine.getEngineName(), module);
-                    Debug.logInfo("  Version: " + engine.getEngineVersion(), module);
-                    Debug.logInfo("  Language: " + engine.getLanguageName(), module);
-                    List<String> extensions = engine.getExtensions();
-                    if (extensions.size() > 0) {
-                        Debug.logInfo("  Engine supports the following extensions:", module);
-                        for (String e : extensions) {
-                            Debug.logInfo("    " + e, module);
-                        }
+        Set<String> writableScriptNames = new HashSet<String>();
+        ScriptEngineManager manager = new ScriptEngineManager();
+        List<ScriptEngineFactory> engines = manager.getEngineFactories();
+        if (engines.isEmpty()) {
+            Debug.logInfo("No scripting engines were found.", module);
+        } else {
+            Debug.logInfo("The following " + engines.size() + " scripting engines were found:", module);
+            for (ScriptEngineFactory engine : engines) {
+                Debug.logInfo("Engine name: " + engine.getEngineName(), module);
+                Debug.logInfo("  Version: " + engine.getEngineVersion(), module);
+                Debug.logInfo("  Language: " + engine.getLanguageName(), module);
+                List<String> extensions = engine.getExtensions();
+                if (extensions.size() > 0) {
+                    Debug.logInfo("  Engine supports the following extensions:", module);
+                    for (String e : extensions) {
+                        Debug.logInfo("    " + e, module);
                     }
-                    List<String> shortNames = engine.getNames();
-                    if (shortNames.size() > 0) {
-                        Debug.logInfo("  Engine has the following short names:", module);
-                        for (String n : engine.getNames()) {
-                            Debug.logInfo("    " + n, module);
-                        }
+                }
+                List<String> shortNames = engine.getNames();
+                if (shortNames.size() > 0) {
+                    Debug.logInfo("  Engine has the following short names:", module);
+                    for (String name : engine.getNames()) {
+                        writableScriptNames.add(name);
+                        Debug.logInfo("    " + name, module);
                     }
                 }
             }
         }
+        SCRIPT_NAMES = Collections.unmodifiableSet(writableScriptNames);
         Iterator<ScriptHelperFactory> iter = ServiceLoader.load(ScriptHelperFactory.class).iterator();
         if (iter.hasNext()) {
             helperFactory = iter.next();
@@ -115,12 +121,11 @@ public final class ScriptUtil {
      * 
      * @param filePath Script path and file name.
      * @return The compiled script, or <code>null</code> if the script engine does not support compilation.
-     * @throws FileNotFoundException
      * @throws IllegalArgumentException
      * @throws ScriptException
-     * @throws MalformedURLException
+     * @throws IOException
      */
-    public static CompiledScript compileScriptFile(String filePath) throws FileNotFoundException, ScriptException, MalformedURLException {
+    public static CompiledScript compileScriptFile(String filePath) throws ScriptException, IOException {
         Assert.notNull("filePath", filePath);
         CompiledScript script = parsedScripts.get(filePath);
         if (script == null) {
@@ -132,7 +137,7 @@ public final class ScriptUtil {
             try {
                 Compilable compilableEngine = (Compilable) engine;
                 URL scriptUrl = FlexibleLocation.resolveLocation(filePath);
-                FileReader reader = new FileReader(new File(scriptUrl.getFile()));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(scriptUrl.openStream()));
                 script = compilableEngine.compile(reader);
                 if (Debug.verboseOn()) {
                     Debug.logVerbose("Compiled script " + filePath + " using engine " + engine.getClass().getName(), module);
@@ -197,14 +202,15 @@ public final class ScriptUtil {
      */
     public static ScriptContext createScriptContext(Map<String, Object> context) {
         Assert.notNull("context", context);
-        context.put(WIDGET_CONTEXT_KEY, context);
-        context.put("context", context);
+        Map<String, Object> localContext = new HashMap<String, Object>(context);
+        localContext.put(WIDGET_CONTEXT_KEY, context);
+        localContext.put("context", context);
         ScriptContext scriptContext = new SimpleScriptContext();
         ScriptHelper helper = createScriptHelper(scriptContext);
         if (helper != null) {
-            context.put(SCRIPT_HELPER_KEY, helper);
+            localContext.put(SCRIPT_HELPER_KEY, helper);
         }
-        Bindings bindings = new SimpleBindings(context);
+        Bindings bindings = new SimpleBindings(localContext);
         scriptContext.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
         return scriptContext;
     }
@@ -221,14 +227,15 @@ public final class ScriptUtil {
      */
     public static ScriptContext createScriptContext(Map<String, Object> context, Set<String> protectedKeys) {
         Assert.notNull("context", context, "protectedKeys", protectedKeys);
-        context.put(WIDGET_CONTEXT_KEY, context);
-        context.put("context", context);
+        Map<String, Object> localContext = new HashMap<String, Object>(context);
+        localContext.put(WIDGET_CONTEXT_KEY, context);
+        localContext.put("context", context);
         ScriptContext scriptContext = new SimpleScriptContext();
-        Bindings bindings = new ProtectedBindings(context, Collections.unmodifiableSet(protectedKeys));
+        Bindings bindings = new ProtectedBindings(localContext, Collections.unmodifiableSet(protectedKeys));
         scriptContext.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
         ScriptHelper helper = createScriptHelper(scriptContext);
         if (helper != null) {
-            context.put(SCRIPT_HELPER_KEY, helper);
+            localContext.put(SCRIPT_HELPER_KEY, helper);
         }
         return scriptContext;
     }
@@ -314,7 +321,7 @@ public final class ScriptUtil {
      * @throws IllegalArgumentException
      */
     public static Object executeScript(String filePath, String functionName, Map<String, Object> context) {
-        return executeScript(filePath, functionName, context, EMPTY_ARGS);
+        return executeScript(filePath, functionName, context, new Object[] { context });
     }
 
     /**
@@ -329,6 +336,11 @@ public final class ScriptUtil {
      */
     public static Object executeScript(String filePath, String functionName, Map<String, Object> context, Object[] args) {
         try {
+            /* Enable this to run Groovy data preparation scripts using GroovyUtil rather than the generic JSR223 that doesn't support debug mode
+            if (filePath.endsWith(".groovy")) {
+                return GroovyUtil.runScriptAtLocation(filePath, functionName, context);
+            }
+            */
             return executeScript(filePath, functionName, createScriptContext(context), args);
         } catch (Exception e) {
             String errMsg = "Error running script at location [" + filePath + "]: " + e.toString();
@@ -345,13 +357,12 @@ public final class ScriptUtil {
      * @param scriptContext Script execution context.
      * @param args Function/method arguments.
      * @return The script result.
-     * @throws ScriptException 
-     * @throws MalformedURLException 
-     * @throws FileNotFoundException 
-     * @throws NoSuchMethodException 
+     * @throws ScriptException
+     * @throws NoSuchMethodException
+     * @throws IOException
      * @throws IllegalArgumentException
      */
-    public static Object executeScript(String filePath, String functionName, ScriptContext scriptContext, Object[] args) throws FileNotFoundException, MalformedURLException, ScriptException, NoSuchMethodException {
+    public static Object executeScript(String filePath, String functionName, ScriptContext scriptContext, Object[] args) throws ScriptException, NoSuchMethodException, IOException {
         Assert.notNull("filePath", filePath, "scriptContext", scriptContext);
         scriptContext.setAttribute(ScriptEngine.FILENAME, filePath, ScriptContext.ENGINE_SCOPE);
         if (functionName == null) {

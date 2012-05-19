@@ -18,18 +18,27 @@
  *******************************************************************************/
 package org.ofbiz.common;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import javolution.util.FastMap;
 import net.sf.json.JSON;
@@ -37,6 +46,8 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 
+import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilGenerics;
@@ -368,10 +379,102 @@ public class CommonEvents {
         writeJSONtoResponse(jsonUiLabel, response);
         return "success";
     }
+
+    public static String getCaptcha(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            final String captchaSizeConfigName = StringUtils.defaultIfEmpty(request.getParameter("captchaSize"), "default");
+            final String captchaSizeConfig = UtilProperties.getPropertyValue("captcha.properties", "captcha." + captchaSizeConfigName);
+            final String[] captchaSizeConfigs = captchaSizeConfig.split("\\|");
+            final String captchaCodeId = StringUtils.defaultIfEmpty(request.getParameter("captchaCodeId"), ""); // this is used to uniquely identify in the user session the attribute where the captcha code for the last captcha for the form is stored
+
+            final int fontSize = Integer.parseInt(captchaSizeConfigs[0]);
+            final int height = Integer.parseInt(captchaSizeConfigs[1]);
+            final int width = Integer.parseInt(captchaSizeConfigs[2]);
+            final int charsToPrint = UtilProperties.getPropertyAsInteger("captcha.properties", "captcha.code_length", 6);
+            final char[] availableChars = UtilProperties.getPropertyValue("captcha.properties", "captcha.characters").toCharArray();
+
+            //It is possible to pass the font size, image width and height with the request as well
+            Color backgroundColor = Color.gray;
+            Color borderColor = Color.DARK_GRAY;
+            Color textColor = Color.ORANGE;
+            Color circleColor = new Color(160, 160, 160);
+            Font textFont = new Font("Arial", Font.PLAIN, fontSize);
+            int circlesToDraw = 6;
+            float horizMargin = 20.0f;
+            double rotationRange = 0.7; // in radians
+            BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+            Graphics2D g = (Graphics2D) bufferedImage.getGraphics();
+
+            g.setColor(backgroundColor);
+            g.fillRect(0, 0, width, height);
+
+            //Generating some circles for background noise
+            g.setColor(circleColor);
+            for (int i = 0; i < circlesToDraw; i++) {
+                int circleRadius = (int) (Math.random() * height / 2.0);
+                int circleX = (int) (Math.random() * width - circleRadius);
+                int circleY = (int) (Math.random() * height - circleRadius);
+                g.drawOval(circleX, circleY, circleRadius * 2, circleRadius * 2);
+            }
+            g.setColor(textColor);
+            g.setFont(textFont);
+
+            FontMetrics fontMetrics = g.getFontMetrics();
+            int maxAdvance = fontMetrics.getMaxAdvance();
+            int fontHeight = fontMetrics.getHeight();
+
+            String captchaCode = RandomStringUtils.random(6, availableChars);
+
+            float spaceForLetters = -horizMargin * 2 + width;
+            float spacePerChar = spaceForLetters / (charsToPrint - 1.0f);
+
+            for (int i = 0; i < captchaCode.length(); i++) {
+
+                // this is a separate canvas used for the character so that
+                // we can rotate it independently
+                int charWidth = fontMetrics.charWidth(captchaCode.charAt(i));
+                int charDim = Math.max(maxAdvance, fontHeight);
+                int halfCharDim = (charDim / 2);
+
+                BufferedImage charImage =
+                    new BufferedImage(charDim, charDim, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D charGraphics = charImage.createGraphics();
+                charGraphics.translate(halfCharDim, halfCharDim);
+                double angle = (Math.random() - 0.5) * rotationRange;
+                charGraphics.transform(AffineTransform.getRotateInstance(angle));
+                charGraphics.translate(-halfCharDim, -halfCharDim);
+                charGraphics.setColor(textColor);
+                charGraphics.setFont(textFont);
+
+                int charX = (int) (0.5 * charDim - 0.5 * charWidth);
+                charGraphics.drawString("" + captchaCode.charAt(i), charX,
+                        ((charDim - fontMetrics.getAscent()) / 2 + fontMetrics.getAscent()));
+
+                float x = horizMargin + spacePerChar * (i) - charDim / 2.0f;
+                int y = ((height - charDim) / 2);
+
+                g.drawImage(charImage, (int) x, y, charDim, charDim, null, null);
+
+                charGraphics.dispose();
+            }
+            // Drawing the image border
+            g.setColor(borderColor);
+            g.drawRect(0, 0, width - 1, height - 1);
+            g.dispose();
+            response.setContentType("image/jpeg");
+            ImageIO.write(bufferedImage, "jpg", response.getOutputStream());
+            HttpSession session = request.getSession();
+            Map captchaCodeMap = (Map)session.getAttribute("_CAPTCHA_CODE_");
+            if (captchaCodeMap == null) {
+                captchaCodeMap = new HashMap();
+                session.setAttribute("_CAPTCHA_CODE_", captchaCodeMap);
+            }
+            captchaCodeMap.put(captchaCodeId, captchaCode);
+        } catch (Exception ioe) {
+            Debug.logError(ioe.getMessage(), module);
+        }
+        return "success";
+    }
+
 }
-
-
-
-
-
-

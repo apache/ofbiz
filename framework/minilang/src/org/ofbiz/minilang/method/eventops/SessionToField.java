@@ -24,6 +24,7 @@ import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.collections.FlexibleServletAccessor;
+import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.ContextAccessor;
 import org.ofbiz.minilang.method.MethodContext;
@@ -34,37 +35,26 @@ import org.w3c.dom.Element;
  * Copies a Servlet session attribute to a map field
  */
 public class SessionToField extends MethodOperation {
-    public static final class SessionToFieldFactory implements Factory<SessionToField> {
-        public SessionToField createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new SessionToField(element, simpleMethod);
-        }
-
-        public String getName() {
-            return "session-to-field";
-        }
-    }
 
     public static final String module = SessionToField.class.getName();
 
-    ContextAccessor<Map<String, Object>> mapAcsr;
-    ContextAccessor<Object> fieldAcsr;
-    FlexibleServletAccessor<Object> sessionAcsr;
     String defaultVal;
+    ContextAccessor<Object> fieldAcsr;
+    ContextAccessor<Map<String, Object>> mapAcsr;
+    FlexibleServletAccessor<Object> sessionAcsr;
 
-    public SessionToField(Element element, SimpleMethod simpleMethod) {
+    public SessionToField(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
         // the schema for this element now just has the "field" attribute, though the old "field-name" and "map-name" pair is still supported
         mapAcsr = new ContextAccessor<Map<String, Object>>(element.getAttribute("map-name"));
         fieldAcsr = new ContextAccessor<Object>(element.getAttribute("field"), element.getAttribute("field-name"));
         sessionAcsr = new FlexibleServletAccessor<Object>(element.getAttribute("session-name"), fieldAcsr.toString());
-
         defaultVal = element.getAttribute("default");
     }
 
     @Override
-    public boolean exec(MethodContext methodContext) {
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
         String defaultVal = methodContext.expandString(this.defaultVal);
-
         Object fieldVal = null;
         // only run this if it is in an EVENT context
         if (methodContext.getMethodType() == MethodContext.EVENT) {
@@ -73,27 +63,22 @@ public class SessionToField extends MethodOperation {
                 Debug.logWarning("Session attribute value not found with name " + sessionAcsr, module);
             }
         }
-
         // if fieldVal is null, or is a String and has zero length, use defaultVal
         if (fieldVal == null) {
             fieldVal = defaultVal;
         } else if (fieldVal instanceof String) {
             String strVal = (String) fieldVal;
-
             if (strVal.length() == 0) {
                 fieldVal = defaultVal;
             }
         }
-
         if (!mapAcsr.isEmpty()) {
             Map<String, Object> fromMap = mapAcsr.get(methodContext);
-
             if (fromMap == null) {
                 Debug.logWarning("Map not found with name " + mapAcsr + " creating a new map", module);
                 fromMap = FastMap.newInstance();
                 mapAcsr.put(methodContext, fromMap);
             }
-
             fieldAcsr.put(fromMap, fieldVal, methodContext);
         } else {
             fieldAcsr.put(methodContext, fieldVal);
@@ -102,13 +87,24 @@ public class SessionToField extends MethodOperation {
     }
 
     @Override
+    public String expandedString(MethodContext methodContext) {
+        // TODO: something more than a stub/dummy
+        return this.rawString();
+    }
+
+    @Override
     public String rawString() {
         // TODO: add all attributes and other info
         return "<session-to-field session-name=\"" + this.sessionAcsr + "\" field-name=\"" + this.fieldAcsr + "\" map-name=\"" + this.mapAcsr + "\"/>";
     }
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    public static final class SessionToFieldFactory implements Factory<SessionToField> {
+        public SessionToField createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new SessionToField(element, simpleMethod);
+        }
+
+        public String getName() {
+            return "session-to-field";
+        }
     }
 }

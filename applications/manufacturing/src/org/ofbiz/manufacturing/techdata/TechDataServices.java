@@ -125,7 +125,7 @@ public class TechDataServices {
         List<GenericValue> listRoutingTaskAssoc = null;
 
         try {
-            listRoutingTaskAssoc = delegator.findByAnd("WorkEffortAssoc",UtilMisc.toMap("workEffortIdFrom", workEffortIdFrom,"sequenceNum",sequenceNum), UtilMisc.toList("fromDate"));
+            listRoutingTaskAssoc = delegator.findByAnd("WorkEffortAssoc",UtilMisc.toMap("workEffortIdFrom", workEffortIdFrom,"sequenceNum",sequenceNum), UtilMisc.toList("fromDate"), false);
         } catch (GenericEntityException e) {
             Debug.logWarning(e, module);
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingTechDataWorkEffortAssocNotExist", UtilMisc.toMap("errorString", e.toString()), locale));
@@ -198,7 +198,7 @@ public class TechDataServices {
         if (techDataCalendar == null) {
             try {
                 Delegator delegator = routingTask.getDelegator();
-                techDataCalendar = delegator.findByPrimaryKey("TechDataCalendar",UtilMisc.toMap("calendarId","DEFAULT"));
+                techDataCalendar = delegator.findOne("TechDataCalendar",UtilMisc.toMap("calendarId","DEFAULT"), false);
             } catch (GenericEntityException e) {
                 Debug.logError("Pb reading TechDataCalendar DEFAULT"+e.getMessage(), module);
             }

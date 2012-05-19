@@ -17,6 +17,12 @@
  * under the License.
  */
 
+//Define global variable to store last auto-completer request object (jqXHR).
+var LAST_AUTOCOMP_REF = null;
+
+//default ajax request timeout in milliseconds
+var AJAX_REQUEST_TIMEOUT = 5000;
+
 // Check Box Select/Toggle Functions for Select/Toggle All
 
 function toggle(e) {
@@ -448,14 +454,23 @@ function ajaxAutoCompleter(areaCsvString, showDescription, defaultMinLength, def
                 jQuery.ajax({
                     url: url,
                     type: "post",
-                    async: false,
                     data: {term : request.term},
+                    beforeSend: function (jqXHR, settings) {
+                        //If LAST_AUTOCOMP_REF is not null means an existing ajax auto-completer request is in progress, so need to abort them to prevent inconsistent behavior of autocompleter
+                        if (LAST_AUTOCOMP_REF != null && LAST_AUTOCOMP_REF.readyState != 4) {
+                            var oldRef = LAST_AUTOCOMP_REF;
+                            oldRef.abort();
+                            //Here we are aborting the LAST_AUTOCOMP_REF so need to call the response method so that auto-completer pending request count handle in proper way
+                            response( [] );
+                        }
+                        LAST_AUTOCOMP_REF= jqXHR;
+                    },
                     success: function(data) {
-                    	// reset the autocomp field
-                    	autocomp = undefined;
-                    	
-                        //update the result div
+                        // reset the autocomp field
+                        autocomp = undefined;
+
                         jQuery("#" + div + "_auto").html(data);
+
                         if (typeof autocomp != 'undefined') {
                             jQuery.each(autocomp, function(index, item){
                                 item.label = jQuery("<div>").html(item.label).text();
@@ -463,8 +478,13 @@ function ajaxAutoCompleter(areaCsvString, showDescription, defaultMinLength, def
                             // autocomp is the JSON Object which will be used for the autocomplete box
                             response(autocomp);
                         }
-                    }
-                })
+                    },
+                    error: function(xhr, reason, exception) {
+                        if(exception != 'abort') {
+                            alert("An error occurred while communicating with the server:\n\n\nreason=" + reason + "\n\nexception=" + exception);
+                        }
+                    },
+                });
             },
             select: function(event, ui){
                 //jQuery("#" + areaArray[0]).html(ui.item);
@@ -697,8 +717,8 @@ function ajaxInPlaceEditDisplayField(element, url, options) {
 
     jElement.editable(function(value, settings){
         // removes all line breaks from the value param, because the parseJSON Function can't work with line breaks
-    	value = value.replace(/\n/g, " ");
-    	value = value.replace(/\"/g,"&quot;");
+        value = value.replace(/\n/g, " ");
+        value = value.replace(/\"/g,"&quot;");
 
         var resultField = jQuery.parseJSON('{"' + settings.name + '":"' + value + '"}');
         // merge both parameter objects together

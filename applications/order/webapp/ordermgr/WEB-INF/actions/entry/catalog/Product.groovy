@@ -42,11 +42,11 @@ metaKeywords = null;
 
 // get the product entity
 if (productId) {
-    product = delegator.findByPrimaryKeyCache("Product", [productId : productId]);
+    product = delegator.findOne("Product", [productId : productId], true);
     if (product) {
         // first make sure this isn't a virtual-variant that has an associated virtual product, if it does show that instead of the variant
         if("Y".equals(product.isVirtual) && "Y".equals(product.isVariant)){
-            virtualVariantProductAssocs = delegator.findByAndCache("ProductAssoc", ["productId": productId, "productAssocTypeId": "ALTERNATIVE_PACKAGE"], ["-fromDate"]);
+            virtualVariantProductAssocs = delegator.findByAnd("ProductAssoc", ["productId": productId, "productAssocTypeId": "ALTERNATIVE_PACKAGE"], ["-fromDate"], true);
             virtualVariantProductAssocs = EntityUtil.filterByDate(virtualVariantProductAssocs);
             if (virtualVariantProductAssocs) {
                 productAssoc = EntityUtil.getFirst(virtualVariantProductAssocs);
@@ -59,20 +59,20 @@ if (productId) {
     virtualProductId = ProductWorker.getVariantVirtualId(product);
     if (virtualProductId) {
         productId = virtualProductId;
-        product = delegator.findByPrimaryKeyCache("Product", [productId : productId]);
+        product = delegator.findOne("Product", [productId : productId], true);
     }
 
-    productPageTitle = delegator.findByAndCache("ProductContentAndInfo", [productId : productId, productContentTypeId : "PAGE_TITLE"]);
+    productPageTitle = delegator.findByAnd("ProductContentAndInfo", [productId : productId, productContentTypeId : "PAGE_TITLE"], null, true);
     if (productPageTitle) {
-        pageTitle = delegator.findByPrimaryKeyCache("ElectronicText", [dataResourceId : productPageTitle.get(0).dataResourceId]);
+        pageTitle = delegator.findOne("ElectronicText", [dataResourceId : productPageTitle.get(0).dataResourceId], true);
     }
-    productMetaDescription = delegator.findByAndCache("ProductContentAndInfo", [productId : productId, productContentTypeId : "META_DESCRIPTION"]);
+    productMetaDescription = delegator.findByAnd("ProductContentAndInfo", [productId : productId, productContentTypeId : "META_DESCRIPTION"], null, true);
     if (productMetaDescription) {
-        metaDescription = delegator.findByPrimaryKeyCache("ElectronicText", [dataResourceId : productMetaDescription.get(0).dataResourceId]);
+        metaDescription = delegator.findOne("ElectronicText", [dataResourceId : productMetaDescription.get(0).dataResourceId], true);
     }
-    productMetaKeywords = delegator.findByAndCache("ProductContentAndInfo", [productId : productId, productContentTypeId : "META_KEYWORD"]);
+    productMetaKeywords = delegator.findByAnd("ProductContentAndInfo", [productId : productId, productContentTypeId : "META_KEYWORD"], null, true);
     if (productMetaKeywords) {
-        metaKeywords = delegator.findByPrimaryKeyCache("ElectronicText", [dataResourceId : productMetaKeywords.get(0).dataResourceId]);
+        metaKeywords = delegator.findOne("ElectronicText", [dataResourceId : productMetaKeywords.get(0).dataResourceId], true);
     }
 
     context.productId = productId;
@@ -110,7 +110,7 @@ if (productId) {
             keywords = [];
             keywords.add(contentWrapper.get("PRODUCT_NAME"));
             keywords.add(catalogName);
-            members = delegator.findByAndCache("ProductCategoryMember", [productId : productId]);
+            members = delegator.findByAnd("ProductCategoryMember", [productId : productId], null, true);
             members.each { member ->
                 category = member.getRelatedOneCache("ProductCategory");
                 if (category.description) {

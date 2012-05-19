@@ -116,10 +116,10 @@ under the License.
         <security https="false" auth="false"/>
         <response name="success" type="view" value="main"/>
     </request-map>
-    <request-map uri="authview">
-        <security https="true" auth="true"/>
-        <response name="success" type="view" value="main"/>
-    </request-map>
+<!--     <request-map uri="authview"> -->
+<!--         <security https="true" auth="true"/> -->
+<!--         <response name="success" type="view" value="main"/> -->
+<!--     </request-map> -->
 
     <request-map uri="main"><security https="false" auth="false"/><response name="success" type="view" value="main"/></request-map>
     <request-map uri="policies"><security https="false" auth="false"/><response name="success" type="view" value="policies"/></request-map>
@@ -244,7 +244,7 @@ under the License.
     <request-map uri="additem">
         <security https="false" auth="false"/>
         <event type="java" path="org.ofbiz.order.shoppingcart.ShoppingCartEvents" invoke="addToCart"/>
-        <response name="success" type="view-last" value="showcart"/>
+        <response name="success" type="view-last" value="showcart" save-last-view="true"/>
         <response name="survey" type="view" value="survey"/>
         <response name="product" type="view" value="product"/>
         <response name="viewcart" type="request-redirect" value="showcart"/>
@@ -1011,7 +1011,6 @@ under the License.
     <!-- ContactMech Requests -->
     <request-map uri="editcontactmech"><security https="true" auth="true"/><response name="success" type="view" value="editcontactmech"/></request-map>
     <request-map uri="editcontactmechnosave"><security https="true" auth="true"/><response name="success" type="view" value="editcontactmech"/></request-map>
-    <request-map uri="editcontactmechdone"><security https="true" auth="true"/><response name="success" type="view-last" value="editcontactmech"/></request-map>
 
     <request-map uri="createContactMech">
         <security https="true" auth="true"/>
@@ -1310,7 +1309,6 @@ under the License.
     </request-map>
     <request-map uri="AnonContactus">
         <security https="true" auth="false"/>
-        <event type="java" invoke="getCodeCaptcha" path="org.ofbiz.common.Captcha"/>
         <response name="success" type="view" value="AnonContactus"/>
     </request-map>
     <request-map uri="contactsubmit">
@@ -1323,7 +1321,6 @@ under the License.
         <security https="true" auth="false"/>
         <event type="simple" invoke="createAnonContact" path="component://ecommerce/script/org/ofbiz/ecommerce/customer/CustomerEvents.xml"/>
         <response name="success" type="request-redirect" value="main"/>
-        <response name="confirm" type="request" value="AnonContactus"/>
         <response name="error" type="request" value="AnonContactus"/>
     </request-map>
 
@@ -1953,16 +1950,13 @@ under the License.
         <response name="success" type="view" value="ProductUomDropDownOnly" save-last-view="true"/>
     </request-map>
     
-    <!-- Captcha -->
-    <request-map uri="reloadCaptchaImage">
-        <security https="true" auth="false"/>        
-        <response name="success" type="view" value="reloadCaptchaImage"/>
-    </request-map>
-    <request-map uri="reloadCaptchaCode">
+    <!-- Captcha: Image request, the captcha code is stored in the session using _CAPTCHA_CODE_ as the key -->
+    <request-map uri="captcha.jpg">
         <security https="true" auth="false"/>
-        <response name="success" type="view" value="reloadCaptchaCode"/>
+        <event type="java" path="org.ofbiz.common.CommonEvents" invoke="getCaptcha"/>
+        <response name="success" type="none"/>
     </request-map>
-    
+
     <request-map uri="productCategoryList">
         <security https="false" auth="false"/>
         <response name="success" type="view" value="productCategoryList" save-current-view="true"/>
@@ -2173,11 +2167,7 @@ under the License.
     
     <!-- Contact List -->
     <view-map name="ContactListOptOut" type="screen" page="component://marketing/widget/ContactListScreens.xml#OptOutResponse"/>
-    
-    <!-- Captcha -->
-    <view-map name="reloadCaptchaImage" type="screen" page="component://myportal/widget/CommonScreens.xml#reloadCaptchaImage"/>
-    <view-map name="reloadCaptchaCode" type="screen" page="component://myportal/widget/CommonScreens.xml#reloadCaptchaCode"/>
-    
+
     <!-- Product Category 's Ajax -->
     <view-map name="productCategoryList" type="screen" page="component://ecommerce/widget/CatalogScreens.xml#productCategoryList"/>
     

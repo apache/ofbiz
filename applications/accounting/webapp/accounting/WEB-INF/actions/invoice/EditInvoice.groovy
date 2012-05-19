@@ -35,7 +35,7 @@ import javolution.util.FastMap;
 
 invoiceId = parameters.get("invoiceId");
 
-invoice = delegator.findByPrimaryKey("Invoice", [invoiceId : invoiceId]);
+invoice = delegator.findOne("Invoice", [invoiceId : invoiceId], false);
 context.invoice = invoice;
 
 currency = parameters.currency;        // allow the display of the invoice in the original currency, the default is to display the invoice in the default currency
@@ -77,7 +77,7 @@ if (invoice) {
         // also create a map with tax grand total amount by VAT tax: it is also required in invoices by UE
         taxRate = invoiceItem.getRelatedOne("TaxAuthorityRateProduct");
         if (taxRate && "VAT_TAX".equals(taxRate.taxAuthorityRateTypeId)) {
-            taxInfos = EntityUtil.filterByDate(delegator.findByAnd("PartyTaxAuthInfo", [partyId : billingParty.partyId, taxAuthGeoId : taxRate.taxAuthGeoId, taxAuthPartyId : taxRate.taxAuthPartyId]), invoice.invoiceDate);
+            taxInfos = EntityUtil.filterByDate(delegator.findByAnd("PartyTaxAuthInfo", [partyId : billingParty.partyId, taxAuthGeoId : taxRate.taxAuthGeoId, taxAuthPartyId : taxRate.taxAuthPartyId], null, false), invoice.invoiceDate);
             taxInfo = EntityUtil.getFirst(taxInfos);
             if (taxInfo) {
                 context.billingPartyTaxId = taxInfo.partyTaxId;
@@ -130,10 +130,10 @@ if (invoice) {
     terms = invoice.getRelated("InvoiceTerm");
     context.terms = terms;
 
-    paymentAppls = delegator.findByAnd("PaymentApplication", [invoiceId : invoiceId]);
+    paymentAppls = delegator.findByAnd("PaymentApplication", [invoiceId : invoiceId], null, false);
     context.payments = paymentAppls;
 
-    orderItemBillings = delegator.findByAnd("OrderItemBilling", [invoiceId : invoiceId], ['orderId']);
+    orderItemBillings = delegator.findByAnd("OrderItemBilling", [invoiceId : invoiceId], ['orderId'], false);
     orders = new LinkedHashSet();
     orderItemBillings.each { orderIb ->
         orders.add(orderIb.orderId);

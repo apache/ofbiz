@@ -18,9 +18,11 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.entityops;
 
+import org.ofbiz.minilang.artifact.ArtifactInfoContext;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.ContextAccessor;
 import org.ofbiz.minilang.method.MethodContext;
@@ -31,24 +33,15 @@ import org.w3c.dom.Element;
  * Gets a list of related entity instance according to the specified relation-name
  */
 public class GetRelatedOne extends MethodOperation {
-    public static final class GetRelatedOneFactory implements Factory<GetRelatedOne> {
-        public GetRelatedOne createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new GetRelatedOne(element, simpleMethod);
-        }
-
-        public String getName() {
-            return "get-related-one";
-        }
-    }
 
     public static final String module = GetRelatedOne.class.getName();
 
-    ContextAccessor<Object> valueAcsr;
-    ContextAccessor<GenericValue> toValueAcsr;
     String relationName;
+    ContextAccessor<GenericValue> toValueAcsr;
     String useCacheStr;
+    ContextAccessor<Object> valueAcsr;
 
-    public GetRelatedOne(Element element, SimpleMethod simpleMethod) {
+    public GetRelatedOne(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
         valueAcsr = new ContextAccessor<Object>(element.getAttribute("value-field"), element.getAttribute("value-name"));
         toValueAcsr = new ContextAccessor<GenericValue>(element.getAttribute("to-value-field"), element.getAttribute("to-value-name"));
@@ -57,11 +50,10 @@ public class GetRelatedOne extends MethodOperation {
     }
 
     @Override
-    public boolean exec(MethodContext methodContext) {
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
         String relationName = methodContext.expandString(this.relationName);
         String useCacheStr = methodContext.expandString(this.useCacheStr);
         boolean useCache = "true".equals(useCacheStr);
-
         Object valueObject = valueAcsr.get(methodContext);
         if (!(valueObject instanceof GenericValue)) {
             String errMsg = "ERROR: Could not complete the " + simpleMethod.getShortDescription() + " process [env variable for value-name " + valueAcsr.toString() + " is not a GenericValue object; for the relation-name: " + relationName + "]";
@@ -89,17 +81,30 @@ public class GetRelatedOne extends MethodOperation {
         return true;
     }
 
-    public String getRelationName() {
-        return this.relationName;
+    @Override
+    public String expandedString(MethodContext methodContext) {
+        // TODO: something more than a stub/dummy
+        return this.rawString();
     }
+
+    @Override
+    public void gatherArtifactInfo(ArtifactInfoContext aic) {
+        aic.addEntityName(relationName);
+    }
+
     @Override
     public String rawString() {
         // TODO: something more than the empty tag
         return "<get-related-one/>";
     }
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    public static final class GetRelatedOneFactory implements Factory<GetRelatedOne> {
+        public GetRelatedOne createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new GetRelatedOne(element, simpleMethod);
+        }
+
+        public String getName() {
+            return "get-related-one";
+        }
     }
 }

@@ -36,18 +36,18 @@ context.returnReasons = returnReasons;
 if (orderId) {
     returnRes = dispatcher.runSync("getReturnableItems", [orderId : orderId]);
     context.returnableItems = returnRes.returnableItems;
-    orderHeader = delegator.findByPrimaryKey("OrderHeader", [orderId : orderId]);
+    orderHeader = delegator.findOne("OrderHeader", [orderId : orderId], false);
     context.orderHeader = orderHeader;
 }
 
-returnItemTypeMap = delegator.findByAnd("ReturnItemTypeMap", [returnHeaderTypeId : "CUSTOMER_RETURN"]);
+returnItemTypeMap = delegator.findByAnd("ReturnItemTypeMap", [returnHeaderTypeId : "CUSTOMER_RETURN"], null, false);
 typeMap = new HashMap();
 returnItemTypeMap.each { value -> typeMap[value.returnItemMapKey] = value.returnItemTypeId }
 context.returnItemTypeMap = typeMap;
 
 //put in the return to party information from the order header
 if (orderId) {
-    order = delegator.findByPrimaryKey("OrderHeader", [orderId : orderId]);
+    order = delegator.findOne("OrderHeader", [orderId : orderId], false);
     productStore = order.getRelatedOne("ProductStore");
     context.toPartyId = productStore.payToPartyId;
 }

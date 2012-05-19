@@ -34,7 +34,6 @@ import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilTimer;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
-import org.ofbiz.base.util.collections.LRUMap;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericDelegator;
@@ -60,6 +59,9 @@ import org.ofbiz.service.job.JobManagerException;
 import org.ofbiz.service.semaphore.ServiceSemaphore;
 import org.w3c.dom.Element;
 
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
+
 /**
  * Global Service Dispatcher
  */
@@ -69,7 +71,7 @@ public class ServiceDispatcher {
     public static final int lruLogSize = 200;
     public static final int LOCK_RETRIES = 3;
 
-    protected static final Map<RunningService, ServiceDispatcher> runLog = new LRUMap<RunningService, ServiceDispatcher>(lruLogSize);
+    protected static final Map<RunningService, ServiceDispatcher> runLog = new ConcurrentLinkedHashMap.Builder<RunningService, ServiceDispatcher>().maximumWeightedCapacity(lruLogSize).build();
     protected static Map<String, ServiceDispatcher> dispatchers = FastMap.newInstance();
     protected static boolean enableJM = true;
     protected static boolean enableJMS = true;
@@ -590,14 +592,23 @@ public class ServiceDispatcher {
             if (resultStr.length() > 10240) {
                 resultStr = resultStr.substring(0, 10226) + "...[truncated]";
             }
-            Debug.logTiming("Sync service [" + localName + "/" + modelService.name + "] finished in [" + timeToRun + "] milliseconds with response [" + resultStr + "]", module);
+            if (!modelService.hideResultInLog) {
+                Debug.logTiming("Sync service [" + localName + "/" + modelService.name + "] finished in [" + timeToRun + "] milliseconds with response [" + resultStr + "]", module);
+            } else {
+                Debug.logTiming("Sync service [" + localName + "/" + modelService.name + "] finished in [" + timeToRun + "] milliseconds", module);                
+            }
         } else if (timeToRun > 200 && Debug.infoOn()) {
             // Sanity check - some service results can be multiple MB in size. Limit message size to 10K.
             String resultStr = result.toString();
             if (resultStr.length() > 10240) {
                 resultStr = resultStr.substring(0, 10226) + "...[truncated]";
             }
-            Debug.logInfo("Sync service [" + localName + "/" + modelService.name + "] finished in [" + timeToRun + "] milliseconds with response [" + resultStr + "]", module);
+            if (!modelService.hideResultInLog) {
+                Debug.logInfo("Sync service [" + localName + "/" + modelService.name + "] finished in [" + timeToRun + "] milliseconds with response [" + resultStr + "]", module);
+            } else {
+                Debug.logInfo("Sync service [" + localName + "/" + modelService.name + "] finished in [" + timeToRun + "] milliseconds", module);
+                
+            }
         }
 
         return result;
@@ -896,7 +907,7 @@ public class ServiceDispatcher {
                 //The old way: GenericValue newUserLogin = getLoginObject(service, localName, userLogin.getString("userLoginId"), userLogin.getString("currentPassword"), (Locale) context.get("locale"));
                 GenericValue newUserLogin = null;
                 try {
-                    newUserLogin = this.getDelegator().findByPrimaryKeyCache("UserLogin", "userLoginId", userLogin.get("userLoginId"));
+                    newUserLogin = this.getDelegator().findOne("UserLogin", true, "userLoginId", userLogin.get("userLoginId"));
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "Error looking up service authentication UserLogin: " + e.toString(), module);
                     // leave newUserLogin null, will be handled below
@@ -1059,23 +1070,7 @@ public class ServiceDispatcher {
     private RunningService logService(String localName, ModelService modelService, int mode) {
         // set up the running service log
         RunningService rs = new RunningService(localName, modelService, mode);
-        if (runLog == null) {
-            Debug.logWarning("LRUMap is null", module);
-        } else {
-            synchronized(runLog) {
-                try {
-                    runLog.put(rs, this);
-                } catch (Throwable t) {
-                    Debug.logWarning("LRUMap problem; resetting LRU [" + runLog.size() + "]", module);
-                    runLog.clear();
-                    try {
-                        runLog.put(rs, this);
-                    } catch (Throwable t2) {
-                        Debug.logError(t2, "Unable to put() in reset LRU map!", module);
-                    }
-                }
-            }
-        }
+        runLog.put(rs, this);
         return rs;
     }
 

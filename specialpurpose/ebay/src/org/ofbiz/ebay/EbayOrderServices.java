@@ -992,7 +992,7 @@ public class EbayOrderServices {
             if (productStoreId == null) {
                 return ServiceUtil.returnFailure(UtilProperties.getMessage(resource, "ordersImportFromEbay.productStoreIdIsMandatory", locale));
             } else {
-                GenericValue productStore = delegator.findByPrimaryKey("ProductStore", UtilMisc.toMap("productStoreId", productStoreId));
+                GenericValue productStore = delegator.findOne("ProductStore", UtilMisc.toMap("productStoreId", productStoreId), false);
                 if (productStore != null) {
                     defaultCurrencyUomId = productStore.getString("defaultCurrencyUomId");
                     payToPartyId = productStore.getString("payToPartyId");
@@ -1141,7 +1141,7 @@ public class EbayOrderServices {
                 // If matching party not found then try to find partyId from PartyAttribute entity.
                 GenericValue partyAttribute = null;
                 if (UtilValidate.isNotEmpty(context.get("eiasTokenBuyer"))) {
-                    partyAttribute = EntityUtil.getFirst(delegator.findByAnd("PartyAttribute", UtilMisc.toMap("attrValue", (String) context.get("eiasTokenBuyer"))));
+                    partyAttribute = EntityUtil.getFirst(delegator.findByAnd("PartyAttribute", UtilMisc.toMap("attrValue", (String) context.get("eiasTokenBuyer")), null, false));
                     if (UtilValidate.isNotEmpty(partyAttribute)) {
                         partyId = (String) partyAttribute.get("partyId");
                     }
@@ -1150,7 +1150,7 @@ public class EbayOrderServices {
                 // if we get a party, check its contact information.
                 if (UtilValidate.isNotEmpty(partyId)) {
                     Debug.logInfo("Found existing party associated to the eBay buyer: " + partyId, module);
-                    GenericValue party = delegator.findByPrimaryKey("Party", UtilMisc.toMap("partyId", partyId));
+                    GenericValue party = delegator.findOne("Party", UtilMisc.toMap("partyId", partyId), false);
 
                     contactMechId = EbayHelper.setShippingAddressContactMech(dispatcher, delegator, party, userLogin, shippingAddressCtx);
                     String emailBuyer = (String) context.get("emailBuyer");

@@ -19,10 +19,9 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+ xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
     <simple-method method-name="createPartyContactMech" short-description="Create a PartyContactMech">
         <make-value entity-name="PartyContactMech" value-field="newValue"/>
-        <make-value entity-name="PartyContactMech" value-field="newPartyContactMech"/><!-- DEJ20061016: is this really needed? doesn't seem to be used... -->
         <if-empty field="parameters.partyId">
             <set field="parameters.partyId" from-field="userLogin.partyId"/>
         </if-empty>
@@ -39,7 +38,8 @@ under the License.
                 <condition>
                     <and>
                         <if-compare operator="equals" value="N" field="contactMechType.hasTable"/>
-                        <if-compare operator="equals" value="${partyAndContactMech.infoString}" field="parameters.infoString"/>
+                        <if-compare-field operator="equals" field="parameters.infoString" to-field="partyAndContactMech.infoString" />
+                        <if-compare-field operator="equals" field="parameters.contactMechTypeId" to-field="partyAndContactMech.contactMechTypeId" />
                     </and>
                 </condition>
                 <then>

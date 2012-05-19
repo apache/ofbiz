@@ -23,18 +23,30 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.w3c.dom.*;
-
-import org.ofbiz.minilang.*;
+import org.ofbiz.minilang.MiniLangElement;
+import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.SimpleMethod;
+import org.w3c.dom.Element;
 
 /**
  * A single operation, does the specified operation on the given field
  */
-public abstract class MethodOperation {
-    public interface Factory<M extends MethodOperation> {
-        M createMethodOperation(Element element, SimpleMethod simpleMethod);
-        String getName();
+public abstract class MethodOperation extends MiniLangElement {
+
+
+    protected MethodOperation(Element element, SimpleMethod simpleMethod) {
+        super(element, simpleMethod);
     }
+
+    /** Execute the operation. Returns false if no further operations should be executed. 
+     * @throws MiniLangException */
+    public abstract boolean exec(MethodContext methodContext) throws MiniLangException;
+
+    /** Create an expanded string representation of the operation, is for the current context */
+    public abstract String expandedString(MethodContext methodContext);
+
+    /** Create a raw string representation of the operation, would be similar to original XML */
+    public abstract String rawString();
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
@@ -42,21 +54,10 @@ public abstract class MethodOperation {
         String value();
     }
 
-    protected SimpleMethod simpleMethod;
+    public interface Factory<M extends MethodOperation> {
 
-    public MethodOperation(Element element, SimpleMethod simpleMethod) {
-        this.simpleMethod = simpleMethod;
+        M createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException;
+
+        String getName();
     }
-
-    public SimpleMethod getSimpleMethod() {
-        return this.simpleMethod;
-    }
-
-    /** Execute the operation; if false is returned then no further operations will be executed */
-    public abstract boolean exec(MethodContext methodContext);
-
-    /** Create a raw string representation of the operation, would be similar to original XML */
-    public abstract String rawString();
-    /** Create an expanded string representation of the operation, is for the current context */
-    public abstract String expandedString(MethodContext methodContext);
 }

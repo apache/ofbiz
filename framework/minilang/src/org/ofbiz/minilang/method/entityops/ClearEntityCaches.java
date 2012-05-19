@@ -18,33 +18,31 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.entityops;
 
-import org.w3c.dom.*;
-
-import org.ofbiz.minilang.*;
-import org.ofbiz.minilang.method.*;
+import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.SimpleMethod;
+import org.ofbiz.minilang.method.MethodContext;
+import org.ofbiz.minilang.method.MethodOperation;
+import org.w3c.dom.Element;
 
 /**
  * Clears all Entity Engine Caches
  */
 public class ClearEntityCaches extends MethodOperation {
-    public static final class ClearEntityCachesFactory implements Factory<ClearEntityCaches> {
-        public ClearEntityCaches createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new ClearEntityCaches(element, simpleMethod);
-        }
 
-        public String getName() {
-            return "clear-entity-caches";
-        }
-    }
-
-    public ClearEntityCaches(Element element, SimpleMethod simpleMethod) {
+    public ClearEntityCaches(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
     }
 
     @Override
-    public boolean exec(MethodContext methodContext) {
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
         methodContext.getDelegator().clearAllCaches();
         return true;
+    }
+
+    @Override
+    public String expandedString(MethodContext methodContext) {
+        // TODO: something more than a stub/dummy
+        return this.rawString();
     }
 
     @Override
@@ -52,9 +50,14 @@ public class ClearEntityCaches extends MethodOperation {
         // TODO: something more than the empty tag
         return "<clear-entity-caches/>";
     }
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    public static final class ClearEntityCachesFactory implements Factory<ClearEntityCaches> {
+        public ClearEntityCaches createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new ClearEntityCaches(element, simpleMethod);
+        }
+
+        public String getName() {
+            return "clear-entity-caches";
+        }
     }
 }

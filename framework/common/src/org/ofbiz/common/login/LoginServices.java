@@ -153,19 +153,6 @@ public class LoginServices {
                 }
 
                 if (userLogin != null) {
-                    String encodedPassword = useEncryption ? HashCrypt.getDigestHash(password, getHashType()) : password;
-                    String encodedPasswordOldFunnyHexEncode = useEncryption ? HashCrypt.getDigestHashOldFunnyHexEncode(password, getHashType()) : password;
-                    String encodedPasswordUsingDbHashType = encodedPassword;
-
-                    String currentPassword = userLogin.getString("currentPassword");
-                    if (useEncryption && currentPassword != null && currentPassword.startsWith("{")) {
-                        // get encode according to the type in the database
-                        String dbHashType = HashCrypt.getHashTypeFromPrefix(currentPassword);
-                        if (dbHashType != null) {
-                            encodedPasswordUsingDbHashType = HashCrypt.getDigestHash(password, dbHashType);
-                        }
-                    }
-
                     String ldmStr = UtilProperties.getPropertyValue("security.properties", "login.disable.minutes");
                     long loginDisableMinutes = 30;
 
@@ -218,11 +205,7 @@ public class LoginServices {
                         // if the password.accept.encrypted.and.plain property in security is set to true allow plain or encrypted passwords
                         // if this is a system account don't bother checking the passwords
                         // if externalAuth passed; this is run as well
-                        if ((!authFatalError && externalAuth) || (userLogin.get("currentPassword") != null &&
-                            (HashCrypt.removeHashTypePrefix(encodedPassword).equals(HashCrypt.removeHashTypePrefix(currentPassword)) ||
-                                    HashCrypt.removeHashTypePrefix(encodedPasswordOldFunnyHexEncode).equals(HashCrypt.removeHashTypePrefix(currentPassword)) ||
-                                    HashCrypt.removeHashTypePrefix(encodedPasswordUsingDbHashType).equals(HashCrypt.removeHashTypePrefix(currentPassword)) ||
-                                ("true".equals(UtilProperties.getPropertyValue("security.properties", "password.accept.encrypted.and.plain")) && password.equals(userLogin.getString("currentPassword")))))) {
+                        if ((!authFatalError && externalAuth) || checkPassword(userLogin.getString("currentPassword"), useEncryption, password)) {
                             Debug.logVerbose("[LoginServices.userLogin] : Password Matched", module);
 
                             // update the hasLoggedOut flag
@@ -254,7 +237,7 @@ public class LoginServices {
                             result.put("userLogin", userLogin);
                             result.put(ModelService.RESPONSE_MESSAGE, ModelService.RESPOND_SUCCESS);
                         } else {
-                            Debug.logInfo("Entered password [" + encodedPassword + "], Entered password OldFunnyHexEncode [" + encodedPasswordOldFunnyHexEncode + "], db password [" + userLogin.getString("currentPassword") + "]", module);
+                            //Debug.logInfo("Entered password [" + encodedPassword + "], Entered password OldFunnyHexEncode [" + encodedPasswordOldFunnyHexEncode + "], db password [" + userLogin.getString("currentPassword") + "]", module);
 
                             // password is incorrect, but this may be the result of a stale cache entry,
                             // so lets clear the cache and try again if this is the first pass
@@ -473,7 +456,7 @@ public class LoginServices {
         // save this password in history
         GenericValue userLoginPwdHistToCreate = delegator.makeValue("UserLoginPasswordHistory", UtilMisc.toMap("userLoginId", userLoginId,"fromDate", nowTimestamp));
         boolean useEncryption = "true".equals(UtilProperties.getPropertyValue("security.properties", "password.encrypt"));
-        userLoginPwdHistToCreate.set("currentPassword", useEncryption ? HashCrypt.getDigestHash(currentPassword, getHashType()) : currentPassword);
+        userLoginPwdHistToCreate.set("currentPassword", useEncryption ? HashCrypt.cryptUTF8(getHashType(), null, currentPassword) : currentPassword);
         userLoginPwdHistToCreate.create();
     }
 
@@ -537,7 +520,7 @@ public class LoginServices {
         userLoginToCreate.set("passwordHint", passwordHint);
         userLoginToCreate.set("enabled", enabled);
         userLoginToCreate.set("requirePasswordChange", requirePasswordChange);
-        userLoginToCreate.set("currentPassword", useEncryption ? HashCrypt.getDigestHash(currentPassword, getHashType()) : currentPassword);
+        userLoginToCreate.set("currentPassword", useEncryption ? HashCrypt.cryptUTF8(getHashType(), null, currentPassword) : currentPassword);
         try {
             userLoginToCreate.set("partyId", partyId);
         } catch (Exception e) {
@@ -689,7 +672,7 @@ public class LoginServices {
                 return ServiceUtil.returnError(errMsg);
             }
         } else {
-            userLoginToUpdate.set("currentPassword", useEncryption ? HashCrypt.getDigestHash(newPassword, getHashType()) : newPassword, false);
+            userLoginToUpdate.set("currentPassword", useEncryption ? HashCrypt.cryptUTF8(getHashType(), null, newPassword) : newPassword, false);
             userLoginToUpdate.set("passwordHint", passwordHint, false);
             userLoginToUpdate.set("requirePasswordChange", "N");
 
@@ -739,7 +722,7 @@ public class LoginServices {
         if (UtilValidate.isNotEmpty(partyId)) {
             //GenericValue party = null;
             //try {
-            //    party = delegator.findByPrimaryKey("Party", UtilMisc.toMap("partyId", partyId));
+            //    party = delegator.findOne("Party", UtilMisc.toMap("partyId", partyId), false);
             //} catch (GenericEntityException e) {
             //    Debug.logWarning(e, "", module);
             //}
@@ -906,33 +889,14 @@ public class LoginServices {
         String errMsg = null;
 
         if (!ignoreCurrentPassword) {
-
-            String encodedPassword = useEncryption ? HashCrypt.getDigestHash(currentPassword, getHashType()) : currentPassword;
-            String encodedPasswordOldFunnyHexEncode = useEncryption ? HashCrypt.getDigestHashOldFunnyHexEncode(currentPassword, getHashType()) : currentPassword;
-            String encodedPasswordUsingDbHashType = encodedPassword;
-
-            String oldPassword = userLogin.getString("currentPassword");
-            if (useEncryption && oldPassword != null && oldPassword.startsWith("{")) {
-                // get encode according to the type in the database
-                String dbHashType = HashCrypt.getHashTypeFromPrefix(oldPassword);
-                if (dbHashType != null) {
-                    encodedPasswordUsingDbHashType = HashCrypt.getDigestHash(currentPassword, dbHashType);
-                }
-            }
-
             // if the password.accept.encrypted.and.plain property in security is set to true allow plain or encrypted passwords
             // if this is a system account don't bother checking the passwords
-            boolean passwordMatches = (oldPassword != null &&
-                (HashCrypt.removeHashTypePrefix(encodedPassword).equals(HashCrypt.removeHashTypePrefix(oldPassword)) ||
-                        HashCrypt.removeHashTypePrefix(encodedPasswordOldFunnyHexEncode).equals(HashCrypt.removeHashTypePrefix(oldPassword)) ||
-                        HashCrypt.removeHashTypePrefix(encodedPasswordUsingDbHashType).equals(HashCrypt.removeHashTypePrefix(oldPassword)) ||
-                    ("true".equals(UtilProperties.getPropertyValue("security.properties", "password.accept.encrypted.and.plain")) && currentPassword.equals(oldPassword))));
-
+            boolean passwordMatches = checkPassword(userLogin.getString("currentPassword"), useEncryption, currentPassword);
             if ((currentPassword == null) || (userLogin != null && currentPassword != null && !passwordMatches)) {
                 errMsg = UtilProperties.getMessage(resource,"loginservices.old_password_not_correct_reenter", locale);
                 errorMessageList.add(errMsg);
             }
-            if (currentPassword.equals(newPassword) || encodedPassword.equals(newPassword)) {
+            if (checkPassword(userLogin.getString("currentPassword"), useEncryption, newPassword)) {
                 errMsg = UtilProperties.getMessage(resource,"loginservices.new_password_is_equal_to_old_password", locale);
                 errorMessageList.add(errMsg);
             }
@@ -961,10 +925,11 @@ public class LoginServices {
             Delegator delegator = userLogin.getDelegator();
             String newPasswordHash = newPassword;
             if (useEncryption) {
-                newPasswordHash = HashCrypt.getDigestHash(newPassword, getHashType());
+                // FIXME: switching to salt-based hashing breaks this history lookup below
+                newPasswordHash = HashCrypt.cryptUTF8(getHashType(), null, newPassword);
             }
             try {
-                List<GenericValue> pwdHistList = delegator.findByAnd("UserLoginPasswordHistory", UtilMisc.toMap("userLoginId",userLogin.getString("userLoginId"),"currentPassword",newPasswordHash));
+                List<GenericValue> pwdHistList = delegator.findByAnd("UserLoginPasswordHistory", UtilMisc.toMap("userLoginId",userLogin.getString("userLoginId"),"currentPassword",newPasswordHash), null, false);
                 Debug.logInfo(" checkNewPassword pwdHistListpwdHistList " + pwdHistList.size(), module);
                 if (pwdHistList.size() >0) {
                     Map<String, Integer> messageMap = UtilMisc.toMap("passwordChangeHistoryLimit", passwordChangeHistoryLimit);
@@ -1014,5 +979,20 @@ public class LoginServices {
         }
 
         return hashType;
+    }
+
+    private static boolean checkPassword(String oldPassword, boolean useEncryption, String currentPassword) {
+        boolean passwordMatches = false;
+        if (oldPassword != null) {
+            if (useEncryption) {
+                passwordMatches = HashCrypt.comparePassword(oldPassword, getHashType(), currentPassword);
+            } else {
+                passwordMatches = oldPassword.equals(currentPassword);
+            }
+        }
+        if (!passwordMatches && "true".equals(UtilProperties.getPropertyValue("security.properties", "password.accept.encrypted.and.plain"))) {
+            passwordMatches = currentPassword.equals(oldPassword);
+        }
+        return passwordMatches;
     }
 }

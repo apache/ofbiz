@@ -53,7 +53,6 @@ import javax.xml.transform.stream.StreamSource;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.MimeConstants;
 import org.ofbiz.base.util.Debug;
@@ -529,22 +528,12 @@ public class EmailServices {
                     baos.close();
 
                     // store in the list of maps for sendmail....
-                    bodyParts.add(UtilMisc.<String, Object>toMap("content", baos.toByteArray(), "type", "application/pdf", "filename", attachmentName));
-                } catch (GeneralException ge) {
-                    Debug.logError(ge, "Error rendering PDF attachment for email: " + ge.toString(), module);
-                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonEmailSendRenderingScreenPdfError", UtilMisc.toMap("errorString", ge.toString()), locale));
-                } catch (IOException ie) {
-                    Debug.logError(ie, "Error rendering PDF attachment for email: " + ie.toString(), module);
-                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonEmailSendRenderingScreenPdfError", UtilMisc.toMap("errorString", ie.toString()), locale));
-                } catch (FOPException fe) {
-                    Debug.logError(fe, "Error rendering PDF attachment for email: " + fe.toString(), module);
-                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonEmailSendRenderingScreenPdfError", UtilMisc.toMap("errorString", fe.toString()), locale));
-                } catch (SAXException se) {
-                    Debug.logError(se, "Error rendering PDF attachment for email: " + se.toString(), module);
-                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonEmailSendRenderingScreenPdfError", UtilMisc.toMap("errorString", se.toString()), locale));
-                } catch (ParserConfigurationException pe) {
-                    Debug.logError(pe, "Error rendering PDF attachment for email: " + pe.toString(), module);
-                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonEmailSendRenderingScreenPdfError", UtilMisc.toMap("errorString", pe.toString()), locale));
+                    bodyParts.add(UtilMisc.<String, Object> toMap("content", baos.toByteArray(), "type", "application/pdf", "filename",
+                            attachmentName));
+                } catch (Exception e) {
+                    Debug.logError(e, "Error rendering PDF attachment for email: " + e.toString(), module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonEmailSendRenderingScreenPdfError",
+                            UtilMisc.toMap("errorString", e.toString()), locale));
                 }
                 
                 serviceContext.put("bodyParts", bodyParts);
@@ -585,11 +574,21 @@ public class EmailServices {
 
         Map<String, Object> result = ServiceUtil.returnSuccess();
         Map<String, Object> sendMailResult;
+        Boolean hideInLog = (Boolean) serviceContext.get("hideInLog");
+        hideInLog = hideInLog == null ? false : hideInLog;
         try {
-            if (isMultiPart) {
-                sendMailResult = dispatcher.runSync("sendMailMultiPart", serviceContext);
+            if (!hideInLog) {
+                if (isMultiPart) {
+                    sendMailResult = dispatcher.runSync("sendMailMultiPart", serviceContext);
+                } else {
+                    sendMailResult = dispatcher.runSync("sendMail", serviceContext);
+                }
             } else {
-                sendMailResult = dispatcher.runSync("sendMail", serviceContext);
+                if (isMultiPart) {
+                    sendMailResult = dispatcher.runSync("sendMailMultiPartHiddenInLog", serviceContext);
+                } else {
+                    sendMailResult = dispatcher.runSync("sendMailHiddenInLog", serviceContext);
+                }
             }
         } catch (Exception e) {
             Debug.logError(e, "Error send email:" + e.toString(), module);
@@ -612,6 +611,19 @@ public class EmailServices {
         return result;
     }
 
+    /**
+     * JavaMail Service same than sendMailFromScreen but with hidden result in log.
+     * To prevent having not encoded passwords shown in log
+     *@param dctx The DispatchContext that this service is operating in
+     *@param rServiceContext Map containing the input parameters
+     *@return Map with the result of the service, the output parameters
+     */
+    public static Map<String, Object> sendMailHiddenInLogFromScreen(DispatchContext dctx, Map<String, ? extends Object> rServiceContext) {
+        Map<String, Object> serviceContext = UtilMisc.makeMapWritable(rServiceContext);
+        serviceContext.put("hideInLog", true);        
+        return sendMailFromScreen(dctx, serviceContext);
+    }
+    
     public static void sendFailureNotification(DispatchContext dctx, Map<String, ? extends Object> context, MimeMessage message, List<SMTPAddressFailedException> failures) {
         Locale locale = (Locale) context.get("locale");
         Map<String, Object> newContext = FastMap.newInstance();

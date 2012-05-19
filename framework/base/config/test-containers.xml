@@ -31,6 +31,7 @@ under the License.
 
     <!-- load the naming (JNDI) server -->
     <container name="naming-container" class="org.ofbiz.base.container.NamingServiceContainer">
+        <property name="host" value="0.0.0.0"/>
         <property name="port" value="1099"/>
     </container>
 
@@ -58,7 +59,7 @@ under the License.
         <property name="admin-user" value="system"/>
         <property name="admin-pass" value="ofbiz"/>
         <property name="iiop-host" value="127.0.0.1"/>
-        <property name="iiop-port" value="2000"/>
+        <property name="iiop-port" value="2001"/>
     </container>
      -->
 
@@ -66,7 +67,7 @@ under the License.
     upon JNDI, it must be started after the naming-container container.-->
     <container name="jcr-container" class="org.ofbiz.jcr.loader.JCRContainer">
         <property name="configFilePath" value="framework/jcr/config/jcr-test-config.xml"/>
-        <property name="removeOnShutdown" value="true"/>
+        <property name="removeRepositoryOnShutdown" value="true"/>
     </container>
 
     <!-- load catalina (tomcat) and all web applications -->
@@ -78,7 +79,7 @@ under the License.
         <property name="catalina-runtime-home" value="runtime/catalina"/>
         <property name="apps-context-reloadable" value="false"/>
         <property name="apps-cross-context" value="false"/>
-        <property name="apps-distributable" value="false"/>
+        <property name="apps-distributable" value="false"/><!-- you must also set all the webapps you want distributable, by adding <distributable/> in their web.xml file -->
         <!-- one or more tomcat engines (servers); map to this + host -->
         <property name="default-server" value="engine">
             <property name="default-host" value="0.0.0.0"/>
@@ -134,7 +135,7 @@ under the License.
             <property name="maxSpareThreads" value="50"/>
             <property name="maxThreads" value="200"/>
             <property name="minSpareThreads" value="4"/>
-            <property name="port" value="8009"/>
+            <property name="port" value="8010"/>
             <property name="tcpNoDelay" value="true"/>
             <property name="soTimeout" value="60000"/>
             <property name="tomcatAuthentication" value="true"/>
@@ -169,7 +170,7 @@ under the License.
             <property name="maxThreads" value="100"/>
             <property name="minSpareThreads" value="4"/>
             <property name="noCompressionUserAgents" value=""/>
-            <property name="port" value="8080"/>
+            <property name="port" value="8081"/>
             <property name="restrictedUserAgents" value=""/>
             <property name="server" value=""/>
             <property name="socketBuffer" value="9000"/>
@@ -207,7 +208,7 @@ under the License.
             <property name="maxThreads" value="100"/>
             <property name="minSpareThreads" value="4"/>
             <property name="noCompressionUserAgents" value=""/>
-            <property name="port" value="8443"/>
+            <property name="port" value="8444"/>
             <property name="restrictedUserAgents" value=""/>
             <property name="server" value=""/>
             <property name="socketBuffer" value="9000"/>
@@ -225,13 +226,6 @@ under the License.
             <property name="ciphers" value=""/>
         </property>
     </container>
-
-    <!-- load JUnit test container -->
-    <!-- this is now run through the new testtools stuff
-    <container name="junit-container" class="org.ofbiz.base.container.JunitContainer">
-        <property name="base-test" value="org.ofbiz.base.test.BaseUnitTests"/>
-    </container>
-    -->
 
     <container name="testtools-container" class="org.ofbiz.testtools.TestRunContainer"/>
 </ofbiz-containers>

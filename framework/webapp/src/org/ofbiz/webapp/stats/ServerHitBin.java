@@ -609,7 +609,7 @@ public class ServerHitBin {
             // check for type data before running.
             GenericValue serverHitType = null;
 
-            serverHitType = delegator.findByPrimaryKeyCache("ServerHitType", UtilMisc.toMap("hitTypeId", ServerHitBin.typeIds[this.type]));
+            serverHitType = delegator.findOne("ServerHitType", UtilMisc.toMap("hitTypeId", ServerHitBin.typeIds[this.type]), true);
             if (serverHitType == null) {
                 // datamodel data not loaded; not storing hit.
                 Debug.logWarning("The datamodel data has not been loaded; cannot find hitTypeId '" + ServerHitBin.typeIds[this.type] + " not storing ServerHit.", module);
@@ -623,7 +623,7 @@ public class ServerHitBin {
                 return;
             }
             String visitId = visit.getString("visitId");
-            visit = delegator.findOne("Visit", UtilMisc.toMap("visitId", visitId), true);
+            visit = delegator.findOne("Visit", UtilMisc.toMap("visitId", visitId), false);
             if (visit == null) {
                 // GenericValue stored in client session does not exist in database.
                 Debug.logInfo("The Visit GenericValue stored in the client session does not exist in the database, not storing server hit.", module);

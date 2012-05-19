@@ -18,7 +18,7 @@ under the License.
 -->
 <#if canNotView>
   <h3>${uiLabelMap.PartyContactInfoNotBelongToYou}.</h3>
-  <a href="<@ofbizUrl>editcontactmechdone</@ofbizUrl>" class="button">${uiLabelMap.CommonBack}</a>
+  <a href="<@ofbizUrl>${donePage}</@ofbizUrl>" class="button">${uiLabelMap.CommonBack}</a>
 <#else>
   <#if !contactMech?exists>
     <#-- When creating a new contact mech, first select the type, then actually create -->
@@ -47,10 +47,10 @@ under the License.
   <#if contactMechTypeId?exists>
     <#if !contactMech?exists>
       <h2>${uiLabelMap.PartyCreateNewContactInfo}</h2>
-      <a href='<@ofbizUrl>editcontactmechdone</@ofbizUrl>' class="button">${uiLabelMap.CommonGoBack}</a>
+      <a href='<@ofbizUrl>${donePage}</@ofbizUrl>' class="button">${uiLabelMap.CommonGoBack}</a>
       <a href="javascript:document.editcontactmechform.submit()" class="button">${uiLabelMap.CommonSave}</a>
       <table width="90%" border="0" cellpadding="2" cellspacing="0">
-        <form method="post" action='<@ofbizUrl>${requestName}</@ofbizUrl>' name="editcontactmechform">
+        <form method="post" action='<@ofbizUrl>${reqName}</@ofbizUrl>' name="editcontactmechform" id="editcontactmechform">
         <div>
           <input type='hidden' name='contactMechTypeId' value='${contactMechTypeId}' />
           <#if contactMechPurposeType?exists>
@@ -60,8 +60,8 @@ under the License.
           <#if preContactMechTypeId?has_content><input type='hidden' name='preContactMechTypeId' value='${preContactMechTypeId}' /></#if>
           <#if paymentMethodId?has_content><input type='hidden' name='paymentMethodId' value='${paymentMethodId}' /></#if>
     <#else>
-      <h2>${uiLabelMap.PartyEditContactInfo}</h2>
-      <a href="<@ofbizUrl>editcontactmechdone</@ofbizUrl>" class="button">${uiLabelMap.CommonGoBack}</a>
+      <h2>${uiLabelMap.PartyEditContactInfo}</h2>      
+      <a href="<@ofbizUrl>${donePage}</@ofbizUrl>" class="button">${uiLabelMap.CommonGoBack}</a>
       <a href="javascript:document.editcontactmechform.submit()" class="button">${uiLabelMap.CommonSave}</a>
       <table width="90%" border="0" cellpadding="2" cellspacing="0">
         <tr>
@@ -116,7 +116,7 @@ under the License.
             </table>
           </td>
         </tr>
-        <form method="post" action='<@ofbizUrl>${requestName}</@ofbizUrl>' name="editcontactmechform">
+        <form method="post" action='<@ofbizUrl>${reqName}</@ofbizUrl>' name="editcontactmechform" id="editcontactmechform">
           <div>
           <input type="hidden" name="contactMechId" value='${contactMechId}' />
           <input type="hidden" name="contactMechTypeId" value='${contactMechTypeId}' />
@@ -159,16 +159,13 @@ under the License.
         *</td>
       </tr>
       <tr>
-        <td align="right" valign="top">${uiLabelMap.PartyState}</td>
+        <td align="right" valign="top"> ${uiLabelMap.PartyState}
         <td>&nbsp;</td>
-        <td>
-          <select name="stateProvinceGeoId" class='selectBox'>
-            <#if postalAddressData.stateProvinceGeoId?exists><option value='${postalAddressData.stateProvinceGeoId}'>${selectedStateName?default(postalAddressData.stateProvinceGeoId)}</option></#if>
-            <option value="">${uiLabelMap.PartyNoState}</option>
-            ${screens.render("component://common/widget/CommonScreens.xml#states")}
+        <td>       
+          <select name="stateProvinceGeoId" id="editcontactmechform_stateProvinceGeoId">
           </select>
-        *</td>
-      </tr>
+        </td>
+      </tr>      
       <tr>
         <td align="right" valign="top">${uiLabelMap.PartyZipCode}</td>
         <td >&nbsp;</td>
@@ -176,15 +173,23 @@ under the License.
           <input type="text" class='inputBox' size="12" maxlength="10" name="postalCode" value="${postalAddressData.postalCode?if_exists}" />
         *</td>
       </tr>
-      <tr>
-        <td align="right" valign="top">${uiLabelMap.PartyCountry}</td>
+      <tr>   
+        <td align="right" valign="top">${uiLabelMap.CommonCountry}</td>
         <td>&nbsp;</td>
         <td>
-          <select name="countryGeoId" class='selectBox'>
-            <#if postalAddressData.countryGeoId?exists><option value='${postalAddressData.countryGeoId}'>${selectedCountryName?default(postalAddressData.countryGeoId)}</option></#if>
-            ${screens.render("component://common/widget/CommonScreens.xml#countries")}
+          <select name="countryGeoId" id="editcontactmechform_countryGeoId">
+          ${screens.render("component://common/widget/CommonScreens.xml#countries")}        
+          <#if (postalAddress?exists) && (postalAddress.countryGeoId?exists)>
+            <#assign defaultCountryGeoId = postalAddress.countryGeoId>
+          <#else>
+            <#assign defaultCountryGeoId = Static["org.ofbiz.base.util.UtilProperties"].getPropertyValue("general.properties", "country.geo.id.default")>
+          </#if>
+          <option selected="selected" value="${defaultCountryGeoId}">
+          <#assign countryGeo = delegator.findOne("Geo",Static["org.ofbiz.base.util.UtilMisc"].toMap("geoId",defaultCountryGeoId), false)>
+            ${countryGeo.get("geoName",locale)}
+          </option>
           </select>
-        *</td>
+        </td>
       </tr>
     <#elseif contactMechTypeId = "TELECOM_NUMBER">
       <tr>
@@ -236,9 +241,9 @@ under the License.
     </form>
   </table>
 
-  <a href="<@ofbizUrl>editcontactmechdone</@ofbizUrl>" class="button">${uiLabelMap.CommonGoBack}</a>
+  <a href="<@ofbizUrl>${donePage}</@ofbizUrl>" class="button">${uiLabelMap.CommonGoBack}</a>
   <a href="javascript:document.editcontactmechform.submit()" class="button">${uiLabelMap.CommonSave}</a>
-  <#else>
-    <a href="<@ofbizUrl>editcontactmechdone</@ofbizUrl>" class="button">${uiLabelMap.CommonGoBack}</a>
+  <#else>    
+    <a href="<@ofbizUrl>${donePage}</@ofbizUrl>" class="button">${uiLabelMap.CommonGoBack}</a>
   </#if>
 </#if>

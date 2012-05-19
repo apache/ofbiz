@@ -71,7 +71,7 @@ session.setAttribute("currentShoppingListId", shoppingListId);
 
 // if we passed a shoppingListId get the shopping list info
 if (shoppingListId) {
-    shoppingList = delegator.findByPrimaryKey("ShoppingList", [shoppingListId : shoppingListId]);
+    shoppingList = delegator.findOne("ShoppingList", [shoppingListId : shoppingListId], false);
     context.shoppingList = shoppingList;
 
     if (shoppingList) {
@@ -159,7 +159,7 @@ if (shoppingListId) {
         context.shoppingListType = shoppingListType;
 
         // get the child shopping lists of the current list for the logged in user
-        childShoppingLists = delegator.findByAndCache("ShoppingList", [partyId : userLogin.partyId, parentShoppingListId : shoppingListId], ["listName"]);
+        childShoppingLists = delegator.findByAnd("ShoppingList", [partyId : userLogin.partyId, parentShoppingListId : shoppingListId], ["listName"], true);
         // now get prices for each child shopping list...
         if (childShoppingLists) {
             childShoppingListDatas = new ArrayList(childShoppingLists.size());
@@ -200,7 +200,7 @@ if (shoppingListId) {
                 context.shippingContactMechList = ContactHelper.getContactMech(party, "SHIPPING_LOCATION", "POSTAL_ADDRESS", false);
                 context.paymentMethodList = EntityUtil.filterByDate(party.getRelated("PaymentMethod", null, ["paymentMethodTypeId"]));
 
-                shipAddress = delegator.findByPrimaryKey("PostalAddress", ["contactMechId" : shoppingList.contactMechId]);
+                shipAddress = delegator.findOne("PostalAddress", ["contactMechId" : shoppingList.contactMechId], false);
                 Debug.log("SL - address : " + shipAddress);
                 if (shipAddress) {
                     listCart = ShoppingListServices.makeShoppingListCart(dispatcher, shoppingListId, locale);

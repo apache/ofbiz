@@ -18,45 +18,70 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.conditional;
 
-import java.util.*;
-import javolution.util.FastList;
-import org.w3c.dom.*;
-import org.ofbiz.base.util.*;
-import org.ofbiz.minilang.*;
-import org.ofbiz.minilang.method.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.minilang.MiniLangElement;
+import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.MiniLangValidate;
+import org.ofbiz.minilang.SimpleMethod;
+import org.ofbiz.minilang.method.MethodContext;
+import org.w3c.dom.Element;
 
 /**
- * Implements generic combining conditions such as or, and, etc.
+ * Implements the &lt;and&gt;, &lt;or&gt;, &lt;not&gt;, and &lt;xor&gt; elements.
  */
-public class CombinedCondition implements Conditional {
-    public static final class OrConditionFactory extends ConditionalFactory<CombinedCondition> {
-        @Override
-        public CombinedCondition createCondition(Element element, SimpleMethod simpleMethod) {
-            return new CombinedCondition(element, OR, simpleMethod);
-        }
+public abstract class CombinedCondition extends MiniLangElement implements Conditional {
 
-        @Override
-        public String getName() {
-            return "or";
+    protected final List<Conditional> subConditions;
+
+    public CombinedCondition(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+        super(element, simpleMethod);
+        List<? extends Element> childElements = UtilXml.childElementList(element);
+        if (MiniLangValidate.validationOn() && childElements.isEmpty()) {
+            MiniLangValidate.handleError("No conditional elements.", simpleMethod, element);
         }
+        List<Conditional> conditionalList = new ArrayList<Conditional>(childElements.size());
+        for (Element conditionalElement : UtilXml.childElementList(element)) {
+            conditionalList.add(ConditionalFactory.makeConditional(conditionalElement, simpleMethod));
+        }
+        this.subConditions = Collections.unmodifiableList(conditionalList);
     }
 
-    public static final class XorConditionFactory extends ConditionalFactory<CombinedCondition> {
-        @Override
-        public CombinedCondition createCondition(Element element, SimpleMethod simpleMethod) {
-            return new CombinedCondition(element, XOR, simpleMethod);
+    protected void prettyPrint(StringBuilder messageBuffer, MethodContext methodContext, String combineText) {
+        messageBuffer.append("(");
+        for (Conditional subCond : subConditions) {
+            subCond.prettyPrint(messageBuffer, methodContext);
+            messageBuffer.append(combineText);
         }
-
-        @Override
-        public String getName() {
-            return "xor";
-        }
+        messageBuffer.append(")");
     }
 
+    /**
+     * A &lt;and&gt; element factory. 
+     */
     public static final class AndConditionFactory extends ConditionalFactory<CombinedCondition> {
         @Override
-        public CombinedCondition createCondition(Element element, SimpleMethod simpleMethod) {
-            return new CombinedCondition(element, AND, simpleMethod);
+        public CombinedCondition createCondition(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new CombinedCondition(element, simpleMethod) {
+                @Override
+                public boolean checkCondition(MethodContext methodContext) throws MiniLangException {
+                    if (subConditions.size() == 0)
+                        return true;
+                    for (Conditional subCond : subConditions) {
+                        if (!subCond.checkCondition(methodContext)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                @Override
+                public void prettyPrint(StringBuilder messageBuffer, MethodContext methodContext) {
+                    prettyPrint(messageBuffer, methodContext, " AND ");
+                }
+            };
         }
 
         @Override
@@ -65,10 +90,30 @@ public class CombinedCondition implements Conditional {
         }
     }
 
+    /**
+     * A &lt;not&gt; element factory. 
+     */
     public static final class NotConditionFactory extends ConditionalFactory<CombinedCondition> {
         @Override
-        public CombinedCondition createCondition(Element element, SimpleMethod simpleMethod) {
-            return new CombinedCondition(element, NOT, simpleMethod);
+        public CombinedCondition createCondition(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new CombinedCondition(element, simpleMethod) {
+                @Override
+                public boolean checkCondition(MethodContext methodContext) throws MiniLangException {
+                    if (subConditions.size() == 0)
+                        return true;
+                    Conditional subCond = subConditions.get(0);
+                    return !subCond.checkCondition(methodContext);
+                }
+                @Override
+                public void prettyPrint(StringBuilder messageBuffer, MethodContext methodContext) {
+                    messageBuffer.append("( NOT ");
+                    if (subConditions.size() > 0) {
+                        Conditional subCond = subConditions.get(0);
+                        subCond.prettyPrint(messageBuffer, methodContext);
+                    }
+                    messageBuffer.append(")");
+                }
+            };
         }
 
         @Override
@@ -77,90 +122,70 @@ public class CombinedCondition implements Conditional {
         }
     }
 
-    public static final int OR = 1;
-    public static final int XOR = 2;
-    public static final int AND = 3;
-    public static final int NOT = 4;
-
-    SimpleMethod simpleMethod;
-    int conditionType;
-    List<Conditional> subConditions = FastList.newInstance();
-
-    public CombinedCondition(Element element, int conditionType, SimpleMethod simpleMethod) {
-        this.simpleMethod = simpleMethod;
-        this.conditionType = conditionType;
-        for (Element subElement: UtilXml.childElementList(element)) {
-            subConditions.add(ConditionalFactory.makeConditional(subElement, simpleMethod));
-        }
-    }
-
-    public boolean checkCondition(MethodContext methodContext) {
-        if (subConditions.size() == 0) return true;
-
-        Iterator<Conditional> subCondIter = subConditions.iterator();
-        switch (this.conditionType) {
-            case OR:
-                while (subCondIter.hasNext()) {
-                    Conditional subCond = subCondIter.next();
-                    if (subCond.checkCondition(methodContext)) {
+    /**
+     * A &lt;or&gt; element factory. 
+     */
+    public static final class OrConditionFactory extends ConditionalFactory<CombinedCondition> {
+        @Override
+        public CombinedCondition createCondition(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new CombinedCondition(element, simpleMethod) {
+                @Override
+                public boolean checkCondition(MethodContext methodContext) throws MiniLangException {
+                    if (subConditions.size() == 0)
                         return true;
-                    }
-                }
-                return false;
-            case XOR:
-                boolean trueFound = false;
-                while (subCondIter.hasNext()) {
-                    Conditional subCond = subCondIter.next();
-                    if (subCond.checkCondition(methodContext)) {
-                        if (trueFound) {
-                            return false;
-                        } else {
-                            trueFound = true;
+                    for (Conditional subCond : subConditions) {
+                        if (subCond.checkCondition(methodContext)) {
+                            return true;
                         }
                     }
+                    return false;
                 }
-                return trueFound;
-            case AND:
-                while (subCondIter.hasNext()) {
-                    Conditional subCond = subCondIter.next();
-                    if (!subCond.checkCondition(methodContext)) {
-                        return false;
-                    }
+                @Override
+                public void prettyPrint(StringBuilder messageBuffer, MethodContext methodContext) {
+                    prettyPrint(messageBuffer, methodContext, " OR ");
                 }
-                return true;
-            case NOT:
-                Conditional subCond = subCondIter.next();
-                return !subCond.checkCondition(methodContext);
-            default:
-                return false;
+            };
+        }
+
+        @Override
+        public String getName() {
+            return "or";
         }
     }
 
-    public void prettyPrint(StringBuilder messageBuffer, MethodContext methodContext) {
-        messageBuffer.append("(");
-        Iterator<Conditional> subCondIter = subConditions.iterator();
-        while (subCondIter.hasNext()) {
-            Conditional subCond = subCondIter.next();
-            subCond.prettyPrint(messageBuffer, methodContext);
-            if (subCondIter.hasNext()) {
-                switch (this.conditionType) {
-                case OR:
-                    messageBuffer.append(" OR ");
-                    break;
-                case XOR:
-                    messageBuffer.append(" XOR ");
-                    break;
-                case AND:
-                    messageBuffer.append(" AND ");
-                    break;
-                case NOT:
-                    messageBuffer.append(" NOT ");
-                    break;
-                default:
-                    messageBuffer.append("?");
+    /**
+     * A &lt;xor&gt; element factory. 
+     */
+    public static final class XorConditionFactory extends ConditionalFactory<CombinedCondition> {
+        @Override
+        public CombinedCondition createCondition(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new CombinedCondition(element, simpleMethod) {
+                @Override
+                public boolean checkCondition(MethodContext methodContext) throws MiniLangException {
+                    if (subConditions.size() == 0)
+                        return true;
+                    boolean trueFound = false;
+                    for (Conditional subCond : subConditions) {
+                        if (subCond.checkCondition(methodContext)) {
+                            if (trueFound) {
+                                return false;
+                            } else {
+                                trueFound = true;
+                            }
+                        }
+                    }
+                    return trueFound;
                 }
-            }
+                @Override
+                public void prettyPrint(StringBuilder messageBuffer, MethodContext methodContext) {
+                    prettyPrint(messageBuffer, methodContext, " XOR ");
+                }
+            };
         }
-        messageBuffer.append(")");
+
+        @Override
+        public String getName() {
+            return "xor";
+        }
     }
 }

@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.collections.FlexibleServletAccessor;
+import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.ContextAccessor;
 import org.ofbiz.minilang.method.MethodContext;
@@ -32,23 +33,14 @@ import org.w3c.dom.Element;
  * Copies a map field to a Servlet session attribute
  */
 public class FieldToSession extends MethodOperation {
-    public static final class FieldToSessionFactory implements Factory<FieldToSession> {
-        public FieldToSession createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new FieldToSession(element, simpleMethod);
-        }
-
-        public String getName() {
-            return "field-to-session";
-        }
-    }
 
     public static final String module = FieldToSession.class.getName();
 
-    ContextAccessor<Map<String, ? extends Object>> mapAcsr;
     ContextAccessor<Object> fieldAcsr;
+    ContextAccessor<Map<String, ? extends Object>> mapAcsr;
     FlexibleServletAccessor<Object> sessionAcsr;
 
-    public FieldToSession(Element element, SimpleMethod simpleMethod) {
+    public FieldToSession(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
         // the schema for this element now just has the "field" attribute, though the old "field-name" and "map-name" pair is still supported
         mapAcsr = new ContextAccessor<Map<String, ? extends Object>>(element.getAttribute("map-name"));
@@ -57,7 +49,7 @@ public class FieldToSession extends MethodOperation {
     }
 
     @Override
-    public boolean exec(MethodContext methodContext) {
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
         // only run this if it is in an EVENT context
         if (methodContext.getMethodType() == MethodContext.EVENT) {
             Object fieldVal = null;
@@ -77,10 +69,15 @@ public class FieldToSession extends MethodOperation {
                 Debug.logWarning("Field value not found with name " + fieldAcsr + " in Map with name " + mapAcsr, module);
                 return true;
             }
-
             sessionAcsr.put(methodContext.getRequest().getSession(), fieldVal, methodContext.getEnvMap());
         }
         return true;
+    }
+
+    @Override
+    public String expandedString(MethodContext methodContext) {
+        // TODO: something more than a stub/dummy
+        return this.rawString();
     }
 
     @Override
@@ -88,9 +85,14 @@ public class FieldToSession extends MethodOperation {
         // TODO: add all attributes and other info
         return "<field-to-session field-name=\"" + this.fieldAcsr + "\" map-name=\"" + this.mapAcsr + "\"/>";
     }
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    public static final class FieldToSessionFactory implements Factory<FieldToSession> {
+        public FieldToSession createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new FieldToSession(element, simpleMethod);
+        }
+
+        public String getName() {
+            return "field-to-session";
+        }
     }
 }

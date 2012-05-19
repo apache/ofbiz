@@ -20,6 +20,7 @@ package org.ofbiz.minilang.method.entityops;
 
 import java.util.Map;
 
+import org.ofbiz.minilang.artifact.ArtifactInfoContext;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilValidate;
@@ -34,6 +35,7 @@ import org.ofbiz.entity.finder.EntityFinderUtil.ConditionExpr;
 import org.ofbiz.entity.finder.EntityFinderUtil.ConditionList;
 import org.ofbiz.entity.finder.EntityFinderUtil.ConditionObject;
 import org.ofbiz.entity.model.ModelEntity;
+import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.MethodContext;
 import org.ofbiz.minilang.method.MethodOperation;
@@ -43,25 +45,16 @@ import org.w3c.dom.Element;
  * Uses the delegator to find entity values by a condition
  */
 public class EntityCount extends MethodOperation {
-    public static final class EntityCountFactory implements Factory<EntityCount> {
-        public EntityCount createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new EntityCount(element, simpleMethod);
-        }
-
-        public String getName() {
-            return "entity-count";
-        }
-    }
 
     public static final String module = EntityCount.class.getName();
 
-    protected FlexibleStringExpander entityNameExdr;
-    protected FlexibleStringExpander delegatorNameExdr;
-    protected Condition whereCondition;
-    protected Condition havingCondition;
     protected FlexibleMapAccessor<Long> countAcsr;
+    protected FlexibleStringExpander delegatorNameExdr;
+    protected FlexibleStringExpander entityNameExdr;
+    protected Condition havingCondition;
+    protected Condition whereCondition;
 
-    public EntityCount(Element element, SimpleMethod simpleMethod) {
+    public EntityCount(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
         this.entityNameExdr = FlexibleStringExpander.getInstance(element.getAttribute("entity-name"));
         this.delegatorNameExdr = FlexibleStringExpander.getInstance(element.getAttribute("delegator-name"));
@@ -70,7 +63,6 @@ public class EntityCount extends MethodOperation {
         } else {
             this.countAcsr = FlexibleMapAccessor.getInstance(element.getAttribute("count-name"));
         }
-
         // process condition-expr | condition-list
         Element conditionExprElement = UtilXml.firstChildElement(element, "condition-expr");
         Element conditionListElement = UtilXml.firstChildElement(element, "condition-list");
@@ -85,7 +77,6 @@ public class EntityCount extends MethodOperation {
         } else if (conditionObjectElement != null) {
             this.whereCondition = new ConditionObject(conditionObjectElement);
         }
-
         // process having-condition-list
         Element havingConditionListElement = UtilXml.firstChildElement(element, "having-condition-list");
         if (havingConditionListElement != null) {
@@ -94,38 +85,31 @@ public class EntityCount extends MethodOperation {
     }
 
     @Override
-    public boolean exec(MethodContext methodContext) {
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
         try {
             Map<String, Object> context = methodContext.getEnvMap();
             Delegator delegator = methodContext.getDelegator();
             String entityName = this.entityNameExdr.expandString(context);
             String delegatorName = this.delegatorNameExdr.expandString(context);
-
             if (UtilValidate.isNotEmpty(delegatorName)) {
                 delegator = DelegatorFactory.getDelegator(delegatorName);
             }
-
             ModelEntity modelEntity = delegator.getModelEntity(entityName);
-
             // create whereEntityCondition from whereCondition
             EntityCondition whereEntityCondition = null;
             if (this.whereCondition != null) {
                 whereEntityCondition = this.whereCondition.createCondition(context, modelEntity, delegator.getModelFieldTypeReader(modelEntity));
             }
-
             // create havingEntityCondition from havingCondition
             EntityCondition havingEntityCondition = null;
             if (this.havingCondition != null) {
                 havingEntityCondition = this.havingCondition.createCondition(context, modelEntity, delegator.getModelFieldTypeReader(modelEntity));
             }
-
             long count = delegator.findCountByCondition(entityName, whereEntityCondition, havingEntityCondition, null);
-
             this.countAcsr.put(context, count);
         } catch (GeneralException e) {
             Debug.logError(e, module);
             String errMsg = "ERROR: Could not complete the " + simpleMethod.getShortDescription() + " process: " + e.getMessage();
-
             if (methodContext.getMethodType() == MethodContext.EVENT) {
                 methodContext.putEnv(simpleMethod.getEventErrorMessageName(), errMsg);
                 methodContext.putEnv(simpleMethod.getEventResponseCodeName(), simpleMethod.getDefaultErrorCode());
@@ -138,11 +122,15 @@ public class EntityCount extends MethodOperation {
         return true;
     }
 
-    public String getEntityName() {
-        String entName = this.entityNameExdr.getOriginal();
-        // if there is expansion syntax
-        if (entName.indexOf("${") >= 0) return null;
-        return entName;
+    @Override
+    public String expandedString(MethodContext methodContext) {
+        // TODO: something more than a stub/dummy
+        return this.rawString();
+    }
+
+    @Override
+    public void gatherArtifactInfo(ArtifactInfoContext aic) {
+        aic.addEntityName(entityNameExdr.toString());
     }
 
     @Override
@@ -150,10 +138,14 @@ public class EntityCount extends MethodOperation {
         // TODO: something more than the empty tag
         return "<entity-count/>";
     }
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    public static final class EntityCountFactory implements Factory<EntityCount> {
+        public EntityCount createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new EntityCount(element, simpleMethod);
+        }
+
+        public String getName() {
+            return "entity-count";
+        }
     }
 }
-

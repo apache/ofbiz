@@ -23,6 +23,7 @@ import java.util.List;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.ContextAccessor;
 import org.ofbiz.minilang.method.MethodContext;
@@ -33,35 +34,24 @@ import org.w3c.dom.Element;
  * Uses the delegator to remove the specified value object (or psuedo-pk) list from the datasource
  */
 public class RemoveList extends MethodOperation {
-    public static final class RemoveListFactory implements Factory<RemoveList> {
-        public RemoveList createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new RemoveList(element, simpleMethod);
-        }
-
-        public String getName() {
-            return "remove-list";
-        }
-    }
 
     public static final String module = RemoveList.class.getName();
 
-    ContextAccessor<List<GenericValue>> listAcsr;
     String doCacheClearStr;
+    ContextAccessor<List<GenericValue>> listAcsr;
 
-    public RemoveList(Element element, SimpleMethod simpleMethod) {
+    public RemoveList(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
         listAcsr = new ContextAccessor<List<GenericValue>>(element.getAttribute("list"), element.getAttribute("list-name"));
         doCacheClearStr = element.getAttribute("do-cache-clear");
     }
 
     @Override
-    public boolean exec(MethodContext methodContext) {
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
         boolean doCacheClear = !"false".equals(doCacheClearStr);
-
         List<GenericValue> values = listAcsr.get(methodContext);
         if (values == null) {
             String errMsg = "In remove-list a value list was not found with the specified listAcsr: " + listAcsr + ", not removing";
-
             Debug.logWarning(errMsg, module);
             if (methodContext.getMethodType() == MethodContext.EVENT) {
                 methodContext.putEnv(simpleMethod.getEventErrorMessageName(), errMsg);
@@ -72,13 +62,11 @@ public class RemoveList extends MethodOperation {
             }
             return false;
         }
-
         try {
             methodContext.getDelegator().removeAll(values, doCacheClear);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             String errMsg = "ERROR: Could not complete the " + simpleMethod.getShortDescription() + " process [problem removing the " + listAcsr + " value list: " + e.getMessage() + "]";
-
             if (methodContext.getMethodType() == MethodContext.EVENT) {
                 methodContext.putEnv(simpleMethod.getEventErrorMessageName(), errMsg);
                 methodContext.putEnv(simpleMethod.getEventResponseCodeName(), simpleMethod.getDefaultErrorCode());
@@ -92,13 +80,24 @@ public class RemoveList extends MethodOperation {
     }
 
     @Override
+    public String expandedString(MethodContext methodContext) {
+        // TODO: something more than a stub/dummy
+        return this.rawString();
+    }
+
+    @Override
     public String rawString() {
         // TODO: something more than the empty tag
         return "<remove-list/>";
     }
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    public static final class RemoveListFactory implements Factory<RemoveList> {
+        public RemoveList createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new RemoveList(element, simpleMethod);
+        }
+
+        public String getName() {
+            return "remove-list";
+        }
     }
 }

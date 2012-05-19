@@ -34,12 +34,12 @@ context.productStore = ProductStoreWorker.getProductStore(request);
 
 if (parameters.add_product_id) { // check if a parameter is passed
     add_product_id = parameters.add_product_id;
-    product = delegator.findByPrimaryKeyCache("Product", [productId : add_product_id]);
+    product = delegator.findOne("Product", [productId : add_product_id], true);
     context.product = product;
 }
 
 // get all the possible gift wrap options
-allgiftWraps = delegator.findByAnd("ProductFeature", [productFeatureTypeId : "GIFT_WRAP"], ["defaultSequenceNum"]);
+allgiftWraps = delegator.findByAnd("ProductFeature", [productFeatureTypeId : "GIFT_WRAP"], ["defaultSequenceNum"], false);
 context.allgiftWraps = allgiftWraps;
 
 // get the shopping lists for the logged in user

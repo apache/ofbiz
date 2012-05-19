@@ -104,7 +104,7 @@ public class EbayStoreOrder {
             if (UtilValidate.isEmpty(productStoreId)) {
                 return ServiceUtil.returnFailure(UtilProperties.getMessage(resource, "ordersImportFromEbay.productStoreIdIsMandatory", locale));
             } else {
-                GenericValue productStore = delegator.findByPrimaryKey("ProductStore", UtilMisc.toMap("productStoreId", productStoreId));
+                GenericValue productStore = delegator.findOne("ProductStore", UtilMisc.toMap("productStoreId", productStoreId), false);
                 if (UtilValidate.isNotEmpty(productStore)) {
                     defaultCurrencyUomId = productStore.getString("defaultCurrencyUomId");
                     payToPartyId = productStore.getString("payToPartyId");
@@ -150,7 +150,7 @@ public class EbayStoreOrder {
             if (UtilValidate.isEmpty(productId)) {
                 return ServiceUtil.returnFailure(UtilProperties.getMessage(resource, "ordersImportFromEbay.productIdNotAvailable", locale));
             } else {
-                GenericValue product = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", productId));
+                GenericValue product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), false);
                 if (UtilValidate.isEmpty(product)) {
                     return ServiceUtil.returnFailure(UtilProperties.getMessage(resource, "ordersImportFromEbay.productIdDoesNotExist", locale));
                 }
@@ -212,14 +212,14 @@ public class EbayStoreOrder {
                 String contactMechId = "";
                 GenericValue partyAttribute = null;
                 if (UtilValidate.isNotEmpty(context.get("eiasTokenBuyer").toString())) {
-                    partyAttribute = EntityUtil.getFirst(delegator.findByAnd("PartyAttribute", UtilMisc.toMap("attrValue", context.get("eiasTokenBuyer").toString())));
+                    partyAttribute = EntityUtil.getFirst(delegator.findByAnd("PartyAttribute", UtilMisc.toMap("attrValue", context.get("eiasTokenBuyer").toString()), null, false));
                 }
 
                 // if we get a party, check its contact information.
                 if (UtilValidate.isNotEmpty(partyAttribute)) {
                     partyId = (String) partyAttribute.get("partyId");
                     Debug.logInfo("Found existing party associated to the eBay buyer: " + partyId, module);
-                    GenericValue party = delegator.findByPrimaryKey("Party", UtilMisc.toMap("partyId", partyId));
+                    GenericValue party = delegator.findOne("Party", UtilMisc.toMap("partyId", partyId), false);
 
                     contactMechId = EbayHelper.setShippingAddressContactMech(dispatcher, delegator, party, userLogin, context);
                     String emailBuyer = context.get("emailBuyer").toString();
@@ -315,7 +315,7 @@ public class EbayStoreOrder {
             if (productStoreId == null) {
                 return ServiceUtil.returnFailure(UtilProperties.getMessage(resource, "ordersImportFromEbay.productStoreIdIsMandatory", locale));
             } else {
-                GenericValue productStore = delegator.findByPrimaryKey("ProductStore", UtilMisc.toMap("productStoreId", productStoreId));
+                GenericValue productStore = delegator.findOne("ProductStore", UtilMisc.toMap("productStoreId", productStoreId), false);
                 if (productStore != null) {
                     defaultCurrencyUomId = productStore.getString("defaultCurrencyUomId");
                     payToPartyId = productStore.getString("payToPartyId");
@@ -443,7 +443,7 @@ public class EbayStoreOrder {
             // If matching party not found then try to find partyId from PartyAttribute entity.
             GenericValue partyAttribute = null;
             if (UtilValidate.isNotEmpty(context.get("eiasTokenBuyer"))) {
-                partyAttribute = EntityUtil.getFirst(delegator.findByAnd("PartyAttribute", UtilMisc.toMap("attrValue", (String) context.get("eiasTokenBuyer"))));
+                partyAttribute = EntityUtil.getFirst(delegator.findByAnd("PartyAttribute", UtilMisc.toMap("attrValue", (String) context.get("eiasTokenBuyer")), null, false));
                 if (UtilValidate.isNotEmpty(partyAttribute)) {
                     partyId = (String) partyAttribute.get("partyId");
                 }
@@ -452,7 +452,7 @@ public class EbayStoreOrder {
             // if we get a party, check its contact information.
             if (UtilValidate.isNotEmpty(partyId)) {
                 Debug.logInfo("Found existing party associated to the eBay buyer: " + partyId, module);
-                GenericValue party = delegator.findByPrimaryKey("Party", UtilMisc.toMap("partyId", partyId));
+                GenericValue party = delegator.findOne("Party", UtilMisc.toMap("partyId", partyId), false);
 
                 contactMechId = EbayHelper.setShippingAddressContactMech(dispatcher, delegator, party, userLogin, shippingAddressCtx);
                 String emailBuyer = (String) context.get("emailBuyer");

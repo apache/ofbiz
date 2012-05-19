@@ -27,10 +27,10 @@ under the License.
                catalina/build.xml,jetty/build.xml,
                security/build.xml,service/build.xml,jcr/build.xml,entityext/build.xml,
                bi/build.xml,minilang/build.xml,
-               webapp/build.xml,guiapp/build.xml,widget/build.xml,
+               webapp/build.xml,widget/build.xml,
                common/build.xml,datafile/build.xml,birt/build.xml,
                testtools/build.xml,
-               appserver/build.xml,webtools/build.xml,example/build.xml"/>
+               appserver/build.xml,webtools/build.xml"/>
 
     <filelist id="test-builds" dir="." files="base/build.xml,sql/build.xml,entity/build.xml"/>
 
@@ -81,6 +81,8 @@ under the License.
     </target>
 
     <target name="clean-data">
+        <delete includeemptydirs="true" dir="../runtime/data/derby"/>
+        <delete includeemptydirs="true" dir="../runtime/data/hsql"/>
         <delete verbose="on" includeemptydirs="true">
             <fileset dir="../runtime/data" includes="**/*">
                 <exclude name="README"/>

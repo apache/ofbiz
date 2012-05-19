@@ -34,6 +34,7 @@ import javax.jcr.Workspace;
 import javax.jcr.nodetype.NoSuchNodeTypeException;
 import javax.jcr.nodetype.NodeTypeManager;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.jackrabbit.core.TransientRepository;
 import org.apache.jackrabbit.core.nodetype.InvalidNodeTypeDefException;
 import org.apache.jackrabbit.core.nodetype.NodeTypeManagerImpl;
@@ -46,15 +47,17 @@ import org.apache.jackrabbit.spi.QNodeTypeDefinition;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.jcr.loader.JCRFactory;
-import org.ofbiz.jcr.orm.jackrabbit.JackrabbitArticle;
-import org.ofbiz.jcr.orm.jackrabbit.JackrabbitFile;
-import org.ofbiz.jcr.orm.jackrabbit.JackrabbitFolder;
-import org.ofbiz.jcr.orm.jackrabbit.JackrabbitHierarchyNode;
-import org.ofbiz.jcr.orm.jackrabbit.JackrabbitLocalizedContent;
-import org.ofbiz.jcr.orm.jackrabbit.JackrabbitNews;
-import org.ofbiz.jcr.orm.jackrabbit.JackrabbitResource;
-import org.ofbiz.jcr.orm.jackrabbit.JackrabbitUnstructured;
+import org.ofbiz.jcr.loader.JCRJndi;
+import org.ofbiz.jcr.orm.jackrabbit.data.JackrabbitArticle;
+import org.ofbiz.jcr.orm.jackrabbit.file.JackrabbitFile;
+import org.ofbiz.jcr.orm.jackrabbit.file.JackrabbitFolder;
+import org.ofbiz.jcr.orm.jackrabbit.file.JackrabbitHierarchyNode;
+import org.ofbiz.jcr.orm.jackrabbit.data.JackrabbitLocalizedContent;
+import org.ofbiz.jcr.orm.jackrabbit.data.JackrabbitNews;
+import org.ofbiz.jcr.orm.jackrabbit.file.JackrabbitResource;
+import org.ofbiz.jcr.orm.jackrabbit.data.JackrabbitUnstructured;
 import org.w3c.dom.Element;
 
 public class JCRFactoryImpl implements JCRFactory {
@@ -70,7 +73,10 @@ public class JCRFactoryImpl implements JCRFactory {
 
     protected static Repository repository = null;
     protected Session session = null;
+
     protected static Mapper mapper = null;
+
+    private JCRJndi jndi;
 
     /*
      * (non-Javadoc)
@@ -78,13 +84,17 @@ public class JCRFactoryImpl implements JCRFactory {
      * @see org.ofbiz.jcr.JCRFactory#initialize(org.w3c.dom.Element)
      */
     @Override
-    public void initialize(Element configRootElement) throws RepositoryException {
+    public void initialize(Element configRootElement, Element factoryImplDefinition) throws RepositoryException {
+        homeDir = UtilXml.childElementAttribute(configRootElement, "home-dir", "path", "runtime/data/jcr/");
+        String factoryJndiName = factoryImplDefinition.getAttribute("jndi-name");
+
+        jndi = new JCRJndi(jackrabbitConfigFile, factoryJndiName, homeDir);
+
         Element childElement = UtilXml.firstChildElement(configRootElement, "jcr-credentials");
         CREDENTIALS_USERNAME = UtilXml.elementAttribute(childElement, "username", null);
         CREDENTIALS_PASSWORD = UtilXml.elementAttribute(childElement, "password", null).toCharArray();
 
         jackrabbitConfigFile = UtilXml.childElementAttribute(configRootElement, "config-file-path", "path", "framework/jcr/config/jackrabbit.xml");
-        homeDir = UtilXml.childElementAttribute(configRootElement, "home-dir", "path", "runtime/data/jcr/");
     }
 
     /*
@@ -112,6 +122,8 @@ public class JCRFactoryImpl implements JCRFactory {
         classes.add(JackrabbitArticle.class);
 
         mapper = new AnnotationMapperImpl(classes);
+
+        jndi.registerJcrToJndi();
     }
 
     /*
@@ -128,9 +140,15 @@ public class JCRFactoryImpl implements JCRFactory {
         if (removeRepositoryOnShutdown) {
             if (UtilValidate.isNotEmpty(homeDir)) {
                 File homeDirFile = new File(homeDir);
-                homeDirFile.deleteOnExit();
+                try {
+                    FileUtils.deleteDirectory(homeDirFile);
+                } catch (IOException e) {
+                    Debug.logError(e, module);
+                }
             }
         }
+
+        jndi.unbindRepository();
     }
 
     /*
@@ -181,7 +199,7 @@ public class JCRFactoryImpl implements JCRFactory {
     /*
      * Register some new node types
      */
-    protected void registerNodeTypes(Session session) throws InvalidNodeTypeDefException, javax.jcr.RepositoryException, IOException {
+    private void registerNodeTypes(Session session) throws InvalidNodeTypeDefException, javax.jcr.RepositoryException, IOException {
         InputStream xml = new FileInputStream(CUSTOM_NODE_TYPES);
 
         // HINT: throws InvalidNodeTypeDefException, IOException

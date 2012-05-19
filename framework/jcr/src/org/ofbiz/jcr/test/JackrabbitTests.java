@@ -18,18 +18,13 @@ under the License.
  */
 package org.ofbiz.jcr.test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.GregorianCalendar;
-import java.util.List;
 import java.util.Map;
 
 import javax.jcr.ItemExistsException;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import javax.jcr.query.QueryResult;
 
 import javolution.util.FastMap;
 import net.sf.json.JSONArray;
@@ -46,14 +41,12 @@ import org.ofbiz.jcr.access.JcrRepositoryAccessor;
 import org.ofbiz.jcr.access.jackrabbit.ContentWriterJackrabbit;
 import org.ofbiz.jcr.access.jackrabbit.JackrabbitRepositoryAccessor;
 import org.ofbiz.jcr.api.JcrDataHelper;
-import org.ofbiz.jcr.api.JcrFileHelper;
 import org.ofbiz.jcr.api.jackrabbit.JackrabbitArticleHelper;
-import org.ofbiz.jcr.api.jackrabbit.JackrabbitFileHelper;
 import org.ofbiz.jcr.loader.JCRFactory;
 import org.ofbiz.jcr.loader.JCRFactoryUtil;
 import org.ofbiz.jcr.loader.jackrabbit.JCRFactoryImpl;
-import org.ofbiz.jcr.orm.jackrabbit.JackrabbitArticle;
-import org.ofbiz.jcr.util.jackrabbit.JcrUtilJackrabbit;
+import org.ofbiz.jcr.orm.jackrabbit.data.JackrabbitArticle;
+import org.ofbiz.jcr.util.jackrabbit.JackrabbitUtils;
 import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.service.testtools.OFBizTestCase;
 
@@ -67,7 +60,7 @@ public class JackrabbitTests extends OFBizTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        userLogin = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+        userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), false);
 
     }
 
@@ -105,24 +98,24 @@ public class JackrabbitTests extends OFBizTestCase {
     //
 
     public void testCreateAbsoluteAndNormalizedNodePath() {
-        String result = JcrUtilJackrabbit.createAbsoluteNodePath("foo/baa");
+        String result = JackrabbitUtils.createAbsoluteNodePath("foo/baa");
 
         assertEquals("/foo/baa", result);
     }
 
     public void testCheckIfNodePathIsAbsoluteAndNormalized() {
-        assertFalse(JcrUtilJackrabbit.checkIfNodePathIsAbsolute("foo/baa"));
-        assertFalse(JcrUtilJackrabbit.checkIfNodePathIsAbsolute("foo/baa/"));
-        assertTrue(JcrUtilJackrabbit.checkIfNodePathIsAbsolute("/foo/baa/"));
-        assertTrue(JcrUtilJackrabbit.checkIfNodePathIsAbsolute("/foo/baa"));
+        assertFalse(JackrabbitUtils.checkIfNodePathIsAbsolute("foo/baa"));
+        assertFalse(JackrabbitUtils.checkIfNodePathIsAbsolute("foo/baa/"));
+        assertTrue(JackrabbitUtils.checkIfNodePathIsAbsolute("/foo/baa/"));
+        assertTrue(JackrabbitUtils.checkIfNodePathIsAbsolute("/foo/baa"));
     }
 
     public void testListRepositoryNodes() throws Exception {
-        assertNotNull(JcrUtilJackrabbit.getRepositoryNodes(userLogin, null));
+        assertNotNull(JackrabbitUtils.getRepositoryNodes(userLogin, null));
     }
 
     public void testDefaultLanguage() {
-        assertEquals(UtilProperties.getPropertyValue("general", "locale.properties.fallback"), JcrUtilJackrabbit.determindeTheDefaultLanguage());
+        assertEquals(UtilProperties.getPropertyValue("general", "locale.properties.fallback"), JackrabbitUtils.determindeTheDefaultLanguage());
     }
 
     //
@@ -321,7 +314,7 @@ public class JackrabbitTests extends OFBizTestCase {
     public void testSpeedTestService() throws Exception {
         Map<String, Object> context = FastMap.newInstance();
         context.put("maxNodes", new Integer(10));
-        context.put("userLogin", dispatcher.getDelegator().findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system")));
+        context.put("userLogin", dispatcher.getDelegator().findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), false));
 
         Map<String, Object> serviceResult = this.dispatcher.runSync("determineJackrabbitRepositorySpeed", context);
 

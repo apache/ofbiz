@@ -24,8 +24,6 @@ under the License.
 
     <import file="macros.xml"/>
     <property name="site.dir" value="../site"/>
-    <property name="ofbiz.admin.port" value="10523"/>
-    <property name="ofbiz.admin.key" value="so3du5kasd5dn"/>
     <property name="memory.initial.param" value="-Xms128M"/>
     <property name="memory.max.param" value="-Xmx512M"/>
     <property name="pos.memory.max.param" value="-Xmx512M"/>
@@ -144,7 +142,7 @@ under the License.
     </target>
 
     <target name="clean-lucene-index"
-          description="Removes lucene indexes created in applications/content/index">
+          description="Remove lucene indexes created in applications/content/index">
         <subant target="clean-lucene-index">
             <filelist dir="." files="applications/content/build.xml"/>
         </subant>
@@ -222,12 +220,27 @@ under the License.
         <subant inheritall="false" failonerror="${specialpurpose.present}">
             <filelist dir="." files="specialpurpose/build.xml"/>
         </subant>
-        <subant inheritall="false">
-            <fileset dir="${basedir}/hot-deploy" casesensitive="no">
+
+        <!-- a check is done, if no build.xml file is present in hot-deploy dir,
+            then the build.xml files - if present - in hot-deploy sub-dirs will be used.
+            So the previous, simpler, behaviour is kept as long as you don't need 
+            to build hot-deploy components in a specific order. -->
+        <if>
+          <available file="hot-deploy/build.xml" property="useHotDeployBuild"/>
+          <then>
+            <subant inheritall="false">
+              <filelist dir="." files="hot-deploy/build.xml"/>
+            </subant>
+          </then>
+          <else>
+            <subant inheritall="false">
+              <fileset dir="${basedir}/hot-deploy" casesensitive="no">
                 <exclude name="disabled/**"/>
                 <include name="*/build.xml"/>
-            </fileset>
-        </subant>
+              </fileset>
+            </subant>
+          </else>
+        </if>
         <antcall target="clean-svninfo"/>
 
         <echo message="[build] ========== Done Building (Compile) =========="/>
@@ -274,7 +287,6 @@ under the License.
           <fileset dir="${ofbiz.home.dir}/framework/catalina/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/framework/entity/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/framework/geronimo/lib" includes="*.jar"/>
-          <fileset dir="${ofbiz.home.dir}/framework/guiapp/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/framework/jetty/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/framework/service/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/framework/testtools/lib" includes="*.jar"/>
@@ -365,28 +377,24 @@ under the License.
     <!-- Start and Stop OFBiz                                                        -->
     <!-- ================================================================== -->
 
-    <target name="run"
-            description="This will start OFBiz">
+    <target name="start"
+            description="Start OFBiz">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${pos.memory.max.param}"/>
             <jvmarg value="${memory.maxpermsize.param}"/>
-            <sysproperty key="ofbiz.admin.port" value="${ofbiz.admin.port}"/>
-            <sysproperty key="ofbiz.admin.key" value="${ofbiz.admin.key}"/>
         </java>
     </target>
-    <target name="run-batch"
-            description="This will start OFBiz as a separate process">
+    <target name="start-batch"
+            description="Start OFBiz as a separate process">
         <java jar="ofbiz.jar" fork="true" spawn="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${pos.memory.max.param}"/>
             <jvmarg value="${memory.maxpermsize.param}"/>
-            <sysproperty key="ofbiz.admin.port" value="${ofbiz.admin.port}"/>
-            <sysproperty key="ofbiz.admin.key" value="${ofbiz.admin.key}"/>
         </java>
     </target>
-    <target name="run-debug" depends="build"
-            description="Starts OFBiz in debugging mode">
+    <target name="start-debug"
+            description="Start OFBiz in debugging mode">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -395,12 +403,10 @@ under the License.
             <jvmarg value="-Djava.compiler=NONE"/>
             <jvmarg value="-Xdebug"/>
             <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8091"/>
-            <sysproperty key="ofbiz.admin.port" value="${ofbiz.admin.port}"/>
-            <sysproperty key="ofbiz.admin.key" value="${ofbiz.admin.key}"/>
         </java>
     </target>
-    <target name="run-pos"
-            description="Start the POS (Point of sale) system">
+    <target name="start-pos"
+            description="Start OFBiz POS (Point of sale)">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -409,11 +415,15 @@ under the License.
         </java>
     </target>
     <target name="stop"
-            description="This will stop OFBiz">
+            description="Stop OFBiz">
         <java jar="ofbiz.jar" fork="true">
-            <sysproperty key="ofbiz.admin.port" value="${ofbiz.admin.port}"/>
-            <sysproperty key="ofbiz.admin.key" value="${ofbiz.admin.key}"/>
             <arg value="-shutdown"/>
+        </java>
+    </target>
+    <target name="status"
+            description="Display status of OFBiz">
+        <java jar="ofbiz.jar" fork="true">
+            <arg value="-status"/>
         </java>
     </target>
 
@@ -421,8 +431,8 @@ under the License.
     <!-- Setup OFBiz Data                                                   -->
     <!-- ================================================================== -->
 
-    <target name="run-install" depends="build"
-            description="This loads all configured data; meant for generic OFBiz development, testing, demonstration, etc purposes">
+    <target name="load-demo" depends="build"
+            description="Load all data; meant for generic OFBiz development, testing, demonstration, etc purposes">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -430,8 +440,8 @@ under the License.
             <arg value="install"/>
         </java>
     </target>
-    <target name="run-install-multitenant" depends="build"
-            description="This loads all data needed for the multi-tenancy demonstration. Caution: this creates three databases, with each one loaded with all demo data.">
+    <target name="load-demo-multitenant" depends="build"
+            description="Load all data needed for the multi-tenancy demonstration. Caution: this creates three databases, with each one loaded with all demo data.">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -453,8 +463,8 @@ under the License.
             <arg value="delegator=default#DEMO2"/>
         </java>
     </target>
-    <target name="run-install-seed" depends="build"
-            description="This loads ONLY the seed data (not seed-initial, demo, ext* or anything else); meant for use after an update of the code to reload the seed data as it is generally maintained along with the code and needs to be in sync for operation">
+    <target name="load-seed" depends="build"
+            description="Load ONLY the seed data (not seed-initial, demo, ext* or anything else); meant for use after an update of the code to reload the seed data as it is generally maintained along with the code and needs to be in sync for operation">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -463,8 +473,8 @@ under the License.
             <arg value="readers=seed"/>
         </java>
     </target>
-    <target name="run-install-extseed" depends="build"
-            description="This loads seed, seed-initial and ext data; meant for manual/generic testing, development, or going into production with a derived system based on stock OFBiz where the ext data basically replaces the demo data">
+    <target name="load-extseed" depends="build"
+            description="Load seed, seed-initial and ext data; meant for manual/generic testing, development, or going into production with a derived system based on stock OFBiz where the ext data basically replaces the demo data">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -473,8 +483,8 @@ under the License.
             <arg value="readers=seed,seed-initial,ext"/>
         </java>
     </target>
-    <target name="run-install-exttest" depends="build"
-            description="This loads seed, seed-initial, ext and ext-test data; meant for automated testing with a derived system based on stock OFBiz">
+    <target name="load-exttest" depends="build"
+            description="Load seed, seed-initial, ext and ext-test data; meant for automated testing with a derived system based on stock OFBiz">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -483,8 +493,8 @@ under the License.
             <arg value="readers=seed,seed-initial,ext,ext-test"/>
         </java>
     </target>
-    <target name="run-install-readers" depends="build"
-            description='This loads data using the command line argument data-readers that takes a comma separated list of readers (seed, seed-initial, demo, ext, ext-test, ext-demo). On Windows XP (at least) you need top wrap the parameters in double-quotes. For instance: ant run-install-readers "-Ddata-readers=seed,seed-initial,ext"'>
+    <target name="load-readers" depends="build"
+            description='Load data using the command line argument data-readers that takes a comma separated list of readers (seed, seed-initial, demo, ext, ext-test, ext-demo). On Windows XP (at least) you need top wrap the parameters in double-quotes. For instance: ant load-readers "-Ddata-readers=seed,seed-initial,ext"'>
         <java jar="ofbiz.jar" fork="true" >
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -493,19 +503,9 @@ under the License.
             <arg value="readers=${data-readers}"/>
         </java>
     </target>
-    <target name="run-install-file" depends="build"
-            description="This loads data using the command line argument 'data-file' to load data from a given file using the default delegator">
-        <java jar="ofbiz.jar" fork="true">
-            <jvmarg value="${memory.initial.param}"/>
-            <jvmarg value="${memory.max.param}"/>
-            <jvmarg value="${memory.maxpermsize.param}"/>
-            <arg value="install"/>
-            <arg value="delegator=default"/>
-            <arg value="file=${data-file}"/>
-        </java>
-    </target>
-    <target name="run-install-file-in-delegator" depends="build"
-            description="This loads data using the command line argument 'data-file' to load data from a given file to the command line argument 'delegator'">
+    <target name="load-file" depends="build"
+            description="Load data using the command line argument 'data-file' to load data from a given file using the 'default' delegator or a delegator specified in the command line argument 'delegator'">
+        <property name="delegator" value="default" />
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -516,10 +516,10 @@ under the License.
         </java>
     </target>
     <!-- =================================
-          target: run-install-tenant
+          target: load-tenant
          ================================= -->
-    <target name="run-install-tenant" depends="build,run-install-tenant-all,run-install-tenant-reader,run-install-tenant-component-all,run-install-tenant-component-reader"
-            description="This loads data using tenantId, syntax eg: ant run-install-tenant -DtenantId=DEMO1 (needs multitenant=Y in general.properties)">
+    <target name="load-tenant" depends="build,load-tenant-all,load-tenant-reader,load-tenant-component-all,load-tenant-component-reader"
+            description="Load data using tenantId, syntax eg: ant load-tenant -DtenantId=DEMO1 (needs multitenant=Y in general.properties)">
     </target>
     <target name="check-tenant-id">
         <java jar="ofbiz.jar" fork="true">
@@ -562,7 +562,7 @@ under the License.
             </or>
         </condition>
     </target>
-    <target name="run-install-tenant-all" depends="check-tenant-reader" if="noReader">
+    <target name="load-tenant-all" depends="check-tenant-reader" if="noReader">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -571,7 +571,7 @@ under the License.
             <arg value="delegator=default#${tenantId}"/>
         </java>
     </target>
-    <target name="run-install-tenant-reader" depends="check-tenant-reader" if="hasReader">
+    <target name="load-tenant-reader" depends="check-tenant-reader" if="hasReader">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -581,8 +581,8 @@ under the License.
             <arg value="readers=${data-readers}"/>
         </java>
     </target>
-    <!-- run-install-tenant-component -->
-    <target name="run-install-tenant-component" if="hasTenantComponent" depends="check-tenant-id">
+    <!-- load-tenant-component -->
+    <target name="load-tenant-component" if="hasTenantComponent" depends="check-tenant-id">
         <condition property="hasComponentReader">
             <and>
                 <length string="${data-readers}" trim="true" when="greater" length="0"/>
@@ -596,7 +596,7 @@ under the License.
             </or>
         </condition>
     </target>
-    <target name="run-install-tenant-component-all" depends="run-install-tenant-component" if="noComponentReader">
+    <target name="load-tenant-component-all" depends="load-tenant-component" if="noComponentReader">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -606,7 +606,7 @@ under the License.
             <arg value="component=${component}"/>
         </java>
     </target>
-    <target name="run-install-tenant-component-reader" depends="run-install-tenant-component" if="hasComponentReader">
+    <target name="load-tenant-component-reader" depends="load-tenant-component" if="hasComponentReader">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -618,10 +618,10 @@ under the License.
         </java>
     </target>
     <!-- =================================
-          target: run-install-all-tenants
+          target: load-all-tenants
          ================================= -->
-    <target name="run-install-all-tenants" depends="build,run-install-tenants-all,run-install-tenants-reader"
-           description="This loads data all tenants, syntax eg: ant run-install-all-tenants (needs multitenant=Y in general.properties)">
+    <target name="load-all-tenants" depends="build,load-tenants-all,load-tenants-reader"
+           description="Load data for all tenants, syntax eg: ant load-all-tenants (needs multitenant=Y in general.properties)">
     </target>
     <target name="check-tenants-reader">
         <property name="delegator" value="all-tenants"/>
@@ -645,7 +645,7 @@ under the License.
             </or>
         </condition>
     </target>
-    <target name="run-install-tenants-all" depends="check-tenants-reader" if="noReader">
+    <target name="load-tenants-all" depends="check-tenants-reader" if="noReader">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -654,7 +654,7 @@ under the License.
             <arg value="delegator=${delegator}"/>
         </java>
     </target>
-    <target name="run-install-tenants-reader" depends="check-tenants-reader" if="hasReader">
+    <target name="load-tenants-reader" depends="check-tenants-reader" if="hasReader">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -665,16 +665,16 @@ under the License.
         </java>
     </target>
     <!-- =================================
-          target: run-create-tenant
+          target: create-tenant
          ================================= -->
-    <target name="run-create-tenant"
+    <target name="create-tenant"
         depends="create-tenant-on-Derby,create-tenant-on-MySQL,create-tenant-on-Oracle,create-tenant-on-PostgreSQL"
-        description="Creates a new tenant in your environment, creates the delegator, loads initial data with admin-user and password (needs multitenant=Y in general.properties)">
+        description="Create a new tenant in your environment, create the delegator, load initial data with admin-user and password (needs multitenant=Y in general.properties)">
         <tstamp/>
     </target>
 
     <!-- description="This creates entity Tenant and TenantDataSource in default, installs data in the delegator and creates the admin-user and password for the tenant"
-        sub-target of run-create-tenant, can't used alone => no description, to not clutter "ant -p" -->
+        sub-target of create-tenant, can't used alone => no description, to not clutter "ant -p" -->
     <target name="get-tenant-data">
         <input addproperty="tenantId" message="Enter Id for the tenant: "/>
         <input addproperty="tenantName" message="Enter name for tenant: "/>
@@ -702,7 +702,7 @@ under the License.
         <antcall target="tenant-data-entry"/>
     </target>
     <!-- description="Creates tenant data and instance"
-        sub-target of run-create-tenant, can't used alone => no description, to not clutter "ant -p" -->
+        sub-target of create-tenant, can't used alone => no description, to not clutter "ant -p" -->
     <target name="create-tenant-on-Derby" depends="get-tenant-data" if="isDerby">
         <echo message="Installing on Derby"/>
         <copy file="${basedir}/framework/resources/templates/AdminNewTenantData-Derby.xml" tofile="runtime/tmp/tmpTenantData.xml">
@@ -711,7 +711,7 @@ under the License.
                 <filter token="tenantName" value="${tenantName}"/>
             </filterset>
         </copy>
-        <antcall target="run-install-file">
+        <antcall target="load-file">
             <param name="data-file" value="runtime/tmp/tmpTenantData.xml"/>
         </antcall>
         <delete file="runtime/tmp/tmpTenantData.xml"/>
@@ -722,7 +722,7 @@ under the License.
         </antcall>
     </target>
     <!-- description="Creates tenant data and instance. Don't forget db driver(s) and already created DBs in function of the entityengine.xml datasource-names"
-        sub-target of run-create-tenant, can't used alone => no description, to not clutter "ant -p" -->
+        sub-target of create-tenant, can't used alone => no description, to not clutter "ant -p" -->
     <target name="create-tenant-on-MySQL" depends="get-tenant-data" if="isMySQL">
         <echo message="Installing on MySQL"/>
         <copy file="${basedir}/framework/resources/templates/AdminNewTenantData-MySQL.xml" tofile="runtime/tmp/tmpTenantData.xml">
@@ -734,7 +734,7 @@ under the License.
                 <filter token="db-Password" value="${db-Password}"/>
             </filterset>
         </copy>
-        <antcall target="run-install-file">
+        <antcall target="load-file">
             <param name="data-file" value="runtime/tmp/tmpTenantData.xml"/>
         </antcall>
         <delete file="runtime/tmp/tmpTenantData.xml"/>
@@ -745,7 +745,7 @@ under the License.
         </antcall>
     </target>
     <!-- description="Creates tenant data and instance. Don't forget db driver(s) and already created DBs in function of the entityengine.xml datasource-names"
-        sub-target of run-create-tenant, can't used alone => no description, to not clutter "ant -p" -->
+        sub-target of create-tenant, can't used alone => no description, to not clutter "ant -p" -->
     <target name="create-tenant-on-Oracle" depends="get-tenant-data" if="isOracle">
         <echo message="Installing on Oracle"/>
         <copy file="${basedir}/framework/resources/templates/AdminNewTenantData-Oracle.xml" tofile="runtime/tmp/tmpTenantData.xml">
@@ -757,7 +757,7 @@ under the License.
                 <filter token="db-Password" value="${db-Password}"/>
             </filterset>
         </copy>
-        <antcall target="run-install-file">
+        <antcall target="load-file">
             <param name="data-file" value="runtime/tmp/tmpTenantData.xml"/>
         </antcall>
         <delete file="runtime/tmp/tmpTenantData.xml"/>
@@ -768,7 +768,7 @@ under the License.
         </antcall>
     </target>
     <!-- description="Creates tenant data and instance. Don't forget db driver(s) and already created DBs in function of the entityengine.xml datasource-names"
-        sub-target of run-create-tenant, can't used alone => no description, to not clutter "ant -p" -->
+        sub-target of create-tenant, can't used alone => no description, to not clutter "ant -p" -->
     <target name="create-tenant-on-PostgreSQL" depends="get-tenant-data" if="isPostgreSQL">
         <echo message="Installing on PostgreSQL"/>
         <copy file="${basedir}/framework/resources/templates/AdminNewTenantData-PostgreSQL.xml" tofile="runtime/tmp/tmpTenantData.xml">
@@ -780,7 +780,7 @@ under the License.
                 <filter token="db-Password" value="${db-Password}"/>
             </filterset>
         </copy>
-        <antcall target="run-install-file">
+        <antcall target="load-file">
             <param name="data-file" value="runtime/tmp/tmpTenantData.xml"/>
         </antcall>
         <delete file="runtime/tmp/tmpTenantData.xml"/>
@@ -808,7 +808,7 @@ under the License.
 
     </target>
     <target name="load-tenant-admin-user-login"
-        description="Creates the admin login for the tenant with admin privileges, and a temporay password equal to 'ofbiz'. Password must be changed on first login">
+        description="Create the admin login for the tenant with admin privileges, and a temporay password equal to 'ofbiz'. Password must be changed on first login">
         <echo>------------------------------------</echo>
         <echo message="Installing the admin for the tenant"/>
         <echo message="Delegator = ${delegatorId}"/>
@@ -821,14 +821,14 @@ under the License.
                 <filter token="userLoginId" value="${userLoginId}"/>
             </filterset>
         </copy>
-        <antcall target="run-tenant-install-file">
+        <antcall target="load-file">
             <param name="data-file" value="runtime/tmp/tmpUserLogin.xml"/>
-            <param name="delegatorId" value="${delegatorId}"/>
+            <param name="delegator" value="${delegatorId}"/>
         </antcall>
         <delete file="runtime/tmp/tmpUserLogin.xml"/>
     </target>
     <target name="load-tenant-data-readers"
-        description="Loads data of given data-readers in the tenant database">
+        description="Load data of given data-readers in the tenant database">
         <echo>------------------------------------</echo>
         <echo message="Loading selected data-readers in tenant databaset"/>
         <echo message="Delegator = default#${tenantId}"/>
@@ -844,19 +844,8 @@ under the License.
             <arg value="delegator=default#${tenantId}"/>
         </java>
     </target>
-    <target name="run-tenant-install-file"
-        description="Loads the data of the tenant using the command line argument 'file' to load data from a given file">
-        <java jar="ofbiz.jar" fork="true">
-            <jvmarg value="${memory.initial.param}"/>
-            <jvmarg value="${memory.max.param}"/>
-            <jvmarg value="${memory.maxpermsize.param}"/>
-            <arg value="install"/>
-            <arg value="file=${data-file}"/>
-            <arg value="delegator=${delegatorId}"/>
-        </java>
-    </target>
     <target name="load-admin-user-login"
-            description="Creates a user login with admin privileges and a temporary password equal to 'ofbiz'; after a succesful login the user will be prompted for a new password. Example command for the userLogin 'admin': ./ant load-admin-user-login -DuserLoginId=admin">
+            description="Create a user login with admin privileges and a temporary password equal to 'ofbiz'; after a successful login the user will be prompted for a new password. Example command for the userLogin 'admin': ./ant load-admin-user-login -DuserLoginId=admin">
         <fail message="userLoginId parameter is required. To add the parameter to the command for user admin: -DuserLoginId=admin">
             <condition>
                 <not><isset property="userLoginId"/></not>
@@ -867,19 +856,19 @@ under the License.
                 <filter token="userLoginId" value="${userLoginId}"/>
             </filterset>
         </copy>
-        <antcall target="run-install-file">
+        <antcall target="load-file">
             <param name="data-file" value="runtime/tmp/tmpUserLogin.xml"/>
         </antcall>
         <delete file="runtime/tmp/tmpUserLogin.xml"/>
     </target>
     <target name="create-admin-user-login"
-            description="Prompts for a user name, then creates a user login with admin privileges and a temporary password equal to 'ofbiz'. After a succesful login the user will be prompted for a new password.">
+            description="Prompt for a user name, then create a user login with admin privileges and a temporary password equal to 'ofbiz'. After a successful login the user will be prompted for a new password.">
         <input addproperty="userLoginId" message="Enter user name (log in with the temporary password 'ofbiz'):"/>
         <antcall target="load-admin-user-login"/>
     </target>
 
-    <target name="run-tests" depends="build"
-          description="Run OFBiz default tests, execute ant run-install before and see results in runtime/logs/test-results/html/all-tests.html.">
+    <target name="run-tests"
+          description="Run OFBiz default tests; you have to manually execute 'ant load-demo' before and see results in runtime/logs/test-results/html/all-tests.html.">
         <java jar="ofbiz.jar" fork="true" resultproperty="test.result">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -904,7 +893,7 @@ under the License.
     </target>
 
    <target name="run-tests-with-cobertura" depends="download-cobertura, run-tests"
-        description="Same as run-tests but downloads cobertura and performs code coverage. You will need a valid Internet connection to download cobertura"/>
+        description="Download Cobertura and perform code coverage (same as run-tests). You will need a valid Internet connection to download cobertura"/>
 
     <target name="_check-separated-tests-already-setup">
         <available file="runtime/test-list-build.xml" property="_separated-tests-already-setup"/>
@@ -920,8 +909,10 @@ under the License.
             <env key="LC_ALL" value="C"/>
         </java>
     </target>
-    <target name="run-single-test" depends="build"
-          description="Run a single test, syntax eg: ant run-single-test -Dtest.component=service -Dtest.case=service-soap-tests">
+    <target name="run-test"
+          description="Run a single test, syntax eg: ant run-test -Dtest.component=service -Dtest.case=service-soap-tests">
+        <fail unless="test.component">test.component is a required parameter: -Dtest.component=componentname</fail>
+        <fail unless="test.case">test.case is a required parameter: -Dtest.case=testcasename</fail>
         <java jar="ofbiz.jar" fork="true" resultproperty="test.result">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -944,8 +935,10 @@ under the License.
             </condition>
         </fail>
     </target>
-    <target name="run-single-test-suite" depends="build"
-            description="Run a single test suite, syntax eg: ant run-single-test-suite -Dtest.component=mycomponent -Dtest.suiteName=mytests">
+    <target name="run-test-suite"
+            description="Run a single test suite, syntax eg: ant run-test-suite -Dtest.component=mycomponent -Dtest.suiteName=mytests">
+        <fail unless="test.component">test.component is a required parameter: -Dtest.component=componentname</fail>
+        <fail unless="test.suiteName">test.suiteName is a required parameter: -Dtest.suiteName=testsuitename</fail>
         <java jar="ofbiz.jar" fork="true" resultproperty="test.result">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -970,7 +963,7 @@ under the License.
     </target>
 
     <target name="cobertura-report"
-            description="generates a HTML code coverage report with cobertura, can be found in runtime/logs/cobertura-report">
+            description="Generate a HTML code coverage report with cobertura, can be found in runtime/logs/cobertura-report">
         <delete dir="runtime/logs/cobertura-report"/>
         <mkdir dir="runtime/logs/cobertura-report"/>
         <taskdef resource="tasks.properties">
@@ -998,7 +991,7 @@ under the License.
     </target>
 
     <target name="cobertura-report-xml"
-            description="generates a XML file from the cobertura report, this will be use by sonar">
+            description="Generate a XML file from the cobertura report, this will be use by sonar">
         <delete dir="runtime/logs/cobertura-report"/>
         <mkdir dir="runtime/logs/cobertura-report"/>
         <taskdef resource="tasks.properties">
@@ -1034,7 +1027,7 @@ under the License.
 
         <property name="sonar.sources" value="framework/appserver/src, framework/base/src, framework/bi/src, framework/birt/src,
             framework/catalina/src, framework/common/src, framework/datafile/src, framework/entity/src, framework/entityext/src,
-            framework/example/src, framework/geronimo/src, framework/guiapp/src, framework/jetty/src, framework/jcr/src,
+            framework/example/src, framework/geronimo/src, framework/jetty/src, framework/jcr/src,
             framework/minilang/src, framework/security/src, framework/service/src, framework/sql/src, framework/start/src,
             framework/testtools/src, framework/webapp/src, framework/webtools/src, framework/widget/src,
             applications/accounting/src, applications/commonext/src, applications/content/src, applications/humanres/src,
@@ -1056,8 +1049,8 @@ under the License.
         <property name="sonar.cobertura.reportPath" value="runtime/logs/cobertura-report/coverage.xml"/>
         <property name="sonar.java.source" value="1.6" />
         <property name="sonar.java.target" value="1.6" />
-        <property name="sonar.jdbc.url"
-           value="jdbc:mysql://localhost:3306/sonar?useUnicode=true&amp;characterEncoding=utf8" />
+        <!-- default for jdbc url: jdbc:mysql://localhost:3306/sonar?useUnicode=true&amp;characterEncoding=utf8-->
+        <property name="sonar.jdbc.url" value="${sonar.jdbc.url}"/>
         <property name="sonar.jdbc.driverClassName" value="com.mysql.jdbc.Driver" />
         <property name="sonar.jdbc.username" value="${sonar.jdbc.username}" />
         <property name="sonar.jdbc.password" value="${sonar.jdbc.password}" />
@@ -1068,7 +1061,7 @@ under the License.
 
     <target name="full-sonar">
         <antcall target="clean-all"/>
-        <antcall target="run-install"/>
+        <antcall target="load-demo"/>
         <antcall target="run-tests"/>
         <antcall target="cobertura-report-xml"/>
         <antcall target="sonar"/>
@@ -1090,12 +1083,16 @@ under the License.
         <ivy:retrieve pattern="framework/base/lib/[artifact]-[revision].[ext]" conf="sonar-ant-task"/>
     </target>
 
+    <target name="download-mySQL-JDBC" depends="ivy-init" description="Download mySQL jdbc driver">
+        <ivy:retrieve pattern="framework/entity/lib/jdbc/[artifact]-[revision].[ext]" conf="mysql"/>
+    </target>
+
     <!-- ================================================================== -->
     <!-- Create New Component. This target will create basic directory structure for an OFBiz component in hot-deploy directory. -->
     <!-- ================================================================== -->
 
     <target name="create-component"
-            description="Creates the layout of an OFBiz component in the hot-deploy folder.">
+            description="Create the layout of an OFBiz component in the hot-deploy folder.">
         <input addproperty="component-name" message="Component name: (e.g. mycomponent) [Mandatory]"/>
         <input addproperty="component-resource-name" message="Component resource name: (e.g. MyComponent) [Mandatory]"/>
         <input addproperty="webapp-name" message="Webapp name: (e.g. mycomponent) [Mandatory]"/>
@@ -1220,5 +1217,66 @@ under the License.
         <echo>Component successfully created in folder ${basedir}/hot-deploy/${component-name}.
               Restart OFBiz and then visit the URL: http://localhost:8080/${webapp-name}
         </echo>
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- Minify js and css files target.                                    -->
+    <!-- ================================================================== -->
+
+    <target name="minifyJsCss" description="Creates a minified version of JS/CSS files">
+        <!-- Needs more work (more files, use of them) just used as an example -->
+        <!--yuicompressor inFile="themes/tomahawk/webapp/tomahawk/css/style.css" outFile="themes/tomahawk/webapp/tomahawk/css/style-min.css"/-->
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- kek helper                                                         -->
+    <!-- ================================================================== -->
+
+    <target name="gen-kek" 
+            description="Generate a new key-encrypting-key for use in entityengine.xml">
+        <java classname="org.ofbiz.base.crypto.Main" fork="false">
+            <arg value="-kek"/>
+            <classpath>
+                <path location="framework/base/build/lib/ofbiz-base.jar"/>
+                <path location="framework/base/lib/commons/commons-codec-1.4.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- Old tasks.                                                         -->
+    <!-- ================================================================== -->
+    <target name="run">
+        <echo message="The 'run' command has been renamed 'start'; please use 'ant start' to start OFBiz."/>
+    </target>
+    <target name="run-debug">
+        <echo message="The 'run-debug' command has been renamed 'start-debug'; please use 'ant start-debug' to start OFBiz in debug mode."/>
+    </target>
+    <target name="run-pos">
+        <echo message="The 'run-pos' command has been renamed 'start-pos'; please use 'ant start-pos' to start the OFBiz POS."/>
+    </target>
+    <target name="run-install">
+        <echo message="The 'run-install' command has been renamed 'load-demo'; please use 'ant load-demo' to load seed and demo data."/>
+    </target>
+    <target name="run-install-multitenant">
+        <echo message="The 'run-install-multitenant' command has been renamed 'load-demo-multitenant'; please use 'ant load-demo-multitenant' to load seed and demo data for multi-tenancy."/>
+    </target>
+    <target name="run-install-seed">
+        <echo message="The 'run-install-seed' command has been renamed 'load-seed'; please use 'ant load-seed' to load seed data."/>
+    </target>
+    <target name="run-install-extseed">
+        <echo message="The 'run-install-extseed' command has been renamed 'load-extseed'; please use 'ant load-extseed' to load seed, seed-initial and ext data."/>
+    </target>
+    <target name="run-install-exttest">
+        <echo message="The 'run-install-exttest' command has been renamed 'load-exttest'; please use 'ant load-exttest' to load seed, seed-initial, ext and ext-test data."/>
+    </target>
+    <target name="run-install-readers">
+        <echo message="The 'run-install-readers' command has been renamed 'load-readers'; please use 'ant load-readers' to load data using the command line argument data-readers."/>
+    </target>
+    <target name="run-install-file">
+        <echo message="The 'run-install-file' command has been renamed 'load-file'; please use 'ant load-file' to load data from a given file."/>
+    </target>
+    <target name="run-install-file-in-delegator">
+        <echo message="The 'run-install-file-in-delegator' command has been renamed 'load-file'; please use 'ant load-file' to load data from a given file."/>
     </target>
 </project>

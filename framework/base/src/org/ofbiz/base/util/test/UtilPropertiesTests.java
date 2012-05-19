@@ -18,35 +18,24 @@
  *******************************************************************************/
 package org.ofbiz.base.util.test;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Locale;
+import java.util.Properties;
 
 import org.ofbiz.base.test.GenericTestCaseBase;
 import org.ofbiz.base.util.UtilProperties;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Locale;
-import java.util.Properties;
-
 public class UtilPropertiesTests extends GenericTestCaseBase {
 
-    private Locale locale;
-    private String country = "AU";
-    private String language = "en";
+    private final String country = "AU";
+    private final String language = "en";
+    private final Locale locale = new Locale(language, country);
 
     public UtilPropertiesTests(String name) {
         super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        locale = new Locale(language, country);
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
     }
 
     /**
@@ -86,9 +75,7 @@ public class UtilPropertiesTests extends GenericTestCaseBase {
                 "\">Key Value</value>\n" +
                 "    </property>\n" +
                 "</resource>";
-        InputStream in = new ByteArrayInputStream(xmlData.getBytes());
-
+        InputStream in = new ByteArrayInputStream(new String(xmlData.getBytes(), Charset.forName("UTF-8")).getBytes());
         return UtilProperties.xmlToProperties(in, locale, null);
     }
-
 }

@@ -18,79 +18,87 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.serviceops;
 
-import java.util.*;
-
-import org.w3c.dom.*;
-import org.ofbiz.base.util.*;
-import org.ofbiz.minilang.*;
-import org.ofbiz.minilang.method.*;
+import org.ofbiz.base.util.collections.FlexibleMapAccessor;
+import org.ofbiz.base.util.string.FlexibleStringExpander;
+import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.MiniLangValidate;
+import org.ofbiz.minilang.SimpleMethod;
+import org.ofbiz.minilang.method.MethodContext;
+import org.ofbiz.minilang.method.MethodOperation;
+import org.w3c.dom.Element;
 
 /**
- * Copies a map field to a Service result entry
+ * Copies a field to the simple-method result Map.
  */
-public class FieldToResult extends MethodOperation {
+public final class FieldToResult extends MethodOperation {
+
+    public static final String module = FieldToResult.class.getName();
+
+    private final FlexibleMapAccessor<Object> fieldFma;
+    private final FlexibleMapAccessor<Object> resultFma;
+
+    public FieldToResult(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+        super(element, simpleMethod);
+        if (MiniLangValidate.validationOn()) {
+            MiniLangValidate.attributeNames(simpleMethod, element, "field", "result-name");
+            MiniLangValidate.requiredAttributes(simpleMethod, element, "field");
+            MiniLangValidate.expressionAttributes(simpleMethod, element, "field", "result-name");
+            MiniLangValidate.noChildElements(simpleMethod, element);
+        }
+        this.fieldFma = FlexibleMapAccessor.getInstance(element.getAttribute("field"));
+        String resultNameAttribute = element.getAttribute("result-name");
+        if (resultNameAttribute.length() == 0) {
+            this.resultFma = this.fieldFma;
+        } else {
+            this.resultFma = FlexibleMapAccessor.getInstance(resultNameAttribute);
+        }
+    }
+
+    @Override
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
+        Object fieldVal = this.fieldFma.get(methodContext.getEnvMap());
+        if (fieldVal != null) {
+            if (this.resultFma.containsNestedExpression()) {
+                String expression = (String) this.resultFma.get(methodContext.getEnvMap());
+                FlexibleMapAccessor<Object> resultFma = FlexibleMapAccessor.getInstance(expression);
+                resultFma.put(methodContext.getResults(), fieldVal);
+            } else {
+                this.resultFma.put(methodContext.getResults(), fieldVal);
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public String expandedString(MethodContext methodContext) {
+        return FlexibleStringExpander.expandString(toString(), methodContext.getEnvMap());
+    }
+
+    @Override
+    public String rawString() {
+        return toString();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("<field-to-result ");
+        if (!this.fieldFma.isEmpty()) {
+            sb.append("field=\"").append(this.fieldFma).append("\" ");
+        }
+        if (!this.resultFma.isEmpty()) {
+            sb.append("result-name=\"").append(this.resultFma).append("\" ");
+        }
+        sb.append("/>");
+        return sb.toString();
+    }
+
     public static final class FieldToResultFactory implements Factory<FieldToResult> {
-        public FieldToResult createMethodOperation(Element element, SimpleMethod simpleMethod) {
+        public FieldToResult createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
             return new FieldToResult(element, simpleMethod);
         }
 
         public String getName() {
             return "field-to-result";
         }
-    }
-
-    public static final String module = FieldToResult.class.getName();
-
-    ContextAccessor<Map<String, ? extends Object>> mapAcsr;
-    ContextAccessor<Object> fieldAcsr;
-    ContextAccessor<Object> resultAcsr;
-
-    public FieldToResult(Element element, SimpleMethod simpleMethod) {
-        super(element, simpleMethod);
-        // the schema for this element now just has the "field" attribute, though the old "field-name" and "map-name" pair is still supported
-        mapAcsr = new ContextAccessor<Map<String, ? extends Object>>(element.getAttribute("map-name"));
-        fieldAcsr = new ContextAccessor<Object>(element.getAttribute("field"), element.getAttribute("field-name"));
-        resultAcsr = new ContextAccessor<Object>(element.getAttribute("result-name"), fieldAcsr.toString());
-    }
-
-    @Override
-    public boolean exec(MethodContext methodContext) {
-        // only run this if it is in an SERVICE context
-        if (methodContext.getMethodType() == MethodContext.SERVICE) {
-            Object fieldVal = null;
-
-            if (!mapAcsr.isEmpty()) {
-                Map<String, ? extends Object> fromMap = mapAcsr.get(methodContext);
-
-                if (fromMap == null) {
-                    Debug.logWarning("Map not found with name " + mapAcsr, module);
-                    return true;
-                }
-
-                fieldVal = fieldAcsr.get(fromMap, methodContext);
-            } else {
-                // no map name, try the env
-                fieldVal = fieldAcsr.get(methodContext);
-            }
-
-            if (fieldVal == null) {
-                Debug.logWarning("Field value not found with name " + fieldAcsr + " in Map with name " + mapAcsr, module);
-                return true;
-            }
-
-            resultAcsr.put(methodContext.getResults(), fieldVal, methodContext);
-        }
-        return true;
-    }
-
-    @Override
-    public String rawString() {
-        // TODO: add all attributes and other info
-        return "<field-to-result field-name=\"" + this.fieldAcsr + "\" map-name=\"" + this.mapAcsr + "\"/>";
-    }
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
     }
 }

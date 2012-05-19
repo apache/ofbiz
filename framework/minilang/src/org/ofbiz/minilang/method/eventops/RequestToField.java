@@ -21,8 +21,10 @@ package org.ofbiz.minilang.method.eventops;
 import java.util.Map;
 
 import javolution.util.FastMap;
+
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.collections.FlexibleServletAccessor;
+import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.ContextAccessor;
 import org.ofbiz.minilang.method.MethodContext;
@@ -33,37 +35,26 @@ import org.w3c.dom.Element;
  * Copies a Servlet request attribute to a map field
  */
 public class RequestToField extends MethodOperation {
-    public static final class RequestToFieldFactory implements Factory<RequestToField> {
-        public RequestToField createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new RequestToField(element, simpleMethod);
-        }
-
-        public String getName() {
-            return "request-to-field";
-        }
-    }
 
     public static final String module = RequestToField.class.getName();
 
-    ContextAccessor<Map<String, Object>> mapAcsr;
-    ContextAccessor<Object> fieldAcsr;
-    FlexibleServletAccessor<Object> requestAcsr;
     String defaultVal;
+    ContextAccessor<Object> fieldAcsr;
+    ContextAccessor<Map<String, Object>> mapAcsr;
+    FlexibleServletAccessor<Object> requestAcsr;
 
-    public RequestToField(Element element, SimpleMethod simpleMethod) {
+    public RequestToField(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
         // the schema for this element now just has the "field" attribute, though the old "field-name" and "map-name" pair is still supported
         mapAcsr = new ContextAccessor<Map<String, Object>>(element.getAttribute("map-name"));
         fieldAcsr = new ContextAccessor<Object>(element.getAttribute("field"), element.getAttribute("field-name"));
         requestAcsr = new FlexibleServletAccessor<Object>(element.getAttribute("request-name"), fieldAcsr.toString());
-
         defaultVal = element.getAttribute("default");
     }
 
     @Override
-    public boolean exec(MethodContext methodContext) {
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
         String defaultVal = methodContext.expandString(this.defaultVal);
-
         Object fieldVal = null;
         // only run this if it is in an EVENT context
         if (methodContext.getMethodType() == MethodContext.EVENT) {
@@ -72,7 +63,6 @@ public class RequestToField extends MethodOperation {
                 Debug.logWarning("Request attribute value not found with name " + requestAcsr, module);
             }
         }
-
         // if fieldVal is null, or is a String and has zero length, use defaultVal
         if (fieldVal == null) {
             fieldVal = defaultVal;
@@ -83,16 +73,13 @@ public class RequestToField extends MethodOperation {
                 fieldVal = defaultVal;
             }
         }
-
         if (!mapAcsr.isEmpty()) {
             Map<String, Object> fromMap = mapAcsr.get(methodContext);
-
             if (fromMap == null) {
                 Debug.logWarning("Map not found with name " + mapAcsr + " creating a new map", module);
                 fromMap = FastMap.newInstance();
                 mapAcsr.put(methodContext, fromMap);
             }
-
             fieldAcsr.put(fromMap, fieldVal, methodContext);
         } else {
             fieldAcsr.put(methodContext, fieldVal);
@@ -101,13 +88,24 @@ public class RequestToField extends MethodOperation {
     }
 
     @Override
+    public String expandedString(MethodContext methodContext) {
+        // TODO: something more than a stub/dummy
+        return this.rawString();
+    }
+
+    @Override
     public String rawString() {
         // TODO: add all attributes and other info
         return "<request-to-field request-name=\"" + this.requestAcsr + "\" field-name=\"" + this.fieldAcsr + "\" map-name=\"" + this.mapAcsr + "\"/>";
     }
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    public static final class RequestToFieldFactory implements Factory<RequestToField> {
+        public RequestToField createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new RequestToField(element, simpleMethod);
+        }
+
+        public String getName() {
+            return "request-to-field";
+        }
     }
 }
