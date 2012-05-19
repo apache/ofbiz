@@ -22,9 +22,12 @@ under the License.
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xsi:schemaLocation="http://docbook.org/ns/docbook ../../../content/dtd/docbook.xsd"
     xmlns="http://docbook.org/ns/docbook">
-       <title>Project Mgr: Main screen.</title>
+        <title>Project Mgr: Project - resources</title>
         <para>
-        This is the startup screen of the project manager. It will show all active projects with some statistical data.
+            This screen provides an overview of all participants in the project.
+        </para>
+        <para>
+            From here the Project Manager can add new resources to the project, or end the participation of existing project members.
         </para>
 </section>
 

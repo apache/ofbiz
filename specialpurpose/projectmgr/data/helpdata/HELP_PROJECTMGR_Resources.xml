@@ -22,9 +22,17 @@ under the License.
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xsi:schemaLocation="http://docbook.org/ns/docbook ../../../content/dtd/docbook.xsd"
     xmlns="http://docbook.org/ns/docbook">
-       <title>Project Mgr: Main screen.</title>
+        <title>Project Mgr: Find Resources</title>
         <para>
-        This is the startup screen of the project manager. It will show all active projects with some statistical data.
+            The project manager allows you to manage a project which in its simplest form consists out of phases and tasks.
+        </para>
+        <para>
+            A project consists out of one or more phases of which each phase can have one or more tasks.
+            A task always has a single parentPhase.
+            Time registration is only done on a task level.
+        </para>
+        <para>
+            Estimated and actual dates are only maintained at the task level. For reporting they are calculated to the higher levels. Project views are created to support this.
         </para>
 </section>
 

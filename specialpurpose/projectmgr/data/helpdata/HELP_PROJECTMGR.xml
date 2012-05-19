@@ -22,7 +22,7 @@ under the License.
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xsi:schemaLocation="http://docbook.org/ns/docbook ../../../content/dtd/docbook.xsd"
     xmlns="http://docbook.org/ns/docbook">
-        <title>Project Manager Introduction</title>
+        <title>Project Mgr: Introduction</title>
         <para>
             The project manager allows you to manage a project which in its simplest form consists out of phases and tasks.
         </para>
