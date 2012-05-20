@@ -1735,7 +1735,10 @@ public class ModelFormField {
                 List<EntityCondition> expandedConditionList = new LinkedList<EntityCondition>();
                 for (EntityFinderUtil.Condition condition: constraintList) {
                     ModelEntity modelEntity = delegator.getModelEntity(this.entityName);
-                    expandedConditionList.add(condition.createCondition(context, modelEntity, delegator.getModelFieldTypeReader(modelEntity)));
+                    EntityCondition createdCondition = condition.createCondition(context, modelEntity, delegator.getModelFieldTypeReader(modelEntity));
+                    if (createdCondition!=null) {
+                        expandedConditionList.add(createdCondition);
+                    }
                 }
                 findCondition = EntityCondition.makeCondition(expandedConditionList);
             }
