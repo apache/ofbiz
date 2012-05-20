@@ -42,6 +42,7 @@ import org.ofbiz.base.util.Base64;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -56,7 +57,6 @@ import org.w3c.dom.Node;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 
-import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.dom.NodeModel;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -345,15 +345,14 @@ public class EntitySaxReader implements javolution.xml.sax.ContentHandler, Error
 
                     StringWriter outWriter = new StringWriter();
                     Configuration config = new Configuration();
-                    config.setObjectWrapper(BeansWrapper.getDefaultInstance());
+                    config.setObjectWrapper(FreeMarkerWorker.getDefaultOfbizWrapper());
                     config.setSetting("datetime_format", "yyyy-MM-dd HH:mm:ss.SSS");
 
                     Template template = new Template("FMImportFilter", templateReader, config);
                     NodeModel nodeModel = NodeModel.wrap(this.rootNodeForTemplate);
 
                     Map<String, Object> context = FastMap.newInstance();
-                    BeansWrapper wrapper = BeansWrapper.getDefaultInstance();
-                    TemplateHashModel staticModels = wrapper.getStaticModels();
+                    TemplateHashModel staticModels = FreeMarkerWorker.getDefaultOfbizWrapper().getStaticModels();
                     context.put("Static", staticModels);
 
                     context.put("doc", nodeModel);

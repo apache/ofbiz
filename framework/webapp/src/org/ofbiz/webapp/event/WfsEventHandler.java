@@ -42,6 +42,7 @@ import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
@@ -53,7 +54,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.dom.NodeModel;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -183,7 +183,7 @@ public class WfsEventHandler implements EventHandler {
 
     public static Configuration makeDefaultOfbizConfig() throws TemplateException, IOException {
         Configuration config = new Configuration();
-        config.setObjectWrapper(BeansWrapper.getDefaultInstance());
+        config.setObjectWrapper(FreeMarkerWorker.getDefaultOfbizWrapper());
         config.setSetting("datetime_format", "yyyy-MM-dd HH:mm:ss.SSS");
         Configuration defaultOfbizConfig = config;
         return defaultOfbizConfig;
