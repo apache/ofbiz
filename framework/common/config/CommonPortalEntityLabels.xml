@@ -134,6 +134,127 @@
         <value xml:lang="fr">idem component, il représente un groupe de subComponent (par ex : pour regrouper les fichiers dans un sous répertoire) (optionnel)</value>
     </property>
     <!--#Eam# portletWidget -->
+    <!--#Bam# icons-purpose -->
+    <property key="PortalPage.portalPageName.IconsList">
+        <value xml:lang="en">List all icons usable in portlets</value>
+        <value xml:lang="fr">Liste des icônes utilisables dans les portlets</value>
+    </property>
+    <!--#Eam# icons-purpose -->
+
+    <!--#Bam# portletExample -->
+    <property key="PortalPage.portalPageName.ExampleFeatureNew">
+        <value xml:lang="en">Example Features Creation</value>
+        <value xml:lang="fr">Créer des caractéristiques</value>
+    </property>
+    <property key="PortalPage.portalPageName.ExampleRecap">
+        <value xml:lang="en">One example (RecapPage)</value>
+        <value xml:lang="fr">Un exemple (RecapPage)</value>
+    </property>
+    <property key="PortalPage.portalPageName.ExampleMgmt">
+        <value xml:lang="en">Examples management (MgmtPage)</value>
+        <value xml:lang="fr">Gestion des exemples (MgmtPage)</value>
+    </property>
+    <property key="PortalPage.portalPageName.ExampleNew">
+        <value xml:lang="en">Create a new example (NewPage)</value>
+        <value xml:lang="fr">Créer un nouvel exemple (NewPage)</value>
+    </property>
+    <property key="PortalPortlet.description.CreateExample">
+        <value xml:lang="en">portlet (screenlet type) to create Example and associated entities</value>
+        <value xml:lang="fr">portlet (type Screenlet) de création d'un exemple et ses entités secondaires</value>
+    </property>
+    <property key="PortalPortlet.description.ExampleDetailsMenu">
+        <value xml:lang="en">Example summary and menu to see all details portlet in the ExampleDetail container</value>
+        <value xml:lang="fr">portlet(type Screenlet) de résumé et menus liés à un exemple, et utilisant une portlet de contener de détails (ici ExampleDetail)</value>
+    </property>
+    <property key="PortalPortlet.description.ExampleDetail">
+        <value xml:lang="en">Use this portlet (Empty type) to say where detail portlet call from a menu will be show</value>
+        <value xml:lang="fr">portlet (type Empty) servant de contener aux portlets de détails d'un exemple (commandé par le menu de la portlet ExampleDetailsMenu)</value>
+    </property>
+    <property key="PortalPortlet.description.ExampleFeatureAppls">
+        <value xml:lang="en">List all ExampleFeatureAppls for one example, sub-portlet simple (Screenlet type, not list, to be able to add an external menu)</value>
+        <value xml:lang="fr">portlet listant les associations de caractéristiques d'exemple (type Screenlet, bien qu'utilisant une liste, pour pouvoir ajouter un menu externe)</value>
+    </property>
+    <property key="PortalPortlet.description.ExampleItems">
+        <value xml:lang="en">portlet (screenletList type) to list and manage example items</value>
+        <value xml:lang="fr">portlet (type ScreenletList) de gestion des lignes d'un exemple (affiche la liste et le menu)</value>
+    </property>
+    <property key="PortalPortlet.description.ExampleStatus">
+        <value xml:lang="en">List all ExampleStatus for one example (portlet which use portletType and showPortlet)</value>
+        <value xml:lang="fr">Liste tous les (évolution de) statuts de l'exemple (portlet utilisant un modéle de portlet et showPortlet)</value>
+    </property>
+    <property key="PortalPortlet.description.FindExample">
+        <value xml:lang="en">portlet to define search criteria for Example list</value>
+        <value xml:lang="fr">portlet (type Screenlet) de critères de recherche pour la liste des exemples</value>
+    </property>
+    <property key="PortalPortlet.description.FindExampleFeature">
+        <value xml:lang="en">portlet to define search criteria for ExampleFeature list</value>
+        <value xml:lang="fr">portlet (type Screenlet) de critères de recherche pour la liste des caractéristiques d'exemple</value>
+    </property>
+    <property key="PortalPortlet.description.ListExample">
+        <value xml:lang="en">portlet to list example depending on search criteria, this portlet is call by FindExample</value>
+        <value xml:lang="fr">portlet (type ScreenletList) listant des exemples selon les critères de recherche fournis par une portlet de recherche (ici FindExample)</value>
+    </property>
+    <property key="PortalPortlet.description.ListExampleFeature">
+        <value xml:lang="en">portlet to list example features depending on search criteria</value>
+        <value xml:lang="fr">portlet (type ScreenletList) listant des caractéristique d'exemples selon les critères de recherche fournis par une portlet de recherche (ici FindExampleFeature)</value>
+    </property>
+    <property key="PortalPortlet.description.SelectExample">
+        <value xml:lang="en">portlet to select example id for overview page</value>
+        <value xml:lang="fr">portlet (type Screenlet) de sélection d'une entité pour une page de visualisation</value>
+    </property>
+    <property key="PortalPortlet.description.ShowExample">
+        <value xml:lang="en">portlet (Screenlet type) to display/edit main entity record (here, example)</value>
+        <value xml:lang="fr">portlet (type Screenlet) de visualisation/modification d'une entité majeure (ici, exemple)</value>
+    </property>
+    <property key="PortalPortlet.portletName.CreateExample">
+        <value xml:lang="en">Create Example Form</value>
+        <value xml:lang="fr">Créer un exemple</value>
+    </property>
+    <property key="PortalPortlet.portletName.ExampleDetailsMenu">
+        <value xml:lang="en">Example summary and details menu (DetailsMenu)</value>
+        <value xml:lang="fr">Résumé et menus associés pour un exemple (DetailsMenu)</value>
+    </property>
+    <property key="PortalPortlet.portletName.ExampleDetail">
+        <value xml:lang="en">Container to show Example portlet detail</value>
+        <value xml:lang="fr">Contener utilisé pour afficher des portlets de détails pour un exemple</value>
+    </property>
+    <property key="PortalPortlet.portletName.ExampleFeatureAppls">
+        <value xml:lang="en">Example Feature Application</value>
+        <value xml:lang="fr">Association de caractéristiques à un exemple</value>
+    </property>
+    <property key="PortalPortlet.portletName.ExampleItems">
+        <value xml:lang="en">List and manage exampleItems</value>
+        <value xml:lang="fr">Listes des lignes d'exemple</value>
+    </property>
+    <property key="PortalPortlet.portletName.ExampleStatus">
+        <value xml:lang="en">List ExampleStatus</value>
+        <value xml:lang="fr">Liste des statuts de l'exemple</value>
+    </property>
+    <property key="PortalPortlet.portletName.FindExample">
+        <value xml:lang="en">Find Example</value>
+        <value xml:lang="fr">Rechercher un exemple</value>
+    </property>
+    <property key="PortalPortlet.portletName.FindExampleFeature">
+        <value xml:lang="en">Find Example Features</value>
+        <value xml:lang="fr">Rechercher des caractéristiques d'exemple</value>
+    </property>
+    <property key="PortalPortlet.portletName.ListExample">
+        <value xml:lang="en">List Examples</value>
+        <value xml:lang="fr">Liste des exemples</value>
+    </property>
+    <property key="PortalPortlet.portletName.ListExampleFeature">
+        <value xml:lang="en">List Example Features</value>
+        <value xml:lang="fr">Liste les caractéristiques d'exemple</value>
+    </property>
+    <property key="PortalPortlet.portletName.SelectExample">
+        <value xml:lang="en">Select one Example</value>
+        <value xml:lang="fr">Sélectionner un exemple</value>
+    </property>
+    <property key="PortalPortlet.portletName.ShowExample">
+        <value xml:lang="en">Display Example (all fields)</value>
+        <value xml:lang="fr">Montrer un exemple (tous les champs)</value>
+    </property>
+    <!--#Eam# portletExample -->
     <property key="PortalPage.portalPageName.MYPORTAL_EMPLOYEE">
         <value xml:lang="en">Main</value>
         <value xml:lang="es">Principal</value>
@@ -191,4 +312,10 @@
         <value xml:lang="zh_CN">仓储设施</value>
         <value xml:lang="zh_TW">場所</value>
     </property>
+    <!--#Bam# icons-purpose -->
+    <property key="PortalPortlet.portletName.IconsList">
+        <value xml:lang="en">List all icons usable in portlets</value>
+        <value xml:lang="fr">Liste des icônes utilisables dans les portlets</value>
+    </property>
+    <!--#Eam# icons-purpose -->
 </resource>

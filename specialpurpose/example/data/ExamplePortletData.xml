@@ -32,6 +32,12 @@ under the License.
         screenName="ExamplePortlet3" screenLocation="component://example/widget/example/PortletScreens.xml"
         editFormName="ExamplePortlet3Edit" editFormLocation="component://example/widget/example/PortletEditForms.xml"/>
 
+    <PortalPortlet portalPortletId="IconsList" portletName="List all icons usable in portlet with iconsPurpose and IconsTooltips_" 
+        description="List all icons usable in portlet with iconsPurpose and IconsTooltips_"
+        portletTypeId="Screenlet" component="example" subComponent="Example" webapp="example"
+        uiLabelLocation="component://example/widget/CommonScreens.xml"/>
+    <PortletPortletCategory portalPortletId="IconsList" portletCategoryId="EXAMPLE"/>
+
     <PortletCategory portletCategoryId="EXAMPLE" description="Example Portlet(s)"/>
     <PortletPortletCategory portalPortletId="EXAMPLE_1" portletCategoryId="EXAMPLE"/>
     <PortletPortletCategory portalPortletId="EXAMPLE_2" portletCategoryId="EXAMPLE"/>
