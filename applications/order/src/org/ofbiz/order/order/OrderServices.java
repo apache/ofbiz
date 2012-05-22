@@ -937,10 +937,9 @@ public class OrderServices {
         // store the orderProductPromoCodes
         Set orderProductPromoCodes = (Set) context.get("orderProductPromoCodes");
         if (UtilValidate.isNotEmpty(orderProductPromoCodes)) {
-            GenericValue orderProductPromoCode = delegator.makeValue("OrderProductPromoCode");
             Iterator orderProductPromoCodeIter = orderProductPromoCodes.iterator();
             while (orderProductPromoCodeIter.hasNext()) {
-                orderProductPromoCode.clear();
+                GenericValue orderProductPromoCode = delegator.makeValue("OrderProductPromoCode");
                 orderProductPromoCode.set("orderId", orderId);
                 orderProductPromoCode.set("productPromoCodeId", orderProductPromoCodeIter.next());
                 toBeStored.add(orderProductPromoCode);
