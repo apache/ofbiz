@@ -2112,30 +2112,6 @@ public class OrderServices {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,"OrderYouDoNotHavePermissionToChangeThisOrdersStatus",locale));
         }
 
-        if ("Y".equals(context.get("setItemStatus"))) {
-            String newItemStatusId = null;
-            if ("ORDER_APPROVED".equals(statusId)) {
-                newItemStatusId = "ITEM_APPROVED";
-            } else if ("ORDER_COMPLETED".equals(statusId)) {
-                newItemStatusId = "ITEM_COMPLETED";
-            } else if ("ORDER_CANCELLED".equals(statusId)) {
-                newItemStatusId = "ITEM_CANCELLED";
-            }
-
-            if (newItemStatusId != null) {
-                try {
-                    Map resp = dispatcher.runSync("changeOrderItemStatus", UtilMisc.<String, Object>toMap("orderId", orderId, "statusId", newItemStatusId, "userLogin", userLogin));
-                    if (ServiceUtil.isError(resp)) {
-                        return ServiceUtil.returnError("Error changing item status to " + newItemStatusId, null, null, resp);
-                    }
-                } catch (GenericServiceException e) {
-                    String errMsg = "Error changing item status to " + newItemStatusId + ": " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    return ServiceUtil.returnError(errMsg);
-                }
-            }
-        }
-
         try {
             GenericValue orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
 
@@ -2144,6 +2120,7 @@ public class OrderServices {
             }
             // first save off the old status
             successResult.put("oldStatusId", orderHeader.get("statusId"));
+            successResult.put("orderTypeId", orderHeader.get("orderTypeId"));
 
             if (Debug.verboseOn()) Debug.logVerbose("[OrderServices.setOrderStatus] : From Status : " + orderHeader.getString("statusId"), module);
             if (Debug.verboseOn()) Debug.logVerbose("[OrderServices.setOrderStatus] : To Status : " + statusId, module);
@@ -2178,7 +2155,6 @@ public class OrderServices {
 
             successResult.put("needsInventoryIssuance", orderHeader.get("needsInventoryIssuance"));
             successResult.put("grandTotal", orderHeader.get("grandTotal"));
-            successResult.put("orderTypeId", orderHeader.get("orderTypeId"));
             //Debug.logInfo("For setOrderStatus orderHeader is " + orderHeader, module);
         } catch (GenericEntityException e) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,"OrderErrorCouldNotChangeOrderStatus",locale) + e.getMessage() + ").");
@@ -2191,6 +2167,30 @@ public class OrderServices {
             // cancel any order processing if we are cancelled
             if ("ORDER_CANCELLED".equals(statusId)) {
                 OrderChangeHelper.abortOrderProcessing(ctx.getDispatcher(), orderId);
+            }
+        }
+
+        if ("Y".equals(context.get("setItemStatus"))) {
+            String newItemStatusId = null;
+            if ("ORDER_APPROVED".equals(statusId)) {
+                newItemStatusId = "ITEM_APPROVED";
+            } else if ("ORDER_COMPLETED".equals(statusId)) {
+                newItemStatusId = "ITEM_COMPLETED";
+            } else if ("ORDER_CANCELLED".equals(statusId)) {
+                newItemStatusId = "ITEM_CANCELLED";
+            }
+
+            if (newItemStatusId != null) {
+                try {
+                    Map resp = dispatcher.runSync("changeOrderItemStatus", UtilMisc.<String, Object>toMap("orderId", orderId, "statusId", newItemStatusId, "userLogin", userLogin));
+                    if (ServiceUtil.isError(resp)) {
+                        return ServiceUtil.returnError("Error changing item status to " + newItemStatusId, null, null, resp);
+                    }
+                } catch (GenericServiceException e) {
+                    String errMsg = "Error changing item status to " + newItemStatusId + ": " + e.toString();
+                    Debug.logError(e, errMsg, module);
+                    return ServiceUtil.returnError(errMsg);
+                }
             }
         }
 
