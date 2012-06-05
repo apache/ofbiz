@@ -828,7 +828,7 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
                 } 
                 ajaxParams += extraParams; 
             } 
-            if(UtilValidate.isNotEmpty(parameters)){ 
+            if(parameters!=null){ 
                 if(UtilValidate.isEmpty(ajaxParams)){ 
                     ajaxParams = ""; 
                 } 

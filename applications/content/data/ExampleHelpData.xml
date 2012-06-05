@@ -84,8 +84,8 @@
         objectInfo="framework/example/data/helpdata/HELP_EXAMPLE_pages.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Use of Portal Page" mimeTypeId="text/xml" isPublic="Y" />
     <Content contentId="EXAMPLE_pages" contentTypeId="DOCUMENT" contentName="Use of Portal Page" templateDataResourceId="HELP_TEMPL" dataResourceId="EXAMPLE_pages" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
     <DataResource dataResourceId="EXAMPLE_pages_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" 
-        objectInfo="framework/example/data/helpdata/HELP_EXAMPLE_pages_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Pages portails type" mimeTypeId="text/xml" isPublic="Y" />
-    <Content contentId="EXAMPLE_pages_FR" contentTypeId="DOCUMENT" contentName="Pages portails type" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="EXAMPLE_pages_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+        objectInfo="framework/example/data/helpdata/HELP_EXAMPLE_pages_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Utilisation des pages portail" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="EXAMPLE_pages_FR" contentTypeId="DOCUMENT" contentName="Utilisation des pages portail" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="EXAMPLE_pages_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
     <ContentAssoc contentId="EXAMPLE_pages" contentIdTo="EXAMPLE_pages_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
 
     <DataResource dataResourceId="EXAMPLE_portlets" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
@@ -232,9 +232,9 @@
           <ContentAssoc contentId="EXAMPLE_pages" contentIdTo="HELP_PPAGE_MGMT" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="000" mapKey="HELP_PPAGE_MGMT"/>
         <ContentAssoc contentId="EXAMPLE_devel" contentIdTo="EXAMPLE_portlets" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="002" mapKey="EXAMPLE_portlets"/>
           <ContentAssoc contentId="EXAMPLE_portlets" contentIdTo="HELP_portletcats" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="001" mapKey="HELP_portletcats"/>
-          <ContentAssoc contentId="EXAMPLE_portlets" contentIdTo="HELP_portletattrs" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="001" mapKey="HELP_portletattrs"/>
-          <ContentAssoc contentId="EXAMPLE_portlets" contentIdTo="HELP_iconsList" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="002" mapKey="HELP_iconsList"/>
-          <ContentAssoc contentId="EXAMPLE_portlets" contentIdTo="HELP_portlettypes" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="003" mapKey="HELP_portlettypes"/>
+          <ContentAssoc contentId="EXAMPLE_portlets" contentIdTo="HELP_portletattrs" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="002" mapKey="HELP_portletattrs"/>
+          <ContentAssoc contentId="EXAMPLE_portlets" contentIdTo="HELP_iconsList" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="003" mapKey="HELP_iconsList"/>
+          <ContentAssoc contentId="EXAMPLE_portlets" contentIdTo="HELP_portlettypes" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="004" mapKey="HELP_portlettypes"/>
             <ContentAssoc contentId="HELP_portlettypes" contentIdTo="HELP_Screenlet" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="001" mapKey="HELP_Screenlet"/>
             <ContentAssoc contentId="HELP_portlettypes" contentIdTo="HELP_ScreenletList" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="002" mapKey="HELP_ScreenletList"/>
             <ContentAssoc contentId="HELP_portlettypes" contentIdTo="HELP_Empty" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="003" mapKey="HELP_Empty"/>

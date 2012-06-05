@@ -36,4 +36,7 @@
   <PortletType portletTypeId="ScreenletList" screenName="ScreenletList" description="include a list type form (do not use screenName) and an editing area, depending of scriptName and menuName exist a screen with call (or not) scriptName in action and include a screenlet with include formName and include (or not) menuName" screenLocation="component://common/widget/PortletTypeScreens.xml"/>
   <PortletType portletTypeId="Empty" screenName="Empty" description="a empty screen, used to define a areaId" screenLocation="component://common/widget/PortletTypeScreens.xml"/>
   <!--#Eam# portletWidget -->
+  <!--#Bam# portletExample can be use for all portal page build like exampleMgmt-->
+  <PortalPortlet portalPortletId="CommonDetail" portletName="Common detail portlet place" description="Use this portlet to say where detail portlet call from a menu will be show" portletTypeId="Empty" component="common" subComponent="Common" securityServiceName="" securityMainAction="VIEW"/>
+  <!--#Eam# portletExample -->
 </entity-engine-xml>

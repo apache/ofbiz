@@ -17,23 +17,25 @@ License.
     version="5.0" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
     xsi:schemaLocation="http://docbook.org/ns/docbook"
     xmlns="http://docbook.org/ns/docbook">
-    <title>Icons list available in OFBIz</title>
+    <title>Attributs d'une portlet</title>
 
-       <para> Icons are useful to make the user interface nicer. </para>
-       <para> To ensure consistency in the application, a logical name was given to each icon and it is advisable to use it. </para>
-       <para> To be able to change icon sets based on themes, it is advisable not access online the image file but to go through the appropriate properties files. </para>
+      <para>Les portlet utilisent des attributs pour permettre de rendre configurable cette portlet.</para>
+      <para>En effet, plus une porlet est configurable, plus il sera aisée de l'utiliser dans un autre contexte, sur une autre page.</para>
       <para>&amp;nbsp;</para>
 
     <section>
-      <title>How to used icon in a link or show-portlet</title>
-      <para>Below is a "Details" icon usage example
+      <title>Gestion des attributs</title>
+      <para>Un exemple d'attributs standard fixé lors de la configuration : l'attribut "initiallyCollapsed" est un attribut générique utilisé par les types de portlets Screenlet et ScreenletList 
+            pour déterminer si la screenlet sera initialement fermée ou ouverte. Ici, on configure sa valeur pour une page portail et une portlet données.
         <programlisting>
-    &amp;lt;show-portlet portlet-id="ShowExample" image-location="${iconsPurpose.Details}" 
-                                                  image-title="${uiLabelMap.IconsTooltips_Details}">
+          &amp;lt;PortletAttribute portalPageId="ExampleNew" portalPortletId="FindExample2" attrName="initiallyCollapsed" attrValue="true" portletSeqId="00001"/>
         </programlisting>
       </para>
-      <para> In this page it is stated in the first column: the logical name of the icon (in the example above Details). </para>
-      <para> Second column is indicated,  which will be displayed as an "image-title" So when the mouse is over the icon, or in some case what is good practice to use. </para>
-      <para> If you leave the mouse on the image of the icon you have the default "image-title". </para>
+      <para>Ensuite, on peut créer son propre attribut qui sera utilisé par le script (par exemple) pour rechercher une liste (par exemple une liste d'acteurs avec un rôle défini).
+            Ainsi, on pourra utiliser la portlet pour différentes valeurs de cet attributs (par exemple, une portlet acteur permet de filtrer sur des propects, des employés,...).
+        <programlisting>
+          &amp;lt;PortletAttribute portalPageId="ExampleMgmt" portalPortletId="ListExample2" attrName="roleTypeId" attrValue="VENDOR" portletSeqId="00001"/>
+        </programlisting>
+      </para>
     </section>
 </section>

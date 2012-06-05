@@ -32,12 +32,6 @@ under the License.
         screenName="ExamplePortlet3" screenLocation="component://example/widget/example/PortletScreens.xml"
         editFormName="ExamplePortlet3Edit" editFormLocation="component://example/widget/example/PortletEditForms.xml"/>
 
-    <PortalPortlet portalPortletId="IconsList" portletName="List all icons usable in portlet with iconsPurpose and IconsTooltips_" 
-        description="List all icons usable in portlet with iconsPurpose and IconsTooltips_"
-        portletTypeId="Screenlet" component="example" subComponent="Example" webapp="example"
-        uiLabelLocation="component://example/widget/CommonScreens.xml"/>
-    <PortletPortletCategory portalPortletId="IconsList" portletCategoryId="EXAMPLE"/>
-
     <PortletCategory portletCategoryId="EXAMPLE" description="Example Portlet(s)"/>
     <PortletPortletCategory portalPortletId="EXAMPLE_1" portletCategoryId="EXAMPLE"/>
     <PortletPortletCategory portalPortletId="EXAMPLE_2" portletCategoryId="EXAMPLE"/>
@@ -137,7 +131,4 @@ under the License.
     <PortletPortletCategory portalPortletId="ListExampleFeature" portletCategoryId="EXAMPLE_PORTLET_TYPE"/>
      <!-- End Addon modification portletExample -->
 
-<!--#Bam# portletExample can be use for all portal page build like exampleMgmt-->
-<PortalPortlet portalPortletId="CommonDetail" portletName="Common detail portlet place" description="Use this portlet to say where detail portlet call from a menu will be show" portletTypeId="Empty" component="common" subComponent="Common" securityServiceName="" securityMainAction="VIEW"/>
-<!--#Eam# portletExample -->
 </entity-engine-xml>
