@@ -37,6 +37,53 @@ under the License.
         <field name="pageId" required-field="true"><text/></field>
         <field name="submit" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
+    <!--#Bam# portletEditForm  -->
+    <!-- use by portlet throws an extend form-->
+    <!-- mgmtPageId : portal page with research and quick vision -->
+    <!-- recapPageId : portal page to see associate data -->
+    <!-- newPageId : portal page to create new entity value -->
+    <!-- targetPageId : portal page to retrieve information present on calling portlet -->
+    <form name="CommonListPageParam" extends="CommonPortletEdit">
+        <field name="mgmtPageId"><lookup target-form-name="LookupPortalPage"/></field>
+        <field name="newPageId"><lookup target-form-name="LookupPortalPage"/></field>
+        <field name="recapPageId"><lookup target-form-name="LookupPortalPage"/></field>
+    </form>
+    <form name="CommonMgmtPageParam" extends="CommonPortletEdit">
+        <field name="mgmtPageId"><lookup target-form-name="LookupPortalPage"/></field>
+    </form>
+    <form name="CommonRecapPageParam" extends="CommonPortletEdit">
+        <field name="recapPageId"><lookup target-form-name="LookupPortalPage"/></field>
+    </form>
+    <form name="CommonTargetPageParam" extends="CommonPortletEdit">
+        <field name="targetPageId"><lookup target-form-name="LookupPortalPage"/></field>
+    </form>
+    <!--#Bam# use directly by portlet without extends form-->
+    <form name="GenericMgmtPageParam" extends="CommonMgmtPageParam">
+        <field name="submit" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="GenericRecapPageParam" extends="CommonRecapPageParam">
+        <field name="submit" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="GenericSelectPageParam" extends="CommonPortletEdit">
+        <field name="lookupName"><text/></field>
+        <field name="submit" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="GenericFindPageParam" extends="CommonTargetPageParam">
+        <field name="submit" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="GenericListPageParam" extends="CommonListPageParam">
+        <field name="submit" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="GenericShowMenu" extends="CommonPortletEdit">
+        <field name="showMenu"><radio><option key="Y"/><option key="N"/></radio></field>
+        <field name="submit" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="GenericEditEditOrShowParam" extends="CommonPortletEdit">
+        <field name="showEditButton"><radio><option key="Y"/><option key="N"/></radio></field>
+        <field name="showScreenletMenu"><radio><option key="Y"/><option key="N"/></radio></field>
+        <field name="submit" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <!--#Eam# portletEditForm  -->
     <form name="FindGenericEntityParam" extends="CommonPortletEdit">
         <field name="titleLabel" required-field="true"><text/></field>
         <field name="entity" required-field="true"><text/></field>

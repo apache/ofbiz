@@ -11238,6 +11238,10 @@
         <value xml:lang="zh">行小计</value>
         <value xml:lang="zh-TW">行小計</value>
     </property>
+    <property key="FormFieldTitle_lookupName">
+        <value xml:lang="en">URI to used for lookup</value>
+        <value xml:lang="fr">URI à utiliser pour le lookup</value>
+    </property>
     <property key="FormFieldTitle_maxRecurrenceCount">
         <value xml:lang="de">Maximale Wiederholungen</value>
         <value xml:lang="en">Max Recurrence Count</value>
@@ -11248,6 +11252,10 @@
         <value xml:lang="pt-BR">Contagem de Recorrências Máxima</value>
         <value xml:lang="zh">最大并发数量</value>
         <value xml:lang="zh-TW">最大並發數量</value>
+    </property>
+    <property key="FormFieldTitle_mgmtPageId">
+        <value xml:lang="en">portal Page Id for Mgmt</value>
+        <value xml:lang="fr">Id. de la page portail management</value>
     </property>
     <property key="FormFieldTitle_modifiedByUserLoginId">
         <value xml:lang="de">Geändert von Benutzer-Id</value>
@@ -11260,6 +11268,10 @@
         <value xml:lang="vi">Chỉnh chửa bởi người dùng</value>
         <value xml:lang="zh">由用户登录标识修改</value>
         <value xml:lang="zh-TW">修改的使用者</value>
+    </property>
+    <property key="FormFieldTitle_newPageId">
+        <value xml:lang="en">portal Page Id for Create</value>
+        <value xml:lang="fr">Id. de la page portail création</value>
     </property>
     <property key="FormFieldTitle_originalPortalPageId">
         <value xml:lang="de">Originalseite</value>
@@ -11342,6 +11354,10 @@
         <value xml:lang="vi">Số lượng</value>
         <value xml:lang="zh">数量</value>
         <value xml:lang="zh-TW">數量</value>
+    </property>
+    <property key="FormFieldTitle_recapPageId">
+        <value xml:lang="en">portal Page Id for Recap</value>
+        <value xml:lang="fr">Id. de la page portail récapitulative</value>
     </property>
     <property key="FormFieldTitle_rejectButton">
         <value xml:lang="ar">إضافة</value>
@@ -11443,6 +11459,14 @@
         <value xml:lang="zh">序号数字</value>
         <value xml:lang="zh-TW">序號數</value>
     </property>
+    <property key="FormFieldTitle_showEditButton">
+        <value xml:lang="en">Show Add, Update, Delete button (or icon) in screenlet bar</value>
+        <value xml:lang="fr">Afficher les bouttons (ou l'icônes) de gestion (ajout, modifier, supprimer</value>
+    </property>
+    <property key="FormFieldTitle_showMenu">
+        <value xml:lang="en">Display screenlet menu (Y/N)</value>
+        <value xml:lang="fr">Afficher le menu de la portlet (Y/N)</value>
+    </property>
     <property key="FormFieldTitle_statusId">
         <value xml:lang="ar">دليل الوضعية</value>
         <value xml:lang="de">Status ID</value>
@@ -11477,6 +11501,10 @@
         <value xml:lang="vi">Tiến hành</value>
         <value xml:lang="zh">提交</value>
         <value xml:lang="zh-TW">提交</value>
+    </property>
+    <property key="FormFieldTitle_targetPageId">
+        <value xml:lang="en">Target portal Page Id</value>
+        <value xml:lang="fr">Id. de la page portail cible</value>
     </property>
     <property key="FormFieldTitle_taxAuthGeoId">
         <value xml:lang="ar">الرمز الجغرافي للسلطة الضريبية</value>

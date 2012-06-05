@@ -56,7 +56,7 @@ under the License.
     <!-- Use directly a form (no screen for default value, only form, see ShowPortalPortlet view) -->
     <PortalPortlet portalPortletId="ListExample"
        portletName="List Examples (with portletType and showPortlet)" description="portlet to list example depending on search criteria, this portlet is call by FindExample"
-       portletTypeId="ScreenletList" component="example" subComponent="Example" useScript="Y" helpName="HELP_ScreenletList"/>
+       portletTypeId="ScreenletList" component="example" subComponent="Example" useScript="Y" helpName="HELP_ScreenletList" editFormName="GenericRecapPageParam" editFormLocation="component://common/widget/PortletEditForms.xml"/>
 
     <!-- Use a screen (default value name, see ShowPortalPortlet view) -->
     <PortalPortlet portalPortletId="ExampleDetailsMenu" 
