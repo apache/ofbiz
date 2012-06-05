@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements. See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to you under the Apache License, Version
+2.0 (the "License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+applicable law or agreed to in writing, software distributed under the
+License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for
+the specific language governing permissions and limitations under the
+License.
+-->
+<section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    version="5.0" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
+    xsi:schemaLocation="http://docbook.org/ns/docbook"
+    xmlns="http://docbook.org/ns/docbook">
+  <title>Portlet de type ScreenletList</title>
+  
+  <para>Ce type de portlet est utilisé lorsque l'on a besoin d'une liste. En effet, les listes imposent, du fait du système de pagination, 
+  d'utiliser un form comme contenu. Ainsi il faut simplement créer le Form en respectant les règles de nommages.
+  </para>
+  <para>Usage classique : gérer une liste d'enregistrement avec possibilité de les éditer.</para>
+
+  <para>Lorsqu'on crée une nouvelle porlet, il faut définir un certain nombre de champs pour garantir son fonctionnement et sa réutilisation.</para>
+  <para>Il faut réfléchir à quel composant se rattache cette portlet et ses fonctionnalités. Une fois le composant et sous-composant identifiés,
+        il faut decrire la fonction de la portlet du mieux possible.</para>
+  <para>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="/example/images/ScreenletList.png"/>
+      </imageobject>
+      <textobject><phrase>ScreenletList</phrase></textobject>
+    </mediaobject>
+  </para>
+
+  <section>
+    <title>Champ génériques de l'entité PortalPortlet</title>
+    <itemizedlist>
+      <listitem><para>portalPortletId : identifiant de la portlet, max. 20 carac.</para></listitem>
+      <listitem><para>portletLongId : identifiant complémentaire, max. 60 carac.</para></listitem>
+      <listitem><para>portletTypeId : renseigner avec le type choisi, ici, ScreenletList</para></listitem>
+      <listitem><para>portletName : descrition courte, penser aux labels de traductions dans CommonPortalEntityLabels.xml</para></listitem>
+      <listitem><para>descrition : descrition longue, penser aux labels de traductions dans CommonPortalEntityLabels.xml</para></listitem>
+      <listitem><para>component : nom du composant, à renseigner pour générer les valeurs par défaut utilisées par le type de portlet</para></listitem>
+      <listitem><para>subComponent : nom du sous-composant, à renseigner pour générer les valeurs par défaut utilisées par le type de portlet</para></listitem>
+      <listitem><para>webapp : à renseigner lorsqu'on utilise des sous-répertoire dans le sous composant</para></listitem>
+      <listitem><para>screenshot : image png de la portlet</para></listitem>
+    </itemizedlist>
+    <para>Ensuite, on peut utilisés les champs complémentaires ou optionnels.</para>
+    <tip>
+      <para>Avec les champs component et subcomponent renseignés, il y aura des valeurs par défaut pour beaucoup des autres champs.</para>
+    </tip>
+  </section>
+
+  <section>
+    <title>Champ de l'entité PortalPortlet utilisés par type Screenlet (à renseigner uniquement si valeur spécifique)</title>
+    <itemizedlist>
+      <listitem><para>titleLabel : titre à afficher</para></listitem>
+      <listitem><para>formName : optionnel, dépend du champ useScreen, il est toujours utilisé</para></listitem>
+      <listitem><para>formLocation : voir ci-dessus</para></listitem>
+      <listitem><para>useScreen</para></listitem>
+      <listitem><para>screenName : optionnel, s'il est présent, il sera utilisé en plus de la form</para></listitem>
+      <listitem><para>screenLocation : voir ci-dessus</para></listitem>
+      <listitem><para>useMenu</para></listitem>
+      <listitem><para>menuName : ajout d'un menu en haut à droite de la screenlet, il est utilisé si useMenu est Y</para></listitem>
+      <listitem><para>menuLocation : voir ci-dessus</para></listitem>
+      <listitem><para>editAreaDivId : zone d'édition en haut du screen ou du form utilisé, premet d'injecter du contenu (via le menu, par exemple)</para></listitem>
+      <listitem><para>subAreaDivId : zone contenant le screen ou le form utilisé, permet de remplacer le contenu de cette zone (via le menu, par exemple)</para></listitem>
+      <listitem><para>useScript</para></listitem>
+      <listitem><para>scriptName, il est utilisé si useScript est Y </para></listitem>
+      <listitem><para>pkIdname</para></listitem>
+    </itemizedlist>
+    <para>Par défaut ce type de portlet est réductible avec save-collapsed="true"</para>
+    <tip>
+      <para>Pour plus d'information voir l'aide détaillé des <link xl:href="showHelp?helpTopic=portletfields">champs d'une portlet</link></para>
+      <para>Lors de la réalisation d'une portlet, en cas de doute, il est possible de visualiser les valeurs par défaut généré, via la page
+         <link xl:href="/webtools/control/ShowPortalPortlet">ShowPortalPortlet</link> dans Adm. Sys</para>
+    </tip>
+  </section>
+
+  <section>
+    <title>Les attribues génériques possible</title>
+    <itemizedlist>
+      <listitem><para>collapsible : si vide c'est true <emphasis role="warning">non opérationnel : true pour le moment</emphasis></para></listitem>
+      <listitem><para>saveCollapsed : si vide c'est true <emphasis role="warning">non opérationnel : true pour le moment</emphasis></para></listitem>
+      <listitem><para>initiallyCollapsed : si vide c'est false</para></listitem>
+    </itemizedlist>
+  </section>
+
+  <section>
+    <title>Liens complémentaires</title>
+    <itemizedlist>
+      <listitem><para>Voir <link xl:href="showHelp?helpTopic=AllPortletType">tous les Types de portlet et les champs</link></para></listitem>
+      <listitem><para>Voir <link xl:href="showHelp?helpTopic=portletfields">la liste complète des champs et leur description</link></para></listitem>
+    </itemizedlist>
+  </section>
+  
+</section>

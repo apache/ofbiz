@@ -1681,16 +1681,16 @@ public abstract class ModelScreenWidget extends ModelWidget {
                 if (UtilValidate.isNotEmpty(portalPortletId)) {
                     GenericValue portletValue = null;
                     if ( UtilValidate.isNotEmpty(portletSeqId)) {
-                        portletValue = delegator.findByPrimaryKey("PortalPagePortletView", UtilMisc.toMap("portalPageId", actualPortalPageId, "portalPortletId", portalPortletId, "portletSeqId", portletSeqId));
+                        portletValue = delegator.findOne("PortalPagePortletView", UtilMisc.toMap("portalPageId", actualPortalPageId, "portalPortletId", portalPortletId, "portletSeqId", portletSeqId), false);
                     } else {
-                        List<GenericValue> portletValues = delegator.findByAnd("PortalPagePortletView", UtilMisc.toMap("portalPageId", actualPortalPageId, "portalPortletId", portalPortletId));
+                        List<GenericValue> portletValues = delegator.findByAnd("PortalPagePortletView", UtilMisc.toMap("portalPageId", actualPortalPageId, "portalPortletId", portalPortletId), null, false);
                         if (UtilValidate.isNotEmpty(portletValues)) {
                             portletValue = EntityUtil.getFirst(portletValues);
                             portletSeqId = portletValue.getString("portletSeqId");
                         }
                     }
                     if ( UtilValidate.isEmpty(portletValue)) {
-                        portletValue = delegator.findByPrimaryKey("PortalPortlet", UtilMisc.toMap("portalPortletId", portalPortletId));
+                        portletValue = delegator.findOne("PortalPortlet", UtilMisc.toMap("portalPortletId", portalPortletId), false);
                     }
 
                     if (UtilValidate.isNotEmpty(portletValue)) {
@@ -1868,7 +1868,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
             String portalPortletId = (String) context.get("portalPortletId");
             GenericValue portletValue = (GenericValue) context.remove("portletValue");
             if (UtilValidate.isEmpty(portletValue)) {
-                portletValue = delegator.findByPrimaryKey("PortalPortlet", UtilMisc.toMap("portalPortletId", portalPortletId));
+                portletValue = delegator.findOne("PortalPortlet", UtilMisc.toMap("portalPortletId", portalPortletId), false);
             }
             String portletSeqId= (String) context.get("portletSeqId");
 

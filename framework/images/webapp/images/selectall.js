@@ -269,7 +269,7 @@ function ajaxUpdateAreas(areaCsvString) {
         // not nice but works
         targetParams = targetParams.replace('#','');
         targetParams = targetParams.replace('?','');
-        /*Begin addon modification portletWidget wait-spinner working*/
+        /*#Bam# portletWidget wait-spinner working*/
         var UPDATE_OP = {};
         UPDATE_OP.areaId = areaId;
         UPDATE_OP.target = target;
@@ -302,7 +302,7 @@ function ajaxUpdateAreas(areaCsvString) {
             error: function(data) {waitSpinnerHide()}
         });
         */
-        /*Begin addon modification portletWidget wait-spinner working*/
+        /*#Eam# portletWidget wait-spinner working*/
     }
 }
 
@@ -378,7 +378,7 @@ function ajaxSubmitFormUpdateAreas(form, areaCsvString) {
        jQuery('#content-messages').remove();
    }
    updateFunction = function(data) {
-       /*Begin addon modification genericPortlet*/
+       /*#Bam# portletWidget*/
        if ((data._ERROR_MESSAGE_LIST_ != undefined || data._ERROR_MESSAGE_ != undefined) 
                && (data.responseMessage == undefined || data.responseMessage != "fail")) {
           showMessages('errorMessage',data._ERROR_MESSAGE_,data._ERROR_MESSAGE_LIST_);
@@ -409,7 +409,7 @@ function ajaxSubmitFormUpdateAreas(form, areaCsvString) {
            }
            else if(jQuery('#content-messages').text()) {
                jQuery('#content-messages').remove();
-           /*End addon modification genericPortlet*/
+           /*#Eam# portletWidget*/
            }
            ajaxUpdateAreas(areaCsvString);
        }

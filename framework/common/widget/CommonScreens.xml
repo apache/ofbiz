@@ -186,14 +186,11 @@ under the License.
                         <set field="appbarOpenTemplateLocation" from-field="layoutSettings.VT_NAV_OPEN_TMPLT[0]" />
                         <set field="appbarCloseTemplateLocation" from-field="layoutSettings.VT_NAV_CLOSE_TMPLT[0]" />
                         <set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC[0]" />
-<<<<<<< .courant
                         <!--#Bam# icons-purpose-->
                         <set field="iconsPurposeProp" from-field="layoutSettings.VT_ICONS_PURP[0]" default-value="iconsPurpose"/>
                         <property-map resource="${iconsPurposeProp}" map-name="iconsPurpose" global="true" />
                         <!--#Eam# icons-purpose-->
-=======
-                        <set field="layoutSettings.suppressTab" value="ofbizsetup"/><!-- diseable ofbiz setup by default -->                        
->>>>>>> .fusion-droit.r1340379
+                        <set field="layoutSettings.suppressTab" value="ofbizsetup"/><!-- diseable ofbiz setup by default -->
                     </actions>
                     <widgets />
                 </section>
@@ -717,7 +714,7 @@ under the License.
         </section>
     </screen>
 
-    <!--#Bam# portletExample and is used by portletUiLabelDecorator : manage standard portlet decorator -->
+    <!--#Bam# portletUiLabelDecorator : manage standard portlet decorator -->
     <screen name="uiLabelDecorator">
         <section>
             <actions>
@@ -751,7 +748,6 @@ under the License.
         </section>
     </screen>
 
-    <!--#Bam# portletExample, can be use for all portalPage build like exampleMgmt -->
     <screen name="portletUiLabelDecorator">
       <section>
         <widgets>
@@ -763,6 +759,7 @@ under the License.
         </widgets>
       </section>
     </screen>
+    <!--  can be use for all portalPage build like exampleMgmt  -->
     <screen name="ShowCommonDetailPortlet">
         <section>
             <actions>
@@ -782,5 +779,5 @@ under the License.
             </widgets>
         </section>
     </screen>
-    <!--#Eam# portletExample -->
+    <!--#Eam# portletUiLabelDecorator -->
 </screens>

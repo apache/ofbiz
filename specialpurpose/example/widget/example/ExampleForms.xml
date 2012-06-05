@@ -106,6 +106,7 @@ under the License.
         <field use-when="example==null @and exampleId!=null" name="exampleId" title="${uiLabelMap.ExampleExampleId}"><display description="${uiLabelMap.CommonCannotBeFound}: [${exampleId}]" also-hidden="false"/></field>
         <field name="exampleTypeId" title="${uiLabelMap.CommonType}" id-name="exampleTypeId" widget-style="required">
             <drop-down allow-empty="false">
+                <auto-complete/><!--#Eam#  portletExample for testing Error Message-->
                 <!-- this is a neat feature, but not good for the type because the user would have to know the possible types in order to enter at least the first letter, so leaving it out by default; just uncomment to enable: <auto-complete/> -->
                 <entity-options entity-name="ExampleType" description="${description}">
                     <entity-order-by field-name="description"/>
@@ -249,4 +250,446 @@ under the License.
         </field>
         <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>
     </form>
+
+
+    <!--#Bam# icons-purpose -->
+    <form name="IconsList" type="single">
+        <field name="globalHelp" title=" " tooltip="${uiLabelMap.BestPractice_Icons}"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Activate"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Activate2" title="${uiLabelMap.IconsTooltips_Activate}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Activate}" image-title="${uiLabelMap.IconsTooltips_Activate}" />
+        </field>
+        <field name="Add"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Add2" title="${uiLabelMap.IconsTooltips_Add}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Add}" image-title="${uiLabelMap.IconsTooltips_Add}" />
+        </field>
+        <field name="AddItem"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="AddItem2" title="${uiLabelMap.BestPractice_IconAddItem}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.AddItem}" image-title="${uiLabelMap.IconsTooltips_AddItem}" />
+        </field>
+        <field name="Address"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Address2" title="${uiLabelMap.IconsTooltips_Address}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Address}" image-title="${uiLabelMap.IconsTooltips_Address}" />
+        </field>
+        <field name="Adm"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Adm2" title="${uiLabelMap.IconsTooltips_Adm}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Adm}" image-title="${uiLabelMap.IconsTooltips_Adm}" />
+        </field>
+        <field name="Alarm"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Alarm2" title="${uiLabelMap.IconsTooltips_Alarm}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Alarm}" image-title="${uiLabelMap.IconsTooltips_Alarm}" />
+        </field>
+        <field name="AppNext"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="AppNext2" title="${uiLabelMap.BestPractice_IconAppNext}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.AppNext}" image-title="${uiLabelMap.IconsTooltips_AppNext}" />
+        </field>
+        <field name="AppPrev"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="AppPrev2" title="${uiLabelMap.BestPractice_IconAppPrev}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.AppPrev}" image-title="${uiLabelMap.IconsTooltips_AppPrev}" />
+        </field>
+        <field name="Associate"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Associate2" title="${uiLabelMap.IconsTooltips_Associate}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Associate}" image-title="${uiLabelMap.IconsTooltips_Associate}" />
+        </field>
+        <field name="Attach"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Attach2" title="${uiLabelMap.IconsTooltips_Attach}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Attach}" image-title="${uiLabelMap.IconsTooltips_Attach}" />
+        </field>
+        <field name="Cancel"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Cancel2" title="${uiLabelMap.IconsTooltips_Cancel}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Cancel}" image-title="${uiLabelMap.IconsTooltips_Cancel}" also-hidden="false" />
+        </field>
+        <field name="Category"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Category2" title="${uiLabelMap.BestPractice_IconCategory}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Category}" image-title="${uiLabelMap.IconsTooltips_Category}" also-hidden="false" />
+        </field>
+        <field name="ChartBar"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="ChartBar2" title="${uiLabelMap.IconsTooltips_Chart}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.ChartBar}" image-title="${uiLabelMap.IconsTooltips_Chart}" also-hidden="false" />
+        </field>
+        <field name="ChartPie"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="ChartPie2" title="${uiLabelMap.IconsTooltips_Chart}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.ChartPie}" image-title="${uiLabelMap.IconsTooltips_Chart}" also-hidden="false" />
+        </field>
+        <field name="ChartLine"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="ChartLine2" title="${uiLabelMap.IconsTooltips_Chart}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.ChartLine}" image-title="${uiLabelMap.IconsTooltips_Chart}" also-hidden="false" />
+        </field>
+        <field name="ContactMech"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="ContactMech2" title="${uiLabelMap.IconsTooltips_ContactMech}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.ContactMech}" image-title="${uiLabelMap.IconsTooltips_ContactMech}" also-hidden="false" />
+        </field>
+        <field name="Date"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Date2" title="${uiLabelMap.IconsTooltips_Date}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Date}" image-title="${uiLabelMap.IconsTooltips_Date}" />
+        </field>
+        <field name="Deactivate"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Deactivate2" title="${uiLabelMap.IconsTooltips_Deactivate}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Deactivate}" image-title="${uiLabelMap.IconsTooltips_Deactivate}" />
+        </field>
+        <field name="Delete"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Delete2" title="${uiLabelMap.IconsTooltips_Delete}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Delete}" image-title="${uiLabelMap.IconsTooltips_Delete}" />
+        </field>
+        <field name="Details"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Details2" title="${uiLabelMap.IconsTooltips_Details}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Details}" image-title="${uiLabelMap.IconsTooltips_Details}" />
+        </field>
+        <field name="Docfusion"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Docfusion2" title="${uiLabelMap.IconsTooltips_Docfusion}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Docfusion}" image-title="${uiLabelMap.IconsTooltips_Docfusion}" />
+        </field>
+        <field name="Done"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Done2" title="${uiLabelMap.IconsTooltips_Done}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Done}" image-title="${uiLabelMap.IconsTooltips_Done}" />
+        </field>
+        <field name="Download"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Download2" title="${uiLabelMap.IconsTooltips_Download}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Download}" image-title="${uiLabelMap.IconsTooltips_Download}" />
+        </field>
+        <field name="Duplicate"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Duplicate2" title="${uiLabelMap.IconsTooltips_Duplicate}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Duplicate}" image-title="${uiLabelMap.IconsTooltips_Duplicate}" />
+        </field>
+        <field name="Edit"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Edit2" title="${uiLabelMap.IconsTooltips_Edit}" position="2">
+          <hyperlink target="" image-location="${iconsPurpose.Edit}" image-title="${uiLabelMap.IconsTooltips_Edit}" also-hidden="false" />
+        </field>
+        <field name="Email"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Email2" title="${uiLabelMap.IconsTooltips_Email}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Email}" image-title="${uiLabelMap.IconsTooltips_Email}" />
+        </field>
+        <field name="EmailAttach"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="EmailAttach2" title="${uiLabelMap.IconsTooltips_EmailAttach}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.EmailAttach}" image-title="${uiLabelMap.IconsTooltips_EmailAttach}" />
+        </field>
+        <field name="EmailEdit"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="EmailEdit2" title="${uiLabelMap.IconsTooltips_EmailEdit}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.EmailEdit}" image-title="${uiLabelMap.IconsTooltips_EmailEdit}" />
+        </field>
+        <field name="EmailGo"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="EmailGo2" title="${uiLabelMap.IconsTooltips_EmailGo}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.EmailGo}" image-title="${uiLabelMap.IconsTooltips_EmailGo}" />
+        </field>
+        <field name="EmailOpen"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="EmailOpen2" title="${uiLabelMap.IconsTooltips_EmailOpen}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.EmailOpen}" image-title="${uiLabelMap.IconsTooltips_EmailOpen}" />
+        </field>
+        <field name="EventCom"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="EventCom2" title="${uiLabelMap.IconsTooltips_EventCom}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.EventCom}" image-title="${uiLabelMap.IconsTooltips_EventCom}" />
+        </field>
+        <field name="Expire"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Expire2" title="${uiLabelMap.IconsTooltips_Expire}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Expire}" image-title="${uiLabelMap.IconsTooltips_Expire}" />
+        </field>
+        <field name="Filter"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Filter2" title="${uiLabelMap.IconsTooltips_Filter}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Filter}" image-title="${uiLabelMap.IconsTooltips_Filter}" />
+        </field>
+        <field name="Gantt"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Gantt2" title="${uiLabelMap.IconsTooltips_Gantt}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Gantt}" image-title="${uiLabelMap.IconsTooltips_Gantt}" />
+        </field>
+        <field name="Grants"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Grants2" title="${uiLabelMap.IconsTooltips_Grants}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Grants}" image-title="${uiLabelMap.IconsTooltips_Grants}" />
+        </field>
+        <field name="Group"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Group2" title="${uiLabelMap.IconsTooltips_Group}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Group}" image-title="${uiLabelMap.IconsTooltips_Group}" />
+        </field>
+        <field name="Hierarchy"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Hierarchy2" title="${uiLabelMap.BestPractice_IconHierarchy}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Hierarchy}" image-title="${uiLabelMap.IconsTooltips_Hierarchy}" also-hidden="false" />
+        </field>
+        <field name="History"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="History2" title="${uiLabelMap.IconsTooltips_History}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.History}" image-title="${uiLabelMap.IconsTooltips_History}" />
+        </field>
+        <field name="HideHistory"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="HideHistory2" title="${uiLabelMap.IconsTooltips_HideHistory}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.HideHistory}" image-title="${uiLabelMap.IconsTooltips_HideHistory}" />
+        </field>
+        <field name="Items"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Items2" title="${uiLabelMap.IconsTooltips_Items}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Items}" image-title="${uiLabelMap.IconsTooltips_Items}" />
+        </field>
+        <field name="Overview"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Overview2" title="${uiLabelMap.IconsTooltips_Overview}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Overview}" image-title="${uiLabelMap.IconsTooltips_Overview}" />
+        </field>
+        <field name="Pause"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Pause2" title="${uiLabelMap.IconsTooltips_Pause}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Pause}" image-title="${uiLabelMap.IconsTooltips_Pause}" />
+        </field>
+        <field name="Payment"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Payment2" title="${uiLabelMap.IconsTooltips_Payment}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Payment}" image-title="${uiLabelMap.IconsTooltips_Payment}" />
+        </field>
+        <field name="PDF"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="PDF2" title="${uiLabelMap.BestPractice_IconPDF}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.PDF}" image-title="${uiLabelMap.IconsTooltips_PDF}" />
+        </field>
+        <field name="Phone"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Phone2" title="${uiLabelMap.IconsTooltips_Phone}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Phone}" image-title="${uiLabelMap.IconsTooltips_Phone}" />
+        </field>
+        <field name="Plan"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Plan2" title="${uiLabelMap.IconsTooltips_Plan}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Plan}" image-title="${uiLabelMap.IconsTooltips_Plan}" />
+        </field>
+        <field name="Print"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Print2" title="${uiLabelMap.BestPractice_IconPrint}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Print}" image-title="${uiLabelMap.IconsTooltips_Print}" />
+        </field>
+        <field name="Refresh"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Refresh2" title="${uiLabelMap.IconsTooltips_Refresh}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Refresh}" image-title="${uiLabelMap.IconsTooltips_Refresh}" />
+        </field>
+        <field name="Role"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Role2" title="${uiLabelMap.IconsTooltips_Role}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Role}" image-title="${uiLabelMap.IconsTooltips_Role}" />
+        </field>
+        <field name="Run"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Run2" title="${uiLabelMap.IconsTooltips_Run}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Run}" image-title="${uiLabelMap.IconsTooltips_Run}" />
+        </field>
+        <field name="Save"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Save2" title="${uiLabelMap.IconsTooltips_Save}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Save}" image-title="${uiLabelMap.IconsTooltips_Save}" />
+        </field>
+        <field name="Select"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Select2" title="${uiLabelMap.IconsTooltips_Select}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Select}" image-title="${uiLabelMap.IconsTooltips_Select}" />
+        </field>
+        <field name="Server"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Server2" title="${uiLabelMap.IconsTooltips_Server}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Server}" image-title="${uiLabelMap.IconsTooltips_Server}" />
+        </field>
+        <field name="Skills"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Skills2" title="${uiLabelMap.IconsTooltips_Skills}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Skills}" image-title="${uiLabelMap.IconsTooltips_Skills}" />
+        </field>
+        <field name="Stop"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Stop2" title="${uiLabelMap.IconsTooltips_Stop}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Stop}" image-title="${uiLabelMap.IconsTooltips_Stop}" />
+        </field>
+        <field name="Switch"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Switch2" title="${uiLabelMap.IconsTooltips_Switch}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Switch}" image-title="${uiLabelMap.IconsTooltips_Switch}" />
+        </field>
+        <field name="Synchronize"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Synchronize2" title="${uiLabelMap.BestPractice_IconSynchronize}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Synchronize}" image-title="${uiLabelMap.IconsTooltips_Synchronize}" />
+        </field>
+        <field name="Telephone"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Telephone2" title="${uiLabelMap.IconsTooltips_Telephone}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Telephone}" image-title="${uiLabelMap.IconsTooltips_Telephone}" />
+        </field>
+        <field name="Template"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Template2" title="${uiLabelMap.IconsTooltips_Template}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Template}" image-title="${uiLabelMap.IconsTooltips_Template}" />
+        </field>
+        <field name="TimeEntry"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="TimeEntry2" title="${uiLabelMap.IconsTooltips_TimeEntry}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.TimeEntry}" image-title="${uiLabelMap.IconsTooltips_TimeEntry}" />
+        </field>
+        <field name="Tools"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Tools2" title="${uiLabelMap.IconsTooltips_Tools}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Tools}" image-title="${uiLabelMap.IconsTooltips_Tools}" />
+        </field>
+        <field name="Upload"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Upload2" title="${uiLabelMap.IconsTooltips_Upload}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Upload}" image-title="${uiLabelMap.IconsTooltips_Upload}" />
+        </field>
+        <field name="UserLogin"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="UserLogin2" title="${uiLabelMap.IconsTooltips_UserLogin}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.UserLogin}" image-title="${uiLabelMap.IconsTooltips_UserLogin}" />
+        </field>
+        <field name="UserAvAvai"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="UserAvAvai2" title="${uiLabelMap.IconsTooltips_UserAvAvai}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.UserAvAvai}" image-title="${uiLabelMap.IconsTooltips_UserAvAvai}" />
+        </field>
+        <field name="UserAvBusy"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="UserAvBusy2" title="${uiLabelMap.IconsTooltips_UserAvBusy}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.UserAvBusy}" image-title="${uiLabelMap.IconsTooltips_UserAvBusy}" />
+        </field>
+        <field name="UserAvAway"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="UserAvAway2" title="${uiLabelMap.IconsTooltips_UserAvAway}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.UserAvAway}" image-title="${uiLabelMap.IconsTooltips_UserAvAway}" />
+        </field>
+        <field name="UserAvUnkn"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="UserAvUnkn2" title="${uiLabelMap.IconsTooltips_UserAvUnkn}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.UserAvUnkn}" image-title="${uiLabelMap.IconsTooltips_UserAvUnkn}" />
+        </field>
+        <field name="Validate"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Validate2" title="${uiLabelMap.IconsTooltips_Validate}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Validate}" image-title="${uiLabelMap.IconsTooltips_Validate}" />
+        </field>
+        <field name="View"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="View2" title="${uiLabelMap.IconsTooltips_View}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.View}" image-title="${uiLabelMap.IconsTooltips_View}" />
+        </field>
+        <field name="Www"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Www2" title="${uiLabelMap.IconsTooltips_Www}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Www}" image-title="${uiLabelMap.IconsTooltips_Www}" />
+        </field>
+        
+        <!--######################## Objects icons ########################-->
+        <field name="Accounting"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Accounting2" title="${uiLabelMap.IconsTooltips_Accounting}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Accounting}" image-title="${uiLabelMap.IconsTooltips_Accounting}" />
+        </field>
+        <field name="Calendar"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Calendar2" title="${uiLabelMap.IconsTooltips_Calendar}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Calendar}" image-title="${uiLabelMap.IconsTooltips_Calendar}" />
+        </field>
+        <field name="Contact"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Contact2" title="${uiLabelMap.BestPractice_IconContact}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Contact}" image-title="${uiLabelMap.IconsTooltips_Contact}" />
+        </field>
+        <field name="Note"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Note2" title="${uiLabelMap.IconsTooltips_Note}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Note}" image-title="${uiLabelMap.IconsTooltips_Note}" />
+        </field>
+        <field name="Order"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Order2" title="${uiLabelMap.IconsTooltips_Order}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Order}" image-title="${uiLabelMap.IconsTooltips_Order}" />
+        </field>
+        <field name="Party"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Party2" title="${uiLabelMap.BestPractice_IconParty}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Party}" image-title="${uiLabelMap.IconsTooltips_Party}" />
+        </field>
+        <field name="Phase"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Phase2" title="${uiLabelMap.IconsTooltips_Phase}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Phase}" image-title="${uiLabelMap.IconsTooltips_Phase}" />
+        </field>
+        <field name="Product"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Product2" title="${uiLabelMap.IconsTooltips_Product}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Product}" image-title="${uiLabelMap.IconsTooltips_Product}" />
+        </field>
+        <field name="Project"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Project2" title="${uiLabelMap.IconsTooltips_Project}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Project}" image-title="${uiLabelMap.IconsTooltips_Project}" />
+        </field>
+        <field name="Quote"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Quote2" title="${uiLabelMap.IconsTooltips_Quote}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Quote}" image-title="${uiLabelMap.IconsTooltips_Quote}" />
+        </field>
+        <field name="Resource"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Resource2" title="${uiLabelMap.IconsTooltips_Resource}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Resource}" image-title="${uiLabelMap.IconsTooltips_Resource}" />
+        </field>
+        <field name="Shipment"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Shipment2" title="${uiLabelMap.IconsTooltips_Shipment}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Shipment}" image-title="${uiLabelMap.IconsTooltips_Shipment}" />
+        </field>
+        <field name="Task"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Task2" title="${uiLabelMap.IconsTooltips_Task}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Task}" image-title="${uiLabelMap.IconsTooltips_Task}" />
+        </field>
+        <sort-order>
+          <field-group>
+            <sort-field name="globalHelp"/>
+          </field-group>
+          <field-group>
+            <sort-field name="Add"/><sort-field name="Add2"/>
+            <sort-field name="Duplicate"/><sort-field name="Duplicate2"/>
+            <sort-field name="Edit"/><sort-field name="Edit2"/>
+            <sort-field name="Associate"/><sort-field name="Associate2"/>
+            <sort-field name="AppPrev"/><sort-field name="AppPrev2"/>
+            <sort-field name="AppNext"/><sort-field name="AppNext2"/>
+            <sort-field name="AddItem"/><sort-field name="AddItem2"/>
+            <sort-field name="Expire"/><sort-field name="Expire2"/>
+            <sort-field name="Delete"/><sort-field name="Delete2"/>
+            <sort-field name="Select"/><sort-field name="Select2"/>
+            <sort-field name="Refresh"/><sort-field name="Refresh2"/>
+            <sort-field name="Date"/><sort-field name="Date2"/>
+            <sort-field name="Filter"/><sort-field name="Filter2"/>
+            <sort-field name="View"/><sort-field name="View2"/>
+            <sort-field name="Save"/><sort-field name="Save2"/>
+            <sort-field name="Switch"/><sort-field name="Switch2"/>
+            <sort-field name="Synchronize"/><sort-field name="Synchronize2"/>
+          </field-group>
+          <field-group>
+            <sort-field name="Run"/><sort-field name="Run2"/>
+            <sort-field name="Stop"/><sort-field name="Stop2"/>
+            <sort-field name="Pause"/><sort-field name="Pause2"/>
+            <sort-field name="Validate"/><sort-field name="Validate2"/>
+            <sort-field name="Cancel"/><sort-field name="Cancel2"/>
+            <sort-field name="Activate"/><sort-field name="Activate2"/>
+            <sort-field name="Deactivate"/><sort-field name="Deactivate2"/>
+            <sort-field name="Done"/><sort-field name="Done2"/>
+            <sort-field name="Plan"/><sort-field name="Plan2"/>
+          </field-group>
+          <field-group>
+            <sort-field name="Items"/><sort-field name="Items2"/>
+            <sort-field name="Details"/><sort-field name="Details2"/>
+            <sort-field name="Overview"/><sort-field name="Overview2"/>
+            <sort-field name="History"/><sort-field name="History2"/>
+            <sort-field name="HideHistory"/><sort-field name="HideHistory2"/>
+            <sort-field name="Tools"/><sort-field name="Tools2"/>
+          </field-group>
+          <field-group>
+            <sort-field name="Party"/><sort-field name="Party2"/>
+            <sort-field name="Contact"/><sort-field name="Contact2"/>
+            <sort-field name="ContactMech"/><sort-field name="ContactMech2"/>
+            <sort-field name="Group"/><sort-field name="Group2"/>
+            <sort-field name="Role"/><sort-field name="Role2"/>
+            <sort-field name="UserLogin"/><sort-field name="UserLogin2"/>
+            <sort-field name="UserAvAvai"/><sort-field name="UserAvAvai2"/>
+            <sort-field name="UserAvAway"/><sort-field name="UserAvAway2"/>
+            <sort-field name="UserAvBusy"/><sort-field name="UserAvBusy2"/>
+            <sort-field name="UserAvUnkn"/><sort-field name="UserAvUnkn2"/>
+            <sort-field name="Grants"/><sort-field name="Grants2"/>
+            <sort-field name="Skills"/><sort-field name="Skills2"/>
+            <sort-field name="Category"/><sort-field name="Category2"/>
+            <sort-field name="Hierarchy"/><sort-field name="Hierarchy2"/>
+          </field-group>
+          <field-group>
+            <sort-field name="Attach"/><sort-field name="Attach2"/>
+            <sort-field name="Note"/><sort-field name="Note2"/>
+            <sort-field name="PDF"/><sort-field name="PDF2"/>
+            <sort-field name="Print"/><sort-field name="Print2"/>
+            <sort-field name="Upload"/><sort-field name="Upload2"/>
+            <sort-field name="Download"/><sort-field name="Download2"/>
+            <sort-field name="Template"/><sort-field name="Template2"/>
+            <sort-field name="Docfusion"/><sort-field name="Docfusion2"/>
+            <sort-field name="ChartBar"/><sort-field name="ChartBar2"/>
+            <sort-field name="ChartPie"/><sort-field name="ChartPie2"/>
+            <sort-field name="ChartLine"/><sort-field name="ChartLine2"/>
+          </field-group>
+          <field-group>
+            <sort-field name="Address"/><sort-field name="Address2"/>
+            <sort-field name="Phone"/><sort-field name="Phone2"/>
+            <sort-field name="Telephone"/><sort-field name="Telephone2"/>
+            <sort-field name="Email"/><sort-field name="Email2"/>
+            <sort-field name="EmailAttach"/><sort-field name="EmailAttach2"/>
+            <sort-field name="EmailEdit"/><sort-field name="EmailEdit2"/>
+            <sort-field name="EmailGo"/><sort-field name="EmailGo2"/>
+            <sort-field name="EmailOpen"/><sort-field name="EmailOpen2"/>
+            <sort-field name="Www"/><sort-field name="Www2"/>
+            <sort-field name="Server"/><sort-field name="Server2"/>
+          </field-group>
+          <field-group>
+            <sort-field name="Product"/><sort-field name="Product2"/>
+            <sort-field name="Quote"/><sort-field name="Quote2"/>
+            <sort-field name="Order"/><sort-field name="Order2"/>
+            <sort-field name="Project"/><sort-field name="Project2"/>
+            <sort-field name="Phase"/><sort-field name="Phase2"/>
+            <sort-field name="Task"/><sort-field name="Task2"/>
+            <sort-field name="Calendar"/><sort-field name="Calendar2"/>
+            <sort-field name="Gantt"/><sort-field name="Gantt2"/>
+            <sort-field name="Resource"/><sort-field name="Resource2"/>
+            <sort-field name="TimeEntry"/><sort-field name="TimeEntry2"/>
+            <sort-field name="EventCom"/><sort-field name="EventCom2"/>
+            <sort-field name="Alarm"/><sort-field name="Alarm2"/>
+            <sort-field name="Shipment"/><sort-field name="Shipment2"/>
+            <sort-field name="Accounting"/><sort-field name="Accounting2"/>
+            <sort-field name="Payment"/><sort-field name="Payment2"/>
+          </field-group>
+        </sort-order>
+    </form>
+    <!--#Eam# icons-purpose -->
 </forms>

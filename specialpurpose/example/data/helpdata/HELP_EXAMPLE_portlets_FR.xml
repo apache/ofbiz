@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements. See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to you under the Apache License, Version
+2.0 (the "License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+applicable law or agreed to in writing, software distributed under the
+License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for
+the specific language governing permissions and limitations under the
+License.
+-->
+<section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    version="5.0" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
+    xsi:schemaLocation="http://docbook.org/ns/docbook"
+    xmlns="http://docbook.org/ns/docbook">
+    <title>Utilisation des portlets</title>
+
+    <section>
+      <title></title>
+      <para>
+        Une fois son type sélectionné, il va falloir configurer la portlet en fonction des besoins de votre écran :
+        <itemizedlist>
+          <listitem><para>configuration du titre de la portlet</para> </listitem>
+          <listitem><para>configuration du screen ou du form utilisé</para></listitem>
+          <listitem><para>utilisation d'un script avant le chargement de la portlet (récupération d)une liste, test de données, actions diverses)</para> </listitem>
+          <listitem><para>utilisation d'un menu (en haut dans la barre de titre du screenlet)</para> </listitem>
+          <listitem><para>utilisation d'un test sur une variable pour afficher ou non le contenu de la portlet</para></listitem>
+          <listitem><para>...</para></listitem>
+        </itemizedlist>
+      </para>
+      <para>&amp;nbsp;</para>
+      <para>La majorité des éléments configurables sur une portlet ont des valeurs par défaut qui évitent d'avoir à les définir lors de la création des portlets.</para>
+      <para>Ainsi, lorsqu'on regarde le fichier de définition des portlets ExempleExamplePortletData.xml, très peu de champs sont renseignés, principalement ceux concernant la portlet elle-même.
+        <itemizedlist>
+          <listitem><para>configuration du titre de la portlet</para> </listitem>
+          <listitem><para>configuration du screen ou du form utilisé</para></listitem>
+          <listitem><para>utilisation d'un script avant le chargement de la portlet (récupération d)une liste, test de données, actions diverses)</para> </listitem>
+          <listitem><para>utilisation d'un menu (en haut dans la barre de titre du screenlet)</para> </listitem>
+          <listitem><para>utilisation d'un test sur une variable pour afficher ou non le contenu de la portlet</para></listitem>
+          <listitem><para>...</para></listitem>
+        </itemizedlist>
+      </para>
+      <para>&amp;nbsp;</para>
+      <para>Et voici des extraits :
+        <programlisting>
+          &amp;lt;PortalPortlet portalPortletId="FindExample"
+             portletName="Find Example (with portletType and showPortlet)" description="portlet to define search criteria for Example list"
+             portletTypeId="Screenlet"  component="example" subComponent="Example" helpName="HELP_Screenlet"/>
+          &amp;lt;PortalPortlet portalPortletId="ListExample"
+             portletName="List Examples (with portletType and showPortlet)" description="portlet to list example depending on search criteria, this portlet is call by FindExample"
+             portletTypeId="ScreenletList" component="example" subComponent="Example" helpName="HELP_ScreenletList"/>
+        </programlisting>
+      </para>
+      <para>&amp;nbsp;</para>
+      <para>Pour garantir la qualité de cette page portail, il est important de penser aux traductions (CommonPortalEntityLabels.xml) :
+        <programlisting>
+    &amp;lt;property key="PortalPortlet.portletName.FindExample">
+        &amp;lt;value xml:lang="en">Find Example &amp;lt;/value>
+        &amp;lt;value xml:lang="fr">Rechercher un exemple &amp;lt;/value>
+    &amp;lt;/property>
+    &amp;lt;property key="PortalPortlet.description.FindExample">
+        &amp;lt;value xml:lang="en">portlet to define search criteria for Example list &amp;lt;/value>
+        &amp;lt;value xml:lang="fr">portlet (type Screenlet) de critères de recherche pour la liste des exemples &amp;lt;/value>
+    &amp;lt;/property>
+        </programlisting>
+      </para>
+    </section>
+    
+</section>
