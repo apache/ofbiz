@@ -837,7 +837,10 @@ public class ModelForm extends ModelWidget {
      */
     public void renderFormString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
         //  increment the paginator, only for list and multi forms
+        Boolean PAGINATOR_AND_ACTION_DONE = null; // #Eam# screenlet navigationForm
         if ("list".equals(this.type) || "multi".equals(this.type)) {
+            Map<String, Object> globalCtx = UtilGenerics.checkMap(context.get("globalContext")); // #Eam# screenlet navigationForm
+            PAGINATOR_AND_ACTION_DONE = (Boolean) globalCtx.get("NO_PAGINATOR"); // #Eam# screenlet navigationForm
             WidgetWorker.incrementPaginatorNumber(context);
         }
 
@@ -850,7 +853,9 @@ public class ModelForm extends ModelWidget {
         context.put("viewIndex", this.getViewIndex(context));
         context.put("viewSize", this.getViewSize(context));
 
-        runFormActions(context);
+        if (UtilValidate.isEmpty(PAGINATOR_AND_ACTION_DONE)) { // #Eam# screenlet navigationForm
+            runFormActions(context);
+        }  // #Eam# screenlet navigationForm
 
         // if this is a list form, don't useRequestParameters
         if ("list".equals(this.type) || "multi".equals(this.type)) {

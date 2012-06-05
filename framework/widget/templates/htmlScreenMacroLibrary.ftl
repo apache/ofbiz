@@ -321,6 +321,65 @@ ${menuString}
       </#if>
 </#macro>
 
+<#--#Bam# portletWidget screenlet navigation form (ajax) -->
+<#macro renderScreenletBeginWithPaginate id title collapsible saveCollapsed collapsibleAreaId expandToolTip collapseToolTip fullUrlString padded menuString showMore collapsed javaScriptEnabled paginateStyle paginateFirstStyle viewIndex highIndex listSize viewSize ajaxEnabled javaScriptEnabled ajaxFirstUrl firstUrl paginateFirstLabel paginatePreviousStyle ajaxPreviousUrl previousUrl paginatePreviousLabel pageLabel ajaxSelectUrl selectUrl ajaxSelectSizeUrl selectSizeUrl commonDisplaying paginateNextStyle ajaxNextUrl nextUrl paginateNextLabel paginateLastStyle ajaxLastUrl lastUrl paginateLastLabel paginateViewSizeLabel>
+<div class="screenlet"<#if id?has_content> id="${id}"</#if>><#rt/>
+<#if showMore>
+<div class="screenlet-title-bar-pager">
+        <ul>
+<#if title?has_content>
+            <li class="h3">${title}</li>
+</#if>
+            <li>&nbsp;</li>
+<#if listSize gt viewSize>
+            <li class="${paginateFirstStyle}<#if viewIndex gt 0>"><a href="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxFirstUrl}')<#else>${firstUrl}</#if>">${paginateFirstLabel}</a><#else>-disabled"><span>${paginateFirstLabel}</span></#if></li>
+            <li class="${paginatePreviousStyle}<#if viewIndex gt 0>"><a href="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxPreviousUrl}')<#else>${previousUrl}</#if>">${paginatePreviousLabel}</a><#else>-disabled"><span>${paginatePreviousLabel}</span></#if></li>
+     <#if listSize gt 0 && javaScriptEnabled>
+            <li class="nav-page-select">${pageLabel} 
+                <select name="page" size="1" onchange="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxSelectUrl}')<#else>location.href='${selectUrl}'+this.value;</#if>"><#rt/>
+        <#assign x=Static["java.lang.Math"].floor(listSize/viewSize)>
+        <#if listSize gt (viewIndex*viewSize)><#assign x=x+1></#if>
+        <#list 1..x as i>
+            <#if i == (viewIndex+1)><option selected="selected" value="<#else><option value="</#if>${i-1}">${i}</option>
+        </#list>
+                </select>
+            </li>
+    </#if>
+            <li class="${paginateNextStyle}<#if highIndex lt listSize>"><a href="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxNextUrl}')<#else>${nextUrl}</#if>">${paginateNextLabel}</a><#else>-disabled"><span>${paginateNextLabel}</span></#if></li>
+            <li class="${paginateLastStyle}<#if highIndex lt listSize>"><a href="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxLastUrl}')<#else>${lastUrl}</#if>">${paginateLastLabel}</a><#else>-disabled"><span>${paginateLastLabel}</span></#if></li>
+    <#if javaScriptEnabled>
+            <li class="nav-pagesize">
+                <select name="pageSize" size="1" onchange="<#if ajaxEnabled>javascript:ajaxUpdateAreas('${ajaxSelectSizeUrl}')<#else>location.href='${selectSizeUrl}';</#if>"><#rt/>
+        <#assign availPageSizes = [20, 30, 50, 100, 200]>
+        <#list availPageSizes as ps>
+                    <option <#if viewSize == ps>selected="selected" </#if> value="${ps}">${ps}</option>
+        </#list>
+                </select> ${paginateViewSizeLabel}
+            </li>
+            <li>&nbsp;</li>
+    </#if>
+</#if>
+
+<#if collapsible>
+            <li class="<#rt/>
+    <#if collapsed>
+collapsed"><a <#if javaScriptEnabled>onclick="javascript:toggleScreenlet(this, '${collapsibleAreaId}', '${saveCollapsed?string}', '${expandToolTip}', '${collapseToolTip}');"<#else>href="${fullUrlString}"</#if><#if expandToolTip?has_content> title="${expandToolTip}"</#if>
+    <#else>
+expanded nav-displaying"><a <#if javaScriptEnabled>onclick="javascript:toggleScreenlet(this, '${collapsibleAreaId}', '${saveCollapsed?string}', '${expandToolTip}', '${collapseToolTip}');"<#else>href="${fullUrlString}"</#if><#if collapseToolTip?has_content> title="${collapseToolTip}"</#if>
+    </#if>>&nbsp;</a>
+            </li>
+            <#if listSize gt viewSize>
+            <li class="nav-displaying">${commonDisplaying}</li>
+            </#if>
+</#if>
+        </ul>
+
+</div>
+<#if menuString?has_content><div class="screenlet-title-bar"><ul>${menuString}</ul></div></#if><#--#Eam# portletWidget -->
+</#if>
+<div <#if collapsibleAreaId?has_content> id="${collapsibleAreaId}" <#if collapsed> style="display: none;"</#if></#if><#if padded> class="screenlet-body"<#else> class="screenlet-body no-padding"</#if>>
+</#macro>
+<#--#Eam# portletWidget navigation form (ajax)-->
 <#--#Bam# portletWidget
 <#macro renderPortalPagePortletEnd confMode="false">
 -->
