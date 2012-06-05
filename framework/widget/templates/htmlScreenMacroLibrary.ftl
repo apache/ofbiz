@@ -193,7 +193,11 @@ ${menuString}
   </table>
 </#macro>
 
+<#--#Bam# portletWidget  add new field in PortalPageColumn to be able to have multiple line in a portalPage. Each line has multiple column
 <#macro renderPortalPageColumnBegin originalPortalPageId portalPageId columnSeqId confMode="false" width="auto" delColumnLabel="Delete column" delColumnHint="Delete this column" addPortletLabel="Add portlet" addPortletHint="Add a new portlet to this column" colWidthLabel="Col. width:" setColumnSizeHint="Set column size">
+-->
+<#macro renderPortalPageColumnBegin originalPortalPageId portalPageId columnSeqId confMode="false" width="auto" delColumnLabel="Delete column" delColumnHint="Delete this column" addPortletLabel="Add portlet" addPortletHint="Add a new portlet to this column" colWidthLabel="Col. width:" setColumnSizeHint="Set column size" newLine="N">
+<#--#Eam# portletWidget -->
   <#assign columnKey = portalPageId+columnSeqId>
   <#assign columnKeyFields = '<input name="portalPageId" value="' + portalPageId + '" type="hidden"/><input name="columnSeqId" value="' + columnSeqId + '" type="hidden"/>'>
   <script type="text/javascript">
@@ -205,6 +209,11 @@ ${menuString}
       }
     }
   </script>
+  <#--#Bam# portletWidget  add new field in PortalPageColumn to be able to have multiple line in a portalPage. Each line has multiple column -->
+  <#if newLine == "Y">
+    </tr></table><table width="100%"><tr>
+  </#if>
+  <#--#Eam# portletWidget -->
   <td class="portal-column<#if confMode == "true">-config</#if> connectedSortable" style="vertical-align: top; <#if width?has_content> width:${width};</#if>" id="portalColumn_${columnSeqId}">
     <#if confMode == "true">
       <div class="portal-column-config-title-bar">

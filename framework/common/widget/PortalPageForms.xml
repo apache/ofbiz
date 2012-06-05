@@ -154,6 +154,7 @@ under the License.
         <field name="columnSeqId"><hidden/></field>
         <field name="columnWidthPixels"><text/></field>
         <field name="columnWidthPercentage"><text/></field>
+        <field name="newLine"><check/></field>
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
     </form>
 </forms>

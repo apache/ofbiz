@@ -1227,6 +1227,10 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         sr.append(colWidthLabel);
         sr.append("\" setColumnSizeHint=\"");
         sr.append(setColumnSizeHint);
+        //#Bam# portletWidget add new field in PortalPageColumn to be able to have multiple line in a portalPage. Each line has multiple column
+        sr.append("\" newLine=\"");
+        sr.append(portalPageColumn.getString("newLine"));
+        //#Eam# portletWidget add new field in PortalPageColumn to be able to have multiple line in a portalPage. Each line has multiple column
         sr.append("\" />");
         executeMacro(writer, sr.toString());
     }   

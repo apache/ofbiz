@@ -809,6 +809,7 @@ under the License.
         <field name="columnSeqId" type="id-ne"></field>
         <field name="columnWidthPixels" type="numeric"></field>
         <field name="columnWidthPercentage" type="numeric"></field>
+        <field name="newLine" type="indicator"/>
         <prim-key field="portalPageId"/>
         <prim-key field="columnSeqId"/>
         <relation type="one" fk-name="PRTL_PGCOL_PAGE" rel-entity-name="PortalPage">
