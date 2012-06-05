@@ -845,6 +845,21 @@ function waitSpinnerHide() {
     jQuery("#wait-spinner").hide()
 }
 
+// #Bam# validate-form
+function clickLink(linkDivId) {
+    var div = document.getElementById(linkDivId); 
+    if(!div ) return; 
+    var aNodeList = div.getElementsByTagName("A");
+    link = aNodeList.item(0);
+    target =link.href;
+    if(target.match(new RegExp("javascript:.*"))){
+        eval(target);
+    } else {
+        window.location.href = target;
+    }
+}
+// #Eam# validate-form
+
 /**
  * Reads the requiered uiLabels from the uiLabelXml Files
  * @param requiredLabels JSON Object {resource : [label1, label2 ...], resource2 : [label1, label2, ...]}

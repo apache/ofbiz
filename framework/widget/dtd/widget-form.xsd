@@ -230,6 +230,19 @@ under the License.
             </xs:annotation>
         </xs:attribute>
         -->
+        <xs:attribute name="validate-link-on-enter" default="false">
+            <xs:annotation><xs:documentation>in some case, a single form doest not include a submit button, instead it includes an hypperlink. setting this attribute to true wil result in click on the link when enter button is pressed on any form other input</xs:documentation></xs:annotation>
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="validate-link-id" default="submit">
+            <xs:annotation><xs:documentation>in some case, a single form doest not include a submit button, instead it includes an hypperlink. setting this attribute to true wil result in click on the link when enter button is pressed on any form other input</xs:documentation></xs:annotation>
+        </xs:attribute>
+        
     </xs:attributeGroup>
     <xs:element name="alt-target">
         <xs:complexType>

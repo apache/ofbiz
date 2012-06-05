@@ -89,6 +89,7 @@ public class ModelForm extends ModelWidget {
     protected String tooltip;
     protected String listName;
     protected String listEntryName;
+    protected String validateLinkId; // #Eam# validateForm
     protected FlexibleMapAccessor<Map<String, ? extends Object>> defaultMapName;
     protected String defaultEntityName;
     protected String defaultServiceName;
@@ -115,6 +116,7 @@ public class ModelForm extends ModelWidget {
     protected boolean separateColumns = false;
     protected boolean groupColumns = true;
     protected boolean useRowSubmit = false;
+    protected boolean validateLinkOnEnter = false; // #Eam# validateForm
     protected FlexibleStringExpander targetWindowExdr;
     protected String defaultRequiredFieldStyle;
     protected String defaultSortFieldStyle;
@@ -273,6 +275,7 @@ public class ModelForm extends ModelWidget {
                 this.tooltip = parent.tooltip;
                 this.listName = parent.listName;
                 this.listEntryName = parent.listEntryName;
+                this.validateLinkId = parent.validateLinkId;// #Eam# validateForm
                 this.tooltip = parent.tooltip;
                 this.defaultEntityName = parent.defaultEntityName;
                 this.defaultServiceName = parent.defaultServiceName;
@@ -486,6 +489,15 @@ public class ModelForm extends ModelWidget {
         if (this.rowCountExdr == null || formElement.hasAttribute("row-count")) {
             this.rowCountExdr = FlexibleStringExpander.getInstance(formElement.getAttribute("row-count"));
         }
+
+        //#Bam# : validateForm
+        if (this.validateLinkId == null || formElement.hasAttribute("validate-link-id")) {
+            this.validateLinkId = formElement.getAttribute("validate-link-id");
+        }
+        if ( formElement.hasAttribute("validate-link-on-enter")) {
+            this.validateLinkOnEnter = "true".equalsIgnoreCase(formElement.getAttribute("validate-link-on-enter"));
+        }
+        //#Eam# : validateForm
 
         //alt-row-styles
         for (Element altRowStyleElement : UtilXml.childElementList(formElement, "alt-row-style")) {
@@ -2727,6 +2739,16 @@ public class ModelForm extends ModelWidget {
     public boolean getUseRowSubmit() {
         return this.useRowSubmit;
     }
+
+    //#Bam# : validateForm
+    public boolean getValidateLinkOnEnter() {
+        return this.validateLinkOnEnter;
+    }
+ 
+    public String getValidateLinkId() {
+        return this.validateLinkId;
+    }
+    //#Eam# : validateForm
 
     public List<ModelFormField> getMultiSubmitFields() {
         return this.multiSubmitFields;

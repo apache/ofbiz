@@ -334,6 +334,7 @@ public class MacroFormRenderer implements FormStringRenderer {
     public void renderTextField(Appendable writer, Map<String, Object> context, TextField textField) throws IOException {
         ModelFormField modelFormField = textField.getModelFormField();
         String name = modelFormField.getParameterName(context);
+        boolean validateLinkOnEnter = modelFormField.getModelForm().getValidateLinkOnEnter(); // #Eam# validate-form
         String className = "";
         String alert = "false";
         String mask = "";
@@ -405,6 +406,18 @@ public class MacroFormRenderer implements FormStringRenderer {
 
         sr.append(" clientAutocomplete=\"");
         sr.append(clientAutocomplete);
+        // #Bam# validate-form
+        if (validateLinkOnEnter) {
+            sr.append("\" validateLinkOnEnter=");
+            sr.append(Boolean.toString(validateLinkOnEnter));
+            sr.append(" validateLinkId=\"");
+            sr.append(modelFormField.getModelForm().getValidateLinkId());
+        } else{
+            sr.append("\" validateLinkOnEnter=");
+            sr.append(Boolean.toString(false));
+            sr.append(" validateLinkId=\"");
+        }
+        // #Eam# validate-form
         sr.append("\" ajaxUrl=\"");
         sr.append(ajaxUrl);
         sr.append("\" ajaxEnabled=");
@@ -1759,6 +1772,7 @@ public class MacroFormRenderer implements FormStringRenderer {
     public void renderTextFindField(Appendable writer, Map<String, Object> context, TextFindField textFindField) throws IOException {
         ModelFormField modelFormField = textFindField.getModelFormField();
 
+        boolean validateLinkOnEnter = modelFormField.getModelForm().getValidateLinkOnEnter(); // #Eam# validate-form
         String defaultOption = textFindField.getDefaultOption();
         String className = "";
         String alert = "false";
@@ -1834,6 +1848,19 @@ public class MacroFormRenderer implements FormStringRenderer {
         sr.append(maxlength);
         sr.append("\" autocomplete=\"");
         sr.append(autocomplete);
+         // #Bam# validate-form
+        if (validateLinkOnEnter) {
+            sr.append("\" validateLinkOnEnter=");
+            sr.append(Boolean.toString(validateLinkOnEnter));
+            sr.append(" validateLinkId=\"");
+            sr.append(modelFormField.getModelForm().getValidateLinkId());
+        }
+        else {
+            sr.append("\" validateLinkOnEnter=");
+            sr.append(Boolean.toString(false));
+            sr.append(" validateLinkId=\"");
+        }
+         // #Eam# validate-form
         sr.append("\" titleStyle=\"");
         sr.append(titleStyle);
         sr.append("\" hideIgnoreCase=");
@@ -3186,6 +3213,10 @@ public class MacroFormRenderer implements FormStringRenderer {
             sr.append(event);
             sr.append("\" action=\"");
             sr.append(action);
+            // #Bam# validate-form
+            sr.append("\" id=\"");
+            sr.append(modelFormField.getIdName());
+            // #Eam# validate-form
             sr.append("\" imgSrc=\"");
             sr.append(imgSrc);
             sr.append("\" title=\"");
