@@ -62,7 +62,7 @@ context.headerAdjustmentsToShow = OrderReadHelper.filterOrderAdjustments(orderHe
 
 orderSubTotal = OrderReadHelper.getOrderItemsSubTotal(orderItems, orderAdjustments);
 context.orderSubTotal = orderSubTotal;
-context.placingCustomerPerson = userLogin?.getRelatedOne("Person");
+context.placingCustomerPerson = userLogin?.getRelatedOne("Person", false);
 context.shippingAddress = cart.getShippingAddress();
 
 paymentMethods = cart.getPaymentMethods();
@@ -73,11 +73,11 @@ if (paymentMethods) {
 }
 
 if ("CREDIT_CARD".equals(paymentMethod?.paymentMethodTypeId)) {
-    creditCard = paymentMethod.getRelatedOneCache("CreditCard");
+    creditCard = paymentMethod.getRelatedOne("CreditCard", true);
     context.creditCard = creditCard;
     context.formattedCardNumber = ContactHelper.formatCreditCard(creditCard);
 } else if ("EFT_ACCOUNT".equals(paymentMethod?.paymentMethodTypeId)) {
-    eftAccount = paymentMethod.getRelatedOneCache("EftAccount");
+    eftAccount = paymentMethod.getRelatedOne("EftAccount", true);
     context.eftAccount = eftAccount;
 }
 
@@ -86,7 +86,7 @@ paymentMethodType = null;
 paymentMethodTypeId = null;
 if (paymentMethodTypeIds) {
     paymentMethodTypeId = paymentMethodTypeIds.get(0);
-    paymentMethodType = delegator.findByPrimaryKey("PaymentMethodType", [paymentMethodTypeId : paymentMethodTypeId]);
+    paymentMethodType = delegator.findOne("PaymentMethodType", [paymentMethodTypeId : paymentMethodTypeId], false);
     context.paymentMethodType = paymentMethodType;
 }
 
@@ -101,12 +101,12 @@ if (productStore) {
 
 billingAddress = null;
 if (paymentMethod) {
-    creditCard = paymentMethod.getRelatedOne("CreditCard");
-    billingAddress = creditCard?.getRelatedOne("PostalAddress");
+    creditCard = paymentMethod.getRelatedOne("CreditCard", false);
+    billingAddress = creditCard?.getRelatedOne("PostalAddress", false);
 }
 if (billingAddress) context.billingAddress = billingAddress;
 
-billingAccount = cart.getBillingAccountId() ? delegator.findByPrimaryKey("BillingAccount", [billingAccountId : cart.getBillingAccountId()]) : null;
+billingAccount = cart.getBillingAccountId() ? delegator.findOne("BillingAccount", [billingAccountId : cart.getBillingAccountId()], false) : null;
 if (billingAccount) context.billingAccount = billingAccount;
 
 context.customerPoNumber = cart.getPoNumber();
@@ -119,7 +119,7 @@ context.isGift = cart.getIsGift();
 context.shipBeforeDate = cart.getShipBeforeDate();
 context.shipAfterDate = cart.getShipAfterDate();
 
-shipmentMethodType = delegator.findByPrimaryKey("ShipmentMethodType", [shipmentMethodTypeId : cart.getShipmentMethodTypeId()]);
+shipmentMethodType = delegator.findOne("ShipmentMethodType", [shipmentMethodTypeId : cart.getShipmentMethodTypeId()], false);
 if (shipmentMethodType) context.shipMethDescription = shipmentMethodType.description;
 
 orh = new OrderReadHelper(orderAdjustments, orderItems);

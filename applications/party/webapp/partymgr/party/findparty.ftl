@@ -258,14 +258,14 @@ under the License.
     <#assign alt_row = false>
     <#assign rowCount = 0>
     <#list partyList as partyRow>
-      <#assign partyType = partyRow.getRelatedOne("PartyType")?if_exists>
+      <#assign partyType = partyRow.getRelatedOne("PartyType", false)?if_exists>
       <tr valign="middle"<#if alt_row> class="alternate-row"</#if>>
         <td><a href="<@ofbizUrl>viewprofile?partyId=${partyRow.partyId}</@ofbizUrl>">${partyRow.partyId}</a></td>
         <td>
       <#if partyRow.containsKey("userLoginId")>
           ${partyRow.userLoginId?default("N/A")}
       <#else>
-        <#assign userLogins = partyRow.getRelated("UserLogin")>
+        <#assign userLogins = partyRow.getRelated("UserLogin", null, null, false)>
         <#if (userLogins.size() > 0)>
           <#if (userLogins.size() > 1)>
           (${uiLabelMap.CommonMany})
@@ -313,7 +313,7 @@ under the License.
       <#if partyType?exists>
         <td>
         <#if partyType.partyTypeId?has_content && partyType.partyTypeId=="PERSON">
-          <#assign partyRelateCom = delegator.findByAnd("PartyRelationship", {"partyIdTo", partyRow.partyId,"roleTypeIdFrom","ACCOUNT","roleTypeIdTo","CONTACT"})>
+          <#assign partyRelateCom = delegator.findByAnd("PartyRelationship", {"partyIdTo", partyRow.partyId,"roleTypeIdFrom","ACCOUNT","roleTypeIdTo","CONTACT"}, null, false)>
           <#if partyRelateCom?has_content>
             <#list partyRelateCom as partyRelationship>
               <#if partyRelationship.partyIdFrom?has_content>

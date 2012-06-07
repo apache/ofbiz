@@ -79,7 +79,7 @@ public class ContentSearch {
 
         // now find all sub-categories, filtered by effective dates, and call this routine for them
         try {
-            List<GenericValue> contentAssocList = delegator.findByAndCache("ContentAssoc", UtilMisc.toMap("contentIdFrom", contentId));
+            List<GenericValue> contentAssocList = delegator.findByAnd("ContentAssoc", UtilMisc.toMap("contentIdFrom", contentId), null, true);
             for (GenericValue contentAssoc: contentAssocList) {
                 String subContentId = contentAssoc.getString("contentIdTo");
                 if (contentIdSet.contains(subContentId)) {
@@ -555,8 +555,8 @@ public class ContentSearch {
             GenericValue content = null;
             GenericValue contentAssocType = null;
             try {
-                content = delegator.findByPrimaryKeyCache("Content", UtilMisc.toMap("contentId", this.contentId));
-                contentAssocType = delegator.findByPrimaryKeyCache("ContentAssocType", UtilMisc.toMap("contentAssocTypeId", this.contentAssocTypeId));
+                content = delegator.findOne("Content", UtilMisc.toMap("contentId", this.contentId), true);
+                contentAssocType = delegator.findOne("ContentAssocType", UtilMisc.toMap("contentAssocTypeId", this.contentAssocTypeId), true);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error looking up ContentAssocConstraint pretty print info: " + e.toString(), module);
             }

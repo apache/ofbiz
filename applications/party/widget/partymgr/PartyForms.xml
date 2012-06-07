@@ -90,7 +90,7 @@ under the License.
             </drop-down>
         </field>
         <field name="submitButton" title="${uiLabelMap.CommonSave}"><submit button-type="button"/></field>
-        <field name="cancelLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="smallSubmit">
+        <field name="cancelLink" title=" " widget-style="smallSubmit">
             <hyperlink target="${donePage}" also-hidden="false" description="${uiLabelMap.CommonCancelDone}">
                 <parameter param-name="partyId"/>
             </hyperlink>
@@ -125,7 +125,7 @@ under the License.
             </drop-down>
         </field>
         <field name="submitButton" title="${uiLabelMap.CommonSave}"><submit button-type="button"/></field>
-        <field name="cancelLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="smallSubmit">
+        <field name="cancelLink" title=" " widget-style="smallSubmit">
             <hyperlink target="${donePage}" also-hidden="false" description="${uiLabelMap.CommonCancelDone}">
                 <parameter param-name="partyId"/>
             </hyperlink>
@@ -190,7 +190,7 @@ under the License.
             <drop-down allow-empty="false" no-current-selected-key="N"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
         </field>
         <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="smallSubmit"><submit button-type="text-link"/></field>
-        <field name="cancelLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="smallSubmit"><hyperlink target="backHome" also-hidden="false" description="${uiLabelMap.CommonCancelDone}"/></field>
+        <field name="cancelLink" title=" " widget-style="smallSubmit"><hyperlink target="backHome" also-hidden="false" description="${uiLabelMap.CommonCancelDone}"/></field>
     </form>
 
     <form name="updatePassword" type="single" target="updatePassword"
@@ -205,7 +205,7 @@ under the License.
         <field name="newPassword"><password/></field>
         <field name="newPasswordVerify"><password/></field>
         <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="smallSubmit"><submit button-type="text-link"/></field>
-        <field name="cancelLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="smallSubmit">
+        <field name="cancelLink" title=" " widget-style="smallSubmit">
             <hyperlink target="${donePage}" also-hidden="false" description="${uiLabelMap.CommonCancelDone}">
                 <parameter param-name="partyId"/>
             </hyperlink>
@@ -223,7 +223,7 @@ under the License.
         <field name="userLdapDn" use-when="&quot;true&quot;.equals(ldapEnabled)"><text/></field>
         <field name="userLdapDn" use-when="!&quot;true&quot;.equals(ldapEnabled)"><ignored/></field>
         <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="smallSubmit"><submit button-type="text-link"/></field>
-        <field name="cancelLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="smallSubmit">
+        <field name="cancelLink" title=" " widget-style="smallSubmit">
             <hyperlink target="${donePage}" also-hidden="false" description="${uiLabelMap.CommonCancelDone}">
                 <parameter param-name="partyId"/>
             </hyperlink>
@@ -336,7 +336,7 @@ under the License.
         </field>
         <field name="fromDate" title="${uiLabelMap.CommonFromDateTime}"><display/></field>
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="smallSubmit">
+        <field name="deleteLink" title=" " widget-style="smallSubmit">
             <hyperlink target="deletePartyTaxAuthInfo" description="${uiLabelMap.CommonDelete}" also-hidden="false">
                 <parameter param-name="partyId"/>
                 <parameter param-name="taxAuthPartyId"/>
@@ -360,7 +360,7 @@ under the License.
         <field name="noteName" title="${uiLabelMap.FormFieldTitle_noteName}" tooltip="${uiLabelMap.PartyOptional}"> </field>
         <field name="note"><textarea cols="70" rows="10"/></field>
         <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="smallSubmit"><submit button-type="text-link"/></field>
-        <field name="cancelLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="smallSubmit">
+        <field name="cancelLink" title=" " widget-style="smallSubmit">
             <hyperlink target="${donePage}" also-hidden="false" description="${uiLabelMap.CommonCancelDone}">
                 <parameter param-name="partyId"/>
             </hyperlink>
@@ -488,7 +488,7 @@ under the License.
         <field use-when="displayPassword!=null" name="PASSWORD" title="${uiLabelMap.CommonPassword}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><password size="15" maxlength="250"/></field>
         <field use-when="displayPassword!=null" name="CONFIRM_PASSWORD" title="${uiLabelMap.CommonPassword}" tooltip="* ${uiLabelMap.CommonConfirm}" widget-style="required"><password size="15" maxlength="250"/></field>
         <field name="USERNAME" title="${uiLabelMap.CommonUsername}" tooltip="* ${uiLabelMap.PartyTemporaryPassword}" widget-style="required"><text size="30" maxlength="250"/></field>
-        <!--<field name="RequiredNote" title="${uiLabelMap.CommonEmptyHeader}"><display description="${uiLabelMap.PartyRequiredNote}" also-hidden="false"/></field> -->
+        <!--<field name="RequiredNote" title=" "><display description="${uiLabelMap.PartyRequiredNote}" also-hidden="false"/></field> -->
 
         <field name="PRODUCT_STORE_ID" title="Product Store" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
             <drop-down>
@@ -517,7 +517,7 @@ under the License.
         <field name="roleTypeId" title="${uiLabelMap.PartyRole}">
             <display-entity entity-name="RoleType" description="${description}"/>
         </field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="smallSubmit">
+        <field name="deleteLink" title=" " widget-style="smallSubmit">
             <hyperlink target="deleteSegmentGroupRole" description="${uiLabelMap.CommonDelete}" also-hidden="false">
                 <parameter param-name="segmentGroupId"/>
                 <parameter param-name="partyId"/>
@@ -540,7 +540,7 @@ under the License.
             </drop-down>
         </field>
         <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="smallSubmit"><submit button-type="text-link"/></field>
-        <!-- <field name="cancelLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="smallSubmit">
+        <!-- <field name="cancelLink" title=" " widget-style="smallSubmit">
             <hyperlink target="${donePage}" also-hidden="false" description="${uiLabelMap.CommonCancelDone}">
                 <parameter param-name="segmentGroupId"/>
             </hyperlink>
@@ -661,7 +661,7 @@ under the License.
         <field name="dataResourceId" title="${uiLabelMap.FormFieldTitle_dataResourceName}" use-when="dataResourceId!=null">
             <display-entity entity-name="DataResource" description="${dataResourceName}"/>
         </field>
-        <field name="editLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="smallSubmit">
+        <field name="editLink" title=" " widget-style="smallSubmit">
            <hyperlink also-hidden="false" description="${uiLabelMap.CommonEdit}" target="EditPartyContents">
                 <parameter param-name="contentId"/>
                 <parameter param-name="partyId"/>
@@ -893,8 +893,8 @@ under the License.
     </form>
 
     <form name="ListInvoicesApplPayments" type="list" list-name="ListInvoicesApplPayments"
-        default-title-style="tableheadtext" default-widget-style="tabletext" odd-row-style="alternate-row" default-table-style="basic-table hover-bar"
-        default-tooltip-style="tabletext">
+        default-title-style="tableheadtext" odd-row-style="alternate-row" default-table-style="basic-table hover-bar"
+       >
         <actions>
             <set field="actualCurrency" from-field="actualCurrency" default-value="true" type="Boolean"/>
             <set field="actualCurrencyUomId" from-field="actualCurrencyUomId" default-value="${defaultOrganizationPartyCurrencyUomId}"/>
@@ -928,8 +928,8 @@ under the License.
         <field name="pmAmount" title="${uiLabelMap.AccountingPaymentAmount}" entry-name="pmActualCurrencyAmount" use-when="actualCurrency==true"><display type="currency" currency="${actualCurrencyUomId}"/></field>
     </form>
     <form name="ListUnAppliedInvoices" type="list" list-name="ListUnAppliedInvoices"
-        default-title-style="tableheadtext" default-widget-style="tabletext" odd-row-style="alternate-row" default-table-style="basic-table hover-bar"
-        default-tooltip-style="tabletext">
+        default-title-style="tableheadtext" odd-row-style="alternate-row" default-table-style="basic-table hover-bar"
+       >
         <actions>
             <set field="actualCurrency" from-field="actualCurrency" default-value="true" type="Boolean"/>
             <script location="component://party/webapp/partymgr/WEB-INF/actions/party/UnAppliedInvoicesForParty.groovy"/>
@@ -949,8 +949,8 @@ under the License.
         <field name="unAppliedAmount"><display type="currency" currency="${invoiceCurrencyUomId}"/></field>
     </form>
     <form name="ListUnAppliedPayments" type="list" list-name="paymentList"
-        default-title-style="tableheadtext" default-widget-style="tabletext" odd-row-style="alternate-row" default-table-style="basic-table hover-bar"
-        default-tooltip-style="tabletext">
+        default-title-style="tableheadtext" odd-row-style="alternate-row" default-table-style="basic-table hover-bar"
+       >
         <actions>
             <set field="actualCurrency" from-field="actualCurrency" default-value="true" type="Boolean"/>
             <script location="component://party/webapp/partymgr/WEB-INF/actions/party/UnAppliedPaymentsForParty.groovy"/>
@@ -974,7 +974,7 @@ under the License.
         <field name="unAppliedAmount"><display type="currency" currency="${paymentCurrencyUomId}"/></field>
     </form>
     <form name="partyFinancialSummary" type="single" title="Financial summary" default-map-name="finanSummary"
-        default-title-style="tableheadtext" default-widget-style="tabletext" default-tooltip-style="tabletext">
+        default-title-style="tableheadtext">
         <actions>
             <set field="actualCurrency" from-field="actualCurrency" default-value="true"/>
             <set field="actualCurrencyUomId" from-field="actualCurrencyUomId" default-value="${defaultOrganizationPartyCurrencyUomId}"/>
@@ -990,9 +990,9 @@ under the License.
         <field position="1" name="totalToBeReceived" use-when="finanSummary.get(&quot;totalToBeReceived&quot;)!=null" title="${uiLabelMap.PartyToBePaidTo} ${parameters.partyId}"><display type="currency" currency="${actualCurrencyUomId}"/></field>
     </form>
     <form name="ViewPartyRoles" type="list" list-name="partyRoles" target="viewroles"
-        default-title-style="tableheadtext" default-widget-style="tabletext"
+        default-title-style="tableheadtext"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar"
-        default-tooltip-style="tabletext">
+       >
         <field name="roleTypeId" title="${uiLabelMap.PartyRoleTypeId}"><display/></field>
         <field name="description" title="${uiLabelMap.PartyRole}"><display/></field>
         <field name="parentTypeId"><display-entity entity-name="RoleType" key-field-name="roleTypeId" description="${description}"/></field>

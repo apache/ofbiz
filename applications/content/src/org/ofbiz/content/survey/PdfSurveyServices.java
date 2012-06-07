@@ -215,7 +215,7 @@ public class PdfSurveyServices {
             }
             pdfStamper.close();
             if (UtilValidate.isNotEmpty(contentId)) {
-                survey = delegator.findByPrimaryKey("Survey", UtilMisc.toMap("surveyId", surveyId));
+                survey = delegator.findOne("Survey", UtilMisc.toMap("surveyId", surveyId), false);
                 survey.set("acroFormContentId", contentId);
                 survey.store();
             }
@@ -248,7 +248,7 @@ public class PdfSurveyServices {
             //String contentId = (String)context.get("contentId");
             surveyResponseId = (String)context.get("surveyResponseId");
             if (UtilValidate.isNotEmpty(surveyResponseId)) {
-                GenericValue surveyResponse = delegator.findByPrimaryKey("SurveyResponse", UtilMisc.toMap("surveyResponseId", surveyResponseId));
+                GenericValue surveyResponse = delegator.findOne("SurveyResponse", UtilMisc.toMap("surveyResponseId", surveyResponseId), false);
                 if (surveyResponse != null) {
                     surveyId = surveyResponse.getString("surveyId");
                 }
@@ -271,7 +271,7 @@ public class PdfSurveyServices {
                 //AcroFields.Item item = fs.getFieldItem(fieldName);
                 //int type = fs.getFieldType(fieldName);
                 String value = fs.getField(fieldName);
-                List<GenericValue> questions = delegator.findByAnd("SurveyQuestionAndAppl", UtilMisc.toMap("surveyId", surveyId, "externalFieldRef", fieldName));
+                List<GenericValue> questions = delegator.findByAnd("SurveyQuestionAndAppl", UtilMisc.toMap("surveyId", surveyId, "externalFieldRef", fieldName), null, false);
                 if (questions.size() == 0) {
                     Debug.logInfo("No question found for surveyId:" + surveyId + " and externalFieldRef:" + fieldName, module);
                     continue;
@@ -423,13 +423,13 @@ public class PdfSurveyServices {
         Document document = new Document();
         try {
             if (UtilValidate.isNotEmpty(surveyResponseId)) {
-                GenericValue surveyResponse = delegator.findByPrimaryKey("SurveyResponse", UtilMisc.toMap("surveyResponseId", surveyResponseId));
+                GenericValue surveyResponse = delegator.findOne("SurveyResponse", UtilMisc.toMap("surveyResponseId", surveyResponseId), false);
                 if (surveyResponse != null) {
                     surveyId = surveyResponse.getString("surveyId");
                 }
             }
             if (UtilValidate.isNotEmpty(surveyId) && UtilValidate.isEmpty(contentId)) {
-                GenericValue survey = delegator.findByPrimaryKey("Survey", UtilMisc.toMap("surveyId", surveyId));
+                GenericValue survey = delegator.findOne("Survey", UtilMisc.toMap("surveyId", surveyId), false);
                 if (survey != null) {
                     String acroFormContentId = survey.getString("acroFormContentId");
                     if (UtilValidate.isNotEmpty(acroFormContentId)) {
@@ -441,11 +441,11 @@ public class PdfSurveyServices {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PdfWriter.getInstance(document, baos);
 
-            List<GenericValue> responses = delegator.findByAnd("SurveyResponseAnswer", UtilMisc.toMap("surveyResponseId", surveyResponseId));
+            List<GenericValue> responses = delegator.findByAnd("SurveyResponseAnswer", UtilMisc.toMap("surveyResponseId", surveyResponseId), null, false);
             for(GenericValue surveyResponseAnswer : responses) {
                 String value = null;
                 String surveyQuestionId = (String) surveyResponseAnswer.get("surveyQuestionId");
-                GenericValue surveyQuestion = delegator.findByPrimaryKey("SurveyQuestion", UtilMisc.toMap("surveyQuestionId", surveyQuestionId));
+                GenericValue surveyQuestion = delegator.findOne("SurveyQuestion", UtilMisc.toMap("surveyQuestionId", surveyQuestionId), false);
                 String questionType = surveyQuestion.getString("surveyQuestionTypeId");
                 // DEJ20060227 this isn't used, if needed in the future should get from SurveyQuestionAppl.externalFieldRef String fieldName = surveyQuestion.getString("description");
                 if ("OPTION".equals(questionType)) {
@@ -490,10 +490,10 @@ public class PdfSurveyServices {
         List<Object> qAndA = FastList.newInstance();
 
         try {
-            List<GenericValue> responses = delegator.findByAnd("SurveyResponseAnswer", UtilMisc.toMap("surveyResponseId", surveyResponseId));
+            List<GenericValue> responses = delegator.findByAnd("SurveyResponseAnswer", UtilMisc.toMap("surveyResponseId", surveyResponseId), null, false);
             for(GenericValue surveyResponseAnswer : responses) {
                 String surveyQuestionId = (String) surveyResponseAnswer.get("surveyQuestionId");
-                GenericValue surveyQuestion = delegator.findByPrimaryKey("SurveyQuestion", UtilMisc.toMap("surveyQuestionId", surveyQuestionId));
+                GenericValue surveyQuestion = delegator.findOne("SurveyQuestion", UtilMisc.toMap("surveyQuestionId", surveyQuestionId), false);
                 qAndA.add(UtilMisc.toMap("question", surveyQuestion, "response", surveyResponseAnswer));
             }
             results.put("questionsAndAnswers", qAndA);
@@ -518,27 +518,27 @@ public class PdfSurveyServices {
         try {
             String surveyId = null;
             if (UtilValidate.isNotEmpty(surveyResponseId)) {
-                GenericValue surveyResponse = delegator.findByPrimaryKey("SurveyResponse", UtilMisc.toMap("surveyResponseId", surveyResponseId));
+                GenericValue surveyResponse = delegator.findOne("SurveyResponse", UtilMisc.toMap("surveyResponseId", surveyResponseId), false);
                 if (surveyResponse != null) {
                     surveyId = surveyResponse.getString("surveyId");
                 }
             }
 
             if (UtilValidate.isNotEmpty(surveyId)) {
-                GenericValue survey = delegator.findByPrimaryKey("Survey", UtilMisc.toMap("surveyId", surveyId));
+                GenericValue survey = delegator.findOne("Survey", UtilMisc.toMap("surveyId", surveyId), false);
                 if (survey != null) {
                     acroFormContentId = survey.getString("acroFormContentId");
                 }
             }
 
-            List<GenericValue> responses = delegator.findByAnd("SurveyResponseAnswer", UtilMisc.toMap("surveyResponseId", surveyResponseId));
+            List<GenericValue> responses = delegator.findByAnd("SurveyResponseAnswer", UtilMisc.toMap("surveyResponseId", surveyResponseId), null, false);
             for(GenericValue surveyResponseAnswer : responses) {
                 String value = null;
                 String surveyQuestionId = (String) surveyResponseAnswer.get("surveyQuestionId");
 
-                GenericValue surveyQuestion = delegator.findByPrimaryKeyCache("SurveyQuestion", UtilMisc.toMap("surveyQuestionId", surveyQuestionId));
+                GenericValue surveyQuestion = delegator.findOne("SurveyQuestion", UtilMisc.toMap("surveyQuestionId", surveyQuestionId), true);
 
-                List<GenericValue> surveyQuestionApplList = EntityUtil.filterByDate(delegator.findByAndCache("SurveyQuestionAppl", UtilMisc.toMap("surveyId", surveyId, "surveyQuestionId", surveyQuestionId), UtilMisc.toList("-fromDate")), false);
+                List<GenericValue> surveyQuestionApplList = EntityUtil.filterByDate(delegator.findByAnd("SurveyQuestionAppl", UtilMisc.toMap("surveyId", surveyId, "surveyQuestionId", surveyQuestionId), UtilMisc.toList("-fromDate"), true), false);
                 GenericValue surveyQuestionAppl = EntityUtil.getFirst(surveyQuestionApplList);
 
                 String questionType = surveyQuestion.getString("surveyQuestionTypeId");
@@ -619,7 +619,7 @@ public class PdfSurveyServices {
                     String https = (String)context.get("https");
                     String webSiteId = (String)context.get("webSiteId");
                     String rootDir = (String)context.get("rootDir");
-                    GenericValue content = delegator.findByPrimaryKeyCache("Content", UtilMisc.toMap("contentId", contentId));
+                    GenericValue content = delegator.findOne("Content", UtilMisc.toMap("contentId", contentId), true);
                     String dataResourceId = content.getString("dataResourceId");
                     inputByteBuffer = DataResourceWorker.getContentAsByteBuffer(delegator, dataResourceId, https, webSiteId, locale, rootDir);
                 } catch (GenericEntityException e) {

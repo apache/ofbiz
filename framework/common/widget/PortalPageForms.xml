@@ -29,32 +29,32 @@ under the License.
                 <parameter param-name="parentPortalPageId" from-field="parameters.parentPortalPageId"/>
             </hyperlink>
         </field>
-        <field name="top" title="${uiLabelMap.CommonEmptyHeader}" use-when="(ownerUserLoginId.equals(&quot;_NA_&quot;))||(itemIndex == 0)"><hyperlink target="" description=""/></field>
-        <field name="bot" title="${uiLabelMap.CommonEmptyHeader}" use-when="(ownerUserLoginId.equals(&quot;_NA_&quot;))||(itemIndex == listSize-1)"><hyperlink target="" description=""/></field>
-        <field name="up" title="${uiLabelMap.CommonEmptyHeader}" use-when="(ownerUserLoginId.equals(&quot;_NA_&quot;))||(itemIndex == 0)"><hyperlink target="" description=""/></field>
-        <field name="dwn" title="${uiLabelMap.CommonEmptyHeader}" use-when="(ownerUserLoginId.equals(&quot;_NA_&quot;))||(itemIndex == listSize-1)"><hyperlink target="" description=""/></field>
-        <field name="top" title="${uiLabelMap.CommonEmptyHeader}" use-when="(!ownerUserLoginId.equals(&quot;_NA_&quot;))&amp;&amp;(itemIndex &gt; 0)">
+        <field name="top" title=" " use-when="(ownerUserLoginId.equals(&quot;_NA_&quot;))||(itemIndex == 0)"><hyperlink target="" description=""/></field>
+        <field name="bot" title=" " use-when="(ownerUserLoginId.equals(&quot;_NA_&quot;))||(itemIndex == listSize-1)"><hyperlink target="" description=""/></field>
+        <field name="up" title=" " use-when="(ownerUserLoginId.equals(&quot;_NA_&quot;))||(itemIndex == 0)"><hyperlink target="" description=""/></field>
+        <field name="dwn" title=" " use-when="(ownerUserLoginId.equals(&quot;_NA_&quot;))||(itemIndex == listSize-1)"><hyperlink target="" description=""/></field>
+        <field name="top" title=" " use-when="(!ownerUserLoginId.equals(&quot;_NA_&quot;))&amp;&amp;(itemIndex &gt; 0)">
             <hyperlink target="updatePortalPageSeq" image-location="/images/arrow-end-up-green.png">
                 <parameter param-name="mode" value="TOP"/>
                 <parameter param-name="portalPageId"/>
                 <parameter param-name="parentPortalPageId" from-field="parameters.parentPortalPageId"/>
             </hyperlink>
         </field>
-        <field name="bot" title="${uiLabelMap.CommonEmptyHeader}" use-when="(!ownerUserLoginId.equals(&quot;_NA_&quot;))&amp;&amp;(itemIndex &lt; listSize-1)">
+        <field name="bot" title=" " use-when="(!ownerUserLoginId.equals(&quot;_NA_&quot;))&amp;&amp;(itemIndex &lt; listSize-1)">
             <hyperlink target="updatePortalPageSeq" image-location="/images/arrow-end-down-green.png">
                 <parameter param-name="mode" value="BOT"/>
                 <parameter param-name="portalPageId"/>
                 <parameter param-name="parentPortalPageId" from-field="parameters.parentPortalPageId"/>
             </hyperlink>
         </field>
-        <field name="up" title="${uiLabelMap.CommonEmptyHeader}" use-when="(!ownerUserLoginId.equals(&quot;_NA_&quot;))&amp;&amp;(itemIndex &gt; 0)">
+        <field name="up" title=" " use-when="(!ownerUserLoginId.equals(&quot;_NA_&quot;))&amp;&amp;(itemIndex &gt; 0)">
             <hyperlink target="updatePortalPageSeq" image-location="/images/arrow-single-up-green.png">
                 <parameter param-name="mode" value="UP"/>
                 <parameter param-name="portalPageId"/>
                 <parameter param-name="parentPortalPageId" from-field="parameters.parentPortalPageId"/>
             </hyperlink>
         </field>
-        <field name="dwn" title="${uiLabelMap.CommonEmptyHeader}" use-when="(!ownerUserLoginId.equals(&quot;_NA_&quot;))&amp;&amp;(itemIndex &lt; listSize-1)">
+        <field name="dwn" title=" " use-when="(!ownerUserLoginId.equals(&quot;_NA_&quot;))&amp;&amp;(itemIndex &lt; listSize-1)">
             <hyperlink target="updatePortalPageSeq" image-location="/images/arrow-single-down-green.png">
                 <parameter param-name="mode" value="DWN"/>
                 <parameter param-name="portalPageId"/>
@@ -62,7 +62,7 @@ under the License.
             </hyperlink>
         </field>
         <field name="portalPageName" use-when="ownerUserLoginId.equals(&quot;_NA_&quot;)" title="${uiLabelMap.CommonName}"><display/></field>
-        <field name="portalPageName" use-when="!ownerUserLoginId.equals(&quot;_NA_&quot;)" title="${uiLabelMap.CommonName}" id-name="portalPageName" widget-style="tabletext">
+        <field name="portalPageName" use-when="!ownerUserLoginId.equals(&quot;_NA_&quot;)" title="${uiLabelMap.CommonName}" id-name="portalPageName">
             <display>
                 <in-place-editor url="updatePortalPage" cancel-control="button" saving-text="Updating..." text-between-controls=" ">
                     <simple-editor/>
@@ -70,8 +70,8 @@ under the License.
                 </in-place-editor>
             </display>
         </field>
-        <field name="description" use-when="ownerUserLoginId.equals(&quot;_NA_&quot;)" title="${uiLabelMap.CommonDescription}" widget-style="tabletext"><display/></field>
-        <field name="description" use-when="!ownerUserLoginId.equals(&quot;_NA_&quot;)" title="${uiLabelMap.CommonDescription}" id-name="portalDescription" widget-style="tabletext">
+        <field name="description" use-when="ownerUserLoginId.equals(&quot;_NA_&quot;)" title="${uiLabelMap.CommonDescription}"><display/></field>
+        <field name="description" use-when="!ownerUserLoginId.equals(&quot;_NA_&quot;)" title="${uiLabelMap.CommonDescription}" id-name="portalDescription">
             <display>
                 <in-place-editor url="updatePortalPage" cancel-control="button" saving-text="Updating..." text-between-controls=" ">
                     <simple-editor/>
@@ -80,13 +80,13 @@ under the License.
             </display>
         </field>
         <field name="originalPortalPageId"><display-entity entity-name="PortalPage" description="${portalPageName} [${portalPageId}]" key-field-name="portalPageId"/></field>
-        <field name="deleteLink" use-when="!ownerUserLoginId.equals(&quot;_NA_&quot;)" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" >
+        <field name="deleteLink" use-when="!ownerUserLoginId.equals(&quot;_NA_&quot;)" title=" " widget-style="buttontext" >
             <hyperlink target="deletePortalPage" description="${uiLabelMap.CommonDelete}">
                 <parameter param-name="portalPageId"/>
                 <parameter param-name="parentPortalPageId" from-field="parameters.parentPortalPageId"/>
             </hyperlink>
         </field>
-        <field name="deleteLink" use-when="!ownerUserLoginId.equals(&quot;_NA_&quot;)&amp;&amp;originalPortalPageId!=null" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" >
+        <field name="deleteLink" use-when="!ownerUserLoginId.equals(&quot;_NA_&quot;)&amp;&amp;originalPortalPageId!=null" title=" " widget-style="buttontext" >
             <hyperlink target="deletePortalPage" description="${uiLabelMap.CommonRevertPortalPage}">
                 <parameter param-name="portalPageId"/>
                 <parameter param-name="parentPortalPageId" from-field="parameters.parentPortalPageId"/>

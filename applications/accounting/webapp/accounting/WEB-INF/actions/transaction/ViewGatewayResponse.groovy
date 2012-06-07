@@ -37,13 +37,13 @@ orderPaymentPreferenceId = context.orderPaymentPreferenceId;
 // first purpose: retrieve orderId and paymentPreferenceId
 if (!orderPaymentPreferenceId) {
   paymentGatewayResponse = context.paymentGatewayResponse;
-  orderPaymentPreference = paymentGatewayResponse.getRelatedOne("OrderPaymentPreference");
+  orderPaymentPreference = paymentGatewayResponse.getRelatedOne("OrderPaymentPreference", false);
   context.orderId = orderPaymentPreference.orderId;
   context.orderPaymentPreferenceId = orderPaymentPreference.orderPaymentPreferenceId;
 } else {
     // second purpose: grab the latest gateway response of the orderpaymentpreferenceId
-    orderPaymentPreference = delegator.findByPrimaryKey("OrderPaymentPreference", [orderPaymentPreferenceId : orderPaymentPreferenceId]);
-    gatewayResponses = orderPaymentPreference.getRelated("PaymentGatewayResponse", ["transactionDate DESC"]);
+    orderPaymentPreference = delegator.findOne("OrderPaymentPreference", [orderPaymentPreferenceId : orderPaymentPreferenceId], false);
+    gatewayResponses = orderPaymentPreference.getRelated("PaymentGatewayResponse", null, ["transactionDate DESC"], false);
     EntityUtil.filterByCondition(gatewayResponses, EntityCondition.makeCondition("transCodeEnumId", EntityOperator.EQUALS, "PGT_AUTHORIZE"));
     
     if (gatewayResponses) {
@@ -57,5 +57,5 @@ if (!orderPaymentPreferenceId) {
 }
 // get the list of payments associated to gateway response
 if (context.paymentGatewayResponse) {
-    context.payments = context.paymentGatewayResponse.getRelated("Payment");
+    context.payments = context.paymentGatewayResponse.getRelated("Payment", null, null, false);
 }

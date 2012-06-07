@@ -151,7 +151,7 @@ public class WfProcessImpl extends WfExecutionObjectImpl implements WfProcess {
                 Map<String, Object> fields = UtilMisc.toMap("packageId", (Object) processDef.getString("packageId"), "packageVersion",
                         processDef.getString("packageVersion"), "processId", processDef.getString("processId"),
                         "processVersion", processDef.getString("processVersion"), "activityId", activityId);
-                start = getDelegator().findByPrimaryKey("WorkflowActivity", fields);
+                start = getDelegator().findOne("WorkflowActivity", fields, false);
 
                 // here we must check and make sure this activity is defined to as a starting activity
                 if (!start.getBoolean("canStart").booleanValue())
@@ -159,7 +159,7 @@ public class WfProcessImpl extends WfExecutionObjectImpl implements WfProcess {
             } else {
                 // this is either the first activity defined or specified as an ExtendedAttribute
                 // since this is defined in XPDL, we don't care if canStart is set.
-                start = getDefinitionObject().getRelatedOne("DefaultStartWorkflowActivity");
+                start = getDefinitionObject().getRelatedOne("DefaultStartWorkflowActivity", false);
             }
         } catch (GenericEntityException e) {
             throw new WfException(e.getMessage(), e.getNested());
@@ -286,7 +286,7 @@ public class WfProcessImpl extends WfExecutionObjectImpl implements WfProcess {
                 GenericValue toActivity = null;
 
                 try {
-                    toActivity = trans.getRelatedOne("ToWorkflowActivity");
+                    toActivity = trans.getRelatedOne("ToWorkflowActivity", false);
                 } catch (GenericEntityException e) {
                     throw new WfException(e.getMessage(), e);
                 }
@@ -320,7 +320,7 @@ public class WfProcessImpl extends WfExecutionObjectImpl implements WfProcess {
         
         List<GenericValue> toTrans = null;
         try {
-            toTrans = toActivity.getRelated("ToWorkflowTransition");
+            toTrans = toActivity.getRelated("ToWorkflowTransition", null, null, false);
         } catch (GenericEntityException e) {
             throw new WfException(e.getMessage(), e);
         }
@@ -410,7 +410,7 @@ public class WfProcessImpl extends WfExecutionObjectImpl implements WfProcess {
         // get the from transitions
         List<GenericValue> fromTransitions = null;
         try {
-            fromTransitions = fromActivity.getDefinitionObject().getRelated("FromWorkflowTransition");
+            fromTransitions = fromActivity.getDefinitionObject().getRelated("FromWorkflowTransition", null, null, false);
         } catch (GenericEntityException e) {
             throw new WfException(e.getMessage(), e);
         }

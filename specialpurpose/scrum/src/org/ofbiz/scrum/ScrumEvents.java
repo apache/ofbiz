@@ -71,7 +71,7 @@ public class ScrumEvents {
             EntityConditionList<EntityCondition> exprAnds = EntityCondition.makeCondition(UtilMisc.toList(exprOrs, EntityCondition.makeCondition("partyId", EntityOperator.EQUALS, partyId)), EntityOperator.AND);
             List<GenericValue> partyRoleList = delegator.findList("PartyRole", exprAnds, null, null, null, false);
             if (UtilValidate.isNotEmpty(partyRoleList)) {
-                List<GenericValue> timesheetList = delegator.findByAndCache("Timesheet", UtilMisc.toMap("partyId", partyId, "statusId", "TIMESHEET_IN_PROCESS"));
+                List<GenericValue> timesheetList = delegator.findByAnd("Timesheet", UtilMisc.toMap("partyId", partyId, "statusId", "TIMESHEET_IN_PROCESS"), null, true);
                 if (UtilValidate.isNotEmpty(timesheetList)) {
                     for (GenericValue timesheetMap : timesheetList) {
                         String timesheetId = timesheetMap.getString("timesheetId");
@@ -83,9 +83,9 @@ public class ScrumEvents {
                             //compare week and compare date
                             if ((timesheetDate.compareTo(weekStart) <= 0) && (realTimeDate.compareTo(nowStartDate) < 0)) {
                                 //check time entry
-                                List<GenericValue> timeEntryList = timesheetMap.getRelatedByAnd("TimeEntry", UtilMisc.toMap("partyId", partyId, "timesheetId",timesheetId, "fromDate",realTimeDate));
+                                List<GenericValue> timeEntryList = timesheetMap.getRelated("TimeEntry", UtilMisc.toMap("partyId", partyId, "timesheetId",timesheetId, "fromDate",realTimeDate), null, false);
                                 //check EmplLeave
-                                List<GenericValue> emplLeaveList = delegator.findByAndCache("EmplLeave", UtilMisc.toMap("partyId", partyId, "fromDate", realTimeDate));
+                                List<GenericValue> emplLeaveList = delegator.findByAnd("EmplLeave", UtilMisc.toMap("partyId", partyId, "fromDate", realTimeDate), null, true);
                                 if (UtilValidate.isEmpty(timeEntryList) && UtilValidate.isEmpty(emplLeaveList)) {
                                     Map<String, Object> noEntryMap = FastMap.newInstance();
                                     noEntryMap.put("timesheetId", timesheetId);

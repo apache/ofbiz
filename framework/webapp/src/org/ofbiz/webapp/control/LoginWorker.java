@@ -568,8 +568,8 @@ public class LoginWorker {
         if (modelUserLogin.isField("partyId")) {
             // if partyId is a field, then we should have these relations defined
             try {
-                GenericValue person = userLogin.getRelatedOne("Person");
-                GenericValue partyGroup = userLogin.getRelatedOne("PartyGroup");
+                GenericValue person = userLogin.getRelatedOne("Person", false);
+                GenericValue partyGroup = userLogin.getRelatedOne("PartyGroup", false);
                 if (person != null) session.setAttribute("person", person);
                 if (partyGroup != null) session.setAttribute("partyGroup", partyGroup);
             } catch (GenericEntityException e) {
@@ -871,7 +871,7 @@ public class LoginWorker {
 
             String cnPattern = UtilProperties.getPropertyValue("security.properties", "security.login.cert.pattern", "(.*)");
             Pattern pattern = Pattern.compile(cnPattern);
-            //Debug.log("CN Pattern: " + cnPattern, module);
+            //Debug.logInfo("CN Pattern: " + cnPattern, module);
 
             if (currentUserLogin == null) {
                 X509Certificate[] clientCerts = (X509Certificate[]) request.getAttribute("javax.servlet.request.X509Certificate"); // 2.2 spec
@@ -884,7 +884,7 @@ public class LoginWorker {
 
                     for (int i = 0; i < clientCerts.length; i++) {
                         //X500Principal x500 = clientCerts[i].getSubjectX500Principal();
-                        //Debug.log("Checking client certification for authentication: " + x500.getName(), module);
+                        //Debug.logInfo("Checking client certification for authentication: " + x500.getName(), module);
 
                         Map<String, String> x500Map = KeyStoreUtil.getCertX500Map(clientCerts[i]);
                         if (i == 0) {
@@ -894,14 +894,14 @@ public class LoginWorker {
                             if (m.matches()) {
                                 userLoginId = m.group(1);
                             } else {
-                                Debug.log("Client certificate CN does not match pattern: [" + cnPattern + "]", module);
+                                Debug.logInfo("Client certificate CN does not match pattern: [" + cnPattern + "]", module);
                             }
                         }
 
                         try {
                             // check for a valid issuer (or generated cert data)
                             if (LoginWorker.checkValidIssuer(delegator, x500Map, clientCerts[i].getSerialNumber())) {
-                                //Debug.log("Looking up userLogin from CN: " + userLoginId, module);
+                                //Debug.logInfo("Looking up userLogin from CN: " + userLoginId, module);
 
                                 // CN should match the userLoginId
                                 GenericValue userLogin = delegator.findOne("UserLogin", false, "userLoginId", userLoginId);
@@ -1055,7 +1055,7 @@ public class LoginWorker {
         GenericValue userLoginSession;
         Map<String, Object> userLoginSessionMap = null;
         try {
-            userLoginSession = userLogin.getRelatedOne("UserLoginSession");
+            userLoginSession = userLogin.getRelatedOne("UserLoginSession", false);
             if (userLoginSession != null) {
                 Object deserObj = XmlSerializer.deserialize(userLoginSession.getString("sessionData"), delegator);
                 //don't check, just cast, if it fails it will get caught and reported below; if (deserObj instanceof Map)

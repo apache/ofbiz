@@ -238,7 +238,7 @@ public class ManagerEvents {
                     // transmit final data to server
                     GenericValue terminal = null;
                     try {
-                        terminal = state.getRelatedOne("PosTerminal");
+                        terminal = state.getRelatedOne("PosTerminal", false);
                     } catch (GenericEntityException e) {
                         Debug.logError(e, module);
                         pos.showDialog("dialog/error/exception", e.getMessage());
@@ -295,7 +295,7 @@ public class ManagerEvents {
             String orderId = input.value();
             GenericValue orderHeader = null;
             try {
-                orderHeader = session.getDelegator().findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+                orderHeader = session.getDelegator().findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
             }

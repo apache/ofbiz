@@ -212,8 +212,7 @@ under the License.
 
             <#-- Show Associated Products (not for Variants) -->
             <#if cartLine.getProductId()?exists>
-              <#assign itemProductAssocList = cartLine.getProduct().getRelated("MainProductAssoc",
-                  Static["org.ofbiz.base.util.UtilMisc"].toList("productAssocTypeId", "sequenceNum"))?if_exists/>
+              <#assign itemProductAssocList = cartLine.getProduct().getRelated("MainProductAssoc", null, Static["org.ofbiz.base.util.UtilMisc"].toList("productAssocTypeId", "sequenceNum"), false)?if_exists/>
             </#if>
             <#if itemProductAssocList?exists && itemProductAssocList?has_content>
               <tr><td colspan="8"><hr /></td></tr>
@@ -238,7 +237,7 @@ under the License.
                   <#-- Show alternate gifts if there are any... -->
                   <div>${uiLabelMap.OrderChooseFollowingForGift}:</div>
                   <#list cartLine.getAlternativeOptionProductIds() as alternativeOptionProductId>
-                    <#assign alternativeOptionProduct = delegator.findByPrimaryKeyCache("Product", Static["org.ofbiz.base.util.UtilMisc"].toMap("productId", alternativeOptionProductId))>
+                    <#assign alternativeOptionProduct = delegator.findOne("Product", Static["org.ofbiz.base.util.UtilMisc"].toMap("productId", alternativeOptionProductId), true)>
                     <#assign alternativeOptionName = Static["org.ofbiz.product.product.ProductContentWrapper"].getProductContentAsText(alternativeOptionProduct, "PRODUCT_NAME", locale, dispatcher)?if_exists>
                     <div><a href="<@ofbizUrl>setDesiredAlternateGwpProductId?alternateGwpProductId=${alternativeOptionProductId}&amp;alternateGwpLine=${cartLineIndex}</@ofbizUrl>" class="buttontext">Select: ${alternativeOptionName?default(alternativeOptionProductId)}</a></div>
                   </#list>
@@ -306,7 +305,7 @@ under the License.
                 <td>&nbsp;</td>
               </tr>
             <#list shoppingCart.getAdjustments() as cartAdjustment>
-              <#assign adjustmentType = cartAdjustment.getRelatedOneCache("OrderAdjustmentType")>
+              <#assign adjustmentType = cartAdjustment.getRelatedOne("OrderAdjustmentType", true)>
               <tr>
                 <td colspan="4" nowrap="nowrap" align="right">
                   <div>

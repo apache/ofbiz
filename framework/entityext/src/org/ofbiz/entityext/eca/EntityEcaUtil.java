@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import freemarker.template.utility.StringUtil;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
@@ -48,19 +49,14 @@ public class EntityEcaUtil {
 
     public static final String module = EntityEcaUtil.class.getName();
 
-    public static UtilCache<String, Map<String, Map<String, List<EntityEcaRule>>>> entityEcaReaders = UtilCache.createUtilCache("entity.EcaReaders", 0, 0, false);
+    private static final UtilCache<String, Map<String, Map<String, List<EntityEcaRule>>>> entityEcaReaders = UtilCache.createUtilCache("entity.EcaReaders", 0, 0, false);
 
     public static Map<String, Map<String, List<EntityEcaRule>>> getEntityEcaCache(String entityEcaReaderName) {
         Map<String, Map<String, List<EntityEcaRule>>> ecaCache = entityEcaReaders.get(entityEcaReaderName);
         if (ecaCache == null) {
-            synchronized (EntityEcaUtil.class) {
-                ecaCache = entityEcaReaders.get(entityEcaReaderName);
-                if (ecaCache == null) {
-                    ecaCache = FastMap.newInstance();
-                    readConfig(entityEcaReaderName, ecaCache);
-                    entityEcaReaders.put(entityEcaReaderName, ecaCache);
-                }
-            }
+            ecaCache = FastMap.newInstance();
+            readConfig(entityEcaReaderName, ecaCache);
+            ecaCache = entityEcaReaders.putIfAbsentAndGet(entityEcaReaderName, ecaCache);
         }
         return ecaCache;
     }
@@ -130,7 +126,7 @@ public class EntityEcaUtil {
             rules.add(new EntityEcaRule(e));
         }
         try {
-            Debug.logImportant("Loaded [" + rules.size() + "] Entity ECA definitions from " + handler.getFullLocation() + " in loader " + handler.getLoaderName(), module);
+            Debug.logImportant("Loaded [" + StringUtil.leftPad(Integer.toString(rules.size()), 3) + "] Entity ECA definitions from " + handler.getFullLocation() + " in loader " + handler.getLoaderName(), module);
         } catch (GenericConfigException e) {
             Debug.logError(e, module);
         }

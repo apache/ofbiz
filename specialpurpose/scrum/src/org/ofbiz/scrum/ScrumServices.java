@@ -65,7 +65,7 @@ public class ScrumServices {
 
         if (UtilValidate.isNotEmpty(communicationEventId)) {
             try {
-                GenericValue communicationEvent = delegator.findByPrimaryKey("CommunicationEvent", UtilMisc.toMap("communicationEventId", communicationEventId));
+                GenericValue communicationEvent = delegator.findOne("CommunicationEvent", UtilMisc.toMap("communicationEventId", communicationEventId), false);
                 if (UtilValidate.isNotEmpty(communicationEvent)) {
                     String subject = communicationEvent.getString("subject");
                     if (UtilValidate.isNotEmpty(subject)) {
@@ -78,15 +78,15 @@ public class ScrumServices {
                             }
                             String productId = subject.substring(pdLocation + 3, nonDigitLocation);
                             // Debug.logInfo("=======================Product id found in subject: >>" + custRequestId + "<<", module);
-                            GenericValue product = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", productId));
+                            GenericValue product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), false);
                             if (UtilValidate.isNotEmpty(product)) {
-                                GenericValue communicationEventProductMap = delegator.findByPrimaryKey("CommunicationEventProduct", UtilMisc.toMap("productId", productId, "communicationEventId", communicationEventId));
+                                GenericValue communicationEventProductMap = delegator.findOne("CommunicationEventProduct", UtilMisc.toMap("productId", productId, "communicationEventId", communicationEventId), false);
                                 if (UtilValidate.isEmpty(communicationEventProductMap)) {
                                     GenericValue communicationEventProduct = delegator.makeValue("CommunicationEventProduct", UtilMisc.toMap("productId", productId, "communicationEventId", communicationEventId));
                                     communicationEventProduct.create();
                                 }
                                 try {
-                                    List<GenericValue> productRoleList = delegator.findByAnd("ProductRole", UtilMisc.toMap("productId",productId, "partyId", communicationEvent.getString("partyIdFrom"), "roleTypeId","PRODUCT_OWNER"));
+                                    List<GenericValue> productRoleList = delegator.findByAnd("ProductRole", UtilMisc.toMap("productId",productId, "partyId", communicationEvent.getString("partyIdFrom"), "roleTypeId","PRODUCT_OWNER"), null, false);
                                     GenericValue productRoleMap = EntityUtil.getFirst(productRoleList);
                                     GenericValue userLogin = (GenericValue) context.get("userLogin");
                                     // also close the incoming communication event
@@ -213,7 +213,7 @@ public class ScrumServices {
                         Debug.logInfo("Revision Link ============== >>>>>>>>>>> "+ revisionLink, module);
                         if (UtilValidate.isNotEmpty(taskId)) {
                             String version = "R" + i;
-                            List <GenericValue> workeffContentList = delegator.findByAnd("WorkEffortAndContentDataResource", UtilMisc.toMap("contentName",version.trim() ,"drObjectInfo", revisionLink.trim()));
+                            List <GenericValue> workeffContentList = delegator.findByAnd("WorkEffortAndContentDataResource", UtilMisc.toMap("contentName",version.trim() ,"drObjectInfo", revisionLink.trim()), null, false);
                             List<EntityCondition> exprsAnd = FastList.newInstance();
                             exprsAnd.add(EntityCondition.makeCondition("workEffortId", EntityOperator.EQUALS, taskId));
 
@@ -291,8 +291,8 @@ public class ScrumServices {
                 if (UtilValidate.isNotEmpty(exclusions)) {
                     for (GenericValue contentResourceMap : exclusions) {
                         Debug.logInfo("Remove contentId ============== >>>>>>>>>>> "+ contentResourceMap.getString("contentId"), module);
-                        GenericValue dataResourceMap = delegator.findByPrimaryKey("DataResource", UtilMisc.toMap("dataResourceId", contentResourceMap.getString("dataResourceId")));
-                        GenericValue contentMap = delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", contentResourceMap.getString("contentId")));
+                        GenericValue dataResourceMap = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", contentResourceMap.getString("dataResourceId")), false);
+                        GenericValue contentMap = delegator.findOne("Content", UtilMisc.toMap("contentId", contentResourceMap.getString("contentId")), false);
                         contentMap.removeRelated("WorkEffortContent");
                         contentMap.removeRelated("ContentRole");
                         contentMap.remove();

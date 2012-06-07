@@ -54,7 +54,7 @@ contentIdTo = ContentManagementWorker.getFromSomewhere("forumId", paramMap, requ
 context.contentIdTo = contentIdTo;
 //Debug.logInfo("in contentaddprep, contentIdTo:" + contentIdTo,"");
 //Debug.logInfo("in contentaddprep, paramMap:" + paramMap,"");
-attrList = delegator.findByAndCache("ContentAttribute", [contentId : contentIdTo, attrName : "publishOperation"]);
+attrList = delegator.findByAnd("ContentAttribute", [contentId : contentIdTo, attrName : "publishOperation"], null, true);
 publishOperation = null;
 if (attrList) {
     contentAttribute = attrList.get(0);
@@ -76,7 +76,7 @@ contentPurpose = page.contentPurpose ?: "ARTICLE";
 singleWrapper.putInContext("contentPurpose", contentPurpose);
 singleWrapper.putInContext("forumId", contentIdTo);
 
-forumContent = delegator.findByPrimaryKeyCache("Content", [contentId : contentIdTo]);
+forumContent = delegator.findOne("Content", [contentId : contentIdTo], true);
 statusId = "CTNT_PUBLISHED";
 if (forumContent) {
     statusId = forumContent.statusId;

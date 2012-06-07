@@ -93,6 +93,14 @@ public class FlexibleMapAccessor<T> implements Serializable, IsEmpty {
         return fma;
     }
 
+    /**
+     * Returns <code>true</code> if this <code>FlexibleMapAccessor</code> contains a nested expression.
+     * @return <code>true</code> if this <code>FlexibleMapAccessor</code> contains a nested expression
+     */
+    public boolean containsNestedExpression() {
+        return fse != null;
+    }
+
     public String getOriginalName() {
         return this.original;
     }

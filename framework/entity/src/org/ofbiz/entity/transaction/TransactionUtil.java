@@ -78,16 +78,16 @@ public class TransactionUtil implements Status {
 
     @Deprecated
     public static <V> V doNewTransaction(String ifErrorMessage, Callable<V> callable) throws GenericEntityException {
-        return inTransaction(noTransaction(callable), ifErrorMessage, 0, true).call();
+        return noTransaction(inTransaction(callable, ifErrorMessage, 0, true)).call();
     }
 
     @Deprecated
     public static <V> V doNewTransaction(String ifErrorMessage, boolean printException, Callable<V> callable) throws GenericEntityException {
-        return inTransaction(noTransaction(callable), ifErrorMessage, 0, printException).call();
+        return noTransaction(inTransaction(callable, ifErrorMessage, 0, printException)).call();
     }
 
     public static <V> V doNewTransaction(Callable<V> callable, String ifErrorMessage, int timeout, boolean printException) throws GenericEntityException {
-        return inTransaction(noTransaction(callable), ifErrorMessage, timeout, printException).call();
+        return noTransaction(inTransaction(callable, ifErrorMessage, timeout, printException)).call();
     }
 
     @Deprecated
@@ -104,7 +104,7 @@ public class TransactionUtil implements Status {
         return inTransaction(callable, ifErrorMessage, timeout, printException).call();
     }
 
-    public static <V> Callable<V> noTransaction(Callable<V> callable) {
+    public static <V> NoTransaction<V> noTransaction(Callable<V> callable) {
         return new NoTransaction<V>(callable);
     }
 
@@ -973,10 +973,18 @@ public class TransactionUtil implements Status {
             this.callable = callable;
         }
 
-        public V call() throws Exception {
+        public V call() throws GenericEntityException {
             Transaction suspended = TransactionUtil.suspend();
             try {
                 return callable.call();
+            } catch (Error e) {
+                throw e;
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (GenericEntityException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new GenericEntityException(e);
             } finally {
                 TransactionUtil.resume(suspended);
             }

@@ -25,8 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.ObjectType;
@@ -41,7 +39,6 @@ import org.ofbiz.entity.serialize.XmlSerializer;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ModelService;
-import org.xml.sax.SAXException;
 
 /**
  * Workflow Application Services - 'Services' and 'Workers' for interaction with Workflow Application API
@@ -208,7 +205,7 @@ public class WfApplicationServices {
             throws GenericServiceException {
         try {
             GenericValue application =
-                delegator.findByPrimaryKey("ApplicationSandbox", UtilMisc.toMap("applicationId", applicationId));
+                delegator.findOne("ApplicationSandbox", UtilMisc.toMap("applicationId", applicationId), false);
             return application;
         } catch (GenericEntityException ee) {
             throw new GenericServiceException(ee.getMessage(), ee);
@@ -219,14 +216,8 @@ public class WfApplicationServices {
             throws GenericServiceException {
         try {
             return UtilGenerics.checkMap(XmlSerializer.deserialize((String) runTimeData.get("runtimeInfo"), delegator));
-        } catch (SerializeException se) {
-            throw new GenericServiceException(se.getMessage(), se);
-        } catch (ParserConfigurationException pe) {
-            throw new GenericServiceException(pe.getMessage(), pe);
-        } catch (SAXException se) {
-            throw new GenericServiceException(se.getMessage(), se);
-        } catch (IOException ioe) {
-            throw new GenericServiceException(ioe.getMessage(), ioe);
+        } catch (Exception e) {
+            throw new GenericServiceException(e.getMessage(), e);
         }
     }
 
@@ -247,8 +238,8 @@ public class WfApplicationServices {
             throws GenericServiceException {
         try {
             GenericValue application =
-                delegator.findByPrimaryKey("ApplicationSandbox", UtilMisc.toMap("applicationId", applicationId));
-            return application.getRelatedOne("RuntimeData");
+                delegator.findOne("ApplicationSandbox", UtilMisc.toMap("applicationId", applicationId), false);
+            return application.getRelatedOne("RuntimeData", false);
         } catch (GenericEntityException ee) {
             throw new GenericServiceException(ee.getMessage(), ee);
         }
@@ -259,7 +250,7 @@ public class WfApplicationServices {
         Map<String, Object> expresions = null;
         // look for the 1st application.
         final GenericValue workEffort =
-            delegator.findByPrimaryKey("WorkEffort", UtilMisc.toMap("workEffortId", application.get("workEffortId")));
+            delegator.findOne("WorkEffort", UtilMisc.toMap("workEffortId", application.get("workEffortId")), false);
         String packageId = (String) workEffort.get("workflowPackageId");
         String packageVersion = (String) workEffort.get("workflowPackageVersion");
         String processId = (String) workEffort.get("workflowProcessId");

@@ -97,14 +97,14 @@ public class MrpServices {
         listResult = null;
         List<GenericValue> listResultRoles = FastList.newInstance();
         try {
-            listResult = delegator.findByAnd("Requirement", UtilMisc.toMap("requirementTypeId", "PRODUCT_REQUIREMENT", "statusId", "REQ_PROPOSED"));
+            listResult = delegator.findByAnd("Requirement", UtilMisc.toMap("requirementTypeId", "PRODUCT_REQUIREMENT", "statusId", "REQ_PROPOSED"), null, false);
         } catch (GenericEntityException e) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingMrpEventFindError", locale));
         }
         if (listResult != null) {
             try {
                 for(GenericValue tmpRequirement : listResult) {
-                    listResultRoles.addAll(tmpRequirement.getRelated("RequirementRole"));
+                    listResultRoles.addAll(tmpRequirement.getRelated("RequirementRole", null, null, false));
                     //int numOfRecordsRemoved = delegator.removeRelated("RequirementRole", tmpRequirement);
                 }
                 delegator.removeAll(listResultRoles);
@@ -115,7 +115,7 @@ public class MrpServices {
         }
         listResult = null;
         try {
-            listResult = delegator.findByAnd("Requirement", UtilMisc.toMap("requirementTypeId", "INTERNAL_REQUIREMENT", "statusId", "REQ_PROPOSED"));
+            listResult = delegator.findByAnd("Requirement", UtilMisc.toMap("requirementTypeId", "INTERNAL_REQUIREMENT", "statusId", "REQ_PROPOSED"), null, false);
         } catch (GenericEntityException e) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingMrpEventFindError", locale));
         }
@@ -146,7 +146,7 @@ public class MrpServices {
         parameters = UtilMisc.<String, Object>toMap("orderTypeId", "SALES_ORDER", "oiStatusId", "ITEM_APPROVED");
         parameters.put("facilityId", facilityId);
         try {
-            resultList = delegator.findByAnd("OrderHeaderItemAndShipGroup", parameters, UtilMisc.toList("orderId"));
+            resultList = delegator.findByAnd("OrderHeaderItemAndShipGroup", parameters, UtilMisc.toList("orderId"), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Error : findByAnd(\"OrderItem\", parameters\")", module);
             Debug.logError(e, "Error : parameters = "+parameters,module);
@@ -207,7 +207,7 @@ public class MrpServices {
         parameters = UtilMisc.<String, Object>toMap("requirementTypeId", "PRODUCT_REQUIREMENT",
                 "statusId", "REQ_APPROVED", "facilityId", facilityId);
         try {
-            resultList = delegator.findByAnd("Requirement", parameters);
+            resultList = delegator.findByAnd("Requirement", parameters, null, false);
         } catch (GenericEntityException e) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingMrpEventFindError", locale));
         }
@@ -237,7 +237,7 @@ public class MrpServices {
         String orderId = null;
         GenericValue orderDeliverySchedule = null;
         try {
-            List<GenericValue> facilityContactMechs = EntityUtil.filterByDate(delegator.findByAnd("FacilityContactMech", UtilMisc.toMap("facilityId", facilityId)));
+            List<GenericValue> facilityContactMechs = EntityUtil.filterByDate(delegator.findByAnd("FacilityContactMech", UtilMisc.toMap("facilityId", facilityId), null, false));
             List<String> facilityContactMechIds = EntityUtil.getFieldListFromEntityList(facilityContactMechs, "contactMechId", true);
             List<EntityExpr> searchConditions = UtilMisc.toList(EntityCondition.makeCondition("orderTypeId", EntityOperator.EQUALS, "PURCHASE_ORDER"),
                                                     EntityCondition.makeCondition("oiStatusId", EntityOperator.EQUALS, "ITEM_APPROVED"),
@@ -254,7 +254,7 @@ public class MrpServices {
                 orderDeliverySchedule = null;
                 orderId = newOrderId;
                 try {
-                    orderDeliverySchedule = delegator.findByPrimaryKey("OrderDeliverySchedule", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", "_NA_"));
+                    orderDeliverySchedule = delegator.findOne("OrderDeliverySchedule", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", "_NA_"), false);
                 } catch (GenericEntityException e) {
                 }
             }
@@ -272,7 +272,7 @@ public class MrpServices {
             OrderReadHelper orh = new OrderReadHelper(delegator, orderId);
             BigDecimal shippedQuantity = null;
             try {
-                shippedQuantity = orh.getItemShippedQuantity(genericResult.getRelatedOne("OrderItem"));
+                shippedQuantity = orh.getItemShippedQuantity(genericResult.getRelatedOne("OrderItem", false));
             } catch (GenericEntityException e) {
             }
             if (UtilValidate.isNotEmpty(shippedQuantity)) {
@@ -281,7 +281,7 @@ public class MrpServices {
 
             GenericValue orderItemDeliverySchedule = null;
             try {
-                orderItemDeliverySchedule = delegator.findByPrimaryKey("OrderDeliverySchedule", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", genericResult.getString("orderItemSeqId")));
+                orderItemDeliverySchedule = delegator.findOne("OrderDeliverySchedule", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", genericResult.getString("orderItemSeqId")), false);
             } catch (GenericEntityException e) {
             }
             Timestamp estimatedShipDate = null;
@@ -311,7 +311,7 @@ public class MrpServices {
         parameters = UtilMisc.<String, Object>toMap("workEffortGoodStdTypeId", "PRUNT_PROD_NEEDED",
                    "statusId", "WEGS_CREATED", "facilityId", facilityId);
         try {
-            resultList = delegator.findByAnd("WorkEffortAndGoods", parameters);
+            resultList = delegator.findByAnd("WorkEffortAndGoods", parameters, null, false);
             for(GenericValue genericResult : resultList) {
                 if ("PRUN_CLOSED".equals(genericResult.getString("currentStatusId")) ||
                     "PRUN_COMPLETED".equals(genericResult.getString("currentStatusId")) ||
@@ -321,7 +321,7 @@ public class MrpServices {
                 String productId =  genericResult.getString("productId");
                 // get the inventory already consumed
                 BigDecimal consumedInventoryTotal = BigDecimal.ZERO;
-                List<GenericValue> consumedInventoryItems = delegator.findByAnd("WorkEffortAndInventoryAssign", UtilMisc.toMap("workEffortId", genericResult.getString("workEffortId"), "productId", productId));
+                List<GenericValue> consumedInventoryItems = delegator.findByAnd("WorkEffortAndInventoryAssign", UtilMisc.toMap("workEffortId", genericResult.getString("workEffortId"), "productId", productId), null, false);
                 for (GenericValue consumedInventoryItem : consumedInventoryItems) {
                     consumedInventoryTotal = consumedInventoryTotal.add(consumedInventoryItem.getBigDecimal("quantity"));
                 }
@@ -346,7 +346,7 @@ public class MrpServices {
         parameters = UtilMisc.<String, Object>toMap("workEffortGoodStdTypeId", "PRUN_PROD_DELIV",
                 "statusId", "WEGS_CREATED", "workEffortTypeId", "PROD_ORDER_HEADER", "facilityId", facilityId);
         try {
-            resultList = delegator.findByAnd("WorkEffortAndGoods", parameters);
+            resultList = delegator.findByAnd("WorkEffortAndGoods", parameters, null, false);
             for(GenericValue genericResult : resultList) {
                 if ("PRUN_CLOSED".equals(genericResult.getString("currentStatusId")) ||
                     "PRUN_COMPLETED".equals(genericResult.getString("currentStatusId")) ||
@@ -385,7 +385,7 @@ public class MrpServices {
         resultList = null;
         parameters = UtilMisc.<String, Object>toMap("facilityId", facilityId);
         try {
-            resultList = delegator.findByAnd("ProductFacility", parameters);
+            resultList = delegator.findByAnd("ProductFacility", parameters, null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Unable to retrieve ProductFacility records.", module);
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingMrpCannotFindProductFacility", locale));
@@ -430,7 +430,7 @@ public class MrpServices {
         }
         String partyId =  (String)facility.get("ownerPartyId");
         try {
-            resultList = delegator.findByAnd("SalesForecast", UtilMisc.toMap("organizationPartyId", partyId));
+            resultList = delegator.findByAnd("SalesForecast", UtilMisc.toMap("organizationPartyId", partyId), null, false);
         } catch (GenericEntityException e) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingMrpCannotFindSalesForecasts", locale));
         }
@@ -448,7 +448,7 @@ public class MrpServices {
                 } else {
                     List<GenericValue> salesForecastDetails = null;
                     try {
-                        salesForecastDetails = delegator.findByAnd("SalesForecastDetail", UtilMisc.toMap("salesForecastId", genericResult.getString("salesForecastId")));
+                        salesForecastDetails = delegator.findByAnd("SalesForecastDetail", UtilMisc.toMap("salesForecastId", genericResult.getString("salesForecastId")), null, false);
                     } catch (GenericEntityException e) {
                         return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingMrpCannotFindSalesForecastDetails", locale));
                     }
@@ -552,7 +552,7 @@ public class MrpServices {
                     try {
                         InventoryEventPlannedServices.createOrUpdateMrpEvent(parameters, componentEventQuantity.negate(), null, product.get("productId") + ": " + eventDate, false, delegator);
                     } catch (GenericEntityException e) {
-                        Debug.logError("Error : findByPrimaryKey(\"MrpEvent\", parameters) ="+parameters+"--"+e.getMessage(), module);
+                        Debug.logError("Error : findOne(\"MrpEvent\", parameters) ="+parameters+"--"+e.getMessage(), module);
                         logMrpError(mrpId, node.getProduct().getString("productId"), "Unable to create event (processBomComponent)", delegator);
                     }
                 }
@@ -591,16 +591,16 @@ public class MrpServices {
         }
         if (UtilValidate.isEmpty(facilityId)) {
             try {
-                GenericValue facilityGroup = delegator.findByPrimaryKey("FacilityGroup", UtilMisc.toMap("facilityGroupId", facilityGroupId));
+                GenericValue facilityGroup = delegator.findOne("FacilityGroup", UtilMisc.toMap("facilityGroupId", facilityGroupId), false);
                 if (UtilValidate.isEmpty(facilityGroup)) {
                     return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingMrpFacilityGroupIsNotValid", UtilMisc.toMap("facilityGroupId", facilityGroupId), locale));
                 }
-                List<GenericValue> facilities = facilityGroup.getRelated("FacilityGroupMember", UtilMisc.toList("sequenceNum"));
+                List<GenericValue> facilities = facilityGroup.getRelated("FacilityGroupMember", null, UtilMisc.toList("sequenceNum"), false);
                 if (UtilValidate.isEmpty(facilities)) {
                     return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingMrpFacilityGroupIsNotAssociatedToFacility", UtilMisc.toMap("facilityGroupId", facilityGroupId), locale));
                 }
                 for(GenericValue facilityMember : facilities) {
-                    GenericValue facility = facilityMember.getRelatedOne("Facility");
+                    GenericValue facility = facilityMember.getRelatedOne("Facility", false);
                     if ("WAREHOUSE".equals(facility.getString("facilityTypeId")) && UtilValidate.isEmpty(facilityId)) {
                         facilityId = facility.getString("facilityId");
                     }
@@ -680,8 +680,8 @@ public class MrpServices {
                         BigDecimal positiveEventQuantity = eventQuantity.compareTo(BigDecimal.ZERO) > 0 ? eventQuantity: eventQuantity.negate();
                         // It's a new product, so it's necessary to  read the MrpQoh
                         try {
-                            product = inventoryEventForMRP.getRelatedOneCache("Product");
-                            productFacility = EntityUtil.getFirst(product.getRelatedByAndCache("ProductFacility", UtilMisc.toMap("facilityId", facilityId)));
+                            product = inventoryEventForMRP.getRelatedOne("Product", true);
+                            productFacility = EntityUtil.getFirst(product.getRelated("ProductFacility", UtilMisc.toMap("facilityId", facilityId), null, true));
                         } catch (GenericEntityException e) {
                             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingMrpCannotFindProductForEvent", locale));
                         }
@@ -751,7 +751,7 @@ public class MrpServices {
                         String routingId = (String)serviceResponse.get("workEffortId");
                         if (routingId != null) {
                             try {
-                                routing = delegator.findByPrimaryKey("WorkEffort", UtilMisc.toMap("workEffortId", routingId));
+                                routing = delegator.findOne("WorkEffort", UtilMisc.toMap("workEffortId", routingId), false);
                             } catch (GenericEntityException e) {
                                 return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingMrpCannotFindProductForEvent", locale));
                             }

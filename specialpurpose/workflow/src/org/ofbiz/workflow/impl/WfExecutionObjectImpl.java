@@ -226,7 +226,7 @@ public abstract class WfExecutionObjectImpl implements WfExecutionObject {
         String stateStr = null;
 
         try {
-            statusObj = getRuntimeObject().getRelatedOne("CurrentStatusItem");
+            statusObj = getRuntimeObject().getRelatedOne("CurrentStatusItem", false);
         } catch (GenericEntityException e) {
             throw new WfException(e.getMessage(), e);
         }
@@ -524,7 +524,7 @@ public abstract class WfExecutionObjectImpl implements WfExecutionObject {
         if (activityId != null)
             fields.put("activityId", activityId);
         try {
-            value = getDelegator().findByPrimaryKey(entityName, fields);
+            value = getDelegator().findOne(entityName, fields, false);
         } catch (GenericEntityException e) {
             throw new WfException(e.getMessage(), e);
         }
@@ -535,8 +535,8 @@ public abstract class WfExecutionObjectImpl implements WfExecutionObject {
         GenericValue value = null;
 
         try {
-            value = getDelegator().findByPrimaryKey("WorkEffort",
-                        UtilMisc.toMap("workEffortId", workEffortId));
+            value = getDelegator().findOne("WorkEffort",
+                        UtilMisc.toMap("workEffortId", workEffortId), false);
         } catch (GenericEntityException e) {
             throw new WfException(e.getMessage(), e);
         }
@@ -568,7 +568,7 @@ public abstract class WfExecutionObjectImpl implements WfExecutionObject {
                 dataObject.set("runtimeDataId", seqId);
                 dataObject.store();
             } else {
-                runtimeData = dataObject.getRelatedOne("RuntimeData");
+                runtimeData = dataObject.getRelatedOne("RuntimeData", false);
             }
             // String serialized = XmlSerializer.serialize(value);
             // System.out.println(serialized);
@@ -603,7 +603,7 @@ public abstract class WfExecutionObjectImpl implements WfExecutionObject {
         if (dataObject.get("runtimeDataId") == null)
             return context;
         try {
-            GenericValue runtimeData = dataObject.getRelatedOne("RuntimeData");
+            GenericValue runtimeData = dataObject.getRelatedOne("RuntimeData", false);
 
             contextXML = runtimeData.getString("runtimeInfo");
         } catch (GenericEntityException e) {
@@ -627,7 +627,7 @@ public abstract class WfExecutionObjectImpl implements WfExecutionObject {
     private GenericValue getWorkEffort(String workEffortId) throws WfException {
         GenericValue we = null;
         try {
-            we = getDelegator().findByPrimaryKey("WorkEffort", UtilMisc.toMap("workEffortId", workEffortId));
+            we = getDelegator().findOne("WorkEffort", UtilMisc.toMap("workEffortId", workEffortId), false);
         } catch (GenericEntityException e) {
             throw new WfException("Problem getting WorkEffort entity (" + workEffortId + ")", e);
         }

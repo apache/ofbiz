@@ -30,15 +30,15 @@ import org.ofbiz.workflow.*;
 workflow = parameters.workflow;
 workflowDef = null;
 if (!workflow) {
-    runningProcesses = delegator.findByAnd("WorkEffort", [workEffortTypeId : "WORK_FLOW", currentStatusId : "WF_RUNNING"]);
+    runningProcesses = delegator.findByAnd("WorkEffort", [workEffortTypeId : "WORK_FLOW", currentStatusId : "WF_RUNNING"], null, false);
     if (runningProcesses) {
         context.runningProcesses = runningProcesses;
     }
 } else {
-    workflowDef = delegator.findByPrimaryKey("WorkEffort", [workEffortId : workflow]);
+    workflowDef = delegator.findOne("WorkEffort", [workEffortId : workflow], false);
     if (workflowDef) {
         context.workflow = workflowDef;
-        activities = delegator.findByAnd("WorkEffort", [workEffortParentId : workflow]);
+        activities = delegator.findByAnd("WorkEffort", [workEffortParentId : workflow], null, false);
         if (activities) {
             context.activities = activities;
         }

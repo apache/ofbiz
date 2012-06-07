@@ -22,17 +22,17 @@ import org.ofbiz.base.util.Debug;
 try{
     // for sprint dropdown
     workEffortList = [];
-    sprintList = delegator.findByAnd("WorkEffort",["workEffortTypeId" : "SCRUM_SPRINT","currentStatusId" : "SPRINT_ACTIVE"]);
+    sprintList = delegator.findByAnd("WorkEffort",["workEffortTypeId" : "SCRUM_SPRINT","currentStatusId" : "SPRINT_ACTIVE"], null, false);
     if (sprintList) {
         sprintList.each{ sprintMap ->
             workEffortMap = [:];
             workEffortParentId = sprintMap.workEffortParentId;
             if (workEffortParentId) {
-               projectList = delegator.findByAnd("WorkEffortAndProduct",["workEffortId" : workEffortParentId]);
+               projectList = delegator.findByAnd("WorkEffortAndProduct",["workEffortId" : workEffortParentId], null, false);
                projectMap = projectList[0];
                // make sure that project dose not closed
                if (projectMap.currentStatusId != "SPJ_CLOSED") {
-                   productMap = delegator.findByPrimaryKey("Product",["productId" : projectMap.productId]);
+                   productMap = delegator.findOne("Product",["productId" : projectMap.productId], false);
                    workEffortMap.productId = productMap.productId;
                    workEffortMap.internalName = returnNameAsString(productMap.internalName,30);
                    workEffortMap.projectId = projectMap.workEffortId;
@@ -59,16 +59,16 @@ try{
     }
     categoryList = [];
     if (productId) {
-        sprintList = delegator.findByAnd("CustRequestAndCustRequestItem",["custRequestTypeId" : "RF_PARENT_BACKLOG","productId" : productId]);
+        sprintList = delegator.findByAnd("CustRequestAndCustRequestItem",["custRequestTypeId" : "RF_PARENT_BACKLOG","productId" : productId], null, false);
     } else {
-        sprintList = delegator.findByAnd("CustRequestAndCustRequestItem",["custRequestTypeId" : "RF_PARENT_BACKLOG"]);
+        sprintList = delegator.findByAnd("CustRequestAndCustRequestItem",["custRequestTypeId" : "RF_PARENT_BACKLOG"], null, false);
     }
     if (sprintList) {
         sprintList.each{ categoryMap ->
             inputMap = [:];
             productIdIn = categoryMap.productId;
             if (productIdIn) {
-               productMap = delegator.findByPrimaryKey("Product",["productId" : productIdIn]);
+               productMap = delegator.findOne("Product",["productId" : productIdIn], false);
                inputMap.productId = productMap.productId;
                inputMap.internalName = productMap.internalName;
                inputMap.custRequestId = categoryMap.custRequestId;

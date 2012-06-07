@@ -119,7 +119,7 @@ under the License.
             <td width="74%">
             <select name="statusId">
                 <#if (inventoryTransfer.statusId)?exists>
-                    <#assign curStatusItem = inventoryTransfer.getRelatedOneCache("StatusItem")>
+                    <#assign curStatusItem = inventoryTransfer.getRelatedOne("StatusItem", true)>
                     <option value="${(inventoryTransfer.statusId)?if_exists}">${(curStatusItem.get("description",locale))?if_exists}</option>
                 </#if>
                 <#list statusItems as statusItem>
@@ -201,7 +201,7 @@ under the License.
                 <td width="14%">&nbsp;</td>
                 <td width="6%" align="right" nowrap="nowrap"><span class="label">${uiLabelMap.ProductToFacilityContainer}</span></td>
                 <td width="6%">&nbsp;</td>
-                <#assign fac = delegator.findByPrimaryKey("Facility", Static["org.ofbiz.base.util.UtilMisc"].toMap("facilityId", inventoryTransfer.facilityIdTo))>
+                <#assign fac = delegator.findOne("Facility", Static["org.ofbiz.base.util.UtilMisc"].toMap("facilityId", inventoryTransfer.facilityIdTo), false)>
                 <td width="74%">${(fac.facilityName)?default("&nbsp;")}</td>
             </tr>
             <tr>

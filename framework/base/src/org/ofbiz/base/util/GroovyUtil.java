@@ -46,7 +46,7 @@ public class GroovyUtil {
 
     public static final String module = GroovyUtil.class.getName();
 
-    public static UtilCache<String, Class<?>> parsedScripts = UtilCache.createUtilCache("script.GroovyLocationParsedCache", 0, 0, false);
+    private static final UtilCache<String, Class<?>> parsedScripts = UtilCache.createUtilCache("script.GroovyLocationParsedCache", 0, 0, false);
 
     /**
      * Evaluate a Groovy condition or expression
@@ -116,10 +116,7 @@ public class GroovyUtil {
     }
     public static Class<?> getScriptClassFromLocation(String location, GroovyClassLoader groovyClassLoader) throws GeneralException {
         try {
-            Class<?> scriptClass = null;
-            synchronized (parsedScripts) {
-                scriptClass = parsedScripts.get(location);
-            }
+            Class<?> scriptClass = parsedScripts.get(location);
             if (scriptClass == null) {
                 URL scriptUrl = FlexibleLocation.resolveLocation(location);
                 if (scriptUrl == null) {
@@ -130,16 +127,14 @@ public class GroovyUtil {
                 } else {
                     scriptClass = parseClass(scriptUrl.openStream(), location);
                 }
-                synchronized (parsedScripts) {
-                    Class<?> scriptClassCached = parsedScripts.get(location);
-                    if (scriptClassCached == null) {
-                        if (Debug.verboseOn()) {
-                            Debug.logVerbose("Caching Groovy script at: " + location, module);
-                        }
-                        parsedScripts.put(location, scriptClass);
-                    } else {
-                        scriptClass = scriptClassCached;
+                Class<?> scriptClassCached = parsedScripts.putIfAbsent(location, scriptClass);
+                if (scriptClassCached == null) { // putIfAbsent returns null if the class is added to the cache
+                    if (Debug.verboseOn()) {
+                        Debug.logVerbose("Cached Groovy script at: " + location, module);
                     }
+                } else {
+                    // the newly parsed script is discarded and the one found in the cache (that has been created by a concurrent thread in the meantime) is used
+                    scriptClass = scriptClassCached;
                 }
             }
             return scriptClass;
@@ -184,22 +179,17 @@ public class GroovyUtil {
 
     public static Object runScriptFromClasspath(String script, Map<String,Object> context) throws GeneralException {
         try {
-            Class<?> scriptClass = null;
-            synchronized (parsedScripts) {
-                parsedScripts.get(script);
-            }
+            Class<?> scriptClass = parsedScripts.get(script);
             if (scriptClass == null) {
                 scriptClass = loadClass(script);
-                synchronized (parsedScripts) {
-                    Class<?> scriptClassCached = parsedScripts.get(script);
-                    if (scriptClassCached == null) {
-                        if (Debug.verboseOn()) {
-                            Debug.logVerbose("Caching Groovy script: " + script, module);
-                        }
-                        parsedScripts.put(script, scriptClass);
-                    } else {
-                        scriptClass = scriptClassCached;
+                Class<?> cachedScriptClass = parsedScripts.putIfAbsent(script, scriptClass);
+                if (cachedScriptClass == null) { // putIfAbsent returns null if the class is added
+                    if (Debug.verboseOn()) {
+                        Debug.logVerbose("Cached Groovy script at: " + script, module);
                     }
+                } else {
+                    // the newly parsed script is discarded and the one found in the cache (that has been created by a concurrent thread in the meantime) is used
+                    scriptClass = cachedScriptClass;
                 }
             }
             return InvokerHelper.createScript(scriptClass, getBinding(context)).run();

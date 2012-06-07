@@ -32,10 +32,10 @@ under the License.
         </fo:table-header>
         <fo:table-body>
             <#list shipGroups as shipGroup>
-                <#assign orderItemShipGroupAssocs = shipGroup.getRelated("OrderItemShipGroupAssoc")?if_exists>
+                <#assign orderItemShipGroupAssocs = shipGroup.getRelated("OrderItemShipGroupAssoc", null, null, false)?if_exists>
                 <#if orderItemShipGroupAssocs?has_content>
                     <#list orderItemShipGroupAssocs as shipGroupAssoc>
-                        <#assign orderItem = shipGroupAssoc.getRelatedOne("OrderItem")?if_exists>
+                        <#assign orderItem = shipGroupAssoc.getRelatedOne("OrderItem", false)?if_exists>
                         <fo:table-row>
                             <fo:table-cell><fo:block>${shipGroup.shipGroupSeqId}</fo:block></fo:table-cell>
                             <fo:table-cell><fo:block>${orderItem.productId?if_exists}</fo:block></fo:table-cell>

@@ -350,7 +350,7 @@ public class RitaServices {
         Locale locale = (Locale) context.get("locale");
         GenericValue orderHeader = null;
         try {
-            orderHeader = orderPaymentPreference.getRelatedOne("OrderHeader");
+            orderHeader = orderPaymentPreference.getRelatedOne("OrderHeader", false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(UtilProperties.getMessage(resourceOrder, 
@@ -364,7 +364,7 @@ public class RitaServices {
                 Timestamp orderDate = orderHeader.getTimestamp("orderDate");
                 GenericValue terminalState = null;
                 try {
-                    List<GenericValue> states = delegator.findByAnd("PosTerminalState", UtilMisc.toMap("posTerminalId", terminalId));
+                    List<GenericValue> states = delegator.findByAnd("PosTerminalState", UtilMisc.toMap("posTerminalId", terminalId), null, false);
                     states = EntityUtil.filterByDate(states, UtilDateTime.nowTimestamp(), "openedDate", "closedDate", true);
                     terminalState = EntityUtil.getFirst(states);
                 } catch (GenericEntityException e) {
@@ -405,7 +405,7 @@ public class RitaServices {
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
         GenericValue creditCard = (GenericValue) context.get("creditCard");
         if (creditCard == null) {
-            creditCard = delegator.findByPrimaryKey("CreditCard", UtilMisc.toMap("paymentMethodId", orderPaymentPreference.getString("paymentMethodId")));
+            creditCard = delegator.findOne("CreditCard", UtilMisc.toMap("paymentMethodId", orderPaymentPreference.getString("paymentMethodId")), false);
         }
         if (creditCard != null) {
             List<String> expDateList = StringUtil.split(creditCard.getString("expireDate"), "/");

@@ -19,15 +19,15 @@
 
 import org.ofbiz.base.util.*;
 
-product = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", parameters.productId));
+product = delegator.findOne("Product", UtilMisc.toMap("productId", parameters.productId), false);
 if (product) {
-    productVirtualVariants = delegator.findByAndCache("ProductAssoc", UtilMisc.toMap("productIdTo", product.productId , "productAssocTypeId", "ALTERNATIVE_PACKAGE"));
+    productVirtualVariants = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productIdTo", product.productId , "productAssocTypeId", "ALTERNATIVE_PACKAGE"), null, true);
     if(productVirtualVariants){
         def mainProducts = [];
         productVirtualVariants.each { virtualVariantKey ->
             mainProductMap = [:];
-            mainProduct = virtualVariantKey.getRelatedOneCache("MainProduct");
-            quantityUom = mainProduct.getRelatedOneCache("QuantityUom");
+            mainProduct = virtualVariantKey.getRelatedOne("MainProduct", true);
+            quantityUom = mainProduct.getRelatedOne("QuantityUom", true);
             mainProductMap.productId = mainProduct.productId;
             mainProductMap.piecesIncluded = mainProduct.piecesIncluded;
             mainProductMap.uomDesc = quantityUom.description;

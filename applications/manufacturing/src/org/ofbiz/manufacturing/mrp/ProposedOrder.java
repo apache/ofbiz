@@ -155,7 +155,7 @@ public class ProposedOrder {
                     if (EntityUtil.isValueActive(routingTaskAssoc, endDate)) {
                         GenericValue routingTask = null;
                         try {
-                            routingTask = routingTaskAssoc.getRelatedOneCache("ToWorkEffort");
+                            routingTask = routingTaskAssoc.getRelatedOne("ToWorkEffort", true);
                         } catch (GenericEntityException e) {
                             Debug.logError(e.getMessage(),  module);
                         }
@@ -190,7 +190,7 @@ public class ProposedOrder {
             // the product is purchased
             // TODO: REVIEW this code
             try {
-                GenericValue techDataCalendar = product.getDelegator().findByPrimaryKeyCache("TechDataCalendar", UtilMisc.toMap("calendarId", "SUPPLIER"));
+                GenericValue techDataCalendar = product.getDelegator().findOne("TechDataCalendar", UtilMisc.toMap("calendarId", "SUPPLIER"), true);
                 startDate = TechDataServices.addBackward(techDataCalendar, endDate, timeToShip);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error : reading SUPPLIER TechDataCalendar: " + e.getMessage(), module);

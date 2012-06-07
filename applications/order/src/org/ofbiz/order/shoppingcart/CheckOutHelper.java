@@ -264,7 +264,7 @@ public class CheckOutHelper {
                 cart.setBillingAccount(billingAccountId, (billingAccountAmt != null ? billingAccountAmt: BigDecimal.ZERO));
                 // copy the billing account terms as order terms
                 try {
-                    List<GenericValue> billingAccountTerms = delegator.findByAnd("BillingAccountTerm", UtilMisc.toMap("billingAccountId", billingAccountId));
+                    List<GenericValue> billingAccountTerms = delegator.findByAnd("BillingAccountTerm", UtilMisc.toMap("billingAccountId", billingAccountId), null, false);
                     if (UtilValidate.isNotEmpty(billingAccountTerms)) {
                         for(GenericValue billingAccountTerm : billingAccountTerms) {
                             // the term is not copied if in the cart a term of the same type is already set
@@ -635,9 +635,9 @@ public class CheckOutHelper {
                 try {
                     // do something tricky here: run as the "system" user
                     // that can actually create and run a production run
-                    GenericValue permUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+                    GenericValue permUserLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), true);
                     GenericValue productStore = ProductStoreWorker.getProductStore(productStoreId, delegator);
-                    GenericValue product = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", productId));
+                    GenericValue product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), false);
                     if (EntityTypeUtil.hasParentType(delegator, "ProductType", "productTypeId", product.getString("productTypeId"), "parentTypeId", "AGGREGATED")) {
                         org.ofbiz.product.config.ProductConfigWrapper config = this.cart.findCartItem(counter).getConfigWrapper();
                         Map<String, Object> inputMap = new HashMap<String, Object>();
@@ -697,7 +697,7 @@ public class CheckOutHelper {
 
         GenericValue party = null;
         try {
-            party = this.delegator.findByPrimaryKey("Party", UtilMisc.toMap("partyId", partyId));
+            party = this.delegator.findOne("Party", UtilMisc.toMap("partyId", partyId), false);
         } catch (GenericEntityException e) {
             Debug.logWarning(e, UtilProperties.getMessage(resource_error,"OrderProblemsGettingPartyRecord", cart.getLocale()), module);
         }
@@ -858,8 +858,8 @@ public class CheckOutHelper {
                 GenericValue facilityContactMech = ContactMechWorker.getFacilityContactMechByPurpose(delegator, originFacilityId, UtilMisc.toList("SHIP_ORIG_LOCATION", "PRIMARY_LOCATION"));
                 if (facilityContactMech != null) {
                     try {
-                        shipAddress = delegator.findByPrimaryKey("PostalAddress",
-                                UtilMisc.toMap("contactMechId", facilityContactMech.getString("contactMechId")));
+                        shipAddress = delegator.findOne("PostalAddress",
+                                UtilMisc.toMap("contactMechId", facilityContactMech.getString("contactMechId")), false);
                     } catch (GenericEntityException e) {
                         Debug.logError(e, module);
                     }
@@ -932,7 +932,7 @@ public class CheckOutHelper {
 
         List<GenericValue> allPaymentPreferences = null;
         try {
-            allPaymentPreferences = delegator.findByAnd("OrderPaymentPreference", UtilMisc.toMap("orderId", orderId));
+            allPaymentPreferences = delegator.findByAnd("OrderPaymentPreference", UtilMisc.toMap("orderId", orderId), null, false);
         } catch (GenericEntityException e) {
             throw new GeneralException("Problems getting payment preferences", e);
         }
@@ -1055,7 +1055,7 @@ public class CheckOutHelper {
 
                     // set the order and item status to approved
                     if (autoApproveOrder) {
-                        List<GenericValue> productStorePaymentSettingList = delegator.findByAnd("ProductStorePaymentSetting", UtilMisc.toMap("productStoreId", productStore.getString("productStoreId"), "paymentMethodTypeId", "CREDIT_CARD", "paymentService", "cyberSourceCCAuth"));
+                        List<GenericValue> productStorePaymentSettingList = delegator.findByAnd("ProductStorePaymentSetting", UtilMisc.toMap("productStoreId", productStore.getString("productStoreId"), "paymentMethodTypeId", "CREDIT_CARD", "paymentService", "cyberSourceCCAuth"), null, false);
                         if (productStorePaymentSettingList.size() > 0) {
                             String decision = (String) paymentResult.get("authCode");
                             if (UtilValidate.isNotEmpty(decision)) {
@@ -1207,9 +1207,9 @@ public class CheckOutHelper {
                 GenericValue creditCard = null;
                 GenericValue billingAddress = null;
                 try {
-                    creditCard = paymentMethod.getRelatedOne("CreditCard");
+                    creditCard = paymentMethod.getRelatedOne("CreditCard", false);
                     if (creditCard != null)
-                        billingAddress = creditCard.getRelatedOne("PostalAddress");
+                        billingAddress = creditCard.getRelatedOne("PostalAddress", false);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "Problems getting credit card from payment method", module);
                     errMsg = UtilProperties.getMessage(resource_error,"checkhelper.problems_reading_database", (cart != null ? cart.getLocale() : Locale.getDefault()));
@@ -1268,7 +1268,7 @@ public class CheckOutHelper {
                 userLogin.set("enabled", "N");
                 userLogin.store();
             } else {
-                userLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+                userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), true);
             }
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
@@ -1294,7 +1294,7 @@ public class CheckOutHelper {
         // you cannot accept multiple payment type when using an external gateway
         GenericValue orderHeader = null;
         try {
-            orderHeader = this.delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+            orderHeader = this.delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Problems getting order header", module);
             errMsg = UtilProperties.getMessage(resource_error,"checkhelper.problems_getting_order_header", (cart != null ? cart.getLocale() : Locale.getDefault()));
@@ -1304,7 +1304,7 @@ public class CheckOutHelper {
         if (orderHeader != null) {
             List<GenericValue> paymentPrefs = null;
             try {
-                paymentPrefs = orderHeader.getRelated("OrderPaymentPreference");
+                paymentPrefs = orderHeader.getRelated("OrderPaymentPreference", null, null, false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Problems getting order payments", module);
                 errMsg = UtilProperties.getMessage(resource_error,"checkhelper.problems_getting_payment_preference", (cart != null ? cart.getLocale() : Locale.getDefault()));

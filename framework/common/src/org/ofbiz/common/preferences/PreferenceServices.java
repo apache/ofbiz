@@ -80,7 +80,7 @@ public class PreferenceServices {
 
         Map<String, Object> userPrefMap = null;
         try {
-            GenericValue preference = EntityUtil.getFirst(delegator.findByAnd("UserPreference", fieldMap));
+            GenericValue preference = EntityUtil.getFirst(delegator.findByAnd("UserPreference", fieldMap, null, true));
             if (preference != null) {
                 userPrefMap = PreferenceWorker.createUserPrefMap(preference);
             }
@@ -124,14 +124,16 @@ public class PreferenceServices {
         if (UtilValidate.isEmpty(userPrefGroupTypeId)) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "getPreference.invalidArgument", locale));
         }
-        String userLoginId = PreferenceWorker.getUserLoginId(context, true);
+        String userLoginId = PreferenceWorker.getUserLoginId(context, false);
 
         Map<String, Object> userPrefMap = null;
         try {
             Map<String, String> fieldMap = UtilMisc.toMap("userLoginId", "_NA_", "userPrefGroupTypeId", userPrefGroupTypeId);
-            userPrefMap = PreferenceWorker.createUserPrefMap(delegator.findByAnd("UserPreference", fieldMap));
-            fieldMap.put("userLoginId", userLoginId);
-            userPrefMap.putAll(PreferenceWorker.createUserPrefMap(delegator.findByAnd("UserPreference", fieldMap)));
+            userPrefMap = PreferenceWorker.createUserPrefMap(delegator.findByAnd("UserPreference", fieldMap, null, true));
+            if (userLoginId != null) {
+                fieldMap.put("userLoginId", userLoginId);
+                userPrefMap.putAll(PreferenceWorker.createUserPrefMap(delegator.findByAnd("UserPreference", fieldMap, null, true)));
+            }
         } catch (GenericEntityException e) {
             Debug.logWarning(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "getPreference.readFailure", new Object[] { e.getMessage() }, locale));
@@ -276,7 +278,7 @@ public class PreferenceServices {
 
         try {
             Map<String, String> fieldMap = UtilMisc.toMap("userLoginId", fromUserLoginId, "userPrefGroupTypeId", userPrefGroupTypeId);
-            List<GenericValue> resultList = delegator.findByAnd("UserPreference", fieldMap);
+            List<GenericValue> resultList = delegator.findByAnd("UserPreference", fieldMap, null, false);
             if (resultList != null) {
                 for (GenericValue preference: resultList) {
                     preference.set("userLoginId", userLoginId);

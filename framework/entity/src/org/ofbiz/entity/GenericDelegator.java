@@ -104,9 +104,6 @@ public class GenericDelegator implements Delegator {
 
     protected Cache cache = null;
 
-    /** keeps a list of field key sets used in the by and cache, a Set (of Sets of fieldNames) for each entityName */
-    protected Map<?,?> andCacheFieldSets = FastMap.newInstance();
-
     protected DistributedCacheClear distributedCacheClear = null;
     protected boolean enableJMS = true;
     protected EntityEcaHandler<?> entityEcaHandler = null;
@@ -212,7 +209,9 @@ public class GenericDelegator implements Delegator {
     protected GenericDelegator(String delegatorFullName) throws GenericEntityException {
         //if (Debug.infoOn()) Debug.logInfo("Creating new Delegator with name \"" + delegatorFullName + "\".", module);
         this.setDelegatorNames(delegatorFullName);
+        this.delegatorInfo = EntityConfigUtil.getDelegatorInfo(delegatorBaseName);
 
+        String kekText;
         // before continuing, if there is a tenantId use the base delegator to see if it is valid
         if (UtilValidate.isNotEmpty(this.delegatorTenantId)) {
             Delegator baseDelegator = DelegatorFactory.getDelegator(this.delegatorBaseName);
@@ -222,6 +221,14 @@ public class GenericDelegator implements Delegator {
             } else if ("Y".equals(tenant.getString("disabled"))) {
                 throw new GenericEntityException("No Tenant record found for delegator [" + this.delegatorFullName + "] with tenantId [" + this.delegatorTenantId + "]");
             }
+            GenericValue kekValue = baseDelegator.findOne("TenantKeyEncryptingKey", true, "tenantId", getDelegatorTenantId());
+            if (kekValue != null) {
+                kekText = kekValue.getString("kekText");
+            } else {
+                kekText = this.delegatorInfo.kekText;
+            }
+        } else {
+            kekText = this.delegatorInfo.kekText;
         }
 
         this.modelReader = ModelReader.getModelReader(delegatorBaseName);
@@ -251,7 +258,7 @@ public class GenericDelegator implements Delegator {
         // NOTE: doing some things before the ECAs and such to make sure it is in place just in case it is used in a service engine startup thing or something
 
         // setup the crypto class; this also after the delegator is in the cache otherwise we get infinite recursion
-        this.crypto = new EntityCrypto(this);
+        this.crypto = new EntityCrypto(this, kekText);
     }
 
     private void initializeOneGenericHelper(String groupName) {
@@ -364,9 +371,6 @@ public class GenericDelegator implements Delegator {
     }
 
     protected DelegatorInfo getDelegatorInfo() {
-        if (this.delegatorInfo == null) {
-            this.delegatorInfo = EntityConfigUtil.getDelegatorInfo(this.delegatorBaseName);
-        }
         return this.delegatorInfo;
     }
 
@@ -1608,21 +1612,27 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#findByPrimaryKey(java.lang.String, java.util.Map)
+     * @deprecated use {@link #findOne(String, Map, boolean)}
      */
+    @Deprecated
     public GenericValue findByPrimaryKey(String entityName, Map<String, ? extends Object> fields) throws GenericEntityException {
         return findOne(entityName, fields, false);
     }
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#findByPrimaryKeyCache(java.lang.String, java.lang.Object)
+     * @deprecated use {@link #findOne(String, boolean, Object...)}
      */
+    @Deprecated
     public GenericValue findByPrimaryKeyCache(String entityName, Object... fields) throws GenericEntityException {
         return findByPrimaryKeyCache(entityName, UtilMisc.<String, Object>toMap(fields));
     }
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#findByPrimaryKeyCache(java.lang.String, java.util.Map)
+     * @deprecated use {@link #findOne(String, Map, boolean)}
      */
+    @Deprecated
     public GenericValue findByPrimaryKeyCache(String entityName, Map<String, ? extends Object> fields) throws GenericEntityException {
         return findOne(entityName, fields, true);
     }
@@ -1675,14 +1685,19 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#findByAnd(java.lang.String, java.lang.Object)
+     * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Deprecated
     public List<GenericValue> findByAnd(String entityName, Object... fields) throws GenericEntityException {
-        return findByAnd(entityName, UtilMisc.<String, Object>toMap(fields));
+        EntityCondition ecl = EntityCondition.makeCondition(UtilMisc.<String, Object>toMap(fields));
+        return this.findList(entityName, ecl, null, null, null, false);
     }
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#findByAnd(java.lang.String, java.util.Map)
+     * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Deprecated
     public List<GenericValue> findByAnd(String entityName, Map<String, ? extends Object> fields) throws GenericEntityException {
         EntityCondition ecl = EntityCondition.makeCondition(fields);
         return this.findList(entityName, ecl, null, null, null, false);
@@ -1690,7 +1705,9 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#findByAnd(java.lang.String, java.util.Map, java.util.List)
+     * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Deprecated
     public List<GenericValue> findByAnd(String entityName, Map<String, ? extends Object> fields, List<String> orderBy) throws GenericEntityException {
         EntityCondition ecl = EntityCondition.makeCondition(fields);
         return this.findList(entityName, ecl, null, orderBy, null, false);
@@ -1698,16 +1715,27 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#findByAndCache(java.lang.String, java.util.Map)
+     * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Deprecated
     public List<GenericValue> findByAndCache(String entityName, Map<String, ? extends Object> fields) throws GenericEntityException {
         return this.findList(entityName, EntityCondition.makeCondition(fields), null, null, null, true);
     }
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#findByAndCache(java.lang.String, java.util.Map, java.util.List)
+     * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Deprecated
     public List<GenericValue> findByAndCache(String entityName, Map<String, ? extends Object> fields, List<String> orderBy) throws GenericEntityException {
         return this.findList(entityName, EntityCondition.makeCondition(fields), null, orderBy, null, true);
+    }
+
+    /* (non-Javadoc)
+     * @see org.ofbiz.entity.Delegator#findByAnd(java.lang.String, java.util.Map, java.util.List, boolean)
+     */
+    public List<GenericValue> findByAnd(String entityName, Map<String, ? extends Object> fields, List<String> orderBy, boolean useCache) throws GenericEntityException {
+        return this.findList(entityName, EntityCondition.makeCondition(fields), null, orderBy, null, useCache);
     }
 
     /* (non-Javadoc)
@@ -1914,8 +1942,17 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getRelated(java.lang.String, java.util.Map, java.util.List, org.ofbiz.entity.GenericValue)
+     * @deprecated use {@link #getRelated(String, Map, List, GenericValue, boolean)
      */
+    @Deprecated
     public List<GenericValue> getRelated(String relationName, Map<String, ? extends Object> byAndFields, List<String> orderBy, GenericValue value) throws GenericEntityException {
+        return getRelated(relationName, byAndFields, orderBy, value, false);
+    }
+
+    /* (non-Javadoc)
+     * @see org.ofbiz.entity.Delegator#getRelated(java.lang.String, java.util.Map, java.util.List, org.ofbiz.entity.GenericValue, boolean)
+     */
+    public List<GenericValue> getRelated(String relationName, Map<String, ? extends Object> byAndFields, List<String> orderBy, GenericValue value, boolean useCache) throws GenericEntityException {
         ModelEntity modelEntity = value.getModelEntity();
         ModelRelation relation = modelEntity.getRelation(relationName);
 
@@ -1934,7 +1971,7 @@ public class GenericDelegator implements Delegator {
             fields.put(keyMap.getRelFieldName(), value.get(keyMap.getFieldName()));
         }
 
-        return this.findByAnd(relation.getRelEntityName(), fields, orderBy);
+        return this.findByAnd(relation.getRelEntityName(), fields, orderBy, useCache);
     }
 
     /* (non-Javadoc)
@@ -1965,28 +2002,35 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getRelatedCache(java.lang.String, org.ofbiz.entity.GenericValue)
+     * @deprecated use {@link #getRelated(String, Map, List, GenericValue, boolean)
      */
+    @Deprecated
     public List<GenericValue> getRelatedCache(String relationName, GenericValue value) throws GenericEntityException {
-        ModelEntity modelEntity = value.getModelEntity();
-        ModelRelation relation = modelEntity.getRelation(relationName);
-
-        if (relation == null) {
-            throw new GenericModelException("Could not find relation for relationName: " + relationName + " for value " + value);
-        }
-
-        Map<String, Object> fields = FastMap.newInstance();
-        for (int i = 0; i < relation.getKeyMapsSize(); i++) {
-            ModelKeyMap keyMap = relation.getKeyMap(i);
-            fields.put(keyMap.getRelFieldName(), value.get(keyMap.getFieldName()));
-        }
-
-        return this.findByAndCache(relation.getRelEntityName(), fields, null);
+        return getRelated(relationName, null, null, value, true);
     }
 
     /* (non-Javadoc)
-     * @see org.ofbiz.entity.Delegator#getRelatedOne(java.lang.String, org.ofbiz.entity.GenericValue)
+     * @see org.ofbiz.entity.Delegator#getRelatedOne(java.lang.String, org.ofbiz.entity.GenericValue, boolean)
+     * @deprecated use {@link #getRelatedOne(String, GenericValue, boolean)
      */
+    @Deprecated
     public GenericValue getRelatedOne(String relationName, GenericValue value) throws GenericEntityException {
+        return this.getRelatedOne(relationName, value, false);
+    }
+
+    /* (non-Javadoc)
+     * @see org.ofbiz.entity.Delegator#getRelatedOneCache(java.lang.String, org.ofbiz.entity.GenericValue, boolean)
+     * @deprecated use {@link #getRelatedOne(String, GenericValue, boolean)
+     */
+    @Deprecated
+    public GenericValue getRelatedOneCache(String relationName, GenericValue value) throws GenericEntityException {
+        return this.getRelatedOne(relationName, value, true);
+    }
+
+    /* (non-Javadoc)
+     * @see org.ofbiz.entity.Delegator#getRelatedOne(java.lang.String, org.ofbiz.entity.GenericValue, boolean)
+     */
+    public GenericValue getRelatedOne(String relationName, GenericValue value, boolean useCache) throws GenericEntityException {
         ModelRelation relation = value.getModelEntity().getRelation(relationName);
 
         if (relation == null) {
@@ -2002,30 +2046,7 @@ public class GenericDelegator implements Delegator {
             fields.put(keyMap.getRelFieldName(), value.get(keyMap.getFieldName()));
         }
 
-        return this.findByPrimaryKey(relation.getRelEntityName(), fields);
-    }
-
-    /* (non-Javadoc)
-     * @see org.ofbiz.entity.Delegator#getRelatedOneCache(java.lang.String, org.ofbiz.entity.GenericValue)
-     */
-    public GenericValue getRelatedOneCache(String relationName, GenericValue value) throws GenericEntityException {
-        ModelEntity modelEntity = value.getModelEntity();
-        ModelRelation relation = modelEntity.getRelation(relationName);
-
-        if (relation == null) {
-            throw new GenericModelException("Could not find relation for relationName: " + relationName + " for value " + value);
-        }
-        if (!"one".equals(relation.getType()) && !"one-nofk".equals(relation.getType())) {
-            throw new GenericModelException("Relation is not a 'one' or a 'one-nofk' relation: " + relationName + " of entity " + value.getEntityName());
-        }
-
-        Map<String, Object> fields = FastMap.newInstance();
-        for (int i = 0; i < relation.getKeyMapsSize(); i++) {
-            ModelKeyMap keyMap = relation.getKeyMap(i);
-            fields.put(keyMap.getRelFieldName(), value.get(keyMap.getFieldName()));
-        }
-
-        return this.findByPrimaryKeyCache(relation.getRelEntityName(), fields);
+        return this.findOne(relation.getRelEntityName(), fields, useCache);
     }
 
 
@@ -2529,7 +2550,7 @@ public class GenericDelegator implements Delegator {
                 }
 
                 // get values in whatever order, we will go through all of them to find the highest value
-                List<GenericValue> allValues = this.findByAnd(value.getEntityName(), lookupValue, null);
+                List<GenericValue> allValues = this.findByAnd(value.getEntityName(), lookupValue, null, false);
                 //Debug.logInfo("Get existing values from entity " + value.getEntityName() + " with lookupValue: " + lookupValue + ", and the seqFieldName: " + seqFieldName + ", and the results are: " + allValues, module);
                 Integer highestSeqVal = null;
                 for (GenericValue curValue: allValues) {
@@ -2647,10 +2668,10 @@ public class GenericDelegator implements Delegator {
                     keyName = modelView.getAliasedEntity(modelView.getAlias(field.getName()).getEntityAlias(), modelReader).getEntityName();
                 }
 
-                String encHex = (String) entity.get(field.getName());
-                if (UtilValidate.isNotEmpty(encHex)) {
+                String encValue = (String) entity.get(field.getName());
+                if (UtilValidate.isNotEmpty(encValue)) {
                     try {
-                        entity.dangerousSetNoCheckButFast(field, crypto.decrypt(keyName, encHex));
+                        entity.dangerousSetNoCheckButFast(field, crypto.decrypt(keyName, encValue));
                     } catch (EntityCryptoException e) {
                         // not fatal -- allow returning of the encrypted value
                         Debug.logWarning(e, "Problem decrypting field [" + entityName + " / " + field.getName() + "]", module);
@@ -2770,7 +2791,6 @@ public class GenericDelegator implements Delegator {
         newDelegator.delegatorBaseName = this.delegatorBaseName;
         newDelegator.delegatorInfo = this.delegatorInfo;
         newDelegator.cache = this.cache;
-        newDelegator.andCacheFieldSets = this.andCacheFieldSets;
         newDelegator.distributedCacheClear = this.distributedCacheClear;
         newDelegator.originalDelegatorName = getOriginalDelegatorName();
         newDelegator.entityEcaHandler = this.entityEcaHandler;

@@ -54,7 +54,7 @@ under the License.
       <#assign subContent=lastNode.value/>
     </#if>
 <#else>
-    <#assign subContent = delegator.findByPrimaryKeyCache("Content", Static["org.ofbiz.base.util.UtilMisc"].toMap("contentId", subContentId))/>
+    <#assign subContent = delegator.findOne("Content", Static["org.ofbiz.base.util.UtilMisc"].toMap("contentId", subContentId), true)/>
 </#if>
 <#assign dummy=Static["org.ofbiz.base.util.Debug"].logInfo("in viewcontent, subContent:" + subContent, "")/>
 <br />
@@ -103,7 +103,7 @@ under the License.
     <#local csv = "">
     <#local counter = 0>
     <#local len = trail?size>
-    <table border="0" class="tabletext" cellspacing="4">
+    <table border="0" cellspacing="4">
     <#list trail as content>
       <#if counter < (len - endIndexOffset) && startIndex <= counter >
         <#if 0 < counter >

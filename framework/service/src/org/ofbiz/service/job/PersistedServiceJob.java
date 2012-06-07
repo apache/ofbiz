@@ -244,7 +244,7 @@ public class PersistedServiceJob extends GenericServiceJob {
                 } catch (GenericEntityException gee) {
                     Debug.logError(gee, "ERROR: Unable to re-schedule job [" + getJobId() + "] to re-run : " + job, module);
                 }
-                Debug.log("Persisted Job [" + getJobId() + "] Failed Re-Scheduling : " + next, module);
+                Debug.logInfo("Persisted Job [" + getJobId() + "] Failed Re-Scheduling : " + next, module);
             } else {
                 Debug.logWarning("Persisted Job [" + getJobId() + "] Failed - Max Retry Hit; not re-scheduling", module);
             }
@@ -280,7 +280,7 @@ public class PersistedServiceJob extends GenericServiceJob {
         try {
             GenericValue jobObj = getJob();
             if (!UtilValidate.isEmpty(jobObj.getString("runtimeDataId"))) {
-                GenericValue contextObj = jobObj.getRelatedOne("RuntimeData");
+                GenericValue contextObj = jobObj.getRelatedOne("RuntimeData", false);
                 if (contextObj != null) {
                     context = UtilGenerics.checkMap(XmlSerializer.deserialize(contextObj.getString("runtimeInfo"), delegator), String.class, Object.class);
                 }

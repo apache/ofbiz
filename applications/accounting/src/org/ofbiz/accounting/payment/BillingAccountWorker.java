@@ -85,7 +85,7 @@ public class BillingAccountWorker {
         if (billingAccountRoleList.size() > 0) {
             BigDecimal totalAvailable = BigDecimal.ZERO;
             for(GenericValue billingAccountRole : billingAccountRoleList) {
-                GenericValue billingAccountVO = billingAccountRole.getRelatedOne("BillingAccount");
+                GenericValue billingAccountVO = billingAccountRole.getRelatedOne("BillingAccount", false);
 
                 // skip accounts that have thruDate < nowTimestamp
                 java.sql.Timestamp thruDate = billingAccountVO.getTimestamp("thruDate");
@@ -132,7 +132,7 @@ public class BillingAccountWorker {
      * @throws GenericEntityException
      */
     public static BigDecimal getBillingAccountBalance(Delegator delegator, String billingAccountId) throws GenericEntityException {
-        GenericValue billingAccount = delegator.findByPrimaryKey("BillingAccount", UtilMisc.toMap("billingAccountId", billingAccountId));
+        GenericValue billingAccount = delegator.findOne("BillingAccount", UtilMisc.toMap("billingAccountId", billingAccountId), false);
         return getBillingAccountBalance(billingAccount);
     }
 
@@ -159,7 +159,7 @@ public class BillingAccountWorker {
             balance = maxAmount != null ? balance.subtract(maxAmount) : balance;
         }
 
-        List<GenericValue> paymentAppls = delegator.findByAnd("PaymentApplication", UtilMisc.toMap("billingAccountId", billingAccountId));
+        List<GenericValue> paymentAppls = delegator.findByAnd("PaymentApplication", UtilMisc.toMap("billingAccountId", billingAccountId), null, false);
         // TODO: cancelled payments?
         for (Iterator<GenericValue> pAi = paymentAppls.iterator(); pAi.hasNext();) {
             GenericValue paymentAppl = pAi.next();
@@ -235,7 +235,7 @@ public class BillingAccountWorker {
     }
 
     public static BigDecimal getBillingAccountAvailableBalance(Delegator delegator, String billingAccountId) throws GenericEntityException {
-        GenericValue billingAccount = delegator.findByPrimaryKey("BillingAccount", UtilMisc.toMap("billingAccountId", billingAccountId));
+        GenericValue billingAccount = delegator.findOne("BillingAccount", UtilMisc.toMap("billingAccountId", billingAccountId), false);
         return getBillingAccountAvailableBalance(billingAccount);
     }
 
@@ -251,11 +251,11 @@ public class BillingAccountWorker {
         BigDecimal balance = ZERO;
 
         // search through all PaymentApplications and add the amount that was applied to invoice and subtract the amount applied from payments
-        List<GenericValue> paymentAppls = delegator.findByAnd("PaymentApplication", UtilMisc.toMap("billingAccountId", billingAccountId));
+        List<GenericValue> paymentAppls = delegator.findByAnd("PaymentApplication", UtilMisc.toMap("billingAccountId", billingAccountId), null, false);
         for (Iterator<GenericValue> pAi = paymentAppls.iterator(); pAi.hasNext();) {
             GenericValue paymentAppl = pAi.next();
             BigDecimal amountApplied = paymentAppl.getBigDecimal("amountApplied");
-            GenericValue invoice = paymentAppl.getRelatedOne("Invoice");
+            GenericValue invoice = paymentAppl.getRelatedOne("Invoice", false);
             if (invoice != null) {
                 // make sure the invoice has not been canceled and it is not a "Customer return invoice"
                 if (!"CUST_RTN_INVOICE".equals(invoice.getString("invoiceTypeId")) && !"INVOICE_CANCELLED".equals(invoice.getString("statusId"))) {
@@ -290,7 +290,7 @@ public class BillingAccountWorker {
         Map<String, Object> result = ServiceUtil.returnSuccess();
 
         try {
-            GenericValue billingAccount = delegator.findByPrimaryKey("BillingAccount", UtilMisc.toMap("billingAccountId", billingAccountId));
+            GenericValue billingAccount = delegator.findOne("BillingAccount", UtilMisc.toMap("billingAccountId", billingAccountId), false);
             if (billingAccount == null) {
                 return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
                         "AccountingBillingAccountNotFound",

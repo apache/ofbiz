@@ -18,14 +18,15 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.conditional;
 
+import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.method.MethodContext;
 
 /**
- * Interface for all conditional elements under the master if element or and else-if element.
+ * Interface for all conditional elements under the &lt;if&gt; element.
  */
 public interface Conditional {
 
-    public boolean checkCondition(MethodContext methodContext);
+    public boolean checkCondition(MethodContext methodContext) throws MiniLangException;
 
     public void prettyPrint(StringBuilder messageBuffer, MethodContext methodContext);
 }

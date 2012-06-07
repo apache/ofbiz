@@ -329,7 +329,7 @@ public class PosTransaction implements Serializable {
             fields.put("maxAmount", inf.amount);
             fields.put("orderId", this.getOrderId());
 
-            List<GenericValue> paymentPrefs = session.getDelegator().findByAnd("OrderPaymentPreference", fields);
+            List<GenericValue> paymentPrefs = session.getDelegator().findByAnd("OrderPaymentPreference", fields, null, false);
             if (UtilValidate.isNotEmpty(paymentPrefs)) {
                 //Debug.logInfo("Found some prefs - " + paymentPrefs.size(), module);
                 if (paymentPrefs.size() > 1) {
@@ -374,7 +374,7 @@ public class PosTransaction implements Serializable {
             String paymentMethodTypeId = infValue.getString("paymentMethodTypeId");
             GenericValue pmt = null;
             try {
-                 pmt = infValue.getRelatedOne("PaymentMethodType");
+                 pmt = infValue.getRelatedOne("PaymentMethodType", false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
             }
@@ -386,7 +386,7 @@ public class PosTransaction implements Serializable {
             if ("CREDIT_CARD".equals(paymentMethodTypeId)) {
                 GenericValue cc = null;
                 try {
-                    cc = infValue.getRelatedOne("CreditCard");
+                    cc = infValue.getRelatedOne("CreditCard", false);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, module);
                 }
@@ -407,7 +407,7 @@ public class PosTransaction implements Serializable {
                 /*
                 GenericValue gc = null;
                 try {
-                    gc = infValue.getRelatedOne("GiftCard"); //FIXME is this really useful ? (Maybe later...)
+                    gc = infValue.getRelatedOne("GiftCard", false); //FIXME is this really useful ? (Maybe later...)
                 } catch (GenericEntityException e) {
                     Debug.logError(e, module);
                 }
@@ -434,7 +434,7 @@ public class PosTransaction implements Serializable {
         try {
             Delegator delegator = cart.getDelegator();
             GenericValue product = null;
-            product = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", productId));
+            product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), true);
             if (UtilValidate.isNotEmpty(product) && ("AGGREGATED".equals(product.getString("productTypeId")) || "AGGREGATED_SERVICE".equals(product.getString("productTypeId")))) {
                 return true;
             }
@@ -493,7 +493,7 @@ public class PosTransaction implements Serializable {
             Delegator delegator = cart.getDelegator();
             GenericValue product = null;
             ProductConfigWrapper pcw = null;
-            product = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", productId));
+            product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), true);
             if (UtilValidate.isNotEmpty(product) && ("AGGREGATED".equals(product.getString("productTypeId"))||"AGGREGATED_SERVICE".equals(product.getString("productTypeId")))) {
                 // if it's an aggregated item, load the configwrapper and set to defaults
                 pcw = new ProductConfigWrapper(delegator, session.getDispatcher(), productId, null, null, null, null, null, null);
@@ -701,7 +701,7 @@ public class PosTransaction implements Serializable {
         Map<String, String> fields = UtilMisc.toMap("paymentMethodTypeId", paymentMethodTypeId, "productStoreId", productStoreId);
         List<GenericValue> values = null;
         try {
-            values = session.getDelegator().findByAndCache("ProductStorePaymentSetting", fields);
+            values = session.getDelegator().findByAnd("ProductStorePaymentSetting", fields, null, true);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
@@ -929,8 +929,8 @@ public class PosTransaction implements Serializable {
             GenericValue facilityContactMech = ContactMechWorker.getFacilityContactMechByPurpose(delegator, facilityId, UtilMisc.toList("SHIP_ORIG_LOCATION", "PRIMARY_LOCATION"));
             if (facilityContactMech != null) {
                 try {
-                    this.shipAddress = session.getDelegator().findByPrimaryKey("PostalAddress",
-                            UtilMisc.toMap("contactMechId", facilityContactMech.getString("contactMechId")));
+                    this.shipAddress = session.getDelegator().findOne("PostalAddress",
+                            UtilMisc.toMap("contactMechId", facilityContactMech.getString("contactMechId")), false);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, module);
                 }
@@ -965,7 +965,7 @@ public class PosTransaction implements Serializable {
                 if (this.isAggregatedItem(item.getProductId())) {
                     // put alterations here
                     ProductConfigWrapper pcw = null;
-                    // product = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", productId));
+                    // product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), true);
                     // pcw = new ProductConfigWrapper(delegator, session.getDispatcher(), productId, null, null, null, null, null, null);
                     pcw = item.getConfigWrapper();
                     List<ConfigOption> selected = pcw.getSelectedOptions();
@@ -1057,7 +1057,7 @@ public class PosTransaction implements Serializable {
                 if ("PaymentMethod".equals(paymentInfoObj.getEntityName())) {
                     paymentMethod = paymentInfoObj;
                     try {
-                        paymentMethodType = paymentMethod.getRelatedOne("PaymentMethodType");
+                        paymentMethodType = paymentMethod.getRelatedOne("PaymentMethodType", false);
                     } catch (GenericEntityException e) {
                         Debug.logError(e, module);
                     }
@@ -1136,7 +1136,7 @@ public class PosTransaction implements Serializable {
         Delegator delegator = session.getDelegator();
         List<GenericValue> states = null;
         try {
-            states = delegator.findByAnd("PosTerminalState", UtilMisc.toMap("posTerminalId", this.getTerminalId()));
+            states = delegator.findByAnd("PosTerminalState", UtilMisc.toMap("posTerminalId", this.getTerminalId()), null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
@@ -1288,7 +1288,7 @@ public class PosTransaction implements Serializable {
         for (GenericValue shoppingList : shoppingLists) {
             List<GenericValue> items = null;
             try {
-                items = shoppingList.getRelated("ShoppingListItem", UtilMisc.toList("shoppingListItemSeqId"));
+                items = shoppingList.getRelated("ShoppingListItem", null, UtilMisc.toList("shoppingListItemSeqId"), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
             }
@@ -1800,7 +1800,7 @@ public class PosTransaction implements Serializable {
             GenericValue  person = null;
 
             try {
-                person = session.getDelegator().findByPrimaryKey("Person", UtilMisc.toMap("partyId", partyId));
+                person = session.getDelegator().findOne("Person", UtilMisc.toMap("partyId", partyId), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
                 pos.showDialog("dialog/error/exception", e.getMessage());
@@ -1809,7 +1809,7 @@ public class PosTransaction implements Serializable {
 
             Boolean newLogin = true;
             try {
-                List<GenericValue>  userLogins = session.getDelegator().findByAnd("UserLogin", UtilMisc.toMap("partyId", partyId));
+                List<GenericValue>  userLogins = session.getDelegator().findByAnd("UserLogin", UtilMisc.toMap("partyId", partyId), null, false);
                 if (UtilValidate.isNotEmpty(userLogins)) {
                     userLogin = userLogins.get(0);
                     newLogin = false;
@@ -1857,7 +1857,7 @@ public class PosTransaction implements Serializable {
                     svcCtx.put("partyId", partyId);
                     svcCtx.put("thruDate", null); // last one
                     try {
-                        List<GenericValue>  PartyTelecomNumbers = session.getDelegator().findByAnd("PartyAndTelecomNumber", svcCtx);
+                        List<GenericValue>  PartyTelecomNumbers = session.getDelegator().findByAnd("PartyAndTelecomNumber", svcCtx, null, false);
                         if (UtilValidate.isNotEmpty(PartyTelecomNumbers)) {
                             GenericValue PartyTelecomNumber = PartyTelecomNumbers.get(0); // There is  only one phone number (contactMechPurposeTypeId == "PHONE_HOME")
                             contactNumber = PartyTelecomNumber.getString("contactNumber");
@@ -1933,7 +1933,7 @@ public class PosTransaction implements Serializable {
                 String contactMechId = null;
                 String infoString = null;
                 try {
-                    List<GenericValue>  PartyEmails = session.getDelegator().findByAnd("PartyAndContactMech", svcCtx);
+                    List<GenericValue>  PartyEmails = session.getDelegator().findByAnd("PartyAndContactMech", svcCtx, null, false);
                     if (UtilValidate.isNotEmpty(PartyEmails)) {
                         GenericValue PartyEmail = PartyEmails.get(0); // There is  only one email address (contactMechPurposeTypeId == "PRIMARY_EMAIL")
                         contactMechId = PartyEmail.getString("contactMechId");

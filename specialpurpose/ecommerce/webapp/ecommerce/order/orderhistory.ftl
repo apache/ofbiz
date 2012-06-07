@@ -34,14 +34,14 @@ under the License.
       <tbody>
         <#if orderHeaderList?has_content>
           <#list orderHeaderList as orderHeader>
-            <#assign status = orderHeader.getRelatedOneCache("StatusItem") />
+            <#assign status = orderHeader.getRelatedOne("StatusItem", true) />
             <tr>
               <td>${orderHeader.orderDate.toString()}</td>
               <td>${orderHeader.orderId}</td>
               <td><@ofbizCurrency amount=orderHeader.grandTotal isoCode=orderHeader.currencyUom /></td>
               <td>${status.get("description",locale)}</td>
               <#-- invoices -->
-              <#assign invoices = delegator.findByAnd("OrderItemBilling", Static["org.ofbiz.base.util.UtilMisc"].toMap("orderId", "${orderHeader.orderId}"), Static["org.ofbiz.base.util.UtilMisc"].toList("invoiceId")) />
+              <#assign invoices = delegator.findByAnd("OrderItemBilling", Static["org.ofbiz.base.util.UtilMisc"].toMap("orderId", "${orderHeader.orderId}"), Static["org.ofbiz.base.util.UtilMisc"].toList("invoiceId"), false) />
               <#assign distinctInvoiceIds = Static["org.ofbiz.entity.util.EntityUtil"].getFieldListFromEntityList(invoices, "invoiceId", true)>
               <#if distinctInvoiceIds?has_content>
                 <td>
@@ -76,7 +76,7 @@ under the License.
       <tbody>
         <#if porderHeaderList?has_content>
           <#list porderHeaderList as porderHeader>
-            <#assign pstatus = porderHeader.getRelatedOneCache("StatusItem") />
+            <#assign pstatus = porderHeader.getRelatedOne("StatusItem", true) />
             <tr>
               <td>${porderHeader.orderDate.toString()}</td>
               <td>${porderHeader.orderId}</td>

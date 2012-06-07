@@ -508,7 +508,7 @@ public class CheckOutEvents {
         ShoppingCart cart = ShoppingCartEvents.getCartObject(request);
         GenericValue productStore = null;
         try {
-            productStore = delegator.findByPrimaryKeyCache("ProductStore", UtilMisc.toMap("productStoreId", cart.getProductStoreId()));
+            productStore = delegator.findOne("ProductStore", UtilMisc.toMap("productStoreId", cart.getProductStoreId()), true);
             Debug.logInfo("checkShipmentNeeded: reqShipAddrForDigItems=" + productStore.getString("reqShipAddrForDigItems"), module);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Error getting ProductStore: " + e.toString(), module);
@@ -652,10 +652,10 @@ public class CheckOutEvents {
         if ("EXT_PAYPAL".equals(paymentMethodTypeId) || cart.getPaymentMethodTypeIds().contains("EXT_PAYPAL")) {
             List<GenericValue> payPalProdStorePaySettings = null;
             try {
-                payPalProdStorePaySettings = delegator.findByAnd("ProductStorePaymentSetting", "productStoreId", productStore.getString("productStoreId"), "paymentMethodTypeId", "EXT_PAYPAL");
+                payPalProdStorePaySettings = delegator.findByAnd("ProductStorePaymentSetting", UtilMisc.toMap("productStoreId", productStore.getString("productStoreId"), "paymentMethodTypeId", "EXT_PAYPAL"), null, false);
                 GenericValue payPalProdStorePaySetting = EntityUtil.getFirst(payPalProdStorePaySettings);
                 if (payPalProdStorePaySetting != null) {
-                    GenericValue gatewayConfig = payPalProdStorePaySetting.getRelatedOne("PaymentGatewayConfig");
+                    GenericValue gatewayConfig = payPalProdStorePaySetting.getRelatedOne("PaymentGatewayConfig", false);
                     if (gatewayConfig != null && "PAYFLOWPRO".equals(gatewayConfig.getString("paymentGatewayConfigTypeId"))) {
                         return "paypal";
                     }
@@ -758,7 +758,7 @@ public class CheckOutEvents {
                 // no userLogin means we are an anonymous shopper; fake the UL for service calls
                 if (userLogin == null) {
                     try {
-                        userLogin = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "anonymous"));
+                        userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "anonymous"), false);
                     } catch (GenericEntityException e) {
                         Debug.logError(e, module);
                     }
@@ -1157,7 +1157,7 @@ public class CheckOutEvents {
                 orderItemMap.put("isPromo", sci.getIsPromo() ? "Y" : "N");
                 orderItemMap.put("productId", sci.getProductId());
                 orderItemMap.put("orderItemTypeId", sci.getItemType());
-                GenericValue orderItem = EntityUtil.getFirst(delegator.findByAnd("OrderItem", orderItemMap));
+                GenericValue orderItem = EntityUtil.getFirst(delegator.findByAnd("OrderItem", orderItemMap, null, false));
                 if (UtilValidate.isNotEmpty(orderItem)) {
                     sci.setAssociatedOrderId(orderItem.getString("orderId"));
                     sci.setAssociatedOrderItemSeqId(orderItem.getString("orderItemSeqId"));

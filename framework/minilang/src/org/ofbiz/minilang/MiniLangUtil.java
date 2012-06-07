@@ -21,24 +21,37 @@ package org.ofbiz.minilang;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Set;
+import java.util.TimeZone;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamSource;
 
+import org.ofbiz.base.conversion.Converter;
+import org.ofbiz.base.conversion.Converters;
+import org.ofbiz.base.conversion.LocalizedConverter;
 import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.ScriptUtil;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
+import org.ofbiz.entity.GenericEntity;
+import org.ofbiz.minilang.method.MethodContext;
+import org.ofbiz.minilang.method.MethodObject;
+import org.ofbiz.minilang.method.MethodOperation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
 /**
  * Mini-language utilities.
@@ -72,10 +85,95 @@ public final class MiniLangUtil {
         return "true".equals(UtilProperties.getPropertyValue("minilang.properties", "autocorrect"));
     }
 
+    public static void callMethod(MethodOperation operation, MethodContext methodContext, List<MethodObject<?>> parameters, Class<?> methodClass, Object methodObject, String methodName, FlexibleMapAccessor<Object> retFieldFma) throws MiniLangRuntimeException {
+        Object[] args = null;
+        Class<?>[] parameterTypes = null;
+        if (parameters != null) {
+            args = new Object[parameters.size()];
+            parameterTypes = new Class<?>[parameters.size()];
+            int i = 0;
+            for (MethodObject<?> methodObjectDef : parameters) {
+                args[i] = methodObjectDef.getObject(methodContext);
+                Class<?> typeClass = null;
+                try {
+                    typeClass = methodObjectDef.getTypeClass(methodContext);
+                } catch (ClassNotFoundException e) {
+                    throw new MiniLangRuntimeException(e, operation);
+                }
+                parameterTypes[i] = typeClass;
+                i++;
+            }
+        }
+        try {
+            Method method = methodClass.getMethod(methodName, parameterTypes);
+            Object retValue = method.invoke(methodObject, args);
+            if (!retFieldFma.isEmpty()) {
+                retFieldFma.put(methodContext.getEnvMap(), retValue);
+            }
+        } catch (Exception e) {
+            throw new MiniLangRuntimeException(e, operation);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Object convertType(Object obj, Class<?> targetClass, Locale locale, TimeZone timeZone, String format) throws Exception {
+        if (obj == null || obj == GenericEntity.NULL_FIELD) {
+            return null;
+        }
+        if (obj instanceof Node) {
+            Node node = (Node) obj;
+            String nodeValue = node.getTextContent();
+            if (targetClass == String.class) {
+                return nodeValue;
+            } else {
+                return convertType(nodeValue, targetClass, locale, timeZone, format);
+            }
+        }
+        if (targetClass == PlainString.class) {
+            return obj.toString();
+        }
+        Class<?> sourceClass = obj.getClass();
+        if (sourceClass == targetClass) {
+            return obj;
+        }
+        Converter<Object, Object> converter = (Converter<Object, Object>) Converters.getConverter(sourceClass, targetClass);
+        LocalizedConverter<Object, Object> localizedConverter = null;
+        try {
+            localizedConverter = (LocalizedConverter) converter;
+            if (locale == null) {
+                locale = Locale.getDefault();
+            }
+            if (timeZone == null) {
+                timeZone = TimeZone.getDefault();
+            }
+            if (format != null && format.isEmpty()) {
+                format = null;
+            }
+            return localizedConverter.convert(obj, locale, timeZone, format);
+        } catch (ClassCastException e) {}
+        return converter.convert(obj);
+    }
+
     public static void flagDocumentAsCorrected(Element element) {
         Document doc = element.getOwnerDocument();
         if (doc != null) {
             doc.setUserData("autoCorrected", "true", null);
+        }
+    }
+
+    public static Class<?> getObjectClassForConversion(Object object) {
+        if (object == null || object instanceof String) {
+            return PlainString.class;
+        } else {
+            if (object instanceof java.util.Map<?, ?>) {
+                return java.util.Map.class;
+            } else if (object instanceof java.util.List<?>) {
+                return java.util.List.class;
+            } else if (object instanceof java.util.Set<?>) {
+                return java.util.Set.class;
+            } else {
+                return object.getClass();
+            }
         }
     }
 
@@ -163,6 +261,8 @@ public final class MiniLangUtil {
             }
         }
     }
+
+    public static class PlainString {}
 
     private MiniLangUtil() {}
 }

@@ -138,7 +138,7 @@ public class ShoppingCartItem implements java.io.Serializable {
     private Locale locale = null;
     private Timestamp shipBeforeDate = null;
     private Timestamp shipAfterDate = null;
-    private Timestamp EstimatedShipDate = null;
+    private Timestamp estimatedShipDate = null;
     private Timestamp cancelBackOrderDate = null;
 
     private Map<String, String> contactMechIdsMap = FastMap.newInstance();
@@ -182,7 +182,7 @@ public class ShoppingCartItem implements java.io.Serializable {
         GenericValue product = null;
 
         try {
-            product = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", productId));
+            product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), true);
         } catch (GenericEntityException e) {
             Debug.logWarning(e.toString(), module);
         }
@@ -323,7 +323,7 @@ public class ShoppingCartItem implements java.io.Serializable {
         GenericValue parentProduct = null;
 
         try {
-            product = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", productId));
+            product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), true);
 
             // first see if there is a purchase allow category and if this product is in it or not
             String purchaseProductCategoryId = CatalogWorker.getCatalogPurchaseAllowCategoryId(delegator, prodCatalogId);
@@ -351,7 +351,7 @@ public class ShoppingCartItem implements java.io.Serializable {
         {
             try
             {
-                parentProduct = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", parentProductId));
+                parentProduct = delegator.findOne("Product", UtilMisc.toMap("productId", parentProductId), true);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e.toString(), module);
             }
@@ -891,7 +891,7 @@ public class ShoppingCartItem implements java.io.Serializable {
         List<GenericValue> selFixedAssetProduct = null;
         GenericValue fixedAssetProduct = null;
         try {
-            List<GenericValue> allFixedAssetProduct = delegator.findByAnd("FixedAssetProduct", UtilMisc.toMap("productId", productId, "fixedAssetProductTypeId", "FAPT_USE"));
+            List<GenericValue> allFixedAssetProduct = delegator.findByAnd("FixedAssetProduct", UtilMisc.toMap("productId", productId, "fixedAssetProductTypeId", "FAPT_USE"), null, false);
             selFixedAssetProduct = EntityUtil.filterByDate(allFixedAssetProduct, UtilDateTime.nowTimestamp(), "fromDate", "thruDate", true);
         } catch (GenericEntityException e) {
             Map<String, Object> messageMap = UtilMisc.<String, Object>toMap("productId", productId);
@@ -910,7 +910,7 @@ public class ShoppingCartItem implements java.io.Serializable {
         // find the fixed asset itself
         GenericValue fixedAsset = null;
         try {
-            fixedAsset = fixedAssetProduct.getRelatedOne("FixedAsset");
+            fixedAsset = fixedAssetProduct.getRelatedOne("FixedAsset", false);
         } catch (GenericEntityException e) {
             Map<String, Object> messageMap = UtilMisc.<String, Object>toMap("fixedAssetId", fixedAssetProduct.getString("fixedAssetId"));
             String msg = UtilProperties.getMessage(resource_error, "item.fixed_Asset_not_found", messageMap , cart.getLocale());
@@ -927,7 +927,7 @@ public class ShoppingCartItem implements java.io.Serializable {
         // DEJ20050725 this isn't being used anywhere, commenting out for now and not assigning from the getRelatedOne: GenericValue techDataCalendar = null;
         GenericValue techDataCalendar = null;
         try {
-            techDataCalendar = fixedAsset.getRelatedOne("TechDataCalendar");
+            techDataCalendar = fixedAsset.getRelatedOne("TechDataCalendar", false);
         } catch (GenericEntityException e) {
             Debug.logWarning(e, module);
         }
@@ -952,8 +952,8 @@ public class ShoppingCartItem implements java.io.Serializable {
             // find an existing Day exception record
             Timestamp exceptionDateStartTime = new Timestamp((reservStart.getTime() + (dayCount++ * 86400000)));
             try {
-                techDataCalendarExcDay = delegator.findByPrimaryKey("TechDataCalendarExcDay",
-                        UtilMisc.toMap("calendarId", fixedAsset.get("calendarId"), "exceptionDateStartTime", exceptionDateStartTime));
+                techDataCalendarExcDay = delegator.findOne("TechDataCalendarExcDay",
+                        UtilMisc.toMap("calendarId", fixedAsset.get("calendarId"), "exceptionDateStartTime", exceptionDateStartTime), false);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -1533,12 +1533,12 @@ public class ShoppingCartItem implements java.io.Serializable {
 
     /** Sets the date to EstimatedShipDate */
     public void setEstimatedShipDate(Timestamp date) {
-        this.EstimatedShipDate = date;
+        this.estimatedShipDate = date;
     }
 
     /** Returns the date to EstimatedShipDate */
     public Timestamp getEstimatedShipDate() {
-        return this.EstimatedShipDate;
+        return this.estimatedShipDate;
     }
 
     /** Sets the item type. */
@@ -1554,7 +1554,7 @@ public class ShoppingCartItem implements java.io.Serializable {
     /** Returns the item type. */
     public GenericValue getItemTypeGenericValue() {
         try {
-            return this.getDelegator().findByPrimaryKeyCache("OrderItemType", UtilMisc.toMap("orderItemTypeId", this.itemType));
+            return this.getDelegator().findOne("OrderItemType", UtilMisc.toMap("orderItemTypeId", this.itemType), true);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Error getting ShippingCartItem's OrderItemType", module);
             return null;
@@ -1587,7 +1587,7 @@ public class ShoppingCartItem implements java.io.Serializable {
         GenericValue orderItemType = null;
         if (this.getItemType() != null) {
             try {
-                orderItemType = this.getDelegator().findByPrimaryKeyCache("OrderItemType", UtilMisc.toMap("orderItemTypeId", this.getItemType()));
+                orderItemType = this.getDelegator().findOne("OrderItemType", UtilMisc.toMap("orderItemTypeId", this.getItemType()), true);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, UtilProperties.getMessage(resource_error,"OrderProblemsGettingOrderItemTypeFor", UtilMisc.toMap("orderItemTypeId",this.getItemType()), locale));
             }
@@ -1848,7 +1848,7 @@ public class ShoppingCartItem implements java.io.Serializable {
         if (product != null) {
             List<GenericValue> featureAppls = null;
             try {
-                featureAppls = product.getRelated("ProductFeatureAppl");
+                featureAppls = product.getRelated("ProductFeatureAppl", null, null, false);
                 List<EntityExpr> filterExprs = UtilMisc.toList(EntityCondition.makeCondition("productFeatureApplTypeId", EntityOperator.EQUALS, "STANDARD_FEATURE"));
                 filterExprs.add(EntityCondition.makeCondition("productFeatureApplTypeId", EntityOperator.EQUALS, "REQUIRED_FEATURE"));
                 featureAppls = EntityUtil.filterByOr(featureAppls, filterExprs);
@@ -1874,7 +1874,7 @@ public class ShoppingCartItem implements java.io.Serializable {
         GenericValue product = this.getProduct();
         if (product != null) {
             try {
-                List<GenericValue> featureAppls = product.getRelated("ProductFeatureAndAppl");
+                List<GenericValue> featureAppls = product.getRelated("ProductFeatureAndAppl", null, null, false);
                 features=EntityUtil.filterByAnd(featureAppls,UtilMisc.toMap("productFeatureApplTypeId","STANDARD_FEATURE"));
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Unable to get features from product : " + product.get("productId"), module);
@@ -2169,7 +2169,7 @@ public class ShoppingCartItem implements java.io.Serializable {
         if (product != null) {
             List<GenericValue> featureAppls = null;
             try {
-                featureAppls = product.getRelated("ProductFeatureAppl");
+                featureAppls = product.getRelated("ProductFeatureAppl", null, null, false);
                 List<EntityExpr> filterExprs = UtilMisc.toList(EntityCondition.makeCondition("productFeatureApplTypeId", EntityOperator.EQUALS, "STANDARD_FEATURE"));
                 filterExprs.add(EntityCondition.makeCondition("productFeatureApplTypeId", EntityOperator.EQUALS, "REQUIRED_FEATURE"));
                 featureAppls = EntityUtil.filterByOr(featureAppls, filterExprs);
@@ -2449,7 +2449,7 @@ public class ShoppingCartItem implements java.io.Serializable {
         }
         if (this.productId != null) {
             try {
-                this._product = this.getDelegator().findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", productId));
+                this._product = this.getDelegator().findOne("Product", UtilMisc.toMap("productId", productId), true);
             } catch (GenericEntityException e) {
                 throw new RuntimeException("Entity Engine error getting Product (" + e.getMessage() + ")");
             }

@@ -61,7 +61,7 @@ context.remove("totalPrice");
 
 // get the product entity
 if (!product && productId) {
-    product = delegator.findByPrimaryKeyCache("Product", [productId : productId]);
+    product = delegator.findOne("Product", [productId : productId], true);
 }
 if (product) {
     //if order is purchase then don't calculate available inventory for product.
@@ -69,13 +69,13 @@ if (product) {
         resultOutput = dispatcher.runSync("getInventoryAvailableByFacility", [productId : product.productId, facilityId : facilityId, useCache : true]);
         totalAvailableToPromise = resultOutput.availableToPromiseTotal;
         if (totalAvailableToPromise && totalAvailableToPromise.doubleValue() > 0) {
-            productFacility = delegator.findByPrimaryKeyCache("ProductFacility", [productId : product.productId, facilityId : facilityId]);
+            productFacility = delegator.findOne("ProductFacility", [productId : product.productId, facilityId : facilityId], true);
             if (productFacility?.daysToShip != null) {
                 context.daysToShip = productFacility.daysToShip;
             }
         }
     } else {
-       supplierProducts = delegator.findByAndCache("SupplierProduct", [productId : product.productId], ["-availableFromDate"]);
+       supplierProducts = delegator.findByAnd("SupplierProduct", [productId : product.productId], ["-availableFromDate"], true);
        supplierProduct = EntityUtil.getFirst(supplierProducts);
        if (supplierProduct?.standardLeadTimeDays != null) {
            standardLeadTimeDays = supplierProduct.standardLeadTimeDays;
@@ -126,19 +126,19 @@ if (product) {
     }
 
     // get the product review(s)
-    reviews = product.getRelatedCache("ProductReview", null, ["-postedDateTime"]);
+    reviews = product.getRelated("ProductReview", null, ["-postedDateTime"], true);
     
     // get product variant for Box/Case/Each
     productVariants = [];
     boolean isAlternativePacking = ProductWorker.isAlternativePacking(delegator, product.productId, null);
     mainProducts = [];
     if(isAlternativePacking){
-        productVirtualVariants = delegator.findByAndCache("ProductAssoc", UtilMisc.toMap("productIdTo", product.productId , "productAssocTypeId", "ALTERNATIVE_PACKAGE"));
+        productVirtualVariants = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productIdTo", product.productId , "productAssocTypeId", "ALTERNATIVE_PACKAGE"), null, true);
         if(productVirtualVariants){
             productVirtualVariants.each { virtualVariantKey ->
                 mainProductMap = [:];
-                mainProduct = virtualVariantKey.getRelatedOneCache("MainProduct");
-                quantityUom = mainProduct.getRelatedOneCache("QuantityUom");
+                mainProduct = virtualVariantKey.getRelatedOne("MainProduct", true);
+                quantityUom = mainProduct.getRelatedOne("QuantityUom", true);
                 mainProductMap.productId = mainProduct.productId;
                 mainProductMap.piecesIncluded = mainProduct.piecesIncluded;
                 mainProductMap.uomDesc = quantityUom.description;
@@ -170,7 +170,7 @@ if (product) {
             variantPriceJS.append("function getVariantPrice(sku) { ");
             
             virtualVariants.each { virtualAssoc ->
-                virtual = virtualAssoc.getRelatedOne("MainProduct");
+                virtual = virtualAssoc.getRelatedOne("MainProduct", false);
                 // Get price from a virtual product
                 priceContext.product = virtual;
                 if (cart.isSalesOrder()) {
@@ -214,7 +214,7 @@ if (reviews) {
 }
 
 // an example of getting features of a certain type to show
-sizeProductFeatureAndAppls = delegator.findByAndCache("ProductFeatureAndAppl", [productId : productId, productFeatureTypeId : "SIZE"], ["sequenceNum", "defaultSequenceNum"]);
+sizeProductFeatureAndAppls = delegator.findByAnd("ProductFeatureAndAppl", [productId : productId, productFeatureTypeId : "SIZE"], ["sequenceNum", "defaultSequenceNum"], true);
 
 context.product = product;
 context.categoryId = categoryId;

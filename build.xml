@@ -86,6 +86,8 @@ under the License.
           description="Clean all downloaded files">
         <delete>
             <fileset dir="framework/base/lib" includes="cobertura-*.jar"/>
+            <fileset dir="framework/base/lib" includes="asm*.jar"/>
+            <fileset dir="framework/base/lib" includes="oro*.jar"/>
             <fileset dir="framework/base/lib" includes="sonar-*.jar"/>
             <fileset dir="framework/entity/lib/jdbc" includes="postgresql-*.jar"/>
         </delete>
@@ -394,7 +396,7 @@ under the License.
         </java>
     </target>
     <target name="start-debug"
-            description="Start OFBiz in debugging mode">
+            description="Start OFBiz in debugging mode. It uses the 8091 port by default">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -828,13 +830,12 @@ under the License.
         <delete file="runtime/tmp/tmpUserLogin.xml"/>
     </target>
     <target name="load-tenant-data-readers"
-        description="Load data of given data-readers in the tenant database">
+        description="Load data of given data-readers in the tenant database. Example: ./ant load-tenant-data-readers -Ddata-readers=seed,seed-initial -DtenantId=demo">
         <echo>------------------------------------</echo>
         <echo message="Loading selected data-readers in tenant databaset"/>
         <echo message="Delegator = default#${tenantId}"/>
         <echo message="Data-readers = ${data-readers}"/>
         <echo>------------------------------------</echo>
-        <input addproperty="continueYN" message="Continue Y or N" validargs="N,n,Y,y"/>
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -867,7 +868,7 @@ under the License.
         <antcall target="load-admin-user-login"/>
     </target>
 
-    <target name="run-tests" depends="build"
+    <target name="run-tests"
           description="Run OFBiz default tests; you have to manually execute 'ant load-demo' before and see results in runtime/logs/test-results/html/all-tests.html.">
         <java jar="ofbiz.jar" fork="true" resultproperty="test.result">
             <jvmarg value="${memory.initial.param}"/>
@@ -909,7 +910,7 @@ under the License.
             <env key="LC_ALL" value="C"/>
         </java>
     </target>
-    <target name="run-test" depends="build"
+    <target name="run-test"
           description="Run a single test, syntax eg: ant run-test -Dtest.component=service -Dtest.case=service-soap-tests">
         <fail unless="test.component">test.component is a required parameter: -Dtest.component=componentname</fail>
         <fail unless="test.case">test.case is a required parameter: -Dtest.case=testcasename</fail>
@@ -935,7 +936,37 @@ under the License.
             </condition>
         </fail>
     </target>
-    <target name="run-test-suite" depends="build"
+    <target name="run-test-debug"
+            description="Run a single test in debug mode, syntax eg: ant run-test-debug -Dtest.component=service -Dtest.case=service-soap-tests">
+      <fail unless="test.component">test.component is a required parameter: -Dtest.component=componentname</fail>
+      <fail unless="test.case">test.case is a required parameter: -Dtest.case=testcasename</fail>
+      <java jar="ofbiz.jar" fork="true" resultproperty="test.result">
+        <jvmarg value="${memory.initial.param}"/>
+        <jvmarg value="${memory.max.param}"/>
+        <jvmarg value="${memory.maxpermsize.param}"/>
+        <jvmarg value="-Xnoagent"/>
+        <jvmarg value="-Djava.compiler=NONE"/>
+        <jvmarg value="-Xdebug"/>
+        <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8091"/>
+        <arg value="test"/>
+        <arg value="-component=${test.component}"/>
+        <arg value="-case=${test.case}"/>
+        <env key="LC_ALL" value="C"/>
+      </java>
+      <delete dir="runtime/logs/test-results/${test.component}-${test.case}"/>
+      <mkdir dir="runtime/logs/test-results/${test.component}-${test.case}"/>
+      <move todir="runtime/logs/test-results/${test.component}-${test.case}">
+        <fileset dir="runtime/logs/test-results" includes="*.xml"/>
+      </move>
+      <fail message="Test run was unsuccessful">
+        <condition>
+          <not>
+            <equals arg1="${test.result}" arg2="0"/>
+          </not>
+        </condition>
+      </fail>
+    </target>
+    <target name="run-test-suite"
             description="Run a single test suite, syntax eg: ant run-test-suite -Dtest.component=mycomponent -Dtest.suiteName=mytests">
         <fail unless="test.component">test.component is a required parameter: -Dtest.component=componentname</fail>
         <fail unless="test.suiteName">test.suiteName is a required parameter: -Dtest.suiteName=testsuitename</fail>
@@ -1027,7 +1058,7 @@ under the License.
 
         <property name="sonar.sources" value="framework/appserver/src, framework/base/src, framework/bi/src, framework/birt/src,
             framework/catalina/src, framework/common/src, framework/datafile/src, framework/entity/src, framework/entityext/src,
-            framework/example/src, framework/geronimo/src, framework/jetty/src, framework/jcr/src,
+            framework/example/src, framework/geronimo/src, framework/jetty/src,
             framework/minilang/src, framework/security/src, framework/service/src, framework/sql/src, framework/start/src,
             framework/testtools/src, framework/webapp/src, framework/webtools/src, framework/widget/src,
             applications/accounting/src, applications/commonext/src, applications/content/src, applications/humanres/src,
@@ -1037,7 +1068,7 @@ under the License.
             specialpurpose/googlecheckout/src, specialpurpose/hhfacility/src, specialpurpose/oagis/src, specialpurpose/pos/src,
             specialpurpose/scrum/src" />
         <property name="sonar.tests" value="framework/base/src/org/ofbiz/base/test, framework/entity/src/org/ofbiz/entity/test,
-            framework/jcr/src/org/ofbiz/jcr/test, framework/service/src/org/ofbiz/service/test, framework/sql/src/org/ofbiz/sql/test,
+            framework/service/src/org/ofbiz/service/test, framework/sql/src/org/ofbiz/sql/test,
             applications/accounting/src/org/ofbiz/accounting/test, applications/content/src/org/ofbiz/content/test,
             applications/product/src/org/ofbiz/product/test, applications/product/src/org/ofbiz/shipment/test,
             applications/securityext/src/org/ofbiz/securityext/test" />
@@ -1226,6 +1257,21 @@ under the License.
     <target name="minifyJsCss" description="Creates a minified version of JS/CSS files">
         <!-- Needs more work (more files, use of them) just used as an example -->
         <!--yuicompressor inFile="themes/tomahawk/webapp/tomahawk/css/style.css" outFile="themes/tomahawk/webapp/tomahawk/css/style-min.css"/-->
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- kek helper                                                         -->
+    <!-- ================================================================== -->
+
+    <target name="gen-kek" 
+            description="Generate a new key-encrypting-key for use in entityengine.xml">
+        <java classname="org.ofbiz.base.crypto.Main" fork="false">
+            <arg value="-kek"/>
+            <classpath>
+                <path location="framework/base/build/lib/ofbiz-base.jar"/>
+                <path location="framework/base/lib/commons/commons-codec-1.4.jar"/>
+            </classpath>
+        </java>
     </target>
 
     <!-- ================================================================== -->

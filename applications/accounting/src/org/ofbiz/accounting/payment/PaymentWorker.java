@@ -59,7 +59,7 @@ public class PaymentWorker {
     public static List<Map<String, GenericValue>> getPartyPaymentMethodValueMaps(Delegator delegator, String partyId, Boolean showOld) {
         List<Map<String, GenericValue>> paymentMethodValueMaps = FastList.newInstance();
         try {
-            List<GenericValue> paymentMethods = delegator.findByAnd("PaymentMethod", UtilMisc.toMap("partyId", partyId));
+            List<GenericValue> paymentMethods = delegator.findByAnd("PaymentMethod", UtilMisc.toMap("partyId", partyId), null, false);
 
             if (!showOld) paymentMethods = EntityUtil.filterByDate(paymentMethods, true);
 
@@ -69,13 +69,13 @@ public class PaymentWorker {
                 paymentMethodValueMaps.add(valueMap);
                 valueMap.put("paymentMethod", paymentMethod);
                 if ("CREDIT_CARD".equals(paymentMethod.getString("paymentMethodTypeId"))) {
-                    GenericValue creditCard = paymentMethod.getRelatedOne("CreditCard");
+                    GenericValue creditCard = paymentMethod.getRelatedOne("CreditCard", false);
                     if (creditCard != null) valueMap.put("creditCard", creditCard);
                 } else if ("GIFT_CARD".equals(paymentMethod.getString("paymentMethodTypeId"))) {
-                    GenericValue giftCard = paymentMethod.getRelatedOne("GiftCard");
+                    GenericValue giftCard = paymentMethod.getRelatedOne("GiftCard", false);
                     if (giftCard != null) valueMap.put("giftCard", giftCard);
                 } else if ("EFT_ACCOUNT".equals(paymentMethod.getString("paymentMethodTypeId"))) {
-                    GenericValue eftAccount = paymentMethod.getRelatedOne("EftAccount");
+                    GenericValue eftAccount = paymentMethod.getRelatedOne("EftAccount", false);
                     if (eftAccount != null) valueMap.put("eftAccount", eftAccount);
                 }
             }
@@ -113,10 +113,10 @@ public class PaymentWorker {
 
         if (UtilValidate.isNotEmpty(paymentMethodId)) {
             try {
-                paymentMethod = delegator.findByPrimaryKey("PaymentMethod", UtilMisc.toMap("paymentMethodId", paymentMethodId));
-                creditCard = delegator.findByPrimaryKey("CreditCard", UtilMisc.toMap("paymentMethodId", paymentMethodId));
-                giftCard = delegator.findByPrimaryKey("GiftCard", UtilMisc.toMap("paymentMethodId", paymentMethodId));
-                eftAccount = delegator.findByPrimaryKey("EftAccount", UtilMisc.toMap("paymentMethodId", paymentMethodId));
+                paymentMethod = delegator.findOne("PaymentMethod", UtilMisc.toMap("paymentMethodId", paymentMethodId), false);
+                creditCard = delegator.findOne("CreditCard", UtilMisc.toMap("paymentMethodId", paymentMethodId), false);
+                giftCard = delegator.findOne("GiftCard", UtilMisc.toMap("paymentMethodId", paymentMethodId), false);
+                eftAccount = delegator.findOne("EftAccount", UtilMisc.toMap("paymentMethodId", paymentMethodId), false);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -160,7 +160,7 @@ public class PaymentWorker {
         try {
             paymentAddresses = delegator.findByAnd("PartyContactMechPurpose",
                 UtilMisc.toMap("partyId", partyId, "contactMechPurposeTypeId", "PAYMENT_LOCATION"),
-                UtilMisc.toList("-fromDate"));
+                UtilMisc.toList("-fromDate"), false);
             paymentAddresses = EntityUtil.filterByDate(paymentAddresses);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Trouble getting PartyContactMechPurpose entity list", module);
@@ -171,7 +171,7 @@ public class PaymentWorker {
         GenericValue postalAddress = null;
         if (purpose != null) {
             try {
-                postalAddress = delegator.findByPrimaryKey("PostalAddress", UtilMisc.toMap("contactMechId", purpose.getString("contactMechId")));
+                postalAddress = delegator.findOne("PostalAddress", UtilMisc.toMap("contactMechId", purpose.getString("contactMechId")), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Trouble getting PostalAddress record for contactMechId: " + purpose.getString("contactMechId"), module);
             }
@@ -216,7 +216,7 @@ public class PaymentWorker {
 
         GenericValue payment = null;
         try {
-            payment = delegator.findByPrimaryKey("Payment", UtilMisc.toMap("paymentId", paymentId));
+            payment = delegator.findOne("Payment", UtilMisc.toMap("paymentId", paymentId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Problem getting Payment", module);
         }
@@ -236,12 +236,12 @@ public class PaymentWorker {
         GenericValue paymentApplication = null;
         BigDecimal appliedAmount = BigDecimal.ZERO;
         try {
-            paymentApplication = delegator.findByPrimaryKey("PaymentApplication", UtilMisc.toMap("paymentApplicationId", paymentApplicationId));
+            paymentApplication = delegator.findOne("PaymentApplication", UtilMisc.toMap("paymentApplicationId", paymentApplicationId), false);
             appliedAmount = paymentApplication.getBigDecimal("amountApplied");
             if (paymentApplication.get("paymentId") != null) {
-                GenericValue payment = paymentApplication.getRelatedOne("Payment");
+                GenericValue payment = paymentApplication.getRelatedOne("Payment", false);
                 if (paymentApplication.get("invoiceId") != null && payment.get("actualCurrencyAmount") != null && payment.get("actualCurrencyUomId") != null) {
-                    GenericValue invoice = paymentApplication.getRelatedOne("Invoice");
+                    GenericValue invoice = paymentApplication.getRelatedOne("Invoice", false);
                     if (payment.getString("actualCurrencyUomId").equals(invoice.getString("currencyUomId"))) {
                            appliedAmount = appliedAmount.multiply(payment.getBigDecimal("amount")).divide(payment.getBigDecimal("actualCurrencyAmount"),new MathContext(100));
                     }
@@ -283,7 +283,7 @@ public class PaymentWorker {
                     BigDecimal amountApplied = paymentApplication.getBigDecimal("amountApplied");
                     // check currency invoice and if different convert amount applied for display
                     if (actual.equals(Boolean.FALSE) && paymentApplication.get("invoiceId") != null && payment.get("actualCurrencyAmount") != null && payment.get("actualCurrencyUomId") != null) {
-                        GenericValue invoice = paymentApplication.getRelatedOne("Invoice");
+                        GenericValue invoice = paymentApplication.getRelatedOne("Invoice", false);
                         if (payment.getString("actualCurrencyUomId").equals(invoice.getString("currencyUomId"))) {
                                amountApplied = amountApplied.multiply(payment.getBigDecimal("amount")).divide(payment.getBigDecimal("actualCurrencyAmount"),new MathContext(100));
                         }
@@ -322,7 +322,7 @@ public class PaymentWorker {
 
         GenericValue payment = null;
         try {
-            payment = delegator.findByPrimaryKey("Payment", UtilMisc.toMap("paymentId", paymentId));
+            payment = delegator.findOne("Payment", UtilMisc.toMap("paymentId", paymentId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Problem getting Payment", module);
         }

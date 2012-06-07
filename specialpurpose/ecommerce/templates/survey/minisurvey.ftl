@@ -46,9 +46,9 @@ under the License.
     <tr>
       <#-- standard question options -->
       <td align='left'>
-        <div class="tabletext">${surveyQuestionAndAppl.question?if_exists}</div>
+        <div>${surveyQuestionAndAppl.question?if_exists}</div>
         <#if surveyQuestionAndAppl.hint?has_content>
-          <div class="tabletext">${surveyQuestionAndAppl.hint}</div>
+          <div>${surveyQuestionAndAppl.hint}</div>
         </#if>
       </td>
     </tr>
@@ -89,7 +89,7 @@ under the License.
           <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "PASSWORD">
             <input type="password" size="30" class="textBox" name="answers_${surveyQuestionAndAppl.surveyQuestionId}" value="${(answer.textResponse)?if_exists}"/>
           <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "OPTION">
-            <#assign options = surveyQuestionAndAppl.getRelated("SurveyQuestionOption", sequenceSort)?if_exists>
+            <#assign options = surveyQuestionAndAppl.getRelated("SurveyQuestionOption", null, sequenceSort, false)?if_exists>
             <#assign selectedOption = (answer.surveyOptionSeqId)?default("_NA_")>
             <select class="selectBox" name="answers_${surveyQuestionAndAppl.surveyQuestionId}">
               <#if surveyQuestionAndAppl.requiredField?default("N") != "Y">
@@ -104,12 +104,12 @@ under the License.
               </#if>
             </select>
           <#else>
-            <div class="tabletext">Unsupported question type : ${surveyQuestionAndAppl.surveyQuestionTypeId}</div>
+            <div>Unsupported question type : ${surveyQuestionAndAppl.surveyQuestionTypeId}</div>
           </#if>
           <#if surveyQuestionAndAppl.requiredField?default("N") == "Y">
-            <span class="tabletext">*</span>
+            <span>*</span>
           <#else>
-            <span class="tabletext">[optional]</span>
+            <span>[optional]</span>
           </#if>
         </td>
 

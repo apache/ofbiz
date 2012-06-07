@@ -59,6 +59,7 @@ import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilURL;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilProperties.UtilResourceBundle;
+import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericEntityException;
@@ -89,7 +90,6 @@ import org.ofbiz.webtools.artifactinfo.ServiceArtifactInfo;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.dom.NodeModel;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -171,8 +171,7 @@ public class WebToolsServices {
                     }
                 }
                 fmcontext.put("doc", nodeModel);
-                BeansWrapper wrapper = BeansWrapper.getDefaultInstance();
-                TemplateHashModel staticModels = wrapper.getStaticModels();
+                TemplateHashModel staticModels = FreeMarkerWorker.getDefaultOfbizWrapper().getStaticModels();
                 fmcontext.put("Static", staticModels);
 
                 template.process(fmcontext, outWriter);
@@ -285,11 +284,11 @@ public class WebToolsServices {
                         }
                         // pause in between files
                         if (pauseLong > 0) {
-                            Debug.log("Pausing for [" + pauseLong + "] seconds - " + UtilDateTime.nowTimestamp());
+                            Debug.logInfo("Pausing for [" + pauseLong + "] seconds - " + UtilDateTime.nowTimestamp(), module);
                             try {
                                 Thread.sleep((pauseLong * 1000));
                             } catch (InterruptedException ie) {
-                                Debug.log("Pause finished - " + UtilDateTime.nowTimestamp());
+                                Debug.logInfo("Pause finished - " + UtilDateTime.nowTimestamp(), module);
                             }
                         }
                     }

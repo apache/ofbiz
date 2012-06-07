@@ -408,7 +408,7 @@ under the License.
                                         <tr>
                                             <td class="label">${uiLabelMap.CommonCountry}</td>
                                              <#if item.getCountry().value()?exists>
-                                                <#assign country = Static["org.ofbiz.entity.util.EntityUtil"].getFirst(delegator.findByAnd("Geo", {"geoCode": item.getCountry().value()}))/>
+                                                <#assign country = Static["org.ofbiz.entity.util.EntityUtil"].getFirst(delegator.findByAnd("Geo", {"geoCode": item.getCountry().value()}, null, false))/>
                                                 <#if country?has_content>
                                                     <#assign countryname = country.geoName/>
                                                 </#if>
@@ -715,7 +715,7 @@ under the License.
                                                                 <table>
                                                                     <#assign j = 0>
                                                                     <#list paymentMethods as paymentMethod>
-                                                                        <#if paymentMethod.value() != null>
+                                                                        <#if paymentMethod.value()??>
                                                                             <#if j == 0><tr></#if>
                                                                         <#if paymentMethod.compareTo(buyerPayMethCode_PAY_PAL?if_exists) == 0 >
                                                                                 <#assign is_payPal = true>

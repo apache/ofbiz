@@ -282,7 +282,7 @@ under the License.
                 </sub-hyperlink>
             </display-entity>
         </field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink also-hidden="false" description="${uiLabelMap.CommonDelete}" target="deleteJobInterview"> 
                 <parameter param-name="jobInterviewId"/> 
             </hyperlink>
@@ -449,7 +449,7 @@ under the License.
                 import org.ofbiz.entity.GenericValue;
                 import org.ofbiz.base.util.UtilMisc;
                 import org.ofbiz.entity.util.EntityUtil;
-                GenericValue partyAndPostalAddress = EntityUtil.getFirst(delegator.findByAnd(&quot;PartyAndPostalAddress&quot;,UtilMisc.toMap(&quot;partyId&quot;,internalOrganisation)));
+                GenericValue partyAndPostalAddress = EntityUtil.getFirst(delegator.findByAnd(&quot;PartyAndPostalAddress&quot;,UtilMisc.toMap(&quot;partyId&quot;,internalOrganisation), null, false));
                 if(partyAndPostalAddress==null) return ;
                 if(partyAndPostalAddress!=null) city = partyAndPostalAddress.getString(&quot;city&quot;);
                 return city;

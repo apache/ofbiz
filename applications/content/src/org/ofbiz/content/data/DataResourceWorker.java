@@ -118,7 +118,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
         if (parentCategoryId != null) {
             matchValue = parentCategoryId;
         }
-        List<GenericValue> categoryValues = delegator.findByAndCache("DataCategory", UtilMisc.toMap("parentCategoryId", matchValue));
+        List<GenericValue> categoryValues = delegator.findByAnd("DataCategory", UtilMisc.toMap("parentCategoryId", matchValue), null, true);
         categoryNode.put("count", Integer.valueOf(categoryValues.size()));
         List<Map<String, Object>> subCategoryIds = FastList.newInstance();
         for (int i = 0; i < categoryValues.size(); i++) {
@@ -576,7 +576,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
             throw new GeneralException("Cannot clear dataResource related cache for a null dataResourceId");
         }
 
-        GenericValue dataResource = delegator.findByPrimaryKeyCache("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
+        GenericValue dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId), true);
         if (dataResource != null) {
             String dataTemplateTypeId = dataResource.getString("dataTemplateTypeId");
             if ("FTL".equals(dataTemplateTypeId)) {

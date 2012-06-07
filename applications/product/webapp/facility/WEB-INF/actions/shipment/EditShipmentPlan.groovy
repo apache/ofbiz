@@ -64,8 +64,8 @@ if (shipment) {
 if (shipmentPlans) {
     shipmentPlans.each { shipmentPlan ->
         oneRow = new HashMap(shipmentPlan);
-        //    oneRow.putAll(shipmentPlan.getRelatedOne("OrderItemShipGrpInvRes"));
-        orderItem = shipmentPlan.getRelatedOne("OrderItem");
+        //    oneRow.putAll(shipmentPlan.getRelatedOne("OrderItemShipGrpInvRes", false));
+        orderItem = shipmentPlan.getRelatedOne("OrderItem", false);
         oneRow.productId = orderItem.productId;
         orderedQuantity = orderItem.getDouble("quantity");
         canceledQuantity = orderItem.getDouble("cancelQuantity");
@@ -77,7 +77,7 @@ if (shipmentPlans) {
         // Total quantity issued
         issuedQuantity = 0.0;
         qtyIssuedInShipment = [:];
-        issuances = orderItem.getRelated("ItemIssuance");
+        issuances = orderItem.getRelated("ItemIssuance", null, null, false);
         issuances.each { issuance ->
             if (issuance.quantity) {
                 issuedQuantity += issuance.getDouble("quantity");
@@ -135,7 +135,7 @@ if (shipmentPlans) {
         // Reserved and Not Available quantity
         reservedQuantity = 0.0;
         reservedNotAvailable = 0.0;
-        reservations = orderItem.getRelated("OrderItemShipGrpInvRes");
+        reservations = orderItem.getRelated("OrderItemShipGrpInvRes", null, null, false);
         reservations.each { reservation ->
             if (reservation.quantity) {
                 reservedQuantity += reservation.getDouble("quantity");
@@ -147,7 +147,7 @@ if (shipmentPlans) {
         oneRow.notAvailableQuantity = reservedNotAvailable;
 
         // Planned Weight and Volume
-        product = orderItem.getRelatedOne("Product");
+        product = orderItem.getRelatedOne("Product", false);
         weight = 0.0;
         quantity = 0.0;
         if (shipmentPlan.getDouble("quantity")) {
@@ -190,7 +190,7 @@ if (shipmentPlans) {
 addRows = [] as ArrayList;
 if (orderItemShipGroupAssocs) {
     orderItemShipGroupAssocs.each { orderItemShipGroupAssoc ->
-        orderItem = orderItemShipGroupAssoc.getRelatedOne("OrderItem");
+        orderItem = orderItemShipGroupAssoc.getRelatedOne("OrderItem", false);
         oneRow = [:];
         oneRow.shipmentId = shipmentId;
         oneRow.orderId = orderItemShipGroupAssoc.orderId;
@@ -206,7 +206,7 @@ if (orderItemShipGroupAssocs) {
         // Total quantity issued
         issuedQuantity = 0.0;
         qtyIssuedInShipment = [:];
-        issuances = orderItem.getRelated("ItemIssuance");
+        issuances = orderItem.getRelated("ItemIssuance", null, null, false);
         issuances.each { issuance ->
             if (issuance.quantity) {
                 issuedQuantity += issuance.getDouble("quantity");
@@ -250,7 +250,7 @@ if (orderItemShipGroupAssocs) {
 
         // Planned (unitary) Weight and Volume
         weight = new Double(0);
-        product = orderItem.getRelatedOne("Product");
+        product = orderItem.getRelatedOne("Product", false);
         if (product.getDouble("weight")) {
             weight = product.getDouble("weight");
         }

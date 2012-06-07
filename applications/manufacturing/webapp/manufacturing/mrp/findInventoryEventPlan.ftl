@@ -148,25 +148,25 @@ document.lookupinventory.productId.focus();
         <#assign count = lowIndex>
         <#assign productTmp = "">
         <#list inventoryList[lowIndex..highIndex-1] as inven>
-            <#assign product = inven.getRelatedOne("Product")>
+            <#assign product = inven.getRelatedOne("Product", false)>
             <#if facilityId?exists && facilityId?has_content>
             </#if>
             <#if ! product.equals( productTmp )>
                 <#assign quantityAvailableAtDate = 0>
-                <#assign errorEvents = delegator.findByAnd("MrpEvent", Static["org.ofbiz.base.util.UtilMisc"].toMap("mrpEventTypeId", "ERROR", "productId", inven.productId))>
-                <#assign qohEvents = delegator.findByAnd("MrpEvent", Static["org.ofbiz.base.util.UtilMisc"].toMap("mrpEventTypeId", "INITIAL_QOH", "productId", inven.productId))>
+                <#assign errorEvents = delegator.findByAnd("MrpEvent", Static["org.ofbiz.base.util.UtilMisc"].toMap("mrpEventTypeId", "ERROR", "productId", inven.productId), null, false)>
+                <#assign qohEvents = delegator.findByAnd("MrpEvent", Static["org.ofbiz.base.util.UtilMisc"].toMap("mrpEventTypeId", "INITIAL_QOH", "productId", inven.productId), null, false)>
                 <#assign additionalErrorMessage = "">
                 <#assign initialQohEvent = null>
                 <#assign productFacility = null>
                 <#if qohEvents?has_content>
                     <#assign initialQohEvent = Static["org.ofbiz.entity.util.EntityUtil"].getFirst(qohEvents)>
                 </#if>
-                <#if initialQohEvent != null>
+                <#if initialQohEvent??>
                     <#if initialQohEvent.quantity?has_content>
                         <#assign quantityAvailableAtDate = initialQohEvent.quantity>
                     </#if>
                     <#if initialQohEvent.facilityId?has_content>
-                        <#assign productFacility = delegator.findByPrimaryKey("ProductFacility", Static["org.ofbiz.base.util.UtilMisc"].toMap("facilityId", initialQohEvent.facilityId, "productId", inven.productId))?if_exists>
+                        <#assign productFacility = delegator.findOne("ProductFacility", Static["org.ofbiz.base.util.UtilMisc"].toMap("facilityId", initialQohEvent.facilityId, "productId", inven.productId), false)?if_exists>
                     </#if>
                 <#else>
                     <#assign additionalErrorMessage = "No QOH information found, assuming 0.">
@@ -176,7 +176,7 @@ document.lookupinventory.productId.focus();
                       <b>[${inven.productId}]</b>&nbsp;&nbsp;${product.internalName?if_exists}
                   </th>
                   <td>
-                    <#if productFacility != null && productFacility?has_content>
+                    <#if productFacility?has_content>
                       <div>
                       <b>${uiLabelMap.ProductFacility}:</b>&nbsp;${productFacility.facilityId?if_exists}
                       </div>
@@ -208,7 +208,7 @@ document.lookupinventory.productId.focus();
             </#if>
             <#assign quantityAvailableAtDate = quantityAvailableAtDate?default(0) + inven.getBigDecimal("quantity")>
             <#assign productTmp = product>
-            <#assign MrpEventType = inven.getRelatedOne("MrpEventType")>
+            <#assign MrpEventType = inven.getRelatedOne("MrpEventType", false)>
             <tr class="${rowClass}">
               <td>${MrpEventType.get("description",locale)}</td>
               <td>&nbsp;</td>

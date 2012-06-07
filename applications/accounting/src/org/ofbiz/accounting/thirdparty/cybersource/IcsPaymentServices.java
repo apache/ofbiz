@@ -401,8 +401,8 @@ public class IcsPaymentServices {
         if (party != null) {
             GenericValue avsOverride = null;
             try {
-                avsOverride = party.getDelegator().findByPrimaryKey("PartyIcsAvsOverride",
-                        UtilMisc.toMap("partyId", party.getString("partyId")));
+                avsOverride = party.getDelegator().findOne("PartyIcsAvsOverride",
+                        UtilMisc.toMap("partyId", party.getString("partyId")), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
             }
@@ -504,7 +504,7 @@ public class IcsPaymentServices {
                 GenericValue item = (GenericValue) orderItem;
                 GenericValue product = null;
                 try {
-                    product = item.getRelatedOne("Product");
+                    product = item.getRelatedOne("Product", false);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "ERROR: Unable to get Product from OrderItem, not passing info to CyberSource");
                 }

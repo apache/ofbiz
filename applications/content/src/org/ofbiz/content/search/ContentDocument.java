@@ -59,7 +59,7 @@ public class ContentDocument {
         Document doc = null;
         GenericValue content;
           try {
-              content = delegator.findByPrimaryKeyCache("Content", UtilMisc.toMap("contentId",id));
+              content = delegator.findOne("Content", UtilMisc.toMap("contentId",id), true);
           } catch (GenericEntityException e) {
               Debug.logError(e, module);
               return doc;
@@ -122,7 +122,7 @@ public class ContentDocument {
         //Debug.logInfo("in ContentDocument, dataResourceId:" + dataResourceId, module);
         GenericValue dataResource;
         try {
-            dataResource = delegator.findByPrimaryKeyCache("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
+            dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId), true);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             List<String> badIndexList = UtilGenerics.checkList(context.get("badIndexList"));
@@ -169,7 +169,7 @@ public class ContentDocument {
         }
         List<GenericValue> featureDataResourceList;
         try {
-            featureDataResourceList = content.getRelatedCache("ProductFeatureDataResource");
+            featureDataResourceList = content.getRelated("ProductFeatureDataResource", null, null, true);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             List<String> badIndexList = UtilGenerics.checkList(context.get("badIndexList"));

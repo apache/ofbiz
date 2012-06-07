@@ -980,7 +980,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
 
                 if (UtilValidate.isEmpty(expandedDataResourceId)) {
                     if (UtilValidate.isNotEmpty(expandedContentId)) {
-                        content = delegator.findByPrimaryKeyCache("Content", UtilMisc.toMap("contentId", expandedContentId));
+                        content = delegator.findOne("Content", UtilMisc.toMap("contentId", expandedContentId), true);
                     } else {
                         String errMsg = "contentId is empty.";
                         Debug.logError(errMsg, module);
@@ -997,7 +997,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
 
                 GenericValue dataResource = null;
                 if (UtilValidate.isNotEmpty(expandedDataResourceId)) {
-                    dataResource = delegator.findByPrimaryKeyCache("DataResource", UtilMisc.toMap("dataResourceId", expandedDataResourceId));
+                    dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", expandedDataResourceId), true);
                 }
 
                 String mimeTypeId = null;
@@ -1626,7 +1626,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
                         portalPage = PortalPageWorker.getPortalPage(expandedPortalPageId, context);
                     }
                     else {
-                        portalPage = delegator.findByPrimaryKeyCache("PortalPage", UtilMisc.toMap("portalPageId", expandedPortalPageId));
+                        portalPage = delegator.findOne("PortalPage", UtilMisc.toMap("portalPageId", expandedPortalPageId), true);
                     }
                     if (portalPage == null) {
                         String errMsg = "Could not find PortalPage with portalPageId [" + expandedPortalPageId + "] ";
@@ -1635,7 +1635,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
                     } else {
                         actualPortalPageId = portalPage.getString("portalPageId");
                         originalPortalPageId = portalPage.getString("originalPortalPageId");
-                        portalPageColumns = delegator.findByAndCache("PortalPageColumn", UtilMisc.toMap("portalPageId", actualPortalPageId), UtilMisc.toList("columnSeqId"));
+                        portalPageColumns = delegator.findByAnd("PortalPageColumn", UtilMisc.toMap("portalPageId", actualPortalPageId), UtilMisc.toList("columnSeqId"), true);
                     }
                 } else {
                     String errMsg = "portalPageId is empty.";
@@ -1659,7 +1659,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
                     screenStringRenderer.renderPortalPageColumnBegin(writer, context, this, columnValue);
 
                     // Get the Portlets located in the current column
-                    portalPagePortlets = delegator.findByAnd("PortalPagePortletView", UtilMisc.toMap("portalPageId", portalPage.getString("portalPageId"), "columnSeqId", columnSeqId), UtilMisc.toList("sequenceNum"));
+                    portalPagePortlets = delegator.findByAnd("PortalPagePortletView", UtilMisc.toMap("portalPageId", portalPage.getString("portalPageId"), "columnSeqId", columnSeqId), UtilMisc.toList("sequenceNum"), false);
                     
                     // First Portlet in a Column has no previous Portlet
                     String prevPortletId = "";

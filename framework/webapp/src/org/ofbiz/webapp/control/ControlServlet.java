@@ -38,6 +38,7 @@ import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilJ2eeCompat;
 import org.ofbiz.base.util.UtilTimer;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericDelegator;
@@ -50,7 +51,6 @@ import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.webapp.stats.ServerHitBin;
 import org.ofbiz.webapp.stats.VisitHandler;
 
-import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.servlet.ServletContextHashModel;
 
 /**
@@ -116,7 +116,7 @@ public class ControlServlet extends HttpServlet {
         }
 
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
-        //Debug.log("Cert Chain: " + request.getAttribute("javax.servlet.request.X509Certificate"), module);
+        //Debug.logInfo("Cert Chain: " + request.getAttribute("javax.servlet.request.X509Certificate"), module);
 
         // set the Entity Engine user info if we have a userLogin
         if (userLogin != null) {
@@ -197,7 +197,7 @@ public class ControlServlet extends HttpServlet {
 
         request.setAttribute("_REQUEST_HANDLER_", requestHandler);
         
-        ServletContextHashModel ftlServletContext = new ServletContextHashModel(this, BeansWrapper.getDefaultInstance());
+        ServletContextHashModel ftlServletContext = new ServletContextHashModel(this, FreeMarkerWorker.getDefaultOfbizWrapper());
         request.setAttribute("ftlServletContext", ftlServletContext);
 
         // setup some things that should always be there

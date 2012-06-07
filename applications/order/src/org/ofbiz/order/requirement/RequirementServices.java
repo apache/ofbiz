@@ -133,7 +133,7 @@ public class RequirementServices {
                 // for good identification, get the UPCA type (UPC code)
                 GenericValue gid = gids.get(productId);
                 if (gid == null) {
-                    gid = delegator.findByPrimaryKey("GoodIdentification", UtilMisc.toMap("goodIdentificationTypeId", "UPCA", "productId", requirement.get("productId")));
+                    gid = delegator.findOne("GoodIdentification", UtilMisc.toMap("goodIdentificationTypeId", "UPCA", "productId", requirement.get("productId")), false);
                     gids.put(productId, gid);
                 }
                 if (gid != null) union.put("idValue", gid.get("idValue"));
@@ -208,16 +208,16 @@ public class RequirementServices {
 
         String orderId = (String) context.get("orderId");
         try {
-            GenericValue order = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
-            GenericValue productStore = order.getRelatedOneCache("ProductStore");
+            GenericValue order = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
+            GenericValue productStore = order.getRelatedOne("ProductStore", true);
             if (productStore == null) {
                 Debug.logInfo("ProductStore for order ID " + orderId + " not found, requirements not created", module);
                 return ServiceUtil.returnSuccess();
             }
             String facilityId = productStore.getString("inventoryFacilityId");
-            List<GenericValue> orderItems = order.getRelated("OrderItem");
+            List<GenericValue> orderItems = order.getRelated("OrderItem", null, null, false);
             for(GenericValue item : orderItems) {
-                GenericValue product = item.getRelatedOne("Product");
+                GenericValue product = item.getRelatedOne("Product", false);
                 if (product == null) continue;
                 if ((!"PRODRQM_AUTO".equals(product.get("requirementMethodEnumId")) &&
                         !"PRODRQM_AUTO".equals(productStore.get("requirementMethodEnumId"))) ||
@@ -267,16 +267,16 @@ public class RequirementServices {
          */
         String orderId = (String) context.get("orderId");
         try {
-            GenericValue order = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
-            GenericValue productStore = order.getRelatedOneCache("ProductStore");
+            GenericValue order = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
+            GenericValue productStore = order.getRelatedOne("ProductStore", true);
             if (productStore == null) {
                 Debug.logInfo("ProductStore for order ID " + orderId + " not found, ATP requirements not created", module);
                 return ServiceUtil.returnSuccess();
             }
             String facilityId = productStore.getString("inventoryFacilityId");
-            List<GenericValue> orderItems = order.getRelated("OrderItem");
+            List<GenericValue> orderItems = order.getRelated("OrderItem", null, null, false);
             for(GenericValue item : orderItems) {
-                GenericValue product = item.getRelatedOne("Product");
+                GenericValue product = item.getRelatedOne("Product", false);
                 if (product == null) continue;
 
                 if (!("PRODRQM_ATP".equals(product.get("requirementMethodEnumId")) ||
@@ -288,7 +288,7 @@ public class RequirementServices {
                 if (ordered.compareTo(BigDecimal.ZERO) <= 0) continue;
 
                 // get the minimum stock for this facility (if not configured assume a minimum of zero, ie create requirements when it goes into backorder)
-                GenericValue productFacility = delegator.findByPrimaryKey("ProductFacility", UtilMisc.toMap("facilityId", facilityId, "productId", product.get("productId")));
+                GenericValue productFacility = delegator.findOne("ProductFacility", UtilMisc.toMap("facilityId", facilityId, "productId", product.get("productId")), false);
                 BigDecimal minimumStock = BigDecimal.ZERO;
                 if (productFacility != null && productFacility.get("minimumStock") != null) {
                     minimumStock = productFacility.getBigDecimal("minimumStock");

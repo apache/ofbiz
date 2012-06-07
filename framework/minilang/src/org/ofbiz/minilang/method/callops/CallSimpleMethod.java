@@ -18,12 +18,16 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.callops;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import javolution.util.FastMap;
 
+import org.ofbiz.base.location.FlexibleLocation;
+import org.ofbiz.minilang.artifact.ArtifactInfoContext;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
@@ -47,6 +51,7 @@ public final class CallSimpleMethod extends MethodOperation {
 
     private final String methodName;
     private final String xmlResource;
+    private final URL xmlURL;
     private final String scope;
     private final List<ResultToField> resultToFieldList;
 
@@ -59,7 +64,18 @@ public final class CallSimpleMethod extends MethodOperation {
             MiniLangValidate.childElements(simpleMethod, element, "result-to-field");
         }
         this.methodName = element.getAttribute("method-name");
-        this.xmlResource = element.getAttribute("xml-resource");
+        String xmlResourceAttribute = element.getAttribute("xml-resource");
+        if (xmlResourceAttribute.isEmpty()) {
+            xmlResourceAttribute = simpleMethod.getFromLocation();
+        }
+        this.xmlResource = xmlResourceAttribute;
+        URL xmlURL = null;
+        try {
+            xmlURL = FlexibleLocation.resolveLocation(this.xmlResource);
+        } catch (MalformedURLException e) {
+            MiniLangValidate.handleError("Could not find SimpleMethod XML document in resource: " + this.xmlResource + "; error was: " + e.toString(), simpleMethod, element);
+        }
+        this.xmlURL = xmlURL;
         this.scope = element.getAttribute("scope");
         List<? extends Element> resultToFieldElements = UtilXml.childElementList(element, "result-to-field");
         if (UtilValidate.isNotEmpty(resultToFieldElements)) {
@@ -81,13 +97,7 @@ public final class CallSimpleMethod extends MethodOperation {
         if (UtilValidate.isEmpty(this.methodName)) {
             throw new MiniLangRuntimeException("method-name attribute is empty", this);
         }
-        SimpleMethod simpleMethodToCall = null;
-        if (UtilValidate.isEmpty(this.xmlResource)) {
-            simpleMethodToCall = this.simpleMethod.getSimpleMethodInSameFile(methodName);
-        } else {
-            Map<String, SimpleMethod> simpleMethods = SimpleMethod.getSimpleMethods(this.xmlResource, methodContext.getLoader());
-            simpleMethodToCall = simpleMethods.get(this.methodName);
-        }
+        SimpleMethod simpleMethodToCall = SimpleMethod.getSimpleMethod(this.xmlURL, this.methodName);
         if (simpleMethodToCall == null) {
             throw new MiniLangRuntimeException("Could not find <simple-method name=\"" + this.methodName + "\"> in XML document " + this.xmlResource, this);
         }
@@ -144,19 +154,28 @@ public final class CallSimpleMethod extends MethodOperation {
         return FlexibleStringExpander.expandString(toString(), methodContext.getEnvMap());
     }
 
+    @Override
+    public void gatherArtifactInfo(ArtifactInfoContext aic) {
+        SimpleMethod simpleMethodToCall;
+        try {
+            simpleMethodToCall = SimpleMethod.getSimpleMethod(this.xmlURL, this.methodName);
+            if (simpleMethodToCall != null) {
+                if (!aic.hasVisited(simpleMethodToCall)) {
+                    aic.addSimpleMethod(simpleMethodToCall);
+                    simpleMethodToCall.gatherArtifactInfo(aic);
+                }
+            }
+        } catch (MiniLangException e) {
+            Debug.logWarning("Could not find <simple-method name=\"" + this.methodName + "\"> in XML document " + this.xmlResource + ": " + e.toString(), module);
+        }
+    }
+
     public String getMethodName() {
         return this.methodName;
     }
 
     public SimpleMethod getSimpleMethodToCall(ClassLoader loader) throws MiniLangException {
-        SimpleMethod simpleMethodToCall = null;
-        if (UtilValidate.isEmpty(xmlResource)) {
-            simpleMethodToCall = this.simpleMethod.getSimpleMethodInSameFile(methodName);
-        } else {
-            Map<String, SimpleMethod> simpleMethods = SimpleMethod.getSimpleMethods(xmlResource, loader);
-            simpleMethodToCall = simpleMethods.get(methodName);
-        }
-        return simpleMethodToCall;
+        return SimpleMethod.getSimpleMethod(xmlResource, methodName, loader);
     }
 
     public String getXmlResource() {

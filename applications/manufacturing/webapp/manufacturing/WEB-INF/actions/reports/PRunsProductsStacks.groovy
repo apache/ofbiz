@@ -23,15 +23,15 @@
 import org.ofbiz.entity.util.EntityUtil;
 
 if (productCategoryIdPar) {
-    category = delegator.findByPrimaryKey("ProductCategory", [productCategoryId : productCategoryIdPar]);
+    category = delegator.findOne("ProductCategory", [productCategoryId : productCategoryIdPar], false);
     context.category = category;
 }
 if (productFeatureTypeIdPar) {
-    featureType = delegator.findByPrimaryKey("ProductFeatureType", [productFeatureTypeId : productFeatureTypeIdPar]);
+    featureType = delegator.findOne("ProductFeatureType", [productFeatureTypeId : productFeatureTypeIdPar], false);
     context.featureType = featureType;
 }
 
-allProductionRuns = delegator.findByAnd("WorkEffortAndGoods", [workEffortName : planName], ["productId"]);
+allProductionRuns = delegator.findByAnd("WorkEffortAndGoods", [workEffortName : planName], ["productId"], false);
 productionRuns = [];
 features = [:];
 products = [:];
@@ -45,15 +45,15 @@ if (allProductionRuns) {
                 continue;
             }
         }
-        productionRunProduct = delegator.findByPrimaryKey("Product", [productId : productionRun.productId]);
+        productionRunProduct = delegator.findOne("Product", [productId : productionRun.productId], false);
         location = [:];
         if (productionRunProduct) {
-            locations = delegator.findByAnd("ProductFacilityLocation", [facilityId : productionRun.facilityId, productId : productionRun.productId]);
+            locations = delegator.findByAnd("ProductFacilityLocation", [facilityId : productionRun.facilityId, productId : productionRun.productId], null, false);
             location = EntityUtil.getFirst(locations);
         }
         if (taskNamePar) {
             // select the production run's task of a given name (i.e. type) if any (based on the report's parameter)
-            productionRunTasks = delegator.findByAnd("WorkEffort", [workEffortParentId : productionRun.workEffortId , workEffortName : taskNamePar]);
+            productionRunTasks = delegator.findByAnd("WorkEffort", [workEffortParentId : productionRun.workEffortId , workEffortName : taskNamePar], null, false);
             productionRunTask = EntityUtil.getFirst(productionRunTasks);
             if (!productionRunTask) {
                 // the production run doesn't include the given task, skip it

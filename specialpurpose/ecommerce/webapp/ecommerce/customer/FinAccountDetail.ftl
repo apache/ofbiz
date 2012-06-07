@@ -20,24 +20,24 @@ under the License.
 <table border="0" cellpadding="1">
   <tr>
       <td align="right" width="25%"><div class="tableheadtext">Account Number:</div></td>
-      <td><div class="tabletext">${ownedFinAccount.finAccountId}</div></td>
+      <td><div>${ownedFinAccount.finAccountId}</div></td>
   </tr>
   <tr>
       <td align="right"><div class="tableheadtext">Currency:</div></td>
-      <td><div class="tabletext">${(accountCurrencyUom.description)?if_exists} [${ownedFinAccount.currencyUomId?if_exists}]</div></td>
+      <td><div>${(accountCurrencyUom.description)?if_exists} [${ownedFinAccount.currencyUomId?if_exists}]</div></td>
   </tr>
   <tr>
       <td align="right"><div class="tableheadtext">Date Opened:</div></td>
-      <td><div class="tabletext">${ownedFinAccount.fromDate?if_exists}</div></td>
+      <td><div>${ownedFinAccount.fromDate?if_exists}</div></td>
   </tr>
   <tr>
       <td align="right"><div class="tableheadtext">Status:</div></td>
-      <td><div class="tabletext">${(finAccountStatusItem.description)?default("Active")}</div></td>
+      <td><div>${(finAccountStatusItem.description)?default("Active")}</div></td>
   </tr>
   <#if ownedFinAccount.replenishLevel?exists>
   <tr>
       <td align="right"><div class="tableheadtext">Replenish Level:</div></td>
-      <td><div class="tabletext">${ownedFinAccount.replenishLevel}</div></td>
+      <td><div>${ownedFinAccount.replenishLevel}</div></td>
   </tr>
   </#if>
 </table>
@@ -52,7 +52,7 @@ under the License.
     <th>Amount</th>
   </tr>
   <#list ownedFinAccountTransList as ownedFinAccountTrans>
-    <#assign finAccountTransType = ownedFinAccountTrans.getRelatedOne("FinAccountTransType")/>
+    <#assign finAccountTransType = ownedFinAccountTrans.getRelatedOne("FinAccountTransType", false)/>
     <#assign displayAmount = ownedFinAccountTrans.amount/>
     <#if ownedFinAccountTrans.finAccountTransTypeId == "WITHDRAWAL">
       <#assign displayAmount = -displayAmount/>

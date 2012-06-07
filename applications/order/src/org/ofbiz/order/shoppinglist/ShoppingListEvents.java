@@ -213,22 +213,22 @@ public class ShoppingListEvents {
         GenericValue shoppingList = null;
         List<GenericValue> shoppingListItems = null;
         try {
-            shoppingList = delegator.findByPrimaryKey("ShoppingList", UtilMisc.toMap("shoppingListId", shoppingListId));
+            shoppingList = delegator.findOne("ShoppingList", UtilMisc.toMap("shoppingListId", shoppingListId), false);
             if (shoppingList == null) {
                 errMsg = UtilProperties.getMessage(resource_error,"shoppinglistevents.error_getting_shopping_list_and_items", cart.getLocale());
                 throw new IllegalArgumentException(errMsg);
             }
 
-            shoppingListItems = shoppingList.getRelated("ShoppingListItem");
+            shoppingListItems = shoppingList.getRelated("ShoppingListItem", null, null, false);
             if (shoppingListItems == null) {
                 shoppingListItems = FastList.newInstance();
             }
 
             // include all items of child lists if flagged to do so
             if (includeChild) {
-                List<GenericValue> childShoppingLists = shoppingList.getRelated("ChildShoppingList");
+                List<GenericValue> childShoppingLists = shoppingList.getRelated("ChildShoppingList", null, null, false);
                 for(GenericValue v : childShoppingLists) {
-                    List<GenericValue> items = v.getRelated("ShoppingListItem");
+                    List<GenericValue> items = v.getRelated("ShoppingListItem", null, null, false);
                     shoppingListItems.addAll(items);
                 }
             }
@@ -371,7 +371,7 @@ public class ShoppingListEvents {
         // TODO: add sorting, just in case there are multiple...
         if (partyId != null) {
             Map<String, Object> findMap = UtilMisc.<String, Object>toMap("partyId", partyId, "productStoreId", productStoreId, "shoppingListTypeId", "SLT_SPEC_PURP", "listName", PERSISTANT_LIST_NAME);
-            List<GenericValue> existingLists = delegator.findByAnd("ShoppingList", findMap);
+            List<GenericValue> existingLists = delegator.findByAnd("ShoppingList", findMap, null, false);
             Debug.logInfo("Finding existing auto-save shopping list with:  \nfindMap: " + findMap + "\nlists: " + existingLists, module);
     
             if (UtilValidate.isNotEmpty(existingLists)) {
@@ -403,10 +403,10 @@ public class ShoppingListEvents {
                 autoSaveListId = getAutoSaveListId(delegator, dispatcher, null, userLogin, cart.getProductStoreId());
                 cart.setAutoSaveListId(autoSaveListId);
             }
-            GenericValue shoppingList = delegator.findByPrimaryKey("ShoppingList", UtilMisc.toMap("shoppingListId", autoSaveListId));
+            GenericValue shoppingList = delegator.findOne("ShoppingList", UtilMisc.toMap("shoppingListId", autoSaveListId), false);
             Integer currentListSize = 0;
             if (UtilValidate.isNotEmpty(shoppingList)) {
-                List<GenericValue> shoppingListItems = shoppingList.getRelated("ShoppingListItem");
+                List<GenericValue> shoppingListItems = shoppingList.getRelated("ShoppingListItem", null, null, false);
                 if (UtilValidate.isNotEmpty(shoppingListItems)) {
                     currentListSize = shoppingListItems.size();
                 }
@@ -504,7 +504,7 @@ public class ShoppingListEvents {
         if (!okayToLoad && lastLoad != null) {
             GenericValue shoppingList = null;
             try {
-                shoppingList = delegator.findByPrimaryKey("ShoppingList", UtilMisc.toMap("shoppingListId", autoSaveListId));
+                shoppingList = delegator.findOne("ShoppingList", UtilMisc.toMap("shoppingListId", autoSaveListId), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
             }
@@ -588,7 +588,7 @@ public class ShoppingListEvents {
         List<String> responseIds = FastList.newInstance();
         List<GenericValue> surveyResp = null;
         try {
-            surveyResp = item.getRelated("ShoppingListItemSurvey");
+            surveyResp = item.getRelated("ShoppingListItemSurvey", null, null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }

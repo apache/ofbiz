@@ -93,7 +93,7 @@ public class CategoryWorker {
             Collection<GenericValue> allCategories = delegator.findList("ProductCategory", null, null, null, null, false);
 
             for (GenericValue curCat: allCategories) {
-                Collection<GenericValue> parentCats = curCat.getRelatedCache("CurrentProductCategoryRollup");
+                Collection<GenericValue> parentCats = curCat.getRelated("CurrentProductCategoryRollup", null, null, true);
 
                 if (parentCats.isEmpty()) results.add(curCat);
             }
@@ -148,9 +148,9 @@ public class CategoryWorker {
         List<GenericValue> rollups = null;
 
         try {
-            rollups = delegator.findByAndCache("ProductCategoryRollup",
+            rollups = delegator.findByAnd("ProductCategoryRollup",
                         UtilMisc.toMap("parentProductCategoryId", parentId),
-                        UtilMisc.toList("sequenceNum"));
+                        UtilMisc.toList("sequenceNum"), true);
             if (limitView) {
                 rollups = EntityUtil.filterByDate(rollups, true);
             }
@@ -164,7 +164,7 @@ public class CategoryWorker {
                 GenericValue cv = null;
 
                 try {
-                    cv = parent.getRelatedOneCache("CurrentProductCategory");
+                    cv = parent.getRelatedOne("CurrentProductCategory", true);
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e.getMessage(), module);
                 }
@@ -363,11 +363,11 @@ public class CategoryWorker {
         if (productCategoryId == null) return false;
         if (UtilValidate.isEmpty(productId)) return false;
 
-        List<GenericValue> productCategoryMembers = EntityUtil.filterByDate(delegator.findByAndCache("ProductCategoryMember",
-                UtilMisc.toMap("productCategoryId", productCategoryId, "productId", productId)), true);
+        List<GenericValue> productCategoryMembers = EntityUtil.filterByDate(delegator.findByAnd("ProductCategoryMember",
+                UtilMisc.toMap("productCategoryId", productCategoryId, "productId", productId), null, true), true);
         if (UtilValidate.isEmpty(productCategoryMembers)) {
             //before giving up see if this is a variant product, and if so look up the virtual product and check it...
-            GenericValue product = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", productId));
+            GenericValue product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), true);
             List<GenericValue> productAssocs = ProductWorker.getVariantVirtualAssocs(product);
             //this does take into account that a product could be a variant of multiple products, but this shouldn't ever really happen...
             if (productAssocs != null) {

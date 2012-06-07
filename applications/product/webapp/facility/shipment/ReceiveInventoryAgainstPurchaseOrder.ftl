@@ -24,7 +24,7 @@ under the License.
         for (var x = 0; x <= rowCount; x++) {
           var quantityAcceptedInput = document.getElementById('quantityAccepted_o_' + x);
           var quantityInput = document.getElementById('quantity_o_' + x);
-          if (quantityAcceptedInput != null && quantityInput != null) {
+          if (quantityAcceptedInput?? && quantityInput??) {
             quantityInput.value = quantityAcceptedInput.value;
           }
         }
@@ -132,7 +132,7 @@ under the License.
                             <td>
                                 <div>
                                     <#assign upcaLookup = Static["org.ofbiz.base.util.UtilMisc"].toMap("productId", product.productId, "goodIdentificationTypeId", "UPCA")/>
-                                    <#assign upca = delegator.findByPrimaryKeyCache("GoodIdentification", upcaLookup)?if_exists/>
+                                    <#assign upca = delegator.findOne("GoodIdentification", upcaLookup, true)?if_exists/>
                                     <#if upca?has_content>
                                         ${upca.idValue?if_exists}
                                     </#if>

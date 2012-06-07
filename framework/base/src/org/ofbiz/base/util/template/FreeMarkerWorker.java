@@ -75,9 +75,18 @@ public class FreeMarkerWorker {
     public static final String module = FreeMarkerWorker.class.getName();
 
     // use soft references for this so that things from Content records don't kill all of our memory, or maybe not for performance reasons... hmmm, leave to config file...
-    public static UtilCache<String, Template> cachedTemplates = UtilCache.createUtilCache("template.ftl.general", 0, 0, false);
-    protected static BeansWrapper defaultOfbizWrapper = BeansWrapper.getDefaultInstance();
-    protected static Configuration defaultOfbizConfig = makeConfiguration(defaultOfbizWrapper);
+    private static final UtilCache<String, Template> cachedTemplates = UtilCache.createUtilCache("template.ftl.general", 0, 0, false);
+    private static final BeansWrapper defaultOfbizWrapper = configureBeansWrapper(new BeansWrapper());
+    private static final Configuration defaultOfbizConfig = makeConfiguration(defaultOfbizWrapper);
+
+    public static BeansWrapper getDefaultOfbizWrapper() {
+        return defaultOfbizWrapper;
+    }
+
+    public static <T extends BeansWrapper> T configureBeansWrapper(T wrapper) {
+        wrapper.setNullWildcards(true);
+        return wrapper;
+    }
 
     public static Configuration makeConfiguration(BeansWrapper wrapper) {
         Configuration newConfig = new Configuration();
@@ -191,49 +200,34 @@ public class FreeMarkerWorker {
     public static Environment renderTemplateFromString(String templateString, String templateLocation, Map<String, Object> context, Appendable outWriter) throws TemplateException, IOException {
         Template template = cachedTemplates.get(templateLocation);
         if (template == null) {
-            synchronized (cachedTemplates) {
-                template = cachedTemplates.get(templateLocation);
-                if (template == null) {
-                    Reader templateReader = new StringReader(templateString);
-                    template = new Template(templateLocation, templateReader, defaultOfbizConfig);
-                    templateReader.close();
-                    cachedTemplates.put(templateLocation, template);
-                }
-            }
+            Reader templateReader = new StringReader(templateString);
+            template = new Template(templateLocation, templateReader, defaultOfbizConfig);
+            templateReader.close();
+            template = cachedTemplates.putIfAbsentAndGet(templateLocation, template);
         }
         return renderTemplate(template, context, outWriter);
     }
 
     public static Environment renderTemplateFromString(String templateString, String templateLocation, Map<String, Object> context, Appendable outWriter, boolean useCache) throws TemplateException, IOException {
         Template template = null;
-        if (useCache){
+        if (useCache) {
             template = cachedTemplates.get(templateLocation);
-        }
-        if (template == null) {
-            if (useCache){
-                synchronized (cachedTemplates) {
-                    template = cachedTemplates.get(templateLocation);
-                    if (template == null) {
-                        Reader templateReader = new StringReader(templateString);
-                        template = new Template(templateLocation, templateReader, defaultOfbizConfig);
-                        templateReader.close();
-                        cachedTemplates.put(templateLocation, template);
-                    }
-                }
-            } else {
+            if (template == null) {
                 Reader templateReader = new StringReader(templateString);
                 template = new Template(templateLocation, templateReader, defaultOfbizConfig);
                 templateReader.close();
+                template = cachedTemplates.putIfAbsentAndGet(templateLocation, template);
             }
+        } else {
+            Reader templateReader = new StringReader(templateString);
+            template = new Template(templateLocation, templateReader, defaultOfbizConfig);
+            templateReader.close();
         }
-
         return renderTemplate(template, context, outWriter);
     }
 
     public static void clearTemplateFromCache(String templateLocation) {
-        synchronized (cachedTemplates) {
-            cachedTemplates.remove(templateLocation);
-        }
+        cachedTemplates.remove(templateLocation);
     }
 
     /**
@@ -332,16 +326,11 @@ public class FreeMarkerWorker {
     public static Template getTemplate(String templateLocation, UtilCache<String, Template> cache, Configuration config) throws TemplateException, IOException {
         Template template = cache.get(templateLocation);
         if (template == null) {
-            synchronized (cache) {
-                template = cache.get(templateLocation);
-                if (template == null) {
-                    // only make the reader if we need it, and then close it right after!
-                    Reader templateReader = makeReader(templateLocation);
-                    template = new Template(templateLocation, templateReader, config);
-                    templateReader.close();
-                    cache.put(templateLocation, template);
-                }
-            }
+            // only make the reader if we need it, and then close it right after!
+            Reader templateReader = makeReader(templateLocation);
+            template = new Template(templateLocation, templateReader, config);
+            templateReader.close();
+            template = cache.putIfAbsentAndGet(templateLocation, template);
         }
         return template;
     }
@@ -617,10 +606,9 @@ public class FreeMarkerWorker {
     }
 
     public static TemplateModel autoWrap(Object obj, Environment env) {
-       BeansWrapper wrapper = BeansWrapper.getDefaultInstance();
        TemplateModel templateModelObj = null;
        try {
-           templateModelObj = wrapper.wrap(obj);
+           templateModelObj = getDefaultOfbizWrapper().wrap(obj);
        } catch (TemplateModelException e) {
            throw new RuntimeException(e.getMessage());
        }

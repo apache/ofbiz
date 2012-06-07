@@ -60,7 +60,7 @@ public class OrderEvents {
         try {
             // has the userLogin.partyId ordered a product with DIGITAL_DOWNLOAD content associated for the given dataResourceId?
             List<GenericValue> orderRoleAndProductContentInfoList = delegator.findByAnd("OrderRoleAndProductContentInfo",
-                    UtilMisc.toMap("partyId", userLogin.get("partyId"), "dataResourceId", dataResourceId, "productContentTypeId", "DIGITAL_DOWNLOAD", "statusId", "ITEM_COMPLETED"));
+                    UtilMisc.toMap("partyId", userLogin.get("partyId"), "dataResourceId", dataResourceId, "productContentTypeId", "DIGITAL_DOWNLOAD", "statusId", "ITEM_COMPLETED"), null, false);
 
             if (orderRoleAndProductContentInfoList.size() == 0) {
                 request.setAttribute("_ERROR_MESSAGE_", "No record of purchase for digital download found (dataResourceId=[" + dataResourceId + "]).");
@@ -111,9 +111,9 @@ public class OrderEvents {
             for (String orderItemSeqId : orderItemSeqIds) {
                 try {
                     GenericValue orderItem = delegator.findOne("OrderItem", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", orderItemSeqId), false);
-                    List<GenericValue> orderItemShipGroupAssocs = orderItem.getRelated("OrderItemShipGroupAssoc");
+                    List<GenericValue> orderItemShipGroupAssocs = orderItem.getRelated("OrderItemShipGroupAssoc", null, null, false);
                     for (GenericValue orderItemShipGroupAssoc : orderItemShipGroupAssocs) {
-                        GenericValue orderItemShipGroup = orderItemShipGroupAssoc.getRelatedOne("OrderItemShipGroup");
+                        GenericValue orderItemShipGroup = orderItemShipGroupAssoc.getRelatedOne("OrderItemShipGroup", false);
                         String shipGroupSeqId = orderItemShipGroup.getString("shipGroupSeqId");
 
                         Map<String, Object> contextMap = FastMap.newInstance();

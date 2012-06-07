@@ -68,12 +68,12 @@ public class UtilProperties implements Serializable {
     /** An instance of the generic cache for storing the non-locale-specific properties.
      *  Each Properties instance is keyed by the resource String.
      */
-    protected static UtilCache<String, Properties> resourceCache = UtilCache.createUtilCache("properties.UtilPropertiesResourceCache");
+    private static final UtilCache<String, Properties> resourceCache = UtilCache.createUtilCache("properties.UtilPropertiesResourceCache");
 
     /** An instance of the generic cache for storing the non-locale-specific properties.
      *  Each Properties instance is keyed by the file's URL.
      */
-    protected static UtilCache<String, Properties> urlCache = UtilCache.createUtilCache("properties.UtilPropertiesUrlCache");
+    private static final UtilCache<String, Properties> urlCache = UtilCache.createUtilCache("properties.UtilPropertiesUrlCache");
 
     protected static Locale fallbackLocale = null;
     protected static Set<Locale> defaultCandidateLocales = null;
@@ -281,7 +281,7 @@ public class UtilProperties implements Serializable {
         try {
             value = properties.getProperty(name);
         } catch (Exception e) {
-            Debug.log(e, module);
+            Debug.logInfo(e, module);
         }
         return value == null ? "" : value.trim();
     }
@@ -302,14 +302,13 @@ public class UtilProperties implements Serializable {
 
                 if (url == null)
                     return null;
-                properties = getProperties(url);
-                resourceCache.put(cacheKey, properties);
+                properties = resourceCache.putIfAbsentAndGet(cacheKey, getProperties(url));
             } catch (MissingResourceException e) {
-                Debug.log(e, module);
+                Debug.logInfo(e, module);
             }
         }
         if (properties == null) {
-            Debug.log("[UtilProperties.getProperties] could not find resource: " + resource, module);
+            Debug.logInfo("[UtilProperties.getProperties] could not find resource: " + resource, module);
             return null;
         }
         return properties;
@@ -330,11 +329,11 @@ public class UtilProperties implements Serializable {
                 properties.load(url.openStream());
                 urlCache.put(url.toString(), properties);
             } catch (Exception e) {
-                Debug.log(e, module);
+                Debug.logInfo(e, module);
             }
         }
         if (properties == null) {
-            Debug.log("[UtilProperties.getProperties] could not find resource: " + url, module);
+            Debug.logInfo("[UtilProperties.getProperties] could not find resource: " + url, module);
             return null;
         }
         return properties;
@@ -421,7 +420,7 @@ public class UtilProperties implements Serializable {
         try {
             value = properties.getProperty(name);
         } catch (Exception e) {
-            Debug.log(e, module);
+            Debug.logInfo(e, module);
         }
         return value == null ? "" : value.trim();
     }
@@ -458,7 +457,7 @@ public class UtilProperties implements Serializable {
                 curIdx++;
             }
         } catch (Exception e) {
-            Debug.log(e, module);
+            Debug.logInfo(e, module);
         }
         return value == null ? "" : value.trim();
     }
@@ -534,7 +533,7 @@ public class UtilProperties implements Serializable {
 
              propFile.close();
          } catch (FileNotFoundException e) {
-             Debug.log(e, "Unable to located the resource file.", module);
+             Debug.logInfo(e, "Unable to located the resource file.", module);
          } catch (IOException e) {
              Debug.logError(e, module);
          }
@@ -576,7 +575,7 @@ public class UtilProperties implements Serializable {
         try {
             value = bundle.getString(name);
         } catch (Exception e) {
-            //Debug.log(e, module);
+            //Debug.logInfo(e, module);
         }
         return value == null ? name : value.trim();
     }
@@ -672,7 +671,7 @@ public class UtilProperties implements Serializable {
             String resourceCacheKey = createResourceName(resource, locale, false);
             if (!resourceNotFoundMessagesShown.contains(resourceCacheKey)) {
                 resourceNotFoundMessagesShown.add(resourceCacheKey);
-                Debug.log("[UtilProperties.getPropertyValue] could not find resource: " + resource + " for locale " + locale, module);
+                Debug.logInfo("[UtilProperties.getPropertyValue] could not find resource: " + resource + " for locale " + locale, module);
             }
             throw new IllegalArgumentException("Could not find resource bundle [" + resource + "] in the locale [" + locale + "]");
         }
@@ -724,9 +723,9 @@ public class UtilProperties implements Serializable {
                 properties = new ExtendedProperties(url, locale);
             } catch (Exception e) {
                 if (UtilValidate.isNotEmpty(e.getMessage())) {
-                    Debug.log(e.getMessage(), module);
+                    Debug.logInfo(e.getMessage(), module);
                 } else {
-                    Debug.log("Exception thrown: " + e.getClass().getName(), module);
+                    Debug.logInfo("Exception thrown: " + e.getClass().getName(), module);
                 }
                 properties = null;
             }
@@ -1006,7 +1005,7 @@ public class UtilProperties implements Serializable {
      * properties file format.
      */
     public static class UtilResourceBundle extends ResourceBundle {
-        protected static UtilCache<String, UtilResourceBundle> bundleCache = UtilCache.createUtilCache("properties.UtilPropertiesBundleCache");
+        private static final UtilCache<String, UtilResourceBundle> bundleCache = UtilCache.createUtilCache("properties.UtilPropertiesBundleCache");
         protected Properties properties = null;
         protected Locale locale = null;
         protected int hashCode = hashCode();

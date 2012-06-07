@@ -52,7 +52,7 @@ public class ProductConfigWorker {
     public static final String resource = "ProductUiLabels";
     public static final String SEPARATOR = "::";    // cache key separator
 
-    public static UtilCache<String, ProductConfigWrapper> productConfigCache = UtilCache.createUtilCache("product.config", true);     // use soft reference to free up memory if needed
+    private static final UtilCache<String, ProductConfigWrapper> productConfigCache = UtilCache.createUtilCache("product.config", true);     // use soft reference to free up memory if needed
 
     public static ProductConfigWrapper getProductConfigWrapper(String productId, String currencyUomId, HttpServletRequest request) {
         ProductConfigWrapper configWrapper = null;
@@ -65,15 +65,16 @@ public class ProductConfigWorker {
              * productId::catalogId::webSiteId::currencyUomId, or whatever the SEPARATOR is defined above to be.
              */
             String cacheKey = productId + SEPARATOR + productStoreId + SEPARATOR + catalogId + SEPARATOR + webSiteId + SEPARATOR + currencyUomId;
-            if (!productConfigCache.containsKey(cacheKey)) {
+            configWrapper = productConfigCache.get(cacheKey);
+            if (configWrapper == null) {
                 configWrapper = new ProductConfigWrapper((Delegator)request.getAttribute("delegator"),
                                                          (LocalDispatcher)request.getAttribute("dispatcher"),
                                                          productId, productStoreId, catalogId, webSiteId,
                                                          currencyUomId, UtilHttp.getLocale(request),
                                                          autoUserLogin);
-                productConfigCache.put(cacheKey, new ProductConfigWrapper(configWrapper));
+                configWrapper = productConfigCache.putIfAbsentAndGet(cacheKey, new ProductConfigWrapper(configWrapper));
             } else {
-                configWrapper = new ProductConfigWrapper(productConfigCache.get(cacheKey));
+                configWrapper = new ProductConfigWrapper(configWrapper);
             }
         } catch (ProductConfigWrapperException we) {
             configWrapper = null;
@@ -208,7 +209,7 @@ public class ProductConfigWorker {
                 configItemId = ci.getConfigItemAssoc().getString("configItemId");
                 sequenceNum = ci.getConfigItemAssoc().getLong("sequenceNum");
                 try {
-                    List<GenericValue> configs = delegator.findByAnd("ProductConfigConfig", UtilMisc.toMap("configItemId",configItemId,"sequenceNum", sequenceNum));
+                    List<GenericValue> configs = delegator.findByAnd("ProductConfigConfig", UtilMisc.toMap("configItemId",configItemId,"sequenceNum", sequenceNum), null, false);
                     for (GenericValue productConfigConfig: configs) {
                         for (ConfigOption oneOption: selectedOptions) {
                             String configOptionId = oneOption.configOption.getString("configOptionId");
@@ -231,9 +232,9 @@ public class ProductConfigWorker {
             for (GenericValue productConfigConfig: configsToCheck) {
                 String tempConfigId = productConfigConfig.getString("configId");
                 try {
-                    List<GenericValue> tempResult = delegator.findByAnd("ProductConfigConfig", UtilMisc.toMap("configId",tempConfigId));
+                    List<GenericValue> tempResult = delegator.findByAnd("ProductConfigConfig", UtilMisc.toMap("configId",tempConfigId), null, false);
                     if (tempResult.size() == selectedOptionSize && configsToCheck.containsAll(tempResult)) {
-                        List<GenericValue> configOptionProductOptions = delegator.findByAnd("ConfigOptionProductOption", UtilMisc.toMap("configId",tempConfigId));
+                        List<GenericValue> configOptionProductOptions = delegator.findByAnd("ConfigOptionProductOption", UtilMisc.toMap("configId",tempConfigId), null, false);
                         if (UtilValidate.isNotEmpty(configOptionProductOptions)) {
 
                             //  check for variant product equality

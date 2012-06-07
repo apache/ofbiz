@@ -25,11 +25,11 @@ import org.ofbiz.manufacturing.jobshopmgt.ProductionRunHelper;
 import org.ofbiz.order.order.OrderReadHelper;
 
 if (productCategoryIdPar) {
-    category = delegator.findByPrimaryKey("ProductCategory", [productCategoryId : productCategoryIdPar]);
+    category = delegator.findOne("ProductCategory", [productCategoryId : productCategoryIdPar], false);
     context.category = category;
 }
 
-allProductionRuns = delegator.findByAnd("WorkEffortAndGoods", UtilMisc.toMap("workEffortName", planName, "statusId", "WEGS_CREATED", "workEffortGoodStdTypeId", "PRUN_PROD_DELIV"), UtilMisc.toList("productId"));
+allProductionRuns = delegator.findByAnd("WorkEffortAndGoods", UtilMisc.toMap("workEffortName", planName, "statusId", "WEGS_CREATED", "workEffortGoodStdTypeId", "PRUN_PROD_DELIV"), UtilMisc.toList("productId"), false);
 productionRuns = [];
 
 if (allProductionRuns) {
@@ -41,13 +41,13 @@ if (allProductionRuns) {
                 continue;
             }
         }
-        productionRunProduct = delegator.findByPrimaryKey("Product", [productId : productionRun.productId]);
+        productionRunProduct = delegator.findOne("Product", [productId : productionRun.productId], false);
         String rootProductionRunId = ProductionRunHelper.getRootProductionRun(delegator, productionRun.workEffortId);
 
-        productionRunOrders = delegator.findByAnd("WorkOrderItemFulfillment", [workEffortId : rootProductionRunId]);
+        productionRunOrders = delegator.findByAnd("WorkOrderItemFulfillment", [workEffortId : rootProductionRunId], null, false);
         productionRunOrder = EntityUtil.getFirst(productionRunOrders);
         OrderReadHelper orh = new OrderReadHelper(delegator, productionRunOrder.orderId);
-        locations = delegator.findByAnd("ProductFacilityLocation", [productId : productionRun.productId, facilityId : productionRun.facilityId]);
+        locations = delegator.findByAnd("ProductFacilityLocation", [productId : productionRun.productId, facilityId : productionRun.facilityId], null, false);
         location = EntityUtil.getFirst(locations);
 
         productionRunMap = [productionRun : productionRun,

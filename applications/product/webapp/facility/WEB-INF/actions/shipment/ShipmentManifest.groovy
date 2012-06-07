@@ -25,21 +25,21 @@ shipmentId = request.getParameter("shipmentId");
 shipment = delegator.findOne("Shipment", [shipmentId : shipmentId], false);
 
 if (shipment) {
-    shipmentPackageRouteSegs = shipment.getRelated("ShipmentPackageRouteSeg", null, ['shipmentRouteSegmentId', 'shipmentPackageSeqId']);
+    shipmentPackageRouteSegs = shipment.getRelated("ShipmentPackageRouteSeg", null, ['shipmentRouteSegmentId', 'shipmentPackageSeqId'], false);
     shipmentPackageDatas = [] as LinkedList;
     if (shipmentPackageRouteSegs) {
         shipmentPackageRouteSegs.each { shipmentPackageRouteSeg ->
-            shipmentPackages = shipmentPackageRouteSeg.getRelated("ShipmentPackage", null, ['shipmentPackageSeqId']);
-            shipmentRouteSegment = shipmentPackageRouteSeg.getRelatedOne("ShipmentRouteSegment");
+            shipmentPackages = shipmentPackageRouteSeg.getRelated("ShipmentPackage", null, ['shipmentPackageSeqId'], false);
+            shipmentRouteSegment = shipmentPackageRouteSeg.getRelatedOne("ShipmentRouteSegment", false);
             if (shipmentPackages) {
                 shipmentPackages.each { shipmentPackage ->
                     shipmentItemsDatas = [] as LinkedList;
-                    shipmentPackageContents = shipmentPackage.getRelated("ShipmentPackageContent", null, ['shipmentItemSeqId']);
+                    shipmentPackageContents = shipmentPackage.getRelated("ShipmentPackageContent", null, ['shipmentItemSeqId'], false);
                     if (shipmentPackageContents) {
                         shipmentPackageContents.each { shipmentPackageContent ->
                             shipmentItemsData = [:];
                             packageQuantity = shipmentPackageContent.getDouble("quantity");
-                            shipmentItem = shipmentPackageContent.getRelatedOne("ShipmentItem");
+                            shipmentItem = shipmentPackageContent.getRelatedOne("ShipmentItem", false);
                             if (shipmentItem) {
                                 shippedQuantity = shipmentItem.getDouble("quantity");
                                 shipmentItemsData.shipmentItem = shipmentItem;

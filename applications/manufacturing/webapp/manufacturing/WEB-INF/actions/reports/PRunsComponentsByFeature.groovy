@@ -24,15 +24,15 @@ import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.product.category.CategoryWorker;
 
 if (productCategoryIdPar) {
-    category = delegator.findByPrimaryKey("ProductCategory", [productCategoryId : productCategoryIdPar]);
+    category = delegator.findOne("ProductCategory", [productCategoryId : productCategoryIdPar], false);
     context.category = category;
 }
 if (productFeatureTypeIdPar) {
-    featureType = delegator.findByPrimaryKey("ProductFeatureType", [productFeatureTypeId : productFeatureTypeIdPar]);
+    featureType = delegator.findOne("ProductFeatureType", [productFeatureTypeId : productFeatureTypeIdPar], false);
     context.featureType = featureType;
 }
 
-allProductionRuns = delegator.findByAnd("WorkEffortAndGoods", [workEffortName : planName],["productId"]);
+allProductionRuns = delegator.findByAnd("WorkEffortAndGoods", [workEffortName : planName],["productId"], false);
 productionRuns = [];
 features = [:]; // each entry is a productFeatureId|{productFeature,products}
 products = [:]; // each entry is a productId|{product,quantity}
@@ -43,7 +43,7 @@ if (!productFeatureTypeIdPar) {
 if (allProductionRuns) {
     allProductionRuns.each { productionRun ->
         // select the production run's task of a given name (i.e. type) if any (based on the report's parameter)
-        productionRunTasks = delegator.findByAnd("WorkEffort", [workEffortParentId : productionRun.workEffortId, workEffortName : taskNamePar]);
+        productionRunTasks = delegator.findByAnd("WorkEffort", [workEffortParentId : productionRun.workEffortId, workEffortName : taskNamePar], null, false);
         productionRunTask = EntityUtil.getFirst(productionRunTasks);
         if (!productionRunTask) {
             // the production run doesn't include the given task, skip it
@@ -51,7 +51,7 @@ if (allProductionRuns) {
         }
 
         // select the task's components, if any
-        allProductionRunComponents = delegator.findByAnd("WorkEffortGoodStandard", [workEffortId : productionRunTask.workEffortId,workEffortGoodStdTypeId : "PRUNT_PROD_NEEDED"]);
+        allProductionRunComponents = delegator.findByAnd("WorkEffortGoodStandard", [workEffortId : productionRunTask.workEffortId,workEffortGoodStdTypeId : "PRUNT_PROD_NEEDED"], null, false);
         allProductionRunComponents.each { productionRunComponent ->
             // verify if the product is a member of the given category (based on the report's parameter)
             if (productCategoryIdPar) {
@@ -60,17 +60,17 @@ if (allProductionRuns) {
                     continue;
                 }
             }
-            productionRunProduct = delegator.findByPrimaryKey("Product", [productId : productionRunComponent.productId]);
+            productionRunProduct = delegator.findOne("Product", [productId : productionRunComponent.productId], false);
 
             location = null;
             if (productionRunProduct) {
-                locations = delegator.findByAnd("ProductFacilityLocation", [facilityId : productionRun.facilityId, productId : productionRunProduct.productId]);
+                locations = delegator.findByAnd("ProductFacilityLocation", [facilityId : productionRun.facilityId, productId : productionRunProduct.productId], null, false);
                 location = EntityUtil.getFirst(locations);
             }
 
             // group by standard feature of type productFeatureTypeIdPar
             if (productFeatureTypeIdPar) {
-                standardFeatures = delegator.findByAnd("ProductFeatureAndAppl", [productFeatureTypeId : productFeatureTypeIdPar, productId : productionRunComponent.productId, productFeatureApplTypeId : "STANDARD_FEATURE"]);
+                standardFeatures = delegator.findByAnd("ProductFeatureAndAppl", [productFeatureTypeId : productFeatureTypeIdPar, productId : productionRunComponent.productId, productFeatureApplTypeId : "STANDARD_FEATURE"], null, false);
                 standardFeatures = EntityUtil.filterByDate(standardFeatures);
                 standardFeature = EntityUtil.getFirst(standardFeatures);
                 standardFeatureId = null;

@@ -79,9 +79,9 @@ if (parameters.sprintId) {
     reviewedBacklog = 0;
     totalbacklog = 0;
     allTask = [];
-    sprintList = delegator.findByAnd("CustRequestWorkEffort", ["workEffortId" : parameters.sprintId]);
+    sprintList = delegator.findByAnd("CustRequestWorkEffort", ["workEffortId" : parameters.sprintId], null, false);
     sprintList.each { sprintMap ->
-        custMap = sprintMap.getRelatedOne("CustRequest");
+        custMap = sprintMap.getRelatedOne("CustRequest", false);
         //if ("RF_PROD_BACKLOG".equals(custMap.custRequestTypeId)) {
             totalbacklog += 1;
             if ("CRQ_REVIEWED".equals(custMap.statusId)){
@@ -90,7 +90,7 @@ if (parameters.sprintId) {
                 completedBacklog += 1;
             }
             //get task
-            workEffortList = custMap.getRelated("CustRequestWorkEffort");
+            workEffortList = custMap.getRelated("CustRequestWorkEffort", null, null, false);
             if (workEffortList) {
                 allTask.addAll(workEffortList);
             }
@@ -102,7 +102,7 @@ if (parameters.sprintId) {
     totalTask = 0;
     if (allTask) {
         allTask.each { taskMap ->
-            workEffMap = taskMap.getRelatedOne("WorkEffort");
+            workEffMap = taskMap.getRelatedOne("WorkEffort", false);
             if (!"SCRUM_SPRINT".equals(workEffMap.workEffortTypeId)) {
                 totalTask += 1;
                 if ("STS_CREATED".equals(workEffMap.currentStatusId)){

@@ -91,7 +91,7 @@ public class PromoServices {
                 }
                 GenericValue existingPromoCode = null;
                 try {
-                    existingPromoCode = delegator.findByPrimaryKeyCache("ProductPromoCode", "productPromoCodeId", newPromoCodeId);
+                    existingPromoCode = delegator.findOne("ProductPromoCode", UtilMisc.toMap("productPromoCodeId", newPromoCodeId), true);
                 }
                 catch (GenericEntityException e) {
                     Debug.logWarning("Could not find ProductPromoCode for just generated ID: " + newPromoCodeId, module);
@@ -236,16 +236,18 @@ public class PromoServices {
     public static Map<String, Object> importPromoCodeEmailsFromFile(DispatchContext dctx, Map<String, ? extends Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
         String productPromoCodeId = (String) context.get("productPromoCodeId");
-        byte[] wrapper = (byte[]) context.get("uploadedFile");
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         Locale locale = (Locale) context.get("locale");
 
-        if (wrapper == null) {
-            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
-                    "ProductPromoCodeImportUploadedFileNotValid", locale));
+        ByteBuffer bytebufferwrapper = (ByteBuffer) context.get("uploadedFile");
+
+        if (bytebufferwrapper == null) {
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ProductPromoCodeImportUploadedFileNotValid", locale));
         }
 
-        // read the bytes into a reader
+        byte[] wrapper = bytebufferwrapper.array();
+       
+      // read the bytes into a reader
         BufferedReader reader = new BufferedReader(new StringReader(new String(wrapper)));
         List<Object> errors = FastList.newInstance();
         int lines = 0;

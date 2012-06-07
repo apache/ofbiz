@@ -22,7 +22,6 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.ObjectType;
 import org.ofbiz.base.util.Scriptlet;
 import org.ofbiz.base.util.StringUtil;
@@ -60,15 +59,6 @@ public final class SetOperation extends MethodOperation {
             element.removeAttribute("from-field");
             elementModified = true;
         }
-        fromAttr = element.getAttribute("from").trim();
-        // Correct from attribute wrapped in ${}
-        if (fromAttr.startsWith("${") && fromAttr.endsWith("}")) {
-            fromAttr = fromAttr.substring(2, fromAttr.length() - 1);
-            if (!fromAttr.contains("${")) {
-                element.setAttribute("from", fromAttr);
-                elementModified = true;
-            }
-        }
         // Correct value attribute expression that belongs in from attribute
         String valueAttr = element.getAttribute("value").trim();
         if (valueAttr.startsWith("${") && valueAttr.endsWith("}")) {
@@ -88,6 +78,7 @@ public final class SetOperation extends MethodOperation {
     private final Scriptlet scriptlet;
     private final boolean setIfEmpty;
     private final boolean setIfNull;
+    private final Class<?> targetClass;
     private final String type;
     private final FlexibleStringExpander valueFse;
 
@@ -103,6 +94,7 @@ public final class SetOperation extends MethodOperation {
             MiniLangValidate.requireAnyAttribute(simpleMethod, element, "from-field", "from", "value");
             MiniLangValidate.constantPlusExpressionAttributes(simpleMethod, element, "value");
             MiniLangValidate.constantAttributes(simpleMethod, element, "type", "set-if-null", "set-if-empty");
+            MiniLangValidate.expressionAttributes(simpleMethod, element, "field");
             MiniLangValidate.noChildElements(simpleMethod, element);
         }
         boolean elementModified = autoCorrect(element);
@@ -121,6 +113,15 @@ public final class SetOperation extends MethodOperation {
         this.valueFse = FlexibleStringExpander.getInstance(element.getAttribute("value"));
         this.defaultFse = FlexibleStringExpander.getInstance(element.getAttribute("default"));
         this.type = element.getAttribute("type");
+        Class<?> targetClass = null;
+        if (!this.type.isEmpty()) {
+            try {
+                targetClass = ObjectType.loadClass(this.type);
+            } catch (ClassNotFoundException e) {
+                MiniLangValidate.handleError("Invalid type " + this.type, simpleMethod, element);
+            }
+        }
+        this.targetClass = targetClass;
         this.setIfNull = "true".equals(element.getAttribute("set-if-null")); // default to false, anything but true is false
         this.setIfEmpty = !"false".equals(element.getAttribute("set-if-empty")); // default to true, anything but false is true
         if (!this.fromFma.isEmpty() && !this.valueFse.isEmpty()) {
@@ -165,11 +166,15 @@ public final class SetOperation extends MethodOperation {
                 newValue = FastList.newInstance();
             } else {
                 try {
-                    newValue = ObjectType.simpleTypeConvert(newValue, this.type, null, methodContext.getTimeZone(), methodContext.getLocale(), true);
-                } catch (GeneralException e) {
+                    Class<?> targetClass = this.targetClass;
+                    if (targetClass == null) {
+                        targetClass = MiniLangUtil.getObjectClassForConversion(newValue);
+                    }
+                    newValue = MiniLangUtil.convertType(newValue, targetClass, methodContext.getLocale(), methodContext.getTimeZone(), null);
+                } catch (Exception e) {
                     String errMsg = "Could not convert field value for the field: [" + this.fieldFma.toString() + "] to the [" + this.type + "] type for the value [" + newValue + "]: " + e.toString();
                     Debug.logWarning(e, errMsg, module);
-                    methodContext.setErrorReturn(errMsg, simpleMethod);
+                    this.simpleMethod.addErrorMessage(methodContext, errMsg);
                     return false;
                 }
             }

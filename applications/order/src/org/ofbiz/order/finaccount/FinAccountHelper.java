@@ -114,7 +114,7 @@ public class FinAccountHelper {
                  newAccountCode.append(char_pool[r.nextInt(char_pool.length)]);
              }
 
-             List<GenericValue> existingAccountsWithCode = delegator.findByAnd("FinAccount", UtilMisc.toMap("finAccountCode", newAccountCode.toString()));
+             List<GenericValue> existingAccountsWithCode = delegator.findByAnd("FinAccount", UtilMisc.toMap("finAccountCode", newAccountCode.toString()), null, false);
              if (existingAccountsWithCode.size() == 0) {
                  foundUniqueNewCode = true;
              }
@@ -151,7 +151,7 @@ public class FinAccountHelper {
          String encryptedFinAccountCode = encryptedFinAccount.getString("finAccountCode");
 
          // now look for the account
-         List<GenericValue> accounts = delegator.findByAnd("FinAccount", UtilMisc.toMap("finAccountCode", encryptedFinAccountCode));
+         List<GenericValue> accounts = delegator.findByAnd("FinAccount", UtilMisc.toMap("finAccountCode", encryptedFinAccountCode), null, false);
          accounts = EntityUtil.filterByDate(accounts);
 
          if (UtilValidate.isEmpty(accounts)) {
@@ -249,7 +249,7 @@ public class FinAccountHelper {
     public static boolean validatePin(Delegator delegator, String finAccountId, String pinNumber) {
         GenericValue finAccount = null;
         try {
-            finAccount = delegator.findByPrimaryKey("FinAccount", UtilMisc.toMap("finAccountId", finAccountId));
+            finAccount = delegator.findOne("FinAccount", UtilMisc.toMap("finAccountId", finAccountId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
@@ -306,7 +306,7 @@ public class FinAccountHelper {
     }
 
     private static boolean checkIsNumberInDatabase(Delegator delegator, String number) throws GenericEntityException {
-        GenericValue finAccount = delegator.findByPrimaryKey("FinAccount", UtilMisc.toMap("finAccountId", number));
+        GenericValue finAccount = delegator.findOne("FinAccount", UtilMisc.toMap("finAccountId", number), false);
         return finAccount == null;
     }
 

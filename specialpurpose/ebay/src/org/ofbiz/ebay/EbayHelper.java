@@ -177,7 +177,7 @@ public class EbayHelper {
                 shipmentMethodTypeId = ebayShippingMethod.getString("shipmentMethodTypeId");
             } else {
                 //Find ebay shipping method on the basis of shipmentMethodName so that we can create new record with productStorId, EbayShippingMethod data is required for atleast one productStore
-                List<GenericValue> ebayShippingMethods = delegator.findByAnd("EbayShippingMethod", UtilMisc.toMap("shipmentMethodName", shippingService));
+                List<GenericValue> ebayShippingMethods = delegator.findByAnd("EbayShippingMethod", UtilMisc.toMap("shipmentMethodName", shippingService), null, false);
                 ebayShippingMethod = EntityUtil.getFirst(ebayShippingMethods);
                 ebayShippingMethod.put("productStoreId", productStoreId);
                 delegator.create(ebayShippingMethod);
@@ -197,7 +197,7 @@ public class EbayHelper {
         try {
             Map<String, String> paymentFields = UtilMisc.toMap("orderId", orderId, "statusId", "PAYMENT_RECEIVED",
                     "paymentMethodTypeId", "EXT_EBAY");
-            paymentPreferences = delegator.findByAnd("OrderPaymentPreference", paymentFields);
+            paymentPreferences = delegator.findByAnd("OrderPaymentPreference", paymentFields, null, false);
 
             if (UtilValidate.isNotEmpty(paymentPreferences)) {
                 Iterator<GenericValue> i = paymentPreferences.iterator();
@@ -210,7 +210,7 @@ public class EbayHelper {
             } else {
                 paymentFields = UtilMisc.toMap("orderId", orderId, "statusId", "PAYMENT_NOT_RECEIVED",
                     "paymentMethodTypeId", "EXT_EBAY");
-                paymentPreferences = delegator.findByAnd("OrderPaymentPreference", paymentFields);
+                paymentPreferences = delegator.findByAnd("OrderPaymentPreference", paymentFields, null, false);
                 if (UtilValidate.isNotEmpty(paymentPreferences)) {
                     Iterator<GenericValue> i = paymentPreferences.iterator();
                     while (i.hasNext()) {
@@ -476,7 +476,7 @@ public class EbayHelper {
             Debug.logInfo("geocode: " + geoCode, module);
 
             geo = EntityUtil.getFirst(delegator.findByAnd("Geo", UtilMisc.toMap("geoCode", geoCode.toUpperCase(),
-                    "geoTypeId", "COUNTRY")));
+                    "geoTypeId", "COUNTRY"), null, false));
             Debug.logInfo("Found a geo entity " + geo, module);
             if (UtilValidate.isEmpty(geo)) {
                 geo = delegator.makeValue("Geo");
@@ -516,7 +516,7 @@ public class EbayHelper {
             GenericValue postalAddress;
             try {
                 // get the postal address for this contact mech
-                postalAddress = delegator.findByPrimaryKey("PostalAddress", UtilMisc.toMap("contactMechId", contactMechId));
+                postalAddress = delegator.findOne("PostalAddress", UtilMisc.toMap("contactMechId", contactMechId), false);
 
                 // match values to compare by modifying them the same way they
                 // were when they were created
@@ -588,8 +588,8 @@ public class EbayHelper {
             GenericValue phoneNumber;
             try {
                 // get the phone number for this contact mech
-                phoneNumber = delegator.findByPrimaryKey("TelecomNumber", UtilMisc
-                        .toMap("contactMechId", contactMechId));
+                phoneNumber = delegator.findOne("TelecomNumber", UtilMisc
+                        .toMap("contactMechId", contactMechId), false);
 
                 // now compare values. If one matches, that's our phone number.
                 // Return the related contact mech id.
@@ -611,7 +611,7 @@ public class EbayHelper {
         String productId = "";
         try {
             // First try to get an exact match: title == internalName
-            List<GenericValue> products = delegator.findByAnd("Product", UtilMisc.toMap("internalName", title));
+            List<GenericValue> products = delegator.findByAnd("Product", UtilMisc.toMap("internalName", title), null, false);
             if (UtilValidate.isNotEmpty(products) && products.size() == 1) {
                 productId = (String) (products.get(0)).get("productId");
             }
@@ -622,7 +622,7 @@ public class EbayHelper {
                     titleFirstWord = title.substring(0, title.indexOf(' '));
                 }
                 if (UtilValidate.isNotEmpty(titleFirstWord)) {
-                    GenericValue product = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", titleFirstWord));
+                    GenericValue product = delegator.findOne("Product", UtilMisc.toMap("productId", titleFirstWord), false);
                     if (UtilValidate.isNotEmpty(product)) {
                         productId = product.getString("productId");
                     }
