@@ -39,7 +39,8 @@ under the License.
     <!--#Bam# icons-purpose -->
     <PortalPortlet portalPortletId="IconsList" portletName="List all icons usable in portlet with iconsPurpose and IconsTooltips_" 
                    description="List all icons usable in portlet with iconsPurpose and IconsTooltips_"
-       portletTypeId="Screenlet" component="example" subComponent="Example" />
+       portletTypeId="Screenlet" component="example" subComponent="Example" webapp="example"
+       uiLabelLocation="component://example/widget/CommonScreens.xml"/>
     <PortletPortletCategory portalPortletId="IconsList" portletCategoryId="EXAMPLE"/>
 
 
