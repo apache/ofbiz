@@ -16,6 +16,7 @@ import javax.jcr.ValueFormatException;
 import org.apache.jackrabbit.ocm.exception.ObjectContentManagerException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit;
 import org.ofbiz.jcr.access.jackrabbit.JackrabbitRepositoryAccessor;
@@ -55,9 +56,10 @@ public class JackrabbitArticleHelper extends JackrabbitAbstractHelper implements
 
     /**
      * Setup my content Object
+     * @throws RepositoryException
      */
-    public JackrabbitArticleHelper(GenericValue userLogin) {
-        super(new JackrabbitRepositoryAccessor(userLogin));
+    public JackrabbitArticleHelper(GenericValue userLogin, Delegator delegator) throws RepositoryException {
+        super(new JackrabbitRepositoryAccessor(userLogin, delegator));
     }
 
     /*

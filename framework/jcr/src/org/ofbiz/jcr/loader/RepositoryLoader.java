@@ -3,6 +3,7 @@ package org.ofbiz.jcr.loader;
 import java.util.Map;
 
 import javax.jcr.Repository;
+import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import javolution.util.FastMap;
@@ -71,7 +72,8 @@ public class RepositoryLoader {
             String jndiName = curElement.getAttribute("jndi-name");
             if (UtilValidate.isNotEmpty(jndiName)) {
                 try {
-                    repos.put(name, (Repository) JNDIContextFactory.getInitialContext("default").lookup(jndiName));
+                    InitialContext initialContext = JNDIContextFactory.getInitialContext("default");
+                    repos.put(name, (Repository) initialContext.lookup(jndiName));
                 } catch (NamingException e) {
                     Debug.logError(e, module);
                 } catch (GenericConfigException e) {

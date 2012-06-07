@@ -26,8 +26,9 @@ under the License.
     <classpath type="jar" location="build/lib/*"/>
     <classpath type="jar" location="lib/*"/>
 
-    <service-resource type="model" loader="main" location="servicedef/services.xml"/>
-    <test-suite loader="main" location="testdef/jcrtests.xml"/>
+    <entity-resource type="model" reader-name="main" loader="main" location="entitydef/entitymodel.xml"/>
 
+    <service-resource type="model" loader="main" location="servicedef/services.xml"/>
+    <test-suite loader="main" location="testdef/jcrtests.xml" />
 </ofbiz-component>
 

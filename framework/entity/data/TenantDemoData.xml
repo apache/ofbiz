@@ -33,4 +33,12 @@ under the License.
     <TenantDataSource tenantId="DEMO2" entityGroupName="org.ofbiz.olap" 
         jdbcUri="jdbc:derby:ofbizolap_DEMO2;create=true" jdbcUsername="ofbiz" jdbcPassword="ofbiz"/>
     <!-- See comments on entity def: <TenantUserLogin tenantId="DEMO2" userLoginId="admin" fromDate="2001-05-13 00:00:00.000" thruDate="" isManager="N"/> -->
+
+    <TenantJcrDataSource tenantId="DEMO1" jcrRepId="demo1" jcrMinRecordLength="0" jcrRepHighlighting="1"
+        jcrRepPath="runtime/data/jcr/demo1/" statusId="" createdDate="" createdByUserLogin=""
+        lastModifiedDate="" lastModifiedByUserLogin="" />
+
+    <TenantJcrDataSource tenantId="DEMO2" jcrRepId="demo2" jcrMinRecordLength="0" jcrRepHighlighting="1"
+        jcrRepPath="runtime/data/jcr/demo2/" statusId="" createdDate="" createdByUserLogin=""
+        lastModifiedDate="" lastModifiedByUserLogin="" />
 </entity-engine-xml>

@@ -29,7 +29,7 @@ public class JackrabbitServices {
         Long start = 0l;
         Long diff = 0l;
 
-        Session session = JCRFactoryUtil.getSession();
+        Session session = JCRFactoryUtil.getSession(ctx.getDelegator());
         VersionManager vm = session.getWorkspace().getVersionManager();
         start = new Date().getTime();
         for (int i = 0; i <= maxNodes; i++) {
@@ -54,7 +54,7 @@ public class JackrabbitServices {
         diff = (new Date().getTime() - start);
         result.put("repositoryDirectAccessTime", diff.toString());
 
-        JackrabbitRepositoryAccessor access = new JackrabbitRepositoryAccessor(userLogin);
+        JackrabbitRepositoryAccessor access = new JackrabbitRepositoryAccessor(userLogin, ctx.getDelegator());
         start = new Date().getTime();
         for (int i = 0; i <= maxNodes; i++) {
             try {

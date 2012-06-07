@@ -9,11 +9,11 @@ import org.apache.jackrabbit.ocm.mapper.impl.annotation.Node;
 public class JackrabbitNews extends JackrabbitLocalizedContent {
 
     @Field(id = true)
-    String title = null;
+    private String title = null;
     @Field(jcrType = "Date")
-    Calendar pubDate = null;
+    private Calendar pubDate = null;
     @Field
-    String content = null;
+    private String content = null;
 
     public JackrabbitNews() {
         super();

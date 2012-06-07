@@ -15,7 +15,7 @@
     <!-- <jcr name="myCustom" class="com.mycompany.jcr.MyCustomJCR"/> -->
 
     <!-- jcr home directory -->
-    <home-dir path="runtime/data/jcr/" />
+    <home-dir path="runtime/data/jcr/common/" />
 
     <!-- config file for thr jcr implementation -->
     <config-file-path path="framework/jcr/config/jackrabbit.xml" />

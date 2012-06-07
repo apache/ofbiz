@@ -22,11 +22,12 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.security.SecurityFactory;
 
 public class JCRFactoryUtil {
 
-    public static final String module = JCRFactoryUtil.class.getName();
+    private static final String module = JCRFactoryUtil.class.getName();
 
     private static JCRFactory jcrFactory;
     private static String jcrFactoryName;
@@ -61,15 +62,8 @@ public class JCRFactoryUtil {
         return jcrFactory;
     }
 
-    public static Session getSession() {
-        Session session = null;
-        try {
-            session = getJCRFactory().createSession();
-        } catch (RepositoryException e) {
-            Debug.logError(e, module);
-        }
-
-        return session;
+    public static Session getSession(Delegator delegator) throws RepositoryException {
+        return getJCRFactory().createSession(delegator);
     }
 
     public static void setJcrFactoryClassName(String jcrFactoryClassName) {

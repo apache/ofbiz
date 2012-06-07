@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+
+    <title>Entity of an Open For Business JCR Component</title>
+    <description>None</description>
+    <version>1.0</version>
+
+    <entity entity-name="TenantJcrDataSource" package-name="org.apache.ofbiz.jcr" title="JCR params">
+        <field name="tenantId" type="id-ne" />
+
+        <field name="jcrRepId" type="id-ne" />
+        <field name="jcrMinRecordLength" type="long-varchar" />
+        <field name="jcrRepHighlighting" type="indicator" />
+        <field name="jcrRepPath" type="long-varchar" not-null="true"/>
+
+        <field name="statusId" type="id-ne" />
+        <field name="createdDate" type="date-time" />
+        <field name="createdByUserLogin" type="id-vlong-ne" />
+        <field name="lastModifiedDate" type="date-time"></field>
+        <field name="lastModifiedByUserLogin" type="id-vlong-ne" />
+
+        <prim-key field="tenantId" />
+        <relation type="one" fk-name="TNTDTSRC_TNT" rel-entity-name="Tenant">
+            <key-map field-name="tenantId" />
+        </relation>
+    </entity>
+</entitymodel>

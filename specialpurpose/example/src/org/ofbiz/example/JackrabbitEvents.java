@@ -35,6 +35,7 @@ import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.JcrRepositoryAccessor;
 import org.ofbiz.jcr.access.jackrabbit.JackrabbitRepositoryAccessor;
@@ -61,7 +62,15 @@ public class JackrabbitEvents {
      */
     public static String addNewTextMessageToJcrRepository(HttpServletRequest request, HttpServletResponse response) {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
-        JcrDataHelper articleHelper = new JackrabbitArticleHelper(userLogin);
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
+
+        JcrDataHelper articleHelper = null;
+        try {
+            articleHelper = new JackrabbitArticleHelper(userLogin, delegator);
+        } catch (RepositoryException e) {
+            Debug.logError(e, module);
+            return "error";
+        }
 
         String contentPath = request.getParameter("path");
         String language = request.getParameter("msgLocale");
@@ -94,8 +103,10 @@ public class JackrabbitEvents {
      */
     public static String scanRepositoryStructure(HttpServletRequest request, HttpServletResponse response) {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
+
         try {
-            List<Map<String, String>> listIt = JackrabbitUtils.getRepositoryNodes(userLogin, "");
+            List<Map<String, String>> listIt = JackrabbitUtils.getRepositoryNodes(userLogin, "", delegator);
             request.setAttribute("listIt", listIt);
         } catch (RepositoryException e) {
             Debug.logError(e, module);
@@ -114,6 +125,7 @@ public class JackrabbitEvents {
      */
     public static String getNodeContent(HttpServletRequest request, HttpServletResponse response) {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
         String contentPath = request.getParameter("path");
 
@@ -127,7 +139,14 @@ public class JackrabbitEvents {
             return "error";
         }
 
-        JcrDataHelper articleHelper = new JackrabbitArticleHelper(userLogin);
+        JcrDataHelper articleHelper;
+        try {
+            articleHelper = new JackrabbitArticleHelper(userLogin, delegator);
+        } catch (RepositoryException e) {
+            Debug.logError(e, module);
+            return "error";
+        }
+
         JackrabbitArticle ormArticle = null;
         try {
             if (UtilValidate.isEmpty(version)) {
@@ -165,9 +184,16 @@ public class JackrabbitEvents {
      */
     public static String updateRepositoryData(HttpServletRequest request, HttpServletResponse response) {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
         String contentPath = request.getParameter("path");
-        JcrDataHelper articleHelper = new JackrabbitArticleHelper(userLogin);
+        JcrDataHelper articleHelper;
+        try {
+            articleHelper = new JackrabbitArticleHelper(userLogin, delegator);
+        } catch (RepositoryException e2) {
+            Debug.logError(e2, module);
+            return "error";
+        }
 
         JackrabbitArticle ormArticle = null;
         try {
@@ -208,10 +234,17 @@ public class JackrabbitEvents {
      */
     public static String removeRepositoryNode(HttpServletRequest request, HttpServletResponse response) {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
         String contentPath = request.getParameter("path");
 
-        JcrDataHelper helper = new JackrabbitArticleHelper(userLogin);
+        JcrDataHelper helper;
+        try {
+            helper = new JackrabbitArticleHelper(userLogin, delegator);
+        } catch (RepositoryException e) {
+            Debug.logError(e, module);
+            return "error";
+        }
         helper.removeContentObject(contentPath);
 
         return "success";
@@ -225,6 +258,8 @@ public class JackrabbitEvents {
      */
     public static String uploadFileData(HttpServletRequest request, HttpServletResponse response) {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
+
         ServletFileUpload fu = new ServletFileUpload(new DiskFileItemFactory(10240, FileUtil.getFile("runtime/tmp")));
         List<FileItem> list = null;
         Map<String, String> passedParams = FastMap.newInstance();
@@ -250,7 +285,13 @@ public class JackrabbitEvents {
             }
         }
 
-        JcrFileHelper fileHelper = new JackrabbitFileHelper(userLogin);
+        JcrFileHelper fileHelper;
+        try {
+            fileHelper = new JackrabbitFileHelper(userLogin, delegator);
+        } catch (RepositoryException e1) {
+            Debug.logError(e1, module);
+            return "error";
+        }
 
         try {
 
@@ -281,8 +322,16 @@ public class JackrabbitEvents {
      */
     public static String getRepositoryFileTree(HttpServletRequest request, HttpServletResponse response) {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
-        JcrRepositoryAccessor repositoryAccess = new JackrabbitRepositoryAccessor(userLogin);
+        JcrRepositoryAccessor repositoryAccess;
+        try {
+            repositoryAccess = new JackrabbitRepositoryAccessor(userLogin, delegator);
+        } catch (RepositoryException e1) {
+            Debug.logError(e1, module);
+            return "error";
+        }
+
         try {
             JSONArray fileTree = repositoryAccess.getJsonFileTree();
             request.setAttribute("fileTree", StringUtil.wrapString(fileTree.toString()));
@@ -307,8 +356,16 @@ public class JackrabbitEvents {
      */
     public static String getRepositoryDataTree(HttpServletRequest request, HttpServletResponse response) {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
-        JackrabbitRepositoryAccessor repositoryAccess = new JackrabbitRepositoryAccessor(userLogin);
+        JackrabbitRepositoryAccessor repositoryAccess = null;
+        try {
+            repositoryAccess = new JackrabbitRepositoryAccessor(userLogin, delegator);
+        } catch (RepositoryException e) {
+            Debug.logError(e, module);
+            return "error";
+        }
+
         try {
             JSONArray fileTree = repositoryAccess.getJsonDataTree();
             request.setAttribute("dataTree", StringUtil.wrapString(fileTree.toString()));
@@ -369,6 +426,7 @@ public class JackrabbitEvents {
 
     public static String getFileFromRepository(HttpServletRequest request, HttpServletResponse response) {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
         String contentPath = request.getParameter("path");
 
@@ -379,7 +437,14 @@ public class JackrabbitEvents {
             return "error";
         }
 
-        JcrFileHelper fileHelper = new JackrabbitFileHelper(userLogin);
+        JcrFileHelper fileHelper;
+        try {
+            fileHelper = new JackrabbitFileHelper(userLogin, delegator);
+        } catch (RepositoryException e2) {
+            Debug.logError(e2, module);
+            return "error";
+        }
+
         JackrabbitHierarchyNode orm = null;
         try {
             orm = fileHelper.getRepositoryContent(contentPath);
@@ -417,9 +482,18 @@ public class JackrabbitEvents {
 
     public static String getFileInformation(HttpServletRequest request, HttpServletResponse response) {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
+
         String contentPath = request.getParameter("path");
 
-        JcrFileHelper fileHelper = new JackrabbitFileHelper(userLogin);
+        JcrFileHelper fileHelper;
+        try {
+            fileHelper = new JackrabbitFileHelper(userLogin, delegator);
+        } catch (RepositoryException e1) {
+            Debug.logError(e1, contentPath);
+            return "error";
+        }
+
         OfbizRepositoryMapping orm;
         try {
             orm = fileHelper.getRepositoryContent(contentPath);
@@ -451,10 +525,17 @@ public class JackrabbitEvents {
 
     public static String queryRepositoryData(HttpServletRequest request, HttpServletResponse response) {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
         String searchQuery = request.getParameter("queryData");
 
-        JcrDataHelper helper = new JackrabbitArticleHelper(userLogin);
+        JcrDataHelper helper;
+        try {
+            helper = new JackrabbitArticleHelper(userLogin, delegator);
+        } catch (RepositoryException e1) {
+            Debug.logError(e1, module);
+            return "error";
+        }
 
         try {
             request.setAttribute("queryResult", helper.queryData(searchQuery));

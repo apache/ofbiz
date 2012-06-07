@@ -11,7 +11,7 @@ import org.ofbiz.jcr.util.jackrabbit.JackrabbitUtils;
 @Node(isAbstract = true, jcrMixinTypes = "mix:versionable")
 public abstract class JackrabbitUnstructured implements OfbizRepositoryMapping {
 
-    protected static String module = JackrabbitUnstructured.class.getName();
+    private static String module = JackrabbitUnstructured.class.getName();
 
     @Field(path = true)
     private String path;

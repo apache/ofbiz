@@ -13,13 +13,14 @@ import javolution.util.FastMap;
 
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit;
 import org.ofbiz.jcr.loader.JCRFactoryUtil;
 
 public class JackrabbitUtils {
 
-    public static final String module = JackrabbitUtils.class.getName();
+    private static final String module = JackrabbitUtils.class.getName();
 
     /**
      * A method to list all nodes in the repository. The result List contains
@@ -29,16 +30,18 @@ public class JackrabbitUtils {
      * @return
      * @throws RepositoryException
      */
-    public static List<Map<String, String>> getRepositoryNodes(GenericValue userLogin, String startNodePath) throws RepositoryException {
+    public static List<Map<String, String>> getRepositoryNodes(GenericValue userLogin, String startNodePath, Delegator delegator) throws RepositoryException {
         List<Map<String, String>> returnList = null;
-        Session session = JCRFactoryUtil.getSession();
+        Session session = JCRFactoryUtil.getSession(delegator);
 
         try {
             returnList = getRepositoryNodes(session, startNodePath);
         } catch (RepositoryException e) {
             throw new RepositoryException(e);
         } finally {
-            session.logout();
+           if (session.isLive()) {
+                session.logout();
+            }
         }
 
         return returnList;

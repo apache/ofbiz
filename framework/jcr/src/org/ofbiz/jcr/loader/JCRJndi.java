@@ -12,7 +12,7 @@ import org.ofbiz.base.util.JNDIContextFactory;
 
 public class JCRJndi {
 
-    public static final String module = JCRJndi.class.getName();
+    private static final String module = JCRJndi.class.getName();
 
     public final static String ADDR_TYPE_FOR_REPOSITORY_HOME_DIR = "REPHOME";
     public final String ADDR_TYPE_FOR_CONFIG_FILE_PATH = "CONFPATH";
@@ -37,8 +37,6 @@ public class JCRJndi {
         }
 
         bindRepository(jndiContext);
-        // Test JNDI bind
-        RepositoryLoader.getRepository();
     }
 
     public void unbindRepository() {

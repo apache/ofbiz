@@ -13,6 +13,7 @@ import org.apache.tika.Tika;
 import org.apache.tika.io.TikaInputStream;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.jackrabbit.ConstantsJackrabbit;
 import org.ofbiz.jcr.access.jackrabbit.JackrabbitRepositoryAccessor;
@@ -42,8 +43,8 @@ public class JackrabbitFileHelper extends JackrabbitAbstractHelper implements Jc
 
     private JackrabbitHierarchyNode hierarchy = null;
 
-    public JackrabbitFileHelper(GenericValue userLogin) {
-        super(new JackrabbitRepositoryAccessor(userLogin));
+    public JackrabbitFileHelper(GenericValue userLogin, Delegator delegator) throws RepositoryException {
+        super(new JackrabbitRepositoryAccessor(userLogin, delegator));
     }
 
     /*

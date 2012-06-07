@@ -34,9 +34,9 @@ import org.w3c.dom.Element;
  */
 public class JCRContainer implements Container {
 
-    public static final String module = JCRContainer.class.getName();
-
     public static final String DEFAULT_JCR_CONFIG_PATH = "framework/jcr/config/jcr-config.xml";
+
+    private static final String module = JCRContainer.class.getName();
 
     private static String configFilePath = null;
     private boolean removeRepositoryOnShutdown = false;

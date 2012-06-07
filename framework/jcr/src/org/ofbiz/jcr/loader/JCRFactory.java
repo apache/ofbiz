@@ -22,6 +22,7 @@ import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
+import org.ofbiz.entity.Delegator;
 import org.w3c.dom.Element;
 
 public interface JCRFactory {
@@ -53,13 +54,7 @@ public interface JCRFactory {
      * @return
      * @throws RepositoryException
      */
-    public Session createSession() throws RepositoryException;
+    public Session createSession(Delegator delegator) throws RepositoryException;
 
-    /**
-     * Should return an instance of the repository implementation.
-     *
-     * @return
-     */
     public Repository getInstance();
-
 }

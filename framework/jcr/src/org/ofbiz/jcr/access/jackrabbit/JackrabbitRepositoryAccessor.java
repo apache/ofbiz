@@ -13,6 +13,7 @@ import net.sf.json.JSONArray;
 import org.apache.jackrabbit.ocm.exception.ObjectContentManagerException;
 import org.apache.jackrabbit.ocm.manager.impl.ObjectContentManagerImpl;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.jcr.access.ContentReader;
 import org.ofbiz.jcr.access.ContentWriter;
@@ -34,11 +35,12 @@ public class JackrabbitRepositoryAccessor implements JcrRepositoryAccessor {
      * Create a repository Access object based on the userLogin.
      *
      * @param userLogin
+     * @throws RepositoryException
      */
-    public JackrabbitRepositoryAccessor(GenericValue userLogin) {
+    public JackrabbitRepositoryAccessor(GenericValue userLogin, Delegator delegator) throws RepositoryException {
         this.userLogin = userLogin;
         // TODO pass the userLogin to the getSession() method and perform some
-        this.session = JCRFactoryUtil.getSession();
+        this.session = JCRFactoryUtil.getSession(delegator);
         this.ocm = new ObjectContentManagerImpl(session, JCRFactoryImpl.getMapper());
     }
 
@@ -230,14 +232,5 @@ public class JackrabbitRepositoryAccessor implements JcrRepositoryAccessor {
             Debug.logError(e, module);
             return false;
         }
-    }
-
-    /**
-     * Returns the party ID which created the accessor.
-     *
-     * @return
-     */
-    private String getPartyId() {
-        return this.userLogin.getString("partyId");
     }
 }
