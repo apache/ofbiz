@@ -192,7 +192,7 @@ under the License.
         <section>
             <actions>
                 <entity-one entity-name="PortalPortlet" value-field="portalPortlet"/>
-                <property-map map-name="uiLabelMap" resource="PortalAdminUiLabels.xml"/><!--#Bam# portletExample -->
+                <property-map map-name="uiLabelMap" resource="PortalAdminUiLabels"/><!--#Bam# portletExample -->
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">

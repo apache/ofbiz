@@ -11463,7 +11463,7 @@
         <value xml:lang="en">Show Add, Update, Delete button (or icon) in screenlet bar</value>
         <value xml:lang="fr">Afficher les bouttons (ou l'icônes) de gestion (ajout, modifier, supprimer</value>
     </property>
-    <property key="FormFieldTitle_showMenu">
+    <property key="FormFieldTitle_showScreenletMenu">
         <value xml:lang="en">Display screenlet menu (Y/N)</value>
         <value xml:lang="fr">Afficher le menu de la portlet (Y/N)</value>
     </property>
@@ -13039,6 +13039,17 @@
         <value xml:lang="th">กลุ่มผู้ใช้</value>
         <value xml:lang="zh">会员</value>
         <value xml:lang="zh_TW">成員</value>
+    </property>
+    <property key="IconsTooltips_Pause">
+        <value xml:lang="de">Pause</value>
+        <value xml:lang="en">Pause</value>
+        <value xml:lang="fr">Pause</value>
+        <value xml:lang="it">Pausa</value>
+        <value xml:lang="pt">Pausar</value>
+        <value xml:lang="ro">Pausa</value>
+        <value xml:lang="th">หยุด</value>
+        <value xml:lang="zh">文件间暂停</value>
+        <value xml:lang="zh_TW">文件間暫停</value>
     </property>
     <property key="IconsTooltips_Payment"><!-- currently copy from AccountingPayment but will change to more detail -->
         <value xml:lang="ar">تسديد</value>
