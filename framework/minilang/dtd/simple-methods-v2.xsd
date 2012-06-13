@@ -57,6 +57,19 @@ under the License.
         </xs:choice>
     </xs:group>
 
+    <xs:simpleType name="booleanConst">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="true" />
+            <xs:enumeration value="false" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="booleanExpr">
+        <xs:restriction base="xs:token">
+            <xs:pattern value="\$\{[a-zA-Z_]{1}[a-zA-Z0-9_\-.]+\}|true|false" />
+        </xs:restriction>
+    </xs:simpleType>
+
     <xs:attribute name="field">
         <xs:annotation>
             <xs:documentation>
@@ -66,8 +79,7 @@ under the License.
             </xs:documentation>
         </xs:annotation>
         <xs:simpleType>
-            <xs:restriction base="xs:string">
-                <xs:whiteSpace value="collapse" />
+            <xs:restriction base="xs:token">
                 <xs:minLength value="1" />
             </xs:restriction>
         </xs:simpleType>
@@ -342,12 +354,13 @@ under the License.
                 &lt;br/&gt;&lt;br/&gt;
                 A simple method can be called in either an event context from the Control
                 Servlet (or another event) or in a service context through the Service
-                Engine, or any other component that has access to a service dispatcher.
+                Engine, or any other component that has access to a service
+                dispatcher.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
             <xs:group minOccurs="0" maxOccurs="unbounded" ref="AllOperations" />
-            <xs:attribute type="xs:string" name="method-name" use="required">
+            <xs:attribute name="method-name" use="required">
                 <xs:annotation>
                     <xs:documentation>
                         A name (preferably a legal Java identifier) for this method.
@@ -356,6 +369,11 @@ under the License.
                         Required. Attribute type: constant.
                     </xs:documentation>
                 </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:pattern value="[a-zA-Z_]{1}[a-zA-Z0-9_\-.]+" />
+                    </xs:restriction>
+                </xs:simpleType>
             </xs:attribute>
             <xs:attribute type="xs:string" name="short-description">
                 <xs:annotation>
@@ -366,7 +384,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="login-required">
+            <xs:attribute name="login-required" type="booleanConst">
                 <xs:annotation>
                     <xs:documentation>
                         Require a user login to run this method. Defaults to "true".
@@ -374,14 +392,8 @@ under the License.
                         Optional. Attribute type: constant.
                     </xs:documentation>
                 </xs:annotation>
-                <xs:simpleType>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="true" />
-                        <xs:enumeration value="false" />
-                    </xs:restriction>
-                </xs:simpleType>
             </xs:attribute>
-            <xs:attribute name="use-transaction">
+            <xs:attribute name="use-transaction" type="booleanConst">
                 <xs:annotation>
                     <xs:documentation>
                         Create a transaction if none exists for this thread. Defaults to "true".
@@ -389,12 +401,6 @@ under the License.
                         Optional. Attribute type: constant.
                     </xs:documentation>
                 </xs:annotation>
-                <xs:simpleType>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="true" />
-                        <xs:enumeration value="false" />
-                    </xs:restriction>
-                </xs:simpleType>
             </xs:attribute>
             <xs:attribute type="xs:string" name="default-error-code">
                 <xs:annotation>
@@ -678,7 +684,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="include-user-login">
+            <xs:attribute name="include-user-login" type="booleanConst">
                 <xs:annotation>
                     <xs:documentation>
                         Include the current UserLogin GenericValue in the called service IN attributes.
@@ -687,16 +693,8 @@ under the License.
                         Optional. Attribute type: constant.
                     </xs:documentation>
                 </xs:annotation>
-                <xs:simpleType>
-                    <xs:annotation>
-                    </xs:annotation>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="true" />
-                        <xs:enumeration value="false" />
-                    </xs:restriction>
-                </xs:simpleType>
             </xs:attribute>
-            <xs:attribute name="break-on-error">
+            <xs:attribute name="break-on-error" type="booleanConst">
                 <xs:annotation>
                     <xs:documentation>
                         Halt script execution if the called service returns an error.
@@ -705,12 +703,6 @@ under the License.
                         Optional. Attribute type: constant.
                     </xs:documentation>
                 </xs:annotation>
-                <xs:simpleType>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="true" />
-                        <xs:enumeration value="false" />
-                    </xs:restriction>
-                </xs:simpleType>
             </xs:attribute>
             <xs:attribute type="xs:string" name="error-code">
                 <xs:annotation>
@@ -732,7 +724,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="require-new-transaction">
+            <xs:attribute name="require-new-transaction" type="booleanConst">
                 <xs:annotation>
                     <xs:documentation>
                         Require a new transaction for the called service.
@@ -741,12 +733,6 @@ under the License.
                         Optional. Attribute type: constant.
                     </xs:documentation>
                 </xs:annotation>
-                <xs:simpleType>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="true" />
-                        <xs:enumeration value="false" />
-                    </xs:restriction>
-                </xs:simpleType>
             </xs:attribute>
             <xs:attribute type="xs:string" name="transaction-timeout">
                 <xs:annotation>
@@ -997,7 +983,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="include-user-login">
+            <xs:attribute name="include-user-login" type="booleanConst">
                 <xs:annotation>
                     <xs:documentation>
                         Include the current UserLogin GenericValue in the called service IN attributes.
@@ -1006,14 +992,6 @@ under the License.
                         Optional. Attribute type: constant.
                     </xs:documentation>
                 </xs:annotation>
-                <xs:simpleType>
-                    <xs:annotation>
-                    </xs:annotation>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="true" />
-                        <xs:enumeration value="false" />
-                    </xs:restriction>
-                </xs:simpleType>
             </xs:attribute>
         </xs:complexType>
     </xs:element>
@@ -1205,218 +1183,226 @@ under the License.
             </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:element name="create-object" substitutionGroup="CallOperations">
+    <xs:element name="create-object" substitutionGroup="EnvOperations">
         <xs:annotation>
             <xs:documentation>
-                Creates an object of the given class and if the field attribute is specified saves it in that field.
+                Creates an object of the specified class.
                 The string and field sub-elements are passed to the constructor method as arguments in the order they are specified.
                 If the sub-elements do not match the constructor method arguments an error will be returned.
+                &lt;br/&gt;&lt;br/&gt;
+                Deprecated - use the script element.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:element ref="field">
-                    <xs:annotation>
-                        <xs:documentation>
-                            Used to specify a field to be passed as an argument to the constructor method.
-                            The field can be in a map in the environment or if no map-name is specified then
-                            the field will come directly from the environment.
-                        </xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-                <xs:element ref="string">
-                    <xs:annotation>
-                        <xs:documentation>
-                            Used to specify an inline String argument to the method call.
-                        </xs:documentation>
-                    </xs:annotation>
-                </xs:element>
+                <xs:element ref="field" />
+                <xs:element ref="string" />
             </xs:choice>
-            <xs:attributeGroup ref="attlist.create-object"/>
+            <xs:attribute type="xs:token" name="class-name" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the class to construct an instance of.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: constant.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute ref="field" />
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.create-object">
-        <xs:attribute type="xs:string" name="class-name" use="required">
-            <xs:annotation>
-                <xs:documentation>
-                    The name of the class to construct an object of.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="field">
-            <xs:annotation>
-                <xs:documentation>
-                    The name of a field to put the new object in.
-                    If not specified the object will be created but ignored after that.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
     <!-- Operations to copy map fields in the current env to context specific containers -->
     <!-- Event specific operations -->
     <xs:element name="field-to-request" substitutionGroup="EventOperations">
         <xs:annotation>
             <xs:documentation>
-                The field-to-request tag copies a field from a map to the specified servlet request attribute.
-                The tag is only used when the simple-method is called as an event, it is ignored otherwise.
+                Copies a field to the specified servlet request attribute.
+                Does nothing if the specified field does not exist.
+                Valid only when the simple-method is called as an event, it is ignored otherwise.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.field-to-request"/>
+            <xs:attribute type="xs:string" name="field" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the field to copy.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="request-name">
+                <xs:annotation>
+                    <xs:documentation>
+                        The servlet request attribute name. Defaults to the value of field attribute.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.field-to-request">
-        <xs:attribute type="xs:string" name="field" use="required">
-            <xs:annotation><xs:documentation>The context name of the field to use.</xs:documentation></xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="request-name">
-            <xs:annotation><xs:documentation>The name of the request attribute to use. Defaults to the value of field attribute.</xs:documentation></xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="field-to-session" substitutionGroup="EventOperations">
         <xs:annotation>
             <xs:documentation>
-                The field-to-session tag copies a field from a map to the specified servlet session attribute.
-                The tag is only used when the simple-method is called as an event, it is ignored otherwise.
+                Copies a field to the specified servlet session attribute.
+                Does nothing if the specified field does not exist.
+                Valid only when the simple-method is called as an event, it is ignored otherwise.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.field-to-session"/>
+            <xs:attribute type="xs:string" name="field" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the field to copy.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="session-name">
+                <xs:annotation>
+                    <xs:documentation>
+                        The servlet session attribute name. Defaults to the value of field attribute.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.field-to-session">
-        <xs:attribute type="xs:string" name="field" use="required">
-            <xs:annotation><xs:documentation>The context name of the field to use.</xs:documentation></xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="session-name">
-            <xs:annotation><xs:documentation>The name of the session attribute to use. Defaults to the value of field attribute.</xs:documentation></xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="request-to-field" substitutionGroup="EventOperations">
         <xs:annotation>
             <xs:documentation>
-                The request-to-field tag copies an attribute from the servlet request to a field of a map in the method environment.
-                The tag is only used when the simple-method is called as an event, it is ignored otherwise (except the default value, if specified).
+                Copies a servlet request attribute to a field.
+                Valid only when the simple-method is called as an event, it is ignored otherwise.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.request-to-field"/>
+            <xs:attribute ref="field" />
+            <xs:attribute type="xs:string" name="request-name">
+                <xs:annotation>
+                    <xs:documentation>
+                        The servlet request attribute name. Defaults to the value of field attribute.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="default">
+                <xs:annotation>
+                    <xs:documentation>
+                        A default value to use if the request attribute does not exist.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.request-to-field">
-        <xs:attribute type="xs:string" name="field" use="required">
-            <xs:annotation><xs:documentation>The context name of the field to use.</xs:documentation></xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="default">
-            <xs:annotation>
-                <xs:documentation>
-                    A default value to use if the request attribute is null or is a String and is empty.
-                    This will also be used when NOT running as an event.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="request-name">
-            <xs:annotation><xs:documentation>The name of the request attribute to use. Defaults to the value of the field attribute.</xs:documentation></xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="request-parameters-to-list" substitutionGroup="EventOperations">
         <xs:annotation>
             <xs:documentation>
-                The request-parameters-to-list tag appends a request parameter values from the servlet request to the specified list.
-                The tag is only used when the simple-method is called as an event, it is ignored otherwise.
+                Appends a servlet request parameter list to a list. If the target list does not exist, one will be created.
+                Valid only when the simple-method is called as an event, it is ignored otherwise.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.request-parameters-to-list"/>
+            <xs:attribute type="xs:string" name="request-name" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The servlet request parameter name.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="list">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the field containing the list. Defaults to the request-name attribute value.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="list-name">
+                <xs:annotation>
+                    <xs:documentation>
+                        Deprecated - use the list attribute.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.request-parameters-to-list">
-        <xs:attribute type="xs:string" name="request-name" use="required">
-            <xs:annotation>
-                <xs:documentation>
-                    The name of the request parameter values to use.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="list-name">
-            <xs:annotation>
-                <xs:documentation>
-                    The name of the list in the method environment that the request parameter values will be appended to.
-                    (default: request-name)
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="session-to-field" substitutionGroup="EventOperations">
         <xs:annotation>
             <xs:documentation>
-                The session-to-field tag copies an attribute from the servlet session to a field of a map in the method environment.
-                The tag is only used when the simple-method is called as an event, it is ignored otherwise (except the default value, if specified).
+                Copies a servlet request attribute to a field.
+                Valid only when the simple-method is called as an event, it is ignored otherwise.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.session-to-field"/>
+            <xs:attribute ref="field" />
+            <xs:attribute type="xs:string" name="session-name">
+                <xs:annotation>
+                    <xs:documentation>
+                        The servlet session attribute name. Defaults to the value of field attribute.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="default">
+                <xs:annotation>
+                    <xs:documentation>
+                        A default value to use if the request attribute does not exist.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.session-to-field">
-        <xs:attribute type="xs:string" name="field" use="required">
-            <xs:annotation><xs:documentation>The name (key) of the map field to use.</xs:documentation></xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="default">
-            <xs:annotation>
-                <xs:documentation>
-                    A default value to use if the session attribute is null or is a String and is empty.
-                    This will also be used when NOT running as an event.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="session-name">
-            <xs:annotation>
-                <xs:documentation>
-                    The name of the session attribute to use. Defaults to the value of field attribute.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="webapp-property-to-field" substitutionGroup="EventOperations">
         <xs:annotation>
             <xs:documentation>
                 The webapp-property-to-field tag copies a property value from a properties file in a ServletContext resource to a field.
-                The tag is only used when the simple-method is called as an event, it is ignored otherwise (except the default value, if specified).
+                Valid only when the simple-method is called as an event, it is ignored otherwise.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.webapp-property-to-field"/>
+            <xs:attribute ref="field" />
+            <xs:attribute type="xs:string" name="resource" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The resource location of the properties file inside the webapp,
+                        and relative to the root of the webapp (can be inside a war file).
+                        An example of this is "/WEB-INF/myprops.properties".
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="property" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The property whose value will be put in the field.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="default">
+                <xs:annotation>
+                    <xs:documentation>
+                        A default value to use if the property value is null or empty.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.webapp-property-to-field">
-        <xs:attribute type="xs:string" name="resource" use="required">
-            <xs:annotation>
-                <xs:documentation>
-                    The resource location of the properties file inside the webapp,
-                    and relative to the root of the webapp (can be inside a war file).
-                    An example of this is "/WEB-INF/myprops.properties".
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="property" use="required">
-            <xs:annotation><xs:documentation>The property whose value will be put in the field.</xs:documentation></xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="default">
-            <xs:annotation>
-                <xs:documentation>
-                    A default value to use if the property value is null or empty.
-                    This will also be used when NOT running as an event.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="field" use="required">
-            <xs:annotation><xs:documentation>The name (key) of the field to use.</xs:documentation></xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="session-name">
-            <xs:annotation><xs:documentation>The name of the session attribute to use. Defaults to the value of field attribute</xs:documentation></xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="field-to-result" substitutionGroup="EnvOperations">
         <xs:annotation>
             <xs:documentation>
@@ -1458,63 +1444,112 @@ under the License.
     <xs:element name="map-to-map" substitutionGroup="EnvOperations">
         <xs:annotation>
             <xs:documentation>
-                The map-to-map tag copies all fields from one map to another map.
+                Copies a map to another map. Does nothing if the source map does not exist.
+                If a target map is not specified, the source map is copied to the current
+                environment (memory space).
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.map-to-map"/>
+            <xs:attribute type="xs:string" name="map" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the map to copy from.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="to-map">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the map to copy to. If the target map does not exist, one will be created.
+                        If this attribute is empty, the source map will be copied to the current environment.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.map-to-map">
-        <xs:attribute type="xs:string" name="map" use="required">
-            <xs:annotation><xs:documentation>The name of the map in the method environment the fields will come from.</xs:documentation></xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="to-map">
-            <xs:annotation>
-                <xs:documentation>
-                    The name of the map in the method environment the fields will go to.
-                    If empty the fields will be copied to the environment.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="field-to-list" substitutionGroup="EnvOperations">
-        <xs:annotation><xs:documentation>The field-to-list tag appends a field to the specified list.</xs:documentation></xs:annotation>
-        <xs:complexType><xs:attributeGroup ref="attlist.field-to-list"/></xs:complexType>
-    </xs:element>
-    <xs:attributeGroup name="attlist.field-to-list">
-        <xs:attribute type="xs:string" name="field" use="required">
-            <xs:annotation><xs:documentation>The name (key) of the map field to use.</xs:documentation></xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="list" use="required">
-            <xs:annotation><xs:documentation>The name of the list in the method environment that the object will be appended to.</xs:documentation></xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
-    <xs:element name="list-to-list" substitutionGroup="EnvOperations">
-        <xs:annotation><xs:documentation>Copy a list to another list.</xs:documentation></xs:annotation>
-        <xs:complexType><xs:attributeGroup ref="attlist.list-to-list"/></xs:complexType>
-    </xs:element>
-    <xs:attributeGroup name="attlist.list-to-list">
-        <xs:attribute type="xs:string" name="list" use="required">
-            <xs:annotation><xs:documentation>Name of the list to copy from</xs:documentation></xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="to-list" use="required">
-            <xs:annotation><xs:documentation>Name of the list to copy to.</xs:documentation></xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
-    <xs:element name="order-map-list" substitutionGroup="EnvOperations">
-        <xs:annotation><xs:documentation>Sort a List containing Maps: order by fields names given in order-by sub-element.</xs:documentation>
+        <xs:annotation>
+            <xs:documentation>
+                Appends an object to the specified list. Does nothing if the specified object does not exist.
+                &lt;br/&gt;&lt;br/&gt;
+                Deprecated - use the set element.
+            </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:sequence><xs:element maxOccurs="unbounded" ref="order-by"/></xs:sequence>
-            <xs:attributeGroup ref="attlist.order-map-list"/>
+            <xs:attribute type="xs:token" name="field" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The field name of the object to append.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:token" name="list" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The field name of the list that the object will be appended to.
+                        If the list does not exist, one will be created.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.order-map-list">
-        <xs:attribute type="xs:string" name="list" use="required">
-            <xs:annotation><xs:documentation>Name of the list to be sorted.</xs:documentation></xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
+    <xs:element name="list-to-list" substitutionGroup="EnvOperations">
+        <xs:annotation>
+            <xs:documentation>
+                Copy a list to another list. Does nothing if the source list does not exist.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attribute type="xs:string" name="list" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        Name of the list to copy from.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="to-list" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        Name of the list to copy to. If the list does not exist, one will be created.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="order-map-list" substitutionGroup="EnvOperations">
+        <xs:annotation>
+            <xs:documentation>
+                Sorts a list of maps. Maps are sorted by the keys specified in the order-by sub-elements.
+                Does nothing if the list is not found.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="order-by" />
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="list" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        Name of the field containing the list to be sorted.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
     <xs:element name="set" substitutionGroup="EnvOperations">
         <xs:annotation>
             <xs:documentation>
@@ -1522,250 +1557,238 @@ under the License.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.set"/>
+            <xs:attribute ref="field" use="required" />
+            <xs:attribute type="xs:string" name="from-field">
+                <xs:annotation>
+                    <xs:documentation>
+                        Deprecated - use the from attribute.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="from">
+                <xs:annotation>
+                    <xs:documentation>
+                        An expression or script that returns an object or null. The source of the assignment.
+                        &lt;br/&gt;&lt;br/&gt;
+                        A script must be prefixed with the script language followed by a colon (":").
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required if the value attribute is empty. Attribute types: expression, script.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="value">
+                <xs:annotation>
+                    <xs:documentation>
+                        A constant value, or a constant that includes an expression. The source of the assignment.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required if the from attribute is empty. Attribute type: constant+expr.
+                        Defaults to java.lang.String data type.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="default-value">
+                <xs:annotation>
+                    <xs:documentation>
+                        Deprecated - use the default attribute.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="default">
+                <xs:annotation>
+                    <xs:documentation>
+                        A default value that is used when the from attribute evaluates to null or empty.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:token" name="type">
+                <xs:annotation>
+                    <xs:documentation>
+                        The Java data type to convert to. "NewList" will create a new java.util.List, "NewMap" will create a new java.util.Map.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute type: constant. Attribute must contain a valid Java class name.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="format">
+                <xs:annotation>
+                    <xs:documentation>
+                        Format to be used for object type conversion. Used when the type attribute is not empty.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="set-if-null" type="booleanConst">
+                <xs:annotation>
+                    <xs:documentation>
+                        Controls if the target field can be set to null when the from attribute evaluates to null.
+                        Defaults to "false".
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute type: constant.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="set-if-empty" type="booleanConst">
+                <xs:annotation>
+                    <xs:documentation>
+                        Controls if the target field can be set to an empty value. The meaning of "empty" depends on the Java data type.
+                        Defaults to "true".
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute type: constant.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.set">
-        <xs:attribute ref="field" use="required" />
-        <xs:attribute type="xs:string" name="from-field">
-            <xs:annotation>
-                <xs:documentation>
-                    Deprecated - use &quot;from&quot;.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="from">
-            <xs:annotation>
-                <xs:documentation>
-                    An expression or script that returns an object or null. The source of the assignment.
-                    &lt;br/&gt;&lt;br/&gt;
-                    A script must be prefixed with the script language followed by a colon (&quot;:&quot;).
-                    &lt;br/&gt;&lt;br/&gt;
-                    Required if the value attribute is empty. Attribute types: expression, script.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="value">
-            <xs:annotation>
-                <xs:documentation>
-                    A constant value, or a constant that includes an expression. The source of the assignment.
-                    &lt;br/&gt;&lt;br/&gt;
-                    Required if the from-field attribute is empty. Attribute type: constant+expr.
-                    Defaults to java.lang.String data type.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="default-value">
-            <xs:annotation>
-                <xs:documentation>
-                    Deprecated - use &quot;default&quot;.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="default">
-            <xs:annotation>
-                <xs:documentation>
-                    A default value that is used if the from-field attribute evaluates to null or empty.
-                    &lt;br/&gt;&lt;br/&gt;
-                    Optional. Attribute types: constant+expr, expression. Expressions must be enclosed in ${}.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="type">
-            <xs:annotation>
-                <xs:documentation>
-                    The Java data type to convert to. &quot;NewList&quot; will create a new java.util.List, &quot;NewMap&quot; will create a new java.util.Map.
-                    &lt;br/&gt;&lt;br/&gt;
-                    Optional. Attribute type: constant. Attribute must contain a valid Java class name.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="set-if-null">
-            <xs:annotation>
-                <xs:documentation>
-                    Controls if the target field can be set to null when the from-field attribute evaluates to null.
-                    &lt;br/&gt;&lt;br/&gt;
-                    Optional. Attribute type: constant. Defaults to &quot;false&quot;.
-                </xs:documentation>
-            </xs:annotation>
-            <xs:simpleType>
-                <xs:restriction base="xs:token">
-                    <xs:enumeration value="true"/>
-                    <xs:enumeration value="false"/>
-                </xs:restriction>
-            </xs:simpleType>
-        </xs:attribute>
-        <xs:attribute name="set-if-empty">
-            <xs:annotation>
-                <xs:documentation>
-                    Controls if the target field can be set to an empty value. The meaning of &quot;empty&quot; depends on the Java data type.
-                    &lt;br/&gt;&lt;br/&gt;
-                    Optional. Attribute type: constant. Defaults to &quot;true&quot;.
-                </xs:documentation>
-            </xs:annotation>
-            <xs:simpleType>
-                <xs:restriction base="xs:token">
-                    <xs:enumeration value="true"/>
-                    <xs:enumeration value="false"/>
-                </xs:restriction>
-            </xs:simpleType>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="string-append" substitutionGroup="EnvOperations">
         <xs:annotation>
             <xs:documentation>
-                NOTE: the prefix and suffix will only be used IFF the current string and the string to be appended are both not empty.
-
-                So if the field does not exist then it will create a new field with this string value.
-                If it does exist then it will append this string value to the end.
+                Performs string concatenation and formatting. The operation starts by applying
+                an argument list (if found) to the string attribute value, the result is
+                prepended by the prefix attribute value, and the suffix attribute value is
+                appended to the result. If the string specified in the field attribute exists,
+                the final result is appended to it, else the field is set to the final result.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.string-append"/>
+            <xs:attribute type="xs:string" name="field" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The target of the string concatention.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="string" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The string to append to the field named in the field attribute.
+                        This can be a formatting string that is used with the argument list
+                        specified in the arg-list attribute.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="arg-list">
+                <xs:annotation>
+                    <xs:documentation>
+                        An argument list to be used with a formatting string.
+                        The argument list is applied to the string attribute value.
+                        Does nothing if the argument list is not found.
+                        See the java.text.MessageFormat class for more information.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="prefix">
+                <xs:annotation>
+                    <xs:documentation>
+                        A string that will be prepended to the string attribute value.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="suffix">
+                <xs:annotation>
+                    <xs:documentation>
+                        A string that will be appended to the string attribute value.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.string-append">
-        <xs:attribute type="xs:string" name="field" use="required">
-            <xs:annotation>
-                <xs:documentation>
-                    The field that you want string-append to operate on.
-                    This is the target field where the value will be put, and this is the string to append to that field.
-
-                    So if the field does not exist then it will create a new field with this string value.
-                    If it does exist then it will append this string value to the end.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="string" use="required">
-            <xs:annotation>
-                <xs:documentation>
-                    The string to append to the field named in field-name.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="arg-list">
-            <xs:annotation>
-                <xs:documentation>
-                    arg-list-name is used to insert values from a list into
-                    the string using the object in the standard Java library
-                    that does this sort of string expression with a { } brackets
-                    and a number, no dollar sign.
-
-                    This pattern of the arg-list-name with the prefix and
-                    suffix is something form the early days which is still
-                    supported, but the best thing to do here is just use the
-                    flexible string expander which is far more flexible and
-                    powerful. So you can have the prefix variables to expand
-                    and everything all mixed into one string.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="prefix">
-            <xs:annotation>
-                <xs:documentation>
-                    Used in conjunction with arg-list-name.
-                    String that will be prepended to the string,
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="suffix">
-            <xs:annotation>
-                <xs:documentation>
-                    Used in conjunction with arg-list-name.
-                    String that will be appended to the string,
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="string-to-list" substitutionGroup="EnvOperations">
         <xs:annotation>
             <xs:documentation>
-                Take a string literally that can also have a flexible string expander and such in it,
-                and it will add it to a list.
-
-                Note that you can have an arg-listname for using the standard
-                Java style argument list where you have in the source
-                string numbers inside of { } brackets that represent the
-                number the index in the argument list to insert at that point.
+                Adds a string to a list of strings. Deprecated - use the set element.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.string-to-list"/>
+            <xs:attribute type="xs:string" name="string" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The string to add to the list specified in the list attribute.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="list" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        List to add the string to. If the list does not exist, one will be created.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="arg-list">
+                <xs:annotation>
+                    <xs:documentation>
+                        An argument list to be used with a formatting string.
+                        The argument list is applied to the string attribute value.
+                        Does nothing if the argument list is not found.
+                        See the java.text.MessageFormat class for more information.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="message-field">
+                <xs:annotation>
+                    <xs:documentation>
+                        To insert a message above a field (used in conjunction with @fieldErrors FTL macro)
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute type: constant.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.string-to-list">
-        <xs:attribute type="xs:string" name="string" use="required">
-            <xs:annotation>
-                <xs:documentation>
-                    String to add to the list named in list-name.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="list" use="required">
-            <xs:annotation>
-                <xs:documentation>
-                    List to add string to.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="arg-list">
-            <xs:annotation>
-                <xs:documentation>
-                    arg-list-name is used to insert values from a list into
-                    the string using the object in the standard Java library
-                    that does this sort of string expresison with a { } brackets
-                    and a number, no dollar sign.
-
-                    This pattern of the arg-list-name with the prefix and
-                    suffix is something form the early days which is still
-                    supported, but the best thing to do here is just use the
-                    flexible string expander which is far more flexible and
-                    powerful. So you can have the prefix variables to expand
-                    and everything all mixed into one string.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="message-field">
-            <xs:annotation>
-                <xs:documentation>
-                    To insert a message above a field (used in conjunction with @fieldErrors FTL macro)
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="to-string" substitutionGroup="EnvOperations">
         <xs:annotation>
             <xs:documentation>
-                The to-string tag converts the Object in the specified field to a String, putting the string in the same field.
+                Converts an object to a string. Deprecated - use the set element.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.to-string"/>
+            <xs:attribute type="xs:string" name="field" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the field containing the object to convert.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="format">
+                <xs:annotation>
+                    <xs:documentation>
+                        Format to use for the conversion.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute type: constant.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="numeric-padding">
+                <xs:annotation>
+                    <xs:documentation>
+                        Left-pad the string with the specified number of zeroes.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute type: constant.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.to-string">
-        <xs:attribute type="xs:string" name="field" use="required">
-            <xs:annotation>
-                <xs:documentation>
-                    The name (key) of the map field to use.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="format">
-            <xs:annotation>
-                <xs:documentation>
-                    Format based on the type of the object (date,number, etc.).
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="numeric-padding">
-            <xs:annotation>
-                <xs:documentation>
-                    Padding to use if a numeric object is used.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="clear-field" substitutionGroup="EnvOperations">
         <xs:annotation>
             <xs:documentation>
@@ -1773,114 +1796,90 @@ under the License.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.clear-field"/>
+            <xs:attribute ref="field" />
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.clear-field">
-        <xs:attribute type="xs:string" name="field" use="required">
-            <xs:annotation>
-                <xs:documentation>
-                    The name (key) of the map field to use.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="first-from-list" substitutionGroup="EnvOperations">
         <xs:annotation>
             <xs:documentation>
-                The first-from-list tag will get the first entry from the given list and put it in the environment field with the given entry-name.
+                Assigns the first (lowest order) entry in the specified list to a field.
+                If the list does not exist or is empty, assigns null to a field.
+                &lt;br/&gt;&lt;br/&gt;
+                Deprecated - use the set element.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.first-from-list"/>
+            <xs:attribute type="xs:token" name="entry" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the field to set. The target of the assignment.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="list" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The field name of the list that contains the object.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.first-from-list">
-        <xs:attribute type="xs:string" name="entry" use="required">
-            <xs:annotation>
-                <xs:documentation>
-                    The name of the method environment field that will contain the first entry in the list.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="list" use="required">
-            <xs:annotation>
-                <xs:documentation>
-                    The name of the method environment field that contains the list to get the first entry from.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
     <!--
         These operations are used to interact with a data source through the entity
         engine and facilitate related operations.
     -->
+    <xs:attribute type="xs:string" name="began-transaction-name">
+        <xs:annotation>
+            <xs:documentation>
+                The name of the field that contains a Boolean value specifying whether or not a transaction was begun in the current transaction demarcation.
+                Defaults to "beganTransaction".
+                &lt;br/&gt;&lt;br/&gt;
+                Optional. Attribute type: expression.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:attribute>
     <xs:element name="transaction-begin" substitutionGroup="EntityTxOperations">
         <xs:annotation>
             <xs:documentation>
-                The transaction-begin tag will begin a transaction if one is not already in place.
-                If a transaction is begun the environment field named as the began-transaction-name will be set to true, otherwise it will be set to false.
-
-                Note that unless the simple-method is flagged to not use a transaction all simple-methods will be inside a transaction.
-                The same is true for service calls through the Service Engine.
+                Begins a transaction if one is not already in place.
+                &lt;br/&gt;&lt;br/&gt;
+                Note that all simple-methods are executed inside a transaction unless
+                the simple-method is flagged to not use a transaction.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.transaction-begin"/>
+            <xs:attribute ref="began-transaction-name" />
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.transaction-begin">
-        <xs:attribute type="xs:string" name="began-transaction-name" default="beganTransaction">
-            <xs:annotation>
-                <xs:documentation>
-                    The name of the method environment field that contains a Boolean specifying whether or not a transaction was begun in the current transaction demarcation.
-                    Defaults to "beganTransaction".
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="transaction-commit" substitutionGroup="EntityTxOperations">
         <xs:annotation>
             <xs:documentation>
-                The transaction-commit tag will commit a transaction if a transaction was begun in the current demarcation context as represented by the environment field named as the began-transaction-name.
-                If the Boolean in that field is false no commit will be done.
+                Commits a transaction that was begun with the transaction-begin element.
+                Does nothing if no transaction was begun.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.transaction-commit"/>
+            <xs:attribute ref="began-transaction-name" />
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.transaction-commit">
-        <xs:attribute type="xs:string" name="began-transaction-name" default="beganTransaction">
-            <xs:annotation>
-                <xs:documentation>
-                    The name of the method environment field that contains a Boolean specifying whether or not a transaction was begun in the current transaction demarcation.
-                    Defaults to "beganTransaction".
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="transaction-rollback" substitutionGroup="EntityTxOperations">
         <xs:annotation>
             <xs:documentation>
-                The transaction-rollback tag will rollback a transaction if a transaction was begun in the current demarcation context as represented by the environment field named as the began-transaction-name.
-                If the Boolean in that field is false a set rollback only will operation will be done instead of rollback which will force the transaction to rollback regardless of which method or object is responsible for beginning and ending the transaction.
+                Rolls back a transaction that was begun with the transaction-begin element.
+                If no transaction was begun with the transaction-begin element, a "set rollback only"
+                operation will be performed - which will force the transaction to rollback regardless
+                of which method or object is responsible for beginning and ending the transaction.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.transaction-rollback"/>
+            <xs:attribute ref="began-transaction-name" />
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.transaction-rollback">
-        <xs:attribute type="xs:string" name="began-transaction-name" default="beganTransaction">
-            <xs:annotation>
-                <xs:documentation>
-                    The name of the method environment field that contains a Boolean specifying whether or not a transaction was begun in the current transaction demarcation.
-                    Defaults to "beganTransaction".
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="sequenced-id" substitutionGroup="EntityMiscOperations">
         <xs:annotation>
             <xs:documentation>
@@ -1910,7 +1909,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="get-long-only">
+            <xs:attribute name="get-long-only" type="booleanConst">
                 <xs:annotation>
                     <xs:documentation>
                         Preserve the sequence type - a numeric long. If set to "false" the sequence
@@ -1919,12 +1918,6 @@ under the License.
                         Optional. Attribute type: constant.
                     </xs:documentation>
                 </xs:annotation>
-                <xs:simpleType>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="false" />
-                        <xs:enumeration value="true" />
-                    </xs:restriction>
-                </xs:simpleType>
             </xs:attribute>
         </xs:complexType>
     </xs:element>
@@ -2161,7 +2154,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="use-iterator">
+            <xs:attribute name="use-iterator" type="booleanExpr">
                 <xs:annotation>
                     <xs:documentation>
                         Specifies whether or not to use the EntityListIterator when doing the query.
@@ -2173,12 +2166,6 @@ under the License.
                         Optional. Attribute type: constant, ${expression}.
                     </xs:documentation>
                 </xs:annotation>
-                <xs:simpleType>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="false" />
-                        <xs:enumeration value="true" />
-                    </xs:restriction>
-                </xs:simpleType>
             </xs:attribute>
             <xs:attribute type="xs:string" name="delegator-name">
                 <xs:annotation>
@@ -2246,7 +2233,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="auto-field-map">
+            <xs:attribute name="auto-field-map" type="booleanExpr">
                 <xs:annotation>
                     <xs:documentation>
                         When "true", the operation looks for all primary key field names in the current context as well as in the parameters map.
@@ -2255,12 +2242,6 @@ under the License.
                         Optional. Attribute type: constant, ${expression}.
                     </xs:documentation>
                 </xs:annotation>
-                <xs:simpleType>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="true" />
-                        <xs:enumeration value="false" />
-                    </xs:restriction>
-                </xs:simpleType>
             </xs:attribute>
         </xs:complexType>
     </xs:element>
@@ -3051,7 +3032,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="do-cache-clear">
+            <xs:attribute name="do-cache-clear" type="booleanConst">
                 <xs:annotation>
                     <xs:documentation>
                         Clear the cache. Defaults to "true".
@@ -3059,14 +3040,8 @@ under the License.
                         Optional. Attribute type: constant.
                     </xs:documentation>
                 </xs:annotation>
-                <xs:simpleType>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="true" />
-                        <xs:enumeration value="false" />
-                    </xs:restriction>
-                </xs:simpleType>
             </xs:attribute>
-            <xs:attribute name="or-store">
+            <xs:attribute name="or-store" type="booleanConst">
                 <xs:annotation>
                     <xs:documentation>
                         Store value if it already exists. Defaults to "false".
@@ -3074,48 +3049,37 @@ under the License.
                         Optional. Attribute type: constant.
                     </xs:documentation>
                 </xs:annotation>
-                <xs:simpleType>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="true" />
-                        <xs:enumeration value="false" />
-                    </xs:restriction>
-                </xs:simpleType>
             </xs:attribute>
         </xs:complexType>
     </xs:element>
     <xs:element name="store-value" substitutionGroup="EntityValueOperations">
         <xs:annotation>
             <xs:documentation>
-                The store-value tag persists the specified GenericValue object by updating the instance of the entity in the datasource.
-                An error will result if an instance of the entity does not exist in the datasource with the same primary key.
+                Stores an entity value in the database. An error will be generated
+                if the entity value does not exist in the database.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.store-value"/>
+            <xs:attribute name="value-field" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the field containing the entity value.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="do-cache-clear" type="booleanExpr">
+                <xs:annotation>
+                    <xs:documentation>
+                        Clear the cache. Defaults to "true".
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute type: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.store-value">
-        <xs:attribute type="xs:string" name="value-field" use="required">
-            <xs:annotation>
-                <xs:documentation>
-                    The name of the method environment field that contains the GenericValue object.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="do-cache-clear" default="true">
-            <xs:annotation>
-                <xs:documentation>
-                    Clear the cache, defaults to true
-                </xs:documentation>
-            </xs:annotation>
-            <xs:simpleType>
-                <xs:restriction base="xs:token">
-                    <xs:enumeration value="true"/>
-                    <xs:enumeration value="false"/>
-                </xs:restriction>
-            </xs:simpleType>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="refresh-value" substitutionGroup="EntityValueOperations">
         <xs:annotation>
             <xs:documentation>
@@ -3132,7 +3096,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="do-cache-clear">
+            <xs:attribute name="do-cache-clear" type="booleanExpr">
                 <xs:annotation>
                     <xs:documentation>
                         Clear the cache. Defaults to "true".
@@ -3140,12 +3104,6 @@ under the License.
                         Optional. Attribute type: constant, ${expression}.
                     </xs:documentation>
                 </xs:annotation>
-                <xs:simpleType>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="true" />
-                        <xs:enumeration value="false" />
-                    </xs:restriction>
-                </xs:simpleType>
             </xs:attribute>
         </xs:complexType>
     </xs:element>
@@ -3165,7 +3123,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="do-cache-clear">
+            <xs:attribute name="do-cache-clear" type="booleanExpr">
                 <xs:annotation>
                     <xs:documentation>
                         Clear the cache. Defaults to "true".
@@ -3173,12 +3131,6 @@ under the License.
                         Optional. Attribute type: constant, ${expression}.
                     </xs:documentation>
                 </xs:annotation>
-                <xs:simpleType>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="true" />
-                        <xs:enumeration value="false" />
-                    </xs:restriction>
-                </xs:simpleType>
             </xs:attribute>
         </xs:complexType>
     </xs:element>
@@ -3209,7 +3161,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="do-cache-clear">
+            <xs:attribute name="do-cache-clear" type="booleanExpr">
                 <xs:annotation>
                     <xs:documentation>
                         Clear the cache. Defaults to "true".
@@ -3217,12 +3169,6 @@ under the License.
                         Optional. Attribute type: constant, ${expression}.
                     </xs:documentation>
                 </xs:annotation>
-                <xs:simpleType>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="true" />
-                        <xs:enumeration value="false" />
-                    </xs:restriction>
-                </xs:simpleType>
             </xs:attribute>
         </xs:complexType>
     </xs:element>
@@ -3254,7 +3200,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="do-cache-clear">
+            <xs:attribute name="do-cache-clear" type="booleanExpr">
                 <xs:annotation>
                     <xs:documentation>
                         Clear the cache. Defaults to "true".
@@ -3262,12 +3208,6 @@ under the License.
                         Optional. Attribute type: constant, ${expression}.
                     </xs:documentation>
                 </xs:annotation>
-                <xs:simpleType>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="true" />
-                        <xs:enumeration value="false" />
-                    </xs:restriction>
-                </xs:simpleType>
             </xs:attribute>
         </xs:complexType>
     </xs:element>
@@ -3314,116 +3254,106 @@ under the License.
     <xs:element name="set-pk-fields" substitutionGroup="EntityValueOperations">
         <xs:annotation>
             <xs:documentation>
-                Looks for each PK field in the named map and if it exists there it will copy it into the named value object.
+                Copies PK fields from a map to an entity value.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.set-pk-fields"/>
+            <xs:attribute type="xs:string" name="value-field" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the field that contains the entity value.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="map" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the field that contains a map that is used to initialize the entity value pk fields.
+                        Map values whose key matches one of the entity value fields will be copied to the entity value.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="set-if-null" type="booleanExpr">
+                <xs:annotation>
+                    <xs:documentation>
+                        Set entity value fields that are null or empty.
+                        Defaults to "true".
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute type: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.set-pk-fields">
-        <xs:attribute type="xs:string" name="value-field" use="required">
-            <xs:annotation>
-                <xs:documentation>
-                    The name of the method environment field that contains the GenericValue object.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="map">
-            <xs:annotation>
-                <xs:documentation>
-                    The name of a map in the method environment that will be used for the entity fields.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="set-if-null" default="true">
-            <xs:annotation>
-                <xs:documentation>
-                    Specifies whether or not to set fields that are null or empty.
-                    Defaults to true.
-                </xs:documentation>
-            </xs:annotation>
-            <xs:simpleType>
-                <xs:restriction base="xs:token">
-                    <xs:enumeration value="true"/>
-                    <xs:enumeration value="false"/>
-                </xs:restriction>
-            </xs:simpleType>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="set-nonpk-fields" substitutionGroup="EntityValueOperations">
         <xs:annotation>
             <xs:documentation>
-                Looks for each non-PK field in the named map and if it exists there it will copy it into the named value object.
+                Copies non-PK fields from a map to an entity value.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.set-nonpk-fields"/>
+            <xs:attribute type="xs:string" name="value-field" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the field that contains the entity value.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="map" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the field that contains a map that is used to initialize the entity value non-pk fields.
+                        Map values whose key matches one of the entity value fields will be copied to the entity value.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="set-if-null" type="booleanExpr">
+                <xs:annotation>
+                    <xs:documentation>
+                        Set entity value fields that are null or empty.
+                        Defaults to "true".
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute type: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.set-nonpk-fields">
-        <xs:attribute type="xs:string" name="value-field" use="required">
-            <xs:annotation>
-                <xs:documentation>
-                    The name of the method environment field that contains the GenericValue object.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="map">
-            <xs:annotation>
-                <xs:documentation>
-                    The name of a map in the method environment that will be used for the entity fields.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="set-if-null" default="true">
-            <xs:annotation>
-                <xs:documentation>
-                    Specifies whether or not to set fields that are null or empty.
-                    Defaults to true.
-                </xs:documentation>
-            </xs:annotation>
-            <xs:simpleType>
-                <xs:restriction base="xs:token">
-                    <xs:enumeration value="true"/>
-                    <xs:enumeration value="false"/>
-                </xs:restriction>
-            </xs:simpleType>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="store-list" substitutionGroup="EntityListOperations">
         <xs:annotation>
             <xs:documentation>
-                The store-list tag uses the delegator to store all entity values in the list.
-                This is different than storing a single value in that values in the list will be inserted if it does not exist or updated if it does exist.
+                Store all entity values in a list. Entity values that do not exist in the database will be added to the database.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.store-list"/>
+            <xs:attribute type="xs:string" name="list" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the field that contains the list of entity values.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="do-cache-clear" type="booleanExpr">
+                <xs:annotation>
+                    <xs:documentation>
+                        Clear the cache. Defaults to "true".
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute type: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.store-list">
-        <xs:attribute type="xs:string" name="list" use="required">
-            <xs:annotation>
-                <xs:documentation>
-                    The name of the method environment field that contains the list of GenericValue objects.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="do-cache-clear" default="true">
-            <xs:annotation>
-                <xs:documentation>
-                    Clear the cache, defaults to true
-                </xs:documentation>
-            </xs:annotation>
-            <xs:simpleType>
-                <xs:restriction base="xs:token">
-                    <xs:enumeration value="true"/>
-                    <xs:enumeration value="false"/>
-                </xs:restriction>
-            </xs:simpleType>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="remove-list" substitutionGroup="EntityListOperations">
         <xs:annotation>
             <xs:documentation>
@@ -3442,7 +3372,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="do-cache-clear">
+            <xs:attribute name="do-cache-clear" type="booleanExpr">
                 <xs:annotation>
                     <xs:documentation>
                         Clear the cache. Defaults to "true".
@@ -3450,12 +3380,6 @@ under the License.
                         Optional. Attribute type: constant, ${expression}.
                     </xs:documentation>
                 </xs:annotation>
-                <xs:simpleType>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="true" />
-                        <xs:enumeration value="false" />
-                    </xs:restriction>
-                </xs:simpleType>
             </xs:attribute>
         </xs:complexType>
     </xs:element>
@@ -4338,23 +4262,25 @@ under the License.
     <xs:element name="set-current-user-login" substitutionGroup="OtherOperations">
         <xs:annotation>
             <xs:documentation>
-                The set-current-user-login tag sets the UserLogin GenericValue object to be used for authentication for the rest of the method.
+                Sets the UserLogin entity value to be used for authentication for the rest of the method.
                 This is mostly used for calling services, etc.
+                &lt;br/&gt;&lt;br/&gt;
+                This element is deprecated. You can pass an alternate UserLogin
+                entity value to the called service's IN attributes.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.set-current-user-login"/>
+            <xs:attribute type="xs:string" name="value-field" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the field that contains the UserLogin entity value.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required. Attribute type: expression.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.set-current-user-login">
-        <xs:attribute type="xs:string" name="value-field" use="required">
-            <xs:annotation>
-                <xs:documentation>
-                    The name of the method environment field that contains the UserLogin GenericValue object.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
     <xs:element name="calculate" substitutionGroup="OtherOperations">
         <xs:annotation>
             <xs:documentation>
@@ -4493,193 +4419,204 @@ under the License.
             </xs:annotation>
         </xs:attribute>
     </xs:attributeGroup>
-    <xs:element name="set-calendar" substitutionGroup="OtherOperations">
+    <xs:element name="set-calendar" substitutionGroup="EnvOperations">
         <xs:annotation>
             <xs:documentation>
-                The set-calendar tag allows to set a date "field" from another "from-field" date field type
-                or directly from a value using at least one adjuster to modify the from-field date.
-                The type of fields or value is Timestamp.
-
-                Again you can use the flexible string expander here, the ${} syntax and such. It can also do a type conversion,
-                so going from whatever type the source data is in, which would be a string value or whatever the variable
-                type is for a from field, it can convert that to any ofthese types before setting it in the target field.
-
-                You can also specify a default value in the case that the value evaluates to an empty string or the from-field is
-                null or empty. Then the default-value will be used.
-
-                Adjuster years, months, days, hours, minutes, seconds and millis use integers optionally precedeed by + or -
-                Period-align-start and period-align-end allows to align on end or start of a period.
-
-                You may specify a locale or a time-zone else the respective default request value is used.
+                Adjusts a Timestamp by a specified time duration.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.set-calendar"/>
+            <xs:attribute ref="field" />
+            <xs:attribute type="xs:string" name="from-field">
+                <xs:annotation>
+                    <xs:documentation>
+                        Deprecated - use the from attribute.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="from">
+                <xs:annotation>
+                    <xs:documentation>
+                        An expression or script that returns an object or null. The source of the assignment.
+                        &lt;br/&gt;&lt;br/&gt;
+                        A script must be prefixed with the script language followed by a colon (":").
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required if the value attribute is empty. Attribute types: expression, script.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="value">
+                <xs:annotation>
+                    <xs:documentation>
+                        A constant value, or a constant that includes an expression. The source of the assignment.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Required if the from attribute is empty. Attribute type: constant+expr.
+                        Defaults to java.lang.String data type.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="default-value">
+                <xs:annotation>
+                    <xs:documentation>
+                        Deprecated - use the default attribute.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="default">
+                <xs:annotation>
+                    <xs:documentation>
+                        A default value that is used when the from attribute evaluates to null or empty.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="set-if-null" type="booleanConst">
+                <xs:annotation>
+                    <xs:documentation>
+                        Controls if the target field can be set to null when the from attribute evaluates to null.
+                        Defaults to "false".
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute type: constant.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="set-if-empty" type="booleanConst">
+                <xs:annotation>
+                    <xs:documentation>
+                        Controls if the target field can be set to an empty value. The meaning of "empty" depends on the Java data type.
+                        Defaults to "true".
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute type: constant.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="years">
+                <xs:annotation>
+                    <xs:documentation>
+                        Add (optionally using +) or subtract (using -) a number of year(s).
+                        If an expression is used, it should evaluate to an integer.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="months">
+                <xs:annotation>
+                    <xs:documentation>
+                        Add (optionally using +) or subtract (using -) a number of month(s).
+                        If an expression is used, it should evaluate to an integer.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="days">
+                <xs:annotation>
+                    <xs:documentation>
+                        Add (optionally using +) or subtract (using -) a number of days(s).
+                        If an expression is used, it should evaluate to an integer.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="hours">
+                <xs:annotation>
+                    <xs:documentation>
+                        Add (optionally using +) or subtract (using -) a number of hour(s).
+                        If an expression is used, it should evaluate to an integer.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="minutes">
+                <xs:annotation>
+                    <xs:documentation>
+                        Add (optionally using +) or subtract (using -) a number of minute(s).
+                        If an expression is used, it should evaluate to an integer.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="seconds">
+                <xs:annotation>
+                    <xs:documentation>
+                        Add (optionally using +) or subtract (using -) a number of second(s).
+                        If an expression is used, it should evaluate to an integer.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="millis">
+                <xs:annotation>
+                    <xs:documentation>
+                        Add (optionally using +) or subtract (using -) a number of milli-second(s).
+                        If an expression is used, it should evaluate to an integer.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="period-align-start">
+                <xs:annotation>
+                    <xs:documentation>
+                        Align the adjusted date to the start of a period.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="year" />
+                        <xs:enumeration value="month" />
+                        <xs:enumeration value="week" />
+                        <xs:enumeration value="day" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="period-align-end">
+                <xs:annotation>
+                    <xs:documentation>
+                        Align the adjusted date to the end of a period.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="year" />
+                        <xs:enumeration value="month" />
+                        <xs:enumeration value="week" />
+                        <xs:enumeration value="day" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="locale">
+                <xs:annotation>
+                    <xs:documentation>
+                        A locale value (eg: en). The locale selects the calendar to be used for the adjustment.
+                        Defaults to the environment locale.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="time-zone">
+                <xs:annotation>
+                    <xs:documentation>
+                        A time zone value (eg: GMT).
+                        Defaults to the environment time zone.
+                        &lt;br/&gt;&lt;br/&gt;
+                        Optional. Attribute types: constant, ${expression}.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
-    <xs:attributeGroup name="attlist.set-calendar">
-        <xs:attribute type="xs:string" name="field" use="required">
-            <xs:annotation>
-                <xs:documentation>
-                    Name of the field to copy value to.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="from-field">
-            <xs:annotation>
-                <xs:documentation>
-                    Name of the field to copy value from.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="value">
-            <xs:annotation>
-                <xs:documentation>
-                    Simple value to copy in field.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="default-value">
-            <xs:annotation>
-                <xs:documentation>
-                    Default value to copy in field if value evaluates to an empty string or the from-field is null or empty.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="set-if-null" default="false">
-            <xs:annotation>
-                <xs:documentation>
-                    Specifies whether or not to set fields that are null or empty.
-                    Defaults to true.
-                </xs:documentation>
-            </xs:annotation>
-            <xs:simpleType>
-                <xs:restriction base="xs:token">
-                    <xs:enumeration value="true"/>
-                    <xs:enumeration value="false"/>
-                </xs:restriction>
-            </xs:simpleType>
-        </xs:attribute>
-        <xs:attribute name="set-if-empty" default="true">
-            <xs:annotation>
-                <xs:documentation>
-                    If the source value, either from a value or from a field, is empty, and
-                    empty-string an empty list or a null value.
-                    In this case it's set to true.
-
-                    If you don't want to set, if you want it to
-                    leave the target field alone when the source is empty,
-                    then you need to set this to false.
-                </xs:documentation>
-            </xs:annotation>
-            <xs:simpleType>
-                <xs:restriction base="xs:token">
-                    <xs:enumeration value="true"/>
-                    <xs:enumeration value="false"/>
-                </xs:restriction>
-            </xs:simpleType>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="years">
-            <xs:annotation>
-                <xs:documentation>
-                    Add (optionally using +) or subtract (using -) a number of year(s).
-                    If an expression is used, it should evaluate to an integer.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="months">
-            <xs:annotation>
-                <xs:documentation>
-                    Add (optionally using +) or subtract (using -) a number of month(s).
-                    If an expression is used, it should evaluate to an integer.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="days">
-            <xs:annotation>
-                <xs:documentation>
-                    Add (optionally using +) or subtract (using -) a number of days(s).
-                    If an expression is used, it should evaluate to an integer.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="hours">
-            <xs:annotation>
-                <xs:documentation>
-                    Add (optionally using +) or subtract (using -) a number of hour(s).
-                    If an expression is used, it should evaluate to an integer.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="minutes">
-            <xs:annotation>
-                <xs:documentation>
-                    Add (optionally using +) or subtract (using -) a number of minute(s).
-                    If an expression is used, it should evaluate to an integer.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="seconds">
-            <xs:annotation>
-                <xs:documentation>
-                    Add (optionally using +) or subtract (using -) a number of second(s).
-                    If an expression is used, it should evaluate to an integer.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="millis">
-            <xs:annotation>
-                <xs:documentation>
-                    Add (optionally using +) or subtract (using -) a number of milli-second(s).
-                    If an expression is used, it should evaluate to an integer.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="period-align-start">
-            <xs:annotation>
-                <xs:documentation>
-                    Align the returned date to the start of the chosen adjustment between year, month, week or day.
-                </xs:documentation>
-            </xs:annotation>
-            <xs:simpleType>
-                <xs:restriction base="xs:token">
-                    <xs:enumeration value="year"/>
-                    <xs:enumeration value="month"/>
-                    <xs:enumeration value="week"/>
-                    <xs:enumeration value="day"/>
-                </xs:restriction>
-            </xs:simpleType>
-        </xs:attribute>
-        <xs:attribute name="period-align-end">
-            <xs:annotation>
-                <xs:documentation>
-                    Align the returned date to the end of the chosen adjustment between year, month, week or day.
-                </xs:documentation>
-            </xs:annotation>
-            <xs:simpleType>
-                <xs:restriction base="xs:token">
-                    <xs:enumeration value="year"/>
-                    <xs:enumeration value="month"/>
-                    <xs:enumeration value="week"/>
-                    <xs:enumeration value="day"/>
-                </xs:restriction>
-            </xs:simpleType>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="locale">
-            <xs:annotation>
-                <xs:documentation>
-                    A locale value (eg: en)
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" name="time-zone">
-            <xs:annotation>
-                <xs:documentation>
-                    a time zone value (eg: GMT)
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:attributeGroup>
     <!--
         ======================================================
         ========== The Simple Map Processor Section ==========
