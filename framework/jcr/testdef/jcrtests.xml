@@ -29,8 +29,17 @@
     -->
 
 
-    <test-case case-name="jackrabbit-tests">
-        <junit-test-suite class-name="org.ofbiz.jcr.test.JackrabbitTests"/>
-    </test-case>
+		<!--
+	<test-group case-name="jackrabbit-tests">
+		<junit-test-suite class-name="org.ofbiz.jcr.test.JackrabbitBaseTests"/>
+		<junit-test-suite class-name="org.ofbiz.jcr.test.JackrabbitDataTests"/>
+		<junit-test-suite class-name="org.ofbiz.jcr.test.JackrabbitFilesTests"/>
+		<junit-test-suite class-name="org.ofbiz.jcr.test.JackrabbitQueryTests"/>
+	</test-group>
+		-->
+
+	<test-case case-name="jackrabbit-tenant-tests">
+		<junit-test-suite class-name="org.ofbiz.jcr.test.JackrabbitTenantTests"/>
+	</test-case>
 
 </test-suite>

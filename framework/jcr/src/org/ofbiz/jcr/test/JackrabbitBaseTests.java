@@ -104,7 +104,7 @@ public class JackrabbitBaseTests extends OFBizTestCase {
     public void testSpeedTestService() throws Exception {
         Map<String, Object> context = FastMap.newInstance();
         context.put("maxNodes", new Integer(10));
-        context.put("userLogin", dispatcher.getDelegator().findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system")));
+        context.put("userLogin", dispatcher.getDelegator().findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), true));
 
         Map<String, Object> serviceResult = this.dispatcher.runSync("determineJackrabbitRepositorySpeed", context);
 

@@ -53,6 +53,14 @@ under the License.
         <property name="ssl-client-auth" value="false"/>
     </container>
 
+
+    <!-- Load embedded Jackrabbit content repository. Since this container depends
+    upon JNDI, it must be started after the naming-container container.-->
+    <container name="jcr-container" class="org.ofbiz.jcr.loader.JCRContainer">
+        <property name="configFilePath" value="framework/jcr/config/jcr-config.xml"/>
+        <property name="removeOnShutdown" value="false"/>
+    </container>
+
     <!-- JavaMail Listener Container - Triggers MCA Rules -->
     <!-- if delete-mail is set to true, will delete messages after fetching them. otherwise, will try to mark them as seen
         mail.store.protocol supports both imap and pop3, but pop3 will not be able to mark messages as seen, so you would need to delete them-->
