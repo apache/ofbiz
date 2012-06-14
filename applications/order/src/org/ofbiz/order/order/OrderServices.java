@@ -3437,6 +3437,9 @@ public class OrderServices {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource,
                     "OrderShipGroupSeqIdInvalid", UtilMisc.toMap("shipGroupSeqId", shipGroupSeqId), locale));
         }
+        if (quantity.compareTo(BigDecimal.ONE) < 0) {
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "OrderItemQtyMustBePositive", locale));
+        }
 
         // obtain a shopping cart object for updating
         ShoppingCart cart = null;
@@ -3570,7 +3573,7 @@ public class OrderServices {
                 return ServiceUtil.returnError(e.getMessage());
             }
 
-            if (groupQty.compareTo(BigDecimal.ZERO) == 0) {
+            if (groupQty.compareTo(BigDecimal.ONE) < 0) {
                 return ServiceUtil.returnError(UtilProperties.getMessage(resource,
                         "OrderItemQtyMustBePositive", locale));
             }
