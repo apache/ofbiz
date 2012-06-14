@@ -308,7 +308,7 @@ public class ProductionRun {
         if (exist()) {
             if (currentStatus == null) {
                 try {
-                    currentStatus = productionRun.getRelatedOneCache("StatusItem");
+                    currentStatus = productionRun.getRelatedOneCache("CurrentStatusItem");
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e.getMessage(), module);
                 }
