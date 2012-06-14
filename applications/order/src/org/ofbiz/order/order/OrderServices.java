@@ -3318,6 +3318,9 @@ public class OrderServices {
         if (shipGroupIdx < 0) {
             return ServiceUtil.returnError("Invalid shipGroupSeqId [" + shipGroupSeqId + "]");
         }
+        if (quantity.compareTo(BigDecimal.ONE) < 0) {
+            return ServiceUtil.returnError("Quantity must be >0, use cancel item to cancel completely!");
+        }
 
         // obtain a shopping cart object for updating
         ShoppingCart cart = null;
@@ -3444,7 +3447,7 @@ public class OrderServices {
                 return ServiceUtil.returnError(e.getMessage());
             }
 
-            if (groupQty.compareTo(BigDecimal.ZERO) == 0) {
+            if (groupQty.compareTo(BigDecimal.ONE) < 0) {
                 return ServiceUtil.returnError("Quantity must be >0, use cancel item to cancel completely!");
             }
 
