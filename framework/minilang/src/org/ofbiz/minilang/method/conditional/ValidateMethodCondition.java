@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
-import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.MiniLangRuntimeException;
 import org.ofbiz.minilang.MiniLangUtil;
@@ -113,11 +112,6 @@ public final class ValidateMethodCondition extends MethodOperation implements Co
     }
 
     @Override
-    public String expandedString(MethodContext methodContext) {
-        return FlexibleStringExpander.expandString(toString(), methodContext.getEnvMap());
-    }
-
-    @Override
     public void gatherArtifactInfo(ArtifactInfoContext aic) {
         if (this.subOps != null) {
             for (MethodOperation method : this.subOps) {
@@ -132,9 +126,6 @@ public final class ValidateMethodCondition extends MethodOperation implements Co
     }
 
     public void prettyPrint(StringBuilder messageBuffer, MethodContext methodContext) {
-        // allow methodContext to be null
-        String methodName = methodContext == null ? this.methodName : methodContext.expandString(this.methodName);
-        String className = methodContext == null ? this.className : methodContext.expandString(this.className);
         messageBuffer.append("validate-method[");
         messageBuffer.append(className);
         messageBuffer.append(".");
@@ -146,11 +137,6 @@ public final class ValidateMethodCondition extends MethodOperation implements Co
             messageBuffer.append(fieldFma.get(methodContext.getEnvMap()));
         }
         messageBuffer.append(")]");
-    }
-
-    @Override
-    public String rawString() {
-        return toString();
     }
 
     @Override

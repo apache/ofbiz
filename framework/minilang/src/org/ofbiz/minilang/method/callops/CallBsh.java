@@ -29,7 +29,6 @@ import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
-import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.MiniLangUtil;
 import org.ofbiz.minilang.MiniLangValidate;
@@ -84,7 +83,7 @@ public final class CallBsh extends MethodOperation {
         bsh.setClassLoader(methodContext.getLoader());
         try {
             // setup environment
-            for (Map.Entry<String, Object> entry : methodContext) {
+            for (Map.Entry<String, Object> entry : methodContext.getEnvMap().entrySet()) {
                 bsh.set(entry.getKey(), entry.getValue());
             }
             // run external, from resource, first if resource specified
@@ -136,16 +135,6 @@ public final class CallBsh extends MethodOperation {
         }
         // always return true, error messages just go on the error list
         return true;
-    }
-
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        return FlexibleStringExpander.expandString(toString(), methodContext.getEnvMap());
-    }
-
-    @Override
-    public String rawString() {
-        return toString();
     }
 
     @Override
