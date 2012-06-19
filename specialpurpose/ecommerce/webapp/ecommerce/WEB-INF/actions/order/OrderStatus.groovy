@@ -38,12 +38,12 @@ if (!userLogin) {
     if (!userLogin) {
         if (orderId) {
             orderHeader = delegator.findOne("OrderHeader", [orderId : orderId], false);
-            orderStatuses = orderHeader.getRelated("OrderStatus");
+            orderStatuses = orderHeader.getRelated("OrderStatus", null, null, false);
             filteredOrderStatusList = [];
             extOfflineModeExists = false;
             
             // Handled the case of OFFLINE payment method. In case of OFFLINE payment "ORDER_CREATED" status must be checked.
-            orderPaymentPreferences = orderHeader.getRelated("OrderPaymentPreference", UtilMisc.toList("orderPaymentPreferenceId"));
+            orderPaymentPreferences = orderHeader.getRelated("OrderPaymentPreference", null, UtilMisc.toList("orderPaymentPreferenceId"), false);
             filteredOrderPaymentPreferences = EntityUtil.filterByCondition(orderPaymentPreferences, EntityCondition.makeCondition("paymentMethodTypeId", EntityOperator.IN, ["EXT_OFFLINE"]));
             if (filteredOrderPaymentPreferences) {
                 extOfflineModeExists = true;
@@ -110,7 +110,7 @@ if (orderId) {
 }
 
 if (orderHeader) {
-    productStore = orderHeader.getRelatedOneCache("ProductStore");
+    productStore = orderHeader.getRelatedOne("ProductStore", true);
     if (productStore) isDemoStore = !"N".equals(productStore.isDemoStore);
 
     orderReadHelper = new OrderReadHelper(orderHeader);
@@ -131,16 +131,16 @@ if (orderHeader) {
     placingCustomerOrderRole = EntityUtil.getFirst(placingCustomerOrderRoles);
     placingCustomerPerson = placingCustomerOrderRole == null ? null : delegator.findOne("Person", [partyId : placingCustomerOrderRole.partyId], false);
 
-    billingAccount = orderHeader.getRelatedOne("BillingAccount");
+    billingAccount = orderHeader.getRelatedOne("BillingAccount", false);
 
-    orderPaymentPreferences = EntityUtil.filterByAnd(orderHeader.getRelated("OrderPaymentPreference"), [EntityCondition.makeCondition("statusId", EntityOperator.NOT_EQUAL, "PAYMENT_CANCELLED")]);
+    orderPaymentPreferences = EntityUtil.filterByAnd(orderHeader.getRelated("OrderPaymentPreference", null, null, false), [EntityCondition.makeCondition("statusId", EntityOperator.NOT_EQUAL, "PAYMENT_CANCELLED")]);
     paymentMethods = [];
     orderPaymentPreferences.each { opp ->
-        paymentMethod = opp.getRelatedOne("PaymentMethod");
+        paymentMethod = opp.getRelatedOne("PaymentMethod", false);
         if (paymentMethod) {
             paymentMethods.add(paymentMethod);
         } else {
-            paymentMethodType = opp.getRelatedOne("PaymentMethodType");
+            paymentMethodType = opp.getRelatedOne("PaymentMethodType", false);
             if (paymentMethodType) {
                 context.paymentMethodType = paymentMethodType;
             }
@@ -177,9 +177,9 @@ if (orderHeader) {
     totalItems = 0.00;
     orderItems.each { oitem ->
         totalItems += oitem.quantity;
-        ritems = oitem.getRelated("ReturnItem");
+        ritems = oitem.getRelated("ReturnItem", null, null, false);
         ritems.each { ritem ->
-            rh = ritem.getRelatedOne("ReturnHeader");
+            rh = ritem.getRelatedOne("ReturnHeader", false);
             if (!rh.statusId.equals("RETURN_CANCELLED")) {
                 returned += ritem.returnQuantity;
             }

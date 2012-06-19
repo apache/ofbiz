@@ -15,11 +15,10 @@
     <classpathentry kind="lib" path="applications/content/lib/tika-parsers-1.0.jar"/>
     <classpathentry kind="lib" path="applications/product/lib/watermarker-0.0.4.jar"/>
     <classpathentry kind="lib" path="applications/product/lib/dozer-4.2.1.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/ant-1.8.3.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/ant-junit-1.8.3.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/ant-launcher-1.8.3.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/ant-trax-1.8.0.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/ant/ant-apache-bsf-1.8.3.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/ant-1.8.4.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/ant-junit-1.8.4.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/ant-launcher-1.8.4.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/ant/ant-apache-bsf-1.8.4.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/ant/ant-nodeps-1.8.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/antisamy-bin.1.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/avalon-framework-4.2.0.jar"/>
@@ -29,14 +28,14 @@
     <classpathentry kind="lib" path="framework/base/lib/clhm-release-1.0-lru.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/hamcrest-all-1.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/fop-1.0.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/freemarker-2.3.19.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/freemarker-2.3.19-null-wildcards.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/httpclient-4.1.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/httpclient-cache-4.1.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/httpcore-4.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/httpmime-4.1.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/httpunit-1.7.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/ical4j-1.0-rc2.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/icu4j-4_4.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/icu4j-49_1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/ivy-2.2.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/javolution-5.4.3.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/jcip-annotations-1.0.jar"/>
@@ -50,7 +49,7 @@
     <classpathentry kind="lib" path="framework/base/lib/mail-1.4.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/mx4j-3.0.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/mx4j-remote-3.0.1.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/nekohtml.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/nekohtml-1.9.7.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/owasp-esapi-full-java-1.4.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/resolver-2.9.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/serializer-2.9.1.jar"/>
@@ -72,7 +71,7 @@
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-cli-1.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-codec-1.4.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-collections-3.2.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/commons/commons-compress-1.4.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/commons/commons-compress-1.4.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-digester-1.8.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-discovery-0.4.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-el-1.0.jar"/>
@@ -113,18 +112,11 @@
     <classpathentry kind="lib" path="framework/birt/lib/org.eclipse.birt.runtime_3.7.2.v20120214-1408.jar"/>
     <classpathentry kind="lib" path="framework/birt/lib/viewservlets.jar"/>
     <classpathentry kind="lib" path="framework/catalina/lib/ecj-3.7.2.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.27.tomcat-juli-adapters.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.27.tomcat-juli.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.27.catalina-ant.jar"/>
     <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.27.catalina-ha.jar"/>
     <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.27.catalina-tribes.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.27.catalina.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.27.jasper-el.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.27.jasper.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.27.tomcat-coyote.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.27.tomcat-dbcp.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.27.tomcat-api.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.27.tomcat-util.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.27.tomcat-embed-core.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.27.tomcat-embed-jasper.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.27.tomcat-embed-logging-log4j.jar"/>
     <classpathentry kind="lib" path="framework/entity/lib/commons-dbcp-1.4.jar"/>
     <classpathentry kind="lib" path="framework/entity/lib/ofbiz-minerva.jar"/>
     <classpathentry kind="lib" path="framework/geronimo/lib/geronimo-connector-2.1.1.jar"/>
@@ -220,7 +212,6 @@
     <classpathentry kind="src" path="specialpurpose/oagis/src"/>
     <classpathentry kind="src" path="specialpurpose/pos/src"/>
     <classpathentry kind="src" path="specialpurpose/projectmgr/src"/>
-    <classpathentry excluding="org/enhydra/|org/ofbiz/" kind="src" path="specialpurpose/shark/src"/>
     <classpathentry kind="src" path="specialpurpose/webpos/src"/>
     <classpathentry kind="src" path="specialpurpose/workflow/src"/>
     <classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>

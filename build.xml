@@ -86,6 +86,8 @@ under the License.
           description="Clean all downloaded files">
         <delete>
             <fileset dir="framework/base/lib" includes="cobertura-*.jar"/>
+            <fileset dir="framework/base/lib" includes="asm*.jar"/>
+            <fileset dir="framework/base/lib" includes="oro*.jar"/>
             <fileset dir="framework/base/lib" includes="sonar-*.jar"/>
             <fileset dir="framework/entity/lib/jdbc" includes="postgresql-*.jar"/>
         </delete>
@@ -394,7 +396,7 @@ under the License.
         </java>
     </target>
     <target name="start-debug"
-            description="Start OFBiz in debugging mode">
+            description="Start OFBiz in debugging mode. It uses the 8091 port by default">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -828,13 +830,12 @@ under the License.
         <delete file="runtime/tmp/tmpUserLogin.xml"/>
     </target>
     <target name="load-tenant-data-readers"
-        description="Load data of given data-readers in the tenant database">
+        description="Load data of given data-readers in the tenant database. Example: ./ant load-tenant-data-readers -Ddata-readers=seed,seed-initial -DtenantId=demo">
         <echo>------------------------------------</echo>
         <echo message="Loading selected data-readers in tenant databaset"/>
         <echo message="Delegator = default#${tenantId}"/>
         <echo message="Data-readers = ${data-readers}"/>
         <echo>------------------------------------</echo>
-        <input addproperty="continueYN" message="Continue Y or N" validargs="N,n,Y,y"/>
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>

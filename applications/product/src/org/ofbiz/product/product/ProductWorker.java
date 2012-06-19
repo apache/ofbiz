@@ -92,7 +92,7 @@ public class ProductWorker {
             Delegator delegator = product.getDelegator();
             List<GenericValue> productGeos = null;
             try {
-                productGeos = product.getRelated("ProductGeo");
+                productGeos = product.getRelated("ProductGeo", null, null, false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
             }
@@ -150,8 +150,7 @@ public class ProductWorker {
         GenericValue instanceProduct = delegator.findOne("Product", UtilMisc.toMap("productId", instanceProductId), false);
 
         if (UtilValidate.isNotEmpty(instanceProduct) && EntityTypeUtil.hasParentType(delegator, "ProductType", "productTypeId", instanceProduct.getString("productTypeId"), "parentTypeId", "AGGREGATED")) {
-            GenericValue productAssoc = EntityUtil.getFirst(EntityUtil.filterByDate(instanceProduct.getRelatedByAnd("AssocProductAssoc",
-                    UtilMisc.toMap("productAssocTypeId", "PRODUCT_CONF"))));
+            GenericValue productAssoc = EntityUtil.getFirst(EntityUtil.filterByDate(instanceProduct.getRelated("AssocProductAssoc", UtilMisc.toMap("productAssocTypeId", "PRODUCT_CONF"), null, false)));
             if (UtilValidate.isNotEmpty(productAssoc)) {
                 return productAssoc.getString("productId");
             }
@@ -163,7 +162,7 @@ public class ProductWorker {
         List<GenericValue> productAssocs = getAggregatedAssocs(delegator, aggregatedProductId);
         if (UtilValidate.isNotEmpty(productAssocs) && UtilValidate.isNotEmpty(configId)) {
             for (GenericValue productAssoc: productAssocs) {
-                GenericValue product = productAssoc.getRelatedOne("AssocProduct");
+                GenericValue product = productAssoc.getRelatedOne("AssocProduct", false);
                 if (configId.equals(product.getString("configId"))) {
                     return productAssoc.getString("productIdTo");
                 }
@@ -176,8 +175,7 @@ public class ProductWorker {
         GenericValue aggregatedProduct = delegator.findOne("Product", UtilMisc.toMap("productId", aggregatedProductId), false);
 
         if (UtilValidate.isNotEmpty(aggregatedProduct) && ("AGGREGATED".equals(aggregatedProduct.getString("productTypeId")) || "AGGREGATED_SERVICE".equals(aggregatedProduct.getString("productTypeId")))) {
-            List<GenericValue> productAssocs = EntityUtil.filterByDate(aggregatedProduct.getRelatedByAnd("MainProductAssoc",
-                    UtilMisc.toMap("productAssocTypeId", "PRODUCT_CONF")));
+            List<GenericValue> productAssocs = EntityUtil.filterByDate(aggregatedProduct.getRelated("MainProductAssoc", UtilMisc.toMap("productAssocTypeId", "PRODUCT_CONF"), null, false));
             return productAssocs;
         }
         return null;
@@ -198,8 +196,7 @@ public class ProductWorker {
 
     public static List<GenericValue> getVariantVirtualAssocs(GenericValue variantProduct) throws GenericEntityException {
         if (variantProduct != null && "Y".equals(variantProduct.getString("isVariant"))) {
-            List<GenericValue> productAssocs = EntityUtil.filterByDate(variantProduct.getRelatedByAndCache("AssocProductAssoc",
-                    UtilMisc.toMap("productAssocTypeId", "PRODUCT_VARIANT")));
+            List<GenericValue> productAssocs = EntityUtil.filterByDate(variantProduct.getRelated("AssocProductAssoc", UtilMisc.toMap("productAssocTypeId", "PRODUCT_VARIANT"), null, true));
             return productAssocs;
         }
         return null;
@@ -330,7 +327,7 @@ public class ProductWorker {
                             if (nameBuf.length() > 0) {
                                 nameBuf.append(", ");
                             }
-                            GenericValue productFeatureType = productFeature.getRelatedOneCache("ProductFeatureType");
+                            GenericValue productFeatureType = productFeature.getRelatedOne("ProductFeatureType", true);
                             if (productFeatureType != null) {
                                 nameBuf.append(productFeatureType.get("description", locale));
                                 nameBuf.append(":");
@@ -391,7 +388,7 @@ public class ProductWorker {
             }
             EntityCondition cond = EntityCondition.makeCondition(condList);
             productAppls = product.getDelegator().findList("ProductFeatureAppl", cond, null, null, null, false);
-            features = EntityUtil.getRelated("ProductFeature", productAppls);
+            features = EntityUtil.getRelated("ProductFeature", null, productAppls, false);
             features = EntityUtil.orderBy(features, UtilMisc.toList("description"));
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
@@ -638,7 +635,7 @@ public class ProductWorker {
             // lookup the reviews if we didn't pass them in
             if (reviews == null) {
                 try {
-                    reviews = product.getRelatedCache("ProductReview", reviewByAnd, UtilMisc.toList("-postedDateTime"));
+                    reviews = product.getRelated("ProductReview", reviewByAnd, UtilMisc.toList("-postedDateTime"), true);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, module);
                 }
@@ -692,9 +689,9 @@ public class ProductWorker {
         }
         List<GenericValue> categories = FastList.newInstance();
         try {
-            List<GenericValue> categoryMembers = product.getRelated("ProductCategoryMember");
+            List<GenericValue> categoryMembers = product.getRelated("ProductCategoryMember", null, null, false);
             categoryMembers = EntityUtil.filterByDate(categoryMembers);
-            categories = EntityUtil.getRelated("ProductCategory", categoryMembers);
+            categories = EntityUtil.getRelated("ProductCategory", null, categoryMembers, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
@@ -719,7 +716,7 @@ public class ProductWorker {
             if (UtilValidate.isNotEmpty(virtualProductAssocs)) {
                 //found one, set this first as the parent product
                 GenericValue productAssoc = EntityUtil.getFirst(virtualProductAssocs);
-                _parentProduct = productAssoc.getRelatedOneCache("MainProduct");
+                _parentProduct = productAssoc.getRelatedOne("MainProduct", true);
             }
         } catch (GenericEntityException e) {
             throw new RuntimeException("Entity Engine error getting Parent Product (" + e.getMessage() + ")");
@@ -732,7 +729,7 @@ public class ProductWorker {
         if (product != null) {
             GenericValue productType = null;
             try {
-                productType = product.getRelatedOneCache("ProductType");
+                productType = product.getRelatedOne("ProductType", true);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e.getMessage(), module);
             }
@@ -747,7 +744,7 @@ public class ProductWorker {
         if (product != null) {
             GenericValue productType = null;
             try {
-                productType = product.getRelatedOneCache("ProductType");
+                productType = product.getRelatedOne("ProductType", true);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e.getMessage(), module);
             }

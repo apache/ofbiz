@@ -209,15 +209,15 @@ public class RequirementServices {
         String orderId = (String) context.get("orderId");
         try {
             GenericValue order = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
-            GenericValue productStore = order.getRelatedOneCache("ProductStore");
+            GenericValue productStore = order.getRelatedOne("ProductStore", true);
             if (productStore == null) {
                 Debug.logInfo("ProductStore for order ID " + orderId + " not found, requirements not created", module);
                 return ServiceUtil.returnSuccess();
             }
             String facilityId = productStore.getString("inventoryFacilityId");
-            List<GenericValue> orderItems = order.getRelated("OrderItem");
+            List<GenericValue> orderItems = order.getRelated("OrderItem", null, null, false);
             for(GenericValue item : orderItems) {
-                GenericValue product = item.getRelatedOne("Product");
+                GenericValue product = item.getRelatedOne("Product", false);
                 if (product == null) continue;
                 if ((!"PRODRQM_AUTO".equals(product.get("requirementMethodEnumId")) &&
                         !"PRODRQM_AUTO".equals(productStore.get("requirementMethodEnumId"))) ||
@@ -268,15 +268,15 @@ public class RequirementServices {
         String orderId = (String) context.get("orderId");
         try {
             GenericValue order = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
-            GenericValue productStore = order.getRelatedOneCache("ProductStore");
+            GenericValue productStore = order.getRelatedOne("ProductStore", true);
             if (productStore == null) {
                 Debug.logInfo("ProductStore for order ID " + orderId + " not found, ATP requirements not created", module);
                 return ServiceUtil.returnSuccess();
             }
             String facilityId = productStore.getString("inventoryFacilityId");
-            List<GenericValue> orderItems = order.getRelated("OrderItem");
+            List<GenericValue> orderItems = order.getRelated("OrderItem", null, null, false);
             for(GenericValue item : orderItems) {
-                GenericValue product = item.getRelatedOne("Product");
+                GenericValue product = item.getRelatedOne("Product", false);
                 if (product == null) continue;
 
                 if (!("PRODRQM_ATP".equals(product.get("requirementMethodEnumId")) ||

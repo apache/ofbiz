@@ -47,7 +47,7 @@ under the License.
                         <#list retAccpTypeArray as retAccpType>
                             <#assign returnAccepted = "">
                             <option value="${retAccpType.getReturnsAcceptedOption()?if_exists}"
-                            <#if returnAccepted != null && returnAccepted.equalsIgnoreCase(retAccpType.getReturnsAcceptedOption()?if_exists)>selected="select"</#if>>
+                            <#if returnAccepted?? && returnAccepted.equalsIgnoreCase(retAccpType.getReturnsAcceptedOption()?if_exists)>selected="select"</#if>>
                             ${retAccpType.getDescription()?if_exists}</option>
                         </#list>
                         </#if>
@@ -68,7 +68,7 @@ under the License.
                  <#list retWithinArray as retWithin>
                     <#assign returnWithin = "">
                     <option value="${retWithin.getReturnsWithinOption()?if_exists}"
-                    <#if returnWithin!=null && returnWithin.equalsIgnoreCase(retWithin.getReturnsWithinOption()?if_exists)>selected="select"</#if>>
+                    <#if returnWithin?? && returnWithin.equalsIgnoreCase(retWithin.getReturnsWithinOption()?if_exists)>selected="select"</#if>>
                     ${retWithin.getDescription()?if_exists}</option>
                 </#list>
                 </#if>
@@ -91,7 +91,7 @@ under the License.
                  <#list refundArray as refundAr>
                     <#assign refund = "">
                     <option value="${refundAr.getRefundOption()?if_exists}"
-                    <#if refund!=null && refund.equalsIgnoreCase(refundAr.getRefundOption())>selected="select"</#if>>
+                    <#if refund?? && refund.equalsIgnoreCase(refundAr.getRefundOption())>selected="select"</#if>>
                     ${refundArray[j].getDescription()?if_exists}</option>
                  </#list>
                  </#if>
@@ -113,7 +113,7 @@ under the License.
                 <#list paidByArray as paidBy>
                     <#assign shippingCostPaidBy = "">
                     <option value="${paidBy.getShippingCostPaidByOption()?if_exists}"
-                    <#if shippingCostPaidBy!=null && shippingCostPaidBy.equalsIgnoreCase(paidBy.getShippingCostPaidByOption()?if_exists)>selected="select"</#if>>
+                    <#if shippingCostPaidBy?? && shippingCostPaidBy.equalsIgnoreCase(paidBy.getShippingCostPaidByOption()?if_exists)>selected="select"</#if>>
                     ${paidBy.getDescription()?if_exists}</option>
                 </#list>
                 </#if>

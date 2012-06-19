@@ -225,8 +225,8 @@ public class InventoryServices {
         try {
             inventoryTransfer = delegator.findOne("InventoryTransfer",
                     UtilMisc.toMap("inventoryTransferId", inventoryTransferId), false);
-            inventoryItem = inventoryTransfer.getRelatedOne("InventoryItem");
-            destinationFacility = inventoryTransfer.getRelatedOne("ToFacility");
+            inventoryItem = inventoryTransfer.getRelatedOne("InventoryItem", false);
+            destinationFacility = inventoryTransfer.getRelatedOne("ToFacility", false);
         } catch (GenericEntityException e) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
                     "ProductInventoryItemLookupProblem", 
@@ -343,7 +343,7 @@ public class InventoryServices {
                         "ProductInventoryItemTransferNotFound", 
                         UtilMisc.toMap("inventoryTransferId", inventoryTransferId), locale));
             }
-            inventoryItem = inventoryTransfer.getRelatedOne("InventoryItem");
+            inventoryItem = inventoryTransfer.getRelatedOne("InventoryItem", false);
         } catch (GenericEntityException e) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
                     "ProductInventoryItemLookupProblem", 
@@ -462,7 +462,7 @@ public class InventoryServices {
             // get the reservations in order of newest first
             List<GenericValue> reservations = null;
             try {
-                reservations = inventoryItem.getRelated("OrderItemShipGrpInvRes", null, UtilMisc.toList("-reservedDatetime"));
+                reservations = inventoryItem.getRelated("OrderItemShipGrpInvRes", null, UtilMisc.toList("-reservedDatetime"), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Problem getting related reservations", module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
@@ -608,7 +608,7 @@ public class InventoryServices {
                                         orderId), null, false);
 
                     for (GenericValue assoc: orderItemShipGroupAssoc) {
-                        GenericValue orderItem = assoc.getRelatedOne("OrderItem");
+                        GenericValue orderItem = assoc.getRelatedOne("OrderItem", false);
                         if (orderItem != null) {
                             orderItems.add(orderItem);
                         }
@@ -799,7 +799,7 @@ public class InventoryServices {
 
             GenericValue product = null;
             try {
-                product = orderItem.getRelatedOneCache("Product");
+                product = orderItem.getRelatedOne("Product", true);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Couldn't get product.", module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(resource, 

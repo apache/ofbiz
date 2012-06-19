@@ -389,12 +389,12 @@ public class FinAccountServices {
                         // make sure there is an order available to refund
                         if (orderId != null && orderItemSeqId != null) {
                             GenericValue orderHeader = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId",orderId), false);
-                            GenericValue productStore = delegator.getRelatedOne("ProductStore", orderHeader);
+                            GenericValue productStore = orderHeader.getRelatedOne("ProductStore", false);
                             GenericValue orderItem = delegator.findOne("OrderItem", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", orderItemSeqId), false);
                             if (!"ITEM_CANCELLED".equals(orderItem.getString("statusId"))) {
 
                                 // make sure the item hasn't already been returned
-                                List<GenericValue> returnItems = orderItem.getRelated("ReturnItem");
+                                List<GenericValue> returnItems = orderItem.getRelated("ReturnItem", null, null, false);
                                 if (UtilValidate.isEmpty(returnItems)) {
                                     BigDecimal txAmt = trans.getBigDecimal("amount");
                                     BigDecimal refAmt = txAmt;
@@ -449,7 +449,7 @@ public class FinAccountServices {
                                     // get the return item
                                     GenericValue returnItem = delegator.findOne("ReturnItem",
                                             UtilMisc.toMap("returnId", returnId, "returnItemSeqId", returnItemSeqId), false);
-                                    GenericValue response = returnItem.getRelatedOne("ReturnItemResponse");
+                                    GenericValue response = returnItem.getRelatedOne("ReturnItemResponse", false);
                                     if (response == null) {
                                         throw new GeneralException("No return response found for: " + returnItem.getPrimaryKey());
                                     }

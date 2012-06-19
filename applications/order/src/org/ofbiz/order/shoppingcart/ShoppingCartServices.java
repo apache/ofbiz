@@ -482,7 +482,7 @@ public class ShoppingCartServices {
                 cartItem.setOrderItemSeqId(item.getString("orderItemSeqId"));
 
                 try {
-                    cartItem.setItemGroup(cart.addItemGroup(item.getRelatedOneCache("OrderItemGroup")));
+                    cartItem.setItemGroup(cart.addItemGroup(item.getRelatedOne("OrderItemGroup", true)));
                 } catch (GenericEntityException e) {
                     Debug.logError(e, module);
                     return ServiceUtil.returnError(e.getMessage());
@@ -693,11 +693,11 @@ public class ShoppingCartServices {
         List<GenericValue>quoteAttributes = null;
         List<GenericValue>quoteTerms = null;
         try {
-            quoteItems = quote.getRelated("QuoteItem", UtilMisc.toList("quoteItemSeqId"));
-            quoteAdjs = quote.getRelated("QuoteAdjustment");
-            quoteRoles = quote.getRelated("QuoteRole");
-            quoteAttributes = quote.getRelated("QuoteAttribute");
-            quoteTerms = quote.getRelated("QuoteTerm");
+            quoteItems = quote.getRelated("QuoteItem", null, UtilMisc.toList("quoteItemSeqId"), false);
+            quoteAdjs = quote.getRelated("QuoteAdjustment", null, null, false);
+            quoteRoles = quote.getRelated("QuoteRole", null, null, false);
+            quoteAttributes = quote.getRelated("QuoteAttribute", null, null, false);
+            quoteTerms = quote.getRelated("QuoteTerm", null, null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(e.getMessage());
@@ -971,7 +971,7 @@ public class ShoppingCartServices {
         // If no currency has been set in the ShoppingList, use the ProductStore default currency
         if (currency == null) {
             try {
-                GenericValue productStore = shoppingList.getRelatedOne("ProductStore");
+                GenericValue productStore = shoppingList.getRelatedOne("ProductStore", false);
                 if (productStore != null) {
                     currency = productStore.getString("defaultCurrencyUomId");
                 }
@@ -1004,7 +1004,7 @@ public class ShoppingCartServices {
 
         List<GenericValue>shoppingListItems = null;
         try {
-            shoppingListItems = shoppingList.getRelated("ShoppingListItem");
+            shoppingListItems = shoppingList.getRelated("ShoppingListItem", null, null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(e.getMessage());

@@ -778,7 +778,7 @@ public class EntityPermissionChecker {
 
         List<GenericValue> purposes = null;
         try {
-            purposes = entity.getRelatedCache(entityName + "Purpose");
+            purposes = entity.getRelated(entityName + "Purpose", null, null, true);
         } catch (GenericEntityException e) {
             Debug.logError(e, "No associated purposes found. ", module);
             return purposeIds;
@@ -820,7 +820,7 @@ public class EntityPermissionChecker {
 
         String partyId = (String)userLogin.get("partyId");
         List<GenericValue> relatedRoles = null;
-        List<GenericValue> tmpRelatedRoles = entity.getRelatedCache(entityName + "Role");
+        List<GenericValue> tmpRelatedRoles = entity.getRelated(entityName + "Role", null, null, true);
         relatedRoles = EntityUtil.filterByDate(tmpRelatedRoles);
         if (relatedRoles != null) {
             for (GenericValue contentRole: relatedRoles) {
@@ -835,7 +835,7 @@ public class EntityPermissionChecker {
                     GenericValue party = null;
                     String partyTypeId = null;
                     try {
-                        party = contentRole.getRelatedOne("Party");
+                        party = contentRole.getRelatedOne("Party", false);
                         partyTypeId = (String)party.get("partyTypeId");
                         if (partyTypeId != null && partyTypeId.equals("PARTY_GROUP")) {
                            Map<String, Object> map = FastMap.newInstance();

@@ -67,7 +67,7 @@ if (invoice) {
         invoice.invoiceMessage = " converted from original with a rate of: " + conversionRate.setScale(8, rounding);
     }
 
-    invoiceItems = invoice.getRelatedOrderBy("InvoiceItem", ["invoiceItemSeqId"]);
+    invoiceItems = invoice.getRelated("InvoiceItem", null, ["invoiceItemSeqId"], false);
     invoiceItemsConv = FastList.newInstance();
     vatTaxesByType = FastMap.newInstance();
     invoiceItems.each { invoiceItem ->
@@ -75,7 +75,7 @@ if (invoice) {
         invoiceItemsConv.add(invoiceItem);
         // get party tax id for VAT taxes: they are required in invoices by EU
         // also create a map with tax grand total amount by VAT tax: it is also required in invoices by UE
-        taxRate = invoiceItem.getRelatedOne("TaxAuthorityRateProduct");
+        taxRate = invoiceItem.getRelatedOne("TaxAuthorityRateProduct", false);
         if (taxRate && "VAT_TAX".equals(taxRate.taxAuthorityRateTypeId)) {
             taxInfos = EntityUtil.filterByDate(delegator.findByAnd("PartyTaxAuthInfo", [partyId : billingParty.partyId, taxAuthGeoId : taxRate.taxAuthGeoId, taxAuthPartyId : taxRate.taxAuthPartyId], null, false), invoice.invoiceDate);
             taxInfo = EntityUtil.getFirst(taxInfos);
@@ -101,8 +101,8 @@ if (invoice) {
 
                 //*________________this snippet was added for adding Tax ID in invoice header if needed _________________
 
-               sendingTaxInfos = sendingParty.getRelated("PartyTaxAuthInfo");
-               billingTaxInfos = billingParty.getRelated("PartyTaxAuthInfo");
+               sendingTaxInfos = sendingParty.getRelated("PartyTaxAuthInfo", null, null, false);
+               billingTaxInfos = billingParty.getRelated("PartyTaxAuthInfo", null, null, false);
                sendingPartyTaxId = null;
                billingPartyTaxId = null;
 
@@ -127,7 +127,7 @@ if (invoice) {
                //________________this snippet was added for adding Tax ID in invoice header if needed _________________*/
 
 
-    terms = invoice.getRelated("InvoiceTerm");
+    terms = invoice.getRelated("InvoiceTerm", null, null, false);
     context.terms = terms;
 
     paymentAppls = delegator.findByAnd("PaymentApplication", [invoiceId : invoiceId], null, false);
@@ -140,7 +140,7 @@ if (invoice) {
     }
     context.orders = orders;
 
-    invoiceStatus = invoice.getRelatedOne("StatusItem");
+    invoiceStatus = invoice.getRelatedOne("StatusItem", false);
     context.invoiceStatus = invoiceStatus;
 
     edit = parameters.editInvoice;

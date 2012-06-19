@@ -32,8 +32,8 @@ if (shipment) {
     shipmentPackages.each { shipmentPackage ->
         shipmentPackageComponents = delegator.findByAnd("ShipmentPackageContent", [shipmentId : shipmentId, shipmentPackageSeqId : shipmentPackage.shipmentPackageSeqId], null, false);
         shipmentPackageComponents.each { shipmentPackageComponent ->
-            shipmentItem = shipmentPackageComponent.getRelatedOne("ShipmentItem");
-            orderShipments = shipmentItem.getRelated("OrderShipment");
+            shipmentItem = shipmentPackageComponent.getRelatedOne("ShipmentItem", false);
+            orderShipments = shipmentItem.getRelated("OrderShipment", null, null, false);
             orderShipment = EntityUtil.getFirst(orderShipments);
 
             String orderId = null;

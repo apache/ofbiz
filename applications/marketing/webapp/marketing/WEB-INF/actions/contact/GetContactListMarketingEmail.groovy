@@ -22,11 +22,11 @@ if (!contactList && contactListId) {
     contactList = delegator.findOne("ContactList", [contactListId : "contactListId"], true);
 }
 if (contactList) {
-    ownerParty = contactList.getRelatedOne("OwnerParty");
+    ownerParty = contactList.getRelatedOne("OwnerParty", false);
     if (ownerParty) {
-        contactMechs = ownerParty.getRelatedByAnd("PartyContactMechPurpose", [contactMechPurposeTypeId : "MARKETING_EMAIL"]);
+        contactMechs = ownerParty.getRelated("PartyContactMechPurpose", [contactMechPurposeTypeId : "MARKETING_EMAIL"], null, false);
         if (!contactMechs) {
-            contactMechs = ownerParty.getRelatedByAnd("PartyContactMechPurpose", [contactMechPurposeTypeId : "PRIMARY_EMAIL"]);
+            contactMechs = ownerParty.getRelated("PartyContactMechPurpose", [contactMechPurposeTypeId : "PRIMARY_EMAIL"], null, false);
         }
         
         if (contactMechs) {

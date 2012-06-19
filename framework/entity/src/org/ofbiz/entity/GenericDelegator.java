@@ -1942,8 +1942,17 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getRelated(java.lang.String, java.util.Map, java.util.List, org.ofbiz.entity.GenericValue)
+     * @deprecated use {@link #getRelated(String, Map, List, GenericValue, boolean)
      */
+    @Deprecated
     public List<GenericValue> getRelated(String relationName, Map<String, ? extends Object> byAndFields, List<String> orderBy, GenericValue value) throws GenericEntityException {
+        return getRelated(relationName, byAndFields, orderBy, value, false);
+    }
+
+    /* (non-Javadoc)
+     * @see org.ofbiz.entity.Delegator#getRelated(java.lang.String, java.util.Map, java.util.List, org.ofbiz.entity.GenericValue, boolean)
+     */
+    public List<GenericValue> getRelated(String relationName, Map<String, ? extends Object> byAndFields, List<String> orderBy, GenericValue value, boolean useCache) throws GenericEntityException {
         ModelEntity modelEntity = value.getModelEntity();
         ModelRelation relation = modelEntity.getRelation(relationName);
 
@@ -1962,7 +1971,7 @@ public class GenericDelegator implements Delegator {
             fields.put(keyMap.getRelFieldName(), value.get(keyMap.getFieldName()));
         }
 
-        return this.findByAnd(relation.getRelEntityName(), fields, orderBy, false);
+        return this.findByAnd(relation.getRelEntityName(), fields, orderBy, useCache);
     }
 
     /* (non-Javadoc)
@@ -1993,28 +2002,35 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getRelatedCache(java.lang.String, org.ofbiz.entity.GenericValue)
+     * @deprecated use {@link #getRelated(String, Map, List, GenericValue, boolean)
      */
+    @Deprecated
     public List<GenericValue> getRelatedCache(String relationName, GenericValue value) throws GenericEntityException {
-        ModelEntity modelEntity = value.getModelEntity();
-        ModelRelation relation = modelEntity.getRelation(relationName);
-
-        if (relation == null) {
-            throw new GenericModelException("Could not find relation for relationName: " + relationName + " for value " + value);
-        }
-
-        Map<String, Object> fields = FastMap.newInstance();
-        for (int i = 0; i < relation.getKeyMapsSize(); i++) {
-            ModelKeyMap keyMap = relation.getKeyMap(i);
-            fields.put(keyMap.getRelFieldName(), value.get(keyMap.getFieldName()));
-        }
-
-        return this.findByAnd(relation.getRelEntityName(), fields, null, true);
+        return getRelated(relationName, null, null, value, true);
     }
 
     /* (non-Javadoc)
-     * @see org.ofbiz.entity.Delegator#getRelatedOne(java.lang.String, org.ofbiz.entity.GenericValue)
+     * @see org.ofbiz.entity.Delegator#getRelatedOne(java.lang.String, org.ofbiz.entity.GenericValue, boolean)
+     * @deprecated use {@link #getRelatedOne(String, GenericValue, boolean)
      */
+    @Deprecated
     public GenericValue getRelatedOne(String relationName, GenericValue value) throws GenericEntityException {
+        return this.getRelatedOne(relationName, value, false);
+    }
+
+    /* (non-Javadoc)
+     * @see org.ofbiz.entity.Delegator#getRelatedOneCache(java.lang.String, org.ofbiz.entity.GenericValue, boolean)
+     * @deprecated use {@link #getRelatedOne(String, GenericValue, boolean)
+     */
+    @Deprecated
+    public GenericValue getRelatedOneCache(String relationName, GenericValue value) throws GenericEntityException {
+        return this.getRelatedOne(relationName, value, true);
+    }
+
+    /* (non-Javadoc)
+     * @see org.ofbiz.entity.Delegator#getRelatedOne(java.lang.String, org.ofbiz.entity.GenericValue, boolean)
+     */
+    public GenericValue getRelatedOne(String relationName, GenericValue value, boolean useCache) throws GenericEntityException {
         ModelRelation relation = value.getModelEntity().getRelation(relationName);
 
         if (relation == null) {
@@ -2030,30 +2046,7 @@ public class GenericDelegator implements Delegator {
             fields.put(keyMap.getRelFieldName(), value.get(keyMap.getFieldName()));
         }
 
-        return this.findByPrimaryKey(relation.getRelEntityName(), fields);
-    }
-
-    /* (non-Javadoc)
-     * @see org.ofbiz.entity.Delegator#getRelatedOneCache(java.lang.String, org.ofbiz.entity.GenericValue)
-     */
-    public GenericValue getRelatedOneCache(String relationName, GenericValue value) throws GenericEntityException {
-        ModelEntity modelEntity = value.getModelEntity();
-        ModelRelation relation = modelEntity.getRelation(relationName);
-
-        if (relation == null) {
-            throw new GenericModelException("Could not find relation for relationName: " + relationName + " for value " + value);
-        }
-        if (!"one".equals(relation.getType()) && !"one-nofk".equals(relation.getType())) {
-            throw new GenericModelException("Relation is not a 'one' or a 'one-nofk' relation: " + relationName + " of entity " + value.getEntityName());
-        }
-
-        Map<String, Object> fields = FastMap.newInstance();
-        for (int i = 0; i < relation.getKeyMapsSize(); i++) {
-            ModelKeyMap keyMap = relation.getKeyMap(i);
-            fields.put(keyMap.getRelFieldName(), value.get(keyMap.getFieldName()));
-        }
-
-        return this.findByPrimaryKeyCache(relation.getRelEntityName(), fields);
+        return this.findOne(relation.getRelEntityName(), fields, useCache);
     }
 
 

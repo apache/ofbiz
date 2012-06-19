@@ -62,7 +62,7 @@ public class GeoWorker {
         List<GenericValue> geoList = FastList.newInstance();
         List<GenericValue> thisGeoAssoc = null;
         try {
-            thisGeoAssoc = geo.getRelated("AssocGeoAssoc", UtilMisc.toMap("geoAssocTypeId", "GROUP_MEMBER"), null);
+            thisGeoAssoc = geo.getRelated("AssocGeoAssoc", UtilMisc.toMap("geoAssocTypeId", "GROUP_MEMBER"), null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Unable to get associated Geo GROUP_MEMBER relationship(s)", module);
         }
@@ -70,7 +70,7 @@ public class GeoWorker {
             for (GenericValue nextGeoAssoc: thisGeoAssoc) {
                 GenericValue nextGeo = null;
                 try {
-                    nextGeo = nextGeoAssoc.getRelatedOne("MainGeo");
+                    nextGeo = nextGeoAssoc.getRelatedOne("MainGeo", false);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "Unable to get related Geo", module);
                 }

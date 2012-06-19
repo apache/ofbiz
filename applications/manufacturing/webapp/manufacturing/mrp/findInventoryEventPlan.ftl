@@ -148,7 +148,7 @@ document.lookupinventory.productId.focus();
         <#assign count = lowIndex>
         <#assign productTmp = "">
         <#list inventoryList[lowIndex..highIndex-1] as inven>
-            <#assign product = inven.getRelatedOne("Product")>
+            <#assign product = inven.getRelatedOne("Product", false)>
             <#if facilityId?exists && facilityId?has_content>
             </#if>
             <#if ! product.equals( productTmp )>
@@ -161,7 +161,7 @@ document.lookupinventory.productId.focus();
                 <#if qohEvents?has_content>
                     <#assign initialQohEvent = Static["org.ofbiz.entity.util.EntityUtil"].getFirst(qohEvents)>
                 </#if>
-                <#if initialQohEvent != null>
+                <#if initialQohEvent??>
                     <#if initialQohEvent.quantity?has_content>
                         <#assign quantityAvailableAtDate = initialQohEvent.quantity>
                     </#if>
@@ -176,7 +176,7 @@ document.lookupinventory.productId.focus();
                       <b>[${inven.productId}]</b>&nbsp;&nbsp;${product.internalName?if_exists}
                   </th>
                   <td>
-                    <#if productFacility != null && productFacility?has_content>
+                    <#if productFacility?has_content>
                       <div>
                       <b>${uiLabelMap.ProductFacility}:</b>&nbsp;${productFacility.facilityId?if_exists}
                       </div>
@@ -208,7 +208,7 @@ document.lookupinventory.productId.focus();
             </#if>
             <#assign quantityAvailableAtDate = quantityAvailableAtDate?default(0) + inven.getBigDecimal("quantity")>
             <#assign productTmp = product>
-            <#assign MrpEventType = inven.getRelatedOne("MrpEventType")>
+            <#assign MrpEventType = inven.getRelatedOne("MrpEventType", false)>
             <tr class="${rowClass}">
               <td>${MrpEventType.get("description",locale)}</td>
               <td>&nbsp;</td>

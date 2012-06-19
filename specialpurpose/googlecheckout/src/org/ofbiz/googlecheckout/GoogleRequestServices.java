@@ -517,7 +517,7 @@ public class GoogleRequestServices {
                 GenericValue googleOrder = null;
                 ShipItemsRequest isr = null;
                 for (GenericValue issue : issued) {
-                    GenericValue orderItem = issue.getRelatedOne("OrderItem");
+                    GenericValue orderItem = issue.getRelatedOne("OrderItem", false);
                     String shipmentItemSeqId = issue.getString("shipmentItemSeqId");
                     String productId = orderItem.getString("productId");
                     String orderId = issue.getString("orderId");
@@ -538,12 +538,12 @@ public class GoogleRequestServices {
                         GenericValue packageContent = EntityUtil.getFirst(spc);
                         String carrier = null;
                         if (UtilValidate.isNotEmpty(packageContent)) {
-                            GenericValue shipPackage = packageContent.getRelatedOne("ShipmentPackage");
+                            GenericValue shipPackage = packageContent.getRelatedOne("ShipmentPackage", false);
                             if (UtilValidate.isNotEmpty(shipPackage)) {
-                                List<GenericValue> prs = shipPackage.getRelated("ShipmentPackageRouteSeg");
+                                List<GenericValue> prs = shipPackage.getRelated("ShipmentPackageRouteSeg", null, null, false);
                                 GenericValue packageRoute = EntityUtil.getFirst(prs);
                                 if (UtilValidate.isNotEmpty(packageRoute)) {
-                                    List<GenericValue> srs = packageRoute.getRelated("ShipmentRouteSegment");
+                                    List<GenericValue> srs = packageRoute.getRelated("ShipmentRouteSegment", null, null, false);
                                     GenericValue route = EntityUtil.getFirst(srs);
                                     String track = packageRoute.getString("trackingCode");
                                     if (UtilValidate.isNotEmpty(route)) {

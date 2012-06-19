@@ -409,7 +409,7 @@ public class BOMNode {
         String serviceName = null;
         if (this.productAssoc != null && this.productAssoc.getString("estimateCalcMethod") != null) {
             try {
-                GenericValue genericService = productAssoc.getRelatedOne("CustomMethod");
+                GenericValue genericService = productAssoc.getRelatedOne("CustomMethod", false);
                 if (genericService != null && genericService.getString("customMethodName") != null) {
                     serviceName = genericService.getString("customMethodName");
                 }
@@ -613,16 +613,16 @@ public class BOMNode {
             }
             List<GenericValue> pfs = null;
             if (UtilValidate.isEmpty(facilityId)) {
-                pfs = getProduct().getRelatedCache("ProductFacility");
+                pfs = getProduct().getRelated("ProductFacility", null, null, true);
             } else {
-                pfs = getProduct().getRelatedCache("ProductFacility", UtilMisc.toMap("facilityId", facilityId), null);
+                pfs = getProduct().getRelated("ProductFacility", UtilMisc.toMap("facilityId", facilityId), null, true);
             }
             if (UtilValidate.isEmpty(pfs)) {
                 if (getSubstitutedNode() != null && getSubstitutedNode().getProduct() != null) {
                     if (UtilValidate.isEmpty(facilityId)) {
-                        pfs = getSubstitutedNode().getProduct().getRelatedCache("ProductFacility");
+                        pfs = getSubstitutedNode().getProduct().getRelated("ProductFacility", null, null, true);
                     } else {
-                        pfs = getSubstitutedNode().getProduct().getRelatedCache("ProductFacility", UtilMisc.toMap("facilityId", facilityId), null);
+                        pfs = getSubstitutedNode().getProduct().getRelated("ProductFacility", UtilMisc.toMap("facilityId", facilityId), null, true);
                     }
                 }
             }
@@ -649,7 +649,7 @@ public class BOMNode {
     public boolean isManufactured(boolean ignoreSupplierProducts) {
         List<GenericValue> supplierProducts = null;
         try {
-            supplierProducts = product.getRelated("SupplierProduct", UtilMisc.toMap("supplierPrefOrderId", "10_MAIN_SUPPL"), UtilMisc.toList("minimumOrderQuantity"));
+            supplierProducts = product.getRelated("SupplierProduct", UtilMisc.toMap("supplierPrefOrderId", "10_MAIN_SUPPL"), UtilMisc.toList("minimumOrderQuantity"), false);
         } catch (GenericEntityException gee) {
             Debug.logError("Problem in BOMNode.isManufactured()", module);
         }

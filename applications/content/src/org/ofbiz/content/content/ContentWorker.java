@@ -153,17 +153,17 @@ public class ContentWorker implements org.ofbiz.widget.ContentWorkerInterface {
         if (partyId != null && roleTypeId != null) {
             List<GenericValue> alternateViews = null;
             try {
-                alternateViews = content.getRelatedCache("ContentAssocDataResourceViewTo", UtilMisc.toMap("caContentAssocTypeId", "ALTERNATE_ROLE"), UtilMisc.toList("-caFromDate"));
+                alternateViews = content.getRelated("ContentAssocDataResourceViewTo", UtilMisc.toMap("caContentAssocTypeId", "ALTERNATE_ROLE"), UtilMisc.toList("-caFromDate"), true);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error finding alternate content: " + e.toString(), module);
             }
 
             alternateViews = EntityUtil.filterByDate(alternateViews, UtilDateTime.nowTimestamp(), "caFromDate", "caThruDate", true);
             for(GenericValue thisView : alternateViews) {
-                GenericValue altContentRole = EntityUtil.getFirst(EntityUtil.filterByDate(thisView.getRelatedByAndCache("ContentRole", UtilMisc.toMap("partyId", partyId, "roleTypeId", roleTypeId))));
+                GenericValue altContentRole = EntityUtil.getFirst(EntityUtil.filterByDate(thisView.getRelated("ContentRole", UtilMisc.toMap("partyId", partyId, "roleTypeId", roleTypeId), null, true)));
                 GenericValue altContent = null;
                 if (UtilValidate.isNotEmpty(altContentRole)) {
-                    altContent = altContentRole.getRelatedOneCache("Content");
+                    altContent = altContentRole.getRelatedOne("Content", true);
                     if (altContent != null) {
                         content = altContent;
                     }
@@ -375,7 +375,7 @@ public class ContentWorker implements org.ofbiz.widget.ContentWorkerInterface {
 
         List<GenericValue> alternateViews = null;
         try {
-            alternateViews = view.getRelatedCache("ContentAssocDataResourceViewTo", UtilMisc.toMap("caContentAssocTypeId", "ALTERNATE_LOCALE"), UtilMisc.toList("-caFromDate"));
+            alternateViews = view.getRelated("ContentAssocDataResourceViewTo", UtilMisc.toMap("caContentAssocTypeId", "ALTERNATE_LOCALE"), UtilMisc.toList("-caFromDate"), true);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Error finding alternate locale content: " + e.toString(), module);
             return contentAssocDataResourceViewFrom;
@@ -433,19 +433,19 @@ public class ContentWorker implements org.ofbiz.widget.ContentWorkerInterface {
             }
             contentId = (String) content.get("contentId");
             contentTypeId = (String) content.get("contentTypeId");
-            List<GenericValue> topicList = content.getRelatedByAnd("ToContentAssoc", UtilMisc.toMap("contentAssocTypeId", "TOPIC"));
+            List<GenericValue> topicList = content.getRelated("ToContentAssoc", UtilMisc.toMap("contentAssocTypeId", "TOPIC"), null, false);
             List<String> topics = FastList.newInstance();
             for (int i = 0; i < topicList.size(); i++) {
                 GenericValue assoc = topicList.get(i);
                 topics.add(assoc.getString("contentId"));
             }
-            List<GenericValue> keywordList = content.getRelatedByAnd("ToContentAssoc", UtilMisc.toMap("contentAssocTypeId", "KEYWORD"));
+            List<GenericValue> keywordList = content.getRelated("ToContentAssoc", UtilMisc.toMap("contentAssocTypeId", "KEYWORD"), null, false);
             List<String> keywords = FastList.newInstance();
             for (int i = 0; i < keywordList.size(); i++) {
                 GenericValue assoc = keywordList.get(i);
                 keywords.add(assoc.getString("contentId"));
             }
-            List<GenericValue> purposeValueList = content.getRelatedCache("ContentPurpose");
+            List<GenericValue> purposeValueList = content.getRelated("ContentPurpose", null, null, true);
             List<String> purposes = FastList.newInstance();
             for (int i = 0; i < purposeValueList.size(); i++) {
                 GenericValue purposeValue = purposeValueList.get(i);
@@ -507,7 +507,7 @@ public class ContentWorker implements org.ofbiz.widget.ContentWorkerInterface {
 
                     boolean isFollow = checkWhen(assocContext, (String) whenMap.get("followWhen"));
                     if (isFollow) {
-                        GenericValue thisContent = assocValue.getRelatedOne(assocRelation);
+                        GenericValue thisContent = assocValue.getRelatedOne(assocRelation, false);
                         traverse(delegator, thisContent, fromDate, thruDate, whenMap, depthIdx + 1, thisNode, contentAssocTypeId, pickList, relatedDirection);
                     }
                 }
@@ -608,7 +608,7 @@ public class ContentWorker implements org.ofbiz.widget.ContentWorkerInterface {
     public static List<Object> getPurposes(GenericValue content) {
         List<Object> purposes = FastList.newInstance();
         try {
-            List<GenericValue> purposeValueList = content.getRelatedCache("ContentPurpose");
+            List<GenericValue> purposeValueList = content.getRelated("ContentPurpose", null, null, true);
             for (int i = 0; i < purposeValueList.size(); i++) {
                 GenericValue purposeValue = purposeValueList.get(i);
                 purposes.add(purposeValue.get("contentPurposeTypeId"));
@@ -622,7 +622,7 @@ public class ContentWorker implements org.ofbiz.widget.ContentWorkerInterface {
     public static List<Object> getSections(GenericValue content) {
         List<Object> sections = FastList.newInstance();
         try {
-            List<GenericValue> sectionValueList = content.getRelatedCache("FromContentAssoc");
+            List<GenericValue> sectionValueList = content.getRelated("FromContentAssoc", null, null, true);
             for (int i = 0; i < sectionValueList.size(); i++) {
                 GenericValue sectionValue = sectionValueList.get(i);
                 String contentAssocPredicateId = (String)sectionValue.get("contentAssocPredicateId");
@@ -639,7 +639,7 @@ public class ContentWorker implements org.ofbiz.widget.ContentWorkerInterface {
     public static List<Object> getTopics(GenericValue content) {
         List<Object> topics = FastList.newInstance();
         try {
-            List<GenericValue> topicValueList = content.getRelatedCache("FromContentAssoc");
+            List<GenericValue> topicValueList = content.getRelated("FromContentAssoc", null, null, true);
             for (int i = 0; i < topicValueList.size(); i++) {
                 GenericValue topicValue = topicValueList.get(i);
                 String contentAssocPredicateId = (String)topicValue.get("contentAssocPredicateId");

@@ -775,7 +775,9 @@ public interface Delegator {
      *            GenericValue instance containing the entity
      * @return List of GenericValue instances as specified in the relation
      *         definition
+     * @deprecated use {@link #getRelated(String, Map, List, GenericValue, boolean)}
      */
+    @Deprecated
     public List<GenericValue> getRelated(String relationName, Map<String, ? extends Object> byAndFields, List<String> orderBy, GenericValue value) throws GenericEntityException;
 
     /**
@@ -791,8 +793,33 @@ public interface Delegator {
      *            GenericValue instance containing the entity
      * @return List of GenericValue instances as specified in the relation
      *         definition
+     * @deprecated use {@link #getRelated(String, Map, List, GenericValue, boolean)}
      */
+    @Deprecated
     public List<GenericValue> getRelatedCache(String relationName, GenericValue value) throws GenericEntityException;
+
+    /**
+     * Get the named Related Entity for the GenericValue from the persistent
+     * store
+     *
+     * @param relationName
+     *            String containing the relation name which is the combination
+     *            of relation.title and relation.rel-entity-name as specified in
+     *            the entity XML definition file
+     * @param byAndFields
+     *            the fields that must equal in order to keep; may be null
+     * @param orderBy
+     *            The fields of the named entity to order the query by; may be
+     *            null; optionally add a " ASC" for ascending or " DESC" for
+     *            descending
+     * @param value
+     *            GenericValue instance containing the entity
+     * @param useCache
+     *            Whether to cache the results
+     * @return List of GenericValue instances as specified in the relation
+     *         definition
+     */
+    public List<GenericValue> getRelated(String relationName, Map<String, ? extends Object> byAndFields, List<String> orderBy, GenericValue value, boolean useCache) throws GenericEntityException;
 
     /**
      * Get a dummy primary key for the named Related Entity for the GenericValue
@@ -812,23 +839,44 @@ public interface Delegator {
     public GenericPK getRelatedDummyPK(String relationName, Map<String, ? extends Object> byAndFields, GenericValue value) throws GenericEntityException;
 
     /**
-     * Get related entity where relation is of type one, uses findByPrimaryKey
+     * Get related entity where relation is of type one, uses findOne
      * NOTE 20080502: 7 references
      *
      * @throws IllegalArgumentException
      *             if the list found has more than one item
+     * @deprecated use {@link #getRelatedOne(String, GenericValue, boolean)
      */
+    @Deprecated
     public GenericValue getRelatedOne(String relationName, GenericValue value) throws GenericEntityException;
 
     /**
-     * Get related entity where relation is of type one, uses findByPrimaryKey,
+     * Get related entity where relation is of type one, uses findOne
      * checking first in the cache to see if the desired value is there NOTE
      * 20080502: 1 references
      *
      * @throws IllegalArgumentException
      *             if the list found has more than one item
+     * @deprecated use {@link #getRelatedOne(String, GenericValue, boolean)
      */
+    @Deprecated
     public GenericValue getRelatedOneCache(String relationName, GenericValue value) throws GenericEntityException;
+
+    /**
+     * Get related entity where relation is of type one, uses findByPrimaryKey
+     *
+     * @param relationName
+     *            String containing the relation name which is the combination
+     *            of relation.title and relation.rel-entity-name as specified in
+     *            the entity XML definition file
+     * @param value
+     *            GenericValue instance containing the entity
+     * @param useCache
+     *            Whether to cache the results
+     * @return GenericValue that is the related entity
+     * @throws IllegalArgumentException
+     *             if the list found has more than one item
+     */
+    public GenericValue getRelatedOne(String relationName, GenericValue value, boolean useCache) throws GenericEntityException;
 
     public void initEntityEcaHandler();
 

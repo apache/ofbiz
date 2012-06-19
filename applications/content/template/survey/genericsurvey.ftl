@@ -68,12 +68,12 @@ under the License.
     <input type="password" size="30" class="textBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "CONTENT"/>
      <#if (answer.contentId)?has_content>
-      <#assign content = answer.getRelatedOne("Content")>
+      <#assign content = answer.getRelatedOne("Content", false)>
       <a href="/content/control/img?imgId=${content.dataResourceId}" class="buttontext">${answer.contentId}</a>&nbsp;-&nbsp;${content.contentName?if_exists}&nbsp;&nbsp;&nbsp;
     </#if>
     <input type="file" size="15" name="${questionFieldName}" class="inputBox"/>
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "OPTION"/>
-    <#assign options = surveyQuestionAndAppl.getRelated("SurveyQuestionOption", sequenceSort)?if_exists/>
+    <#assign options = surveyQuestionAndAppl.getRelated("SurveyQuestionOption", null, sequenceSort, false)?if_exists/>
     <#assign selectedOption = (answer.surveyOptionSeqId)?default("_NA_")/>
     <select name="${questionFieldName}">
       <#if surveyQuestionAndAppl.requiredField?default("N") != "Y">
@@ -90,7 +90,7 @@ under the License.
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "ENUMERATION"/>
     <select name="${questionFieldName}">
     <#assign formatString = surveyQuestionAndAppl.get("formatString")?if_exists/>
-    <#assign enums = surveyQuestionAndAppl.getRelated("Enumeration")/>
+    <#assign enums = surveyQuestionAndAppl.getRelated("Enumeration", null, null, false)/>
     <#list enums as enum>
         <#if (((answer.textResponse)?has_content && answer.textResponse == enum.enumId) || (defValue == enum.enumId))>
             <#assign selected = 'selected'/>
@@ -176,9 +176,9 @@ under the License.
     <#-- Get and setup MultiResp info for this question -->
     <#assign openMultiRespHeader = false/>
     <#assign closeMultiRespHeader = false/>
-    <#assign surveyMultiResp = surveyQuestionAndAppl.getRelatedOneCache("SurveyMultiResp")?if_exists/>
+    <#assign surveyMultiResp = surveyQuestionAndAppl.getRelatedOne("SurveyMultiResp", true)?if_exists/>
     <#if surveyMultiResp?has_content>
-      <#assign surveyMultiRespColumnList = surveyMultiResp.getRelatedCache("SurveyMultiRespColumn", Static["org.ofbiz.base.util.UtilMisc"].toList("sequenceNum"))/>
+      <#assign surveyMultiRespColumnList = surveyMultiResp.getRelated("SurveyMultiRespColumn", null, Static["org.ofbiz.base.util.UtilMisc"].toList("sequenceNum"), true)/>
 
       <#if lastSurveyMultiRespId == "">
         <#assign openMultiRespHeader = true/>

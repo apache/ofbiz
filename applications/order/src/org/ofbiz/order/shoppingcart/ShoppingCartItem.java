@@ -910,7 +910,7 @@ public class ShoppingCartItem implements java.io.Serializable {
         // find the fixed asset itself
         GenericValue fixedAsset = null;
         try {
-            fixedAsset = fixedAssetProduct.getRelatedOne("FixedAsset");
+            fixedAsset = fixedAssetProduct.getRelatedOne("FixedAsset", false);
         } catch (GenericEntityException e) {
             Map<String, Object> messageMap = UtilMisc.<String, Object>toMap("fixedAssetId", fixedAssetProduct.getString("fixedAssetId"));
             String msg = UtilProperties.getMessage(resource_error, "item.fixed_Asset_not_found", messageMap , cart.getLocale());
@@ -927,7 +927,7 @@ public class ShoppingCartItem implements java.io.Serializable {
         // DEJ20050725 this isn't being used anywhere, commenting out for now and not assigning from the getRelatedOne: GenericValue techDataCalendar = null;
         GenericValue techDataCalendar = null;
         try {
-            techDataCalendar = fixedAsset.getRelatedOne("TechDataCalendar");
+            techDataCalendar = fixedAsset.getRelatedOne("TechDataCalendar", false);
         } catch (GenericEntityException e) {
             Debug.logWarning(e, module);
         }
@@ -1848,7 +1848,7 @@ public class ShoppingCartItem implements java.io.Serializable {
         if (product != null) {
             List<GenericValue> featureAppls = null;
             try {
-                featureAppls = product.getRelated("ProductFeatureAppl");
+                featureAppls = product.getRelated("ProductFeatureAppl", null, null, false);
                 List<EntityExpr> filterExprs = UtilMisc.toList(EntityCondition.makeCondition("productFeatureApplTypeId", EntityOperator.EQUALS, "STANDARD_FEATURE"));
                 filterExprs.add(EntityCondition.makeCondition("productFeatureApplTypeId", EntityOperator.EQUALS, "REQUIRED_FEATURE"));
                 featureAppls = EntityUtil.filterByOr(featureAppls, filterExprs);
@@ -1874,7 +1874,7 @@ public class ShoppingCartItem implements java.io.Serializable {
         GenericValue product = this.getProduct();
         if (product != null) {
             try {
-                List<GenericValue> featureAppls = product.getRelated("ProductFeatureAndAppl");
+                List<GenericValue> featureAppls = product.getRelated("ProductFeatureAndAppl", null, null, false);
                 features=EntityUtil.filterByAnd(featureAppls,UtilMisc.toMap("productFeatureApplTypeId","STANDARD_FEATURE"));
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Unable to get features from product : " + product.get("productId"), module);
@@ -2169,7 +2169,7 @@ public class ShoppingCartItem implements java.io.Serializable {
         if (product != null) {
             List<GenericValue> featureAppls = null;
             try {
-                featureAppls = product.getRelated("ProductFeatureAppl");
+                featureAppls = product.getRelated("ProductFeatureAppl", null, null, false);
                 List<EntityExpr> filterExprs = UtilMisc.toList(EntityCondition.makeCondition("productFeatureApplTypeId", EntityOperator.EQUALS, "STANDARD_FEATURE"));
                 filterExprs.add(EntityCondition.makeCondition("productFeatureApplTypeId", EntityOperator.EQUALS, "REQUIRED_FEATURE"));
                 featureAppls = EntityUtil.filterByOr(featureAppls, filterExprs);

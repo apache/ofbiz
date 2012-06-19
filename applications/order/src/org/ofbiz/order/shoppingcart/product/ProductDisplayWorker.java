@@ -82,13 +82,13 @@ public class ProductDisplayWorker {
                 productsCategories = EntityUtil.filterByDate(productsCategories, true);
                 if (productsCategories != null) {
                     for(GenericValue productsCategoryMember : productsCategories) {
-                        GenericValue productsCategory = productsCategoryMember.getRelatedOneCache("ProductCategory");
+                        GenericValue productsCategory = productsCategoryMember.getRelatedOne("ProductCategory", true);
                         if ("CROSS_SELL_CATEGORY".equals(productsCategory.getString("productCategoryTypeId"))) {
-                            List<GenericValue> curPcms = productsCategory.getRelatedCache("ProductCategoryMember");
+                            List<GenericValue> curPcms = productsCategory.getRelated("ProductCategoryMember", null, null, true);
                             if (curPcms != null) {
                                 for(GenericValue curPcm : curPcms) {
                                     if (!products.containsKey(curPcm.getString("productId"))) {
-                                        GenericValue product = curPcm.getRelatedOneCache("Product");
+                                        GenericValue product = curPcm.getRelatedOne("Product", true);
                                         products.put(product.getString("productId"), product);
                                     }
                                 }
@@ -100,7 +100,7 @@ public class ProductDisplayWorker {
                 if (UtilValidate.isNotEmpty(complementProducts)) {
                     for(GenericValue productAssoc : complementProducts) {
                         if (!products.containsKey(productAssoc.getString("productIdTo"))) {
-                            GenericValue product = productAssoc.getRelatedOneCache("AssocProduct");
+                            GenericValue product = productAssoc.getRelatedOne("AssocProduct", true);
                             products.put(product.getString("productId"), product);
                         }
                     }
@@ -175,7 +175,7 @@ public class ProductDisplayWorker {
                 while (ordersIter != null && ordersIter.hasNext()) {
                     GenericValue orderRole = ordersIter.next();
                     // for each order role get all order items
-                    List<GenericValue> orderItems = orderRole.getRelated("OrderItem");
+                    List<GenericValue> orderItems = orderRole.getRelated("OrderItem", null, null, false);
                     Iterator<GenericValue> orderItemsIter = UtilMisc.toIterator(orderItems);
 
                     while (orderItemsIter != null && orderItemsIter.hasNext()) {
@@ -183,7 +183,7 @@ public class ProductDisplayWorker {
                         String productId = orderItem.getString("productId");
                         if (UtilValidate.isNotEmpty(productId)) {
                             // for each order item get the associated product
-                            GenericValue product = orderItem.getRelatedOneCache("Product");
+                            GenericValue product = orderItem.getRelatedOne("Product", true);
 
                             products.put(product.getString("productId"), product);
 

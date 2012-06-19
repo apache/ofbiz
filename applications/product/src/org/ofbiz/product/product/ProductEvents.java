@@ -684,16 +684,14 @@ public class ProductEvents {
                         if ("Y".equals(product.getString("isVirtual"))) {
                             boolean foundFeatureOnVariant = false;
                             // get/check all the variants
-                            List<GenericValue> variantAssocs = product.getRelatedByAnd("MainProductAssoc", UtilMisc.toMap("productAssocTypeId", "PRODUCT_VARIANT"));
+                            List<GenericValue> variantAssocs = product.getRelated("MainProductAssoc", UtilMisc.toMap("productAssocTypeId", "PRODUCT_VARIANT"), null, false);
                             variantAssocs = EntityUtil.filterByDate(variantAssocs);
-                            List<GenericValue> variants = EntityUtil.getRelated("AssocProduct", variantAssocs);
+                            List<GenericValue> variants = EntityUtil.getRelated("AssocProduct", null, variantAssocs, false);
                             Iterator<GenericValue> variantIter = variants.iterator();
                             while (!foundFeatureOnVariant && variantIter.hasNext()) {
                                 GenericValue variant = variantIter.next();
                                 // get the selectable features for the variant
-                                List<GenericValue> variantProductFeatureAndAppls = variant.getRelated("ProductFeatureAndAppl",
-                                        UtilMisc.toMap("productFeatureTypeId", productFeatureTypeId,
-                                                "productFeatureApplTypeId", "STANDARD_FEATURE", "description", description), null);
+                                List<GenericValue> variantProductFeatureAndAppls = variant.getRelated("ProductFeatureAndAppl", UtilMisc.toMap("productFeatureTypeId", productFeatureTypeId, "productFeatureApplTypeId", "STANDARD_FEATURE", "description", description), null, false);
                                 if (variantProductFeatureAndAppls.size() > 0) {
                                     foundFeatureOnVariant = true;
                                 }
@@ -771,19 +769,19 @@ public class ProductEvents {
         try {
             GenericValue product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), false);
             // get all the variants
-            List<GenericValue> variantAssocs = product.getRelatedByAnd("MainProductAssoc", UtilMisc.toMap("productAssocTypeId", "PRODUCT_VARIANT"));
+            List<GenericValue> variantAssocs = product.getRelated("MainProductAssoc", UtilMisc.toMap("productAssocTypeId", "PRODUCT_VARIANT"), null, false);
             variantAssocs = EntityUtil.filterByDate(variantAssocs);
-            List<GenericValue> variants = EntityUtil.getRelated("AssocProduct", variantAssocs);
+            List<GenericValue> variants = EntityUtil.getRelated("AssocProduct", null, variantAssocs, false);
             for (GenericValue variant: variants) {
                 // get the selectable features for the variant
-                List<GenericValue> productFeatureAndAppls = variant.getRelated("ProductFeatureAndAppl", UtilMisc.toMap("productFeatureTypeId", productFeatureTypeId, "productFeatureApplTypeId", "STANDARD_FEATURE"), null);
+                List<GenericValue> productFeatureAndAppls = variant.getRelated("ProductFeatureAndAppl", UtilMisc.toMap("productFeatureTypeId", productFeatureTypeId, "productFeatureApplTypeId", "STANDARD_FEATURE"), null, false);
                 for (GenericValue productFeatureAndAppl: productFeatureAndAppls) {
                     GenericPK productFeatureApplPK = delegator.makePK("ProductFeatureAppl");
                     productFeatureApplPK.setPKFields(productFeatureAndAppl);
                     delegator.removeByPrimaryKey(productFeatureApplPK);
                 }
             }
-            List<GenericValue> productFeatureAndAppls = product.getRelated("ProductFeatureAndAppl", UtilMisc.toMap("productFeatureTypeId", productFeatureTypeId, "productFeatureApplTypeId", "SELECTABLE_FEATURE"), null);
+            List<GenericValue> productFeatureAndAppls = product.getRelated("ProductFeatureAndAppl", UtilMisc.toMap("productFeatureTypeId", productFeatureTypeId, "productFeatureApplTypeId", "SELECTABLE_FEATURE"), null, false);
             for (GenericValue productFeatureAndAppl: productFeatureAndAppls) {
                 GenericPK productFeatureApplPK = delegator.makePK("ProductFeatureAppl");
                 productFeatureApplPK.setPKFields(productFeatureAndAppl);
@@ -1179,6 +1177,7 @@ public class ProductEvents {
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         String productId = request.getParameter("productId");
         String productTags = request.getParameter("productTags");
+        String statusId = request.getParameter("statusId");
         if (UtilValidate.isNotEmpty(productId) && UtilValidate.isNotEmpty(productTags)) {
             List<String> matchList = FastList.newInstance();
             Pattern regex = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
@@ -1195,10 +1194,14 @@ public class ProductEvents {
                 return "error";
             }
             
+            if(UtilValidate.isEmpty(statusId)) {
+                statusId = "KW_PENDING";
+            }
+            
             if(UtilValidate.isNotEmpty(matchList)) {
                 for (String keywordStr : matchList) {
                     try {
-                        dispatcher.runSync("createProductKeyword", UtilMisc.toMap("productId", productId, "keyword", keywordStr.trim(), "keywordTypeId", "KWT_TAG","statusId","KW_PENDING" , "userLogin", userLogin));
+                        dispatcher.runSync("createProductKeyword", UtilMisc.toMap("productId", productId, "keyword", keywordStr.trim(), "keywordTypeId", "KWT_TAG", "statusId", statusId, "userLogin", userLogin));
                     } catch (GenericServiceException e) {
                         request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
                         return "error";

@@ -24,11 +24,12 @@ import org.ofbiz.minilang.method.MethodContext;
 import org.w3c.dom.Element;
 
 /**
- * A single Mini-language element. This class is the superclass for all <code>Element</code> models.
+ * A single Mini-language element. This class is the superclass for all XML element models.
  */
 public class MiniLangElement {
 
-    public static final String module = MiniLangElement.class.getName();
+    // This must be private so subclasses cannot reference it.
+    private static final String module = MiniLangElement.class.getName();
 
     private final Object lineNumber;
     protected final SimpleMethod simpleMethod;

@@ -212,8 +212,7 @@ under the License.
 
             <#-- Show Associated Products (not for Variants) -->
             <#if cartLine.getProductId()?exists>
-              <#assign itemProductAssocList = cartLine.getProduct().getRelated("MainProductAssoc",
-                  Static["org.ofbiz.base.util.UtilMisc"].toList("productAssocTypeId", "sequenceNum"))?if_exists/>
+              <#assign itemProductAssocList = cartLine.getProduct().getRelated("MainProductAssoc", null, Static["org.ofbiz.base.util.UtilMisc"].toList("productAssocTypeId", "sequenceNum"), false)?if_exists/>
             </#if>
             <#if itemProductAssocList?exists && itemProductAssocList?has_content>
               <tr><td colspan="8"><hr /></td></tr>
@@ -306,7 +305,7 @@ under the License.
                 <td>&nbsp;</td>
               </tr>
             <#list shoppingCart.getAdjustments() as cartAdjustment>
-              <#assign adjustmentType = cartAdjustment.getRelatedOneCache("OrderAdjustmentType")>
+              <#assign adjustmentType = cartAdjustment.getRelatedOne("OrderAdjustmentType", true)>
               <tr>
                 <td colspan="4" nowrap="nowrap" align="right">
                   <div>

@@ -126,19 +126,19 @@ if (product) {
     }
 
     // get the product review(s)
-    reviews = product.getRelatedCache("ProductReview", null, ["-postedDateTime"]);
+    reviews = product.getRelated("ProductReview", null, ["-postedDateTime"], true);
     
     // get product variant for Box/Case/Each
     productVariants = [];
     boolean isAlternativePacking = ProductWorker.isAlternativePacking(delegator, product.productId, null);
     mainProducts = [];
     if(isAlternativePacking){
-        productVirtualVariants = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productIdTo", product.productId , "productAssocTypeId", "ALTERNATIVE_PACKAGE"), true);
+        productVirtualVariants = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productIdTo", product.productId , "productAssocTypeId", "ALTERNATIVE_PACKAGE"), null, true);
         if(productVirtualVariants){
             productVirtualVariants.each { virtualVariantKey ->
                 mainProductMap = [:];
-                mainProduct = virtualVariantKey.getRelatedOneCache("MainProduct");
-                quantityUom = mainProduct.getRelatedOneCache("QuantityUom");
+                mainProduct = virtualVariantKey.getRelatedOne("MainProduct", true);
+                quantityUom = mainProduct.getRelatedOne("QuantityUom", true);
                 mainProductMap.productId = mainProduct.productId;
                 mainProductMap.piecesIncluded = mainProduct.piecesIncluded;
                 mainProductMap.uomDesc = quantityUom.description;
@@ -170,7 +170,7 @@ if (product) {
             variantPriceJS.append("function getVariantPrice(sku) { ");
             
             virtualVariants.each { virtualAssoc ->
-                virtual = virtualAssoc.getRelatedOne("MainProduct");
+                virtual = virtualAssoc.getRelatedOne("MainProduct", false);
                 // Get price from a virtual product
                 priceContext.product = virtual;
                 if (cart.isSalesOrder()) {

@@ -22,10 +22,10 @@ import org.ofbiz.base.util.Debug;
 custRequestWorkEffortList = [];
 sprintStatusId = "SPRINT_CLOSED";
 sprintId = null;
-custRequestWorkEffortList = custRequestMap.getRelated("CustRequestWorkEffort");
+custRequestWorkEffortList = custRequestMap.getRelated("CustRequestWorkEffort", null, null, false);
 if (custRequestWorkEffortList) {
     custRequestWorkEffortList.each { custWorkEffortMap ->
-        workEffortMap = custWorkEffortMap.getRelatedOne("WorkEffort");
+        workEffortMap = custWorkEffortMap.getRelatedOne("WorkEffort", false);
         if ("SCRUM_SPRINT".equals(workEffortMap.workEffortTypeId) && "SPRINT_ACTIVE".equals(workEffortMap.currentStatusId)) {
             sprintId = workEffortMap.workEffortId;
             sprintStatusId = "SPRINT_ACTIVE";

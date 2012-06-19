@@ -413,8 +413,7 @@ public class ProductServices {
             GenericValue mainProduct = product;
 
             if (product.get("isVariant") != null && product.getString("isVariant").equalsIgnoreCase("Y")) {
-                List<GenericValue> c = product.getRelatedByAndCache("AssocProductAssoc",
-                        UtilMisc.toMap("productAssocTypeId", "PRODUCT_VARIANT"));
+                List<GenericValue> c = product.getRelated("AssocProductAssoc", UtilMisc.toMap("productAssocTypeId", "PRODUCT_VARIANT"), null, true);
                 //if (Debug.infoOn()) Debug.logInfo("Found related: " + c, module);
                 c = EntityUtil.filterByDate(c);
                 //if (Debug.infoOn()) Debug.logInfo("Found Filtered related: " + c, module);
@@ -422,7 +421,7 @@ public class ProductServices {
                     GenericValue asV = c.iterator().next();
 
                     //if (Debug.infoOn()) Debug.logInfo("ASV: " + asV, module);
-                    mainProduct = asV.getRelatedOneCache("MainProduct");
+                    mainProduct = asV.getRelatedOne("MainProduct", true);
                     //if (Debug.infoOn()) Debug.logInfo("Main product = " + mainProduct, module);
                 }
             }
@@ -520,9 +519,9 @@ public class ProductServices {
                 productAssocs = delegator.findList("ProductAssoc", cond, null, orderBy, null, true);
             } else {
                 if (productIdTo == null) {
-                    productAssocs = product.getRelatedCache("MainProductAssoc", UtilMisc.toMap("productAssocTypeId", type), orderBy);
+                    productAssocs = product.getRelated("MainProductAssoc", UtilMisc.toMap("productAssocTypeId", type), orderBy, true);
                 } else {
-                    productAssocs = product.getRelatedCache("AssocProductAssoc", UtilMisc.toMap("productAssocTypeId", type), orderBy);
+                    productAssocs = product.getRelated("AssocProductAssoc", UtilMisc.toMap("productAssocTypeId", type), orderBy, true);
                 }
             }
             // filter the list by date
@@ -859,7 +858,7 @@ public class ProductServices {
                     }
 
                     for (GenericValue goodIdentification: goodIdentificationList) {
-                        GenericValue giProduct = goodIdentification.getRelatedOne("Product");
+                        GenericValue giProduct = goodIdentification.getRelatedOne("Product", false);
                         if (giProduct != null) {
                             variantProductsById.put(giProduct.getString("productId"), giProduct);
                         }
@@ -1143,7 +1142,7 @@ public class ProductServices {
                 if (content != null) {
                     GenericValue dataResource = null;
                     try {
-                        dataResource = content.getRelatedOne("DataResource");
+                        dataResource = content.getRelatedOne("DataResource", false);
                     } catch (GenericEntityException e) {
                         Debug.logError(e, module);
                         return ServiceUtil.returnError(e.getMessage());
@@ -1349,7 +1348,7 @@ public class ProductServices {
                     if (UtilValidate.isNotEmpty(content)) {
                         GenericValue dataResource = null;
                         try {
-                            dataResource = content.getRelatedOne("DataResource");
+                            dataResource = content.getRelatedOne("DataResource", false);
                         } catch (GenericEntityException e) {
                             Debug.logError(e, module);
                             return ServiceUtil.returnError(e.getMessage());
