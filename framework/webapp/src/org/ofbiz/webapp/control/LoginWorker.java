@@ -659,7 +659,7 @@ public class LoginWorker {
             String mgrClassName = null;
             try {
                 cc = ContainerConfig.getContainer("catalina-container", configFile);
-                mgrClassName = ContainerConfig.getPropertyValue(cc, "manager-class", "org.apache.catalina.ha.session.DeltaManager");
+                mgrClassName = ContainerConfig.getPropertyValue(cc, "manager-class", "");
             } catch (ContainerException e) {
                 Debug.logError(e, "No catalina-container configuration found in container config!");
             }
@@ -1024,15 +1024,13 @@ public class LoginWorker {
     }
 
     protected static boolean hasBasePermission(GenericValue userLogin, HttpServletRequest request) {
-        ServletContext context = (ServletContext) request.getAttribute("servletContext");
-        Authorization authz = (Authorization) request.getAttribute("authz");
         Security security = (Security) request.getAttribute("security");
-
-        String serverId = (String) context.getAttribute("_serverId");
-        String contextPath = request.getContextPath();
-
-        ComponentConfig.WebappInfo info = ComponentConfig.getWebAppInfo(serverId, contextPath);
         if (security != null) {
+            ServletContext context = (ServletContext) request.getAttribute("servletContext");
+            Authorization authz = (Authorization) request.getAttribute("authz");
+            String serverId = (String) context.getAttribute("_serverId");
+            String contextPath = request.getContextPath();
+            ComponentConfig.WebappInfo info = ComponentConfig.getWebAppInfo(serverId, contextPath);
             if (info != null) {
                 for (String permission: info.getBasePermission()) {
                     if (!"NONE".equals(permission) && !security.hasEntityPermission(permission, "_VIEW", userLogin) &&

@@ -525,6 +525,9 @@
         <value xml:lang="zh">任务列表</value>
         <value xml:lang="zh_TW">任務列表</value>
     </property>
+    <property key="PageTitleJobDetails">
+        <value xml:lang="en">Job Details</value>
+    </property>
     <property key="PageTitleLogConfiguration">
         <value xml:lang="de">Log Konfiguration</value>
         <value xml:lang="en">Log Configuration</value>
@@ -822,6 +825,9 @@
         <value xml:lang="vi">Bảo trì bộ nhớ Đệm</value>
         <value xml:lang="zh">缓存维护</value>
         <value xml:lang="zh_TW">緩存維護</value>
+    </property>
+    <property key="WebtoolsCacheMemory">
+        <value xml:lang="en">Cache Memory</value>
     </property>
     <property key="WebtoolsCacheName">
         <value xml:lang="de">Cache Name</value>
@@ -3995,6 +4001,9 @@
         <value xml:lang="vi">Thời gian thực thi</value>
         <value xml:lang="zh">运行时间</value>
         <value xml:lang="zh_TW">運行時間</value>
+    </property>
+    <property key="WebtoolsRunTimeDataInfo">
+        <value xml:lang="en">Run Time Data Info</value>
     </property>
     <property key="WebtoolsSchedule">
         <value xml:lang="de">Einplanen</value>

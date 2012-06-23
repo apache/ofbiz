@@ -116,9 +116,8 @@ under the License.
     </form>
 
     <form name="LookupLocale" type="single" target="LookupLocale">
-        <field name="localeString"><text-find/></field>
-        <field name="localeName" title="${uiLabelMap.CommonLanguageTitle}"><text-find/></field>
-        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="localeString"><text-find hide-options="true"/></field>
+        <field name="localeName" title="${uiLabelMap.CommonLanguageTitle}"><text-find hide-options="true"/></field>
         <field name="submitButton" title="${uiLabelMap.CommonFind}"><submit button-type="button"/></field>
     </form>
 
