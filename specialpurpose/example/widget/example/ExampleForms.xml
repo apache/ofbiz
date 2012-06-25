@@ -146,7 +146,7 @@ under the License.
     <!-- Typically, this extended form wouldn't be necessary. The parent form (EditExample) would
         have these settings. -->
     <form name="EditExampleBackgroundSubmit" type="single" extends="EditExample" target="updateExampleAjax">
-        <alt-target use-when="example==null" target="createExampleAjax"/>
+        <alt-target use-when="example==null" target="createExampleJson"/>
         <field name="statusId" use-when="example==null" title="${uiLabelMap.CommonStatus}" id-name="statusId">
             <drop-down allow-empty="false">
                 <entity-options entity-name="ExampleStatusItem" description="${description}"/>

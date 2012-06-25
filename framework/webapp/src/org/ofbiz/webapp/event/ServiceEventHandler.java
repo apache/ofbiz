@@ -365,6 +365,7 @@ public class ServiceEventHandler implements EventHandler {
                 responseString = ModelService.RESPOND_SUCCESS;
             } else {
                 responseString = (String) result.get(ModelService.RESPONSE_MESSAGE);
+                request.setAttribute(ModelService.RESPONSE_MESSAGE,result.get(ModelService.RESPONSE_MESSAGE)); // necessary for Ajax-Json and ModelService.RESPOND_FAIL
             }
 
             // set the messages in the request; this will be picked up by messages.ftl and displayed

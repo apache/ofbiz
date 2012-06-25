@@ -19,6 +19,11 @@
     under the License.
 -->
 <resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    
+    <property key="FormFieldTitle_titleLabel">
+        <value xml:lang="en">Screenlet Title Label</value>
+        <value xml:lang="fr">Label de titre de la screenlet</value>
+    </property>
     <property key="tooltip_mgmtPageId">
         <value xml:lang="en">Used for recap link</value>
         <value xml:lang="fr">Utilisé dans le lien vers la page de management</value>

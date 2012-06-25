@@ -74,12 +74,6 @@ under the License.
         </response>
         <response name="error" type="view" value="EditExample"/>
     </request-map>
-    <request-map uri="createExampleAjax">
-        <security https="true" auth="true"/>
-        <event type="service" invoke="createExample"/>
-        <response name="success" type="request" value="json"/>
-        <response name="error" type="request" value="json"/>
-    </request-map>
     <request-map uri="updateExampleAjax">
         <security https="true" auth="true"/>
         <event type="service" invoke="updateExample"/>

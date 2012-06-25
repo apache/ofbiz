@@ -20,6 +20,7 @@
         <security https="true" auth="true"/>
         <event type="service" invoke="createExample"/>
         <response name="success" type="request" value="json"/>
+        <response name="fail" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
     <request-map uri="updateExampleJson">

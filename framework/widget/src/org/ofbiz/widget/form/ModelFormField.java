@@ -2563,6 +2563,7 @@ public class ModelFormField {
         protected FlexibleStringExpander portletSeqId;
         protected List<String> formsToSerialize = FastList.newInstance();
         protected List<WidgetWorker.Parameter> parameterList = FastList.newInstance();
+        protected FlexibleMapAccessor<Map<String, String>> parametersMapAcsr;
 
         public ShowPortletItem(Element element, ShowPortletLink showPortletLink) {
             this.showPortletLink = showPortletLink;
@@ -2577,6 +2578,7 @@ public class ModelFormField {
             this.setImageTitle(element.getAttribute("image-title"));
             this.setTarget(element.getAttribute("target"));
             this.setImage (element.getAttribute("image-location"));
+            this.parametersMapAcsr = FlexibleMapAccessor.getInstance(element.getAttribute("parameters-map"));
             this.setSize(element.getAttribute("size"));
             this.setCollapseScreenlet(element.getAttribute("collapse-screenlet"));
             this.setMarkSelected(element.getAttribute("mark-selected"));
@@ -2678,6 +2680,10 @@ public class ModelFormField {
 
         public Map<String, String> getParameterMap(Map<String, Object> context) {
             Map<String, String> fullParameterMap = FastMap.newInstance();
+            Map<String, String> addlParamMap = this.parametersMapAcsr.get(context);
+            if (addlParamMap != null) {
+                fullParameterMap.putAll(addlParamMap);
+            }
             for (WidgetWorker.Parameter parameter: this.parameterList) {
                 String paramValue = parameter.getValue(context);
                 if (UtilValidate.isNotEmpty(paramValue) || parameter.sendIfEmpty(context)){

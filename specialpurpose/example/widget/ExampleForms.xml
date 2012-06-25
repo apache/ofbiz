@@ -90,8 +90,9 @@ under the License.
         <field name="description" title="${uiLabelMap.CommonDescription}" sort-field="true"><display/></field>
         <field name="exampleDate" ><display type="date"/></field>
         <field name="deleteLink" title=" ">
-            <show-portlet portlet-id="ListExample" target="deleteExampleAjax" parameters-map="queryStringMap"
-                          request-confirmation="true" image-location="${iconsPurpose.Delete}" image-title="${uiLabelMap.IconsTooltips_Delete}">
+            <show-portlet portlet-id="ListExample" target="deleteExamplePortlet" parameters-map="result.queryStringMap"
+                          request-confirmation="true" confirmation-message="${uiLabelMap.CommonConfirmDelete} : [${exampleId}] ${exampleName}"
+                          image-location="${iconsPurpose.Delete}" image-title="${uiLabelMap.IconsTooltips_Delete}">
               <parameter param-name="exampleId"/>
               <parameter param-name="comingFromDelete" value="Y"/>
             </show-portlet>
@@ -134,7 +135,7 @@ under the License.
         <field name="exampleDate" ><display type="date"/></field>
     </form>
     <!-- Form used directly by a portlet (no screen including it) -->
-    <form name="CreateExample" type="single" default-entity-name="Example" target="createExampleAjax">
+    <form name="CreateExample" type="single" default-entity-name="Example" target="createExampleJson">
         <actions>
             <entity-one entity-name="StatusItem" value-field="currentStatus" auto-field-map="false">
                 <field-map field-name="statusId" from-field="example.statusId"/>
@@ -142,7 +143,7 @@ under the License.
         </actions>
         <auto-fields-service service-name="createExample"/>
         <field name="exampleTypeId" title="${uiLabelMap.CommonType}" id-name="exampleTypeId">
-            <drop-down allow-empty="false">
+            <drop-down allow-empty="true">
                 <!-- this is a neat feature, but not good for the type because the user would have to know the possible types in order to enter at least the first letter, so leaving it out by default; just uncomment to enable: <auto-complete/> -->
                 <entity-options entity-name="ExampleType" description="${description}">
                     <entity-order-by field-name="description"/>
