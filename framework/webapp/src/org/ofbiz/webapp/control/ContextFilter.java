@@ -305,7 +305,7 @@ public class ContextFilter implements Filter {
                     config.getServletContext().setAttribute("delegator", delegator);
 
                     // clear web context objects
-                    config.getServletContext().setAttribute("authorization", null);
+                    config.getServletContext().setAttribute("authz", null);
                     config.getServletContext().setAttribute("security", null);
                     config.getServletContext().setAttribute("dispatcher", null);
 
@@ -317,10 +317,10 @@ public class ContextFilter implements Filter {
                     LocalDispatcher dispatcher = getDispatcher(config.getServletContext());
 
                     // set web context objects
-                    httpRequest.getSession().setAttribute("dispatcher", dispatcher);
-                    httpRequest.getSession().setAttribute("security", security);
+                    request.setAttribute("dispatcher", dispatcher);
+                    request.setAttribute("security", security);
                     
-                    httpRequest.setAttribute("tenantId", tenantId);
+                    request.setAttribute("tenantId", tenantId);
                 }
 
                 // NOTE DEJ20101130: do NOT always put the delegator name in the user's session because the user may 
@@ -420,7 +420,7 @@ public class ContextFilter implements Filter {
     }
 
     protected Authorization getAuthz() {
-        Authorization authz = (Authorization) config.getServletContext().getAttribute("authorization");
+        Authorization authz = (Authorization) config.getServletContext().getAttribute("authz");
         if (authz == null) {
             Delegator delegator = (Delegator) config.getServletContext().getAttribute("delegator");
 
