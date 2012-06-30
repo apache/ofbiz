@@ -992,6 +992,7 @@ under the License.
         <field name="add" title="${uiLabelMap.CommonAdd}"><submit/></field>
     </form>
     <form name="AddRoleType" type="single" title="Add a new roletype" target="createroletype"  list-name="parentRoleList">
+        <field name="partyId"><hidden value="${parameters.partyId}"/></field>
         <field name="roleTypeId" title="${uiLabelMap.PartyRoleTypeId}" required-field="true" entry-name="dummy" position="1"><text/></field>
         <field name="parentTypeId" position="2">
             <drop-down allow-empty="true">
