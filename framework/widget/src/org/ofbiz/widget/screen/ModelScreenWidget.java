@@ -346,9 +346,6 @@ public abstract class ModelScreenWidget extends ModelWidget {
                 for (ModelWidget subWidget : this.subWidgets) {
                     if (formName.equals(subWidget.getName()) && subWidget instanceof Form) {
                         this.navigationForm = (Form) subWidget;
-                        // Let's give this a try, it can be removed later if it
-                        // proves to cause problems
-                        this.padded = false;
                         break;
                     }
                 }
