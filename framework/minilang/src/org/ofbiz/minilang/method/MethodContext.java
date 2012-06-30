@@ -73,7 +73,11 @@ public class MethodContext implements Iterable<Map.Entry<String, Object>> {
         this.methodType = MethodContext.SERVICE;
         Map<String, Object> parametersCtx = UtilGenerics.checkMap(context.get("parameters"));
         this.parameters = UtilMisc.makeMapWritable(parametersCtx);
-        //putAllEnv(context);
+        for (Map.Entry<String, ? extends Object> entry : context.entrySet()) {
+            if (! "parameters".equals(entry.getKey())) {
+                this.putEnv(entry.getKey(), entry.getValue());
+            }
+        }
         loadThis(ctx, context, null);
     }
 
