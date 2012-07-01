@@ -94,7 +94,6 @@ public class GenerateContainer implements Container {
      */
     public boolean start() throws ContainerException {
         generateFiles();
-        System.exit(1);
         return true;
     }
 
