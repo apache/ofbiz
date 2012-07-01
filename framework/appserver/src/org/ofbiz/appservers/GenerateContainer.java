@@ -79,7 +79,7 @@ public class GenerateContainer implements Container {
         ofbizHome = System.getProperty("ofbiz.home");
         this.configFile = configFile;
         this.args = args;
-        isGeronimo = args[0].toLowerCase().contains("geronimo") || args[0].toLowerCase().contains("wasce");
+        isGeronimo = args[1].toLowerCase().contains("geronimo") || args[1].toLowerCase().contains("wasce");
         if (isGeronimo) {
             target="/META-INF/";
             geronimoHome = System.getenv("GERONIMO_HOME");
@@ -156,7 +156,7 @@ public class GenerateContainer implements Container {
             for(int inst = 0; inst <= instancesNumber; inst++) {
                 instanceNumber = (inst == 0 ? "" : inst).toString();
                 GenerateGeronimoDeployment geronimoDeployment = new GenerateGeronimoDeployment();
-                List<String> classpathJars = geronimoDeployment.generate(args[0], geronimoHostHome, instanceNumber);
+                List<String> classpathJars = geronimoDeployment.generate(args[1], geronimoHostHome, instanceNumber);
                 if (classpathJars == null) {
                     throw new ContainerException("Error in Geronimo deployment, please check the log");
                 }
@@ -233,7 +233,6 @@ public class GenerateContainer implements Container {
                         parseTemplate(files[i], dataMap);
                     }
                 }
-
                 String ofbizName = "ofbiz" + instanceNumber;
                 String separator = File.separator;
                 File workingDir = new File(geronimoHome + separator + "bin");
@@ -376,7 +375,7 @@ public class GenerateContainer implements Container {
             throw new ContainerException("Invalid application server type argument passed");
         }
 
-        String templateLocation = args[0];
+        String templateLocation = args[1];
         if (templateLocation == null) {
             throw new ContainerException("Unable to locate Application Server template directory");
         }
@@ -426,13 +425,13 @@ public class GenerateContainer implements Container {
 
     private String getTargetDirectory() throws ContainerException {
         // create the target file/directory
-        String targetDirectoryName = args.length > 1 ? args[1] : null;
+        String targetDirectoryName = args.length > 2 ? args[2] : null;
         if (targetDirectoryName == null) {
             targetDirectoryName = target;
         }
         String targetDirectory = null;
         if (!isGeronimo) {
-            targetDirectory = ofbizHome + targetDirectoryName + args[0];
+            targetDirectory = ofbizHome + targetDirectoryName + args[1];
         } else {
             targetDirectory = ofbizHome + targetDirectoryName;
         }
@@ -467,7 +466,6 @@ public class GenerateContainer implements Container {
                 }
             }
         }
-
         // create the target file/directory
         String targetDirectory = getTargetDirectory();
 
