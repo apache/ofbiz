@@ -143,7 +143,7 @@ under the License.
                 <not><if-empty field="parameters.exampleId"/></not>
             </condition>
             <link target="showPortalPage">
-                <parameter param-name="portalPageId" from-field="recapPageId" value="ExampleFullRecap"/>
+                <parameter param-name="portalPageId" from-field="recapPageId" value="ExampleRecap"/>
                 <parameter param-name="exampleId" from-field="parameters.exampleId"/>
                 <image src="${iconsPurpose.Overview}" title="${uiLabelMap.IconsTooltips_Overview}"/>
             </link>
