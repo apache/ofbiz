@@ -50,6 +50,7 @@ public class ComponentContainer implements Container {
     protected Classpath classPath = new Classpath(System.getProperty("java.class.path"));
     protected Classpath libraryPath = new Classpath(System.getProperty("java.library.path"));
     protected String configFileLocation = null;
+    private String name;
     private boolean loaded = false;
     private String instrumenterClassName;
     private String instrumenterFile;
@@ -57,11 +58,12 @@ public class ComponentContainer implements Container {
     /**
      * @see org.ofbiz.base.container.Container#init(java.lang.String[], java.lang.String)
      */
-    public void init(String[] args, String configFile) throws ContainerException {
+    public void init(String[] args, String name, String configFile) throws ContainerException {
+        this.name = name;
         this.configFileLocation = configFile;
 
         // get the config for this container
-        ContainerConfig.Container cc = ContainerConfig.getContainer("component-container", configFileLocation);
+        ContainerConfig.Container cc = ContainerConfig.getContainer(name, configFileLocation);
 
         // check for an override loader config
         String loaderConfig = null;
@@ -297,6 +299,10 @@ public class ComponentContainer implements Container {
      * @see org.ofbiz.base.container.Container#stop()
      */
     public void stop() throws ContainerException {
+    }
+
+    public String getName() {
+        return name;
     }
 
     /**

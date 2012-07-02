@@ -38,8 +38,10 @@ public class BirtContainer implements Container {
     
     protected String configFile;
 
-    public void init(String[] args, String configFile)
-            throws ContainerException {
+    private String name;
+
+    public void init(String[] args, String name, String configFile) throws ContainerException {
+        this.name = name;
         this.configFile = configFile;
     }
 
@@ -50,13 +52,13 @@ public class BirtContainer implements Container {
         Debug.logInfo("Start BIRT container", module);
 
         // make sure the subclass sets the config name
-        if (this.getContainerConfigName() == null) {
+        if (getName() == null) {
             throw new ContainerException("Unknown container config name");
         }
         // get the container config
-        ContainerConfig.Container cc = ContainerConfig.getContainer(this.getContainerConfigName(), configFile);
+        ContainerConfig.Container cc = ContainerConfig.getContainer(getName(), configFile);
         if (cc == null) {
-            throw new ContainerException("No " + this.getContainerConfigName() + " configuration found in container config!");
+            throw new ContainerException("No " + getName() + " configuration found in container config!");
         }
 
         // create engine config
@@ -101,7 +103,7 @@ public class BirtContainer implements Container {
     public void stop() throws ContainerException {
     }
 
-    public String getContainerConfigName() {
-        return "birt-container";
+    public String getName() {
+        return name;
     }
 }

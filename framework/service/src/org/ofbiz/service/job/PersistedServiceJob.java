@@ -49,6 +49,8 @@ import org.ofbiz.service.calendar.RecurrenceInfo;
 import org.ofbiz.service.config.ServiceConfigUtil;
 import org.xml.sax.SAXException;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Entity Service Job - Store => Schedule => Run
  */
@@ -61,6 +63,7 @@ public class PersistedServiceJob extends GenericServiceJob {
     private Timestamp storedDate = null;
     private long nextRecurrence = -1;
     private long maxRetry = -1;
+    private long currentRetryCount = 0;
     private boolean warningLogged = false;
 
     /**
@@ -77,7 +80,14 @@ public class PersistedServiceJob extends GenericServiceJob {
         this.storedDate = jobValue.getTimestamp("runTime");
         this.runtime = storedDate.getTime();
         this.maxRetry = jobValue.get("maxRetry") != null ? jobValue.getLong("maxRetry").longValue() : -1;
-        
+        Long retryCount = jobValue.getLong("currentRetryCount");
+        if (retryCount != null) {
+            this.currentRetryCount = retryCount.longValue();
+        } else {
+            // backward compatibility
+            this.currentRetryCount = PersistedServiceJob.getRetries(jobValue, this.delegator);
+        }
+
         // Debug.logInfo("=============== New PersistedServiceJob, delegator from dctx is [" + dctx.getDelegator().getDelegatorName() + "] and delegator from jobValue is [" + jobValue.getDelegator().getDelegatorName() + "]", module);
     }
 
@@ -171,7 +181,7 @@ public class PersistedServiceJob extends GenericServiceJob {
                 }
                 Calendar next = expr.next(Calendar.getInstance());
                 if (next != null) {
-                    createRecurrence(job, next.getTimeInMillis());
+                    createRecurrence(job, next.getTimeInMillis(), false);
                 }
             }
         } catch (GenericEntityException e) {
@@ -180,7 +190,7 @@ public class PersistedServiceJob extends GenericServiceJob {
         if (Debug.infoOn()) Debug.logInfo("Job  [" + getJobName() + "] Id ["  + getJobId() + "] -- Next runtime: " + new Date(nextRecurrence), module);
     }
 
-    private void createRecurrence(GenericValue job, long next) throws GenericEntityException {
+    private void createRecurrence(GenericValue job, long next, boolean isRetryOnFailure) throws GenericEntityException {
         if (Debug.verboseOn()) Debug.logVerbose("Next runtime returned: " + next, module);
 
         if (next > runtime) {
@@ -196,6 +206,11 @@ public class PersistedServiceJob extends GenericServiceJob {
             newJob.set("startDateTime", null);
             newJob.set("runByInstanceId", null);
             newJob.set("runTime", new java.sql.Timestamp(next));
+            if (isRetryOnFailure) {
+                newJob.set("currentRetryCount", new Long(currentRetryCount + 1));
+            } else {
+                newJob.set("currentRetryCount", new Long(0));
+            }
             nextRecurrence = next;
             delegator.createSetNextSeqId(newJob);
             if (Debug.verboseOn()) Debug.logVerbose("Created next job entry: " + newJob, module);
@@ -206,8 +221,8 @@ public class PersistedServiceJob extends GenericServiceJob {
      * @see org.ofbiz.service.job.GenericServiceJob#finish()
      */
     @Override
-    protected void finish() throws InvalidJobException {
-        super.finish();
+    protected void finish(Map<String, Object> result) throws InvalidJobException {
+        super.finish(result);
 
         // set the finish date
         GenericValue job = getJob();
@@ -216,6 +231,15 @@ public class PersistedServiceJob extends GenericServiceJob {
             job.set("statusId", "SERVICE_FINISHED");
         }
         job.set("finishDateTime", UtilDateTime.nowTimestamp());
+        String jobResult = null;
+        if (ServiceUtil.isError(result)) {
+            jobResult = StringUtils.substring(ServiceUtil.getErrorMessage(result), 0, 255);
+        } else {
+            jobResult = StringUtils.substring(ServiceUtil.makeSuccessMessage(result, "", "", "", ""), 0, 255);
+        }
+        if (UtilValidate.isNotEmpty(jobResult)) {
+            job.set("jobResult", jobResult);
+        }
         try {
             job.store();
         } catch (GenericEntityException e) {
@@ -240,7 +264,7 @@ public class PersistedServiceJob extends GenericServiceJob {
                 cal.add(Calendar.MINUTE, ServiceConfigUtil.getFailedRetryMin());
                 long next = cal.getTimeInMillis();
                 try {
-                    createRecurrence(job, next);
+                    createRecurrence(job, next, true);
                 } catch (GenericEntityException gee) {
                     Debug.logError(gee, "ERROR: Unable to re-schedule job [" + getJobId() + "] to re-run : " + job, module);
                 }
@@ -252,6 +276,7 @@ public class PersistedServiceJob extends GenericServiceJob {
         // set the failed status
         job.set("statusId", "SERVICE_FAILED");
         job.set("finishDateTime", UtilDateTime.nowTimestamp());
+        job.set("jobResult", StringUtils.substring(t.getMessage(), 0, 255));
         try {
             job.store();
         } catch (GenericEntityException e) {
@@ -327,8 +352,7 @@ public class PersistedServiceJob extends GenericServiceJob {
     }
 
     // returns the number of current retries
-    private long getRetries() throws InvalidJobException {
-        GenericValue job = this.getJob();
+    private static long getRetries(GenericValue job, Delegator delegator) {
         String pJobId = job.getString("parentJobId");
         if (pJobId == null) {
             return 0;
@@ -349,9 +373,6 @@ public class PersistedServiceJob extends GenericServiceJob {
         if (maxRetry == -1) {
             return true;
         }
-        if (this.getRetries() < maxRetry) {
-            return true;
-        }
-        return false;
+        return currentRetryCount < maxRetry;
     }
 }

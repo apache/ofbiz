@@ -150,13 +150,6 @@ under the License.
         </subant>
     </target>
 
-    <target name="download-selenium"
-          description="Download the selenium server v1.0.3 20.8 MB download">
-        <subant target="install-seleniumxml">
-            <filelist dir="." files="framework/testtools/build.xml"/>
-        </subant>
-    </target>
-
     <target name="tests" depends="ofbiz-init">
         <subant target="tests">
             <filelist dir="." files="framework/build.xml"/>
@@ -863,7 +856,7 @@ under the License.
         <delete file="runtime/tmp/tmpUserLogin.xml"/>
     </target>
     <target name="create-admin-user-login"
-            description="Prompt for a user name, then create a user login with admin privileges and a temporary password equal to 'ofbiz'. After a successful login the user will be prompted for a new password.">
+            description="Prompt for a user name, then create a user login with admin privileges and a temporary password equal to 'ofbiz'. After a successful login the user will be prompted for a new password. Note: this uses load-admin-user-login target">
         <input addproperty="userLoginId" message="Enter user name (log in with the temporary password 'ofbiz'):"/>
         <antcall target="load-admin-user-login"/>
     </target>

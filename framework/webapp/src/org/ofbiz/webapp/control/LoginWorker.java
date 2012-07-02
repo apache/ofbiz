@@ -39,18 +39,16 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.component.ComponentConfig;
-import org.ofbiz.base.container.ContainerConfig;
-import org.ofbiz.base.container.ContainerException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.KeyStoreUtil;
 import org.ofbiz.base.util.StringUtil;
+import org.ofbiz.base.util.StringUtil.StringWrapper;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.StringUtil.StringWrapper;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericEntityException;
@@ -447,7 +445,7 @@ public class LoginWorker {
 
             if (setupNewDelegatorEtc) {
                 // now set the delegator and dispatcher in a bunch of places just in case they were changed
-                setWebContextObjects(request, response, delegator, dispatcher, true);
+                setWebContextObjects(request, response, delegator, dispatcher);
             }
 
             // check to see if a password change is required for the user
@@ -477,47 +475,28 @@ public class LoginWorker {
         }
     }
 
-    /*         persistSerialized is set at false in the context of a cluster when using (at least) DeltaManager.
-            Because we have no easy ways to set DeltaManager.pathname to null from OFBiz
-           So persistSerialized is set to true when login out. This prevent a NPE due to non serialized objects put in session*/
-    private static void setWebContextObjects(HttpServletRequest request, HttpServletResponse response, Delegator delegator, LocalDispatcher dispatcher, Boolean persistSerialized) {
+    private static void setWebContextObjects(HttpServletRequest request, HttpServletResponse response, Delegator delegator, LocalDispatcher dispatcher) {
         HttpSession session = request.getSession();
+        // NOTE: we do NOT want to set this in the servletContext, only in the request and session
+        // We also need to setup the security and authz objects since they are dependent on the delegator
+        Security security = null;
+        try {
+            security = SecurityFactory.getInstance(delegator);
+        } catch (SecurityConfigurationException e) {
+            Debug.logError(e, module);
+        }
+        Authorization authz = null;
+        try {
+            authz = AuthorizationFactory.getInstance(delegator);
+        } catch (SecurityConfigurationException e) {
+            Debug.logError(e, module);
+        }
 
-        // NOTE: we do NOT want to set this in the servletContet, only in the request and session
         session.setAttribute("delegatorName", delegator.getDelegatorName());
-
         request.setAttribute("delegator", delegator);
-        if (!persistSerialized) {
-            session.setAttribute("delegator", null);
-        } else {
-            session.setAttribute("delegator", delegator);
-        }
-
         request.setAttribute("dispatcher", dispatcher);
-        if (!persistSerialized) {
-            session.setAttribute("dispatcher", null);
-        } else {
-            session.setAttribute("dispatcher", dispatcher);
-        }
-
-        if (persistSerialized) {
-            // we also need to setup the security and authz objects since they are dependent on the delegator
-            try {
-                Security security = SecurityFactory.getInstance(delegator);
-                request.setAttribute("security", security);
-                session.setAttribute("security", security);
-            } catch (SecurityConfigurationException e) {
-                Debug.logError(e, module);
-            }
-
-            try {
-                Authorization authz = AuthorizationFactory.getInstance(delegator);
-                request.setAttribute("authz", authz);
-                session.setAttribute("authz", authz);
-            } catch (SecurityConfigurationException e) {
-                Debug.logError(e, module);
-            }
-        }
+        request.setAttribute("security", security);
+        request.setAttribute("authz", authz);
 
         // get rid of the visit info since it was pointing to the previous database, and get a new one
         session.removeAttribute("visitor");
@@ -652,22 +631,7 @@ public class LoginWorker {
 
             delegator = DelegatorFactory.getDelegator(delegatorName);
             LocalDispatcher dispatcher = ContextFilter.makeWebappDispatcher(session.getServletContext(), delegator);
-            // get the container configuration
-            String ofbizHome = System.getProperty("ofbiz.home");
-            String configFile = ofbizHome + "/framework/base/config/ofbiz-containers.xml";
-            ContainerConfig.Container cc = null;
-            String mgrClassName = null;
-            try {
-                cc = ContainerConfig.getContainer("catalina-container", configFile);
-                mgrClassName = ContainerConfig.getPropertyValue(cc, "manager-class", "org.apache.catalina.ha.session.DeltaManager");
-            } catch (ContainerException e) {
-                Debug.logError(e, "No catalina-container configuration found in container config!");
-            }
-            if ("org.apache.catalina.ha.session.DeltaManager".equals(mgrClassName)) {
-                setWebContextObjects(request, response, delegator, dispatcher, false);
-            } else {
-                setWebContextObjects(request, response, delegator, dispatcher, true);
-            }
+            setWebContextObjects(request, response, delegator, dispatcher);
         }
 
         // DON'T save the cart, causes too many problems: if (shoppingCart != null) session.setAttribute("shoppingCart", new WebShoppingCart(shoppingCart, session));
@@ -981,7 +945,7 @@ public class LoginWorker {
             if (!oldDelegatorName.equals(userLogin.getDelegator().getDelegatorName())) {
                 delegator = DelegatorFactory.getDelegator(userLogin.getDelegator().getDelegatorName());
                 dispatcher = ContextFilter.makeWebappDispatcher(servletContext, delegator);
-                setWebContextObjects(request, response, delegator, dispatcher, true);
+                setWebContextObjects(request, response, delegator, dispatcher);
             }
             // found userLogin, do the external login...
 
@@ -1024,15 +988,13 @@ public class LoginWorker {
     }
 
     protected static boolean hasBasePermission(GenericValue userLogin, HttpServletRequest request) {
-        ServletContext context = (ServletContext) request.getAttribute("servletContext");
-        Authorization authz = (Authorization) request.getAttribute("authz");
         Security security = (Security) request.getAttribute("security");
-
-        String serverId = (String) context.getAttribute("_serverId");
-        String contextPath = request.getContextPath();
-
-        ComponentConfig.WebappInfo info = ComponentConfig.getWebAppInfo(serverId, contextPath);
         if (security != null) {
+            ServletContext context = (ServletContext) request.getAttribute("servletContext");
+            Authorization authz = (Authorization) request.getAttribute("authz");
+            String serverId = (String) context.getAttribute("_serverId");
+            String contextPath = request.getContextPath();
+            ComponentConfig.WebappInfo info = ComponentConfig.getWebAppInfo(serverId, contextPath);
             if (info != null) {
                 for (String permission: info.getBasePermission()) {
                     if (!"NONE".equals(permission) && !security.hasEntityPermission(permission, "_VIEW", userLogin) &&

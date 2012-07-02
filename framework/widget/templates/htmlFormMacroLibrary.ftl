@@ -274,9 +274,10 @@ if(disa && document.styleSheets)
 
 <#macro renderCheckField items className alert id allChecked currentValue name event action>
 <#list items as item>
-<input type="checkbox"<#if (item_index == 0)> id="${id}"</#if> <@renderClass className alert /><#rt/>
+<span <@renderClass className alert />><#rt/>
+<input type="checkbox"<#if (item_index == 0)> id="${id}"</#if><#rt/>
 <#if allChecked?has_content && allChecked> checked="checked" <#elseif allChecked?has_content && !allChecked><#elseif currentValue?has_content && currentValue==item.value> checked="checked"</#if> name="${name?default("")?html}" value="${item.value?default("")?html}"<#if event?has_content> ${event}="${action}"</#if>/><#rt/>
-${item.description?default("")}
+${item.description?default("")}</span>
 </#list>
 </#macro>
 
@@ -674,23 +675,41 @@ Parameter: lastViewName, String, optional - If the ajaxEnabled parameter is true
           </#if>
       </#if>
     </#if>
-    <script type="text/javascript">
+	<script type="text/javascript">
         jQuery(document).ready(function(){
-            new ConstructLookup("${fieldFormName}", "${id}", document.${formName?html}.${name?html}, <#if descriptionFieldName?has_content>document.${formName?html}.${descriptionFieldName}<#else>null</#if>, "${formName?html}", "${width}", "${height}", "${position}", "${fadeBackground}", <#if ajaxEnabled?has_content && ajaxEnabled>"${ajaxUrl}", ${showDescription}<#else>"", false</#if>, "${presentation!}", "${defaultMinLength!2}", "${defaultDelay!300}"<#rt/>
-    <#if targetParameterIter?has_content>
-      <#assign isFirst = true>
-      <#lt/>, [<#rt/>
-      <#list targetParameterIter as item>
-        <#if isFirst>
-          <#lt/>document.${formName}.${item}<#rt/>
-          <#assign isFirst = false>
-        <#else>
-          <#lt/> ,document.${formName}.${item}<#rt/>
-        </#if>
-      </#list>
-      <#lt/>]<#rt/>
-    </#if>
-            <#lt/>);
+        	var options = {
+        		requestUrl : "${fieldFormName}",
+				inputFieldId : "${id}",
+				dialogTarget : document.${formName?html}.${name?html},
+				dialogOptionalTarget : <#if descriptionFieldName?has_content>document.${formName?html}.${descriptionFieldName}<#else>null</#if>,
+				formName : "${formName?html}",
+				width : "${width}",
+				height : "${height}",
+				position : "${position}",
+				modal : "${fadeBackground}",
+				ajaxUrl : <#if ajaxEnabled?has_content && ajaxEnabled>"${ajaxUrl}"<#else>""</#if>,
+				showDescription : <#if ajaxEnabled?has_content && ajaxEnabled>"${showDescription}"<#else>false</#if>,
+				presentation : "${presentation!}",
+				defaultMinLength : "${defaultMinLength!2}",
+				defaultDelay : "${defaultDelay!300}",
+				args : <#rt/>
+					    <#if targetParameterIter?has_content>
+						    <#assign isFirst = true>
+						    <#lt/>, [<#rt/>
+						    <#list targetParameterIter as item>
+						      <#if isFirst>
+						          <#lt/>document.${formName}.${item}<#rt/>
+						          <#assign isFirst = false>
+						      <#else>
+						          <#lt/> ,document.${formName}.${item}<#rt/>
+						      </#if>
+						    </#list>
+						    <#lt/>]<#rt/>
+					    <#else>[]
+					    </#if>
+            		   <#lt/>
+        	};
+		new Lookup(options).init();
         });
     </script>
 </#if>

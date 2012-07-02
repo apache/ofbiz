@@ -63,33 +63,4 @@ under the License.
     <Example exampleId="EX10" exampleName="Example 10" exampleTypeId="MADE_UP" statusId="EXST_IN_DESIGN"/>
     <Example exampleId="EX11" exampleName="Example 11" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
     <Example exampleId="EX12" exampleName="Example 12" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <!--#Bam# for screenlet navigation form -->
-    <Example exampleId="EX13" exampleName="Example 13" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX14" exampleName="Example 14" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX15" exampleName="Example 15" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX16" exampleName="Example 16" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX17" exampleName="Example 17" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX18" exampleName="Example 18" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX19" exampleName="Example 19" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX20" exampleName="Example 20" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX21" exampleName="Example 21" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX22" exampleName="Example 22" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX23" exampleName="Example 23" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX24" exampleName="Example 24" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX25" exampleName="Example 25" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX26" exampleName="Example 26" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX27" exampleName="Example 27" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX28" exampleName="Example 28" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX29" exampleName="Example 29" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX30" exampleName="Example 30" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX31" exampleName="Example 31" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX32" exampleName="Example 32" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX33" exampleName="Example 33" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX34" exampleName="Example 34" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <Example exampleId="EX35" exampleName="Example 35" exampleTypeId="INSPIRED" statusId="EXST_IN_DESIGN"/>
-    <!--#Eam# for screenlet navigation form -->
-
-    <!-- example test suite -->
-    <SeleniumTestSuitePath testSuiteId="EXAMPLE_TESTSUITE" testSuiteName="example_testsuite" testSuiteType="XML" testSuitePath="framework/testtools/testdef/seleniumxml/example/example_testsuite.xml" description="test suite for example component"/>
-    <SeleniumTestSuitePath testSuiteId="EX_HTML_TESTSUITE" testSuiteName="example_html_testsuite" testSuiteType="HTML" testSuitePath="framework/example/testdef/selenium/testSuite.html" description="HTML test suite for example component"/>
 </entity-engine-xml>

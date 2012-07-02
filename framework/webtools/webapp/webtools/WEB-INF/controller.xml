@@ -24,7 +24,6 @@ under the License.
     <include location="component://common/webcommon/WEB-INF/portal-controller.xml"/>
     <include location="component://common/webcommon/WEB-INF/security-controller.xml"/>
     <include location="component://common/webcommon/WEB-INF/tempexpr-controller.xml"/>
-    <include location="component://testtools/webapp/testtools/WEB-INF/controller.xml"/>
     <description>WebTools Site Configuration File</description>
 
     <handler name="ftl" type="view" class="org.ofbiz.webapp.ftl.FreeMarkerViewHandler"/>
@@ -90,12 +89,6 @@ under the License.
 
     <request-map uri="yahoo">
         <response name="success" type="url" value="http://www.yahoo.com"/>
-    </request-map>
-
-    <request-map uri="changeDelegator">
-        <event type="java" path="org.ofbiz.webapp.event.CoreEvents" invoke="changeDelegator"/>
-        <response name="success" type="view" value="main"/>
-        <response name="error" type="view" value="main"/>
     </request-map>
 
     <request-map uri="view">
@@ -276,6 +269,10 @@ under the License.
     <request-map uri="FindJob">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="FindJob"/>
+    </request-map>
+    <request-map uri="JobDetails">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="JobDetails"/>
     </request-map>
     <request-map uri="cancelJob">
         <security https="true" auth="true"/>
@@ -650,6 +647,7 @@ under the License.
     <view-map name="ServiceLog" type="screen" page="component://webtools/widget/LogScreens.xml#ServiceLog"/>
     <view-map name="ServiceList" type="screen" page="component://webtools/widget/ServiceScreens.xml#ServiceList"/>
     <view-map name="FindJob" type="screen" page="component://webtools/widget/ServiceScreens.xml#FindJob"/>
+    <view-map name="JobDetails" type="screen" page="component://webtools/widget/ServiceScreens.xml#JobDetails"/>
     <view-map name="serviceResult" type="screen" page="component://webtools/widget/ServiceScreens.xml#ServiceResult"/>
     <view-map name="threadList" type="screen" page="component://webtools/widget/ServiceScreens.xml#ThreadList"/>
     <view-map name="scheduleJob" type="screen" page="component://webtools/widget/ServiceScreens.xml#ScheduleJob"/>
