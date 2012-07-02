@@ -34,7 +34,7 @@ import org.w3c.dom.Element;
 /**
  * Implements the &lt;remove-value&gt; element.
  */
-public class RemoveValue extends MethodOperation {
+public final class RemoveValue extends MethodOperation {
 
     public static final String module = RemoveValue.class.getName();
 
@@ -69,16 +69,6 @@ public class RemoveValue extends MethodOperation {
             return false;
         }
         return true;
-    }
-
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        return FlexibleStringExpander.expandString(toString(), methodContext.getEnvMap());
-    }
-
-    @Override
-    public String rawString() {
-        return toString();
     }
 
     @Override
