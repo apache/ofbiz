@@ -150,6 +150,7 @@ under the License.
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/validate/jquery.validate.min.js" global="true" />
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/fjTimer/jquerytimer-min.js" global="true" />
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/ui/development-bundle/ui/jquery.ui.datepicker.js" global="true" />
+                <set field="layoutSettings.javaScripts[+0]" value="/images/portlet.js" global="true"/><!--#Eam# portletWidget -->
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/jquery-1.7.2.min.js" global="true" />
                 <!-- jQuery CSSs -->
                 <set field="layoutSettings.styleSheets[+0]" value="/images/jquery/plugins/asmselect/jquery.asmselect-1.0.4a-beta.css" global="true" />
@@ -184,6 +185,10 @@ under the License.
                         <set field="appbarOpenTemplateLocation" from-field="layoutSettings.VT_NAV_OPEN_TMPLT[0]" />
                         <set field="appbarCloseTemplateLocation" from-field="layoutSettings.VT_NAV_CLOSE_TMPLT[0]" />
                         <set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC[0]" />
+                        <!--#Bam# icons-purpose-->
+                        <set field="iconsPurposeProp" from-field="layoutSettings.VT_ICONS_PURP[0]" default-value="iconsPurpose"/>
+                        <property-map resource="${iconsPurposeProp}" map-name="iconsPurpose" global="true" />
+                        <!--#Eam# icons-purpose-->
                         <set field="layoutSettings.suppressTab" value="ofbizsetup"/><!-- diseable ofbiz setup by default -->
                     </actions>
                     <widgets />
@@ -387,6 +392,10 @@ under the License.
                         <set field="layoutSettings.javaScripts[]" value="/images/fieldlookup.js" global="true"/>
 
                         <set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC[0]" default-value="component://common/webcommon/includes/messages.ftl"/>
+                        <!--#Bam# icons-purpose-->
+                        <set field="iconsPurposeProp" from-field="layoutSettings.VT_ICONS_PURP[0]" default-value="iconsPurpose"/>
+                        <property-map resource="${iconsPurposeProp}" map-name="iconsPurpose" global="true" />
+                        <!--#Eam# icons-purpose-->
                     </actions>
                     <widgets>
                         <section>
@@ -477,6 +486,7 @@ under the License.
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/fjTimer/jquerytimer-min.js" global="true"/>
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/validate/jquery.validate.min.js" global="true"/>
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/ui/development-bundle/ui/jquery.ui.datepicker.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/portlet.js" global="true"/><!--#Eam# portletWidget -->
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/jquery-1.7.2.min.js" global="true"/>
                     <!-- jQuery CSSs -->
                 <set field="layoutSettings.styleSheets[+0]" value="/images/jquery/plugins/asmselect/jquery.asmselect-1.0.4a-beta.css" global="true"/>
@@ -491,6 +501,10 @@ under the License.
                 <!-- The settings below are used for xsl-fo screens -->
                 <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="logoImageUrl" value="/images/ofbiz_logo.gif"/>
+                <!--#Bam# icons-purpose-->
+                <set field="iconsPurposeProp" from-field="layoutSettings.VT_ICONS_PURP[0]" default-value="iconsPurpose"/>
+                <property-map resource="${iconsPurposeProp}" map-name="iconsPurpose" global="true" />
+                <!--#Eam# icons-purpose-->
                 <!--<set field="defaultFontFamily" value="Arial"/>-->
             </actions>
             <widgets>
@@ -697,4 +711,71 @@ under the License.
             </widgets>
         </section>
     </screen>
+
+    <!--#Bam# portletUiLabelDecorator : manage standard portlet decorator -->
+    <screen name="uiLabelDecorator">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true" />
+                <property-map resource="general" map-name="generalProperties" global="true"/>
+                <set field="defaultVisualThemeId" from-field="generalProperties.defaultVisualThemeId" default-value="SMOOTH_FEATHER"/>
+                <set field="visualThemeId" from-field="userPreferences.VISUAL_THEME" default-value="${defaultVisualThemeId}" global="true"/>
+                <service service-name="getVisualThemeResources">
+                    <field-map field-name="visualThemeId"/>
+                    <field-map field-name="themeResources" from-field="layoutSettings"/>
+                </service>
+                <set field="layoutSettings" from-field="themeResources" default-value="${layoutSettings}" global="true"/>
+                <set field="iconsLocation" from-field="layoutSettings.VT_ICONS_LOC[0]" default-value="/images/icons/famfamfam" global="true"/>
+                <set field="iconsPurposeProp" from-field="layoutSettings.VT_ICONS_PURP[0]" default-value="iconsPurpose"/>
+                <property-map resource="${iconsPurposeProp}" map-name="iconsPurpose" global="true" />
+            </actions>
+            <widgets>
+              <section>
+                <condition>
+                  <if-empty field="includedInPage"/>
+                </condition>
+                <widgets>
+                  <platform-specific>
+                    <html>
+                        <html-template location="component://common/webcommon/includes/messages.ftl" />
+                    </html>
+                  </platform-specific>
+                </widgets>
+              </section>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="portletUiLabelDecorator">
+      <section>
+        <widgets>
+          <decorator-screen name="uiLabelDecorator" location="${parameters.mainDecoratorLocation}">
+              <decorator-section name="body">
+                <decorator-section-include name="body" />
+              </decorator-section>
+          </decorator-screen>
+        </widgets>
+      </section>
+    </screen>
+    <!--  can be use for all portalPage build like exampleMgmt  -->
+    <screen name="ShowCommonDetailPortlet">
+        <section>
+            <actions>
+                <set field="defaultdetailPortletId" from-field="detailCommonPortletId" from-scope="user" default-value="CommonInfo"/>
+                <set field="portalPortletId" from-field="parameters.portalPortletId" default-value="${defaultdetailPortletId}"/>
+                <set field="detailCommonPortletId" from-field="portalPortletId" to-scope="user"/>
+                <set field="portalPageId" from-field="parameters.portalPageId"/>
+                <set field="parameters.areaId" value="PP_${portalPageId}CommonDetail00001"/>
+                <set field="portletSeqId" from-field="parameters.portletSeqId" default-value="00001"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="portletUiLabelDecorator">
+                    <decorator-section name="body">
+                      <include-portal-page id="${portalPageId}" portalPortletId="${portalPortletId}" portletSeqId="${portletSeqId}"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <!--#Eam# portletUiLabelDecorator -->
 </screens>
