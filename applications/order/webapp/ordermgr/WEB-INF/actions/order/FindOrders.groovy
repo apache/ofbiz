@@ -53,7 +53,7 @@ carrierShipmentMethods = delegator.findList("CarrierShipmentMethod", null, null,
 context.carrierShipmentMethods = carrierShipmentMethods;
 
 // get the Payment Status
-paymentStatusList = delegator.findByAnd("StatusItem", [statusTypeId : "PAYMENT_PREF_STATUS"], ["description"]);
+paymentStatusList = delegator.findByAnd("StatusItem", [statusTypeId : "PAYMENT_PREF_STATUS"], ["description"], false);
 context.paymentStatusList = paymentStatusList;
 
 // current role type

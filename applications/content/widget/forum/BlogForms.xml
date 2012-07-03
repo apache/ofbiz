@@ -23,7 +23,7 @@ under the License.
     <form name="ListBlogs" type="list" list-name="blogs" separate-columns="true" paginate-target="blogMain"
         odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
         <field name="contentId"><hidden/></field>
-        <field name="contentName" widget-style="tabletext">
+        <field name="contentName">
             <hyperlink target="editBlog" description="${contentName} [${contentId}]">
                 <parameter param-name="blogContentId" from-field="contentId"/>
             </hyperlink>
@@ -39,7 +39,7 @@ under the License.
     <form name="BlogContent" type="list" list-name="blogContent" separate-columns="true" paginate-target="blogContent"
         odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
         <field name="contentId"><hidden/></field>
-        <field name="contentName" widget-style="tabletext">
+        <field name="contentName">
             <hyperlink target="ViewBlogArticle" description="${contentName} [${contentId}]">
                 <parameter param-name="articleContentId" from-field="contentId"/>
                 <parameter param-name="blogContentId" from-field="parameters.blogContentId"/>
@@ -64,7 +64,7 @@ under the License.
     </form>
 
     <form name="EditArticle" target="createBlogArticle" title="" type="upload" skip-end="true" default-map-name="blogEntry"
-        default-title-style="treeHeader" default-tooltip-style="tabletext" default-widget-style="inputBox">
+        default-title-style="treeHeader" default-widget-style="inputBox">
         <alt-target use-when="contentId!=void&amp;&amp;contentId!=null" target="updateBlogArticle"/>
         <field name="blogContentId"><hidden value="${parameters.blogContentId}"/></field>
         <field name="contentId" title="${uiLabelMap.ContentBlogEntryId}" use-when="contentId!=void&amp;&amp;contentId!=null"><display/></field>

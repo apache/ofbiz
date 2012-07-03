@@ -1266,7 +1266,7 @@ display: inline; /* IE Fix */
 }
 
 .screenlet-title-bar ul li {
-/*border-left: 0.1em solid #BBBBBB;*/
+border-left: 0.1em solid #BBBBBB;
 color: #ffffff;
 float: right;
 font-size: 1em;

@@ -103,7 +103,7 @@ under the License.
                                     <decorator-section name="body">
                                         <screenlet title="${uiLabelMap.CommonExtHelpTitle}" navigation-menu-name="lookupMenu">
                                             <include-menu name="lookupMenu" location="component://content/widget/content/ContentMenus.xml"/>
-                                            <iterate-section entry="contentAssoc" list="contentAssocs" view-size="10">
+                                            <iterate-section entry="contentAssoc" list="contentAssocs">
                                               <section>
                                                 <actions>
                                                   <set field="contentId" from-field="contentAssoc.contentIdTo"/>

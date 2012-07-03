@@ -471,7 +471,7 @@ public class ObjectType {
     @SourceMonitored
     @SuppressWarnings("unchecked")
     public static Object simpleTypeConvert(Object obj, String type, String format, TimeZone timeZone, Locale locale, boolean noTypeFail) throws GeneralException {
-        if (obj == null || type == null || "Object".equals(type) || "java.lang.Object".equals(type)) {
+        if (obj == null || UtilValidate.isEmpty(type) || "Object".equals(type) || "java.lang.Object".equals(type)) {
             return obj;
         }
         if ("PlainString".equals(type)) {
