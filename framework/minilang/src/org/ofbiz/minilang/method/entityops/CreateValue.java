@@ -19,89 +19,91 @@
 package org.ofbiz.minilang.method.entityops;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.MiniLangValidate;
 import org.ofbiz.minilang.SimpleMethod;
-import org.ofbiz.minilang.method.ContextAccessor;
 import org.ofbiz.minilang.method.MethodContext;
 import org.ofbiz.minilang.method.MethodOperation;
 import org.w3c.dom.Element;
 
 /**
- * Uses the delegator to create the specified value object entity in the datasource
+ * Implements the &lt;create-value&gt; element.
+ * 
+ * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Ccreatevalue%3E}}">Mini-language Reference</a>
  */
-public class CreateValue extends MethodOperation {
+public final class CreateValue extends MethodOperation {
 
     public static final String module = CreateValue.class.getName();
 
-    boolean createOrStore;
-    String doCacheClearStr;
-    boolean testDuplicate;
-    ContextAccessor<GenericValue> valueAcsr;
+    private final boolean createOrStore;
+    private final boolean doCacheClear;
+    private final FlexibleMapAccessor<GenericValue> valueFma;
 
     public CreateValue(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
-        valueAcsr = new ContextAccessor<GenericValue>(element.getAttribute("value-field"), element.getAttribute("value-name"));
-        doCacheClearStr = element.getAttribute("do-cache-clear");
+        if (MiniLangValidate.validationOn()) {
+            MiniLangValidate.attributeNames(simpleMethod, element, "value-field", "do-cache-clear", "or-store");
+            MiniLangValidate.requiredAttributes(simpleMethod, element, "value-field");
+            MiniLangValidate.expressionAttributes(simpleMethod, element, "value-field");
+            MiniLangValidate.constantAttributes(simpleMethod, element, "do-cache-clear", "or-store");
+            MiniLangValidate.noChildElements(simpleMethod, element);
+        }
+        valueFma = FlexibleMapAccessor.getInstance(element.getAttribute("value-field"));
+        doCacheClear = !"false".equals(element.getAttribute("do-cache-clear"));
         createOrStore = "true".equals(element.getAttribute("or-store"));
     }
 
     @Override
     public boolean exec(MethodContext methodContext) throws MiniLangException {
-        boolean doCacheClear = !"false".equals(methodContext.expandString(doCacheClearStr));
-        GenericValue value = valueAcsr.get(methodContext);
+        GenericValue value = valueFma.get(methodContext.getEnvMap());
         if (value == null) {
-            String errMsg = "In create-value a value was not found with the specified valueAcsr: " + valueAcsr + ", not creating";
+            String errMsg = "In <create-value> the value \"" + valueFma + "\" was not found, not creating";
             Debug.logWarning(errMsg, module);
-            if (methodContext.getMethodType() == MethodContext.EVENT) {
-                methodContext.putEnv(simpleMethod.getEventErrorMessageName(), errMsg);
-                methodContext.putEnv(simpleMethod.getEventResponseCodeName(), simpleMethod.getDefaultErrorCode());
-            } else if (methodContext.getMethodType() == MethodContext.SERVICE) {
-                methodContext.putEnv(simpleMethod.getServiceErrorMessageName(), errMsg);
-                methodContext.putEnv(simpleMethod.getServiceResponseMessageName(), simpleMethod.getDefaultErrorCode());
-            }
+            simpleMethod.addErrorMessage(methodContext, errMsg);
             return false;
         }
         try {
-            if (createOrStore == true) {
+            if (createOrStore) {
                 methodContext.getDelegator().createOrStore(value, doCacheClear);
             } else {
                 methodContext.getDelegator().create(value, doCacheClear);
             }
         } catch (GenericEntityException e) {
-
-            Debug.logError(e, module);
-            String errMsg = "ERROR: Could not complete the " + simpleMethod.getShortDescription() + " process [problem creating the " + valueAcsr + " value: " + e.getMessage() + "]";
-            if (methodContext.getMethodType() == MethodContext.EVENT) {
-                methodContext.putEnv(simpleMethod.getEventErrorMessageName(), errMsg);
-                methodContext.putEnv(simpleMethod.getEventResponseCodeName(), simpleMethod.getDefaultErrorCode());
-            } else if (methodContext.getMethodType() == MethodContext.SERVICE) {
-                methodContext.putEnv(simpleMethod.getServiceErrorMessageName(), errMsg);
-                methodContext.putEnv(simpleMethod.getServiceResponseMessageName(), simpleMethod.getDefaultErrorCode());
-            }
+            String errMsg = "Exception thrown while creating the \"" + valueFma +"\" GenericValue: " + e.getMessage();
+            Debug.logWarning(e, errMsg, module);
+            simpleMethod.addErrorMessage(methodContext, errMsg);
             return false;
         }
         return true;
     }
 
     @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+    public String toString() {
+        StringBuilder sb = new StringBuilder("<create-value ");
+        sb.append("value-field=\"").append(this.valueFma).append("\" ");
+        if (!this.doCacheClear) {
+            sb.append("do-cache-clear=\"false\"");
+        }
+        if (this.createOrStore) {
+            sb.append("or-store=\"true\"");
+        }
+        sb.append("/>");
+        return sb.toString();
     }
 
-    @Override
-    public String rawString() {
-        // TODO: something more than the empty tag
-        return "<create-value/>";
-    }
-
+    /**
+     * A factory for the &lt;create-value&gt; element.
+     */
     public static final class CreateValueFactory implements Factory<CreateValue> {
+        @Override
         public CreateValue createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
             return new CreateValue(element, simpleMethod);
         }
 
+        @Override
         public String getName() {
             return "create-value";
         }

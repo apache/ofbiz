@@ -19,7 +19,6 @@
 package org.ofbiz.minilang.method.serviceops;
 
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
-import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.MiniLangValidate;
 import org.ofbiz.minilang.SimpleMethod;
@@ -28,7 +27,9 @@ import org.ofbiz.minilang.method.MethodOperation;
 import org.w3c.dom.Element;
 
 /**
- * Copies a field to a service OUT attribute.
+ * Implements the &lt;field-to-request&gt; element.
+ * 
+ * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Cfieldtoresult%3E}}">Mini-language Reference</a>
  */
 public final class FieldToResult extends MethodOperation {
 
@@ -58,19 +59,15 @@ public final class FieldToResult extends MethodOperation {
     public boolean exec(MethodContext methodContext) throws MiniLangException {
         Object fieldVal = this.fieldFma.get(methodContext.getEnvMap());
         if (fieldVal != null) {
-            this.resultFma.put(methodContext.getResults(), fieldVal);
+            if (this.resultFma.containsNestedExpression()) {
+                String expression = (String) this.resultFma.get(methodContext.getEnvMap());
+                FlexibleMapAccessor<Object> resultFma = FlexibleMapAccessor.getInstance(expression);
+                resultFma.put(methodContext.getResults(), fieldVal);
+            } else {
+                this.resultFma.put(methodContext.getResults(), fieldVal);
+            }
         }
         return true;
-    }
-
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        return FlexibleStringExpander.expandString(toString(), methodContext.getEnvMap());
-    }
-
-    @Override
-    public String rawString() {
-        return toString();
     }
 
     @Override
@@ -86,11 +83,16 @@ public final class FieldToResult extends MethodOperation {
         return sb.toString();
     }
 
+    /**
+     * A factory for the &lt;field-to-request&gt; element.
+     */
     public static final class FieldToResultFactory implements Factory<FieldToResult> {
+        @Override
         public FieldToResult createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
             return new FieldToResult(element, simpleMethod);
         }
 
+        @Override
         public String getName() {
             return "field-to-result";
         }

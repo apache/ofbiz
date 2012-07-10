@@ -16,30 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.minilang.method.conditional;
+package org.ofbiz.minilang.method.envops;
 
 import java.util.Collections;
 import java.util.List;
 
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.MiniLangValidate;
 import org.ofbiz.minilang.SimpleMethod;
+import org.ofbiz.minilang.artifact.ArtifactInfoContext;
 import org.ofbiz.minilang.method.MethodContext;
 import org.ofbiz.minilang.method.MethodOperation;
+import org.ofbiz.minilang.method.conditional.Conditional;
+import org.ofbiz.minilang.method.conditional.ConditionalFactory;
 import org.ofbiz.minilang.method.envops.Break.BreakElementException;
 import org.ofbiz.minilang.method.envops.Continue.ContinueElementException;
 import org.w3c.dom.Element;
 
 /**
- * Continually processes sub-ops while the condition remains true
+ * Implements the &lt;while&gt; element.
+ * 
+ * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Cwhile%3E}}">Mini-language Reference</a>
  */
-public class While extends MethodOperation {
+public final class While extends MethodOperation {
 
-    Conditional condition;
-    List<MethodOperation> thenSubOps;
+    private final Conditional condition;
+    private final List<MethodOperation> thenSubOps;
 
     public While(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
+        if (MiniLangValidate.validationOn()) {
+            MiniLangValidate.childElements(simpleMethod, element, "condition", "then");
+            MiniLangValidate.requiredChildElements(simpleMethod, element, "condition", "then");
+        }
         Element conditionElement = UtilXml.firstChildElement(element, "condition");
         Element conditionChildElement = UtilXml.firstChildElement(conditionElement);
         this.condition = ConditionalFactory.makeConditional(conditionChildElement, simpleMethod);
@@ -49,9 +59,6 @@ public class While extends MethodOperation {
 
     @Override
     public boolean exec(MethodContext methodContext) throws MiniLangException {
-        // if conditions fails, always return true;
-        // if a sub-op returns false return false and stop, otherwise drop though loop and
-        // return true
         while (condition.checkCondition(methodContext)) {
             try {
                 for (MethodOperation methodOperation : thenSubOps) {
@@ -73,27 +80,31 @@ public class While extends MethodOperation {
     }
 
     @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: fill in missing details, if needed
-        StringBuilder messageBuf = new StringBuilder();
-        this.condition.prettyPrint(messageBuf, methodContext);
-        return "<while><condition>" + messageBuf + "</condition></while>";
-    }
-
-    public List<MethodOperation> getThenSubOps() {
-        return this.thenSubOps;
+    public void gatherArtifactInfo(ArtifactInfoContext aic) {
+        for (MethodOperation method : this.thenSubOps) {
+            method.gatherArtifactInfo(aic);
+        }
     }
 
     @Override
-    public String rawString() {
-        return expandedString(null);
+    public String toString() {
+        StringBuilder messageBuf = new StringBuilder();
+        this.condition.prettyPrint(messageBuf, null);
+        return "<while><condition>" + messageBuf + "</condition></while>";
     }
 
+    /**
+     * A factory for the &lt;while&gt; element.
+     * 
+     * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Cwhile%3E}}">Mini-language Reference</a>
+     */
     public static final class WhileFactory implements Factory<While> {
+        @Override
         public While createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
             return new While(element, simpleMethod);
         }
 
+        @Override
         public String getName() {
             return "while";
         }

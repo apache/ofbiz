@@ -18,58 +18,66 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.callops;
 
-import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.MiniLangValidate;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.MethodContext;
 import org.ofbiz.minilang.method.MethodOperation;
 import org.w3c.dom.Element;
 
 /**
- * An event operation that returns the given response code
+ * Implements the &lt;return&gt; element.
+ * 
+ * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Creturn%3E}}">Mini-language Reference</a>
  */
-public class Return extends MethodOperation {
+public final class Return extends MethodOperation {
 
-    String responseCode;
+    private final FlexibleStringExpander responseCodeFse;
 
     public Return(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
-        responseCode = element.getAttribute("response-code");
-        if (UtilValidate.isEmpty(responseCode))
-            responseCode = "success";
+        if (MiniLangValidate.validationOn()) {
+            MiniLangValidate.attributeNames(simpleMethod, element, "response-code");
+            MiniLangValidate.noChildElements(simpleMethod, element);
+        }
+        responseCodeFse = FlexibleStringExpander.getInstance(element.getAttribute("response-code"));
     }
 
     @Override
     public boolean exec(MethodContext methodContext) throws MiniLangException {
-        String responseCode = methodContext.expandString(this.responseCode);
+        String responseCode = responseCodeFse.expandString(methodContext.getEnvMap());
+        if (responseCode.isEmpty()) {
+            responseCode = simpleMethod.getDefaultSuccessCode();
+        }
         if (methodContext.getMethodType() == MethodContext.EVENT) {
             methodContext.putEnv(simpleMethod.getEventResponseCodeName(), responseCode);
-            return false;
-        } else if (methodContext.getMethodType() == MethodContext.SERVICE) {
-            methodContext.putEnv(simpleMethod.getServiceResponseMessageName(), responseCode);
-            return false;
         } else {
-            return false;
+            methodContext.putEnv(simpleMethod.getServiceResponseMessageName(), responseCode);
         }
+        return false;
     }
 
     @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+    public String toString() {
+        StringBuilder sb = new StringBuilder("<return ");
+        if (!"success".equals(responseCodeFse.getOriginal())) {
+            sb.append("response-code=\"").append(responseCodeFse).append("\" ");
+        }
+        sb.append("/>");
+        return sb.toString();
     }
 
-    @Override
-    public String rawString() {
-        // TODO: something more than the empty tag
-        return "<return/>";
-    }
-
+    /**
+     * A factory for the &lt;return&gt; element.
+     */
     public static final class ReturnFactory implements Factory<Return> {
+        @Override
         public Return createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
             return new Return(element, simpleMethod);
         }
 
+        @Override
         public String getName() {
             return "return";
         }

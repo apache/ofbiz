@@ -23,46 +23,43 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.ofbiz.base.util.string.FlexibleStringExpander;
+import org.ofbiz.minilang.MiniLangElement;
 import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.w3c.dom.Element;
 
 /**
- * A single operation, does the specified operation on the given field
+ * An abstract class for Mini-language element models.
  */
-public abstract class MethodOperation {
+public abstract class MethodOperation extends MiniLangElement {
 
-    private final Object lineNumber;
-    protected final SimpleMethod simpleMethod;
-    private final String tagName;
 
     protected MethodOperation(Element element, SimpleMethod simpleMethod) {
-        this.lineNumber = element.getUserData("startLine");
-        this.simpleMethod = simpleMethod;
-        this.tagName = element.getTagName().intern();
+        super(element, simpleMethod);
     }
 
-    /** Execute the operation. Returns false if no further operations should be executed. 
+    /**
+     * Executes the operation.
+     * Returns <code>true</code> if script execution should continue, or
+     * <code>false</code> if script execution should stop.
+     * 
      * @throws MiniLangException */
     public abstract boolean exec(MethodContext methodContext) throws MiniLangException;
 
-    /** Create an expanded string representation of the operation, is for the current context */
-    public abstract String expandedString(MethodContext methodContext);
-
-    public String getLineNumber() {
-        return this.lineNumber == null ? "unknown" : this.lineNumber.toString();
+    /** Create a string representation of the operation, using the current context.
+     * @deprecated No replacement.
+     */
+    public String expandedString(MethodContext methodContext) {
+        return FlexibleStringExpander.expandString(toString(), methodContext.getEnvMap());
     }
 
-    public SimpleMethod getSimpleMethod() {
-        return this.simpleMethod;
+    /** Create a string representation of the operation - similar to the original XML.
+     * @deprecated Use {@link #toString()}.
+     */
+    public String rawString() {
+        return toString();
     }
-
-    public String getTagName() {
-        return this.tagName;
-    }
-
-    /** Create a raw string representation of the operation, would be similar to original XML */
-    public abstract String rawString();
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)

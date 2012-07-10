@@ -18,57 +18,64 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.entityops;
 
-import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.MiniLangRuntimeException;
+import org.ofbiz.minilang.MiniLangValidate;
 import org.ofbiz.minilang.SimpleMethod;
-import org.ofbiz.minilang.method.ContextAccessor;
 import org.ofbiz.minilang.method.MethodContext;
 import org.ofbiz.minilang.method.MethodOperation;
 import org.w3c.dom.Element;
 
 /**
- * Uses the delegator to create the specified value object entity in the datasource
+ * Implements the &lt;set-current-user-login&gt; element.
+ * 
+ * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Csetcurrentuserlogin%3E}}">Mini-language Reference</a>
  */
-public class SetCurrentUserLogin extends MethodOperation {
+public final class SetCurrentUserLogin extends MethodOperation {
 
-    public static final String module = SetCurrentUserLogin.class.getName();
-
-    ContextAccessor<GenericValue> valueAcsr;
+    private final FlexibleMapAccessor<GenericValue> valueFma;
 
     public SetCurrentUserLogin(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
-        valueAcsr = new ContextAccessor<GenericValue>(element.getAttribute("value-field"), element.getAttribute("value-name"));
+        if (MiniLangValidate.validationOn()) {
+            MiniLangValidate.handleError("Deprecated - use the called service's userLogin IN attribute", simpleMethod, element);
+            MiniLangValidate.attributeNames(simpleMethod, element, "value-field");
+            MiniLangValidate.requiredAttributes(simpleMethod, element, "value-field");
+            MiniLangValidate.expressionAttributes(simpleMethod, element, "value-field");
+            MiniLangValidate.noChildElements(simpleMethod, element);
+        }
+        valueFma = FlexibleMapAccessor.getInstance(element.getAttribute("value-field"));
     }
 
     @Override
     public boolean exec(MethodContext methodContext) throws MiniLangException {
-        GenericValue userLogin = valueAcsr.get(methodContext);
+        GenericValue userLogin = valueFma.get(methodContext.getEnvMap());
         if (userLogin == null) {
-            Debug.logWarning("In SetCurrentUserLogin a value was not found with the specified valueName: " + valueAcsr + ", not setting", module);
-            return true;
+            throw new MiniLangRuntimeException("Entity value not found with name: " + valueFma, this);
         }
         methodContext.setUserLogin(userLogin, this.simpleMethod.getUserLoginEnvName());
         return true;
     }
 
     @Override
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+    public String toString() {
+        StringBuilder sb = new StringBuilder("<set-current-user-login ");
+        sb.append("value-field=\"").append(this.valueFma).append("\" />");
+        return sb.toString();
     }
 
-    @Override
-    public String rawString() {
-        // TODO: something more than the empty tag
-        return "<set-current-user-login/>";
-    }
-
+    /**
+     * A factory for the &lt;set-current-user-login&gt; element.
+     */
     public static final class SetCurrentUserLoginFactory implements Factory<SetCurrentUserLogin> {
+        @Override
         public SetCurrentUserLogin createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
             return new SetCurrentUserLogin(element, simpleMethod);
         }
 
+        @Override
         public String getName() {
             return "set-current-user-login";
         }

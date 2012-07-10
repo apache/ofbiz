@@ -28,16 +28,17 @@ import org.ofbiz.minilang.method.MethodOperation;
 import org.w3c.dom.Element;
 
 /**
- * Logs a message.
+ * Implements the &lt;log&gt; element.
+ * 
+ * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Clog%3E}}">Mini-language Reference</a>
  */
 public final class Log extends MethodOperation {
 
     public static final String module = Log.class.getName();
-    private static final String[] LEVEL_ARRAY = {"always", "verbose", "timing", "info", "important", "warning", "error", "fatal", "notify"};
+    public static final String[] LEVEL_ARRAY = {"always", "verbose", "timing", "info", "important", "warning", "error", "fatal", "notify"};
 
     private final int level;
     private final FlexibleStringExpander messageFse;
-    private final Object startLine;
 
     public Log(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
@@ -60,7 +61,6 @@ public final class Log extends MethodOperation {
         } else {
             this.level = levelInt.intValue();
         }
-        this.startLine = element.getUserData("startLine");
     }
 
     @Override
@@ -76,25 +76,13 @@ public final class Log extends MethodOperation {
             buf.append(methodLocation);
             buf.append("#");
             buf.append(this.simpleMethod.getMethodName());
-            if (this.startLine != null) {
-                buf.append(" line ");
-                buf.append(this.startLine);
-            }
+            buf.append(" line ");
+            buf.append(getLineNumber());
             buf.append("] ");
             buf.append(message);
             Debug.log(this.level, null, buf.toString(), module);
         }
         return true;
-    }
-
-    @Override
-    public String expandedString(MethodContext methodContext) {
-        return FlexibleStringExpander.expandString(toString(), methodContext.getEnvMap());
-    }
-
-    @Override
-    public String rawString() {
-        return toString();
     }
 
     @Override
@@ -106,11 +94,16 @@ public final class Log extends MethodOperation {
         return sb.toString();
     }
 
+    /**
+     * A factory for the &lt;log&gt; element.
+     */
     public static final class LogFactory implements Factory<Log> {
+        @Override
         public Log createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
             return new Log(element, simpleMethod);
         }
 
+        @Override
         public String getName() {
             return "log";
         }
