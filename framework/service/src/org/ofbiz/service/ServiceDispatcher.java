@@ -21,6 +21,7 @@ package org.ofbiz.service;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.transaction.Transaction;
 
 import javolution.util.FastList;
@@ -30,7 +31,6 @@ import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralRuntimeException;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilTimer;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
@@ -60,7 +60,6 @@ import org.ofbiz.service.semaphore.ServiceSemaphore;
 import org.w3c.dom.Element;
 
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 
 /**
  * Global Service Dispatcher
@@ -251,54 +250,47 @@ public class ServiceDispatcher {
      * @throws GenericServiceException
      */
     public Map<String, Object> runSync(String localName, ModelService modelService, Map<String, ? extends Object> params, boolean validateOut) throws ServiceAuthException, ServiceValidationException, GenericServiceException {
-        // check for semaphore and aquire a lock
-        ServiceSemaphore lock = null;
-        if ("wait".equals(modelService.semaphore) || "fail".equals(modelService.semaphore)) {
-            lock = new ServiceSemaphore(delegator, modelService);
-            lock.acquire();
-        }
-
         long serviceStartTime = System.currentTimeMillis();
-        boolean debugging = checkDebug(modelService, 1, true);
-        if (Debug.verboseOn()) {
-            Debug.logVerbose("[ServiceDispatcher.runSync] : invoking service " + modelService.name + " [" + modelService.location +
-                "/" + modelService.invoke + "] (" + modelService.engineName + ")", module);
-        }
-
-        Map<String, Object> context = FastMap.newInstance();
-        if (params != null) {
-            context.putAll(params);
-        }
-
-        // setup the result map and other initial settings
         Map<String, Object> result = FastMap.newInstance();
+        ServiceSemaphore lock = null;
+        Map<String, List<ServiceEcaRule>> eventMap = null;
+        Map<String, Object> ecaContext = null;
+        RunningService rs = null;
+        DispatchContext ctx = localContext.get(localName);
+        GenericEngine engine = null;
+        Transaction parentTransaction = null;
         boolean isFailure = false;
         boolean isError = false;
-
-        // set up the running service log
-        RunningService rs = this.logService(localName, modelService, GenericEngine.SYNC_MODE);
-
-        // get eventMap once for all calls for speed, don't do event calls if it is null
-        Map<String, List<ServiceEcaRule>> eventMap = ServiceEcaUtil.getServiceEventMap(modelService.name);
-
-        // check the locale
-        Locale locale = this.checkLocale(context);
-
-        // setup the engine and context
-        DispatchContext ctx = localContext.get(localName);
-        GenericEngine engine = this.getGenericEngine(modelService.engineName);
-
-        // set IN attributes with default-value as applicable
-        modelService.updateDefaultValues(context, ModelService.IN_PARAM);
-
-        Map<String, Object> ecaContext = null;
-
-        // for isolated transactions
-        Transaction parentTransaction = null;
-
-        // start the transaction
         boolean beganTrans = false;
         try {
+            // check for semaphore and aquire a lock
+            if ("wait".equals(modelService.semaphore) || "fail".equals(modelService.semaphore)) {
+                lock = new ServiceSemaphore(delegator, modelService);
+                lock.acquire();
+            }
+
+            if (Debug.verboseOn() || modelService.debug) {
+                Debug.logVerbose("[ServiceDispatcher.runSync] : invoking service " + modelService.name + " [" + modelService.location +
+                    "/" + modelService.invoke + "] (" + modelService.engineName + ")", module);
+            }
+
+            Map<String, Object> context = FastMap.newInstance();
+            if (params != null) {
+                context.putAll(params);
+            }
+            // check the locale
+            Locale locale = this.checkLocale(context);
+
+            // set up the running service log
+            rs = this.logService(localName, modelService, GenericEngine.SYNC_MODE);
+
+            // get eventMap once for all calls for speed, don't do event calls if it is null
+            eventMap = ServiceEcaUtil.getServiceEventMap(modelService.name);
+            engine = this.getGenericEngine(modelService.engineName);
+
+
+            // set IN attributes with default-value as applicable
+            modelService.updateDefaultValues(context, ModelService.IN_PARAM);
             //Debug.logInfo("=========================== " + modelService.name + " 1 tx status =" + TransactionUtil.getStatusString() + ", modelService.requireNewTransaction=" + modelService.requireNewTransaction + ", modelService.useTransaction=" + modelService.useTransaction + ", TransactionUtil.isTransactionInPlace()=" + TransactionUtil.isTransactionInPlace(), module);
             if (modelService.useTransaction) {
                 if (TransactionUtil.isTransactionInPlace()) {
@@ -516,7 +508,6 @@ public class ServiceDispatcher {
                 } catch (GenericTransactionException te) {
                     Debug.logError(te, "Cannot rollback transaction", module);
                 }
-                checkDebug(modelService, 0, debugging);
                 rs.setEndStamp();
                 if (t instanceof ServiceAuthException) {
                     throw (ServiceAuthException) t;
@@ -544,6 +535,7 @@ public class ServiceDispatcher {
                     try {
                         TransactionUtil.commit(beganTrans);
                     } catch (GenericTransactionException e) {
+                        GenericDelegator.popUserIdentifier();
                         String errMsg = "Could not commit transaction for service [" + modelService.name + "] call";
                         Debug.logError(e, errMsg, module);
                         if (e.getMessage() != null) {
@@ -563,9 +555,13 @@ public class ServiceDispatcher {
             Debug.logError(te, "Problems with the transaction", module);
             throw new GenericServiceException("Problems with the transaction.", te.getNested());
         } finally {
-            // release the semaphore lock
             if (lock != null) {
-                lock.release();
+                // release the semaphore lock
+                try {
+                    lock.release();
+                } catch (GenericServiceException e) {
+                    Debug.logWarning(e, "Exception thrown while unlocking semaphore: ", module);
+                }
             }
 
             // resume the parent transaction
@@ -582,11 +578,15 @@ public class ServiceDispatcher {
         // pre-return ECA
         if (eventMap != null) ServiceEcaUtil.evalRules(modelService.name, eventMap, "return", ctx, ecaContext, result, isError, isFailure);
 
-        checkDebug(modelService, 0, debugging);
         rs.setEndStamp();
 
         long timeToRun = System.currentTimeMillis() - serviceStartTime;
         if (Debug.timingOn() && timeToRun > 50) {
+            Debug.logTiming("Slow sync service execution detected: service [" + localName + "/" + modelService.name + "] finished in [" + timeToRun + "] milliseconds", module);
+        } else if (Debug.infoOn() && timeToRun > 200) {
+            Debug.logInfo("Very slow sync service execution detected: service [" + localName + "/" + modelService.name + "] finished in [" + timeToRun + "] milliseconds", module);
+        }
+        if ((Debug.verboseOn() || modelService.debug) && timeToRun > 50 && !modelService.hideResultInLog) {
             // Sanity check - some service results can be multiple MB in size. Limit message size to 10K.
             String resultStr = result.toString();
             if (resultStr.length() > 10240) {
@@ -629,8 +629,7 @@ public class ServiceDispatcher {
         if (Debug.timingOn()) {
             UtilTimer.timerLog(localName + " / " + service.name, "ASync service started...", module);
         }
-        boolean debugging = checkDebug(service, 1, true);
-        if (Debug.verboseOn()) {
+        if (Debug.verboseOn() || service.debug) {
             Debug.logVerbose("[ServiceDispatcher.runAsync] : preparing service " + service.name + " [" + service.location + "/" + service.invoke +
                 "] (" + service.engineName + ")", module);
         }
@@ -726,7 +725,6 @@ public class ServiceDispatcher {
                 if (Debug.timingOn()) {
                     UtilTimer.closeTimer(localName + " / " + service.name, "ASync service finished...", module);
                 }
-                checkDebug(service, 0, debugging);
             } catch (Throwable t) {
                 if (Debug.timingOn()) {
                     UtilTimer.closeTimer(localName + " / " + service.name, "ASync service failed...", module);
@@ -739,7 +737,6 @@ public class ServiceDispatcher {
                 } catch (GenericTransactionException te) {
                     Debug.logError(te, "Cannot rollback transaction", module);
                 }
-                checkDebug(service, 0, debugging);
                 if (t instanceof ServiceAuthException) {
                     throw (ServiceAuthException) t;
                 } else if (t instanceof ServiceValidationException) {
@@ -994,32 +991,6 @@ public class ServiceDispatcher {
         }
         context.put("locale", newLocale);
         return newLocale;
-    }
-
-    // mode 1 = beginning (turn on) mode 0 = end (turn off)
-    private boolean checkDebug(ModelService model, int mode, boolean enable) {
-        boolean debugOn = Debug.verboseOn();
-        switch (mode) {
-            case 0:
-                if (model.debug && enable && debugOn) {
-                    // turn it off
-                    Debug.set(Debug.VERBOSE, false);
-                    Debug.logInfo("Verbose logging turned OFF", module);
-                    return true;
-                }
-                break;
-            case 1:
-                if (model.debug && enable && !debugOn) {
-                    // turn it on
-                    Debug.set(Debug.VERBOSE, true);
-                    Debug.logInfo("Verbose logging turned ON", module);
-                    return true;
-                }
-                break;
-            default:
-                Debug.logError("Invalid mode for checkDebug should be (0 or 1)", module);
-        }
-        return false;
     }
 
     // run startup services
