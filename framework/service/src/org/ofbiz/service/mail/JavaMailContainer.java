@@ -22,8 +22,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
 import javax.mail.Folder;
@@ -48,9 +49,9 @@ import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.service.GenericDispatcher;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.GenericServiceException;
+import org.ofbiz.service.ServiceContainer;
 
 public class JavaMailContainer implements Container {
 
@@ -62,7 +63,7 @@ public class JavaMailContainer implements Container {
     protected GenericValue userLogin = null;
     protected long timerDelay = 300000;
     protected long maxSize = 1000000;
-    protected Timer pollTimer = null;
+    protected ScheduledExecutorService pollTimer = null;
     protected boolean deleteMail = false;    // whether to delete emails after fetching them.
 
     protected String configFile = null;
@@ -80,7 +81,7 @@ public class JavaMailContainer implements Container {
         this.name = name;
         this.configFile = configFile;
         this.stores = new LinkedHashMap<Store, Session>();
-        this.pollTimer = new Timer();
+        this.pollTimer = Executors.newScheduledThreadPool(1);
     }
 
     /**
@@ -97,7 +98,7 @@ public class JavaMailContainer implements Container {
         this.deleteMail = "true".equals(ContainerConfig.getPropertyValue(cfg, "delete-mail", "false"));
 
         this.delegator = DelegatorFactory.getDelegator(delegatorName);
-        this.dispatcher = GenericDispatcher.getLocalDispatcher(dispatcherName, delegator);
+        this.dispatcher = ServiceContainer.getLocalDispatcher(dispatcherName, delegator);
         this.timerDelay = ContainerConfig.getPropertyValue(cfg, "poll-delay", 300000);
         this.maxSize = ContainerConfig.getPropertyValue(cfg, "maxSize", 1000000); // maximum size in bytes
 
@@ -126,7 +127,7 @@ public class JavaMailContainer implements Container {
 
         // start the polling timer
         if (UtilValidate.isNotEmpty(stores)) {
-            pollTimer.schedule(new PollerTask(dispatcher, userLogin), timerDelay, timerDelay);
+            pollTimer.scheduleAtFixedRate(new PollerTask(dispatcher, userLogin), timerDelay, timerDelay, TimeUnit.MILLISECONDS);
         } else {
             Debug.logWarning("No JavaMail Store(s) configured; poller disabled.", module);
         }
@@ -142,7 +143,7 @@ public class JavaMailContainer implements Container {
      */
     public void stop() throws ContainerException {
         // stop the poller
-        this.pollTimer.cancel();
+        this.pollTimer.shutdown();
         Debug.logWarning("stop JavaMail poller", module);
     }
 
@@ -250,7 +251,7 @@ public class JavaMailContainer implements Container {
         }
     }
 
-    class PollerTask extends TimerTask {
+    class PollerTask implements Runnable {
 
         LocalDispatcher dispatcher;
         GenericValue userLogin;
@@ -260,7 +261,6 @@ public class JavaMailContainer implements Container {
             this.userLogin = userLogin;
         }
 
-        @Override
         public void run() {
             if (UtilValidate.isNotEmpty(stores)) {
                 for (Map.Entry<Store, Session> entry: stores.entrySet()) {

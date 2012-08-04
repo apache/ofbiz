@@ -42,6 +42,8 @@ import com.ibm.icu.util.Calendar;
 
 /**
  * Implements the &lt;set-calendar&gt; element.
+ * 
+ * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Csetcalendar%3E}}">Mini-language Reference</a>
  */
 public final class SetCalendar extends MethodOperation {
 
@@ -89,7 +91,6 @@ public final class SetCalendar extends MethodOperation {
     private final FlexibleStringExpander periodAlignEnd;
     private final FlexibleStringExpander periodAlignStart;
     private final FlexibleStringExpander secondsFse;
-    private final boolean setIfEmpty;
     private final boolean setIfNull;
     private final Scriptlet scriptlet;
     private final FlexibleStringExpander timeZoneFse;
@@ -101,12 +102,12 @@ public final class SetCalendar extends MethodOperation {
         if (MiniLangValidate.validationOn()) {
             MiniLangValidate.deprecatedAttribute(simpleMethod, element, "from-field", "replace with \"from\"");
             MiniLangValidate.deprecatedAttribute(simpleMethod, element, "default-value", "replace with \"default\"");
-            MiniLangValidate.attributeNames(simpleMethod, element, "field", "from-field", "from", "value", "default-value", "default", "set-if-null", "set-if-empty",
+            MiniLangValidate.attributeNames(simpleMethod, element, "field", "from-field", "from", "value", "default-value", "default", "set-if-null",
                     "years", "months", "days", "hours", "minutes", "seconds", "millis", "period-align-start", "period-align-end", "locale", "time-zone");
             MiniLangValidate.requiredAttributes(simpleMethod, element, "field");
             MiniLangValidate.requireAnyAttribute(simpleMethod, element, "from", "value");
             MiniLangValidate.constantPlusExpressionAttributes(simpleMethod, element, "value");
-            MiniLangValidate.constantAttributes(simpleMethod, element, "set-if-null", "set-if-empty");
+            MiniLangValidate.constantAttributes(simpleMethod, element, "set-if-null");
             MiniLangValidate.expressionAttributes(simpleMethod, element, "field", "from", "from-field");
             MiniLangValidate.noChildElements(simpleMethod, element);
         }
@@ -129,7 +130,6 @@ public final class SetCalendar extends MethodOperation {
         }
         this.defaultFse = FlexibleStringExpander.getInstance(element.getAttribute("default"));
         this.setIfNull = "true".equals(element.getAttribute("set-if-null"));
-        this.setIfEmpty = !"false".equals(element.getAttribute("set-if-empty"));
         this.yearsFse = FlexibleStringExpander.getInstance(element.getAttribute("years"));
         this.monthsFse = FlexibleStringExpander.getInstance(element.getAttribute("months"));
         this.daysFse = FlexibleStringExpander.getInstance(element.getAttribute("days"));
@@ -161,9 +161,6 @@ public final class SetCalendar extends MethodOperation {
             newValue = this.defaultFse.expand(methodContext.getEnvMap());
         }
         if (!setIfNull && newValue == null) {
-            return true;
-        }
-        if (!setIfEmpty && ObjectType.isEmpty(newValue)) {
             return true;
         }
         Locale locale = null;
@@ -311,9 +308,6 @@ public final class SetCalendar extends MethodOperation {
         }
         if (this.setIfNull) {
             sb.append("set-if-null=\"true\" ");
-        }
-        if (!this.setIfEmpty) {
-            sb.append("set-if-empty=\"false\" ");
         }
         sb.append("/>");
         return sb.toString();

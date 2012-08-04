@@ -96,14 +96,4 @@ under the License.
             </widgets>
         </section>
     </screen>
-
-    <!--#Bam# icons-purpose -->
-    <screen name="IconsList">
-        <section>
-            <widgets>
-                <include-form name="IconsList" location="component://example/widget/example/ExampleForms.xml"/>
-            </widgets>
-        </section>
-    </screen>
-    <!--#Eam# icons-purpose -->
 </screens>

@@ -93,6 +93,4 @@ public interface FormStringRenderer {
     public void renderContainerFindField(Appendable writer, Map<String, Object> context, ModelFormField.ContainerField containerField) throws IOException;
     public void renderFieldGroupOpen(Appendable writer, Map<String, Object> context, ModelForm.FieldGroup fieldGroup) throws IOException;
     public void renderFieldGroupClose(Appendable writer, Map<String, Object> context, ModelForm.FieldGroup fieldGroup) throws IOException;
-//    public void renderShowPortletField(Appendable writer,Map<String, Object> context, ModelFormField.ShowPortletField showPortletField) throws IOException;
-    public void renderShowPortletLink(Appendable writer,Map<String, Object> context, ModelFormField.ShowPortletLink showPortletLink) throws IOException;
 }

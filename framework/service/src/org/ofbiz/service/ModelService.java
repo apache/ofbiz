@@ -59,6 +59,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.base.metrics.Metrics;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.ObjectType;
@@ -205,6 +206,11 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
     /** Flag to say if we have pulled in our addition parameters from our implemented service(s) */
     protected boolean inheritedParameters = false;
 
+    /**
+     * Service metrics.
+     */
+    public Metrics metrics = null;
+
     public ModelService() {}
 
     public ModelService(ModelService model) {
@@ -231,7 +237,7 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         this.inheritedParameters = model.inheritedParameters();
         this.internalGroup = model.internalGroup;
         this.hideResultInLog = model.hideResultInLog;
-
+        this.metrics = model.metrics;
         List<ModelParam> modelParamList = model.getModelParamList();
         for (ModelParam param: modelParamList) {
             this.addParamClone(param);
@@ -1625,7 +1631,7 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         cusObjElement.appendChild(cusObjElement0);
         Element cusObjElement1 = document.createElement("xsd:documentation");
         cusObjElement0.appendChild(cusObjElement1);
-        cusObjElement1.setTextContent("Object content need to be in CDATA such as <cus-obj><![CDATA[--byteHex--]]></cus-obj>");
+        cusObjElement1.setTextContent("Object content is hex encoded so does not need to be in a CDATA block.");
         schema.appendChild(cusObjElement);
 
         /*-----------------------------------*/

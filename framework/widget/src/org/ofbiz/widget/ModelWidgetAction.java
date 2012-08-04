@@ -76,9 +76,8 @@ public abstract class ModelWidgetAction implements Serializable {
     public abstract void runAction(Map<String, Object> context) throws GeneralException;
 
     public static List<ModelWidgetAction> readSubActions(ModelWidget modelWidget, Element parentElement) {
-        List<ModelWidgetAction> actions = FastList.newInstance();
-
         List<? extends Element> actionElementList = UtilXml.childElementList(parentElement);
+        List<ModelWidgetAction> actions = new ArrayList<ModelWidgetAction>(actionElementList.size());
         for (Element actionElement: actionElementList) {
             if ("set".equals(actionElement.getNodeName())) {
                 actions.add(new SetField(modelWidget, actionElement));
@@ -104,7 +103,6 @@ public abstract class ModelWidgetAction implements Serializable {
                 throw new IllegalArgumentException("Action element not supported with name: " + actionElement.getNodeName());
             }
         }
-
         return actions;
     }
 
@@ -389,37 +387,31 @@ public abstract class ModelWidgetAction implements Serializable {
     }
 
     public static class Script extends ModelWidgetAction {
-        protected FlexibleStringExpander scriptLocationExdr;
+        protected String location;
+        protected String method;
 
         public Script(ModelWidget modelWidget, Element scriptElement) {
             super (modelWidget, scriptElement);
-            this.scriptLocationExdr = FlexibleStringExpander.getInstance(scriptElement.getAttribute("location"));
+            String scriptLocation = scriptElement.getAttribute("location");
+            this.location = WidgetWorker.getScriptLocation(scriptLocation);
+            this.method = WidgetWorker.getScriptMethodName(scriptLocation);
         }
 
         @Override
         public void runAction(Map<String, Object> context) throws GeneralException {
-            Locale locale = (Locale) context.get("locale");
-            String scriptLocation = this.scriptLocationExdr.expandString(context, locale);
-            String location = WidgetWorker.getScriptLocation(scriptLocation);
-            String method = WidgetWorker.getScriptMethodName(scriptLocation);
             if (location.endsWith(".xml")) {
+                Map<String, Object> localContext = FastMap.newInstance();
+                localContext.putAll(context);
                 DispatchContext ctx = WidgetWorker.getDispatcher(context).getDispatchContext();
-                MethodContext methodContext = new MethodContext(ctx, context);
+                MethodContext methodContext = new MethodContext(ctx, localContext, null);
                 try {
                     SimpleMethod.runSimpleMethod(location, method, methodContext);
-                    Map<String, Object> resultContext = methodContext.getEnv("widget");
-                    if (UtilValidate.isNotEmpty(resultContext)){
-                        context.putAll(resultContext);
-                    }
-                    Map<String, Object> parametersUp = methodContext.getParameters();
-                    if (UtilValidate.isNotEmpty(parametersUp)){
-                        context.put("parameters",parametersUp);
-                    }
+                    context.putAll(methodContext.getResults());
                 } catch (MiniLangException e) {
                     throw new GeneralException("Error running simple method at location [" + location + "]", e);
                 }
             } else {
-                ScriptUtil.executeScript(location, method, context);
+                ScriptUtil.executeScript(this.location, this.method, context);
             }
         }
     }

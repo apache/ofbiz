@@ -22,56 +22,6 @@ under the License.
     xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
 
 
-    
-
-    <!--#Bam# portletWidget currently only To be able to have help for each portalPortlet field -->
-    <screen name="ShowPortalPortlet">
-        <section>
-            <actions>
-                <set field="headerItem" value="portalAdmin"/>
-                <set field="titleProperty" value="WebtoolsShowPortalPortlet"/>
-                <entity-one value-field="portalPortlet" entity-name="PortalPortlet"/>
-                <script location="component://webtools/webapp/webtools/WEB-INF/actions/portlet/RetrievePortletAttributes.groovy" />
-            </actions>
-            <widgets>
-                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
-                        <section>
-                            <widgets>
-                                <include-form name="SelectPortalPortlet" location="component://webtools/widget/PortalAdmForms.xml"/>
-                                <include-form name="ShowPortalPortlet" location="component://webtools/widget/PortalAdmForms.xml"/>
-                                <include-form name="listPortletAttribute" location="component://webtools/widget/PortalAdmForms.xml"/>
-                                <label text="Generic Portlet attribute for _NA_ and 00000"/>
-                                <include-form name="listPortletAttributeNA" location="component://webtools/widget/PortalAdmForms.xml"/>
-                            </widgets>
-                        </section>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-    <screen name="ShowPortalPortletHelp">
-        <section>
-            <actions>
-                <set field="headerItem" value="portalAdmin"/>
-                <set field="titleProperty" value="WebtoolsShowPortalPortlet"/>
-                <entity-one value-field="portalPortlet" entity-name="PortalPortlet"/>
-                <script location="component://webtools/webapp/webtools/WEB-INF/actions/portlet/RetrievePortletAttributes.groovy" />
-            </actions>
-            <widgets>
-                <decorator-screen name="uiLabelDecorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
-                        <section>
-                            <widgets>
-                                <include-form name="ShowPortalPortlet" location="component://webtools/widget/PortalAdmForms.xml"/>
-                            </widgets>
-                        </section>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-    <!--#Eam# portletWidget -->
     <!-- list all PortalPage in a tabular format -->
     <screen name="FindPortalPage">
         <section>

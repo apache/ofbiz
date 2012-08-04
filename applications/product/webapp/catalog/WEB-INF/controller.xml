@@ -2377,15 +2377,21 @@ under the License.
     </request-map>
 
     <!-- ================ Product Review Requests ================= -->
-    <request-map uri="pendingReviews">
-        <security https="true" auth="true"/>
-        <response name="success" type="view" value="pendingReviews"/>
-    </request-map>
     <request-map uri="updateProductReview">
         <security https="true" auth="true"/>
-        <event type="service-multi" path="" invoke="updateProductReview"/>
-        <response name="success" type="view" value="pendingReviews"/>
-        <response name="error" type="view" value="pendingReviews"/>
+        <event type="service" path="" invoke="updateProductReview"/>
+        <response name="success" type="request-redirect-noparam" value="FindReviews"/>
+        <response name="error" type="view" value="FindReviews"/>
+    </request-map>
+    <request-map uri="FindReviews">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindReviews"/>
+    </request-map>
+    <request-map uri="updateProductReviewStatus">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="setProductReviewStatus"/>
+        <response name="success" type="view" value="FindReviews"/>
+        <response name="error" type="view" value="FindReviews"/>
     </request-map>
 
     <!-- ================ Supplier Product Requests ================= -->
@@ -3133,7 +3139,6 @@ under the License.
     <view-map name="ListFeaturePrice" type="screen" page="component://product/widget/catalog/FeatureScreens.xml#ListFeaturePrice"/>
     <view-map name="CreateFeature" type="screen" page="component://product/widget/catalog/FeatureScreens.xml#CreateFeature"/>
 
-    <view-map name="FindProdCatalog" type="screen" page="component://product/widget/catalog/CatalogScreens.xml#FindProdCatalog"/>
     <view-map name="EditProdCatalog" type="screen" page="component://product/widget/catalog/CatalogScreens.xml#EditProdCatalog"/>
     <view-map name="EditProdCatalogCategories" type="screen" page="component://product/widget/catalog/CatalogScreens.xml#EditProdCatalogCategories"/>
     <view-map name="EditProdCatalogStores" type="screen" page="component://product/widget/catalog/CatalogScreens.xml#EditProdCatalogStores"/>
@@ -3174,7 +3179,7 @@ under the License.
     <view-map name="EditVendorProduct" type="screen" page="component://product/widget/catalog/ProductScreens.xml#EditVendorProduct"/>
     <view-map name="EditKeywordThesaurus" type="screen" page="component://product/widget/catalog/ThesaurusScreens.xml#EditKeywordThesaurus"/>
 
-    <view-map name="pendingReviews" type="screen" page="component://product/widget/catalog/ReviewScreens.xml#pendingReviews"/>
+    <view-map name="FindReviews" type="screen" page="component://product/widget/catalog/ReviewScreens.xml#FindReviews"/>
 
     <view-map name="ViewProductOrder" type="screen" page="component://product/widget/catalog/ProductScreens.xml#ViewProductOrder"/>
     <view-map name="EditProductCommunicationEvents" type="screen" page="component://product/widget/catalog/ProductScreens.xml#EditProductCommunicationEvents"/>
@@ -3243,8 +3248,6 @@ under the License.
     <view-map name="ListImageRecentlyApproved" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ListImageRecentlyApproved"/>
     <view-map name="ListPeopleApproved" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ListPeopleApproved"/>
     <view-map name="ListPeopleRejected" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ListPeopleRejected"/>
-    <view-map name="AutomaticResize" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#AutomaticResize"/>
-    <view-map name="ListAutomaticResize" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ListAutomaticResize"/>
     <view-map name="LookupImageFrame" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#LookupImageFrame"/>
     <view-map name="ImageResize" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ImageResize"/>
     <!-- end of view mappings -->

@@ -881,6 +881,38 @@ background: #FC7455;
 /* button column style - for the small
 collection of buttons used in lists */
 vertical-align: top;
+padding: 0.3em;
+}
+.basic-table tr .button-col a,
+.basic-table tr .button-col button,
+.basic-table tr .button-col input[type="reset"],
+.basic-table tr .button-col input[type="submit"],
+.basic-table tr .button-col input[type="button"] {
+    -webkit-appearance: none;
+    -moz-border-radius: 1em;
+    -webkit-border-radius: 1em;
+    border-radius: 1em;
+    background: #ddd url(images/button.png) repeat-x;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0, #fff), color-stop(1, #ddd));
+    background: -moz-linear-gradient(top center, #fff 0%, #ddd 100%);
+    border: 0.1em solid;
+    border-color: #ddd #bbb #999;
+    cursor: pointer;
+    color: #333;
+    display:inline-block;
+    font-size: 0.9em;
+    font-weight: bold;
+    outline: 0;
+    overflow: visible;
+    padding: 0.1em 0.5em 0.2em 0.5em;
+    text-decoration: none;
+    text-shadow: #fff 0 1px 1px; /* Setting must be in px */
+    /*text-transform:uppercase;*/
+    width: auto;
+    
+    /* IE7 */
+    *padding-top: 0.2em;
+    *padding-bottom: 0;
 }
 
 .basic-table .collapsed {
@@ -1426,7 +1458,6 @@ a.buttontextbig,
 .button-style-1 ul a,
 .button-style-2 ul a, 
 .button-style-2 a, 
-.basic-table tr .button-col a, 
 .button,
 button,
 input[type="reset"],
@@ -2201,126 +2232,3 @@ height: auto;
 white-space:normal;
 height: auto;
 }
-
-/*begin addon modification portletWidget navigation form*/
-.screenlet-title-bar-pager {
-background: url(images/bhead.gif) top left repeat-x;
-color: #ffffff;
-height: 1%; /* IE fix */
-min-height: 1.5em;
-padding:0.8em 0.2em;
-}
-
-.screenlet-title-bar-pager .h1,
-.screenlet-title-bar-pager .h2,
-.screenlet-title-bar-pager .h3,
-.screenlet-title-bar-pager h1,
-.screenlet-title-bar-pager h2,
-.screenlet-title-bar-pager h3 {
-background: none;
-color: #333;
-text-shadow: 1px 1px 0 #fff; /* Setting must be in px */
-}
-
-.screenlet-title-bar-pager ul {
-display: inline; /* IE Fix */
-}
-
-.screenlet-title-bar-pager ul li {
-color: #222;
-float: left;
-font-size: 1em;
-font-weight: bold;
-padding: 0.1em 0.5em 0.2em 0.5em;
-}
-
-.screenlet-title-bar-pager ul .h1,
-.screenlet-title-bar-pager ul .h2,
-.screenlet-title-bar-pager ul .h3 {
-border-left: none;
-float: left;
-}
-
-.screenlet-title-bar-pager h1,
-.screenlet-title-bar-pager .h1 {
-font-size: 1.6em;
-}
-
-.screenlet-title-bar-pager h2,
-.screenlet-title-bar-pager .h2 {
-font-size: 1.3em;
-}
-
-.screenlet-title-bar-pager h3,
-.screenlet-title-bar-pager .h3 {
-font-size: 1.1em;
-}
-
-.screenlet-title-bar-pager .h3 a {
-color: #222;
-display: inline;
-}
-
-.screenlet-title-bar-pager ul a {
-color: #222;
-display: block;
-}
-
-.screenlet-title-bar-pager ul a:visited {
-color: #222;
-}
-
-.screenlet-title-bar-pager ul a:hover {
-color: #ffffff;
-text-decoration: none;
-}
-
-.screenlet-title-bar-pager ul .disabled {
-color: #CCCCCC;
-}
-
-.screenlet-title-bar-pager ul .collapsed,
-.screenlet-title-bar-pager ul .collapsed:hover {
-background: url(/images/expand.gif) no-repeat center center;
-min-height: 1.1em;
-min-width: 1.1em;
-}
-
-.screenlet-title-bar-pager ul .expanded,
-.screenlet-title-bar-pager ul .expanded:hover {
-background: url(/images/collapse.gif) no-repeat center center;
-min-height: 1.1em;
-min-width: 1.1em;
-}
-
-.screenlet-title-bar-pager ul .collapsed a,
-.screenlet-title-bar-pager ul .expanded a {
-/* IE fix */
-cursor: default;
-}
-
-
-.screenlet-title-bar-pager ul a:hover {
-background-color: #999;
-}
-
-.screenlet-title-bar-pager ul .nav-pagesize,
-.screenlet-title-bar-pager ul .nav-page-select,
-.screenlet-title-bar-pager ul .nav-displaying {
-padding: 0 1em 0 1em;
-}
-
-.screenlet-title-bar-pager ul .nav-first-disabled,
-.screenlet-title-bar-pager ul .nav-previous-disabled,
-.screenlet-title-bar-pager ul .nav-next-disabled,
-.screenlet-title-bar-pager ul .nav-last-disabled {
-color: #D4D0C8;
-padding: 0 1em 0 1em;
-}
-
-.screenlet-title-bar-pager ul .nav-displaying {
-border-right: none;
-float :right;
-}
-
-/*end addon modification portletWidget navigation form*/

@@ -32,35 +32,6 @@ import org.w3c.dom.Element;
 @SuppressWarnings("serial")
 public class ModelWidget implements Serializable {
 
-    public interface ShowPortletLink {
-        public String getImage(Map<String, Object> context);
-        public String getImageTitle(Map<String, Object> context);
-        public String getAlternate(Map<String, Object> context);
-        public String getDescription(Map<String, Object> context);
-    }
-    public static class ShowPortletLinkData {
-        public String imgSrc;
-        public String imgTitle;
-        public String alt;
-        public String description;
-    }
-    public interface ShowPortletItem {
-        public String getPortalPageId(Map<String, Object> context);
-        public String getPortletId(Map<String, Object> context);
-        public String getPortletSeqId(Map<String, Object> context);
-        public String getAreaId(Map<String, Object> context);
-        public String getTarget(Map<String, Object> context);
-        public Map<String, String> getParameterMap(Map<String, Object> context);
-    }
-    public static class ShowPortletItemData {
-        public String portalPageId;
-        public String portletId;
-        public String portletSeqId;
-        public String areaId;
-        public String target;
-        public Map<String, String> parameterMap;
-        public StringBuilder params;
-    }
     /**
      * The parameter name used to control widget boundary comments. Currently
      * set to "widgetVerbose".

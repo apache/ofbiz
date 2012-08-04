@@ -159,7 +159,7 @@ under the License.
     </form>
 
     <form name="ViewPartyPerson" type="single" default-map-name="lookupPerson">
-        <field name="personalImage" use-when="personalImage!=null" title="${uiLabelMap.FormFieldTitle_personalImage}"><image value="${personalImage}" style="cssImgStandard"/></field>
+        <field name="personalImage" use-when="partyContentId!=null" title="${uiLabelMap.FormFieldTitle_personalImage}"><image value="${personalImage}" style="cssImgStandard"/></field>
         <field name="partyId"><display/></field>
         <field name="name" title="${uiLabelMap.PartyName}"><display description="${lookupPerson.personalTitle} ${lookupPerson.firstName} ${lookupPerson.middleName} ${lookupPerson.lastName}"/></field>
         <field name="comments" title="${uiLabelMap.PartyComments}"><display/></field>
@@ -893,8 +893,8 @@ under the License.
     </form>
 
     <form name="ListInvoicesApplPayments" type="list" list-name="ListInvoicesApplPayments"
-        default-title-style="tableheadtext" default-widget-style="tabletext" odd-row-style="alternate-row" default-table-style="basic-table hover-bar"
-        default-tooltip-style="tabletext">
+        default-title-style="tableheadtext" odd-row-style="alternate-row" default-table-style="basic-table hover-bar"
+       >
         <actions>
             <set field="actualCurrency" from-field="actualCurrency" default-value="true" type="Boolean"/>
             <set field="actualCurrencyUomId" from-field="actualCurrencyUomId" default-value="${defaultOrganizationPartyCurrencyUomId}"/>
@@ -928,8 +928,8 @@ under the License.
         <field name="pmAmount" title="${uiLabelMap.AccountingPaymentAmount}" entry-name="pmActualCurrencyAmount" use-when="actualCurrency==true"><display type="currency" currency="${actualCurrencyUomId}"/></field>
     </form>
     <form name="ListUnAppliedInvoices" type="list" list-name="ListUnAppliedInvoices"
-        default-title-style="tableheadtext" default-widget-style="tabletext" odd-row-style="alternate-row" default-table-style="basic-table hover-bar"
-        default-tooltip-style="tabletext">
+        default-title-style="tableheadtext" odd-row-style="alternate-row" default-table-style="basic-table hover-bar"
+       >
         <actions>
             <set field="actualCurrency" from-field="actualCurrency" default-value="true" type="Boolean"/>
             <script location="component://party/webapp/partymgr/WEB-INF/actions/party/UnAppliedInvoicesForParty.groovy"/>
@@ -949,8 +949,8 @@ under the License.
         <field name="unAppliedAmount"><display type="currency" currency="${invoiceCurrencyUomId}"/></field>
     </form>
     <form name="ListUnAppliedPayments" type="list" list-name="paymentList"
-        default-title-style="tableheadtext" default-widget-style="tabletext" odd-row-style="alternate-row" default-table-style="basic-table hover-bar"
-        default-tooltip-style="tabletext">
+        default-title-style="tableheadtext" odd-row-style="alternate-row" default-table-style="basic-table hover-bar"
+       >
         <actions>
             <set field="actualCurrency" from-field="actualCurrency" default-value="true" type="Boolean"/>
             <script location="component://party/webapp/partymgr/WEB-INF/actions/party/UnAppliedPaymentsForParty.groovy"/>
@@ -974,7 +974,7 @@ under the License.
         <field name="unAppliedAmount"><display type="currency" currency="${paymentCurrencyUomId}"/></field>
     </form>
     <form name="partyFinancialSummary" type="single" title="Financial summary" default-map-name="finanSummary"
-        default-title-style="tableheadtext" default-widget-style="tabletext" default-tooltip-style="tabletext">
+        default-title-style="tableheadtext">
         <actions>
             <set field="actualCurrency" from-field="actualCurrency" default-value="true"/>
             <set field="actualCurrencyUomId" from-field="actualCurrencyUomId" default-value="${defaultOrganizationPartyCurrencyUomId}"/>
@@ -990,9 +990,9 @@ under the License.
         <field position="1" name="totalToBeReceived" use-when="finanSummary.get(&quot;totalToBeReceived&quot;)!=null" title="${uiLabelMap.PartyToBePaidTo} ${parameters.partyId}"><display type="currency" currency="${actualCurrencyUomId}"/></field>
     </form>
     <form name="ViewPartyRoles" type="list" list-name="partyRoles" target="viewroles"
-        default-title-style="tableheadtext" default-widget-style="tabletext"
+        default-title-style="tableheadtext"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar"
-        default-tooltip-style="tabletext">
+       >
         <field name="roleTypeId" title="${uiLabelMap.PartyRoleTypeId}"><display/></field>
         <field name="description" title="${uiLabelMap.PartyRole}"><display/></field>
         <field name="parentTypeId"><display-entity entity-name="RoleType" key-field-name="roleTypeId" description="${description}"/></field>

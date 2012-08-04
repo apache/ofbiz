@@ -35,5 +35,4 @@ public interface MenuStringRenderer {
     public void setUserLoginIdHasChanged(boolean b) throws IOException ;
     public void renderLink(Appendable writer, Map<String, Object> context, ModelMenuItem.Link link) throws IOException ;
     public void renderImage(Appendable writer, Map<String, Object> context, ModelMenuItem.Image image) throws IOException ;
-    public void renderShowPortletLink(Appendable writer, Map<String, Object> context, ModelMenuItem.ShowPortletLink showPortletLink) throws IOException ;
 }

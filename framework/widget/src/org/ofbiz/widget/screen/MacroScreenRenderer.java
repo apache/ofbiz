@@ -47,7 +47,6 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.service.DispatchContext;//#Eam# : portletWidget
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.webapp.control.RequestHandler;
 import org.ofbiz.webapp.taglib.ContentUrlTag;
@@ -55,7 +54,7 @@ import org.ofbiz.widget.ModelWidget;
 import org.ofbiz.widget.WidgetContentWorker;
 import org.ofbiz.widget.WidgetDataResourceWorker;
 import org.ofbiz.widget.WidgetWorker;
-//import org.ofbiz.widget.form.FormStringRenderer;  #Bam# PortletWidget : screenlet navigationForm
+import org.ofbiz.widget.form.FormStringRenderer;
 import org.ofbiz.widget.form.MacroFormRenderer;
 import org.ofbiz.widget.form.ModelForm;
 import org.ofbiz.widget.html.HtmlScreenRenderer.ScreenletMenuRenderer;
@@ -65,10 +64,6 @@ import org.xml.sax.SAXException;
 import freemarker.core.Environment;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-//#Bam# portletWidget
-import java.util.List;
-import org.ofbiz.base.util.string.FlexibleStringExpander;
-//#Eam# portletWidget
 
 public class MacroScreenRenderer implements ScreenStringRenderer {
 
@@ -78,7 +73,7 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
     private String rendererName;
     private int elementId = 999;
     protected boolean widgetCommentsEnabled = false;
-    //private static final String formrenderer = UtilProperties.getPropertyValue("widget", "screen.formrenderer"); #Bam# PortletWidget : screenlet navigationForm
+    private static final String formrenderer = UtilProperties.getPropertyValue("widget", "screen.formrenderer");
 
     public MacroScreenRenderer(String name, String macroLibraryPath) throws TemplateException, IOException {
         macroLibrary = FreeMarkerWorker.getTemplate(macroLibraryPath);
@@ -625,14 +620,9 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
                 context.put("menuStringRenderer", renderer);
                 navMenu.renderWidgetString(sb, context, this);
                 context.put("menuStringRenderer", savedRenderer);
-            // #Bam# PortletWidget screenlet navigationForm
-            /*
             } else if (navForm != null) {
                 renderScreenletPaginateMenu(sb, context, navForm);
             }
-            */
-            }
-            // #Bam# PortletWidget screenlet navigationForm
             menuString = sb.toString();
         }
 
@@ -650,35 +640,11 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         parameters.put("showMore", showMore);
         parameters.put("collapsed", collapsed);
         parameters.put("javaScriptEnabled", javaScriptEnabled);
-       // #Bam# PortletWidget screenlet navigationForm
-        /*
         executeMacro(writer, "renderScreenletBegin", parameters);
-        */
-        String macroName = "renderScreenletBegin";
-        if (navForm != null) {
-            Map<String, Object> paramNav = preparePaginateData(context, navForm.getModelForm(context));
-            int listSize = (Integer) paramNav.get("listSize");
-            int viewSize = (Integer) paramNav.get("viewSize");
-            if (listSize > viewSize){
-                parameters.putAll(paramNav);
-                macroName = "renderScreenletBeginWithPaginate";
-            }
-        } 
-        executeMacro(writer, macroName, parameters);
-        // #Bam# PortletWidget screenlet navigationForm
     }
 
     public void renderScreenletSubWidget(Appendable writer, Map<String, Object> context, ModelScreenWidget subWidget, ModelScreenWidget.Screenlet screenlet) throws GeneralException, IOException  {
         if (subWidget.equals(screenlet.getNavigationForm())) {
-           // #Bam# PortletWidget : screenlet navigationForm
-            Map<String, Object> globalCtx = UtilGenerics.checkMap(context.get("globalContext"));
-            globalCtx.put("NO_PAGINATOR", true);
-            MacroFormRenderer formRenderer = (MacroFormRenderer) context.get("formStringRenderer"); // in MacroScreenRenderer it should be a MacroForm
-            boolean previousRenderPagination = formRenderer.getRenderPagination();
-            formRenderer.setRenderPagination(false);
-            subWidget.renderWidgetString(writer, context, this);
-            formRenderer.setRenderPagination(previousRenderPagination);
-            /*
             HttpServletRequest request = (HttpServletRequest) context.get("request");
             HttpServletResponse response = (HttpServletResponse) context.get("response");
             if (request != null && response != null) {
@@ -696,8 +662,6 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
                 subWidget.renderWidgetString(writer, context, this);
                 context.put("formStringRenderer", savedRenderer);
             }
-            */ 
-            // #Eam# PortletWidget : screenlet navigationForm
         } else {
             subWidget.renderWidgetString(writer, context, this);
         }
@@ -712,12 +676,6 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         ModelForm modelForm = form.getModelForm(context);
         modelForm.runFormActions(context);
         modelForm.preparePager(context);
-        //#Bam# portletWidget : screenlet navigationForm
-        context.put("forScreenlet", "Y");
-        MacroFormRenderer formStringRenderer = (MacroFormRenderer) context.get("formStringRenderer");
-        formStringRenderer.renderNextPrev(writer, context, modelForm);
-        //#Eam# portletWidget
-
         String targetService = modelForm.getPaginateTarget(context);
         if (targetService == null) {
             targetService = "${targetService}";
@@ -835,301 +793,6 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         executeMacro(writer, "renderScreenletPaginateMenu", parameters);
     }
 
-    //#Bam# portletWidget screenlet navigation Form
-    public Map<String, Object> preparePaginateData(Map<String, Object> context, ModelForm modelForm) { 
-        boolean ajaxEnabled = false; 
-        HttpServletRequest request = (HttpServletRequest) context.get("request"); 
-        HttpServletResponse response = (HttpServletResponse) context.get("response"); 
-        ServletContext ctx = (ServletContext) request.getAttribute("servletContext"); 
-        RequestHandler rh = (RequestHandler) ctx.getAttribute("_REQUEST_HANDLER_"); 
-        Map<String, Object> inputFields = UtilGenerics.checkMap(context.get("requestParameters")); 
-        Map<String, Object> queryStringMap = UtilGenerics.toMap(context.get("queryStringMap")); 
-        if (UtilValidate.isNotEmpty(queryStringMap)) { 
-            inputFields.putAll(queryStringMap); 
-        } 
-        if (modelForm.getType().equals("multi")) { 
-            inputFields = UtilHttp.removeMultiFormParameters(inputFields); 
-        } 
-        String queryString = UtilHttp.urlEncodeArgs(inputFields); 
-        List<ModelForm.UpdateArea> updateAreas = modelForm.getOnPaginateUpdateAreas(); 
-        modelForm.runFormActions(context); 
-        modelForm.preparePager(context); 
-        String targetService = modelForm.getPaginateTarget(context); 
-        if (UtilHttp.isJavaScriptEnabled(request)) { 
-            if (UtilValidate.isNotEmpty(updateAreas)) { 
-                ajaxEnabled = true; 
-            } 
-        } 
-        if (targetService == null) { 
-            targetService = "${targetService}"; 
-        } 
- 
-        // get the parameterized pagination index and size fields 
-        int paginatorNumber = WidgetWorker.getPaginatorNumber(context); 
-        String viewIndexParam = modelForm.getMultiPaginateIndexField(context); 
-        String viewSizeParam = modelForm.getMultiPaginateSizeField(context); 
- 
-        int viewIndex = modelForm.getViewIndex(context); 
-        int viewSize = modelForm.getViewSize(context); 
-        int listSize = modelForm.getListSize(context); 
- 
-        int lowIndex = modelForm.getLowIndex(context); 
-        int highIndex = modelForm.getHighIndex(context); 
-        int actualPageSize = modelForm.getActualPageSize(context); 
- 
-        // needed for the "Page" and "rows" labels 
-        Map<String, String> uiLabelMap = UtilGenerics.checkMap(context.get("uiLabelMap")); 
-        String pageLabel = ""; 
-        String commonDisplaying = ""; 
-        if (uiLabelMap == null) { 
-            Debug.logWarning("Could not find uiLabelMap in context", module); 
-        } else { 
-            pageLabel = uiLabelMap.get("CommonPage"); 
-            Map<String, Integer> messageMap = UtilMisc.toMap("lowCount", Integer.valueOf(lowIndex + 1), "highCount", Integer.valueOf(lowIndex + actualPageSize), "total", Integer.valueOf(listSize)); 
-            commonDisplaying = UtilProperties.getMessage("CommonUiLabels", "CommonDisplaying", messageMap, (Locale) context.get("locale")); 
-        } 
- 
-        // for legacy support, the viewSizeParam is VIEW_SIZE and viewIndexParam is VIEW_INDEX when the fields are "viewSize" and "viewIndex" 
-        if (viewIndexParam.equals("viewIndex" + "_" + paginatorNumber)) viewIndexParam = "VIEW_INDEX" + "_" + paginatorNumber; 
-        if (viewSizeParam.equals("viewSize" + "_" + paginatorNumber)) viewSizeParam = "VIEW_SIZE" + "_" + paginatorNumber; 
- 
- 
-        // strip legacy viewIndex/viewSize params from the query string 
-        queryString = UtilHttp.stripViewParamsFromQueryString(queryString, "" + paginatorNumber); 
- 
-        // strip parameterized index/size params from the query string 
-        HashSet<String> paramNames = new HashSet<String>(); 
-        paramNames.add(viewIndexParam); 
-        paramNames.add(viewSizeParam); 
-        queryString = UtilHttp.stripNamedParamsFromQueryString(queryString, paramNames); 
- 
-        String anchor = ""; 
-        String paginateAnchor = modelForm.getPaginateTargetAnchor(); 
-        if (UtilValidate.isNotEmpty(paginateAnchor)) anchor = "#" + paginateAnchor; 
- 
-        // Create separate url path String and request parameters String, 
-        // add viewIndex/viewSize parameters to request parameter String 
-        String urlPath = UtilHttp.removeQueryStringFromTarget(targetService); 
-        String prepLinkText = UtilHttp.getQueryStringFromTarget(targetService); 
-        String prepLinkSizeText; 
- 
-        if (UtilValidate.isNotEmpty(queryString)) { 
-            queryString = UtilHttp.encodeAmpersands(queryString); 
-        } 
-         
-        if (prepLinkText == null) { 
-            prepLinkText = ""; 
-        } 
-        if (prepLinkText.indexOf("?") < 0) { 
-            prepLinkText += "?"; 
-        } else if (!prepLinkText.endsWith("?")) { 
-            prepLinkText += "&amp;"; 
-        } 
-        if (!UtilValidate.isEmpty(queryString) && !queryString.equals("null")) { 
-            prepLinkText += queryString + "&amp;"; 
-        } 
-        prepLinkSizeText = prepLinkText + viewSizeParam + "='+this.value+'" + "&amp;" + viewIndexParam + "=0"; 
-        prepLinkText += viewSizeParam + "=" + viewSize + "&amp;" + viewIndexParam + "="; 
-        if (ajaxEnabled) { 
-            // Prepare params for prototype.js 
-            prepLinkText = prepLinkText.replace("?", ""); 
-            prepLinkText = prepLinkText.replace("&amp;", "&"); 
-        } 
-        String linkText; 
-        String paginateStyle = modelForm.getPaginateStyle(); 
-        String paginateFirstStyle = modelForm.getPaginateFirstStyle(); 
-        String paginateFirstLabel = modelForm.getPaginateFirstLabel(context); 
-        String firstUrl = ""; 
-        String ajaxFirstUrl = ""; 
-        String paginatePreviousStyle = modelForm.getPaginatePreviousStyle(); 
-        String paginatePreviousLabel = modelForm.getPaginatePreviousLabel(context); 
-        String previousUrl = ""; 
-        String ajaxPreviousUrl = ""; 
-        String selectUrl = ""; 
-        String ajaxSelectUrl = ""; 
-        String paginateViewSizeLabel = modelForm.getPaginateViewSizeLabel(context); 
-        String selectSizeUrl = ""; 
-        String ajaxSelectSizeUrl = ""; 
-        String paginateNextStyle = modelForm.getPaginateNextStyle(); 
-        String paginateNextLabel = modelForm.getPaginateNextLabel(context); 
-        String nextUrl = ""; 
-        String ajaxNextUrl = ""; 
-        String paginateLastStyle = modelForm.getPaginateLastStyle(); 
-        String paginateLastLabel = modelForm.getPaginateLastLabel(context); 
-        String lastUrl = ""; 
-        String ajaxLastUrl = ""; 
- 
-        if (viewIndex > 0) { 
-            if (ajaxEnabled) { 
-                ajaxFirstUrl = createAjaxParamsFromUpdateAreas(rh, request, response, updateAreas, prepLinkText + 0 + anchor, context); 
-            } else { 
-                linkText = prepLinkText + 0 + anchor; 
-                firstUrl = rh.makeLink(request, response, urlPath + linkText); 
-            } 
-        } 
-        if (viewIndex > 0) { 
-            if (ajaxEnabled) { 
-                ajaxPreviousUrl = createAjaxParamsFromUpdateAreas(rh, request, response, updateAreas, prepLinkText + (viewIndex - 1) + anchor, context); 
-            } else { 
-                linkText = prepLinkText + (viewIndex - 1) + anchor; 
-                previousUrl = rh.makeLink(request, response, urlPath + linkText); 
-            } 
-        } 
-        // Page select dropdown 
-        if (listSize > 0 && ajaxEnabled) { 
-            if (ajaxEnabled) { 
-                ajaxSelectUrl = createAjaxParamsFromUpdateAreas(rh, request, response, updateAreas, prepLinkText + "' + this.value + '", context); 
-            } else { 
-                linkText = prepLinkText; 
-                if (linkText.startsWith("/")) { 
-                    linkText = linkText.substring(1); 
-                } 
-                selectUrl = rh.makeLink(request, response, urlPath + linkText); 
-            } 
-        } 
- 
-        // Next button 
-        if (highIndex < listSize) { 
-            if (ajaxEnabled) { 
-                ajaxNextUrl = createAjaxParamsFromUpdateAreas(rh, request, response, updateAreas, prepLinkText + (viewIndex + 1) + anchor, context); 
-            } else { 
-                linkText = prepLinkText + (viewIndex + 1) + anchor; 
-                nextUrl = rh.makeLink(request, response, urlPath + linkText); 
-            } 
-        } 
- 
-        // Last button 
-        if (highIndex < listSize) { 
-            if (ajaxEnabled) { 
-                ajaxLastUrl = createAjaxParamsFromUpdateAreas(rh, request, response, updateAreas, prepLinkText + (listSize / viewSize) + anchor, context); 
-            } else { 
-                linkText = prepLinkText + (listSize / viewSize) + anchor; 
-                lastUrl = rh.makeLink(request, response, urlPath + linkText); 
-            } 
-        } 
- 
-        // Page size select dropdown 
-        if (listSize > 0 && ajaxEnabled) { 
-            if (ajaxEnabled) { 
-                ajaxSelectSizeUrl = createAjaxParamsFromUpdateAreas(rh, request, response, updateAreas, prepLinkSizeText + anchor, context); 
-            } else { 
-                linkText = prepLinkSizeText; 
-                if (linkText.startsWith("/")) { 
-                    linkText = linkText.substring(1); 
-                } 
-                selectSizeUrl = rh.makeLink(request, response, urlPath + linkText); 
-            } 
-        } 
- 
-        Map<String, Object> navigationData = FastMap.newInstance(); 
-        navigationData.put("paginateStyle", paginateStyle); 
-        navigationData.put("paginateFirstStyle", paginateFirstStyle); 
-        navigationData.put("viewIndex", viewIndex); 
-        navigationData.put("highIndex", highIndex); 
-        navigationData.put("listSize", listSize); 
-        navigationData.put("viewSize", viewSize); 
-        navigationData.put("ajaxEnabled", ajaxEnabled); 
-//        navigationData.put("javaScriptEnabled", Boolean.toString(ajaxEnabled)); 
-        navigationData.put("ajaxFirstUrl", ajaxFirstUrl); 
-        navigationData.put("firstUrl", firstUrl); 
-        navigationData.put("paginateFirstLabel", paginateFirstLabel); 
-        navigationData.put("paginatePreviousStyle", paginatePreviousStyle); 
-        navigationData.put("ajaxPreviousUrl", ajaxPreviousUrl); 
-        navigationData.put("previousUrl", previousUrl); 
-        navigationData.put("paginatePreviousLabel", paginatePreviousLabel); 
-        navigationData.put("pageLabel", pageLabel); 
-        navigationData.put("ajaxSelectUrl", ajaxSelectUrl); 
-        navigationData.put("selectUrl", selectUrl); 
-        navigationData.put("ajaxSelectSizeUrl", ajaxSelectSizeUrl); 
-        navigationData.put("selectSizeUrl", selectSizeUrl); 
-        navigationData.put("commonDisplaying", commonDisplaying); 
-        navigationData.put("paginateNextStyle", paginateNextStyle); 
-        navigationData.put("ajaxNextUrl", ajaxNextUrl); 
-        navigationData.put("nextUrl", nextUrl); 
-        navigationData.put("paginateNextLabel", paginateNextLabel); 
-        navigationData.put("paginateLastStyle", paginateLastStyle); 
-        navigationData.put("ajaxLastUrl", ajaxLastUrl); 
-        navigationData.put("lastUrl", lastUrl); 
-        navigationData.put("paginateLastLabel", paginateLastLabel); 
-        navigationData.put("paginateViewSizeLabel", paginateViewSizeLabel); 
-        return navigationData; 
- 
-    } 
-    /** Create an ajaxXxxx JavaScript CSV string from a list of UpdateArea objects. See 
-     * <code>selectall.js</code>. 
-     * @param updateAreas 
-     * @param extraParams Renderer-supplied additional target parameters 
-     * @param context 
-     * @return Parameter string or empty string if no UpdateArea objects were found 
-     */ 
-    public String createAjaxParamsFromUpdateAreas(RequestHandler rh,HttpServletRequest request, HttpServletResponse response, List<ModelForm.UpdateArea> updateAreas, String extraParams, Map<String, ? extends Object> context) { 
-        //FIXME copy from HtmlFormRenderer.java 
-        if (updateAreas == null) { 
-            return ""; 
-        } 
-        String ajaxUrl = ""; 
-        boolean firstLoop = true; 
-        for (ModelForm.UpdateArea updateArea : updateAreas) { 
-            if (firstLoop) { 
-                firstLoop = false; 
-            } else { 
-                ajaxUrl += ","; 
-            } 
-            Map<String, Object> ctx = UtilGenerics.checkMap(context); 
-            Map<String, String> parameters = updateArea.getParameterMap(ctx); 
-            String targetUrl = updateArea.getAreaTarget(context); 
-            String ajaxParams = getAjaxParamsFromTarget(targetUrl); 
-            if (UtilValidate.isNotEmpty(extraParams)) { 
-                if (ajaxParams.length() > 0 && !extraParams.startsWith("&")) { 
-                    ajaxParams += "&"; 
-                } 
-                ajaxParams += extraParams; 
-            } 
-            if(parameters!=null){ 
-                if(UtilValidate.isEmpty(ajaxParams)){ 
-                    ajaxParams = ""; 
-                } 
-                for (String key : parameters.keySet()) { 
-                    if (ajaxParams.length() > 0 && ajaxParams.indexOf(key) < 0) { 
-                        ajaxParams += "&"; 
-                    } 
-                    if (ajaxParams.indexOf(key) < 0) { 
-                        ajaxParams += key + "=" + parameters.get(key); 
-                    } 
-                } 
-                StringBuilder params = new StringBuilder(); 
-                params.append(ajaxParams); 
-                List<String> addingParams = UtilMisc.toList("portalPageId", "portalPortletId", "portletSeqId", "areaId", "idDescription"); 
-                for (String addingParam : addingParams) { 
-                    if (UtilValidate.isNotEmpty(ajaxParams) && ajaxParams.contains(addingParam + "=")) { 
-                        continue; 
-                    } 
-                    WidgetWorker.addToParamsIfInContext(params, ctx, addingParam, parameters); 
-                } 
-                ajaxParams = params.toString(); 
-            } 
-            ajaxUrl += updateArea.getAreaId() + ","; 
-            ajaxUrl += rh.makeLink(request, response, UtilHttp.removeQueryStringFromTarget(targetUrl)); 
-            ajaxUrl += "," + ajaxParams; 
-        } 
-        Locale locale = UtilMisc.ensureLocale(context.get("locale")); 
-        return FlexibleStringExpander.expandString(ajaxUrl, context, locale); 
-    } 
- 
-    /** Extracts parameters from a target URL string, prepares them for an Ajax 
-     * JavaScript call. This method is currently set to return a parameter string 
-     * suitable for the Prototype.js library. 
-     * @param target Target URL string 
-     * @return Parameter string 
-     */ 
-    public static String getAjaxParamsFromTarget(String target) { 
-        String targetParams = UtilHttp.getQueryStringFromTarget(target); 
-        targetParams = targetParams.replace("?", ""); 
-        targetParams = targetParams.replace("&amp;", "&"); 
-        return targetParams;
-     }
-    //#Eam# portletWidget
-
     public void renderPortalPageBegin(Appendable writer, Map<String, Object> context, ModelScreenWidget.PortalPage portalPage) throws GeneralException, IOException {
         String portalPageId = portalPage.getActualPortalPageId();
         String originalPortalPageId = portalPage.getOriginalPortalPageId();
@@ -1227,10 +890,6 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         sr.append(colWidthLabel);
         sr.append("\" setColumnSizeHint=\"");
         sr.append(setColumnSizeHint);
-        //#Bam# portletWidget add new field in PortalPageColumn to be able to have multiple line in a portalPage. Each line has multiple column
-        sr.append("\" newLine=\"");
-        sr.append(portalPageColumn.getString("newLine"));
-        //#Eam# portletWidget add new field in PortalPageColumn to be able to have multiple line in a portalPage. Each line has multiple column
         sr.append("\" />");
         executeMacro(writer, sr.toString());
     }   
@@ -1245,18 +904,8 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         String portalPageId = portalPage.getActualPortalPageId();
         String originalPortalPageId = portalPage.getOriginalPortalPageId();
         String portalPortletId = portalPortlet.getString("portalPortletId");
-       //#Bam# portletWidget
-        /*
         String portletSeqId = portalPortlet.getString("portletSeqId");
         String columnSeqId = portalPortlet.getString("columnSeqId");
-        */
-        String portletSeqId = null;
-        String columnSeqId = null;
-        if (! portalPortlet.getEntityName().equals("PortalPortlet")){
-            portletSeqId = portalPortlet.getString("portletSeqId");
-            columnSeqId = portalPortlet.getString("columnSeqId");
-        }
-        //#Eam# portletWidget
         String confMode = portalPage.getConfMode(context);
         String editFormName = portalPortlet.getString("editFormName");
         String editFormLocation = portalPortlet.getString("editFormLocation");
@@ -1277,7 +926,6 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
             delPortletHint = uiLabelMap.get("CommonDeleteThisPortlet");
             editAttributeHint = uiLabelMap.get("CommonEditPortletAttributes");
         }
-        String includedInPage = (String) context.get("includedInPage");//#Eam# : portletWidget
 
         StringWriter sr = new StringWriter();
         sr.append("<@renderPortalPagePortletBegin ");
@@ -1309,10 +957,6 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         sr.append(editAttributeHint);
         sr.append("\" confMode=\"");
         sr.append(confMode);
-        //#Bam# : portletWidget
-        sr.append("\" includedInPage=\"");
-        sr.append(includedInPage);
-        //#Eam# : portletWidget
         sr.append("\"");
         if (UtilValidate.isNotEmpty(editFormName) && UtilValidate.isNotEmpty(editFormLocation)) {
             sr.append(" editAttribute=\"true\"");
@@ -1328,11 +972,6 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         sr.append("<@renderPortalPagePortletEnd ");
         sr.append(" confMode=\"");
         sr.append(confMode);
-        //#Bam# : portletWidget
-        String includedInPage = (String) context.get("includedInPage");
-        sr.append("\" includedInPage=\"");
-        sr.append(includedInPage);
-        //#Eam# : portletWidget
         sr.append("\" />");
         executeMacro(writer, sr.toString());
     }
@@ -1341,49 +980,11 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         String portalPortletId = portalPortlet.getString("portalPortletId");
         String screenName = portalPortlet.getString("screenName");
         String screenLocation = portalPortlet.getString("screenLocation");
-        //#Bam# : portletWidget
-        if (UtilValidate.isEmpty(screenName) || UtilValidate.isEmpty(screenLocation)){
-            Debug.logError("Impossible to show portalPortletId="+portalPortletId+" screenName="+screenName+" screenLocation="+screenLocation, module);
-            return;
-        }
-
-        LocalDispatcher dispatcher = (LocalDispatcher) context.get("dispatcher");
-        DispatchContext dctx = dispatcher.getDispatchContext();
-        Boolean hasPermission = true;
-        if (UtilValidate.isNotEmpty(portalPortlet.get("securityServiceName")) && UtilValidate.isNotEmpty(portalPortlet.get("securityMainAction"))) {
-            String serviceName = portalPortlet.getString("securityServiceName");
-                Map<String, Object> inMap = UtilMisc.toMap("mainAction", portalPortlet.get("securityMainAction"),
-                                                           "resourceDescription", portalPortletId,
-                                                           "userLogin",context.get("userLogin"));
-                //Add request parameters to service context
-                Map<String, Object> inputFields = UtilGenerics.checkMap(context.get("requestParameters"));
-                for (String name: inputFields.keySet()) {
-                    inMap.put(name, inputFields.get(name));
-                }
-                inMap = dctx.makeValidContext(serviceName, "IN", inMap);
-                Map<String, Object> result = dispatcher.runSync(serviceName, inMap);
-                if (UtilValidate.isNotEmpty(result)) {
-                    hasPermission = (Boolean) result.get("hasPermission");
-
-                    //Add service result parameters to context
-                    for (String name: result.keySet()) {
-                        context.put(name, result.get(name));
-                    }
-                }
-        }
-        //#Eam# : portletWidget
 
         ModelScreen modelScreen = null;
         if (UtilValidate.isNotEmpty(screenName) && UtilValidate.isNotEmpty(screenLocation)) {
             try {
-            if (hasPermission) {//#Eam# : portletWidget
                 modelScreen = ScreenFactory.getScreenFromLocation(screenLocation, screenName);
-            //#Bam# : portletWidget
-            } else {
-                //Display permission error screen
-                modelScreen = ScreenFactory.getScreenFromLocation("component://common/widget/PortalPageScreens.xml","PermissionErrorScreen");
-            }
-            //#Eam# : portletWidget
             } catch (IOException e) {
                 String errMsg = "Error rendering portlet ID [" + portalPortletId + "]: " + e.toString();
                 Debug.logError(e, errMsg, module);

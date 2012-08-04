@@ -25,7 +25,6 @@ import java.util.Map;
 import java.sql.Timestamp;
 
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.service.ServiceDispatcher;
 import org.ofbiz.service.RunningService;
 import org.ofbiz.service.engine.GenericEngine;
 import org.ofbiz.base.util.UtilHttp;
@@ -35,19 +34,9 @@ uiLabelMap = UtilProperties.getResourceBundleMap("WebtoolsUiLabels", locale);
 uiLabelMap.addBottomResourceBundle("CommonUiLabels");
 
 threads = [];
-jobs = dispatcher.getJobManager().processList();
-jobs.each { job ->
-    state = job.status;
-    switch (state) {
-        case 0 : status = uiLabelMap.WebtoolsStatusSleeping; break;
-        case 1 : status = uiLabelMap.WebtoolsStatusRunning; break;
-        case -1: status = uiLabelMap.WebtoolsStatusShuttingDown; break;
-        default: status = uiLabelMap.WebtoolsStatusInvalid; break;
-    }
-    job.status = status;
-    threads.add(job);
-}
-context.threads = threads;
+poolState = dispatcher.getJobManager().getPoolState();
+context.poolState = poolState;
+context.threads = poolState.taskList;
 
 // Some stuff for general threads on the server
 currentThread = Thread.currentThread();

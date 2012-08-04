@@ -89,7 +89,6 @@ public class ModelForm extends ModelWidget {
     protected String tooltip;
     protected String listName;
     protected String listEntryName;
-    protected String validateLinkId; // #Eam# validateForm
     protected FlexibleMapAccessor<Map<String, ? extends Object>> defaultMapName;
     protected String defaultEntityName;
     protected String defaultServiceName;
@@ -116,7 +115,6 @@ public class ModelForm extends ModelWidget {
     protected boolean separateColumns = false;
     protected boolean groupColumns = true;
     protected boolean useRowSubmit = false;
-    protected boolean validateLinkOnEnter = false; // #Eam# validateForm
     protected FlexibleStringExpander targetWindowExdr;
     protected String defaultRequiredFieldStyle;
     protected String defaultSortFieldStyle;
@@ -275,7 +273,6 @@ public class ModelForm extends ModelWidget {
                 this.tooltip = parent.tooltip;
                 this.listName = parent.listName;
                 this.listEntryName = parent.listEntryName;
-                this.validateLinkId = parent.validateLinkId;// #Eam# validateForm
                 this.tooltip = parent.tooltip;
                 this.defaultEntityName = parent.defaultEntityName;
                 this.defaultServiceName = parent.defaultServiceName;
@@ -489,15 +486,6 @@ public class ModelForm extends ModelWidget {
         if (this.rowCountExdr == null || formElement.hasAttribute("row-count")) {
             this.rowCountExdr = FlexibleStringExpander.getInstance(formElement.getAttribute("row-count"));
         }
-
-        //#Bam# : validateForm
-        if (this.validateLinkId == null || formElement.hasAttribute("validate-link-id")) {
-            this.validateLinkId = formElement.getAttribute("validate-link-id");
-        }
-        if ( formElement.hasAttribute("validate-link-on-enter")) {
-            this.validateLinkOnEnter = "true".equalsIgnoreCase(formElement.getAttribute("validate-link-on-enter"));
-        }
-        //#Eam# : validateForm
 
         //alt-row-styles
         for (Element altRowStyleElement : UtilXml.childElementList(formElement, "alt-row-style")) {
@@ -849,10 +837,7 @@ public class ModelForm extends ModelWidget {
      */
     public void renderFormString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
         //  increment the paginator, only for list and multi forms
-        Boolean PAGINATOR_AND_ACTION_DONE = null; // #Eam# screenlet navigationForm
         if ("list".equals(this.type) || "multi".equals(this.type)) {
-            Map<String, Object> globalCtx = UtilGenerics.checkMap(context.get("globalContext")); // #Eam# screenlet navigationForm
-            PAGINATOR_AND_ACTION_DONE = (Boolean) globalCtx.get("NO_PAGINATOR"); // #Eam# screenlet navigationForm
             WidgetWorker.incrementPaginatorNumber(context);
         }
 
@@ -865,9 +850,7 @@ public class ModelForm extends ModelWidget {
         context.put("viewIndex", this.getViewIndex(context));
         context.put("viewSize", this.getViewSize(context));
 
-        if (UtilValidate.isEmpty(PAGINATOR_AND_ACTION_DONE)) { // #Eam# screenlet navigationForm
-            runFormActions(context);
-        }  // #Eam# screenlet navigationForm
+        runFormActions(context);
 
         // if this is a list form, don't useRequestParameters
         if ("list".equals(this.type) || "multi".equals(this.type)) {
@@ -1258,11 +1241,7 @@ public class ModelForm extends ModelWidget {
                     continue;
                 }
 
-                /* #Bam# portletWidget
                 if (fieldInfo.getFieldType() != ModelFormField.FieldInfo.DISPLAY && fieldInfo.getFieldType() != ModelFormField.FieldInfo.DISPLAY_ENTITY && fieldInfo.getFieldType() != ModelFormField.FieldInfo.HYPERLINK) {
-                */
-                if (fieldInfo.getFieldType() != ModelFormField.FieldInfo.DISPLAY && fieldInfo.getFieldType() != ModelFormField.FieldInfo.DISPLAY_ENTITY && fieldInfo.getFieldType() != ModelFormField.FieldInfo.HYPERLINK && fieldInfo.getFieldType() != ModelFormField.FieldInfo.SHOW_PORTLET) {
-                // #Eam# portletWidget
                     inputFieldFound = true;
                     continue;
                 }
@@ -1286,11 +1265,7 @@ public class ModelForm extends ModelWidget {
                 }
 
                 // skip all of the display/hyperlink fields
-                /* #Bam# portletWidget
                 if (fieldInfo.getFieldType() == ModelFormField.FieldInfo.DISPLAY || fieldInfo.getFieldType() == ModelFormField.FieldInfo.DISPLAY_ENTITY || fieldInfo.getFieldType() == ModelFormField.FieldInfo.HYPERLINK) {
-                */
-                if (fieldInfo.getFieldType() == ModelFormField.FieldInfo.DISPLAY || fieldInfo.getFieldType() == ModelFormField.FieldInfo.DISPLAY_ENTITY || fieldInfo.getFieldType() == ModelFormField.FieldInfo.HYPERLINK || fieldInfo.getFieldType() == ModelFormField.FieldInfo.SHOW_PORTLET) {
-                // #Eam# portletWidget
                     continue;
                 }
 
@@ -1534,6 +1509,9 @@ public class ModelForm extends ModelWidget {
                 if (itemIndex < lowIndex) {
                     continue;
                 }
+                
+                // reset/remove the BshInterpreter now as well as later because chances are there is an interpreter at this level of the stack too
+                this.resetBshInterpreter(context);
 
                 Map<String, Object> itemMap = UtilGenerics.checkMap(item);
                 MapStack<String> localContext = MapStack.create(context);
@@ -1620,11 +1598,7 @@ public class ModelForm extends ModelWidget {
                             continue;
                         }
 
-                        /* #Bam# portletWidget
                         if (fieldInfo.getFieldType() != ModelFormField.FieldInfo.DISPLAY && fieldInfo.getFieldType() != ModelFormField.FieldInfo.DISPLAY_ENTITY && fieldInfo.getFieldType() != ModelFormField.FieldInfo.HYPERLINK) {
-                        */
-                        if (fieldInfo.getFieldType() != ModelFormField.FieldInfo.DISPLAY && fieldInfo.getFieldType() != ModelFormField.FieldInfo.DISPLAY_ENTITY && fieldInfo.getFieldType() != ModelFormField.FieldInfo.HYPERLINK && fieldInfo.getFieldType() != ModelFormField.FieldInfo.SHOW_PORTLET) {
-                        // #Eam# portletWidget
                             // okay, now do the form cell
                             break;
                         }
@@ -1648,11 +1622,7 @@ public class ModelForm extends ModelWidget {
                         }
 
                         // skip all of the display/hyperlink fields
-                        /* #Bam# portletWidget
                         if (fieldInfo.getFieldType() == ModelFormField.FieldInfo.DISPLAY || fieldInfo.getFieldType() == ModelFormField.FieldInfo.DISPLAY_ENTITY || fieldInfo.getFieldType() == ModelFormField.FieldInfo.HYPERLINK) {
-                        */
-                        if (fieldInfo.getFieldType() == ModelFormField.FieldInfo.DISPLAY || fieldInfo.getFieldType() == ModelFormField.FieldInfo.DISPLAY_ENTITY || fieldInfo.getFieldType() == ModelFormField.FieldInfo.HYPERLINK || fieldInfo.getFieldType() == ModelFormField.FieldInfo.SHOW_PORTLET) {
-                        // #Bam# portletWidget
                             continue;
                         }
 
@@ -1674,11 +1644,7 @@ public class ModelForm extends ModelWidget {
                         }
 
                         // skip all non-display and non-hyperlink fields
-                        /* #Bam# portletWidget
                         if (fieldInfo.getFieldType() != ModelFormField.FieldInfo.DISPLAY && fieldInfo.getFieldType() != ModelFormField.FieldInfo.DISPLAY_ENTITY && fieldInfo.getFieldType() != ModelFormField.FieldInfo.HYPERLINK) {
-                        */
-                        if (fieldInfo.getFieldType() != ModelFormField.FieldInfo.DISPLAY && fieldInfo.getFieldType() != ModelFormField.FieldInfo.DISPLAY_ENTITY && fieldInfo.getFieldType() != ModelFormField.FieldInfo.HYPERLINK && fieldInfo.getFieldType() != ModelFormField.FieldInfo.SHOW_PORTLET) {
-                        // #Eam# portletWidget
                             continue;
                         }
 
@@ -2740,16 +2706,6 @@ public class ModelForm extends ModelWidget {
         return this.useRowSubmit;
     }
 
-    //#Bam# : validateForm
-    public boolean getValidateLinkOnEnter() {
-        return this.validateLinkOnEnter;
-    }
- 
-    public String getValidateLinkId() {
-        return this.validateLinkId;
-    }
-    //#Eam# : validateForm
-
     public List<ModelFormField> getMultiSubmitFields() {
         return this.multiSubmitFields;
     }
@@ -2883,7 +2839,6 @@ public class ModelForm extends ModelWidget {
         protected String areaId;
         protected String areaTarget;
         List<WidgetWorker.Parameter> parameterList =FastList.newInstance();
-        List<WidgetWorker.Parameter> redirParameterList =FastList.newInstance(); // #Eam# portletWidget
         /** XML constructor.
          * @param updateAreaElement The <code>&lt;on-xxx-update-area&gt;</code>
          * XML element.
@@ -2896,12 +2851,6 @@ public class ModelForm extends ModelWidget {
             for (Element parameterElement: parameterElementList) {
                 this.parameterList.add(new WidgetWorker.Parameter(parameterElement));
             }
-            // #Bam# portletWidget
-            parameterElementList = UtilXml.childElementList(updateAreaElement, "redirect-parameter");
-            for (Element parameterElement: parameterElementList) {
-                this.redirParameterList.add(new WidgetWorker.Parameter(parameterElement));
-            }
-            // #Eam# portletWidget
         }
         /** String constructor.
          * @param areaId The id of the widget element to be updated
@@ -2932,25 +2881,6 @@ public class ModelForm extends ModelWidget {
         public Map<String, String> getParameterMap(Map<String, Object> context) {
             Map<String, String> fullParameterMap = FastMap.newInstance();
             for (WidgetWorker.Parameter parameter: this.parameterList) {
-                // #Bam# portletWidget : add property sendIfEmpty in parameters
-                String paramValue = parameter.getValue(context);
-                if (UtilValidate.isNotEmpty(paramValue) || parameter.sendIfEmpty(context)){
-                    fullParameterMap.put(parameter.getName(), parameter.getValue(context));
-                }
-                // #Eam# portletWidget
-            }
-
-            return fullParameterMap;
-        }
-        // #Bam# portletWidget
-        public boolean hasRedirParamList() {
-            return UtilValidate.isNotEmpty(this.redirParameterList);
-        }
-
-        public Map<String, String> getRedirParamList(Map<String, Object> context) {
-            Map<String, String> fullParameterMap = FastMap.newInstance();
-            for (WidgetWorker.Parameter parameter: this.redirParameterList) {
-        // #Eam# portletWidget
                 fullParameterMap.put(parameter.getName(), parameter.getValue(context));
             }
             

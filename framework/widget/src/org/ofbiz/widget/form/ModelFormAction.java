@@ -273,37 +273,31 @@ public abstract class ModelFormAction {
     }
 
     public static class Script extends ModelFormAction {
-        protected FlexibleStringExpander scriptLocationExdr;
+        protected String location;
+        protected String method;
 
         public Script(ModelForm modelForm, Element scriptElement) {
             super (modelForm, scriptElement);
-            this.scriptLocationExdr = FlexibleStringExpander.getInstance(scriptElement.getAttribute("location"));
+            String scriptLocation = scriptElement.getAttribute("location");
+            this.location = WidgetWorker.getScriptLocation(scriptLocation);
+            this.method = WidgetWorker.getScriptMethodName(scriptLocation);
         }
 
         @Override
         public void runAction(Map<String, Object> context) {
-            Locale locale = (Locale) context.get("locale");
-            String scriptLocation = this.scriptLocationExdr.expandString(context, locale);
-            String location = WidgetWorker.getScriptLocation(scriptLocation);
-            String method = WidgetWorker.getScriptMethodName(scriptLocation);
             if (location.endsWith(".xml")) {
+                Map<String, Object> localContext = FastMap.newInstance();
+                localContext.putAll(context);
                 DispatchContext ctx = this.modelForm.dispatchContext;
-                MethodContext methodContext = new MethodContext(ctx, context);
+                MethodContext methodContext = new MethodContext(ctx, localContext, null);
                 try {
                     SimpleMethod.runSimpleMethod(location, method, methodContext);
-                    Map<String, Object> resultContext = methodContext.getEnv("widget");
-                    if (UtilValidate.isNotEmpty(resultContext)){
-                        context.putAll(resultContext);
-                    }
-                    Map<String, Object> parametersUp = methodContext.getParameters();
-                    if (UtilValidate.isNotEmpty(parametersUp)){
-                        context.put("parameters",parametersUp);
-                    }
+                    context.putAll(methodContext.getResults());
                 } catch (MiniLangException e) {
                     throw new IllegalArgumentException("Error running simple method at location [" + location + "]", e);
                 }
             } else {
-                ScriptUtil.executeScript(location, method, context);
+                ScriptUtil.executeScript(this.location, this.method, context);
             }
         }
     }

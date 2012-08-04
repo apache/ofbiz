@@ -15,7 +15,7 @@ License.
 -->
 <section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     version="5.0" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
-    xsi:schemaLocation="http://docbook.org/ns/docbook"
+    xsi:schemaLocation="http://docbook.org/ns/docbook ../../../../applications/content/dtd/docbook.xsd"
     xmlns="http://docbook.org/ns/docbook">
   <title>The Example Main Help page.</title>
   <para>
@@ -27,7 +27,7 @@ License.
 
   <section>
     <title>Help file organization</title>
-    <para>Help is managed by using content component functionality. For more detail, look at the example help sub tree.</para>
+    <para>Help is managed by using content component functionality.</para>
     <para>Help can be for :
       <itemizedlist>
         <listitem><para>one component or sub-component, access is possible by navigation in help index tree and select it, contentId is associated to
@@ -48,7 +48,6 @@ License.
       main shortcut :
       <itemizedlist>
         <listitem><para>How is organize <link xl:href="showHelp?helpTopic=DOCUMENTATION_SYSTEM">The Apache OFBiz documentation system</link></para></listitem>
-        <listitem><para><link xl:href="showHelp?helpTopic=EXAMPLE_devel">Best practices for development</link></para></listitem>
         <listitem><para><link xl:href="showHelp?helpTopic=EXAMPLE_docbook">What it's possible to do in help file</link></para></listitem>
       </itemizedlist>
     </para>

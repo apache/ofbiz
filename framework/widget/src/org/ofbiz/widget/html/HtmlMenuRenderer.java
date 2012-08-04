@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.ofbiz.base.util.Debug; //#Eam# portletWidget
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
@@ -38,19 +37,11 @@ import org.ofbiz.webapp.control.RequestHandler;
 import org.ofbiz.webapp.taglib.ContentUrlTag;
 import org.ofbiz.widget.ModelWidget;
 import org.ofbiz.widget.WidgetWorker;
-//#Bam# portletWidget
-import org.ofbiz.widget.ModelWidget.ShowPortletItemData;
-import org.ofbiz.widget.ModelWidget.ShowPortletLinkData;
-//#Eam# portletWidget
 import org.ofbiz.widget.menu.MenuStringRenderer;
 import org.ofbiz.widget.menu.ModelMenu;
 import org.ofbiz.widget.menu.ModelMenuItem;
 import org.ofbiz.widget.menu.ModelMenuItem.Image;
 import org.ofbiz.widget.menu.ModelMenuItem.Link;
-//#Bam# portletWidget
-import org.ofbiz.widget.menu.ModelMenuItem.ShowPortletItem;
-import org.ofbiz.widget.menu.ModelMenuItem.ShowPortletLink;
-//#Bam# portletWidget
 
 /**
  * Widget Library - HTML Menu Renderer implementation
@@ -190,15 +181,9 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
         writer.append(">");
 
         Link link = menuItem.getLink();
-        ShowPortletLink showPortletLink = menuItem.getShowPortletLink(); //#Eam# portletWidget
         //if (Debug.infoOn()) Debug.logInfo("in HtmlMenuRendererImage, link(0):" + link,"");
         if (link != null) {
             renderLink(writer, context, link);
-        //#Bam# portletWidget
-        } 
-        else if(showPortletLink != null){
-            renderShowPortletLink(writer, context, showPortletLink);
-        //#Eam# portletWidget
         } else {
             String txt = menuItem.getTitle(context);
             StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
@@ -580,14 +565,6 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
             writer.append(border);
             writer.append("\"");
         }
-        //#Bam# portletWidget
-        String title = image.getTitle(context);
-        if (UtilValidate.isNotEmpty(title)) {
-            writer.append(" title=\"");
-            writer.append(title);
-            writer.append("\"");
-        }
-        //#Eam# portletWidget
         String src = image.getSrc(context);
         if (UtilValidate.isNotEmpty(src)) {
             writer.append(" src=\"");
@@ -621,63 +598,4 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
         }
         writer.append("/>");
     }
-    //#Bam# portletWidget
-    public void renderShowPortletLink(Appendable writer, Map<String, Object> context, ShowPortletLink showPortletLink) throws IOException  {
-        ModelMenuItem modelMenuItem = showPortletLink.getModelMenuItem();
-        String linkStyle = "";
-        //prepare show link properties 
-        String id = "";
-        String event = "";
-        String action = "";
-        if (UtilValidate.isNotEmpty(context.get("itemIndex"))) {
-            id = id + context.get("itemIndex");
-        }
-        StringBuilder areaCsvString = new StringBuilder();
-
-        ShowPortletLinkData splData = WidgetWorker.prepareShowPortletLinkData(showPortletLink, context);
-
-        for(ShowPortletItem showPortletItem : showPortletLink.getShowPortletItems()){
-
-            ShowPortletItemData spiData = WidgetWorker.prepareShowPortletItemsData(showPortletItem, context);
-
-            if(showPortletItem.getRequireConfirmation() && UtilValidate.isNotEmpty(showPortletItem.getConfirmationMessage(context))) {
-                event = "onclick";
-                action = "return confirm('" + showPortletItem.getConfirmationMessage(context) +"')";
-            }
-
-            if (UtilValidate.isEmpty(spiData.areaId) && 
-                 (UtilValidate.isEmpty(spiData.portalPageId) || UtilValidate.isEmpty(spiData.portletId) || UtilValidate.isEmpty(spiData.portletSeqId))) {
-                Debug.logWarning("The menu [" + modelMenuItem.getModelMenu().getBoundaryCommentName() +"] has a show-portlet field that should define a target-area  or must have target-page-id, target-portlet-id and target-seq_id attributes", module);
-            }
-
-            if (UtilValidate.isNotEmpty(modelMenuItem.getWidgetStyle())) {
-                linkStyle = modelMenuItem.getWidgetStyle();
-            }
-
-            if (UtilValidate.isNotEmpty( spiData.areaId )) {
-                StringBuilder areanElement = new StringBuilder(); 
-                areanElement.append(spiData.areaId).append(",").append(spiData.target).append(",").append(spiData.params);
-                if (UtilValidate.isNotEmpty( areaCsvString )) {
-                    areaCsvString.append(",");
-                } 
-                areaCsvString.append(areanElement);
-            }
-        }
-
-        writer.append("    <a ");
-        if (UtilValidate.isNotEmpty(event) && UtilValidate.isNotEmpty(action)) {
-            writer.append(event + "=\"" + action +"\"");
-        }
-        if(UtilValidate.isNotEmpty(linkStyle)) {
-            writer.append(" class=\"" + linkStyle +"\"");
-        }
-        writer.append(" href=\"javascript:ajaxUpdateAreas(\'" + areaCsvString.toString() + "\');\" ");
-        writer.append(">");
-        if(UtilValidate.isNotEmpty(splData.imgSrc)) {
-            writer.append("<img src=\"" + splData.imgSrc +"\" alt=\"" + splData.alt + "\" title=\"" + splData.imgTitle +"\"/>");
-        }
-        writer.append(splData.description);
-        writer.append("</a>");
-    }
-    //#Eam# portletWidget
 }

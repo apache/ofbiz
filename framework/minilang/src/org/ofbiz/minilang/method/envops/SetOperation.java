@@ -37,6 +37,8 @@ import org.w3c.dom.Element;
 
 /**
  * Implements the &lt;set&gt; element.
+ * 
+ * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Cset%3E}}">Mini-language Reference</a>
  */
 public final class SetOperation extends MethodOperation {
 
@@ -114,7 +116,7 @@ public final class SetOperation extends MethodOperation {
         this.formatFse = FlexibleStringExpander.getInstance(element.getAttribute("format"));
         this.type = element.getAttribute("type");
         Class<?> targetClass = null;
-        if (!this.type.isEmpty()) {
+        if (!this.type.isEmpty() && !"NewList".equals(this.type) && !"NewMap".equals(this.type)) {
             try {
                 targetClass = ObjectType.loadClass(this.type);
             } catch (ClassNotFoundException e) {

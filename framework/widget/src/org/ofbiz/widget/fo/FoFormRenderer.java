@@ -48,7 +48,6 @@ import org.ofbiz.widget.form.ModelFormField.PasswordField;
 import org.ofbiz.widget.form.ModelFormField.RadioField;
 import org.ofbiz.widget.form.ModelFormField.RangeFindField;
 import org.ofbiz.widget.form.ModelFormField.ResetField;
-import org.ofbiz.widget.form.ModelFormField.ShowPortletLink;
 import org.ofbiz.widget.form.ModelFormField.SubmitField;
 import org.ofbiz.widget.form.ModelFormField.TextField;
 import org.ofbiz.widget.form.ModelFormField.TextFindField;
@@ -422,8 +421,5 @@ public class FoFormRenderer extends HtmlWidgetRenderer implements FormStringRend
     }
 
     public void renderContainerFindField(Appendable writer, Map<String, Object> context, ContainerField containerField) throws IOException {
-    }
-
-    public void renderShowPortletLink(Appendable writer, Map<String, Object> context, ShowPortletLink showPortletLink) {
     }
 }

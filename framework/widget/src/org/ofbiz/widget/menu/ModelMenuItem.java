@@ -35,13 +35,11 @@ import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.UtilURL; // #Eam# portletWidget
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entityext.permission.EntityPermissionChecker;
-import org.ofbiz.widget.ModelWidget; // #Eam# portletWidget
 import org.ofbiz.widget.WidgetWorker;
 import org.ofbiz.widget.PortalPageWorker;
 import org.w3c.dom.Element;
@@ -55,7 +53,6 @@ public class ModelMenuItem {
     public static final String module = ModelMenuItem.class.getName();
 
     protected ModelMenu modelMenu;
-    protected ShowPortletLink showPortletLink;// #Eam# portletWidget
 
     protected Map<String, Object> dataMap = new HashMap<String, Object>();
     protected String name;
@@ -190,15 +187,7 @@ public class ModelMenuItem {
         if (actionsElement != null) {
             this.actions = ModelMenuAction.readSubActions(this, actionsElement);
         }
-        // #Bam# portletWidget
-        List<? extends Element> showPortlets = UtilXml.childElementList(fieldElement, "show-portlet");
-        for (Element showPortlet: showPortlets) {
-            if (UtilValidate.isEmpty(showPortletLink)) {
-                showPortletLink= new ShowPortletLink(showPortlet, this);
-            }
-            showPortletLink.addShowPorletTolink(showPortlet);
-        }
-        // #Eam# portletWidget
+
     }
 
     public ModelMenuItem addUpdateMenuItem(ModelMenuItem modelMenuItem) {
@@ -570,12 +559,6 @@ public class ModelMenuItem {
        return this.link;
     }
 
-    // #BAM# portletWidget
-    public ShowPortletLink getShowPortletLink() {
-        return this.showPortletLink;
-     }
-    // #EAM# portletWidget
-
     public boolean isSelected(Map<String, Object> context) {
         return this.name.equals(modelMenu.getSelectedMenuItemContextFieldName(context));
     }
@@ -842,7 +825,6 @@ public class ModelMenuItem {
         protected FlexibleStringExpander widthExdr;
         protected FlexibleStringExpander heightExdr;
         protected FlexibleStringExpander borderExdr;
-        protected FlexibleStringExpander title; // #Eam# portletWidget
         protected String urlMode;
 
         public Image(Element imageElement) {
@@ -852,7 +834,6 @@ public class ModelMenuItem {
             setStyle(imageElement.getAttribute("style"));
             setWidth(imageElement.getAttribute("width"));
             setHeight(imageElement.getAttribute("height"));
-            setTitle(imageElement.getAttribute("title"));// #Eam# portletWidget
             setBorder(UtilFormatOut.checkEmpty(imageElement.getAttribute("border"), "0"));
             setUrlMode(UtilFormatOut.checkEmpty(imageElement.getAttribute("url-mode"), "content"));
 
@@ -885,12 +866,6 @@ public class ModelMenuItem {
         public String getBorder(Map<String, Object> context) {
             return this.borderExdr.expandString(context);
         }
-
-        // #Bam# portletWidget
-        public String getTitle(Map<String, Object> context) {
-            return this.title.expandString(context);
-        }
-        // #Eam# portletWidget
 
         public String getUrlMode() {
             return this.urlMode;
@@ -928,313 +903,5 @@ public class ModelMenuItem {
                 this.urlMode = val;
         }
 
-        // #Bam# portletWidget
-        public void setTitle(String val) {
-            String titleAttr = UtilFormatOut.checkNull(val);
-            this.title = FlexibleStringExpander.getInstance(titleAttr);
-        }
-        // #Eam# portletWidget
-    }
-
-    public static class ShowPortletLink implements ModelWidget.ShowPortletLink {
-        protected ModelMenuItem linkMenuItem;
-        protected FlexibleStringExpander description;
-        protected FlexibleStringExpander imageTitle;
-        protected FlexibleStringExpander alternate;
-        protected FlexibleStringExpander image;
-        protected String size;
-        protected List<ShowPortletItem> showPortletItems = FastList.newInstance();
-        public String listToString(List<String> list) {
-            String result = "";
-            for(String s : list) {
-                result = result.concat(s).concat(";");
-            }
-            if (result.endsWith(";")) {
-                return result.substring(0, result.length()-1);
-            }
-            return result;
-        }
-
-        public ShowPortletLink(Element linkElement, ModelMenuItem parentMenuItem) {
-            this.linkMenuItem = parentMenuItem;
-        }
-
-        public void renderFieldString(Appendable writer, Map<String, Object> context, MenuStringRenderer menuStringRenderer) throws IOException {
-            menuStringRenderer.renderShowPortletLink(writer, context, this);
-        }
-
-        public void addShowPorletTolink(Element element) {
-            showPortletItems.add(new ShowPortletItem(element, this));
-        }
-
-        /**
-         * @param string
-         */
-        public void setDescription(String string) {
-            if (UtilValidate.isNotEmpty(string)) {
-                this.description = FlexibleStringExpander.getInstance(string);
-            }
-        }
-
-        /**
-         * @param string
-         */
-        public void setImageTitle(String string) {
-            if (UtilValidate.isNotEmpty(string)) {
-                this.imageTitle = FlexibleStringExpander.getInstance(string);
-            }
-        }
-        public ModelMenuItem getModelMenuItem() {
-            return linkMenuItem;
-        }
-        public List<ShowPortletItem> getShowPortletItems() {
-            return showPortletItems;
-        }
-        /**
-         * @param string
-         */
-        public void setAlternate(String string) {
-            if (UtilValidate.isNotEmpty(string)) {
-                this.alternate = FlexibleStringExpander.getInstance(string);
-            }
-        }
-        
-        public String getDescription(Map<String, Object> context) {
-            String description = "";
-            if (UtilValidate.isNotEmpty(this.description)) {
-                description = this.description.expandString(context);
-            }
-            if (UtilValidate.isEmpty(description)) {
-                description = this.getModelMenuItem().getTitle(context);
-            }
-            return description;
-        }
-
-        public String getAlternate(Map<String, Object> context) {
-            if (UtilValidate.isNotEmpty(alternate)) {
-                return this.alternate.expandString(context);
-            }
-            return "";
-        }
-
-        public String getImageTitle(Map<String, Object> context) {
-            if (UtilValidate.isNotEmpty(imageTitle)) {
-                return this.imageTitle.expandString(context);
-            }
-            return "";
-        }
-
-        public String getImage(Map<String, Object> context) {
-            if (UtilValidate.isNotEmpty(imageTitle)) {
-                return this.image.expandString(context);
-            }
-            return "";
-        }
-
-        public String getSize() {
-            return this.size;
-        }
-
-        public String setSize(String size) {
-            return this.size = size;
-        }
-    }
-
-    public static class ShowPortletItem implements ModelWidget.ShowPortletItem {
-
-        protected FlexibleStringExpander areaId;
-        protected FlexibleStringExpander target;
-        protected ShowPortletLink showPortletLink;
-        protected FlexibleStringExpander portletId;
-        protected boolean requireConfirmation;
-        protected FlexibleStringExpander confirmationMessage;
-        protected FlexibleStringExpander portalPageId;
-        protected FlexibleStringExpander portletSeqId;
-        protected List<WidgetWorker.Parameter> parameterList = FastList.newInstance();
-        
-        public ShowPortletItem(Element element, ShowPortletLink showPortletLink) {
-            this.showPortletLink = showPortletLink;
-            this.setConfirmationMessage(element.getAttribute("confirmation-message"));
-            this.setRequireConfirmation(("true".equals(element.getAttribute("request-confirmation"))));
-            this.setAreaId(element.getAttribute("area-id"));
-            this.setPortletId(element.getAttribute("portlet-id"));
-            this.setPortalPageId(element.getAttribute("portal-page-id"));
-            this.setPortletSeqId(element.getAttribute("portlet-seq-id"));
-            this.setDescription(element.getAttribute("description"));
-            this.setAlternate(element.getAttribute("alternate"));
-            this.setImageTitle(element.getAttribute("image-title"));
-            this.setTarget(element.getAttribute("target"));
-            this.setImage (element.getAttribute("image-location"));
-            this.setSize(element.getAttribute("size"));
-
-            List<? extends Element> parameterElementList = UtilXml.childElementList(element, "parameter");
-            for (Element parameterElement: parameterElementList) {
-                this.parameterList.add(new WidgetWorker.Parameter(parameterElement));
-            }
-
-        }
-        public ModelMenuItem getModelMenuItem() {
-            return showPortletLink.getModelMenuItem();
-        }
-
-        public String getDescription(Map<String, Object> context) {
-            return showPortletLink.getDescription(context);
-        }
-
-        public String getPortalPageId(Map<String, Object> context) {
-            if (UtilValidate.isNotEmpty(portalPageId)) {
-                return this.portalPageId.expandString(context);
-            }
-            return "";
-        }
-
-        public String getPortletId(Map<String, Object> context) {
-            if (UtilValidate.isNotEmpty(portletId)) {
-                return this.portletId.expandString(context);
-            }
-            return "";
-        }
-
-        public String getPortletSeqId(Map<String, Object> context) {
-            if (UtilValidate.isNotEmpty(portletSeqId)) {
-                return this.portletSeqId.expandString(context);
-            }
-            return "";
-        }
-
-        public String getAreaId(Map<String, Object> context) {
-            String areaIdValue =  "";
-            if (UtilValidate.isNotEmpty(areaId)) {
-                areaIdValue = this.areaId.expandString(context);
-            }
-            return areaIdValue;
-        }
-
-        public String getAlternate(Map<String, Object> context) {
-            return showPortletLink.getAlternate(context);
-        }
-
-        public String getImageTitle(Map<String, Object> context) {
-            return showPortletLink.getImageTitle(context);
-        }
-
-        public String getTarget(Map<String, Object> context) {
-            if (UtilValidate.isNotEmpty(target)) {
-                return this.target.expandString(context);
-            }
-            return "";
-        }
-
-        public Map<String, String> getParameterMap(Map<String, Object> context) {
-            Map<String, String> fullParameterMap = FastMap.newInstance();
-
-            for (WidgetWorker.Parameter parameter: this.parameterList) {
-                String paramValue = parameter.getValue(context);
-                if (UtilValidate.isNotEmpty(paramValue) || parameter.sendIfEmpty(context)){
-                    if ("idDescription".equals(parameter.getName())) {
-                        if (UtilValidate.isNotEmpty(paramValue)) {
-                            paramValue = UtilURL.removeBadCharForUrl(paramValue);
-                            fullParameterMap.put(parameter.getName(), paramValue);
-                        }
-                    }
-                    else {
-                        fullParameterMap.put(parameter.getName(), paramValue);
-                    }
-                }
-            }
-            return fullParameterMap;
-        }
-
-        public String getImage(Map<String, Object> context) {
-            if (UtilValidate.isNotEmpty(this.showPortletLink.image)) {
-                return this.showPortletLink.image.expandString(context);
-            }
-            return "";
-        }
-        public String getSize() {
-            return showPortletLink.size;
-        }
-
-        public void setImage(String image) {
-            this.showPortletLink.image = FlexibleStringExpander.getInstance(image); 
-        }
-        public void setSize(String size) {
-            showPortletLink.setSize(size);
-        }
-
-        /**
-         * @param string
-         */
-        public void setAreaId(String areaId) {
-            this.areaId = FlexibleStringExpander.getInstance(areaId);
-        }
-
-        /**
-         * @param string
-         */
-        public void setPortletId(String portletId) {
-            this.portletId = FlexibleStringExpander.getInstance(portletId);
-        }
-
-        /**
-         * @param string
-         */
-        public void setPortletSeqId(String portletSeqId) {
-            this.portletSeqId = FlexibleStringExpander.getInstance(portletSeqId);
-        }
-
-        /**
-         * @param string
-         */
-        public void setPortalPageId(String portalPageId) {
-            this.portalPageId = FlexibleStringExpander.getInstance(portalPageId);
-        }
-        /**
-         * @param string
-         */
-        public void setDescription(String string) {
-            showPortletLink.setDescription(string);
-        }
-
-        /**
-         * @param string
-         */
-        public void setImageTitle(String string) {
-            showPortletLink.setImageTitle(string);
-        }
-
-        /**
-         * @param string
-         */
-        public void setAlternate(String string) {
-            showPortletLink.setAlternate(string);
-        }
-
-        /**
-         * @param string
-         */
-        public void setTarget(String string) {
-            this.target = FlexibleStringExpander.getInstance(string);
-        }
-
-        public String getConfirmationMessage(Map<String, Object> context) {
-            String areaIdValue =  "";
-            if (UtilValidate.isNotEmpty(confirmationMessage)) {
-                areaIdValue = this.confirmationMessage.expandString(context);
-            }
-            return areaIdValue;
-        }
-
-        public void setRequireConfirmation(boolean reqConfirm) {
-            requireConfirmation = reqConfirm;
-        }
-
-        public boolean getRequireConfirmation() {
-            return requireConfirmation;
-        }
-
-        public void setConfirmationMessage(String string) {
-            this.confirmationMessage = FlexibleStringExpander.getInstance(string);
-        }
     }
 }

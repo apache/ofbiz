@@ -25,8 +25,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 
@@ -71,7 +73,7 @@ public class Config {
     public String containerConfig;
     public String instrumenterClassName;
     public String instrumenterFile;
-    public List<String> loaders;
+    public List<Map> loaders;
     public String logDir;
     public String ofbizHome;
     public boolean requireCommJar = false;
@@ -209,8 +211,6 @@ public class Config {
                     fis = new FileInputStream(propsFile);
                     if (fis != null) {
                         props.load(fis);
-                    } else {
-                        throw new FileNotFoundException();
                     }
                 } catch (FileNotFoundException e2) {
                     // do nothing; we will see empty props below
@@ -420,14 +420,18 @@ public class Config {
         instrumenterFile = getProp(props, "ofbiz.instrumenterFile", null);
 
         // loader classes
-        loaders = new ArrayList<String>();
+        loaders = new ArrayList<Map>();
         int currentPosition = 1;
+        Map<String, String> loader = null;
         while (true) {
+            loader = new HashMap<String, String>();
             String loaderClass = props.getProperty("ofbiz.start.loader" + currentPosition);
             if (loaderClass == null || loaderClass.length() == 0) {
                 break;
             } else {
-                loaders.add(loaderClass);
+                loader.put("class", loaderClass);
+                loader.put("profiles", props.getProperty("ofbiz.start.loader" + currentPosition + ".loaders"));
+                loaders.add(loader);
                 currentPosition++;
             }
         }

@@ -145,17 +145,4 @@ under the License.
             </widgets>
         </section>
     </screen>
-    <!--#Bam# uiLabelDecorator : decorator for portlet, it's uiLabelDecorator of portlet Components which is call by portlet -->
-    <screen name="uiLabelDecorator"><!-- Main decorator -->
-        <section> <!-- labels define here are loading before portlet label (use for surcharge label definition)-->
-            <actions>
-                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
-            </actions>
-            <widgets>
-                <include-screen name="uiLabelDecorator" location="component://common/widget/CommonScreens.xml"/>
-                <decorator-section-include name="body"/>
-            </widgets>
-        </section>
-    </screen>
-    <!--#Eam# uiLabelDecorator  -->
 </screens>

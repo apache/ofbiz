@@ -45,7 +45,6 @@ import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.entity.util.EntityUtil; //#Eam# portletWidget
 import org.ofbiz.widget.ModelWidget;
 import org.ofbiz.widget.ModelWidgetAction;
 import org.ofbiz.widget.WidgetFactory;
@@ -346,6 +345,9 @@ public abstract class ModelScreenWidget extends ModelWidget {
                 for (ModelWidget subWidget : this.subWidgets) {
                     if (formName.equals(subWidget.getName()) && subWidget instanceof Form) {
                         this.navigationForm = (Form) subWidget;
+                        // Let's give this a try, it can be removed later if it
+                        // proves to cause problems
+                        this.padded = false;
                         break;
                     }
                 }
@@ -1600,44 +1602,12 @@ public abstract class ModelScreenWidget extends ModelWidget {
         protected String originalPortalPageId;
         protected String actualPortalPageId;
         protected Boolean usePrivate;
-        //#Bam# portletWidget
-        protected FlexibleStringExpander portalPortletId;
-        protected FlexibleStringExpander portletSeqId;
-        private static final List<String> portletFieldNames = initPortletFieldNames();
-
-        static private List<String> initPortletFieldNames(){
-            List<String> _portletFieldNames = FastList.newInstance();
-            _portletFieldNames.add("screenName");
-            _portletFieldNames.add("screenLocation");
-            _portletFieldNames.add("useScreen");
-            _portletFieldNames.add("useScript");
-            _portletFieldNames.add("scriptName");
-            _portletFieldNames.add("uiLabelLocation");
-            _portletFieldNames.add("formName");
-            _portletFieldNames.add("formLocation");
-            _portletFieldNames.add("pkIdName");
-            _portletFieldNames.add("editAreaDivId");
-            _portletFieldNames.add("subAreaDivId");
-            _portletFieldNames.add("titleLabel");
-            _portletFieldNames.add("useMenu");
-            _portletFieldNames.add("menuName");
-            _portletFieldNames.add("menuLocation");
-            _portletFieldNames.add("helpName");
-            _portletFieldNames.add("editFormName");
-            _portletFieldNames.add("editFormLocation");
-            return _portletFieldNames;
-        }
-        //#Eam# portletWidget
 
         public PortalPage(ModelScreen modelScreen, Element portalPageElement) {
             super(modelScreen, portalPageElement);
             this.idExdr = FlexibleStringExpander.getInstance(portalPageElement.getAttribute("id"));
             this.confModeExdr = FlexibleStringExpander.getInstance(portalPageElement.getAttribute("conf-mode"));
             this.usePrivate = !("false".equals(portalPageElement.getAttribute("use-private")));
-            //#Bam# portletWidget
-            this.portalPortletId = FlexibleStringExpander.getInstance(portalPageElement.getAttribute("portalPortletId"));
-            this.portletSeqId = FlexibleStringExpander.getInstance(portalPageElement.getAttribute("portletSeqId"));
-            //#Eam# portletWidget
         }
 
         @Override
@@ -1647,10 +1617,9 @@ public abstract class ModelScreenWidget extends ModelWidget {
                 GenericValue portalPage = null;
                 List<GenericValue> portalPageColumns = null;
                 List<GenericValue> portalPagePortlets = null;
+                List<GenericValue> portletAttributes = null;
 
                 String expandedPortalPageId = getId(context);
-                String portalPortletId = this.portalPortletId.expandString(context);//#Eam# portletWidget
-                String portletSeqId = this.portletSeqId.expandString(context);//#Eam# portletWidget
 
                 if (UtilValidate.isNotEmpty(expandedPortalPageId)) {
                     if (usePrivate) {
@@ -1673,45 +1642,6 @@ public abstract class ModelScreenWidget extends ModelWidget {
                     Debug.logError(errMsg, module);
                     return;
                 }
-
-                //#Bam# portletWidget
-                if (UtilValidate.isNotEmpty(portalPortletId)) {
-                    GenericValue portletValue = null;
-                    if ( UtilValidate.isNotEmpty(portletSeqId)) {
-                        portletValue = delegator.findOne("PortalPagePortletView", UtilMisc.toMap("portalPageId", actualPortalPageId, "portalPortletId", portalPortletId, "portletSeqId", portletSeqId), false);
-                    } else {
-                        List<GenericValue> portletValues = delegator.findByAnd("PortalPagePortletView", UtilMisc.toMap("portalPageId", actualPortalPageId, "portalPortletId", portalPortletId), null, false);
-                        if (UtilValidate.isNotEmpty(portletValues)) {
-                            portletValue = EntityUtil.getFirst(portletValues);
-                            portletSeqId = portletValue.getString("portletSeqId");
-                        }
-                    }
-                    if ( UtilValidate.isEmpty(portletValue)) {
-                        portletValue = delegator.findOne("PortalPortlet", UtilMisc.toMap("portalPortletId", portalPortletId), false);
-                    }
-
-                    if (UtilValidate.isNotEmpty(portletValue)) {
-                        //remove from context value which will be initialized by this portlet
-                        for (String portletField : portletFieldNames) {
-                            if (context.containsKey(portletField)) context.put(portletField, null); //remove not works, suppose it's a because it's a stack
-                        }
-                        context.put("portletValue",portletValue);
-                        context.put("portalPageId", actualPortalPageId);
-                        context.put("portletSeqId", portletSeqId);
-                        context.put("portalPortletId", portalPortletId);
-
-                        retrievePortletAttributes(context);
-                        putScreenNameLocationValue(delegator, context, portletValue);
-
-                        // Renders the portalPagePortlet
-                        context.put("includedInPage", "N"); // portletWidget modification
-                        screenStringRenderer.renderPortalPagePortletBegin(writer, context, this, portletValue);
-                        screenStringRenderer.renderPortalPagePortletBody(writer, context, this, portletValue);
-                        screenStringRenderer.renderPortalPagePortletEnd(writer, context, this, portletValue);
-                    }
-                } else {
-                    context.put("includedInPage", "Y"); // portletWidget modification
-                //#Eam# portletWidget
 
                 // Renders the portalPage header
                 screenStringRenderer.renderPortalPageBegin(writer, context, this);
@@ -1763,8 +1693,6 @@ public abstract class ModelScreenWidget extends ModelWidget {
                         context.put("nextColumnSeqId", nextColumnSeqId);
                        
                         // Get portlet's attributes
-                        //#Bam# portletWidget
-                        /*
                         portletAttributes = delegator.findList("PortletAttribute",
                             EntityCondition.makeCondition(UtilMisc.toMap("portalPageId", portletValue.get("portalPageId"), "portalPortletId", portletValue.get("portalPortletId"), "portletSeqId", portletValue.get("portletSeqId"))),
                             null, null, null, false);
@@ -1773,30 +1701,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
                             GenericValue attribute = attributesIterator.next();
                             context.put(attribute.getString("attrName"), attribute.getString("attrValue"));
                         }
-                        */
-                        for (String portletField : portletFieldNames) {
-                            if (context.containsKey(portletField))     context.remove(portletField);
-                        }
-                        //if (context.containsKey("areaDivId"))        context.remove("areaDivId"); with id build with portalPageId portalPortletId portletSeqId, it seem, it's no more necessary because always unique
-                        if (context.containsKey("component"))        context.remove("component");
-                        if (context.containsKey("portletLongId"))    context.remove("portletLongId");
-                        if (context.containsKey("portletTypeId"))    context.remove("portletTypeId");
-                        if (context.containsKey("subComponent"))     context.remove("subComponent");
-                        if (context.containsKey("webapp"))           context.remove("webapp");
-                        if (context.containsKey("areaId"))           context.remove("areaId");
-
-                        context.put("portletValue",portletValue);
-                        context.put("portalPageId", portletValue.get("portalPageId"));
-                        context.put("portalPortletId", portletValue.get("portalPortletId"));
-                        context.put("portletSeqId", portletValue.get("portletSeqId"));
-
-                        retrievePortletAttributes(context);
-
-                        ListIterator<GenericValue> attributesIterator = (ListIterator<GenericValue>) context.remove("portletAttributesIterator");
                         
-                        putScreenNameLocationValue(delegator, context, portletValue);
-                        //#Eam# portletWidget
-
                         // Renders the portalPagePortlet
                         screenStringRenderer.renderPortalPagePortletBegin(writer, context, this, portletValue);
                         screenStringRenderer.renderPortalPagePortletBody(writer, context, this, portletValue);
@@ -1820,7 +1725,6 @@ public abstract class ModelScreenWidget extends ModelWidget {
                 }
                 // Renders the portalPage footer
                 screenStringRenderer.renderPortalPageEnd(writer, context, this);
-              } //#Eam# portletWidget
             } catch (IOException e) {
                 String errMsg = "Error rendering PortalPage with portalPageId [" + getId(context) + "]: " + e.toString();
                 Debug.logError(e, errMsg, module);
@@ -1830,214 +1734,6 @@ public abstract class ModelScreenWidget extends ModelWidget {
                 Debug.logError(e, errMsg, module);
                 throw new RuntimeException(errMsg);
             }
-        }
-
-        /**
-         *  update screenName and screenLocation in portletValue with correct value if it's with a portletType or if it's a default value
-         * @param delegator
-         * @param context
-         * @param portletValue
-         * @throws GenericEntityException
-         */
-        private static void putScreenNameLocationValue(Delegator delegator, Map<String,Object> context, GenericValue portletValue) throws GenericEntityException{
-            if (UtilValidate.isNotEmpty(portletValue.get("portletTypeId"))) {
-                //update screen values
-                GenericValue portletType = delegator.findOne("PortletType", true, "portletTypeId", portletValue.get("portletTypeId"));
-                if (UtilValidate.isEmpty(portletType)){
-                    Debug.logError("PortletId = " + portletValue.get("portalPortletId") + " with a not existing portletType, portletTypeId = " + portletValue.get("portletTypeId"), module);
-                } else {
-                    portletValue.put("screenName", portletType.get("screenName"));
-                    portletValue.put("screenLocation", portletType.get("screenLocation"));
-                }
-            } else {
-                if (UtilValidate.isEmpty(portletValue.get("screenName"))){
-                    portletValue.put("screenName", context.get("screenName"));
-                }
-                if (UtilValidate.isEmpty(portletValue.get("screenLocation"))){
-                    portletValue.put("screenLocation", context.get("screenLocation"));
-                }
-            }
-        }
-
-        protected static Map<String,Object> retrievePortletAttributes (Map<String,Object> context) throws GenericEntityException {
-            Delegator delegator = (Delegator) context.get("delegator");
-            String portalPageId = (String) context.get("portalPageId");
-            String portalPortletId = (String) context.get("portalPortletId");
-            GenericValue portletValue = (GenericValue) context.remove("portletValue");
-            if (UtilValidate.isEmpty(portletValue)) {
-                portletValue = delegator.findOne("PortalPortlet", UtilMisc.toMap("portalPortletId", portalPortletId), false);
-            }
-            String portletSeqId= (String) context.get("portletSeqId");
-
-            List<GenericValue> portletAttributes = delegator.findList("PortletAttribute",
-                    EntityCondition.makeCondition(UtilMisc.toMap("portalPageId", "_NA_", "portalPortletId", portalPortletId, "portletSeqId", "00000")),
-                    null, null, null, false);
-            //Begin addon modification : portletWidget
-
-            //Retrieve attributes from portletValue
-            // portalPortlet field overwrite PortletAttribute coming from portalPageId _NA_
-            if (UtilValidate.isNotEmpty(portletValue)) {
-                for (String portletField : portletFieldNames) {
-                    if (UtilValidate.isNotEmpty(portletValue.get(portletField)))     portletAttributes.add(delegator.makeValidValue("PortletAttribute", UtilMisc.toMap("attrName",portletField,"attrValue", portletValue.get(portletField))));
-                }
-                if (UtilValidate.isNotEmpty(portletValue.get("helpName"))) {
-                    String helpName = (String) portletValue.get("helpName");
-                    if (helpName.startsWith("DETAIL_") && helpName.length()>7) {
-                        helpName = (String) context.get(helpName.substring(7, helpName.length()));
-                    }
-                    portletAttributes.add(delegator.makeValidValue("PortletAttribute", UtilMisc.toMap("attrName","helpName","attrValue", helpName)));
-                }
-            }
-            //End addon modification : portletWidget
-
-            if (UtilValidate.isNotEmpty(portletSeqId)) {
-                List<GenericValue> portalPortletAttributes = delegator.findList("PortletAttribute",
-                        EntityCondition.makeCondition(UtilMisc.toMap("portalPageId", portalPageId, "portalPortletId", portalPortletId, "portletSeqId",portletSeqId)),
-                        null, null, null, false);
-                if (UtilValidate.isNotEmpty(portalPortletAttributes)) {
-                    portletAttributes.addAll(portalPortletAttributes);
-                }
-            }
-            ListIterator<GenericValue> portletAttributesIterator = portletAttributes.listIterator();
-            while (portletAttributesIterator.hasNext()) {
-                GenericValue attribute = portletAttributesIterator.next();
-                context.put(attribute.getString("attrName"), attribute.getString("attrValue"));
-            }
-            if (UtilValidate.isNotEmpty(portletValue.get("portletLongId"))) context.put("portletLongId", portletValue.get("portletLongId"));
-            if (UtilValidate.isNotEmpty(portletValue.get("portletTypeId"))) context.put("portletTypeId", portletValue.get("portletTypeId"));
-            if (UtilValidate.isNotEmpty(portletValue.get("component")))     context.put("component", portletValue.get("component"));
-            if (UtilValidate.isNotEmpty(portletValue.get("subComponent")))  context.put("subComponent", portletValue.get("subComponent"));
-            if (UtilValidate.isNotEmpty(portletValue.get("webapp")))        context.put("webapp", portletValue.get("webapp"));
-
-            // put default value in areaId, use value in attribute (so in context) or in parameters or PP_${portalPageId}${portalPortletId}${portletSeqId}
-            String areaId = (String) context.get("areaId");
-            if (UtilValidate.isEmpty(areaId)) {
-                Map<String, Object> contextParameters = UtilGenerics.checkMap( context.get("parameters"));
-                areaId = (String) contextParameters.get("areaId");
-            }
-            if (UtilValidate.isEmpty(areaId)) {
-                areaId = "PP_"+portalPageId+portalPortletId+portletSeqId;
-            }
-            context.put("currentAreaId", "PP_"+portalPageId+portalPortletId+portletSeqId);
-            context.put("areaId", areaId);
-
-            //Begin addon modification : portletWidget
-            String portletLongId = (String) context.get("portletLongId");
-            if (UtilValidate.isEmpty(portletLongId)) {
-                portletLongId = portalPortletId;
-            }
-            if (UtilValidate.isNotEmpty(portletValue.get("component"))) {
-                if (UtilValidate.isNotEmpty(portletValue) && UtilValidate.isNotEmpty(portletValue.get("screenName"))) {
-                    context.put("screenName", portletValue.get("screenName"));
-                } else {
-                    context.put("screenName", portletLongId);
-                }
-            } 
-
-            // prepare location for screen form menu
-            StringBuffer location = new StringBuffer();
-            StringBuffer uiLabelLocation = new StringBuffer();
-            if (UtilValidate.isNotEmpty(portletValue.get("component"))){
-                location.append("component://").append(portletValue.get("component")).append("/widget/");
-                if (UtilValidate.isNotEmpty(context.get("webapp"))) {
-                    location.append(context.get("webapp")).append("/");
-                }
-                uiLabelLocation.append(location);
-                location.append(context.get("subComponent"));
-            }
-            //End addon modification : portletWidget
-            if (UtilValidate.isNotEmpty(portletValue.get("component"))) {
-                if (UtilValidate.isNotEmpty(portletValue) && UtilValidate.isNotEmpty(portletValue.get("screenLocation"))
-                        && "Y".equals(portletValue.get("useScreen"))) {
-                    context.put("screenLocation",portletValue.get("screenLocation"));
-                } else if ("Y".equals(portletValue.get("useScreen")) ) {
-                    context.put("screenLocation", location +"Screens.xml");
-                }
-            } 
-            else if (UtilValidate.isNotEmpty(portletValue)) {
-                context.put("screenLocation", portletValue.get("screenLocation"));
-            }
-
-            //if (UtilValidate.isEmpty(context.get("areaDivId")))     context.put("areaDivId", "PP_" + portalPageId + portalPortletId + portletSeqId); with id build with portalPageId portalPortletId portletSeqId, it seem, it's no more necessary because always unique
-            if (UtilValidate.isEmpty(context.get("editAreaDivId"))) context.put("editAreaDivId", portletLongId + "_EditArea");
-            if (UtilValidate.isEmpty(context.get("entity")))        context.put("entity", portletLongId);
-            if (UtilValidate.isEmpty(context.get("helpName")))      context.put("helpName", "HELP_" + portalPortletId);
-            if (UtilValidate.isEmpty(context.get("subAreaDivId")))  context.put("subAreaDivId", portletLongId + "_SubArea");
-            if (UtilValidate.isEmpty(context.get("titleLabel")))    context.put("titleLabel", "PageTitle"+portletLongId);
-
-                if (UtilValidate.isNotEmpty(portletValue) && UtilValidate.isNotEmpty(portletValue.get("menuName")) ){
-                    context.put("menuName", portletValue.get("menuName"));
-                } else {
-                    context.put("menuName", portletLongId);
-                }
-
-                if (UtilValidate.isNotEmpty(portletValue.get("portletTypeId"))){
-                    if (UtilValidate.isNotEmpty(portletValue) && UtilValidate.isNotEmpty(portletValue.get("menuLocation"))
-                            && "Y".equals(portletValue.get("useMenu")) ){
-                        context.put("menuLocation", portletValue.get("menuLocation"));
-                    } else if ("Y".equals(portletValue.get("useMenu")) ) {
-                        context.put("menuLocation", location.toString() + "Menus.xml");
-                    }
-                }
-
-            if (UtilValidate.isNotEmpty(portletValue.get("portletTypeId"))){
-                if (UtilValidate.isNotEmpty(portletValue) 
-                        && UtilValidate.isNotEmpty(portletValue.get("scriptName"))
-                        && "Y".equals(portletValue.get("useScript"))  ){
-                    context.put("scriptName", portletValue.get("scriptName"));
-                } else {
-                    StringBuffer scriptName = new StringBuffer();
-                    scriptName.append("component://").append(context.get("component"))
-                                                     .append("/script/org/ofbiz/")
-                                                     .append(context.get("component"))
-                                                     .append("/");
-                    if (UtilValidate.isNotEmpty(context.get("webapp"))) {
-                        scriptName.append(context.get("webapp")).append("/");
-                    }
-                    // test if we should use script, if yes add scriptName in context
-                    if (UtilValidate.isNotEmpty(portletValue) && "Y".equals(portletValue.get("useScript"))) {
-                        context.put("scriptName", scriptName.append(context.get("subComponent")).append("Wactions.xml").append("#").append(portletLongId) );
-                    }
-                }
-                if (UtilValidate.isNotEmpty(portletValue) && UtilValidate.isNotEmpty(portletValue.get("uiLabelLocation")) ){
-                    context.put("uiLabelLocation", portletValue.get("uiLabelLocation"));
-                } else {
-                    uiLabelLocation.append("CommonScreens.xml");
-                    context.put("uiLabelLocation", uiLabelLocation );
-                }
-            }
-            if (UtilValidate.isEmpty(context.get("formName"))) {
-                if (UtilValidate.isNotEmpty(portletValue) && UtilValidate.isNotEmpty(portletValue.get("formName")) ){
-                    context.put("formName", portletValue.get("formName"));
-                } else {
-                    context.put("formName", portletLongId);
-                }
-            }
-            if (UtilValidate.isEmpty(context.get("formLocation"))) {
-                if (UtilValidate.isNotEmpty(portletValue) && UtilValidate.isNotEmpty(portletValue.get("formLocation")) ){
-                    context.put("formLocation", portletValue.get("formLocation"));
-                } else {
-                    context.put("formLocation", location.toString() + "Forms.xml");
-                }
-            }
-
-            if (UtilValidate.isEmpty(context.get("editFormName"))){
-                if (UtilValidate.isNotEmpty(portletValue) && UtilValidate.isNotEmpty(portletValue.get("editFormName")) ){
-                    context.put("editFormName", portletValue.get("editFormName"));
-                } else {
-                    context.put("editFormName", "EditParam_"+portletLongId);
-                }
-            }
-            if (UtilValidate.isEmpty(context.get("editFormLocation"))) {
-                if (UtilValidate.isNotEmpty(portletValue) && UtilValidate.isNotEmpty(portletValue.get("editFormLocation")) ){
-                    context.put("editFormLocation", portletValue.get("editFormLocation"));
-                } else {
-                    context.put("editFormLocation", location.toString() + "Forms.xml");
-                }
-            }
-            //End addon modification : portletWidget
-            context.put("portletAttributesIterator", portletAttributesIterator);
-            return context;
         }
 
         public String getId(Map<String, Object> context) {

@@ -55,7 +55,6 @@ ofbiz/trunk/framework/base/lib/commons/commons-net-1.4.1.jar
 ofbiz/trunk/framework/base/lib/commons/commons-pool-1.3.jar
 ofbiz/trunk/framework/base/lib/commons/commons-primitives-1.0.jar
 ofbiz/trunk/framework/base/lib/commons/commons-validator-1.3.1
-ofbiz/trunk/framework/base/lib/commons/commons-vfs-20070730.jar
 ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-activation_1.0.2_spec-1.0.jar
 ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-j2ee-connector_1.5_spec-1.0.jar
 ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-jaxr_1.0_spec-1.0.jar
@@ -75,11 +74,11 @@ ofbiz/trunk/framework/base/lib/scripting/jansi-1.2.1.jar
 ofbiz/trunk/framework/base/lib/xmlrpc-client-3.1.2.jar
 ofbiz/trunk/framework/base/lib/xmlrpc-common-3.1.2.jar
 ofbiz/trunk/framework/base/lib/xmlrpc-server-3.1.2.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.28.catalina-ha.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.28.catalina-tribes.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.28.tomcat-embed-core.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.28.tomcat-embed-jasper.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.28.tomcat-embed-logging-log4j.jar
+ofbiz/framework/catalina/lib/tomcat-7.0.29-catalina-ha.jar
+ofbiz/framework/catalina/lib/tomcat-7.0.29-catalina-tribes.jar
+ofbiz/framework/catalina/lib/tomcat-7.0.29-tomcat-embed-core.jar
+ofbiz/framework/catalina/lib/tomcat-7.0.29-tomcat-embed-jasper.jar
+ofbiz/framework/catalina/lib/tomcat-7.0.29-tomcat-embed-logging-log4j.jar
 ofbiz/trunk/framework/entity/lib/commons-dbcp-1.4.jar
 ofbiz/trunk/framework/entity/lib/jdbc/derby-10.8.2.2.jar
 ofbiz/trunk/framework/entity/lib/jdbc/derbytools-10.8.2.2.jar
@@ -1219,7 +1218,6 @@ The following libraries distributed with Apache OFBiz are licensed under the
 MIT/X License:
 ofbiz/trunk/framework/base/lib/icu4j-49_1.jar
 ofbiz/trunk/framework/base/lib/jcl-over-slf4j-1.6.4.jar
-ofbiz/trunk/framework/entity/lib/ofbiz-minerva.jar
 ofbiz/trunk/framework/base/lib/slf4j-api-1.6.4.jar
 ofbiz/trunk/framework/base/lib/slf4j-simple-1.6.4.jar
 ofbiz/trunk/framework/images/webapp/images/jquery/*
@@ -1245,59 +1243,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
-=========================================================================
-The following libraries distributed with Apache OFBiz are licensed under the
-W3C License:
-ofbiz/trunk/framework/base/lib/Tidy.jar
-=========================================================================
-W3C¨ SOFTWARE NOTICE AND LICENSE
-
- Copyright © 1994-2001 World Wide Web Consortium, (Massachusetts Institute of
- Technology, Institut National de Recherche en Informatique et en Automatique,
- Keio University). All Rights Reserved. http://www.w3.org/Consortium/Legal/
-
- This W3C work (including software, documents, or other related items) is
- being provided by the copyright holders under the following license. By
- obtaining, using and/or copying this work, you (the licensee) agree that you
- have read, understood, and will comply with the following terms and
- conditions:
-
- Permission to use, copy, modify, and distribute this software and its
- documentation, with or without modification,  for any purpose and without fee
- or royalty is hereby granted, provided that you include the following on ALL
- copies of the software and documentation or portions thereof, including
- modifications, that you make:
-
-   1. The full text of this NOTICE in a location viewable to users of the
-   redistributed or derivative work.
-
-   2. Any pre-existing intellectual property disclaimers, notices, or terms and
-   conditions. If none exist, a short notice of the following form (hypertext is
-   preferred, text is permitted) should be used within the body of any
-   redistributed or derivative code: "Copyright © [$date-of-software] World Wide
-   Web Consortium, (Massachusetts Institute of Technology, Institut National de
-   Recherche en Informatique et en Automatique, Keio University). All Rights
-   Reserved. http://www.w3.org/Consortium/Legal/"
-
-   3. Notice of any changes or modifications to the W3C files, including the
-   date changes were made. (We recommend you provide URIs to the location from
-   which the code is derived.)
-
- THIS SOFTWARE AND DOCUMENTATION IS PROVIDED "AS IS," AND COPYRIGHT HOLDERS
- MAKE NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT
- LIMITED TO, WARRANTIES OF MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE
- OR THAT THE USE OF THE SOFTWARE OR DOCUMENTATION WILL NOT INFRINGE ANY THIRD
- PARTY PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.
-
- COPYRIGHT HOLDERS WILL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL OR
- CONSEQUENTIAL DAMAGES ARISING OUT OF ANY USE OF THE SOFTWARE OR
- DOCUMENTATION.
-
- The name and trademarks of copyright holders may NOT be used in advertising
- or publicity pertaining to the software without specific, written prior
- permission. Title to copyright in this software and any associated
- documentation will at all times remain with copyright holders.
 
 =========================================================================
 The following libraries distributed with Apache OFBiz are licensed under the
@@ -2307,37 +2252,37 @@ questions or comments regarding the usage of this material.
 =========================================================================
 The following libraries distributed with Apache OFBiz are licensed under the
 Eclipse Public License - v 1.0:
-ofbiz/trunk/framework/birt/lib/flute.jar
-ofbiz/trunk/framework/birt/lib/jaxrpc.jar
-ofbiz/trunk/framework/birt/lib/js.jar
-ofbiz/trunk/framework/birt/lib/org.apache.xml.resolver_1.2.0.v201005080400.jar
-ofbiz/trunk/framework/birt/lib/org.apache.xml.serializer_2.7.1.v201005080400.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.birt.runtime_3.7.2.v20120214-1408.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.core.contenttype_3.4.100.v20110423-0524.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.core.expressions_3.4.300.v20110228.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.core.filesystem_1.3.100.v20110423-0524.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.core.jobs_3.5.101.v20120113-1953.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.core.resources_3.7.101.v20120125-1505.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.core.runtime_3.7.0.v20110110.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.datatools.connectivity.oda_3.3.3.v201110130935.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.emf_2.6.0.v20120123-1045.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.emf.common_2.7.0.v20120123-0926.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.emf.ecore_2.7.0.v20120123-0926.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.emf.ecore.change_2.7.1.v20120123-0926.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.emf.ecore.xmi_2.7.0.v20120123-0926.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.equinox.app_1.3.100.v20110321.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.equinox.common_3.6.0.v20110523.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.equinox.preferences_3.4.2.v20120111-2020.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.equinox.registry_3.5.101.R37x_v20110810-1611.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.osgi_3.7.2.v20120110-1415.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.osgi.services_3.3.0.v20110513.jar
-ofbiz/trunk/framework/birt/lib/org.eclipse.update.configurator_3.3.100.v20100512.jar
-ofbiz/trunk/framework/birt/lib/org.w3c.css.sac_1.3.0.v200805290154.jar
-ofbiz/trunk/framework/birt/lib/org.w3c.dom.smil_1.0.0.v200806040011.jar
-ofbiz/trunk/framework/birt/lib/org.w3c.dom.svg_1.1.0.v201011041433.jar
-ofbiz/trunk/framework/birt/lib/saaj.jar
-ofbiz/trunk/framework/birt/lib/Tidy.jar
-ofbiz/trunk/framework/birt/lib/viewservlets.jar
+ofbiz/trunk/specialpurpose/birt/lib/flute.jar
+ofbiz/trunk/specialpurpose/birt/lib/jaxrpc.jar
+ofbiz/trunk/specialpurpose/birt/lib/js.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.apache.xml.resolver_1.2.0.v201005080400.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.apache.xml.serializer_2.7.1.v201005080400.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.birt.runtime_3.7.2.v20120214-1408.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.core.contenttype_3.4.100.v20110423-0524.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.core.expressions_3.4.300.v20110228.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.core.filesystem_1.3.100.v20110423-0524.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.core.jobs_3.5.101.v20120113-1953.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.core.resources_3.7.101.v20120125-1505.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.core.runtime_3.7.0.v20110110.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.datatools.connectivity.oda_3.3.3.v201110130935.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.emf_2.6.0.v20120123-1045.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.emf.common_2.7.0.v20120123-0926.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.emf.ecore_2.7.0.v20120123-0926.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.emf.ecore.change_2.7.1.v20120123-0926.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.emf.ecore.xmi_2.7.0.v20120123-0926.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.equinox.app_1.3.100.v20110321.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.equinox.common_3.6.0.v20110523.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.equinox.preferences_3.4.2.v20120111-2020.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.equinox.registry_3.5.101.R37x_v20110810-1611.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.osgi_3.7.2.v20120110-1415.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.osgi.services_3.3.0.v20110513.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.eclipse.update.configurator_3.3.100.v20100512.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.w3c.css.sac_1.3.0.v200805290154.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.w3c.dom.smil_1.0.0.v200806040011.jar
+ofbiz/trunk/specialpurpose/birt/lib/org.w3c.dom.svg_1.1.0.v201011041433.jar
+ofbiz/trunk/specialpurpose/birt/lib/saaj.jar
+ofbiz/trunk/specialpurpose/birt/lib/Tidy.jar
+ofbiz/trunk/specialpurpose/birt/lib/viewservlets.jar
 ofbiz/trunk/framework/catalina/lib/ecj-3.7.2.jar
 ofbiz/trunk/framework/jetty/lib/jetty-ajp-8.1.2.v20120308.jar
 ofbiz/trunk/framework/jetty/lib/jetty-continuation-8.1.2.v20120308.jar

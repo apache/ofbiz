@@ -30,13 +30,4 @@
     <PortalPortlet portalPortletId="GricScltAjaxWithMenu" portletName="Screenlet with one screen, and one menu called by ajax" screenName="GenericScreenletAjaxWithMenu" screenLocation="component://common/widget/PortalPageScreens.xml" editFormName="GenericScreenletAjaxWithMenuParam" editFormLocation="component://common/widget/PortletEditForms.xml" description="Simple portlet using screenlet with a menu, with one screen which was update by ajax process, so with a div. This portlet has 6 mandatory parameters." securityServiceName="" securityMainAction="VIEW"/>
     <PortletPortletCategory portalPortletId="GricScltAjaxWithMenu" portletCategoryId="GENERIC_PORTLET"/>
     <PortalPage portalPageId="_NA_" sequenceNum="000" portalPageName="For using genericPortletScreen" description="To be able to have parameters at the portlet level, not PortletPage level" ownerUserLoginId="_NA_"/>
-  <!--#Bam# portletWidget -->
-  <PortletType portletTypeId="Decorator" screenName="portletUiLabelDecorator" description="use screen and screen location in the portletDecorator" screenLocation="component://common/widget/PortletTypeScreens.xml"/>
-  <PortletType portletTypeId="Screenlet" screenName="Screenlet" description="depending of scriptName, menuName and screenName exist a screen with call (or not) scriptName in action and include a screenlet with include formName (or screenName) and include (or not) menuName" screenLocation="component://common/widget/PortletTypeScreens.xml"/>
-  <PortletType portletTypeId="ScreenletList" screenName="ScreenletList" description="include a list type form (do not use screenName) and an editing area, depending of scriptName and menuName exist a screen with call (or not) scriptName in action and include a screenlet with include formName and include (or not) menuName" screenLocation="component://common/widget/PortletTypeScreens.xml"/>
-  <PortletType portletTypeId="Empty" screenName="Empty" description="a empty screen, used to define a areaId" screenLocation="component://common/widget/PortletTypeScreens.xml"/>
-  <!--#Eam# portletWidget -->
-  <!--#Bam# portletExample can be use for all portal page build like exampleMgmt-->
-  <PortalPortlet portalPortletId="CommonDetail" portletName="Common detail portlet place" description="Use this portlet to say where detail portlet call from a menu will be show" portletTypeId="Empty" component="common" subComponent="Common" securityServiceName="" securityMainAction="VIEW"/>
-  <!--#Eam# portletExample -->
 </entity-engine-xml>

@@ -123,18 +123,10 @@ under the License.
                 <field-map field-name="portalPageId" from-field="parameters.portalPageId"/>
             </entity-and>
         </actions>
-        <!--#Bam# exampleHelp -->
-        <row-actions>
-           <entity-one entity-name="PortalPortlet" value-field="portlet"></entity-one>
-           <set field="helpTopicName" from-field="helpName" default-value="HELP_${portalPortletId}"/>
-        </row-actions>
-        <field name="portletName" >
-            <hyperlink also-hidden="false" target="showHelp?helpTopic=${helpTopicName}" description="${portlet.portletName}"></hyperlink>
+        <field name="portletName">
+            <hyperlink also-hidden="false" target="showHelp?helpTopic=HELP_${portalPortletId}" description="${portletName}" ></hyperlink>
         </field>
-        <field name="description" title="${uiLabelMap.CommonDescription}"><display description="${portlet.description}"/></field>
-        <!--#Eam# exampleHelp -->
-        
-        
+        <field name="description"><display/></field>
     </form>
 
     <form name="FindGenericEntity" type="single" target="list${entity}" title="" focus-field-name="idName">
@@ -154,7 +146,6 @@ under the License.
         <field name="columnSeqId"><hidden/></field>
         <field name="columnWidthPixels"><text/></field>
         <field name="columnWidthPercentage"><text/></field>
-        <field name="newLine"><check/></field>
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
     </form>
 </forms>

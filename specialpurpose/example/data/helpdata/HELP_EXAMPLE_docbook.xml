@@ -24,70 +24,31 @@ under the License.
     xmlns="http://docbook.org/ns/docbook">
 
     <title>Help on writing docBook documents</title>
-    <para>This file aims to contain an example of what is possible to put in a docBook file that is used as an ofbiz helping page.</para>
-    <para>It has to be opened as an xml file. To display the helping page, only a few docBook tags are interpreted. This file contains all the ones that are interpreted.</para>
-    <para>The interpretation of these tags is made by the ftl file HelpTemplate.ftl</para>
-    <para>It is advisable to only take a 2-character indentation, in order to limit the width of the file.</para>
-    <para>&amp;nbsp;</para>
-    <para>The tag "para" enables to manage the paragraphs and, for the moment, it enables to manage the chosen carriage returns. The number of spaces or carriage returns in the docBook text is ignored. For instance, an empty line between two paragraphs in a docBook file does not generate any space between the paragraphs.</para>
-    <para>When forcing this action is necessary, in exceptional situations, it is possible to include html code, 
-     to generate spaces or carriage returns for instance. But attention! During the creation of pdf files or according to the type of transformation in html,</para> 
-    <para> &lt;br \>these elements will appear and won't be interpreted.
-        <programlisting>
-      &amp;lt;para>Short paragraph&amp;lt;/para>
-      to insert an empty line between two paragraphs &amp;lt;para>&amp;amp;nbsp;&amp;lt;/para>
-      &amp;lt;para>Short paragraphe with a carriage&amp;amp;lt;br \>in the middle&amp;lt;/para>
-        </programlisting> 
-      </para>
-    <section>
-      <title><anchor xml:id="WhatIsSection"/>What is a section? (H2)</title>
-      <para>When the user asks for the display of the helping page (clicks on the icon), the system looks for the associated file(s) and displays it (for more details about the organization of the helping page, read <link xl:href="showHelp?helpTopic=DOCUMENTATION_SYSTEM">Principles and organization of the Apache OfBoz Documentation</link>).</para>
-      <para>The tag "Title" of the file will be the title of the page (H1 in html), and it will be possible to have as many subsections (H2) as we want, and with as many levels (H3, H4, H5, ...) as we want. This is the aim of the tag. In the tag Title, it is possible to put a tag Anchor in order to link it (with an internal or external link) straight to this section.</para>
-      <section>
-        <title>Subsection (H3)</title>
-        <para>and we could go on...</para>
-      </section>
-    </section>
     <section>
         <title>Example of an ordered list</title>
-        <para>There will be a number in front of each item.</para>
+        <para>The orderedlist will put numbers in front of each item.</para>
         <orderedlist>
             <listitem><para>First item of my list</para></listitem>
             <listitem><para>Second item</para></listitem>
             <listitem><para>Third...</para></listitem>
-            <listitem><para>Forth...</para></listitem>
-            <listitem><para>and so on...</para></listitem>
+            <listitem><para>4th...</para></listitem>
+            <listitem><para>and this can go longer...</para></listitem>
         </orderedlist>
     </section>
     <section>
         <title>Example of an itemized list</title>
-        <para>There will only be a symbol (a point) at the beginning of each line.</para>
+        <para>The itemizedlist will put a bullet in front of each item.</para>
         <itemizedlist>
             <listitem><para>First item of my list</para></listitem>
             <listitem><para>Second item</para></listitem>
             <listitem><para>Third...</para></listitem>
-            <listitem><para>Forth...</para></listitem>
-            <listitem><para>and so on...</para></listitem>
+            <listitem><para>4th...</para></listitem>
+            <listitem><para>and this can go longer...</para></listitem>
         </itemizedlist>
     </section>
 
     <section>
         <title>Examples of text formatting</title>
-        <para>In formatting, there are 2 notions:
-          <itemizedlist>
-            <listitem><para>formatting the text <emphasis role="caution">in progress</emphasis></para></listitem>
-            <listitem><para>a paragraph with a specific formatting. In this case, you can put a title at that paragraph, but it is not compulsory. Currently, in any case, this title will be on level H3.</para></listitem>
-          </itemizedlist>
-        </para>
-        <para>Each formatting corresponds to a style. Currently, 4 have been created.
-          <itemizedlist>
-            <listitem><para>caution: caution (but softer than warning)</para></listitem>
-            <listitem><para>important: as its name implies</para></listitem>
-            <listitem><para>note: as its name implies</para></listitem>
-            <listitem><para>tip: trick</para></listitem>
-            <listitem><para>warning: warning (stronger than caution)</para></listitem>
-          </itemizedlist>
-        </para>
         <caution>
             <title>Caution title</title>
             <para>Here is a caution text</para>
@@ -107,36 +68,5 @@ under the License.
         <warning>
             <para>Here is a warning</para>
         </warning>
-    </section>
-
-    <section>
-      <title>Possible inclusion</title>
-      <para>During the display of the helping page, according to the links between elements of contents, it is possible to display several elements of contents
-        <itemizedlist>
-          <listitem><para>another helping file</para></listitem>
-          <listitem><para>a picture</para></listitem>
-          <listitem><para>a form (or a screen) so as to be able to see the helping page of each field</para></listitem>
-        </itemizedlist>
-      </para>
-      <para>During the display of the helping page on the <link xl:href="showHelp?helpTopic=EXAMPLE_main">home page</link> of the component Example, 2 helping files are displayed.</para>
-      <para>Example of a display of a picture, <emphasis role="caution">only the field fileref is compulsory, but for a good page setting, the fields width and depth are recommended.</emphasis></para>
-      <para>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref="/example/images/MgmtPage.png" width="638" depth="478"/>
-          </imageobject>
-          <textobject><phrase>A typical portal page</phrase></textobject>
-          <caption>Diagram of a typical portal page, about a search management and a main entity management</caption>
-        </mediaobject>
-      </para>
-      <para>&amp;nbsp;</para>
-      <para>So as to enable the user to display the helping page of each field (which appears when the mouse is situated on the field's label), it is sometimes interesting to display a form in a helping page text. To do this, you have to create an associated element of contents (dataresource) which is associated to a screen.xml, with a dataTemplateTypeId="SCREEN_COMBINED". It is advisable to do a dedicated screen that does not include the general decorator.&lt;br \>
-        Then, you have to associate the element of contents with the same parent as for the helping page with which the screen has to appear. Here are the data for the display of the following screen.
-        <programlisting>
-      &amp;lt;DataResource dataResourceId="EXAMPLE_EditForm"  objectInfo="component://example/widget/example/ExampleScreens.xml#ExampleEditForm" dataResourceTypeId="URL_RESOURCE" dataTemplateTypeId="SCREEN_COMBINED"/>
-      &amp;lt;Content contentId="EXAMPLE_EditForm" contentTypeId="DOCUMENT" contentName="Example Fields" dataResourceId="EXAMPLE_EditForm"/>
-      &amp;lt;ContentAssoc contentId="HELP_EXAMPLE_docbook" contentIdTo="EXAMPLE_EditForm" mapKey="EXAMPLE_docbook" fromDate="2006-01-12 01:01:01" sequenceNum="005" contentAssocTypeId="INSTANCE"/>
-        </programlisting> 
-      </para>
     </section>
 </section>
