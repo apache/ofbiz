@@ -591,8 +591,8 @@ Parameter: width, String or Integer, optional - The width of the lookup field.
 Parameter: height, String or Integer, optional - The height of the lookup field.
 Parameter: position, String, optional - The position style of the lookup field.
 Parameter: fadeBackground, ?
-Parameter: clearText, String, optional - If the readonly parameter is true, clearText contains the text to be displayed in the field.
-Parameter: showDescription, String, optional - ? (contains "true" or "false").
+Parameter: clearText, String, optional - If the readonly parameter is true, clearText contains the text to be displayed in the field, default is CommonClear label.
+Parameter: showDescription, String, optional - If the showDescription parameter is true, a special span with css class "tooltip" will be created at right of the lookup button and a description will fill in (see setLookDescription in selectall.js). For now not when the lookup is read only.
 Parameter: initiallyCollapsed, Not used.
 Parameter: lastViewName, String, optional - If the ajaxEnabled parameter is true, the contents of lastViewName will be appended to the Ajax URL.
 -->
@@ -672,7 +672,17 @@ Parameter: lastViewName, String, optional - If the ajaxEnabled parameter is true
         });
     </script>
 </#if>
-<#if readonly?has_content && readonly><a id="${id}_clear" style="background:none;margin-left:5px;margin-right:15px;" class="clearField" href="javascript:void(0);" onclick="javascript:document.${formName}.${name}.value='';<#if descriptionFieldName?has_content>document.${formName}.${descriptionFieldName}.value='';</#if>">${clearText}</a></#if>
+<#if readonly?has_content && readonly>
+  <a id="${id}_clear" 
+      style="background:none;margin-left:5px;margin-right:15px;" 
+      class="clearField" 
+      href="javascript:void(0);" 
+      onclick="javascript:document.${formName}.${name}.value='';
+              jQuery('#' + jQuery('#${id}_clear').next().attr('id').replace('_button','') + '_${id}_lookupDescription').html('');
+              <#if descriptionFieldName?has_content>document.${formName}.${descriptionFieldName}.value='';</#if>">
+      <#if clearText?has_content>${clearText}<#else>${uiLabelMap.CommonClear}</#if>
+  </a>
+</#if>
 </span>
 <#if ajaxEnabled?has_content && ajaxEnabled && (presentation?has_content && presentation == "window")>
       <#if ajaxUrl?index_of("_LAST_VIEW_NAME_") < 0>
