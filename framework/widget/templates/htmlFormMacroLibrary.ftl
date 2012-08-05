@@ -611,7 +611,17 @@ ${item.description}</span>
         });
     </script>
 </#if>
-<#if readonly?has_content && readonly><a id="${id}_clear" style="background:none;margin-left:5px;margin-right:15px;" class="clearField" href="javascript:void(0);" onclick="javascript:document.${formName}.${name}.value='';<#if descriptionFieldName?has_content>document.${formName}.${descriptionFieldName}.value='';</#if>">${clearText}</a></#if>
+<#if readonly?has_content && readonly>
+  <a id="${id}_clear" 
+      style="background:none;margin-left:5px;margin-right:15px;" 
+      class="clearField" 
+      href="javascript:void(0);" 
+      onclick="javascript:document.${formName}.${name}.value='';
+              jQuery('#' + jQuery('#${id}_clear').next().attr('id').replace('_button','') + '_${id}_lookupDescription').html('');
+              <#if descriptionFieldName?has_content>document.${formName}.${descriptionFieldName}.value='';</#if>">
+      <#if clearText?has_content>${clearText}<#else>${uiLabelMap.CommonClear}</#if>
+  </a>
+</#if>
 </span>
 <#if ajaxEnabled?has_content && ajaxEnabled && (presentation?has_content && presentation == "window")>
       <#if ajaxUrl?index_of("_LAST_VIEW_NAME_") < 0>
