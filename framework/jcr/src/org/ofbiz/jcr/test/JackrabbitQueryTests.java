@@ -18,57 +18,66 @@ under the License.
  */
 package org.ofbiz.jcr.test;
 
+import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.query.QueryResult;
+
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.jcr.access.JcrRepositoryAccessor;
+import org.ofbiz.jcr.access.jackrabbit.JackrabbitRepositoryAccessor;
+import org.ofbiz.jcr.api.JcrDataHelper;
+import org.ofbiz.jcr.api.jackrabbit.JackrabbitArticleHelper;
 import org.ofbiz.service.testtools.OFBizTestCase;
 
 public class JackrabbitQueryTests extends OFBizTestCase {
 
-    private GenericValue userLogin = null;
+	private GenericValue userLogin = null;
 
-    public JackrabbitQueryTests(String name) {
-        super(name);
-    }
+	public JackrabbitQueryTests(String name) {
+		super(name);
+	}
 
-    @Override
-    protected void setUp() throws Exception {
-        userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"),	true);
+	@Override
+	protected void setUp() throws Exception {
+		userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), true);
 
-    }
+	}
 
-    @Override
-    protected void tearDown() throws Exception {
-    }
+	@Override
+	protected void tearDown() throws Exception {
+	}
 
-    /*
-    public void testAccessorQuery() throws RepositoryException {
-        JcrRepositoryAccessor accessor = new JackrabbitRepositoryAccessor(userLogin);
-        QueryResult results = accessor.queryForRepositoryData("SELECT * FROM [rep:root]");
+	public void testAccessorQuery() throws RepositoryException {
+		JcrRepositoryAccessor accessor = new JackrabbitRepositoryAccessor(userLogin, delegator);
+		QueryResult results = accessor.queryForRepositoryData("SELECT * FROM [rep:root]");
 
-        assertNotNull(results);
-        assertEquals(1, results.getNodes().getSize());
+		assertNotNull(results);
+		assertEquals(1, results.getNodes().getSize());
 
-        accessor.closeAccess();
-    }*/
+		accessor.closeAccess();
+	}
 
-    /*
-    public void testQuery() throws Exception {
-        JcrDataHelper helper = new JackrabbitArticleHelper(userLogin);
+	public void testQuery() throws Exception {
+		JcrDataHelper helper = new JackrabbitArticleHelper(userLogin, delegator);
 
-        helper.storeContentInRepository("/query", "en", "query", "query test", new GregorianCalendar());
+		helper.storeContentInRepository("/query", "en", "query", "query test", Calendar.getInstance());
 
-        List<Map<String, String>> queryResult = helper.queryData("SELECT * FROM [nt:unstructured]");
+		List<Map<String, String>> queryResult = helper.queryData("SELECT * FROM [nt:unstructured]");
 
-        assertEquals(3, queryResult.size()); // the list should contain 3 result
-                                             // sets
+		assertEquals(3, queryResult.size()); // the list should contain 3 result
+												// sets
 
-        assertEquals("/", queryResult.get(0).get("path"));
-        assertEquals("/query", queryResult.get(1).get("path"));
-        assertEquals("/query/en", queryResult.get(2).get("path"));
+		assertEquals("/", queryResult.get(0).get("path"));
+		assertEquals("/query", queryResult.get(1).get("path"));
+		assertEquals("/query/en", queryResult.get(2).get("path"));
 
-        helper.removeContentObject("query");
+		helper.removeContentObject("query");
 
-        helper.closeContentSession();
+		helper.closeContentSession();
 
-    }*/
+	}
 }

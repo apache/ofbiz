@@ -32,10 +32,8 @@
 	<test-group case-name="jackrabbit-tests">
 		<junit-test-suite class-name="org.ofbiz.jcr.test.JackrabbitBaseTests"/>
 		<junit-test-suite class-name="org.ofbiz.jcr.test.JackrabbitDataTests"/>
-		<!--
 		<junit-test-suite class-name="org.ofbiz.jcr.test.JackrabbitFilesTests"/>
 		<junit-test-suite class-name="org.ofbiz.jcr.test.JackrabbitQueryTests"/>
-		-->
 	</test-group>
 
 	<!--

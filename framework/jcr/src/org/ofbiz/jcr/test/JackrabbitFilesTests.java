@@ -18,62 +18,73 @@ under the License.
  */
 package org.ofbiz.jcr.test;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+
+import javax.jcr.RepositoryException;
+
+import net.sf.json.JSONArray;
+
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.jcr.access.JcrRepositoryAccessor;
+import org.ofbiz.jcr.access.jackrabbit.JackrabbitRepositoryAccessor;
+import org.ofbiz.jcr.api.JcrFileHelper;
+import org.ofbiz.jcr.api.jackrabbit.JackrabbitFileHelper;
 import org.ofbiz.service.testtools.OFBizTestCase;
 
 public class JackrabbitFilesTests extends OFBizTestCase {
 
-    private GenericValue userLogin = null;
+	private GenericValue userLogin = null;
 
-    public JackrabbitFilesTests(String name) {
-        super(name);
-    }
+	public JackrabbitFilesTests(String name) {
+		super(name);
+	}
 
-    @Override
-    protected void setUp() throws Exception {
-        userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), true);
+	@Override
+	protected void setUp() throws Exception {
+		userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), true);
 
-    }
+	}
 
-    @Override
-    protected void tearDown() throws Exception {
-    }
+	@Override
+	protected void tearDown() throws Exception {
+	}
 
-    /*
-    public void testAccessorFileTree() throws RepositoryException {
-        JcrRepositoryAccessor accessor = new JackrabbitRepositoryAccessor(userLogin);
+	public void testAccessorFileTree() throws RepositoryException {
+		JcrRepositoryAccessor accessor = new JackrabbitRepositoryAccessor(userLogin, delegator);
 
-        JSONArray array = accessor.getJsonFileTree();
-        assertEquals(0, array.size()); // should be 0 because there are no
-                                       // entries in the repository yet
-        accessor.closeAccess();
-    }*/
+		JSONArray array = accessor.getJsonFileTree();
+		assertEquals(0, array.size()); // should be 0 because there are no
+										// entries in the repository yet
+		accessor.closeAccess();
+	}
 
-    /*
-     * Test the File upload
-     */ /*
-    public void testCreateRepositoryFileNode() throws Exception {
-        File f = new File("stopofbiz.sh");
-        File f2 = new File("README");
-        assertTrue(f.exists() && f2.exists());
+	/*
+	 * Test the File upload
+	 */
+	public void testCreateRepositoryFileNode() throws Exception {
+		File f = new File("LICENSE");
+		File f2 = new File("README");
+		assertTrue(f.exists() && f2.exists());
 
-        InputStream file = new FileInputStream(f);
+		InputStream file = new FileInputStream(f);
 
-        JcrFileHelper helper = new JackrabbitFileHelper(userLogin);
-        helper.storeContentInRepository(file, f.getName(), "/fileHome");
+		JcrFileHelper helper = new JackrabbitFileHelper(userLogin, delegator);
+		helper.storeContentInRepository(file, f.getName(), "/fileHome");
 
-        assertNotNull(helper.getRepositoryContent("/fileHome/" + f.getName()));
+		assertNotNull(helper.getRepositoryContent("/fileHome/" + f.getName()));
 
-        // add a second file to the same folder
-        file = new FileInputStream(f2);
+		// add a second file to the same folder
+		file = new FileInputStream(f2);
 
-        helper.storeContentInRepository(file, f2.getName(), "/fileHome");
-        assertNotNull(helper.getRepositoryContent("/fileHome/" + f2.getName()));
+		helper.storeContentInRepository(file, f2.getName(), "/fileHome");
+		assertNotNull(helper.getRepositoryContent("/fileHome/" + f2.getName()));
 
-        // remove all files in folder
-        helper.removeContentObject("/fileHome");
+		// remove all files in folder
+		helper.removeContentObject("/fileHome");
 
-        helper.closeContentSession();
-    }*/
+		helper.closeContentSession();
+	}
 }

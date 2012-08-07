@@ -59,21 +59,21 @@ public class JackrabbitDataTests extends OFBizTestCase {
     protected void tearDown() throws Exception {
     }
 
+    public void testAccessorDataTree() throws RepositoryException {
+    	JcrRepositoryAccessor accessor = new JackrabbitRepositoryAccessor(userLogin, delegator);
+
+    	JSONArray array = accessor.getJsonDataTree();
+    	// should be 0 because there are no entries in the repository yet
+    	assertEquals(0, array.size());
+
+    	accessor.closeAccess();
+    }
+
     public void testAccessorConstructor() throws RepositoryException {
         JcrRepositoryAccessor accessor = new JackrabbitRepositoryAccessor(userLogin, delegator);
 
         assertNotNull(accessor);
         assertEquals("/", accessor.getSession().getRootNode().getPath());
-
-        accessor.closeAccess();
-    }
-
-    public void testAccessorDataTree() throws RepositoryException {
-        JcrRepositoryAccessor accessor = new JackrabbitRepositoryAccessor(userLogin, delegator);
-
-        JSONArray array = accessor.getJsonDataTree();
-        // should be 0 because there are no entries in the repository yet
-        assertEquals(0, array.size());
 
         accessor.closeAccess();
     }

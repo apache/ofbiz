@@ -205,13 +205,13 @@
 	<classpathentry kind="src" path="specialpurpose/webpos/src"/>
 	<classpathentry kind="src" path="specialpurpose/workflow/src"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
-	<classpathentry kind="lib" path="framework/jcr/lib/jackrabbit-api-2.3.3.jar"/>
-	<classpathentry kind="lib" path="framework/jcr/lib/jackrabbit-core-2.3.3.jar"/>
-	<classpathentry kind="lib" path="framework/jcr/lib/jackrabbit-jca-2.3.3.jar"/>
-	<classpathentry kind="lib" path="framework/jcr/lib/jackrabbit-jcr-commons-2.3.3.jar"/>
+	<classpathentry kind="lib" path="framework/jcr/lib/jackrabbit-api-2.5.1.jar"/>
+	<classpathentry kind="lib" path="framework/jcr/lib/jackrabbit-core-2.5.1.jar"/>
+	<classpathentry kind="lib" path="framework/jcr/lib/jackrabbit-jca-2.5.1.jar"/>
+	<classpathentry kind="lib" path="framework/jcr/lib/jackrabbit-jcr-commons-2.5.1.jar"/>
 	<classpathentry kind="lib" path="framework/jcr/lib/jackrabbit-ocm-2.0.jar"/>
-	<classpathentry kind="lib" path="framework/jcr/lib/jackrabbit-spi-2.3.3.jar"/>
-	<classpathentry kind="lib" path="framework/jcr/lib/jackrabbit-spi-commons-2.3.3.jar"/>
+	<classpathentry kind="lib" path="framework/jcr/lib/jackrabbit-spi-2.5.1.jar"/>
+	<classpathentry kind="lib" path="framework/jcr/lib/jackrabbit-spi-commons-2.5.1.jar"/>
 	<classpathentry kind="lib" path="framework/jcr/lib/jcr-2.0.jar"/>
 	<classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.29-catalina-ha.jar"/>
 	<classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.29-catalina-tribes.jar"/>
