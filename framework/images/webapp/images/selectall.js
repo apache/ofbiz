@@ -269,6 +269,27 @@ function ajaxUpdateAreas(areaCsvString) {
         // not nice but works
         targetParams = targetParams.replace('#','');
         targetParams = targetParams.replace('?','');
+        /*#Bam# portletWidget wait-spinner working*/
+        var UPDATE_OP = {};
+        UPDATE_OP.areaId = areaId;
+        UPDATE_OP.target = target;
+        UPDATE_OP.targetParams = targetParams;
+        UPDATE_OP.update = function(){
+            var _op = this;
+            jQuery.ajax({
+                url: _op.target,
+                type: "POST",
+                data: _op.targetParams,
+                success: function(data) {
+                    jQuery("#" + _op.areaId).html(data);
+                    evalScripts(jQuery("#" + _op.areaId));
+                    waitSpinnerHide();
+                },
+                error: function(data) {waitSpinnerHide()}
+            });
+        }
+        UPDATE_OP.update();
+        /*
         jQuery.ajax({
             url: target,
             async: false,
@@ -280,6 +301,8 @@ function ajaxUpdateAreas(areaCsvString) {
             },
             error: function(data) {waitSpinnerHide()}
         });
+        */
+        /*#Eam# portletWidget wait-spinner working*/
     }
 }
 
@@ -355,7 +378,11 @@ function ajaxSubmitFormUpdateAreas(form, areaCsvString) {
        jQuery('#content-messages').removeClass('errorMessage').fadeIn('fast');
    }
    updateFunction = function(data) {
-       if (data._ERROR_MESSAGE_LIST_ != undefined || data._ERROR_MESSAGE_ != undefined) {
+       /*#Bam# portletWidget*/
+       if ((data._ERROR_MESSAGE_LIST_ != undefined || data._ERROR_MESSAGE_ != undefined) 
+               && (data.responseMessage == undefined || data.responseMessage != "fail")) {
+          showMessages('errorMessage',data._ERROR_MESSAGE_,data._ERROR_MESSAGE_LIST_);
+          /*
            if(!jQuery('#content-messages')) {
               //add this div just after app-navigation
               if(jQuery('#content-main-section')){
@@ -371,9 +398,18 @@ function ajaxSubmitFormUpdateAreas(form, areaCsvString) {
               jQuery('#content-messages' ).html(data._ERROR_MESSAGE_);
           }
           jQuery('#content-messages').fadeIn('fast');
+          */
        }else {
-           if(jQuery('#content-messages')) {
+           // now show message if needed
+           if (data.responseMessage != undefined && data.responseMessage == "fail") {
+               showMessages('failMessage',data._ERROR_MESSAGE_,data._ERROR_MESSAGE_LIST_);
+           }
+           else if (data._EVENT_MESSAGE_LIST_ != undefined || data._EVENT_MESSAGE_ != undefined){
+               showMessages('eventMessage',data._EVENT_MESSAGE_,data._EVENT_MESSAGE_LIST_);
+           }
+           else if(jQuery('#content-messages').text()) {
                jQuery('#content-messages').removeClass('errorMessage').fadeIn("fast");
+           /*#Eam# portletWidget*/
            }
            ajaxUpdateAreas(areaCsvString);
        }
@@ -808,6 +844,21 @@ function waitSpinnerShow() {
 function waitSpinnerHide() {
     jQuery("#wait-spinner").hide()
 }
+
+// #Bam# validate-form
+function clickLink(linkDivId) {
+    var div = document.getElementById(linkDivId); 
+    if(!div ) return; 
+    var aNodeList = div.getElementsByTagName("A");
+    link = aNodeList.item(0);
+    target =link.href;
+    if(target.match(new RegExp("javascript:.*"))){
+        eval(target);
+    } else {
+        window.location.href = target;
+    }
+}
+// #Eam# validate-form
 
 /**
  * Reads the requiered uiLabels from the uiLabelXml Files

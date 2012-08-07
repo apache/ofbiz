@@ -96,6 +96,7 @@ under the License.
                 <xs:element minOccurs="0" ref="condition"/>
                 <xs:element minOccurs="0" ref="actions"/>
                 <xs:element minOccurs="0" ref="link"/>
+                <xs:element minOccurs="0" ref="show-portlet"/>
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="menu-item"/>
             </xs:sequence>
             <xs:attributeGroup ref="attlist.menu-item"/>
@@ -135,6 +136,7 @@ under the License.
     </xs:element>
     <xs:attributeGroup name="attlist.image">
         <xs:attribute type="xs:string" name="src"/>
+        <xs:attribute type="xs:string" name="title"/>
         <xs:attribute type="xs:string" name="id"/>
         <xs:attribute type="xs:string" name="style"/>
         <xs:attribute type="xs:string" name="width"/>
@@ -605,4 +607,69 @@ under the License.
     <xs:attributeGroup name="attlist.if-empty">
         <xs:attribute name="field" use="required"/>
     </xs:attributeGroup>
+    <xs:element name="show-portlet">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="parameter"/>
+            </xs:sequence>
+            <xs:attributeGroup ref="attlist.showPortlet"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.showPortlet">
+        <xs:attribute name="also-hidden" default="true">
+            <xs:annotation><xs:documentation>If set to true, an hidden form field is also rendered, with the name of the field and its content.</xs:documentation></xs:annotation>
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="portlet-id" use="required">
+            <xs:annotation><xs:documentation>The portalPortletId which want to show, will pass as parameter to target; can use the ${} syntax to substitute values from the context.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="portal-page-id">
+            <xs:annotation><xs:documentation>if a field named portalPageId is present in context it will be used, will be pass as parameter to target if has content otherwise generate a warning message; can use the ${} syntax to substitute values from the context.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="portlet-seq-id">
+            <xs:annotation><xs:documentation>if a field named portletSeqId is present in context it will be used, will be pass as parameter to target if has content otherwise generate a warning message; can use the ${} syntax to substitute values from the context.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="target">
+            <xs:annotation><xs:documentation>The target uri, default value is refreshPortlet; can use the ${} syntax to substitute values from the context.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="description">
+            <xs:annotation><xs:documentation>Specifies the string to display, can use the ${} syntax to insert context values; if empty the value of the field will be printed for a default.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="area-id">
+            <xs:annotation><xs:documentation>Area where to show the portlet, default value is "PP_${targetPageId}${targetPortletId}${targetSeqId}", will be pass as parameter to target if has content otherwise generate a warning message;can use the ${} syntax to insert context values; if empty the value of the field will be printed for a default.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="alternate">
+            <xs:annotation><xs:documentation>Alternate text if the image is not found at image-location</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="image-title">
+            <xs:annotation><xs:documentation>Use as a title for the HTML img tag</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="image-location"/>
+        <xs:attribute name="request-confirmation" default="false">
+            <xs:annotation><xs:documentation>If true then the user is presented with a dialog box, if confirmation-message is empty, use default</xs:documentation></xs:annotation>
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="confirmation-message" type="xs:string"><xs:annotation><xs:documentation>The message displayed in confirmation box</xs:documentation></xs:annotation></xs:attribute>
+        <xs:attribute name="parameters-map" type="xs:string">
+            <xs:annotation><xs:documentation>A Map in the context that will be used as additional name/value pairs.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:integer" name="size">
+            <xs:annotation><xs:documentation>Specifies the size of the field (as a number of characters), when the text to display exceed the given size it is truncated and add the complete text as a hint</xs:documentation></xs:annotation>
+        </xs:attribute>
+    </xs:attributeGroup>
+    <xs:element name="parameters-form">
+        <xs:complexType>
+            <xs:attribute type="xs:string" name="form-name"/>
+        </xs:complexType>
+    </xs:element>
 </xs:schema>

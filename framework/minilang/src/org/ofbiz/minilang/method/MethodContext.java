@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
@@ -62,9 +63,25 @@ public final class MethodContext {
     private int traceLogLevel = Debug.INFO;
     private GenericValue userLogin;
 
-    public MethodContext(DispatchContext ctx, Map<String, ? extends Object> context, ClassLoader loader) {
+    // constructor to use minilang as script call in screen action 
+    public MethodContext(DispatchContext ctx, Map<String, ? extends Object> context) {
         this.methodType = MethodContext.SERVICE;
+        Map<String, Object> parametersCtx = UtilGenerics.checkMap(context.get("parameters"));
+        this.parameters = UtilMisc.makeMapWritable(parametersCtx);
+        for (Map.Entry<String, ? extends Object> entry : context.entrySet()) {
+            if (! "parameters".equals(entry.getKey())) {
+                this.putEnv(entry.getKey(), entry.getValue());
+            }
+        }
+        loadThis(ctx, context, null);
+    }
+
+    public MethodContext(DispatchContext ctx, Map<String, ? extends Object> context, ClassLoader loader) {
         this.parameters = UtilMisc.makeMapWritable(context);
+        loadThis(ctx, context, loader);
+    }
+    private void loadThis(DispatchContext ctx, Map<String, ? extends Object> context, ClassLoader loader) {
+        this.methodType = MethodContext.SERVICE;
         this.loader = loader;
         this.locale = (Locale) context.get("locale");
         this.timeZone = (TimeZone) context.get("timeZone");

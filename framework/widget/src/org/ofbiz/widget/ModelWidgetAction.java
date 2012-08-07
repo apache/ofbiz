@@ -387,31 +387,37 @@ public abstract class ModelWidgetAction implements Serializable {
     }
 
     public static class Script extends ModelWidgetAction {
-        protected String location;
-        protected String method;
+        protected FlexibleStringExpander scriptLocationExdr;
 
         public Script(ModelWidget modelWidget, Element scriptElement) {
             super (modelWidget, scriptElement);
-            String scriptLocation = scriptElement.getAttribute("location");
-            this.location = WidgetWorker.getScriptLocation(scriptLocation);
-            this.method = WidgetWorker.getScriptMethodName(scriptLocation);
+            this.scriptLocationExdr = FlexibleStringExpander.getInstance(scriptElement.getAttribute("location"));
         }
 
         @Override
         public void runAction(Map<String, Object> context) throws GeneralException {
+            Locale locale = (Locale) context.get("locale");
+            String scriptLocation = this.scriptLocationExdr.expandString(context, locale);
+            String location = WidgetWorker.getScriptLocation(scriptLocation);
+            String method = WidgetWorker.getScriptMethodName(scriptLocation);
             if (location.endsWith(".xml")) {
-                Map<String, Object> localContext = FastMap.newInstance();
-                localContext.putAll(context);
                 DispatchContext ctx = WidgetWorker.getDispatcher(context).getDispatchContext();
-                MethodContext methodContext = new MethodContext(ctx, localContext, null);
+                MethodContext methodContext = new MethodContext(ctx, context);
                 try {
                     SimpleMethod.runSimpleMethod(location, method, methodContext);
-                    context.putAll(methodContext.getResults());
+                    Map<String, Object> resultContext = methodContext.getEnv("widget");
+                    if (UtilValidate.isNotEmpty(resultContext)){
+                        context.putAll(resultContext);
+                    }
+                    Map<String, Object> parametersUp = methodContext.getParameters();
+                    if (UtilValidate.isNotEmpty(parametersUp)){
+                        context.put("parameters",parametersUp);
+                    }
                 } catch (MiniLangException e) {
                     throw new GeneralException("Error running simple method at location [" + location + "]", e);
                 }
             } else {
-                ScriptUtil.executeScript(this.location, this.method, context);
+                ScriptUtil.executeScript(location, method, context);
             }
         }
     }

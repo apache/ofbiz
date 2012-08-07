@@ -21,6 +21,136 @@ under the License.
 <forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
 
+    
+    <!--#Bam# portletWidget -->
+    <form name="ShowPortalPortlet" type="single" default-map-name="portalPortlet" default-entity-name="PortalPortlet">
+        <actions>
+          <entity-one entity-name="PortletType" value-field="portletType">
+            <field-map field-name="portletTypeId" from-field="portalPortlet.portletTypeId"/>
+          </entity-one>
+        </actions>
+<!--      <auto-fields-entity entity-name="PortalPortlet" default-field-type="display"/>-->
+        <field name="portalPortletId"><display/></field>
+        <field name="portletLongId" tooltip="${context.portletLongId}"><display/></field>
+        <field name="portletName"><display/></field>
+        <field name="portletTypeId" tooltip="${portletType.screenLocation}#${portletType.screenName}">
+          <drop-down allow-empty="true">
+            <entity-options description="[${portletTypeId}] ${description}" entity-name="PortletType">
+              <entity-order-by field-name="portletTypeId"/>
+            </entity-options>
+          </drop-down>
+        </field>
+        <field name="component"><display/></field>
+        <field name="subComponent"><display/></field>
+        <field name="webapp"><display/></field>
+        <field name="useScreen"><display description="${uiLabelMap.Common${useScreen}}"/></field>
+        <field name="screenName" tooltip="${context.screenName}"><display/></field>
+        <field name="screenLocation" tooltip="${context.screenLocation}"><display/></field>
+        <field name="useScript"><display description="${uiLabelMap.Common${useScript}}"/></field>
+        <field name="scriptName" tooltip="${context.scriptName}"><display/></field>
+        <field name="uiLabelLocation" tooltip="${context.uiLabelLocation}"><display/></field>
+        <field name="formName" tooltip="${context.formName}"><display/></field>
+        <field name="formLocation" tooltip="${context.formLocation}"><display/></field>
+        <field name="pkIdName" tooltip="${context.pkIdName}"><display/></field>
+<!--        <field name="areaDivId" tooltip="${context.areaDivId}"><display/></field> with id build with portalPageId portalPortletId portletSeqId, it seem, it's no more necessary because always unique -->
+        <field name="editAreaDivId" tooltip="${context.editAreaDivId}"><display/></field>
+        <field name="subAreaDivId" tooltip="${context.subAreaDivId}"><display/></field>
+        <field name="titleLabel" tooltip="${context.titleLabel}"><display/></field>
+        <field name="useMenu"><display description="${uiLabelMap.Common${useMenu}}"/></field>
+        <field name="menuName" tooltip="${context.menuName}"><display/></field>
+        <field name="menuLocation" tooltip="${context.menuLocation}"><display/></field>
+        <field name="helpName" tooltip="${context.helpName}"><display/></field>
+        <field name="editFormName" tooltip="${context.editFormName}"><display/></field>
+        <field name="editFormLocation" tooltip="${context.editFormLocation}"><display/></field>
+        <field name="description" tooltip="${context.description}"><display/></field>
+        <field name="screenshot" tooltip="${context.screenshot}"><display/></field>
+        <field name="description" tooltip="${context.description}"><display/></field>
+        <field name="securityServiceName" tooltip="${context.securityServiceName}"><display/></field>
+        <field name="securityPermission" tooltip="${context.securityPermission}"><display/></field>
+        <field name="securityMainAction" tooltip="${context.securityMainAction}"><display/></field>
+<!--        <field name="back" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">-->
+<!--            <hyperlink target="ShowPortalPortlet" description="${uiLabelMap.CommonBack}"/>-->
+<!--        </field>-->
+        <sort-order>
+            <field-group title="${uiLabelMap.PortalPortletFieldFunctions}" collapsible="true">
+                <sort-field name="portalPortletId"/>
+                <sort-field name="portletLongId"/>
+                <sort-field name="portletTypeId"/>
+                <sort-field name="portletName"/>
+                <sort-field name="description"/>
+                <sort-field name="component"/>
+                <sort-field name="subComponent"/>
+                <sort-field name="webapp"/>
+                <sort-field name="uiLabelLocation"/>
+                <sort-field name="screenshot"/>
+            </field-group>
+            <field-group title="${uiLabelMap.PortalPortletFieldActionsBefore}" collapsible="true">
+                <sort-field name="useScript"/>
+                <sort-field name="scriptName"/>
+                <sort-field name="pkIdName"/>
+            </field-group>
+            <field-group title="${uiLabelMap.PortalPortletFieldContent}" collapsible="true">
+                <sort-field name="titleLabel"/>
+                <sort-field name="useScreen"/>
+                <sort-field name="screenName"/>
+                <sort-field name="screenLocation"/>
+                <sort-field name="formName"/>
+                <sort-field name="formLocation"/>
+                <sort-field name="useMenu"/>
+                <sort-field name="menuName"/>
+                <sort-field name="menuLocation"/>
+            </field-group>
+            <field-group title="${uiLabelMap.PortalPortletFieldAjaxEditArea}" collapsible="true">
+                <sort-field name="editAreaDivId"/>
+                <sort-field name="subAreaDivId"/>
+            </field-group>
+            <field-group title="${uiLabelMap.PortalPortletFieldAttributeMgmt}" collapsible="true">
+                <sort-field name="editFormName"/>
+                <sort-field name="editFormLocation"/>
+            </field-group>
+            <field-group title="${uiLabelMap.PortalPortletFieldHelp}" collapsible="true">
+                <sort-field name="helpName"/>
+            </field-group>
+            <field-group title="${uiLabelMap.PortalPortletFieldSecurity}" collapsible="true">
+                <sort-field name="securityServiceName"/>
+                <sort-field name="securityPermission"/>
+                <sort-field name="securityMainAction"/>
+            </field-group>
+        </sort-order>
+    </form>
+    <form name="SelectPortalPortlet" type="single" target="ShowPortalPortlet">
+        <field name="portalPageId"><text/></field>
+        <field name="portalPortletId" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text/></field>
+        <field name="portletSeqId"><text/></field>
+        <field name="submit" title="${uiLabelMap.CommonValidate}"><submit/></field>
+    </form>
+    <form name="listPortletAttribute" type="list" list-name="portletAttributeList">
+      <actions>
+        <entity-and entity-name="PortletAttribute" list="portletAttributeList">
+          <field-map field-name="portalPageId" from-field="parameters.portalPageId"/>
+          <field-map field-name="portalPortletId" from-field="parameters.portalPortletId"/>
+          <field-map field-name="portletSeqId" from-field="parameters.portletSeqId"/>
+          <order-by field-name="attrName"/>
+        </entity-and>
+      </actions>
+      <field name="attrName"><display/></field>
+      <field name="attrValue"><display/></field>
+      <field name="attrType"><display/></field>
+    </form>
+    <form name="listPortletAttributeNA" type="list" list-name="portletAttributeList">
+      <actions>
+        <entity-and entity-name="PortletAttribute" list="portletAttributeList">
+          <field-map field-name="portalPageId" value="_NA_"/>
+          <field-map field-name="portalPortletId" from-field="parameters.portalPortletId"/>
+          <field-map field-name="portletSeqId" value="00000"/>
+          <order-by field-name="attrName"/>
+        </entity-and>
+      </actions>
+      <field name="attrName"><display/></field>
+      <field name="attrValue"><display/></field>
+      <field name="attrType"><display/></field>
+    </form>
+    <!--#Eam# portletWidget -->
     <form name="FindPortalPages" type="single" target="FindPortalPage" default-entity-name="PortalPage">
         <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
         <field name="portalPageId" position="1" title="${uiLabelMap.CommonId}"><text-find/></field>

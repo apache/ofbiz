@@ -47,8 +47,19 @@ under the License.
     </#if>
 </#macro>
 <#macro renderHyperlinkField></#macro>
+<#macro makeShowPortletString linkStyle id event action target targetArea targetPortletId description parameterForm parameterList collapse>
+<div <#if id?has_content>id="${id}_div"</#if>><a href="javascript:ajaxUpdateArea('${targetArea}','${target}',<#if parameterForm?has_content> jQuery('#${parameterForm}').serialize()<#elseif parameterList?has_content>${parameterList}<#else>'portalPortletId=${targetPortletId}'</#if>); <#if collapse?has_content>toggleParentScreenlet('${collapse}');</#if>">${description}</a></div>
+</#macro>
+<#macro rerenderRefreshPortlet linkStyle event action areaId id formName imgSrc title alternate target appendFormParams description params collapse markSelected>
+<#if id?has_content><div id="${id}_div"></#if>
+<a <#if linkStyle?has_content>class="${linkStyle}"</#if> href='javascript:refrshPortlet("${target}", "${areaId}", "${params}", "${formName}", "${appendFormParams}", "${collapse}", <#if (collapse== "true"  || markSelected=="true" ) && id?has_content>"${id}_div"<#else>""</#if>,"${markSelected}" )' <#if action?has_content && event?has_content> ${event}="${action}"</#if><#if imgSrc?length == 0 && title?has_content> title="${title}"</#if>><#if imgSrc?has_content><img src="${imgSrc}" alt="${alternate}" title="${title}"/></#if>${description}</a><#if id?has_content></div></#if>
+</#macro>
 
+<#--#Bam# validate-form
 <#macro renderTextField name className alert value textSize maxlength id event action disabled clientAutocomplete ajaxUrl ajaxEnabled mask>
+-->
+<#macro renderTextField name className alert value textSize maxlength id event action disabled clientAutocomplete validateLinkOnEnter validateLinkId ajaxUrl ajaxEnabled mask>
+<#--#Eam# validate-form -->
     <#if mask?has_content>
       <script type="text/javascript">
         jQuery(function($){jQuery("#${id}").mask("${mask}");});
@@ -61,6 +72,7 @@ under the License.
     <#if maxlength?has_content> maxlength="${maxlength}"</#if><#rt/>
     <#if disabled?has_content && disabled> disabled="disabled"</#if><#rt/>
     <#if id?has_content> id="${id}"</#if><#rt/>
+    <#if validateLinkOnEnter?has_content && validateLinkOnEnter && validateLinkId?has_content>onkeydown="if ((window.event && window.event.keyCode == 13) || (event && event.keyCode == 13)) clickLink('${validateLinkId}_div')"</#if> <#--#Eam# validate-form -->
     <#if event?has_content && action?has_content> ${event}="${action}"</#if><#rt/>
     <#if clientAutocomplete?has_content && clientAutocomplete=="false"> autocomplete="off"</#if><#rt/>
     /><#t/>
@@ -277,13 +289,15 @@ ${item.description}</span>
 </#list>
 </#macro>
 
-<#macro renderSubmitField buttonType className alert formName title name event action imgSrc confirmation containerId ajaxUrl>
+<#-- <#macro renderSubmitField buttonType className alert formName title name event action imgSrc confirmation containerId ajaxUrl> -->
+<#macro renderSubmitField buttonType className alert formName title name event action imgSrc confirmation containerId ajaxUrl returnParams>
 <#if buttonType=="text-link">
  <a <@renderClass className alert /> href="javascript:document.${formName}.submit()" <#if confirmation?has_content>onclick="return confirm('${confirmation?js_string}');"</#if>><#if title?has_content>${title}</#if> </a>
 <#elseif buttonType=="image">
  <input type="image" src="${imgSrc}" <@renderClass className alert /><#if name?has_content> name="${name}"</#if><#if title?has_content> alt="${title}"</#if><#if event?has_content> ${event}="${action}"</#if> <#if confirmation?has_content>onclick="return confirm('${confirmation?js_string}');"</#if>/>
 <#else>
-<input type="<#if containerId?has_content>button<#else>submit</#if>" <@renderClass className alert /><#if name?exists> name="${name}"</#if><#if title?has_content> value="${title}"</#if><#if event?has_content> ${event}="${action}"</#if><#if containerId?has_content> onclick="<#if confirmation?has_content>if (confirm('${confirmation?js_string}')) </#if>ajaxSubmitFormUpdateAreas('${containerId}', '${ajaxUrl}')"<#else><#if confirmation?has_content> onclick="return confirm('${confirmation?js_string}');"</#if></#if>/></#if>
+<#--<input type="<#if containerId?has_content>button<#else>submit</#if>" <@renderClass className alert /><#if name?exists> name="${name}"</#if><#if title?has_content> value="${title}"</#if><#if event?has_content> ${event}="${action}"</#if><#if containerId?has_content> onclick="<#if confirmation?has_content>if (confirm('${confirmation?js_string}')) </#if>ajaxSubmitFormUpdateAreas('${containerId}', '${ajaxUrl}')"<#else><#if confirmation?has_content> onclick="return confirm('${confirmation?js_string}');"</#if></#if>/></#if>-->
+<input type="<#if containerId?has_content>button<#else>submit</#if>" <@renderClass className alert /><#if name?exists> name="${name}"</#if><#if title?has_content> value="${title}"</#if><#if event?has_content> ${event}="${action}"</#if><#if containerId?has_content> onclick="<#if confirmation?has_content>if (confirm('${confirmation?js_string}')) </#if><#if returnParams?has_content>ajaxSubmitFormUpdateAreasWithReturn('${containerId}', '${ajaxUrl}', ${returnParams})"<#else>ajaxSubmitFormUpdateAreas('${containerId}', '${ajaxUrl}')"</#if><#else><#if confirmation?has_content> onclick="return confirm('${confirmation?js_string}');"</#if></#if>/></#if>
 </#macro>
 
 <#macro renderResetField className alert name title>
@@ -377,7 +391,7 @@ ${item.description}</span>
 </#macro>
 
 <#macro renderFormatItemRowOpen formName itemIndex altRowStyles evenRowStyle oddRowStyle>
-    <tr <#if itemIndex?has_content><#if itemIndex%2==0><#if evenRowStyle?has_content>class="${evenRowStyle}<#if altRowStyles?has_content> ${altRowStyles}</#if>"<#elseif altRowStyles?has_content>class="${altRowStyles}"</#if><#else><#if oddRowStyle?has_content>class="${oddRowStyle}<#if altRowStyles?has_content> ${altRowStyles}</#if>"<#elseif altRowStyles?has_content>class="${altRowStyles}"</#if></#if></#if> >
+    <tr <#if itemIndex?has_content>id="${formName}_row_${itemIndex}" </#if><#if itemIndex?has_content><#if itemIndex%2==0><#if evenRowStyle?has_content>class="${evenRowStyle}<#if altRowStyles?has_content> ${altRowStyles}</#if>"<#elseif altRowStyles?has_content>class="${altRowStyles}"</#if><#else><#if oddRowStyle?has_content>class="${oddRowStyle}<#if altRowStyles?has_content> ${altRowStyles}</#if>"<#elseif altRowStyles?has_content>class="${altRowStyles}"</#if></#if></#if> >
 </#macro>
 <#macro renderFormatItemRowClose formName>
     </tr>
@@ -440,7 +454,11 @@ ${item.description}</span>
 
 <#macro renderFormatEmptySpace>&nbsp;</#macro>
 
+<#--#Bam# validate-form
 <#macro renderTextFindField name value defaultOption opEquals opBeginsWith opContains opIsEmpty opNotEqual className alert size maxlength autocomplete titleStyle hideIgnoreCase ignCase ignoreCase>
+-->
+<#macro renderTextFindField name value defaultOption opEquals opBeginsWith opContains opIsEmpty opNotEqual className alert size maxlength autocomplete validateLinkOnEnter validateLinkId titleStyle hideIgnoreCase ignCase ignoreCase>
+<#--#Eam# validate-form -->
 <#if opEquals?has_content>
 <select <#if name?has_content>name="${name}_op"</#if>    class="selectBox"><#rt/>
 <option value="equals"<#if defaultOption=="equals"> selected="selected"</#if>>${opEquals}</option><#rt/>
@@ -452,7 +470,11 @@ ${item.description}</span>
 <#else>
 <input type="hidden" name=<#if name?has_content> "${name}_op"</#if>    value="${defaultOption}"/><#rt/>
 </#if>
+<#--#Bam# validate-form
  <input type="text" <@renderClass className alert /> name="${name}"<#if value?has_content> value="${value}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if><#if autocomplete?has_content> autocomplete="off"</#if>/><#rt/>
+-->
+ <input type="text" <@renderClass className alert /> <#if validateLinkOnEnter?has_content && validateLinkOnEnter && validateLinkId?has_content>onkeydown="if ((window.event && window.event.keyCode == 13) || (event && event.keyCode == 13)) clickLink('${validateLinkId}_div')"</#if> name="${name}"<#if value?has_content> value="${value}"</#if><#if size?has_content> size="${size}"</#if><#if maxlength?has_content> maxlength="${maxlength}"</#if><#if autocomplete?has_content> autocomplete="off"</#if>/><#rt/>
+<#--#Eam# validate-form -->
 <#if titleStyle?has_content><span class="${titleStyle}" ><#rt/></#if>
 <#if hideIgnoreCase>
  <input type="hidden" name="${name}_ic" value=<#if ignCase>"Y"<#else> ""</#if>/><#rt/>
@@ -770,4 +792,8 @@ Parameter: lastViewName, String, optional - If the ajaxEnabled parameter is true
 
 <#macro makeHiddenFormLinkForm actionUrl name parameters targetWindow><form method="post" action="${actionUrl}" <#if targetWindow?has_content>target="${targetWindow}"</#if> onsubmit="javascript:submitFormDisableSubmits(this)" name="${name}"><#list parameters as parameter><input name="${parameter.name}" value="${parameter.value}" type="hidden"/></#list></form></#macro>
 <#macro makeHiddenFormLinkAnchor linkStyle hiddenFormName event action imgSrc description confirmation><a <#if linkStyle?has_content>class="${linkStyle}"</#if> href="javascript:document.${hiddenFormName}.submit()"<#if action?has_content && event?has_content> ${event}="${action}"</#if><#if confirmation?has_content> onclick="return confirm('${confirmation?js_string}')"</#if>><#if imgSrc?has_content><img src="${imgSrc}" alt=""/></#if>${description}</a></#macro>
+<#--#Bam# validate-form
 <#macro makeHyperlinkString linkStyle hiddenFormName event action imgSrc title alternate linkUrl targetWindow description confirmation><a <#if linkStyle?has_content>class="${linkStyle}"</#if> href="${linkUrl}"<#if targetWindow?has_content> target="${targetWindow}"</#if><#if action?has_content && event?has_content> ${event}="${action}"</#if><#if confirmation?has_content> onclick="return confirm('${confirmation?js_string}')"</#if><#if imgSrc?length == 0 && title?has_content> title="${title}"</#if>><#if imgSrc?has_content><img src="${imgSrc}" alt="${alternate}" title="${title}"/></#if>${description}</a></#macro>
+-->
+<#macro makeHyperlinkString linkStyle hiddenFormName event action id imgSrc title alternate linkUrl targetWindow description confirmation><#if id?has_content><div id="${id}_div"></#if><a <#if linkStyle?has_content>class="${linkStyle}"</#if> href="${linkUrl}"<#if targetWindow?has_content> target="${targetWindow}"</#if><#if action?has_content && event?has_content> ${event}="${action}"</#if><#if confirmation?has_content> onclick="return confirm('${confirmation?js_string}')"</#if><#if imgSrc?length == 0 && title?has_content> title="${title}"</#if>><#if imgSrc?has_content><img src="${imgSrc}" alt="${alternate}" title="${title}"/></#if>${description}</a><#if id?has_content></div></#if></#macro>
+<#--#Eam# validate-form -->

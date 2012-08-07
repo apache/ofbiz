@@ -701,18 +701,51 @@ under the License.
     <!-- org.ofbiz.common.portal -->
     <!-- ============================ -->
 
-    <entity entity-name="PortalPortlet" package-name="org.ofbiz.common.portal" title="Defines a Portlet to be used in Portals">
+    <entity entity-name="PortalPortlet" package-name="org.ofbiz.common.portal" title="Defines a Portlet to be used in Portals" default-resource-name="CommonPortalEntityLabels">
+        <!--#Eam# PortletWidget : default-resource-name is used to contain description field, currentlty all FieldDescription are done.
+               If you want have information to each field go to portlet editPortlet and read hint about each field label -->
         <field name="portalPortletId" type="id-ne"></field>
+        <field name="portletLongId" type="id-long"></field>
         <field name="portletName" type="name"></field>
+        <field name="portletTypeId" type="id"></field>
+        <field name="component" type="id"></field>
+        <field name="subComponent" type="id"></field>
+        <field name="webapp" type="id"></field>
+        <field name="useScreen" type="indicator"></field>
         <field name="screenName" type="long-varchar"></field>
         <field name="screenLocation" type="long-varchar"></field>
+        <field name="useScript" type="indicator"></field>
+        <field name="scriptName" type="long-varchar"></field>
+        <field name="uiLabelLocation" type="long-varchar"></field>
+        <field name="formName" type="long-varchar"></field>
+        <field name="formLocation" type="long-varchar"></field>
+        <field name="pkIdName" type="short-varchar"></field>
+<!--        <field name="areaDivId" type="short-varchar"></field>  with id build with portalPageId portalPortletId portletSeqId, it seem, it's no more necessary because alway unique -->
+        <field name="editAreaDivId" type="short-varchar"></field>
+        <field name="subAreaDivId" type="short-varchar"></field>
+        <field name="titleLabel" type="short-varchar"></field>
+        <field name="useMenu" type="indicator"></field>
+        <field name="menuName" type="short-varchar"></field>
+        <field name="menuLocation" type="long-varchar"></field>
+        <field name="helpName" type="short-varchar"></field>
         <field name="editFormName" type="long-varchar"></field>
         <field name="editFormLocation" type="long-varchar"></field>
         <field name="description" type="description"></field>
         <field name="screenshot" type="url"></field>
         <field name="securityServiceName" type="long-varchar"><description>The service named here is used to see if current user can see the portlet on the list of available portlets; the screen that the portlet calls should also call this service to check permission and not render; the service named here must implement the "permissionInterface" service just like services used for service permissions</description></field>
+        <field name="securityPermission" type="short-varchar"></field>
         <field name="securityMainAction" type="short-varchar"><description>The main action which can be done with this portlet, possible values: CREATE UPDATE VIEW DELETE</description></field>
         <prim-key field="portalPortletId"/>
+        <relation rel-entity-name="PortletType" type="one" fk-name="PPORTLET_TYPE">
+          <key-map field-name="portletTypeId"/>
+        </relation>
+    </entity>
+    <entity entity-name="PortletType" package-name="org.ofbiz.common.portal" title="Portlet Type Entity">
+      <field name="portletTypeId" type="id-ne"/>
+      <field name="description" type="description"/>
+      <field name="screenName" type="long-varchar"></field>
+      <field name="screenLocation" type="long-varchar"></field>
+      <prim-key field="portletTypeId"/>
     </entity>
     <entity entity-name="PortletCategory" package-name="org.ofbiz.common.portal" title="Portlet Category Entity">
       <field name="portletCategoryId" type="id-ne"/>
@@ -776,6 +809,7 @@ under the License.
         <field name="columnSeqId" type="id-ne"></field>
         <field name="columnWidthPixels" type="numeric"></field>
         <field name="columnWidthPercentage" type="numeric"></field>
+        <field name="newLine" type="indicator"/>
         <prim-key field="portalPageId"/>
         <prim-key field="columnSeqId"/>
         <relation type="one" fk-name="PRTL_PGCOL_PAGE" rel-entity-name="PortalPage">
@@ -811,7 +845,8 @@ under the License.
             <key-map field-name="portalPortletId"/>
         </view-link>
     </view-entity>
-    <entity entity-name="PortletAttribute" package-name="org.ofbiz.common.portal" title="Allows to set different attribute values for each instance of the same portlet">
+    <entity entity-name="PortletAttribute" package-name="org.ofbiz.common.portal" title="Allows to set different attribute values for each instance of the same portlet"
+                                           default-resource-name="CommonPortalEntityLabels">
         <field name="portalPageId" type="id-ne"></field>
         <field name="portalPortletId" type="id-ne"></field>
         <field name="portletSeqId" type="id-ne"></field>

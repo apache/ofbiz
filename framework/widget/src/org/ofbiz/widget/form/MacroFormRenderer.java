@@ -38,7 +38,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import javolution.util.FastList;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilFormatOut;
@@ -54,6 +53,8 @@ import org.ofbiz.webapp.control.RequestHandler;
 import org.ofbiz.webapp.taglib.ContentUrlTag;
 import org.ofbiz.widget.ModelWidget;
 import org.ofbiz.widget.WidgetWorker;
+import org.ofbiz.widget.ModelWidget.ShowPortletItemData;
+import org.ofbiz.widget.ModelWidget.ShowPortletLinkData;
 import org.ofbiz.widget.form.ModelFormField.CheckField;
 import org.ofbiz.widget.form.ModelFormField.ContainerField;
 import org.ofbiz.widget.form.ModelFormField.DateFindField;
@@ -71,6 +72,8 @@ import org.ofbiz.widget.form.ModelFormField.PasswordField;
 import org.ofbiz.widget.form.ModelFormField.RadioField;
 import org.ofbiz.widget.form.ModelFormField.RangeFindField;
 import org.ofbiz.widget.form.ModelFormField.ResetField;
+import org.ofbiz.widget.form.ModelFormField.ShowPortletItem;
+import org.ofbiz.widget.form.ModelFormField.ShowPortletLink;
 import org.ofbiz.widget.form.ModelFormField.SubmitField;
 import org.ofbiz.widget.form.ModelFormField.TextField;
 import org.ofbiz.widget.form.ModelFormField.TextFindField;
@@ -331,6 +334,7 @@ public class MacroFormRenderer implements FormStringRenderer {
     public void renderTextField(Appendable writer, Map<String, Object> context, TextField textField) throws IOException {
         ModelFormField modelFormField = textField.getModelFormField();
         String name = modelFormField.getParameterName(context);
+        boolean validateLinkOnEnter = modelFormField.getModelForm().getValidateLinkOnEnter(); // #Eam# validate-form
         String className = "";
         String alert = "false";
         String mask = "";
@@ -402,6 +406,18 @@ public class MacroFormRenderer implements FormStringRenderer {
 
         sr.append(" clientAutocomplete=\"");
         sr.append(clientAutocomplete);
+        // #Bam# validate-form
+        if (validateLinkOnEnter) {
+            sr.append("\" validateLinkOnEnter=");
+            sr.append(Boolean.toString(validateLinkOnEnter));
+            sr.append(" validateLinkId=\"");
+            sr.append(modelFormField.getModelForm().getValidateLinkId());
+        } else{
+            sr.append("\" validateLinkOnEnter=");
+            sr.append(Boolean.toString(false));
+            sr.append(" validateLinkId=\"");
+        }
+        // #Eam# validate-form
         sr.append("\" ajaxUrl=\"");
         sr.append(ajaxUrl);
         sr.append("\" ajaxEnabled=");
@@ -1136,8 +1152,14 @@ public class MacroFormRenderer implements FormStringRenderer {
 
         boolean ajaxEnabled = (updateAreas != null || UtilValidate.isNotEmpty(backgroundSubmitRefreshTarget)) && this.javaScriptEnabled;
         String ajaxUrl = "";
+        String returnParams = ""; // #Eam# portletWidget
         if (ajaxEnabled) {
+            /* #Bam# portletWidget
             ajaxUrl = createAjaxParamsFromUpdateAreas(updateAreas, null, context);
+            */
+            returnParams = createReturnParamsFromUpdateAreas(updateAreas, context);
+            ajaxUrl = createAjaxParamsFromUpdateAreas(updateAreas, null, context, UtilValidate.isNotEmpty(returnParams));
+            // #Eam# portletWidget
         }
         StringWriter sr = new StringWriter();
         sr.append("<@renderSubmitField ");
@@ -1173,6 +1195,10 @@ public class MacroFormRenderer implements FormStringRenderer {
         if (ajaxEnabled) {
             sr.append(ajaxUrl);
         }
+        //#Bam# portletWidget
+        sr.append("\" returnParams =\"");
+        sr.append(returnParams);
+        //#Eam# portletWidget
         sr.append("\" />");
         executeMacro(writer, sr.toString());
         this.appendTooltip(writer, context, modelFormField);
@@ -1746,6 +1772,7 @@ public class MacroFormRenderer implements FormStringRenderer {
     public void renderTextFindField(Appendable writer, Map<String, Object> context, TextFindField textFindField) throws IOException {
         ModelFormField modelFormField = textFindField.getModelFormField();
 
+        boolean validateLinkOnEnter = modelFormField.getModelForm().getValidateLinkOnEnter(); // #Eam# validate-form
         String defaultOption = textFindField.getDefaultOption();
         String className = "";
         String alert = "false";
@@ -1821,6 +1848,19 @@ public class MacroFormRenderer implements FormStringRenderer {
         sr.append(maxlength);
         sr.append("\" autocomplete=\"");
         sr.append(autocomplete);
+         // #Bam# validate-form
+        if (validateLinkOnEnter) {
+            sr.append("\" validateLinkOnEnter=");
+            sr.append(Boolean.toString(validateLinkOnEnter));
+            sr.append(" validateLinkId=\"");
+            sr.append(modelFormField.getModelForm().getValidateLinkId());
+        }
+        else {
+            sr.append("\" validateLinkOnEnter=");
+            sr.append(Boolean.toString(false));
+            sr.append(" validateLinkId=\"");
+        }
+         // #Eam# validate-form
         sr.append("\" titleStyle=\"");
         sr.append(titleStyle);
         sr.append("\" hideIgnoreCase=");
@@ -2915,6 +2955,12 @@ public class MacroFormRenderer implements FormStringRenderer {
      * @return Parameter string or empty string if no UpdateArea objects were found
      */
     public String createAjaxParamsFromUpdateAreas(List<ModelForm.UpdateArea> updateAreas, String extraParams, Map<String, ? extends Object> context) {
+    // #Bam# portletWidget
+        return createAjaxParamsFromUpdateAreas(updateAreas, extraParams, context, false);
+    }
+
+    public String createAjaxParamsFromUpdateAreas(List<ModelForm.UpdateArea> updateAreas, String extraParams, Map<String, ? extends Object> context, boolean addReturnParams) {
+    // #Eam# portletWidget
         //FIXME copy from HtmlFormRenderer.java
         if (updateAreas == null) {
             return "";
@@ -2951,6 +2997,18 @@ public class MacroFormRenderer implements FormStringRenderer {
                     }
                 }
             }
+            // #Bam# portletWidget
+            StringBuilder params = new StringBuilder();
+            params.append(ajaxParams);
+            List<String> addingParams = UtilMisc.toList("portalPageId", "portalPortletId", "portletSeqId", "areaId", "idDescription");
+            for (String addingParam : addingParams) {
+                if (UtilValidate.isNotEmpty(extraParams) && extraParams.contains(addingParam + "=")) {
+                    continue;
+                }
+                WidgetWorker.addToParamsIfInContext(params, ctx, addingParam, parameters);
+            }
+            ajaxParams = params.toString();
+            // #Eam# portletWidget
             //then add parameters from request. Those parameters could end with an anchor so we must set ajax parameters first
             if (UtilValidate.isNotEmpty(extraParams)) {
                 if (ajaxParams.length() > 0 && !extraParams.startsWith("&")) {
@@ -2961,10 +3019,47 @@ public class MacroFormRenderer implements FormStringRenderer {
             ajaxUrl += updateArea.getAreaId() + ",";
             ajaxUrl += this.rh.makeLink(this.request, this.response, UtilHttp.removeQueryStringFromTarget(targetUrl));
             ajaxUrl += "," + ajaxParams;
+            // #Bam# portletWidget
+            if (addReturnParams) {
+                if(updateArea.hasRedirParamList()){
+                    ajaxUrl += ",true";
+                } else {
+                    ajaxUrl += ",false";
+                }
+                
+            } 
+            // #Eam# portletWidget
         }
         Locale locale = UtilMisc.ensureLocale(context.get("locale"));
         return FlexibleStringExpander.expandString(ajaxUrl, context, locale);
     }
+
+    // #Bam# portletWidget
+    public String createReturnParamsFromUpdateAreas(List<ModelForm.UpdateArea> updateAreas, Map<String, ? extends Object> context){
+        String returnParam = "";
+        boolean first = true;
+        for (ModelForm.UpdateArea updateArea : updateAreas) {
+            Map<String, Object> ctx = UtilGenerics.checkMap(context);
+            Map<String, String> redirectParameters = updateArea.getRedirParamList(ctx);
+            if(UtilValidate.isNotEmpty(redirectParameters)){
+                for (String key : redirectParameters.keySet()) {
+                    if(first){
+                        returnParam += "{'" + key + "' : '" + key + "'";
+                        first = false;
+                    }
+                    else{
+                        returnParam += ", '" + key + "' : '" + key + "'";
+                    }
+                }
+            }
+        }
+        if (UtilValidate.isNotEmpty(returnParam)) {
+            returnParam += "}";
+        }
+        return returnParam;
+    }
+    // #Eam# portletWidget
+
     /** Extracts parameters from a target URL string, prepares them for an Ajax
      * JavaScript call. This method is currently set to return a parameter string
      * suitable for the Prototype.js library.
@@ -3118,6 +3213,10 @@ public class MacroFormRenderer implements FormStringRenderer {
             sr.append(event);
             sr.append("\" action=\"");
             sr.append(action);
+            // #Bam# validate-form
+            sr.append("\" id=\"");
+            sr.append(modelFormField.getIdName());
+            // #Eam# validate-form
             sr.append("\" imgSrc=\"");
             sr.append(imgSrc);
             sr.append("\" title=\"");
@@ -3136,6 +3235,221 @@ public class MacroFormRenderer implements FormStringRenderer {
             executeMacro(writer, sr.toString());
         }
     }
+
+    //#Bam# portletWidget
+    // same as HtmlFormRenderer except when populate StringWriter sr
+    public void renderShowPortletLink(Appendable writer, Map<String, Object> context, ShowPortletLink showPortletLink) throws IOException {
+        ModelFormField modelFormField = showPortletLink.getModelFormField();
+        String linkStyle = "";
+        //prepare show link properties 
+        String id = "";
+        
+        if (UtilValidate.isNotEmpty(modelFormField.getIdName())) {
+            id = modelFormField.getIdName();
+        }
+        if (UtilValidate.isNotEmpty(context.get("itemIndex"))) {
+            id = id + "_" + context.get("itemIndex");
+        }
+        String markSelected = showPortletLink.getMarkSelected(context);
+        String event = "";
+        if (UtilValidate.isNotEmpty(modelFormField.getEvent())) {
+            event = modelFormField.getEvent();
+        }
+        String action = "";
+        if (UtilValidate.isNotEmpty(modelFormField.getAction(context))) {
+            action = modelFormField.getAction(context);
+        }
+        String collapseScreenlet = showPortletLink.getCollapseScreenlet(context);
+        
+        String formName = modelFormField.getModelForm().getName();
+        List<String> areasList = FastList.newInstance();
+        List<String> targetList = FastList.newInstance();
+        List<String> paramsList = FastList.newInstance();
+        List<String> formList = FastList.newInstance();
+        List<String> collapseLis = FastList.newInstance();
+        
+        ShowPortletLinkData splData = WidgetWorker.prepareShowPortletLinkData(showPortletLink, context);
+        
+        for(ShowPortletItem showPortletItem : showPortletLink.getShowPortletItems()){
+            
+            ShowPortletItemData spiData = WidgetWorker.prepareShowPortletItemsData(showPortletItem, context);
+            
+            if (UtilValidate.isEmpty(spiData.areaId) && 
+                 (UtilValidate.isEmpty(spiData.portalPageId) || UtilValidate.isEmpty(spiData.portletId) || UtilValidate.isEmpty(spiData.portletSeqId))) {
+                    Debug.logWarning("The form [" + modelFormField.getModelForm().getFormLocation() + "#" + modelFormField.getModelForm().getName() +"] has a show-portlet field that should define a target-area  or must have target-page-id, target-portlet-id and target-seq_id attributes", module);
+            }
+            
+            if (UtilValidate.isNotEmpty(modelFormField.getWidgetStyle())) {
+                linkStyle = modelFormField.getWidgetStyle();
+            }
+            collapseScreenlet = showPortletItem.getCollapseScreenlet(context);
+            
+            //check whether the current form field values should be appended to request parameters or not
+            List<String> appendFormParams = showPortletItem.getFormsToSerialize();
+            areasList.add(spiData.areaId);
+            targetList.add(spiData.target);
+            paramsList.add(spiData.params.toString());
+            String formParamsString = "";
+            if(UtilValidate.isNotEmpty(appendFormParams) && appendFormParams.size() > 0){
+                formParamsString = appendFormParams.toString();
+                if (formParamsString.startsWith("{"))
+                    formParamsString = formParamsString.replace("{", "");
+                if (formParamsString.endsWith("}"))
+                    formParamsString = formParamsString.replace("}", "");
+                formParamsString = formParamsString.replace(", ", ",");
+            }
+            formList.add(formParamsString);
+            collapseLis.add(collapseScreenlet);
+            if(showPortletItem.getRequireConfirmation()) {
+                event = "onclick";
+                action = "return confirm('" + showPortletItem.getConfirmationMessage(context) +"')";
+            }
+        }
+        if (areasList.size() != targetList.size() 
+                || areasList.size() != paramsList.size()) {
+            Debug.logWarning("The form Field [" + modelFormField.getModelForm().getFormLocation() + "#" + modelFormField.getModelForm().getName() +"] has define a target and arameters list for each area it is going to refresh", module);
+        }
+        StringWriter sr = new StringWriter();
+        sr.append("<@rerenderRefreshPortlet ");
+        sr.append("linkStyle=\"");
+        sr.append(linkStyle);
+        sr.append("\" event=\"");
+        sr.append(event);
+        sr.append("\" action=\"");
+        sr.append(action);
+        sr.append("\" areaId=\"");
+        sr.append(showPortletLink.listToString(areasList));
+        sr.append("\" id=\"");
+        sr.append(id);
+        sr.append("\" formName=\"");
+        sr.append(formName);
+        sr.append("\" imgSrc=\"");
+        sr.append(splData.imgSrc);
+        sr.append("\" title=\"");
+        sr.append(splData.imgTitle);
+        
+        sr.append("\" alternate=\"");
+        sr.append(splData.alt);
+        sr.append("\" target=\"");
+        sr.append(showPortletLink.listToString(targetList));
+        sr.append("\" appendFormParams=\"");
+        sr.append(showPortletLink.listToString(formList));
+        sr.append("\" description=\"");
+        sr.append(splData.description);
+        sr.append("\" params=\"");
+        sr.append(showPortletLink.listToString(paramsList));
+        sr.append("\" collapse=\"");
+        sr.append(Boolean.valueOf(collapseScreenlet).toString());
+        sr.append("\" markSelected=\"");
+        sr.append(Boolean.valueOf(markSelected).toString());
+        sr.append("\" />");
+        executeMacro(writer, sr.toString());
+        this.appendTooltip(writer, context, modelFormField);
+    }
+    //#Eam# portletWidget
+    // #Bam# portletWidget
+    public void makeShowPortletString(Appendable writer, String linkStyle, String targetArea, String target, String targetPortletId, Map<String, String> parameterMap,
+            String description, String collapse, ModelFormField modelFormField, HttpServletRequest request, HttpServletResponse response, Map<String, Object> context)
+            throws IOException {
+        
+        StringBuilder linkUrl = new StringBuilder();
+        
+        String event = "";
+        String action = "";
+        String parameterKey = "";
+        String parameterValue = "";
+        String parameterList = "";
+        String parameterForm = "";
+        String collapseScreenlet = "";
+        //String collapseScreenlet = collapse?"true":"";
+        
+        if (UtilValidate.isNotEmpty(modelFormField.getEvent()) && UtilValidate.isNotEmpty(modelFormField.getAction(context))) {
+            event = modelFormField.getEvent();
+            action = modelFormField.getAction(context);
+        }
+        
+        Integer size = Integer.valueOf("0");
+        
+        if( UtilValidate.isNotEmpty(description) && size > 0 && description.length() > size) {
+            description = description.substring(0, size - 8) + "..." + description.substring(description.length() - 5);
+        }
+        
+        if (UtilValidate.isNotEmpty(collapse)) {
+            collapseScreenlet = collapse;
+        }
+    
+        /* manage parameters-form and parameter */
+        
+        Appendable localWriter = new StringWriter();
+        boolean first = true;
+        if (UtilValidate.isNotEmpty(parameterMap)) {
+            //parameterForm = modelFormField.getModelForm().getName();
+            for (Map.Entry<String, String> parameter: parameterMap.entrySet()) {
+                if (parameter.getValue() instanceof String) {
+                    parameterKey = parameter.getKey();
+                    parameterValue = parameter.getValue();
+                    if(first){
+                        // targetPortletId is required for show-portlet
+                        parameterList += "{'portalPortletId':'" + targetPortletId + "', '" + parameterKey + "':'" + parameterValue + "'";
+                        first = false;
+                    }
+                    else{
+                        parameterList += ", '" + parameterKey + "':'" + parameterValue + "'";
+                    }
+                } else {
+                    Object parameterObject = parameter.getValue();
+                    
+                    // skip null values
+                    if (parameterObject == null){ 
+                        parameterForm = modelFormField.getModelForm().getName();
+                    }
+                    else if (parameterObject instanceof String[]) {
+                        // it's probably a String[], just get the first value
+                        String[] parameterArray = (String[]) parameterObject;
+                        parameterValue = parameterArray[0];
+                        Debug.logInfo("Found String array value for parameter [" + parameter.getKey() + "], using first value: " + parameterValue, module);
+                    } else {
+                        // not a String, and not a String[], just use toString
+                        parameterValue = parameterObject.toString();
+                    }
+                }
+            }
+            if(!first){ // this means that we reached the end and the list wasn't void since we read a first element
+                parameterList += "}";
+            }
+        } else {
+            linkUrl.append(localWriter.toString());
+        }
+        
+        StringWriter sr = new StringWriter();
+        sr.append("<@makeShowPortletString ");
+        sr.append("linkStyle=\"");
+        sr.append(linkStyle==null?"":linkStyle);
+        sr.append("\" id=\"");
+        sr.append(modelFormField.getIdName());
+        sr.append("\" event=\"");
+        sr.append(event);
+        sr.append("\" action=\"");
+        sr.append(action);
+        sr.append("\" target=\"");
+        sr.append(target);
+        sr.append("\" targetArea=\"");
+        sr.append(targetArea);
+        sr.append("\" targetPortletId=\"");
+        sr.append(targetPortletId);
+        sr.append("\" description=\"");
+        sr.append(description);
+        sr.append("\" parameterForm=\"");
+        sr.append(parameterForm);
+        sr.append("\" parameterList=\"");
+        sr.append(parameterList);
+        sr.append("\" collapse=\"");
+        sr.append(collapseScreenlet);
+        
+        sr.append("\" />");
+        executeMacro(writer, sr.toString());
+    }
+    // #Eam# portletWidget
 
     public void makeHiddenFormLinkAnchor(Appendable writer, String linkStyle, String description, String confirmation , ModelFormField modelFormField, HttpServletRequest request, HttpServletResponse response, Map<String, Object> context) throws IOException {
         if (UtilValidate.isNotEmpty(description) || UtilValidate.isNotEmpty(request.getAttribute("image"))) {
