@@ -29,6 +29,7 @@ under the License.
     <load-component component-location="minilang"/>
     <load-component component-location="common"/>
     <load-component component-location="service"/>
+    <load-component component-location="jcr"/>
     <!-- <load-component component-location="jetty"/> -->
     <load-component component-location="catalina"/>
     <load-component component-location="entityext"/>
@@ -39,5 +40,4 @@ under the License.
     <load-component component-location="testtools"/>
     <load-component component-location="webtools"/>
     <load-component component-location="images"/>
-    <load-component component-location="jcr"/>
 </component-loader>

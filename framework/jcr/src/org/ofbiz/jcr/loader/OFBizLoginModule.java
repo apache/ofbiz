@@ -38,7 +38,7 @@ import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.service.GenericDispatcher;
+import org.ofbiz.service.GenericDispatcherFactory;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
@@ -76,7 +76,8 @@ public class OFBizLoginModule implements LoginModule {
         delegator = DelegatorFactory.getDelegator("default");
 
         // get the dispatcher
-        dispatcher = GenericDispatcher.getLocalDispatcher("auth-dispatcher", delegator);
+        GenericDispatcherFactory factory = new GenericDispatcherFactory();
+        dispatcher = factory.createLocalDispatcher("auth-dispatcher", delegator);
 
         this.subject = subject;
         this.callbackHandler = callbackHandler;

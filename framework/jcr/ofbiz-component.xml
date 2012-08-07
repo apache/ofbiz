@@ -18,17 +18,30 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<ofbiz-component name="jcr"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/ofbiz-component.xsd">
-    <resource-loader name="main" type="component"/>
-    <classpath type="dir" location="config"/>
-    <classpath type="jar" location="build/lib/*"/>
-    <classpath type="jar" location="lib/*"/>
+<ofbiz-component name="jcr" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/ofbiz-component.xsd">
+	<resource-loader name="main" type="component" />
+	<classpath type="dir" location="config" />
+	<classpath type="jar" location="build/lib/*" />
+	<classpath type="jar" location="lib/*" />
 
-    <entity-resource type="model" reader-name="main" loader="main" location="entitydef/entitymodel.xml"/>
+	<entity-resource type="model" reader-name="main" loader="main" location="entitydef/entitymodel.xml" />
 
-    <service-resource type="model" loader="main" location="servicedef/services.xml"/>
-    <test-suite loader="main" location="testdef/jcrtests.xml" />
+	<service-resource type="model" loader="main" location="servicedef/services.xml" />
+	<test-suite loader="main" location="testdef/jcrtests.xml" />
+
+	<!-- Load embedded Jackrabbit content repository. Since this container depends upon JNDI, it must be started after the naming-container
+		container. -->
+    <container name="jcr-container" class="org.ofbiz.jcr.loader.JCRContainer" loaders="test">
+        <property name="configFilePath" value="framework/jcr/config/jcr-test-config.xml"/>
+        <property name="removeRepositoryOnShutdown" value="true"/>
+    </container>
+
+	<container name="jcr-container" class="org.ofbiz.jcr.loader.JCRContainer" loaders="main" >
+		<property name="configFilePath" value="framework/jcr/config/jcr-config.xml" />
+		<property name="removeOnShutdown" value="false" />
+	</container>
+
+
 </ofbiz-component>
 

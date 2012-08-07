@@ -59,11 +59,7 @@ public class JCRContainer implements Container {
         initializeJcrFactory(configRootElement, factoryImplDefinition);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.ofbiz.base.container.Container#start()
-     */
+    @Override
     public boolean start() throws ContainerException {
         JCRFactory jcrFactory = getJCRFactory();
 
@@ -76,11 +72,7 @@ public class JCRContainer implements Container {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.ofbiz.base.container.Container#stop()
-     */
+    @Override
     public void stop() throws ContainerException {
         JCRFactory jcrFactory = getJCRFactory();
 
@@ -111,7 +103,7 @@ public class JCRContainer implements Container {
     private Element getConfigFileRootElement() throws ContainerException {
         Element configRootElement = null;
         try {
-            configRootElement = ResourceLoader.getXmlRootElement(configFilePath);
+        	configRootElement = ResourceLoader.getXmlRootElement(configFilePath);
         } catch (GenericConfigException e) {
             throw new ContainerException("Could not load the jcr configuration in file " + configFilePath, e);
         }
