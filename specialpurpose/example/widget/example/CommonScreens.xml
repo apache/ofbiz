@@ -70,7 +70,7 @@ under the License.
                             <condition>
                                 <and>
                                     <if-has-permission permission="EXAMPLE" action="_VIEW"/>
-                                    <not><if-empty field="example"/></not>
+                                    <not><if-empty field="example"/></not><!-- This is a check useful when only seed data are loaded -->
                                 </and>
                             </condition>
                             <widgets>
@@ -87,7 +87,7 @@ under the License.
                             <widgets>
                                 <section>
                                     <condition>
-                                        <not><if-empty field="example"/></not>
+                                        <not><if-empty field="example"/></not><!-- This is a check useful when only seed data are loaded -->
                                     </condition>
                                     <widgets>
                                         <container style="h1"><label>${uiLabelMap[titleProperty]} ${uiLabelMap.CommonFor} ${example.exampleName} [${exampleId}]</label></container>
@@ -139,7 +139,7 @@ under the License.
                             <condition>
                                 <and>
                                     <if-has-permission permission="EXAMPLE" action="_VIEW"/>
-                                    <not><if-empty field="exampleFeature"/></not>
+                                    <not><if-empty field="exampleFeature"/></not><!-- This is a check useful when only seed data are loaded -->
                                 </and>
                             </condition>
                             <widgets>
@@ -156,7 +156,7 @@ under the License.
                             <widgets>
                                 <section>
                                     <condition>
-                                        <not><if-empty field="exampleFeature"/></not>
+                                        <not><if-empty field="exampleFeature"/></not><!-- This is a check useful when only seed data are loaded -->
                                     </condition>
                                     <widgets>
                                         <container style="h1">
@@ -226,44 +226,6 @@ under the License.
                     <decorator-section name="body">
                         <container style="clear" />
                         <include-screen name="geoChart" location="component://common/widget/CommonScreens.xml"/>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-
-    <screen name="CommonBirtDecorator">
-        <section>
-            <actions>
-                <set field="headerItem" value="Birt"/>
-            </actions>
-            <widgets>
-                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="pre-body">
-                        <section>
-                            <!-- do check for WEBTOOLS, _VIEW permission -->
-                            <condition>
-                                <if-has-permission permission="ENTITY_MAINT"/>
-                            </condition>
-                            <widgets>
-                                <include-menu name="BirtTabBar" location="component://example/widget/example/ExampleMenus.xml"/>
-                            </widgets>
-                        </section>
-                    </decorator-section>
-                    <decorator-section name="body">
-                        <container style="clear" />
-                        <section>
-                            <!-- do check for WEBTOOLS, _VIEW permission -->
-                            <condition>
-                                <if-has-permission permission="ENTITY_MAINT"/>
-                            </condition>
-                            <widgets>
-                                <decorator-section-include name="body"/>
-                            </widgets>
-                            <fail-widgets>
-                                <label style="h3">${uiLabelMap.WebtoolsPermissionError}</label>
-                            </fail-widgets>
-                        </section>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

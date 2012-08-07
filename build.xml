@@ -27,7 +27,7 @@ under the License.
     <property name="memory.initial.param" value="-Xms128M"/>
     <property name="memory.max.param" value="-Xmx512M"/>
     <property name="pos.memory.max.param" value="-Xmx512M"/>
-    <property name="memory.maxpermsize.param" value="-XX:MaxPermSize=512m"/>
+    <property name="memory.maxpermsize.param" value="-XX:MaxPermSize=512M"/>
 
     <available file="applications/build.xml" property="applications.present"/>
     <available file="specialpurpose/build.xml" property="specialpurpose.present"/>
@@ -188,7 +188,7 @@ under the License.
         <xmlproperty file="runtime/svninfo_tmp.xml"/>
         <echo message="Rev:${info.entry.commit(revision)}"/>
         <basename property="releasePath" file="${info.entry.url}"/>
-        <echo message=" - Release-revision : ${releasePath}-${info.entry.commit(revision)}" file="runtime/svninfo.ftl"/>
+        <echo message=" - Release-revision : ${releasePath}-r${info.entry.commit(revision)}" file="runtime/svninfo.ftl"/>
         <delete file="runtime/svninfo_tmp.xml"/>
         <echo message="Done!"/>
     </target>
@@ -278,7 +278,6 @@ under the License.
           <fileset dir="${ofbiz.home.dir}/framework/base/lib/commons" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/framework/base/lib/j2eespecs" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/framework/base/lib/scripting" includes="*.jar"/>
-          <fileset dir="${ofbiz.home.dir}/framework/birt/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/framework/catalina/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/framework/entity/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/framework/geronimo/lib" includes="*.jar"/>
@@ -287,6 +286,7 @@ under the License.
           <fileset dir="${ofbiz.home.dir}/framework/testtools/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/framework/webapp/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/framework/webapp/build/lib" includes="*.jar"/>
+          <fileset dir="${ofbiz.home.dir}/specialpurpose/birt/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/specialpurpose/ebaystore/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/specialpurpose/googlecheckout/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/specialpurpose/ldap/lib" includes="*.jar"/>
@@ -376,7 +376,7 @@ under the License.
             description="Start OFBiz">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
-            <jvmarg value="${pos.memory.max.param}"/>
+            <jvmarg value="${memory.max.param}"/>
             <jvmarg value="${memory.maxpermsize.param}"/>
         </java>
     </target>
@@ -384,7 +384,7 @@ under the License.
             description="Start OFBiz as a separate process">
         <java jar="ofbiz.jar" fork="true" spawn="true">
             <jvmarg value="${memory.initial.param}"/>
-            <jvmarg value="${pos.memory.max.param}"/>
+            <jvmarg value="${memory.max.param}"/>
             <jvmarg value="${memory.maxpermsize.param}"/>
         </java>
     </target>
@@ -856,7 +856,7 @@ under the License.
         <delete file="runtime/tmp/tmpUserLogin.xml"/>
     </target>
     <target name="create-admin-user-login"
-            description="Prompt for a user name, then create a user login with admin privileges and a temporary password equal to 'ofbiz'. After a successful login the user will be prompted for a new password.">
+            description="Prompt for a user name, then create a user login with admin privileges and a temporary password equal to 'ofbiz'. After a successful login the user will be prompted for a new password. Note: this uses load-admin-user-login target">
         <input addproperty="userLoginId" message="Enter user name (log in with the temporary password 'ofbiz'):"/>
         <antcall target="load-admin-user-login"/>
     </target>
@@ -1049,7 +1049,7 @@ under the License.
         </exec>
         <xmlproperty file="runtime/svninfo_tmp.xml"/>
 
-        <property name="sonar.sources" value="framework/appserver/src, framework/base/src, framework/bi/src, framework/birt/src,
+        <property name="sonar.sources" value="framework/appserver/src, framework/base/src, framework/bi/src,
             framework/catalina/src, framework/common/src, framework/datafile/src, framework/entity/src, framework/entityext/src,
             framework/example/src, framework/geronimo/src, framework/jetty/src,
             framework/minilang/src, framework/security/src, framework/service/src, framework/sql/src, framework/start/src,
@@ -1059,7 +1059,7 @@ under the License.
             applications/product/src, applications/securityext/src, applications/workeffort/src, specialpurpose/assetmaint/src,
             specialpurpose/ebay/src, specialpurpose/ebaystore/src, specialpurpose/ecommerce/src, specialpurpose/googlebase/src,
             specialpurpose/googlecheckout/src, specialpurpose/hhfacility/src, specialpurpose/oagis/src, specialpurpose/pos/src,
-            specialpurpose/scrum/src" />
+            specialpurpose/scrum/src, specialpurpose/birt/src" />
         <property name="sonar.tests" value="framework/base/src/org/ofbiz/base/test, framework/entity/src/org/ofbiz/entity/test,
             framework/service/src/org/ofbiz/service/test, framework/sql/src/org/ofbiz/sql/test,
             applications/accounting/src/org/ofbiz/accounting/test, applications/content/src/org/ofbiz/content/test,

@@ -2717,7 +2717,7 @@ under the License.
       <field name="inventoryMessage" type="description"></field>
       <field name="requireInventory" type="indicator"></field>
       <field name="quantityUomId" type="id"></field>
-      <field name="quantityIncluded" type="fixed-point"></field>
+      <field name="quantityIncluded" type="fixed-point"><description>If you have a six-pack of 12oz soda cans you would have quantityIncluded=12, quantityUomId=oz, piecesIncluded=6.</description></field> 
       <field name="piecesIncluded" type="numeric"></field>
       <field name="requireAmount" type="indicator"></field>
       <field name="fixedAmount" type="currency-amount"><description>Use this for products which are sold in fixed denominations, such as gift certificates or calling cards.</description></field>
@@ -4812,12 +4812,16 @@ under the License.
       <field name="productId" type="id-ne"></field>
       <field name="fromDate" type="date-time"></field>
       <field name="thruDate" type="date-time"></field>
+      <field name="statusId" type="id-ne"></field>
       <field name="reqOrderQty" type="fixed-point"></field>
       <field name="soldOrderQty" type="fixed-point"></field>
       <field name="jobId" type="id-ne"></field>
       <prim-key field="groupOrderId"/>
       <relation type="one" fk-name="PROD_GROUP_ORDER" rel-entity-name="Product">
         <key-map field-name="productId"/>
+      </relation>
+      <relation type="one" fk-name="GROUP_ORDER_STATUS" rel-entity-name="StatusItem">
+        <key-map field-name="statusId"/>
       </relation>
       <relation type="one" fk-name="GROUP_ORDER_JOB" rel-entity-name="JobSandbox">
         <key-map field-name="jobId"/>

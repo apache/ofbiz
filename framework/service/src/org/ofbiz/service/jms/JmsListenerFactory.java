@@ -28,8 +28,8 @@ import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.service.GenericServiceException;
-import org.ofbiz.service.ServiceDispatcher;
 import org.ofbiz.service.config.ServiceConfigUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -49,18 +49,18 @@ public class JmsListenerFactory implements Runnable {
 
     protected static JmsListenerFactory jlf = null;
 
-    protected ServiceDispatcher dispatcher;
+    protected Delegator delegator;
     protected boolean firstPass = true;
     protected int  loadable = 0;
     protected int connected = 0;
     protected Thread thread;
 
 
-    public static JmsListenerFactory getInstance(ServiceDispatcher dispatcher){
+    public static JmsListenerFactory getInstance(Delegator delegator){
         if (jlf == null) {
             synchronized (JmsListenerFactory.class) {
                 if (jlf == null) {
-                    jlf = new JmsListenerFactory(dispatcher);
+                    jlf = new JmsListenerFactory(delegator);
                 }
             }
         }
@@ -68,8 +68,8 @@ public class JmsListenerFactory implements Runnable {
         return jlf;
     }
 
-    public JmsListenerFactory(ServiceDispatcher dispatcher) {
-        this.dispatcher = dispatcher;
+    public JmsListenerFactory(Delegator delegator) {
+        this.delegator = delegator;
         thread = new Thread(this, this.toString());
         thread.setDaemon(false);
         thread.start();
@@ -80,6 +80,10 @@ public class JmsListenerFactory implements Runnable {
         while (firstPass || connected < loadable) {
             if (Debug.verboseOn()) Debug.logVerbose("First Pass: " + firstPass + " Connected: " + connected + " Available: " + loadable, module);
             this.loadListeners();
+            if (loadable == 0) {
+                // if there is nothing to do then we can break without sleeping
+                break;
+            }
             firstPass = false;
             try {
                 Thread.sleep(20000);
@@ -95,7 +99,7 @@ public class JmsListenerFactory implements Runnable {
             Element rootElement = ServiceConfigUtil.getXmlRootElement();
             NodeList nodeList = rootElement.getElementsByTagName("jms-service");
 
-            if (Debug.verboseOn()) Debug.logVerbose("[ServiceDispatcher] : Loading JMS Listeners.", module);
+            if (Debug.verboseOn()) Debug.logVerbose("Loading JMS Listeners.", module);
             for (int i = 0; i < nodeList.getLength(); i++) {
                 Element element = (Element) nodeList.item(i);
                 StringBuilder serverKey = new StringBuilder();
@@ -158,9 +162,9 @@ public class JmsListenerFactory implements Runnable {
 
                     try {
                         Class<?> c = cl.loadClass(className);
-                        Constructor<GenericMessageListener> cn = UtilGenerics.cast(c.getConstructor(ServiceDispatcher.class, String.class, String.class, String.class, String.class, String.class));
+                        Constructor<GenericMessageListener> cn = UtilGenerics.cast(c.getConstructor(Delegator.class, String.class, String.class, String.class, String.class, String.class));
 
-                        listener = cn.newInstance(dispatcher, serverName, jndiName, queueName, userName, password);
+                        listener = cn.newInstance(delegator, serverName, jndiName, queueName, userName, password);
                     } catch (Exception e) {
                         throw new GenericServiceException(e.getMessage(), e);
                     }

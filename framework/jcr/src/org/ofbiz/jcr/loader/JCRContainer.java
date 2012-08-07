@@ -36,10 +36,10 @@ public class JCRContainer implements Container {
 
     public static final String DEFAULT_JCR_CONFIG_PATH = "framework/jcr/config/jcr-config.xml";
 
-    private static final String module = JCRContainer.class.getName();
-
     private static String configFilePath = null;
     private boolean removeRepositoryOnShutdown = false;
+
+	private String name;
 
     /*
      * (non-Javadoc)
@@ -48,8 +48,10 @@ public class JCRContainer implements Container {
      * java.lang.String)
      */
     @Override
-    public void init(String[] args, String configFile) throws ContainerException {
-        readContainerConfig(configFile);
+    public void init(String[] args, String name, String configFile) throws ContainerException {
+        this.name = name;
+
+    	readContainerConfig(configFile);
 
         Element configRootElement = getConfigFileRootElement();
 
@@ -62,7 +64,6 @@ public class JCRContainer implements Container {
      *
      * @see org.ofbiz.base.container.Container#start()
      */
-    @Override
     public boolean start() throws ContainerException {
         JCRFactory jcrFactory = getJCRFactory();
 
@@ -80,7 +81,6 @@ public class JCRContainer implements Container {
      *
      * @see org.ofbiz.base.container.Container#stop()
      */
-    @Override
     public void stop() throws ContainerException {
         JCRFactory jcrFactory = getJCRFactory();
 
@@ -154,4 +154,9 @@ public class JCRContainer implements Container {
         }
         return jcrFactory;
     }
+
+	@Override
+	public String getName() {
+		return this.name;
+	}
 }

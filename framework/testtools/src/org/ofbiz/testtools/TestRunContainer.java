@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.lang.String;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -56,14 +57,14 @@ public class TestRunContainer implements Container {
     protected String testCase = null;
     protected String logLevel = null;
 
-    /**
-     * @see org.ofbiz.base.container.Container#init(java.lang.String[], java.lang.String)
-     */
-    public void init(String[] args, String configFile) {
+    private String name;
+
+    @Override
+    public void init(String[] args, String name, String configFile) {
+        this.name = name;
         this.configFile = configFile;
         if (args != null) {
-            for (int i = 0; i < args.length; i++) {
-                String argument = args[i];
+            for (String argument : args) {
                 // arguments can prefix w/ a '-'. Just strip them off
                 if (argument.startsWith("-")) {
                     int subIdx = 1;
@@ -196,6 +197,10 @@ public class TestRunContainer implements Container {
     }
 
     public void stop() throws ContainerException {
+    }
+
+    public String getName() {
+        return name;
     }
 
     class JunitXmlListener extends XMLJUnitResultFormatter {

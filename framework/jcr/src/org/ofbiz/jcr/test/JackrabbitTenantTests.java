@@ -24,14 +24,14 @@ public class JackrabbitTenantTests extends OFBizTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        userLogin = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "admin"));
+        userLogin = delegator.findOne("UserLogin", true, UtilMisc.toMap("userLoginId", "admin"));
 
         // tenant delegator
         String delegatorName = delegator.getDelegatorBaseName() + "#DEMO1";
         tenantDelegator = DelegatorFactory.getDelegator(delegatorName);
         assertNotNull(tenantDelegator);
 
-        tenantUserLogin = tenantDelegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "admin"));
+        tenantUserLogin = tenantDelegator.findOne("UserLogin", true, UtilMisc.toMap("userLoginId", "admin"));
         assertNotNull(tenantUserLogin);
 
     }

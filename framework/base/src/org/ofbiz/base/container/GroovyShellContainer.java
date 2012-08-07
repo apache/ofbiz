@@ -28,14 +28,13 @@ public class GroovyShellContainer implements Container {
 
     private static final Logger log = Logger.getLogger(GroovyShellContainer.class);
 
+    private String name;
     private String configFileLocation = null;
     private GroovyService gsh = null;
 
-    /**
-     * @see org.ofbiz.base.container.Container#init(java.lang.String[], java.lang.String)
-     */
     @Override
-    public void init(String[] args, String configFile) {
+    public void init(String[] args, String name, String configFile) {
+        this.name = name;
         configFileLocation = configFile;
     }
 
@@ -62,8 +61,12 @@ public class GroovyShellContainer implements Container {
         gsh = null;
     }
 
+    public String getName() {
+        return name;
+    }
+
     private int getTelnetPort() throws ContainerException {
-        ContainerConfig.Container config = ContainerConfig.getContainer("groovyshell-container", configFileLocation);
+        ContainerConfig.Container config = ContainerConfig.getContainer(name, configFileLocation);
         Property telnetPort = config.getProperty("telnet-port");
         try {
             return Integer.parseInt(telnetPort.value);
