@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
+    <!-- The controller elements that are common to all OFBiz components
+         can be found in the following xml file. A component can override the
+         elements found in the common-controller.xml file. -->
+
+    <description>Example portlets common Component Site Configuration File</description>
+
+    <!-- Request Mappings -->
+
+    <!-- Begin Addon modification : portletExample -->
+    <!-- Example portlets entries -->
+    <!-- Not use by portlet, screen directly use for area edition -->
+    <request-map uri="editExamplePortlet"><security https="true" auth="true"/><response name="success" type="view" value="EditExamplePortlet"/></request-map>
+    <request-map uri="editExampleItemPortlet"><security https="true" auth="true"/><response name="success" type="view" value="EditExampleItemPortlet"/></request-map>
+    <request-map uri="showExampleDetail"><security https="true" auth="true"/><response name="success" type="view" value="ShowExampleDetail"/></request-map>
+
+    <request-map uri="createExampleJson">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createExample"/>
+        <response name="success" type="request" value="json"/>
+        <response name="fail" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="updateExampleJson">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateExample"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="deleteExamplePortlet">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteExample"/>
+        <response name="success" type="request" value="showPortlet"/>
+        <response name="error" type="request" value="showPortlet"/>
+    </request-map>
+    <request-map uri="createExampleItemJs">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createExampleItem"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="updateExampleItemJs">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateExampleItem"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="deleteExampleItemPortlet">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteExampleItem"/>
+        <response name="success" type="request" value="showPortlet"/>
+        <response name="error" type="request" value="showPortlet"/>
+    </request-map>
+
+    <!-- ExampleFeature portlets entries -->
+    <request-map uri="editExampleFeatureApplPortlet"><security https="true" auth="true"/><response name="success" type="view" value="EditExampleFeatureApplPortlet"/></request-map>
+    <request-map uri="createExampleFeatureApplJs">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createExampleFeatureAppl"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="updateExampleFeatureApplJs">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateExampleFeatureAppl"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="deleteExampleFeatApplPortlet">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteExampleFeature"/>
+        <response name="success" type="request" value="showPortlet"/>
+        <response name="error" type="request" value="showPortlet"/>
+    </request-map>
+
+    <!-- ExampleFeatureAppl portlets entries -->
+    <request-map uri="editExampleFeaturePortlet"><security https="true" auth="true"/><response name="success" type="view" value="EditExampleFeaturePortlet"/></request-map>
+    <request-map uri="createExampleFeatureJs">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createExampleFeature"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="updateExampleFeatureJs">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateExampleFeature"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="deleteExampleFeaturePortlet">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteExampleFeature"/>
+        <response name="success" type="request" value="showPortlet"/>
+        <response name="error" type="request" value="showPortlet"/>
+    </request-map>
+    <!-- End Addon modification portletExample Portlet Request -->
+
+    <!-- end of request mappings -->
+
+    <!-- View Mappings -->
+    <!-- used by portlet for URI edition -->
+    <view-map name="EditExamplePortlet" type="screen" page="component://example/widget/ExampleScreens.xml#EditExample"/>
+    <view-map name="EditExampleItemPortlet" type="screen" page="component://example/widget/ExampleScreens.xml#EditExampleItem"/>
+    <view-map name="ShowExampleDetail" type="screen" page="component://example/widget/ExampleScreens.xml#ShowExampleDetail"/>
+    <view-map name="EditExampleFeatureApplPortlet" type="screen" page="component://example/widget/ExampleFeatureScreens.xml#EditExampleFeatureAppl"/>
+    <view-map name="EditExampleFeaturePortlet" type="screen" page="component://example/widget/ExampleFeatureScreens.xml#EditExampleFeature"/>
+
+    <!-- end of view mappings -->
+</site-conf>

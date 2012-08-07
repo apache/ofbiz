@@ -25,6 +25,7 @@ under the License.
          elements found in the common-controller.xml file. -->
     <include location="component://common/webcommon/WEB-INF/common-controller.xml"/>
     <include location="component://common/webcommon/WEB-INF/portal-controller.xml"/>
+    <include location="component://example/webapp/example/WEB-INF/controller-portlet.xml"/><!--#Bam# portlet-example-->
 
     <description>Example Component Site Configuration File</description>
 
@@ -59,7 +60,7 @@ under the License.
     <request-map uri="createExample">
         <security https="true" auth="true"/>
         <event type="service" invoke="createExample"/>
-        <response name="success" type="request-redirect" value="EditExample">
+        <response name="success" type="request-redirect" value="FindExample">
             <redirect-parameter name="exampleId"/>
         </response>
         <response name="error" type="view" value="FindExample"/>
@@ -71,12 +72,6 @@ under the License.
             <redirect-parameter name="exampleId"/>
         </response>
         <response name="error" type="view" value="EditExample"/>
-    </request-map>
-    <request-map uri="createExampleAjax">
-        <security https="true" auth="true"/>
-        <event type="service" invoke="createExample"/>
-        <response name="success" type="request" value="json"/>
-        <response name="error" type="request" value="json"/>
     </request-map>
     <request-map uri="updateExampleAjax">
         <security https="true" auth="true"/>
@@ -152,7 +147,7 @@ under the License.
         <security https="true" auth="true"/>
         <event type="service" invoke="updateExampleFeature"/>
         <response name="success" type="request-redirect" value="EditExampleFeature">
-            <redirect-parameter name="exampleFeatureId"/>
+            <redirect-parameter name="exampleId"/>
         </response>
         <response name="error" type="view" value="EditExampleFeature"/>
     </request-map>
@@ -191,7 +186,9 @@ under the License.
 
     <request-map uri="FormWidgetExamples"><security https="true" auth="true"/><response name="success" type="view" value="FormWidgetExamples"/></request-map>
 
+    <request-map uri="LookupExample"><security https="true" auth="true"/><response name="success" type="view" value="LookupExample"/></request-map>
     <request-map uri="LookupExampleFeature"><security https="true" auth="true"/><response name="success" type="view" value="LookupExampleFeature"/></request-map>
+    <request-map uri="LookupPartyName"><security https="true" auth="true"/><response name="success" type="view" value="LookupPartyName"/></request-map>
     <request-map uri="LookupPartyGroupByName"><security https="true" auth="true"/><response name="success" type="view" value="LookupPartyGroupByName"/></request-map>
 
     <request-map uri="ListExampleFormOnly"><security https="true" auth="false"/><response name="success" type="view" value="ListExampleFormOnly"/></request-map>
@@ -235,7 +232,9 @@ under the License.
 
     <view-map name="FormWidgetExamples" type="screen" page="component://example/widget/example/FormWidgetExampleScreens.xml#FormWidgetExamples"/>
 
+    <view-map name="LookupExample" type="screen" page="component://example/widget/example/LookupScreens.xml#LookupExample"/>
     <view-map name="LookupExampleFeature" type="screen" page="component://example/widget/example/ExampleFeatureScreens.xml#LookupExampleFeature"/>
+    <view-map name="LookupPartyName" type="screen" page="component://example/widget/example/FormWidgetExampleLookupScreens.xml#LookupPartyName"/>
     <view-map name="LookupPartyGroupByName" type="screen" page="component://example/widget/example/FormWidgetExampleLookupScreens.xml#LookupPartyGroupByName"/>
 
     <!-- ajax view mappings -->

@@ -3141,3 +3141,130 @@ height: auto;
 white-space:normal;
 height: auto;
 }
+/* begin addon modification : portletWidget navigation form*/
+.screenlet-title-bar-pager {
+background:url(../images/bkgd_header.gif) repeat-x;
+height: 23px;
+padding:0px 0px;
+}
+
+.screenlet-title-bar-pager ul h1,
+.screenlet-title-bar-pager ul h2,
+.screenlet-title-bar-pager ul h3,
+.screenlet-title-bar-pager ul .h1,
+.screenlet-title-bar-pager ul .h2,
+.screenlet-title-bar-pager ul .h3 {
+font-weight: normal;
+border-left: none;
+font-size:12px;
+float: left;
+}
+
+.screenlet-title-bar-pager select{
+margin-left:10px;
+border:none;
+height: auto;
+margin-top: 1px;
+}
+
+.screenlet-title-bar-pager ul {
+display: inline; /* IE Fix */
+}
+
+.screenlet-title-bar-pager ul li {
+float: left;
+color : #ffffff;
+line-height: 1.8em;
+margin: 0px 0px 0px 3px;
+font-size:12px;
+}
+
+.screenlet-title-bar-pager ul li.nav-displaying {
+float: right;
+}
+
+.screenlet-title-bar-pager ul li a {
+display: block;
+text-indent:-2000px;
+}
+
+.screenlet-title-bar-pager ul li span {
+visibility:hidden;
+display: block;
+}
+
+.screenlet-title-bar-pager ul .nav-first a:hover {
+background: url(../images/navigation.png) no-repeat 0px -46px;
+}
+.screenlet-title-bar-pager ul .nav-previous a:hover {
+background: url(../images/navigation.png) no-repeat -23px -46px;
+}
+.screenlet-title-bar-pager ul .nav-next a:hover {
+background: url(../images/navigation.png) no-repeat -46px -46px;
+}
+.screenlet-title-bar-pager ul .nav-last a:hover {
+background: url(../images/navigation.png) no-repeat -69px -46px;
+}
+
+.screenlet-title-bar-pager ul .nav-first a {
+background: url(../images/navigation.png) no-repeat 0px -23px;
+}
+.screenlet-title-bar-pager ul .nav-previous a {
+background: url(../images/navigation.png) no-repeat -23px -23px;
+}
+.screenlet-title-bar-pager ul .nav-next a {
+background: url(../images/navigation.png) no-repeat -46px -23px;
+}
+.screenlet-title-bar-pager ul .nav-last a {
+background: url(../images/navigation.png) no-repeat -69px -23px;
+}
+.screenlet-title-bar-pager ul .nav-first-disabled {
+background: url(../images/navigation.png) no-repeat 0px 0px;
+}
+.screenlet-title-bar-pager ul .nav-previous-disabled {
+background: url(../images/navigation.png) no-repeat -23px 0px;
+}
+.screenlet-title-bar-pager ul .nav-next-disabled {
+background: url(../images/navigation.png) no-repeat -46px 0px;
+}
+.screenlet-title-bar-pager ul .nav-last-disabled {
+background: url(../images/navigation.png) no-repeat -69px 0px;
+}
+
+.screenlet-title-bar-pager ul .nav-first a,
+.screenlet-title-bar-pager ul .nav-previous a,
+.screenlet-title-bar-pager ul .nav-next a,
+.screenlet-title-bar-pager ul .nav-last a,
+.screenlet-title-bar-pager ul .nav-first-disabled,
+.screenlet-title-bar-pager ul .nav-previous-disabled,
+.screenlet-title-bar-pager ul .nav-next-disabled,
+.screenlet-title-bar-pager ul .nav-last-disabled {
+width: 23px;
+height:23px;
+}
+
+.screenlet-title-bar-pager-pager ul .nav-pagesize {
+padding: 0 30px 0 30px;
+}
+
+.screenlet-title-bar-pager ul .collapsed,
+.screenlet-title-bar-pager ul .collapsed:hover {
+background: url(../images/bullet_arrow_down.png) no-repeat right;
+width:16px;
+border:none;
+padding-left: 3px;
+}
+
+.screenlet-title-bar-pager ul .expanded,
+.screenlet-title-bar-pager ul .expanded:hover {
+background: url(../images/bullet_arrow_up.png) no-repeat right;
+width:16px;
+border:none;
+padding-left: 3px;
+}
+
+.screenlet-title-bar-pager ul .collapsed a,
+.screenlet-title-bar-pager ul .expanded a {
+cursor: pointer;
+}
+/* End addon modification : portletWidget navigation form*/

@@ -15,28 +15,30 @@ License.
 -->
 <section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     version="5.0" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
-    xsi:schemaLocation="http://docbook.org/ns/docbook ../../../../applications/content/dtd/docbook.xsd"
+    xsi:schemaLocation="http://docbook.org/ns/docbook"
     xmlns="http://docbook.org/ns/docbook">
     <title>Page principale de l'aide du composant Exemple</title>
     <para>
       L'application exemple vous permet de découvrir les possibilités pour créer une application contenant, entre autres, des
       boîtes de recherche, des listes et beaucoup d'autres choses.
     </para>
-    <para>
-      Cette application peut être utilisée pour avoir un aperçu des bonnes pratiques d'interface utilisateur pour OFBiz.</para>
-    <para>
-      Par exemple, si vous voulez voir comment vous pouvez ajouter des textes d'aide, vous pouvez regarder les fichiers contenus dans le
-      répertoire data/heldata dans le composant Example et dans le fichier contenu dans data/ExempleHelpData.xml au niveau de l'application
-      content
-    </para>
+    <para>Cette application peut être utilisée pour avoir un aperçu des bonnes pratiques de developpement d'interface utilisateur pour OFBiz.</para>
+    <para>Lisez l'aide de chaque écran, celle-ci vous expliquera quelle partie du développement est utilisé dans ce cas. </para>
+    <para>Par exemple, si vous voulez voir comment vous devez faire pour ajouter un peu d'aide, vous pouvez regarder les fichiers d'aide dans le répertoire data/helpdata
+     du composant example et dans le fichier data/ExempleHelpData.xml dans le composant contenu. </para>
 
     <section>
-      <title>Sous-menus dans l'aide</title>
+      <title>Organisation des fichiers d'aide</title>
+      <para>L'aide est géré dans le composant contenu, pour plus de détail voir les sous points de l'index de l'aide au niveau de exemple.</para>
+    </section>
+
+    <section>
+      <title>Sous-menus de l'aide</title>
       <para>
-        Pour avoir la liste complète, cliquez sur le bouton "Index" et regardez l'arborescence de l'aide. Voici aussi une liste
-        de raccourcis :
+        Pour avoir la liste complète, cliquez sur le bouton "Index" et regardez l'arborescence de l'aide. Voici aussi une liste de raccourcis :
         <itemizedlist>
           <listitem><para>Comment fonctionne <link xl:href="showHelp?helpTopic=DOCUMENTATION_SYSTEM">le système de documentation d'Apache OFBiz</link></para></listitem>
+          <listitem><para><link xl:href="showHelp?helpTopic=EXAMPLE_devel">Les bonnes pratiques de développement avec les portlets</link></para></listitem>
           <listitem><para><link xl:href="showHelp?helpTopic=EXAMPLE_docbook">Ce qu'il est possible de faire dans les fichiers d'aide</link></para></listitem>
         </itemizedlist>
       </para>

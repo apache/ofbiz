@@ -15,11 +15,11 @@ License.
 -->
 <section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     version="5.0" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
-    xsi:schemaLocation="http://docbook.org/ns/docbook ../../../../applications/content/dtd/docbook.xsd"
+    xsi:schemaLocation="http://docbook.org/ns/docbook"
     xmlns="http://docbook.org/ns/docbook">
     <title>The Example Main page.</title>
-    <para><link xl:href="showHelp?helpTopic=EXAMPLE">About the Example application</link></para>
-    <para>
+    <para>What is the component example? how to use it? what it's goal?... for all these questions refer to the help index in the Sample
         In this page, you can create or search an example
     </para>
+    <para><link xl:href="showHelp?helpTopic=HELP_EXAMPLE">About the Example application</link></para>
 </section>

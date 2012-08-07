@@ -19,6 +19,118 @@
     under the License.
 -->
 <resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <!-- #Bam# Begin Addon modification portletExample -->
+    <property key="ExampleApplicationPortal">
+        <value xml:lang="en">Portal Example Application</value>
+        <value xml:lang="fr">Application exemple Portail</value>
+        <value xml:lang="it">Applicazione Esempi</value>
+        <value xml:lang="ro">Aplicatie Exemple</value>
+        <value xml:lang="ru">Приложение Пример</value>
+        <value xml:lang="th">ตัวอย่างโปรแกรมคอมพิวเตอร์</value>
+        <value xml:lang="zh">样例应用</value>
+    </property>
+    <property key="ExampleMessageCreateExampleIsSuccess">
+        <value xml:lang="en">One Example is created</value>
+        <value xml:lang="fr">Un exemple est créé</value>
+    </property>
+    <property key="ExampleMessageExampleTypeCannotBeEmpty">
+        <value xml:lang="en">Example Type is mandatory</value>
+        <value xml:lang="fr">Le type d'exemple ne peut pas être vide</value>
+    </property>
+    <property key="ExampleMessageExampleStatusIs">
+        <value xml:lang="en">it's status is {0}</value>
+        <value xml:lang="fr">son statut est {0}</value>
+    </property>
+    <property key="ExampleStatusHistory">
+        <value xml:lang="en">Status History</value>
+        <value xml:lang="fr">Historique statut</value>
+    </property>
+    <property key="FormFieldTitle_exampleId">
+        <value xml:lang="en">Example ID</value>
+        <value xml:lang="fr">Réf. exemple</value>
+        <value xml:lang="it">Codice esempio</value>
+        <value xml:lang="ro">Cod Exemplu</value>
+        <value xml:lang="ru">Код примера</value>
+        <value xml:lang="th">รหัสตัวอย่าง</value>
+        <value xml:lang="zh">样例标识</value>
+    </property>
+    <property key="FormFieldTitle_exampleItemSeqId">
+        <value xml:lang="en">Example Item ID</value>
+        <value xml:lang="fr">Réf. lg. exemple</value>
+    </property>
+    <property key="PageTitleCreateExample">
+        <value xml:lang="en">Create an example</value>
+        <value xml:lang="fr">Création d'un exemple</value>
+    </property>
+    <property key="PageTitleExampleItems">
+        <value xml:lang="en">List Example Items</value>
+        <value xml:lang="fr">Liste des lignes d'exemple</value>
+    </property>
+    <property key="PageTitleExampleDetailsMenu">
+        <value xml:lang="en">Summary &amp; Menu</value>
+        <value xml:lang="fr">Résumé &amp; menu</value>
+    </property>
+    <property key="PageTitleExampleFeatureAppls">
+        <value xml:lang="en">List Example Features Appl</value>
+        <value xml:lang="fr">Liste des caratéristiques associées d'exemple</value>
+    </property>
+    <property key="PageTitleExampleStatus">
+        <value xml:lang="en">List Example Statuses</value>
+        <value xml:lang="fr">Historique des statuts d'exemple</value>
+    </property>
+    <property key="PageTitleFindExampleMgmt">
+        <value xml:lang="en">Find Example</value>
+        <value xml:lang="fr">Rechercher des exemples</value>
+    </property>
+    <property key="PageTitleListExample">
+        <value xml:lang="en">List Examples</value>
+        <value xml:lang="fr">Liste des exemples</value>
+    </property>
+    <property key="PageTitleListExampleFeature">
+        <value xml:lang="en">List Example Feature</value>
+        <value xml:lang="fr">Liste des caractérisques exemples</value>
+    </property>
+    <property key="PageTitleLookupExample">
+        <value xml:lang="en">Lookup Example</value>
+        <value xml:lang="fr">Rechercher un exemple</value>
+    </property>
+    <property key="PageTitleSelectExample">
+        <value xml:lang="en">Select an Example</value>
+        <value xml:lang="fr">Sélectionner un exemple</value>
+    </property>
+    <property key="PageTitleShowExample">
+        <value xml:lang="en">Show Example</value>
+        <value xml:lang="fr">Afficher l'exemple</value>
+    </property>
+    <!-- #Eam# portletExample -->
+    <property key="ExampelsJackrabbitDownloadFile">
+        <value xml:lang="de">Datei herunterladen</value>
+        <value xml:lang="en">Download file</value>
+    </property>
+    <property key="ExampelsJackrabbitOpenData">
+        <value xml:lang="de">Content öffnen.</value>
+        <value xml:lang="en">Open content.</value>
+    </property>
+    <property key="ExampelsJackrabbitOpenFile">
+        <value xml:lang="de">Datei öffnen</value>
+        <value xml:lang="en">Open file</value>
+    </property>
+    <property key="ExampelsJackrabbitRemoveData">
+        <value xml:lang="de">Content löschen.</value>
+        <value xml:lang="en">Remove content.</value>
+    </property>
+    <property key="ExampelsJackrabbitRemoveFile">
+        <value xml:lang="de">Datei löschen</value>
+        <value xml:lang="en">Remove file</value>
+    </property>
+    <property key="ExampleAddNewContentEntry">
+        <value xml:lang="de">Einen neuen Content Eintrag hinzufügen</value>
+        <value xml:lang="en">Add a new content entry</value>
+    </property>
+    <property key="ExampleAddNewNodePath">
+        <value xml:lang="de">Füge einen neuen Node Pfad hinzu, z.B. /Foo/Baa speichert die Datei im Ordner "Baa"</value>
+        <value xml:lang="en">Add a (new) node path like /Foo/Baa will store the file under the folder "Baa"</value>
+    </property>
     <property key="ExampleAjaxExamples">
         <value xml:lang="en">Ajax Examples</value>
         <value xml:lang="fr">Exemples Ajax</value>
@@ -428,12 +540,6 @@
         <value xml:lang="th">ลักษณะ</value>
         <value xml:lang="zh">特征</value>
     </property>
-    <property key="ExampleFeaturesAddToExample">
-        <value xml:lang="en">Add Feature To Example</value>
-    </property>      
-    <property key="ExampleFeaturesByExample">
-        <value xml:lang="en">Features by Example</value>
-    </property>    
     <property key="ExampleField">
         <value xml:lang="en">Field</value>
         <value xml:lang="it">Campo</value>
@@ -786,4 +892,59 @@
         <value xml:lang="de">Sie haben den Wert in der Select Box geändert.</value>
         <value xml:lang="en">You have changed the value in the select box</value>
     </property>
+
+    <!--#Bam# icons-purpose-->
+    <property key="BestPractice_IconAddItem">
+        <value xml:lang="en">BP: Used to add an object on an item of a list</value>
+        <value xml:lang="fr">BP: Utilisé pour ajouter un object à un item d'une liste</value>
+    </property>
+    <property key="BestPractice_IconAppNext">
+        <value xml:lang="en">BP: Next item in a naviguation menu or dependancy after. Add a iconTitle each time you use it</value>
+        <value xml:lang="fr">BP: Elément suivant lors de naviguation ou dépendance après. Ajouter un iconTitle à chaque usage</value>
+    </property>
+    <property key="BestPractice_IconAppPrev">
+        <value xml:lang="en">BP: Previous item in a naviguation menu or dependancy before. Add a iconTitle each time you use it</value>
+        <value xml:lang="fr">BP: Elément précédent lors de naviguation ou dépendance avant. Ajouter un iconTitle à chaque usage</value>
+    </property>
+    <property key="BestPractice_IconCategory">
+        <value xml:lang="en">BP: Categories (Product categories, Party classification, Task purposes, ...)</value>
+        <value xml:lang="fr">BP: Catégories (de produit, de classification d'acteur, d'usage de tâche, ...)</value>
+    </property>
+    <property key="BestPractice_IconContact">
+        <value xml:lang="en">BP: Person associated List (most of time with contact mech details)</value>
+        <value xml:lang="fr">BP: Liste des personnes associées (affiche des élements de coordonnées, la plupart du temps)</value>
+    </property>
+    <property key="BestPractice_IconHierarchy">
+        <value xml:lang="en">BP: Rollup (product, parties, party groups, project, ...</value>
+        <value xml:lang="fr">BP: Hiérarchie (de produits, d'acteurs, de groupe d'acteurs, projet, ...)</value>
+    </property>
+    <property key="BestPractice_IconParty">
+        <value xml:lang="en">BP: Parties associated List (most of time show PartyRole list), so Person or Group or Company</value>
+        <value xml:lang="fr">BP: Liste des acteurs associés (affiche une liste d'acteur- rôle, la plupart du temps), personne, groupe ou société</value>
+    </property>
+    <property key="BestPractice_IconPDF">
+        <value xml:lang="en">BP: For generate or show (download) a PDF file</value>
+        <value xml:lang="fr">BP: Pour générer ou afficher (télécharger) un document PDF</value>
+    </property>
+    <property key="BestPractice_IconPrint">
+        <value xml:lang="en">Print</value>
+        <value xml:lang="fr">Imprimer directement sur l'imprimante (paramètré selon votre utilisateur de connexion)</value>
+    </property>
+    <property key="BestPractice_IconRefresh">
+        <value xml:lang="en">Refresh</value>
+        <value xml:lang="fr">re-Afficher les données (selon les critères de sélection) sans prendre en compte la saisie en cours</value>
+    </property>
+    <property key="BestPractice_IconSynchronize">
+        <value xml:lang="en">BP: Used to apply modification from an object to another. Add a iconTitle each time you use it</value>
+        <value xml:lang="fr">BP: Utilisé pour appliquer une modification d'un object à un autre (synchronisation). Ajouter un iconTitle à chaque usage !</value>
+    </property>
+    <property key="BestPractice_Icons">
+        <value xml:lang="en">When Icon explanation start with BP (Best Practice), put the mouse on icon to read the end-user label </value>
+        <value xml:lang="fr">Quand l'explication de l'icône est précédée par BP (Bonne Pratique), positionner la souris sur l'icone pour visualiser ce que l'utilisateur verra</value>
+    </property>
+    <property key="PageTitleIconsList">
+        <value xml:lang="en">Icons list</value>
+        <value xml:lang="fr">Liste des icônes</value>
+    </property>
+    <!--#Eam# icons-purpose-->
 </resource>

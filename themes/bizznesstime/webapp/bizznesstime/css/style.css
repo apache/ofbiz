@@ -2203,3 +2203,147 @@ height: auto;
 white-space:normal;
 height: auto;
 }
+
+/* Begin addon modification portletWidget navigation form*/
+.screenlet-title-bar-pager {
+    background-color: #1c334d;
+    color: #ffffff;
+    height: 1%; /* IE fix */
+    min-height: 1.5em;
+}
+
+.screenlet-title-bar-pager .h1,
+.screenlet-title-bar-pager .h2,
+.screenlet-title-bar-pager .h3,
+.screenlet-title-bar-pager h1,
+.screenlet-title-bar-pager h2,
+.screenlet-title-bar-pager h3 {
+    background: none;
+    color: #ffffff;
+    font-weight: bold;
+    padding: 0.0em 0.5em 0.2em 3em;
+}
+
+.screenlet-title-bar-pager ul {
+    display: inline; /* IE Fix */
+}
+
+.screenlet-title-bar-pager ul li {
+    background: none;
+    float: right;
+    font-size: 1em;
+    font-weight: bold;
+    padding: 0.0em 0.5em 0.2em 0.5em;
+    margin:0;
+}
+
+.screenlet-title-bar-pager ul h1,
+.screenlet-title-bar-pager ul h2,
+.screenlet-title-bar-pager ul h3,
+.screenlet-title-bar-pager ul .h1,
+.screenlet-title-bar-pager ul .h2,
+.screenlet-title-bar-pager ul .h3 {
+    border-left: none;
+    float: left;
+    padding: 0.0em 0.5em 0.2em 0.5em;
+}
+.screenlet-title-bar-pager .h1 { font-size: 1.6em; }
+.screenlet-title-bar-pager .h2 { font-size: 1.3em; }
+.screenlet-title-bar-pager .h3,
+.screenlet-title-bar-pager .head4 {
+    font-size: 1.1em;
+}
+
+.screenlet-title-bar-pager .h3 a {
+    display: inline;
+}
+
+.screenlet-title-bar-pager ul a {
+    color: #A80000;
+    display: block;
+}
+
+
+.screenlet-title-bar-pager ul a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.screenlet-title-bar-pager ul .disabled {
+    color: #CCCCCC;
+}
+
+.screenlet-title-bar-pager ul .collapsed,
+.screenlet-title-bar-pager ul .collapsed:hover {
+    background: url(/images/expand.gif) no-repeat center center;
+    min-height: 1.1em;
+    min-width: 1.1em;
+}
+
+.screenlet-title-bar-pager ul .expanded,
+.screenlet-title-bar-pager ul .expanded:hover {
+    background: url(/images/collapse.gif) no-repeat center center;
+    min-height: 1.1em;
+    min-width: 1.1em;
+}
+
+.screenlet-title-bar-pager ul .collapsed a,
+.screenlet-title-bar-pager ul .expanded a {
+    cursor: default;
+}
+
+.login-screenlet {
+    min-width: 25em;
+    width: 25%;
+}
+
+
+.screenlet-title-bar-pager {
+    padding:0.08em 0 3em 0;
+    clear:both;
+    display:block;
+    position:relative;
+    margin:0px 0 10px 0;
+}
+
+.screenlet-title-bar-pager ul {
+    display: inline; /* IE Fix */
+}
+
+.screenlet-title-bar-pager ul li {
+    float: left;
+    font-weight: bold;
+    line-height: 1.8em;
+    margin: 0.2em;
+}
+
+.screenlet-title-bar-pager ul li a {
+    display: block;
+    font-weight: bold;
+}
+
+.screenlet-title-bar-pager ul .nav-first,
+.screenlet-title-bar-pager ul .nav-previous,
+.screenlet-title-bar-pager ul .nav-next,
+.screenlet-title-bar-pager ul .nav-last {
+    border:2px solid #ddd;
+    color:#fff;
+    padding: 0 0.5em 0 0.5em;
+}
+
+.screenlet-title-bar-pager ul .nav-first-disabled,
+.screenlet-title-bar-pager ul .nav-previous-disabled,
+.screenlet-title-bar-pager ul .nav-next-disabled,
+.screenlet-title-bar-pager ul .nav-last-disabled {
+    border:2px solid #ddd;
+    color:#ccc;
+    padding: 0 0.5em 0 0.5em;
+}
+
+.screenlet-title-bar-pager select {
+    margin: 0;
+}
+.screenlet-title-bar-pager ul li.nav-displaying {
+float: right;
+}
+/* End addon modification portletWidget navigation form*/

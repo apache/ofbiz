@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <!-- Form used directly by a portlet, with portlet type "Screenlet" (no screen including it) -->
+    <form name="FindExample" type="single" target="FindExample" default-entity-name="Example" > <!-- validate-link-on-enter="true" -->
+        <actions>
+            <set field="parameters.portalPageId" value="ExampleMgmt"/>
+        </actions>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="exampleId" title="${uiLabelMap.ExampleExampleId}"><lookup target-form-name="LookupExample"/></field>
+        <field name="exampleName" title="${uiLabelMap.CommonName}"><text-find/></field>
+        <field name="exampleTypeId" title="${uiLabelMap.CommonType}">
+            <drop-down allow-empty="true" current-description="">
+                <entity-options description="${description}" key-field-name="exampleTypeId" entity-name="ExampleType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+            <drop-down allow-empty="true" current-description="">
+                <entity-options description="${description}" key-field-name="statusId" entity-name="ExampleStatusItem"/>
+            </drop-down>
+        </field>
+        <field name="exampleDate" ><date-find/></field>
+        <field name="portalPageId"><hidden value="ExampleMgmt"/></field>
+        <field name="searchButton" title=" " widget-style="smallSubmit" id-name="submit">
+          <!-- area-id is not mandatory default value is PP_${portalPageId}${portlet-id}${portletSeqId}-->
+          <show-portlet portlet-id="ListExample" description="${uiLabelMap.CommonSearch}" >
+            <parameters-form/>
+          </show-portlet>
+        </field>
+    </form>
+    <form name="SelectExample" type="single" target="showPortalPage">
+        <field name="portalPageId"><hidden/></field>
+        <field name="exampleId" title="${uiLabelMap.ExampleExampleId}" position="1"><lookup size="15" target-form-name="LookupExample"/></field>
+        <field name="searchButton" position="2"><submit button-type="button"/></field>
+    </form>
+    <!-- Form used directly by a portlet, with portlet type "ScreenletList" (no screen including it) -->
+    <form name="ListExample" type="list" list-name="listIt" default-entity-name="Example" separate-columns="true"
+        odd-row-style="alternate-row" header-row-style="header-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <set field="recapPageId" from-field="recapPageId" default-value="ExampleRecap"/><!-- coming from portlet attribute -->
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="Example"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <alt-row-style use-when="&quot;EXST_APPROVED&quot;.equals(statusId)" style="Validate"/>
+        <alt-row-style use-when="&quot;EXST_CANCELLED&quot;.equals(statusId)" style="Warn"/>
+        <field name="exampleId" title="${uiLabelMap.ExampleExampleId}1">
+            <show-portlet portlet-id="ExampleDetailsMenu" collapse-screenlet="true" description="${exampleId}" mark-selected="true">
+                <parameter param-name="exampleId"/>
+            </show-portlet>
+            <show-portlet portlet-id="" target="showExampleDetail" area-id="PP_${portalPageId}ExampleDetail00001">
+              <parameter param-name="exampleId" />
+              <parameter param-name="idDescription" value="${exampleId}: ${exampleName}"/>
+            </show-portlet>
+        </field>
+        <field name="recapPage" title=" ">
+            <hyperlink target="showPortalPage" image-location="${iconsPurpose.Overview}" image-title="${uiLabelMap.IconsTooltips_Overview}">
+              <parameter param-name="portalPageId" from-field="recapPageId"/>
+              <parameter param-name="exampleId"/>
+            </hyperlink>
+        </field>
+        <field name="exampleName" title="${uiLabelMap.CommonName}" sort-field="true"><display/></field>
+        <field name="exampleTypeId" title="${uiLabelMap.CommonType}"><display-entity entity-name="ExampleType"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}"><display-entity entity-name="StatusItem"/></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}" sort-field="true"><display/></field>
+        <field name="exampleDate" ><display type="date"/></field>
+        <field name="deleteLink" title=" ">
+            <show-portlet portlet-id="ListExample" target="deleteExamplePortlet" parameters-map="result.queryStringMap"
+                          request-confirmation="true" confirmation-message="${uiLabelMap.CommonConfirmDelete} : [${exampleId}] ${exampleName}"
+                          image-location="${iconsPurpose.Delete}" image-title="${uiLabelMap.IconsTooltips_Delete}">
+              <parameter param-name="exampleId"/>
+              <parameter param-name="comingFromDelete" value="Y"/>
+            </show-portlet>
+                <!-- parameters-map="queryStringMap" is here to solve a problem : refresh will list all records not only selected by the previous request parameters -->
+        </field>
+        <on-event-update-area event-type="paginate" area-id="${currentAreaId}" area-target="showPortlet"/>
+    </form>
+    <!-- Form used by a screen (portlet type "Screenlet") : need to include a secondary menu for external page links -->
+    <form name="ExampleDetailsMenu" type="single" default-map-name="example" default-entity-name="Example">
+        <field name="exampleId" title="${uiLabelMap.ExampleExampleId}"><display/></field>
+        <field name="exampleName" title="${uiLabelMap.CommonName}" position="2"><display/></field>
+        <field name="exampleTypeId" title="${uiLabelMap.CommonType}"><display-entity entity-name="ExampleType"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" position="2"><display-entity entity-name="StatusItem"/></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"><display/></field>
+        <field name="exampleDate" ><display type="date"/></field>
+    </form>
+    <!-- Form used by a screen (portlet type "Screenlet") : need to add a variable check for displaying form -->
+    <form name="ShowExample" type="single" default-map-name="example" default-entity-name="Example">
+      <actions>
+        <entity-one entity-name="Example" use-cache="true"/>
+      </actions>
+        <auto-fields-service service-name="updateExample" default-field-type="display"/>
+        <field name="exampleId" title="${uiLabelMap.ExampleExampleId}"><display/></field>
+        <field name="exampleName" title="${uiLabelMap.CommonName}" position="2"><display/></field>
+        <field name="exampleTypeId" title="${uiLabelMap.CommonType}"><display-entity entity-name="ExampleType"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" position="2"><display-entity entity-name="StatusItem"/></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"><display/></field>
+        <field name="exampleDate" ><display type="date"/></field>
+        <field name="longDescription" title="${uiLabelMap.ExampleLongDescription}"><display/></field>
+    </form>
+    <form name="ExampleSummary" type="single" default-map-name="example" default-entity-name="Example">
+      <actions>
+        <entity-one entity-name="Example" use-cache="true"/>
+      </actions>
+        <field name="exampleId" title="${uiLabelMap.ExampleExampleId}"><display/></field>
+        <field name="exampleName" title="${uiLabelMap.CommonName}" position="2"><display/></field>
+        <field name="exampleTypeId" title="${uiLabelMap.CommonType}"><display-entity entity-name="ExampleType"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" position="2"><display-entity entity-name="StatusItem"/></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"><display/></field>
+        <field name="exampleDate" ><display type="date"/></field>
+    </form>
+    <!-- Form used directly by a portlet (no screen including it) -->
+    <form name="CreateExample" type="single" default-entity-name="Example" target="createExampleJson">
+        <actions>
+            <entity-one entity-name="StatusItem" value-field="currentStatus" auto-field-map="false">
+                <field-map field-name="statusId" from-field="example.statusId"/>
+            </entity-one>
+        </actions>
+        <auto-fields-service service-name="createExample"/>
+        <field name="exampleTypeId" title="${uiLabelMap.CommonType}" id-name="exampleTypeId">
+            <drop-down allow-empty="true">
+                <!-- this is a neat feature, but not good for the type because the user would have to know the possible types in order to enter at least the first letter, so leaving it out by default; just uncomment to enable: <auto-complete/> -->
+                <entity-options entity-name="ExampleType" description="${description}">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="ExampleStatusItem" description="${description}"/>
+            </drop-down>
+        </field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"/>
+        <field name="longDescription" title="${uiLabelMap.ExampleLongDescription}"/>
+        <field name="anotherText">
+            <drop-down allow-empty="true">
+                <option key="Explicit Option" description="${uiLabelMap.ExampleExplicitOption}"/>
+                <entity-options entity-name="ExampleType" description="${description}" key-field-name="exampleTypeId">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonCreate}"><submit button-type="button"/></field>
+        <on-event-update-area area-target="showPortlet" event-type="submit" area-id="${currentAreaId}">
+            <parameter param-name="portalPortletId" value="ShowExample"/>
+            <redirect-parameter param-name="exampleId"/>
+        </on-event-update-area>
+        <on-event-update-area area-target="showPortlet" event-type="submit" area-id="PP_${portalPageId}ExampleItems00001">
+            <parameter param-name="portalPortletId" value="ExampleItems"/>
+            <parameter param-name="areaId" value="PP_${portalPageId}ExampleItems00001"/>
+            <redirect-parameter param-name="exampleId"/>
+        </on-event-update-area>
+    </form>
+    <!-- Form used by a screen by controller entry (not used directly by a portlet) : use for entity edition in edit area -->
+    <form name="EditExample" type="single" default-map-name="example" default-entity-name="Example" target="updateExampleJson">
+        <actions>
+            <entity-one entity-name="StatusItem" value-field="currentStatus" auto-field-map="false">
+                <field-map field-name="statusId" from-field="example.statusId"/>
+            </entity-one>
+        </actions>
+        <auto-fields-service service-name="updateExample"/>
+        <field name="exampleId" title="${uiLabelMap.ExampleExampleId}" tooltip="${uiLabelMap.CommonNotModifRecreat}"><display/></field>
+        <field name="exampleTypeId" title="${uiLabelMap.CommonType}" id-name="exampleTypeId">
+            <drop-down allow-empty="false">
+                <!-- this is a neat feature, but not good for the type because the user would have to know the possible types in order to enter at least the first letter, so leaving it out by default; just uncomment to enable: <auto-complete/> -->
+                <entity-options entity-name="ExampleType" description="${description}">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+            <drop-down allow-empty="false" current-description="${currentStatus.description}">
+                <entity-options entity-name="StatusValidChangeToDetail" key-field-name="statusIdTo" description="${transitionName} (${description})">
+                    <entity-constraint name="statusId" env-name="example.statusId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"/>
+        <field name="longDescription" title="${uiLabelMap.ExampleLongDescription}"/>
+        <field name="anotherText">
+            <drop-down allow-empty="true">
+                <option key="Explicit Option" description="${uiLabelMap.ExampleExplicitOption}"/>
+                <entity-options entity-name="ExampleType" description="${description}" key-field-name="exampleTypeId">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="displayAnotherText" use-when="example.get(&quot;anotherText&quot;)!=null">
+            <display description="${example.anotherText}"/>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
+        <field name="back" title=" " position="2" widget-style="buttontext">
+           <show-portlet portlet-id="${parameters.portalPortletId}" area-id="${parameters.areaId}" description="${uiLabelMap.CommonBack}" >
+               <parameter param-name="exampleId" from-field="parameters.exampleId"/>
+           </show-portlet>
+        </field>
+        <on-event-update-area area-target="showPortlet" event-type="submit" area-id="${parameters.areaId}">
+          <parameter param-name="exampleId"/>
+        </on-event-update-area>
+    </form>
+    <!-- Form used directly by a portlet (no screen including it) -->
+    <form name="ExampleItems" type="list"  list-name="exampleItems" 
+          odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <set field="exampleId" from-field="parameters.exampleId"/>
+            <entity-condition entity-name="ExampleItem">
+                <condition-expr field-name="exampleId" from-field="exampleId"/>
+                <order-by field-name="exampleItemSeqId"/>
+            </entity-condition>
+        </actions>
+        <field name="exampleId"><hidden/></field>
+        <field name="exampleItemSeqId" title="${uiLabelMap.CommonItem}">
+            <show-portlet portlet-id="${portalPortletId}" target="editExampleItemPortlet" area-id="${editAreaDivId}" mark-selected="true" 
+                          description="${exampleItemSeqId}"  also-hidden="false">
+                <parameter param-name="exampleId"/>
+                <parameter param-name="exampleItemSeqId"/>
+            </show-portlet>
+        </field>
+        <field name="description"><display size="30"/></field>
+        <field name="amount"><display/></field>
+        <field name="amountUomId" title="${uiLabelMap.CommonUom}" >
+          <display-entity entity-name="Uom" key-field-name="uomId" description="${description} (${abbreviation})" size="20"/>
+        </field>
+        <field name="deleteLink" title=" ">
+            <show-portlet portlet-id="${portalPortletId}" target="deleteExampleItemPortlet" area-id="${areaId}"
+                          image-location="${iconsPurpose.Delete}" image-title="${uiLabelMap.IconsTooltips_Delete}"
+                          request-confirmation="true" confirmation-message="${uiLabelMap.CommonConfirmDelete}">
+                <parameter param-name="exampleId"/>
+                <parameter param-name="exampleItemSeqId"/>
+            </show-portlet>
+        </field>
+    </form>
+    <!-- Form used by a screen by controller entry (not used directly by a portlet) : use for entity edition in edit area -->
+    <form name="EditExampleItem" type="single" target="createExampleItemJs" title="" default-map-name="exampleItem">
+        <alt-target use-when="exampleItem!=null" target="updateExampleItemJs"/>
+        <auto-fields-service service-name="createExampleItem"/>
+        <field name="exampleId"><hidden/></field>
+        <field name="exampleItemSeqId" use-when="exampleItem==null"><ignored/><!-- this will be auto-sequenced --></field>
+        <field name="exampleItemSeqId" use-when="exampleItem!=null"><display/></field><!-- appears after all fields from auto service (doesn't appear without it) -->
+        <field name="amountUomId" title="${uiLabelMap.CommonUom}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="UomAndType" key-field-name="uomId" description="${typeDescription}: ${description} (${abbreviation})">
+                    <entity-order-by field-name="typeDescription"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${groovy: exampleItem == null ? uiLabelMap.CommonAdd : uiLabelMap.CommonSave}">
+           <submit button-type="button"/>
+        </field>
+        <field name="back" title=" " position="2" widget-style="buttontext">  <!-- Back button that refresh portlet with edit area-->
+           <show-portlet portlet-id="${parameters.portalPortletId}" area-id="${parameters.areaId}" description="${uiLabelMap.CommonBack}" >
+               <parameter param-name="exampleId" from-field="parameters.exampleId"/><!-- parameters idDescription, areaId, portalPageId, portletSeqId will be add automatically -->
+           </show-portlet>
+        </field>
+        <on-event-update-area area-target="showPortlet" event-type="submit" area-id="${parameters.areaId}">
+          <parameter param-name="exampleId"/>
+        </on-event-update-area>
+    </form>
+
+    <!-- ExampleStatus : Form used directly by a portlet (no screen including it) -->
+    <form name="ExampleStatus" type="list"  list-name="exampleStatus" 
+          odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <set field="exampleId" from-field="parameters.exampleId"/>
+            <entity-condition entity-name="ExampleStatus">
+                <condition-expr field-name="exampleId" from-field="exampleId"/>
+                <order-by field-name="statusDate"/>
+                <order-by field-name="statusId"/>
+            </entity-condition>
+        </actions>
+        <field name="exampleId"><hidden/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+          <display-entity entity-name="StatusItem"/>
+        </field>
+        <field name="statusDate" title="${uiLabelMap.CommonDate}"><display type="date"/></field>
+        <field name="statusEndDate" title="${uiLabelMap.CommonEndDate}"><display type="date"/></field>
+    </form>
+</forms>
