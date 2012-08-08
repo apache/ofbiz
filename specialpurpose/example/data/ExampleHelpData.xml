@@ -18,30 +18,275 @@ specific language governing permissions and limitations
 under the License.
 -->
 <entity-engine-xml>
+    
+    <!-- Summary -->
+    <!--#################### 1. Files definition : name, location, alternate locale ####################-->
+    <!--#################### 2. Tree definition : sequenceNum and mapKey ####################-->
+    <!--#################### 3. File form association : add a form to file entry (mostly to be able to have easily access to hint of each field) ####################-->
+    <!--#################### 4. Portlet Help configuration : name, location, alternate locale ####################-->
+    <!--#################### 5. Portal Page Help configuration : name, location, alternate locale ####################-->
+    <!--#################### 6. Group definition : type INSTANCE and mapKey ####################-->
 
-    <DataResource dataResourceId="HELP_EXAMPLE" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
-        objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS"
-        dataResourceName="Framework Example" mimeTypeId="text/xml" isPublic="Y" />
-    <Content contentId="HELP_EXAMPLE" contentTypeId="DOCUMENT" contentName="Framework Example" templateDataResourceId="HELP_TEMPL" 
-        dataResourceId="HELP_EXAMPLE" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
-    <ContentAssoc contentId="HELP_ROOT" contentIdTo="HELP_EXAMPLE" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="000"/>
-
-    <DataResource dataResourceId="HELP_EXAMPLE_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/xml" isPublic="Y" 
-        objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE_FR.xml" 
-        dataResourceName="Exemple pour le développement" />
-    <Content contentId="HELP_EXAMPLE_FR"  dataResourceId="HELP_EXAMPLE_FR" contentName="Exemple pour le développement" localeString="fr" contentTypeId="DOCUMENT" templateDataResourceId="HELP_TEMPL" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="HELP_EXAMPLE" localeString="en" dataResourceTypeId="OFBIZ_FILE"
+       objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS"
+       dataResourceName="Framework Example" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_EXAMPLE" contentTypeId="DOCUMENT" contentName="Framework Example" templateDataResourceId="HELP_TEMPL"
+       dataResourceId="HELP_EXAMPLE" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="HELP_EXAMPLE_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/xml" isPublic="Y"
+       objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE_FR.xml"
+       dataResourceName="Exemples" />
+    <Content contentId="HELP_EXAMPLE_FR"  dataResourceId="HELP_EXAMPLE_FR" contentName="Exemples" localeString="fr" contentTypeId="DOCUMENT" templateDataResourceId="HELP_TEMPL" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
     <ContentAssoc contentId="HELP_EXAMPLE" contentIdTo="HELP_EXAMPLE_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
 
-    <DataResource dataResourceId="EXAMPLE_main" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
-        objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE_main.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Example help main page" mimeTypeId="text/xml" isPublic="Y" />
-    <Content contentId="EXAMPLE_main" contentTypeId="DOCUMENT" contentName="Example main menu." templateDataResourceId="HELP_TEMPL" dataResourceId="EXAMPLE_main" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
-    <ContentAssoc contentId="HELP_EXAMPLE" contentIdTo="EXAMPLE_main" mapKey="EXAMPLE_main" fromDate="2006-01-12 01:01:01" contentAssocTypeId="TREE_CHILD" sequenceNum="000"/>
+    <DataResource dataResourceId="EXAMPLE_main" localeString="en" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE_main.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Main page" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="EXAMPLE_main" contentTypeId="DOCUMENT" contentName="Main menu." templateDataResourceId="HELP_TEMPL" dataResourceId="EXAMPLE_main" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="EXAMPLE_main_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE_main_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Accueil" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="EXAMPLE_main_FR" contentTypeId="DOCUMENT" contentName="Accueil" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="EXAMPLE_main_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="EXAMPLE_main" contentIdTo="EXAMPLE_main_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+
+    <DataResource dataResourceId="EXAMPLE_help" localeString="en" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE_help.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Use of help file" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="EXAMPLE_help" contentTypeId="DOCUMENT" contentName="Use of help file" templateDataResourceId="HELP_TEMPL" dataResourceId="EXAMPLE_help" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="EXAMPLE_help_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE_help_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Usage de l'aide" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="EXAMPLE_help_FR" contentTypeId="DOCUMENT" contentName="Usage de l'aide" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="EXAMPLE_help_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="EXAMPLE_help" contentIdTo="EXAMPLE_help_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+    <DataResource dataResourceId="EXAMPLE_docbook" localeString="en" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE_docbook.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Use of Docbook" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="EXAMPLE_docbook" contentTypeId="DOCUMENT" contentName="Use of Docbook" templateDataResourceId="HELP_TEMPL" dataResourceId="EXAMPLE_docbook" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="EXAMPLE_docbook_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE_docbook_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Usage de docBook" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="EXAMPLE_docbook_FR" contentTypeId="DOCUMENT" contentName="Usage de docBook" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="EXAMPLE_docbook_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="EXAMPLE_docbook" contentIdTo="EXAMPLE_docbook_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+    <DataResource dataResourceId="EXAMPLE_helpfile" localeString="en" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE_helpfile.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Help files" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="EXAMPLE_helpfile" contentTypeId="DOCUMENT" contentName="Help files" templateDataResourceId="HELP_TEMPL" dataResourceId="EXAMPLE_helpfile" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="EXAMPLE_helpfile_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE_helpfile_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Usage des fichiers d'aide" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="EXAMPLE_helpfile_FR" contentTypeId="DOCUMENT" contentName="Usage des fichiers d'aide" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="EXAMPLE_helpfile_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="EXAMPLE_helpfile" contentIdTo="EXAMPLE_helpfile_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+
+    <DataResource dataResourceId="EXAMPLE_devel" localeString="en" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE_devel.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Portal Development" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="EXAMPLE_devel" contentTypeId="DOCUMENT" contentName="Portal Development" templateDataResourceId="HELP_TEMPL" dataResourceId="EXAMPLE_devel" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="EXAMPLE_devel_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE_devel_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Développement" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="EXAMPLE_devel_FR" contentTypeId="DOCUMENT" contentName="Développement" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="EXAMPLE_devel_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="EXAMPLE_devel" contentIdTo="EXAMPLE_devel_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+    <DataResource dataResourceId="EXAMPLE_pages" localeString="en" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE_pages.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Use of Portal Page" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="EXAMPLE_pages" contentTypeId="DOCUMENT" contentName="Use of Portal Page" templateDataResourceId="HELP_TEMPL" dataResourceId="EXAMPLE_pages" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="EXAMPLE_pages_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE_pages_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Utilisation des pages portail" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="EXAMPLE_pages_FR" contentTypeId="DOCUMENT" contentName="Utilisation des pages portail" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="EXAMPLE_pages_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="EXAMPLE_pages" contentIdTo="EXAMPLE_pages_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+    <DataResource dataResourceId="EXAMPLE_portlets" localeString="en" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE_portlets.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Use of Portlet" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="EXAMPLE_portlets" contentTypeId="DOCUMENT" contentName="Use of Portlet" templateDataResourceId="HELP_TEMPL" dataResourceId="EXAMPLE_portlets" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="EXAMPLE_portlets_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE_portlets_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Utilisation des portlets" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="EXAMPLE_portlets_FR" contentTypeId="DOCUMENT" contentName="Utilisation des portlets" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="EXAMPLE_portlets_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="EXAMPLE_portlets" contentIdTo="EXAMPLE_portlets_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+
+    <!-- Help About Portlet Type -->
+    <DataResource dataResourceId="HELP_portlettypes" localeString="en" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_portlettypes.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Portlet types" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_portlettypes" contentTypeId="DOCUMENT" contentName="Portlet types" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_portlettypes" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="H_portlettypes_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_portlettypes_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Types de portlets" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="H_portlettypes_FR" contentTypeId="DOCUMENT" contentName="Types de portlets" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="H_portlettypes_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_portlettypes" contentIdTo="H_portlettypes_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+    <DataResource dataResourceId="HELP_Screenlet" localeString="en" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_Screenlet.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Screenlet type" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_Screenlet" contentTypeId="DOCUMENT" contentName="Screenlet type" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_Screenlet" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="H_Screenlet_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_Screenlet_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Type Screenlet" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="H_Screenlet_FR" contentTypeId="DOCUMENT" contentName="Type Screenlet" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="H_Screenlet_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_Screenlet" contentIdTo="H_Screenlet_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+    <ContentAssoc contentId="HELP_portlettypes" contentIdTo="HELP_Screenlet" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="000" />
+
+    <DataResource dataResourceId="HELP_ScreenletList" localeString="en" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_ScreenletList.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="ScreenletList type" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_ScreenletList" contentTypeId="DOCUMENT" contentName="ScreenletList type" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_ScreenletList" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="H_ScreenletList_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_ScreenletList_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Type ScreenletList" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="H_ScreenletList_FR" contentTypeId="DOCUMENT" contentName="Type ScreenletList" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="H_ScreenletList_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_ScreenletList" contentIdTo="H_ScreenletList_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+    <DataResource dataResourceId="HELP_Empty" localeString="en" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_Empty.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Empty type" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_Empty" contentTypeId="DOCUMENT" contentName="Empty type" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_Empty" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="H_Empty_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_Empty_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Type Empty" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="H_Empty_FR" contentTypeId="DOCUMENT" contentName="Type Empty" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="H_Empty_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_Empty" contentIdTo="H_Empty_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+    <DataResource dataResourceId="HELP_Decorator" localeString="en" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_Decorator.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Decorator type" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_Decorator" contentTypeId="DOCUMENT" contentName="Decorator type" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_Decorator" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="H_Decorator_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE"
+      objectInfo="specialpurpose/example/data/helpdata/HELP_Decorator_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Type Decorator" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="H_Decorator_FR" contentTypeId="DOCUMENT" contentName="Type Decorator" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="H_Decorator_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_Decorator" contentIdTo="H_Decorator_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+    <!-- Help About Portlet Fields -->
+    <DataResource dataResourceId="HELP_portletfields" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="specialpurpose/example/data/helpdata/HELP_portletfields.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Portlet fields" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_portletfields" contentTypeId="DOCUMENT" contentName="Portlet fields" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_portletfields" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="H_portletfields_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="specialpurpose/example/data/helpdata/HELP_portletfields_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Champs des portlets" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="H_portletfields_FR" contentTypeId="DOCUMENT" contentName="Champs des portlets" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="H_portletfields_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_portletfields" contentIdTo="H_portletfields_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+    <!-- Help About Portlet Categories -->
+    <DataResource dataResourceId="HELP_portletcats" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="specialpurpose/example/data/helpdata/HELP_portletcats.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Portlet categories" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_portletcats" contentTypeId="DOCUMENT" contentName="Portlet categories" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_portletcats" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="H_portletcats_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="specialpurpose/example/data/helpdata/HELP_portletcats_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Catégories de portlets" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="H_portletcats_FR" contentTypeId="DOCUMENT" contentName="Catégories de portlets" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="H_portletcats_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_portletcats" contentIdTo="H_portletcats_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+    <!-- Help About Portlet Attributes -->
+    <DataResource dataResourceId="HELP_portletattrs" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="specialpurpose/example/data/helpdata/HELP_portletattrs.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Portlet attributes" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_portletattrs" contentTypeId="DOCUMENT" contentName="Portlet attributes" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_portletattrs" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="H_portletattrs_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="specialpurpose/example/data/helpdata/HELP_portletattrs_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Attributs de portlets" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="H_portletattrs_FR" contentTypeId="DOCUMENT" contentName="Attributs de portlets" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="H_portletattrs_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_portletattrs" contentIdTo="H_portletattrs_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+    <!-- Help About Icons List -->
+    <DataResource dataResourceId="HELP_iconsList" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="specialpurpose/example/data/helpdata/HELP_iconsList.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Icons List" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_iconsList" contentTypeId="DOCUMENT" contentName="Icons List" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_iconsList" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="H_iconsList_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="specialpurpose/example/data/helpdata/HELP_iconsList_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Liste des icônes" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="H_iconsList_FR" contentTypeId="DOCUMENT" contentName="Liste des icônes" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="H_iconsList_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_iconsList" contentIdTo="H_iconsList_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+    <!-- Help about Portal Page Type -->
+    <DataResource dataResourceId="HELP_portaltypes" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="specialpurpose/example/data/helpdata/HELP_portaltypes.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Portal types" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_portaltypes" contentTypeId="DOCUMENT" contentName="Portal types" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_portaltypes" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="H_portaltypes_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="specialpurpose/example/data/helpdata/HELP_portaltypes_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Types de pages portails" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="H_portaltypes_FR" contentTypeId="DOCUMENT" contentName="Types de pages portails" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="H_portaltypes_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_portaltypes" contentIdTo="H_portaltypes_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+    <DataResource dataResourceId="HELP_PPAGE_MGMT" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="specialpurpose/example/data/helpdata/HELP_PPAGE_MGMT.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Page Mgmt" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_PPAGE_MGMT" contentTypeId="DOCUMENT" contentName="Page Mgmt" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_PPAGE_MGMT" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="HELP_PPAGE_MGMT_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="specialpurpose/example/data/helpdata/HELP_PPAGE_MGMT_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Page de gestion" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_PPAGE_MGMT_FR" contentTypeId="DOCUMENT" contentName="Page de gestion" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="HELP_PPAGE_MGMT_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_PPAGE_MGMT" contentIdTo="HELP_PPAGE_MGMT_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+    <DataResource dataResourceId="HELP_PPAGE_RECAP" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="specialpurpose/example/data/helpdata/HELP_PPAGE_RECAP.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Page Recap" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_PPAGE_RECAP" contentTypeId="DOCUMENT" contentName="Page Recap" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_PPAGE_RECAP" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="HELP_PPAGE_RECAP_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="specialpurpose/example/data/helpdata/HELP_PPAGE_RECAP_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Page récapitulative" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_PPAGE_RECAP_FR" contentTypeId="DOCUMENT" contentName="Page récapitulative" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="HELP_PPAGE_RECAP_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_PPAGE_RECAP" contentIdTo="HELP_PPAGE_RECAP_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+    <DataResource dataResourceId="HELP_PPAGE_NEW" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="specialpurpose/example/data/helpdata/HELP_PPAGE_NEW.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Creation Page" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_PPAGE_NEW" contentTypeId="DOCUMENT" contentName="Creation Page" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_PPAGE_NEW" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="HELP_PPAGE_NEW_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="specialpurpose/example/data/helpdata/HELP_PPAGE_NEW_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Page de création" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_PPAGE_NEW_FR" contentTypeId="DOCUMENT" contentName="Page de création" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="HELP_PPAGE_NEW_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_PPAGE_NEW" contentIdTo="HELP_PPAGE_NEW_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+
+    <!-- Help About Portlet Example -->
+    <DataResource dataResourceId="HELP_FindExample" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="specialpurpose/example/data/helpdata/HELP_FindExample.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Simple Find Portlet" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_FindExample" contentTypeId="DOCUMENT" contentName="Simple Find Portlet" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_FindExample" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="HELP_FindExample_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="specialpurpose/example/data/helpdata/HELP_FindExample_FR.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Portlet de recherche simple" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_FindExample_FR" contentTypeId="DOCUMENT" contentName="Portlet de recherche simple" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="HELP_FindExample_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_FindExample" contentIdTo="HELP_FindExample_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+
+    <!--#################### 2. Tree definition : type TREE_CHILD with sequenceNum and mapKey ####################-->
+    
+    <ContentAssoc contentId="HELP_ROOT" contentIdTo="HELP_EXAMPLE" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="010" mapKey="HELP_EXAMPLE"/>
+      <ContentAssoc contentId="HELP_EXAMPLE" contentIdTo="EXAMPLE_main" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="001" mapKey="EXAMPLE_main"/>
+      <ContentAssoc contentId="HELP_EXAMPLE" contentIdTo="EXAMPLE_help" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="002" mapKey="EXAMPLE_help"/>
+        <ContentAssoc contentId="EXAMPLE_help" contentIdTo="EXAMPLE_docbook" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="001" mapKey="EXAMPLE_docbook"/>
+        <ContentAssoc contentId="EXAMPLE_help" contentIdTo="EXAMPLE_helpfile" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="002" mapKey="EXAMPLE_helpfile"/>
+      <ContentAssoc contentId="HELP_EXAMPLE" contentIdTo="EXAMPLE_devel" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="003" mapKey="EXAMPLE_devel"/>
+        <ContentAssoc contentId="EXAMPLE_devel" contentIdTo="EXAMPLE_pages" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="001" mapKey="EXAMPLE_pages"/>
+          <ContentAssoc contentId="EXAMPLE_pages" contentIdTo="HELP_PPAGE_RECAP" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="000" mapKey="HELP_PPAGE_RECAP"/>
+          <ContentAssoc contentId="EXAMPLE_pages" contentIdTo="HELP_PPAGE_NEW" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="000" mapKey="HELP_PPAGE_NEW"/>
+          <ContentAssoc contentId="EXAMPLE_pages" contentIdTo="HELP_PPAGE_MGMT" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="000" mapKey="HELP_PPAGE_MGMT"/>
+        <ContentAssoc contentId="EXAMPLE_devel" contentIdTo="EXAMPLE_portlets" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="002" mapKey="EXAMPLE_portlets"/>
+          <ContentAssoc contentId="EXAMPLE_portlets" contentIdTo="HELP_portletcats" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="001" mapKey="HELP_portletcats"/>
+          <ContentAssoc contentId="EXAMPLE_portlets" contentIdTo="HELP_portletattrs" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="002" mapKey="HELP_portletattrs"/>
+          <ContentAssoc contentId="EXAMPLE_portlets" contentIdTo="HELP_iconsList" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="003" mapKey="HELP_iconsList"/>
+          <ContentAssoc contentId="EXAMPLE_portlets" contentIdTo="HELP_portlettypes" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="004" mapKey="HELP_portlettypes"/>
+            <ContentAssoc contentId="HELP_portlettypes" contentIdTo="HELP_Screenlet" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="001" mapKey="HELP_Screenlet"/>
+            <ContentAssoc contentId="HELP_portlettypes" contentIdTo="HELP_ScreenletList" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="002" mapKey="HELP_ScreenletList"/>
+            <ContentAssoc contentId="HELP_portlettypes" contentIdTo="HELP_Empty" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="003" mapKey="HELP_Empty"/>
+            <ContentAssoc contentId="HELP_portlettypes" contentIdTo="HELP_Decorator" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="004" mapKey="HELP_Decorator"/>
+          <ContentAssoc contentId="EXAMPLE_portlets" contentIdTo="HELP_portletfields" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="003" mapKey="HELP_portletfields"/>
+
+    <!--#################### 3. Help file form association : add a form on file entry (mostly to be able to have easily access to hint of each field) ####################-->
+
+    <!-- Example on docBook help -->
+    <ContentAssoc contentId="EXAMPLE_help" contentIdTo="EXAMPLE_docbook" mapKey="EXAMPLE_docbook" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="025"/>
+    <ContentAssoc contentId="EXAMPLE_help" contentIdTo="EXAMPLE_docbook" mapKey="EXAMPLE_docbook_editform" contentAssocTypeId="INSTANCE" fromDate="2006-01-12 01:01:01" sequenceNum="025"/>
+    <DataResource dataResourceId="EXAMPLE_EditForm"  objectInfo="component://example/widget/example/ExampleScreens.xml#ExampleEditForm" dataResourceTypeId="URL_RESOURCE" dataTemplateTypeId="SCREEN_COMBINED"/>
+    <Content contentId="EXAMPLE_EditForm" contentTypeId="DOCUMENT" contentName="Example Fields" dataResourceId="EXAMPLE_EditForm"/>
+    <ContentAssoc contentId="EXAMPLE_help" contentIdTo="EXAMPLE_EditForm" mapKey="EXAMPLE_docbook" fromDate="2006-01-12 01:01:01" sequenceNum="026" contentAssocTypeId="INSTANCE"/>
+    <ContentAssoc contentId="EXAMPLE_help" contentIdTo="EXAMPLE_EditForm" mapKey="EXAMPLE_docbook_editform" fromDate="2006-01-12 01:01:02" sequenceNum="026" contentAssocTypeId="INSTANCE"/>
+    
+    <!-- Form addition to HELP_portletfields file -->
+    <ContentAssoc contentId="EXAMPLE_portlets" contentIdTo="HELP_portletfields" mapKey="portletfields" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="025"/>
+    <DataResource dataResourceId="FORM_portletfields"  objectInfo="component://webtools/widget/PortalAdmScreens.xml#ShowPortalPortletHelp" dataResourceTypeId="URL_RESOURCE" dataTemplateTypeId="SCREEN_COMBINED"/>
+    <Content contentId="FORM_portletfields" contentTypeId="DOCUMENT" contentName="Portlet Fields" dataResourceId="FORM_portletfields"/>
+    <ContentAssoc contentId="EXAMPLE_portlets" contentIdTo="FORM_portletfields" mapKey="portletfields" fromDate="2006-01-12 01:01:02" sequenceNum="026" contentAssocTypeId="INSTANCE"/>
+
+    <!--#################### 4. Portlet Help configuration : name, location, alternate locale ####################-->
+
+    <!-- configuration will be done after file creation in previous part -->
+    <PortalPortlet portalPortletId="ListExample" helpName="HELP_ScreenletList"/>
+
+    <!--#################### 5. Portal Page Help configuration : name, location, alternate locale ####################-->
+
+    <!-- Also associate previous help files to portal page examples corresponding to each portal page types -->
+    <PortalPage portalPageId="ExampleMgmt" helpContentId="HELP_PPAGE_MGMT"/>
+    <PortalPage portalPageId="ExampleRecap" helpContentId="HELP_PPAGE_RECAP"/>
+    <PortalPage portalPageId="ExampleNew" helpContentId="HELP_PPAGE_NEW"/>
+    <PortalPage portalPageId="ExampleFeatureNew" helpContentId="HELP_PPAGE_NEW"/>
+    <PortalPage portalPageId="IconsList" helpContentId="HELP_iconsList"/>
+    <PortalPortlet portalPortletId="IconsList" helpName="HELP_iconsList"/>
+
+    <!-- To be able to link with some other contents on same page-->
+<!--    <ContentAssoc contentId="HELP_PPAGE_MGMT" contentIdTo="HELP_Screenlet" contentAssocTypeId="INSTANCE" fromDate="2006-01-12 01:01:02" sequenceNum="030" mapKey="HELP_Screenlet"/>-->
+<!--    <ContentAssoc contentId="HELP_PPAGE_MGMT" contentIdTo="HELP_ScreenletList" contentAssocTypeId="INSTANCE" fromDate="2006-01-12 01:01:02" sequenceNum="030" mapKey="HELP_ScreenletList"/>-->
+<!--    <ContentAssoc contentId="HELP_PPAGE_MGMT" contentIdTo="HELP_Decorator" contentAssocTypeId="INSTANCE" fromDate="2006-01-12 01:01:02" sequenceNum="030" mapKey="HELP_Decorator"/>-->
+<!--    <ContentAssoc contentId="HELP_PPAGE_MGMT" contentIdTo="HELP_Empty" contentAssocTypeId="INSTANCE" fromDate="2006-01-12 01:01:02" sequenceNum="030" mapKey="HELP_Empty"/>-->
+
+    <!--#################### 6. Group definition : type INSTANCE and mapKey ####################-->
+    
     <ContentAssoc contentId="HELP_EXAMPLE" contentIdTo="EXAMPLE_main" mapKey="EXAMPLE_FindExample" fromDate="2006-01-12 01:01:02" sequenceNum="000" contentAssocTypeId="INSTANCE"/>
-
-    <DataResource dataResourceId="EXAMPLE_docbook" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
-        objectInfo="specialpurpose/example/data/helpdata/HELP_EXAMPLE_docbook.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Example docBook usage" mimeTypeId="text/xml" isPublic="Y" />
-    <Content contentId="EXAMPLE_docbook" contentTypeId="DOCUMENT" contentName="Example Docbook usage" templateDataResourceId="HELP_TEMPL" dataResourceId="EXAMPLE_docbook" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
-    <ContentAssoc contentId="HELP_EXAMPLE" contentIdTo="EXAMPLE_docbook" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="000" mapKey="EXAMPLE_docbook"/>
-
-
+    
+    <!-- To regroup several files or forms ordered into a same page call AllPortletType -->
+    <ContentAssoc contentId="HELP_PPAGE_MGMT" contentIdTo="HELP_Screenlet" contentAssocTypeId="INSTANCE" fromDate="2006-01-12 01:01:02" sequenceNum="030" mapKey="AllPortletType"/>
+    <ContentAssoc contentId="HELP_PPAGE_MGMT" contentIdTo="HELP_ScreenletList" contentAssocTypeId="INSTANCE" fromDate="2006-01-12 01:01:02" sequenceNum="040" mapKey="AllPortletType"/>
+    <ContentAssoc contentId="HELP_PPAGE_MGMT" contentIdTo="HELP_Decorator" contentAssocTypeId="INSTANCE" fromDate="2006-01-12 01:01:02" sequenceNum="050" mapKey="AllPortletType"/>
+    <ContentAssoc contentId="HELP_PPAGE_MGMT" contentIdTo="HELP_Empty" contentAssocTypeId="INSTANCE" fromDate="2006-01-12 01:01:02" sequenceNum="060" mapKey="AllPortletType"/>
+    <ContentAssoc contentId="HELP_PPAGE_MGMT" contentIdTo="HELP_portletfields" contentAssocTypeId="INSTANCE" fromDate="2006-01-12 01:01:02" sequenceNum="070" mapKey="AllPortletType"/>
+    <ContentAssoc contentId="HELP_PPAGE_MGMT" contentIdTo="FORM_portletfields" contentAssocTypeId="INSTANCE" fromDate="2006-01-12 01:01:02" sequenceNum="075" mapKey="AllPortletType"/>
 </entity-engine-xml>
