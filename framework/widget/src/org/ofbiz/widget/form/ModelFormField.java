@@ -1089,11 +1089,13 @@ public class ModelFormField {
     }
 
     public String getTooltip(Map<String, Object> context) {
-        if (tooltip != null && !tooltip.isEmpty()) {
-            return tooltip.expandString(context);
-        } else {
-            return "";
+        String tooltipString = "";
+        if (tooltip != null && !tooltip.isEmpty()) tooltipString = tooltip.expandString(context);
+        if (this.getEncodeOutput()) {
+            StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+            if (simpleEncoder != null) tooltipString = simpleEncoder.encode(tooltipString);
         }
+        return tooltipString;
     }
 
     public String getUseWhen(Map<String, Object> context) {
