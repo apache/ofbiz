@@ -87,7 +87,7 @@ function fieldLookup1(obj_target, args, presentation) {
     // passing methods
     this.popup = lookup_popup1;
     this.popup2 = lookup_popup2;
-    
+
     // validate input parameters
     if (! obj_target) return lookup_error("Error calling the field lookup: no target control specified");
     if (obj_target.value == null) return lookup_error("Error calling the field lookup: parameter specified is not valid target control");
@@ -108,7 +108,7 @@ function fieldLookup2(obj_target, obj_target2, args, presentation) {
     if (! obj_target2) return lookup_error("Error calling the field lookup: no target2 control specified");
     if (obj_target2.value == null) return lookup_error("Error calling the field lookup: parameter specified is not valid target2 control");
     target2 = obj_target2;
-    
+
 }
 
 function lookup_popup1(view_name, form_name, viewWidth, viewheight) {
@@ -157,7 +157,7 @@ function initiallyCollapse() {
             if (childElements[j].className == 'expanded' || childElements[j].className == 'collapsed') {
                 break;
             }
-        }        
+        }
         var childEle = childElements[j].firstChild;
         CollapsePanel(childEle, 'lec' + COLLAPSE);
         break;
@@ -185,7 +185,7 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
     if(!presentation) {
       var presentation = "layer"
     }
-    
+
     // create Link Element with unique Key
     var lookupId = GLOBAL_LOOKUP_REF.createNextKey();
     var inputBox = document.getElementById(inputFieldId);
@@ -213,7 +213,7 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
         ajaxUrl = ajaxUrl.replace(ajaxUrl.substring(0, ajaxUrl.indexOf(",")), newInputBoxId);
         new ajaxAutoCompleter(ajaxUrl, showDescription, defaultMinLength, defaultDelay, formName);
     }
-    
+
     var positioning = null;
     if (position == "topleft") {
         positioning = ['left', 'top'];
@@ -238,7 +238,7 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
             return false;
         }
     }
-    
+
     // Lookup Configuration
     var dialogOpts = {
         modal: (modal == "true") ? true : false,
@@ -272,7 +272,7 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
                 },
                 success: function(data) {
                     jQuery("#" + lookupId).html(data);
-                    
+
                     lookupFormAction = jQuery("#" + lookupId + " form:first").attr("action");
                     modifySubmitButton(lookupId);
                     jQuery("#" + lookupId).bind("keypress", lookup_onKeyEnter);
@@ -286,7 +286,7 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
                         prevLookup = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).lookupId;
                     }
                     identifyLookup(lookupId);
-                    
+
                     if (prevLookup) {
                         GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).prevLookup = prevLookup;
                     }
@@ -301,7 +301,7 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
         },
         close: function() {
             jQuery("#" + lookupId).unbind("keypress", lookup_onKeyEnter);
-            
+
             waitSpinnerHide();
 
             //when the window is closed the prev Lookup get the focus (if exists)
@@ -315,11 +315,11 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
             }
         }
     };
-    
+
     // init Dialog and register
     // create an object with all Lookup Informationes that are needed
     var dialogRef = jQuery("#" + lookupId).dialog(dialogOpts);
-    
+
     //setting up global variabels, for external access
     this.inputBoxId = inputBox.id;
     this.lookupId = lookupId;
@@ -333,7 +333,7 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
     this.dialogRef = dialogRef;
     //write external settings in global window manager
     GLOBAL_LOOKUP_REF.setReference(lookupId, this);
-    
+
     // bind click Event to Dialog button
     jQuery("#" + lookupId + "_button").click(
         function (){
@@ -349,7 +349,7 @@ function ConstructLookup(requestUrl, inputFieldId, dialogTarget, dialogOptionalT
     );
 
     // close the dialog when clicking outside the dialog area
-    jQuery(".ui-widget-overlay").live("click", function() {  
+    jQuery(".ui-widget-overlay").live("click", function() {
         if(!ACTIVATED_LOOKUP || lookupId==ACTIVATED_LOOKUP){
             jQuery("#" + lookupId).dialog("close");
         }
@@ -372,31 +372,31 @@ function FieldLookupCounter() {
         this.refArr[""+ key + ""] = ref;
         return this.refArr[key];
     };
-    
+
     this.getReference = function (key) {
         // when key does not exist return null?
         return this.refArr[key] != null ? this.refArr[key] : null;
     };
-    
+
     this.getLastReference = function () {
         return (this.countFields() -1) + "_lookupId";
     }
-    
+
     this.createNextKey = function () {
-        return this.countFields() + "_lookupId";       
+        return this.countFields() + "_lookupId";
     };
-    
+
     this.countFields = function () {
         var count = 0;
         jQuery.each(this.refArr, function (itm) {count++;});
         return count;
     };
-    
+
     this.removeReference = function (key) {
         // deletes the Array entry (doesn't effect the array length)
         delete this.refArr[key];
     };
-    
+
 };
 var GLOBAL_LOOKUP_REF = new FieldLookupCounter;
 
@@ -413,7 +413,7 @@ function isEmpty(value) {
 }
 
 function identifyLookup (newAl) {
-    if (ACTIVATED_LOOKUP != newAl) { 
+    if (ACTIVATED_LOOKUP != newAl) {
         ACTIVATED_LOOKUP = newAl;
     }
 }
@@ -635,6 +635,7 @@ function lookupFormAjaxRequest(formAction, form) {
     var screenletTitleBar= jQuery("#"+lookupId+" .screenlet-title-bar :visible:first");
     jQuery.ajax({
       url: formAction,
+      type: "POST",
       data: data,
       beforeSend: function(jqXHR, settings) {
         //Here we append the spinner to the lookup screenlet and it will shown till the ajax request is processed.
@@ -719,7 +720,7 @@ function set_duration_value (value) {
     }
     else {
         obj_caller.target = jQuery(obj_caller.targetW);
-    }    
+    }
     var target = obj_caller.target;
 
     write_value(value, target);
@@ -733,7 +734,7 @@ function set_value (value) {
     else {
         obj_caller.target = jQuery(obj_caller.targetW);
     }
-    
+
     var target = obj_caller.target;
     write_value(value, target);
 
@@ -746,14 +747,14 @@ function set_values (value, value2) {
         obj_caller.target2 = GLOBAL_LOOKUP_REF.getReference(ACTIVATED_LOOKUP).target2;
     }
     else {
-        obj_caller.target = jQuery(obj_caller.targetW);        
+        obj_caller.target = jQuery(obj_caller.targetW);
     }
     var target = obj_caller.target;
     var target2 = obj_caller.target2;
     write_value(value, target);
     write_value(value2, target2)
     if (SHOW_DESCRIPTION) setLookDescription(target.attr("id"), value + " " + value2, "", "", SHOW_DESCRIPTION);
-    
+
     closeLookup();
 }
 
@@ -762,7 +763,7 @@ function write_value (value, target) {
         setSourceColor(target);
         target.val(value);
         target.trigger("lookup:changed");
-    }    
+    }
 }
 
 function set_multivalues(value) {
@@ -775,7 +776,7 @@ function set_multivalues(value) {
 
     var thisForm = obj_caller.target.form;
     var evalString = "";
-    
+
     if (arguments.length > 2) {
         for (var i = 1; i < arguments.length; i = i + 2) {
             evalString = "setSourceColor(thisForm." + arguments[i] + ")";
@@ -797,7 +798,7 @@ function closeLookup() {
     }
 }
 
-//load description for lookup fields 
+//load description for lookup fields
 var lookupDescriptionLoaded = function(fieldId, url, params, formName) {
   this.init(fieldId, url, params, formName);
 }
@@ -819,7 +820,7 @@ lookupDescriptionLoaded.prototype.update = function (){
   var fieldSerialized = jQuery("input[name=" + fieldName + "]", jQuery("form[name=" + this.formName + "]")).serialize();
   this.allParams = this.params + '&' + fieldSerialized + '&' + 'searchType=EQUALS';
   _fieldId = this.fieldId;
-  
+
   jQuery.ajax({
     url: this.url,
     type: "POST",
@@ -834,9 +835,9 @@ lookupDescriptionLoaded.prototype.update = function (){
   });
   }
 }
-    
+
 if(typeof String.prototype.trim !== 'function') { // Needed because IE8 does not implement trim yet
   String.prototype.trim = function() {
-    return this.replace(/^\s+|\s+$/g, ''); 
+    return this.replace(/^\s+|\s+$/g, '');
   }
 }
