@@ -1001,7 +1001,7 @@ public class InvoiceServices {
                 Debug.logError(e, errMsg, module);
                 return ServiceUtil.returnError(errMsg);
             }
-            invoicesCreated.add(UtilMisc.toMap("commissionInvoiceId",invoiceId, "salesRepresentative ",partyIdBillFrom));
+            invoicesCreated.add(UtilMisc.<String, String>toMap("commissionInvoiceId",invoiceId, "salesRepresentative ",partyIdBillFrom));;
         }
         Map<String, Object> result = ServiceUtil.returnSuccess("Created Commission invoices for each commission receiving parties " + invoicesCreated);
         Debug.logInfo("Created Commission invoices for each commission receiving parties " + invoicesCreated, module);
