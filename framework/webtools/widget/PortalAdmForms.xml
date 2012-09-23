@@ -68,7 +68,7 @@ under the License.
         <field name="securityServiceName" tooltip="${context.securityServiceName}"><display/></field>
         <field name="securityPermission" tooltip="${context.securityPermission}"><display/></field>
         <field name="securityMainAction" tooltip="${context.securityMainAction}"><display/></field>
-<!--        <field name="back" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">-->
+<!--        <field name="back" title=" " widget-style="buttontext">-->
 <!--            <hyperlink target="ShowPortalPortlet" description="${uiLabelMap.CommonBack}"/>-->
 <!--        </field>-->
         <sort-order>

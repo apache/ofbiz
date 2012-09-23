@@ -241,4 +241,19 @@ under the License.
             </widgets>
         </section>
     </screen>
+    <!--#Bam# portletWidget -->
+    <screen name="PermissionErrorScreen">
+      <section>
+        <widgets>
+            <decorator-screen name="uiLabelDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-section name="body">
+                    <screenlet title="${uiLabelMap.${titleLabel}}">
+                         <label style="h3" text="${uiLabelMap.CommonPermissionError}"/>
+                    </screenlet>
+                </decorator-section>
+            </decorator-screen>
+        </widgets>
+      </section>
+    </screen>
+    <!--#Eam# portletWidget -->
 </screens>

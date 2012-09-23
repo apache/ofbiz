@@ -68,7 +68,7 @@
           <listitem><para>Portlet :
             <itemizedlist>
               <listitem><para>Findxxxs : formulaire de recherche</para></listitem>
-              <listitem><para>Listxxxs : portlet listant l'enregistrement de l'entité, souvent en tant que résultat de la portlet xxxFind</para></listitem>
+              <listitem><para>Listxxxs : portlet listant l'enregistrement de l'entité, souvent en tant que résultat de la portlet Findxxxs</para></listitem>
               <listitem><para>xxxSummary : portlet de petite ou moyenne taille uniquement en affichage, destinée à être dans une colonne (25% ou 33%) pour rappeler l'objet sur lequel on travaille</para></listitem>
               <listitem><para>xxxDetailsMenu : contenu identique à xxxSummary avec un menu permettant d'afficher dans un autre emplacement de l'écran le détail d'entités associés</para></listitem>
               <listitem><para>xxxDetail : portlet vide permettant de définir l'emplacement (le container) où s'affiche le détail d'entités associés (cf xxxMenuDetail)</para></listitem>

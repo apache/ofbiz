@@ -85,7 +85,7 @@ License.
           <listitem><para>Portlet:
             <itemizedlist>
               <listitem><para>Findxxxs: search form</para></listitem>
-              <listitem><para>Listxxxs: portlet that lists the record of the entity, often as result of the portlet xxxFind</para></listitem>
+              <listitem><para>Listxxxs: portlet that lists the record of the entity, often as result of the portlet Findxxxs</para></listitem>
               <listitem><para>xxxRecap: small or medium portlet, only on display, meant to be in a column (25% or 33%) in order to remind the object on which you are working</para></listitem>
               <listitem><para>xxxDetailsMenu: same contents as in xxxSummary, with a menu enabling to display the details of associated entities somewhere else on the screen</para></listitem>
               <listitem><para>xxxDetail: empty portlet that enables to define the slot (the container) where the details of associated entities will be displayed (see xxxMenuDetail)</para></listitem>
