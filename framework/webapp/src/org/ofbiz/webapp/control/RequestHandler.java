@@ -58,6 +58,7 @@ import org.ofbiz.webapp.view.ViewFactory;
 import org.ofbiz.webapp.view.ViewHandler;
 import org.ofbiz.webapp.view.ViewHandlerException;
 import org.ofbiz.webapp.website.WebSiteWorker;
+import org.owasp.esapi.errors.EncodingException;
 
 /**
  * RequestHandler - Request Processor Object
@@ -924,7 +925,7 @@ public class RequestHandler {
      * @return
      */
     public String makeQueryString(HttpServletRequest request, ConfigXMLReader.RequestResponse requestResponse) {
-        if (requestResponse == null || 
+        if (requestResponse == null ||
                 (requestResponse.redirectParameterMap.size() == 0 && requestResponse.redirectParameterValueMap.size() == 0)) {
             Map<String, Object> urlParams = UtilHttp.getUrlOnlyParameterMap(request);
             String queryString = UtilHttp.urlEncodeArgs(urlParams, false);
@@ -944,29 +945,31 @@ public class RequestHandler {
                     value = request.getParameter(from);
                 }
 
-                if (UtilValidate.isNotEmpty(value)) {
-                    if (queryString.length() > 1) {
-                        queryString.append("&");
-                    }
-                    queryString.append(name);
-                    queryString.append("=");
-                    queryString.append(value);
-                }
+                addNameValuePairToQueryString(queryString, name, (String) value);
             }
             for (Map.Entry<String, String> entry: requestResponse.redirectParameterValueMap.entrySet()) {
                 String name = entry.getKey();
                 String value = entry.getValue();
 
-                if (UtilValidate.isNotEmpty(value)) {
-                    if (queryString.length() > 1) {
-                        queryString.append("&");
-                    }
-                    queryString.append(name);
-                    queryString.append("=");
-                    queryString.append(value);
-                }
+                addNameValuePairToQueryString(queryString, name, (String) value);
             }
             return queryString.toString();
+        }
+    }
+
+    private void addNameValuePairToQueryString(StringBuilder queryString, String name, String value) {
+        if (UtilValidate.isNotEmpty(value)) {
+            if (queryString.length() > 1) {
+                queryString.append("&");
+            }
+
+            try {
+                queryString.append(StringUtil.defaultWebEncoder.encodeForURL(name));
+                queryString.append("=");
+                queryString.append(StringUtil.defaultWebEncoder.encodeForURL(value));
+            } catch (EncodingException e) {
+                Debug.logError(e, module);
+            }
         }
     }
 
