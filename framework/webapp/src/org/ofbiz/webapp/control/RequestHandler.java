@@ -53,11 +53,11 @@ import org.ofbiz.webapp.event.EventFactory;
 import org.ofbiz.webapp.event.EventHandler;
 import org.ofbiz.webapp.event.EventHandlerException;
 import org.ofbiz.webapp.stats.ServerHitBin;
-import org.ofbiz.webapp.stats.VisitHandler;
 import org.ofbiz.webapp.view.ViewFactory;
 import org.ofbiz.webapp.view.ViewHandler;
 import org.ofbiz.webapp.view.ViewHandlerException;
 import org.ofbiz.webapp.website.WebSiteWorker;
+import org.owasp.esapi.errors.EncodingException;
 
 /**
  * RequestHandler - Request Processor Object
@@ -927,16 +927,25 @@ public class RequestHandler {
                     value = request.getParameter(from);
                 }
 
-                if (UtilValidate.isNotEmpty(value)) {
-                    if (queryString.length() > 1) {
-                        queryString.append("&");
-                    }
-                    queryString.append(name);
-                    queryString.append("=");
-                    queryString.append(value);
-                }
+                addNameValuePairToQueryString(queryString, name, (String) value);
             }
             return queryString.toString();
+        }
+    }
+
+    private void addNameValuePairToQueryString(StringBuilder queryString, String name, String value) {
+        if (UtilValidate.isNotEmpty(value)) {
+            if (queryString.length() > 1) {
+                queryString.append("&");
+            }
+
+            try {
+                queryString.append(StringUtil.defaultWebEncoder.encodeForURL(name));
+                queryString.append("=");
+                queryString.append(StringUtil.defaultWebEncoder.encodeForURL(value));
+            } catch (EncodingException e) {
+                Debug.logError(e, module);
+            }
         }
     }
 
