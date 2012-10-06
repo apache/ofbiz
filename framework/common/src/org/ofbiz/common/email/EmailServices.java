@@ -158,6 +158,7 @@ public class EmailServices {
         String messageId = (String) context.get("messageId");
         String contentType = (String) context.get("contentType");
         Boolean sendPartial = (Boolean) context.get("sendPartial");
+        Boolean isStartTLSEnabled = (Boolean) context.get("startTLSEnabled");
 
         boolean useSmtpAuth = false;
 
@@ -190,6 +191,9 @@ public class EmailServices {
             }
             if (sendPartial == null) {
                 sendPartial = EntityUtilProperties.propertyValueEqualsIgnoreCase("general.properties", "mail.smtp.sendpartial", "true", delegator) ? true : false;
+            }
+            if (isStartTLSEnabled == null) {
+                isStartTLSEnabled = EntityUtilProperties.propertyValueEqualsIgnoreCase("general.properties", "mail.smtp.starttls.enable", "true", delegator);
             }
         } else if (sendVia == null) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonEmailSendMissingParameterSendVia", locale));
@@ -227,6 +231,9 @@ public class EmailServices {
             }
             if (sendPartial != null) {
                 props.put("mail.smtp.sendpartial", sendPartial ? "true" : "false");
+            }
+            if (isStartTLSEnabled) {
+                props.put("mail.smtp.starttls.enable", "true");
             }
 
             session = Session.getInstance(props);
