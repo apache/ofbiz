@@ -1088,7 +1088,11 @@ public class RequestHandler {
                         newURL.insert(questionIndex, sessionId);
                     }
                 }
-                encodedUrl = newURL.toString();
+                if (response != null) {
+                    encodedUrl = response.encodeURL(newURL.toString());
+                } else {
+                    encodedUrl = newURL.toString();
+                }
             }
         } else {
             encodedUrl = newURL.toString();
