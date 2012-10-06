@@ -190,7 +190,7 @@ public class EmailServices {
                 sendPartial = UtilProperties.propertyValueEqualsIgnoreCase("general.properties", "mail.smtp.sendpartial", "true") ? true : false;
             }
             if (isStartTLSEnabled == null) {
-                isStartTLSEnabled = EntityUtilProperties.propertyValueEqualsIgnoreCase("general.properties", "mail.smtp.starttls.enable", "true", delegator);
+                isStartTLSEnabled = UtilProperties.propertyValueEqualsIgnoreCase("general.properties", "mail.smtp.starttls.enable", "true");
             }
         } else if (sendVia == null) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonEmailSendMissingParameterSendVia", locale));
