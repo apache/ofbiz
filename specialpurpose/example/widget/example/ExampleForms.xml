@@ -335,6 +335,10 @@ under the License.
         <field name="Details2" title="${uiLabelMap.IconsTooltips_Details}" position="2">
             <hyperlink target="" image-location="${iconsPurpose.Details}" image-title="${uiLabelMap.IconsTooltips_Details}" />
         </field>
+        <field name="Diff"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Diff2" title="${uiLabelMap.IconsTooltips_Diff}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Diff}" image-title="${uiLabelMap.IconsTooltips_Diff}" />
+        </field>
         <field name="Docfusion"><display also-hidden="false" description=" " size="1"/></field>
         <field name="Docfusion2" title="${uiLabelMap.IconsTooltips_Docfusion}" position="2">
             <hyperlink target="" image-location="${iconsPurpose.Docfusion}" image-title="${uiLabelMap.IconsTooltips_Docfusion}" />
@@ -398,6 +402,10 @@ under the License.
         <field name="Group"><display also-hidden="false" description=" " size="1"/></field>
         <field name="Group2" title="${uiLabelMap.IconsTooltips_Group}" position="2">
             <hyperlink target="" image-location="${iconsPurpose.Group}" image-title="${uiLabelMap.IconsTooltips_Group}" />
+        </field>
+        <field name="Help"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="Help2" title="${uiLabelMap.CommonHelp}" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.Help}" image-title="${uiLabelMap.CommonHelp}" also-hidden="false" />
         </field>
         <field name="Hierarchy"><display also-hidden="false" description=" " size="1"/></field>
         <field name="Hierarchy2" title="${uiLabelMap.BestPractice_IconHierarchy}" position="2">
@@ -609,8 +617,10 @@ under the License.
             <sort-field name="Filter"/><sort-field name="Filter2"/>
             <sort-field name="View"/><sort-field name="View2"/>
             <sort-field name="Save"/><sort-field name="Save2"/>
+            <sort-field name="Help"/><sort-field name="Help2"/>
             <sort-field name="Switch"/><sort-field name="Switch2"/>
             <sort-field name="Synchronize"/><sort-field name="Synchronize2"/>
+            <sort-field name="Diff"/><sort-field name="Diff2"/>
           </field-group>
           <field-group>
             <sort-field name="Run"/><sort-field name="Run2"/>

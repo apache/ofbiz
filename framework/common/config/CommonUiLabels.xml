@@ -12948,6 +12948,10 @@
         <value xml:lang="zh_CN">细节</value>
         <value xml:lang="zh_TW">詳細</value>
     </property>
+    <property key="IconsTooltips_Diff">
+        <value xml:lang="en">Difference between two </value>
+        <value xml:lang="fr">Différence entre deux </value>
+    </property>
     <property key="IconsTooltips_Disabled"><!-- copy from CommonDisabled but changed in french -->
         <value xml:lang="ar">غير شغال</value>
         <value xml:lang="de">Deaktiviert</value>
