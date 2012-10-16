@@ -1110,8 +1110,7 @@ under the License.
             <xs:annotation><xs:documentation>Show the portal in configuration mode.</xs:documentation></xs:annotation>
             <xs:simpleType>
                 <xs:restriction base="xs:token">
-                    <xs:enumeration value="true"/>
-                    <xs:enumeration value="false"/>
+                    <xs:pattern value="\$\{[a-zA-Z_]{1}[a-zA-Z0-9_\-.]+\}|true|false" />
                 </xs:restriction>
             </xs:simpleType>
         </xs:attribute>
@@ -1119,8 +1118,7 @@ under the License.
             <xs:annotation><xs:documentation>If a derived private PortalPage exists for the actual UserLogin than show the private PortalPage instead of the original.</xs:documentation></xs:annotation>
             <xs:simpleType>
                 <xs:restriction base="xs:token">
-                    <xs:enumeration value="true"/>
-                    <xs:enumeration value="false"/>
+                    <xs:pattern value="\$\{[a-zA-Z_]{1}[a-zA-Z0-9_\-.]+\}|true|false" />
                 </xs:restriction>
             </xs:simpleType>
         </xs:attribute>

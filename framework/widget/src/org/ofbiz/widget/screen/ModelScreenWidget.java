@@ -1859,7 +1859,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
             }
         }
 
-        protected static Map<String,Object> retrievePortletAttributes (Map<String,Object> context) throws GenericEntityException {
+        public static Map<String,Object> retrievePortletAttributes (Map<String,Object> context) throws GenericEntityException {
             Delegator delegator = (Delegator) context.get("delegator");
             String portalPageId = (String) context.get("portalPageId");
             String portalPortletId = (String) context.get("portalPortletId");
