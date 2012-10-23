@@ -299,6 +299,10 @@ under the License.
         <field name="Cancel2" title="${uiLabelMap.IconsTooltips_Cancel}" position="2">
             <hyperlink target="" image-location="${iconsPurpose.Cancel}" image-title="${uiLabelMap.IconsTooltips_Cancel}" also-hidden="false" />
         </field>
+        <field name="BillingAccount"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="BillingAccount2" title="${uiLabelMap.BestPractice_UseExistingLabel} : AccountingCreateBillingAccount" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.BillingAccount}" image-title="${uiLabelMap.AccountingCreateBillingAccount}" />
+        </field>
         <field name="Category"><display also-hidden="false" description=" " size="1"/></field>
         <field name="Category2" title="${uiLabelMap.BestPractice_IconCategory}" position="2">
             <hyperlink target="" image-location="${iconsPurpose.Category}" image-title="${uiLabelMap.IconsTooltips_Category}" also-hidden="false" />
@@ -318,6 +322,10 @@ under the License.
         <field name="ContactMech"><display also-hidden="false" description=" " size="1"/></field>
         <field name="ContactMech2" title="${uiLabelMap.IconsTooltips_ContactMech}" position="2">
             <hyperlink target="" image-location="${iconsPurpose.ContactMech}" image-title="${uiLabelMap.IconsTooltips_ContactMech}" also-hidden="false" />
+        </field>
+        <field name="CreditCard"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="CreditCard2" title="${uiLabelMap.BestPractice_UseExistingLabel} : PartyCreateNewCreditCard" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.CreditCard}" image-title="${uiLabelMap.PartyCreateNewCreditCard}" />
         </field>
         <field name="Date"><display also-hidden="false" description=" " size="1"/></field>
         <field name="Date2" title="${uiLabelMap.IconsTooltips_Date}" position="2">
@@ -359,6 +367,10 @@ under the License.
         <field name="Edit2" title="${uiLabelMap.IconsTooltips_Edit}" position="2">
           <hyperlink target="" image-location="${iconsPurpose.Edit}" image-title="${uiLabelMap.IconsTooltips_Edit}" also-hidden="false" />
         </field>
+        <field name="EftAccount"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="EftAccount2" title="${uiLabelMap.BestPractice_UseExistingLabel} : PartyCreateNewEftAccount" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.EftAccount}" image-title="${uiLabelMap.PartyCreateNewEftAccount}" />
+        </field>
         <field name="Email"><display also-hidden="false" description=" " size="1"/></field>
         <field name="Email2" title="${uiLabelMap.IconsTooltips_Email}" position="2">
             <hyperlink target="" image-location="${iconsPurpose.Email}" image-title="${uiLabelMap.IconsTooltips_Email}" />
@@ -394,6 +406,10 @@ under the License.
         <field name="Gantt"><display also-hidden="false" description=" " size="1"/></field>
         <field name="Gantt2" title="${uiLabelMap.IconsTooltips_Gantt}" position="2">
             <hyperlink target="" image-location="${iconsPurpose.Gantt}" image-title="${uiLabelMap.IconsTooltips_Gantt}" />
+        </field>
+        <field name="GiftCard"><display also-hidden="false" description=" " size="1"/></field>
+        <field name="GiftCard2" title="${uiLabelMap.BestPractice_UseExistingLabel} : PartyCreateNewGiftCard" position="2">
+            <hyperlink target="" image-location="${iconsPurpose.GiftCard}" image-title="${uiLabelMap.PartyCreateNewGiftCard}" />
         </field>
         <field name="Grants"><display also-hidden="false" description=" " size="1"/></field>
         <field name="Grants2" title="${uiLabelMap.IconsTooltips_Grants}" position="2">
@@ -698,6 +714,10 @@ under the License.
             <sort-field name="Shipment"/><sort-field name="Shipment2"/>
             <sort-field name="Accounting"/><sort-field name="Accounting2"/>
             <sort-field name="Payment"/><sort-field name="Payment2"/>
+            <sort-field name="CreditCard"/><sort-field name="CreditCard2"/>
+            <sort-field name="GiftCard"/><sort-field name="GiftCard2"/>
+            <sort-field name="EftAccount"/><sort-field name="EftAccount2"/>
+            <sort-field name="BillingAccount"/><sort-field name="BillingAccount2"/>
           </field-group>
         </sort-order>
     </form>

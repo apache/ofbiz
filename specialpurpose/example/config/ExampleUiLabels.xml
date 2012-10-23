@@ -942,6 +942,10 @@
         <value xml:lang="en">When Icon explanation start with BP (Best Practice), put the mouse on icon to read the end-user label </value>
         <value xml:lang="fr">Quand l'explication de l'icône est précédée par BP (Bonne Pratique), positionner la souris sur l'icone pour visualiser ce que l'utilisateur verra</value>
     </property>
+    <property key="BestPractice_UseExistingLabel">
+        <value xml:lang="en">BP: There is no dedicated IconsTooltips, use the existing label</value>
+        <value xml:lang="fr">BP: Il n'y a pas d'IconsTooltips dédié, il faut utiliser le label existant</value>
+    </property>
     <property key="PageTitleIconsList">
         <value xml:lang="en">Icons list</value>
         <value xml:lang="fr">Liste des icônes</value>
