@@ -1093,8 +1093,7 @@ under the License.
         <xs:attribute name="share-scope" default="false">
             <xs:simpleType>
                 <xs:restriction base="xs:token">
-                    <xs:enumeration value="true"/>
-                    <xs:enumeration value="false"/>
+                    <xs:pattern value="\$\{[a-zA-Z_]{1}[a-zA-Z0-9_\-.]+\}|true|false" />
                 </xs:restriction>
             </xs:simpleType>
         </xs:attribute>
@@ -1146,8 +1145,7 @@ under the License.
         <xs:attribute name="xml-escape" default="false">
             <xs:simpleType>
                 <xs:restriction base="xs:token">
-                    <xs:enumeration value="true"/>
-                    <xs:enumeration value="false"/>
+                    <xs:pattern value="\$\{[a-zA-Z_]{1}[a-zA-Z0-9_\-.]+\}|true|false" />
                 </xs:restriction>
             </xs:simpleType>
         </xs:attribute>

@@ -96,7 +96,7 @@ under the License.
                 <xs:element minOccurs="0" ref="condition"/>
                 <xs:element minOccurs="0" ref="actions"/>
                 <xs:element minOccurs="0" ref="link"/>
-                <xs:element minOccurs="0" ref="show-portlet"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="show-portlet"/>
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="menu-item"/>
             </xs:sequence>
             <xs:attributeGroup ref="attlist.menu-item"/>

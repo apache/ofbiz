@@ -1959,11 +1959,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
             }
 
             //if (UtilValidate.isEmpty(context.get("areaDivId")))     context.put("areaDivId", "PP_" + portalPageId + portalPortletId + portletSeqId); with id build with portalPageId portalPortletId portletSeqId, it seem, it's no more necessary because always unique
-            if (UtilValidate.isEmpty(context.get("editAreaDivId"))) context.put("editAreaDivId", portletLongId + "_EditArea");
+            if (UtilValidate.isEmpty(context.get("editAreaDivId"))) context.put("editAreaDivId", portletLongId + "_EditArea" + portletSeqId);
             if (UtilValidate.isEmpty(context.get("entity")))        context.put("entity", portletLongId);
             if (UtilValidate.isEmpty(context.get("helpName")))      context.put("helpName", "HELP_" + portalPortletId);
-            if (UtilValidate.isEmpty(context.get("subAreaDivId")))  context.put("subAreaDivId", portletLongId + "_SubArea");
-            if (UtilValidate.isEmpty(context.get("titleLabel")))    context.put("titleLabel", "PageTitle"+portletLongId);
+            if (UtilValidate.isEmpty(context.get("subAreaDivId")))  context.put("subAreaDivId", portletLongId + "_SubArea" + portletSeqId);
+            if (UtilValidate.isEmpty(context.get("titleLabel")))    context.put("titleLabel", "PageTitle" + portletLongId);
 
                 if (UtilValidate.isNotEmpty(portletValue) && UtilValidate.isNotEmpty(portletValue.get("menuName")) ){
                     context.put("menuName", portletValue.get("menuName"));
