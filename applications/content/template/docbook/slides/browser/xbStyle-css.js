@@ -1,6 +1,6 @@
 /*
  * xbStyle-css.js
- * $Revision$ $Date: 2003/02/07 16:04:21 $
+ * $Revision$ $Date$
  *
  */
 

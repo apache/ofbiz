@@ -149,6 +149,7 @@
 <l:gentext key="warning" text="Averto"/>
 <l:gentext key="WARNING" text="AVERTO"/>
 <l:gentext key="and" text="kaj"/>
+<l:gentext key="or" text="or" lang="en"/>
 <l:gentext key="by" text="fare de"/>
 <l:gentext key="Edited" text="Redaktita"/>
 <l:gentext key="edited" text="Redaktita"/>
@@ -157,7 +158,6 @@
 <l:gentext key="in" text="en"/>
 <l:gentext key="lastlistcomma" text=","/>
 <l:gentext key="listcomma" text=","/>
-<l:gentext key="nonexistantelement" text="neekzistanta elemento"/>
 <l:gentext key="notes" text="Notoj"/>
 <l:gentext key="Notes" text="Notoj"/>
 <l:gentext key="Pgs" text="p."/>
@@ -216,6 +216,19 @@
 <l:gentext key="hyphenation-character" text="-"/>
 <l:gentext key="hyphenation-push-character-count" text="2"/>
 <l:gentext key="hyphenation-remain-character-count" text="2"/>
+<l:context name="webhelp"><l:template name="Search" text="Search" lang="en"/>
+<l:template name="Enter_a_term_and_click" text="Enter a term and click " lang="en"/>
+<l:template name="Go" text="Go" lang="en"/>
+<l:template name="to_perform_a_search" text=" to perform a search." lang="en"/>
+<l:template name="txt_filesfound" text="Results" lang="en"/>
+<l:template name="txt_enter_at_least_1_char" text="You must enter at least one character." lang="en"/>
+<l:template name="txt_browser_not_supported" text="JavaScript is disabled on your browser. Please enable JavaScript to enjoy all the features of this site." lang="en"/>
+<l:template name="txt_please_wait" text="Please wait. Search in progress..." lang="en"/>
+<l:template name="txt_results_for" text="Results for: " lang="en"/>
+<l:template name="TableofContents" text="Contents" lang="en"/>
+<l:template name="HighlightButton" text="Toggle search result highlighting" lang="en"/>
+<l:template name="Your_search_returned_no_results" text="Your search returned no results." lang="en"/>
+</l:context>
 <l:context name="styles"><l:template name="person-name" text="first-last"/>
 </l:context>
 <l:context name="title"><l:template name="abstract" text="%t"/>
@@ -309,6 +322,7 @@
 <l:template name="sect5" text="%t"/>
 <l:template name="section" text="%t"/>
 <l:template name="simplesect" text="%t"/>
+<l:template name="topic" text="%t" lang="en"/>
 <l:template name="part" text="%t"/>
 </l:context>
 <l:context name="title-numbered"><l:template name="appendix" text="Apendico %n. %t"/>
@@ -323,6 +337,7 @@
 <l:template name="sect5" text="%n. %t"/>
 <l:template name="section" text="%n. %t"/>
 <l:template name="simplesect" text="%t"/>
+<l:template name="topic" text="%t" lang="en"/>
 </l:context>
 <l:context name="subtitle"><l:template name="appendix" text="%s"/>
 <l:template name="acknowledgements" text="%s" lang="en"/>
@@ -362,6 +377,7 @@
 <l:template name="setindex" text="%s"/>
 <l:template name="sidebar" text="%s"/>
 <l:template name="simplesect" text="%s"/>
+<l:template name="topic" text="%t" lang="en"/>
 <l:template name="toc" text="%s"/>
 </l:context>
 <l:context name="xref"><l:template name="abstract" text="%t"/>
@@ -435,6 +451,7 @@
 <l:template name="docnamelong" text=" en la dokumento titolata %o"/>
 <l:template name="pageabbrev" text="(p. %p)"/>
 <l:template name="Page" text="Paĝo %p"/>
+<l:template name="topic" text="%t" lang="en"/>
 <l:template name="bridgehead" text="la sekcio nomata “%t”"/>
 <l:template name="refsection" text="la sekcio nomata “%t”"/>
 <l:template name="refsect1" text="la sekcio nomata “%t”"/>

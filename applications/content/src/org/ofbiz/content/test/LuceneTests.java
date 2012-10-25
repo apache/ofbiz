@@ -36,7 +36,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.Version;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.content.search.SearchWorker;
@@ -76,7 +75,7 @@ public class LuceneTests extends OFBizTestCase {
         Directory directory = FSDirectory.open(new File(SearchWorker.getIndexPath(null)));
         IndexReader r = null;
         try {
-            r = IndexReader.open(directory, false);
+            r = IndexReader.open(directory);
         } catch (Exception e) {
             // ignore
         }
@@ -85,9 +84,9 @@ public class LuceneTests extends OFBizTestCase {
         String queryLine = "hand";
 
         IndexSearcher searcher = new IndexSearcher(r);
-        Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_35);
+        Analyzer analyzer = new StandardAnalyzer(SearchWorker.LUCENE_VERSION);
 
-        QueryParser parser = new QueryParser(Version.LUCENE_35, "content", analyzer);
+        QueryParser parser = new QueryParser(SearchWorker.LUCENE_VERSION, "content", analyzer);
         Query query = parser.parse(queryLine);
         combQuery.add(query, BooleanClause.Occur.MUST);
 

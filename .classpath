@@ -4,7 +4,7 @@
     <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
     <classpathentry kind="lib" path="applications/content/lib/fontbox-1.4.0.jar"/>
     <classpathentry kind="lib" path="applications/content/lib/jempbox-1.4.0.jar"/>
-    <classpathentry kind="lib" path="applications/content/lib/lucene-core-3.5.0.jar"/>
+    <classpathentry kind="lib" path="applications/content/lib/lucene-core-3.6.1.jar"/>
     <classpathentry kind="lib" path="applications/content/lib/pdfbox-1.4.0.jar"/>
     <classpathentry kind="lib" path="applications/content/lib/dom4j-1.6.1.jar"/>
     <classpathentry kind="lib" path="applications/content/lib/poi-3.8-20120326.jar"/>
@@ -29,10 +29,10 @@
     <classpathentry kind="lib" path="framework/base/lib/hamcrest-all-1.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/fop-1.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/freemarker-2.3.19-null-wildcards.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/httpclient-4.1.1.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/httpclient-cache-4.1.1.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/httpcore-4.1.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/httpmime-4.1.1.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/httpclient-4.2.1.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/httpclient-cache-4.2.1.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/httpcore-4.2.1.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/httpmime-4.2.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/httpunit-1.7.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/ical4j-1.0-rc2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/icu4j-49_1.jar"/>
@@ -48,7 +48,7 @@
     <classpathentry kind="lib" path="framework/base/lib/mail-1.4.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/mx4j-3.0.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/mx4j-remote-3.0.1.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/nekohtml-1.9.7.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/nekohtml-1.9.16.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/owasp-esapi-full-java-1.4.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/resolver-2.9.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/serializer-2.9.1.jar"/>
@@ -64,23 +64,23 @@
     <classpathentry kind="lib" path="framework/base/lib/xmlrpc-server-3.1.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/xstream-1.3.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/xpp3_min-1.1.4c.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/commons/commons-beanutils-1.7.0.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/commons/commons-cli-1.0.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/commons/commons-codec-1.4.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/commons/commons-collections-3.2.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/commons/commons-beanutils-1.8.3.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/commons/commons-cli-1.2.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/commons/commons-codec-1.6.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/commons/commons-collections-3.2.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-compress-1.4.1.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/commons/commons-digester-1.8.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/commons/commons-digester3-3.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-discovery-0.4.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-el-1.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-fileupload-1.2.2.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/commons/commons-io-1.4.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/commons/commons-lang-2.4.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/commons/commons-logging-1.1.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/commons/commons-modeler-2.0.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/commons/commons-net-1.4.1.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/commons/commons-io-2.4.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/commons/commons-lang-2.6.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/commons/commons-logging-1.1.1.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/commons/commons-modeler-2.0.1.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/commons/commons-net-3.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-pool-1.3.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-primitives-1.0.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/commons/commons-validator-1.3.1.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/commons/commons-validator-1.4.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/j2eespecs/geronimo-activation_1.0.2_spec-1.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/j2eespecs/geronimo-j2ee-connector_1.5_spec-1.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/j2eespecs/geronimo-jaxr_1.0_spec-1.0.jar"/>
@@ -108,11 +108,11 @@
     <classpathentry kind="lib" path="specialpurpose/birt/lib/org.eclipse.birt.runtime_3.7.2.v20120214-1408.jar"/>
     <classpathentry kind="lib" path="specialpurpose/birt/lib/viewservlets.jar"/>
     <classpathentry kind="lib" path="framework/catalina/lib/ecj-3.7.2.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.28.catalina-ha.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.28.catalina-tribes.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.28.tomcat-embed-core.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.28.tomcat-embed-jasper.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.28.tomcat-embed-logging-log4j.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.30-catalina-ha.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.30-catalina-tribes.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.30-tomcat-embed-core.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.30-tomcat-embed-jasper.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.30-tomcat-embed-logging-log4j.jar"/>
     <classpathentry kind="lib" path="framework/entity/lib/commons-dbcp-1.4.jar"/>
     <classpathentry kind="lib" path="framework/geronimo/lib/geronimo-connector-2.1.1.jar"/>
     <classpathentry kind="lib" path="framework/geronimo/lib/geronimo-transaction-2.1.1.jar"/>
@@ -207,7 +207,6 @@
     <classpathentry kind="src" path="specialpurpose/pos/src"/>
     <classpathentry kind="src" path="specialpurpose/projectmgr/src"/>
     <classpathentry kind="src" path="specialpurpose/webpos/src"/>
-    <classpathentry kind="src" path="specialpurpose/workflow/src"/>
     <classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>

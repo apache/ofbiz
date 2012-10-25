@@ -4,7 +4,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:doc="http://nwalsh.com/xsl/documentation/1.0" xmlns="http://www.w3.org/1999/xhtml" version="1.0" exclude-result-prefixes="doc">
 
 <!-- ********************************************************************
-     $Id: chunktoc.xsl 8399 2009-04-08 07:37:42Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -92,7 +92,7 @@
 
   <xsl:variable name="filename">
     <xsl:call-template name="make-relative-filename">
-      <xsl:with-param name="base.dir" select="$base.dir"/>
+      <xsl:with-param name="base.dir" select="$chunk.base.dir"/>
       <xsl:with-param name="base.name" select="$chunkfn"/>
     </xsl:call-template>
   </xsl:variable>
@@ -160,6 +160,10 @@
 </xsl:template>
 
 <xsl:template match="article">
+  <xsl:call-template name="process-chunk"/>
+</xsl:template>
+
+<xsl:template match="topic">
   <xsl:call-template name="process-chunk"/>
 </xsl:template>
 
@@ -302,6 +306,7 @@
 
 <xsl:template match="*" mode="process.root">
   <xsl:apply-templates select="."/>
+  <xsl:call-template name="generate.css"/>
 </xsl:template>
 
 <xsl:template name="make.lots">
@@ -430,7 +435,7 @@
         <xsl:call-template name="write.chunk">
           <xsl:with-param name="filename">
             <xsl:call-template name="make-relative-filename">
-              <xsl:with-param name="base.dir" select="$base.dir"/>
+              <xsl:with-param name="base.dir" select="$chunk.base.dir"/>
               <xsl:with-param name="base.name">
                 <xsl:call-template name="dbhtml-dir"/>
                 <xsl:apply-templates select="." mode="recursive-chunk-filename">
@@ -471,7 +476,7 @@
   <xsl:if test="string($lot) != ''">
     <xsl:variable name="filename">
       <xsl:call-template name="make-relative-filename">
-        <xsl:with-param name="base.dir" select="$base.dir"/>
+        <xsl:with-param name="base.dir" select="$chunk.base.dir"/>
         <xsl:with-param name="base.name">
           <xsl:call-template name="dbhtml-dir"/>
           <xsl:value-of select="$type"/>
@@ -483,6 +488,7 @@
 
     <xsl:variable name="href">
       <xsl:call-template name="make-relative-filename">
+        <xsl:with-param name="base.dir" select="''"/>
         <xsl:with-param name="base.name">
           <xsl:call-template name="dbhtml-dir"/>
           <xsl:value-of select="$type"/>

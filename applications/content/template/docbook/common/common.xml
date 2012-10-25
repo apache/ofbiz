@@ -4,7 +4,7 @@
   <info>
     <title>Common » Base Template Reference</title>
     <releaseinfo role="meta">
-      $Id: common.xsl 8274 2009-02-27 07:02:45Z bobstayton $
+      $Id$
     </releaseinfo>
   </info>
   
@@ -616,6 +616,25 @@ unchanged.</para>
     
 <para>Returns a node (the result of evaluating the
     <parameter>profile</parameter> parameter)</para>
+
+  </refsect1></refentry>
+
+<refentry xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="template.graphic.format.content-type">
+<refnamediv>
+<refname>graphic.format.content-type</refname>
+<refpurpose>Returns mimetype for media format</refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+<synopsis>&lt;xsl:template name="graphic.format.content-type"&gt;
+&lt;xsl:param name="format"/&gt;
+  ...
+&lt;/xsl:template&gt;</synopsis>
+</refsynopsisdiv>
+<refsect1><title>Description</title>
+    
+<para>This takes as input a 'format' param and returns
+    a mimetype string.  It uses an xsl:choose after first
+    converting the input to all uppercase.</para>
 
   </refsect1></refentry>
 </reference>

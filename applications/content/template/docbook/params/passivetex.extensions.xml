@@ -20,7 +20,7 @@
 <refsection><info><title>Description</title></info>
 
 <para>If non-zero,
-<link xlink:href="http://www.tei-c.org.uk/Software/passivetex/">PassiveTeX</link>
+<link xlink:href="http://projects.oucs.ox.ac.uk/passivetex/">PassiveTeX</link>
 extensions will be used. At present, this consists of PDF bookmarks
 and sorted index terms.
 </para>

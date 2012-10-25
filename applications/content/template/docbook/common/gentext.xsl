@@ -5,7 +5,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: gentext.xsl 8396 2009-04-07 07:41:35Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -90,7 +90,7 @@
 </xsl:template>
 
 <xsl:template match="section|sect1|sect2|sect3|sect4|sect5|simplesect
-                     |bridgehead"
+                     |bridgehead|topic"
               mode="object.title.template">
   <xsl:variable name="is.numbered">
     <xsl:call-template name="label.this.section"/>
@@ -234,6 +234,9 @@
 
   <xsl:variable name="context">
     <xsl:choose>
+      <xsl:when test="self::equation and not(title) and not(info/title)">
+         <xsl:value-of select="'xref-number'"/>
+      </xsl:when>
       <xsl:when test="string($autonumber) != 0 
                       and $number-and-title-template != 0
                       and $xref.with.number.and.title != 0">
@@ -397,7 +400,7 @@
       <xsl:message>
         <xsl:text>Xref is only supported to listitems in an</xsl:text>
         <xsl:text> orderedlist: </xsl:text>
-        <xsl:value-of select="@id|@xml:id"/>
+        <xsl:value-of select=".//@id|.//@xml:id"/>
       </xsl:message>
       <xsl:text>???</xsl:text>
     </xsl:when>

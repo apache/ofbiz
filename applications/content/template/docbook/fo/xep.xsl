@@ -5,7 +5,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: xep.xsl 7531 2007-10-17 18:06:49Z dcramer $
+     $Id$
      ********************************************************************
      (c) Stephane Bline Peregrine Systems 2001
      Implementation of xep extensions:
@@ -32,6 +32,9 @@
           </xsl:when>
           <xsl:when test="$authors[self::corpauthor]">
             <xsl:value-of select="$authors"/>
+          </xsl:when>
+          <xsl:when test="$authors[orgname]">
+            <xsl:value-of select="$authors/orgname"/>
           </xsl:when>
           <xsl:otherwise>
             <xsl:call-template name="person.name">
@@ -109,7 +112,7 @@
 </xsl:template>
 
 <xsl:template match="set|book|part|reference|preface|chapter|appendix|article
-                     |glossary|bibliography|index|setindex
+                     |glossary|bibliography|index|setindex|topic
                      |refentry|refsynopsisdiv
                      |refsect1|refsect2|refsect3|refsection
                      |sect1|sect2|sect3|sect4|sect5|section"
@@ -149,7 +152,7 @@
       </xsl:variable>
       <xsl:if test="contains($toc.params, 'toc')
                     and set|book|part|reference|section|sect1|refentry
-                        |article|bibliography|glossary|chapter
+                        |article|topic|bibliography|glossary|chapter
                         |appendix">
         <rx:bookmark internal-destination="toc...{$id}">
           <rx:bookmark-label>

@@ -13,7 +13,7 @@
                 version="1.0">
 
 <!-- ********************************************************************
-     $Id: autoidx.xsl 8399 2009-04-08 07:37:42Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the DocBook XSL Stylesheet distribution.

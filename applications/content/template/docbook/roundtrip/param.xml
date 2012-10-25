@@ -3,7 +3,7 @@
   <info>
     <title>Roundtrip Parameter Reference</title>
     <releaseinfo role="meta">
-      $Id: param.xweb 7042 2007-07-17 04:28:48Z xmldoc $
+      $Id$
     </releaseinfo>
     <author>
       <personname>
@@ -12,10 +12,8 @@
       </personname>
     </author>
     <copyright>
-      <year>2007</year>
-      <year>2006</year>
-      <year>2005</year>
-      <year>2004</year>
+      <year>2004-2011</year>
+     
       <holder>Steve Ball</holder>
     </copyright>
     <abstract>
@@ -88,7 +86,7 @@
 &lt;!-- This file is generated from param.xweb --&gt;
 
 &lt;!-- ********************************************************************
-     $Id: param.xweb 7042 2007-07-17 04:28:48Z xmldoc $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.

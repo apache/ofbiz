@@ -59,15 +59,12 @@ public class TestRunContainer implements Container {
 
     private String name;
 
-    /**
-     * @see org.ofbiz.base.container.Container#init(String[] args, String name, String configFile)
-     */
+    @Override
     public void init(String[] args, String name, String configFile) {
         this.name = name;
         this.configFile = configFile;
         if (args != null) {
-            for (int i = 0; i < args.length; i++) {
-                String argument = args[i];
+            for (String argument : args) {
                 // arguments can prefix w/ a '-'. Just strip them off
                 if (argument.startsWith("-")) {
                     int subIdx = 1;

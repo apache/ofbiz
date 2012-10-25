@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="ASCII"?>
+<?xml version="1.0"?>
 <!-- ********************************************************************
-     $Id: lib.xweb 7102 2007-07-20 15:35:24Z xmldoc $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -410,26 +410,76 @@
   <xsl:param name="uriB" select="''"/>
   <xsl:param name="return" select="'A'"/>
 
+  <!-- Resolve any ../ in the path -->
+  <xsl:variable name="trimmed.uriA">
+    <xsl:call-template name="resolve.path">
+      <xsl:with-param name="filename" select="$uriA"/>
+    </xsl:call-template>
+  </xsl:variable>
+
+  <xsl:variable name="trimmed.uriB">
+    <xsl:call-template name="resolve.path">
+      <xsl:with-param name="filename" select="$uriB"/>
+    </xsl:call-template>
+  </xsl:variable>
+
   <xsl:choose>
-    <xsl:when test="contains($uriA, '/') and contains($uriB, '/')                     and substring-before($uriA, '/') = substring-before($uriB, '/')">
+    <xsl:when test="contains($trimmed.uriA, '/') and contains($trimmed.uriB, '/')                     and substring-before($trimmed.uriA, '/') = substring-before($trimmed.uriB, '/')">
       <xsl:call-template name="trim.common.uri.paths">
-        <xsl:with-param name="uriA" select="substring-after($uriA, '/')"/>
-        <xsl:with-param name="uriB" select="substring-after($uriB, '/')"/>
+        <xsl:with-param name="uriA" select="substring-after($trimmed.uriA, '/')"/>
+        <xsl:with-param name="uriB" select="substring-after($trimmed.uriB, '/')"/>
         <xsl:with-param name="return" select="$return"/>
       </xsl:call-template>
     </xsl:when>
     <xsl:otherwise>
       <xsl:choose>
         <xsl:when test="$return = 'A'">
-          <xsl:value-of select="$uriA"/>
+          <xsl:value-of select="$trimmed.uriA"/>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:value-of select="$uriB"/>
+          <xsl:value-of select="$trimmed.uriB"/>
         </xsl:otherwise>
       </xsl:choose>
     </xsl:otherwise>
   </xsl:choose>
 </xsl:template>
+<xsl:template name="resolve.path">
+  <xsl:param name="filename" select="''"/>
+  <xsl:choose>
+    <!-- Leading .. are not eliminated -->
+    <xsl:when test="starts-with($filename, '../')">
+      <xsl:value-of select="'../'"/>
+      <xsl:call-template name="resolve.path">
+        <xsl:with-param name="filename" select="substring-after($filename, '../')"/>
+      </xsl:call-template>
+    </xsl:when>
+    <xsl:when test="contains($filename, '/../')">
+      <xsl:call-template name="resolve.path">
+        <xsl:with-param name="filename">
+          <xsl:call-template name="dirname">
+            <xsl:with-param name="filename" select="substring-before($filename, '/../')"/>
+          </xsl:call-template>
+          <xsl:value-of select="substring-after($filename, '/../')"/>
+        </xsl:with-param>
+      </xsl:call-template>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:value-of select="$filename"/>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
+
+<xsl:template name="dirname">
+  <xsl:param name="filename" select="''"/>
+  <xsl:if test="contains($filename, '/')">
+    <xsl:value-of select="substring-before($filename, '/')"/>
+    <xsl:text>/</xsl:text>
+    <xsl:call-template name="dirname">
+      <xsl:with-param name="filename" select="substring-after($filename, '/')"/>
+    </xsl:call-template>
+  </xsl:if>
+</xsl:template>
+
 
   <xsl:template name="trim.text">
     <xsl:param name="contents" select="."/>
@@ -478,3 +528,4 @@
   </xsl:template>
 
 </xsl:stylesheet>
+

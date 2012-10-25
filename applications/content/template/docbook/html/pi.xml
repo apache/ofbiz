@@ -2,7 +2,7 @@
 
 <reference><info><title>HTML Processing Instruction Reference</title>
     <releaseinfo role="meta">
-      $Id: pi.xsl 8394 2009-04-02 20:31:30Z mzjn $
+      $Id$
     </releaseinfo>
   </info>
   <partintro xml:id="partintro">
@@ -226,6 +226,35 @@
       directory into which any long-description files for that
       <tag>mediaobject</tag> will be written.</para>
 
+
+
+<para>The output directory specification is inherited by all
+chunks of the descendants of the element.  If descendants need
+to go to a different directory, then add another 
+<tag class="xmlpi">dbhtml dir</tag> processing
+instruction as a child of the source element
+for that chunk, and specify the path relative to the
+ancestor path.</para>
+
+
+
+<para>For example, to put most chunk files into 
+<filename class="directory">shared</filename>
+but one chapter into 
+<filename class="directory">exception</filename>
+at the same level, use:</para>
+
+
+<programlisting>&lt;book&gt;
+  &lt;?dbhtml dir="shared"?&gt;
+  ...
+  &lt;chapter&gt;
+    &lt;?dbhtml dir="../exception"?&gt;
+  &lt;/chapter&gt;
+&lt;/book&gt;
+</programlisting>
+
+
   </refsect1><refsect1><title>Parameters</title>
     
 <variablelist>
@@ -259,10 +288,20 @@
   
 </refsynopsisdiv>
 <refsect1><title>Description</title>
-    
+
 <para>When chunking output, use the <tag class="xmlpi">dbhtml filename</tag>
       PI as a child of a chunk source to specify a filename for
-      the output file for that chunk.</para>
+      the output file for that chunk. Include the filename suffix.</para>
+
+
+
+<para>You cannot include a directory path in the filename value,
+or your links may not work.  Add a 
+<tag class="xmlpi">dbhtml dir</tag> processing instruction
+to specify the output directory. You can also combine the two
+specifications in one processing instruction: 
+<tag class="xmlpi">dbhtml dir="mydir" filename="myfile.html"</tag>.</para>
+
 
   </refsect1><refsect1><title>Parameters</title>
     

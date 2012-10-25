@@ -619,14 +619,8 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
     }
 
     public String getString(String name) {
-        // might be nice to add some ClassCastException handling... and auto conversion? hmmm...
         Object object = get(name);
-        if (object == null) return null;
-        if (object instanceof java.lang.String) {
-            return (String) object;
-        } else {
-            return object.toString();
-        }
+        return object == null ? null : object.toString();
     }
 
     public java.sql.Timestamp getTimestamp(String name) {
@@ -657,10 +651,9 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         // this "hack" is needed for now until the Double/BigDecimal issues are all resolved
         Object value = get(name);
         if (value instanceof BigDecimal) {
-            return Double.valueOf(((BigDecimal) value).doubleValue());
-        } else {
-            return (Double) value;
+            return new Double(((BigDecimal) value).doubleValue());
         }
+        return (Double) value;
     }
 
     public BigDecimal getBigDecimal(String name) {
@@ -668,10 +661,9 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         // NOTE: for things to generally work properly BigDecimal should really be used as the java-type in the field type def XML files
         Object value = get(name);
         if (value instanceof Double) {
-            return BigDecimal.valueOf(((Double) value).doubleValue());
-        } else {
-            return (BigDecimal) value;
+            return new BigDecimal(((Double) value).doubleValue());
         }
+        return (BigDecimal) value;
     }
 
     @SuppressWarnings("deprecation")

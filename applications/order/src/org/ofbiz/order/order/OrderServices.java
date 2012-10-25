@@ -42,6 +42,7 @@ import javolution.util.FastSet;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.GeneralRuntimeException;
+import org.ofbiz.base.util.ObjectType;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilGenerics;
@@ -3337,8 +3338,18 @@ public class OrderServices {
 
                         String fulfillmentType = productContentItem.getString("productContentTypeId");
                         if ("FULFILLMENT_EXTASYNC".equals(fulfillmentType) || "FULFILLMENT_EXTSYNC".equals(fulfillmentType)) {
-                            // enternal service fulfillment
-                            String fulfillmentService = (String) content.get("serviceName");
+                            // external service fulfillment
+                            String fulfillmentService = (String) content.get("serviceName"); // Kept for backward compatibility
+                            GenericValue custMethod = null;
+                            if (UtilValidate.isNotEmpty(content.getString("customMethodId"))) {
+                                try {
+                                    custMethod = delegator.findOne("CustomMethod", UtilMisc.toMap("customMethodId", content.get("customMethodId")), true);
+                                } catch (GenericEntityException e) {
+                                    Debug.logError(e,"ERROR: Cannot get CustomMethod associate to Content entity: " + e.getMessage(),module);
+                                    continue;
+                                }
+                            }
+                            if (custMethod != null) fulfillmentService = custMethod.getString("customMethodName");
                             if (fulfillmentService == null) {
                                 Debug.logError("ProductContent of type FULFILLMENT_EXTERNAL had Content with empty serviceName, can not run fulfillment", module);
                             }
@@ -3629,8 +3640,8 @@ public class OrderServices {
             String quantityStr = itemQtyMap.get(key);
             BigDecimal groupQty = BigDecimal.ZERO;
             try {
-                groupQty = new BigDecimal(quantityStr);
-            } catch (NumberFormatException e) {
+                groupQty = (BigDecimal) ObjectType.simpleTypeConvert(quantityStr, "BigDecimal", null, locale);
+            } catch (GeneralException e) {
                 Debug.logError(e, module);
                 return ServiceUtil.returnError(e.getMessage());
             }
@@ -3673,8 +3684,14 @@ public class OrderServices {
                 if (overridePriceMap.containsKey(itemSeqId)) {
                     String priceStr = itemPriceMap.get(itemSeqId);
                     if (UtilValidate.isNotEmpty(priceStr)) {
-                        BigDecimal price = new BigDecimal("-1");
-                        price = new BigDecimal(priceStr).setScale(orderDecimals, orderRounding);
+                        BigDecimal price = null;
+                        try {
+                            price = (BigDecimal) ObjectType.simpleTypeConvert(priceStr, "BigDecimal", null, locale);
+                        } catch (GeneralException e) {
+                            Debug.logError(e, module);
+                            return ServiceUtil.returnError(e.getMessage());
+                        }
+                        price = price.setScale(orderDecimals, orderRounding);
                         cartItem.setBasePrice(price);
                         cartItem.setIsModifiedPrice(true);
                         Debug.logInfo("Set item price: [" + itemSeqId + "] " + price, module);
@@ -3713,24 +3730,31 @@ public class OrderServices {
         // Create Estimated Delivery dates
         for (Map.Entry<String, String> entry : itemEstimatedDeliveryDateMap.entrySet()) {
             String itemSeqId =  entry.getKey();
-            String estimatedDeliveryDate = entry.getValue();
-            if (UtilValidate.isNotEmpty(estimatedDeliveryDate)) {
-                Timestamp deliveryDate = Timestamp.valueOf(estimatedDeliveryDate);
-                ShoppingCartItem cartItem = cart.findCartItem(itemSeqId);
-                cartItem.setDesiredDeliveryDate(deliveryDate);
+
+            // ignore internationalised variant of dates
+            if (!itemSeqId.endsWith("_i18n")) {
+                String estimatedDeliveryDate = entry.getValue();
+                if (UtilValidate.isNotEmpty(estimatedDeliveryDate)) {
+                    Timestamp deliveryDate = Timestamp.valueOf(estimatedDeliveryDate);
+                    ShoppingCartItem cartItem = cart.findCartItem(itemSeqId);
+                    cartItem.setDesiredDeliveryDate(deliveryDate);
+                }
             }
         }
 
         // Create Estimated ship dates
         for (Map.Entry<String, String> entry : itemEstimatedShipDateMap.entrySet()) {
             String itemSeqId =  entry.getKey();
-            String estimatedShipDate = entry.getValue();
-            if (UtilValidate.isNotEmpty(estimatedShipDate)) {
-                Timestamp shipDate = Timestamp.valueOf(estimatedShipDate);
-                ShoppingCartItem cartItem = cart.findCartItem(itemSeqId);
-                cartItem.setEstimatedShipDate(shipDate);
-            }
 
+            // ignore internationalised variant of dates
+            if (!itemSeqId.endsWith("_i18n")) {
+                String estimatedShipDate = entry.getValue();
+                if (UtilValidate.isNotEmpty(estimatedShipDate)) {
+                    Timestamp shipDate = Timestamp.valueOf(estimatedShipDate);
+                    ShoppingCartItem cartItem = cart.findCartItem(itemSeqId);
+                    cartItem.setEstimatedShipDate(shipDate);
+                }
+            }
         }
 
         // update the group amounts
@@ -3738,8 +3762,8 @@ public class OrderServices {
             String quantityStr = itemQtyMap.get(key);
             BigDecimal groupQty = BigDecimal.ZERO;
             try {
-                groupQty = new BigDecimal(quantityStr);
-            } catch (NumberFormatException e) {
+                groupQty = (BigDecimal) ObjectType.simpleTypeConvert(quantityStr, "BigDecimal", null, locale);
+            } catch (GeneralException e) {
                 Debug.logError(e, module);
                 return ServiceUtil.returnError(e.getMessage());
             }
@@ -5569,6 +5593,7 @@ public class OrderServices {
         boolean processAllOrders = context.get("processAllOrders") == null ? false : (Boolean) context.get("processAllOrders");
         if (orderEntryFromDateTime == null && !processAllOrders) {
             // No from date supplied, check to see when this service last ran and use the startDateTime
+            // FIXME: This code is unreliable - the JobSandbox value might have been purged. Use another mechanism to persist orderEntryFromDateTime.
             EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("statusId", "SERVICE_FINISHED", "serviceName", "createAlsoBoughtProductAssocs"));
             EntityFindOptions efo = new EntityFindOptions();
             efo.setMaxRows(1);

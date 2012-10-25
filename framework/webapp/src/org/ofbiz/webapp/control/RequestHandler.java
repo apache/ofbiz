@@ -58,6 +58,7 @@ import org.ofbiz.webapp.view.ViewFactory;
 import org.ofbiz.webapp.view.ViewHandler;
 import org.ofbiz.webapp.view.ViewHandlerException;
 import org.ofbiz.webapp.website.WebSiteWorker;
+import org.owasp.esapi.errors.EncodingException;
 
 /**
  * RequestHandler - Request Processor Object
@@ -65,6 +66,8 @@ import org.ofbiz.webapp.website.WebSiteWorker;
 public class RequestHandler {
 
     public static final String module = RequestHandler.class.getName();
+    private static final Boolean THROW_REQUEST_HANDLER_EXCEPTION_ON_MISSING_LOCAL_REQUEST =  
+        UtilProperties.propertyValueEqualsIgnoreCase("requestHandler.properties", "throwRequestHandlerExceptionOnMissingLocalRequest", "Y");  
 
     public static RequestHandler getRequestHandler(ServletContext servletContext) {
         RequestHandler rh = (RequestHandler) servletContext.getAttribute("_REQUEST_HANDLER_");
@@ -96,7 +99,7 @@ public class RequestHandler {
         return ConfigXMLReader.getControllerConfig(this.controllerConfigURL);
     }
 
-    public void doRequest(HttpServletRequest request, HttpServletResponse response, String requestUri) throws RequestHandlerException {
+    public void doRequest(HttpServletRequest request, HttpServletResponse response, String requestUri) throws RequestHandlerException, RequestHandlerExceptionAllowExternalRequests {
         HttpSession session = request.getSession();
         Delegator delegator = (Delegator) request.getAttribute("delegator");
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
@@ -104,7 +107,7 @@ public class RequestHandler {
     }
 
     public void doRequest(HttpServletRequest request, HttpServletResponse response, String chain,
-            GenericValue userLogin, Delegator delegator) throws RequestHandlerException {
+            GenericValue userLogin, Delegator delegator) throws RequestHandlerException, RequestHandlerExceptionAllowExternalRequests {
 
         long startTime = System.currentTimeMillis();
         HttpSession session = request.getSession();
@@ -152,10 +155,13 @@ public class RequestHandler {
             }
         }
 
-        // still not found so stop
+        // if no matching request is found in the controller, depending on THROW_REQUEST_HANDLER_EXCEPTION_ON_MISSING_LOCAL_REQUEST
+        //  we throw a RequestHandlerException or RequestHandlerExceptionAllowExternalRequests
         if (requestMap == null) {
-            throw new RequestHandlerException(requestMissingErrorMessage);
-        }
+            if (THROW_REQUEST_HANDLER_EXCEPTION_ON_MISSING_LOCAL_REQUEST) throw new RequestHandlerException(requestMissingErrorMessage);
+            else throw new RequestHandlerExceptionAllowExternalRequests();
+         }
+
         String eventReturn = null;
         if (requestMap.metrics != null && requestMap.metrics.getThreshold() != 0.0 && requestMap.metrics.getTotalEvents() > 3 && requestMap.metrics.getThreshold() < requestMap.metrics.getServiceRate()) {
             eventReturn = "threshold-exceeded";
@@ -962,29 +968,33 @@ public class RequestHandler {
                     value = request.getParameter(from);
                 }
 
-                if (UtilValidate.isNotEmpty(value)) {
-                    if (queryString.length() > 1) {
-                        queryString.append("&");
-                    }
-                    queryString.append(name);
-                    queryString.append("=");
-                    queryString.append(value);
-                }
+                addNameValuePairToQueryString(queryString, name, (String) value);
             }
+
             for (Map.Entry<String, String> entry: requestResponse.redirectParameterValueMap.entrySet()) {
                 String name = entry.getKey();
                 String value = entry.getValue();
 
-                if (UtilValidate.isNotEmpty(value)) {
-                    if (queryString.length() > 1) {
-                        queryString.append("&");
-                    }
-                    queryString.append(name);
-                    queryString.append("=");
-                    queryString.append(value);
-                }
+                addNameValuePairToQueryString(queryString, name, value);
             }
+
             return queryString.toString();
+        }
+    }
+
+    private void addNameValuePairToQueryString(StringBuilder queryString, String name, String value) {
+        if (UtilValidate.isNotEmpty(value)) {
+            if (queryString.length() > 1) {
+                queryString.append("&");
+            }
+
+            try {
+                queryString.append(StringUtil.defaultWebEncoder.encodeForURL(name));
+                queryString.append("=");
+                queryString.append(StringUtil.defaultWebEncoder.encodeForURL(value));
+            } catch (EncodingException e) {
+                Debug.logError(e, module);
+            }
         }
     }
 
@@ -1127,8 +1137,11 @@ public class RequestHandler {
                         newURL.insert(questionIndex, sessionId);
                     }
                 }
-
-                encodedUrl = newURL.toString();
+                if (response != null) {
+                    encodedUrl = response.encodeURL(newURL.toString());
+                } else {
+                    encodedUrl = newURL.toString();
+                }
             }
         } else {
             encodedUrl = newURL.toString();

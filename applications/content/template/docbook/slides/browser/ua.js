@@ -1,6 +1,6 @@
 /*
  * ua.js
- * $Revision$ $Date: 2003/02/07 16:04:17 $
+ * $Revision$ $Date$
  */
 
 /* ***** BEGIN LICENSE BLOCK *****

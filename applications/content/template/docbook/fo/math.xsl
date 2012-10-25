@@ -6,7 +6,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: math.xsl 7503 2007-10-08 01:57:30Z xmldoc $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -70,7 +70,7 @@
 </xsl:template>
 
 <xsl:template match="equation/graphic | informalequation/graphic">
-  <xsl:if test="$passivetex.extensions = 0 or $tex.math.in.alt = ''">
+  <xsl:if test="$tex.math.in.alt = ''">
     <fo:block>
       <xsl:call-template name="process.image"/>
     </fo:block>

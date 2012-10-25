@@ -6,7 +6,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: website-common.xsl 8100 2008-08-03 18:15:51Z mzjn $
+     $Id$
      ********************************************************************
 
      This file is part of the WebSite distribution.
@@ -19,7 +19,7 @@
 
 <xsl:import href="../html/docbook.xsl"/>
 <xsl:import href="xbel.xsl"/>
-<xsl:include href="../VERSION"/>
+<xsl:include href="../VERSION.xsl"/>
 <xsl:include href="param.xsl"/>
 <xsl:include href="head.xsl"/>
 <xsl:include href="rss.xsl"/>

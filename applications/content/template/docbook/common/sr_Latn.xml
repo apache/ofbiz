@@ -29,8 +29,8 @@
 
 <l:gentext key="Abstract" text="Sažetak"/>
 <l:gentext key="abstract" text="sažetak"/>
-<l:gentext key="Acknowledgements" text="Acknowledgements" lang="en"/>
-<l:gentext key="acknowledgements" text="Acknowledgements" lang="en"/>
+<l:gentext key="Acknowledgements" text="Priznanja"/>
+<l:gentext key="acknowledgements" text="priznanja"/>
 <l:gentext key="Answer" text="O:"/>
 <l:gentext key="answer" text="o:"/>
 <l:gentext key="Appendix" text="Dodatak"/>
@@ -103,15 +103,15 @@
 <l:gentext key="QandASet" text="Često postavljana pitanja"/>
 <l:gentext key="Question" text="P:"/>
 <l:gentext key="question" text="p:"/>
-<l:gentext key="RefEntry" text=""/>
-<l:gentext key="refentry" text=""/>
+<l:gentext key="RefEntry" text="Stranica"/>
+<l:gentext key="refentry" text="stranica"/>
 <l:gentext key="Reference" text="Referenca"/>
 <l:gentext key="reference" text="referenca"/>
 <l:gentext key="References" text="Reference"/>
 <l:gentext key="RefName" text="Ime"/>
 <l:gentext key="refname" text="ime"/>
-<l:gentext key="RefSection" text=""/>
-<l:gentext key="refsection" text=""/>
+<l:gentext key="RefSection" text="Odeljak"/>
+<l:gentext key="refsection" text="odeljak"/>
 <l:gentext key="RefSynopsisDiv" text="Pregled"/>
 <l:gentext key="refsynopsisdiv" text="pregled"/>
 <l:gentext key="RevHistory" text="Istorija revizija"/>
@@ -149,6 +149,7 @@
 <l:gentext key="warning" text="upozorenje"/>
 <l:gentext key="WARNING" text="UPOZORENJE"/>
 <l:gentext key="and" text="i"/>
+<l:gentext key="or" text="or" lang="en"/>
 <l:gentext key="by" text="od"/>
 <l:gentext key="Edited" text="Uređeno"/>
 <l:gentext key="edited" text="uređeno"/>
@@ -157,7 +158,6 @@
 <l:gentext key="in" text="u"/>
 <l:gentext key="lastlistcomma" text=","/>
 <l:gentext key="listcomma" text=","/>
-<l:gentext key="nonexistantelement" text="nepostojeći element"/>
 <l:gentext key="notes" text="primedbe"/>
 <l:gentext key="Notes" text="Primedbe"/>
 <l:gentext key="Pgs" text="Str."/>
@@ -216,6 +216,19 @@
 <l:gentext key="hyphenation-character" text="-"/>
 <l:gentext key="hyphenation-push-character-count" text="2"/>
 <l:gentext key="hyphenation-remain-character-count" text="2"/>
+<l:context name="webhelp"><l:template name="Search" text="Search" lang="en"/>
+<l:template name="Enter_a_term_and_click" text="Enter a term and click " lang="en"/>
+<l:template name="Go" text="Go" lang="en"/>
+<l:template name="to_perform_a_search" text=" to perform a search." lang="en"/>
+<l:template name="txt_filesfound" text="Results" lang="en"/>
+<l:template name="txt_enter_at_least_1_char" text="You must enter at least one character." lang="en"/>
+<l:template name="txt_browser_not_supported" text="JavaScript is disabled on your browser. Please enable JavaScript to enjoy all the features of this site." lang="en"/>
+<l:template name="txt_please_wait" text="Please wait. Search in progress..." lang="en"/>
+<l:template name="txt_results_for" text="Results for: " lang="en"/>
+<l:template name="TableofContents" text="Contents" lang="en"/>
+<l:template name="HighlightButton" text="Toggle search result highlighting" lang="en"/>
+<l:template name="Your_search_returned_no_results" text="Your search returned no results." lang="en"/>
+</l:context>
 <l:context name="styles"><l:template name="person-name" text="ime-prezime"/>
 </l:context>
 <l:context name="title"><l:template name="abstract" text="%t"/>
@@ -309,6 +322,7 @@
 <l:template name="sect5" text="%t"/>
 <l:template name="section" text="%t"/>
 <l:template name="simplesect" text="%t"/>
+<l:template name="topic" text="%t" lang="en"/>
 <l:template name="part" text="%t"/>
 </l:context>
 <l:context name="title-numbered"><l:template name="appendix" text="Dodatak %n. %t"/>
@@ -323,6 +337,7 @@
 <l:template name="sect5" text="%n. %t"/>
 <l:template name="section" text="%n. %t"/>
 <l:template name="simplesect" text="%t"/>
+<l:template name="topic" text="%t" lang="en"/>
 </l:context>
 <l:context name="subtitle"><l:template name="appendix" text="%s"/>
 <l:template name="acknowledgements" text="%s" lang="en"/>
@@ -362,6 +377,7 @@
 <l:template name="setindex" text="%s"/>
 <l:template name="sidebar" text="%s"/>
 <l:template name="simplesect" text="%s"/>
+<l:template name="topic" text="%t" lang="en"/>
 <l:template name="toc" text="%s"/>
 </l:context>
 <l:context name="xref"><l:template name="abstract" text="%t"/>
@@ -435,6 +451,7 @@
 <l:template name="docnamelong" text=" u dokumentu sa naslovom %o"/>
 <l:template name="pageabbrev" text="(str. %p)"/>
 <l:template name="Page" text="Strana %p"/>
+<l:template name="topic" text="%t" lang="en"/>
 <l:template name="bridgehead" text="odeljak pod imenom „%t“"/>
 <l:template name="refsection" text="odeljak pod imenom „%t“"/>
 <l:template name="refsect1" text="odeljak pod imenom „%t“"/>

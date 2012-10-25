@@ -3,7 +3,7 @@
 <info>
 <title>Slides FO Parameter Reference</title>
 <releaseinfo role="meta">
-$Id: param.xweb 6633 2007-02-21 18:33:33Z xmldoc $
+$Id$
 </releaseinfo>
 <author>
   <personname>
@@ -12,7 +12,7 @@ $Id: param.xweb 6633 2007-02-21 18:33:33Z xmldoc $
   </personname>
 </author>
 <copyright>
-  <year>2002</year>
+  <year>2002-2011</year>
   <holder>Norman Walsh</holder>
 </copyright>
 <abstract>
@@ -329,7 +329,7 @@ around all these parameters.</para>
 &lt;xsl:stylesheet exclude-result-prefixes="src" version="1.0"&gt;
 
 &lt;!-- ********************************************************************
-     $Id: param.xweb 6633 2007-02-21 18:33:33Z xmldoc $
+     $Id$
      ********************************************************************
 
      This file is part of the DocBook Slides Stylesheet distribution.

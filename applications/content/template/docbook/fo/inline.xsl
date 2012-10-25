@@ -10,7 +10,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: inline.xsl 8363 2009-03-21 07:46:57Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -18,6 +18,9 @@
      copyright and other information.
 
      ******************************************************************** -->
+
+<xsl:key name="glossentries" match="glossentry" use="normalize-space(glossterm)"/>
+<xsl:key name="glossentries" match="glossentry" use="normalize-space(glossterm/@baseform)"/>
 
 <xsl:template name="simple.xlink">
   <xsl:param name="node" select="."/>
@@ -89,6 +92,7 @@
 
             <xsl:otherwise>
               <fo:basic-link internal-destination="{$idref}">
+                <xsl:apply-templates select="." mode="simple.xlink.properties"/>
                 <xsl:copy-of select="$content"/>
               </fo:basic-link>
             </xsl:otherwise>
@@ -98,6 +102,7 @@
         <!-- otherwise it's a URI -->
         <xsl:otherwise>
           <fo:basic-link external-destination="url({$xhref})">
+            <xsl:apply-templates select="." mode="simple.xlink.properties"/>
             <xsl:copy-of select="$content"/>
           </fo:basic-link>
           <!-- * Call the template for determining whether the URL for this -->
@@ -129,6 +134,7 @@
 
         <xsl:otherwise>
           <fo:basic-link internal-destination="{$linkend}">
+            <xsl:apply-templates select="." mode="simple.xlink.properties"/>
             <xsl:copy-of select="$content"/>
           </fo:basic-link>
         </xsl:otherwise>
@@ -179,6 +185,7 @@
   </xsl:param>
 
   <fo:inline xsl:use-attribute-sets="monospace.properties">
+    <xsl:call-template name="anchor"/>
     <xsl:if test="@dir">
       <xsl:attribute name="direction">
         <xsl:choose>
@@ -841,9 +848,7 @@
       </xsl:variable>
 
       <xsl:variable name="targets"
-                    select="//glossentry[normalize-space(glossterm)=$term
-                            or normalize-space(glossterm/@baseform)=$term]"/>
-
+                    select="key('glossentries', $term)"/>
       <xsl:variable name="target" select="$targets[1]"/>
 
       <xsl:choose>
@@ -1280,6 +1285,19 @@
 
 <xsl:template match="beginpage">
   <!-- does nothing; this *is not* markup to force a page break. -->
+</xsl:template>
+
+<xsl:template match="*" mode="simple.xlink.properties">
+  <!-- Placeholder template to apply properties to links made from
+       elements other than xref, link, and olink.
+       This template should generate attributes only, as it is
+       applied right after the opening <fo:basic-link> tag.
+       -->
+  <!-- for example
+  <xsl:attribute name="color">blue</xsl:attribute>
+  -->
+  <!-- Since this is a mode, you can create different
+       templates with different properties for different linking elements -->
 </xsl:template>
 
 </xsl:stylesheet>

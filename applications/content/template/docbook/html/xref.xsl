@@ -7,7 +7,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: xref.xsl 8421 2009-05-04 07:49:49Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -23,7 +23,16 @@
 <!-- ==================================================================== -->
 
 <xsl:template match="anchor">
-  <xsl:call-template name="anchor"/>
+  <xsl:choose>
+    <xsl:when test="$generate.id.attributes = 0">
+      <xsl:call-template name="anchor"/>
+    </xsl:when>
+    <xsl:otherwise>
+      <span>
+        <xsl:call-template name="id.attribute"/>
+      </span>
+    </xsl:otherwise>
+  </xsl:choose>
 </xsl:template>
 
 <!-- ==================================================================== -->
@@ -159,12 +168,14 @@
           </xsl:message>
           <a href="{$href}">
             <xsl:apply-templates select="." mode="common.html.attributes"/>
+            <xsl:call-template name="id.attribute"/>
             <xsl:text>???</xsl:text>
           </a>
         </xsl:when>
         <xsl:otherwise>
           <a href="{$href}">
             <xsl:apply-templates select="." mode="common.html.attributes"/>
+            <xsl:call-template name="id.attribute"/>
             <xsl:apply-templates select="$etarget" mode="endterm"/>
           </a>
         </xsl:otherwise>
@@ -198,7 +209,7 @@
 
       <a href="{$href}">
         <xsl:apply-templates select="." mode="class.attribute"/>
-        <xsl:if test="$target/title or $target/*/title">
+        <xsl:if test="$target/title or $target/info/title">
           <xsl:attribute name="title">
             <xsl:apply-templates select="$target" mode="xref-title"/>
           </xsl:attribute>
@@ -230,7 +241,7 @@
 <xsl:template match="*" mode="endterm">
   <!-- Process the children of the endterm element -->
   <xsl:variable name="endterm">
-    <xsl:apply-templates select="child::node()"/>
+    <xsl:apply-templates select="child::node()" mode="no.anchor.mode"/>
   </xsl:variable>
 
   <xsl:choose>
@@ -478,7 +489,7 @@
                           level="any" format="1"/>
             </xsl:when>
             <xsl:when test="local-name($entry/*[1]) = 'abbrev'">
-              <xsl:apply-templates select="$entry/*[1]"/>
+              <xsl:apply-templates select="$entry/*[1]" mode="no.anchor.mode"/>
             </xsl:when>
             <xsl:otherwise>
               <xsl:value-of select="(@id|@xml:id)[1]"/>
@@ -503,7 +514,7 @@
                       level="any" format="1"/>
         </xsl:when>
         <xsl:when test="local-name(*[1]) = 'abbrev'">
-          <xsl:apply-templates select="*[1]"/>
+          <xsl:apply-templates select="*[1]" mode="no.anchor.mode"/>
         </xsl:when>
         <xsl:otherwise>
           <xsl:value-of select="(@id|@xml:id)[1]"/>
@@ -534,7 +545,7 @@
     <xsl:when test="$glossentry.show.acronym = 'primary'">
       <xsl:choose>
         <xsl:when test="acronym|abbrev">
-          <xsl:apply-templates select="(acronym|abbrev)[1]"/>
+          <xsl:apply-templates select="(acronym|abbrev)[1]" mode="no.anchor.mode"/>
         </xsl:when>
         <xsl:otherwise>
           <xsl:apply-templates select="glossterm[1]" mode="xref-to">
@@ -556,7 +567,7 @@
 </xsl:template>
 
 <xsl:template match="glossterm|firstterm" mode="xref-to">
-  <xsl:apply-templates/>
+  <xsl:apply-templates mode="no.anchor.mode"/>
 </xsl:template>
 
 <xsl:template match="index" mode="xref-to">
@@ -601,6 +612,19 @@
   <!-- FIXME: What about "in Chapter X"? -->
 </xsl:template>
 
+<xsl:template match="topic" mode="xref-to">
+  <xsl:param name="referrer"/>
+  <xsl:param name="xrefstyle"/>
+  <xsl:param name="verbose" select="1"/>
+
+  <xsl:apply-templates select="." mode="object.xref.markup">
+    <xsl:with-param name="purpose" select="'xref'"/>
+    <xsl:with-param name="xrefstyle" select="$xrefstyle"/>
+    <xsl:with-param name="referrer" select="$referrer"/>
+    <xsl:with-param name="verbose" select="$verbose"/>
+  </xsl:apply-templates>
+</xsl:template>
+
 <xsl:template match="bridgehead" mode="xref-to">
   <xsl:param name="referrer"/>
   <xsl:param name="xrefstyle"/>
@@ -616,19 +640,6 @@
 </xsl:template>
 
 <xsl:template match="qandaset" mode="xref-to">
-  <xsl:param name="referrer"/>
-  <xsl:param name="xrefstyle"/>
-  <xsl:param name="verbose" select="1"/>
-
-  <xsl:apply-templates select="." mode="object.xref.markup">
-    <xsl:with-param name="purpose" select="'xref'"/>
-    <xsl:with-param name="xrefstyle" select="$xrefstyle"/>
-    <xsl:with-param name="referrer" select="$referrer"/>
-    <xsl:with-param name="verbose" select="$verbose"/>
-  </xsl:apply-templates>
-</xsl:template>
-
-<xsl:template match="qandadiv" mode="xref-to">
   <xsl:param name="referrer"/>
   <xsl:param name="xrefstyle"/>
   <xsl:param name="verbose" select="1"/>
@@ -692,13 +703,13 @@
 
   <xsl:choose>
     <xsl:when test="refmeta/refentrytitle">
-      <xsl:apply-templates select="refmeta/refentrytitle"/>
+      <xsl:apply-templates select="refmeta/refentrytitle" mode="no.anchor.mode"/>
     </xsl:when>
     <xsl:otherwise>
-      <xsl:apply-templates select="refnamediv/refname[1]"/>
+      <xsl:apply-templates select="refnamediv/refname[1]" mode="no.anchor.mode"/>
     </xsl:otherwise>
   </xsl:choose>
-  <xsl:apply-templates select="refmeta/manvolnum"/>
+  <xsl:apply-templates select="refmeta/manvolnum" mode="no.anchor.mode"/>
 </xsl:template>
 
 <xsl:template match="refnamediv" mode="xref-to">
@@ -756,8 +767,7 @@
   <xsl:param name="referrer"/>
   <xsl:param name="xrefstyle"/>
 
-  <!-- to avoid the comma that will be generated if there are several terms -->
-  <xsl:apply-templates/>
+  <xsl:apply-templates mode="no.anchor.mode"/>
 </xsl:template>
 
 <xsl:template match="co" mode="xref-to">
@@ -806,6 +816,7 @@
                                        |ancestor::sect3
                                        |ancestor::sect4
                                        |ancestor::sect5
+                                       |ancestor::topic
                                        |ancestor::refsection
                                        |ancestor::refsect1
                                        |ancestor::refsect2
@@ -891,7 +902,7 @@
     <xsl:text>[</xsl:text>
     <xsl:choose>
       <xsl:when test="local-name(*[1]) = 'abbrev'">
-        <xsl:apply-templates select="*[1]"/>
+        <xsl:apply-templates select="*[1]" mode="no.anchor.mode"/>
       </xsl:when>
       <xsl:otherwise>
         <xsl:value-of select="(@id|@xml:id)[1]"/>
@@ -939,7 +950,7 @@
     <xsl:choose>
       <xsl:when test="count(child::node()) &gt; 0">
         <!-- If it has content, use it -->
-        <xsl:apply-templates/>
+        <xsl:apply-templates mode="no.anchor.mode"/>
       </xsl:when>
       <!-- else look for an endterm -->
       <xsl:when test="@endterm">
@@ -990,9 +1001,18 @@
     <a>
       <xsl:apply-templates select="." mode="common.html.attributes"/>
       <xsl:if test="@id or @xml:id">
-        <xsl:attribute name="name">
-          <xsl:value-of select="(@id|@xml:id)[1]"/>
-        </xsl:attribute>
+        <xsl:choose>
+          <xsl:when test="$generate.id.attributes = 0">
+            <xsl:attribute name="name">
+              <xsl:value-of select="(@id|@xml:id)[1]"/>
+            </xsl:attribute>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:attribute name="id">
+              <xsl:value-of select="(@id|@xml:id)[1]"/>
+            </xsl:attribute>
+          </xsl:otherwise>
+        </xsl:choose>
       </xsl:if>
       <xsl:attribute name="href"><xsl:value-of select="$url"/></xsl:attribute>
       <xsl:if test="$ulink.target != ''">
@@ -1005,7 +1025,7 @@
           <xsl:value-of select="$url"/>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:apply-templates/>
+          <xsl:apply-templates mode="no.anchor.mode"/>
         </xsl:otherwise>
       </xsl:choose>
     </a>
@@ -1148,13 +1168,17 @@
         <xsl:when test="$href != ''">
           <a href="{$href}">
             <xsl:apply-templates select="." mode="common.html.attributes"/>
+            <xsl:call-template name="id.attribute"/>
             <xsl:copy-of select="$hottext"/>
           </a>
           <xsl:copy-of select="$olink.page.citation"/>
           <xsl:copy-of select="$olink.docname.citation"/>
         </xsl:when>
         <xsl:otherwise>
-          <span class="olink"><xsl:copy-of select="$hottext"/></span>
+          <span class="olink">
+            <xsl:call-template name="id.attribute"/>
+            <xsl:copy-of select="$hottext"/>
+          </span>
           <xsl:copy-of select="$olink.page.citation"/>
           <xsl:copy-of select="$olink.docname.citation"/>
         </xsl:otherwise>
@@ -1206,6 +1230,7 @@
         <xsl:when test="$href != ''">
           <a href="{$href}">
             <xsl:apply-templates select="." mode="common.html.attributes"/>
+            <xsl:call-template name="id.attribute"/>
             <xsl:call-template name="olink.hottext"/>
           </a>
         </xsl:when>
@@ -1285,7 +1310,7 @@
 <!-- ==================================================================== -->
 
 <xsl:template match="title" mode="xref">
-  <xsl:apply-templates/>
+  <xsl:apply-templates mode="no.anchor.mode"/>
 </xsl:template>
 
 <xsl:template match="command" mode="xref">

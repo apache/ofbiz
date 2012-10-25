@@ -4,7 +4,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns="http://www.w3.org/1999/xhtml" version="1.0">
 
 <!-- ********************************************************************
-     $Id: changebars.xsl 8128 2008-09-29 17:16:10Z mzjn $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -48,7 +48,7 @@ span.off     {  }
   <xsl:param name="revisionflag" select="@revisionflag"/>
   
   <xsl:choose>
-    <xsl:when test="local-name(.) = 'para'       or local-name(.) = 'formalpara'       or local-name(.) = 'simpara'       or local-name(.) = 'simplesect'       or local-name(.) = 'section'                           or local-name(.) = 'sect1'       or local-name(.) = 'sect2'       or local-name(.) = 'sect3'       or local-name(.) = 'sect4'       or local-name(.) = 'sect5'       or local-name(.) = 'chapter'       or local-name(.) = 'preface'       or local-name(.) = 'itemizedlist'       or local-name(.) = 'orderedlist'       or local-name(.) = 'variablelist'       or local-name(.) = 'varlistentry'       or local-name(.) = 'informaltable'       or local-name(.) = 'informalexample'       or local-name(.) = 'note'       or local-name(.) = 'example'       or local-name(.) = 'mediaobject'       or local-name(.) = 'sidebar'       or local-name(.) = 'glossary'       or local-name(.) = 'glossentry'                           or local-name(.) = 'bibliography'       or local-name(.) = 'index'                           or local-name(.) = 'appendix'">
+    <xsl:when test="local-name(.) = 'para'       or local-name(.) = 'formalpara'       or local-name(.) = 'simpara'       or local-name(.) = 'simplesect'       or local-name(.) = 'section'                           or local-name(.) = 'sect1'       or local-name(.) = 'sect2'       or local-name(.) = 'sect3'       or local-name(.) = 'sect4'       or local-name(.) = 'sect5'       or local-name(.) = 'topic'                           or local-name(.) = 'chapter'       or local-name(.) = 'preface'       or local-name(.) = 'itemizedlist'       or local-name(.) = 'orderedlist'       or local-name(.) = 'variablelist'       or local-name(.) = 'varlistentry'       or local-name(.) = 'informaltable'       or local-name(.) = 'informalexample'       or local-name(.) = 'note'       or local-name(.) = 'example'       or local-name(.) = 'mediaobject'       or local-name(.) = 'sidebar'       or local-name(.) = 'glossary'       or local-name(.) = 'glossentry'                           or local-name(.) = 'bibliography'       or local-name(.) = 'index'                           or local-name(.) = 'appendix'">
       <div class="{$revisionflag}">
 	<xsl:apply-imports/>
       </div>

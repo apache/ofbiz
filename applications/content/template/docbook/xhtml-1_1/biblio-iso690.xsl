@@ -5,7 +5,7 @@
 
 
 <!-- ********************************************************************
-     $Id: biblio.xsl 6402 2006-11-12 08:23:21Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -509,9 +509,9 @@
 </xsl:template>
 
 <xsl:template name="iso690.italic.title">
-  <i>
+  <em xmlns:xslo="http://www.w3.org/1999/XSL/Transform">
     <xsl:call-template name="iso690.make.title"/>
-  </i>
+  </em>
 </xsl:template>
 
 <xsl:template name="iso690.make.title">
@@ -519,9 +519,9 @@
     <xsl:call-template name="gentext.template"><xsl:with-param name="context" select="'iso690'"/><xsl:with-param name="name" select="'submaintitle.sep'"/></xsl:call-template>
   </xsl:param>
   <xsl:apply-templates mode="iso690.mode"/>
-  <xsl:if test="../subtitle">
+  <xsl:if test="../subtitle|../info/subtitle">
     <xsl:value-of select="$submaintitle.sep"/>
-    <xsl:apply-templates mode="iso690.mode" select="../subtitle"/>
+    <xsl:apply-templates mode="iso690.mode" select="../subtitle|../info/subtitle"/>
   </xsl:if>
 </xsl:template>
 
@@ -1245,9 +1245,9 @@
   <xsl:param name="patcountry.sep">
     <xsl:call-template name="gentext.template"><xsl:with-param name="context" select="'iso690'"/><xsl:with-param name="name" select="'patcountry.sep'"/></xsl:call-template>
   </xsl:param>
-  <i>
+  <em xmlns:xslo="http://www.w3.org/1999/XSL/Transform">
     <xsl:apply-templates mode="iso690.mode"/>
-  </i>
+  </em>
   <xsl:value-of select="$patcountry.sep"/>
 </xsl:template>
 
@@ -1256,9 +1256,9 @@
   <xsl:param name="pattype.sep">
     <xsl:call-template name="gentext.template"><xsl:with-param name="context" select="'iso690'"/><xsl:with-param name="name" select="'pattype.sep'"/></xsl:call-template>
   </xsl:param>
-  <i>
+  <em xmlns:xslo="http://www.w3.org/1999/XSL/Transform">
     <xsl:apply-templates mode="iso690.mode"/>
-  </i>
+  </em>
   <xsl:value-of select="$pattype.sep"/>
 </xsl:template>
 

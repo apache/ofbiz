@@ -9,7 +9,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: glossary.xsl 8421 2009-05-04 07:49:49Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -24,13 +24,11 @@
   &setup-language-variable;
   <xsl:call-template name="id.warning"/>
 
-  <div>
+  <xsl:element name="{$div.element}">
     <xsl:apply-templates select="." mode="common.html.attributes"/>
-    <xsl:if test="$generate.id.attributes != 0">
-      <xsl:attribute name="id">
-        <xsl:call-template name="object.id"/>
-      </xsl:attribute>
-    </xsl:if>
+    <xsl:call-template name="id.attribute">
+      <xsl:with-param name="conditional" select="0"/>
+    </xsl:call-template>
 
     <xsl:call-template name="glossary.titlepage"/>
 
@@ -72,7 +70,7 @@
     <xsl:if test="not(parent::article)">
       <xsl:call-template name="process.footnotes"/>
     </xsl:if>
-  </div>
+  </xsl:element>
 </xsl:template>
 
 <xsl:template match="glossary/glossaryinfo"></xsl:template>
@@ -87,6 +85,7 @@
   &setup-language-variable;
   <div>
     <xsl:apply-templates select="." mode="common.html.attributes"/>
+    <xsl:call-template name="id.attribute"/>
     <xsl:call-template name="anchor"/>
     <xsl:if test="blockinfo/title|info/title|title">
       <xsl:call-template name="formal.object.heading"/>
@@ -114,6 +113,9 @@
 
   <div>
     <xsl:apply-templates select="." mode="common.html.attributes"/>
+    <xsl:call-template name="id.attribute">
+      <xsl:with-param name="conditional" select="0"/>
+    </xsl:call-template>
     <xsl:apply-templates select="(glossentry[1]/preceding-sibling::*)"/>
 
     <dl>
@@ -154,6 +156,14 @@ GlossEntry ::=
   <xsl:choose>
     <xsl:when test="$glossentry.show.acronym = 'primary'">
       <dt>
+        <xsl:call-template name="id.attribute">
+          <xsl:with-param name="conditional">
+            <xsl:choose>
+              <xsl:when test="$glossterm.auto.link != 0">0</xsl:when>
+              <xsl:otherwise>1</xsl:otherwise>
+            </xsl:choose>
+          </xsl:with-param>
+        </xsl:call-template>
         <xsl:call-template name="anchor">
           <xsl:with-param name="conditional">
             <xsl:choose>
@@ -178,6 +188,14 @@ GlossEntry ::=
     </xsl:when>
     <xsl:when test="$glossentry.show.acronym = 'yes'">
       <dt>
+        <xsl:call-template name="id.attribute">
+          <xsl:with-param name="conditional">
+            <xsl:choose>
+              <xsl:when test="$glossterm.auto.link != 0">0</xsl:when>
+              <xsl:otherwise>1</xsl:otherwise>
+            </xsl:choose>
+          </xsl:with-param>
+        </xsl:call-template>
         <xsl:call-template name="anchor">
           <xsl:with-param name="conditional">
             <xsl:choose>
@@ -198,6 +216,14 @@ GlossEntry ::=
     </xsl:when>
     <xsl:otherwise>
       <dt>
+        <xsl:call-template name="id.attribute">
+          <xsl:with-param name="conditional">
+            <xsl:choose>
+              <xsl:when test="$glossterm.auto.link != 0">0</xsl:when>
+              <xsl:otherwise>1</xsl:otherwise>
+            </xsl:choose>
+          </xsl:with-param>
+        </xsl:call-template>
         <xsl:call-template name="anchor">
           <xsl:with-param name="conditional">
             <xsl:choose>
@@ -253,6 +279,7 @@ GlossEntry ::=
           <xsl:when test="$target">
             <a>
               <xsl:apply-templates select="." mode="common.html.attributes"/>
+              <xsl:call-template name="id.attribute"/>
               <xsl:attribute name="href">
                 <xsl:call-template name="href.target">
                   <xsl:with-param name="object" select="$target"/>
@@ -322,6 +349,7 @@ GlossEntry ::=
     <xsl:when test="$target">
       <a>
         <xsl:apply-templates select="." mode="common.html.attributes"/>
+        <xsl:call-template name="id.attribute"/>
         <xsl:attribute name="href">
           <xsl:call-template name="href.target">
             <xsl:with-param name="object" select="$target"/>
@@ -390,11 +418,9 @@ GlossEntry ::=
 
   <div>
     <xsl:apply-templates select="." mode="common.html.attributes"/>
-    <xsl:if test="$generate.id.attributes != 0">
-      <xsl:attribute name="id">
-        <xsl:call-template name="object.id"/>
-      </xsl:attribute>
-    </xsl:if>
+    <xsl:call-template name="id.attribute">
+      <xsl:with-param name="conditional" select="0"/>
+    </xsl:call-template>
 
     <xsl:call-template name="glossary.titlepage"/>
 
@@ -461,13 +487,16 @@ GlossEntry ::=
 
   <div>
     <xsl:apply-templates select="." mode="common.html.attributes"/>
+    <xsl:call-template name="id.attribute">
+      <xsl:with-param name="conditional" select="0"/>
+    </xsl:call-template>
     <xsl:apply-templates select="(glossentry[1]/preceding-sibling::*)"/>
 
     <dl>
       <xsl:choose>
         <xsl:when test="$glossary.sort != 0">
           <xsl:for-each select="glossentry">
-				<xsl:sort lang="{$language}" select="normalize-space(translate(concat(@sortas, glossterm[not(parent::glossentry/@sortas) or parent::glossentry/@sortas = '']), &lowercase;, &uppercase;))"/>!
+				<xsl:sort lang="{$language}" select="normalize-space(translate(concat(@sortas, glossterm[not(parent::glossentry/@sortas) or parent::glossentry/@sortas = '']), &lowercase;, &uppercase;))"/>
             <xsl:variable name="cterm" select="glossterm"/>
             <xsl:if test="$terms[@baseform = $cterm or . = $cterm]">
               <xsl:apply-templates select="." mode="auto-glossary"/>

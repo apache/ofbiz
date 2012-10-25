@@ -5,11 +5,11 @@
                 xmlns:exsl="http://exslt.org/common"
                 xmlns:doc="http://nwalsh.com/xsl/documentation/1.0"
 		version="1.0"
-                exclude-result-prefixes="doc"
+                exclude-result-prefixes="saxon lxslt redirect exsl doc"
                 extension-element-prefixes="saxon redirect lxslt exsl">
 
 <!-- ********************************************************************
-     $Id: chunker.xsl 6910 2007-06-28 23:23:30Z xmldoc $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -33,7 +33,20 @@
 <xsl:param name="chunker.output.doctype-system" select="''"/>
 <xsl:param name="chunker.output.media-type" select="''"/>
 <xsl:param name="chunker.output.cdata-section-elements" select="''"/>
-<xsl:param name="chunker.output.quiet" select="0"/>
+
+<!-- Make sure base.dir has a trailing slash now -->
+<xsl:param name="chunk.base.dir">
+  <xsl:choose>
+    <xsl:when test="string-length($base.dir) = 0"></xsl:when>
+    <!-- make sure to add trailing slash if omitted by user -->
+    <xsl:when test="substring($base.dir, string-length($base.dir), 1) = '/'">
+      <xsl:value-of select="$base.dir"/>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:value-of select="concat($base.dir, '/')"/>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:param>
 
 <xsl:param name="saxon.character.representation" select="'entity;decimal'"/>
 
@@ -47,13 +60,13 @@
     <!-- put Saxon first to work around a bug in libxslt -->
     <xsl:when test="element-available('saxon:output')">
       <!-- Saxon doesn't make the chunks relative -->
-      <xsl:value-of select="concat($base.dir,$base.name)"/>
+      <xsl:value-of select="concat($chunk.base.dir,$base.name)"/>
     </xsl:when>
     <xsl:when test="element-available('exsl:document')">
       <!-- EXSL document does make the chunks relative, I think -->
       <xsl:choose>
         <xsl:when test="count(parent::*) = 0">
-          <xsl:value-of select="concat($base.dir,$base.name)"/>
+          <xsl:value-of select="concat($chunk.base.dir,$base.name)"/>
         </xsl:when>
         <xsl:otherwise>
           <xsl:value-of select="$base.name"/>
@@ -62,7 +75,7 @@
     </xsl:when>
     <xsl:when test="element-available('redirect:write')">
       <!-- Xalan doesn't make the chunks relative -->
-      <xsl:value-of select="concat($base.dir,$base.name)"/>
+      <xsl:value-of select="concat($chunk.base.dir,$base.name)"/>
     </xsl:when>
     <xsl:otherwise>
       <xsl:message terminate="yes">
@@ -75,7 +88,7 @@
 
 <xsl:template name="write.chunk">
   <xsl:param name="filename" select="''"/>
-  <xsl:param name="quiet" select="$chunker.output.quiet"/>
+  <xsl:param name="quiet" select="$chunk.quietly"/>
   <xsl:param name="suppress-context-node-name" select="0"/>
   <xsl:param name="message-prolog"/>
   <xsl:param name="message-epilog"/>
@@ -373,7 +386,7 @@
 
 <xsl:template name="write.chunk.with.doctype">
   <xsl:param name="filename" select="''"/>
-  <xsl:param name="quiet" select="$chunker.output.quiet"/>
+  <xsl:param name="quiet" select="$chunk.quietly"/>
 
   <xsl:param name="method" select="$chunker.output.method"/>
   <xsl:param name="encoding" select="$chunker.output.encoding"/>
@@ -407,7 +420,7 @@
 
 <xsl:template name="write.text.chunk">
   <xsl:param name="filename" select="''"/>
-  <xsl:param name="quiet" select="$chunker.output.quiet"/>
+  <xsl:param name="quiet" select="$chunk.quietly"/>
   <xsl:param name="suppress-context-node-name" select="0"/>
   <xsl:param name="message-prolog"/>
   <xsl:param name="message-epilog"/>

@@ -3,13 +3,13 @@
   <info>
     <title>Manpages Parameter Reference</title>
     <releaseinfo role="meta">
-      $Id: param.xweb 8235 2009-02-09 16:22:14Z xmldoc $
+      $Id$
     </releaseinfo>
     <author>
       <orgname>The DocBook Project</orgname>
     </author>
     <copyright>
-      <year>2005-2007</year>
+      <year>2005-2011</year>
       <holder>The DocBook Project</holder>
     </copyright>
     <abstract>
@@ -3141,7 +3141,7 @@ simply for the purpose of increasing reability of the source.</para>
 &lt;!-- This file is generated from param.xweb --&gt;
 
 &lt;!-- ********************************************************************
-     $Id: param.xweb 8235 2009-02-09 16:22:14Z xmldoc $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.

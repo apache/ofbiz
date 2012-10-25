@@ -5,7 +5,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: labels.xsl 8350 2009-03-17 07:24:29Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -382,6 +382,7 @@ element label.</para>
   <xsl:variable name="contsec"
                 select="(ancestor::section
                          |ancestor::simplesect
+                         |ancestor::topic
                          |ancestor::sect1
                          |ancestor::sect2
                          |ancestor::sect3
@@ -500,6 +501,10 @@ element label.</para>
       <xsl:number format="{$format}" count="simplesect"/>
     </xsl:when>
   </xsl:choose>
+</xsl:template>
+
+<xsl:template match="topic" mode="label.markup">
+  <!-- topics are not numbered by default -->
 </xsl:template>
 
 <xsl:template match="qandadiv" mode="label.markup">
@@ -742,11 +747,11 @@ element label.</para>
             <xsl:apply-templates select="$pchap" mode="label.markup"/>
             <xsl:apply-templates select="$pchap" mode="intralabel.punctuation"/>
           </xsl:if>
-          <xsl:number format="1" count="equation[title or info/title]" 
+          <xsl:number format="1" count="equation" 
                       from="chapter|appendix" level="any"/>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:number format="1" count="equation[title or info/title]" 
+          <xsl:number format="1" count="equation" 
                       from="book|article" level="any"/>
         </xsl:otherwise>
       </xsl:choose>
@@ -791,6 +796,14 @@ element label.</para>
 </xsl:template>
 
 <xsl:template match="sidebar" mode="label.markup">
+  <!-- nop -->
+</xsl:template>
+
+<xsl:template match="glossdiv|glosslist" mode="label.markup">
+  <!-- nop -->
+</xsl:template>
+
+<xsl:template match="glossentry" mode="label.markup">
   <!-- nop -->
 </xsl:template>
 

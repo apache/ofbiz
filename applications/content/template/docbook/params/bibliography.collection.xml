@@ -97,6 +97,24 @@ bibliography entries in exactly the same way you do now.</para>
 customization layer or directly through your processor's interface) to
 point to your global bibliography.</para>
 
+<para>A relative path in the parameter is interpreted in one
+of two ways:</para>
+<orderedlist numeration="loweralpha">
+  <listitem>
+    <para>If your document contains no links to empty bibliographic elements,
+    then the path is relative to the file containing
+    the first <tag>bibliomixed</tag> element in the document.</para>
+  </listitem>
+  <listitem>
+    <para>If your document does contain links to empty bibliographic elements,
+    then the path is relative to the file containing
+    the first such link element in the document.</para>
+  </listitem>
+</orderedlist>
+<para>Once the collection file is opened by the first instance described
+above, it stays open for the current document
+and the relative path is not reinterpreted again.</para>
+
 <para>The stylesheets will format the bibliography in your document as if
 all of the entries referenced appeared there literally.</para>
 

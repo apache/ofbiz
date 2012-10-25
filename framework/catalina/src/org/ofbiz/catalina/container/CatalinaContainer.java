@@ -173,9 +173,7 @@ public class CatalinaContainer implements Container {
 
     private String name;
 
-    /**
-     * @see org.ofbiz.base.container.Container#init(String[] args, String name, String configFile)
-     */
+    @Override
     public void init(String[] args, String name, String configFile) throws ContainerException {
         this.name = name;
         // get the container config
@@ -548,6 +546,11 @@ public class CatalinaContainer implements Container {
                     connector.setProperty(prop.name, prop.value);
                     //connector.setAttribute(prop.name, prop.value);
                 }
+
+                if (connectorProp.properties.containsKey("URIEncoding")) {
+                    connector.setURIEncoding(connectorProp.properties.get("URIEncoding").value);
+                }
+
                 tomcat.getService().addConnector(connector);
             } catch (Exception e) {
                 throw new ContainerException(e);
@@ -624,21 +627,25 @@ public class CatalinaContainer implements Container {
         }
 
         final String webXmlFilePath = new StringBuilder().append("file:///").append(location).append("/WEB-INF/web.xml").toString();
-
-        URL webXmlUrl;
+        boolean appIsDistributable = distribute;
+        URL webXmlUrl = null;
         try {
             webXmlUrl = FlexibleLocation.resolveLocation(webXmlFilePath);
         } catch (MalformedURLException e) {
             throw new ContainerException(e);
         }
-        Document webXmlDoc = null;
-        try {
-            webXmlDoc = UtilXml.readXmlDocument(webXmlUrl);
-        } catch (Exception e) {
-            throw new ContainerException(e);
+        File webXmlFile = new File(webXmlUrl.getFile());
+        if (webXmlFile.exists()) {
+            Document webXmlDoc = null;
+            try {
+                webXmlDoc = UtilXml.readXmlDocument(webXmlUrl);
+            } catch (Exception e) {
+                throw new ContainerException(e);
+            }
+            appIsDistributable = webXmlDoc.getElementsByTagName("distributable").getLength() > 0;
+        } else {
+            Debug.logInfo(webXmlFilePath + " not found.", module);
         }
-
-        boolean appIsDistributable = webXmlDoc.getElementsByTagName("distributable").getLength() > 0;
         final boolean contextIsDistributable = distribute && appIsDistributable;
 
         // configure persistent sessions

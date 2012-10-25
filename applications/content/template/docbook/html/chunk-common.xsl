@@ -7,7 +7,7 @@
                 exclude-result-prefixes="exsl cf ng db">
 
 <!-- ********************************************************************
-     $Id: chunk-common.xsl 8420 2009-05-04 02:17:33Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -29,15 +29,28 @@
 <xsl:variable name="chunk.hierarchy">
   <xsl:if test="$chunk.fast != 0">
     <xsl:choose>
+      <!-- Are we handling a docbook5 document? -->
+      <xsl:when test="$exsl.node.set.available != 0
+                      and (*/self::ng:* or */self::db:*)">
+        <xsl:if test="$chunk.quietly = 0">
+          <xsl:message>Computing stripped namespace chunks...</xsl:message>
+        </xsl:if>
+        <xsl:apply-templates mode="find.chunks" select="exsl:node-set($no.namespace)"/>
+      </xsl:when>
       <xsl:when test="$exsl.node.set.available != 0">
-        <xsl:message>Computing chunks...</xsl:message>
+        <xsl:if test="$chunk.quietly = 0">
+          <xsl:message>Computing chunks...</xsl:message>
+        </xsl:if>
+
         <xsl:apply-templates select="/*" mode="find.chunks"/>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:message>
-          <xsl:text>Fast chunking requires exsl:node-set(). </xsl:text>
-          <xsl:text>Using "slow" chunking.</xsl:text>
-        </xsl:message>
+        <xsl:if test="$chunk.quietly = 0">
+          <xsl:message>
+            <xsl:text>Fast chunking requires exsl:node-set(). </xsl:text>
+            <xsl:text>Using "slow" chunking.</xsl:text>
+          </xsl:message>
+        </xsl:if>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:if>
@@ -130,7 +143,7 @@
 
   <xsl:variable name="filename">
     <xsl:call-template name="make-relative-filename">
-      <xsl:with-param name="base.dir" select="$base.dir"/>
+      <xsl:with-param name="base.dir" select="$chunk.base.dir"/>
       <xsl:with-param name="base.name" select="$chunkfn"/>
     </xsl:call-template>
   </xsl:variable>
@@ -240,6 +253,7 @@
              |preceding::refentry[1]
              |preceding::colophon[1]
              |preceding::article[1]
+             |preceding::topic[1]
              |preceding::bibliography[parent::article or parent::book or parent::part][1]
              |preceding::glossary[parent::article or parent::book or parent::part][1]
              |preceding::index[$generate.index != 0]
@@ -253,6 +267,7 @@
              |ancestor::part[1]
              |ancestor::reference[1]
              |ancestor::article[1]
+             |ancestor::topic[1]
              |$prev-v1
              |$prev-v2)[last()]"/>
 
@@ -342,12 +357,14 @@
              |following::index[$generate.index != 0]
                                [parent::article or parent::book or parent::part][1]
              |following::article[1]
+             |following::topic[1]
              |following::setindex[$generate.index != 0][1]
              |descendant::book[1]
              |descendant::preface[1]
              |descendant::chapter[1]
              |descendant::appendix[1]
              |descendant::article[1]
+             |descendant::topic[1]
              |descendant::bibliography[parent::article or parent::book or parent::part][1]
              |descendant::glossary[parent::article or parent::book or parent::part][1]
              |descendant::index[$generate.index != 0]
@@ -398,6 +415,7 @@
              |preceding::refentry[1]
              |preceding::colophon[1]
              |preceding::article[1]
+             |preceding::topic[1]
              |preceding::bibliography[parent::article or parent::book or parent::part][1]
              |preceding::glossary[parent::article or parent::book or parent::part][1]
              |preceding::index[$generate.index != 0]
@@ -411,6 +429,7 @@
              |ancestor::part[1]
              |ancestor::reference[1]
              |ancestor::article[1]
+             |ancestor::topic[1]
              |$prev-v1
              |$prev-v2)[last()]"/>
 
@@ -445,12 +464,14 @@
              |following::index[$generate.index != 0]
                                [parent::article or parent::book][1]
              |following::article[1]
+             |following::topic[1]
              |following::setindex[$generate.index != 0][1]
              |descendant::book[1]
              |descendant::preface[1]
              |descendant::chapter[1]
              |descendant::appendix[1]
              |descendant::article[1]
+             |descendant::topic[1]
              |descendant::bibliography[parent::article or parent::book][1]
              |descendant::glossary[parent::article or parent::book or parent::part][1]
              |descendant::index[$generate.index != 0]
@@ -513,7 +534,7 @@
             <xsl:with-param name="lot">
               <xsl:call-template name="list.of.titles">
                 <xsl:with-param name="titles" select="'table'"/>
-                <xsl:with-param name="nodes" select=".//table"/>
+                <xsl:with-param name="nodes" select=".//table[not(@tocentry = 0)]"/>
               </xsl:call-template>
             </xsl:with-param>
           </xsl:call-template>
@@ -521,7 +542,7 @@
         <xsl:otherwise>
           <xsl:call-template name="list.of.titles">
             <xsl:with-param name="titles" select="'table'"/>
-            <xsl:with-param name="nodes" select=".//table"/>
+            <xsl:with-param name="nodes" select=".//table[not(@tocentry = 0)]"/>
           </xsl:call-template>
         </xsl:otherwise>
       </xsl:choose>
@@ -557,7 +578,7 @@
             <xsl:with-param name="lot">
               <xsl:call-template name="list.of.titles">
                 <xsl:with-param name="titles" select="'equation'"/>
-                <xsl:with-param name="nodes" select=".//equation"/>
+                <xsl:with-param name="nodes" select=".//equation[title or info/title]"/>
               </xsl:call-template>
             </xsl:with-param>
           </xsl:call-template>
@@ -565,7 +586,7 @@
         <xsl:otherwise>
           <xsl:call-template name="list.of.titles">
             <xsl:with-param name="titles" select="'equation'"/>
-            <xsl:with-param name="nodes" select=".//equation"/>
+            <xsl:with-param name="nodes" select=".//equation[title or info/title]"/>
           </xsl:call-template>
         </xsl:otherwise>
       </xsl:choose>
@@ -600,9 +621,10 @@
         <xsl:call-template name="write.chunk">
           <xsl:with-param name="filename">
             <xsl:call-template name="make-relative-filename">
-              <xsl:with-param name="base.dir" select="$base.dir"/>
+              <xsl:with-param name="base.dir" select="$chunk.base.dir"/>
               <xsl:with-param name="base.name">
                 <xsl:call-template name="dbhtml-dir"/>
+                <xsl:value-of select="$chunked.filename.prefix"/>
                 <xsl:apply-templates select="." mode="recursive-chunk-filename">
                   <xsl:with-param name="recursive" select="true()"/>
                 </xsl:apply-templates>
@@ -643,7 +665,7 @@
   <xsl:if test="string($lot) != ''">
     <xsl:variable name="filename">
       <xsl:call-template name="make-relative-filename">
-        <xsl:with-param name="base.dir" select="$base.dir"/>
+        <xsl:with-param name="base.dir" select="$chunk.base.dir"/>
         <xsl:with-param name="base.name">
           <xsl:call-template name="dbhtml-dir"/>
           <xsl:value-of select="$type"/>
@@ -655,6 +677,7 @@
 
     <xsl:variable name="href">
       <xsl:call-template name="make-relative-filename">
+        <xsl:with-param name="base.dir" select="''"/>
         <xsl:with-param name="base.name">
           <xsl:call-template name="dbhtml-dir"/>
           <xsl:value-of select="$type"/>
@@ -864,8 +887,27 @@
   <!-- Only bother to do this if there's at least one non-table footnote -->
   <xsl:if test="$fcount &gt; 0">
     <div class="footnotes">
+      <xsl:call-template name="footnotes.attributes"/>
       <br/>
-      <hr width="100" align="{$direction.align.start}"/>
+      <hr>
+        <xsl:choose>
+          <xsl:when test="$make.clean.html != 0">
+            <xsl:attribute name="class">footnote-hr</xsl:attribute>
+          </xsl:when>
+          <xsl:when test="$css.decoration != 0">
+            <xsl:attribute name="style">
+              <xsl:value-of select="concat('width:100; align:',
+                                            $direction.align.start,
+                                            ';')"/>
+            </xsl:attribute>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:attribute name="width">100</xsl:attribute>
+            <xsl:attribute name="align"><xsl:value-of 
+                      select="$direction.align.start"/></xsl:attribute>
+          </xsl:otherwise>
+        </xsl:choose>
+      </hr>
       <xsl:call-template name="process.footnotes.in.this.chunk">
         <xsl:with-param name="node" select="."/>
         <xsl:with-param name="footnotes" select="$footnotes"/>
@@ -926,6 +968,7 @@
        section          if position()>1 && depth < chunk.section.depth
        set
        setindex
+       topic
                                                                             -->
   <!-- ==================================================================== -->
 
@@ -1002,6 +1045,7 @@
     <xsl:when test="local-name($node)='chapter'">1</xsl:when>
     <xsl:when test="local-name($node)='appendix'">1</xsl:when>
     <xsl:when test="local-name($node)='article'">1</xsl:when>
+    <xsl:when test="local-name($node)='topic'">1</xsl:when>
     <xsl:when test="local-name($node)='part'">1</xsl:when>
     <xsl:when test="local-name($node)='reference'">1</xsl:when>
     <xsl:when test="local-name($node)='refentry'">1</xsl:when>
@@ -1355,7 +1399,8 @@
     <xsl:call-template name="system.head.content"/>
     <xsl:call-template name="head.content"/>
 
-    <xsl:if test="$home">
+    <!-- home link not valid in HTML5 -->
+    <xsl:if test="$home and $div.element != 'section'">
       <link rel="home">
         <xsl:attribute name="href">
           <xsl:call-template name="href.target">
@@ -1369,7 +1414,8 @@
       </link>
     </xsl:if>
 
-    <xsl:if test="$up">
+    <!-- up link not valid in HTML5 -->
+    <xsl:if test="$up and $div.element != 'section'">
       <link rel="up">
         <xsl:attribute name="href">
           <xsl:call-template name="href.target">
@@ -1680,6 +1726,7 @@
                 <xsl:if test="$chunk.tocs.and.lots != 0 and $nav.context != 'toc'">
                   <a accesskey="t">
                     <xsl:attribute name="href">
+                      <xsl:value-of select="$chunked.filename.prefix"/>
                       <xsl:apply-templates select="/*[1]"
                                            mode="recursive-chunk-filename">
                         <xsl:with-param name="recursive" select="true()"/>
@@ -1830,6 +1877,7 @@
   <xsl:call-template name="user.preroot"/>
 
   <html>
+    <xsl:call-template name="root.attributes"/>
     <xsl:call-template name="html.head">
       <xsl:with-param name="prev" select="$prev"/>
       <xsl:with-param name="next" select="$next"/>
@@ -1837,7 +1885,12 @@
 
     <body>
       <xsl:call-template name="body.attributes"/>
-      <xsl:call-template name="user.header.navigation"/>
+
+      <xsl:call-template name="user.header.navigation">
+        <xsl:with-param name="prev" select="$prev"/>
+        <xsl:with-param name="next" select="$next"/>
+        <xsl:with-param name="nav.context" select="$nav.context"/>
+      </xsl:call-template>
 
       <xsl:call-template name="header.navigation">
         <xsl:with-param name="prev" select="$prev"/>
@@ -1857,7 +1910,11 @@
         <xsl:with-param name="nav.context" select="$nav.context"/>
       </xsl:call-template>
 
-      <xsl:call-template name="user.footer.navigation"/>
+      <xsl:call-template name="user.footer.navigation">
+        <xsl:with-param name="prev" select="$prev"/>
+        <xsl:with-param name="next" select="$next"/>
+        <xsl:with-param name="nav.context" select="$nav.context"/>
+      </xsl:call-template>
     </body>
   </html>
   <xsl:value-of select="$chunk.append"/>
@@ -1869,7 +1926,7 @@
   <xsl:call-template name="write.text.chunk">
     <xsl:with-param name="filename">
       <xsl:if test="$manifest.in.base.dir != 0">
-        <xsl:value-of select="$base.dir"/>
+        <xsl:value-of select="$chunk.base.dir"/>
       </xsl:if>
       <xsl:value-of select="$manifest"/>
     </xsl:with-param>

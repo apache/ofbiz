@@ -4,7 +4,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:doc="http://nwalsh.com/xsl/documentation/1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/1999/xhtml" exclude-result-prefixes="doc" version="1.0">
 
 <!-- ********************************************************************
-     $Id: pi.xsl 8394 2009-04-02 20:31:30Z mzjn $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -15,7 +15,7 @@
 
 <doc:reference xmlns=""><info xmlns="http://www.w3.org/1999/xhtml"><title>HTML Processing Instruction Reference</title>
     <releaseinfo role="meta">
-      $Id: pi.xsl 8394 2009-04-02 20:31:30Z mzjn $
+      $Id$
     </releaseinfo>
   </info>
   <partintro xmlns="http://www.w3.org/1999/xhtml" xml:id="partintro">
@@ -211,6 +211,31 @@
       as a child of a <tag>mediaobject</tag> to specify a
       directory into which any long-description files for that
       <tag>mediaobject</tag> will be written.</para>
+
+<para>The output directory specification is inherited by all
+chunks of the descendants of the element.  If descendants need
+to go to a different directory, then add another 
+<tag class="xmlpi">dbhtml dir</tag> processing
+instruction as a child of the source element
+for that chunk, and specify the path relative to the
+ancestor path.</para>
+
+<para>For example, to put most chunk files into 
+<filename class="directory">shared</filename>
+but one chapter into 
+<filename class="directory">exception</filename>
+at the same level, use:</para>
+
+<programlisting>&lt;book&gt;
+  &lt;?dbhtml dir="shared"?&gt;
+  ...
+  &lt;chapter&gt;
+    &lt;?dbhtml dir="../exception"?&gt;
+  &lt;/chapter&gt;
+&lt;/book&gt;
+</programlisting>
+
+
   </refdescription>
   <refsynopsisdiv xmlns="http://www.w3.org/1999/xhtml">
     <synopsis><tag class="xmlpi">dbhtml dir="<replaceable>path</replaceable>"</tag></synopsis>
@@ -242,9 +267,17 @@
 <doc:pi xmlns="" name="dbhtml_filename">
   <refpurpose xmlns="http://www.w3.org/1999/xhtml">Specifies a filename for a chunk</refpurpose>
   <refdescription xmlns="http://www.w3.org/1999/xhtml">
-    <para>When chunking output, use the <tag class="xmlpi">dbhtml filename</tag>
+<para>When chunking output, use the <tag class="xmlpi">dbhtml filename</tag>
       PI as a child of a chunk source to specify a filename for
-      the output file for that chunk.</para>
+      the output file for that chunk. Include the filename suffix.</para>
+
+<para>You cannot include a directory path in the filename value,
+or your links may not work.  Add a 
+<tag class="xmlpi">dbhtml dir</tag> processing instruction
+to specify the output directory. You can also combine the two
+specifications in one processing instruction: 
+<tag class="xmlpi">dbhtml dir="mydir" filename="myfile.html"</tag>.</para>
+
   </refdescription>
   <refsynopsisdiv xmlns="http://www.w3.org/1999/xhtml">
     <synopsis><tag class="xmlpi">dbhtml filename="<replaceable>filename</replaceable>"</tag></synopsis>

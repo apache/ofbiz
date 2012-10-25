@@ -9,7 +9,7 @@
   <doc:reference xmlns="">
     <referenceinfo>
       <releaseinfo role="meta">
-        $Id: date-time.xsl 3991 2004-11-10 06:51:55Z balls $
+        $Id$
       </releaseinfo>
       <author>
         <surname>Diamond</surname>

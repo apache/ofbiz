@@ -4,7 +4,7 @@
   exclude-result-prefixes='doc'>
 
   <!-- ********************************************************************
-       $Id: dbk2wp.xsl 8047 2008-06-10 12:46:53Z balls $
+       $Id$
        ********************************************************************
 
        This file is part of the XSL DocBook Stylesheet distribution.
@@ -20,7 +20,7 @@
 
     -->
 
-  <xsl:include href='../VERSION'/>
+  <xsl:include href='../VERSION.xsl'/>
 
   <!-- doc:docprop.author mode is for creating document metadata -->
 

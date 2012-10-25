@@ -1,6 +1,6 @@
 /*
  * xbStyle-nn4.js
- * $Revision$ $Date: 2003/02/07 16:04:22 $
+ * $Revision$ $Date$
  */
 
 /* ***** BEGIN LICENSE BLOCK *****

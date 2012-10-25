@@ -5,7 +5,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: block.xsl 8235 2009-02-09 16:22:14Z xmldoc $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -101,12 +101,24 @@
 </xsl:template>
 
 <xsl:template match="simpara">
-  <xsl:if test="not(ancestor::authorblurb)
-    and not(ancestor::personblurb)
-    and not(ancestor::callout)"
-    >
-    <xsl:text>.sp&#10;</xsl:text>
-  </xsl:if>
+  <xsl:choose>
+    <xsl:when test="ancestor::footnote or
+                    ancestor::annotation or
+                    ancestor::authorblurb or
+                    ancestor::personblurb or
+                    ancestor::callout">
+      <xsl:if test="preceding-sibling::*[not(name() ='')]">
+        <xsl:text>.sp</xsl:text>
+        <xsl:text>&#10;</xsl:text>
+        <xsl:text>.RS 4n</xsl:text>
+        <xsl:text>&#10;</xsl:text>
+      </xsl:if>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:text>.sp</xsl:text>
+      <xsl:text>&#10;</xsl:text>
+    </xsl:otherwise>
+  </xsl:choose>
   <xsl:variable name="content">
     <xsl:apply-templates/>
   </xsl:variable>

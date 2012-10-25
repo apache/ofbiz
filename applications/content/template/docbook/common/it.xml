@@ -149,6 +149,7 @@
 <l:gentext key="warning" text="avvertimento"/>
 <l:gentext key="WARNING" text="AVVERTIMENTO"/>
 <l:gentext key="and" text="e"/>
+<l:gentext key="or" text="o"/>
 <l:gentext key="by" text="di"/>
 <l:gentext key="Edited" text="A cura"/>
 <l:gentext key="edited" text="A cura"/>
@@ -157,7 +158,6 @@
 <l:gentext key="in" text="in"/>
 <l:gentext key="lastlistcomma" text=","/>
 <l:gentext key="listcomma" text=","/>
-<l:gentext key="nonexistantelement" text="elemento non esistente"/>
 <l:gentext key="notes" text="Note"/>
 <l:gentext key="Notes" text="Note"/>
 <l:gentext key="Pgs" text="pp."/>
@@ -199,7 +199,7 @@
 <l:gentext key="Draft" text="Bozza"/>
 <l:gentext key="above" text="sopra"/>
 <l:gentext key="below" text="sotto"/>
-<l:gentext key="sectioncalled" text="la sezione chiamata"/>
+<l:gentext key="sectioncalled" text="sezione chiamata"/>
 <l:gentext key="index symbols" text="Simboli"/>
 <l:gentext key="writing-mode" text="lr-tb"/>
 <l:gentext key="lowercase.alpha" text="abcdefghijklmnopqrstuvwxyz"/>
@@ -216,6 +216,19 @@
 <l:gentext key="hyphenation-character" text="-"/>
 <l:gentext key="hyphenation-push-character-count" text="2"/>
 <l:gentext key="hyphenation-remain-character-count" text="2"/>
+<l:context name="webhelp"><l:template name="Search" text="Search" lang="en"/>
+<l:template name="Enter_a_term_and_click" text="Enter a term and click " lang="en"/>
+<l:template name="Go" text="Go" lang="en"/>
+<l:template name="to_perform_a_search" text=" to perform a search." lang="en"/>
+<l:template name="txt_filesfound" text="Results" lang="en"/>
+<l:template name="txt_enter_at_least_1_char" text="You must enter at least one character." lang="en"/>
+<l:template name="txt_browser_not_supported" text="JavaScript is disabled on your browser. Please enable JavaScript to enjoy all the features of this site." lang="en"/>
+<l:template name="txt_please_wait" text="Please wait. Search in progress..." lang="en"/>
+<l:template name="txt_results_for" text="Results for: " lang="en"/>
+<l:template name="TableofContents" text="Contents" lang="en"/>
+<l:template name="HighlightButton" text="Toggle search result highlighting" lang="en"/>
+<l:template name="Your_search_returned_no_results" text="Your search returned no results." lang="en"/>
+</l:context>
 <l:context name="styles"><l:template name="person-name" text="first-last"/>
 </l:context>
 <l:context name="title"><l:template name="abstract" text="%t"/>
@@ -309,6 +322,7 @@
 <l:template name="sect5" text="%t"/>
 <l:template name="section" text="%t"/>
 <l:template name="simplesect" text="%t"/>
+<l:template name="topic" text="%t" lang="en"/>
 <l:template name="part" text="%t"/>
 </l:context>
 <l:context name="title-numbered"><l:template name="appendix" text="Appendice %n. %t"/>
@@ -323,6 +337,7 @@
 <l:template name="sect5" text="%n. %t"/>
 <l:template name="section" text="%n. %t"/>
 <l:template name="simplesect" text="%t"/>
+<l:template name="topic" text="%t" lang="en"/>
 </l:context>
 <l:context name="subtitle"><l:template name="appendix" text="%s"/>
 <l:template name="acknowledgements" text="%s" lang="en"/>
@@ -362,6 +377,7 @@
 <l:template name="setindex" text="%s"/>
 <l:template name="sidebar" text="%s"/>
 <l:template name="simplesect" text="%s"/>
+<l:template name="topic" text="%t" lang="en"/>
 <l:template name="toc" text="%s"/>
 </l:context>
 <l:context name="xref"><l:template name="abstract" text="%t"/>
@@ -435,18 +451,19 @@
 <l:template name="docnamelong" text=" nel documento dal titolo %o"/>
 <l:template name="pageabbrev" text="(p. %p)"/>
 <l:template name="Page" text="Pagina %p"/>
-<l:template name="bridgehead" text="la sezione chiamata «%t»"/>
-<l:template name="refsection" text="la sezione chiamata «%t»"/>
-<l:template name="refsect1" text="la sezione chiamata «%t»"/>
-<l:template name="refsect2" text="la sezione chiamata «%t»"/>
-<l:template name="refsect3" text="la sezione chiamata «%t»"/>
-<l:template name="sect1" text="la sezione chiamata «%t»"/>
-<l:template name="sect2" text="la sezione chiamata «%t»"/>
-<l:template name="sect3" text="la sezione chiamata «%t»"/>
-<l:template name="sect4" text="la sezione chiamata «%t»"/>
-<l:template name="sect5" text="la sezione chiamata «%t»"/>
-<l:template name="section" text="la sezione chiamata «%t»"/>
-<l:template name="simplesect" text="la sezione chiamata «%t»"/>
+<l:template name="topic" text="%t" lang="en"/>
+<l:template name="bridgehead" text="sezione chiamata «%t»"/>
+<l:template name="refsection" text="sezione chiamata «%t»"/>
+<l:template name="refsect1" text="sezione chiamata «%t»"/>
+<l:template name="refsect2" text="sezione chiamata «%t»"/>
+<l:template name="refsect3" text="sezione chiamata «%t»"/>
+<l:template name="sect1" text="sezione chiamata «%t»"/>
+<l:template name="sect2" text="sezione chiamata «%t»"/>
+<l:template name="sect3" text="sezione chiamata «%t»"/>
+<l:template name="sect4" text="sezione chiamata «%t»"/>
+<l:template name="sect5" text="sezione chiamata «%t»"/>
+<l:template name="section" text="sezione chiamata «%t»"/>
+<l:template name="simplesect" text="sezione chiamata «%t»"/>
 </l:context>
 <l:context name="xref-number"><l:template name="answer" text="Risposta: %n"/>
 <l:template name="appendix" text="Appendice %n"/>
@@ -479,17 +496,17 @@
 <l:template name="procedure" text="Procedura %n, «%t»"/>
 <l:template name="productionset" text="Produzione %n, «%t»"/>
 <l:template name="qandadiv" text="Domande e risposte %n, «%t»"/>
-<l:template name="refsect1" text="la sezione chiamata «%t»"/>
-<l:template name="refsect2" text="la sezione chiamata «%t»"/>
-<l:template name="refsect3" text="la sezione chiamata «%t»"/>
-<l:template name="refsection" text="la sezione chiamata «%t»"/>
+<l:template name="refsect1" text="sezione chiamata «%t»"/>
+<l:template name="refsect2" text="sezione chiamata «%t»"/>
+<l:template name="refsect3" text="sezione chiamata «%t»"/>
+<l:template name="refsection" text="sezione chiamata «%t»"/>
 <l:template name="sect1" text="Sezione %n, «%t»"/>
 <l:template name="sect2" text="Sezione %n, «%t»"/>
 <l:template name="sect3" text="Sezione %n, «%t»"/>
 <l:template name="sect4" text="Sezione %n, «%t»"/>
 <l:template name="sect5" text="Sezione %n, «%t»"/>
 <l:template name="section" text="Sezione %n, «%t»"/>
-<l:template name="simplesect" text="la sezione chiamata «%t»"/>
+<l:template name="simplesect" text="sezione chiamata «%t»"/>
 <l:template name="table" text="Tabella %n, «%t»"/>
 </l:context>
 <l:context name="authorgroup"><l:template name="sep" text=", "/>

@@ -14,7 +14,7 @@
   <xsl:output method="xml" indent='yes' encoding='ascii'/>
 
   <!-- ********************************************************************
-       $Id: dbk2pages.xsl 7701 2008-02-22 06:07:31Z balls $
+       $Id$
        ********************************************************************
 
        This file is part of the XSL DocBook Stylesheet distribution.
@@ -23,7 +23,7 @@
 
        ******************************************************************** -->
 
-  <xsl:include href='../VERSION'/>
+  <xsl:include href='../VERSION.xsl'/>
   <xsl:include href='param.xsl'/>
 
   <xsl:variable name='templatedoc' select='document($pages.template)'/>

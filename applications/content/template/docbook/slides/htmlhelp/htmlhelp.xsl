@@ -10,7 +10,7 @@
                 exclude-result-prefixes="doc exsl set">
 
 <!-- ********************************************************************
-     $Id: htmlhelp.xsl 6569 2007-01-30 07:03:13Z xmldoc $
+     $Id$
      ******************************************************************** 
 
      This stylesheet can convert DocBook Slides document type into HTML Help.

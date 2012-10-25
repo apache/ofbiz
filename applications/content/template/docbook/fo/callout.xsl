@@ -8,7 +8,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: callout.xsl 6910 2007-06-28 23:23:30Z xmldoc $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -174,6 +174,40 @@
               <xsl:when test="$conum = 8">&#10109;</xsl:when>
               <xsl:when test="$conum = 9">&#10110;</xsl:when>
               <xsl:when test="$conum = 10">&#10111;</xsl:when>
+              <xsl:when test="$conum = 11">&#9451;</xsl:when>
+              <xsl:when test="$conum = 12">&#9452;</xsl:when>
+              <xsl:when test="$conum = 13">&#9453;</xsl:when>
+              <xsl:when test="$conum = 14">&#9454;</xsl:when>
+              <xsl:when test="$conum = 15">&#9455;</xsl:when>
+              <xsl:when test="$conum = 16">&#9456;</xsl:when>
+              <xsl:when test="$conum = 17">&#9457;</xsl:when>
+              <xsl:when test="$conum = 18">&#9458;</xsl:when>
+              <xsl:when test="$conum = 19">&#9459;</xsl:when>
+              <xsl:when test="$conum = 20">&#9460;</xsl:when>
+            </xsl:choose>
+          </xsl:when>
+          <xsl:when test="$callout.unicode.start.character = 9312">
+            <xsl:choose>
+              <xsl:when test="$conum = 1">&#9312;</xsl:when>
+              <xsl:when test="$conum = 2">&#9313;</xsl:when>
+              <xsl:when test="$conum = 3">&#9314;</xsl:when>
+              <xsl:when test="$conum = 4">&#9315;</xsl:when>
+              <xsl:when test="$conum = 5">&#9316;</xsl:when>
+              <xsl:when test="$conum = 6">&#9317;</xsl:when>
+              <xsl:when test="$conum = 7">&#9318;</xsl:when>
+              <xsl:when test="$conum = 8">&#9319;</xsl:when>
+              <xsl:when test="$conum = 9">&#9320;</xsl:when>
+              <xsl:when test="$conum = 10">&#9321;</xsl:when>
+              <xsl:when test="$conum = 11">&#9322;</xsl:when>
+              <xsl:when test="$conum = 12">&#9323;</xsl:when>
+              <xsl:when test="$conum = 13">&#9324;</xsl:when>
+              <xsl:when test="$conum = 14">&#9325;</xsl:when>
+              <xsl:when test="$conum = 15">&#9326;</xsl:when>
+              <xsl:when test="$conum = 16">&#9327;</xsl:when>
+              <xsl:when test="$conum = 17">&#9328;</xsl:when>
+              <xsl:when test="$conum = 18">&#9329;</xsl:when>
+              <xsl:when test="$conum = 19">&#9330;</xsl:when>
+              <xsl:when test="$conum = 20">&#9331;</xsl:when>
             </xsl:choose>
           </xsl:when>
           <xsl:otherwise>

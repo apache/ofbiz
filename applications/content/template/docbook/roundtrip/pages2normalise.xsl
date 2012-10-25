@@ -13,7 +13,7 @@
   <xsl:output method="xml" indent='yes'/>
 
   <!-- ********************************************************************
-       $Id: pages2normalise.xsl 7637 2008-01-09 20:48:30Z balls $
+       $Id$
        ********************************************************************
 
        This file is part of the XSL DocBook Stylesheet distribution.

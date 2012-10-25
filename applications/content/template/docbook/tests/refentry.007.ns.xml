@@ -1,7 +1,7 @@
 <book xmlns="http://docbook.org/ns/docbook" version="5.0">
 <info><title>Unit Test: refentry.007</title>
 
-<releaseinfo role="CVS">$Id: refentry.007.xml 7282 2007-08-23 09:27:01Z xmldoc $</releaseinfo>
+<releaseinfo role="CVS">$Id$</releaseinfo>
 <author><personname><firstname>Norman</firstname><surname>Walsh</surname></personname><affiliation><address><email>ndw@nwalsh.com</email></address></affiliation></author>
 </info>
 <reference><info><title>Reference</title></info>

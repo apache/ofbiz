@@ -23,5 +23,11 @@
 
 <para>This location has precedence over the corresponding Java property.</para>
 
+<para>Please note that usually you have to specify location as URL not
+just as a simple path on the local
+filesystem. E.g. <filename>file:///home/user/xslthl/my-xslthl-config.xml</filename>.</para>
+
+
+
 </refsection>
 </refentry>

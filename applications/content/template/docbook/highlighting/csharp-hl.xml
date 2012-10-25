@@ -175,10 +175,16 @@ Michiel Hendriks <elmuerte at users.sourceforge.net>
 		<!-- special words, not really keywords -->
 		<keyword>add</keyword>
 		<keyword>alias</keyword>
+		<keyword>from</keyword>
 		<keyword>get</keyword>
 		<keyword>global</keyword>
+		<keyword>group</keyword>
+		<keyword>into</keyword>
+		<keyword>join</keyword>
+		<keyword>orderby</keyword>
 		<keyword>partial</keyword>
 		<keyword>remove</keyword>
+		<keyword>select</keyword>
 		<keyword>set</keyword>
 		<keyword>value</keyword>
 		<keyword>where</keyword>

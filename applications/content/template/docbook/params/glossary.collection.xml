@@ -187,6 +187,25 @@ occur in precisely the order they occur in your database.</para>
 customization layer or directly through your processor's interface) to
 point to your global glossary.</para>
 
+<para>A relative path in the parameter is interpreted in one
+of two ways:</para>
+<orderedlist numeration="loweralpha">
+  <listitem>
+    <para>If the parameter <literal>glossterm.auto.link</literal>
+    is set to zero, then the path is relative to the file containing
+    the empty <tag>glossary</tag> element in the document.</para>
+  </listitem>
+  <listitem>
+    <para>If the parameter <literal>glossterm.auto.link</literal>
+    is set to non-zero, then the path is relative to the file containing
+    the first inline <tag>glossterm</tag> or
+    <tag>firstterm</tag> in the document to be linked.</para>
+  </listitem>
+</orderedlist>
+<para>Once the collection file is opened by the first instance described
+above, it stays open for the current document
+and the relative path is not reinterpreted again.</para>
+
 <para>The stylesheets will format the glossary in your document as if
 all of the entries implicilty referenced appeared there literally.</para>
 </refsection>

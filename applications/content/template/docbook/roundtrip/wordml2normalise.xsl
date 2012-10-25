@@ -20,7 +20,7 @@
   <xsl:output method='xml' indent="yes"/>
 
   <!-- ********************************************************************
-       $Id: wordml2normalise.xsl 8105 2008-08-15 01:29:11Z balls $
+       $Id$
        ********************************************************************
 
        This file is part of the XSL DocBook Stylesheet distribution.

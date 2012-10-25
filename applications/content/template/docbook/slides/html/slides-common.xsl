@@ -3,7 +3,7 @@
 		version="1.0">
 
 <xsl:import href="../../html/chunk.xsl"/>
-<xsl:include href="../../VERSION"/>
+<xsl:include href="../../VERSION.xsl"/>
 
 <xsl:include href="param.xsl"/>
 <xsl:include href="jscript.xsl"/>

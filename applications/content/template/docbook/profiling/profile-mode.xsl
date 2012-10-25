@@ -226,7 +226,13 @@
   <xsl:param name="sep" select="$profile.separator"/>
   <xsl:variable name="head" select="substring-before(concat($a, $sep), $sep)"/>
   <xsl:variable name="tail" select="substring-after($a, $sep)"/>
-  <xsl:if test="contains(concat($sep, $b, $sep), concat($sep, $head, $sep))">1</xsl:if>
+<!-- <xsl:message> -->
+<!-- a="<xsl:value-of select="$a"/>" -->
+<!-- a="<xsl:value-of select="normalize-space($a)"/>" -->
+<!-- head="<xsl:value-of select="$head"/>" -->
+<!-- tail="<xsl:value-of select="$tail"/>" -->
+<!-- </xsl:message> -->
+  <xsl:if test="contains(concat($sep, $b, $sep), concat($sep, $head, $sep)) or normalize-space($a) = '' ">1</xsl:if>
   <xsl:if test="$tail">
     <xsl:call-template name="cross.compare">
       <xsl:with-param name="a" select="$tail"/>

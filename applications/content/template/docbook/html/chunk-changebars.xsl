@@ -5,7 +5,7 @@
                 exclude-result-prefixes="exsl cf">
 
 <!-- ********************************************************************
-     $Id: chunk-changebars.xsl 8399 2009-04-08 07:37:42Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.

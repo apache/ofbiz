@@ -15,7 +15,9 @@
 
 <refsynopsisdiv>
 <src:fragment xml:id="example.properties.frag">
-<xsl:attribute-set name="example.properties" use-attribute-sets="formal.object.properties"/>
+<xsl:attribute-set name="example.properties" use-attribute-sets="formal.object.properties">
+    <xsl:attribute name="keep-together.within-column">auto</xsl:attribute>
+</xsl:attribute-set>
 </src:fragment>
 </refsynopsisdiv>
 

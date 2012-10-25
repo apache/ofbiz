@@ -20,13 +20,12 @@ package org.ofbiz.service.job;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.RejectedExecutionException;
-
-import javolution.util.FastList;
 
 import org.ofbiz.base.util.Assert;
 import org.ofbiz.base.util.Debug;
@@ -38,13 +37,13 @@ import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityConditionList;
 import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.serialize.SerializeException;
 import org.ofbiz.entity.serialize.XmlSerializer;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
+import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceContainer;
@@ -52,14 +51,22 @@ import org.ofbiz.service.calendar.RecurrenceInfo;
 import org.ofbiz.service.calendar.RecurrenceInfoException;
 import org.ofbiz.service.config.ServiceConfigUtil;
 
+import com.ibm.icu.util.Calendar;
+
 /**
- * JobManager
+ * Job manager. The job manager queues and manages jobs. Client code can queue a job to be run immediately
+ * by calling the {@link #runJob(Job)} method, or schedule a job to be run later by calling the
+ * {@link #schedule(String, String, String, Map, long, int, int, int, long, int)} method.
+ * Scheduled jobs are persisted in the JobSandbox entity.
+ * <p>A scheduled job's start time is an approximation - the actual start time will depend
+ * on the job manager/job poller configuration (poll interval) and the load on the server.
+ * Scheduled jobs might be rescheduled if the server is busy. Therefore, applications
+ * requiring a precise job start time should use a different mechanism to schedule the job.</p>
  */
 public final class JobManager {
 
     public static final String module = JobManager.class.getName();
     public static final String instanceId = UtilProperties.getPropertyValue("general.properties", "unique.instanceId", "ofbiz0");
-    public static final Map<String, Object> updateFields = UtilMisc.<String, Object>toMap("runByInstanceId", instanceId, "statusId", "SERVICE_QUEUED");
     private static final ConcurrentHashMap<String, JobManager> registeredManagers = new ConcurrentHashMap<String, JobManager>();
     private static boolean isShutDown = false;
 
@@ -69,68 +76,41 @@ public final class JobManager {
         }
     }
 
+    /**
+     * Returns a <code>JobManager</code> instance.
+     * @param delegator
+     * @param enablePoller Enables polling of the JobSandbox entity.
+     * @throws IllegalStateException if the Job Manager is shut down.
+     */
     public static JobManager getInstance(Delegator delegator, boolean enablePoller) {
         assertIsRunning();
         Assert.notNull("delegator", delegator);
-        JobManager jm = JobManager.registeredManagers.get(delegator.getDelegatorName());
+        JobManager jm = registeredManagers.get(delegator.getDelegatorName());
         if (jm == null) {
             jm = new JobManager(delegator);
-            JobManager.registeredManagers.putIfAbsent(delegator.getDelegatorName(), jm);
-            jm = JobManager.registeredManagers.get(delegator.getDelegatorName());
+            registeredManagers.putIfAbsent(delegator.getDelegatorName(), jm);
+            jm = registeredManagers.get(delegator.getDelegatorName());
             if (enablePoller) {
-                jm.enablePoller();
+                jm.reloadCrashedJobs();
+                JobPoller.registerJobManager(jm);
             }
         }
         return jm;
     }
 
-    /** gets the recurrence info object for a job. */
-    public static RecurrenceInfo getRecurrenceInfo(GenericValue job) {
-        try {
-            if (job != null && !UtilValidate.isEmpty(job.getString("recurrenceInfoId"))) {
-                if (job.get("cancelDateTime") != null) {
-                    // cancel has been flagged, no more recurrence
-                    return null;
-                }
-                GenericValue ri = job.getRelatedOne("RecurrenceInfo", false);
-                if (ri != null) {
-                    return new RecurrenceInfo(ri);
-                } else {
-                    return null;
-                }
-            } else {
-                return null;
-            }
-        } catch (GenericEntityException e) {
-            Debug.logError(e, "Problem getting RecurrenceInfo entity from JobSandbox", module);
-        } catch (RecurrenceInfoException re) {
-            Debug.logError(re, "Problem creating RecurrenceInfo instance: " + re.getMessage(), module);
-        }
-        return null;
-    }
-
+    /**
+     * Shuts down all job managers. This method is called when OFBiz shuts down.
+     */
     public static void shutDown() {
         isShutDown = true;
-        for (JobManager jm : registeredManagers.values()) {
-            jm.shutdown();
-        }
+        JobPoller.getInstance().stop();
     }
 
     private final Delegator delegator;
-    private final JobPoller jp;
-    private boolean pollerEnabled = false;
+    private boolean crashedJobsReloaded = false;
 
     private JobManager(Delegator delegator) {
         this.delegator = delegator;
-        jp = new JobPoller(this);
-    }
-
-    private synchronized void enablePoller() {
-        if (!pollerEnabled) {
-            pollerEnabled = true;
-            reloadCrashedJobs();
-            jp.enable();
-        }
     }
 
     /** Returns the Delegator. */
@@ -150,18 +130,30 @@ public final class JobManager {
      * @return List containing a Map of each thread's state.
      */
     public Map<String, Object> getPoolState() {
-        return jp.getPoolState();
+        return JobPoller.getInstance().getPoolState();
     }
 
-    public synchronized List<Job> poll() {
+    /**
+     * Scans the JobSandbox entity and returns a list of jobs that are due to run.
+     * Returns an empty list if there are no jobs due to run.
+     * This method is called by the {@link JobPoller} polling thread.
+     */
+    protected List<Job> poll(int limit) {
         assertIsRunning();
-        List<Job> poll = FastList.newInstance();
-        // sort the results by time
-        List<String> order = UtilMisc.toList("runTime");
+        // The rest of this method logs exceptions and does not throw them.
+        // The idea is to keep the JobPoller working even when a database
+        // connection is not available (possible on a saturated server).
+        List<Job> poll = new ArrayList<Job>(limit);
+        DispatchContext dctx = getDispatcher().getDispatchContext();
+        if (dctx == null) {
+            Debug.logWarning("Unable to locate DispatchContext object; not running job!", module);
+            return poll;
+        }
         // basic query
         List<EntityExpr> expressions = UtilMisc.toList(EntityCondition.makeCondition("runTime", EntityOperator.LESS_THAN_EQUAL_TO, UtilDateTime.nowTimestamp()),
-                EntityCondition.makeCondition("startDateTime", EntityOperator.EQUALS, null), EntityCondition.makeCondition("cancelDateTime",
-                EntityOperator.EQUALS, null), EntityCondition.makeCondition("runByInstanceId", EntityOperator.EQUALS, null));
+                EntityCondition.makeCondition("startDateTime", EntityOperator.EQUALS, null),
+                EntityCondition.makeCondition("cancelDateTime", EntityOperator.EQUALS, null),
+                EntityCondition.makeCondition("runByInstanceId", EntityOperator.EQUALS, null));
         // limit to just defined pools
         List<String> pools = ServiceConfigUtil.getRunPools();
         List<EntityExpr> poolsExpr = UtilMisc.toList(EntityCondition.makeCondition("poolId", EntityOperator.EQUALS, null));
@@ -174,81 +166,126 @@ public final class JobManager {
         EntityCondition baseCondition = EntityCondition.makeCondition(expressions);
         EntityCondition poolCondition = EntityCondition.makeCondition(poolsExpr, EntityOperator.OR);
         EntityCondition mainCondition = EntityCondition.makeCondition(UtilMisc.toList(baseCondition, poolCondition));
-        // we will loop until we have no more to do
-        boolean pollDone = false;
-        while (!pollDone) {
-            boolean beganTransaction = false;
+        EntityListIterator jobsIterator = null;
+        boolean beganTransaction = false;
+        try {
+            beganTransaction = TransactionUtil.begin();
+            if (!beganTransaction) {
+                Debug.logWarning("Unable to poll JobSandbox for jobs; transaction was not started by this process", module);
+                return poll;
+            }
+            jobsIterator = delegator.find("JobSandbox", mainCondition, null, null, UtilMisc.toList("runTime"), null);
+            GenericValue jobValue = jobsIterator.next();
+            while (jobValue != null) {
+                // Claim ownership of this value. Using storeByCondition to avoid a race condition.
+                List<EntityExpr> updateExpression = UtilMisc.toList(EntityCondition.makeCondition("jobId", EntityOperator.EQUALS, jobValue.get("jobId")), EntityCondition.makeCondition("runByInstanceId", EntityOperator.EQUALS, null));
+                int rowsUpdated = delegator.storeByCondition("JobSandbox", UtilMisc.toMap("runByInstanceId", instanceId), EntityCondition.makeCondition(updateExpression));
+                if (rowsUpdated == 1) {
+                    poll.add(new PersistedServiceJob(dctx, jobValue, null));
+                    if (poll.size() == limit) {
+                        break;
+                    }
+                }
+                jobValue = jobsIterator.next();
+            }
+        } catch (Throwable t) {
+            poll.clear();
+            String errMsg =  "Exception thrown while polling JobSandbox: ";
+            Debug.logWarning(t, errMsg, module);
+            try {
+                TransactionUtil.rollback(beganTransaction, errMsg + t.getMessage(), t);
+            } catch (GenericEntityException e) {
+                Debug.logWarning(e, "Exception thrown while rolling back transaction: ", module);
+            }
+        } finally {
+            if (jobsIterator != null) {
+                try {
+                    jobsIterator.close();
+                } catch (GenericEntityException e) {
+                    Debug.logWarning(e, module);
+                }
+            }
+            try {
+                TransactionUtil.commit(beganTransaction);
+            } catch (GenericTransactionException e) {
+                Debug.logWarning(e, "Transaction error trying to commit when polling and updating the JobSandbox: ", module);
+            }
+        }
+        if (poll.isEmpty()) {
+            // No jobs to run, see if there are any jobs to purge
+            int daysToKeep = ServiceConfigUtil.getPurgeJobDays();
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DAY_OF_YEAR, -daysToKeep);
+            Timestamp purgeTime = new Timestamp(cal.getTimeInMillis());
+            List<EntityExpr> finExp = UtilMisc.toList(EntityCondition.makeCondition("finishDateTime", EntityOperator.NOT_EQUAL, null), EntityCondition.makeCondition("finishDateTime", EntityOperator.LESS_THAN, purgeTime));
+            List<EntityExpr> canExp = UtilMisc.toList(EntityCondition.makeCondition("cancelDateTime", EntityOperator.NOT_EQUAL, null), EntityCondition.makeCondition("cancelDateTime", EntityOperator.LESS_THAN, purgeTime));
+            EntityCondition doneCond = EntityCondition.makeCondition(UtilMisc.toList(EntityCondition.makeCondition(canExp), EntityCondition.makeCondition(finExp)), EntityOperator.OR);
+            mainCondition = EntityCondition.makeCondition(UtilMisc.toList(EntityCondition.makeCondition("runByInstanceId", instanceId), doneCond));
+            beganTransaction = false;
+            jobsIterator = null;
             try {
                 beganTransaction = TransactionUtil.begin();
                 if (!beganTransaction) {
-                    Debug.logError("Unable to poll for jobs; transaction was not started by this process", module);
-                    return null;
+                    Debug.logWarning("Unable to poll JobSandbox for jobs; transaction was not started by this process", module);
+                    return poll;
                 }
-                List<Job> localPoll = FastList.newInstance();
-                // first update the jobs w/ this instance running information
-                delegator.storeByCondition("JobSandbox", updateFields, mainCondition);
-                // now query all the 'queued' jobs for this instance
-                List<GenericValue> jobEnt = delegator.findByAnd("JobSandbox", updateFields, order, false);
-                // jobEnt = delegator.findByCondition("JobSandbox", mainCondition, null, order);
-                if (UtilValidate.isNotEmpty(jobEnt)) {
-                    for (GenericValue v : jobEnt) {
-                        DispatchContext dctx = getDispatcher().getDispatchContext();
-                        if (dctx == null) {
-                            Debug.logError("Unable to locate DispatchContext object; not running job!", module);
-                            continue;
-                        }
-                        Job job = new PersistedServiceJob(dctx, v, null); // TODO fix the requester
-                        try {
-                            job.queue();
-                            localPoll.add(job);
-                        } catch (InvalidJobException e) {
-                            Debug.logError(e, module);
-                        }
+                jobsIterator = delegator.find("JobSandbox", mainCondition, null, null, UtilMisc.toList("jobId"), null);
+                GenericValue jobValue = jobsIterator.next();
+                while (jobValue != null) {
+                    poll.add(new PurgeJob(jobValue));
+                    if (poll.size() == limit) {
+                        break;
                     }
-                } else {
-                    pollDone = true;
+                    jobValue = jobsIterator.next();
                 }
-                // nothing should go wrong at this point, so add to the general list
-                poll.addAll(localPoll);
             } catch (Throwable t) {
-                // catch Throwable so nothing slips through the cracks... this is a fairly sensitive operation
-                String errMsg = "Error in polling JobSandbox: [" + t.toString() + "]. Rolling back transaction.";
-                Debug.logError(t, errMsg, module);
+                poll.clear();
+                String errMsg =  "Exception thrown while polling JobSandbox: ";
+                Debug.logWarning(t, errMsg, module);
                 try {
-                    // only rollback the transaction if we started one...
-                    TransactionUtil.rollback(beganTransaction, errMsg, t);
-                } catch (GenericEntityException e2) {
-                    Debug.logError(e2, "[Delegator] Could not rollback transaction: " + e2.toString(), module);
+                    TransactionUtil.rollback(beganTransaction, errMsg + t.getMessage(), t);
+                } catch (GenericEntityException e) {
+                    Debug.logWarning(e, "Exception thrown while rolling back transaction: ", module);
                 }
             } finally {
+                if (jobsIterator != null) {
+                    try {
+                        jobsIterator.close();
+                    } catch (GenericEntityException e) {
+                        Debug.logWarning(e, module);
+                    }
+                }
                 try {
-                    // only commit the transaction if we started one... but make sure we try
                     TransactionUtil.commit(beganTransaction);
                 } catch (GenericTransactionException e) {
-                    String errMsg = "Transaction error trying to commit when polling and updating the JobSandbox: " + e.toString();
-                    // we don't really want to do anything different, so just log and move on
-                    Debug.logError(e, errMsg, module);
+                    Debug.logWarning(e, "Transaction error trying to commit when polling the JobSandbox: ", module);
                 }
             }
         }
         return poll;
     }
 
-    private void reloadCrashedJobs() {
+    private synchronized void reloadCrashedJobs() {
+        assertIsRunning();
+        if (crashedJobsReloaded) {
+            return;
+        }
         List<GenericValue> crashed = null;
-        List<EntityExpr> exprs = UtilMisc.toList(EntityCondition.makeCondition("runByInstanceId", instanceId));
-        exprs.add(EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "SERVICE_RUNNING"));
-        EntityConditionList<EntityExpr> ecl = EntityCondition.makeCondition(exprs);
+        List<EntityExpr> statusExprList = UtilMisc.toList(EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "SERVICE_PENDING"),
+                EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "SERVICE_QUEUED"),
+                EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "SERVICE_RUNNING"));
+        EntityCondition statusCondition = EntityCondition.makeCondition(statusExprList, EntityOperator.OR);
+        EntityCondition mainCondition = EntityCondition.makeCondition(UtilMisc.toList(EntityCondition.makeCondition("runByInstanceId", instanceId), statusCondition));
         try {
-            crashed = delegator.findList("JobSandbox", ecl, null, UtilMisc.toList("startDateTime"), null, false);
+            crashed = delegator.findList("JobSandbox", mainCondition, null, UtilMisc.toList("startDateTime"), null, false);
         } catch (GenericEntityException e) {
-            Debug.logError(e, "Unable to load crashed jobs", module);
+            Debug.logWarning(e, "Unable to load crashed jobs", module);
         }
         if (UtilValidate.isNotEmpty(crashed)) {
-            try {
-                int rescheduled = 0;
-                for (GenericValue job : crashed) {
-                    Timestamp now = UtilDateTime.nowTimestamp();
+            int rescheduled = 0;
+            Timestamp now = UtilDateTime.nowTimestamp();
+            for (GenericValue job : crashed) {
+                try {
                     Debug.logInfo("Scheduling Job : " + job, module);
                     String pJobId = job.getString("parentJobId");
                     if (pJobId == null) {
@@ -267,16 +304,17 @@ public final class JobManager {
                     job.set("cancelDateTime", now);
                     delegator.store(job);
                     rescheduled++;
+                } catch (GenericEntityException e) {
+                    Debug.logWarning(e, module);
                 }
-                if (Debug.infoOn())
-                    Debug.logInfo("-- " + rescheduled + " jobs re-scheduled", module);
-            } catch (GenericEntityException e) {
-                Debug.logError(e, module);
             }
+            if (Debug.infoOn())
+                Debug.logInfo("-- " + rescheduled + " jobs re-scheduled", module);
         } else {
             if (Debug.infoOn())
                 Debug.logInfo("No crashed jobs to re-schedule", module);
         }
+        crashedJobsReloaded = true;
     }
 
     /** Queues a Job to run now.
@@ -286,7 +324,7 @@ public final class JobManager {
     public void runJob(Job job) throws JobManagerException {
         assertIsRunning();
         if (job.isValid()) {
-            jp.queueNow(job);
+            JobPoller.getInstance().queueNow(job);
         }
     }
 
@@ -501,13 +539,4 @@ public final class JobManager {
             throw new JobManagerException(e.getMessage(), e);
         }
     }
-
-    /** Close out the scheduler thread. */
-    public void shutdown() {
-        Debug.logInfo("Stopping the JobManager...", module);
-        registeredManagers.remove(delegator.getDelegatorName(), this);
-        jp.stop();
-        Debug.logInfo("JobManager stopped.", module);
-    }
-
 }

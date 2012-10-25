@@ -25,8 +25,13 @@
 
 <refsection><info><title>Description</title></info>
 
-<para>The body font family is the default font used for text in the page body.
-</para>
+<para>The body font family is the default font used for text in the page body.</para>
+<para>If more than one font is required, enter the font names,
+separated by a comma, e.g.</para>
+<literallayout>
+  &lt;xsl:param name="body.font.family">Arial, SimSun, serif&lt;/xsl:param>
+
+</literallayout>
 
 </refsection>
 </refentry>

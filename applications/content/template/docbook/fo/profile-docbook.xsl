@@ -9,7 +9,7 @@
 <xsl:output method="xml" indent="no"/>
 
 <!-- ********************************************************************
-     $Id: docbook.xsl 8414 2009-04-18 22:40:23Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -20,7 +20,7 @@
 
 <!-- ==================================================================== -->
 
-<xsl:include href="../VERSION"/>
+<xsl:include href="../VERSION.xsl"/>
 <xsl:include href="param.xsl"/>
 <xsl:include href="../lib/lib.xsl"/>
 <xsl:include href="../common/l10n.xsl"/>
@@ -239,6 +239,7 @@
           <xsl:copy-of select="$bookmarks"/>
         </fo:bookmark-tree>
       </xsl:if>
+      <xsl:apply-templates select="$document.element" mode="fop1.foxdest"/>
     </xsl:if>
 
     <xsl:if test="$xep.extensions != 0">

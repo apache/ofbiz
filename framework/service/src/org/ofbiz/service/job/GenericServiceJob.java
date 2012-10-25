@@ -18,8 +18,10 @@
  *******************************************************************************/
 package org.ofbiz.service.job;
 
+import java.io.Serializable;
 import java.util.Map;
 
+import org.ofbiz.base.util.Assert;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericRequester;
@@ -27,34 +29,25 @@ import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
 /**
- * Generic Service Job - A generic async-service Job.
+ * A generic async-service job.
  */
 @SuppressWarnings("serial")
-public class GenericServiceJob extends AbstractJob {
+public class GenericServiceJob extends AbstractJob implements Serializable {
 
     public static final String module = GenericServiceJob.class.getName();
 
-    protected transient GenericRequester requester = null;
-    protected transient DispatchContext dctx = null;
-
-    private String service = null;
-    private Map<String, Object> context = null;
+    protected final transient GenericRequester requester;
+    protected final transient DispatchContext dctx;
+    private final String service;
+    private final Map<String, Object> context;
 
     public GenericServiceJob(DispatchContext dctx, String jobId, String jobName, String service, Map<String, Object> context, GenericRequester req) {
         super(jobId, jobName);
+        Assert.notNull("dctx", dctx);
         this.dctx = dctx;
         this.service = service;
         this.context = context;
         this.requester = req;
-        runtime = System.currentTimeMillis();
-    }
-
-    protected GenericServiceJob(String jobId, String jobName) {
-        super(jobId, jobName);
-        this.dctx = null;
-        this.requester = null;
-        this.service = null;
-        this.context = null;
     }
 
     /**
@@ -62,36 +55,37 @@ public class GenericServiceJob extends AbstractJob {
      */
     @Override
     public void exec() throws InvalidJobException {
+        if (currentState != State.QUEUED) {
+            throw new InvalidJobException("Illegal state change");
+        }
+        currentState = State.RUNNING;
         init();
-
+        Throwable thrown = null;
         Map<String, Object> result = null;
         // no transaction is necessary since runSync handles this
         try {
             // get the dispatcher and invoke the service via runSync -- will run all ECAs
             LocalDispatcher dispatcher = dctx.getDispatcher();
             result = dispatcher.runSync(getServiceName(), getContext());
-
             // check for a failure
             if (ServiceUtil.isError(result)) {
-                 this.failed(new Exception(ServiceUtil.getErrorMessage(result)));
+                thrown = new Exception(ServiceUtil.getErrorMessage(result));
             }
-
             if (requester != null) {
                 requester.receiveResult(result);
             }
-
         } catch (Throwable t) {
-            // pass the exception back to the requester.
             if (requester != null) {
+                // pass the exception back to the requester.
                 requester.receiveThrowable(t);
             }
-
-            // call the failed method
-            this.failed(t);
+            thrown = t;
         }
-
-        // call the finish method
-        this.finish(result);
+        if (thrown == null) {
+            finish(result);
+        } else {
+            failed(thrown);
+        }
     }
 
     /**
@@ -102,11 +96,14 @@ public class GenericServiceJob extends AbstractJob {
     }
 
     /**
-     * Method is called after the service has finished.
+     * Method is called after the service has finished successfully.
      */
     protected void finish(Map<String, Object> result) throws InvalidJobException {
+        if (currentState != State.RUNNING) {
+            throw new InvalidJobException("Illegal state change");
+        }
+        currentState = State.FINISHED;
         if (Debug.verboseOn()) Debug.logVerbose("Async-Service finished.", module);
-        runtime = 0;
     }
 
     /**
@@ -114,8 +111,11 @@ public class GenericServiceJob extends AbstractJob {
      * @param t Throwable
      */
     protected void failed(Throwable t) throws InvalidJobException {
+        if (currentState != State.RUNNING) {
+            throw new InvalidJobException("Illegal state change");
+        }
+        currentState = State.FAILED;
         Debug.logError(t, "Async-Service failed.", module);
-        runtime = 0;
     }
 
     /**
@@ -130,7 +130,18 @@ public class GenericServiceJob extends AbstractJob {
      * Gets the name of the service as defined in the definition file.
      * @return The name of the service to be invoked.
      */
-    protected String getServiceName() throws InvalidJobException {
+    protected String getServiceName() {
         return service;
+    }
+
+    @Override
+    public boolean isValid() {
+        return currentState == State.CREATED;
+    }
+
+    @Override
+    public void deQueue() throws InvalidJobException {
+        super.deQueue();
+        throw new InvalidJobException("Unable to queue job [" + getJobId() + "]");
     }
 }

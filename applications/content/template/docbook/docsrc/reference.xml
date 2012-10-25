@@ -15,7 +15,7 @@
   <!-- * WARNING WARNING WARNING -->
   <!-- * WARNING WARNING WARNING -->
   <title>DocBook XSL Stylesheets: Reference Documentation</title>
-  <info><releaseinfo role="meta">$Id: reference.xml 8321 2009-03-12 18:20:36Z mzjn $ </releaseinfo>
+  <info><releaseinfo role="meta">$Id$ </releaseinfo>
     <xi:include href="./authors.xml"/>
     <xi:include href="./copyright.xml" xpointer="xpointer(//*[local-name() = 'copyright'])"/>
     <xi:include href="./license.xml"/>
@@ -146,7 +146,19 @@
       </partintro>
       <xi:include href="../website/param.xml" xpointer="xpointer(/book/reference)" />
     </part>
+   <!-- Prepare WebHelp output
+    <part xml:id="webhelp">
+      <?dbhtml dir="webhelp"?>
+      <?dbhtml filename="index.html"?>
+      <xi:include href="../webhelp/param.xml" xpointer="xpointer(/book/info/title)" />
+      <partintro xml:id="webhelpintro">
+        <xi:include href="../webhelp/param.xml" xpointer="xpointer(/book/info/abstract/node())" />
+      </partintro>
+      <xi:include href="../webhelp/param.xml" xpointer="xpointer(/book/reference)" />
+    </part>
+   -->
   </book>
+ 
   <book xml:id="pi"><title>DocBook XSL Stylesheets User Reference: PIs</title>
     <?dbhtml dir="pi"?>
     <?dbhtml filename="index.html"?>

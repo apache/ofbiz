@@ -23,7 +23,7 @@
         </affiliation>
       </author>
 
-      <releaseinfo>$Id: default.xsl 6567 2007-01-30 06:43:18Z xmldoc $</releaseinfo>
+      <releaseinfo>$Id$</releaseinfo>
 
       <copyright>
         <year>2002</year>

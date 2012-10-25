@@ -5,7 +5,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: axf.xsl 6483 2007-01-08 18:00:22Z bobstayton $
+     $Id$
      ******************************************************************** -->
 
 <xsl:template name="axf-document-information">
@@ -24,6 +24,9 @@
           </xsl:when>
           <xsl:when test="$authors[self::corpauthor]">
             <xsl:value-of select="$authors"/>
+          </xsl:when>
+           <xsl:when test="$authors[orgname]">
+            <xsl:value-of select="$authors/orgname"/>
           </xsl:when>
           <xsl:otherwise>
             <xsl:call-template name="person.name">

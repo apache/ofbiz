@@ -26,7 +26,7 @@ is non-zero, unicode characters are used to represent
 callout numbers. The value of
 <parameter>callout.unicode.start.character</parameter>
 is the decimal unicode value used for callout number one. Currently, 
-only 10102 is supported in the stylesheets for this parameter. 
+only values 9312 and 10102 are supported in the stylesheets for this parameter. 
 </para>
 
 </refsection>

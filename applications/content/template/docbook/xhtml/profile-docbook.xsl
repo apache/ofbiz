@@ -8,7 +8,7 @@
 <xsl:output method="xml" encoding="UTF-8" indent="no" doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"/>
 
 <!-- ********************************************************************
-     $Id: docbook.xsl 8399 2009-04-08 07:37:42Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -19,7 +19,7 @@
 
 <!-- ==================================================================== -->
 
-<xsl:include href="../VERSION"/>
+<xsl:include href="../VERSION.xsl"/>
 <xsl:include href="param.xsl"/>
 <xsl:include href="../lib/lib.xsl"/>
 <xsl:include href="../common/l10n.xsl"/>
@@ -124,18 +124,27 @@
     <xsl:copy-of select="$title"/>
   </title>
 
+  <xsl:if test="$html.base != ''">
+    <base href="{$html.base}"/>
+  </xsl:if>
+
+  <!-- Insert links to CSS files or insert literal style elements -->
+  <xsl:call-template name="generate.css"/>
+
   <xsl:if test="$html.stylesheet != ''">
     <xsl:call-template name="output.html.stylesheets">
       <xsl:with-param name="stylesheets" select="normalize-space($html.stylesheet)"/>
     </xsl:call-template>
   </xsl:if>
 
-  <xsl:if test="$link.mailto.url != ''">
-    <link rev="made" href="{$link.mailto.url}"/>
+  <xsl:if test="$html.script != ''">
+    <xsl:call-template name="output.html.scripts">
+      <xsl:with-param name="scripts" select="normalize-space($html.script)"/>
+    </xsl:call-template>
   </xsl:if>
 
-  <xsl:if test="$html.base != ''">
-    <base href="{$html.base}"/>
+  <xsl:if test="$link.mailto.url != ''">
+    <link rev="made" href="{$link.mailto.url}"/>
   </xsl:if>
 
   <meta name="generator" content="DocBook {$DistroTitle} V{$VERSION}"/>
@@ -177,25 +186,43 @@ body { background-image: url('</xsl:text>
 
   <xsl:choose>
     <xsl:when test="contains($stylesheets, ' ')">
-      <link rel="stylesheet" href="{substring-before($stylesheets, ' ')}">
-        <xsl:if test="$html.stylesheet.type != ''">
-          <xsl:attribute name="type">
-            <xsl:value-of select="$html.stylesheet.type"/>
-          </xsl:attribute>
-        </xsl:if>
-      </link>
+      <xsl:variable name="css.filename" select="substring-before($stylesheets, ' ')"/>
+
+      <xsl:call-template name="make.css.link">
+        <xsl:with-param name="css.filename" select="$css.filename"/>
+      </xsl:call-template>
+
       <xsl:call-template name="output.html.stylesheets">
         <xsl:with-param name="stylesheets" select="substring-after($stylesheets, ' ')"/>
       </xsl:call-template>
     </xsl:when>
     <xsl:when test="$stylesheets != ''">
-      <link rel="stylesheet" href="{$stylesheets}">
-        <xsl:if test="$html.stylesheet.type != ''">
-          <xsl:attribute name="type">
-            <xsl:value-of select="$html.stylesheet.type"/>
-          </xsl:attribute>
-        </xsl:if>
-      </link>
+      <xsl:call-template name="make.css.link">
+        <xsl:with-param name="css.filename" select="$stylesheets"/>
+      </xsl:call-template>
+    </xsl:when>
+  </xsl:choose>
+</xsl:template>
+
+<xsl:template name="output.html.scripts">
+  <xsl:param name="scripts" select="''"/>
+
+  <xsl:choose>
+    <xsl:when test="contains($scripts, ' ')">
+      <xsl:variable name="script.filename" select="substring-before($scripts, ' ')"/>
+
+      <xsl:call-template name="make.script.link">
+        <xsl:with-param name="script.filename" select="$script.filename"/>
+      </xsl:call-template>
+
+      <xsl:call-template name="output.html.scripts">
+        <xsl:with-param name="scripts" select="substring-after($scripts, ' ')"/>
+      </xsl:call-template>
+    </xsl:when>
+    <xsl:when test="$scripts != ''">
+      <xsl:call-template name="make.script.link">
+        <xsl:with-param name="script.filename" select="$scripts"/>
+      </xsl:call-template>
     </xsl:when>
   </xsl:choose>
 </xsl:template>
@@ -290,6 +317,9 @@ var popup_</xsl:text>
 
 <xsl:template name="user.header.navigation">
   <xsl:param name="node" select="."/>
+  <xsl:param name="prev" select="/foo"/>
+  <xsl:param name="next" select="/foo"/>
+  <xsl:param name="nav.context"/>
 </xsl:template>
 
 <xsl:template name="user.header.content">
@@ -302,7 +332,19 @@ var popup_</xsl:text>
 
 <xsl:template name="user.footer.navigation">
   <xsl:param name="node" select="."/>
+  <xsl:param name="prev" select="/foo"/>
+  <xsl:param name="next" select="/foo"/>
+  <xsl:param name="nav.context"/>
 </xsl:template>
+
+<!-- To use the same stripped nodeset everywhere, it should
+be created as a global variable here.
+Used by docbook.xsl, chunk-code.xsl and chunkfast.xsl -->
+<xsl:variable name="no.namespace">
+  <xsl:if test="$exsl.node.set.available != 0                     and (*/self::ng:* or */self::db:*)">
+    <xsl:apply-templates select="/*" mode="stripNS"/>
+  </xsl:if>
+</xsl:variable>
 
 <xslo:include xmlns:xslo="http://www.w3.org/1999/XSL/Transform" href="../profiling/profile-mode.xsl"/><xslo:variable xmlns:xslo="http://www.w3.org/1999/XSL/Transform" name="profiled-content"><xslo:choose><xslo:when test="*/self::ng:* or */self::db:*"><xslo:message>Note: namesp. cut : stripped namespace before processing</xslo:message><xslo:variable name="stripped-content"><xslo:apply-templates select="/" mode="stripNS"/></xslo:variable><xslo:message>Note: namesp. cut : processing stripped document</xslo:message><xslo:apply-templates select="exslt:node-set($stripped-content)" mode="profile"/></xslo:when><xslo:otherwise><xslo:apply-templates select="/" mode="profile"/></xslo:otherwise></xslo:choose></xslo:variable><xslo:variable xmlns:xslo="http://www.w3.org/1999/XSL/Transform" name="profiled-nodes" select="exslt:node-set($profiled-content)"/><xsl:template match="/">
   <!-- * Get a title for current doc so that we let the user -->
@@ -365,6 +407,7 @@ var popup_</xsl:text>
   <xsl:call-template name="root.messages"/>
 
   <html>
+    <xsl:call-template name="root.attributes"/>
     <head>
       <xsl:call-template name="system.head.content">
         <xsl:with-param name="node" select="$doc"/>
@@ -388,6 +431,13 @@ var popup_</xsl:text>
     </body>
   </html>
   <xsl:value-of select="$html.append"/>
+  
+  <!-- Generate any css files only once, not once per chunk -->
+  <xsl:call-template name="generate.css.files"/>
+</xsl:template>
+
+<xsl:template name="root.attributes">
+  <!-- customize to add attributes to <html> element  -->
 </xsl:template>
 
 <xsl:template name="root.messages">
@@ -403,7 +453,5 @@ var popup_</xsl:text>
   <!-- The default is that we are not chunking... -->
   <xsl:text>0</xsl:text>
 </xsl:template>
-
-<!-- ==================================================================== -->
 
 </xsl:stylesheet>

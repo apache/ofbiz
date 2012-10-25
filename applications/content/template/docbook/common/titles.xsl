@@ -1,11 +1,12 @@
 <?xml version='1.0'?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:doc="http://nwalsh.com/xsl/documentation/1.0"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
                 exclude-result-prefixes="doc"
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: titles.xsl 8469 2009-07-09 21:49:16Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -250,6 +251,7 @@ title of the element. This does not include the label.
 <xsl:template match="section
                      |sect1|sect2|sect3|sect4|sect5
                      |refsect1|refsect2|refsect3|refsection
+                     |topic
                      |simplesect"
               mode="title.markup">
   <xsl:param name="allow-anchors" select="0"/>
@@ -601,6 +603,7 @@ title of the element. This does not include the label.
 <xsl:template match="section
                      |sect1|sect2|sect3|sect4|sect5
                      |refsect1|refsect2|refsect3
+                     |topic
                      |simplesect"
               mode="titleabbrev.markup">
   <xsl:param name="allow-anchors" select="0"/>
@@ -719,7 +722,7 @@ title of the element. This does not include the label.
 </xsl:template>
 
 <xsl:template match="xref" mode="no.anchor.mode">
-  <xsl:variable name="targets" select="key('id',@linkend)"/>
+  <xsl:variable name="targets" select="key('id',@linkend)|key('id',substring-after(@xlink:href,'#'))"/>
   <xsl:variable name="target" select="$targets[1]"/>
   <xsl:variable name="refelem" select="local-name($target)"/>
   
@@ -731,7 +734,8 @@ title of the element. This does not include the label.
     <xsl:when test="count($target) = 0">
       <xsl:message>
         <xsl:text>XRef to nonexistent id: </xsl:text>
-        <xsl:value-of select="@linkend"/>
+        <xsl:value-of select="@linkend"/> 
+        <xsl:value-of select="@xlink:href"/>
       </xsl:message>
       <xsl:text>???</xsl:text>
     </xsl:when>

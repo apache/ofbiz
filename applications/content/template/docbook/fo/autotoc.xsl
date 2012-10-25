@@ -5,7 +5,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: autotoc.xsl 8286 2009-03-06 22:53:04Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -69,6 +69,7 @@
                         |$toc-context/chapter
                         |$toc-context/appendix
                         |$toc-context/article
+                        |$toc-context/topic
                         |$toc-context/bibliography
                         |$toc-context/glossary
                         |$toc-context/index"/>
@@ -110,7 +111,7 @@
   </xsl:variable>
 
   <xsl:variable name="nodes" select="section|sect1|refentry
-                                     |article|bibliography|glossary
+                                     |article|topic|bibliography|glossary
                                      |qandaset[$qanda.in.toc != 0]
                                      |appendix|index"/>
   <xsl:if test="$nodes">
@@ -390,12 +391,11 @@
   </xsl:call-template>
 
   <xsl:variable name="nodes" select="glossary|bibliography|preface|chapter
-                                     |reference|part|article|appendix|index"/>
+                                     |reference|part|article|topic|appendix|index"/>
 
   <xsl:variable name="depth.from.context" select="count(ancestor::*)-count($toc-context/ancestor::*)"/>
 
-  <xsl:if test="$toc.section.depth > 0 
-                and $toc.max.depth > $depth.from.context
+  <xsl:if test="$toc.max.depth > $depth.from.context
                 and $nodes">
     <fo:block id="toc.{$cid}.{$id}">
       <xsl:attribute name="margin-{$direction.align.start}">
@@ -430,8 +430,7 @@
 
   <xsl:variable name="depth.from.context" select="count(ancestor::*)-count($toc-context/ancestor::*)"/>
 
-  <xsl:if test="$toc.section.depth > 0 
-                and $toc.max.depth > $depth.from.context
+  <xsl:if test="$toc.max.depth > $depth.from.context
                 and $nodes">
     <fo:block id="toc.{$cid}.{$id}">
       <xsl:attribute name="margin-{$direction.align.start}">
@@ -463,13 +462,12 @@
   </xsl:call-template>
 
   <xsl:variable name="nodes" select="chapter|appendix|preface|reference|
-                                     refentry|article|index|glossary|
+                                     refentry|article|topic|index|glossary|
                                      bibliography"/>
 
   <xsl:variable name="depth.from.context" select="count(ancestor::*)-count($toc-context/ancestor::*)"/>
 
-  <xsl:if test="$toc.section.depth > 0 
-                and $toc.max.depth > $depth.from.context
+  <xsl:if test="$toc.max.depth > $depth.from.context
                 and $nodes">
     <fo:block id="toc.{$cid}.{$id}">
       <xsl:attribute name="margin-{$direction.align.start}">
@@ -546,6 +544,7 @@
   <xsl:variable name="nodes" select="section|sect1
                                      |qandaset[$qanda.in.toc != 0]
                                      |simplesect[$simplesect.in.toc != 0]
+                                     |topic
                                      |refentry|appendix"/>
 
   <xsl:variable name="depth.from.context" select="count(ancestor::*)-count($toc-context/ancestor::*)"/>
@@ -728,6 +727,14 @@
   </xsl:call-template>
 </xsl:template>
 
+<xsl:template match="topic" mode="toc">
+  <xsl:param name="toc-context" select="."/>
+
+  <xsl:call-template name="toc.line">
+    <xsl:with-param name="toc-context" select="$toc-context"/>
+  </xsl:call-template>
+</xsl:template>
+
 <xsl:template name="set.toc.indent">
   <xsl:param name="reldepth"/>
 
@@ -850,6 +857,44 @@
         </xsl:when>
         <xsl:otherwise>
           <xsl:call-template name="list.of.unknowns.titlepage"/>
+        </xsl:otherwise>
+      </xsl:choose>
+      <xsl:apply-templates select="$nodes" mode="toc">
+        <xsl:with-param name="toc-context" select="$toc-context"/>
+      </xsl:apply-templates>
+    </fo:block>
+  </xsl:if>
+</xsl:template>
+
+<xsl:template name="component.list.of.titles">
+  <xsl:param name="titles" select="'table'"/>
+  <xsl:param name="nodes" select=".//table"/>
+  <xsl:param name="toc-context" select="."/>
+
+  <xsl:variable name="id">
+    <xsl:call-template name="object.id"/>
+  </xsl:variable>
+
+  <xsl:if test="$nodes">
+    <fo:block id="lot...{$titles}...{$id}">
+      <xsl:choose>
+        <xsl:when test="$titles='table'">
+          <xsl:call-template name="component.list.of.tables.titlepage"/>
+        </xsl:when>
+        <xsl:when test="$titles='figure'">
+          <xsl:call-template name="component.list.of.figures.titlepage"/>
+        </xsl:when>
+        <xsl:when test="$titles='equation'">
+          <xsl:call-template name="component.list.of.equations.titlepage"/>
+        </xsl:when>
+        <xsl:when test="$titles='example'">
+          <xsl:call-template name="component.list.of.examples.titlepage"/>
+        </xsl:when>
+        <xsl:when test="$titles='procedure'">
+          <xsl:call-template name="component.list.of.procedures.titlepage"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:call-template name="component.list.of.unknowns.titlepage"/>
         </xsl:otherwise>
       </xsl:choose>
       <xsl:apply-templates select="$nodes" mode="toc">

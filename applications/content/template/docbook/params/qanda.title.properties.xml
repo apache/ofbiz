@@ -17,7 +17,7 @@
 <src:fragment xml:id="qanda.title.properties.frag">
 <xsl:attribute-set name="qanda.title.properties">
   <xsl:attribute name="font-family">
-    <xsl:value-of select="$title.font.family"/>
+    <xsl:value-of select="$title.fontset"/>
   </xsl:attribute>
   <xsl:attribute name="font-weight">bold</xsl:attribute>
   <!-- font size is calculated dynamically by qanda.heading template -->

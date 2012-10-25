@@ -166,7 +166,6 @@ public class ServiceDispatcher {
 
     /**
      * Registers the loader with this ServiceDispatcher
-     * @param name the local dispatcher
      * @param context the context of the local dispatcher
      */
     public void register(DispatchContext context) {
@@ -835,8 +834,6 @@ public class ServiceDispatcher {
             // shutdown JMS listeners
             jlf.closeListeners();
         }
-        // shutdown the job scheduler
-        jm.shutdown();
     }
 
     // checks if parameters were passed for authentication

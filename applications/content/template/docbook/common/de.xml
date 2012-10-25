@@ -29,8 +29,8 @@
 
 <l:gentext key="Abstract" text="Zusammenfassung"/>
 <l:gentext key="abstract" text="Zusammenfassung"/>
-<l:gentext key="Acknowledgements" text="Acknowledgements" lang="en"/>
-<l:gentext key="acknowledgements" text="Acknowledgements" lang="en"/>
+<l:gentext key="Acknowledgements" text="Danksagungen"/>
+<l:gentext key="acknowledgements" text="Danksagungen"/>
 <l:gentext key="Answer" text="A:"/>
 <l:gentext key="answer" text="A:"/>
 <l:gentext key="Appendix" text="Anhang"/>
@@ -97,23 +97,23 @@
 <l:gentext key="pubdate" text="Veröffentlicht"/>
 <l:gentext key="Published" text="Veröffentlicht"/>
 <l:gentext key="published" text="Veröffentlicht"/>
-<l:gentext key="Publisher" text="Publisher" lang="en"/>
+<l:gentext key="Publisher" text="Herausgeber"/>
 <l:gentext key="Qandadiv" text="F &amp; A"/>
 <l:gentext key="qandadiv" text="F &amp; A"/>
-<l:gentext key="QandASet" text="Frequently Asked Questions" lang="en"/>
+<l:gentext key="QandASet" text="Häufig gestellte Fragen"/>
 <l:gentext key="Question" text="F:"/>
 <l:gentext key="question" text="F:"/>
-<l:gentext key="RefEntry" text=""/>
-<l:gentext key="refentry" text=""/>
+<l:gentext key="RefEntry" text="Seite"/>
+<l:gentext key="refentry" text="seite"/>
 <l:gentext key="Reference" text="Verweis"/>
 <l:gentext key="reference" text="Verweis"/>
-<l:gentext key="References" text="References" lang="en"/>
+<l:gentext key="References" text="Verweise"/>
 <l:gentext key="RefName" text="Name"/>
 <l:gentext key="refname" text="Name"/>
 <l:gentext key="RefSection" text="Abschnitt"/>
 <l:gentext key="refsection" text="Abschnitt"/>
-<l:gentext key="RefSynopsisDiv" text="Synopsis"/>
-<l:gentext key="refsynopsisdiv" text="Synopsis"/>
+<l:gentext key="RefSynopsisDiv" text="Übersicht"/>
+<l:gentext key="refsynopsisdiv" text="Übersicht"/>
 <l:gentext key="RevHistory" text="Versionsgeschichte"/>
 <l:gentext key="revhistory" text="Versionsgeschichte"/>
 <l:gentext key="revision" text="Version"/>
@@ -140,8 +140,8 @@
 <l:gentext key="Step" text="Schritt"/>
 <l:gentext key="table" text="Tabelle"/>
 <l:gentext key="Table" text="Tabelle"/>
-<l:gentext key="task" text="Task" lang="en"/>
-<l:gentext key="Task" text="Task" lang="en"/>
+<l:gentext key="task" text="aufgabe"/>
+<l:gentext key="Task" text="Aufgabe"/>
 <l:gentext key="tip" text="Tipp"/>
 <l:gentext key="TIP" text="TIPP"/>
 <l:gentext key="Tip" text="Tipp"/>
@@ -149,6 +149,7 @@
 <l:gentext key="warning" text="Warnung"/>
 <l:gentext key="WARNING" text="WARNUNG"/>
 <l:gentext key="and" text="und"/>
+<l:gentext key="or" text="oder"/>
 <l:gentext key="by" text="von"/>
 <l:gentext key="Edited" text="Herausgegeben"/>
 <l:gentext key="edited" text="Herausgegeben"/>
@@ -157,7 +158,6 @@
 <l:gentext key="in" text="in"/>
 <l:gentext key="lastlistcomma" text=""/>
 <l:gentext key="listcomma" text=","/>
-<l:gentext key="nonexistantelement" text="nicht existierendes Element"/>
 <l:gentext key="notes" text="Fußnoten"/>
 <l:gentext key="Notes" text="Fußnoten"/>
 <l:gentext key="Pgs" text="Seiten"/>
@@ -172,19 +172,19 @@
 <l:gentext key="unsupported" text="wird nicht unterstützt"/>
 <l:gentext key="xrefto" text="xref auf"/>
 <l:gentext key="Authors" text="Autoren"/>
-<l:gentext key="copyeditor" text="Copy Editor" lang="en"/>
-<l:gentext key="graphicdesigner" text="Graphic Designer" lang="en"/>
-<l:gentext key="productioneditor" text="Production Editor" lang="en"/>
-<l:gentext key="technicaleditor" text="Technical Editor" lang="en"/>
-<l:gentext key="translator" text="Translator" lang="en"/>
+<l:gentext key="copyeditor" text="Korrekteur"/>
+<l:gentext key="graphicdesigner" text="Grafikgestalter"/>
+<l:gentext key="productioneditor" text="Produktions-Verfasser"/>
+<l:gentext key="technicaleditor" text="Technischer Verfasser"/>
+<l:gentext key="translator" text="Übersetzer"/>
 <l:gentext key="listofequations" text="Gleichungen"/>
 <l:gentext key="ListofEquations" text="Gleichungen"/>
-<l:gentext key="ListofExamples" text="Beispiele"/>
-<l:gentext key="listofexamples" text="Beispiele"/>
+<l:gentext key="ListofExamples" text="Liste der Beispiele"/>
+<l:gentext key="listofexamples" text="Liste der Beispiele"/>
 <l:gentext key="ListofFigures" text="Abbildungsverzeichnis"/>
 <l:gentext key="listoffigures" text="Abbildungsverzeichnis"/>
-<l:gentext key="ListofProcedures" text="List of Procedures" lang="en"/>
-<l:gentext key="listofprocedures" text="List of Procedures" lang="en"/>
+<l:gentext key="ListofProcedures" text="Liste der Prozeduren"/>
+<l:gentext key="listofprocedures" text="Liste der Prozeduren"/>
 <l:gentext key="listoftables" text="Tabellenverzeichnis"/>
 <l:gentext key="ListofTables" text="Tabellenverzeichnis"/>
 <l:gentext key="ListofUnknown" text="???-Verzeichnis"/>
@@ -216,6 +216,19 @@
 <l:gentext key="hyphenation-character" text="-"/>
 <l:gentext key="hyphenation-push-character-count" text="2"/>
 <l:gentext key="hyphenation-remain-character-count" text="3"/>
+<l:context name="webhelp"><l:template name="Search" text="Suchen"/>
+<l:template name="Enter_a_term_and_click" text="Geben Sie einen Begriff ein und wählen Sie "/>
+<l:template name="Go" text="Go"/>
+<l:template name="to_perform_a_search" text=", um eine Suche durchzuführen."/>
+<l:template name="txt_filesfound" text="Ergebnisse"/>
+<l:template name="txt_enter_at_least_1_char" text="Sie müssen mindestens ein Zeichen eingeben."/>
+<l:template name="txt_browser_not_supported" text="JavaScript ist in Ihrem Browser abgeschaltet. Bitte schalten Sie JavaScript an, damit diese Seiten vollständig dargestellt werden."/>
+<l:template name="txt_please_wait" text="Bitte warten Sie. Die Suche ist im Gange ..."/>
+<l:template name="txt_results_for" text="Ergebnisse für: "/>
+<l:template name="TableofContents" text="Inhalt"/>
+<l:template name="HighlightButton" text="Markierte Suchergebnisse ein/ausschalten"/>
+<l:template name="Your_search_returned_no_results" text="Ihre Suche erbrachte kein Ergebnis."/>
+</l:context>
 <l:context name="styles"><l:template name="person-name" text="first-last"/>
 </l:context>
 <l:context name="title"><l:template name="abstract" text="%t"/>
@@ -309,6 +322,7 @@
 <l:template name="sect5" text="%t"/>
 <l:template name="section" text="%t"/>
 <l:template name="simplesect" text="%t"/>
+<l:template name="topic" text="%t" lang="en"/>
 <l:template name="part" text="%t" lang="en"/>
 </l:context>
 <l:context name="title-numbered"><l:template name="appendix" text="Anhang %n. %t"/>
@@ -323,6 +337,7 @@
 <l:template name="sect5" text="%n. %t"/>
 <l:template name="section" text="%n. %t"/>
 <l:template name="simplesect" text="%n. %t"/>
+<l:template name="topic" text="%t" lang="en"/>
 </l:context>
 <l:context name="subtitle"><l:template name="appendix" text="%s"/>
 <l:template name="acknowledgements" text="%s" lang="en"/>
@@ -362,6 +377,7 @@
 <l:template name="setindex" text="%s"/>
 <l:template name="sidebar" text="%s"/>
 <l:template name="simplesect" text="%s"/>
+<l:template name="topic" text="%t" lang="en"/>
 <l:template name="toc" text="%s"/>
 </l:context>
 <l:context name="xref"><l:template name="abstract" text="%t"/>
@@ -435,6 +451,7 @@
 <l:template name="docnamelong" text=" in the document titled %o" lang="en"/>
 <l:template name="pageabbrev" text="(S. %p)"/>
 <l:template name="Page" text="Seite %p"/>
+<l:template name="topic" text="%t" lang="en"/>
 <l:template name="bridgehead" text="„%t“"/>
 <l:template name="refsection" text="„%t“"/>
 <l:template name="refsect1" text="„%t“"/>

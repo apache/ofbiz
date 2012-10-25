@@ -4,7 +4,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: biblio.xsl 7467 2007-09-27 16:10:31Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -344,8 +344,15 @@
 
 <xsl:template match="author" mode="bibliography.mode">
   <fo:inline>
-    <xsl:call-template name="person.name"/>
-    <xsl:value-of select="$biblioentry.item.separator"/>
+    <xsl:choose>
+      <xsl:when test="orgname">
+        <xsl:apply-templates select="orgname" mode="bibliography.mode"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:call-template name="person.name"/>
+        <xsl:value-of select="$biblioentry.item.separator"/>
+      </xsl:otherwise>
+    </xsl:choose>
   </fo:inline>
 </xsl:template>
 
@@ -411,13 +418,6 @@
 </xsl:template>
 
 <!-- ================================================== -->
-
-<xsl:template match="bookbiblio" mode="bibliography.mode">
-  <fo:inline>
-    <xsl:apply-templates mode="bibliography.mode"/>
-    <xsl:value-of select="$biblioentry.item.separator"/>
-  </fo:inline>
-</xsl:template>
 
 <xsl:template match="citetitle" mode="bibliography.mode">
   <fo:inline>
@@ -849,7 +849,14 @@
 
 <xsl:template match="author" mode="bibliomixed.mode">
   <fo:inline>
-    <xsl:call-template name="person.name"/>
+    <xsl:choose>
+      <xsl:when test="orgname">
+        <xsl:apply-templates select="orgname" mode="bibliomixed.mode"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:call-template name="person.name"/>
+      </xsl:otherwise>
+    </xsl:choose>
   </fo:inline>
 </xsl:template>
 

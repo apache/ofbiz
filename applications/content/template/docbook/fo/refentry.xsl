@@ -5,7 +5,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: refentry.xsl 7564 2007-11-19 18:38:43Z mzjn $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -17,6 +17,7 @@
 <!-- ==================================================================== -->
 
 <xsl:template match="reference">
+   <!-- If there is a partintro, it triggers the page  sequence -->
    <xsl:if test="not(partintro)">
     <xsl:variable name="id">
       <xsl:call-template name="object.id"/>
@@ -80,6 +81,21 @@
         <fo:block id="{$id}">
           <xsl:call-template name="reference.titlepage"/>
         </fo:block>
+
+        <xsl:variable name="toc.params">
+          <xsl:call-template name="find.path.params">
+            <xsl:with-param name="table" 
+                            select="normalize-space($generate.toc)"/>
+          </xsl:call-template>
+        </xsl:variable>
+        <xsl:if test="contains($toc.params, 'toc')">
+          <xsl:call-template name="component.toc">
+            <xsl:with-param name="toc.title.p" 
+                            select="contains($toc.params, 'title')"/>
+          </xsl:call-template>
+          <xsl:call-template name="component.toc.separator"/>
+        </xsl:if>
+
         <!-- Create one page sequence if no pagebreaks needed -->
         <xsl:if test="$refentry.pagebreak = 0">
           <xsl:apply-templates select="refentry"/>
@@ -165,6 +181,24 @@
         <xsl:call-template name="partintro.titlepage"/>
       </xsl:if>
       <xsl:apply-templates/>
+
+      <!-- switch contexts to generate any toc -->
+      <xsl:for-each select="..">
+        <xsl:variable name="toc.params">
+          <xsl:call-template name="find.path.params">
+            <xsl:with-param name="table" 
+                            select="normalize-space($generate.toc)"/>
+          </xsl:call-template>
+        </xsl:variable>
+        <xsl:if test="contains($toc.params, 'toc')">
+          <xsl:call-template name="component.toc">
+            <xsl:with-param name="toc.title.p" 
+                            select="contains($toc.params, 'title')"/>
+          </xsl:call-template>
+          <xsl:call-template name="component.toc.separator"/>
+        </xsl:if>
+      </xsl:for-each>
+
       <!-- Create one page sequence if no pagebreaks needed -->
       <xsl:if test="$refentry.pagebreak = 0">
         <xsl:apply-templates select="../refentry"/>
@@ -268,6 +302,7 @@
 </xsl:template>
 
 <xsl:template match="refmeta">
+  <xsl:apply-templates select=".//indexterm"/>
 </xsl:template>
 
 <xsl:template match="manvolnum">

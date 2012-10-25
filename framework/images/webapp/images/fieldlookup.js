@@ -650,6 +650,7 @@ function lookupFormAjaxRequest(formAction, form) {
 	var screenletTitleBar = jQuery("#" + lookupId + " .screenlet-title-bar :visible:first");
 	jQuery.ajax({
 		url : formAction,
+		type: "POST",
 		data : data,
 		beforeSend : function(jqXHR, settings) {
 			// Here we append the spinner to the lookup screenlet and it will
@@ -718,7 +719,7 @@ function lookupPaginationAjaxRequest(navAction, type) {
  ******************************************************************************/
 var re_id = new RegExp('id=(\\d+)');
 var num_id = (re_id.exec(String(window.location)) ? new Number(RegExp.$1) : 0);
-var obj_caller = (window.opener ? window.opener.lookups[num_id] : null);
+var obj_caller = (window.opener && window.opener.lookups? window.opener.lookups[num_id]: null);
 if (obj_caller == null && window.opener != null) {
 	obj_caller = window.opener;
 } else if (obj_caller == null && window.opener == null) {
@@ -851,22 +852,21 @@ lookupDescriptionLoaded.prototype.update = function() {
 		this.allParams = this.params + '&' + fieldSerialized + '&' + 'searchType=EQUALS';
 		var _fieldId = this.fieldId;
 
-		jQuery
-				.ajax({
-					url : this.url,
-					type : "POST",
-					data : this.allParams,
-					async : false,
-					success : function(result) {
-						// This would be far more reliable if we were removing
-						// the widget boundaries in LookupDecorator using
-						// widgetVerbose in context :/
-						if (result.split("ajaxAutocompleteOptions.ftl -->")[1]) {
-							setLookDescription(_fieldId, result.split("ajaxAutocompleteOptions.ftl -->")[1].trim().split("<!--")[0].trim(),
-									"", "");
-						}
-					}
-				});
+		jQuery.ajax({
+			url : this.url,
+			type : "POST",
+			data : this.allParams,
+			async : false,
+			success : function(result) {
+				// This would be far more reliable if we were removing
+				// the widget boundaries in LookupDecorator using
+				// widgetVerbose in context :/
+				if (result.split("ajaxAutocompleteOptions.ftl -->")[1]) {
+					setLookDescription(_fieldId, result.split("ajaxAutocompleteOptions.ftl -->")[1].trim().split("<!--")[0].trim(),
+							"", "");
+				}
+			}
+		});
 	}
 }
 

@@ -23,5 +23,13 @@
 
 <para>Sets the filename extension to use on admonition graphics.</para>
 
+<itemizedlist>
+  <para>The DocBook XSL distribution provides admonition graphics in the following formats:</para>
+  <listitem><para>GIF (extension: <filename class="extension">.gif</filename>)</para></listitem>
+  <listitem><para>PNG (extension: <filename class="extension">.png</filename>)</para></listitem>
+  <listitem><para>SVG (extension: <filename class="extension">.svg</filename>)</para></listitem>
+  <listitem><para>TIFF (extension: <filename class="extension">.tif</filename>)</para></listitem>
+</itemizedlist>
+
 </refsection>
 </refentry>

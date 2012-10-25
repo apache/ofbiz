@@ -149,6 +149,7 @@
 <l:gentext key="warning" text="警告"/>
 <l:gentext key="WARNING" text="警告"/>
 <l:gentext key="and" text="和"/>
+<l:gentext key="or" text="或"/>
 <l:gentext key="by" text="由"/>
 <l:gentext key="Edited" text="编辑时间"/>
 <l:gentext key="edited" text="编辑时间"/>
@@ -157,7 +158,6 @@
 <l:gentext key="in" text="于"/>
 <l:gentext key="lastlistcomma" text=""/>
 <l:gentext key="listcomma" text="、"/>
-<l:gentext key="nonexistantelement" text="不存在的元素"/>
 <l:gentext key="notes" text="备注"/>
 <l:gentext key="Notes" text="备注"/>
 <l:gentext key="Pgs" text="页"/>
@@ -216,6 +216,19 @@
 <l:gentext key="hyphenation-character" text="-"/>
 <l:gentext key="hyphenation-push-character-count" text="2"/>
 <l:gentext key="hyphenation-remain-character-count" text="2"/>
+<l:context name="webhelp"><l:template name="Search" text="搜索"/>
+<l:template name="Enter_a_term_and_click" text="输入字词，然后点击 "/>
+<l:template name="Go" text="去"/>
+<l:template name="to_perform_a_search" text=" to perform a search."/>
+<l:template name="txt_filesfound" text="条结果"/>
+<l:template name="txt_enter_at_least_1_char" text="您必须输入至少一个字符。"/>
+<l:template name="txt_browser_not_supported" text="JavaScript is disabled on your browser. Please enable JavaScript to enjoy all the features of this site."/>
+<l:template name="txt_please_wait" text="请稍候。搜索中..."/>
+<l:template name="txt_results_for" text="结果： "/>
+<l:template name="TableofContents" text="Contents"/>
+<l:template name="HighlightButton" text="Toggle search result highlighting"/>
+<l:template name="Your_search_returned_no_results" text="Your search returned no results."/>
+</l:context>
 <l:context name="styles"><l:template name="person-name" text="first-last"/>
 </l:context>
 <l:context name="title"><l:template name="abstract" text="%t"/>
@@ -309,6 +322,7 @@
 <l:template name="sect5" text="%t"/>
 <l:template name="section" text="%t"/>
 <l:template name="simplesect" text="%t"/>
+<l:template name="topic" text="%t" lang="en"/>
 <l:template name="part" text="%t"/>
 </l:context>
 <l:context name="title-numbered"><l:template name="appendix" text="附录 %n. %t"/>
@@ -323,6 +337,7 @@
 <l:template name="sect5" text="%n. %t"/>
 <l:template name="section" text="%n. %t"/>
 <l:template name="simplesect" text="%t"/>
+<l:template name="topic" text="%t" lang="en"/>
 </l:context>
 <l:context name="subtitle"><l:template name="appendix" text="%s"/>
 <l:template name="acknowledgements" text="%s"/>
@@ -362,6 +377,7 @@
 <l:template name="setindex" text="%s"/>
 <l:template name="sidebar" text="%s"/>
 <l:template name="simplesect" text="%s"/>
+<l:template name="topic" text="%t" lang="en"/>
 <l:template name="toc" text="%s"/>
 </l:context>
 <l:context name="xref"><l:template name="abstract" text="%t"/>
@@ -435,6 +451,7 @@
 <l:template name="docnamelong" text=" 在文档标题 %o"/>
 <l:template name="pageabbrev" text="(第 %p 页)"/>
 <l:template name="Page" text="第 %p 页"/>
+<l:template name="topic" text="%t" lang="en"/>
 <l:template name="bridgehead" text="“%t”一节"/>
 <l:template name="refsection" text="“%t”一节"/>
 <l:template name="refsect1" text="“%t”一节"/>

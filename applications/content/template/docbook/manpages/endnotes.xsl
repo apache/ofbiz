@@ -8,7 +8,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: endnotes.xsl 8490 2009-07-18 17:48:06Z mzjn $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -259,7 +259,9 @@
           <!-- * do some further checking on it, so we can emit warnings -->
           <!-- * about potential problems -->
         <xsl:for-each select="node()">
-          <xsl:if test="local-name() != 'para' and local-name() !=''">
+          <xsl:if test="local-name() != 'para' and
+                        local-name() != 'simpara' and
+                        local-name() !=''">
             <!-- * for each node we find as a child of a footnote or -->
             <!-- * annotation, if it's not a para or a text node, emit a -->
             <!-- * warning... because in manpages output, we can't render -->

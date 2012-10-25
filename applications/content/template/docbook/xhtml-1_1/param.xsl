@@ -5,7 +5,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns="http://www.w3.org/1999/xhtml" version="1.0">
 
 <!-- ********************************************************************
-     $Id: param.xweb 8345 2009-03-16 06:44:07Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -14,6 +14,7 @@
 
      ******************************************************************** -->
 
+<xsl:param name="abstract.notitle.enabled" select="0"/>
 <xsl:param name="admon.graphics.extension">.png</xsl:param>
 <xsl:param name="admon.graphics" select="0"/>
 <xsl:param name="admon.graphics.path">images/</xsl:param>
@@ -65,18 +66,18 @@ div.annotation-close { position: absolute;
                        right: 2px;
                      }
 </xsl:param>
+<xsl:param name="annotation.graphic.close">
+http://docbook.sourceforge.net/release/images/annot-close.png</xsl:param>
+<xsl:param name="annotation.graphic.open">http://docbook.sourceforge.net/release/images/annot-open.png</xsl:param>
 
 <xsl:param name="annotation.js">
 <xsl:text>http://docbook.sourceforge.net/release/script/AnchorPosition.js http://docbook.sourceforge.net/release/script/PopupWindow.js</xsl:text></xsl:param>
 
-<xsl:param name="annotation.graphic.open">http://docbook.sourceforge.net/release/images/annot-open.png</xsl:param>
-<xsl:param name="annotation.graphic.close">
-http://docbook.sourceforge.net/release/images/annot-close.png</xsl:param>
 <xsl:param name="annotation.support" select="0"/>
 <xsl:param name="appendix.autolabel">A</xsl:param>
 <xsl:param name="author.othername.in.middle" select="1"/>
-<xsl:param name="autotoc.label.separator">. </xsl:param>
 <xsl:param name="autotoc.label.in.hyperlink" select="1"/>
+<xsl:param name="autotoc.label.separator">. </xsl:param>
 <xsl:param name="base.dir"/>
 <xsl:param name="biblioentry.item.separator">. </xsl:param>
 <xsl:param name="bibliography.collection">http://docbook.sourceforge.net/release/bibliography/bibliography.xml</xsl:param>
@@ -102,16 +103,18 @@ http://docbook.sourceforge.net/release/images/annot-close.png</xsl:param>
 <xsl:param name="chunk.first.sections" select="0"/>
 <xsl:param name="chunk.quietly" select="0"/>
 <xsl:param name="chunk.section.depth" select="1"/>
+<xsl:param name="chunk.separate.lots" select="0"/>
 <xsl:param name="chunk.toc"/>
 <xsl:param name="chunk.tocs.and.lots" select="0"/>
 <xsl:param name="chunk.tocs.and.lots.has.title" select="1"/>
-<xsl:param name="chunk.separate.lots" select="0"/>
+<xsl:param name="chunked.filename.prefix"/>
 <xsl:param name="citerefentry.link" select="0"/>
 <xsl:param name="collect.xref.targets">no</xsl:param>
 <xsl:param name="component.label.includes.part.label" select="0"/>
 <xsl:param name="contrib.inline.enabled">1</xsl:param>
 <xsl:param name="css.decoration" select="0"/>
 <xsl:param name="current.docid"/>
+<xsl:param name="custom.css.source"/>
 <xsl:param name="default.float.class">
   <xsl:choose>
     <xsl:when test="contains($stylesheet.result.type,'html')">left</xsl:when>
@@ -119,21 +122,23 @@ http://docbook.sourceforge.net/release/images/annot-close.png</xsl:param>
   </xsl:choose>
 </xsl:param>
 <xsl:param name="default.image.width"/>
-<xsl:param name="default.table.width"/>
 <xsl:param name="default.table.frame">all</xsl:param>
-<xsl:param name="draft.mode">maybe</xsl:param>
-<xsl:param name="draft.watermark.image">http://docbook.sourceforge.net/release/images/draft.png</xsl:param>
-<xsl:param name="ebnf.table.bgcolor">#F5DCB3</xsl:param>
-<xsl:param name="ebnf.table.border" select="1"/>
+<xsl:param name="default.table.width"/>
+<xsl:param name="docbook.css.link" select="1"/>
+<xsl:param name="docbook.css.source">docbook.css.xml</xsl:param>
+<xsl:param name="draft.mode">no</xsl:param>
+<xsl:param name="draft.watermark.image">images/draft.png</xsl:param>
 <xsl:param name="ebnf.assignment">
 <code>::=</code>
 </xsl:param>
 
 <xsl:param name="ebnf.statement.terminator"/>
 
+<xsl:param name="ebnf.table.bgcolor">#F5DCB3</xsl:param>
+<xsl:param name="ebnf.table.border" select="1"/>
 <xsl:param name="eclipse.autolabel" select="0"/>
-<xsl:param name="eclipse.plugin.name">DocBook Online Help Sample</xsl:param>
 <xsl:param name="eclipse.plugin.id">com.example.help</xsl:param>
+<xsl:param name="eclipse.plugin.name">DocBook Online Help Sample</xsl:param>
 <xsl:param name="eclipse.plugin.provider">Example provider</xsl:param>
 <xsl:param name="editedby.enabled">1</xsl:param>
 <xsl:param name="email.delimiters.enabled" select="1"/>
@@ -161,12 +166,14 @@ task before
 <xsl:param name="funcsynopsis.decoration" select="1"/>
 <xsl:param name="funcsynopsis.style">kr</xsl:param>
 <xsl:param name="function.parens" select="0"/>
+<xsl:param name="generate.consistent.ids" select="0"/>
+<xsl:param name="generate.css.header" select="0"/>
 <xsl:param name="generate.id.attributes" select="0"/>
 <xsl:param name="generate.index" select="1"/>
 <xsl:param name="generate.legalnotice.link" select="0"/>
-<xsl:param name="generate.revhistory.link" select="0"/>
 <xsl:param name="generate.manifest" select="0"/>
 <xsl:param name="generate.meta.abstract" select="1"/>
+<xsl:param name="generate.revhistory.link" select="0"/>
 <xsl:param name="generate.section.toc.level" select="0"/>
 <xsl:param name="generate.toc">
 appendix  toc,title
@@ -206,10 +213,12 @@ set       toc,title
 <xsl:param name="html.cleanup" select="1"/>
 <xsl:param name="html.ext">.html</xsl:param>
 <xsl:param name="html.extra.head.links" select="0"/>
-<xsl:param name="html.head.legalnotice.link.types">copyright</xsl:param>
 <xsl:param name="html.head.legalnotice.link.multiple" select="1"/>
+<xsl:param name="html.head.legalnotice.link.types">copyright</xsl:param>
 <xsl:param name="html.longdesc" select="0"/>
 <xsl:param name="html.longdesc.link" select="$html.longdesc"/>
+<xsl:param name="html.script"/>
+<xsl:param name="html.script.type">text/javascript</xsl:param>
 <xsl:param name="html.stylesheet"/>
 <xsl:param name="html.stylesheet.type">text/css</xsl:param>
 <xsl:param name="htmlhelp.alias.file">alias.h</xsl:param>
@@ -261,18 +270,20 @@ set       toc,title
 <xsl:param name="htmlhelp.title"/>
 <xsl:param name="htmlhelp.use.hhk" select="0"/>
 <xsl:param name="htmlhelp.window.geometry"/>
-<xsl:param name="img.src.path"/>
 <xsl:param name="id.warnings" select="0"/>
-<xsl:param name="index.method">basic</xsl:param>
-<xsl:param name="index.on.role" select="0"/>
-<xsl:param name="index.links.to.section" select="1"/>
-<xsl:param name="index.on.type" select="0"/>
-<xsl:param name="index.number.separator"/>
-<xsl:param name="index.term.separator"/>
-<xsl:param name="index.range.separator"/>
-<xsl:param name="index.prefer.titleabbrev" select="0"/>
 <xsl:param name="ignore.image.scaling" select="0"/>
+<xsl:param name="img.src.path"/>
+<xsl:param name="index.links.to.section" select="1"/>
+<xsl:param name="index.method">basic</xsl:param>
+<xsl:param name="index.number.separator"/>
+<xsl:param name="index.on.role" select="0"/>
+<xsl:param name="index.on.type" select="0"/>
+<xsl:param name="index.prefer.titleabbrev" select="0"/>
+<xsl:param name="index.range.separator"/>
+<xsl:param name="index.term.separator"/>
 <xsl:param name="inherit.keywords" select="1"/>
+<xsl:param name="insert.olink.page.number">no</xsl:param>
+<xsl:param name="insert.olink.pdf.frag" select="0"/>
 <xsl:param name="insert.xref.page.number">no</xsl:param>
 <xsl:param name="javahelp.encoding">iso-8859-1</xsl:param>
 <xsl:param name="keep.relative.image.uris" select="1"/>
@@ -287,6 +298,7 @@ set       toc,title
 <xsl:param name="linenumbering.separator"><xsl:text> </xsl:text></xsl:param>
 <xsl:param name="linenumbering.width">3</xsl:param>
 <xsl:param name="link.mailto.url"/>
+<xsl:param name="make.clean.html" select="0"/>
 <xsl:param name="make.graphic.viewport" select="1"/>
 <xsl:param name="make.single.year.ranges" select="0"/>
 <xsl:param name="make.valid.html" select="1"/>
@@ -306,20 +318,16 @@ set       toc,title
 <xsl:param name="nominal.table.width">6in</xsl:param>
 <xsl:param name="olink.base.uri"/>
 <xsl:param name="olink.debug" select="0"/>
+<xsl:param name="olink.doctitle">no</xsl:param> 
+<xsl:param name="olink.fragid">fragid=</xsl:param>
+<xsl:param name="olink.lang.fallback.sequence"/>
+<xsl:param name="olink.outline.ext">.olink</xsl:param>
 <xsl:attribute-set name="olink.properties">
   <xsl:attribute name="show-destination">replace</xsl:attribute>
 </xsl:attribute-set>
-<xsl:param name="insert.olink.page.number">no</xsl:param>
-<xsl:param name="insert.olink.pdf.frag" select="0"/>
-<xsl:param name="prefer.internal.olink" select="0"/>
-<xsl:param name="olink.lang.fallback.sequence"/>
-<xsl:param name="olink.doctitle">no</xsl:param> 
-<xsl:param name="olink.fragid">fragid=</xsl:param>
-<xsl:param name="olink.outline.ext">.olink</xsl:param>
 <xsl:param name="olink.pubid">pubid</xsl:param>
   <xsl:param name="olink.resolver">/cgi-bin/olink</xsl:param>
 <xsl:param name="olink.sysid">sysid</xsl:param>
-<xsl:param name="abstract.notitle.enabled" select="0"/>
 <xsl:param name="othercredit.like.author.enabled">0</xsl:param>
 <xsl:param name="para.propagates.style" select="1"/>
 <xsl:param name="part.autolabel">I</xsl:param>
@@ -327,12 +335,13 @@ set       toc,title
 <xsl:param name="pixels.per.inch">90</xsl:param>
 <xsl:param name="points.per.em">10</xsl:param>
 <xsl:param name="preface.autolabel" select="0"/>
+<xsl:param name="prefer.internal.olink" select="0"/>
 <xsl:param name="preferred.mediaobject.role"/>
 <xsl:param name="process.empty.source.toc" select="0"/>
 <xsl:param name="process.source.toc" select="0"/>
 <xsl:param name="profile.arch"/>
-<xsl:param name="profile.audience"/>
 <xsl:param name="profile.attribute"/>
+<xsl:param name="profile.audience"/>
 <xsl:param name="profile.condition"/>
 <xsl:param name="profile.conformance"/>
 <xsl:param name="profile.lang"/>
@@ -349,16 +358,16 @@ set       toc,title
 <xsl:param name="profile.wordsize"/>
 <xsl:param name="punct.honorific">.</xsl:param>
 <xsl:param name="qanda.defaultlabel">number</xsl:param>
-<xsl:param name="qanda.inherit.numeration" select="1"/>
 <xsl:param name="qanda.in.toc" select="0"/>
+<xsl:param name="qanda.inherit.numeration" select="1"/>
 <xsl:param name="qanda.nested.in.toc" select="0"/>
 <xsl:param name="qandadiv.autolabel" select="1"/>
+<xsl:param name="refclass.suppress" select="0"/>
 <xsl:param name="refentry.generate.name" select="1"/>
 <xsl:param name="refentry.generate.title" select="0"/>
 <xsl:param name="refentry.separator" select="1"/>
 <xsl:param name="refentry.xref.manvolnum" select="1"/>
   <xsl:param name="reference.autolabel">I</xsl:param>
-<xsl:param name="refclass.suppress" select="0"/>
 <xsl:param name="root.filename">index</xsl:param>
 <xsl:param name="rootid"/>
 <xsl:param name="runinhead.default.title.end.punct">.</xsl:param>
@@ -394,15 +403,15 @@ set       toc,title
 <xsl:param name="tablecolumns.extension" select="1"/>
  <xsl:param name="target.database.document">olinkdb.xml</xsl:param>
 <xsl:param name="targets.filename">target.db</xsl:param>
-<xsl:param name="textdata.default.encoding"/>
 <xsl:param name="tex.math.delims" select="1"/>
 <xsl:param name="tex.math.file">tex-math-equations.tex</xsl:param>
 <xsl:param name="tex.math.in.alt"/>
+<xsl:param name="textdata.default.encoding"/>
   <xsl:param name="textinsert.extension" select="1"/>
 <xsl:param name="toc.list.type">dl</xsl:param>
-<xsl:param name="toc.section.depth">2</xsl:param>
 <xsl:param name="toc.max.depth">8</xsl:param>
-<xsl:param name="ulink.target"><xsl:text/></xsl:param>
+<xsl:param name="toc.section.depth">2</xsl:param>
+<xsl:param name="ulink.target"/>
 <xsl:param name="use.embed.for.svg" select="0"/>
 <xsl:param name="use.extensions" select="0"/>
 <xsl:param name="use.id.as.filename" select="0"/>
@@ -411,8 +420,16 @@ set       toc,title
 <xsl:param name="use.role.for.mediaobject" select="1"/>
 <xsl:param name="use.svg" select="1"/>
 <xsl:param name="variablelist.as.table" select="0"/>
-<xsl:param name="variablelist.term.separator">, </xsl:param>
 <xsl:param name="variablelist.term.break.after">0</xsl:param>
+<xsl:param name="variablelist.term.separator">, </xsl:param>
+<xsl:param name="webhelp.autolabel">0</xsl:param>
+<xsl:param name="webhelp.base.dir">docs</xsl:param>
+<xsl:param name="webhelp.common.dir">../common/</xsl:param>
+<xsl:param name="webhelp.default.topic">index.html</xsl:param>
+<xsl:param name="webhelp.include.search.tab">true</xsl:param>
+<xsl:param name="webhelp.indexer.language">en</xsl:param>
+<xsl:param name="webhelp.start.filename">index.html</xsl:param>
+<xsl:param name="webhelp.tree.cookie.id" select="concat( 'treeview-', count(//node()) )"/>
 <xsl:param name="writing.mode">
   <xsl:call-template name="gentext">
     <xsl:with-param name="key">writing-mode</xsl:with-param>
@@ -423,9 +440,9 @@ set       toc,title
     </xsl:with-param>
   </xsl:call-template>
 </xsl:param>
-<xsl:param name="xref.with.number.and.title" select="1"/>
-<xsl:param name="xref.label-title.separator">: </xsl:param>
 <xsl:param name="xref.label-page.separator"><xsl:text> </xsl:text></xsl:param>
+<xsl:param name="xref.label-title.separator">: </xsl:param>
 <xsl:param name="xref.title-page.separator"><xsl:text> </xsl:text></xsl:param>
+<xsl:param name="xref.with.number.and.title" select="1"/>
 
 </xsl:stylesheet>

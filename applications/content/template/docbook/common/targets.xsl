@@ -6,7 +6,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: targets.xsl 8366 2009-03-21 07:49:16Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -227,6 +227,10 @@ document output.
 </xsl:template>
 
 <xsl:template match="article" mode="olink.mode">
+  <xsl:call-template name="div"/>
+</xsl:template>
+
+<xsl:template match="topic" mode="olink.mode">
   <xsl:call-template name="div"/>
 </xsl:template>
 

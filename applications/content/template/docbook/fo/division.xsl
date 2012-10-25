@@ -5,7 +5,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: division.xsl 8320 2009-03-12 17:43:44Z mzjn $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -24,7 +24,9 @@
     </xsl:call-template>
   </xsl:variable>
   <xsl:variable name="title">
-    <xsl:apply-templates select="$node" mode="object.title.markup"/>
+    <xsl:apply-templates select="$node" mode="object.title.markup">
+      <xsl:with-param name="allow-anchors" select="1"/>
+    </xsl:apply-templates>
   </xsl:variable>
 
   <xsl:if test="$passivetex.extensions != 0">
@@ -331,7 +333,7 @@
       <xsl:with-param name="content">
         <xsl:call-template name="list.of.titles">
           <xsl:with-param name="titles" select="'table'"/>
-          <xsl:with-param name="nodes" select=".//table"/>
+          <xsl:with-param name="nodes" select=".//table[not(@tocentry = 0)]"/>
         </xsl:call-template>
       </xsl:with-param>
     </xsl:call-template>

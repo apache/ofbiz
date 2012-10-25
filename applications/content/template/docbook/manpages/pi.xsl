@@ -6,7 +6,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: pi.xsl 7644 2008-01-16 11:04:07Z xmldoc $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -17,7 +17,7 @@
 
 <doc:reference xmlns=""><info><title>manpages Processing Instruction Reference</title>
     <releaseinfo role="meta">
-      $Id: pi.xsl 7644 2008-01-16 11:04:07Z xmldoc $
+      $Id$
     </releaseinfo>
   </info>
   <partintro xml:id="partintro">

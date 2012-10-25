@@ -6,7 +6,7 @@
   <info>
     <title>Titlepage Template Stylesheet Reference</title>
     <releaseinfo role="meta">
-      $Id: titlepage.xsl 7058 2007-07-17 13:59:29Z xmldoc $
+      $Id$
     </releaseinfo>
   </info>
   <partintro xml:id="intro_partintro">

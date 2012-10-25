@@ -8,7 +8,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: other.xsl 8235 2009-02-09 16:22:14Z xmldoc $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -223,7 +223,7 @@ manvolnum
   <xsl:call-template name="string.subst">
     <xsl:with-param name="string" select="$content"/>
     <xsl:with-param name="target">'</xsl:with-param>
-    <xsl:with-param name="replacement">\'</xsl:with-param>
+    <xsl:with-param name="replacement">\*(Aq</xsl:with-param>
   </xsl:call-template>
 </xsl:template>
 
@@ -306,7 +306,7 @@ manvolnum
     </xsl:call-template>
     <xsl:text>&#10;</xsl:text>
     <xsl:text>.\"  Language: </xsl:text>
-    <xsl:call-template name="l10.language.name"/>
+    <xsl:call-template name="l10n.language.name"/>
     <xsl:text>&#10;</xsl:text>
     <xsl:text>.\"</xsl:text>
     <xsl:text>&#10;</xsl:text>
@@ -595,10 +595,11 @@ manvolnum
           <xsl:with-param name="message-prolog">Note: </xsl:with-param>
           <xsl:with-param name="message-epilog"> (soelim stub)</xsl:with-param>
           <xsl:with-param name="content">
-            <xsl:value-of select="concat('.so man', $section, '/')"/>
+            <xsl:value-of select="'.so '"/>
             <xsl:call-template name="make.adjusted.man.filename">
               <xsl:with-param name="name" select="$first.refname"/>
               <xsl:with-param name="section" select="$section"/>
+              <xsl:with-param name="lang" select="$lang"/>
             </xsl:call-template>
             <xsl:text>&#10;</xsl:text>
           </xsl:with-param>
@@ -654,6 +655,24 @@ manvolnum
     <xsl:if test="$man.output.quietly = 0">
       <xsl:message><xsl:text>&#10;</xsl:text></xsl:message>
     </xsl:if>
+  </xsl:template>
+
+  <!-- ============================================================== -->
+
+  <!-- There is some stuff, that is not portable between groff/troff. -->
+  <xsl:template name="define.portability.macros">
+    <xsl:text>.\" -----------------------------------------------------------------&#10;</xsl:text>
+    <xsl:text>.\" * Define some portability stuff&#10;</xsl:text>
+    <xsl:text>.\" -----------------------------------------------------------------&#10;</xsl:text>
+    <xsl:text>.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&#10;</xsl:text>
+    <xsl:text>.\" http://bugs.debian.org/507673&#10;</xsl:text>
+    <xsl:text>.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html&#10;</xsl:text>
+    <xsl:text>.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&#10;</xsl:text>
+    <xsl:text>&#10;</xsl:text>
+    <xsl:text>.ie \n(.g .ds Aq \(aq</xsl:text>
+    <xsl:text>&#10;</xsl:text>
+    <xsl:text>.el       .ds Aq '</xsl:text>
+    <xsl:text>&#10;</xsl:text>
   </xsl:template>
 
   <!-- ============================================================== -->

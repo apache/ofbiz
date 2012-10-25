@@ -26,5 +26,7 @@ and if you're using a processor that supports extension functions), the
 <function>getWidth</function> and <function>getDepth</function> functions
 will be used to extract image sizes from graphics.</para>
 
+<para>The main supported image formats are GIF, JPEG, and PNG. Somewhat cruder 
+support for EPS and PDF images is also available.</para>
 </refsection>
 </refentry>

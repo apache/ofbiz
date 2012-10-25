@@ -10,7 +10,8 @@
 </refmeta>
 <refnamediv>
 <refname>ulink.hyphenate.chars</refname>
-<refpurpose>List of characters to allow ulink URLs to be automatically hyphenated on</refpurpose>
+<refpurpose>List of characters to allow ulink URLs to be automatically
+hyphenated on</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -21,14 +22,14 @@
 
 <refsection><info><title>Description</title></info>
 
-<para>If the <parameter>ulink.hyphenate</parameter> is not empty, then 
-hyphenation of ulinks is turned on, and any
-character contained in this parameter is treated as an allowable
-hyphenation point.</para>
+<para>If the <parameter>ulink.hyphenate</parameter> parameter is not
+empty, then hyphenation of ulinks is turned on, and any character
+contained in this parameter is treated as an allowable hyphenation
+point. This and <parameter>ulink.hyphenate</parameter> work together,
+one is pointless without the other being set to a non-empty value</para>
 
-<para>The default value is <quote>/</quote>, but the parameter
-could be customized
-to contain other URL characters, as for example:</para>
+<para>The default value is <quote>/</quote>, but the parameter could
+be customized to contain other URL characters, as for example:</para>
 <programlisting>
 &lt;xsl:param name="ulink.hyphenate.chars"&gt;:/@&amp;?.#&lt;/xsl:param&gt;
 </programlisting>

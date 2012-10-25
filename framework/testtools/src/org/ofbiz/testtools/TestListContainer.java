@@ -58,9 +58,7 @@ public class TestListContainer implements Container {
         }
     }
 
-    /**
-     * @see org.ofbiz.base.container.Container#init(String[] args, String name, String configFile)
-     */
+    @Override
     public void init(String[] args, String name, String configFile) {
         this.name = name;
         this.outputLocation = args[0];
@@ -105,8 +103,7 @@ public class TestListContainer implements Container {
                     pout.format("%s:%s", foundTest.componentName, foundTest.suiteName);
                 }
                 pout.println("\"/>\n");
-                for (int i = 0; i < foundTests.size(); i++) {
-                    FoundTest foundTest = foundTests.get(i);
+                for (FoundTest foundTest : foundTests) {
                     pout.format(" <target name=\"%1$s:%2$s\">\n  <ant antfile=\"build.xml\" target=\"run-single-test-suite\">\n   <property name=\"test.component\" value=\"%1$s\"/>\n   <property name=\"test.suiteName\" value=\"%2$s\"/>\n  </ant>\n </target>\n", foundTest.componentName, foundTest.suiteName);
                 }
                 pout.println("</project>");

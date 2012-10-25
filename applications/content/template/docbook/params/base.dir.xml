@@ -21,9 +21,18 @@
 
 <refsection><info><title>Description</title></info>
 
-<para>If specified, the <parameter>base.dir</parameter> identifies
+<para>If specified, the <parameter>base.dir</parameter> parameter identifies
 the output directory for chunks. (If not specified, the output directory
 is system dependent.)</para>
+
+<para>Starting with version 1.77 of the stylesheets, 
+the param's value will have a trailing slash added if it does
+not already have one.</para>
+
+<caution><para>Do not use <parameter>base.dir</parameter>
+to add a filename prefix string to chunked  files. 
+Instead, use the <parameter>chunked.filename.prefix</parameter>
+parameter.</para></caution>
 
 </refsection>
 </refentry>

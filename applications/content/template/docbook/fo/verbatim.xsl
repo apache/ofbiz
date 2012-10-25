@@ -9,7 +9,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: verbatim.xsl 8344 2009-03-16 06:35:43Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -63,11 +63,19 @@
     </xsl:choose>
   </xsl:variable>
 
+  <xsl:variable name="keep.together">
+    <xsl:call-template name="pi.dbfo_keep-together"/>
+  </xsl:variable>
+
   <xsl:variable name="block.content">
     <xsl:choose>
       <xsl:when test="$shade.verbatim != 0">
         <fo:block id="{$id}"
              xsl:use-attribute-sets="monospace.verbatim.properties shade.verbatim.style">
+	  <xsl:if test="$keep.together != ''">
+	    <xsl:attribute name="keep-together.within-column"><xsl:value-of
+	    select="$keep.together"/></xsl:attribute>
+	  </xsl:if>
           <xsl:choose>
             <xsl:when test="$hyphenate.verbatim != 0 and 
                             $exsl.node.set.available != 0">
@@ -83,6 +91,10 @@
       <xsl:otherwise>
         <fo:block id="{$id}"
                   xsl:use-attribute-sets="monospace.verbatim.properties">
+	  <xsl:if test="$keep.together != ''">
+	    <xsl:attribute name="keep-together.within-column"><xsl:value-of
+	    select="$keep.together"/></xsl:attribute>
+	  </xsl:if>
           <xsl:choose>
             <xsl:when test="$hyphenate.verbatim != 0 and 
                             $exsl.node.set.available != 0">
@@ -129,6 +141,10 @@
 
   <xsl:variable name="id"><xsl:call-template name="object.id"/></xsl:variable>
 
+  <xsl:variable name="keep.together">
+    <xsl:call-template name="pi.dbfo_keep-together"/>
+  </xsl:variable>
+
   <xsl:variable name="content">
     <xsl:choose>
       <xsl:when test="$suppress-numbers = '0'
@@ -153,13 +169,20 @@
         <xsl:when test="$shade.verbatim != 0">
           <fo:block id="{$id}"
                     xsl:use-attribute-sets="monospace.verbatim.properties shade.verbatim.style">
-
+	    <xsl:if test="$keep.together != ''">
+	      <xsl:attribute name="keep-together.within-column"><xsl:value-of
+	      select="$keep.together"/></xsl:attribute>
+	    </xsl:if>
             <xsl:copy-of select="$content"/>
           </fo:block>
         </xsl:when>
         <xsl:otherwise>
           <fo:block id="{$id}"
                     xsl:use-attribute-sets="monospace.verbatim.properties">
+	    <xsl:if test="$keep.together != ''">
+	      <xsl:attribute name="keep-together.within-column"><xsl:value-of
+	      select="$keep.together"/></xsl:attribute>
+	    </xsl:if>
             <xsl:copy-of select="$content"/>
           </fo:block>
         </xsl:otherwise>
@@ -170,12 +193,20 @@
         <xsl:when test="$shade.verbatim != 0">
           <fo:block id="{$id}"
                     xsl:use-attribute-sets="verbatim.properties shade.verbatim.style">
+	    <xsl:if test="$keep.together != ''">
+	      <xsl:attribute name="keep-together.within-column"><xsl:value-of
+	      select="$keep.together"/></xsl:attribute>
+	    </xsl:if>
             <xsl:copy-of select="$content"/>
           </fo:block>
         </xsl:when>
         <xsl:otherwise>
           <fo:block id="{$id}"
                     xsl:use-attribute-sets="verbatim.properties">
+	    <xsl:if test="$keep.together != ''">
+	      <xsl:attribute name="keep-together.within-column"><xsl:value-of
+	      select="$keep.together"/></xsl:attribute>
+	    </xsl:if>
             <xsl:copy-of select="$content"/>
           </fo:block>
         </xsl:otherwise>

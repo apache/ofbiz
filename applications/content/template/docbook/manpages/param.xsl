@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="ASCII"?>
+<?xml version="1.0"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
 <!-- This file is generated from param.xweb -->
 
 <!-- ********************************************************************
-     $Id: param.xweb 8235 2009-02-09 16:22:14Z xmldoc $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -91,9 +91,9 @@ or
 <xsl:param name="man.string.subst.map">
 
   <!-- * remove no-break marker at beginning of line (stylesheet artifact) --> 
-  <substitution oldstring="&#9618;&#9600;" newstring="&#9618;"/>
+  <substitution oldstring="&#x2592;&#x2580;" newstring="&#x2592;"/>
   <!-- * replace U+2580 no-break marker (stylesheet-added) w/ no-break space -->
-  <substitution oldstring="&#9600;" newstring="\ "/>
+  <substitution oldstring="&#x2580;" newstring="\ "/>
 
   <!-- ==================================================================== -->
 
@@ -111,30 +111,30 @@ or
   <substitution oldstring=".RE&#10;&#10;" newstring=".RE&#10;"/>
   <!-- * U+2591 is a marker we add before and after every Parameter in -->
   <!-- * Funcprototype output -->
-  <substitution oldstring="&#9617;" newstring=" "/>
+  <substitution oldstring="&#x2591;" newstring=" "/>
   <!-- * U+2592 is a marker we add for the newline before output of <sbr>; -->
-  <substitution oldstring="&#9618;" newstring="&#10;"/>
+  <substitution oldstring="&#x2592;" newstring="&#10;"/>
   <!-- * -->
   <!-- * Now deal with some other characters that are added by the -->
   <!-- * stylesheets during processing. -->
   <!-- * -->
   <!-- * bullet -->
-  <substitution oldstring="&#8226;" newstring="\(bu"/>
+  <substitution oldstring="&#x2022;" newstring="\(bu"/>
   <!-- * left double quote -->
-  <substitution oldstring="&#8220;" newstring="\(lq"/>
+  <substitution oldstring="&#x201C;" newstring="\(lq"/>
   <!-- * right double quote -->
-  <substitution oldstring="&#8221;" newstring="\(rq"/>
+  <substitution oldstring="&#x201D;" newstring="\(rq"/>
   <!-- * left single quote -->
-  <substitution oldstring="&#8216;" newstring="\(oq"/>
+  <substitution oldstring="&#x2018;" newstring="\(oq"/>
   <!-- * right single quote -->
-  <substitution oldstring="&#8217;" newstring="\(cq"/>
+  <substitution oldstring="&#x2019;" newstring="\(cq"/>
   <!-- * copyright sign -->
-  <substitution oldstring="&#169;" newstring="\(co"/>
+  <substitution oldstring="&#xA9;" newstring="\(co"/>
   <!-- * registered sign -->
-  <substitution oldstring="&#174;" newstring="\(rg"/>
+  <substitution oldstring="&#xAE;" newstring="\(rg"/>
   <!-- * ...servicemark... -->
   <!-- * There is no groff equivalent for it. -->
-  <substitution oldstring="&#8480;" newstring="(SM)"/>
+  <substitution oldstring="&#x2120;" newstring="(SM)"/>
   <!-- * ...trademark... -->
   <!-- * We don't do "\(tm" because for console output, -->
   <!-- * groff just renders that as "tm"; that is: -->
@@ -144,7 +144,7 @@ or
   <!-- * So we just make it to "(TM)" instead; thus: -->
   <!-- * -->
   <!-- *   Product&#x2122; -> Product(TM) -->
-  <substitution oldstring="&#8482;" newstring="(TM)"/>
+  <substitution oldstring="&#x2122;" newstring="(TM)"/>
 
 </xsl:param>
 <xsl:param name="man.string.subst.map.local.post"/>
@@ -191,3 +191,4 @@ refmeta/refmiscinfo[not(@class = 'date')][1]/node()</xsl:param>
 </xsl:param>
 <xsl:param name="refentry.version.suppress">0</xsl:param>
 </xsl:stylesheet>
+

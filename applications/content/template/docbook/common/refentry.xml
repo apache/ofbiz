@@ -4,7 +4,7 @@
   <info>
     <title>Common » Refentry Metadata Template Reference</title>
     <releaseinfo role="meta">
-      $Id: refentry.xsl 7867 2008-03-07 09:54:25Z xmldoc $
+      $Id$
     </releaseinfo>
   </info>
   

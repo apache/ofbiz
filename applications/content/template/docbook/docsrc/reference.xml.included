@@ -9,7 +9,7 @@
   <!-- * WARNING WARNING WARNING -->
   <!-- * WARNING WARNING WARNING -->
   <title>DocBook XSL Stylesheets: Reference&#160;Documentation</title>
-  <info><releaseinfo role="meta">$Id: reference.xml 8321 2009-03-12 18:20:36Z mzjn $ </releaseinfo>
+  <info><releaseinfo role="meta">$Id: reference.xml 9275 2012-04-14 08:46:07Z mzjn $ </releaseinfo>
     <authorgroup version="5.0">
   <author>
     <personname>
@@ -139,6 +139,14 @@ THE SOFTWARE.</para>
 <refsection><info><title>Description</title></info>
 
 <para>Sets the filename extension to use on admonition graphics.</para>
+
+<itemizedlist>
+  <para>The DocBook XSL distribution provides admonition graphics in the following formats:</para>
+  <listitem><para>GIF (extension: <filename class="extension">.gif</filename>)</para></listitem>
+  <listitem><para>PNG (extension: <filename class="extension">.png</filename>)</para></listitem>
+  <listitem><para>SVG (extension: <filename class="extension">.svg</filename>)</para></listitem>
+  <listitem><para>TIFF (extension: <filename class="extension">.tif</filename>)</para></listitem>
+</itemizedlist>
 
 </refsection>
 </refentry>
@@ -466,7 +474,7 @@ is non-zero, unicode characters are used to represent
 callout numbers. The value of
 <parameter>callout.unicode.start.character</parameter>
 is the decimal unicode value used for callout number one. Currently, 
-only 10102 is supported in the stylesheets for this parameter. 
+only values 9312 and 10102 are supported in the stylesheets for this parameter. 
 </para>
 
 </refsection>
@@ -513,7 +521,7 @@ only 10102 is supported in the stylesheets for this parameter.
 <refsection><info><title>Description</title></info>
 
 <para>The callouts extension processes <tag>areaset</tag>
-elements in <tag>ProgramListingCO</tag> and other text-based
+elements in <tag>programlistingco</tag> and other text-based
 callout elements.
 </para>
 
@@ -1575,6 +1583,10 @@ and this parameter has no effect.
 <para>If line numbering is enabled, everyNth line will be
 numbered. Note that numbering is one based, not zero based.
 </para>
+<para>See also <parameter>linenumbering.extension</parameter>,
+<parameter>linenumbering.separator</parameter>,
+<parameter>linenumbering.width</parameter> and
+<parameter>use.extensions</parameter></para>
 
 </refsection>
 </refentry>
@@ -1780,6 +1792,8 @@ and if you're using a processor that supports extension functions), the
 <function>getWidth</function> and <function>getDepth</function> functions
 will be used to extract image sizes from graphics.</para>
 
+<para>The main supported image formats are GIF, JPEG, and PNG. Somewhat cruder 
+support for EPS and PDF images is also available.</para>
 </refsection>
 </refentry>
 
@@ -2363,28 +2377,6 @@ shifted.</para>
 </refsection>
 </refentry>
 
-<refentry version="5.0" id="html.stylesheet.type">
-<refmeta>
-<refentrytitle>html.stylesheet.type</refentrytitle>
-<refmiscinfo class="other" otherclass="datatype">string</refmiscinfo>
-</refmeta>
-<refnamediv>
-<refname>html.stylesheet.type</refname>
-<refpurpose>The type of the stylesheet used in the generated HTML</refpurpose>
-</refnamediv>
-
-<refsynopsisdiv>
-<programlisting id="html.stylesheet.type.frag">&lt;xsl:param name="html.stylesheet.type"&gt;text/css&lt;/xsl:param&gt;</programlisting>
-</refsynopsisdiv>
-
-<refsection><info><title>Description</title></info>
-
-<para>The type of the stylesheet to place in the HTML <tag>link</tag> tag.
-</para>
-
-</refsection>
-</refentry>
-
 <refentry version="5.0" id="html.stylesheet">
 <refmeta>
 <refentrytitle>html.stylesheet</refentrytitle>
@@ -2417,6 +2409,28 @@ parameter.</para>
 </refsection>
 </refentry>
 
+<refentry version="5.0" id="html.stylesheet.type">
+<refmeta>
+<refentrytitle>html.stylesheet.type</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">string</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>html.stylesheet.type</refname>
+<refpurpose>The type of the stylesheet used in the generated HTML</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="html.stylesheet.type.frag">&lt;xsl:param name="html.stylesheet.type"&gt;text/css&lt;/xsl:param&gt;</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>The type of the stylesheet to place in the HTML <tag>link</tag> tag.
+</para>
+
+</refsection>
+</refentry>
+
 <refentry version="5.0" id="css.decoration">
 <refmeta>
 <refentrytitle>css.decoration</refentrytitle>
@@ -2442,6 +2456,65 @@ decorated with <literal>style</literal> attributes.  For example, the
 fragment of CSS in the <literal>style</literal> attribute which sets
 the CSS property "list-style-type".
 </para>
+
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="html.script">
+<refmeta>
+<refentrytitle>html.script</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">string</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>html.script</refname>
+<refpurpose>Name of the script(s) to use in the generated HTML</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="html.script.frag">
+&lt;xsl:param name="html.script"&gt;&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>The <parameter>html.script</parameter> parameter is either
+empty (default), indicating that no <tag>script</tag> element should be
+generated in the html output, or it is a list of one or more
+script locations.</para>
+
+<para>Multiple script locations are space-delimited. If you need to
+reference a script URI that includes a space, encode it with
+<literal>%20</literal>. A separate html <literal>script</literal> element will
+be generated for each script in the order they are listed in the
+parameter.</para>
+
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="html.script.type">
+<refmeta>
+<refentrytitle>html.script.type</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">string</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>html.script.type</refname>
+<refpurpose>The type of script used in the generated HTML</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="html.script.type.frag">&lt;xsl:param name="html.script.type"&gt;text/javascript&lt;/xsl:param&gt;</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>The type of script to place in the HTML <tag>script</tag> element.
+Specifically, the value of the <tag>script</tag> element's <tag>type</tag>
+attribute.
+The default value is <literal>text/javascript</literal>.
+This param is used only when the stylesheet parameter
+<tag>html.script</tag> is non-blank and specifies the location of a script.</para>
+
 
 </refsection>
 </refentry>
@@ -2725,7 +2798,7 @@ be set to is a newline character: <code>&amp;#x0a;</code> or
 
 <refsynopsisdiv>
 <programlisting id="draft.mode.frag">
-&lt;xsl:param name="draft.mode"&gt;maybe&lt;/xsl:param&gt;
+&lt;xsl:param name="draft.mode"&gt;no&lt;/xsl:param&gt;
 </programlisting>
 </refsynopsisdiv>
 
@@ -2754,7 +2827,7 @@ on how their <literal>status</literal> attribute is set.
 
 <refsynopsisdiv>
 <programlisting id="draft.watermark.image.frag">
-&lt;xsl:param name="draft.watermark.image"&gt;http://docbook.sourceforge.net/release/images/draft.png&lt;/xsl:param&gt;
+&lt;xsl:param name="draft.watermark.image"&gt;images/draft.png&lt;/xsl:param&gt;
 </programlisting>
 </refsynopsisdiv>
 
@@ -2820,6 +2893,55 @@ will not suppress the anchors.</para>
 </refsection>
 </refentry>
 
+<refentry version="5.0" id="generate.consistent.ids">
+<refmeta>
+<refentrytitle>generate.consistent.ids</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">boolean</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>generate.consistent.ids</refname>
+<refpurpose>Generate consistent id values if document is unchanged</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="generate.consistent.ids.frag">
+&lt;xsl:param name="generate.consistent.ids" select="0"&gt;&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>When the stylesheet assigns an id value to an output element,
+the generate-id() function may be used.  That function may not
+produce consistent values between runs.  Version control
+systems may misidentify the changing id values as changes
+to the document.</para>
+
+<para>If you set this parameter's value to 1, then the
+template named <literal>object.id</literal> will replace
+the use of the function generate-id() with
+<literal>&lt;xsl:number level="multiple" count="*"/&gt;</literal>.
+This counts preceding elements to generate a unique number for
+the id value.</para>
+
+<caution>
+<para>This param does not associate permanent unique id values
+with particular elements.
+The id values are consistent only as long as the document
+structure does not change.
+If the document structure changes, then the counting
+of elements changes, and all id values after
+the first such change may be different, even when there is
+no change to the element itself or its output.
+</para>
+</caution>
+
+<para>The default value of this parameter is zero, so generate-id() is used
+by default.</para>
+
+</refsection>
+</refentry>
+
 <refentry version="5.0" id="generate.meta.abstract">
 <refmeta>
 <refentrytitle>generate.meta.abstract</refentrytitle>
@@ -2841,6 +2963,321 @@ will not suppress the anchors.</para>
 <para>If non-zero, document abstracts will be reproduced in the HTML
 <literal>head</literal>, with <literal>&gt;meta name="description" content="..."</literal></para>
 
+
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="make.clean.html">
+<refmeta>
+<refentrytitle>make.clean.html</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">boolean</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>make.clean.html</refname>
+<refpurpose>Make HTML conform to modern coding standards</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="make.clean.html.frag">
+&lt;xsl:param name="make.clean.html" select="0"&gt;&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>If <parameter>make.clean.html</parameter> is true, the stylesheets take
+extra effort to ensure that the resulting HTML is conforms to
+modern HTML coding standards.  In addition to eliminating
+excessive and noncompliant coding, it moves presentation
+HTML coding to a CSS stylesheet.</para>
+
+<para>The resulting HTML is dependent on
+CSS for formatting, and so the stylesheet is capable of
+generating a supporting CSS file. The <parameter>docbook.css.source</parameter>
+and <parameter>custom.css.source</parameter> parameters control
+how a CSS file is generated.</para>
+
+<para>If you require your CSS to reside in the HTML 
+<tag>head</tag> element, then the <parameter>generate.css.header</parameter>
+can be used to do that.</para>
+
+<para>The <parameter>make.clean.html</parameter> parameter is
+different from <parameter>html.cleanup</parameter>
+because the former changes the resulting markup; it does not use extension functions
+like the latter to manipulate result-tree-fragments,
+and is therefore applicable to any XSLT processor.</para>
+
+<para>If <parameter>make.clean.html</parameter> is set to zero (the default),
+then the stylesheet retains its original 
+<quote>old style</quote>
+HTML formatting features.</para>
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="docbook.css.source">
+  <refmeta>
+    <refentrytitle>docbook.css.source</refentrytitle>
+    <refmiscinfo class="other" otherclass="datatype">string</refmiscinfo>
+  </refmeta>
+  <refnamediv>
+    <refname>docbook.css.source</refname>
+    <refpurpose>Name of the default CSS input file</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <programlisting id="docbook.css.source.frag">&lt;xsl:param name="docbook.css.source"&gt;docbook.css.xml&lt;/xsl:param&gt;</programlisting>
+  </refsynopsisdiv>
+
+  <refsection><info><title>Description</title></info>
+
+<para>The <parameter>docbook.css.source</parameter> parameter
+specifies the name of the file containing the default DocBook
+CSS styles.  Those styles are necessary when the
+<parameter>make.clean.html</parameter> parameter is nonzero.</para>
+
+<para>The file is a well-formed XML file that
+must consist of a single <tag>style</tag> root
+element that contains CSS styles as its text content.
+The default value of the parameter (and filename)
+is <literal>docbook.css.xml</literal>.
+The stylesheets ship with the default file. You can substitute
+your own and specify its path in this parameter.</para>
+
+<para>If <parameter>docbook.css.source</parameter> is not blank,
+and <parameter>make.clean.html</parameter> is nonzero, then
+the stylesheet takes the following actions:</para>
+
+<orderedlist>
+  <listitem>
+    <para>The stylesheet uses the XSLT <literal>document()</literal>
+    function to open the file specified by the parameter and
+    load it into a variable.</para>
+  </listitem>
+  <listitem>
+    <para>The stylesheet forms an output pathname consisting of the
+    value of the <parameter>base.dir</parameter> parameter (if it is set)
+    and the value of <parameter>docbook.css.source</parameter>,
+    with the <literal>.xml</literal> suffix stripped off.
+    </para>
+  </listitem>
+  <listitem>
+    <para>The stylesheet removes the <tag>style</tag>
+    wrapper element and writes just the CSS text content to the output file.</para>
+  </listitem>
+  <listitem>
+    <para>The stylesheet adds a <tag>link</tag> element to the
+    HTML <tag>HEAD</tag> element to reference the external CSS stylesheet.
+    For example:</para>
+    <programlisting>&lt;link rel="stylesheet" href="docbook.css" type="text/css"&gt;
+    </programlisting>
+    <para>However, if the <parameter>docbook.css.link</parameter>
+    parameter is set to zero, then no <tag>link</tag> is written
+    for the default CSS file.  That is useful if a custom
+    CSS file will import the default CSS stylesheet to ensure
+    proper cascading of styles.</para>
+  </listitem>
+</orderedlist>
+
+<para>If the <parameter>docbook.css.source</parameter> parameter
+is changed from its default <literal>docbook.css.xml</literal> to blank,
+then no default CSS is generated. Likewise if the
+<parameter>make.clean.html</parameter> parameter is set to zero,
+then no default CSS is generated. The 
+<parameter>custom.css.source</parameter> parameter can be used
+instead to generate a complete custom CSS file.</para>
+
+<para>You can use the <parameter>generate.css.header</parameter>
+parameter to instead write the CSS to each HTML <tag>HEAD</tag>
+element in a <tag>style</tag> tag instead of an external CSS file.</para>
+
+  </refsection>
+</refentry>
+
+<refentry version="5.0" id="docbook.css.link">
+<refmeta>
+<refentrytitle>docbook.css.link</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">boolean</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>docbook.css.link</refname>
+<refpurpose>Insert a link referencing the default CSS stylesheet</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="docbook.css.link.frag">
+&lt;xsl:param name="docbook.css.link" select="1"&gt;&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>The stylesheets are capable of generating a default
+CSS stylesheet file.  The parameters 
+<parameter>make.clean.html</parameter> and
+<parameter>docbook.css.source</parameter> control that feature.</para>
+
+<para>Normally if a default CSS file is generated, then 
+the stylesheet inserts a <tag>link</tag> tag in the HTML
+<tag>HEAD</tag> element to reference it.
+However, you can omit that <tag>link</tag> reference if
+you set the <parameter>docbook.css.link</parameter> to zero
+(1 is the default).</para>
+
+<para>This parameter is useful when you want to import the 
+default CSS into a custom CSS file generated using the
+<parameter>custom.css.source</parameter> parameter.
+</para>
+
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="custom.css.source">
+  <refmeta>
+    <refentrytitle>custom.css.source</refentrytitle>
+    <refmiscinfo class="other" otherclass="datatype">string</refmiscinfo>
+  </refmeta>
+  <refnamediv>
+    <refname>custom.css.source</refname>
+    <refpurpose>Name of a custom CSS input file</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <programlisting id="custom.css.source.frag">&lt;xsl:param name="custom.css.source"&gt;&lt;/xsl:param&gt;</programlisting>
+  </refsynopsisdiv>
+
+  <refsection><info><title>Description</title></info>
+
+<para>The <parameter>custom.css.source</parameter>
+parameter enables you to add CSS styles to DocBook's
+HTML output.</para>
+
+<para>The parameter
+specifies the name of a file containing custom
+CSS styles.  The file must be a well-formed XML file that
+consists of a single <tag>style</tag> root
+element that contains CSS styles as its text content.
+For example:</para>
+<programlisting>&lt;?xml version="1.0"?&gt;
+&lt;style&gt;
+h2 {
+  font-weight: bold;
+  color: blue;
+}
+...
+&lt;/style&gt;
+</programlisting>
+
+<para>The filename specified by the parameter
+should have a <literal>.xml</literal>
+filename suffix, although that is not required.
+The default value of this parameter is blank.</para>
+
+<para>If <parameter>custom.css.source</parameter> is not blank, then
+the stylesheet takes the following actions.
+These actions take place regardless of the value of
+the <parameter>make.clean.html</parameter> parameter.</para>
+
+<orderedlist>
+  <listitem>
+    <para>The stylesheet uses the XSLT <literal>document()</literal>
+    function to open the file specified by the parameter and
+    load it into a variable.</para>
+  </listitem>
+  <listitem>
+    <para>The stylesheet forms an output pathname consisting of the
+    value of the <parameter>base.dir</parameter> parameter (if it is set)
+    and the value of <parameter>custom.css.source</parameter>,
+    with the <literal>.xml</literal> suffix stripped off.
+    </para>
+  </listitem>
+  <listitem>
+    <para>The stylesheet removes the <tag>style</tag>
+    wrapper element and writes just the CSS text content to the output file.</para>
+  </listitem>
+  <listitem>
+    <para>The stylesheet adds a <tag>link</tag> element to the
+    HTML <tag>HEAD</tag> element to reference this external CSS stylesheet.
+    For example:
+    <programlisting>&lt;link rel="stylesheet" href="custom.css" type="text/css"&gt;
+    </programlisting>
+    </para>
+  </listitem>
+</orderedlist>
+
+
+
+<para>If the <parameter>make.clean.html</parameter> parameter is nonzero
+(the default is zero),
+and if the <parameter>docbook.css.source</parameter> parameter
+is not blank (the default is not blank),
+then the stylesheet will also generate a default CSS file
+and add a <tag>link</tag> tag to reference it.
+The <tag>link</tag> to the custom CSS comes after the 
+<tag>link</tag> to the default, so it should cascade properly
+in most browsers.
+If you do not want two <tag>link</tag> tags, and
+instead want your custom CSS to import the default generated
+CSS file, then do the following:
+</para>
+
+<orderedlist>
+  <listitem>
+    <para>Add a line like the following to your custom CSS source file:</para>
+    <programlisting>@import url("docbook.css")
+    </programlisting>
+  </listitem>
+  <listitem>
+    <para>Set the <parameter>docbook.css.link</parameter> parameter 
+    to zero. This will omit the <tag>link</tag> tag
+    that references the default CSS file.</para>
+  </listitem>
+</orderedlist>
+
+<para>If you set <parameter>make.clean.html</parameter> to nonzero but
+you do not want the default CSS generated, then also set
+the <parameter>docbook.css.source</parameter> parameter to blank.
+Then no default CSS will be generated, and so
+all CSS styles must come from your custom CSS file.</para>
+
+<para>You can use the <parameter>generate.css.header</parameter>
+parameter to instead write the CSS to each HTML <tag>HEAD</tag>
+element in a <tag>style</tag> tag instead of an external CSS file.</para>
+
+  </refsection>
+</refentry>
+
+<refentry version="5.0" id="generate.css.header">
+<refmeta>
+<refentrytitle>generate.css.header</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">boolean</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>generate.css.header</refname>
+<refpurpose>Insert generated CSS styles in HEAD element</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="generate.css.header.frag">
+&lt;xsl:param name="generate.css.header" select="0"&gt;&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>The stylesheets are capable of generating both default
+and custom CSS stylesheet files.  The parameters 
+<parameter>make.clean.html</parameter>,
+<parameter>docbook.css.source</parameter>, and
+<parameter>custom.css.source</parameter> control that feature.</para>
+
+<para>If you require that CSS styles reside in the HTML 
+<tag>HEAD</tag> element instead of external CSS files,
+then set the <parameter>generate.css.header</parameter>
+parameter to nonzero (it is zero by default).
+Then instead of generating the CSS in external files,
+they are wrapped in <tag>style</tag> elements in
+the <tag>HEAD</tag> element of each HTML output file.
+</para>
 
 </refsection>
 </refentry>
@@ -5580,6 +6017,24 @@ bibliography entries in exactly the same way you do now.</para>
 customization layer or directly through your processor's interface) to
 point to your global bibliography.</para>
 
+<para>A relative path in the parameter is interpreted in one
+of two ways:</para>
+<orderedlist numeration="loweralpha">
+  <listitem>
+    <para>If your document contains no links to empty bibliographic elements,
+    then the path is relative to the file containing
+    the first <tag>bibliomixed</tag> element in the document.</para>
+  </listitem>
+  <listitem>
+    <para>If your document does contain links to empty bibliographic elements,
+    then the path is relative to the file containing
+    the first such link element in the document.</para>
+  </listitem>
+</orderedlist>
+<para>Once the collection file is opened by the first instance described
+above, it stays open for the current document
+and the relative path is not reinterpreted again.</para>
+
 <para>The stylesheets will format the bibliography in your document as if
 all of the entries referenced appeared there literally.</para>
 
@@ -5847,6 +6302,25 @@ occur in precisely the order they occur in your database.</para>
 <parameter>glossary.collection</parameter> parameter (in either a
 customization layer or directly through your processor's interface) to
 point to your global glossary.</para>
+
+<para>A relative path in the parameter is interpreted in one
+of two ways:</para>
+<orderedlist numeration="loweralpha">
+  <listitem>
+    <para>If the parameter <literal>glossterm.auto.link</literal>
+    is set to zero, then the path is relative to the file containing
+    the empty <tag>glossary</tag> element in the document.</para>
+  </listitem>
+  <listitem>
+    <para>If the parameter <literal>glossterm.auto.link</literal>
+    is set to non-zero, then the path is relative to the file containing
+    the first inline <tag>glossterm</tag> or
+    <tag>firstterm</tag> in the document to be linked.</para>
+  </listitem>
+</orderedlist>
+<para>Once the collection file is opened by the first instance described
+above, it stays open for the current document
+and the relative path is not reinterpreted again.</para>
 
 <para>The stylesheets will format the glossary in your document as if
 all of the entries implicilty referenced appeared there literally.</para>
@@ -6301,11 +6775,7 @@ equations in your document.</para>
     <parameter>passivetex.extensions</parameter>,
     <parameter>tex.math.file</parameter></para>
 </refsection>
-<refsection><info><title>More information</title></info>
-  <para>For how-to documentation on embedding TeX equations and
-    generating output from them, see
-    <link role="tcg" xlink:href="TexMath.html">DBTeXMath</link>.</para>
-</refsection>
+
 </refentry>
 
 <refentry version="5.0" id="tex.math.file">
@@ -6365,6 +6835,12 @@ surrounded by math mode delimiters?</refpurpose>
 <para>For compatibility with DSSSL based DBTeXMath from Allin Cottrell
 you should set this parameter to 0.</para>
 
+<warning>
+  <para>This feature is useful for print/PDF output only if you
+  use the obsolete and now unsupported PassiveTeX XSL-FO
+  engine.</para>
+</warning>
+
 </refsection>
 <refsection><info><title>Related Parameters</title></info>
   <para><parameter>tex.math.in.alt</parameter>,
@@ -6375,11 +6851,8 @@ you should set this parameter to 0.</para>
   <para>You can also use the <tag class="xmlpi">dbtex delims</tag> processing
     instruction to control whether delimiters are output.</para>
 </refsection>
-<refsection><info><title>More information</title></info>
-  <para>For how-to documentation on embedding TeX equations and
-    generating output from them, see
-    <link role="tcg" xlink:href="TexMath.html">DBTeXMath</link>.</para>
-</refsection>
+
+
 </refentry>
 
 <refentry version="5.0" id="pixels.per.inch">
@@ -6782,6 +7255,12 @@ an XSLT 2.0 processor it is not guaranteed to work with DocBook XSL in all circu
 
 <para>This location has precedence over the corresponding Java property.</para>
 
+<para>Please note that usually you have to specify location as URL not
+just as a simple path on the local
+filesystem. E.g. <filename>file:///home/user/xslthl/my-xslthl-config.xml</filename>.</para>
+
+
+
 </refsection>
 </refentry>
 
@@ -7158,10 +7637,8 @@ and the <tag class="attribute">format</tag> attribute is
 <refsection><info><title>Description</title></info>
 
 <para>If specified, this value will be used for the
-<tag class="attribute">width</tag> attribute on
-images that do not specify any
-<link xlink:href="http://docbook.org/tdg/en/html/imagedata.html#viewport.area">viewport
-dimensions</link>.</para>
+<tag class="attribute">width</tag> attribute on images that do not specify any 
+<emphasis xlink:title="DocBook 5: The Definitive Guide" xlink:href="http://docbook.org/tdg5/en/html/imagedata.html#viewport.area">viewport dimensions</emphasis>.</para>
 
 </refsection>
 </refentry>
@@ -7800,10 +8277,56 @@ the chunk created for the root of each document processed.
 
 <refsection><info><title>Description</title></info>
 
-<para>If specified, the <parameter>base.dir</parameter> identifies
+<para>If specified, the <parameter>base.dir</parameter> parameter identifies
 the output directory for chunks. (If not specified, the output directory
 is system dependent.)</para>
 
+<para>Starting with version 1.77 of the stylesheets, 
+the param's value will have a trailing slash added if it does
+not already have one.</para>
+
+<caution><para>Do not use <parameter>base.dir</parameter>
+to add a filename prefix string to chunked  files. 
+Instead, use the <parameter>chunked.filename.prefix</parameter>
+parameter.</para></caution>
+
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="chunked.filename.prefix">
+<refmeta>
+<refentrytitle>chunked.filename.prefix</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">string</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>chunked.filename.prefix</refname>
+<refpurpose>Filename prefix for chunked files</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="chunked.filename.prefix.frag">
+&lt;xsl:param name="chunked.filename.prefix"&gt;&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>If specified, the <parameter>chunked.filename.prefix</parameter> 
+parameter specifies a prefix string to add to each generated chunk filename.
+For example:</para>
+<programlisting>&lt;xsl:param name="chunked.filename.prefix"&gt;admin-&lt;xsl:param&gt;</programlisting>
+<para>will produce chunked filenames like:</para>
+<programlisting>admin-index.html
+admin-ch01.html
+admin-ch01s01.html
+...
+</programlisting>
+
+<caution><para>Trying to use the <parameter>base.dir</parameter>
+parameter to add a string prefix (by omitting the trailing slash)
+no longer works (it never worked completely anyway). That parameter
+value should contain only a directory path, and
+now gets a trailing slash appended if it was omitted from the param.</para></caution>
 </refsection>
 </refentry>
 
@@ -8805,8 +9328,8 @@ ones (<filename>docbook.xsl</filename>,
 
 <refsection><info><title>Description</title></info>
 
-<para>HTML Help Compiler is not UTF-8 aware, so you should always use an
-appropriate single-byte encoding here. Use one from <link xlink:href="ftp://ftp.isi.edu/in-notes/iana/assignments/character-sets">iana</link>, the  registered charset values.</para>
+<para>The HTML Help Compiler is not UTF-8 aware, so you should always use an
+appropriate single-byte encoding here. See also <link xlink:href="HtmlHelp.html#HelpProcOptions" role="tcg">Processing options</link>.</para>
 
 </refsection>
 </refentry>
@@ -9237,11 +9760,9 @@ ToC as a default.</para>
 
 <refsection><info><title>Description</title></info>
 
-<para>Set non-zero for folder-like icons or zero for book-like icons in the TOC
-ToC. If you want to use folder-like icons you must swith off binary
-ToC using (xref) <parameter>htmlhelp.hhc.binary</parameter>.
-
-
+<para>Set to non-zero for folder-like icons or zero for book-like icons in the ToC. 
+If you want to use folder-like icons, you must switch off the binary ToC using 
+<parameter>htmlhelp.hhc.binary</parameter>.
 
 </para>
 
@@ -10051,6 +10572,234 @@ unique for each help.</para>
 </refsection>
 </refentry>
 
+</reference><reference id="webhelp" xml:base="../html/param.xml"><title>WebHelp</title>
+<refentry version="5.0" id="webhelp.autolabel">
+<refmeta>
+<refentrytitle>webhelp.autolabel</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">boolean</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>webhelp.autolabel</refname>
+<refpurpose>Should tree-like ToC use autonumbering feature?</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="webhelp.autolabel.frag">
+&lt;xsl:param name="webhelp.autolabel"&gt;0&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+<para>To include chapter and section numbers the table of contents pane, set this parameter to 1.</para>
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="webhelp.base.dir">
+<refmeta>
+<refentrytitle>webhelp.base.dir</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">string</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>webhelp.base.dir</refname>
+<refpurpose>The base directory for webhelp output.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="webhelp.base.dir.frag">
+&lt;xsl:param name="webhelp.base.dir"&gt;docs&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+<para>If specified, the <parameter>webhelp.base.dir</parameter>
+parameter identifies the output directory for webhelp. (If not
+specified, the output directory is system dependent.) By default, this
+parameter is set to <filename>docs</filename>.</para>
+
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="webhelp.common.dir">
+<refmeta>
+<refentrytitle>webhelp.common.dir</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">string</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>webhelp.common.dir</refname>
+<refpurpose>Path to the directory for the common webhelp resources (JavaScript, css, common images, etc).</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="webhelp.common.dir.frag">
+&lt;xsl:param name="webhelp.common.dir"&gt;../common/&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+<para>By default, webhelp creates a common directory containing resources such as JavaScript files, css, common images, etc. In some cases you may prefer to store these files in a standard location on your site and point all webhelp documents to that location. You can use this parameter to control the urls written to these common resources. For example, you might set this parameter to <code>/common</code> and create a single common directory at the root of your web server.  </para>
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="webhelp.default.topic">
+<refmeta>
+<refentrytitle>webhelp.default.topic</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">string</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>webhelp.default.topic</refname>
+<refpurpose>The name of the file to which the start file in the webhelp base directory redirects</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="webhelp.default.topic.frag">
+&lt;xsl:param name="webhelp.default.topic"&gt;index.html&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+<para>Currently webhelp creates a base directory and puts the output
+files in a <filename>content</filename> subdirectory. It creates a
+file in the base directory that redirects to a configured file in the
+<filename>content</filename> directory. The
+<parameter>webhelp.default.topic</parameter> parameter lets you
+configure the name of the file that is redirected to.
+<note>
+  <para>This parameter will be removed from a future version of
+  webhelp along with the <filename>content</filename>
+  directory.</para>
+</note>
+</para>
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="webhelp.include.search.tab">
+<refmeta>
+<refentrytitle>webhelp.include.search.tab</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">boolean</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>webhelp.include.search.tab</refname>
+<refpurpose>Should the webhelp output include a Search tab?</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="webhelp.include.search.tab.frag">
+&lt;xsl:param name="webhelp.include.search.tab"&gt;true&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+<para>Set this parameter to 0 to suppress the search tab from webhelp output.</para>
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="webhelp.indexer.language">
+<refmeta>
+<refentrytitle>webhelp.indexer.language</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype"/>
+</refmeta>
+<refnamediv>
+<refname>webhelp.indexer.language</refname>
+<refpurpose>The language to use for creating the webhelp search index.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="webhelp.indexer.language.frag">
+&lt;xsl:param name="webhelp.indexer.language"&gt;en&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+<para>To support stemming in the client-side webhelp stemmer, you must provide the language code. By default, the following languages are supported:
+<itemizedlist>
+  <listitem>
+    <para><code>en</code>: English</para>
+  </listitem>
+  <listitem>
+    <para><code>de</code>: German</para>
+  </listitem>
+  <listitem>
+    <para><code>fr</code>: French</para>
+  </listitem>
+  <listitem>
+    <para><code>zh</code>: Chinese</para>
+  </listitem>
+  <listitem>
+    <para><code>ja</code>: Japanese</para>
+  </listitem>
+  <listitem>
+    <para><code>ko</code>: Korean</para>
+  </listitem>
+</itemizedlist>
+See the webhelp documentation for information on adding support for additional languages.
+</para>
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="webhelp.start.filename">
+<refmeta>
+<refentrytitle>webhelp.start.filename</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">string</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>webhelp.start.filename</refname>
+<refpurpose>The name of the start file in the webhelp base directory.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="webhelp.start.filename.frag">
+&lt;xsl:param name="webhelp.start.filename"&gt;index.html&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+<para>Currently webhelp creates a base directory and puts the output
+files in a <filename>content</filename> subdirectory. It creates a
+file in the base directory that redirects to a configured file in the
+<filename>content</filename> directory. The <parameter>webhelp.start.filename</parameter> parameter lets you configure the name of the redirect file.
+<note>
+  <para>This parameter will be removed from a future version of
+  webhelp along with the <filename>content</filename>
+  directory.</para>
+</note>
+</para>
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="webhelp.tree.cookie.id">
+<refmeta>
+<refentrytitle>webhelp.tree.cookie.id</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">string</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>webhelp.tree.cookie.id</refname>
+<refpurpose>Controls how the cookie that stores the webhelp toc state is named.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="webhelp.tree.cookie.id.frag">
+&lt;xsl:param name="webhelp.tree.cookie.id" select="concat( 'treeview-', count(//node()) )"&gt;&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+<para>The webhelp output does not use a frameset. Instead, the table of contents is a div on each page. To preserve the state of the table of contents as the user navigates from page to page, webhelp stores the state in a cookie and reads that cookie when you get to the next page. If you've published several webhelp documents on the same domain, it is important that each cookie have a unique id. In lieu of calling on a GUID generator, by default this parameter is just set to the number of nodes in the document on the assumption that it is unlikely that you will have more than one document with the exact number of nodes. A more optimal solution would be for the user to pass in some unique, stable identifier from the build system to use as the webhelp cookie id. For example, if you have safeguards in place to ensure that the xml:id of the root element of each document will be unique on your site, then you could set webhelptree.cookie.id as follows:
+<programlisting>
+  &lt;xsl:param name="webhelp.tree.cookie.id"&gt;
+    &lt;xsl:choose&gt;
+      &lt;xsl:when test="/*/@xml:id"&gt;
+	&lt;xsl:value-of select="concat('treeview-',/*/@xml:id)"/&gt;
+      &lt;/xsl:when&gt;
+      &lt;xsl:otherwise&gt;
+	&lt;xsl:value-of select="concat( 'treeview-', count(//node()) )"/&gt;
+      &lt;/xsl:otherwise&gt;
+    &lt;/xsl:choose&gt;
+  &lt;/xsl:param&gt;
+  </programlisting>
+ </para>
+</refsection>
+</refentry>
+
 </reference><reference id="javahelp" xml:base="../html/param.xml"><title>JavaHelp</title>
 <refentry version="5.0" id="javahelp.encoding">
 <refmeta>
@@ -10374,6 +11123,14 @@ a graphic.  Default graphics are provided in the distribution.
 
 <para>Sets the filename extension to use on admonition graphics.</para>
 
+<itemizedlist>
+  <para>The DocBook XSL distribution provides admonition graphics in the following formats:</para>
+  <listitem><para>GIF (extension: <filename class="extension">.gif</filename>)</para></listitem>
+  <listitem><para>PNG (extension: <filename class="extension">.png</filename>)</para></listitem>
+  <listitem><para>SVG (extension: <filename class="extension">.svg</filename>)</para></listitem>
+  <listitem><para>TIFF (extension: <filename class="extension">.tif</filename>)</para></listitem>
+</itemizedlist>
+
 </refsection>
 </refentry>
 
@@ -10553,6 +11310,53 @@ to the rest of the content.</para>
 </refentry>
 
 </reference><reference id="callouts" xml:base="../fo/param.xml"><title>Callouts</title>
+<refentry version="5.0" id="calloutlist.properties">
+<refmeta>
+<refentrytitle>calloutlist.properties</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">attribute set</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>calloutlist.properties</refname>
+<refpurpose>Properties that apply to each list-block generated by calloutlist.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="calloutlist.properties.frag">&lt;xsl:attribute-set name="calloutlist.properties"&gt;
+  &lt;xsl:attribute name="space-before.optimum"&gt;1em&lt;/xsl:attribute&gt;
+  &lt;xsl:attribute name="space-before.minimum"&gt;0.8em&lt;/xsl:attribute&gt;
+  &lt;xsl:attribute name="space-before.maximum"&gt;1.2em&lt;/xsl:attribute&gt;
+  &lt;xsl:attribute name="provisional-distance-between-starts"&gt;2.2em&lt;/xsl:attribute&gt;
+  &lt;xsl:attribute name="provisional-label-separation"&gt;0.2em&lt;/xsl:attribute&gt;
+&lt;/xsl:attribute-set&gt;</programlisting>
+</refsynopsisdiv>
+<refsection><info><title>Description</title></info>
+<para>Properties that apply to the fo:list-block generated by calloutlist.
+Typically used to adjust spacing or margins of the entire list.
+Change the <literal>provisional-distance-between-starts</literal> attribute to
+change the indent of the list paragraphs relative to the
+callout numbers.</para>
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="callout.properties">
+<refmeta>
+<refentrytitle>callout.properties</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">attribute set</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>callout.properties</refname>
+<refpurpose>Properties that apply to the list-item generated by each callout within a calloutlist.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="callout.properties.frag">&lt;xsl:attribute-set name="callout.properties"&gt;
+&lt;/xsl:attribute-set&gt;</programlisting>
+</refsynopsisdiv>
+<refsection><info><title>Description</title></info>
+<para>Properties that apply to the fo:list-item generated by each callout within a calloutlist. Typically used to add spacing properties.</para>
+</refsection>
+</refentry>
+
 <refentry version="5.0" id="callout.defaultcolumn">
 <refmeta>
 <refentrytitle>callout.defaultcolumn</refentrytitle>
@@ -10816,7 +11620,7 @@ is non-zero, unicode characters are used to represent
 callout numbers. The value of
 <parameter>callout.unicode.start.character</parameter>
 is the decimal unicode value used for callout number one. Currently, 
-only 10102 is supported in the stylesheets for this parameter. 
+only values 9312 and 10102 are supported in the stylesheets for this parameter. 
 </para>
 
 </refsection>
@@ -10841,7 +11645,7 @@ only 10102 is supported in the stylesheets for this parameter.
 <refsection><info><title>Description</title></info>
 
 <para>The callouts extension processes <tag>areaset</tag>
-elements in <tag>ProgramListingCO</tag> and other text-based
+elements in <tag>programlistingco</tag> and other text-based
 callout elements.
 </para>
 
@@ -11727,7 +12531,7 @@ because not all processors support expressions.</para>
 </refmeta>
 <refnamediv>
 <refname>toc.line.properties</refname>
-<refpurpose>Properties for lines in ToC and LoTs</refpurpose>
+<refpurpose>Properties for lines in ToCs and LoTs</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -11745,13 +12549,15 @@ because not all processors support expressions.</para>
 
 <para>Properties which are applied to every line in ToC (or LoT). You can
 modify them in order to change appearance of all, or some lines. For
-example in order to make lines for chapters in bold specify the
-following in your customization layer.</para>
+example, in order to make lines for chapters bold, specify the
+following in your customization layer:</para>
 
 <programlisting>&lt;xsl:attribute-set name="toc.line.properties"&gt;
   &lt;xsl:attribute name="font-weight"&gt;
-    &lt;xsl:when test="self::chapter | self::preface | self::appendix"&gt;bold&lt;/xsl:when&gt;
+   &lt;xsl:choose&gt;
+    &lt;xsl:when test="self::chapter"&gt;bold&lt;/xsl:when&gt;
     &lt;xsl:otherwise&gt;normal&lt;/xsl:otherwise&gt;
+   &lt;/xsl:choose&gt;
   &lt;/xsl:attribute&gt;
 &lt;/xsl:attribute-set&gt;</programlisting>
 
@@ -12002,7 +12808,7 @@ should still be used for FOP version 0.20.5 and earlier.
 <refsection><info><title>Description</title></info>
 
 <para>If non-zero,
-<link xlink:href="http://www.tei-c.org.uk/Software/passivetex/">PassiveTeX</link>
+<link xlink:href="http://projects.oucs.ox.ac.uk/passivetex/">PassiveTeX</link>
 extensions will be used. At present, this consists of PDF bookmarks
 and sorted index terms.
 </para>
@@ -12087,11 +12893,7 @@ equations in your document.</para>
     <parameter>passivetex.extensions</parameter>,
     <parameter>tex.math.file</parameter></para>
 </refsection>
-<refsection><info><title>More information</title></info>
-  <para>For how-to documentation on embedding TeX equations and
-    generating output from them, see
-    <link role="tcg" xlink:href="TexMath.html">DBTeXMath</link>.</para>
-</refsection>
+
 </refentry>
 
 <refentry version="5.0" id="tex.math.delims">
@@ -12116,6 +12918,12 @@ surrounded by math mode delimiters?</refpurpose>
 <para>For compatibility with DSSSL based DBTeXMath from Allin Cottrell
 you should set this parameter to 0.</para>
 
+<warning>
+  <para>This feature is useful for print/PDF output only if you
+  use the obsolete and now unsupported PassiveTeX XSL-FO
+  engine.</para>
+</warning>
+
 </refsection>
 <refsection><info><title>Related Parameters</title></info>
   <para><parameter>tex.math.in.alt</parameter>,
@@ -12126,11 +12934,8 @@ you should set this parameter to 0.</para>
   <para>You can also use the <tag class="xmlpi">dbtex delims</tag> processing
     instruction to control whether delimiters are output.</para>
 </refsection>
-<refsection><info><title>More information</title></info>
-  <para>For how-to documentation on embedding TeX equations and
-    generating output from them, see
-    <link role="tcg" xlink:href="TexMath.html">DBTeXMath</link>.</para>
-</refsection>
+
+
 </refentry>
 
 <refentry version="5.0" id="xep.extensions">
@@ -12182,6 +12987,10 @@ are supported</para>
 <para>If line numbering is enabled, everyNth line will be
 numbered. Note that numbering is one based, not zero based.
 </para>
+<para>See also <parameter>linenumbering.extension</parameter>,
+<parameter>linenumbering.separator</parameter>,
+<parameter>linenumbering.width</parameter> and
+<parameter>use.extensions</parameter></para>
 
 </refsection>
 </refentry>
@@ -13159,7 +13968,7 @@ start its own page-sequence.
 <programlisting id="refentry.title.properties.frag">
 &lt;xsl:attribute-set name="refentry.title.properties"&gt;
   &lt;xsl:attribute name="font-family"&gt;
-    &lt;xsl:value-of select="$title.font.family"&gt;&lt;/xsl:value-of&gt;
+    &lt;xsl:value-of select="$title.fontset"&gt;&lt;/xsl:value-of&gt;
   &lt;/xsl:attribute&gt;
   &lt;xsl:attribute name="font-size"&gt;18pt&lt;/xsl:attribute&gt;
   &lt;xsl:attribute name="font-weight"&gt;bold&lt;/xsl:attribute&gt;
@@ -13632,6 +14441,33 @@ have been called <literal>table.properties</literal>, but that parameter
 name was inadvertently established for the block-level properties
 of the table as a whole.
 </para>
+
+<para>See also <parameter>table.properties</parameter>.</para>
+
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="table.caption.properties">
+<refmeta>
+<refentrytitle>table.caption.properties</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">attribute set</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>table.caption.properties</refname>
+<refpurpose>Properties associated with a table caption</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="table.caption.properties.frag">
+&lt;xsl:attribute-set name="table.caption.properties"&gt;
+  &lt;xsl:attribute name="keep-together.within-column"&gt;always&lt;/xsl:attribute&gt;
+&lt;/xsl:attribute-set&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>The styling for table caption element (not the table title).</para>
 
 <para>See also <parameter>table.properties</parameter>.</para>
 
@@ -15246,6 +16082,24 @@ bibliography entries in exactly the same way you do now.</para>
 customization layer or directly through your processor's interface) to
 point to your global bibliography.</para>
 
+<para>A relative path in the parameter is interpreted in one
+of two ways:</para>
+<orderedlist numeration="loweralpha">
+  <listitem>
+    <para>If your document contains no links to empty bibliographic elements,
+    then the path is relative to the file containing
+    the first <tag>bibliomixed</tag> element in the document.</para>
+  </listitem>
+  <listitem>
+    <para>If your document does contain links to empty bibliographic elements,
+    then the path is relative to the file containing
+    the first such link element in the document.</para>
+  </listitem>
+</orderedlist>
+<para>Once the collection file is opened by the first instance described
+above, it stays open for the current document
+and the relative path is not reinterpreted again.</para>
+
 <para>The stylesheets will format the bibliography in your document as if
 all of the entries referenced appeared there literally.</para>
 
@@ -15537,6 +16391,25 @@ occur in precisely the order they occur in your database.</para>
 <parameter>glossary.collection</parameter> parameter (in either a
 customization layer or directly through your processor's interface) to
 point to your global glossary.</para>
+
+<para>A relative path in the parameter is interpreted in one
+of two ways:</para>
+<orderedlist numeration="loweralpha">
+  <listitem>
+    <para>If the parameter <literal>glossterm.auto.link</literal>
+    is set to zero, then the path is relative to the file containing
+    the empty <tag>glossary</tag> element in the document.</para>
+  </listitem>
+  <listitem>
+    <para>If the parameter <literal>glossterm.auto.link</literal>
+    is set to non-zero, then the path is relative to the file containing
+    the first inline <tag>glossterm</tag> or
+    <tag>firstterm</tag> in the document to be linked.</para>
+  </listitem>
+</orderedlist>
+<para>Once the collection file is opened by the first instance described
+above, it stays open for the current document
+and the relative path is not reinterpreted again.</para>
 
 <para>The stylesheets will format the glossary in your document as if
 all of the entries implicilty referenced appeared there literally.</para>
@@ -16268,15 +17141,19 @@ that point to external resources.</para>
 
 <refsection><info><title>Description</title></info>
 
-<para>If not empty, the specified character (or more generally, content) is
-added to URLs after every character included in the string
+<para>If not empty, the specified character (or more generally,
+content) is added to URLs after every character included in the string
 in the <parameter>ulink.hyphenate.chars</parameter> parameter (default
-is <quote>/</quote>). If the character in this parameter is a
-Unicode soft hyphen (0x00AD) or Unicode zero-width space (0x200B), some FO
-processors will be able to reasonably hyphenate long URLs.</para>
+is <quote>/</quote>) to enable hyphenation of ulinks. If the character
+in this parameter is a Unicode soft hyphen (0x00AD) or Unicode
+zero-width space (0x200B), some FO processors will be able to
+reasonably hyphenate long URLs.</para>
 
-<para>As of 28 Jan 2002, discretionary hyphens are more widely and correctly
-supported than zero-width spaces for this purpose.</para>
+<para>Note that this hyphenation process is only applied when the
+ulink element is empty and the url attribute is reused as the link
+text.  It is not applied if the ulink has literal text content. The
+same applies in in DocBook 5, where ulink was replaced with link with
+an xlink:href attribute.</para>
 
 </refsection>
 </refentry>
@@ -16288,7 +17165,8 @@ supported than zero-width spaces for this purpose.</para>
 </refmeta>
 <refnamediv>
 <refname>ulink.hyphenate.chars</refname>
-<refpurpose>List of characters to allow ulink URLs to be automatically hyphenated on</refpurpose>
+<refpurpose>List of characters to allow ulink URLs to be automatically
+hyphenated on</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -16299,14 +17177,14 @@ supported than zero-width spaces for this purpose.</para>
 
 <refsection><info><title>Description</title></info>
 
-<para>If the <parameter>ulink.hyphenate</parameter> is not empty, then 
-hyphenation of ulinks is turned on, and any
-character contained in this parameter is treated as an allowable
-hyphenation point.</para>
+<para>If the <parameter>ulink.hyphenate</parameter> parameter is not
+empty, then hyphenation of ulinks is turned on, and any character
+contained in this parameter is treated as an allowable hyphenation
+point. This and <parameter>ulink.hyphenate</parameter> work together,
+one is pointless without the other being set to a non-empty value</para>
 
-<para>The default value is <quote>/</quote>, but the parameter
-could be customized
-to contain other URL characters, as for example:</para>
+<para>The default value is <quote>/</quote>, but the parameter could
+be customized to contain other URL characters, as for example:</para>
 <programlisting>
 &lt;xsl:param name="ulink.hyphenate.chars"&gt;:/@&amp;?.#&lt;/xsl:param&gt;
 </programlisting>
@@ -17143,6 +18021,12 @@ an XSLT 2.0 processor it is not guaranteed to work with DocBook XSL in all circu
 
 <para>This location has precedence over the corresponding Java property.</para>
 
+<para>Please note that usually you have to specify location as URL not
+just as a simple path on the local
+filesystem. E.g. <filename>file:///home/user/xslthl/my-xslthl-config.xml</filename>.</para>
+
+
+
 </refsection>
 </refentry>
 
@@ -17381,6 +18265,115 @@ of bookmarks is displayed.</para>
 </refsection>
 </refentry>
 
+<refentry version="5.0" id="generate.consistent.ids">
+<refmeta>
+<refentrytitle>generate.consistent.ids</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">boolean</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>generate.consistent.ids</refname>
+<refpurpose>Generate consistent id values if document is unchanged</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="generate.consistent.ids.frag">
+&lt;xsl:param name="generate.consistent.ids" select="0"&gt;&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>When the stylesheet assigns an id value to an output element,
+the generate-id() function may be used.  That function may not
+produce consistent values between runs.  Version control
+systems may misidentify the changing id values as changes
+to the document.</para>
+
+<para>If you set this parameter's value to 1, then the
+template named <literal>object.id</literal> will replace
+the use of the function generate-id() with
+<literal>&lt;xsl:number level="multiple" count="*"/&gt;</literal>.
+This counts preceding elements to generate a unique number for
+the id value.</para>
+
+<caution>
+<para>This param does not associate permanent unique id values
+with particular elements.
+The id values are consistent only as long as the document
+structure does not change.
+If the document structure changes, then the counting
+of elements changes, and all id values after
+the first such change may be different, even when there is
+no change to the element itself or its output.
+</para>
+</caution>
+
+<para>The default value of this parameter is zero, so generate-id() is used
+by default.</para>
+
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="base.dir">
+<refmeta>
+<refentrytitle>base.dir</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">uri</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>base.dir</refname>
+<refpurpose>The base directory of chunks</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="base.dir.frag">
+&lt;xsl:param name="base.dir"&gt;&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>If specified, the <parameter>base.dir</parameter> parameter identifies
+the output directory for chunks. (If not specified, the output directory
+is system dependent.)</para>
+
+<para>Starting with version 1.77 of the stylesheets, 
+the param's value will have a trailing slash added if it does
+not already have one.</para>
+
+<caution><para>Do not use <parameter>base.dir</parameter>
+to add a filename prefix string to chunked  files. 
+Instead, use the <parameter>chunked.filename.prefix</parameter>
+parameter.</para></caution>
+
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="chunk.quietly">
+<refmeta>
+<refentrytitle>chunk.quietly</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">boolean</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>chunk.quietly</refname>
+<refpurpose>Omit the chunked filename messages.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="chunk.quietly.frag">
+&lt;xsl:param name="chunk.quietly" select="0"&gt;&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>If zero (the default), the XSL processor emits a message naming
+each separate chunk filename as it is being output.
+If nonzero, then the messages are suppressed.
+</para>
+
+</refsection>
+</refentry>
+
 </reference><reference id="graphics" xml:base="../fo/param.xml"><title>Graphics</title>
 <refentry version="5.0" id="graphic.default.extension">
 <refmeta>
@@ -17426,10 +18419,8 @@ and the <tag class="attribute">format</tag> attribute is
 <refsection><info><title>Description</title></info>
 
 <para>If specified, this value will be used for the
-<tag class="attribute">width</tag> attribute on
-images that do not specify any
-<link xlink:href="http://docbook.org/tdg/en/html/imagedata.html#viewport.area">viewport
-dimensions</link>.</para>
+<tag class="attribute">width</tag> attribute on images that do not specify any 
+<emphasis xlink:title="DocBook 5: The Definitive Guide" xlink:href="http://docbook.org/tdg5/en/html/imagedata.html#viewport.area">viewport dimensions</emphasis>.</para>
 
 </refsection>
 </refentry>
@@ -18065,6 +19056,8 @@ edge of the physical page.
 <refmiscinfo class="other" otherclass="list-type">open</refmiscinfo>
 <refmiscinfo class="other" otherclass="value">USletter<alt>8.5x11in</alt></refmiscinfo>
 <refmiscinfo class="other" otherclass="value">USlandscape<alt>11x8.5in</alt></refmiscinfo>
+<refmiscinfo class="other" otherclass="value">USlegal<alt>8.5inx14in</alt></refmiscinfo>
+<refmiscinfo class="other" otherclass="value">USlegallandscape<alt>14inx8.5in</alt></refmiscinfo>
 <refmiscinfo class="other" otherclass="value">4A0<alt>2378x1682mm</alt></refmiscinfo>
 <refmiscinfo class="other" otherclass="value">2A0<alt>1682x1189mm</alt></refmiscinfo>
 <refmiscinfo class="other" otherclass="value">A0<alt>1189x841mm</alt></refmiscinfo>
@@ -18197,6 +19190,103 @@ in the page body to the bottom of the region-after.
 <para>The body top margin is the distance from the top of the
 region-before to the first line of text in the page body.</para>
 
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="body.margin.inner">
+<refmeta>
+<refentrytitle>body.margin.inner</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">length</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>body.margin.inner</refname>
+<refpurpose>Specify the size of the inner margin of the body region</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="body.margin.inner.frag">
+&lt;xsl:param name="body.margin.inner"&gt;0in&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>The inner body margin is the extra inner side 
+(binding side) margin taken from the body
+region in addition to the inner page margin.
+It makes room for a side region for text content whose width is 
+specified by the <parameter>region.inner.extent</parameter>
+parameter.</para>
+
+<para>For double-sided output,
+this side region 
+is <literal>fo:region-start</literal> on a odd-numbered page,
+and <literal>fo:region-end</literal> on an even-numbered page.</para>
+
+<para>For single-sided output,
+this side region
+is <literal>fo:region-start</literal> for all pages.</para>
+
+<para>This correspondence applies to all languages,
+both left-to-right and right-to-left writing modes.</para>
+
+<para>The default value is zero.</para>
+
+<para>See also
+<parameter>region.inner.extent</parameter>,
+<parameter>region.outer.extent</parameter>,
+<parameter>body.margin.outer</parameter>,
+<parameter>side.region.precedence</parameter>.
+</para>
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="body.margin.outer">
+<refmeta>
+<refentrytitle>body.margin.outer</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">length</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>body.margin.outer</refname>
+<refpurpose>Specify the size of the outer margin of the body region</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="body.margin.outer.frag">
+&lt;xsl:param name="body.margin.outer"&gt;0in&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>The outer body margin is the extra outer side 
+(opposite the binding side) margin taken
+from the body
+region in addition to the outer page margin.
+It makes room for a side region for text content whose width is 
+specified by the <parameter>region.outer.extent</parameter>
+parameter.</para>
+
+<para>For double-sided output,
+this side region 
+is <literal>fo:region-end</literal> on a odd-numbered page,
+and <literal>fo:region-start</literal> on an even-numbered page.</para>
+
+<para>For single-sided output,
+this side region
+is <literal>fo:region-end</literal> for all pages.</para>
+
+<para>This correspondence applies to all languages,
+both left-to-right and right-to-left writing modes.</para>
+
+<para>The default value is zero.</para>
+
+<para>See also
+<parameter>region.inner.extent</parameter>,
+<parameter>region.outer.extent</parameter>,
+<parameter>body.margin.inner</parameter>,
+<parameter>side.region.precedence</parameter>.
+</para>
 </refsection>
 </refentry>
 
@@ -18349,8 +19439,8 @@ The default value is <literal>justify</literal>.
 
 <refsection><info><title>Description</title></info>
 
-<para>If true, words may be hyphenated. Otherwise, they may not.
-</para>
+<para>If true, words may be hyphenated. Otherwise, they may not.</para>
+<para>See also <parameter>ulink.hyphenate.chars</parameter> </para>
 
 </refsection>
 </refentry>
@@ -18712,6 +19802,99 @@ are printed.
 </refsection>
 </refentry>
 
+<refentry version="5.0" id="region.inner.extent">
+<refmeta>
+<refentrytitle>region.inner.extent</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">length</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>region.inner.extent</refname>
+<refpurpose>Specifies the width of the inner side region</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="region.inner.extent.frag">
+&lt;xsl:param name="region.inner.extent"&gt;0in&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>The region inner extent is the width of the optional
+text area next to the inner side (binding side) of the
+body region.  </para>
+
+<para>For double-sided output, this side region 
+is <literal>fo:region-start</literal> on a odd-numbered page,
+and <literal>fo:region-end</literal> on an even-numbered page.</para>
+
+<para>For single-sided output, this side region
+is <literal>fo:region-start</literal> for all pages.</para>
+
+<para>This correspondence applies to all languages,
+both left-to-right and right-to-left writing modes.</para>
+
+<para>The default value of this parameter is zero.  If you enlarge this extent,
+be sure to also enlarge the <parameter>body.margin.inner</parameter>
+parameter to make room for its content, otherwise any text in
+the side region may overlap with the body text.</para>
+
+<para>See also
+<parameter>region.outer.extent</parameter>,
+<parameter>body.margin.inner</parameter>,
+<parameter>body.margin.outer</parameter>,
+<parameter>side.region.precedence</parameter>.
+</para>
+
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="region.outer.extent">
+<refmeta>
+<refentrytitle>region.outer.extent</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">length</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>region.outer.extent</refname>
+<refpurpose>Specifies the width of the outer side region</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="region.outer.extent.frag">
+&lt;xsl:param name="region.outer.extent"&gt;0in&lt;/xsl:param&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>The region outer extent is the width of the optional
+text area next to the outer side (opposite the binding side) of the
+body region.  </para>
+
+<para>For double-sided output, this side region 
+is <literal>fo:region-end</literal> on a odd-numbered page,
+and <literal>fo:region-start</literal> on an even-numbered page.</para>
+
+<para>For single-sided output, this side region
+is <literal>fo:region-end</literal> for all pages.</para>
+
+<para>This correspondence applies to all languages,
+both left-to-right and right-to-left writing modes.</para>
+
+<para>The default value of this parameter is zero.  If you enlarge this extent,
+be sure to also enlarge the <parameter>body.margin.outer</parameter>
+parameter to make room for its content, otherwise any text in
+the side region may overlap with the body text.</para>
+
+<para>See also
+<parameter>region.inner.extent</parameter>,
+<parameter>body.margin.inner</parameter>,
+<parameter>body.margin.outer</parameter>,
+<parameter>side.region.precedence</parameter>.
+</para>
+</refsection>
+</refentry>
+
 <refentry version="5.0" id="default.units">
 <refmeta>
 <refentrytitle>default.units</refentrytitle>
@@ -18763,7 +19946,51 @@ units. Unqualified dimensions are not allowed in XSL Formatting Objects.
 &lt;/xsl:attribute-set&gt;</programlisting>
 </refsynopsisdiv>
 <refsection><info><title>Description</title></info>
-<para>Specify the spacing required between normal paragraphs</para>
+<para>Specify the spacing required between normal paragraphs as well as
+the following block-level elements:
+</para>
+<literallayout>ackno
+acknowledgements
+cmdsynopsis
+glosslist
+sidebar
+simpara
+simplelist
+</literallayout>
+<para>To customize the spacing, you need to reset all three attributes.</para>
+
+<para>To specify properties on just <tag>para</tag> elements without
+affecting these other elements,
+use the
+<link linkend="para.properties">para.properties</link>
+attribute-set. </para>
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="para.properties">
+<refmeta>
+<refentrytitle>para.properties</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">attribute set</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>para.properties</refname>
+<refpurpose>Properties to apply to para elements</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="para.properties.frag">&lt;xsl:attribute-set name="para.properties" use-attribute-sets="normal.para.spacing"&gt;
+&lt;/xsl:attribute-set&gt;</programlisting>
+</refsynopsisdiv>
+<refsection><info><title>Description</title></info>
+<para>Specify properties to apply to the fo:block of a para element,
+such as <literal>text-indent</literal>.
+Although the default attribute-set is empty, it uses the attribute-set
+named <literal>normal.para.spacing</literal> to add vertical space before
+each para. The <literal>para.properties</literal> attribute-set can override those 
+spacing properties for para only.</para>
+<para>See also
+<link linkend="normal.para.spacing">normal.para.spacing</link>.
+</para>
 </refsection>
 </refentry>
 
@@ -18920,7 +20147,7 @@ the FO processor will report errors.
 
 <refsynopsisdiv>
 <programlisting id="draft.mode.frag">
-&lt;xsl:param name="draft.mode"&gt;maybe&lt;/xsl:param&gt;
+&lt;xsl:param name="draft.mode"&gt;no&lt;/xsl:param&gt;
 </programlisting>
 </refsynopsisdiv>
 
@@ -18949,7 +20176,7 @@ on how their <literal>status</literal> attribute is set.
 
 <refsynopsisdiv>
 <programlisting id="draft.watermark.image.frag">
-&lt;xsl:param name="draft.watermark.image"&gt;http://docbook.sourceforge.net/release/images/draft.png&lt;/xsl:param&gt;
+&lt;xsl:param name="draft.watermark.image"&gt;images/draft.png&lt;/xsl:param&gt;
 </programlisting>
 </refsynopsisdiv>
 
@@ -19418,6 +20645,239 @@ an output element such as:
 </refsection>
 </refentry>
 
+<refentry version="5.0" id="side.region.precedence"> 
+<refmeta> 
+<refentrytitle>side.region.precedence</refentrytitle> 
+<refmiscinfo class="other" otherclass="datatype">string</refmiscinfo> 
+</refmeta> 
+<refnamediv> 
+<refname>side.region.precedence</refname> 
+<refpurpose>Determines side region page layout precedence</refpurpose> 
+</refnamediv> 
+<refsynopsisdiv> <programlisting id="side.region.precedence.frag">
+&lt;xsl:param name="side.region.precedence"&gt;false&lt;/xsl:param&gt;
+</programlisting> 
+</refsynopsisdiv> 
+<refsection><info><title>Description</title></info> 
+ 
+<para>If optional side regions on a page
+are established using parameters such as
+<parameter>body.margin.inner</parameter>, 
+<parameter>region.inner.extent</parameter>, etc., then this
+parameter determines what happens at the corners where the
+side regions meet the header and footer regions.</para>
+
+<para>If the value of this parameter is <literal>true</literal>,
+then the side regions have precedence and extend higher
+and lower, while the header and footer regions are narrower
+and fit inside the side regions.</para>
+
+<para>If the value of this parameter is <literal>false</literal>
+(the default value), then the header and footer regions 
+have precedence and extend over and below the side regions.
+Any value other than <literal>true</literal> or
+<literal>false</literal> is taken to be <literal>false</literal>.</para>
+
+<para>If you need to set precedence separately for
+individual regions, then you can set four
+parameters that are normally internal to the stylesheet.
+These four parameters are normally set based
+on the value from <parameter>side.region.precedence</parameter>:</para>
+
+<programlisting>region.before.precedence
+region.after.precedence
+region.start.precedence
+region.end.precedence</programlisting>
+
+<para>See also
+<parameter>region.inner.extent</parameter>,
+<parameter>region.outer.extent</parameter>,
+<parameter>body.margin.inner</parameter>,
+<parameter>body.margin.outer</parameter>.
+</para>
+</refsection> </refentry>
+
+<refentry version="5.0" id="region.inner.properties">
+<refmeta>
+<refentrytitle>region.inner.properties</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">attribute set</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>region.inner.properties</refname>
+<refpurpose>Properties of running inner side region</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="region.inner.properties.frag">
+&lt;xsl:attribute-set name="region.inner.properties"&gt;
+  &lt;xsl:attribute name="border-width"&gt;0&lt;/xsl:attribute&gt;
+  &lt;xsl:attribute name="padding"&gt;0&lt;/xsl:attribute&gt;
+  &lt;xsl:attribute name="reference-orientation"&gt;90&lt;/xsl:attribute&gt;
+&lt;/xsl:attribute-set&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>The FO stylesheet supports optional side regions
+similar to the header and footer regions.
+Any attributes declared in this attribute-set 
+are applied to the region element in the page master
+on the inner side (binding side) of the page.
+This corresponds to <literal>&lt;fo:regin-start&gt;</literal>
+on odd-numbered pages and <literal>&lt;fo:region-end&gt;</literal>
+on even-numbered pages.
+For single-sided output, it always corresponds to
+<literal>&lt;fo:regin-start&gt;</literal>.</para>
+
+<para>You can customize the template named 
+<literal>inner.region.content</literal> to specify
+the content of the inner side region.</para>
+
+<para>See also
+<parameter>inner.region.content.properties</parameter>,
+<parameter>page.margin.inner</parameter>, 
+<parameter>body.margin.inner</parameter>,
+and the corresponding <literal>outer</literal>
+parameters.</para>
+
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="region.outer.properties">
+<refmeta>
+<refentrytitle>region.outer.properties</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">attribute set</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>region.outer.properties</refname>
+<refpurpose>Properties of running outer side region</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="region.outer.properties.frag">
+&lt;xsl:attribute-set name="region.outer.properties"&gt;
+  &lt;xsl:attribute name="border-width"&gt;0&lt;/xsl:attribute&gt;
+  &lt;xsl:attribute name="padding"&gt;0&lt;/xsl:attribute&gt;
+  &lt;xsl:attribute name="reference-orientation"&gt;90&lt;/xsl:attribute&gt;
+&lt;/xsl:attribute-set&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>The FO stylesheet supports optional side regions
+similar to the header and footer regions.
+Any attributes declared in this attribute-set 
+are applied to the region element in the page master
+on the outer side (opposite the binding side) of the page.
+This corresponds to <literal>&lt;fo:regin-start&gt;</literal>
+on odd-numbered pages and <literal>&lt;fo:region-end&gt;</literal>
+on even-numbered pages.
+For single-sided output, it always corresponds to
+<literal>&lt;fo:regin-start&gt;</literal>.</para>
+
+<para>You can customize the template named 
+<literal>outer.region.content</literal> to specify
+the content of the outer side region.</para>
+
+<para>See also
+<parameter>outer.region.content.properties</parameter>,
+<parameter>page.margin.outer</parameter>, 
+<parameter>body.margin.outer</parameter>,
+and the corresponding <literal>inner</literal>
+parameters.</para>
+
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="inner.region.content.properties">
+<refmeta>
+<refentrytitle>inner.region.content.properties</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">attribute set</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>inner.region.content.properties</refname>
+<refpurpose>Properties of running inner side content</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="inner.region.content.properties.frag">
+&lt;xsl:attribute-set name="inner.region.content.properties"&gt;
+&lt;/xsl:attribute-set&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>The FO stylesheet supports optional side regions
+similar to the header and footer regions.
+Any attributes declared in this attribute-set 
+are applied to the fo:block in the side region
+on the inner side (binding side) of the page.
+This corresponds to the <literal>start</literal>
+region on odd-numbered pages and the <literal>end</literal>
+region on even-numbered pages.
+For single-sided output, it always corresponds to
+the <literal>start</literal> region.</para>
+
+<para>You can customize the template named 
+<literal>inner.region.content</literal> to specify
+the content of the inner side region.</para>
+
+<para>See also
+<parameter>region.inner.properties</parameter>,
+<parameter>page.margin.inner</parameter>, 
+<parameter>body.margin.inner</parameter>,
+and the corresponding <literal>outer</literal>
+parameters.</para>
+
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="outer.region.content.properties">
+<refmeta>
+<refentrytitle>outer.region.content.properties</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">attribute set</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>outer.region.content.properties</refname>
+<refpurpose>Properties of running outer side content</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="outer.region.content.properties.frag">
+&lt;xsl:attribute-set name="outer.region.content.properties"&gt;
+&lt;/xsl:attribute-set&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>The FO stylesheet supports optional side regions
+similar to the header and footer regions.
+Any attributes declared in this attribute-set 
+are applied to the fo:block in the side region
+on the outer side (opposite the binding side) of the page.
+This corresponds to the <literal>start</literal>
+region on odd-numbered pages and the <literal>end</literal>
+region on even-numbered pages.
+For single-sided output, it always corresponds to
+the <literal>start</literal> region.</para>
+
+<para>You can customize the template named 
+<literal>outer.region.content</literal> to specify
+the content of the outer side region.</para>
+
+<para>See also
+<parameter>region.outer.properties</parameter>,
+<parameter>page.margin.outer</parameter>, 
+<parameter>body.margin.outer</parameter>,
+and the corresponding <literal>inner</literal>
+parameters.</para>
+</refsection>
+</refentry>
+
 </reference><reference id="fonts" xml:base="../fo/param.xml"><title>Font Families</title>
 <refentry version="5.0" id="body.font.family">
 <refmeta>
@@ -19441,8 +20901,13 @@ an output element such as:
 
 <refsection><info><title>Description</title></info>
 
-<para>The body font family is the default font used for text in the page body.
-</para>
+<para>The body font family is the default font used for text in the page body.</para>
+<para>If more than one font is required, enter the font names,
+separated by a comma, e.g.</para>
+<literallayout>
+  &lt;xsl:param name="body.font.family"&gt;Arial, SimSun, serif&lt;/xsl:param&gt;
+
+</literallayout>
 
 </refsection>
 </refentry>
@@ -19497,7 +20962,12 @@ as the empty string, no font change is effected around dingbats.
 <para>The monospace font family is used for verbatim environments
 (program listings, screens, etc.).
 </para>
+<para>If more than one font is required, enter the font names,
+separated by a comma, e.g.</para>
+<literallayout>
+  &lt;xsl:param name="body.font.family"&gt;Arial, SimSun, serif&lt;/xsl:param&gt;
 
+</literallayout>
 </refsection>
 </refentry>
 
@@ -19551,7 +21021,12 @@ actually used by the stylesheets.
 <para>The title font family is used for titles (chapter, section, figure,
 etc.)
 </para>
+<para>If more than one font is required, enter the font names,
+separated by a comma, e.g.</para>
+<literallayout>
+  &lt;xsl:param name="body.font.family"&gt;Arial, SimSun, serif&lt;/xsl:param&gt;
 
+</literallayout>
 </refsection>
 </refentry>
 
@@ -20219,7 +21694,7 @@ property on the block that is a direct child of the flow.</para>
 <programlisting id="section.title.properties.frag">
 &lt;xsl:attribute-set name="section.title.properties"&gt;
   &lt;xsl:attribute name="font-family"&gt;
-    &lt;xsl:value-of select="$title.font.family"&gt;&lt;/xsl:value-of&gt;
+    &lt;xsl:value-of select="$title.fontset"&gt;&lt;/xsl:value-of&gt;
   &lt;/xsl:attribute&gt;
   &lt;xsl:attribute name="font-weight"&gt;bold&lt;/xsl:attribute&gt;
   &lt;!-- font size is calculated dynamically by section.heading template --&gt;
@@ -20710,7 +22185,9 @@ general <tag>section.properties</tag> attribute set.
 
 <refsynopsisdiv>
 <programlisting id="example.properties.frag">
-&lt;xsl:attribute-set name="example.properties" use-attribute-sets="formal.object.properties"&gt;&lt;/xsl:attribute-set&gt;
+&lt;xsl:attribute-set name="example.properties" use-attribute-sets="formal.object.properties"&gt;
+    &lt;xsl:attribute name="keep-together.within-column"&gt;auto&lt;/xsl:attribute&gt;
+&lt;/xsl:attribute-set&gt;
 </programlisting>
 </refsynopsisdiv>
 
@@ -20744,6 +22221,30 @@ general <tag>section.properties</tag> attribute set.
 </refsection>
 </refentry>
 
+<refentry version="5.0" id="equation.number.properties">
+<refmeta>
+<refentrytitle>equation.number.properties</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">attribute set</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>equation.number.properties</refname>
+<refpurpose>Properties that apply to the <tag>fo:table-cell</tag> containing the number
+of an <tag>equation</tag> that does not have a title.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="equation.number.properties.frag">&lt;xsl:attribute-set name="equation.number.properties"&gt;
+  &lt;xsl:attribute name="text-align"&gt;end&lt;/xsl:attribute&gt;
+  &lt;xsl:attribute name="display-align"&gt;center&lt;/xsl:attribute&gt;
+&lt;/xsl:attribute-set&gt;</programlisting>
+</refsynopsisdiv>
+<refsection><info><title>Description</title></info>
+<para>Properties that apply to the fo:table-cell containing the number
+of an equation when it has no title. The number in an equation with a
+title is formatted along with the title, and this attribute-set does not apply.</para>
+</refsection>
+</refentry>
+
 <refentry version="5.0" id="table.properties">
 <refmeta>
 <refentrytitle>table.properties</refentrytitle>
@@ -20770,6 +22271,31 @@ like that, but we&#8217;re leaving it to avoid backwards-compatibility
 problems.</para>
 
 <para>See also <parameter>table.table.properties</parameter>.</para>
+
+</refsection>
+</refentry>
+
+<refentry version="5.0" id="task.properties">
+<refmeta>
+<refentrytitle>task.properties</refentrytitle>
+<refmiscinfo class="other" otherclass="datatype">attribute set</refmiscinfo>
+</refmeta>
+<refnamediv>
+<refname>task.properties</refname>
+<refpurpose>Properties associated with a task</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting id="task.properties.frag">
+&lt;xsl:attribute-set name="task.properties" use-attribute-sets="formal.object.properties"&gt;
+    &lt;xsl:attribute name="keep-together.within-column"&gt;auto&lt;/xsl:attribute&gt;
+&lt;/xsl:attribute-set&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><info><title>Description</title></info>
+
+<para>Properties to style the entire block containing a task element.</para>
 
 </refsection>
 </refentry>
@@ -20952,7 +22478,7 @@ an FO file. It defines a set of default, global parameters.</para>
 <programlisting id="qanda.title.properties.frag">
 &lt;xsl:attribute-set name="qanda.title.properties"&gt;
   &lt;xsl:attribute name="font-family"&gt;
-    &lt;xsl:value-of select="$title.font.family"&gt;&lt;/xsl:value-of&gt;
+    &lt;xsl:value-of select="$title.fontset"&gt;&lt;/xsl:value-of&gt;
   &lt;/xsl:attribute&gt;
   &lt;xsl:attribute name="font-weight"&gt;bold&lt;/xsl:attribute&gt;
   &lt;!-- font size is calculated dynamically by qanda.heading template --&gt;
@@ -27790,7 +29316,19 @@ will be used to indent the TOC.</para>
 
 </reference>
     </part>
+   <!-- Prepare WebHelp output
+    <part xml:id="webhelp">
+      <?dbhtml dir="webhelp"?>
+      <?dbhtml filename="index.html"?>
+      <xi:include href="../webhelp/param.xml" xpointer="xpointer(/book/info/title)" />
+      <partintro xml:id="webhelpintro">
+        <xi:include href="../webhelp/param.xml" xpointer="xpointer(/book/info/abstract/node())" />
+      </partintro>
+      <xi:include href="../webhelp/param.xml" xpointer="xpointer(/book/reference)" />
+    </part>
+   -->
   </book>
+ 
   <book id="pi"><title>DocBook XSL Stylesheets User&#160;Reference:&#160;PIs</title>
     <?dbhtml dir="pi"?>
     <?dbhtml filename="index.html"?>
@@ -27812,7 +29350,7 @@ will be used to indent the TOC.</para>
     <part id="pi-html">
       <info xml:base="../html/pi.xml"><title>HTML Processing Instruction Reference</title>
     <releaseinfo role="meta">
-      $Id: pi.xsl 8394 2009-04-02 20:31:30Z mzjn $
+      $Id: pi.xsl 9022 2011-07-14 19:21:36Z bobstayton $
     </releaseinfo>
   </info>
   <partintro id="partintro" xml:base="../html/pi.xml">
@@ -28036,6 +29574,35 @@ will be used to indent the TOC.</para>
       directory into which any long-description files for that
       <tag>mediaobject</tag> will be written.</para>
 
+
+
+<para>The output directory specification is inherited by all
+chunks of the descendants of the element.  If descendants need
+to go to a different directory, then add another 
+<tag class="xmlpi">dbhtml dir</tag> processing
+instruction as a child of the source element
+for that chunk, and specify the path relative to the
+ancestor path.</para>
+
+
+
+<para>For example, to put most chunk files into 
+<filename class="directory">shared</filename>
+but one chapter into 
+<filename class="directory">exception</filename>
+at the same level, use:</para>
+
+
+<programlisting>&lt;book&gt;
+  &lt;?dbhtml dir="shared"?&gt;
+  ...
+  &lt;chapter&gt;
+    &lt;?dbhtml dir="../exception"?&gt;
+  &lt;/chapter&gt;
+&lt;/book&gt;
+</programlisting>
+
+
   </refsect1><refsect1><title>Parameters</title>
     
 <variablelist>
@@ -28069,10 +29636,20 @@ will be used to indent the TOC.</para>
   
 </refsynopsisdiv>
 <refsect1><title>Description</title>
-    
+
 <para>When chunking output, use the <tag class="xmlpi">dbhtml filename</tag>
       PI as a child of a chunk source to specify a filename for
-      the output file for that chunk.</para>
+      the output file for that chunk. Include the filename suffix.</para>
+
+
+
+<para>You cannot include a directory path in the filename value,
+or your links may not work.  Add a 
+<tag class="xmlpi">dbhtml dir</tag> processing instruction
+to specify the output directory. You can also combine the two
+specifications in one processing instruction: 
+<tag class="xmlpi">dbhtml dir="mydir" filename="myfile.html"</tag>.</para>
+
 
   </refsect1><refsect1><title>Parameters</title>
     
@@ -28924,7 +30501,7 @@ will be used to indent the TOC.</para>
     <part id="pi-fo">
       <info xml:base="../fo/pi.xml"><title>FO Processing Instruction Reference</title>
     <releaseinfo role="meta">
-      $Id: pi.xsl 8487 2009-07-14 21:43:36Z bobstayton $
+      $Id: pi.xsl 9267 2012-04-03 20:23:45Z bobstayton $
     </releaseinfo>
   </info>
 
@@ -29994,7 +31571,7 @@ will be used to indent the TOC.</para>
     <part id="pi-common">
       <info xml:base="../common/pi.xml"><title>Common Processing Instruction Reference</title>
     <releaseinfo role="meta">
-      $Id: pi.xsl 8349 2009-03-17 06:53:03Z bobstayton $
+      $Id: pi.xsl 8782 2010-07-27 21:15:17Z mzjn $
     </releaseinfo>
   </info>
   <partintro id="partintro" xml:base="../common/pi.xml">
@@ -30132,6 +31709,13 @@ will be used to indent the TOC.</para>
       markup, to cause that markup to be surrounded by
       <literal>$</literal> delimiter characters in output.</para>
 
+      <warning>
+       
+<para>This feature is useful for print/PDF output only if you
+       use the obsolete and now unsupported PassiveTeX XSL-FO
+       engine.</para>
+
+      </warning>
   </refsect1><refsect1><title>Parameters</title>
     
 <variablelist>
@@ -30147,10 +31731,6 @@ will be used to indent the TOC.</para>
   </refsect1><refsect1 role="params"><title>Related Global Parameters</title>
     
 <para><parameter>tex.math.delims</parameter></para>
-
-  </refsect1><refsect1 role="tcg"><title>Related Information in <link xlink:href="http://www.sagehill.net/docbookxsl/">DocBook XSL: The Complete Guide</link></title>
-    
-<para><link role="tcg" xlink:href="TexMath.html">DBTeXMath</link></para>
 
   </refsect1></refentry>
 
@@ -30333,6 +31913,51 @@ the empty string.</para>
     &lt;/xsl:when&gt;
     &lt;xsl:when test="starts-with($xpointer, '#')"&gt;
       &lt;xsl:value-of select="substring-after($xpointer, '#')"&gt;&lt;/xsl:value-of&gt;
+    &lt;/xsl:when&gt;
+    &lt;!-- otherwise it's a pointer to some other document --&gt;
+  &lt;/xsl:choose&gt;
+&lt;/xsl:template&gt;
+</programlisting>
+
+</refsect1>
+</refentry>
+
+
+
+<refentry id="idref">
+<refnamediv>
+<refname>idref</refname>
+<refpurpose>Extract IDREF from a linking element</refpurpose>
+</refnamediv>
+
+<refsect1><title>Description</title>
+
+<para>The <function>idref</function> template accepts 
+any <tag>xref</tag> or universally linking element as a parameter
+and returns the local
+ID that it points to.
+If it has a <tag class="attribute">linkend</tag> attribute,
+it returns that value.
+If it has a <tag class="attribute">xlink:href</tag>, it
+returns that value, parsed as needed to extract just
+the id reference.  Otherwise it returns an empty string.</para>
+
+<programlisting id="idref.frag">
+&lt;xsl:template name="idref"&gt;
+  &lt;xsl:param name="xref" select="."&gt;&lt;/xsl:param&gt;
+  &lt;xsl:param name="linkend" select="$xref/@linkend"&gt;&lt;/xsl:param&gt;
+  &lt;xsl:param name="xpointer"&gt;
+    &lt;xsl:call-template name="xpointer.idref"&gt;
+      &lt;xsl:with-param name="xpointer" select="$xref/@xlink:href"&gt;&lt;/xsl:with-param&gt;
+    &lt;/xsl:call-template&gt;
+  &lt;/xsl:param&gt; 
+
+  &lt;xsl:choose&gt;
+    &lt;xsl:when test="string-length($linkend) != 0"&gt;
+      &lt;xsl:value-of select="$linkend"&gt;&lt;/xsl:value-of&gt;
+    &lt;/xsl:when&gt;
+    &lt;xsl:when test="string-length($xpointer) != 0"&gt;
+      &lt;xsl:value-of select="$xpointer"&gt;&lt;/xsl:value-of&gt;
     &lt;/xsl:when&gt;
     &lt;!-- otherwise it's a pointer to some other document --&gt;
   &lt;/xsl:choose&gt;
@@ -31061,26 +32686,108 @@ which would effectively move <quote>up</quote> the hierarchy.</para>
   &lt;xsl:param name="uriB" select="''"&gt;&lt;/xsl:param&gt;
   &lt;xsl:param name="return" select="'A'"&gt;&lt;/xsl:param&gt;
 
+  &lt;!-- Resolve any ../ in the path --&gt;
+  &lt;xsl:variable name="trimmed.uriA"&gt;
+    &lt;xsl:call-template name="resolve.path"&gt;
+      &lt;xsl:with-param name="filename" select="$uriA"&gt;&lt;/xsl:with-param&gt;
+    &lt;/xsl:call-template&gt;
+  &lt;/xsl:variable&gt;
+
+  &lt;xsl:variable name="trimmed.uriB"&gt;
+    &lt;xsl:call-template name="resolve.path"&gt;
+      &lt;xsl:with-param name="filename" select="$uriB"&gt;&lt;/xsl:with-param&gt;
+    &lt;/xsl:call-template&gt;
+  &lt;/xsl:variable&gt;
+
   &lt;xsl:choose&gt;
-    &lt;xsl:when test="contains($uriA, '/') and contains($uriB, '/')                     and substring-before($uriA, '/') = substring-before($uriB, '/')"&gt;
+    &lt;xsl:when test="contains($trimmed.uriA, '/') and contains($trimmed.uriB, '/')                     and substring-before($trimmed.uriA, '/') = substring-before($trimmed.uriB, '/')"&gt;
       &lt;xsl:call-template name="trim.common.uri.paths"&gt;
-        &lt;xsl:with-param name="uriA" select="substring-after($uriA, '/')"&gt;&lt;/xsl:with-param&gt;
-        &lt;xsl:with-param name="uriB" select="substring-after($uriB, '/')"&gt;&lt;/xsl:with-param&gt;
+        &lt;xsl:with-param name="uriA" select="substring-after($trimmed.uriA, '/')"&gt;&lt;/xsl:with-param&gt;
+        &lt;xsl:with-param name="uriB" select="substring-after($trimmed.uriB, '/')"&gt;&lt;/xsl:with-param&gt;
         &lt;xsl:with-param name="return" select="$return"&gt;&lt;/xsl:with-param&gt;
       &lt;/xsl:call-template&gt;
     &lt;/xsl:when&gt;
     &lt;xsl:otherwise&gt;
       &lt;xsl:choose&gt;
         &lt;xsl:when test="$return = 'A'"&gt;
-          &lt;xsl:value-of select="$uriA"&gt;&lt;/xsl:value-of&gt;
+          &lt;xsl:value-of select="$trimmed.uriA"&gt;&lt;/xsl:value-of&gt;
         &lt;/xsl:when&gt;
         &lt;xsl:otherwise&gt;
-          &lt;xsl:value-of select="$uriB"&gt;&lt;/xsl:value-of&gt;
+          &lt;xsl:value-of select="$trimmed.uriB"&gt;&lt;/xsl:value-of&gt;
         &lt;/xsl:otherwise&gt;
       &lt;/xsl:choose&gt;
     &lt;/xsl:otherwise&gt;
   &lt;/xsl:choose&gt;
 &lt;/xsl:template&gt;
+</programlisting>
+
+</refsect1>
+</refentry>
+
+<refentry id="resolve.path">
+<refnamediv>
+<refname>resolve.path</refname>
+<refpurpose>Resolve any ../ in path, except leading ../</refpurpose>
+</refnamediv>
+
+<refsect1><title>Description</title>
+
+<para>This function resolves any relative ../ parts of a file path.</para>
+
+<programlisting id="resolve.path.frag">
+&lt;xsl:template name="resolve.path"&gt;
+  &lt;xsl:param name="filename" select="''"&gt;&lt;/xsl:param&gt;
+  &lt;xsl:choose&gt;
+    &lt;!-- Leading .. are not eliminated --&gt;
+    &lt;xsl:when test="starts-with($filename, '../')"&gt;
+      &lt;xsl:value-of select="'../'"&gt;&lt;/xsl:value-of&gt;
+      &lt;xsl:call-template name="resolve.path"&gt;
+        &lt;xsl:with-param name="filename" select="substring-after($filename, '../')"&gt;&lt;/xsl:with-param&gt;
+      &lt;/xsl:call-template&gt;
+    &lt;/xsl:when&gt;
+    &lt;xsl:when test="contains($filename, '/../')"&gt;
+      &lt;xsl:call-template name="resolve.path"&gt;
+        &lt;xsl:with-param name="filename"&gt;
+          &lt;xsl:call-template name="dirname"&gt;
+            &lt;xsl:with-param name="filename" select="substring-before($filename, '/../')"&gt;&lt;/xsl:with-param&gt;
+          &lt;/xsl:call-template&gt;
+          &lt;xsl:value-of select="substring-after($filename, '/../')"&gt;&lt;/xsl:value-of&gt;
+        &lt;/xsl:with-param&gt;
+      &lt;/xsl:call-template&gt;
+    &lt;/xsl:when&gt;
+    &lt;xsl:otherwise&gt;
+      &lt;xsl:value-of select="$filename"&gt;&lt;/xsl:value-of&gt;
+    &lt;/xsl:otherwise&gt;
+  &lt;/xsl:choose&gt;
+&lt;/xsl:template&gt;
+</programlisting>
+
+</refsect1>
+</refentry>
+
+<refentry id="dirname">
+<refnamediv>
+<refname>dirname</refname>
+<refpurpose>Return directory part of a path</refpurpose>
+</refnamediv>
+
+<refsect1><title>Description</title>
+
+<para>This function returns the directory part of a path.</para>
+
+<programlisting id="dirname.frag">
+
+&lt;xsl:template name="dirname"&gt;
+  &lt;xsl:param name="filename" select="''"&gt;&lt;/xsl:param&gt;
+  &lt;xsl:if test="contains($filename, '/')"&gt;
+    &lt;xsl:value-of select="substring-before($filename, '/')"&gt;&lt;/xsl:value-of&gt;
+    &lt;xsl:text&gt;/&lt;/xsl:text&gt;
+    &lt;xsl:call-template name="dirname"&gt;
+      &lt;xsl:with-param name="filename" select="substring-after($filename, '/')"&gt;&lt;/xsl:with-param&gt;
+    &lt;/xsl:call-template&gt;
+  &lt;/xsl:if&gt;
+&lt;/xsl:template&gt;
+
 </programlisting>
 
 </refsect1>
@@ -31108,7 +32815,7 @@ which would effectively move <quote>up</quote> the hierarchy.</para>
   <info>
     <title>Common &#187; Base Template Reference</title>
     <releaseinfo role="meta">
-      $Id: common.xsl 8274 2009-02-27 07:02:45Z bobstayton $
+      $Id: common.xsl 9347 2012-05-11 03:49:49Z bobstayton $
     </releaseinfo>
   </info>
   
@@ -31720,6 +33427,25 @@ unchanged.</para>
     
 <para>Returns a node (the result of evaluating the
     <parameter>profile</parameter> parameter)</para>
+
+  </refsect1></refentry>
+
+<refentry id="template.graphic.format.content-type">
+<refnamediv>
+<refname>graphic.format.content-type</refname>
+<refpurpose>Returns mimetype for media format</refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+<synopsis>&lt;xsl:template name="graphic.format.content-type"&gt;
+&lt;xsl:param name="format"/&gt;
+  ...
+&lt;/xsl:template&gt;</synopsis>
+</refsynopsisdiv>
+<refsect1><title>Description</title>
+    
+<para>This takes as input a 'format' param and returns
+    a mimetype string.  It uses an xsl:choose after first
+    converting the input to all uppercase.</para>
 
   </refsect1></refentry>
 </reference>
@@ -32946,7 +34672,7 @@ unchanged.</para>
   <info xml:base="../fo/table.xml">
     <title>Formatting Object Table Reference</title>
     <releaseinfo role="meta">
-      $Id: table.xsl 8392 2009-04-01 08:47:55Z bobstayton $
+      $Id: table.xsl 9345 2012-05-11 03:46:46Z bobstayton $
     </releaseinfo>
   </info>
   <partintro id="partintro" xml:base="../fo/table.xml">
@@ -33081,7 +34807,7 @@ proportional-column-width() function.</para>
   <info xml:base="../template/titlepage.xml">
     <title>Titlepage Template Stylesheet Reference</title>
     <releaseinfo role="meta">
-      $Id: titlepage.xsl 7058 2007-07-17 13:59:29Z xmldoc $
+      $Id: titlepage.xsl 9394 2012-06-02 21:18:04Z bobstayton $
     </releaseinfo>
   </info>
   <partintro id="intro_partintro" xml:base="../template/titlepage.xml">

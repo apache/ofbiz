@@ -8,7 +8,7 @@
                 version='1.0'>
 
 <!-- ********************************************************************
-     $Id: verbatim.xsl 8421 2009-05-04 07:49:49Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -28,11 +28,10 @@
 
 <xsl:template match="programlisting|screen|synopsis">
   <xsl:param name="suppress-numbers" select="'0'"/>
-  <xsl:variable name="id">
-    <xsl:call-template name="object.id"/>
-  </xsl:variable>
 
   <xsl:call-template name="anchor"/>
+
+  <xsl:variable name="div.element">pre</xsl:variable>
 
   <xsl:if test="$shade.verbatim != 0">
     <xsl:message>
@@ -61,8 +60,9 @@
           </xsl:otherwise>
         </xsl:choose>
       </xsl:variable>
-      <pre>
+      <xsl:element name="{$div.element}">
         <xsl:apply-templates select="." mode="common.html.attributes"/>
+        <xsl:call-template name="id.attribute"/>
         <xsl:if test="@width != ''">
           <xsl:attribute name="width">
             <xsl:value-of select="@width"/>
@@ -71,11 +71,12 @@
         <xsl:call-template name="number.rtf.lines">
           <xsl:with-param name="rtf" select="$rtf"/>
         </xsl:call-template>
-      </pre>
+      </xsl:element>
     </xsl:when>
     <xsl:otherwise>
-      <pre>
+      <xsl:element name="{$div.element}">
         <xsl:apply-templates select="." mode="common.html.attributes"/>
+        <xsl:call-template name="id.attribute"/>
         <xsl:if test="@width != ''">
           <xsl:attribute name="width">
             <xsl:value-of select="@width"/>
@@ -89,7 +90,7 @@
             <xsl:apply-templates/>
           </xsl:otherwise>
         </xsl:choose>
-      </pre>
+      </xsl:element>
     </xsl:otherwise>
   </xsl:choose>
 </xsl:template>
@@ -122,6 +123,7 @@
         <xsl:when test="@class='monospaced'">
           <pre>
             <xsl:apply-templates select="." mode="common.html.attributes"/>
+            <xsl:call-template name="id.attribute"/>
             <xsl:call-template name="number.rtf.lines">
               <xsl:with-param name="rtf" select="$rtf"/>
             </xsl:call-template>
@@ -130,6 +132,7 @@
         <xsl:otherwise>
           <div>
             <xsl:apply-templates select="." mode="common.html.attributes"/>
+            <xsl:call-template name="id.attribute"/>
             <p>
               <xsl:call-template name="number.rtf.lines">
                 <xsl:with-param name="rtf" select="$rtf"/>
@@ -144,12 +147,14 @@
         <xsl:when test="@class='monospaced'">
           <pre>
             <xsl:apply-templates select="." mode="common.html.attributes"/>
+            <xsl:call-template name="id.attribute"/>
             <xsl:copy-of select="$rtf"/>
           </pre>
         </xsl:when>
         <xsl:otherwise>
           <div>
             <xsl:apply-templates select="." mode="common.html.attributes"/>
+            <xsl:call-template name="id.attribute"/>
             <p>
               <xsl:call-template name="make-verbatim">
                 <xsl:with-param name="rtf" select="$rtf"/>
@@ -176,6 +181,7 @@
                     and $linenumbering.extension != '0'">
       <div>
         <xsl:apply-templates select="." mode="common.html.attributes"/>
+        <xsl:call-template name="id.attribute"/>
         <p>
           <xsl:call-template name="number.rtf.lines">
             <xsl:with-param name="rtf" select="$rtf"/>
@@ -187,6 +193,7 @@
     <xsl:otherwise>
       <div>
         <xsl:apply-templates select="." mode="common.html.attributes"/>
+        <xsl:call-template name="id.attribute"/>
         <p>
           <xsl:call-template name="make-verbatim">
             <xsl:with-param name="rtf" select="$rtf"/>

@@ -6,7 +6,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:exsl="http://exslt.org/common" xmlns:cf="http://docbook.sourceforge.net/xmlns/chunkfast/1.0" xmlns:ng="http://docbook.org/docbook-ng" xmlns:db="http://docbook.org/ns/docbook" xmlns:exslt="http://exslt.org/common" xmlns="http://www.w3.org/1999/xhtml" exslt:dummy="dummy" ng:dummy="dummy" db:dummy="dummy" extension-element-prefixes="exslt" exclude-result-prefixes="exsl cf ng db exslt" version="1.0">
 
 <!-- ********************************************************************
-     $Id: chunk-code.xsl 8345 2009-03-16 06:44:07Z bobstayton $
+     $Id$
      ********************************************************************
 
      This file is part of the XSL DocBook Stylesheet distribution.
@@ -51,6 +51,8 @@
   <xsl:if test="$fn != ''">
     <xsl:call-template name="dbhtml-dir"/>
   </xsl:if>
+
+  <xsl:value-of select="$chunked.filename.prefix"/>
 
   <xsl:value-of select="$fn"/>
   <!-- You can't add the html.ext here because dbhtml filename= may already -->
@@ -251,6 +253,12 @@
           </xsl:apply-templates>
         </xsl:when>
         <xsl:otherwise>
+          <xsl:if test="/set">
+            <!-- in a set, make sure we inherit the right book info... -->
+            <xsl:apply-templates mode="recursive-chunk-filename" select="parent::*">
+              <xsl:with-param name="recursive" select="true()"/>
+            </xsl:apply-templates>
+          </xsl:if>
         </xsl:otherwise>
       </xsl:choose>
 
@@ -356,6 +364,25 @@
       </xsl:if>
     </xsl:when>
 
+    <xsl:when test="self::topic">
+      <xsl:choose>
+        <xsl:when test="/set">
+          <!-- in a set, make sure we inherit the right book info... -->
+          <xsl:apply-templates mode="recursive-chunk-filename" select="parent::*">
+            <xsl:with-param name="recursive" select="true()"/>
+          </xsl:apply-templates>
+        </xsl:when>
+        <xsl:otherwise>
+        </xsl:otherwise>
+      </xsl:choose>
+
+      <xsl:text>to</xsl:text>
+      <xsl:number level="any" format="01" from="book"/>
+      <xsl:if test="not($recursive)">
+        <xsl:value-of select="$html.ext"/>
+      </xsl:if>
+    </xsl:when>
+
     <xsl:otherwise>
       <xsl:text>chunk-filename-error-</xsl:text>
       <xsl:value-of select="name(.)"/>
@@ -395,6 +422,9 @@
     </xsl:otherwise>
   </xsl:choose>
 </xsl:template>
+
+<!-- Leave legalnotice chunk out of the list for Next and Prev -->
+<xsl:template match="legalnotice" mode="find.chunks"/>
 
 <xslo:include xmlns:xslo="http://www.w3.org/1999/XSL/Transform" href="../profiling/profile-mode.xsl"/><xslo:variable xmlns:xslo="http://www.w3.org/1999/XSL/Transform" name="profiled-content"><xslo:choose><xslo:when test="*/self::ng:* or */self::db:*"><xslo:message>Note: namesp. cut : stripped namespace before processing</xslo:message><xslo:variable name="stripped-content"><xslo:apply-templates select="/" mode="stripNS"/></xslo:variable><xslo:message>Note: namesp. cut : processing stripped document</xslo:message><xslo:apply-templates select="exslt:node-set($stripped-content)" mode="profile"/></xslo:when><xslo:otherwise><xslo:apply-templates select="/" mode="profile"/></xslo:otherwise></xslo:choose></xslo:variable><xslo:variable xmlns:xslo="http://www.w3.org/1999/XSL/Transform" name="profiled-nodes" select="exslt:node-set($profiled-content)"/><xsl:template match="/">
   <!-- * Get a title for current doc so that we let the user -->
@@ -461,11 +491,12 @@
 
 <xsl:template match="*" mode="process.root">
   <xsl:apply-templates select="."/>
+  <xsl:call-template name="generate.css.files"/>
 </xsl:template>
 
 <!-- ====================================================================== -->
 
-<xsl:template match="set|book|part|preface|chapter|appendix                      |article                      |reference|refentry                      |book/glossary|article/glossary|part/glossary                      |book/bibliography|article/bibliography|part/bibliography                      |colophon">
+<xsl:template match="set|book|part|preface|chapter|appendix                      |article                      |topic                      |reference|refentry                      |book/glossary|article/glossary|part/glossary                      |book/bibliography|article/bibliography|part/bibliography                      |colophon">
   <xsl:choose>
     <xsl:when test="$onechunk != 0 and parent::*">
       <xsl:apply-imports/>
@@ -529,13 +560,13 @@
 </xsl:template>
 
 <!-- ==================================================================== -->
-<xsl:template match="set|book|part|preface|chapter|appendix                      |article                      |reference|refentry                      |sect1|sect2|sect3|sect4|sect5                      |section                      |book/glossary|article/glossary|part/glossary                      |book/bibliography|article/bibliography|part/bibliography                      |colophon" mode="enumerate-files">
+<xsl:template match="set|book|part|preface|chapter|appendix                      |article                      |topic                      |reference|refentry                      |sect1|sect2|sect3|sect4|sect5                      |section                      |book/glossary|article/glossary|part/glossary                      |book/bibliography|article/bibliography|part/bibliography                      |colophon" mode="enumerate-files">
   <xsl:variable name="ischunk"><xsl:call-template name="chunk"/></xsl:variable>
   <xsl:if test="$ischunk='1'">
     <xsl:call-template name="make-relative-filename">
       <xsl:with-param name="base.dir">
         <xsl:if test="$manifest.in.base.dir = 0">
-          <xsl:value-of select="$base.dir"/>
+          <xsl:value-of select="$chunk.base.dir"/>
         </xsl:if>
       </xsl:with-param>
       <xsl:with-param name="base.name">
@@ -555,7 +586,7 @@
       <xsl:call-template name="make-relative-filename">
         <xsl:with-param name="base.dir">
           <xsl:if test="$manifest.in.base.dir = 0">
-            <xsl:value-of select="$base.dir"/>
+            <xsl:value-of select="$chunk.base.dir"/>
           </xsl:if>
         </xsl:with-param>
         <xsl:with-param name="base.name">
@@ -575,7 +606,7 @@
     <xsl:call-template name="make-relative-filename">
       <xsl:with-param name="base.dir">
         <xsl:if test="$manifest.in.base.dir = 0">
-          <xsl:value-of select="$base.dir"/>
+          <xsl:value-of select="$chunk.base.dir"/>
         </xsl:if>
       </xsl:with-param>
       <xsl:with-param name="base.name">
