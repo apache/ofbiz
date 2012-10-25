@@ -124,7 +124,7 @@ under the License.
             </show-portlet>
         </menu-item>
         <menu-item name="addExampleItem">
-            <show-portlet portlet-id="${portalPortletId}" target="editExampleItemPortlet" area-id="ExampleItems_EditArea" image-location="${iconsPurpose.Add}" image-title="${uiLabelMap.IconsTooltips_Add}">
+            <show-portlet portlet-id="${portalPortletId}" target="editExampleItemPortlet" area-id="${editAreaDivId}" image-location="${iconsPurpose.Add}" image-title="${uiLabelMap.IconsTooltips_Add}">
               <parameter param-name="exampleId" from-field="parameters.exampleId"/>
             </show-portlet>
         </menu-item>
