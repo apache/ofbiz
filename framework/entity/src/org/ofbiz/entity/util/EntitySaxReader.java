@@ -88,6 +88,7 @@ public class EntitySaxReader implements javolution.xml.sax.ContentHandler, Error
     protected boolean checkDataOnly = false;
     protected boolean doCacheClear = true;
     protected boolean disableEeca = false;
+    protected boolean setOtherFieldsToNull = false;
     protected List<Object> messageList = null;
 
     protected List<GenericValue> valuesToWrite = new ArrayList<GenericValue>(valuesPerWrite);
@@ -200,6 +201,14 @@ public class EntitySaxReader implements javolution.xml.sax.ContentHandler, Error
                 this.delegator.setEntityEcaHandler(ecaHandler);
             }
         }
+    }
+
+    public boolean getSetOtherFieldsToNull() {
+        return this.setOtherFieldsToNull;
+    }
+
+    public void setSetOtherFieldsToNull(boolean _setOtherFieldsToNull) {
+        this.setOtherFieldsToNull = _setOtherFieldsToNull;
     }
 
     public long parse(String content) throws SAXException, java.io.IOException {
@@ -493,6 +502,12 @@ public class EntitySaxReader implements javolution.xml.sax.ContentHandler, Error
                 this.setCreateDummyFks("true".equalsIgnoreCase(dummyFk.toString()));
             }
 
+            // check if other fields should be set to null
+            CharSequence _setOtherFieldsToNull = attributes.getValue("set-other-fields-to-null");
+            if (_setOtherFieldsToNull != null) {
+                this.setSetOtherFieldsToNull("true".equalsIgnoreCase(_setOtherFieldsToNull.toString()));
+            }
+
             return;
         }
 
@@ -573,6 +588,16 @@ public class EntitySaxReader implements javolution.xml.sax.ContentHandler, Error
                         }
                     } catch (Exception e) {
                         Debug.logWarning(e, "Could not set field " + entityName + "." + name + " to the value " + value, module);
+                    }
+                }
+                if (this.getSetOtherFieldsToNull()) {
+                    ModelEntity currentEntity = currentValue.getModelEntity();
+                    for (String fieldName : currentEntity.getAllFieldNames() ){
+                        if (   ! ModelEntity.STAMP_FIELD.equals(fieldName)        && ! ModelEntity.STAMP_TX_FIELD.equals(fieldName)
+                            && ! ModelEntity.CREATE_STAMP_FIELD.equals(fieldName) && ! ModelEntity.CREATE_STAMP_TX_FIELD.equals(fieldName)
+                            && currentValue.get(fieldName) == null ) {
+                                currentValue.set(fieldName, null);
+                        }
                     }
                 }
             }
