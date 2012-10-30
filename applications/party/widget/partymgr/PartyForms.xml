@@ -633,6 +633,23 @@ under the License.
         <field name="createButton" use-when="content==null"><submit button-type="button"/></field>
         <field name="updateButton" use-when="content!=null"><submit button-type="button"/></field>
     </form>
+<!--#Bam# jquery-submit-upload-file 
+     currently not activated, is for : if used uploadJs for screen
+    <form name="UploadPartyContent" extends="AddPartyContent">
+        <actions>
+            <set field="content" from-field="nullField"/>
+        </actions>
+        <alt-target use-when="content==null" target="uploadPartyContentJson"/>
+        <field name="dataResourceName"><ignored/></field>
+        <field name="uploadedFile" title="${uiLabelMap.CommonUpload}"><file/></field>
+        <on-event-update-area area-target="partyContentList" event-type="submit" area-id="partyContentList">
+            <parameter param-name="partyId"/>
+        </on-event-update-area>
+        <sort-order>
+            <sort-field name="uploadedFile"/>
+        </sort-order>
+    </form>
+#Eam# jquery-submit-upload-file  -->
 
     <form name="ListPartyContents" type="list" separate-columns="false"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar">

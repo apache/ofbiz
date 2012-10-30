@@ -293,15 +293,13 @@ ${item.description}</span>
 </#list>
 </#macro>
 
-<#-- <#macro renderSubmitField buttonType className alert formName title name event action imgSrc confirmation containerId ajaxUrl> -->
-<#macro renderSubmitField buttonType className alert formName title name event action imgSrc confirmation containerId ajaxUrl returnParams>
+<#macro renderSubmitField buttonType className alert formName formType title name event action imgSrc confirmation containerId ajaxUrl returnParams>
 <#if buttonType=="text-link">
  <a <@renderClass className alert /> href="javascript:document.${formName}.submit()" <#if confirmation?has_content>onclick="return confirm('${confirmation?js_string}');"</#if>><#if title?has_content>${title}</#if> </a>
 <#elseif buttonType=="image">
  <input type="image" src="${imgSrc}" <@renderClass className alert /><#if name?has_content> name="${name}"</#if><#if title?has_content> alt="${title}"</#if><#if event?has_content> ${event}="${action}"</#if> <#if confirmation?has_content>onclick="return confirm('${confirmation?js_string}');"</#if>/>
 <#else>
-<#--<input type="<#if containerId?has_content>button<#else>submit</#if>" <@renderClass className alert /><#if name?exists> name="${name}"</#if><#if title?has_content> value="${title}"</#if><#if event?has_content> ${event}="${action}"</#if><#if containerId?has_content> onclick="<#if confirmation?has_content>if (confirm('${confirmation?js_string}')) </#if>ajaxSubmitFormUpdateAreas('${containerId}', '${ajaxUrl}')"<#else><#if confirmation?has_content> onclick="return confirm('${confirmation?js_string}');"</#if></#if>/></#if>-->
-<input type="<#if containerId?has_content>button<#else>submit</#if>" <@renderClass className alert /><#if name?exists> name="${name}"</#if><#if title?has_content> value="${title}"</#if><#if event?has_content> ${event}="${action}"</#if><#if containerId?has_content> onclick="<#if confirmation?has_content>if (confirm('${confirmation?js_string}')) </#if><#if returnParams?has_content>ajaxSubmitFormUpdateAreasWithReturn('${containerId}', '${ajaxUrl}', ${returnParams})"<#else>ajaxSubmitFormUpdateAreas('${containerId}', '${ajaxUrl}')"</#if><#else><#if confirmation?has_content> onclick="return confirm('${confirmation?js_string}');"</#if></#if>/></#if>
+<input type="<#if containerId?has_content>button<#else>submit</#if>" <@renderClass className alert /><#if name?exists> name="${name}"</#if><#if title?has_content> value="${title}"</#if><#if event?has_content> ${event}="${action}"</#if><#if containerId?has_content> onclick="<#if confirmation?has_content>if (confirm('${confirmation?js_string}')) </#if><#if returnParams?has_content>ajax<#if formType=="upload">Upload<#else>Submit</#if>FormUpdateAreasWithReturn('${containerId}', '${ajaxUrl}', ${returnParams})"<#else>ajax<#if formType=="upload">Upload<#else>Submit</#if>FormUpdateAreas('${containerId}', '${ajaxUrl}')"</#if><#else><#if confirmation?has_content> onclick="return confirm('${confirmation?js_string}');"</#if></#if>/></#if>
 </#macro>
 
 <#macro renderResetField className alert name title>
@@ -325,6 +323,9 @@ ${item.description}</span>
 <#macro renderFormOpen linkUrl formType targetWindow containerId containerStyle autocomplete name viewIndexField viewSizeField viewIndex viewSize useRowSubmit>
 
     <form method="post" action="${linkUrl}"<#if formType=="upload"> enctype="multipart/form-data"</#if><#if targetWindow?has_content> target="${targetWindow}"</#if><#if containerId?has_content> id="${containerId}"</#if> class=<#if containerStyle?has_content>"${containerStyle}"<#else>"basic-form"</#if> onsubmit="javascript:submitFormDisableSubmits(this)"<#if autocomplete?has_content> autocomplete="${autocomplete}"</#if> name="${name}"><#lt/>
+    <#if formType?has_content && formType=="upload">
+        <div id="fields_${containerId}">
+    </#if>
     <#if useRowSubmit?has_content && useRowSubmit>
         <input type="hidden" name="_useRowSubmit" value="Y"/>
         <#if linkUrl?index_of("VIEW_INDEX") &lt;= 0 && linkUrl?index_of(viewIndexField) &lt;= 0>
@@ -335,7 +336,10 @@ ${item.description}</span>
         </#if>
     </#if>
 </#macro>
-<#macro renderFormClose focusFieldName formName containerId hasRequiredField>
+<#macro renderFormClose focusFieldName formName formType containerId hasRequiredField>
+    <#if formType?has_content && formType=="upload">
+        <div id="fields_${containerId}">
+    </#if>
     </form><#lt/>
     <#if focusFieldName?has_content>
         <script language="JavaScript" type="text/javascript">

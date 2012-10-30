@@ -212,6 +212,9 @@
         portletTypeId="Screenlet" component="party" subComponent="Profile" useScreen="Y" useScript="N" useMenu="Y" pkIdName="partyId"
         titleLabel="PartyPaymentMethodInformation" screenshot="/images/portlets/PartyPaymentMethods.png"
         securityServiceName="" securityMainAction="VIEW"/>
+  <PortalPortlet portalPortletId="PartyContents" portletName="Contents associated to Party management" description="List and manage Contents associated to one party"
+        portletTypeId="ScreenletList" component="party" subComponent="Profile" useScreen="N" useScript="N" useMenu="Y" pkIdName="partyId"
+        titleLabel="PartyContent" securityMainAction="VIEW"/>
 
   <PortletPortletCategory portalPortletId="PartyInfo" portletCategoryId="PARTY_PROFILE"/>
   <PortletPortletCategory portalPortletId="SelectParty" portletCategoryId="PARTY_PROFILE"/>
@@ -226,6 +229,7 @@
   <PortletPortletCategory portalPortletId="PartyIdentLists" portletCategoryId="PARTY_PROFILE"/>
   <PortletPortletCategory portalPortletId="PartyNotes" portletCategoryId="PARTY_PROFILE"/>
   <PortletPortletCategory portalPortletId="PartyPaymentMethods" portletCategoryId="PARTY_PROFILE"/>
+  <PortletPortletCategory portalPortletId="PartyContents" portletCategoryId="PARTY_PROFILE"/>
 
 
   <PortalPage portalPageId="PartyRecap" sequenceNum="0" portalPageName="Party Profile overview" description="Party profile page whith a lot of portlet" ownerUserLoginId="_NA_"/>
@@ -243,7 +247,8 @@
    <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="PartyRoles" portletSeqId="00001" columnSeqId="00002" sequenceNum="2"/>
    <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="PartyAttributes" portletSeqId="00001" columnSeqId="00002" sequenceNum="3"/>
    <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="PartyAvsSettings" portletSeqId="00001" columnSeqId="00002" sequenceNum="4"/>
-   <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="PartyNotes" portletSeqId="00001" columnSeqId="00002" sequenceNum="5"/>
+   <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="PartyContents" portletSeqId="00001" columnSeqId="00002" sequenceNum="5"/>
+   <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="PartyNotes" portletSeqId="00001" columnSeqId="00002" sequenceNum="6"/>
 
 
   <PortalPortlet portalPortletId="PartyLastVisits" portletName="List last Visits for the Party" description="Last 5 Visits of a certain party"

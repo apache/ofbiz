@@ -1127,6 +1127,7 @@ public class MacroFormRenderer implements FormStringRenderer {
         String name = modelFormField.getParameterName(context);
         String buttonType =  submitField.getButtonType();
         String formName = modelForm.getCurrentFormName(context);
+        String formType = modelForm.getType();
         String imgSrc = submitField.getImageLocation(context);
         String confirmation = submitField.getConfirmation(context);
         String className = "";
@@ -1171,6 +1172,8 @@ public class MacroFormRenderer implements FormStringRenderer {
         sr.append(alert);
         sr.append("\" formName=\"");
         sr.append(formName);
+        sr.append("\" formType=\"");
+        sr.append(formType);
         sr.append("\" title=\"");
         sr.append(encode(title, modelFormField, context));
         sr.append("\" name=\"");
@@ -1420,6 +1423,7 @@ public class MacroFormRenderer implements FormStringRenderer {
     public void renderFormClose(Appendable writer, Map<String, Object> context, ModelForm modelForm) throws IOException {
         String focusFieldName = modelForm.getfocusFieldName();
         String formName = modelForm.getCurrentFormName(context);
+        String formType = modelForm.getType();
         String containerId = modelForm.getCurrentContainerId(context);
         String hasRequiredField = "";
         for (ModelFormField formField : modelForm.getFieldList()) {
@@ -1434,6 +1438,8 @@ public class MacroFormRenderer implements FormStringRenderer {
         sr.append(focusFieldName);
         sr.append("\" formName=\"");
         sr.append(formName);
+        sr.append("\" formType=\"");
+        sr.append(formType);
         sr.append("\" containerId=\"");
         sr.append(containerId);
         sr.append("\" hasRequiredField=\"");

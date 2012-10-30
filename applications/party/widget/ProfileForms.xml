@@ -248,6 +248,7 @@ under the License.
         <field name="PartyUserLoginsMenu">   <radio no-current-selected-key="Y"><option key="Y"/><option key="N"/></radio></field>
         <field name="PartyRolesMenu">        <radio no-current-selected-key="Y"><option key="Y"/><option key="N"/></radio></field>
         <field name="PartyNotesMenu">        <radio no-current-selected-key="Y"><option key="Y"/><option key="N"/></radio></field>
+        <field name="PartyContentsMenu">     <radio no-current-selected-key="Y"><option key="Y"/><option key="N"/></radio></field>
         <field name="PartyPaymentsMenu">     <radio no-current-selected-key="Y"><option key="Y"/><option key="N"/></radio></field>
         <field name="PartyIdentListsMenu">   <radio no-current-selected-key="Y"><option key="Y"/><option key="N"/></radio></field>
         <field name="PartyAttributesMenu">   <radio no-current-selected-key="Y"><option key="Y"/><option key="N"/></radio></field>
@@ -869,6 +870,97 @@ under the License.
           <parameter param-name="partyId"/>
         </on-event-update-area>
     </form>
+     <form name="PartyContents" type="list" list-name="listIt" separate-columns="false" odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-and entity-name="PartyContentDetail" list="listIt">
+                <field-map field-name="partyId" from-field="parameters.partyId"/>
+            </entity-and>
+        </actions>
+        <field name="partyId"><hidden/></field>
+        <field name="contentId" title="${uiLabelMap.CommonId}">
+          <show-portlet portlet-id="${portalPortletId}" target="EditPartyContentPt" area-id="${editAreaDivId}" description="${contentId}">
+            <parameter param-name="contentId"/>
+            <parameter param-name="partyId"/>
+            <parameter param-name="partyContentTypeId"/>
+            <parameter param-name="fromDate"/>
+          </show-portlet>
+        </field>
+        <field name="contentName"><display/></field>
+        <field name="partyContentTypeId"><display-entity entity-name="PartyContentType"/></field>
+        <field name="description"><display/></field>
+        <field name="statusId"><display-entity entity-name="StatusItem"/></field>
+        <field name="localeString"><display-entity entity-name="CountryCode" key-field-name="countryCode" description="${countryName}${countryCode}"/></field>
+<!--        <field name="contentTypeId"><display-entity entity-name="ContentType"/></field>-->
+        <field name="mimeTypeId"><display-entity entity-name="MimeType"/></field>
+        <field name="dataResourceId" title="${uiLabelMap.FormFieldTitle_dataResourceName}" use-when="dataResourceId==null"><display/> </field>
+        <field name="dataResourceId" title="${uiLabelMap.FormFieldTitle_dataResourceName}" use-when="dataResourceId!=null">
+            <display-entity entity-name="DataResource" description="${dataResourceName}"/>
+        </field>
+       <field name="viewLink" title=" " use-when="dataResourceId!=null">
+            <hyperlink target="img/${contentName}" target-type="inter-app" target-window="upload" image-location="${iconsPurpose.Download}" image-title="${uiLabelMap.IconsTooltips_Download}">
+                <parameter param-name="imgId" from-field="dataResourceId"/>
+            </hyperlink>
+        </field>
+        <field name="deleteLink" title=" ">
+            <show-portlet portlet-id="${portalPortletId}" area-id="${areaId}" target="removePartyContentJson" image-location="${iconsPurpose.Delete}" image-title="${uiLabelMap.IconsTooltips_Delete}" request-confirmation="true" confirmation-message="${uiLabelMap.CommonConfirmDelete} : ${contentName}">
+                   <parameter param-name="contentId"/>
+                   <parameter param-name="partyId"/>
+                   <parameter param-name="partyContentTypeId"/>
+                   <parameter param-name="fromDate"/>
+            </show-portlet>
+        </field>
+    </form>
+
+    <form name="EditPartyContent" target="updatePartyContentJson" type="upload" default-map-name="content"
+        focus-field-name="contentTypeId" header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <entity-one entity-name="StatusItem" value-field="currentStatus" auto-field-map="false">
+                <field-map field-name="statusId" from-field="content.statusId"/>
+            </entity-one>
+            <entity-one entity-name="DataResource" value-field="dataResource" auto-field-map="false">
+                <field-map field-name="dataResourceId" from-field="content.dataResourceId"/>
+            </entity-one>
+        </actions>
+        <alt-target use-when="content==null" target="uploadPartyContentJson"/>
+        <field name="partyId" map-name="parameters"><hidden/></field>
+        <field name="dataResourceId" map-name="dataResource" use-when="content!=null"><hidden/></field>
+        <field use-when="content!=null" name="contentId" tooltip="${uiLabelMap.CommonNotModifRecreat}"><display/></field>
+        <field name="dataCategoryId"><hidden value="PERSONAL"/></field>
+        <field name="contentTypeId"><hidden value="DOCUMENT"/></field>
+        <field name="statusId"><hidden value="CTNT_PUBLISHED"/></field>
+        <field name="uploadedFile" title="${uiLabelMap.CommonUpload}" use-when="content==null"><file/></field>
+        <field name="fromDate" use-when="content!=null"><display type="date-time"/></field>
+        <field name="thruDate" use-when="content!=null"><date-time/></field>
+        <field name="partyContentTypeId">
+            <drop-down allow-empty="false">
+                <entity-options description="${description}" entity-name="PartyContentType"/>
+            </drop-down>
+        </field>
+        <field name="mimeTypeId" >
+            <drop-down allow-empty="false">
+                <entity-options description="${description}" entity-name="MimeType"/>
+            </drop-down>
+        </field>
+        <field name="isPublic" title="${uiLabelMap.PartyIsPublic}" map-name="dataResource">
+            <drop-down no-current-selected-key="N">
+                <option key="N" description="${uiLabelMap.CommonNo}"/>
+                <option key="Y" description="${uiLabelMap.CommonYes}"/>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${groovy: content==null ? uiLabelMap.CommonAdd: uiLabelMap.CommonSave}"><submit button-type="button"/></field>
+        <field name="back" title=" " position="2" widget-style="buttontext">
+            <show-portlet portlet-id="${parameters.portalPortletId}" area-id="${parameters.areaId}" description="${uiLabelMap.CommonBack}" >
+               <parameter param-name="partyId" from-field="parameters.partyId"/>
+            </show-portlet>
+        </field>
+        <on-event-update-area event-type="submit" area-id="${parameters.areaId}" area-target="showPortlet">
+             <parameter param-name="partyId" from-field="parameters.partyId"/>
+        </on-event-update-area>
+        <sort-order>
+            <sort-field name="uploadedFile"/>
+        </sort-order>
+    </form>
+
 
 
     <form name="PartyAttributes" type="list" odd-row-style="alternate-row" default-table-style="basic-table hover-bar">

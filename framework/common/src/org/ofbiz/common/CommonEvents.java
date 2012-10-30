@@ -274,8 +274,26 @@ public class CommonEvents {
 
         return "success";
     }
+    /*#Bam# jquery-submit-upload-file*/
+    public static String jsonUploadResponseFromRequestAttributes(HttpServletRequest request, HttpServletResponse response) {
+        // pull out the service response from the request attribute
+        Map<String, Object> attrMap = UtilHttp.getJSONAttributeMap(request);
+
+        // create a JSON Object for return
+        JSONObject json = JSONObject.fromObject(attrMap);
+        writeJSONtoResponse(json, response, "text/html"); //text-html since jquery.upload don't work wit contentType application/x-json : http://lagoscript.org/jquery/upload/documentation
+
+        return "success";
+    }
+    /*#Eam# jquery-submit-upload-file*/
 
     private static void writeJSONtoResponse(JSON json, HttpServletResponse response) {
+        /*#Bam# jquery-submit-upload-file*/
+        writeJSONtoResponse(json, response, "application/x-json");
+    }
+
+    private static void writeJSONtoResponse(JSON json, HttpServletResponse response, String contentType ) {
+    /*#Eam# jquery-submit-upload-file*/
         String jsonStr = json.toString();
         if (jsonStr == null) {
             Debug.logError("JSON Object was empty; fatal error!", module);
@@ -283,7 +301,11 @@ public class CommonEvents {
         }
 
         // set the X-JSON content type
+        /*#Bam# jquery-submit-upload-file
         response.setContentType("application/x-json");
+        */
+        response.setContentType(contentType);
+        /*#Eam# jquery-submit-upload-file*/
         // jsonStr.length is not reliable for unicode characters
         try {
             response.setContentLength(jsonStr.getBytes("UTF8").length);

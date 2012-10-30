@@ -1071,7 +1071,7 @@
     <property key="FormFieldTitle_partyContentTypeId">
         <value xml:lang="de">Übergeordnete Kontakttyp ID</value>
         <value xml:lang="en">Parent Content Type Id</value>
-        <value xml:lang="fr">Type de contenu parent</value>
+        <value xml:lang="fr">Usage du contenu</value>
         <value xml:lang="hi_IN">उच्च(Parent) सामग्री(content) प्रकार का क्रमांक</value>
         <value xml:lang="it">Tipo contenuto padre</value>
         <value xml:lang="pt_BR">Id do tipo de conteúdo superior</value>

@@ -425,6 +425,46 @@ function ajaxSubmitFormUpdateAreas(form, areaCsvString) {
        }
    });
 }
+//#Bam# jquery-submit-upload-file
+/** Submit form, update multiple areas (HTML container elements).
+ * @param form The form element
+ * @param areaCsvString The area CSV string. The CSV string is a flat array in the
+ * form of: areaId, target, target parameters [, areaId, target, target parameters...].
+*/
+function ajaxUploadFormUpdateAreas(form, areaCsvString) {
+       waitSpinnerShow();
+       hideErrorContainer = function() {
+           jQuery('#content-messages').removeClass('errorMessage').fadeIn('fast');
+       }
+       updateFunction = function(data) {
+           if (data._ERROR_MESSAGE_LIST_ != undefined || data._ERROR_MESSAGE_ != undefined) {
+               if(!jQuery('#content-messages')) {
+                  //add this div just after app-navigation
+                  if(jQuery('#content-main-section')){
+                      jQuery('#content-main-section' ).before('<div id="content-messages" onclick="hideErrorContainer()"></div>');
+                  }
+               }
+               jQuery('#content-messages').addClass('errorMessage');
+              if (data._ERROR_MESSAGE_LIST_ != undefined && data._ERROR_MESSAGE_ != undefined) {
+                 jQuery('#content-messages' ).html(data._ERROR_MESSAGE_LIST_ + " " + data._ERROR_MESSAGE_);
+              } else if (data._ERROR_MESSAGE_LIST_ != undefined) {
+                  jQuery('#content-messages' ).html(data._ERROR_MESSAGE_LIST_);
+              } else {
+                  jQuery('#content-messages' ).html(data._ERROR_MESSAGE_);
+              }
+              jQuery('#content-messages').fadeIn('fast');
+           }else {
+               if(jQuery('#content-messages')) {
+                   jQuery('#content-messages').removeClass('errorMessage').fadeIn("fast");
+               }
+               ajaxUpdateAreas(areaCsvString);
+           }
+           waitSpinnerHide();
+       }
+
+   jQuery("#fields_" + form).upload(jQuery("#" + form).attr("action"), function(data) {updateFunction(data)}, 'json');
+}
+//#Eam# jquery-submit-upload-file
 
 /** Enable auto-completion for text elements, with a possible span of tooltip class showing description.
  * @param areaCsvString The area CSV string. The CSV string is a flat array in the

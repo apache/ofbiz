@@ -439,6 +439,12 @@
                         <html-template location="component://party/webapp/partymgr/party/profileblocks/Content.ftl"/>
                     </html>
                 </platform-specific>
+<!--#Bam# jquery-submit-upload-file 
+     currently not activated, is for : if used uploadJs for screen
+                <screenlet title="${uiLabelMap.PageTitleAddPartyContent}">
+                    <include-form name="UploadPartyContent" location="component://party/widget/partymgr/PartyForms.xml"/>
+                </screenlet>
+#Eam# jquery-submit-upload-file -->
             </widgets>
         </section>
     </screen>

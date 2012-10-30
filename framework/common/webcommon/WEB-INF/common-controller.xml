@@ -180,6 +180,13 @@ under the License.
         <event type="java" path="org.ofbiz.common.CommonEvents" invoke="jsonResponseFromRequestAttributes"/>
         <response name="success" type="none"/>
     </request-map>
+    <!--#Bam# jquery-submit-upload-file -->
+    <request-map uri="jsonUpload">
+        <security direct-request="false"/>
+        <event type="java" path="org.ofbiz.common.CommonEvents" invoke="jsonUploadResponseFromRequestAttributes"/>
+        <response name="success" type="none"/>
+    </request-map>
+    <!--#Eam# jquery-submit-upload-file -->
 
     <request-map uri="showHelp">
         <security https="true" auth="true"/>

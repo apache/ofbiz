@@ -143,6 +143,20 @@
               <parameter param-name="partyId" from-field="parameters.partyId"/>
             </show-portlet>
         </menu-item>
+
+        <menu-item name="PartyContents">
+            <condition>
+              <or>
+                  <if-empty field="PartyContentsMenu"/>
+                  <if-compare field="PartyContentsMenu" operator="equals" value="Y"/>
+              </or>
+            </condition>
+            <show-portlet portlet-id="PartyContents" target="ShowPartyDetail" area-id="${areaId}" image-location="${iconsPurpose.Attach}" 
+                                                                                                    image-title="${uiLabelMap.IconsTooltips_Attach}">
+              <parameter param-name="partyId" from-field="parameters.partyId"/>
+            </show-portlet>
+        </menu-item>
+
         <menu-item name="PartyPayments">
             <condition>
               <or>
@@ -474,6 +488,24 @@
           </show-portlet>
       </menu-item>
     </menu>
+
+    <menu name="PartyContents" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <actions>
+            <set field="areaId" from-field="parameters.areaId" default-value="${currentAreaId}"/>
+        </actions>
+        <menu-item name="RefreshPortlet">
+            <show-portlet portlet-id="${portalPortletId}" area-id="${areaId}" image-location="${iconsPurpose.Refresh}" image-title="${uiLabelMap.IconsTooltips_Refresh}">
+                 <parameter param-name="partyId" from-field="parameters.partyId"/>
+            </show-portlet>
+        </menu-item>
+        <menu-item name="AddPartyContent">
+            <condition><not><if-empty field="parameters.partyId"/></not></condition>
+            <show-portlet portlet-id="${portalPortletId}" target="EditPartyContentPt" area-id="${editAreaDivId}" image-location="${iconsPurpose.Add}" image-title="${uiLabelMap.IconsTooltips_Add}">
+               <parameter param-name="partyId" from-field="parameters.partyId"/>
+            </show-portlet>
+        </menu-item>
+    </menu>
+
 
     <menu name="PartyAttributes" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
         <actions>

@@ -351,6 +351,28 @@ under the License.
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
+<!--#Bam# jquery-submit-upload-file -->
+    <request-map uri="EditPartyContentPt"><security https="true" auth="true"/><response name="success" type="view" value="EditPartyContentPt"/></request-map>
+    <request-map uri="updatePartyContentJson">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updatePartyContent"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="uploadPartyContentJson">
+        <security auth="true" https="true"/>
+        <event type="service" invoke="uploadPartyContentFile"/>
+        <response name="success" type="request" value="jsonUpload"/>
+        <response name="error" type="request" value="jsonUpload"/>
+    </request-map>
+    <request-map uri="removePartyContentJson">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="removePartyContent"/>
+        <response name="success" type="request" value="showPortlet"/>
+        <response name="error" type="request" value="showPortlet"/>
+    </request-map>
+<!--#Eam# jquery-submit-upload-file -->
+
 
     <request-map uri="editPartyAttributePt">
       <security https="true" auth="true"/>
@@ -434,6 +456,8 @@ under the License.
 
     <view-map name="EditPartyNotePt" type="screen" page="component://party/widget/ProfileScreens.xml#EditPartyNote"/>
     <view-map name="AssocPartyNotePt" type="screen" page="component://party/widget/ProfileScreens.xml#AssocPartyNote"/>
+    <view-map name="EditPartyContentPt" type="screen" page="component://party/widget/ProfileScreens.xml#EditPartyContent"/><!--#Eam# jquery-submit-upload-file -->
+
     <view-map name="editPartyAttributePt" type="screen" page="component://party/widget/ProfileScreens.xml#EditPartyAttribute"/>
     <view-map name="editavsoverridePt"    type="screen" page="component://party/widget/ProfileScreens.xml#editavsoverride"/>
     <view-map name="visitdetailPt"        type="screen" page="component://party/widget/VisitScreens.xml#visitdetail"/>

@@ -454,6 +454,25 @@
         </section>
     </screen>
 
+    <screen name="EditPartyContent">
+        <section>
+            <condition><not><if-empty field="parameters.partyId"/></not></condition>
+            <actions>
+                <set field="partyId" from-field="parameters.partyId"/>
+                <set field="contentId" from-field="parameters.contentId"/>
+                <entity-one value-field="content" entity-name="PartyContentDetail"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                         <include-form name="EditPartyContent" location="component://party/widget/ProfileForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+
     <screen name="PartyPaymentMethods">
         <section>
             <condition><not><if-empty field="parameters.partyId"/></not></condition>
