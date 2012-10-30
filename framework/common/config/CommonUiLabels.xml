@@ -847,6 +847,13 @@
         <value xml:lang="zh-CN">关联</value>
         <value xml:lang="zh-TW">關連</value>
     </property>
+    <!--#Bam# : CommonPortlet -->
+    <property key="CommonAssociateExistingNote">
+        <value xml:lang="en">Associate an already existing note</value>
+        <value xml:lang="fr">Associer une note déjà existante</value>
+    </property>
+    <!--#Eam# : CommonPortlet -->
+
     <property key="CommonAssocs">
         <value xml:lang="ar">شركاء</value>
         <value xml:lang="de">Assoziationen</value>
@@ -5050,6 +5057,13 @@
         <value xml:lang="fr">Recherche langue</value>
         <value xml:lang="vi">Chọn Đất nước</value>
     </property>
+    <!--#Bam# : CommonPortlet -->
+    <property key="CommonLookupNote">
+        <value xml:lang="en">Lookup Note</value>
+        <value xml:lang="fr">rechercher note</value>
+    </property>
+    <!--#Eam# : CommonPortlet -->
+
     <property key="CommonLookupWhitepages">
         <value xml:lang="en">Look up White pages</value>
         <value xml:lang="es">Páginas Blancas</value>
@@ -6107,6 +6121,13 @@
         <value xml:lang="zh-CN">当前没有任务，需要你的关注。</value>
         <value xml:lang="zh-TW">現在沒有任務需要處理。</value>
     </property>
+    <!--#Bam# : CommonPortlet -->
+    <property key="CommonNoteNameOptional">
+        <value xml:lang="en">Optional, only used in loookup search.</value>
+        <value xml:lang="fr">Optionnel, utilisé uniquement lors de recherche.</value>
+    </property>
+    <!--#Eam# : CommonPortlet -->
+
     <property key="CommonNoUomConversionFound">
         <value xml:lang="ar">علاقة تحويل وحدات القياس غير موجودة</value>
         <value xml:lang="de">Die Beziehung der Einheit für die Konversion wurde nicht gefunden</value>
@@ -7595,6 +7616,13 @@
         <value xml:lang="zh-CN">费用</value>
         <value xml:lang="zh-TW">評等</value>
     </property>
+    <!--#Bam# : ContactMechMgmtPortlet -->
+    <property key="CommonReactivate">
+        <value xml:lang="en">Reactivate</value>
+        <value xml:lang="fr">Réactiver</value>
+    </property>
+    <!--#Eam# : ContactMechMgmtPortlet -->
+
     <property key="CommonReady">
         <value xml:lang="ar">جاهز</value>
         <value xml:lang="de">Fertig</value>
@@ -12447,6 +12475,83 @@
         <value xml:lang="zh">销售管理</value>
         <value xml:lang="zh-TW">銷售</value>
     </property>
+    <!--#Bam# : ContactMechMgmtPortlet -->
+    <property key="Tooltips_useCountryCode">
+        <value xml:lang="en">Use separate countryCode field on telecom number</value>
+        <value xml:lang="fr">Utiliser le champs de numéro de pays séparer du numéro de téléphone</value>
+    </property>
+
+    <property key="Tooltips_useAreaCode">
+        <value xml:lang="en">Use separate areaCode field on telecom number</value>
+        <value xml:lang="fr">Utiliser le champs de numéros de région séparer du numéro de téléphone</value>
+    </property>
+
+    <property key="Tooltips_useExtCode">
+        <value xml:lang="en">Use separate extCode field on telecom number</value>
+        <value xml:lang="fr">Utiliser le champs code externe séparer du numéro de téléphone</value>
+    </property>
+
+    <property key="Tooltips_showMenuAddTelecomNumber">
+        <value xml:lang="en">show menu add telecomNumber</value>
+        <value xml:lang="fr">Voir le menu d'ajout d'un numéro de téléphone</value>
+    </property>
+
+    <property key="Tooltips_showMenuAddMobileNumber">
+        <value xml:lang="en">show menu add MobileNumber</value>
+        <value xml:lang="fr">Voir le menu d'ajout d'un mobile</value>
+    </property>
+
+    <property key="Tooltips_showMenuAddFax">
+        <value xml:lang="en">show menu add Fax Number</value>
+        <value xml:lang="fr">Voir le menu d'ajout d'un fax</value>
+    </property>
+
+    <property key="Tooltips_showMenuAddPostalAddress">
+        <value xml:lang="en">show menu add PostalAddress</value>
+        <value xml:lang="fr">Voir le menu d'ajout d'une adresse postale</value>
+    </property>
+
+    <property key="Tooltips_showMenuAddEmail">
+        <value xml:lang="en">show menu add Email</value>
+        <value xml:lang="fr">Voir le menu d'ajout d'un couriel</value>
+    </property>
+
+    <property key="Tooltips_showMenuAddOther">
+        <value xml:lang="en">show menu add other contact</value>
+        <value xml:lang="fr">Voir le menu d'ajout d'autres coordonnées</value>
+    </property>
+
+    <property key="Tooltips_enableGeolocation">
+        <value xml:lang="en">Enable Gelocation icon</value>
+        <value xml:lang="fr">Activer l'îcone de Géolocalisation sur les adresses postales</value>
+    </property>
+
+    <property key="Tooltips_defaultTelecomNumberPurposeId">
+        <value xml:lang="en">When create a telecomNumber use this purpose by default</value>
+        <value xml:lang="fr">Lors de la création d'un téléphone fixe, on utilise ce but par défaut</value>
+    </property>
+
+    <property key="Tooltips_defaultMobilePurposeId">
+        <value xml:lang="en">When create a mobile Number use this purpose by default</value>
+        <value xml:lang="fr">Lors de la création d'un mobile, on utilise ce but par défaut</value>
+    </property>
+
+    <property key="Tooltips_defaultFaxPurposeId">
+        <value xml:lang="en">When create a fax number use this purpose by default</value>
+        <value xml:lang="fr">Lors de la création d'un fax, on utilise ce but par défaut</value>
+    </property>
+
+    <property key="Tooltips_defaultPostalAddressPurposeId">
+        <value xml:lang="en">When create a postalAddress use this purpose by default</value>
+        <value xml:lang="fr">Lors de la création d'une adresse postale, on utilise ce but par défaut</value>
+    </property>
+
+    <property key="Tooltips_defaultEmailAddressPurposeId">
+        <value xml:lang="en">When create a email use this purpose by default</value>
+        <value xml:lang="fr">Lors de la création d'un courriel, on utilise ce but par défaut</value>
+    </property>
+    <!--#Eam# : ContactMechMgmtPortlet -->
+
     <property key="Web Pos">
         <value xml:lang="en">Web Pos</value>
         <value xml:lang="es">POS web</value>

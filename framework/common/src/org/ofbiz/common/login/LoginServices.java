@@ -50,6 +50,7 @@ import org.ofbiz.entity.util.EntityFindOptions;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.security.Security;
 import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceUtil;
@@ -994,5 +995,38 @@ public class LoginServices {
             passwordMatches = currentPassword.equals(oldPassword);
         }
         return passwordMatches;
+    }
+
+    /** Create UserLogin and add a SecurityGroupId to the userLogin. securityGroupId is read directly as a portletAttribute "securityGroupId"
+     *@param ctx The DispatchContext that this service is operating in
+     *@param context Map containing the input parameters
+     *@return Map with the result of the service, the output parameters
+     * @throws GenericServiceException 
+     * @throws GenericEntityException 
+     */
+    public static Map<String, Object> createUserLoginAndSecurityGroup(DispatchContext ctx, Map<String, ?> context) throws GenericServiceException, GenericEntityException {
+        Map<String, Object> result = FastMap.newInstance();
+        Delegator delegator = ctx.getDelegator();
+        GenericValue loggedInUserLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
+        LocalDispatcher dispatcher = ctx.getDispatcher();
+        Map<String, Object> createUserLoginContext = ctx.makeValidContext("createUserLogin", "IN", context);
+        Map<String, Object> resultMap = dispatcher.runSync("createUserLogin", createUserLoginContext);
+        if ( ServiceUtil.isError(resultMap) ) return resultMap;
+
+        // now search securityGroupId by reading portletAttribute
+        GenericValue portletAttribute = delegator.findOne("PortletAttribute", true, 
+                "portalPageId",    context.get("portalPageId"),
+                "portalPortletId", context.get("portalPortletId"),
+                "portletSeqId",    context.get("portletSeqId"),
+                "attrName",        "securityGroupId" );
+        if (UtilValidate.isNotEmpty(portletAttribute)) {
+            Map<String, Object> addToGroupContext = UtilMisc.toMap("userLogin",loggedInUserLogin,"locale",locale);
+            addToGroupContext.put("userLoginId", context.get("userLoginId"));
+            addToGroupContext.put("groupId", portletAttribute.get("attrValue"));
+            addToGroupContext.put("fromDate", UtilDateTime.nowTimestamp());
+            return dispatcher.runSync("addUserLoginToSecurityGroup", addToGroupContext);
+        }
+        return result;
     }
 }

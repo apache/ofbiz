@@ -22,8 +22,10 @@ under the License.
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
     <include location="component://common/webcommon/WEB-INF/common-controller.xml"/>
     <include location="component://common/webcommon/WEB-INF/security-controller.xml"/>
+    <include location="component://common/webcommon/WEB-INF/portal-controller.xml"/><!--#Eam# portlet-party-->
     <include location="component://commonext/webapp/WEB-INF/controller.xml"/>
     <include location="component://content/webapp/content/WEB-INF/controller.xml"/>
+    <include location="component://party/webapp/partymgr/WEB-INF/controller-portlet-party.xml"/><!--#Eam# portlet-party-->
     <description>Party Manager Module Site Configuration File</description>
     
     <handler name="service-multi" type="request" class="org.ofbiz.webapp.event.ServiceMultiEventHandler"/>

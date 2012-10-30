@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements. See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to you under the Apache License, Version
+2.0 (the "License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+applicable law or agreed to in writing, software distributed under the
+License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for
+the specific language governing permissions and limitations under the
+License.
+-->
+<section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    version="5.0" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
+    xsi:schemaLocation="http://docbook.org/ns/docbook"
+    xmlns="http://docbook.org/ns/docbook">
+    <title>The Portlet User login list for a Party.</title>
+
+      <para>This portlet list all user login associated to a Party. Most of time a party has only one, but when party is a company, sometime it's 
+            useful to give multiple user login, if you don't want create a party for each company's employee.</para>
+      <para>A user login is used to connect to ofbiz application. Security Group give which screens he can view and which functions he can execute.</para>
+      <para>&amp;nbsp;</para>
+
+    <section>
+      <title>Limitations or futurs fonctionnalities</title>
+      <itemizedlist>
+          <listitem><para>Only the first 5 user login are show</para> </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Portlet parameters</title>
+      <itemizedlist>
+          <listitem><para>Standard show screenlet menu</para> </listitem>
+          <listitem><para>Standard show edit menu : if value = N "add user login button" not appears</para> </listitem>
+          <listitem><para>security Group Id : if a securityGroupId is put, the 'add user login button' will automatically add this securityGroupId to the 
+            userLogin just after creating it</para></listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Security rules</title>
+      <itemizedlist>
+          <listitem><para>SECURITY_VIEW is needed to view Security Group List</para> </listitem>
+          <listitem><para>PARTYMGR_CREATE is needed to have the "add user login button", and SECURITY_CREATE when a security group is
+            automatically add (cf security group parameters)</para></listitem>
+          <listitem><para>PARTYMGR_UPDATE and SECURITY_ADMIN are needed to be able to edit user login security information (enable or not user login, new password, ...)
+            and to manage security group list for a login</para></listitem>
+          <listitem><para>When a user use this portlet for him (with its own user login), he can change its password</para></listitem>
+      </itemizedlist>
+    </section>
+</section>

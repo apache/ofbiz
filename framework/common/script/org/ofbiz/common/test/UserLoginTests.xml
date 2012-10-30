@@ -35,4 +35,50 @@
         </assert>
         <check-errors/>
     </simple-method>
+
+    <simple-method method-name="testCreateUserLoginAndSecurityGroup" short-description="Test case for service createUserLoginAndSecurityGroup" login-required="false">
+      <!-- this service is call from portlet, it uses portletAttribute to find the securityGroupId, so start by created one  -->
+        <entity-one entity-name="UserLogin" value-field="userLogin">
+            <field-map field-name="userLoginId" value="system"/>
+        </entity-one>
+        <set field="serviceCtx.userLogin" from-field="userLogin"/>
+        <set field="serviceCtx.portalPageId" value="MYPORTAL_EMPLOYEE1"/>
+        <set field="serviceCtx.portalPortletId" value="PartyUserLogins"/>
+        <set field="serviceCtx.portletSeqId" value="00001"/>
+        <set field="serviceCtx.attrName" value="securityGroupId"/>
+        <set field="serviceCtx.attrValue" value="MYPORTAL_EMPLOYEE"/>
+        <call-service service-name="createPortletAttribute" in-map-name="serviceCtx"/>
+
+        <set field="service2Ctx.userLogin" from-field="userLogin"/>
+        <set field="userLoginId" value="demo.person1"/>
+        <set field="service2Ctx.userLoginId" from-field="userLoginId"/>
+        <set field="service2Ctx.enabled" value="Y"/>
+        <set field="service2Ctx.currentPassword" value="ofbiz"/>
+        <set field="service2Ctx.currentPasswordVerify" value="ofbiz"/>
+        <set field="service2Ctx.portalPageId" value="MYPORTAL_EMPLOYEE1"/>
+        <set field="service2Ctx.portalPortletId" value="PartyUserLogins"/>
+        <set field="service2Ctx.portletSeqId" value="00001"/>
+        <call-service service-name="createUserLoginAndSecurityGroup" in-map-name="service2Ctx"/>
+        <entity-one entity-name="UserLogin" value-field="userLogin"/>
+        <assert>
+            <not><if-empty field="userLogin"/></not>
+            <if-compare field="userLogin.enabled" operator="equals" value="Y"/>
+        </assert>
+        <check-errors/>
+        <entity-count count-field="groupCount" entity-name="UserLoginSecurityGroup">
+          <condition-expr field-name="userLoginId" value="demo.person1"/>
+        </entity-count>
+        <assert>
+          <if-compare operator="equals" value="1" field="groupCount"/>
+        </assert>
+        <check-errors/>
+        <entity-and list="securityGroups" entity-name="UserLoginSecurityGroup">
+          <field-map field-name="userLoginId" value="demo.person1"/>
+        </entity-and>
+        <first-from-list entry="securityGroup" list="securityGroups"/>
+        <assert>
+          <if-compare operator="equals" value="MYPORTAL_EMPLOYEE" field="securityGroup.groupId"/>
+        </assert>
+        <check-errors/>
+    </simple-method>
 </simple-methods>

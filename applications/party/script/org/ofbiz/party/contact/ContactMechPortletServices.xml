@@ -1,0 +1,566 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+
+    <simple-method method-name="createGivenTelecomNumber" short-description="Create telecom number for given 'entity' and given 'primaryId'">
+        <if-compare operator="equals" value="Order" field="parameters.entity">
+            <add-error>
+                <fail-message message="No services are yet implemented for Order"/>
+            </add-error>
+        </if-compare>
+        <if-compare operator="equals" value="WorkEffort" field="parameters.entity">
+            <set-service-fields service-name="createTelecomNumber" map="parameters" to-map="createTelecomNumberMap"/>
+            <call-service in-map-name="createTelecomNumberMap" service-name="createTelecomNumber">
+                <default-message resource="PartyUiLabels" property="PartyTelecomNumberSuccessfullyCreated"/>
+                <result-to-field result-name="contactMechId" field="contactMechId"/>
+            </call-service>
+
+            <set-service-fields service-name="createWorkEffortContactMech" map="parameters" to-map="createWorkEffortContactMech"/>
+            <set field="createWorkEffortContactMech.workEffortId" from-field="parameters.primaryId"/>
+            <set field="createWorkEffortContactMech.contactMechId" from-field="contactMechId"/>
+            <set field="createWorkEffortContactMech.contactMechTypeId" value="TELECOM_NUMBER"/>
+            <call-service service-name="createWorkEffortContactMech" in-map-name="createWorkEffortContactMech" break-on-error="true">
+                 <default-message resource="PartyUiLabels" property="PartyTelecomNumberSuccessfullyCreated"/>
+            </call-service>
+        </if-compare>
+        <check-errors/>
+        <if-compare operator="equals" value="Party" field="parameters.entity">
+            <set-service-fields service-name="createPartyTelecomNumber" to-map="partyMap" map="parameters"/>
+            <set field="partyMap.partyId" from-field="parameters.primaryId"/>
+            <call-service service-name="createPartyTelecomNumber" in-map-name="partyMap"/>
+        </if-compare>
+        <if-compare operator="equals" value="Facility" field="parameters.entity">
+            <set-service-fields service-name="createFacilityTelecomNumber" to-map="facilityMap" map="parameters"/>
+            <set field="facilityMap.facilityId" from-field="parameters.primaryId"/>
+            <call-service service-name="createFacilityTelecomNumber" in-map-name="facilityMap"/>
+        </if-compare>
+    </simple-method>
+    
+    <simple-method method-name="createGivenPostalAddress" short-description="Create postal address for given 'entity' and given 'primaryId'">
+        <entity-one value-field="postalCodeGeo" entity-name="Geo">
+            <field-map field-name="geoId" from-field="parameters.postalCodeGeoId"/>
+        </entity-one>
+        <if-empty field="postalCodeGeo">
+            <set field="parameters.postalCode" from-field="parameters.postalCode" set-if-null="true"/>
+        <else>
+            <set field="parameters.postalCode" from-field="postalCodeGeo.geoName" default-value="${parameters.postalCodeGeoId}"/>
+            <set field="parameters.postalCodeGeoId" from-field="postalCodeGeo.geoId" set-if-null="true"/>
+        </else>
+        </if-empty>
+
+        <entity-one value-field="cityGeo" entity-name="Geo">
+            <field-map field-name="geoId" from-field="parameters.cityGeoId"/>
+        </entity-one>
+        <if-empty field="cityGeo">
+            <set field="parameters.cityGeoId" from-field="parameters.city" set-if-null="true"/>
+        <else>
+            <set field="parameters.city" from-field="cityGeo.geoName" default-value="${parameters.cityGeoId}"/>
+            <set field="parameters.cityGeoId" from-field="cityGeo.geoId" set-if-null="true"/>
+        </else>
+        </if-empty>
+
+        <entity-and list="countyGeos" entity-name="GeoAssoc" use-cache="true">
+            <field-map field-name="geoAssocTypeId" value="COUNTY_CITY"/>
+            <field-map field-name="geoIdTo" from-field="parameters.postalCodeGeoId"/>
+        </entity-and>
+        <if-not-empty field="countyGeos">
+            <first-from-list entry="countyGeo" list="countyGeos"/>
+            <set field="parameters.countyGeoId" from-field="countyGeo.geoId" set-if-null="true"/>
+            <entity-and list="stateGeos" entity-name="GeoAssoc" use-cache="true">
+                <field-map field-name="geoAssocTypeId" value="REGIONS"/>
+                <field-map field-name="geoIdTo" from-field="parameters.countyGeoId"/>
+            </entity-and>
+            <if-not-empty field="stateGeos">
+                <first-from-list entry="stateGeo" list="stateGeos"/>
+                <set field="parameters.stateProvinceGeoId" from-field="stateGeo.geoId" set-if-null="true"/>
+            </if-not-empty>
+        </if-not-empty>
+        
+        <if-compare operator="equals" value="Order" field="parameters.entity">
+            <add-error>
+                <fail-message message="No services are yet implemented for Order"/>
+            </add-error>
+        </if-compare>
+        <if-compare operator="equals" value="WorkEffort" field="parameters.entity">
+            <set-service-fields service-name="createPostalAddress" map="parameters" to-map="createPostalAddressMap"/>
+            <call-service in-map-name="createPostalAddressMap" service-name="createPostalAddress">
+                <default-message resource="PartyUiLabels" property="PartyPostalAddressSuccessfullyCreated"/>
+                <result-to-field result-name="contactMechId" field="contactMechId"/>
+            </call-service>
+
+            <set-service-fields service-name="createWorkEffortContactMech" map="parameters" to-map="createWorkEffortContactMech"/>
+            <set field="createWorkEffortContactMech.workEffortId" from-field="parameters.primaryId"/>
+            <set field="createWorkEffortContactMech.contactMechId" from-field="contactMechId"/>
+            <set field="createWorkEffortContactMech.contactMechTypeId" value="POSTAL_ADDRESS"/>
+            <call-service service-name="createWorkEffortContactMech" in-map-name="createWorkEffortContactMech" break-on-error="true">
+                 <default-message resource="PartyUiLabels" property="PartyPostalAddressSuccessfullyUpdated"/>
+            </call-service>
+        </if-compare>
+        <check-errors/>
+        <if-compare operator="equals" value="Party" field="parameters.entity">
+            <set-service-fields service-name="createPartyPostalAddress" to-map="partyMap" map="parameters"/>
+            <set field="partyMap.partyId" from-field="parameters.primaryId"/>
+            <call-service service-name="createPartyPostalAddress" in-map-name="partyMap"/>
+        </if-compare>
+        <if-compare operator="equals" value="Facility" field="parameters.entity">
+            <set-service-fields service-name="createFacilityPostalAddress" to-map="facilityMap" map="parameters"/>
+            <set field="facilityMap.facilityId" from-field="parameters.primaryId"/>
+            <call-service service-name="createFacilityPostalAddress" in-map-name="facilityMap"/>
+        </if-compare>
+    </simple-method>
+    
+    <simple-method method-name="createGivenEmailAddress" short-description="Create Email Address for given 'entity' and given 'primaryId'">
+        <if-compare operator="equals" value="Order" field="parameters.entity">
+            <add-error>
+                <fail-message message="No services are yet implemented for Order"/>
+            </add-error>
+        </if-compare>
+        <if-compare operator="equals" value="WorkEffort" field="parameters.entity">
+            <if-validate-method field="parameters.emailAddress" method="isEmail">
+                <else><add-error><fail-property resource="PartyUiLabels" property="PartyEmailAddressNotFormattedCorrectly"/></add-error></else>
+            </if-validate-method>
+            <check-errors/>
+
+            <!-- if e-mail address already exists simply return -->
+            <entity-condition list="workEffortAndContactMechs" entity-name="WorkEffortContactMechView">
+                <condition-list combine="and">
+                    <condition-expr field-name="workEffortId" from-field="parameters.workEffortId"/>
+                    <condition-expr field-name="infoString" from-field="parameters.emailAddress" ignore-case="true"/>
+                </condition-list>
+            </entity-condition>
+            <filter-list-by-date list="workEffortAndContactMechs"/>
+            <if-not-empty field="workEffortAndContactMechs">
+                <log level="info" message="E-mail address: ${parameters.emailAddress} already exists, did not add again.."/>
+                <first-from-list entry="existsWorkEffortContactMechView" list="workEffortAndContactMechs"/>
+                <field-to-result field="existsWorkEffortContactMechView.contactMechId" result-name="contactMechId"/>
+                <field-to-request field="existsWorkEffortContactMechView.contactMechId" request-name="contactMechId"/>
+                <return/>
+            </if-not-empty>
+            <make-value value-field="newContactMech" entity-name="ContactMech"/>
+            <sequenced-id sequence-name="ContactMech" field="newContactMech.contactMechId"/>
+            <set-nonpk-fields map="parameters" value-field="newContactMech"/>
+            <set field="newContactMech.contactMechTypeId" value="EMAIL_ADDRESS"/>
+            <set field="newContactMech.infoString" from-field="parameters.emailAddress"/>
+            <create-value value-field="newContactMech"/>
+
+            <set-service-fields service-name="createWorkEffortContactMech" map="parameters" to-map="createWorkEffortContactMechCtx"/>
+            <set field="createWorkEffortContactMechCtx.workEffortId" from-field="parameters.primaryId"/>
+            <set field="createWorkEffortContactMechCtx.contactMechId" from-field="newContactMech.contactMechId"/>
+            <call-service service-name="createWorkEffortContactMech" in-map-name="createWorkEffortContactMechCtx" break-on-error="true">
+                 <default-message resource="PartyUiLabels" property="PartyEmailAddressSuccessfullyCreated"/>
+            </call-service>
+        </if-compare>
+        <check-errors/>
+        <if-compare operator="equals" value="Party" field="parameters.entity">
+            <set-service-fields service-name="createPartyEmailAddress" to-map="partyMap" map="parameters"/>
+            <set field="partyMap.partyId" from-field="parameters.primaryId"/>
+            <call-service service-name="createPartyEmailAddress" in-map-name="partyMap"/>
+        </if-compare>
+        <if-compare operator="equals" value="Facility" field="parameters.entity">
+            <set-service-fields service-name="createFacilityEmailAddress" to-map="facilityMap" map="parameters"/>
+            <set field="facilityMap.facilityId" from-field="parameters.primaryId"/>
+            <call-service service-name="createFacilityEmailAddress" in-map-name="facilityMap"/>
+        </if-compare>
+    </simple-method>
+
+    <simple-method method-name="createContactMechEntity" short-description="Create contact mech for given 'entity' and given 'primaryId'">
+        <if-compare operator="equals" value="Order" field="parameters.entity">
+            <add-error>
+                <fail-message message="No services are yet implemented for Order"/>
+            </add-error>
+        </if-compare>
+        <if-compare operator="equals" value="WorkEffort" field="parameters.entity">
+            <set-service-fields service-name="createWorkEffortContactMech" map="parameters" to-map="createContactMechMap"/>
+            <set field="createContactMechMap.workEffortId" from-field="parameters.primaryId"/>
+            <call-service service-name="createWorkEffortContactMech" in-map-name="createContactMechMap" break-on-error="true"/>
+        </if-compare>
+        <check-errors/>
+        <if-compare operator="equals" value="Party" field="parameters.entity">
+            <set-service-fields service-name="createPartyContactMech" map="parameters" to-map="createContactMechMap"/>
+            <set field="createContactMechMap.partyId" from-field="parameters.primaryId"/>
+            <call-service service-name="createPartyContactMech" in-map-name="createContactMechMap" break-on-error="true"/>
+        </if-compare>
+        <if-compare operator="equals" value="Facility" field="parameters.entity">
+            <set-service-fields service-name="createFacilityContactMech" map="parameters" to-map="createContactMechMap"/>
+            <set field="createContactMechMap.facilityId" from-field="parameters.primaryId"/>
+            <call-service service-name="createFacilityContactMech" in-map-name="createContactMechMap" break-on-error="true"/>
+        </if-compare>
+    </simple-method>
+
+    <simple-method method-name="updateGivenTelecomNumber" short-description="update telecom number for given 'entity' and given 'primaryId'">
+            <entity-one value-field="telNum" entity-name="TelecomNumber"/>
+            <set-nonpk-fields value-field="telNum" map="parameters"/>
+            <store-value value-field="telNum"/>
+
+            <if-compare operator="equals" value="Party" field="parameters.entity">
+                <entity-one value-field="contactMech" entity-name="PartyContactMech">
+                   <field-map field-name="partyId" from-field="parameters.primaryId"/>
+                   <field-map field-name="contactMechId" from-field="parameters.contactMechId"/>
+                   <field-map field-name="fromDate" from-field="parameters.fromDate"/>
+                </entity-one>
+            </if-compare>
+            <if-compare operator="equals" value="Facility" field="parameters.entity">
+                <entity-one value-field="contactMech" entity-name="FacilityContactMech">
+                   <field-map field-name="facilityId" from-field="parameters.primaryId"/>
+                   <field-map field-name="contactMechId" from-field="parameters.contactMechId"/>
+                   <field-map field-name="fromDate" from-field="parameters.fromDate"/>
+                </entity-one>
+            </if-compare>
+            <if-not-empty field="contactMech">
+                <set field="contactMech.extension" from-field="parameters.extension"/>
+                <store-value value-field="contactMech"/>
+            </if-not-empty>
+    </simple-method>
+
+    <simple-method method-name="updateGivenPostalAddress" short-description="update postal Address for given 'entity' and given 'primaryId'">
+        <log level="error" message="${parameters}"></log>
+        <entity-one value-field="postalCodeGeo" entity-name="Geo" use-cache="true">
+            <field-map field-name="geoId" from-field="parameters.postalCodeGeoId"/>
+        </entity-one>
+        <if-empty field="postalCodeGeo">
+            <set field="parameters.postalCode" from-field="parameters.postalCode" set-if-null="true"/>
+        <else>
+            <set field="parameters.postalCode" from-field="postalCodeGeo.geoName" default-value="${parameters.postalCodeGeoId}"/>
+            <set field="parameters.postalCodeGeoId" from-field="postalCodeGeo.geoId" set-if-null="true"/>
+        </else>
+        </if-empty>
+
+       <entity-one value-field="cityGeo" entity-name="Geo" use-cache="true">
+            <field-map field-name="geoId" from-field="parameters.cityGeoId"/>
+        </entity-one>
+        <if-empty field="cityGeo">
+            <set field="parameters.cityGeoId" from-field="parameters.city" set-if-null="true"/>
+        <else>
+            <set field="parameters.city" from-field="cityGeo.geoName" default-value="${parameters.cityGeoId}"/>
+            <set field="parameters.cityGeoId" from-field="cityGeo.geoId" set-if-null="true"/>
+        </else>
+        </if-empty>
+
+        <entity-and list="countyGeos" entity-name="GeoAssoc" use-cache="true">
+            <field-map field-name="geoAssocTypeId" value="COUNTY_CITY"/>
+            <field-map field-name="geoIdTo" from-field="parameters.postalCodeGeoId"/>
+        </entity-and>
+        <if-not-empty field="countyGeos">
+            <first-from-list entry="countyGeo" list="countyGeos"/>
+            <set field="parameters.countyGeoId" from-field="countyGeo.geoId" set-if-null="true"/>
+            <entity-and list="stateGeos" entity-name="GeoAssoc" use-cache="true">
+                <field-map field-name="geoAssocTypeId" value="REGIONS"/>
+                <field-map field-name="geoIdTo" from-field="parameters.countyGeoId"/>
+            </entity-and>
+            <if-not-empty field="stateGeos">
+                <first-from-list entry="stateGeo" list="stateGeos"/>
+                <set field="parameters.stateProvinceGeoId" from-field="stateGeo.geoId" set-if-null="true"/>
+            </if-not-empty>
+        </if-not-empty>
+        <entity-one value-field="postAdd" entity-name="PostalAddress"/>
+        <set-nonpk-fields value-field="postAdd" map="parameters"/>
+        <store-value value-field="postAdd"/>
+    </simple-method>
+
+    <simple-method method-name="updateGivenEmailAddress" short-description="update telecom number for given 'entity' and given 'primaryId'">
+            <entity-one value-field="mailAdd" entity-name="ContactMech"/>
+            <set field="mailAdd.infoString" from-field="parameters.emailAddress"/>
+            <store-value value-field="mailAdd"/>
+    </simple-method>
+
+    <simple-method method-name="updateContactMechEntity" short-description="Update contact mech for given 'entity' and given 'primaryId'">
+        <if-compare operator="equals" value="Order" field="parameters.entity">
+            <add-error>
+                <fail-message message="No services are yet implemented for Order"/>
+            </add-error>
+        </if-compare>
+        <if-compare operator="equals" value="WorkEffort" field="parameters.entity">
+            <set-service-fields service-name="updateWorkEffortContactMech" map="parameters" to-map="updateContactMechMap"/>
+            <set field="updateContactMechMap.workEffortId" from-field="parameters.primaryId"/>
+            <call-service service-name="updateWorkEffortContactMech" in-map-name="updateContactMechMap" break-on-error="true"/>
+        </if-compare>
+        <check-errors/>
+        <if-compare operator="equals" value="Party" field="parameters.entity">
+            <set-service-fields service-name="updatePartyContactMech" map="parameters" to-map="updateContactMechMap"/>
+            <set field="updateContactMechMap.partyId" from-field="parameters.primaryId"/>
+            <call-service service-name="updatePartyContactMech" in-map-name="updateContactMechMap" break-on-error="true"/>
+        </if-compare>
+        <if-compare operator="equals" value="Facility" field="parameters.entity">
+            <set-service-fields service-name="updateFacilityContactMech" map="parameters" to-map="updateContactMechMap"/>
+            <set field="updateContactMechMap.facilityId" from-field="parameters.primaryId"/>
+            <call-service service-name="updateFacilityContactMech" in-map-name="updateContactMechMap" break-on-error="true"/>
+        </if-compare>
+    </simple-method>
+
+    <simple-method method-name="removeGivenContactMech" short-description="Delete ContactMech from database, for given 'entity', 'primaryId' and 'contacMechId'">
+        <if-compare operator="equals" value="Order" field="parameters.entity">
+            <add-error>
+                <fail-message message="No services are yet implemented for Order"/>
+            </add-error>
+        </if-compare>
+        <if-compare operator="equals" value="WorkEffort" field="parameters.entity">
+            <!--  delete the workEffortContactMech -->
+            <entity-and list="workEffortContactMechs" entity-name="WorkEffortContactMech">
+                <field-map field-name="workEffortId" from-field="parameters.primaryId"/>
+                <field-map field-name="contactMechId" from-field="parameters.contactMechId"/>
+            </entity-and>
+            <if-not-empty field="workEffortContactMechs">
+                 <remove-list list="workEffortContactMechs"/>
+            </if-not-empty>
+            <!--  delete first all contactMech Purpose -->
+            <set field="conditionMap.contactMechId" from-field="parameters.contactMechId"/>
+            <remove-by-and map="conditionMap" entity-name="PostalAddress"/>
+            <remove-by-and map="conditionMap" entity-name="TelecomNumber"/>
+            <remove-by-and map="conditionMap" entity-name="PartyContactMechPurpose"/>
+            <!-- then delete contactMech -->
+            <entity-one value-field="contactMech" entity-name="ContactMech"/>
+            <remove-value value-field="contactMech"/>
+        </if-compare>
+        <check-errors/>
+        <if-compare operator="equals" value="Party" field="parameters.entity">
+            <!--  delete first all contactMech Purpose -->
+            <set field="conditionMap.contactMechId" from-field="parameters.contactMechId"/>
+            <remove-by-and map="conditionMap" entity-name="PostalAddress"/>
+            <remove-by-and map="conditionMap" entity-name="TelecomNumber"/>
+            <remove-by-and map="conditionMap" entity-name="PartyContactMechPurpose"/>
+            <!--  delete then partycontactMech -->
+            <set field="conditionMap.partyId" from-field="parameters.primaryId"/>
+            <remove-by-and map="conditionMap" entity-name="PartyContactMech"/>
+            <!-- then delete contactMech -->
+            <entity-one value-field="contactMech" entity-name="ContactMech"/>
+            <remove-value value-field="contactMech"/>
+        </if-compare>
+        <if-compare operator="equals" value="Facility" field="parameters.entity">
+            <!--  delete first all contactMech Purpose and extended data-->
+            <set field="conditionMap.contactMechId" from-field="parameters.contactMechId"/>
+            <remove-by-and map="conditionMap" entity-name="FacilityContactMechPurpose"/>
+            <remove-by-and map="conditionMap" entity-name="PostalAddress"/>
+            <remove-by-and map="conditionMap" entity-name="TelecomNumber"/>
+            <!--  delete then partycontactMech -->
+            <set field="conditionMap.facilityId" from-field="parameters.primaryId"/>
+            <remove-by-and map="conditionMap" entity-name="FacilityContactMech"/>
+            <!-- then delete contactMech -->
+            <entity-one value-field="contactMech" entity-name="ContactMech"/>
+            <remove-value value-field="contactMech"/>
+        </if-compare>
+    </simple-method>
+
+    <simple-method method-name="updateGivenContactMech" short-description="Update ContactMech for given 'entity', 'primaryId' and 'contacMechId'">
+        <if-compare operator="equals" value="Order" field="parameters.entity">
+            <add-error>
+                <fail-message message="No services are yet implemented for Order"/>
+            </add-error>
+        </if-compare>
+        <if-compare operator="equals" value="WorkEffort" field="parameters.entity">
+            <entity-one entity-name="WorkEffortContactMech" value-field="workEffortContactMech">
+                <field-map field-name="workEffortId"  from-field="parameters.primaryId"/>
+                <field-map field-name="contactMechId" from-field="parameters.contactMechId"/>
+                <field-map field-name="fromDate"      from-field="parameters.fromDate"/>
+            </entity-one>
+            <if-empty field="workEffortContactMech">
+                <add-error><fail-message message="ERROR: Cannot update specified contact info because it does not correspond to the specified work effort"/></add-error>
+            </if-empty>
+            <check-errors/>
+            <set field="thruDate" from-field="parameters." set-if-null="true"/>
+            <store-value value-field="workEffortContactMech"/>
+        </if-compare>
+        <check-errors/>
+        <if-compare operator="equals" value="Party" field="parameters.entity">
+            <!-- Update facility contactMech -->
+            <entity-one entity-name="PartyContactMech" value-field="partyContactMech">
+                <field-map field-name="partyId"       from-field="parameters.primaryId"/>
+                <field-map field-name="contactMechId" from-field="parameters.contactMechId"/>
+                <field-map field-name="fromDate"      from-field="parameters.fromDate"/>
+            </entity-one>
+            <if-empty field="partyContactMech">
+                <add-error><fail-message message="ERROR: Cannot update specified contact info because it does not correspond to the specified facility; query map was: ${facilityContactMechMap}"/></add-error>
+            </if-empty>
+            <check-errors/>
+            <set-nonpk-fields value-field="partyContactMech" map="parameters"/>
+            <store-value value-field="partyContactMech"/>
+
+            <!-- Reactivate all existing party contactMechPurpose if necessary -->
+            <if-empty field="parameters.thruDate">
+                <get-related relation-name="PartyContactMechPurpose" list="pcmps" value-field="partyContactMech"/>
+                <if-not-empty field="pcmps">
+                    <iterate entry="pcmp" list="pcmps">
+                        <if-not-empty field="pcmp.thruDate">
+                            <set field="pcmp.thruDate" value="" set-if-null="true"/>
+                            <store-value value-field="pcmp"/>
+                        </if-not-empty>
+                    </iterate>
+                </if-not-empty>
+            </if-empty>
+        </if-compare>
+        <if-compare operator="equals" value="Facility" field="parameters.entity">
+            <!-- Update facility contactMech -->
+            <entity-one entity-name="FacilityContactMech" value-field="facilityContactMech">
+                <field-map field-name="facilityId"    from-field="parameters.primaryId"/>
+                <field-map field-name="contactMechId" from-field="parameters.contactMechId"/>
+                <field-map field-name="fromDate"      from-field="parameters.fromDate"/>
+            </entity-one>
+            <if-empty field="facilityContactMech">
+                <add-error><fail-message message="ERROR: Cannot update specified contact info because it does not correspond to the specified facility; query map was: ${facilityContactMechMap}"/></add-error>
+            </if-empty>
+            <check-errors/>
+            <set-nonpk-fields value-field="facilityContactMech" map="parameters"/>
+            <store-value value-field="facilityContactMech"/>
+
+            <!-- Reactivate all existing facility contactMechPurpose if necessary -->
+            <if-empty field="parameters.thruDate">
+                <get-related relation-name="FacilityContactMechPurpose" list="fcmps" value-field="facilityContactMech"/>
+                <if-not-empty field="fcmps">
+                    <iterate entry="fcmp" list="fcmps">
+                        <if-not-empty field="fcmp.thruDate">
+                            <set field="fcmp.thruDate" value="" set-if-null="true"/>
+                            <store-value value-field="fcmp"/>
+                        </if-not-empty>
+                    </iterate>
+                </if-not-empty>
+            </if-empty>
+        </if-compare>
+    </simple-method>
+
+    <simple-method method-name="deleteGivenContactMech" short-description="Delete ContactMech for given 'entity', 'primaryId' and 'contacMechId'">
+        <if-compare operator="equals" value="Order" field="parameters.entity">
+            <add-error>
+                <fail-message message="No services are yet implemented for Order"/>
+            </add-error>
+        </if-compare>
+        <if-compare operator="equals" value="WorkEffort" field="parameters.entity">
+            <entity-one entity-name="WorkEffortContactMech" value-field="workEffortContactMech">
+                <field-map field-name="workEffortId"  from-field="parameters.primaryId"/>
+                <field-map field-name="contactMechId" from-field="parameters.contactMechId"/>
+                <field-map field-name="fromDate"      from-field="parameters.fromDate"/>
+            </entity-one>
+            <if-empty field="workEffortContactMech">
+                <add-error><fail-message message="ERROR: Cannot delete specified contact info because it does not correspond to the specified work effort"/></add-error>
+            </if-empty>
+            <check-errors/>
+            <now-timestamp field="workEffortContactMech.thruDate"/>
+            <store-value value-field="workEffortContactMech"/>
+        </if-compare>
+        <check-errors/>
+        <if-compare operator="equals" value="Party" field="parameters.entity">
+            <set-service-fields service-name="deletePartyContactMech" to-map="partyMap" map="parameters"/>
+            <set field="partyMap.partyId" from-field="parameters.primaryId"/>
+            <call-service service-name="deletePartyContactMech" in-map-name="partyMap"/>
+        </if-compare>
+        <if-compare operator="equals" value="Facility" field="parameters.entity">
+            <set-service-fields service-name="deleteFacilityContactMech" to-map="facilityMap" map="parameters"/>
+            <set field="facilityMap.facilityId" from-field="parameters.primaryId"/>
+            <call-service service-name="deleteFacilityContactMech" in-map-name="facilityMap"/>
+        </if-compare>
+    </simple-method>
+    
+    <simple-method method-name="createGivenContactMechPurpose" short-description="Delete ContactMechPurpose for given 'entity', 'primaryId' and 'contacMechId'">
+        <if-compare operator="equals" value="Order" field="parameters.entity">
+            <add-error>
+                <fail-message message="No services are yet implemented for Order"/>
+            </add-error>
+        </if-compare>
+        <if-compare operator="equals" value="WorkEffort" field="parameters.entity">
+            <add-error>
+                <fail-message message="No services are yet implemented for WorkEffort"/>
+            </add-error>
+        </if-compare>
+        <check-errors/>
+        <if-compare operator="equals" value="Party" field="parameters.entity">
+            <set-service-fields service-name="createPartyContactMechPurpose" to-map="partyMap" map="parameters"/>
+            <set field="partyMap.partyId" from-field="parameters.primaryId"/>
+            <call-service service-name="createPartyContactMechPurpose" in-map-name="partyMap"/>
+        </if-compare>
+        <if-compare operator="equals" value="Facility" field="parameters.entity">
+            <set-service-fields service-name="createFacilityContactMechPurpose" to-map="facilityMap" map="parameters"/>
+            <set field="facilityMap.facilityId" from-field="parameters.primaryId"/>
+            <call-service service-name="createFacilityContactMechPurpose" in-map-name="facilityMap"/>
+        </if-compare>
+    </simple-method>
+
+    <simple-method method-name="updateGivenContactMechPurpose" short-description="Update ContactMechPurpose for given 'entity', 'primaryId' and 'contacMechId'">
+        <if-compare operator="equals" value="Order" field="parameters.entity">
+            <add-error>
+                <fail-message message="No services are yet implemented for Order"/>
+            </add-error>
+        </if-compare>
+        <if-compare operator="equals" value="WorkEffort" field="parameters.entity">
+            <add-error>
+                <fail-message message="No services are yet implemented for WorkEffort"/>
+            </add-error>
+        </if-compare>
+        <check-errors/>
+        <if-compare operator="equals" value="Party" field="parameters.entity">
+            <set-service-fields service-name="updatePartyContactMechPurpose" to-map="partyMap" map="parameters"/>
+            <set field="partyMap.partyId" from-field="parameters.primaryId"/>
+            <call-service service-name="updatePartyContactMechPurpose" in-map-name="partyMap"/>
+        </if-compare>
+        <if-compare operator="equals" value="Facility" field="parameters.entity">
+            <set-service-fields service-name="updateFacilityContactMechPurpose" to-map="facilityMap" map="parameters"/>
+            <set field="facilityMap.facilityId" from-field="parameters.primaryId"/>
+            <call-service service-name="updateFacilityContactMechPurpose" in-map-name="facilityMap"/>
+        </if-compare>
+    </simple-method>
+
+    <simple-method method-name="deleteGivenContactMechPurpose" short-description="Deactivate ContactMechPurpose for given 'entity', 'primaryId' and 'contacMechId'">
+        <if-compare operator="equals" value="Order" field="parameters.entity">
+            <add-error>
+                <fail-message message="No services are yet implemented for Order"/>
+            </add-error>
+        </if-compare>
+        <if-compare operator="equals" value="WorkEffort" field="parameters.entity">
+            <add-error>
+                <fail-message message="No services are yet implemented for WorkEffort"/>
+            </add-error>
+        </if-compare>
+        <check-errors/>
+        <if-compare operator="equals" value="Party" field="parameters.entity">
+            <set-service-fields service-name="deletePartyContactMechPurpose" to-map="partyMap" map="parameters"/>
+            <set field="partyMap.partyId" from-field="parameters.primaryId"/>
+            <call-service service-name="deletePartyContactMechPurpose" in-map-name="partyMap"/>
+        </if-compare>
+        <if-compare operator="equals" value="Facility" field="parameters.entity">
+            <set-service-fields service-name="deleteFacilityContactMechPurpose" to-map="facilityMap" map="parameters"/>
+            <set field="facilityMap.facilityId" from-field="parameters.primaryId"/>
+            <call-service service-name="deleteFacilityContactMechPurpose" in-map-name="facilityMap"/>
+        </if-compare>
+    </simple-method>
+
+    <simple-method method-name="removeGivenContactMechPurpose" short-description="Remove ContactMechPurpose for given 'entity', 'primaryId' and 'contacMechId'">
+        <if-compare operator="equals" value="Order" field="parameters.entity">
+            <add-error>
+                <fail-message message="No services are yet implemented for Order"/>
+            </add-error>
+        </if-compare>
+        <if-compare operator="equals" value="WorkEffort" field="parameters.entity">
+            <add-error>
+                <fail-message message="No services are yet implemented for WorkEffort"/>
+            </add-error>
+        </if-compare>
+        <check-errors/>
+        <if-compare operator="equals" value="Party" field="parameters.entity">
+            <set-service-fields service-name="removePartyContactMechPurpose" to-map="partyMap" map="parameters"/>
+            <set field="partyMap.partyId" from-field="parameters.primaryId"/>
+            <call-service service-name="removePartyContactMechPurpose" in-map-name="partyMap"/>
+        </if-compare>
+        <if-compare operator="equals" value="Facility" field="parameters.entity">
+            <set-service-fields service-name="removeFacilityContactMechPurpose" to-map="facilityMap" map="parameters"/>
+            <set field="facilityMap.facilityId" from-field="parameters.primaryId"/>
+            <call-service service-name="removeFacilityContactMechPurpose" in-map-name="facilityMap"/>
+        </if-compare>
+    </simple-method>
+
+</simple-methods>

@@ -73,6 +73,35 @@
         <value xml:lang="en">Short description</value>
         <value xml:lang="fr">Description courte</value>
     </property>
+    <property key="FieldDescription.PortletAttribute.roleTypeGroupId">
+        <value xml:lang="en">RoleType Group which will be used in add screen to show only roleType included in this roleTypeGroup. If this field is empty all role type will be .</value>
+        <value xml:lang="fr">Groupe de rôle parmi lequel l'utisateur choisira dans l'écran d'ajout. Si ce champ est vide tous les rôles apparaitront</value>
+    </property>
+    <property key="FieldDescription.PortletAttribute.partyRelationshipTypeId">
+        <value xml:lang="en">Show only Party Relationship with this partyRelationshipTypeId, or left empty if you want to show field</value>
+        <value xml:lang="fr">indiquer le type de relation à utiliser pour filtrer les relations à afficher, ou laisser le champ vide pour les afficher toutes et donc montrer ce champ</value>
+    </property>
+    <property key="FieldDescription.PortletAttribute.roleTypeGroupIdFrom">
+        <value xml:lang="en">If attribute roleType is empty, give roleTypeGroup which will be used in edit screen (add - update) to show only roleType included in this roleTypeGroup. In this case roleTypeId will be show in the list.</value>
+        <value xml:lang="fr">Si le champ Role est vide, indique le groupe de rôle parmi lequel l'utisateur choisira dans l'écran d'édition (ajout - modification). Le champ rôle d'origine sera alors affiché dans la liste.</value>
+    </property>
+    <property key="FieldDescription.PortletAttribute.roleTypeGroupIdTo"><!-- Copy from previous label (xxxxFrom) without change -->
+        <value xml:lang="en">If attribute roleType is empty, give roleTypeGroup which will be used in edit screen (add - update) to show only roleType included in this roleTypeGroup. In this case roleTypeId will be show in the list.</value>
+        <value xml:lang="fr">Si le champ Role est vide, indique le groupe de rôle parmi lequel l'utisateur choisira dans l'écran d'édition (ajout - modification). Le champ rôle de destination sera alors affiché dans la liste.</value>
+    </property>
+    <property key="FieldDescription.PortletAttribute.roleTypeIdFrom">
+        <value xml:lang="en">If this field is fielded, its value will used to filter list, will use on edit screen (add or update), the field roleType will not be show.</value>
+        <value xml:lang="fr">Si ce champ est renseigné, cela permet de filtrer la liste affiché et dans l'écran d'édition (ajout ou modification) ce sera la valeur utilisé, le champ role ne sera pas affiché à l'utilisateur.</value>
+    </property>
+    <property key="FieldDescription.PortletAttribute.roleTypeIdTo"><!-- Copy from previous label (xxxxFrom) without change -->
+        <value xml:lang="en">If this field is fielded, its value will used to filter list, will use on edit screen (add or update), the field roleType will not be show.</value>
+        <value xml:lang="fr">Si ce champ est renseigné, cela permet de filtrer la liste affiché et dans l'écran d'édition (ajout ou modification) ce sera la valeur utilisé, le champ role ne sera pas affiché à l'utilisateur.</value>
+    </property>
+    <property key="FieldDescription.PortletAttribute.titleLabel">
+        <value xml:lang="en">Label to use on the screenLet Title</value>
+        <value xml:lang="fr">Label à utiliser en tant que titre de la screenlet</value>
+    </property>
+
     <property key="FieldDescription.portletTypeId">
         <value xml:lang="en">Can be empty, define a portlet template name (enumCode): a screen in PortletTypeScreens.xml in common</value>
         <value xml:lang="fr">Peux être vide, défini le modèle de portlet, le nom (enumCode) correspond à un screen dans PortletTypeScreens.xml dans common</value>
@@ -306,6 +335,15 @@
         <value xml:lang="fr">Mes paiements</value>
         <value xml:lang="vi">Thanh toán Riêng</value>
     </property>
+    <property key="PortalPage.portalPageName.PartyMgmt">
+        <value xml:lang="en">Party Management</value>
+        <value xml:lang="fr">Gestion des acteurs</value>
+    </property>
+    <property key="PortalPage.portalPageName.PartyRecap">
+        <value xml:lang="en">Party Profile Overview</value>
+        <value xml:lang="fr">Détail d'un acteur</value>
+    </property>
+
     <property key="PortalPage.portalPageName.ProductStoreFacility">
         <value xml:lang="de">Lager</value>
         <value xml:lang="en">Facility</value>
@@ -328,4 +366,61 @@
         <value xml:lang="fr">Liste des icônes utilisables dans les portlets</value>
     </property>
     <!--#Eam# icons-purpose -->
+    <property key="PortalPortlet.portletName.SelectParty">
+        <value xml:lang="en">Select one Party</value>
+        <value xml:lang="fr">Sélection d'un acteur</value>
+    </property>
+    <property key="PortalPortlet.description.SelectParty">
+        <value xml:lang="en">Choose Party to show Details Portal Page</value>
+        <value xml:lang="fr">Sélection de l'acteur pour lequel on souhaite l'affichage de la page portail détail</value>
+    </property>
+    <property key="PortalPortlet.portletName.PartyInfo">
+        <value xml:lang="en">Party Info</value>
+        <value xml:lang="fr">Descriptif d'un acteur</value>
+    </property>
+    <property key="PortalPortlet.description.PartyInfo">
+        <value xml:lang="en">General information about a party, person or party group. Show and edit</value>
+        <value xml:lang="fr">Informations générales d'un acteur, une personne ou un groupe, affiche et édite</value>
+    </property>
+    <property key="PortalPortlet.portletName.PartyUserLogins">
+        <value xml:lang="en">Party user login list</value>
+        <value xml:lang="fr">Liste des logins d'un acteur</value>
+    </property>
+    <property key="PortalPortlet.description.PartyUserLogins">
+        <value xml:lang="en">List and manage User Logins of a party. Show and edit security informations (password, ...)</value>
+        <value xml:lang="fr">Liste et gestion des utilisateurs de connexion d'un acteur. Permet les modifications des informations de sécurités (mot de passe, groupe de sécurité, ...)</value>
+    </property>
+    <property key="PortalPortlet.portletName.ContactMechMgmt">
+        <value xml:lang="en">Contact information management</value>
+        <value xml:lang="fr">Coordonnées de l'acteur</value>
+    </property>
+    <property key="PortalPortlet.description.ContactMechMgmt">
+        <value xml:lang="en">List all Contacts information for the party. Show and edit</value>
+        <value xml:lang="fr">Liste les coordonnées de l'acteur, affichage  et édition</value>
+    </property>
+    <property key="PortalPortlet.portletName.PartyRelationFroms">
+        <value xml:lang="en">Parties associated to the Party</value>
+        <value xml:lang="fr">Liste des acteurs associés à l'acteur</value>
+    </property>
+    <property key="PortalPortlet.description.PartyRelationFroms">
+        <value xml:lang="en">List Parties associated with Party, relation type and role type from and to are configurable. Show and edit association</value>
+        <value xml:lang="fr">Liste des acteurs associés à l'acteur, le type de relation et les roles associés sont configurable. Affichage  et édition</value>
+    </property>
+    <property key="PortalPortlet.portletName.PartyRelationTos">
+        <value xml:lang="en">Party Lists to which it is associated</value>
+        <value xml:lang="fr">Liste des acteurs auxquels il est associés</value>
+    </property>
+    <property key="PortalPortlet.description.PartyRelationTos">
+        <value xml:lang="en">Party Lists to which it is associated, relation type and role type from and to are configurable. Show and edit association</value>
+        <value xml:lang="fr">Liste des acteurs auxquels il est associés, le type de relation et les roles associés sont configurable. Affichage  et édition</value>
+    </property>
+    <property key="PortalPortlet.portletName.PartyRoles">
+        <value xml:lang="en">Party Roles List</value>
+        <value xml:lang="fr">Liste des rôles de l'acteur</value>
+    </property>
+    <property key="PortalPortlet.description.PartyRoles">
+        <value xml:lang="en">Lists all (or only for a role group) roles for Party. Show and edit</value>
+        <value xml:lang="fr">Liste tous (ou uniquement ceux d'un groupe de rôle) les rôle de l'acteur. Affichage  et édition</value>
+    </property>
+
 </resource>

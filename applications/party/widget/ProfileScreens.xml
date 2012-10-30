@@ -1,0 +1,539 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+  -->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+    <screen name="PartyDetailsMenu">
+        <section>
+            <condition>
+                <not><if-empty field="parameters.partyId"/></not>
+            </condition>
+            <widgets>
+                  <include-menu name="PartyExternalMenu" location="component://party/widget/ProfileMenus.xml"/>
+                  <section>
+                      <widgets>
+                          <include-screen name="PartyInfo"/>
+                      </widgets>
+                  </section>
+            </widgets>
+        </section>
+    </screen>
+
+    <!-- Screen used by controller for displaying portlets in details area (not used directly by a portlet) -->
+    <screen name="ShowPartyDetail">
+        <section>
+            <condition>
+                  <not><if-empty field="parameters.partyId"/></not>
+            </condition>
+            <actions>
+                <set field="defaultdetailPortletId" from-field="dtPartyId" from-scope="user" default-value="PartyInfo"/>
+                <set field="portalPortletId" from-field="parameters.portalPortletId" default-value="${defaultdetailPortletId}"/>
+                <set field="dtPartyId" from-field="portalPortletId" to-scope="user"/>
+                <set field="portalPageId" from-field="parameters.portalPageId"/>
+                <set field="parameters.areaId" value="PP_${portalPageId}PartyDetail00001"/>
+                <set field="portletSeqId" from-field="parameters.portletSeqId" default-value="00001"/>
+            </actions>
+            <widgets>
+                <include-portal-page id="${portalPageId}" portalPortletId="${portalPortletId}" portletSeqId="${portletSeqId}"/>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="PartyInfo">
+        <section>
+            <widgets>
+                <section>
+                    <condition>
+                        <not><if-empty field="lookupPerson"/></not>
+                    </condition>
+                    <widgets>
+                        <include-form name="ViewPartyPerson" location="component://party/widget/partymgr/PartyForms.xml"/>
+                        <section>
+                            <condition>
+                                <not><if-empty field="partyNameHistoryList"/></not>
+                            </condition>
+                            <widgets>
+                                <include-form name="ViewPartyPersonHistory" location="component://party/widget/partymgr/PartyForms.xml"/>
+                            </widgets>
+                        </section>
+                    </widgets>
+                </section>
+                <section>
+                    <condition>
+                        <not><if-empty field="lookupGroup"/></not>
+                    </condition>
+                    <widgets>
+                        <include-form name="ViewPartyGroup" location="component://party/widget/partymgr/PartyForms.xml"/>
+                        <section>
+                            <condition>
+                                <not><if-empty field="partyNameHistoryList"/></not>
+                            </condition>
+                            <widgets>
+                                <include-form name="ViewPartyGroupHistory" location="component://party/widget/partymgr/PartyForms.xml"/>
+                            </widgets>
+                        </section>
+                    </widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditPerson">
+        <section>
+            <actions>
+                <set field="partyId" from-field="parameters.partyId"/>
+                <entity-one entity-name="PartyAndPerson" value-field="personInfo"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <include-form name="EditPerson" location="component://party/widget/ProfileForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditPartyGroup">
+        <section>
+            <actions>
+                <set field="partyId" from-field="parameters.partyId"/>
+                <entity-one entity-name="PartyAndGroup" value-field="partyGroup"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <include-form name="EditPartyGroup" location="component://party/widget/ProfileForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="PartyUserLogins">
+        <section>
+<!--            <actions>Done in ProfileWactions.xml</actions>-->
+            <widgets>
+               <iterate-section entry="partyAndUserLogin" list="partyAndUserLogins">
+                    <section>
+                        <actions>
+                            <set field="userLoginId" from-field="partyAndUserLogin.userLoginId"/>
+                            <set field="disabledDateTime" from-field="partyAndUserLogin.disabledDateTime"/>
+                        </actions>
+                        <widgets>
+                            <container id="PartyUserLogin${userLoginId}_EditArea"/>
+                            <include-form name="ShowUserLogin" location="component://party/widget/ProfileForms.xml"/>
+                            <section>
+                              <condition>
+                                <if-has-permission permission="SECURITY" action="_VIEW"/>
+                              </condition>
+                              <widgets>
+                                <include-form name="ListUserLoginSecurityGroups" location="component://party/widget/ProfileForms.xml"/>
+                              </widgets>
+                            </section>
+                            <horizontal-separator/>
+                        </widgets>
+                    </section>
+               </iterate-section>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditUserLoginPassword">
+        <section>
+            <actions>
+                <set field="userLoginId" from-field="parameters.userLoginId"/>
+                <entity-one entity-name="UserLogin" value-field="editUserLogin"/>
+                <set field="partyId" from-field="editUserLogin.partyId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <include-form name="EditUserLoginPassword" location="component://party/widget/ProfileForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditPartyUserLogin">
+      <section>
+        <actions>
+            <entity-one value-field="editUserLogin" entity-name="UserLogin"/>
+            <set field="partyId" from-field="editUserLogin.partyId"/>
+        </actions>
+        <widgets>
+            <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+                <decorator-section name="body">
+                    <container style="h2">
+                        <label text="${uiLabelMap.UserLoginUpdateSecuritySettings} - ${parameters.userLoginId}"/>
+                    </container>
+                    <include-form name="updateUserLoginSecurity" location="component://party/widget/ProfileForms.xml"/>
+                    <screenlet title="${uiLabelMap.UserLoginChangePassword} - ${parameters.userLoginId}">
+                    <include-form name="EditUserLoginPassword" location="component://party/widget/ProfileForms.xml"/>
+                    </screenlet>
+                </decorator-section>
+            </decorator-screen>
+        </widgets>
+        </section>
+    </screen>
+    <screen name="CreatePartyUserLogin">
+        <section>
+            <actions>
+                <set field="partyId" from-field="parameters.partyId"/>
+                <service service-name="getPortletAttributes"></service><!--FIXME OHE use service result not coming from parameters  -->
+                <set field="securityGroupId" from-field="parameters.securityGroupId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <include-form name="addUserLogin" location="component://party/widget/ProfileForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="AddUserLoginSecurityGroup">
+        <section>
+            <actions>
+                <set field="userLoginId" from-field="parameters.userLoginId"/>
+                <set field="partyId" from-field="parameters.partyId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <include-form name="AddUserLoginSecurityGroup" location="component://party/widget/ProfileForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ContactMechMgmt">
+        <section>
+            <actions>
+                <set field="primaryId" from-field="parameters.primaryId"/>
+                <set field="entity" from-field="parameters.entity"/>
+            </actions>
+            <widgets>
+                <platform-specific>
+                    <html>
+                        <html-template location="component://party/webapp/partymgr/party/profileblocks/GivenContact.ftl"/>
+                    </html>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditContactMechMgmt">
+        <section>
+            <actions>
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/HasPartyPermissions.groovy"/>
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/EditGivenContactMech.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <or>
+                                    <if-compare field="hasViewPermission" operator="equals" value="true" type="Boolean"/>
+                                    <if-compare field="hasPcmCreatePermission" operator="equals" value="true" type="Boolean"/>
+                                    <if-compare field="hasPcmUpdatePermission" operator="equals" value="true" type="Boolean"/>
+                                    <if-compare-field field="parameters.partyId" operator="equals" to-field="userLogin.partyId"/>
+                                    <not><if-empty field="mechMap.partyContactMech"/></not>
+                                </or>
+                            </condition>
+                            <actions>
+                              <set field="dependentForm" value="editcontactmechform"/>
+                              <set field="paramKey" value="countryGeoId"/>
+                              <set field="mainId" value="countryGeoId"/>
+                              <set field="dependentId" value="stateProvinceGeoId"/>
+                              <set field="requestName" value="getAssociatedStateList"/>
+                              <set field="responseName" value="stateList"/>
+                              <set field="dependentKeyName" value="geoId"/>
+                              <set field="descName" value="geoName"/>
+                              <set field="selectedDependentOption" from-field="mechMap.postalAddress.stateProvinceGeoId" default-value="_none_"/>
+                            </actions>
+                            <widgets>
+                                <platform-specific>
+                                  <html>
+                                    <html-template location="component://common/webcommon/includes/setDependentDropdownValuesJs.ftl"/>
+                                    <html-template location="component://party/webapp/partymgr/party/editgivencontactmech.ftl"/>
+                                  </html>
+                                </platform-specific>
+                                <horizontal-separator/>
+                            </widgets>
+                        </section>
+                        <section>
+                            <condition>
+                                <if-compare value="EMAIL_ADDRESS"  operator="equals" field="${mechMap.contactMechTypeId}"/>
+                            </condition>
+                            <widgets>
+                               <label text="${uiLabelMap.PartyPhoneNumber}"/> 
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditPartyRelationship">
+      <section>
+        <actions>
+          <service service-name="getPortletAttributes" result-map="result"/>
+          <set field="attributeMap" from-field="result.attributeMap"/>
+          <entity-one value-field="relation" entity-name="PartyRelationship"/>
+        </actions>
+        <widgets>
+          <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+            <decorator-section name="body">
+              <include-form name="EditPartyRelationship" location="component://party/widget/ProfileForms.xml"/>
+            </decorator-section>
+          </decorator-screen>
+        </widgets>
+      </section>
+    </screen>
+
+    <screen name="AddPartyRoles">
+        <section>
+            <actions>
+              <service service-name="getPortletAttributes" result-map="result"/>
+              <set field="attributeMap" from-field="result.attributeMap"/>
+              <set field="partyId" from-field="parameters.partyId" />
+            </actions>
+            <widgets>
+                <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <and>
+                                    <if-empty field="attributeMap.roleTypeGroupId"/>
+                                </and>
+                            </condition>
+                            <widgets>
+                              <label style="h2">${uiLabelMap.PartySelectMainRole}</label>
+                              <include-form name="SelectMainRoleForParty" location="component://party/widget/ProfileForms.xml"/>
+                              <container id="addPartySecondaryRole" />
+                              <label style="h2">${uiLabelMap.PartyAddToRoleViewAll}</label>
+                              <include-form name="AddRoletoParty" location="component://party/widget/ProfileForms.xml"/>
+                            </widgets>
+                            <fail-widgets>
+                                <include-form name="AddRoleForPartyWithFilter" location="component://party/widget/ProfileForms.xml" />
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="AddSecondaryPartyRole">
+      <section>
+        <actions>
+          <entity-and entity-name="RoleType" list="roles" >
+              <field-map field-name="parentTypeId" value="${parameters.roleTypeId}"/>
+              <order-by field-name="roleTypeId"/><!-- orderBy description not works for other language than English -->
+          </entity-and>
+        </actions>
+        <widgets>
+          <section>
+            <condition>
+              <not>
+                <if-empty field="roles"/>
+              </not>
+            </condition>
+            <widgets>
+              <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+                <decorator-section name="body">
+                  <label style="h2">${uiLabelMap.PartyAddToSecondRole}</label>
+                  <include-form name="AddSecondaryPartyRole" location="component://party/widget/ProfileForms.xml"/>
+                </decorator-section>
+              </decorator-screen>
+            </widgets>
+          </section>
+        </widgets>
+      </section>
+    </screen>
+
+    <screen name="EditPartyAttribute">
+        <section>
+            <actions>
+                <entity-one entity-name="PartyAttribute" value-field="attribute"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                       <include-form name="EditPartyAttribute" location="component://party/widget/ProfileForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>    
+
+<!--       <screen name="PartyIdentification">
+        <section>
+            <actions>
+              <set field="partyId" from-field="parameters.partyId"/>
+              <set field="refreshId" from-field="parameters.refreshId" default-value="PartyIdentification_refresh"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <include-form name="ListPartyIdentification" location="component://party/widget/ProfileForms.xml"/>
+                    </decorator-section>
+                 </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+ -->
+    <screen name="EditPartyIdentification">
+      <section>
+          <actions>
+              <service service-name="getPortletAttributes" result-map="result"/>
+              <set field="attributeMap" from-field="result.attributeMap"/>
+              <entity-one entity-name="PartyIdentification" value-field="partyIdentification"/>
+              <set field="paramParentTypeId" from-field="attributeMap.parentTypeId"/>
+<!--                  <field-map field-name="partyId" from-field="parameters.partyId"/>-->
+<!--                  <field-map field-name="partyIdentificationTypeId" from-field="parameters.partyIdentificationTypeId"/>-->
+<!--              </entity-one>-->
+          </actions>
+          <widgets>
+              <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+                <decorator-section name="body">
+                  <include-form name="EditPartyIdentification" location="component://party/widget/ProfileForms.xml"/>
+                </decorator-section>
+              </decorator-screen>
+          </widgets>
+      </section>
+    </screen>
+    <screen name="EditPartyNote">
+        <section>
+            <condition><not><if-empty field="parameters.partyId"/></not></condition>
+            <actions>
+                <set field="partyId" from-field="parameters.partyId"/>
+                <set field="areaId" from-field="parameters.areaId" default-value="${areaId}"/>
+                <set field="portalPageId" from-field="parameters.portalPageId" default-value="${portalPageId}"/>
+                <set field="portletSeqId" from-field="parameters.portletSeqId" default-value="${portletSeqId}"/>
+                <entity-one value-field="partyNote" entity-name="NoteData"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                         <include-form name="EditPartyNote" location="component://party/widget/ProfileForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="AssocPartyNote">
+        <section>
+            <actions>
+                <set field="partyId" from-field="parameters.partyId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                         <include-form name="AssocPartyNote" location="component://party/widget/ProfileForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="PartyPaymentMethods">
+        <section>
+            <condition><not><if-empty field="parameters.partyId"/></not></condition>
+            <actions>
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/GetPartyPaymentMethods.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <include-form name="PartyPaymentMethodsList" location="component://party/widget/ProfileForms.xml"/>
+                    </decorator-section>
+                 </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditPartyBillingAccount">
+        <section>
+            <actions>
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/EditPaymentMethod.groovy"/>
+                <property-to-field field="defaultOrganizationPartyCurrencyUomId" resource="general" property="currency.uom.id.default" default="USD"/>
+                <set field="roleTypeId" from-field="parameters.roleTypeId"/>
+                <entity-one entity-name="BillingAccount" value-field="billingAccount"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <condition><not><if-empty field="billingAccount"/></not></condition>
+                            <widgets>
+                                <platform-specific>
+                                    <html><html-template location="component://party/webapp/partymgr/party/editbillingaccountterm.ftl"/></html>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                        <include-form name="EditPartyBillingAccount" location="component://party/widget/ProfileForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditPartyPaymentMethod">
+        <section>
+            <condition><not><if-empty field="parameters.partyId"/></not></condition>
+            <actions>
+                <entity-one entity-name="PaymentMethod" value-field="paymentMethod"/>
+                <set field="paymentMethodTypeId" from-field="parameters.paymentMethodTypeId" default-value="${paymentMethod.paymentMethodTypeId}"/>
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/HasPartyPermissions.groovy"/>
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/EditPaymentMethod.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="portletUiLabelDecorator" location="component://party/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <condition><if-compare field="paymentMethodTypeId" operator="equals" value="CREDIT_CARD" /></condition>
+                            <widgets>
+                                <include-form name="EditPartyCreditCard" location="component://party/widget/ProfileForms.xml"/>
+                            </widgets>
+                            <fail-widgets>
+                                <section>
+                                    <condition><if-compare field="paymentMethodTypeId" operator="equals" value="GIFT_CARD" /></condition>
+                                    <widgets>
+                                        <include-form name="EditPartyGiftCard" location="component://party/widget/ProfileForms.xml"/>
+                                    </widgets>
+                                    <fail-widgets>
+                                        <section>
+                                            <condition><if-compare field="paymentMethodTypeId" operator="equals" value="EFT_ACCOUNT" /></condition>
+                                            <widgets>
+                                                <include-form name="EditPartyEftAccount" location="component://party/widget/ProfileForms.xml"/>
+                                            </widgets>
+                                            <fail-widgets>
+                                                <include-form name="EditPartyPaymentMethod" location="component://party/widget/ProfileForms.xml"/>
+                                            </fail-widgets>
+                                        </section>
+                                    </fail-widgets>
+                                </section>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

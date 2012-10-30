@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+    <simple-method method-name="PartyInfo" short-description="action for PartyInfo screen">
+      <set field="parameters.partyId" from="parameters.partyId" default="${userLogin.partyId}"/>
+      <call-simple-method method-name="PartyDetailsMenu"/>
+    </simple-method>
+    <simple-method method-name="PartyDetailsMenu" short-description="action for PartyInfo screen">
+      <entity-and entity-name="PartyNameHistory" list="widget.partyNameHistoryList">
+          <field-map field-name="partyId" from-field="parameters.partyId"/>
+          <order-by field-name="-changeDate"/>
+      </entity-and>
+      <entity-one entity-name="PartyAndGroup" value-field="widget.lookupGroup">
+          <field-map field-name="partyId" from-field="parameters.partyId"/><!-- is required -->
+      </entity-one>
+      <entity-one entity-name="PartyAndPerson" value-field="widget.lookupPerson">
+          <field-map field-name="partyId" from-field="parameters.partyId"/><!-- is required -->
+      </entity-one>
+      <entity-and list="partyContentList" entity-name="PartyContent">
+          <field-map field-name="partyId" from-field="parameters.partyId"/>
+          <field-map field-name="partyContentTypeId" value="LGOIMGURL"/>
+          <order-by field-name="-fromDate"/>
+      </entity-and>
+      <set field="partyContentId" from="partyContentList[0].contentId" set-if-null="true"/>
+      <set field="partyContent" from="groovy: (partyContentId!=null) ? '/content/control/stream?contentId=' + partyContentId : null"/>
+      <set field="widget.partyGroupLogoLinkUrl" from="partyContent" default="${lookupGroup.logoImageUrl}"/> <!-- FIXME in screen global=true, find why -->
+      <set field="widget.personalImage" from="partyContent" set-if-null="true"/>
+
+      <if-not-empty field="widget.lookupPerson">
+        <set field="widget.titleLabel" value="PartyPersonalInformation"/>
+      </if-not-empty>
+      <if-not-empty field="widget.lookupGroup">
+        <set field="widget.titleLabel" value="PartyPartyGroupInformation"/>
+      </if-not-empty>
+    </simple-method>
+
+    <simple-method method-name="hasSecurityUpdate" short-description="test if user login as SECURITY_UPDATE and put adminSecurity in widget">
+      <if-has-permission permission="SECURITY" action="_UPDATE">
+        <set field="widget.hasSecurityUpdate" value="true" type="Boolean"/>
+      <else>
+        <set field="widget.hasSecurityUpdate" value="false" type="Boolean"/>
+        </else>
+      </if-has-permission>
+    </simple-method>
+    <simple-method method-name="PartyUserLogins" short-description="action for PartyUserLogin screen">
+      <set field="widget.partyId" from="parameters.partyId"/>
+      <entity-and list="widget.partyAndUserLogins" entity-name="PartyAndUserLogin">
+          <field-map field-name="partyId" from-field="widget.partyId"/>
+      </entity-and>
+      <set field="widget.isUserLogin" from="groovy: (parameters.partyId.equals(userLogin.partyId)) ? true : false" type="Boolean"/>
+      <set field="widget.userLoginIdLogged" from="userLogin.userLoginId" />
+      <call-simple-method method-name="hasSecurityUpdate"/>
+    </simple-method>
+
+    <simple-method method-name="ContactMechMgmt" short-description="action for ContactMechMgmt Screen">
+        <script location="component://party/script/org/ofbiz/party/contact/GetContactMechsFromAll.groovy"/>
+        <set field="widget.contactMeches" from="contactMeches"/>
+        <set field="areaId" from="parameters.areaId" default-value="${currentAreaId}"/>
+    </simple-method>
+
+    <simple-method method-name="PartyRelationships" short-description="action for PartyRelationships From and To portlet">
+      <set field="widget.roleTypeGroupIdFrom" from="roleTypeGroupIdFrom" set-if-null="true"/>
+      <set field="widget.roleTypeGroupIdTo"   from="roleTypeGroupIdTo"   set-if-null="true"/>
+      <set field="widget.partyRelationshipTypeIdAttr" from="partyRelationshipTypeId" set-if-null="true"/>
+
+      <if-not-empty field="roleTypeGroupIdFrom">
+        <entity-and list="roleTypeIdFromMapList" entity-name="RoleType">
+          <field-map field-name="parentTypeId" from-field="roleTypeGroupIdFrom"/>
+          <select-field field-name="roleTypeId"/>
+        </entity-and>
+        <iterate entry="roleType" list="roleTypeIdFromMapList">
+          <set field="roleTypeIdFromList[]" from="roleType.roleTypeId"/>
+        </iterate>
+      </if-not-empty>
+
+      <if-not-empty field="roleTypeGroupIdTo">
+        <entity-and list="roleTypeIdToMapList" entity-name="RoleType">
+          <field-map field-name="parentTypeId" from-field="roleTypeGroupIdTo"/>
+          <select-field field-name="roleTypeId"/>
+        </entity-and>
+        <iterate entry="roleType" list="roleTypeIdToMapList">
+          <set field="roleTypeIdToList[]" from="roleType.roleTypeId"/>
+        </iterate>
+      </if-not-empty>
+
+      <set field="widget.Y" value="Y"/>
+      <set field="widget.showEditButton" from="showEditButton" default="Y" />
+      <set field="widget.showHistoryButton" from="showHistoryButton" default="Y" />
+      <set field="widget.showDeleteButton" from="showDeleteButton" default="Y" />
+      <set field="widget.showHistory" from="parameters.showHistory" default="N" />
+      <set field="widget.partyId" from="parameters.partyId"/>
+
+      <set field="sortField" from-field="parameters.sortField" default-value="fromDate"/>
+      <set field="relationIsNotFrom" from="'FROM'!=widget.relationIs"/>
+      <set field="relationIsFrom" from="'FROM'==widget.relationIs"/>
+      <entity-condition entity-name="PartyRelationship" list="widget.partyRelationList">
+           <condition-list>
+             <condition-expr field-name="partyIdFrom" operator="equals" from-field="parameters.partyId" ignore="${relationIsNotFrom}"/>
+             <condition-expr field-name="partyIdTo" operator="equals" from-field="parameters.partyId" ignore="${relationIsFrom}"/>
+             <condition-expr field-name="partyRelationshipTypeId" from-field="partyRelationshipTypeIdAttr" ignore-if-empty="true"/>
+             <condition-expr field-name="roleTypeIdFrom" from-field="roleTypeIdFrom" ignore-if-empty="true"/>
+             <condition-expr field-name="roleTypeIdFrom" operator="in" from-field="roleTypeIdFromList" ignore-if-empty="true"/>
+             <condition-expr field-name="roleTypeIdTo" from-field="roleTypeIdTo" ignore-if-empty="true"/>
+             <condition-expr field-name="roleTypeIdTo" operator="in" from-field="roleTypeIdToList" ignore-if-empty="true"/>
+           </condition-list>
+           <order-by field-name="${sortField}"/>
+      </entity-condition>
+      <if-compare field="widget.showHistory" operator="not-equals" value="Y">
+        <filter-list-by-date list="widget.partyRelationList"/>
+      </if-compare>
+    </simple-method>
+
+    <simple-method method-name="PartyRelationFroms" short-description="action for PartyRelationships From portlet">
+      <set field="widget.relationIs" value="FROM"/>
+      <call-simple-method method-name="PartyRelationships"/>
+    </simple-method>
+    <simple-method method-name="PartyRelationTos" short-description="action for PartyRelationships To portlet">
+      <set field="widget.relationIs" value="TO"/>
+      <call-simple-method method-name="PartyRelationships"/>
+    </simple-method>
+
+    <simple-method method-name="PartyRoles" short-description="action for PartyRoles portlet">
+      <set field="widget.partyId" from="parameters.partyId"/>
+      <set field="roleTypeGroupId" from="roleTypeGroupId" set-if-null="true"/>
+      <entity-condition entity-name="RoleTypeAndParty" list="widget.partyRoles" distinct="true">
+          <condition-list combine="and">
+              <condition-expr field-name="partyId" operator="equals" value="${parameters.partyId}" />
+              <condition-expr field-name="roleTypeId" operator="not-equals" value="_NA_" />
+              <condition-expr field-name="parentTypeId" operator="equals" from-field="roleTypeGroupId" ignore-if-empty="true"/>
+          </condition-list>
+      </entity-condition>
+      <set field="parentTitle" from="groovy: (roleTypeGroupId ? org.ofbiz.base.util.UtilProperties.getMessage('PartyEntityLabels', 'RoleType.description.' + roleTypeGroupId, locale) : '')"/>
+      <if-compare-field field="parameters.idDescription" operator="contains" to-field="parentTitle"><!-- not add two time -->
+      <else><set field="parameters.idDescription" value="${parentTitle} ${parameters.idDescription}"/></else><!-- in the else because test should be "not contains" -->
+      </if-compare-field>
+      <set field="showEditButton" from="showEditButton" default="Y"/>
+      <set field="widget.showEditButton" from="showEditButton=='Y'" type="Boolean"/>
+    </simple-method>
+
+    <simple-method method-name="getParentRoleDescription" short-description="get list of roleTypeId with childs and its description ">
+      <entity-condition entity-name="RoleType" list="parentRoleList" distinct="true">
+          <condition-expr field-name="parentTypeId" operator="not-equals" from-field="nullField"/>
+          <select-field field-name="parentTypeId"/>
+      </entity-condition>
+      <iterate entry="parentRole" list="parentRoleList">
+        <entity-one value-field="roleType" entity-name="RoleType" use-cache="true">
+          <field-map field-name="roleTypeId" from-field="parentRole.parentTypeId"/>
+        </entity-one>
+        <set field="parentRole.description" from="groovy:roleType.get('description',locale)"/>
+      </iterate>
+      <order-map-list list="parentRoleList" >
+        <order-by field-name="description"/>
+      </order-map-list>
+      <set field="widget.parentRoleList" from="parentRoleList"/>
+    </simple-method>
+
+    <simple-method method-name="PartyAvsSettings" short-description="read PartyIcsAvsOverride and put in widget context ">
+          <set field="partyId" from-field="parameters.partyId"/>
+          <entity-one entity-name="PartyIcsAvsOverride" value-field="widget.avsOverride" use-cache="true">
+              <field-map field-name="partyId"/>
+          </entity-one>
+    </simple-method>
+</simple-methods>

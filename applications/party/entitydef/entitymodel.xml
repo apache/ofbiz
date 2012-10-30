@@ -1691,6 +1691,26 @@ under the License.
         <key-map field-name="parentTypeId" rel-field-name="partyIdentificationTypeId"/>
       </relation>
     </entity>
+<!--#Bam# portletWidget-party -->
+
+  
+    <view-entity entity-name="PartyIdentificationAndType"
+                package-name="org.ofbiz.party.party"
+                title="PartyIdentification and PartyIdentificationType View Entity">
+      <member-entity entity-alias="PI" entity-name="PartyIdentification"/>
+      <member-entity entity-alias="PIT" entity-name="PartyIdentificationType"/>
+      <alias-all entity-alias="PI" />
+      <alias-all entity-alias="PIT">
+           <exclude field="partyId"/>
+      </alias-all>
+      <view-link entity-alias="PI" rel-entity-alias="PIT">
+        <key-map field-name="partyIdentificationTypeId"/>
+      </view-link>
+    </view-entity>
+    
+<!--#Eam# portletWidget-party -->
+
+
   
     <entity entity-name="PartyGeoPoint"
         package-name="org.ofbiz.party.party"
@@ -1851,6 +1871,24 @@ under the License.
         <key-map field-name="parentTypeId" rel-field-name="partyClassificationTypeId"/>
       </relation>
     </entity>
+<!--#Bam# portletWidget-party -->
+
+    <view-entity entity-name="PartyClassificationGroupAndType"
+                 package-name="org.ofbiz.party.party"
+                 title="PartyClassificationGroup and PartyClassificationType View">
+      <member-entity entity-alias="PCG" entity-name="PartyClassificationGroup"/>
+      <member-entity entity-alias="PCT" entity-name="PartyClassificationType"/>
+      <alias-all entity-alias="PCG"/>
+      <alias entity-alias="PCT" name="typeDescription" field="description"/>
+      <alias entity-alias="PCT" name="parentTypeId"/>
+      <view-link entity-alias="PCG" rel-entity-alias="PCT">
+          <key-map field-name="partyClassificationTypeId"/>
+      </view-link>
+    </view-entity>
+    
+<!--#Eam# portletWidget-party -->
+
+
     <view-entity entity-name="PartyContactWithPurpose"
             package-name="org.ofbiz.party.party"
             title="Party Contact Purpose View Entity">
@@ -2752,6 +2790,25 @@ under the License.
         <key-map field-name="parentTypeId" rel-field-name="roleTypeId"/>
       </relation>
     </entity>
+<!--#Bam# portletWidget-party -->
+
+    <view-entity entity-name="ParentRoleTypeDescription"
+        package-name="org.ofbiz.party.party" title="Party Role View in 2 levels"
+        default-resource-name="PartyEntityLabels">
+        <member-entity entity-alias="RT" entity-name="RoleType" />
+        <member-entity entity-alias="PRT" entity-name="RoleType" />
+        <alias entity-alias="RT" name="roleTypeId" field="parentTypeId"/>
+        <alias entity-alias="RT" name="childRoleTypeId" field="roleTypeId"/>
+        <alias entity-alias="PRT" name="description" />
+<!--        <alias entity-alias="PRT" name="parentRoleDescription" field="description" />-->
+        <view-link entity-alias="RT" rel-entity-alias="PRT">
+            <key-map field-name="parentTypeId" rel-field-name="roleTypeId"/>
+        </view-link>
+    </view-entity>
+    
+<!--#Eam# portletWidget-party -->
+
+
     <view-entity entity-name="RoleTypeIn3Levels"
         package-name="org.ofbiz.party.party" title="Party Role View in 4 levels">
         <member-entity entity-alias="RT1" entity-name="RoleType" />

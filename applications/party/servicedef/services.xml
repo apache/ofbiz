@@ -1355,4 +1355,180 @@ under the License.
         <attribute name="userLoginId" type="String" mode="IN" optional="false"/>
         <attribute name="productStoreId" type="String" mode="IN" optional="false"/>
     </service>
+
+    <!--#Bam# contactMechMgmtPortlet-->
+    <service name="removePartyContactMechPurpose" engine="java"
+            location="org.ofbiz.party.contact.ContactMechServices" invoke="removePartyContactMechPurpose" auth="true">
+        <description>Remove a Party ContactMech Purpose from database</description>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="contactMechId" type="String" mode="IN" optional="false"/>
+        <attribute name="contactMechPurposeTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
+    </service>
+
+    <service name="updatePartyContactMechPurpose" engine="java"
+            location="org.ofbiz.party.contact.ContactMechServices" invoke="updatePartyContactMechPurpose" auth="true">
+        <description>Update a Party ContactMech Purpose</description>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="contactMechId" type="String" mode="IN" optional="false"/>
+        <attribute name="contactMechPurposeTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="true"/>
+    </service>
+
+    <service name="createGivenTelecomNumber" engine="simple"
+            location="component://party/script/org/ofbiz/party/contact/ContactMechPortletServices.xml" invoke="createGivenTelecomNumber" auth="true">
+        <description>Create telecom number for given 'entity' and given 'primaryId'</description>
+        <auto-attributes entity-name="TelecomNumber" include="all" mode="IN" optional="true"/>
+        <attribute name="primaryId" type="String" mode="IN" optional="false"/>
+        <attribute name="entity" type="String" mode="IN" optional="false"/>
+        <attribute name="allowSolicitation" type="String" mode="IN" optional="true"/>
+        <attribute name="extension" type="String" mode="IN" optional="true"/>
+        <attribute name="contactMechPurposeTypeId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="updateGivenTelecomNumber" engine="simple"
+            location="component://party/script/org/ofbiz/party/contact/ContactMechPortletServices.xml" invoke="updateGivenTelecomNumber" auth="true">
+        <description>Update telecom number for given 'entity' and given 'primaryId'</description>
+        <auto-attributes entity-name="TelecomNumber" include="all" mode="IN" optional="true"/>
+        <attribute name="contactMechId" type="String" mode="IN" optional="false"/>
+        <attribute name="primaryId" type="String" mode="IN" optional="false"/>
+        <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="entity" type="String" mode="IN" optional="false"/>
+        <attribute name="allowSolicitation" type="String" mode="IN" optional="true"/>
+        <attribute name="extension" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="createContactMechEntity" engine="simple"
+            location="component://party/script/org/ofbiz/party/contact/ContactMechPortletServices.xml" invoke="createContactMechEntity" auth="true">
+        <description>Create contactMech for given 'entity' and given 'primaryId'</description>
+        <auto-attributes entity-name="ContactMech" include="all" mode="IN" optional="true"/>
+        <attribute name="primaryId" type="String" mode="IN" optional="false"/>
+        <attribute name="entity" type="String" mode="IN" optional="false"/>
+        <attribute name="allowSolicitation" type="String" mode="IN" optional="true"/>
+        <attribute name="contactMechPurposeTypeId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="updateContactMechEntity" engine="simple"
+            location="component://party/script/org/ofbiz/party/contact/ContactMechPortletServices.xml" invoke="updateContactMechEntity" auth="true">
+        <description>Update contactMech for given 'entity' and given 'primaryId'</description>
+        <auto-attributes entity-name="ContactMech" include="all" mode="IN" optional="true"/>
+        <attribute name="contactMechId" type="String" mode="IN" optional="false"/>
+        <attribute name="primaryId" type="String" mode="IN" optional="false"/>
+        <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="entity" type="String" mode="IN" optional="false"/>
+        <attribute name="allowSolicitation" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="createGivenPostalAddress" engine="simple"
+            location="component://party/script/org/ofbiz/party/contact/ContactMechPortletServices.xml" invoke="createGivenPostalAddress" auth="true">
+        <description>Create telecom number for given 'entity' and given 'primaryId'</description>
+        <auto-attributes entity-name="PostalAddress" include="all" mode="IN" optional="true"/>
+        <attribute name="cityGeoId" type="String" mode="IN" optional="true"/>
+        <attribute name="primaryId" type="String" mode="IN" optional="false"/>
+        <attribute name="entity" type="String" mode="IN" optional="false"/>
+        <attribute name="allowSolicitation" type="String" mode="IN" optional="true"/>
+        <attribute name="contactMechPurposeTypeId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="updateGivenPostalAddress" engine="simple"
+            location="component://party/script/org/ofbiz/party/contact/ContactMechPortletServices.xml" invoke="updateGivenPostalAddress" auth="true">
+        <description>Update telecom number for given 'entity' and given 'primaryId'</description>
+        <auto-attributes entity-name="PostalAddress" include="all" mode="IN" optional="true"/>
+        <attribute name="contactMechId" type="String" mode="IN" optional="false"/>
+        <attribute name="cityGeoId" type="String" mode="IN" optional="true"/>
+        <attribute name="primaryId" type="String" mode="IN" optional="false"/>
+        <attribute name="entity" type="String" mode="IN" optional="false"/>
+        <attribute name="allowSolicitation" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="createGivenEmailAddress" engine="simple"
+            location="component://party/script/org/ofbiz/party/contact/ContactMechPortletServices.xml" invoke="createGivenEmailAddress" auth="true">
+        <description>Create telecom number for given 'entity' and given 'primaryId'</description>
+        <attribute name="emailAddress" type="String" mode="IN" optional="false"/>
+        <attribute name="primaryId" type="String" mode="IN" optional="false"/>
+        <attribute name="entity" type="String" mode="IN" optional="false"/>
+        <attribute name="allowSolicitation" type="String" mode="IN" optional="true"/>
+        <attribute name="contactMechPurposeTypeId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="updateGivenEmailAddress" engine="simple"
+            location="component://party/script/org/ofbiz/party/contact/ContactMechPortletServices.xml" invoke="updateGivenEmailAddress" auth="true">
+        <description>Update telecom number for given 'entity' and given 'primaryId'</description>
+        <attribute name="contactMechId" type="String" mode="IN" optional="false"/>
+        <attribute name="emailAddress" type="String" mode="IN" optional="false"/>
+        <attribute name="primaryId" type="String" mode="IN" optional="false"/>
+        <attribute name="entity" type="String" mode="IN" optional="false"/>
+        <attribute name="allowSolicitation" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="deleteGivenContactMech" engine="simple"
+            location="component://party/script/org/ofbiz/party/contact/ContactMechPortletServices.xml" invoke="deleteGivenContactMech" auth="true">
+        <description>Delete contactMech for given 'entity' and given 'primaryId'</description>
+        <attribute name="contactMechId" type="String" mode="IN" optional="false"/>
+        <attribute name="primaryId" type="String" mode="IN" optional="false"/>
+        <attribute name="entity" type="String" mode="IN" optional="false"/>
+        <attribute name="fromDate" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="updateGivenContactMech" engine="simple"
+            location="component://party/script/org/ofbiz/party/contact/ContactMechPortletServices.xml" invoke="updateGivenContactMech" auth="true">
+        <description>Update contactMech for given 'entity' and given 'primaryId'</description>
+        <attribute name="contactMechId" type="String" mode="IN" optional="false"/>
+        <attribute name="primaryId" type="String" mode="IN" optional="false"/>
+        <attribute name="entity" type="String" mode="IN" optional="false"/>
+        <attribute name="fromDate" type="String" mode="IN" optional="false"/>
+        <attribute name="thruDate" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="removeGivenContactMech" engine="simple"
+            location="component://party/script/org/ofbiz/party/contact/ContactMechPortletServices.xml" invoke="removeGivenContactMech" auth="true">
+        <description>Delete contactMech for given 'entity' and given 'primaryId'</description>
+        <attribute name="contactMechId" type="String" mode="IN" optional="false"/>
+        <attribute name="primaryId" type="String" mode="IN" optional="false"/>
+        <attribute name="entity" type="String" mode="IN" optional="false"/>
+        <attribute name="fromDate" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="createGivenContactMechPurpose" engine="simple"
+            location="component://party/script/org/ofbiz/party/contact/ContactMechPortletServices.xml" invoke="createGivenContactMechPurpose" auth="true">
+        <description>Create contactMechPurpose for given 'entity' and given 'primaryId'</description>
+        <attribute name="contactMechId" type="String" mode="IN" optional="false"/>
+        <attribute name="contactMechPurposeTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="primaryId" type="String" mode="IN" optional="false"/>
+        <attribute name="entity" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="updateGivenContactMechPurpose" engine="simple"
+            location="component://party/script/org/ofbiz/party/contact/ContactMechPortletServices.xml" invoke="updateGivenContactMechPurpose" auth="true">
+        <description>Update contactMechPurpose for given 'entity' and given 'primaryId'</description>
+        <attribute name="contactMechId" type="String" mode="IN" optional="false"/>
+        <attribute name="contactMechPurposeTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="primaryId" type="String" mode="IN" optional="false"/>
+        <attribute name="entity" type="String" mode="IN" optional="false"/>
+        <attribute name="fromDate" type="String" mode="IN" optional="false"/>
+        <attribute name="thruDate" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="deleteGivenContactMechPurpose" engine="simple"
+            location="component://party/script/org/ofbiz/party/contact/ContactMechPortletServices.xml" invoke="deleteGivenContactMechPurpose" auth="true">
+        <description>Deactivate contactMechPurpose for given 'entity' and given 'primaryId'</description>
+        <attribute name="contactMechId" type="String" mode="IN" optional="false"/>
+        <attribute name="contactMechPurposeTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="primaryId" type="String" mode="IN" optional="false"/>
+        <attribute name="entity" type="String" mode="IN" optional="false"/>
+        <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
+    </service>
+
+    <service name="removeGivenContactMechPurpose" engine="simple"
+            location="component://party/script/org/ofbiz/party/contact/ContactMechPortletServices.xml" invoke="removeGivenContactMechPurpose" auth="true">
+        <description>Remove contactMechPurpose for given 'entity' and given 'primaryId'</description>
+        <attribute name="contactMechId" type="String" mode="IN" optional="false"/>
+        <attribute name="contactMechPurposeTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="primaryId" type="String" mode="IN" optional="false"/>
+        <attribute name="entity" type="String" mode="IN" optional="false"/>
+        <attribute name="fromDate" type="String" mode="IN" optional="false"/>
+    </service>
+    <!--#Eam# contactMechMgmtPortlet-->
 </services>

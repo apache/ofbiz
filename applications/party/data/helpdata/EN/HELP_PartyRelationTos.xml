@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements. See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to you under the Apache License, Version
+2.0 (the "License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+applicable law or agreed to in writing, software distributed under the
+License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for
+the specific language governing permissions and limitations under the
+License.
+-->
+<section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    version="5.0" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
+    xsi:schemaLocation="http://docbook.org/ns/docbook"
+    xmlns="http://docbook.org/ns/docbook">
+    <title>Party Lists to which it is associated</title>
+
+      <para>This portlet displays the parties to which it is associated to the selected Party. The display and behavior depend on its setting. </para>
+      <para>To characterize the relationship between two parties, we must specify the "relationship type", the more fluently this portlet is used
+         for a specific relationship Type, eg
+          <itemizedlist>
+            <listitem> <para> "Contact", ie list all sales reps or customer, to which he is a contact; </para> </listitem>
+            <listitem> <para> "Employee", ie list all company where a person is employed; </para> </listitem>
+            <listitem> <para> "Team Member", ie list all team or group to which person is member; </para> </listitem>
+            <listitem> <para> ... </para> </listitem>
+          </itemizedlist>
+      </para>
+      <para>For a relationship between Party, it is also possible to specify the role of the party associated, for example in the case of Relationship Type
+         "employee", the role will detail the role of the employee in the company. In most cases this field does not appear because it is not necessary. </para>
+      <para> A relationship between Party possesses validity date (from date .. thru date ..), it is possible to keep a history. Depending on the setting
+             it is also possible to delete a relationship in which case the history will not be retained. </para>
+      <para>&amp;nbsp;</para>
+
+    <section>
+      <title>Portlet parameters</title>
+      <itemizedlist>
+        <listitem><para>Title portlet: You must include a "UiLabel" (a code according to a language that give wording), it allows you to customize the portlet Title
+            this is useful when the portlet is used several times in the same page. Ask a technical consultant to find the UILabel
+            corresponding to your needs, or to define a new one.</para> </listitem>
+        <listitem><para>Role From Type: If this field is filled, the list displayed will be filter (only this role) and in editing (add or change) this value will be used, the role field will not be shown to the user.
+            Usually, this parameter is left blank.</para></listitem>
+        <listitem><para>Role Group : If the field Role From is empty, indicates the group from which the role will be selectable in the edit screen (add - change). The field "original role" will be displayed in the list</para></listitem>
+        <listitem><para>Party Relationship Type Id : indicate the RelationshipType to use to filter relationships to display, or leave it blank to display all and therefore this field.</para></listitem>
+        <listitem><para>Party associated Role (Role Type To): If this field is filled, the list displayed will be filter (only this role) and in editing (add or change) this value will be used, field "role to" will not be displayed to the user.</para></listitem>
+        <listitem><para>Role To Group: If the field RoleTo is empty, indicates the group from which the user will select a role in the edit screen (add - change). The field "destination role" will be displayed in the list. </para></listitem>
+        <listitem><para>Show edit menu Standard: if set to N then the buttons "Add", "edit" and "suppression does not appear.</para></listitem>
+        <listitem><para>History management (show history button): if set to N then the buttons "invalidate" and "view history" not appear </para></listitem>
+        <listitem><para>delete button (Show Delete button): if set to N then the buttons "delete" does not appear, often only used to force the use of archiving. </para></listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Security rules</title>
+      <itemizedlist>
+        <listitem><para>nothing at the portlet level, only at the update service level (and component rules)</para> </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Technical remarks</title>
+      <para>This portlet list only entity PartyRelationship with partyIdTo == partyId selected. A other portlet exist for
+        partyIdFrom = partyId</para>
+      <para>When Role From and/or To are not define (field by the user or in parameters),  _NA_ is used.</para>
+    </section>
+</section>

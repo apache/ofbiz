@@ -17,7 +17,7 @@
     specific language governing permissions and limitations
     under the License.
 -->
-<entity-engine-xml>
+<entity-engine-xml set-other-fields-to-null="true">
 
     <!-- party -->
     <PortletCategory portletCategoryId="PARTY_PROFILE" description="Profiles"/>
@@ -166,4 +166,133 @@
     <PortalPagePortlet portalPageId="PartyProfile" portalPortletId="Visits" portletSeqId="00001" columnSeqId="00002" sequenceNum="7"/>
     <PortalPagePortlet portalPageId="PartyProfile" portalPortletId="ProductStores" portletSeqId="00001" columnSeqId="00002" sequenceNum="8"/>
 
+
+
+<!--#Bam# portletWidget portlet-party  -->
+  <PortalPortlet portalPortletId="PartyInfo" portletName="Party Info" description="General information about a party, person or party group. Show and edit" screenshot="/images/portlets/party.png"
+     portletTypeId="Screenlet" component="party" subComponent="Profile" useScreen="Y" useScript="Y" useMenu="Y" editFormName="GenericEditEditOrShowParam" editFormLocation="component://common/widget/PortletEditForms.xml"/>
+  <PortalPortlet portalPortletId="SelectParty" portletName="Select One Party" description="Select one Party for a Page PartyRecap" screenshot="/images/portlets/SelectParty.png"
+     portletTypeId="Screenlet" component="party" subComponent="Profile" useScreen="N" useScript="N" useMenu="N" editFormName="GenericSelectPageParam" editFormLocation="component://common/widget/PortletEditForms.xml"/>
+  <PortalPortlet portalPortletId="PartyUserLogins" portletName="Party user login list" description="List and manage User Logins of a party" screenshot="/images/portlets/UserLogin.png"
+     portletTypeId="Screenlet" component="party" subComponent="Profile" useScreen="Y" useScript="Y" useMenu="Y" pkIdName="partyId" 
+     editFormName="EditParam_PartyUserLogin" editFormLocation="component://party/widget/ProfileForms.xml"/>
+  <PortalPortlet portalPortletId="ContactMechMgmt" portletName="Contact mechanism for Party and Facility" description="Contact mechanism for Party and Facility"
+     portletTypeId="Screenlet" component="party" subComponent="Profile" useScreen="Y" useScript="Y" useMenu="Y" pkIdName="primaryId"
+     editFormName="EditParam_ContactMechMgmt" editFormLocation="component://party/widget/ProfileForms.xml"
+     titleLabel="PartyContactInformation" screenshot="/images/portlets/ContactMechMgmt.png"/>
+  <PortalPortlet portalPortletId="PartyRelationFroms" portletName="List relation associated to a party" description="List relation associated to a party"
+     portletTypeId="Screenlet" component="party" subComponent="Profile" useScreen="N" useScript="Y" useMenu="Y" pkIdName="partyId"
+     menuName="PartyRelationships"
+     titleLabel="PartyListRelatedAccounts" editFormName="EditParam_PartyRelationship" editFormLocation="component://party/widget/ProfileForms.xml"/>
+  <PortalPortlet portalPortletId="PartyRelationTos" portletName="Party Lists to which it is associated" description="List relation associated from a party"
+     portletTypeId="Screenlet" component="party" subComponent="Profile" useScreen="N" useScript="Y" useMenu="Y" pkIdName="partyId"
+     menuName="PartyRelationships"
+     editFormName="EditParam_PartyRelationship" editFormLocation="component://party/widget/ProfileForms.xml"/>
+  <PortalPortlet portalPortletId="PartyRoles" portletName="Party roles" description="Portlet to manage PartyRole"
+     portletTypeId="Screenlet" component="party" subComponent="Profile" useScript="Y" useMenu="Y" pkIdName="partyId"
+     editFormName="EditParam_PartyRoles" editFormLocation="component://party/widget/ProfileForms.xml"
+     titleLabel="PartyRoles" screenshot="/images/portlets/PartyRoles.png"/>
+  <PortalPortlet portalPortletId="PartyAttributes" portletName="PartyAttributes" description="Attributes of a party"
+     portletTypeId="Screenlet" component="party" subComponent="Profile" useScreen="N" useScript="N" useMenu="Y" pkIdName="partyId"
+     titleLabel="PartyAttributes" screenshot="/images/portlets/Attributes.png"/>
+  <PortalPortlet portalPortletId="PartyAvsSettings" portletName="Party Avs Settings" description="Avs Settings of a party"
+     portletTypeId="Screenlet" component="party" subComponent="Profile" useScreen="N" useScript="Y" useMenu="Y" pkIdName="partyId"
+     titleLabel="PartyAvsOver" screenshot="/images/portlets/AvsSettings.png"/>
+  <PortalPortlet portalPortletId="PartyLoyaltyPoints" portletName="Party Loyalty Points" description="Loyalty Points of a party"
+     portletTypeId="Screenlet" component="party" subComponent="Profile" useScreen="N" useScript="N" useMenu="N" pkIdName="partyId"
+     titleLabel="PartyLoyaltyPoints" screenshot="/images/portlets/LoyaltyPoints.png"/>
+  <PortalPortlet portalPortletId="PartyIdentLists" portletLongId="PartyIdentifications" portletName="Party identifications list" description="Party identification number list"
+      portletTypeId="ScreenletList" component="party" subComponent="Profile" useScreen="N" useScript="N" useMenu="Y" pkIdName="partyId"
+      editFormName="EditParam_PartyIdentifications" editFormLocation="component://party/widget/ProfileForms.xml"
+      titleLabel="PartyPartyIdentifications" screenshot="/images/portlets/PartyIdentification.png"/>
+  <PortalPortlet portalPortletId="PartyNotes" portletName="Notes associated to Party management" description="Notes associated to one party list and management"
+        portletTypeId="ScreenletList" component="party" subComponent="Profile" useScreen="N" useScript="N" useMenu="Y" pkIdName="partyId"
+        titleLabel="CommonNotes" securityMainAction="VIEW"/>
+  <PortalPortlet portalPortletId="PartyPaymentMethods" portletName="Party payment method list" description="List and manage payment method for one Party"
+        portletTypeId="Screenlet" component="party" subComponent="Profile" useScreen="Y" useScript="N" useMenu="Y" pkIdName="partyId"
+        titleLabel="PartyPaymentMethodInformation" screenshot="/images/portlets/PartyPaymentMethods.png"
+        securityServiceName="" securityMainAction="VIEW"/>
+
+  <PortletPortletCategory portalPortletId="PartyInfo" portletCategoryId="PARTY_PROFILE"/>
+  <PortletPortletCategory portalPortletId="SelectParty" portletCategoryId="PARTY_PROFILE"/>
+  <PortletPortletCategory portalPortletId="PartyUserLogins" portletCategoryId="PARTY_PROFILE"/>
+  <PortletPortletCategory portalPortletId="ContactMechMgmt" portletCategoryId="PARTY_PROFILE"/>
+  <PortletPortletCategory portalPortletId="PartyRelationFroms" portletCategoryId="PARTY_PROFILE"/>
+  <PortletPortletCategory portalPortletId="PartyRelationTos" portletCategoryId="PARTY_PROFILE"/>
+  <PortletPortletCategory portalPortletId="PartyRoles" portletCategoryId="PARTY_PROFILE"/>
+  <PortletPortletCategory portalPortletId="PartyAttributes" portletCategoryId="PARTY_PROFILE"/>
+  <PortletPortletCategory portalPortletId="PartyAvsSettings" portletCategoryId="PARTY_PROFILE"/>
+  <PortletPortletCategory portalPortletId="PartyLoyaltyPoints" portletCategoryId="PARTY_PROFILE"/>
+  <PortletPortletCategory portalPortletId="PartyIdentLists" portletCategoryId="PARTY_PROFILE"/>
+  <PortletPortletCategory portalPortletId="PartyNotes" portletCategoryId="PARTY_PROFILE"/>
+  <PortletPortletCategory portalPortletId="PartyPaymentMethods" portletCategoryId="PARTY_PROFILE"/>
+
+
+  <PortalPage portalPageId="PartyRecap" sequenceNum="0" portalPageName="Party Profile overview" description="Party profile page whith a lot of portlet" ownerUserLoginId="_NA_"/>
+  <PortalPageColumn portalPageId="PartyRecap" columnSeqId="00001" columnWidthPercentage="50"/>
+   <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="SelectParty" portletSeqId="00001" columnSeqId="00001" sequenceNum="0"/>
+   <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="PartyInfo" portletSeqId="00001" columnSeqId="00001" sequenceNum="1"/>
+   <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="ContactMechMgmt" portletSeqId="00001" columnSeqId="00001" sequenceNum="2"/>
+   <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="PartyRelationFroms" portletSeqId="00001" columnSeqId="00001" sequenceNum="3"/>
+   <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="PartyRelationTos" portletSeqId="00001" columnSeqId="00001" sequenceNum="4"/>
+   <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="PartyLoyaltyPoints" portletSeqId="00001" columnSeqId="00001" sequenceNum="5"/>
+   <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="PartyPaymentMethods" portletSeqId="00001" columnSeqId="00001" sequenceNum="6"/>
+   <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="PartyIdentLists" portletSeqId="00001" columnSeqId="00001" sequenceNum="7"/>
+  <PortalPageColumn portalPageId="PartyRecap" columnSeqId="00002"/><!-- no width in pixels or percent, use the rest of the space available -->
+   <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="PartyUserLogins" portletSeqId="00001" columnSeqId="00002" sequenceNum="1"/>
+   <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="PartyRoles" portletSeqId="00001" columnSeqId="00002" sequenceNum="2"/>
+   <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="PartyAttributes" portletSeqId="00001" columnSeqId="00002" sequenceNum="3"/>
+   <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="PartyAvsSettings" portletSeqId="00001" columnSeqId="00002" sequenceNum="4"/>
+   <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="PartyNotes" portletSeqId="00001" columnSeqId="00002" sequenceNum="5"/>
+
+
+  <PortalPortlet portalPortletId="PartyLastVisits" portletName="List last Visits for the Party" description="Last 5 Visits of a certain party"
+     portletTypeId="Screenlet" component="party" subComponent="Visit" useScreen="N" useScript="N" useMenu="Y" pkIdName="partyId"
+     titleLabel="PageTitleVisitList" screenshot="/images/portlets/Visits.png"/>
+  <PortalPortlet portalPortletId="PartyAllVisits" portletName="List Visits" description="search or select and list  party visits"
+     portletTypeId="Screenlet" component="party" subComponent="Visit" useScreen="Y" useScript="N" useMenu="N"
+     titleLabel="PageTitleVisitList" screenshot="/images/portlets/Visits.png"/>
+  <PortletPortletCategory portalPortletId="PartyLastVisits" portletCategoryId="PARTY_PROFILE"/>
+  <PortletPortletCategory portalPortletId="PartyAllVisits" portletCategoryId="PARTY_PROFILE"/>
+  <PortalPagePortlet portalPageId="PartyRecap" portalPortletId="PartyLastVisits" portletSeqId="00001" columnSeqId="00002" sequenceNum="5"/>
+
+  <PortalPortlet portalPortletId="FindParties" portletName="Party and Person find form" description="Muliple criteria find form for PartyGroup and Person" 
+     portletTypeId="Screenlet" component="party" subComponent="Profile" useScreen="N" useScript="N" useMenu="N"
+     titleLabel="CommonSearch" editFormName="EditParam_FindParties" editFormLocation="component://party/widget/ProfileForms.xml" screenshot="/images/portlets/FindParties.png"/>
+  <PortletAttribute portalPortletId="FindParties" attrName="resultPortalPortletId" attrValue="ListParties" portalPageId="_NA_" portletSeqId="00000"/>
+  <PortletAttribute portalPortletId="FindParties" attrName="useAreaCode"     attrValue="N" portalPageId="_NA_" portletSeqId="00000"/>
+  <PortletAttribute portalPortletId="FindParties" attrName="useCountryCode"  attrValue="N" portalPageId="_NA_" portletSeqId="00000"/>
+
+  <PortalPortlet portalPortletId="ListParties" portletName="PartyGroups and Persons list" description="PartyGroup and Person search results"
+     portletTypeId="ScreenletList" component="party" subComponent="Profile" useScreen="N" useScript="N" useMenu="N"
+     titleLabel="CommonSearchResults" editFormName="GenericRecapPageParam" editFormLocation="component://common/widget/PortletEditForms.xml" screenshot="/images/portlets/ListParties.png"/>
+  <PortletAttribute portalPortletId="ListParties" attrName="recapPageId" attrValue="PartyRecap" portalPageId="_NA_" portletSeqId="00000"/>
+
+    <!-- Use a screen (default value name, see ShowPortalPortlet view) -->
+    <PortalPortlet portalPortletId="PartyDetailsMenu" 
+       portletName="Party summary and details menu (with portletType and showPortlet)" description="Party summary and menu to see all details profile portlet in the PartyDetail contener"
+       portletTypeId="Screenlet" component="party" subComponent="Profile" useMenu="Y" useScreen="Y" useScript="Y"
+       editFormName="EditParam_PartyDetailsMenu" editFormLocation="component://party/widget/ProfileForms.xml"
+       titleLabel="CommonEmptyHeader" pkIdName="partyId" />
+    <!-- Empty area for portlet injected by DetailMenu -->
+    <PortalPortlet portalPortletId="PartyDetail" 
+       portletName="Container to show Party portlet detail (with portletType and showPortlet)" description="Use this portlet to say where detail portlet call from a menu will be show"
+       portletTypeId="Empty" component="party" subComponent="Profile"/>
+
+
+  <PortletPortletCategory portalPortletId="FindParties" portletCategoryId="PARTY_PROFILE"/>
+  <PortletPortletCategory portalPortletId="ListParties" portletCategoryId="PARTY_PROFILE"/>
+  <PortletPortletCategory portalPortletId="PartyDetailsMenu" portletCategoryId="PARTY_PROFILE"/>
+  <PortletPortletCategory portalPortletId="PartyDetail" portletCategoryId="PARTY_PROFILE"/>
+
+
+  <PortalPage portalPageId="PartyMgmt" sequenceNum="0" portalPageName="Party Managment" description="Find, List Party and show menu to look for all Party Portlet" ownerUserLoginId="_NA_"/>
+  <PortalPageColumn portalPageId="PartyMgmt" columnSeqId="00001" columnWidthPercentage="25"/>
+   <PortalPagePortlet portalPageId="PartyMgmt" portalPortletId="FindParties" portletSeqId="00001" columnSeqId="00001" sequenceNum="1"/>
+   <PortalPagePortlet portalPageId="PartyMgmt" portalPortletId="PartyDetailsMenu" portletSeqId="00001" columnSeqId="00001" sequenceNum="2"/>
+  <PortalPageColumn portalPageId="PartyMgmt" columnSeqId="00002"/><!-- no width in pixels or percent, use the rest of the space available -->
+   <PortalPagePortlet portalPageId="PartyMgmt" portalPortletId="ListParties" portletSeqId="00001" columnSeqId="00002" sequenceNum="1"/>
+   <PortalPagePortlet portalPageId="PartyMgmt" portalPortletId="PartyDetail" portletSeqId="00001" columnSeqId="00002" sequenceNum="2"/>
+
+<!--#Eam# portletWidget portlet-party  -->
 </entity-engine-xml>

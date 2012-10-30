@@ -30,4 +30,68 @@ under the License.
     <Content contentId="PARTY_findparty" contentTypeId="DOCUMENT" contentName="List parties Help" templateDataResourceId="HELP_TEMPL" dataResourceId="PARTY_findparty" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
     <ContentAssoc contentId="HELP_PARTY" contentIdTo="PARTY_findparty" contentAssocTypeId="TREE_CHILD" fromDate="2006-01-12 01:01:01" sequenceNum="000" mapKey="PARTY_findparty"/>
 
+
+
+    <DataResource dataResourceId="HELP_PartyInfo" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="applications/party/data/helpdata/EN/HELP_PartyInfo.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Help files" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_PartyInfo" contentTypeId="DOCUMENT" contentName="Party's Information" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_PartyInfo" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="H_PartyInfo_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="applications/party/data/helpdata/FR/HELP_PartyInfo.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Usage des fichiers d'aide" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="H_PartyInfo_FR" contentTypeId="DOCUMENT" contentName="Les informations d'un acteur" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="H_PartyInfo_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_PartyInfo" contentIdTo="H_PartyInfo_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+    <ContentAssoc contentId="HELP_PARTY" contentIdTo="HELP_PartyInfo" contentAssocTypeId="INSTANCE" fromDate="2006-01-12 01:01:01" sequenceNum="000"  mapKey="HELP_PartyInfo"/>
+
+    <DataResource dataResourceId="HELP_SelectParty" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="applications/party/data/helpdata/EN/HELP_SelectParty.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Help files" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_SelectParty" contentTypeId="DOCUMENT" contentName="Select a Party" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_SelectParty" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="H_SelectParty_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="applications/party/data/helpdata/FR/HELP_SelectParty.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Usage des fichiers d'aide" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="H_SelectParty_FR" contentTypeId="DOCUMENT" contentName="Sélection d'un acteur" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="H_SelectParty_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_SelectParty" contentIdTo="H_SelectParty_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+    <ContentAssoc contentId="HELP_PARTY" contentIdTo="HELP_SelectParty" contentAssocTypeId="INSTANCE" fromDate="2006-01-12 01:01:01" sequenceNum="000"  mapKey="HELP_SelectParty"/>
+
+    <DataResource dataResourceId="HELP_PartyUserLogins" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="applications/party/data/helpdata/EN/HELP_PartyUserLogins.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Help files" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_PartyUserLogins" contentTypeId="DOCUMENT" contentName="Party's UserLogins" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_PartyUserLogins" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="H_PartyUserLogins_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="applications/party/data/helpdata/FR/HELP_PartyUserLogins.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Usage des fichiers d'aide" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="H_PartyUserLogins_FR" contentTypeId="DOCUMENT" contentName="Les Logins d'un acteur" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="H_PartyUserLogins_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_PartyUserLogins" contentIdTo="H_PartyUserLogins_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01" />
+    <ContentAssoc contentId="HELP_PARTY" contentIdTo="HELP_PartyUserLogins" contentAssocTypeId="INSTANCE" fromDate="2006-01-12 01:01:01" sequenceNum="000" mapKey="HELP_PartyUserLogins"/>
+
+    <DataResource dataResourceId="HELP_ContactMechMgmt" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="applications/party/data/helpdata/EN/HELP_ContactMechMgmt.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Help files" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_ContactMechMgmt" contentTypeId="DOCUMENT" contentName="Contact Mech Managment" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_ContactMechMgmt" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="H_ContactMechMgmt_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="applications/party/data/helpdata/FR/HELP_ContactMechMgmt.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Usage des fichiers d'aide" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="H_ContactMechMgmt_FR" contentTypeId="DOCUMENT" contentName="Gestion des coordonnées" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="H_ContactMechMgmt_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_ContactMechMgmt" contentIdTo="H_ContactMechMgmt_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+    <ContentAssoc contentId="HELP_PARTY" contentIdTo="HELP_ContactMechMgmt" contentAssocTypeId="INSTANCE" fromDate="2006-01-12 01:01:01" sequenceNum="000"  mapKey="HELP_ContactMechMgmt"/>
+
+    <DataResource dataResourceId="HELP_PartyRelFroms" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="applications/party/data/helpdata/EN/HELP_PartyRelationFroms.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Help files" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_PartyRelFroms" contentTypeId="DOCUMENT" contentName="Contact Mech Managment" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_PartyRelFroms" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="H_PartyRelFroms_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="applications/party/data/helpdata/FR/HELP_PartyRelationFroms.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Usage des fichiers d'aide" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="H_PartyRelFroms_FR" contentTypeId="DOCUMENT" contentName="Gestion des coordonnées" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="H_PartyRelFroms_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_PartyRelFroms" contentIdTo="H_PartyRelFroms_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+    <ContentAssoc contentId="HELP_PARTY" contentIdTo="HELP_PartyRelFroms" contentAssocTypeId="INSTANCE" fromDate="2006-01-12 01:01:01" sequenceNum="000"  mapKey="HELP_PartyRelationFroms"/>
+
+    <DataResource dataResourceId="HELP_PartyRelTos" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="applications/party/data/helpdata/EN/HELP_PartyRelationTos.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Help files" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_PartyRelTos" contentTypeId="DOCUMENT" contentName="Contact Mech Managment" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_PartyRelTos" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="H_PartyRelTos_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="applications/party/data/helpdata/FR/HELP_PartyRelationTos.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Usage des fichiers d'aide" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="H_PartyRelTos_FR" contentTypeId="DOCUMENT" contentName="Gestion des coordonnées" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="H_PartyRelTos_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_PartyRelTos" contentIdTo="H_PartyRelTos_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+    <ContentAssoc contentId="HELP_PARTY" contentIdTo="HELP_PartyRelTos" contentAssocTypeId="INSTANCE" fromDate="2006-01-12 01:01:01" sequenceNum="000"  mapKey="HELP_PartyRelationTos"/>
+
+    <DataResource dataResourceId="HELP_PartyRoles" localeString="en" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="applications/party/data/helpdata/EN/HELP_PartyRoles.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Help files" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="HELP_PartyRoles" contentTypeId="DOCUMENT" contentName="Contact Mech Managment" templateDataResourceId="HELP_TEMPL" dataResourceId="HELP_PartyRoles" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <DataResource dataResourceId="H_PartyRoles_FR" localeString="fr" dataResourceTypeId="OFBIZ_FILE" 
+        objectInfo="applications/party/data/helpdata/FR/HELP_PartyRoles.xml" dataTemplateTypeId="NONE" statusId="CTNT_IN_PROGRESS" dataResourceName="Usage des fichiers d'aide" mimeTypeId="text/xml" isPublic="Y" />
+    <Content contentId="H_PartyRoles_FR" contentTypeId="DOCUMENT" contentName="Gestion des coordonnées" templateDataResourceId="HELP_TEMPL" localeString="fr" dataResourceId="H_PartyRoles_FR" statusId="CTNT_IN_PROGRESS" mimeTypeId="text/html"/>
+    <ContentAssoc contentId="HELP_PartyRoles" contentIdTo="H_PartyRoles_FR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2006-01-12 01:01:01"/>
+    <ContentAssoc contentId="HELP_PARTY" contentIdTo="HELP_PartyRoles" contentAssocTypeId="INSTANCE" fromDate="2006-01-12 01:01:01" sequenceNum="000"  mapKey="HELP_PartyRoles"/>
 </entity-engine-xml>

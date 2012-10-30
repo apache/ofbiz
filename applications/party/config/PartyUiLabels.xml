@@ -1058,6 +1058,16 @@
         <value xml:lang="zh">会员分类类型标识</value>
         <value xml:lang="zh_TW">成員分類類型</value>
     </property>
+<!--#Bam# portletWidget-party -->
+
+    <property key="FormFieldTitle_parentPartyClassificationTypeId">
+        <value xml:lang="en">Parent Party Classification Type Id</value>
+        <value xml:lang="fr">Classification d'acteur parent</value>
+    </property>
+    
+<!--#Eam# portletWidget-party -->
+
+
     <property key="FormFieldTitle_partyContentTypeId">
         <value xml:lang="de">Übergeordnete Kontakttyp ID</value>
         <value xml:lang="en">Parent Content Type Id</value>
@@ -1150,6 +1160,16 @@
         <value xml:lang="zh">会员邀请标识</value>
         <value xml:lang="zh_TW">成員邀請ID</value>
     </property>
+<!--#Bam# portletWidget-party -->
+
+    <property key="FormFieldTitle_partyName">
+        <value xml:lang="en">Name</value>
+        <value xml:lang="fr">Nom</value>
+    </property>
+    
+<!--#Eam# portletWidget-party -->
+
+
     <property key="FormFieldTitle_partyRelationshipName">
         <value xml:lang="de">Akteur Beziehungsname</value>
         <value xml:lang="en">Party Relationship Name</value>
@@ -1377,6 +1397,26 @@
         <value xml:lang="zh">居住状态枚举类型</value>
         <value xml:lang="zh_TW">居住狀態</value>
     </property>
+<!--#Bam# portletWidget-party -->
+
+    <property key="FormFieldTitle_roleTypeGroupIdFrom">
+        <value xml:lang="en">Role Type Group From</value>
+        <value xml:lang="fr">Groupe de Rôle d'origine</value>
+    </property>
+    
+<!--#Eam# portletWidget-party -->
+<!--#Bam# portletWidget-party -->
+
+    <property key="FormFieldTitle_roleTypeGroupIdTo">
+        <value xml:lang="en">Role Type Group To</value>
+        <value xml:lang="fr">Groupe de Rôle de destination</value>
+    </property>
+    
+<!--#Eam# portletWidget-party -->
+
+
+
+
     <property key="FormFieldTitle_roleTypeId">
         <value xml:lang="ar">تعريف نوع الدور</value>
         <value xml:lang="de">Rolle Typ ID</value>
@@ -2379,6 +2419,38 @@
         <value xml:lang="zh">会员邀请</value>
         <value xml:lang="zh_TW">成員邀請</value>
     </property>
+<!--#Bam# portletWidget-party -->
+
+    <property key="PageTitlePartyRelationTos">
+        <value xml:lang="en">Party Lists to which it is associated</value>
+        <value xml:lang="fr">Liste des acteurs auxquels il est associés</value>
+    </property>
+    
+<!--#Eam# portletWidget-party -->
+<!--#Bam# portletWidget-party -->
+
+    <property key="PageTitlePartyUserLogins">
+        <value xml:lang="de">Benutzername(n)</value>
+        <value xml:lang="en">UserLogins management</value>
+        <value xml:lang="es">Usuario(s)</value>
+        <value xml:lang="fr">Gestion des identifiants de connexion</value>
+        <value xml:lang="hi_IN">उपयोगकर्ता नाम(ओं)</value>
+        <value xml:lang="it">Nome Utente(i)</value>
+        <value xml:lang="nl">Gebruikersnamen</value>
+        <value xml:lang="pt_BR">Nome(s) de usuário</value>
+        <value xml:lang="pt_PT">Utilizador(es)</value>
+        <value xml:lang="ro">Nume Utilizator(i)</value>
+        <value xml:lang="ru">Имя пользователя (ей)</value>
+        <value xml:lang="th">ชื่อผู้ใช้</value>
+        <value xml:lang="zh">用户名</value>
+        <value xml:lang="zh_TW">使用者名稱</value>
+    </property>
+    
+<!--#Eam# portletWidget-party -->
+
+
+
+
     <property key="PageTitlePendingCommunications">
         <value xml:lang="de">Anstehende Kommunikationen</value>
         <value xml:lang="en">Pending Communications</value>
@@ -2412,6 +2484,16 @@
         <value xml:lang="zh">安全组列表</value>
         <value xml:lang="zh_TW">安全組列表</value>
     </property>
+<!--#Bam# portletWidget-party -->
+
+    <property key="PageTitleSelectParty">
+        <value xml:lang="en">Select one Party</value>
+        <value xml:lang="fr">Sélection d'un acteur</value>
+    </property>
+    
+<!--#Eam# portletWidget-party -->
+
+
     <property key="PageTitleShoppingList">
         <value xml:lang="cs">Nákupní seznam</value>
         <value xml:lang="de">Einkaufsliste</value>
@@ -2848,13 +2930,15 @@
     <property key="PartyAddToSecondRole">
         <value xml:lang="de">Zweitrolle hinzufügen</value>
         <value xml:lang="en">Add To Second Role</value>
-        <value xml:lang="fr">Ajouter le rôle secondaire</value>
+        <value xml:lang="fr">Ajouter un rôle fils</value>
+        
         <value xml:lang="vi">Thêm vào vai trò thứ 2</value>
     </property>
     <property key="PartyAddToRoleViewAll">
         <value xml:lang="de">Rolle hinzufügen: generelle Ansicht</value>
         <value xml:lang="en">Add To Role : view all</value>
-        <value xml:lang="fr">Ajouter le rôle : vue générale</value>
+        <value xml:lang="fr">Ajouter un rôle : (parmi tous les rôles)</value>
+        
         <value xml:lang="vi">Thêm vào vai trò : xem tất cả</value>
     </property>
     <property key="PartyAddToRole">
@@ -10461,6 +10545,16 @@
         <value xml:lang="zh">会员角色类型标识到 (新)</value>
         <value xml:lang="zh_TW">成員角色類型到 (新)</value>
     </property>
+<!--#Bam# portletWidget-party -->
+
+    <property key="PartyRoleTypeParent">
+        <value xml:lang="en">Parent Role Type Id</value>
+        <value xml:lang="fr">Rôle Père</value>
+    </property>
+    
+<!--#Eam# portletWidget-party -->
+
+
     <property key="PartyRoleTypeTo">
         <value xml:lang="de">Rolle Typ an</value>
         <value xml:lang="en">Role Type To</value>
@@ -10627,6 +10721,16 @@
         <value xml:lang="zh">选择联系方式</value>
         <value xml:lang="zh_TW">選擇連絡方式</value>
     </property>
+<!--#Bam# portletWidget-party -->
+
+    <property key="PartySelectMainRole">
+        <value xml:lang="en">Select the Parent Role</value>
+        <value xml:lang="fr">Sélectionnez le rôle père</value>
+    </property>
+    
+<!--#Eam# portletWidget-party -->
+
+
     <property key="PartySelectMimeType">
         <value xml:lang="de">Mime Typ auswählen</value>
         <value xml:lang="en">Select Mime Type</value>
@@ -12233,4 +12337,54 @@
         <value xml:lang="zh">找不到邮政编码</value>
         <value xml:lang="zh_TW">找不到郵遞區號</value>
     </property>
+
+<!--#Bam# portletWidget-party -->
+
+    <property key="CreateNewFaxNumber">
+        <value xml:lang="en">Add a phone number</value>
+        <value xml:lang="fr">Ajouter un fax</value>
+    </property>
+    
+<!--#Eam# portletWidget-party -->
+<!--#Bam# portletWidget-party -->
+
+    <property key="CreateNewMailAddress">
+        <value xml:lang="en">Add an Email address</value>
+        <value xml:lang="fr">Ajouter une Adresse mail</value>
+    </property>
+    
+<!--#Eam# portletWidget-party -->
+<!--#Bam# portletWidget-party -->
+
+    <property key="CreateNewMobileNumber">
+        <value xml:lang="en">Add a phone number</value>
+        <value xml:lang="fr">Ajouter un portable</value>
+    </property>
+    
+<!--#Eam# portletWidget-party -->
+<!--#Bam# portletWidget-party -->
+
+    <property key="CreateNewPostalAddress">
+        <value xml:lang="en">Add a postal Address</value>
+        <value xml:lang="fr">Ajouter une Adresse postale</value>
+    </property>
+    
+<!--#Eam# portletWidget-party -->
+<!--#Bam# portletWidget-party -->
+
+    <property key="CreateNewTelNumber">
+        <value xml:lang="en">Add a phone number</value>
+        <value xml:lang="fr">Ajouter un num.tel.</value>
+    </property>
+
+<!--#Eam# portletWidget-party -->
+
+
+
+
+
+
+
+
+
 </resource>

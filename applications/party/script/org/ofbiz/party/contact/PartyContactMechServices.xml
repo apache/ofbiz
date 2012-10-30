@@ -161,6 +161,18 @@ under the License.
         </if-empty>
         <now-timestamp field="partyContactMech.thruDate"/>
         <store-value value-field="partyContactMech"/>
+        <!--#Bam# contactMechMgmtPortlet -->
+        <get-related relation-name="PartyContactMechPurpose" list="pcmps" value-field="partyContactMech"/>
+        <if-not-empty field="pcmps">
+            <!-- Deactivate all contactMechPurpose if necessary -->
+            <iterate entry="pcmp" list="pcmps">
+                <if-empty field="pcmp.thruDate">
+                    <now-timestamp field="pcmp.thruDate"/>
+                    <store-value value-field="pcmp"/>
+                </if-empty>
+            </iterate>
+        </if-not-empty>
+        <!--#Eam# contactMechMgmtPortlet -->
     </simple-method>
 
     <simple-method method-name="createPartyPostalAddress" short-description="Create a PostalAddress for party">

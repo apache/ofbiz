@@ -257,13 +257,27 @@ public class ContactMechWorker {
     }
 
     public static Collection<Map<String, GenericValue>> getWorkEffortContactMechValueMaps(Delegator delegator, String workEffortId) {
+      //#Bam# ContactMechMgmtPortlet
+        return getWorkEffortContactMechValueMaps(delegator, workEffortId, false);
+    }
+    
+    public static Collection<Map<String, GenericValue>> getWorkEffortContactMechValueMaps(Delegator delegator, String workEffortId, boolean showOld) {
+      //#Eam# ContactMechMgmtPortlet
         Collection<Map<String, GenericValue>> workEffortContactMechValueMaps = FastList.newInstance();
 
         List<GenericValue> allWorkEffortContactMechs = null;
 
         try {
             List<GenericValue> workEffortContactMechs = delegator.findByAnd("WorkEffortContactMech", UtilMisc.toMap("workEffortId", workEffortId), null, false);
+//      #Bam# ContactMechMgmtPortlet
+            /*
             allWorkEffortContactMechs = EntityUtil.filterByDate(workEffortContactMechs);
+            */if (!showOld) {
+                allWorkEffortContactMechs = EntityUtil.filterByDate(workEffortContactMechs);
+            } else  {
+                allWorkEffortContactMechs = workEffortContactMechs;
+            }
+//            #Eam# ContactMechMgmtPortlet
         } catch (GenericEntityException e) {
             Debug.logWarning(e, module);
         }
@@ -305,8 +319,147 @@ public class ContactMechWorker {
 
         return workEffortContactMechValueMaps.size() > 0 ? workEffortContactMechValueMaps : null;
     }
+    
+//    #Bam# ContactMechMgmtPortlet
+    @SuppressWarnings("deprecation")
+    public static void getWorkEffortContactMechAndRelated(ServletRequest request, String workEffortId, Map<String, Object> target, boolean showOld) {
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
+        
+        boolean tryEntity = true;
+        if (request.getAttribute("_ERROR_MESSAGE_") != null) tryEntity = false;
+        if ("true".equals(request.getParameter("tryEntity"))) tryEntity = true;
+        
+        String donePage = request.getParameter("DONE_PAGE");
+        if (donePage == null) donePage = (String) request.getAttribute("DONE_PAGE");
+        if (donePage == null || donePage.length() <= 0) donePage = "viewprofile";
+        target.put("donePage", donePage);
+        
+        String contactMechTypeId = request.getParameter("preContactMechTypeId");
+        if (contactMechTypeId == null) contactMechTypeId = (String) request.getAttribute("preContactMechTypeId");
+        if (contactMechTypeId != null)
+            tryEntity = false;
+        
+        String contactMechId = request.getParameter("contactMechId");
+        if (request.getAttribute("contactMechId") != null)
+            contactMechId = (String) request.getAttribute("contactMechId");
+        
+        GenericValue contactMech = null;
+        if (contactMechId != null) {
+            target.put("contactMechId", contactMechId);
+            
+         // try to find a WorkEffortContactMech with a valid date range
+            List<GenericValue> workEffortContactMechs = null;
+            
+            try {
+                workEffortContactMechs = delegator.findByAnd("WorkEffortContactMech", UtilMisc.toMap("workEffortId", workEffortId, "contactMechId", contactMechId), null, false);
+                if (!showOld) workEffortContactMechs = EntityUtil.filterByDate(workEffortContactMechs, true);
+            } catch (GenericEntityException e) {
+                Debug.logWarning(e, module);
+            }
+            
+            GenericValue workEffortContactMech = EntityUtil.getFirst(workEffortContactMechs);
+            if (workEffortContactMech != null) {
+                target.put("workEffortContactMech", workEffortContactMech);
+            }
+            
+            try {
+                contactMech = delegator.findOne("ContactMech", UtilMisc.toMap("contactMechId", contactMechId), false);
+            } catch (GenericEntityException e) {
+                Debug.logWarning(e, module);
+            }
+            
+            if (contactMech != null) {
+                target.put("contactMech", contactMech);
+                contactMechTypeId = contactMech.getString("contactMechTypeId");
+            }
+        }
+        
+        if (contactMechTypeId != null) {
+            target.put("contactMechTypeId", contactMechTypeId);
+            
+            try {
+                GenericValue contactMechType = delegator.findOne("ContactMechType", UtilMisc.toMap("contactMechTypeId", contactMechTypeId), false);
+                
+                if (contactMechType != null)
+                    target.put("contactMechType", contactMechType);
+            } catch (GenericEntityException e) {
+                Debug.logWarning(e, module);
+            }
+        }
+        
+        String requestName;
+        if (contactMech == null) {
+         // create
+            if ("POSTAL_ADDRESS".equals(contactMechTypeId)) {
+                if (request.getParameter("contactMechPurposeTypeId") != null || request.getAttribute("contactMechPurposeTypeId") != null) {
+                    requestName = "createPostalAddressAndPurpose";
+                } else {
+                    requestName = "createPostalAddress";
+                }
+            } else if ("TELECOM_NUMBER".equals(contactMechTypeId)) {
+                requestName = "createTelecomNumber";
+            } else if ("EMAIL_ADDRESS".equals(contactMechTypeId)) {
+                requestName = "createEmailAddress";
+            } else {
+                requestName = "createContactMech";
+            }
+        } else {
+         // update
+            if ("POSTAL_ADDRESS".equals(contactMechTypeId)) {
+                requestName = "updatePostalAddress";
+            } else if ("TELECOM_NUMBER".equals(contactMechTypeId)) {
+                requestName = "updateTelecomNumber";
+            } else if ("EMAIL_ADDRESS".equals(contactMechTypeId)) {
+                requestName = "updateEmailAddress";
+            } else {
+                requestName = "updateContactMech";
+            }
+        }
+        target.put("requestName", requestName);
+        
+        if ("POSTAL_ADDRESS".equals(contactMechTypeId)) {
+            GenericValue postalAddress = null;
+            
+            try {
+                if (contactMech != null) postalAddress = contactMech.getRelatedOne("PostalAddress", false);
+            } catch (GenericEntityException e) {
+                Debug.logWarning(e, module);
+            }
+            if (postalAddress != null) target.put("postalAddress", postalAddress);
+        } else if ("TELECOM_NUMBER".equals(contactMechTypeId)) {
+            GenericValue telecomNumber = null;
+            
+            try {
+                if (contactMech != null) telecomNumber = contactMech.getRelatedOne("TelecomNumber", false);
+            } catch (GenericEntityException e) {
+                Debug.logWarning(e, module);
+            }
+            if (telecomNumber != null) target.put("telecomNumber", telecomNumber);
+        }
+        
+        if ("true".equals(request.getParameter("useValues"))) tryEntity = true;
+        target.put("tryEntity", Boolean.valueOf(tryEntity));
+        try {
+            Collection<GenericValue> contactMechTypes = delegator.findList("ContactMechType", null, null, null, null, true);
+            
+            if (contactMechTypes != null) {
+                target.put("contactMechTypes", contactMechTypes);
+            }
+        }  catch (GenericEntityException e) {
+            Debug.logWarning(e, module);
+        }
+    }
+//  #Eam# ContactMechMgmtPortlet
+
 
     public static void getContactMechAndRelated(ServletRequest request, String partyId, Map<String, Object> target) {
+//      #Bam# ContactMechMgmtPortlet
+        getContactMechAndRelated(request, partyId, target, false);
+    }
+    
+    @SuppressWarnings("deprecation")
+    public static void getContactMechAndRelated(ServletRequest request, String partyId, Map<String, Object> target, boolean showOld) {
+//      #Eam# ContactMechMgmtPortlet
         Delegator delegator = (Delegator) request.getAttribute("delegator");
 
         boolean tryEntity = true;
@@ -338,7 +491,13 @@ public class ContactMechWorker {
             List<GenericValue> partyContactMechs = null;
 
             try {
+//              #Bam# ContactMechMgmtPortlet
+                /*
                 partyContactMechs = EntityUtil.filterByDate(delegator.findByAnd("PartyContactMech", UtilMisc.toMap("partyId", partyId, "contactMechId", contactMechId), null, false), true);
+                */
+                partyContactMechs = delegator.findByAnd("PartyContactMech", UtilMisc.toMap("partyId", partyId, "contactMechId", contactMechId), null, false);
+                if (!showOld) partyContactMechs = EntityUtil.filterByDate(partyContactMechs, true);
+//              #Eam# ContactMechMgmtPortlet
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -351,7 +510,13 @@ public class ContactMechWorker {
                 Collection<GenericValue> partyContactMechPurposes = null;
 
                 try {
+//                  #Bam# ContactMechMgmtPortlet
+                    /*
                     partyContactMechPurposes = EntityUtil.filterByDate(partyContactMech.getRelated("PartyContactMechPurpose", null, null, false), true);
+                    */
+                    partyContactMechPurposes = partyContactMech.getRelated("PartyContactMechPurpose", null, null, false);
+                    if (!showOld) partyContactMechPurposes = EntityUtil.filterByDate((List<GenericValue>) partyContactMechPurposes, true);
+//                  #Eam# ContactMechMgmtPortlet
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
                 }
@@ -519,6 +684,13 @@ public class ContactMechWorker {
     }
 
     public static void getFacilityContactMechAndRelated(ServletRequest request, String facilityId, Map<String, Object> target) {
+//      #Bam# ContactMechMgmtPortlet
+        getFacilityContactMechAndRelated(request, facilityId, target, false);
+    }
+    
+    @SuppressWarnings("deprecation")
+    public static void getFacilityContactMechAndRelated(ServletRequest request, String facilityId, Map<String, Object> target, boolean showOld) {
+//      #Bam# ContactMechMgmtPortlet
         Delegator delegator = (Delegator) request.getAttribute("delegator");
 
         boolean tryEntity = true;
@@ -550,7 +722,13 @@ public class ContactMechWorker {
             List<GenericValue> facilityContactMechs = null;
 
             try {
+//              #Bam# ContactMechMgmtPortlet
+                /*
                 facilityContactMechs = EntityUtil.filterByDate(delegator.findByAnd("FacilityContactMech", UtilMisc.toMap("facilityId", facilityId, "contactMechId", contactMechId), null, false), true);
+                */
+                facilityContactMechs = delegator.findByAnd("FacilityContactMech", UtilMisc.toMap("facilityId", facilityId, "contactMechId", contactMechId), null, false);
+                if (!showOld) facilityContactMechs = EntityUtil.filterByDate(facilityContactMechs, true);
+//              #Eam# ContactMechMgmtPortlet
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -563,7 +741,13 @@ public class ContactMechWorker {
                 Collection<GenericValue> facilityContactMechPurposes = null;
 
                 try {
+//                  #Bam# ContactMechMgmtPortlet
+                    /*
                     facilityContactMechPurposes = EntityUtil.filterByDate(facilityContactMech.getRelated("FacilityContactMechPurpose", null, null, false), true);
+                    */
+                    facilityContactMechPurposes = facilityContactMech.getRelated("FacilityContactMechPurpose", null, null, false);
+                    if (!showOld) facilityContactMechPurposes = EntityUtil.filterByDate((List<GenericValue>) facilityContactMechPurposes, true);
+//                  #Eam# ContactMechMgmtPortlet
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
                 }

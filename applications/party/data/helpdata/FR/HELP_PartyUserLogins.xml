@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements. See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to you under the Apache License, Version
+2.0 (the "License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+applicable law or agreed to in writing, software distributed under the
+License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for
+the specific language governing permissions and limitations under the
+License.
+-->
+<section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    version="5.0" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
+    xsi:schemaLocation="http://docbook.org/ns/docbook"
+    xmlns="http://docbook.org/ns/docbook">
+    <title>Portlet de Liste des utilisateurs de connexion d'un acteur.</title>
+
+      <para>Cette portlet liste tous les utilisateurs de connexion associés à un acteur. La plupart du temps, il n'y a qu'un
+            utilisateur de connexion par acteur, mais pour les acteurs de type société, il peut être utile de pouvoir
+            créer de multiple utilisateurs, plutot que de créer des acteurs pour chaque employé(e).</para>
+      <para>Un utilisateur de connexion permet de se connecter à l'application OFBiz. Les groupes de sécurité auxquels il est associé
+            déterminent les écrans qu'il peut voir et les fonctions qu'il peux excécuter.</para>
+      <para>&amp;nbsp;</para>
+
+    <section>
+      <title>Limitations ou futures fonctionnalitées</title>
+      <itemizedlist>
+          <listitem><para>Seul les 5 premiers utilisateur de connexion sont affichés</para> </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Les paramètres de la Portlet</title>
+      <itemizedlist>
+          <listitem><para>Le show screenlet menu Standard, il permet de cacher le menu de la portlet (refresh et ajout d'un utilisateur de connexion)</para> </listitem>
+          <listitem><para>Le show edit menu Standard: si il est positionné à N alors le bouton "ajout d'un utilisateur de connexion" n'apparait pas</para></listitem>
+          <listitem><para>security Group Id : Si un groupe de sécurité est indiqué alors le bouton "ajout d'un utilisateur de connexion" associe ce 
+            groupe de sécurité à l'utilisateur de connexion juste après sa création</para></listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Règles de Securité</title>
+      <itemizedlist>
+          <listitem><para>SECURITY_VIEW est nécessaire pour voir la liste des groupes de sécurité</para> </listitem>
+          <listitem><para>PARTYMGR_CREATE est nécessaire pour avoir le bouton "ajout d'un utilisateur de connexion", 
+            ainsi que SECURITY_CREATE si il y a un ajout de groupe de securité en automatique (cf paramètre Security Group Id)</para></listitem>
+          <listitem><para>PARTYMGR_UPDATE et SECURITY_ADMIN sont nécessaires pour pourvoir éditer les informations de sécurité d'un utilisateur de connexion 
+            (le rendre valide ou non, changer son mot de passe, ...) et pour gérer les groupes de sécurité associés à un utilisateur de connexion.</para></listitem>
+          <listitem><para>Quand un utilisateur accéde à cette portlet pour lui-même, il peut changer son mot de passe</para></listitem>
+      </itemizedlist>
+    </section>
+</section>

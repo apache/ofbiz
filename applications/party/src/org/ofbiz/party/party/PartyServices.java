@@ -21,6 +21,7 @@ package org.ofbiz.party.party;
 
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -33,6 +34,7 @@ import javolution.util.FastMap;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
@@ -45,7 +47,6 @@ import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityFunction;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.DynamicViewEntity;
-import org.ofbiz.entity.model.ModelKeyMap;
 import org.ofbiz.entity.util.EntityFindOptions;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.entity.util.EntityTypeUtil;
@@ -993,12 +994,89 @@ public class PartyServices {
         return ServiceUtil.returnSuccess();
     }
 
+    // #Bam# Portlet-Party
+    public static Map<String, Object> performFindParty(DispatchContext dctx, Map<String, ? extends Object> context) {
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        Delegator delegator = dctx.getDelegator();
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
+        List<String> orderBy = null;
+        if (context.containsKey("orderBy")) orderBy = UtilMisc.toList((String)context.get("orderBy"));
+        boolean lookupFlag = "Y".equals(context.get("lookupFlag"));
+        Integer viewSize = (Integer) context.get("viewSize");
+        Integer viewIndex = (Integer) context.get("viewIndex");
+        Integer maxRows = null;
+        if (viewSize != null && viewIndex != null) {
+            maxRows = viewSize * (viewIndex + 1);
+        } else {
+            maxRows = -1;
+        }
+
+        Map<String, ? extends Object> prepareFind = null;
+        EntityListIterator listIt = null;
+        int listSize = 0;
+        try {
+            prepareFind = PartyWorker.preparePartyDynamicViewAndCondition(delegator, context, userLogin);
+
+            // set distinct on so we only get one row per order
+            EntityFindOptions findOpts = new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, -1, maxRows, true);
+
+            //Retrieve search elements
+            DynamicViewEntity dynamicView = (DynamicViewEntity) prepareFind.get("dynamicView");
+            List<String> fieldsToSelect = UtilGenerics.checkList( prepareFind.get("fieldsToSelect") );
+            EntityCondition mainCond = (EntityCondition) prepareFind.get("conditions");
+
+            //filter orderBy field only on available field selected
+            if (UtilValidate.isNotEmpty(orderBy) && UtilValidate.isNotEmpty(fieldsToSelect)) {
+                List<String> availableField = FastList.newInstance();
+                for (String orderField : orderBy) {
+                    String fieldToOrder = orderField;
+                    if (orderField.startsWith("-")) {
+                        fieldToOrder = orderField.replace("-","");
+                    }
+                    if (fieldsToSelect.contains(fieldToOrder)) {
+                        availableField.add(orderField);
+                    }
+                }
+                orderBy = availableField;
+            }
+            if (lookupFlag) {
+                // using list iterator
+                listIt = delegator.findListIteratorByCondition(dynamicView, mainCond, null, fieldsToSelect, orderBy, findOpts);
+                listSize = listIt.getResultsSizeAfterPartialList();
+            } 
+        } catch (GenericEntityException e) {
+                String errMsg = "Failure in party find operation, rolling back transaction: " + e.toString();
+                Debug.logError(e, errMsg, module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource,
+                    "PartyLookupPartyError",
+                    UtilMisc.toMap("errMessage", e.toString()), locale));
+        }
+
+        if (listSize > 0) {
+            Map<String, Object> queryMap = FastMap.newInstance();
+            queryMap.putAll(context);
+            queryMap.remove("locale");
+            queryMap.remove("userLogin");
+            queryMap.remove("timeZone");
+            result.put("queryString", UtilHttp.urlEncodeArgs(queryMap, true));
+            result.put("queryStringMap", queryMap);
+        }
+        result.put("listIt", listIt);
+        result.put("listSize", listSize);
+        return result;
+    }
+    //#Eam# Portlet-Party
+
     public static Map<String, Object> findParty(DispatchContext dctx, Map<String, ? extends Object> context) {
         Map<String, Object> result = ServiceUtil.returnSuccess();
         Delegator delegator = dctx.getDelegator();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         Locale locale = (Locale) context.get("locale");
         
+        
+        // #Bam# Portlet-Party
+        /*
         String extInfo = (String) context.get("extInfo");
 
         // get the role types
@@ -1486,6 +1564,184 @@ public class PartyServices {
 
         return result;
     }
+        */
+        // get the role types
+        try {
+            List<GenericValue> roleTypes = delegator.findList("RoleType", null, null, UtilMisc.toList("description"), null, false);
+            result.put("roleTypes", roleTypes);
+        } catch (GenericEntityException e) {
+            String errMsg = "Error looking up RoleTypes: " + e.toString();
+            Debug.logError(e, errMsg, module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource,
+                    "PartyLookupRoleTypeError",
+                    UtilMisc.toMap("errMessage", e.toString()), locale));
+        }
+        // current role type
+        String roleTypeId;
+        try {
+            roleTypeId = (String) context.get("roleTypeId");
+            if (UtilValidate.isNotEmpty(roleTypeId)) {
+                GenericValue currentRole = delegator.findOne("RoleType", UtilMisc.toMap("roleTypeId", roleTypeId), true);
+                result.put("currentRole", currentRole);
+            }
+        } catch (GenericEntityException e) {
+            String errMsg = "Error looking up current RoleType: " + e.toString();
+            Debug.logError(e, errMsg, module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource,
+                    "PartyLookupRoleTypeError",
+                    UtilMisc.toMap("errMessage", e.toString()), locale));
+        }
+
+        //get party types
+        try {
+            List<GenericValue> partyTypes = delegator.findList("PartyType", null, null, UtilMisc.toList("description"), null, false);
+            result.put("partyTypes", partyTypes);
+        } catch (GenericEntityException e) {
+            String errMsg = "Error looking up PartyTypes: " + e.toString();
+            Debug.logError(e, errMsg, module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource,
+                    "PartyLookupPartyTypeError",
+                    UtilMisc.toMap("errMessage", e.toString()), locale));
+        }
+
+        // current party type
+        String partyTypeId;
+        try {
+            partyTypeId = (String) context.get("partyTypeId");
+            if (UtilValidate.isNotEmpty(partyTypeId)) {
+                GenericValue currentPartyType = delegator.findOne("PartyType", UtilMisc.toMap("partyTypeId", partyTypeId), true);
+                result.put("currentPartyType", currentPartyType);
+            }
+        } catch (GenericEntityException e) {
+            String errMsg = "Error looking up current PartyType: " + e.toString();
+            Debug.logError(e, errMsg, module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource,
+                    "PartyLookupPartyTypeError",
+                    UtilMisc.toMap("errMessage", e.toString()), locale));
+        }
+
+        // current state
+        String stateProvinceGeoId;
+        try {
+            stateProvinceGeoId = (String) context.get("stateProvinceGeoId");
+            if (UtilValidate.isNotEmpty(stateProvinceGeoId)) {
+                GenericValue currentStateGeo = delegator.findOne("Geo", UtilMisc.toMap("geoId", stateProvinceGeoId), true);
+                result.put("currentStateGeo", currentStateGeo);
+            }
+        } catch (GenericEntityException e) {
+            String errMsg = "Error looking up current stateProvinceGeo: " + e.toString();
+            Debug.logError(e, errMsg, module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource,
+                    "PartyLookupStateProvinceGeoError",
+                    UtilMisc.toMap("errMessage", e.toString()), locale));
+        }
+
+        // set the page parameters
+        int viewIndex = 0;
+        try {
+            viewIndex = Integer.parseInt((String) context.get("VIEW_INDEX"));
+        } catch (Exception e) {
+            viewIndex = 0;
+        }
+        result.put("viewIndex", Integer.valueOf(viewIndex));
+
+        int viewSize = 20;
+        try {
+            viewSize = Integer.parseInt((String) context.get("VIEW_SIZE"));
+        } catch (Exception e) {
+            viewSize = 20;
+        }
+        result.put("viewSize", Integer.valueOf(viewSize));
+
+        // get the lookup flag
+        String lookupFlag = (String) context.get("lookupFlag");
+
+        // prepare param list
+        Map<String, Object> queryMap = FastMap.newInstance();
+        queryMap.putAll(context);
+        queryMap.remove("locale");
+        queryMap.remove("userLogin");
+        queryMap.remove("timeZone");
+        queryMap.remove("VIEW_SIZE");
+        queryMap.remove("VIEW_INDEX");
+        String paramList = "&" + UtilHttp.urlEncodeArgs(queryMap, false);
+
+        List<GenericValue> partyList = null;
+        int partyListSize = 0;
+        int lowIndex = 0;
+        int highIndex = 0;
+
+        List<String> orderBy = FastList.newInstance();
+        if ("Y".equals(lookupFlag)) {
+            String showAll = (context.get("showAll") != null ? (String) context.get("showAll") : "N");
+            Map<String, ? extends Object> prepareFind = null;
+            Map<String, ? extends Object> transmitMap = showAll.equals("N")?context : new HashMap<String, Object>();
+            try {
+                prepareFind = PartyWorker.preparePartyDynamicViewAndCondition(delegator, transmitMap, userLogin);
+            } catch (GenericEntityException e) {
+                String errMsg = "Failure in party find operation, rolling back transaction: " + e.toString();
+                Debug.logError(e, errMsg, module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource,
+                        "PartyLookupPartyError",
+                        UtilMisc.toMap("errMessage", e.toString()), locale));
+            }
+
+            if (!"Y".equals(showAll)) {
+                // check for a partyId
+                if (UtilValidate.isNotEmpty(context.get("firstName")) || UtilValidate.isNotEmpty(context.get("lastName"))) {
+                    orderBy.add("lastName");
+                    orderBy.add("firstName");
+                }
+            }
+            
+            // do the lookup
+            EntityCondition mainCond = (EntityCondition) prepareFind.get("conditions");
+            if (mainCond != null || "Y".equals(showAll)) {
+                try {
+                    // get the indexes for the partial list
+                    lowIndex = viewIndex * viewSize + 1;
+                    highIndex = (viewIndex + 1) * viewSize;
+
+                    // set distinct on so we only get one row per order
+                    EntityFindOptions findOpts = new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, -1, highIndex, true);
+                    // using list iterator
+                    DynamicViewEntity dynamicView = (DynamicViewEntity) prepareFind.get("dynamicView");
+                    List<String> fieldsToSelect = UtilGenerics.checkList( prepareFind.get("fieldsToSelect") );
+                    EntityListIterator pli = delegator.findListIteratorByCondition(dynamicView, mainCond, null, fieldsToSelect, orderBy, findOpts);
+
+                    // get the partial list for this page
+                    partyList = pli.getPartialList(lowIndex, viewSize);
+
+                    // attempt to get the full size
+                    partyListSize = pli.getResultsSizeAfterPartialList();
+                    if (highIndex > partyListSize) {
+                        highIndex = partyListSize;
+                    }
+
+                    // close the list iterator
+                    pli.close();
+                } catch (GenericEntityException e) {
+                    String errMsg = "Failure in party find operation, rolling back transaction: " + e.toString();
+                    Debug.logError(e, errMsg, module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource,
+                            "PartyLookupPartyError",
+                            UtilMisc.toMap("errMessage", e.toString()), locale));
+                }
+            } else {
+                partyListSize = 0;
+            }
+        }
+
+        if (partyList == null) partyList = FastList.newInstance();
+        result.put("partyList", partyList);
+        result.put("partyListSize", Integer.valueOf(partyListSize));
+        result.put("paramList", paramList);
+        result.put("highIndex", Integer.valueOf(highIndex));
+        result.put("lowIndex", Integer.valueOf(lowIndex));
+
+        return result;
+    }
+    // #Eam# Portlet-Party
 
     /**
      * Changes the association of contact mechs, purposes, notes, orders and attributes from

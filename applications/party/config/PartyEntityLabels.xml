@@ -1008,6 +1008,46 @@
         <value xml:lang="zh">网站网址</value>
         <value xml:lang="zh_TW">網站網址</value>
     </property>
+<!--#Bam# portletWidget-party -->
+
+    <property key="FieldDescription.parentPartyClassificationTypeId">
+        <value xml:lang="en">Parent Classification Type use to filter showing classifiction type </value>
+        <value xml:lang="fr">Type de classification parente à utiliser pour filter les types de classification à visualiser</value>
+    </property>
+    
+<!--#Eam# portletWidget-party -->
+<!--#Bam# portletWidget-party -->
+
+    <property key="FieldDescription.roleTypeIdTo">
+        <value xml:lang="en">role Type To</value>
+        <value xml:lang="fr">Rôle de l'acteur utiliser dans l'opération</value>
+    </property>
+    
+<!--#Eam# portletWidget-party -->
+<!--#Bam# portletWidget-party -->
+
+    <property key="FieldDescription.roleRoleTypeId">
+        <value xml:lang="en">Default role use to filter partyRelationship on role type id to to find parties contact</value>
+        <value xml:lang="fr">Rôle à utiliser pour filtrer les acteurs en relation avec la société</value>
+    </property>
+    
+<!--#Eam# portletWidget-party -->
+<!--#Bam# portletWidget-party -->
+
+    <property key="FieldDescription.roleStatusId">
+        <value xml:lang="en">Default status use for the communicationEventRole</value>
+        <value xml:lang="fr">Statut par défaut utilisé par les rôles associés à la communication</value>
+    </property>
+    
+<!--#Eam# portletWidget-party -->
+
+
+
+
+
+
+
+
     <property key="PartyClassificationGroup.description.ASSEMBLY">
         <value xml:lang="de">Montage</value>
         <value xml:lang="en">ASSEMBLY</value>

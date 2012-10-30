@@ -156,4 +156,14 @@ under the License.
         <call-simple-method method-name="duplicatePortalPageDetails"/>
 
     </simple-method>
+
+
+    <simple-method method-name="hasPortalAdminSecurity" short-description="test if user login as PORTAL_ADMIN and put adminSecurity in widget">
+      <if-has-permission permission="PORTALPAGE" action="_ADMIN">
+        <set field="widget.hasPortalAdminSecurity" value="true" type="Boolean"/>
+      <else>
+        <set field="widget.hasPortalAdminSecurity" value="false" type="Boolean"/>
+        </else>
+      </if-has-permission>
+    </simple-method>
 </simple-methods>

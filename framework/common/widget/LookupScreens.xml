@@ -249,4 +249,30 @@ under the License.
             </widgets>
         </section>
     </screen>
+
+    <!--#Bam# portlet-common -->
+    <screen name="LookupNote">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="title" value="${uiLabelMap.CommonLookupNote}"/>
+                <set field="queryString" from-field="result.queryString"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="NoteData"/>
+                <set field="searchFields" value="[noteId, noteName]"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="search-options">
+                        <include-form name="LookupNote" location="component://common/widget/LookupForms.xml"/>
+                    </decorator-section>
+                    <decorator-section name="search-results">
+                        <include-form name="listLoookupNote" location="component://common/widget/LookupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <!--#Eam# portlet-common -->
 </screens>

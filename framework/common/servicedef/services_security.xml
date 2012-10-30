@@ -92,6 +92,18 @@ under the License.
     </service>
 
     <!-- ProtectedView to SecurityGroup services -->
+    <service name="createUserLoginAndSecurityGroup" engine="java"
+        location="org.ofbiz.common.login.LoginServices" invoke="createUserLoginAndSecurityGroup" auth="true">
+        <description>Create UserLogin and add a SecurityGroupId to the userLogin. 
+                     securityGroupId is read directly as a portletAttribute "securityGroupId".
+                     Tested by a JunitTest</description>
+        <implements service="createUserLogin"/>
+<!--        <attribute name="securityGroupId" mode="IN" type="String" optional="false"/> to avoid user modification on client side, so read portlet attribute-->
+        <attribute name="portalPageId" type="String" mode="IN" optional="false"/>
+        <attribute name="portalPortletId" type="String" mode="IN" optional="false"/>
+        <attribute name="portletSeqId" type="String" mode="IN" optional="false"/>
+    </service>
+
     <service name="addProtectedViewToSecurityGroup" engine="entity-auto" invoke="create" default-entity-name="ProtectedView" auth="true">
         <description>Add a Protected View to a SecurityGroup</description>
         <permission-service service-name="securityPermissionCheck" main-action="CREATE"/>
