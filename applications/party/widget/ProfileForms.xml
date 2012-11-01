@@ -141,7 +141,7 @@ under the License.
             <sort-field name="find"/>
     </sort-order>
     </form>
-    <form name="EditParam_FindParties" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml" default-entity-name="PartyClassificationType">
+    <form name="EditParam_FindParties" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml" default-entity-name="PartyAttribute">
         <field name="useAreaCode"><radio no-current-selected-key="N"><option key="Y"/><option key="N"/></radio></field>
         <field name="useCountryCode"><radio no-current-selected-key="N"><option key="Y"/><option key="N"/></radio></field>
         <field name="resultPortalPortletId">
@@ -242,7 +242,7 @@ under the License.
         <on-event-update-area event-type="paginate" area-target="showPortlet" area-id="${currentAreaId}"/>
     </form>
 
-    <form name="EditParam_PartyDetailsMenu" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml" default-entity-name="PartyClassificationType">
+    <form name="EditParam_PartyDetailsMenu" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml" default-entity-name="PartyAttribute">
         <field name="ContactMechMgmtMenu">   <radio no-current-selected-key="Y"><option key="Y"/><option key="N"/></radio></field>
         <field name="PartyRelationFromsMenu"><radio no-current-selected-key="Y"><option key="Y"/><option key="N"/></radio></field>
         <field name="PartyUserLoginsMenu">   <radio no-current-selected-key="Y"><option key="Y"/><option key="N"/></radio></field>
@@ -415,7 +415,7 @@ under the License.
         </on-event-update-area>
     </form>
 
-    <form name="EditParam_PartyUserLogin" type="single" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml">
+    <form name="EditParam_PartyUserLogin" type="single" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml" default-entity-name="PartyAttribute">
          <actions>
           <call-parent-actions/>
           <script location="component://party/script/org/ofbiz/party/ProfileWactions.xml#hasSecurityUpdate"/>
@@ -433,7 +433,7 @@ under the License.
         <field name="submit" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
 
-    <form name="EditParam_ContactMechMgmt" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml">
+    <form name="EditParam_ContactMechMgmt" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml" default-entity-name="PartyAttribute">
         <field name="useCountryCode" tooltip="${uiLabelMap.Tooltips_useCountryCode}"><radio no-current-selected-key="N"><option key="Y"/><option key="N"/></radio></field>
         <field name="useAreaCode" tooltip="${uiLabelMap.Tooltips_useAreaCode}"><radio no-current-selected-key="N"><option key="Y"/><option key="N"/></radio></field>
         <field name="useExtCode" tooltip="${uiLabelMap.Tooltips_useExtCode}"><radio no-current-selected-key="N"><option key="Y"/><option key="N"/></radio></field>
@@ -485,7 +485,7 @@ under the License.
         <field name="updateButton"><submit /></field>
     </form>
 
-    <form name="EditParam_PartyRelationship" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml" default-entity-name="PortletAttribute">
+    <form name="EditParam_PartyRelationship" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml" default-entity-name="PartyAttribute">
         <field name="titleLabel" ><text/></field>
         <field name="roleTypeIdFrom">
             <drop-down allow-empty="true" >
@@ -724,7 +724,7 @@ under the License.
     </form>
 
 
-    <form name="EditParam_PartyRoles" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml" default-entity-name="PortletAttribute">
+    <form name="EditParam_PartyRoles" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml" default-entity-name="PartyAttribute">
         <actions>
           <call-parent-actions/>
           <script location="component://party/script/org/ofbiz/party/ProfileWactions.xml#getParentRoleDescription"/>
@@ -829,7 +829,7 @@ under the License.
             <parameter param-name="partyId" from-field="parameters.partyId"/>
         </on-event-update-area>
     </form>
-    <form name="EditParam_PartyNote" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml" default-entity-name="PartyClassificationType">
+    <form name="EditParam_PartyNote" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml" default-entity-name="PartyAttribute">
         <field name="canEditNote">  <radio no-current-selected-key="Y"><option key="Y"/><option key="N"/></radio></field>
         <field name="assocNoteMenu"><radio no-current-selected-key="Y"><option key="Y"/><option key="N"/></radio></field>
         <field name="updateButton">
@@ -1033,7 +1033,7 @@ under the License.
         </field>
     </form>
 
-    <form name="EditParam_PartyIdentifications" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml">
+    <form name="EditParam_PartyIdentifications" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml" default-entity-name="PartyAttribute">
         <field name="parentTypeId">
             <drop-down allow-empty="true">
                 <entity-options description="${description}" entity-name="PartyIdentificationType" key-field-name="partyIdentificationTypeId">

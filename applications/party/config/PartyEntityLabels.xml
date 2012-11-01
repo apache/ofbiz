@@ -1014,7 +1014,31 @@
         <value xml:lang="en">Parent Classification Type use to filter showing classifiction type </value>
         <value xml:lang="fr">Type de classification parente à utiliser pour filter les types de classification à visualiser</value>
     </property>
-    
+    <property key="FieldDescription.PartyAttribute.roleTypeGroupId">
+        <value xml:lang="en">RoleType Group which will be used in add screen to show only roleType included in this roleTypeGroup. If this field is empty all role type will be .</value>
+        <value xml:lang="fr">Groupe de rôle parmi lequel l'utisateur choisira dans l'écran d'ajout. Si ce champ est vide tous les rôles apparaitront</value>
+    </property>
+    <property key="FieldDescription.PartyAttribute.partyRelationshipTypeId">
+        <value xml:lang="en">Show only Party Relationship with this partyRelationshipTypeId, or left empty if you want to show field</value>
+        <value xml:lang="fr">indiquer le type de relation à utiliser pour filtrer les relations à afficher, ou laisser le champ vide pour les afficher toutes et donc montrer ce champ</value>
+    </property>
+    <property key="FieldDescription.PartyAttribute.roleTypeGroupIdFrom">
+        <value xml:lang="en">If attribute roleType is empty, give roleTypeGroup which will be used in edit screen (add - update) to show only roleType included in this roleTypeGroup. In this case roleTypeId will be show in the list.</value>
+        <value xml:lang="fr">Si le champ Role est vide, indique le groupe de rôle parmi lequel l'utisateur choisira dans l'écran d'édition (ajout - modification). Le champ rôle d'origine sera alors affiché dans la liste.</value>
+    </property>
+    <property key="FieldDescription.PartyAttribute.roleTypeGroupIdTo"><!-- Copy from previous label (xxxxFrom) without change -->
+        <value xml:lang="en">If attribute roleType is empty, give roleTypeGroup which will be used in edit screen (add - update) to show only roleType included in this roleTypeGroup. In this case roleTypeId will be show in the list.</value>
+        <value xml:lang="fr">Si le champ Role est vide, indique le groupe de rôle parmi lequel l'utisateur choisira dans l'écran d'édition (ajout - modification). Le champ rôle de destination sera alors affiché dans la liste.</value>
+    </property>
+    <property key="FieldDescription.PartyAttribute.roleTypeIdFrom">
+        <value xml:lang="en">If this field is fielded, its value will used to filter list, will use on edit screen (add or update), the field roleType will not be show.</value>
+        <value xml:lang="fr">Si ce champ est renseigné, cela permet de filtrer la liste affiché et dans l'écran d'édition (ajout ou modification) ce sera la valeur utilisé, le champ role ne sera pas affiché à l'utilisateur.</value>
+    </property>
+    <property key="FieldDescription.PartyAttribute.roleTypeIdTo"><!-- Copy from previous label (xxxxFrom) without change -->
+        <value xml:lang="en">If this field is fielded, its value will used to filter list, will use on edit screen (add or update), the field roleType will not be show.</value>
+        <value xml:lang="fr">Si ce champ est renseigné, cela permet de filtrer la liste affiché et dans l'écran d'édition (ajout ou modification) ce sera la valeur utilisé, le champ role ne sera pas affiché à l'utilisateur.</value>
+    </property>
+
 <!--#Eam# portletWidget-party -->
 <!--#Bam# portletWidget-party -->
 

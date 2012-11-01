@@ -1795,6 +1795,7 @@ under the License.
     </view-entity>
     <entity entity-name="PartyAttribute"
             package-name="org.ofbiz.party.party"
+            default-resource-name="PartyEntityLabels"
             title="Party Attribute Entity">
       <field name="partyId" type="id-ne"></field>
       <field name="attrName" type="id-long-ne"></field>
