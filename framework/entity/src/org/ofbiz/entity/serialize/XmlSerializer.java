@@ -316,6 +316,9 @@ public class XmlSerializer {
             } else if ("std-Locale".equals(tagName)) {
                 String valStr = element.getAttribute("value");
                 return UtilMisc.parseLocale(valStr);
+            } else if ("std-BigDecimal".equals(tagName)) {
+                String valStr = element.getAttribute("value");
+                return new BigDecimal(valStr);
             } else if ("std-Date".equals(tagName)) {
                 String valStr = element.getAttribute("value");
                 DateFormat formatter = getDateFormat();
