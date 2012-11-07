@@ -104,12 +104,12 @@
 	<classpathentry kind="lib" path="framework/birt/lib/saaj.jar"/>
 	<classpathentry kind="lib" path="framework/birt/lib/scriptapi.jar"/>
 	<classpathentry kind="lib" path="framework/birt/lib/viewservlets.jar"/>
+	<classpathentry kind="lib" path="framework/catalina/lib/ecj-3.7.2.jar"/>
 	<classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.36-catalina.jar"/>
 	<classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.36-catalina-ha.jar"/>
 	<classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.36-catalina-tribes.jar"/>
 	<classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.36-jasper.jar"/>
 	<classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.36-jasper-el.jar"/>
-	<classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.36-jasper-jdt.jar"/>
 	<classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.36-tomcat-coyote.jar"/>
 	<classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.36-tomcat-dbcp.jar"/>
 	<classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.36-tomcat-juli.jar"/>

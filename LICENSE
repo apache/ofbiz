@@ -2302,7 +2302,7 @@ questions or comments regarding the usage of this material.
 =========================================================================
 The following libraries distributed with Apache OFBiz are licensed under the
 Eclipse Public License - v 1.0:
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.16-jasper-jdt.jar
+ofbiz/trunk/framework/catalina/lib/ecj-3.7.2.jar
 ofbiz/trunk/framework/birt/lib/chartengineapi.jar
 ofbiz/trunk/framework/birt/lib/coreapi.jar
 ofbiz/trunk/framework/birt/lib/crosstabcoreapi.jar
