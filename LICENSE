@@ -65,10 +65,10 @@ ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-jms_1.1_spec-1.0.jar
 ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-jta_1.1_spec-1.1.1.jar
 ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-qname_1.1_spec-1.0.jar
 ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-saaj_1.1_spec-1.0.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-6.0.35-annotations-api.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-6.0.35-el-api.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-6.0.35-jsp-api.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-6.0.35-servlet-api.jar
+ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-6.0.36-annotations-api.jar
+ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-6.0.36-el-api.jar
+ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-6.0.36-jsp-api.jar
+ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-6.0.36-servlet-api.jar
 ofbiz/trunk/framework/base/lib/scripting/bsf-2.4.0.jar
 ofbiz/trunk/framework/base/lib/scripting/jakarta-oro-2.0.8.jar
 ofbiz/trunk/framework/base/lib/scripting/groovy-all-1.7.7.jar
@@ -76,14 +76,14 @@ ofbiz/trunk/framework/base/lib/scripting/jansi-1.2.1.jar
 ofbiz/trunk/framework/base/lib/xmlrpc-client-3.1.2.jar
 ofbiz/trunk/framework/base/lib/xmlrpc-common-3.1.2.jar
 ofbiz/trunk/framework/base/lib/xmlrpc-server-3.1.2.jar
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.35-catalina-ha.jar
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.35-catalina-tribes.jar
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.35-catalina.jar
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.35-jasper-el.jar
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.35-jasper.jar
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.35-tomcat-coyote.jar
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.35-tomcat-dbcp.jar
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.35-tomcat-juli.jar
+ofbiz/trunk/framework/catalina/lib/tomcat-6.0.36-catalina-ha.jar
+ofbiz/trunk/framework/catalina/lib/tomcat-6.0.36-catalina-tribes.jar
+ofbiz/trunk/framework/catalina/lib/tomcat-6.0.36-catalina.jar
+ofbiz/trunk/framework/catalina/lib/tomcat-6.0.36-jasper-el.jar
+ofbiz/trunk/framework/catalina/lib/tomcat-6.0.36-jasper.jar
+ofbiz/trunk/framework/catalina/lib/tomcat-6.0.36-tomcat-coyote.jar
+ofbiz/trunk/framework/catalina/lib/tomcat-6.0.36-tomcat-dbcp.jar
+ofbiz/trunk/framework/catalina/lib/tomcat-6.0.36-tomcat-juli.jar
 ofbiz/trunk/framework/entity/lib/commons-dbcp-1.4.jar
 ofbiz/trunk/framework/entity/lib/jdbc/derby-10.7.1.1.jar
 ofbiz/trunk/framework/entity/lib/jdbc/derbytools-10.7.1.1.jar
@@ -2429,7 +2429,7 @@ ofbiz/trunk/framework/birt/lib/platform/plugins/org.w3c.dom.svg_1.1.0.v200806040
 ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.core.runtime.compatibility.registry_3.3.0.v20100520-1800/runtime_registry_compatibility.jar
 ofbiz/trunk/framework/birt/lib/platform/plugins/org.mozilla.rhino_1.7.1.v20090608/lib/js.jar
 ofbiz/trunk/framework/birt/lib/platform/plugins/org.w3c.sac_1.3.0.v20090608/lib/flute.jar
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.35-ecj-3.7.jar
+ofbiz/trunk/framework/catalina/lib/ecj-3.7.2.jar
 =========================================================================
 Eclipse Public License - v 1.0
 
