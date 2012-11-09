@@ -18,38 +18,9 @@
  *******************************************************************************/
 package org.ofbiz.order.shoppingcart;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
-
 import javolution.util.FastList;
 import javolution.util.FastMap;
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.GeneralRuntimeException;
-import org.ofbiz.base.util.UtilDateTime;
-import org.ofbiz.base.util.UtilFormatOut;
-import org.ofbiz.base.util.UtilGenerics;
-import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.UtilNumber;
-import org.ofbiz.base.util.UtilProperties;
-import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.base.util.*;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericEntityException;
@@ -2265,19 +2236,11 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         }
         csi.setContactMechId(shippingContactMechId);
     }
-    
-    /**
-     * Sets @param shippingContactMechId in all ShipInfo(ShipGroups) associated
-     * with this ShoppingCart
-     * <p>
-     * @param shippingContactMechId
-     */
-    public void setAllShippingContactMechId(String shippingContactMechId) {
-        for(int x=0; x < shipInfo.size(); x++) {
-            this.setShippingContactMechId(x, shippingContactMechId);
-        }
+
+    public void setShippingContactMechId(String shippingContactMechId) {
+        this.setShippingContactMechId(0, shippingContactMechId);
     }
-    
+
     /** Returns the shipping contact mech id. */
     public String getShippingContactMechId(int idx) {
         CartShipInfo csi = this.getShipInfo(idx);
@@ -2293,19 +2256,11 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         CartShipInfo csi = this.getShipInfo(idx);
         csi.shipmentMethodTypeId = shipmentMethodTypeId;
     }
-    
-    /**
-     * Sets @param shipmentMethodTypeId in all ShipInfo(ShipGroups) associated
-     * with this ShoppingCart
-     * <p>
-     * @param shipmentMethodTypeId
-     */
-    public void setAllShipmentMethodTypeId(String shipmentMethodTypeId) {
-        for(int x=0; x < shipInfo.size(); x++) {
-            this.setShipmentMethodTypeId(x, shipmentMethodTypeId);
-        }
+
+    public void setShipmentMethodTypeId(String shipmentMethodTypeId) {
+        this.setShipmentMethodTypeId(0, shipmentMethodTypeId);
     }
-    
+
     /** Returns the shipment method type ID */
     public String getShipmentMethodTypeId(int idx) {
         CartShipInfo csi = this.getShipInfo(idx);
@@ -2349,17 +2304,9 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         CartShipInfo csi = this.getShipInfo(idx);
         csi.shippingInstructions = shippingInstructions;
     }
-    
-    /**
-     * Sets @param shippingInstructions in all ShipInfo(ShipGroups) associated
-     * with this ShoppingCart
-     * <p>
-     * @param shippingInstructions
-     */
-    public void setAllShippingInstructions(String shippingInstructions) {
-        for(int x=0; x < shipInfo.size(); x++) {
-            this.setShippingInstructions(x, shippingInstructions);
-        }
+
+    public void setShippingInstructions(String shippingInstructions) {
+        this.setShippingInstructions(0, shippingInstructions);
     }
 
     /** Returns the shipping instructions. */
@@ -2378,19 +2325,10 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
             csi.setMaySplit(maySplit);
         }
     }
-    
-    /**
-     * Sets @param maySplit in all ShipInfo(ShipGroups) associated
-     * with this ShoppingCart
-     * <p>
-     * @param maySplit
-     */
-    public void setAllMaySplit(Boolean maySplit) {
-        for(int x=0; x < shipInfo.size(); x++) {
-            this.setMaySplit(x, maySplit);
-        }
+
+    public void setMaySplit(Boolean maySplit) {
+        this.setMaySplit(0, maySplit);
     }
-    
 
     /** Returns Boolean.TRUE if the order may be split (null if unspecified) */
     public String getMaySplit(int idx) {
@@ -2407,18 +2345,10 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         csi.giftMessage = giftMessage;
     }
 
-    /**
-     * Sets @param giftMessage in all ShipInfo(ShipGroups) associated
-     * with this ShoppingCart
-     * <p>
-     * @param giftMessage
-     */
-    public void setAllGiftMessage(String giftMessage) {
-        for(int x=0; x < shipInfo.size(); x++) {
-            this.setGiftMessage(x, giftMessage);
-        }
+    public void setGiftMessage(String giftMessage) {
+        this.setGiftMessage(0, giftMessage);
     }
-    
+
     public String getGiftMessage(int idx) {
         CartShipInfo csi = this.getShipInfo(idx);
         return csi.giftMessage;
@@ -2435,18 +2365,10 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         }
     }
 
-    /**
-     * Sets @param isGift in all ShipInfo(ShipGroups) associated
-     * with this ShoppingCart
-     * <p>
-     * @param isGift
-     */
-    public void setAllIsGift(Boolean isGift) {
-        for(int x=0; x < shipInfo.size(); x++) {
-            this.setIsGift(x, isGift);
-        }
+    public void setIsGift(Boolean isGift) {
+        this.setIsGift(0, isGift);
     }
-    
+
     public String getIsGift(int idx) {
         CartShipInfo csi = this.getShipInfo(idx);
         return csi.isGift;
@@ -2460,19 +2382,11 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         CartShipInfo csi = this.getShipInfo(idx);
         csi.carrierPartyId = carrierPartyId;
     }
-    
-    /**
-     * Sets @param carrierPartyId in all ShipInfo(ShipGroups) associated
-     * with this ShoppingCart
-     * <p>
-     * @param carrierPartyId
-     */
-    public void setAllCarrierPartyId(String carrierPartyId) {
-        for(int x=0; x < shipInfo.size(); x++) {
-            this.setCarrierPartyId(x, carrierPartyId);
-        }
+
+    public void setCarrierPartyId(String carrierPartyId) {
+        this.setCarrierPartyId(0, carrierPartyId);
     }
-    
+
     public String getCarrierPartyId(int idx) {
         CartShipInfo csi = this.getShipInfo(idx);
         return csi.carrierPartyId;
@@ -2495,17 +2409,9 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         CartShipInfo csi = this.getShipInfo(idx);
         csi.productStoreShipMethId = productStoreShipMethId;
     }
-    
-    /**
-     * Sets @param productStoreShipMethId in all ShipInfo(ShipGroups) associated
-     * with this ShoppingCart
-     * <p>
-     * @param productStoreShipMethId
-     */
-    public void setAllProductStoreShipMethId(String productStoreShipMethId) {
-        for(int x=0; x < shipInfo.size(); x++) {
-            this.setProductStoreShipMethId(x, productStoreShipMethId);
-        }
+
+    public void setProductStoreShipMethId(String productStoreShipMethId) {
+        this.setProductStoreShipMethId(0, productStoreShipMethId);
     }
 
     public void setShipGroupFacilityId(int idx, String facilityId) {
@@ -2603,7 +2509,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
                     Collection shippingContactMechList = ContactHelper.getContactMech(orderParty, "SHIPPING_LOCATION", "POSTAL_ADDRESS", false);
                     if (UtilValidate.isNotEmpty(shippingContactMechList)) {
                         GenericValue shippingContactMech = (GenericValue)(shippingContactMechList.iterator()).next();
-                        this.setAllShippingContactMechId(shippingContactMech.getString("contactMechId"));
+                        this.setShippingContactMechId(shippingContactMech.getString("contactMechId"));
                     }
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "Error setting shippingContactMechId in setDefaultCheckoutOptions() method.", module);
@@ -2613,8 +2519,8 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
             ShippingEstimateWrapper shipEstimateWrapper = org.ofbiz.order.shoppingcart.shipping.ShippingEstimateWrapper.getWrapper(dispatcher, this, 0);
             GenericValue carrierShipmentMethod = EntityUtil.getFirst(shipEstimateWrapper.getShippingMethods());
             if (carrierShipmentMethod != null) {
-                this.setAllShipmentMethodTypeId(carrierShipmentMethod.getString("shipmentMethodTypeId"));
-                this.setAllCarrierPartyId(carrierShipmentMethod.getString("partyId"));
+                this.setShipmentMethodTypeId(carrierShipmentMethod.getString("shipmentMethodTypeId"));
+                this.setCarrierPartyId(carrierShipmentMethod.getString("partyId"));
             }
         } else {
             // checkout options for purchase orders
@@ -2634,12 +2540,12 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
                 }
             }
             // shipping options
-            this.setAllShipmentMethodTypeId("NO_SHIPPING");
-            this.setAllCarrierPartyId("_NA_");
-            this.setAllShippingInstructions("");
-            this.setAllGiftMessage("");
-            this.setAllMaySplit(Boolean.TRUE);
-            this.setAllIsGift(Boolean.FALSE);
+            this.setShipmentMethodTypeId(0, "NO_SHIPPING");
+            this.setCarrierPartyId(0, "_NA_");
+            this.setShippingInstructions(0, "");
+            this.setGiftMessage(0, "");
+            this.setMaySplit(0, Boolean.TRUE);
+            this.setIsGift(0, Boolean.FALSE);
             //this.setInternalCode(internalCode);
         }
     }

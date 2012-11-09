@@ -4610,7 +4610,7 @@ public class OrderServices {
                             // set checkout options
                             cart.setDefaultCheckoutOptions(dispatcher);
                             // the shipping address is the one of the customer
-                            cart.setAllShippingContactMechId(shipGroup.getString("contactMechId"));
+                            cart.setShippingContactMechId(shipGroup.getString("contactMechId"));
                             // create the order
                             CheckOutHelper coh = new CheckOutHelper(dispatcher, delegator, cart);
                             Map resultOrderMap = coh.createOrder(userLogin);

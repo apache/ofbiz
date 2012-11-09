@@ -227,8 +227,8 @@ public class CheckOutEvents {
 
         // if no shipping applies, set the no shipment method and skip to payment
         if (!cart.shippingApplies()) {
-            cart.setAllShipmentMethodTypeId("NO_SHIPPING");
-            cart.setAllCarrierPartyId("_NA_");
+            cart.setShipmentMethodTypeId("NO_SHIPPING");
+            cart.setCarrierPartyId("_NA_");
             page = "payment";
         }
 
@@ -264,7 +264,7 @@ public class CheckOutEvents {
         ShoppingCart cart = (ShoppingCart) request.getSession().getAttribute("shoppingCart");
         String shipToCustomerPartyId = request.getParameter("shipToCustomerPartyId");
         cart.setShipToCustomerPartyId(shipToCustomerPartyId);
-        cart.setAllShippingContactMechId(null);
+        cart.setShippingContactMechId(null);
         return "success";
     }
 

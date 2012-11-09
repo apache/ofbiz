@@ -241,8 +241,8 @@ public class PayPalServices {
             if (estimate == null || estimate.compareTo(BigDecimal.ZERO) < 0) {
                 continue;
             }
-            cart.setAllShipmentMethodTypeId(shipMethod.getString("shipmentMethodTypeId"));
-            cart.setAllCarrierPartyId(shipMethod.getString("partyId"));
+            cart.setShipmentMethodTypeId(shipMethod.getString("shipmentMethodTypeId"));
+            cart.setCarrierPartyId(shipMethod.getString("partyId"));
             try {
                 coh.calcAndAddTax();
             } catch (GeneralException e) {
@@ -586,18 +586,18 @@ public class PayPalServices {
         // that was shown to the customer
         String shipMethod = decoder.get("SHIPPINGOPTIONNAME");
         if ("Calculated Offline".equals(shipMethod)) {
-            cart.setAllCarrierPartyId("_NA_");
-            cart.setAllShipmentMethodTypeId("NO_SHIPPING");
+            cart.setCarrierPartyId("_NA_");
+            cart.setShipmentMethodTypeId("NO_SHIPPING");
         } else {
             String[] shipMethodSplit = shipMethod.split(" - ");
-            cart.setAllCarrierPartyId(shipMethodSplit[0]);
+            cart.setCarrierPartyId(shipMethodSplit[0]);
             String shippingMethodTypeDesc = StringUtils.join(shipMethodSplit, " - ", 1, shipMethodSplit.length);
             try {
                 EntityCondition cond = EntityCondition.makeCondition(
                         UtilMisc.toMap("productStoreId", cart.getProductStoreId(), "partyId", shipMethodSplit[0], "roleTypeId", "CARRIER", "description", shippingMethodTypeDesc)
                );
                 GenericValue shipmentMethod = EntityUtil.getFirst(delegator.findList("ProductStoreShipmentMethView", cond, null, null, null, false));
-                cart.setAllShipmentMethodTypeId(shipmentMethod.getString("shipmentMethodTypeId"));
+                cart.setShipmentMethodTypeId(shipmentMethod.getString("shipmentMethodTypeId"));
             } catch (GenericEntityException e1) {
                 Debug.logError(e1, module);
             }
@@ -611,7 +611,7 @@ public class PayPalServices {
             }
         }
         cart.cleanUpShipGroups();
-        cart.setAllShippingContactMechId(postalContactId);
+        cart.setShippingContactMechId(postalContactId);
         Map<String, Object> result = ShippingEvents.getShipGroupEstimate(dispatcher, delegator, cart, 0);
         if (result.get(ModelService.RESPONSE_MESSAGE).equals(ModelService.RESPOND_ERROR)) {
             return ServiceUtil.returnError((String) result.get(ModelService.ERROR_MESSAGE));
