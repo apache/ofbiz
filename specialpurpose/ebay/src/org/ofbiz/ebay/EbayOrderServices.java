@@ -1201,8 +1201,8 @@ public class EbayOrderServices {
                 cart.setEndUserCustomerPartyId(partyId);
 
                 Debug.logInfo("Setting contact mech in cart: " + contactMechId, module);
-                cart.setAllShippingContactMechId(contactMechId);
-                cart.setAllMaySplit(Boolean.FALSE);
+                cart.setShippingContactMechId(contactMechId);
+                cart.setMaySplit(Boolean.FALSE);
 
                 Debug.logInfo("Setting shipment method: " + (String) shippingServiceSelectedCtx.get("shippingService"), module);
                 EbayHelper.setShipmentMethodType(cart, (String) shippingServiceSelectedCtx.get("shippingService"), productStoreId, delegator);

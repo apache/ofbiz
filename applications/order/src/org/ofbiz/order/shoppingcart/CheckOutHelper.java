@@ -115,7 +115,7 @@ public class CheckOutHelper {
 
         // set the shipping address
         if (UtilValidate.isNotEmpty(shippingContactMechId)) {
-            this.cart.setAllShippingContactMechId(shippingContactMechId);
+            this.cart.setShippingContactMechId(shippingContactMechId);
         } else if (cart.shippingApplies()) {
             // only return an error if shipping is required for this purchase
             errMsg = UtilProperties.getMessage(resource_error,"checkhelper.select_shipping_destination", (cart != null ? cart.getLocale() : Locale.getDefault()));
@@ -166,8 +166,8 @@ public class CheckOutHelper {
                 carrierPartyId = shippingMethod.substring(delimiterPos + 1);
             }
 
-            this.cart.setAllShipmentMethodTypeId(shipmentMethodTypeId);
-            this.cart.setAllCarrierPartyId(carrierPartyId);
+            this.cart.setShipmentMethodTypeId(shipmentMethodTypeId);
+            this.cart.setCarrierPartyId(carrierPartyId);
         } else if (cart.shippingApplies()) {
             // only return an error if shipping is required for this purchase
             errMsg = UtilProperties.getMessage(resource_error,"checkhelper.select_shipping_method", (cart != null ? cart.getLocale() : Locale.getDefault()));
@@ -175,20 +175,20 @@ public class CheckOutHelper {
         }
 
         // set the shipping instructions
-        this.cart.setAllShippingInstructions(shippingInstructions);
+        this.cart.setShippingInstructions(shippingInstructions);
 
         if (UtilValidate.isNotEmpty(maySplit)) {
-            cart.setAllMaySplit(Boolean.valueOf(maySplit));
+            cart.setMaySplit(Boolean.valueOf(maySplit));
         } else {
             errMsg = UtilProperties.getMessage(resource_error,"checkhelper.select_splitting_preference", (cart != null ? cart.getLocale() : Locale.getDefault()));
             errorMessages.add(errMsg);
         }
 
         // set the gift message
-        this.cart.setAllGiftMessage(giftMessage);
+        this.cart.setGiftMessage(giftMessage);
 
         if (UtilValidate.isNotEmpty(isGift)) {
-            cart.setAllIsGift(Boolean.valueOf(isGift));
+            cart.setIsGift(Boolean.valueOf(isGift));
         } else {
             errMsg = UtilProperties.getMessage(resource_error, "checkhelper.specify_if_order_is_gift", (cart != null ? cart.getLocale() : Locale.getDefault()));
             errorMessages.add(errMsg);
