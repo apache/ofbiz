@@ -4834,7 +4834,7 @@ public class OrderServices {
                             // set checkout options
                             cart.setDefaultCheckoutOptions(dispatcher);
                             // the shipping address is the one of the customer
-                            cart.setAllShippingContactMechId(shipGroup.getString("contactMechId"));
+                            cart.setShippingContactMechId(shipGroup.getString("contactMechId"));
                             // associate ship groups of sales and purchase orders
                             ShoppingCart.CartShipInfo cartShipInfo = cart.getShipGroups().get(0);
                             cartShipInfo.setAssociatedShipGroupSeqId(shipGroup.getString("shipGroupSeqId"));

@@ -517,13 +517,13 @@ public class ShoppingListServices {
                         listCart.addPayment(shoppingList.getString("paymentMethodId"));
                     }
                     if (UtilValidate.isNotEmpty(shoppingList.get("contactMechId"))) {
-                        listCart.setAllShippingContactMechId(shoppingList.getString("contactMechId"));
+                        listCart.setShippingContactMechId(0, shoppingList.getString("contactMechId"));
                     }
                     if (UtilValidate.isNotEmpty(shoppingList.get("shipmentMethodTypeId"))) {
-                        listCart.setAllShipmentMethodTypeId(shoppingList.getString("shipmentMethodTypeId"));
+                        listCart.setShipmentMethodTypeId(0, shoppingList.getString("shipmentMethodTypeId"));
                     }
                     if (UtilValidate.isNotEmpty(shoppingList.get("carrierPartyId"))) {
-                        listCart.setAllCarrierPartyId(shoppingList.getString("carrierPartyId"));
+                        listCart.setCarrierPartyId(0, shoppingList.getString("carrierPartyId"));
                     }
                     if (UtilValidate.isNotEmpty(shoppingList.getString("productPromoCodeId"))) {
                         listCart.addProductPromoCode(shoppingList.getString("productPromoCodeId"), dispatcher);
