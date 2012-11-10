@@ -2236,7 +2236,26 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         }
         csi.setContactMechId(shippingContactMechId);
     }
-
+    
+    /**
+     * Sets @param shippingContactMechId in all ShipInfo(ShipGroups) associated
+     * with this ShoppingCart
+     * <p>
+     * @param shippingContactMechId
+     */
+    public void setAllShippingContactMechId(String shippingContactMechId) {
+        for(int x=0; x < shipInfo.size(); x++) {
+            this.setShippingContactMechId(x, shippingContactMechId);
+        }
+    }
+    
+    /**
+     * Use alternative methods setShippingContactMechId(int idx, String shippingContactMechId)
+     * or setAllShippingContactMechId(String shippingContactMechId)
+     * <p>
+     * @deprecated
+     * @param shippingContactMechId
+     */
     public void setShippingContactMechId(String shippingContactMechId) {
         this.setShippingContactMechId(0, shippingContactMechId);
     }
@@ -2256,7 +2275,26 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         CartShipInfo csi = this.getShipInfo(idx);
         csi.shipmentMethodTypeId = shipmentMethodTypeId;
     }
-
+    
+    /**
+     * Sets @param shipmentMethodTypeId in all ShipInfo(ShipGroups) associated
+     * with this ShoppingCart
+     * <p>
+     * @param shipmentMethodTypeId
+     */
+    public void setAllShipmentMethodTypeId(String shipmentMethodTypeId) {
+        for(int x=0; x < shipInfo.size(); x++) {
+            this.setShipmentMethodTypeId(x, shipmentMethodTypeId);
+        }
+    }
+    
+    /**
+     * Use alternative methods setShipmentMethodTypeId(int idx, String shipmentMethodTypeId)
+     * or setAllShipmentMethodTypeId(String shipmentMethodTypeId)
+     * <p>
+     * @deprecated
+     * @param shipmentMethodTypeId
+     */
     public void setShipmentMethodTypeId(String shipmentMethodTypeId) {
         this.setShipmentMethodTypeId(0, shipmentMethodTypeId);
     }
@@ -2304,7 +2342,26 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         CartShipInfo csi = this.getShipInfo(idx);
         csi.shippingInstructions = shippingInstructions;
     }
+    
+    /**
+     * Sets @param shippingInstructions in all ShipInfo(ShipGroups) associated
+     * with this ShoppingCart
+     * <p>
+     * @param shippingInstructions
+     */
+    public void setAllShippingInstructions(String shippingInstructions) {
+        for(int x=0; x < shipInfo.size(); x++) {
+            this.setShippingInstructions(x, shippingInstructions);
+        }
+    }
 
+    /**
+     * Use alternative methods setShippingInstructions(int idx, String shippingInstructions)
+     * or setAllShippingInstructions(String shippingInstructions)
+     * <p>
+     * @deprecated
+     * @param shippingInstructions
+     */
     public void setShippingInstructions(String shippingInstructions) {
         this.setShippingInstructions(0, shippingInstructions);
     }
@@ -2325,7 +2382,26 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
             csi.setMaySplit(maySplit);
         }
     }
-
+    
+    /**
+     * Sets @param maySplit in all ShipInfo(ShipGroups) associated
+     * with this ShoppingCart
+     * <p>
+     * @param maySplit
+     */
+    public void setAllMaySplit(Boolean maySplit) {
+        for(int x=0; x < shipInfo.size(); x++) {
+            this.setMaySplit(x, maySplit);
+        }
+    }
+    
+    /**
+     * Use alternative methods setMaySplit(int idx, Boolean maySplit)
+     * or setAllMaySplit(Boolean maySplit)
+     * <p>
+     * @deprecated
+     * @param maySplit
+     */
     public void setMaySplit(Boolean maySplit) {
         this.setMaySplit(0, maySplit);
     }
@@ -2345,6 +2421,25 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         csi.giftMessage = giftMessage;
     }
 
+    /**
+     * Sets @param giftMessage in all ShipInfo(ShipGroups) associated
+     * with this ShoppingCart
+     * <p>
+     * @param giftMessage
+     */
+    public void setAllGiftMessage(String giftMessage) {
+        for(int x=0; x < shipInfo.size(); x++) {
+            this.setGiftMessage(x, giftMessage);
+        }
+    }
+    
+    /**
+     * Use alternative methods setGiftMessage(int idx, String giftMessage)
+     * or setAllGiftMessage(String giftMessage)
+     * <p>
+     * @deprecated
+     * @param giftMessage
+     */
     public void setGiftMessage(String giftMessage) {
         this.setGiftMessage(0, giftMessage);
     }
@@ -2365,6 +2460,25 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         }
     }
 
+    /**
+     * Sets @param isGift in all ShipInfo(ShipGroups) associated
+     * with this ShoppingCart
+     * <p>
+     * @param isGift
+     */
+    public void setAllIsGift(Boolean isGift) {
+        for(int x=0; x < shipInfo.size(); x++) {
+            this.setIsGift(x, isGift);
+        }
+    }
+    
+    /**
+     * Use alternative methods setIsGift(int idx, Boolean isGift)
+     * or setAllIsGift(Boolean isGift)
+     * <p>
+     * @deprecated
+     * @param isGift
+     */
     public void setIsGift(Boolean isGift) {
         this.setIsGift(0, isGift);
     }
@@ -2382,7 +2496,26 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         CartShipInfo csi = this.getShipInfo(idx);
         csi.carrierPartyId = carrierPartyId;
     }
-
+    
+    /**
+     * Sets @param carrierPartyId in all ShipInfo(ShipGroups) associated
+     * with this ShoppingCart
+     * <p>
+     * @param carrierPartyId
+     */
+    public void setAllCarrierPartyId(String carrierPartyId) {
+        for(int x=0; x < shipInfo.size(); x++) {
+            this.setCarrierPartyId(x, carrierPartyId);
+        }
+    }
+    
+    /**
+     * Use alternative methods setCarrierPartyId(int idx, String carrierPartyId)
+     * or setAllCarrierPartyId(String carrierPartyId)
+     * <p>
+     * @deprecated
+     * @param carrierPartyId
+     */
     public void setCarrierPartyId(String carrierPartyId) {
         this.setCarrierPartyId(0, carrierPartyId);
     }
@@ -2409,7 +2542,26 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         CartShipInfo csi = this.getShipInfo(idx);
         csi.productStoreShipMethId = productStoreShipMethId;
     }
+    
+    /**
+     * Sets @param productStoreShipMethId in all ShipInfo(ShipGroups) associated
+     * with this ShoppingCart
+     * <p>
+     * @param productStoreShipMethId
+     */
+    public void setAllProductStoreShipMethId(String productStoreShipMethId) {
+        for(int x=0; x < shipInfo.size(); x++) {
+            this.setProductStoreShipMethId(x, productStoreShipMethId);
+        }
+    }
 
+    /**
+     * Use alternative methods setProductStoreShipMethId(int idx, String productStoreShipMethId)
+     * or setAllProductStoreShipMethId(String productStoreShipMethId)
+     * <p>
+     * @deprecated
+     * @param productStoreShipMethId
+     */
     public void setProductStoreShipMethId(String productStoreShipMethId) {
         this.setProductStoreShipMethId(0, productStoreShipMethId);
     }
