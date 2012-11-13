@@ -1970,9 +1970,9 @@ public class PaymentGatewayServices {
             }
 
             // set the status of the OrderPaymentPreference
-            if (context != null && authResult.booleanValue()) {
+            if (authResult.booleanValue()) {
                 orderPaymentPreference.set("statusId", "PAYMENT_AUTHORIZED");
-            } else if (context != null && !authResult.booleanValue()) {
+            } else if (!authResult.booleanValue()) {
                 orderPaymentPreference.set("statusId", "PAYMENT_DECLINED");
             } else {
                 orderPaymentPreference.set("statusId", "PAYMENT_ERROR");
@@ -3212,7 +3212,7 @@ public class PaymentGatewayServices {
             requestContext.put("paymentGatewayConfigId", paymentGatewayConfigId);
         }
         // check the service name
-        if (paymentService == null || (paymentGatewayConfigId == null && paymentConfig == null)) {
+        if (paymentService == null || paymentGatewayConfigId == null) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
                     "AccountingPaymentSettingNotValid", locale));
         }
@@ -3569,7 +3569,7 @@ public class PaymentGatewayServices {
         String lastNumberStr = expireDate.substring(expireDate.length() - 1);
         int lastNumber = Integer.parseInt(lastNumberStr);
 
-        if (lastNumber / 2.0 == 0.0) {
+        if (lastNumber % 2.0 == 0.0) {
             return alwaysBadExpireProcessor(dctx, context);
         } else {
             return alwaysApproveProcessor(dctx, context);
