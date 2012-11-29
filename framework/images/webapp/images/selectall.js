@@ -240,6 +240,7 @@ function confirmActionFormLink(msg, formName) {
 */
 
 function ajaxUpdateArea(areaId, target, targetParams) {
+    targetParams = decodeCommaParams(targetParams);
     waitSpinnerShow();
     jQuery.ajax({
         url: target,
@@ -269,6 +270,7 @@ function ajaxUpdateAreas(areaCsvString) {
         // not nice but works
         targetParams = targetParams.replace('#','');
         targetParams = targetParams.replace('?','');
+        targetParams = decodeCommaParams(targetParams);
         /*#Bam# portletWidget wait-spinner working*/
         var UPDATE_OP = {};
         UPDATE_OP.areaId = areaId;
@@ -313,6 +315,7 @@ function ajaxUpdateAreas(areaCsvString) {
   * @param interval The update interval, in seconds.
 */
 function ajaxUpdateAreaPeriodic(areaId, target, targetParams, interval) {
+    targetParams = decodeCommaParams(targetParams);
     jQuery.fjTimer({
         interval: interval,
         repeat: true,
@@ -339,6 +342,8 @@ function ajaxUpdateAreaPeriodic(areaId, target, targetParams, interval) {
   * form of: areaId, target, target parameters [, areaId, target, target parameters...].
 */
 function ajaxSubmitRequestUpdateAreas(target, targetParams, areaCsvString) {
+    targetParams = decodeCommaParams(targetParams);
+    areaCsvString = decodeCommaParams(areaCsvString);
     updateFunction = function(transport) {
         ajaxUpdateAreas(areaCsvString);
     }
@@ -377,6 +382,7 @@ function ajaxSubmitFormUpdateAreas(form, areaCsvString) {
    hideErrorContainer = function() {
        jQuery('#content-messages').removeClass('errorMessage').fadeIn('fast');
    }
+   areaCsvString = decodeCommaParams(areaCsvString);
    updateFunction = function(data) {
        /*#Bam# portletWidget*/
        if ((data._ERROR_MESSAGE_LIST_ != undefined || data._ERROR_MESSAGE_ != undefined) 
@@ -791,6 +797,14 @@ function replaceQueryParam(queryString, currentParam, newParam) {
         }
     }
     return result;
+}
+
+//Function to replace ` with , (comma are encoded in parameters on server side to avoid errors in ajax script)
+function decodeCommaParams (txt) {
+  if (txt != null && typeof txt == 'string') {
+      txt = txt.replace(new RegExp('`', 'g'),',');
+  }
+  return txt;
 }
 
 function submitFormDisableSubmits(form) {

@@ -396,7 +396,8 @@ public class StringUtil {
      */
     public static List<String> toList(String s) {
         List<String> newList = FastList.newInstance();
-        if (s.startsWith("[") && s.endsWith("]")) {
+        if (s.startsWith("[") && s.endsWith("]")
+            || (s.startsWith("{") && s.endsWith("}"))) {
             s = s.substring(1, s.length() - 1);
             String[] entries = s.split("\\,\\s");
             for (String entry: entries) {

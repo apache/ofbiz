@@ -2973,6 +2973,10 @@ public class MacroFormRenderer implements FormStringRenderer {
         }
         String ajaxUrl = "";
         boolean firstLoop = true;
+        //Replace , with ` in parameters to avoid errors in ajax script
+        if (UtilValidate.isNotEmpty(extraParams) && extraParams.contains("%2C")) {
+            extraParams = extraParams.replaceAll("%2C","%60");
+        }
         for (ModelForm.UpdateArea updateArea : updateAreas) {
             if (firstLoop) {
                 firstLoop = false;

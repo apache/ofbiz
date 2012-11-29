@@ -146,7 +146,8 @@ public class CollectionConverters implements ConverterLoader {
 
         @Override
         public List<String> convert(String obj) throws ConversionException {
-            if (obj.startsWith("[") && obj.endsWith("]")) {
+            if (obj.startsWith("[") && obj.endsWith("]")
+                || (obj.startsWith("{") && obj.endsWith("}"))) {
                 return StringUtil.toList(obj);
             } else {
                 return super.convert(obj);
