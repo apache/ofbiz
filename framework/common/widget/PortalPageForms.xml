@@ -125,7 +125,6 @@ under the License.
         </actions>
         <!--#Bam# exampleHelp -->
         <row-actions>
-           <entity-one entity-name="PortalPortlet" value-field="portlet"></entity-one>
            <set field="helpTopicName" from-field="helpName" default-value="HELP_${portalPortletId}"/>
         </row-actions>
         <field name="portletName" >
