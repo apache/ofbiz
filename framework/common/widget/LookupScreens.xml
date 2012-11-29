@@ -212,6 +212,9 @@ under the License.
         <section>
             <actions>
                 <set field="title" value="${uiLabelMap.CommonPortalPage}"/>
+                <set field="entityName" value="PortalPage"/>
+                <set field="searchFields" value="[portalPageId, portalPageName, description]"/>
+                <set field="displayFields" value="[portalPageId, portalPageName]"/>
             </actions>
             <widgets>
                <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
