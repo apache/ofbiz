@@ -41,7 +41,156 @@ function lookup_error(str_message) {
 	showErrorAlert(CommonErrorMessage2, str_message);
 }
 
-function lookup_popup1(view_name, form_name, viewWidth, viewheight) {
+/*******************************************************************************
+ * Lookup Context Sensitive Help for Webhelp 
+ ******************************************************************************/
+function lookup_help(serverroot, viewName, webapp, locale, viewWidth, viewHeight) {
+
+	var locale = "_" + locale.substring(0,2)	
+	var hasLocale = hasHelpForLocale(webapp, locale);
+	
+	if (hasLocale==false){
+		alert("Help is not available for this language. Opening Help in English");
+		locale = "_en"
+	    }	
+
+//	Check for available screens when all screens are not supported
+	if (webapp=="accounting"){
+	isAccounting = isAccountingHelpScreen(viewName);	
+	if (isAccounting==false){
+		alert("Help is not available for this screen. Opening Main Help Screen");
+		viewName="ACCOUNTING_main"
+	    }
+    }
+	
+	if (webapp=="projectmgr"){
+		isProjectmgr = isProjectmgrHelpScreen(viewName);	
+		if (isProjectmgr==false){
+			alert("Help is not available for this screen. Opening Main Help Screen");
+			viewName="projectmgr_main "
+	        }
+	}	
+	
+	if (webapp=="catalog"){
+		isCatalog = isCatalogHelpScreen(viewName);	
+		if (isCatalog==false){
+			alert("Help is not available for this screen. Opening Main Help Screen");
+			viewName="catalog_main"
+	        }	
+	}	
+	
+	var serverRoot=serverroot.slice(serverroot.lastIndexOf("//"),serverroot.lastIndexOf(":"));
+    var url = "http:" + serverRoot + ":8080/ofbizhelp/" + webapp + locale + "/content/" + viewName + ".html";
+    var windowName = "helpWindow";	
+    var resizable = "resizable=yes";
+    var menubar = "menubar=yes";
+    var toolbar = "toolbar=yes";	
+    var scrollbars = "scrollbars=yes"
+    window.open(url, windowName, 'resizable,menubar,toolbar,scrollbars,width=750,height=750,left=0,top=0');
+	event.preventDefault();
+	helpWindow.focus();	
+	
+}
+
+function isAccountingHelpScreen(viewName){
+	var accountingHelpScreens = [
+        "accounting_main",
+		"accounting_findInvoices",
+		"accounting_findPayments",
+		"accounting_FindPaymentGroup",
+		"accounting_FindGatewayResponses",
+		"accounting_FindPaymentGatewayConfig",
+		"accounting_FindBillingAccount",
+		"accounting_FinAccountMain",
+		"accounting_FindTaxAuthority",
+		"accounting_FindAgreement",
+		"accounting_ListFixedAssets",
+		"accounting_FindGlobalGlAccount",
+		"accounting_ListCompanies"
+		];
+	
+	var result=false;
+    jQuery.each(accountingHelpScreens, function() { 
+        if (viewName==this){    	    
+        	result=true;}     		
+    });
+    return result;
+}
+
+function isProjectmgrHelpScreen(viewName){
+	var projectmgrHelpScreens = [
+        "projectmgr_EditProject_main",
+		"projectmgr_EditSkillTypes",
+		"projectmgr_FindProject",
+		"projectmgr_FindResource",
+		"projectmgr_FindTask",
+		"projectmgr_FindTimeSheet",
+		"projectmgr_main",
+		"projectmgr_MyTasks",
+		"projectmgr_MyTimesheet",
+		"projectmgr_projectView",
+		"projectmgr_RequestList",
+		"projectmgr_EditProject"
+		];
+	
+	var result=false;
+    jQuery.each(projectmgrHelpScreens, function() { 
+        if (viewName==this){    	    
+        	result=true;}     		
+    });
+    return result;
+}
+
+function isCatalogHelpScreen(viewName){
+	var catalogHelpScreens = [
+        "catalog_main",
+		"catalog_FindCatalog",
+		"catalog_FindCategory",
+		"catalog_FindProduct",
+		"catalog_EditFeatureCategories",
+		"catalog_FindProductPromo",
+		"catalog_FindPriceRules",
+		"catalog_FindProductStore",
+		"catalog_ListParentProductStoreGroup",
+		"catalog_EditKeywordThesaurus",
+		"catalog_FindReviews",
+		"catalog_FindProductConfigItems",
+		"catalog_FindSubscription",
+		"catalog_ListShipmentMethodTypes",
+		"catalog_Imagemanagement"
+		];
+	
+	var result=false;
+    jQuery.each(catalogHelpScreens, function() { 
+        if (viewName==this){    	    
+        	result=true;}     		
+    });
+    return result;
+}
+
+function hasHelpForLocale(webapp, locale){	
+	var webappLocale = webapp + locale
+	var helpLocals = [
+        "accounting_en",
+	    "humanres_en",
+	    "projectmgr_en",
+	    "manufacturing_en",
+	    "manufacturing_nl",
+	    "manufacturing_de",
+	    "catalog_en"
+    ];
+	                     	
+    var result=false;
+	    jQuery.each(helpLocals, function() { 
+	        if (webappLocale==this){    	    
+	        result=true;}     		
+	        });
+    return result;
+}
+//End context sensitive help
+
+
+function lookup_popup1(view_name, form_name, viewWidth, viewheight) {	
 	var obj_lookupwindow = window.open(getViewNameWithSeparator(view_name) + 'formName=' + form_name + '&presentation=' + this.presentation
 			+ '&id=' + this.id, '_blank', 'width=' + viewWidth + ',height=' + viewheight + ',scrollbars=yes,status=no,resizable=yes,top='
 			+ my + ',left=' + mx + ',dependent=yes,alwaysRaised=yes');
@@ -719,7 +868,7 @@ function lookupPaginationAjaxRequest(navAction, type) {
  ******************************************************************************/
 var re_id = new RegExp('id=(\\d+)');
 var num_id = (re_id.exec(String(window.location)) ? new Number(RegExp.$1) : 0);
-var obj_caller = (window.opener && window.opener.lookups? window.opener.lookups[num_id]: null);
+var obj_caller = (window.opener ? window.opener.lookups[num_id] : null);
 if (obj_caller == null && window.opener != null) {
 	obj_caller = window.opener;
 } else if (obj_caller == null && window.opener == null) {

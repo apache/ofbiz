@@ -364,20 +364,47 @@ http://creativecommons.org/licenses/by/2.5/
 
 You are free:
 
-    * to Share â€” to copy, distribute and transmit the work
-    * to Remix â€” to adapt the work
+    * to Share � to copy, distribute and transmit the work
+    * to Remix � to adapt the work
 
 Under the following conditions:
 
     * Attribution. You must attribute the work in the manner specified 
       by the author or licensor (but not in any way that suggests that 
-	  they endorse you or your use of the work).
+      they endorse you or your use of the work).
     * For any reuse or distribution, you must make clear to 
       others the license terms of this work. The best way to do 
-	  this is with a link to this web page.
+      this is with a link to this web page.
     * Any of the above conditions can be waived if you get 
     * For any reuse or distribution, you must make clear to 
       permission from the copyright holder.
     * Nothing in this license impairs or restricts the 
     * For any reuse or distribution, you must make clear to 
       author's moral rights.
+=========================================================================
+==   Web-based Help from DocBook XML Notice                                                       ==
+=========================================================================
+
+This product includes software developed by Kasun Gajasinghe and David Cramer
+This package is maintained by Kasun Gajasinghe, <kasunbg AT gmail DOT com> 
+and David Cramer, <david AT thingbag DOT net>.
+
+This package also includes the following software written and copyrighted by others:
+    * Files in template/common/jquery are copyrighted by JQuery under the MIT License. 
+      The file jquery.cookie.js Copyright (c) 2006 Klaus Hartl under the MIT license.
+    * Some files in the template/content/search and indexer directories were originally 
+      part of N. Quaine's htmlsearch DITA plugin. The htmlsearch DITA plugin is 
+      available from the files page of the DITA-users yahoogroup. 
+      The htmlsearch plugin was released under a BSD-style license. 
+      See indexer/license.txt for details.
+    * Stemmers from the Snowball project released under a BSD license.
+    * Code from the Apache Lucene search engine provides support for tokenizing Chinese, 
+      Japanese, and Korean content released under the Apache 2.0 license.
+    * Code that provides weighted search results and some other improvements was graciously 
+      donated by SyncRO Soft Ltd., the publishers of the oXygen XML Editor.
+    * Cosmetic improvements provided by OpenStack.
+
+Webhelp for DocBook was first developed as a Google Summer of Code project.  
+** Any stylesheet derived from this Software that is publicly distributed will be identified 
+  with a different name and the version strings in any derived Software will be changed so 
+  that no possibility of confusion between the derived package and this Software will exist. **       

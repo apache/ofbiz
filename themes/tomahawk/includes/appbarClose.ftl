@@ -71,12 +71,32 @@ under the License.
         </li>
       </#if>
     </#if>
-    <#if userLogin?exists>
-      <#--if webSiteId?exists && requestAttributes._CURRENT_VIEW_?exists && helpTopic?exists-->
-      <#if parameters.componentName?exists && requestAttributes._CURRENT_VIEW_?exists && helpTopic?exists>
-        <#include "component://common/webcommon/includes/helplink.ftl" />
-        <li><a class="help-link <#if pageAvail?has_content> alert</#if>" href="javascript:lookup_popup1('showHelp?helpTopic=${helpTopic}&amp;portalPageId=${parameters.portalPageId?if_exists}','help' ,500,500);" title="${uiLabelMap.CommonHelp}"></a></li>
+    <#if userLogin?exists>         
+      <!-- ******************* -->
+      <!-- Start Display webhelp screen names -->       
+      <!-- OFBiz webhelp content authors can use the following lines to expose unique screen identifiers for naming help id's and image files -->
+      <#--    
+      <#if parameters.portalPageId?has_content>
+        <li class="org">${parameters._WEBAPP_NAME_}_${requestAttributes._CURRENT_VIEW_}_${parameters.portalPageId} |</li>
+      <#else>
+        <li class="org">${parameters._WEBAPP_NAME_}_${requestAttributes._CURRENT_VIEW_} |</li>
       </#if>
+       -->        
+      <#if parameters.componentName?exists && requestAttributes._CURRENT_VIEW_?exists && helpTopic?exists>        
+        <#if parameters._WEBAPP_NAME_!="accounting" && parameters._WEBAPP_NAME_!="humanres" && parameters._WEBAPP_NAME_!="projectmgr" && parameters._WEBAPP_NAME_!="manufacturing" && parameters._WEBAPP_NAME_!="catalog">
+          <li><a class="help-link <#if pageAvail?has_content> alert</#if>" href="javascript:lookup_popup1('showHelp?helpTopic=${helpTopic}&amp;portalPageId=${parameters.portalPageId?if_exists}','help' ,500,500);" title="${uiLabelMap.CommonHelp}"></a></li>        
+        <#else>
+          <#if parameters.portalPageId?has_content>
+            <li><a class="help-link <#if pageAvail?has_content>alert</#if>" href="javascript:lookup_help('${parameters._SERVER_ROOT_URL_}','${parameters._WEBAPP_NAME_}_${requestAttributes._CURRENT_VIEW_}_${parameters.portalPageId}','${parameters._WEBAPP_NAME_}' , '${locale}',250,250);" title="${uiLabelMap.CommonHelp}"></a></li>
+          <#else>
+            <li><a class="help-link <#if pageAvail?has_content>alert</#if>" href="javascript:lookup_help('${parameters._SERVER_ROOT_URL_}','${parameters._WEBAPP_NAME_}_${requestAttributes._CURRENT_VIEW_}','${parameters._WEBAPP_NAME_}' , '${locale}',250,250);" title="${uiLabelMap.CommonHelp}"></a></li>
+          </#if>
+        </#if>
+      </#if>
+
+      <!-- End  Display webhelp screen names -->
+      <!-- ******************* -->
+      
       <li><a href="<@ofbizUrl>logout</@ofbizUrl>">${uiLabelMap.CommonLogout}</a></li>
       <li><a href="<@ofbizUrl>ListVisualThemes</@ofbizUrl>">${uiLabelMap.CommonVisualThemes}</a></li>
     <#else>

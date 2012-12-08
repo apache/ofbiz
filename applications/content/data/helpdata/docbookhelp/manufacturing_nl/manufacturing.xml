@@ -1,0 +1,930 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+
+<book version="5.0" xmlns="http://docbook.org/ns/docbook"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:svg="http://www.w3.org/2000/svg"
+      xmlns:m="http://www.w3.org/1998/Math/MathML"
+      xmlns:html="http://www.w3.org/1999/xhtml"
+      xmlns:db="http://docbook.org/ns/docbook">
+  <info>
+    <title>Manufacturing</title>
+
+    <author>
+      <personname><firstname/><surname/></personname>
+
+      <affiliation>
+        <orgname/>
+      </affiliation>
+    </author>
+
+    <pubdate/>
+  </info>
+
+  <chapter>
+    <title>Introduction</title>
+
+    <para>MFG is the application to assist in manufacturing processes.</para>
+  </chapter>
+
+  <chapter xml:id="manufacturing_main">
+    <title>Hoofdmenu</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../manufacturing_nl_images/main.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>This is the start screen of the application.</para>
+  </chapter>
+
+  <chapter xml:id="manufacturing_FindProductionRun">
+    <title>Job Shop</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../manufacturing_nl_images/FindProductionRun.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>In this screen you can search for existing production runs. You can
+    also create new production runs by clicking 'Create new production
+    run'</para>
+
+    <sect1 xml:id="manufacturing_CreateProductionRun">
+      <title>Create a Production Run</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/CreateProductionRun.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunDeclaration">
+      <title>Production Run Declaration</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/ProductionRunDeclaration.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunActualComponents">
+      <title>Actual Materials</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/ProductionRunActualComponents.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditProductionRun">
+      <title>Edit Production Run</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/EditProductionRun.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para><emphasis role="bold">Tonen production run</emphasis></para>
+
+      <para>Dit scherm toont de productierun. Via dit scherm kun je:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Basisgegevens van de productierun wijzigen</para>
+        </listitem>
+
+        <listitem>
+          <para>Taken aanmaken - klik op 'Taken'</para>
+        </listitem>
+
+        <listitem>
+          <para>Materialen toevoegen - klik op 'Materialen'</para>
+        </listitem>
+
+        <listitem>
+          <para>Productiemiddelen koppelen - klik op
+          'Productiemiddelen'</para>
+        </listitem>
+
+        <listitem>
+          <para>De gekoppelde (afhankelijke) productieruns bekijken - klik op
+          'Associaties'</para>
+        </listitem>
+
+        <listitem>
+          <para>De gekoppelde content document bekijken - klik op
+          'Content'</para>
+        </listitem>
+
+        <listitem>
+          <para>De werkelijke kosten van de productierun bekijken - klik op
+          'Kosten'</para>
+        </listitem>
+      </itemizedlist>
+
+      <para><emphasis role="bold">Gegevens productierun</emphasis></para>
+
+      <para>Deze sectie toont de basisgegevens van de productie run. Tevens
+      kun je de basisgegevens bijwerken.</para>
+
+      <para>In deze sectie kun je volgende acties uitvoeren:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Annuleren - om de taak te annuleren</para>
+        </listitem>
+
+        <listitem>
+          <para>Quick close - om de taak af te sluiten</para>
+        </listitem>
+
+        <listitem>
+          <para>Quick complete - 0m de taak als uitgevoerd aan te
+          merken</para>
+        </listitem>
+
+        <listitem>
+          <para>Bevestigen - om de taak te bevestigen</para>
+        </listitem>
+
+        <listitem>
+          <para>Agenderen -om de taak te agenderen in de kalender</para>
+        </listitem>
+
+        <listitem>
+          <para>Afdrukken - om een pdf van de productierun aan te maken</para>
+        </listitem>
+      </itemizedlist>
+
+      <para><emphasis role="bold">Orderregels</emphasis></para>
+
+      <para>Deze sectie toont de gekoppelde orderregels</para>
+
+      <para><emphasis role="bold">Taken</emphasis></para>
+
+      <para>Deze sectie toont de gekoppelde taken</para>
+
+      <para><emphasis role="bold">Materialen</emphasis></para>
+
+      <para>Deze sectie toont de benodigde materialen voor de
+      productierun</para>
+
+      <para><emphasis role="bold">Productiemiddelen</emphasis></para>
+
+      <para>Deze sectie toont de benodigde productiemiddelen voor de
+      productierun</para>
+
+      <para><emphasis role="bold">Notities</emphasis></para>
+
+      <para>Deze sectie toont de gekoppelde notities inzake de
+      productierun</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunTasks">
+      <title>Tasks</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/ProductionRunTasks.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para><emphasis role="bold">Aanmaken en tonen taken
+      productierun</emphasis></para>
+
+      <para>In dit scherm kun je (werkplan) taken koppelen aan de
+      productierun. Het scherm toont tevens de gekoppelde (werkplan)
+      taken.</para>
+
+      <para><emphasis role="bold">Werkplan taak
+      toevoegen/wijzigen</emphasis></para>
+
+      <para>In deze sectie selecteer je een beschikbare werkplan taak en vult
+      de gegevens voor de productierun aan.</para>
+
+      <para><emphasis role="bold">Overzicht gekoppelde werkplan
+      taken</emphasis></para>
+
+      <para>Dit overzicht toont de gekoppelde werkplan taken.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunComponents">
+      <title>Materials</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/ProductionRunComponents.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunFixedAssets">
+      <title>Vaste Activa</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/ProductionRunFixedAssets.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dit scherm biedt de mogelijk productiemiddelen te koppelen
+      gekoppeld aan de productierun. Tevens toont het de gekoppelde
+      productiemiddelen.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunAssocs">
+      <title>Assocs</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="char"
+                       fileref="../manufacturing_nl_images/ProductionRunAssocs.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para><emphasis role="bold">Gekoppelde (afhankelijke)
+      productieruns</emphasis></para>
+
+      <para>Dit scherm toont de verplichte en de afhankelijke
+      productieruns.</para>
+
+      <para><emphasis role="bold">Verplichte productieruns</emphasis></para>
+
+      <para>Deze sectie toont een overzicht van de verplichte
+      productieruns.</para>
+
+      <para><emphasis role="bold">Afhankelijke productieruns</emphasis></para>
+
+      <para>Deze sectie toont een overzicht van de afhankelijke
+      productieruns.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunContent">
+      <title>Content</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/ProductionRunContent.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dit scherm toont de content die gekoppeld is aan
+      productierun.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunCosts">
+      <title>Actual Costs</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/ProductionRunCosts.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para><emphasis role="bold">Tonen kosten productierun</emphasis></para>
+
+      <para>Dit scherm toont de kosten van de productierun.</para>
+
+      <para><emphasis role="bold">Kosten route(s)</emphasis></para>
+
+      <para>Deze sectie toont de routes en de daarbijhorende kosten.</para>
+
+      <para><emphasis role="bold">Kosten productierun</emphasis></para>
+
+      <para>Deze sectie toont kosten van de productierun.</para>
+    </sect1>
+  </chapter>
+
+  <chapter xml:id="manufacturing_FindRouting">
+    <title>Routing</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../manufacturing_nl_images/FindRouting.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para><emphasis role="bold">Werkplan aanmaken</emphasis></para>
+
+    <para>Klik op de knop 'Nieuw werkplan' om een nieuw werkplan aan te
+    maken.</para>
+
+    <para><emphasis role="bold">Werkplan zoeken en vinden</emphasis></para>
+
+    <para>Vul de parameters in en klik op de 'zoek' knop. Worden resultaten
+    gevonden, dan worden deze getoond in de sectie onder het zoek deel.</para>
+
+    <sect1 xml:id="manufacturing_EditRouting">
+      <title>Edit Routing</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/EditRouting.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>In dit scherm kun je een nieuwe route aanmaken en een bestaande
+      wijzigen.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditRoutingTaskAssoc">
+      <title>Edit Routing Task Assoc</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/EditRoutingTaskAssoc.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>In this screen you can connect a task to a routing and modify an
+      existing routing task.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditRoutingProductLink">
+      <title>Edit Routing Production Link</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="char"
+                       fileref="../manufacturing_nl_images/EditRoutingProductLink.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>In this screen can you create a link to a product for the route.
+      You can also edit a existing product link. An overview of the associated
+      products is displayed in the lower section of the screen.</para>
+    </sect1>
+  </chapter>
+
+  <chapter xml:id="manufacturing_FindRoutingTask">
+    <title>Routing Task</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../manufacturing_nl_images/FindRoutingTask.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para><emphasis role="bold">Werkplan taken aanmaken en
+    vinden</emphasis></para>
+
+    <para>Dit scherm biedt de mogelijkheid om werkplan taken aan te maken en
+    te vinden.</para>
+
+    <para><emphasis role="bold">Werkplan taak aanmaken</emphasis></para>
+
+    <para>Klik op de knop 'Nieuwe werkplan taak' om een nieuwe taak voor een
+    werkplan aan te maken.</para>
+
+    <para><emphasis role="bold">Werkplan taak zoeken en
+    vinden</emphasis></para>
+
+    <para>Vul de parameters in en klik op de 'zoek' knop. Worden resultaten
+    gevonden, dan worden deze getoond in de sectie onder het zoek deel.</para>
+
+    <sect1 xml:id="manufacturing_EditRoutingTask">
+      <title>Edit Routing Task</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/EditRoutingTask.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Geef de werkplan taak een beschrijvende naam en
+      omschrijving.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditRoutingTaskCosts">
+      <title>Routing Task Cost</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/EditRoutingTaskCosts.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Met dit scherm kunnen bestaande kosten definities voor een
+      werkplan taak aangepast worden en nieuwe gedefinieerd.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ListRoutingTaskProducts">
+      <title>Deliverable Products</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/ListRoutingTaskProducts.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>In dit scherm kun je een product aan een werkplan taak koppelen en
+      een bestaande koppeling aanpassen.</para>
+
+      <sect2 xml:id="manufacturing_EditRoutingTaskProduct">
+        <title>Edit Routing Task Product</title>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center"
+                         fileref="../manufacturing_nl_images/EditRoutingTaskProduct.jpg"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </sect2>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditRoutingTaskFixedAssets">
+      <title>Fixed Assets</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/EditRoutingTaskFixedAssets.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </sect1>
+  </chapter>
+
+  <chapter>
+    <title>Calendar</title>
+
+    <para>Dit schermt stelt je in staat nieuwe productiekalenders te
+    definieren. Tevens worden hier de beschikbare kalenders getoond.</para>
+
+    <para>Vanaf hier kun je doorklikken naar:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>kalenders</para>
+      </listitem>
+
+      <listitem>
+        <para>kalenderweken</para>
+      </listitem>
+    </itemizedlist>
+
+    <para><emphasis role="bold">Nieuwe kalender aanmaken</emphasis></para>
+
+    <para>Klik op de knop 'Nieuwe kalender' om een nieuwe kalender te
+    definieren.</para>
+
+    <para><emphasis role="bold">Overzicht kalenders</emphasis></para>
+
+    <para>Dit overzicht toont de beschikbare kalenders. Klik op de kalender ID
+    (in de eerste kolom) om een kalender aan te passen. Klik op de knop 'Wis'
+    om een kalender te verwijderen.</para>
+
+    <sect1 xml:id="manufacturing_FindCalendar">
+      <title>Calendars</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/FindCalendar.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>In dit scherm kun je de omschrijving en de gekoppelde kalenderweek
+      definitie van de kalender wijzigen.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ListCalendarWeek">
+      <title>Weeks</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/ListCalendarWeek.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dit scherm toont de kalenderweken die opgenomen kunnen worden in
+      een productiekalender. Het scherm stelt je tevens in staat een
+      kalenderweek toe te voegen en te wijzigen.</para>
+
+      <para>In this screen you can define a new calendar week and modify an
+      existing calendar week.</para>
+
+      <para>For a new calendar week give it a name and a description. Set for
+      each day the start time and the capacity.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditCalendarWeek">
+      <title>Edit Week</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/EditCalendarWeek.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>In dit scherm kun je nieuwe kalenderweken aanmaken en bestaande
+      wijzigen.</para>
+
+      <para>Geef de nieuwe kalenderweek een naam en een omschrijving. Zet voor
+      iedere dag de starttijd en de capaciteit.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditCalendar">
+      <title>Wijzign</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/EditCalendar.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>In dit scherm kun je de omschrijving en de gekoppelde kalenderweek
+      definitie van de kalender wijzigen.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditCalendarExceptionDay">
+      <title>Exception Day</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/EditCalendarExceptionDay.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dit scherm toont de uitzonderingsdagen van een productiekalender.
+      Het scherm stelt je tevens in staat een uitzonderingsdag toe te voegen
+      en te wijzigen.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditCalendarExceptionWeek">
+      <title>Exception Week</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/EditCalendarExceptionWeek.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dit scherm toont de uitzonderingsweken van een productiekalender.
+      Het scherm stelt je tevens in staat een uitzonderingsweek toe te voegen
+      en te wijzigen.</para>
+    </sect1>
+  </chapter>
+
+  <chapter xml:id="manufacturing_EditCostCalcs">
+    <title>Cost</title>
+
+    <para><screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/EditCostCalcs.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot></para>
+
+    <para><emphasis role="bold">Manage Cost Component Calc
+    Entries</emphasis></para>
+
+    <para>Dit scherm biedt de mogelijkheid om nieuwe kostencalculaties aan te
+    maken en te wijzigen.</para>
+
+    <para><emphasis role="bold">Kostencalculatie wijzigen</emphasis></para>
+
+    <para>Vul het eerste deel van het scherm in om de kostencalculatie aan te
+    maken. Klik vervolgens op 'Opslaan' om de gegevens vast te leggen. Het
+    scherm wordt ververst en de ingevoerde gegevens worden in het onderste
+    deel getoond.</para>
+
+    <para><emphasis role="bold">Overzicht kostencalculaties</emphasis></para>
+
+    <para>Dit deel van het scherm toont de beschikbare kostencalculaties. Klik
+    op de ID van de kostencalculatie (in de eerste kolom) om deze te wijzigen.
+    Klik op de knop 'Verwijderen' om een kostencalculatie te
+    verwijderen.</para>
+  </chapter>
+
+  <chapter>
+    <title>Bill Of Materails</title>
+
+    <sect1 xml:id="manufacturing_FindBom">
+      <title>Find</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/FindBom.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dit scherm biedt je de mogelijkheid om nieuwe BoM's aan te maken
+      en om ze te vinden en te bekijken. Vanaf hier kun je doorklikken
+      naar:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>kalenders</para>
+        </listitem>
+
+        <listitem>
+          <para>kalenderweken</para>
+        </listitem>
+      </itemizedlist>
+
+      <para><emphasis role="bold">Nieuwe BoM aanmaken</emphasis></para>
+
+      <para>Klik op de knop 'BoM aanmaken' om een nieuwe BoM te
+      definieren.</para>
+
+      <para><emphasis role="bold">Overzicht Bom's</emphasis></para>
+
+      <para>Dit overzicht toont de beschikbare BoM's. Klik op de ID van de BoM
+      om die te bekijken.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_BomSimulation">
+      <title>Bom Simulation</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/BomSimulation.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dit scherm toont de effecten van een simulatie van een BoM.</para>
+
+      <para><emphasis role="bold">Het invulscherm</emphasis></para>
+
+      <para>Selecteer het product van de te simuleren BoM. Kies vervolgens het
+      BoM-type en zet het aantal.</para>
+
+      <para>Kies de type simulatie en selecteer het magazijn, om de vooraad
+      van de componenten op te halen.</para>
+
+      <para>Klik vervolgens op de 'Uitvoeren'-knop om de simulatie uit te
+      voeren. De gegevens van de simulatie worden onder het invulformulier
+      getoond.</para>
+
+      <para><emphasis role="bold">Het simulatie overzicht</emphasis></para>
+
+      <para>Nadat op de knop is gedrukt wordt het simulatie overzicht
+      getoond.</para>
+
+      <para>Het eerste deel toont de BoM. Het tweede deel toont de benodigde
+      hoeveelheden, en de kosten.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditProductBom">
+      <title>Edit BOM</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/EditProductBom.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>In dit scherm kun je een bestaande BoM aanpassen of een nieuwe
+      definieren.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditProductManufacturingRules">
+      <title>Manufacturing Rules</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/EditProductManufacturingRules.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dit scherm toont de productie regels die van toepassing zijn op
+      een te produceren product. Een productie regel geeft aan welke
+      componenten vervangen kunnen worden door een ander component. In dit
+      scherm kun je tevens nieuwe productie regels definieren.</para>
+
+      <para><emphasis role="bold">Nieuwe productie regel
+      definieren</emphasis></para>
+
+      <para>Dit formulier stelt je in staat vervangende componenten te
+      definieren voor BoM componenten. In het tweede deel van het scherm
+      worden de vervangingsregels getoond.</para>
+    </sect1>
+  </chapter>
+
+  <chapter>
+    <title>MRP</title>
+
+    <sect1 xml:id="manufacturing_MrpExecution">
+      <title>Run MRP</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/WorkWithShipmentPlans.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Met dit scherm kunnen MRP's opgestart worden.</para>
+
+      <para><emphasis role="bold">Nieuwe MRP opstarten</emphasis></para>
+
+      <para>Geef de MRP naam op, selecteer de magazijngroep en het warehouse
+      om de MRP te starten.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_FindMrpPlannedEvents">
+      <title>MRP Log</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_nl_images/MrpExecution.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dit scherm toont de uitgevoerde MRP's en de MRP's die nog
+      uitgevoerd moeten worden.</para>
+    </sect1>
+  </chapter>
+
+  <chapter xml:id="manufacturing_WorkWithShipmentPlans">
+    <title>Shipment Plans</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../manufacturing_nl_images/WorkWithShipmentPlans.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>Dit scherm toont de plannen voor de zendingen inzake gefabriceerde
+    goederen.</para>
+  </chapter>
+
+  <chapter xml:id="manufacturing_ManufacturingReports">
+    <title>Reports</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../manufacturing_nl_images/ManufacturingReports.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>Dit scherm toont de fabricage rapporten.</para>
+  </chapter>
+</book>

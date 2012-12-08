@@ -1,0 +1,769 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+
+<book version="5.0" xmlns="http://docbook.org/ns/docbook"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:svg="http://www.w3.org/2000/svg"
+      xmlns:m="http://www.w3.org/1998/Math/MathML"
+      xmlns:html="http://www.w3.org/1999/xhtml"
+      xmlns:db="http://docbook.org/ns/docbook">
+  <info>
+    <title>Manufacturing</title>
+
+    <author>
+      <personname><firstname/><surname/></personname>
+
+      <affiliation>
+        <orgname/>
+      </affiliation>
+    </author>
+
+    <pubdate/>
+  </info>
+
+  <chapter>
+    <title>Einführung</title>
+
+    <para>MFG ist die OFBiz Anwendung, die Fertigungsprozesse
+    unterstützt.</para>
+  </chapter>
+
+  <chapter xml:id="manufacturing_main">
+    <title>Startseite</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../manufacturing_de_images/main.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>Dies ist der Startbildschrim von OFBiz:MFG.</para>
+  </chapter>
+
+  <chapter xml:id="manufacturing_FindProductionRun">
+    <title>Produktionsverwaltung</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../manufacturing_de_images/FindProductionRun.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>In diesem Bildschirm können Sie suchen nach bestehenden Produktion
+    läuft. Sie können auch neue Produktion läuft durch Klicken auf "Neuer
+    Produktion ausführen'.</para>
+
+    <sect1 xml:id="manufacturing_CreateProductionRun">
+      <title>Produktionsauftrag Erstellen</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/CreateProductionRun.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditProductionRun">
+      <title>Produktionsauftrag Bearbeiten</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/EditProductionRun.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dieser Schirm zeigt einen Fertigungslauf. Hier können Sie:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Abbrechen - den Fertigungslauf abbrechen.</para>
+        </listitem>
+
+        <listitem>
+          <para>Schnelles Beenden - den Fertigungslauf beenden.</para>
+        </listitem>
+
+        <listitem>
+          <para>Schnelles Abschließen - den Fertigungslauf als 'vollständig'
+          abschließen</para>
+        </listitem>
+
+        <listitem>
+          <para>Bestätigen - den Fertigungslauf bestätigen</para>
+        </listitem>
+
+        <listitem>
+          <para>Planen - den Fertigungslauf in den Kalender einplanen</para>
+        </listitem>
+
+        <listitem>
+          <para>Drucken - eine PDF-Datei des Fertigungslaufs erstellen</para>
+        </listitem>
+      </itemizedlist>
+
+      <para><emphasis role="bold">Auftragspositionen</emphasis></para>
+
+      <para>Dieser Abschnitt zeigt eine Übersicht der verknüpften
+      Auftragselemente.</para>
+
+      <para><emphasis role="bold">Arbeitsschritte</emphasis></para>
+
+      <para>Dieser Abschnitt zeigt eine Übersicht der verknüpften
+      Arbeitsschritte.</para>
+
+      <para><emphasis role="bold">Material</emphasis></para>
+
+      <para>Dieser Abschnitt zeigt eine Übersicht des benötigten Materials
+      (Stückliste).</para>
+
+      <para><emphasis role="bold">Werkzeuge/Anlagen</emphasis></para>
+
+      <para>Dieser Abschnitt zeigt das benötigte Werkzeug und die notwendigen
+      Anlagen(zeiten).</para>
+
+      <para><emphasis role="bold">Notizen</emphasis></para>
+
+      <para>Dieser Abschnitt zeigt die zugehörigen Notizen.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunTasks">
+      <title>Arbeitsgänge</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="char"
+                       fileref="../manufacturing_de_images/ProductionRunTasks.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dieser Schirm zeigt eine Übersicht aller zugehörigen Arbeitsgänge.
+      Hier können Sie auch neue Arbeitsgänge hinzufügen oder bestehende
+      Arbeitsgänge bearbeiten.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunComponents">
+      <title>Materialien</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/ProductionRunComponents.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dieser Schirm zeigt eine Übersicht der Materialien (Stückliste),
+      die für den Fertigungslauf benötigt werden. Hier können Sie auch weitere
+      Materialien mit dem Fertigungslauf verknüpfen.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunFixedAssets">
+      <title>Anlagen</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/ProductionRunFixedAssets.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dieser Schirm zeigt eine Übersicht der Ausrüstungsgegenstände und
+      Anlagen, die für den Fertigungslauf benötigt werden. Hier können Sie
+      auch weitere Komponenten mit dem Fertigungslauf verknüpfen.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunAssocs">
+      <title>Zuordnungen</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/ProductionRunAssocs.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dieser Schirm zeigt eine Übersicht der erforderlichen und
+      abhängigen Fertigungsläufe.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunContent">
+      <title>Inhalte</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/ProductionRunContent.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dieser Schirm zeigt einen Überblick über alle mit dem
+      Fertigungslauf verknüpften Inhalte und Dokumente.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunCosts">
+      <title>Ist-Kosten</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/ProductionRunCosts.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dieser Schirm zeigt eine Übersicht der Kosten der Arbeitsgänge und
+      Abläufe des Fertigungslaufs.</para>
+    </sect1>
+  </chapter>
+
+  <chapter xml:id="manufacturing_FindRouting">
+    <title>Arbeitsplan</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../manufacturing_de_images/FindRouting.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>Dieser Bildschirm zeigt eine Übersicht aller verfügbaren
+    Arbeitspläne. Auch einen neuen Arbeitsplan können Sie hier mit einem Klick
+    auf 'Neuer Arbeitsplan' erstellen.</para>
+
+    <sect1 xml:id="manufacturing_EditRouting">
+      <title>Arbeitsplan Bearbeiten</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/EditRouting.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>In this screen you can create new a new routing and edit an
+      existing routing.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditRoutingTaskAssoc">
+      <title>Arbeitsgang-Zuordnung Bearbeiten</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/EditRoutingTaskAssoc.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para><emphasis role="bold">Koppeling werkplan-taak
+      wijzigen</emphasis></para>
+
+      <para>Dit scherm toont gekoppelde werkplan taken en biedt de
+      mogelijkheid werkplan taken te koppelen.</para>
+
+      <para><emphasis role="bold">Koppelen</emphasis></para>
+
+      <para>Selecteer de werkplan taak, geef het een volgnummer en zet de van-
+      en tot-datum.</para>
+
+      <para><emphasis role="bold">Overzicht</emphasis></para>
+
+      <para>Onder het formulier wordt het overzicht van gekoppelde werkplan
+      taken getoond. Klik op een werkplan taak om deze te openen. Klik op de
+      'Wis'-knop om de koppeling te verwijderen.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditRoutingProductLink">
+      <title>Arbeitsplan-Produkt-Verbindung Bearbeiten</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="char"
+                       fileref="../manufacturing_de_images/EditRoutingProductLink.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Auf diesem Schirm können Sie ein Produkt mit dem Arbeitsgang
+      verknüpfen.</para>
+
+      <para>Sie können auch eine bestehende Verknüpfung bearbeiten.</para>
+
+      <para>Ein Überblick der mit dem Arbeitsgang bereits verknüpften Produkte
+      wird im unteren Bildschirmabschnitt gezeigt.</para>
+    </sect1>
+  </chapter>
+
+  <chapter xml:id="manufacturing_FindRoutingTask">
+    <title>Arbeitsgang</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../manufacturing_de_images/FindRoutingTask.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>Dieser Schirm zeigt eine Übersicht aller Arbeitsgänge. Einen neuen
+    Arbeitsgang erstellen Sie durch einen Klick auf 'Neuer
+    Arbeitsgang'.</para>
+
+    <sect1 xml:id="manufacturing_EditRoutingTask">
+      <title>Arbeitsgang Bearbeiten</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/EditRoutingTask.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Auf diesem Schirm erstellen Sie einen neuen oder bearbeiten einen
+      bestehenden Arbeitsgang.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditRoutingTaskCosts">
+      <title>Arbeitsgang-Kosten</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/EditRoutingTaskCosts.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Auf diesem Schirm verknüpfen Sie ein Kosten-Element und die
+      Berechnungsmethod mit dem Arbeitsgang. Sie können auch ein bereits
+      verknüpftes Kosten-Element entfernen.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ListRoutingTaskProducts">
+      <title>Produkte Auflisten</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="left"
+                       fileref="../manufacturing_de_images/EditRoutingTaskProduct.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Auf diesem Schirm können Sie Produkte als Ergebnis eines
+      Arbeitsgangs verknüpfen sowie bestehende Verknüpfungen zu Produkten
+      bearbeiten</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditRoutingTaskFixedAssets">
+      <title>Anlagen</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/EditRoutingTaskFixedAssets.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Auf diesem Schirm können Sie Werkzeug und Anlagen mit dem
+      Arbeitsgang verknüpfen. Im unteren Bildschirmabschnitt werden alle
+      benötigten Werkzeuge und Anlagen gelistet.</para>
+    </sect1>
+  </chapter>
+
+  <chapter>
+    <title>Kalender</title>
+
+    <sect1 xml:id="manufacturing_FindCalendar">
+      <title>Kalender</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/FindCalendar.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dieser Bildschirm zeigt eine Übersicht aller Produktions-Kalender.
+      Einen neuen Kalender erstellen Sie mit einem Klick auf 'Neuer
+      Kalender'.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ListCalendarWeek">
+      <title>Wochen</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/ListCalendarWeek.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dieser Schirm zeigt eine Übersicht aller Kalenderwochen für die
+      Fertigung. Hier können auch neue Kalenderwochen angelegt werden.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditCalendarWeek">
+      <title> Woche Bearbeiten </title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/EditCalendarWeek.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Auf diesem Schirm können Sie neue Kalenderwochen erstellen und
+      bestehende Wochen bearbeiten.</para>
+
+      <para>Für eine neue Kalenderwoche vergeben Sie einen Namen und eine
+      Beschreibung.</para>
+
+      <para>Für jeden Tag der Woche legen Sie dann eine Anfangszeit und eine
+      Kapazität fest.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditCalendar">
+      <title>Bearbeiten</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/EditCalendar.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Auf diesem Schirm können Sie neue Kalender erstellen und
+      bestehende Kalender bearbeiten.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditCalendarExceptionDay">
+      <title>Ausnahme-Datum</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/EditCalendarExceptionDay.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dieser Schirm zeigt eine Liste der Feier- und Pausentage im
+      Kalender.</para>
+
+      <para>Hier können auch neue Sonder-Tage zum Kalender hinzu gefügt
+      werden.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditCalendarExceptionWeek">
+      <title>Ausnahme-Woche</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/EditCalendarExceptionWeek.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dieser Schirm zeigt die Liste der Sonderwochen im Kalender.</para>
+
+      <para>Hier können auch neue Sonder-Wochen zum Kalender hinzu gefügt
+      werden.</para>
+    </sect1>
+  </chapter>
+
+  <chapter xml:id="manufacturing_EditCostCalcs">
+    <title>Kosten</title>
+
+    <para><screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/EditCostCalcs.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot></para>
+
+    <para><emphasis role="bold">Kosten-Berechnungs-Elemente
+    bearbeiten</emphasis></para>
+
+    <para>Auf diesem Schirm können Sie neue Kosten-Berechnungs-Elemente
+    eingeben und bestehende Elemente bearbeiten.</para>
+
+    <para><emphasis role="bold">Kostenberechnung Bearbeiten</emphasis></para>
+
+    <para>Der erste Teil des Bildschirms betrifft die Erstellung einer neuen
+    bzw. die Bearbeitung einer bestehenden Kostenberechnung. Klicken Sie den
+    'abschicken'-Knopf um Änderungen zu speichern. Anschließend wird der
+    Bildschirm neu aufgebaut und die geänderten Details werden im unteren
+    Bildschirmabschnitt angezeigt.</para>
+
+    <para><emphasis role="bold">Übersicht der
+    Kostenberechnungen</emphasis></para>
+
+    <para>Dieser Teil des Schirms zeigt die angelegten Kostenberechnungen.
+    Klicken Sie auf die ID-Nummer einer Berechnung um sie zu bearbeiten.
+    Klicken Sie auf 'löschen' um eine Kostenberechnung zu löschen.</para>
+  </chapter>
+
+  <chapter>
+    <title>Stückliste</title>
+
+    <sect1 xml:id="manufacturing_FindBom">
+      <title> Suchoptionen</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/FindBom.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dieser Schirm zeigt eine Übersicht der verfügbaren Stücklisten.
+      Sie können auch eine neue Stückliste erstellen, indem Sie auf den Knopf
+      'Stückliste erstellen' klicken.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_BomSimulation">
+      <title>Stücklistensimulation</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/BomSimulation.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dieser Bildschirm zeigt die Auswirkungen einer simulierten
+      Stückliste.</para>
+
+      <para><emphasis role="bold">Simulations-Parameter</emphasis></para>
+
+      <para>Wählen Sie das Produkt aus der Stückliste, die Sie simulieren
+      wollen. Legen Sie den Stücklisten-Typ fest und setzen Sie die Menge auf
+      'simulieren'.</para>
+
+      <para>Legen Sie die Simulations-Art fest und setzen das Lager auf 'QoH'
+      (Quantity on Hand).</para>
+
+      <para>Anschließen klicken Sie den 'abschicken'-Knopf um die Simulation
+      aus zu führen. Das Ergebnis der Simulation wird dann unterhalb des
+      Formulars ausgegeben.</para>
+
+      <para><emphasis role="bold">Simulations-Übersicht</emphasis></para>
+
+      <para>Nachdem der Knopf 'abschicken' gedrückt worden ist, wird sie
+      Simulation ausgeführt und ein Überblick wird gezeigt.</para>
+
+      <para>Der erste Abschnitt zeigt die Details der Stückliste. Der zweite
+      Abschnitt zeigt die erforderlichen Mengen und Kosten der
+      Komponenten.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditProductBom">
+      <title>Stückliste Bearbeiten</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/EditProductBom.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Auf diesem Schirm können Sie eine neue Stückliste erstellen oder
+      eine bestehende Liste bearbeiten.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditProductManufacturingRules">
+      <title>Fertigungsregeln</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/EditProductManufacturingRules.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dieser Schirm bietet einen Überblick der angelegten Regeln, die
+      für einen Fertigungsablauf zur Verfügung stehen. Eine Fertigungsregel
+      zeigt den Austausch einer Komponente an. Sie können hier auch neue
+      Fertigungsregeln anlegen.</para>
+    </sect1>
+  </chapter>
+
+  <chapter>
+    <title>MRP</title>
+
+    <sect1 xml:id="manufacturing_MrpExecution">
+      <title>MRP Ausführen</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/MrpExecution.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Dieser Bildschirm ermöglicht Ihnen das Ausführen einer
+      Materialbedarfsplanung.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_FindMrpPlannedEvents">
+      <title>MRP Log</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_de_images/manufacturing_FindMrpPlannedEvents.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>Diese Schirm zeigt eine Übersicht der abgeschlossenen MRP-Läufe.
+      Ein zweiter Abschnitt zeigt die geplanten MRP Läufe. Hier können Sie
+      auch MRP-Läufe suchen..</para>
+    </sect1>
+  </chapter>
+
+  <chapter xml:id="manufacturing_WorkWithShipmentPlans">
+    <title>Versand Pläne</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../manufacturing_de_images/WorkWithShipmentPlans.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>Dieser Bildschirm bietet eine Übersicht über alle Versand
+    Pläne.</para>
+  </chapter>
+
+  <chapter xml:id="manufacturing_ManufacturingReports">
+    <title>Berichte</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../manufacturing_de_images/ManufacturingReports.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>Dieser Schirm erlaubt es, Berichte für einen MRP zu
+    erstellen.</para>
+  </chapter>
+</book>

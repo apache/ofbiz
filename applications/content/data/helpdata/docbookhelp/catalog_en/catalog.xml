@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+
+<book version="5.0" xmlns="http://docbook.org/ns/docbook"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:svg="http://www.w3.org/2000/svg"
+      xmlns:m="http://www.w3.org/1998/Math/MathML"
+      xmlns:html="http://www.w3.org/1999/xhtml"
+      xmlns:db="http://docbook.org/ns/docbook">
+  <info>
+    <title>OFBiz Catalog Manager Guide</title>
+
+    <author>
+      <personname><firstname/><surname/></personname>
+
+      <affiliation>
+        <orgname/>
+      </affiliation>
+    </author>
+
+    <pubdate/>
+  </info>
+
+  <chapter xml:id="catalog_main">
+    <title>Product Catalog overview</title>
+
+    <section>
+      <title>Introduction</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../catalog_en_images/main.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>The Catalog Manager creates or provides access to a variety of
+      information. Whether Products, Catalogs, or Categories, this screen
+      offers search tools and links to get you to the type of information you
+      need or are working with quickly and accurately.</para>
+
+      <para>Down the left hand column are 4 sections: 1. Search Products, 2.
+      Browse Catalogs, 3. Browse Categories, and 4. Product Categories.</para>
+    </section>
+  </chapter>
+
+  <chapter xml:id="catalog_FindCatalog">
+    <title>Catalogs</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="left"
+                     fileref="../catalog_en_images/FindCatalog.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para/>
+  </chapter>
+
+  <chapter xml:id="catalog_FindCategory">
+    <title>Categories</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="left"
+                     fileref="../catalog_en_images/FindCategory.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para/>
+  </chapter>
+
+  <chapter xml:id="catalog_FindProduct">
+    <title>Products</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="left"
+                     fileref="../catalog_en_images/FindProduct.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para/>
+  </chapter>
+
+  <chapter xml:id="catalog_EditFeatureCategories">
+    <title>Features</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="left"
+                     fileref="../catalog_en_images/EditFeatureCategories.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para/>
+  </chapter>
+
+  <chapter xml:id="catalog_FindProductPromo">
+    <title>Promos</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="left"
+                     fileref="../catalog_en_images/FindProductPromo.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para/>
+  </chapter>
+
+  <chapter xml:id="catalog_FindPriceRules">
+    <title>Price Rules</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="left"
+                     fileref="../catalog_en_images/FindPriceRules.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para/>
+  </chapter>
+
+  <chapter xml:id="catalog_FindProductStore">
+    <title>Stores</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="left"
+                     fileref="../catalog_en_images/FindProductStore.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para/>
+  </chapter>
+
+  <chapter xml:id="catalog_ListParentProductStoreGroup">
+    <title>Product Store Groups</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="left"
+                     fileref="../catalog_en_images/ListParentProductStoreGroup.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para/>
+  </chapter>
+
+  <chapter xml:id="catalog_EditKeywordThesaurus">
+    <title>Thesaurus</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="left"
+                     fileref="../catalog_en_images/EditKeywordThesaurus.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para/>
+  </chapter>
+
+  <chapter xml:id="catalog_FindReviews">
+    <title>Reviews</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="left"
+                     fileref="../catalog_en_images/FindReviews.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para/>
+  </chapter>
+
+  <chapter xml:id="catalog_FindProductConfigItems">
+    <title>Configurations</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="left"
+                     fileref="../catalog_en_images/FindProductConfigItems.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para/>
+  </chapter>
+
+  <chapter xml:id="catalog_FindSubscription">
+    <title>Subscriptions</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="left"
+                     fileref="../catalog_en_images/FindSubscription.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para/>
+  </chapter>
+
+  <chapter xml:id="catalog_ListShipmentMethodTypes">
+    <title>Shipping</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="left"
+                     fileref="../catalog_en_images/ListShipmentMethodTypes.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para/>
+  </chapter>
+
+  <chapter xml:id="catalog_Imagemanagement">
+    <title>Image Management</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="left"
+                     fileref="../catalog_en_images/Imagemanagement.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>The Image Management module manages many kind of image what user
+    want. There are various functions including 'Gallery', 'Upload',
+    'Approved', 'Manage' etc.</para>
+
+    <itemizedlist>
+      <listitem>
+        <orderedlist>
+          <listitem>
+            <para>Go to Catalog Component.</para>
+          </listitem>
+
+          <listitem>
+            <para>Go to Image Management.</para>
+          </listitem>
+        </orderedlist>
+      </listitem>
+    </itemizedlist>
+
+    <sect1>
+      <title>Gallery</title>
+
+      <para>Gallery shows all images which have approved.</para>
+
+      <note>
+        <para>Everybody can access Gallery function.</para>
+      </note>
+
+      <orderedlist>
+        <listitem>
+          <para>Go to 'Upload' section, Enter 'Product Id' by type or click a
+          find icon.</para>
+        </listitem>
+
+        <listitem>
+          <para>Optional, you can specify the size of images.</para>
+        </listitem>
+
+        <listitem>
+          <para>Then click 'Browse' button to choose image file(s).</para>
+        </listitem>
+
+        <listitem>
+          <para>Click 'Upload' button.</para>
+
+          <para/>
+        </listitem>
+      </orderedlist>
+    </sect1>
+
+    <sect1>
+      <title>Upload</title>
+
+      <para/>
+    </sect1>
+
+    <sect1>
+      <title>Manage</title>
+
+      <para/>
+    </sect1>
+
+    <sect1>
+      <title>Approve</title>
+
+      <para/>
+    </sect1>
+
+    <sect1>
+      <title>Rejected</title>
+
+      <para/>
+    </sect1>
+
+    <sect1>
+      <title>Recently Approved</title>
+
+      <para/>
+    </sect1>
+
+    <sect1>
+      <title>Replace</title>
+
+      <para/>
+    </sect1>
+
+    <sect1>
+      <title>Resize</title>
+
+      <para/>
+    </sect1>
+  </chapter>
+</book>

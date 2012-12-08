@@ -133,6 +133,7 @@ under the License.
     </request-map>
     <request-map uri="sprintBacklogListTarget">
         <security auth="true" https="true"/>
+        <event type=""/>
         <response name="success" type="view-last"></response>
     </request-map>
     <request-map uri="UpdateHours">

@@ -1,0 +1,817 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+
+<book version="5.0" xmlns="http://docbook.org/ns/docbook"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:svg="http://www.w3.org/2000/svg"
+      xmlns:m="http://www.w3.org/1998/Math/MathML"
+      xmlns:html="http://www.w3.org/1999/xhtml"
+      xmlns:db="http://docbook.org/ns/docbook">
+  <info>
+    <title>Manufacturing</title>
+
+    <author>
+      <personname><firstname/><surname/></personname>
+
+      <affiliation>
+        <orgname/>
+      </affiliation>
+    </author>
+
+    <pubdate/>
+  </info>
+
+  <chapter>
+    <title>Introduction</title>
+
+    <para>MFG is the application to assist in manufacturing processes.</para>
+  </chapter>
+
+  <chapter xml:id="manufacturing_main">
+    <title>Main</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../manufacturing_en_images/main.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>This is the start screen of the application.</para>
+  </chapter>
+
+  <chapter xml:id="manufacturing_FindProductionRun">
+    <title>Job Shop</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../manufacturing_en_images/FindProductionRun.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>In this screen you can search for existing production runs. You can
+    also create new production runs by clicking 'Create new production
+    run'</para>
+
+    <sect1 xml:id="manufacturing_CreateProductionRun">
+      <title>Create a Production Run</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/CreateProductionRun.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunDeclaration">
+      <title>Production Run Declaration</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/ProductionRunDeclaration.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunActualComponents">
+      <title>Actual Materials</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/ProductionRunActualComponents.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditProductionRun">
+      <title>Edit Production Run</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/EditProductionRun.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>This screen displays the production run. Through this screen you
+      can:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Edit the base details of the production run</para>
+        </listitem>
+
+        <listitem>
+          <para>Create tasks - Click 'Taksks'</para>
+        </listitem>
+
+        <listitem>
+          <para>Add materials - Click 'Materials'</para>
+        </listitem>
+
+        <listitem>
+          <para>Associate equipment - Click 'Equipment'</para>
+        </listitem>
+
+        <listitem>
+          <para>View associated (dependent) productie runs - click
+          'Assocs'</para>
+        </listitem>
+
+        <listitem>
+          <para>View associated content - Click 'Content'</para>
+        </listitem>
+
+        <listitem>
+          <para>View actual cost of the production run - Click 'Actual
+          Costs'</para>
+        </listitem>
+      </itemizedlist>
+
+      <para><emphasis role="bold">Base details production
+      run</emphasis></para>
+
+      <para>This section displays the base details of the production run.
+      Additionally you can edit the details.</para>
+
+      <para>In this section following action can be performed:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Cancel - to cancel the production run.</para>
+        </listitem>
+
+        <listitem>
+          <para>Quick close - to close the production run</para>
+        </listitem>
+
+        <listitem>
+          <para>Quick complete - to mark the production run as
+          'complete'</para>
+        </listitem>
+
+        <listitem>
+          <para>Confirm - to confirm the production run</para>
+        </listitem>
+
+        <listitem>
+          <para>Schedule -to schedule the production run in the
+          calendar</para>
+        </listitem>
+
+        <listitem>
+          <para>Print - to create a pdf file of the production run</para>
+        </listitem>
+      </itemizedlist>
+
+      <para><emphasis role="bold">Order items</emphasis></para>
+
+      <para>This section displays an overview of associated order
+      items.</para>
+
+      <para><emphasis role="bold">Tasks</emphasis></para>
+
+      <para>This section displays an overview of associated tasks</para>
+
+      <para><emphasis role="bold">Materials</emphasis></para>
+
+      <para>This section displays an overview of the required materials</para>
+
+      <para><emphasis role="bold">Equipment</emphasis></para>
+
+      <para>This section displays the required equimpent to be used in the
+      productionn run.</para>
+
+      <para><emphasis role="bold">Notes</emphasis></para>
+
+      <para>This sections displays an overview of associated notes.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunTasks">
+      <title>Tasks</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="char"
+                       fileref="../manufacturing_en_images/ProductionRunTasks.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>This screen provides an overview of all routing tasks connected to
+      the production run. From here you can also add a new or modify an
+      existing routing task to the production run.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunComponents">
+      <title>Materials</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/ProductionRunComponents.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunFixedAssets">
+      <title>Fixed Assets</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/ProductionRunFixedAssets.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>This screen provides an overview of the equipment related to the
+      production run. From here you can also connect new equipment to the
+      production run.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunAssocs">
+      <title>Assocs</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/ProductionRunAssocs.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>This screen provides overviews of mandatory and dependent
+      associated production runs.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunContent">
+      <title>Content</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/ProductionRunContent.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>This screen provides an overview of all connected content to the
+      production run.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ProductionRunCosts">
+      <title>Actual Costs</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/ProductionRunCosts.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>This screen provides overviews of the costs of routing tasks of
+      the production run and the cost of routings of the production
+      run.</para>
+    </sect1>
+  </chapter>
+
+  <chapter xml:id="manufacturing_FindRouting">
+    <title>Routing</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../manufacturing_en_images/FindRouting.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>This screen displays an overview of all routings available. From
+    here you can also create a new routing by clicking 'New routing'.</para>
+
+    <sect1 xml:id="manufacturing_EditRouting">
+      <title>Edit Routing</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/EditRouting.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>In this screen you can create new a new routing and edit an
+      existing routing.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditRoutingTaskAssoc">
+      <title>Edit Routing Task Assoc</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/EditRoutingTaskAssoc.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>In this screen you can connect a task to a routing and modify an
+      existing routing task.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditRoutingProductLink">
+      <title>Edit Routing Production Link</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="char"
+                       fileref="../manufacturing_en_images/EditRoutingProductLink.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>In this screen can you create a link to a product for the route.
+      You can also edit a existing product link. An overview of the associated
+      products is displayed in the lower section of the screen.</para>
+    </sect1>
+  </chapter>
+
+  <chapter xml:id="manufacturing_FindRoutingTask">
+    <title>Routing Task</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../manufacturing_en_images/FindRoutingTask.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>This screen displays an overview of all available routing tasks.
+    From here you can also create a new routing task.</para>
+
+    <sect1 xml:id="manufacturing_EditRoutingTask">
+      <title>Edit Routing Task</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/EditRoutingTask.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>In this screen you can create a new routing task and modify an
+      existing routing task.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditRoutingTaskCosts">
+      <title>Routing Task Cost</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/EditRoutingTaskCosts.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>In this screen you can associate a cost component and the related
+      calculation method to the routing task. You can also remove an existing
+      associated cost component.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ListRoutingTaskProducts">
+      <title>Deliverable Products</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/ListRoutingTaskProducts.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>In this screen you can add deliverable products to the routing
+      task and modify existing deliverable products.</para>
+
+      <sect2 xml:id="manufacturing_EditRoutingTaskProduct">
+        <title>Edit Routing Task Product</title>
+
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center"
+                         fileref="../manufacturing_en_images/EditRoutingTaskProduct.jpg"
+                         scalefit="1" width="100%"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </sect2>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditRoutingTaskFixedAssets">
+      <title>Fixed Assets</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/EditRoutingTaskFixedAssets.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </sect1>
+  </chapter>
+
+  <chapter>
+    <title>Calendar</title>
+
+    <sect1 xml:id="manufacturing_FindCalendar">
+      <title>Calendars</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/FindCalendar.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>This screen displays an overview of exisiting production
+      calendars. From this screen you can also create a new calendar by
+      clicking 'New Calendar'</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_ListCalendarWeek">
+      <title>Weeks</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/ListCalendarWeek.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>This screen displays an overview all calendar weeks From here you
+      can create new calendar weeks.</para>
+
+      <para>In this screen you can define a new calendar week and modify an
+      existing calendar week.</para>
+
+      <para>For a new calendar week give it a name and a description. Set for
+      each day the start time and the capacity.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditCalendarWeek">
+      <title>Edit Week</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/EditCalendarWeek.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>In this screen you can define a new calendar week and modify an
+      existing calendar week.</para>
+
+      <para>For a new calendar week give it a name and a description. Set for
+      each day the start time and the capacity.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditCalendar">
+      <title>Edit</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/EditCalendar.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>In this screen you can create new calendars and change existing
+      calendars.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditCalendarExceptionDay">
+      <title>Exception Day</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/EditCalendarExceptionDay.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>This screen displays a list of the exception days of the
+      calendar.</para>
+
+      <para>In this screen you can also add a new exception day to the
+      overview.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditCalendarExceptionWeek">
+      <title>Exception Week</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/EditCalendarExceptionWeek.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>This screen displays a list of the exception weekks of the
+      calendar.</para>
+
+      <para>In this screen you can also add a new exception week to the
+      overview.</para>
+    </sect1>
+  </chapter>
+
+  <chapter xml:id="manufacturing_EditCostCalcs">
+    <title>Cost</title>
+
+    <para><screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/EditCostCalcs.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot></para>
+
+    <para><emphasis role="bold">Manage Cost Component Calc
+    Entries</emphasis></para>
+
+    <para>In this screen you can create new cost calculations and modify
+    existing calculations.</para>
+
+    <para><emphasis role="bold">Modify cost calculation</emphasis></para>
+
+    <para>The first part of the screen is to create a new cost calculation, or
+    to modify an existing calculation. Click the 'Submit'-button to save the
+    changes. Subsequently, the screen will be refreshed and the the modified
+    details are shown in the lower part of the screen.</para>
+
+    <para><emphasis role="bold">Cost calculations overview</emphasis></para>
+
+    <para>This part of the screen shows the available cost calculations. Click
+    the ID of cost calculation to modify it. Click the 'Delete'-button to
+    remove a cost calculation.</para>
+  </chapter>
+
+  <chapter>
+    <title>Bill Of Materails</title>
+
+    <sect1 xml:id="manufacturing_FindBom">
+      <title>Find</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/FindBom.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>This screen displays an overview of the BoM's available. You can
+      also click the button 'Create BOM' to create a new BoM.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_BomSimulation">
+      <title>Bom Simulation</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/BomSimulation.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>This screen shows the effects of a simulated BoM.</para>
+
+      <para><emphasis role="bold">The parameters form</emphasis></para>
+
+      <para>Select the product of the BoM you want to simulate. Choose the
+      BoM-type and set the quantity to simulate</para>
+
+      <para>Set the simulation type and select the warehouse to get the QoH
+      (Quantity on Hand).</para>
+
+      <para>Subsequently click the 'Submit'-button to execute the simulation.
+      The output of the simulation is shown below the form.</para>
+
+      <para><emphasis role="bold">The simulation overview</emphasis></para>
+
+      <para>The simulation will be executed and an overview will be shown
+      after the button has been pressed.</para>
+
+      <para>The first section will show the details of the BoM. The second
+      part will show the required quantities and costs of the
+      components.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditProductBom">
+      <title>Edit BOM</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/EditProductBom.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>In this screen you can create a new BoM or modify an existing
+      BoM.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_EditProductManufacturingRules">
+      <title>Manufacturing Rules</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/EditProductManufacturingRules.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>This screen displays an overview of the manufacturing rules that
+      are applicable to produce a product. A manufacturing rule displays the
+      replacements of a component. In this screen you can also create new
+      manufacturing rules.</para>
+    </sect1>
+  </chapter>
+
+  <chapter>
+    <title>MRP</title>
+
+    <sect1 xml:id="manufacturing_MrpExecution">
+      <title>Run MRP</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/WorkWithShipmentPlans.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>This screen enables you to run an MRP.</para>
+    </sect1>
+
+    <sect1 xml:id="manufacturing_FindMrpPlannedEvents">
+      <title>MRP Log</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../manufacturing_en_images/MrpExecution.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>This screen displays an overview of the MRPs that ran. The second
+      overview in this screen displays the MRPs that are scheduled to run.
+      From here you can also search for MRPs .</para>
+    </sect1>
+  </chapter>
+
+  <chapter xml:id="manufacturing_WorkWithShipmentPlans">
+    <title>Shipment Plans</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../manufacturing_en_images/WorkWithShipmentPlans.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>This screen provides an overview of all shipment plans.</para>
+  </chapter>
+
+  <chapter xml:id="manufacturing_ManufacturingReports">
+    <title>Reports</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../manufacturing_en_images/ManufacturingReports.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>This screen enables you to get a report on an MRP.</para>
+  </chapter>
+</book>
