@@ -87,8 +87,8 @@ function lookup_help(serverroot, viewName, webapp, locale, viewWidth, viewHeight
     var toolbar = "toolbar=yes";	
     var scrollbars = "scrollbars=yes"
     window.open(url, windowName, 'resizable,menubar,toolbar,scrollbars,width=750,height=750,left=0,top=0');
-	event.preventDefault();
-	helpWindow.focus();	
+	  //event.preventDefault();
+	  //helpWindow.focus();	
 	
 }
 
