@@ -1265,6 +1265,24 @@ under the License.
             </classpath>
         </java>
     </target>
+  
+    <!-- ================================================================== -->
+    <!-- webhelp helpers                                                    -->
+    <!-- ================================================================== -->
+  
+    <target name="webhelp"
+          description="Create all webhelp">
+        <subant target="webhelp.all">
+            <filelist dir="." files=" applications/content/template/docbook/webhelp/build.ofbiz.xml"/>
+        </subant>
+    </target>  
+    
+    <target name="clean-webhelp"
+          description="Clean all webhelp">
+        <subant target="clean">
+          <filelist dir="." files=" applications/content/template/docbook/webhelp/build.ofbiz.xml"/>
+        </subant>
+    </target>
 
     <!-- ================================================================== -->
     <!-- Old tasks.                                                         -->

@@ -57,7 +57,6 @@ import org.ofbiz.product.store.ProductStoreWorker;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
-import org.ofbiz.service.ModelParam;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceUtil;
 
@@ -1842,7 +1841,7 @@ public class OrderReturnServices {
                                             if (ServiceUtil.isError(invReqResult)) {
                                                 Debug.logError("Error calling isStoreInventoryAvailable service, result is: " + invReqResult, module);
                                             } else {
-                                                inventoryAvailable = "Y".equals((String) invReqResult.get("available"));
+                                                inventoryAvailable = "Y".equals(invReqResult.get("available"));
                                             }
                                         } catch (GenericServiceException e) {
                                             Debug.logError(e, "Fatal error calling inventory checking services: " + e.toString(), module);
@@ -1962,7 +1961,7 @@ public class OrderReturnServices {
                                                 }
 
                                                 if (priceResult.get("listPrice") != null) {
-                                                    newItem.set("unitListPrice", (BigDecimal)priceResult.get("listPrice"));
+                                                    newItem.set("unitListPrice", priceResult.get("listPrice"));
                                                 }
 
                                                 BigDecimal repairUnitPrice = null;

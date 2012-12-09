@@ -20,18 +20,14 @@ package org.ofbiz.entity.util;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.crypto.SecretKey;
-import javax.transaction.Transaction;
 
 import org.apache.commons.codec.binary.Base64;
-
 import org.ofbiz.base.crypto.DesCrypt;
 import org.ofbiz.base.crypto.HashCrypt;
 import org.ofbiz.base.util.Debug;
@@ -39,11 +35,10 @@ import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilObject;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.EntityCryptoException;
 import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.EntityCryptoException;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 
 public final class EntityCrypto {
@@ -221,38 +216,46 @@ public final class EntityCrypto {
     }
 
     protected static abstract class LegacyStorageHandler extends StorageHandler {
+        @Override
         protected byte[] decodeKeyBytes(String keyText) throws GeneralException {
             return StringUtil.fromHexString(keyText);
         }
 
+        @Override
         protected String encodeKey(SecretKey key) {
             return StringUtil.toHexString(key.getEncoded());
         }
 
+        @Override
         protected byte[] decryptValue(SecretKey key, String encryptedString) throws GeneralException {
             return DesCrypt.decrypt(key, StringUtil.fromHexString(encryptedString));
         }
 
+        @Override
         protected String encryptValue(SecretKey key, byte[] objBytes) throws GeneralException {
             return StringUtil.toHexString(DesCrypt.encrypt(key, objBytes));
         }
     };
 
     protected static final StorageHandler OldFunnyHashStorageHandler = new LegacyStorageHandler() {
+        @Override
         protected String getHashedKeyName(String originalKeyName) {
             return HashCrypt.digestHashOldFunnyHex(null, originalKeyName);
         }
 
+        @Override
         protected String getKeyMapPrefix(String hashedKeyName) {
             return "{funny-hash}";
         }
     };
 
     protected static final StorageHandler NormalHashStorageHandler = new LegacyStorageHandler() {
+        @Override
         protected String getHashedKeyName(String originalKeyName) {
             return HashCrypt.digestHash("SHA", originalKeyName.getBytes());
         }
 
+        @Override
         protected String getKeyMapPrefix(String hashedKeyName) {
             return "{normal-hash}";
         }
@@ -265,14 +268,17 @@ public final class EntityCrypto {
             this.kek = kek;
         }
 
+        @Override
         protected String getHashedKeyName(String originalKeyName) {
             return HashCrypt.digestHash64("SHA", originalKeyName.getBytes());
         }
 
+        @Override
         protected String getKeyMapPrefix(String hashedKeyName) {
             return "{salted-base64}";
         }
 
+        @Override
         protected byte[] decodeKeyBytes(String keyText) throws GeneralException {
             byte[] keyBytes = Base64.decodeBase64(keyText);
             if (kek != null) {
@@ -281,6 +287,7 @@ public final class EntityCrypto {
             return keyBytes;
         }
 
+        @Override
         protected String encodeKey(SecretKey key) throws GeneralException {
             byte[] keyBytes = key.getEncoded();
             if (kek != null) {
@@ -289,6 +296,7 @@ public final class EntityCrypto {
             return Base64.encodeBase64String(keyBytes);
         }
 
+        @Override
         protected byte[] decryptValue(SecretKey key, String encryptedString) throws GeneralException {
             byte[] allBytes = DesCrypt.decrypt(key, Base64.decodeBase64(encryptedString));
             int length = allBytes[0];
@@ -297,6 +305,7 @@ public final class EntityCrypto {
             return objBytes;
         }
 
+        @Override
         protected String encryptValue(SecretKey key, byte[] objBytes) throws GeneralException {
             Random random = new Random();
             // random length 5-16

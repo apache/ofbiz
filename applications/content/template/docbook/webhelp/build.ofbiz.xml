@@ -27,7 +27,7 @@ under the License.
     <property name="ofbiz.dir" value="../../framework/base/lib"/>
     <!--   <property name="lib.dir" value="lib"/> -->
 
-    <path id="classpath">       
+    <path id="classpath">
         <pathelement location="${extensions.dir}/webhelpindexer.jar"/>
         <pathelement location="${extensions.dir}/lucene-analyzers-3.0.0.jar"/>
         <pathelement location="${extensions.dir}/lucene-core-3.0.0.jar"/>
@@ -1082,8 +1082,10 @@ under the License.
     <target name="help">
         <echo>
 Usage:
-    Run help for this message.
-    Run webhelp.componentname target to generate webhelp format and indexes for the OFBiz Component.
+    help for this message.
+    webhelp.all               Generates webhelp for all OFBiz Components with webhelp present.
+    webhelp.componentname     Generates webhelp for the OFBiz Component.
+    clean                     Remove all webhelp for all OFBiz Components.
         </echo>
     </target>
 

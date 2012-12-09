@@ -22,7 +22,6 @@ package org.ofbiz.manufacturing.bom;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -161,7 +160,7 @@ public class BOMNode {
                     if (productFeatures != null) {
                         for (int j = 0; j < productFeatures.size(); j++) {
                             feature = productFeatures.get(j);
-                            if (ruleCondition.equals((String)feature.get("productFeatureId"))) {
+                            if (ruleCondition.equals(feature.get("productFeatureId"))) {
                                 ruleSatisfied = true;
                                 break;
                             }
