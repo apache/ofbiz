@@ -2335,7 +2335,7 @@
         <value xml:lang="hi_IN">चेक/हुंडी नम्बर</value>
         <value xml:lang="pt">Verifiquar número</value>
         <value xml:lang="zh">支票号</value>
-        <value xml:lang="zh_Tw">支票號碼</value>
+        <value xml:lang="zh_TW">支票號碼</value>
     </property>
     <property key="AccountingChecks">
         <value xml:lang="ar">صكوك</value>
