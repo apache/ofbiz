@@ -27,10 +27,6 @@ under the License.
         <security https="true" auth="true"/>
         <response name="success" type="view" value="showPortlet"/>
     </request-map>
-    <request-map uri="refreshPortlet">
-        <security https="true" auth="true"/>
-        <response name="success" type="view" value="showPortlet"/>
-    </request-map>
     <request-map uri="showPortletMainDecorator">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="showPortletMainDecorator"/>

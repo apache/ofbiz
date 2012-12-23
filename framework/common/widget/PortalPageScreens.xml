@@ -140,54 +140,6 @@ under the License.
         </section>
     </screen>
 
-    <screen name="GenericPortalPage">
-        <section>
-            <widgets>
-                <include-portal-page id="${pageId}"/>
-            </widgets>
-        </section>
-    </screen>
-    <screen name="FindGenericEntity">
-        <section>
-            <widgets>
-                <screenlet title="${uiLabelMap.${titleLabel}}">
-                    <include-form name="FindGenericEntity" location="component://common/widget/PortalPageForms.xml"/>
-                </screenlet>
-            </widgets>
-        </section>
-    </screen>
-    <screen name="GenericScreenlet">
-        <section>
-            <widgets>
-                <screenlet title="${uiLabelMap.${titleLabel}}" collapsible="true" id="scrlt_${formName}">
-                    <include-form name="${formName}" location="${formLocation}"/>
-                </screenlet>
-            </widgets>
-        </section>
-    </screen>
-    <screen name="GenericScreenletAjax">
-        <section>
-            <widgets>
-                <screenlet title="${uiLabelMap.${titleLabel}}">
-                    <container id="${divIdArea}">
-                        <include-screen name="${screenName}" location="${screenLocation}"/>
-                    </container>
-                </screenlet>
-            </widgets>
-        </section>
-    </screen>
-    <screen name="GenericScreenletAjaxWithMenu">
-        <section>
-            <widgets>
-                <screenlet title="${uiLabelMap.${titleLabel}}" navigation-menu-name="${menuName}">
-                    <include-menu name="${menuName}" location="${menuLocation}"/>
-                    <container id="${divIdArea}">
-                        <include-screen name="${screenName}" location="${screenLocation}"/>
-                    </container>
-                </screenlet>
-            </widgets>
-        </section>
-    </screen>
     <screen name="EditPortalPortletAttributes">
         <section>
             <actions>

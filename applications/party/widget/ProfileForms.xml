@@ -1145,7 +1145,7 @@ under the License.
                    <parameter param-name="billingAccountId"/>
             </show-portlet>
         </field>
-        <on-event-update-area event-type="paginate" area-id="" area-target="refreshPortlet">
+        <on-event-update-area event-type="paginate" area-id="" area-target="showPortlet">
             <parameter param-name="portalPortletId" from-field="parameters.portalPortletId"/>
             <parameter param-name="partyId" from-field="partyId"/>
         </on-event-update-area>
@@ -1178,7 +1178,7 @@ under the License.
                <parameter param-name="partyId" from-field="parameters.partyId"/>
             </show-portlet>
         </field>
-        <on-event-update-area event-type="submit" area-id="${parameters.areaId}" area-target="refreshPortlet" >
+        <on-event-update-area event-type="submit" area-id="${parameters.areaId}" area-target="showPortlet" >
              <parameter param-name="portalPortletId" from-field="parameters.portalPortletId"/>
              <parameter param-name="partyId" from-field="parameters.partyId"/>
              <parameter param-name="billingAccountId"/>
@@ -1241,7 +1241,7 @@ under the License.
                <parameter param-name="partyId" from-field="parameters.partyId"/>
             </show-portlet>
         </field>
-        <on-event-update-area event-type="submit" area-id="${parameters.areaId}" area-target="refreshPortlet">
+        <on-event-update-area event-type="submit" area-id="${parameters.areaId}" area-target="showPortlet">
              <parameter param-name="portalPortletId" from-field="parameters.portalPortletId"/>
              <parameter param-name="partyId" from-field="parameters.partyId"/>
         </on-event-update-area>
@@ -1289,7 +1289,7 @@ under the License.
                <parameter param-name="partyId" from-field="parameters.partyId"/>
             </show-portlet>
         </field>
-        <on-event-update-area event-type="submit" area-id="${parameters.areaId}" area-target="refreshPortlet">
+        <on-event-update-area event-type="submit" area-id="${parameters.areaId}" area-target="showPortlet">
              <parameter param-name="portalPortletId" from-field="parameters.portalPortletId"/>
              <parameter param-name="partyId" from-field="parameters.partyId"/>
         </on-event-update-area>
@@ -1315,7 +1315,7 @@ under the License.
                <parameter param-name="partyId" from-field="parameters.partyId"/>
             </show-portlet>
         </field>
-        <on-event-update-area event-type="submit" area-id="${parameters.areaId}" area-target="refreshPortlet">
+        <on-event-update-area event-type="submit" area-id="${parameters.areaId}" area-target="showPortlet">
              <parameter param-name="portalPortletId" from-field="parameters.portalPortletId"/>
              <parameter param-name="partyId" from-field="parameters.partyId"/>
         </on-event-update-area>
@@ -1351,7 +1351,7 @@ under the License.
                <parameter param-name="partyId" from-field="parameters.partyId"/>
             </show-portlet>
         </field>
-        <on-event-update-area event-type="submit" area-id="${parameters.areaId}" area-target="refreshPortlet">
+        <on-event-update-area event-type="submit" area-id="${parameters.areaId}" area-target="showPortlet">
              <parameter param-name="portalPortletId" from-field="parameters.portalPortletId"/>
              <parameter param-name="partyId" from-field="parameters.partyId"/>
         </on-event-update-area>

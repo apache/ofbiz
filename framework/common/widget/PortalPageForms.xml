@@ -136,18 +136,6 @@ under the License.
         
     </form>
 
-    <form name="FindGenericEntity" type="single" target="list${entity}" title="" focus-field-name="idName">
-        <field name="idName" title="${uiLabelMap.FormFieldTitle_${pkIdName}"><text size="16"/></field>
-        <field name="idName_op" ><hidden value="contains"/></field>
-        <field name="idName_ic" ><hidden value="Y"/></field>
-        <field name="description" ><text size="16"/></field>
-        <field name="description_op" ><hidden value="contains"/></field>
-        <field name="description_ic" ><hidden value="Y"/></field>
-        <field name="submitButton" title=" " widget-style="smallSubmit">
-            <hyperlink target="javascript:ajaxUpdateArea('List${entity}Area', 'list${entity}', $(FindGenericEntity).serialize());" target-type="plain"  description="${uiLabelMap.CommonSearch}"/>
-        </field>
-    </form>
-
     <form name="EditPortalPageColumnWidth" type="single" target="updatePortalPageColumnWidth" default-map-name="portalPageColumn">
         <field name="portalPageId"><hidden/></field>
         <field name="columnSeqId"><hidden/></field>
