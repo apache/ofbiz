@@ -780,7 +780,17 @@ under the License.
         <attribute name="geoAssocTypeId" mode="IN" type="String"/>        
         <attribute name="geoList" mode="OUT" type="java.util.List"/>
     </service>
-
+    
+    <service name="getServerTimestampAsLong" engine="simple" auth="false"
+        location="component://common/script/org/ofbiz/common/CommonServices.xml" invoke="getServerTimestampAsLong">
+        <attribute name="serverTimestamp" mode="OUT" type="Long"/>
+    </service>
+    
+    <service name="getServerTimestamp" engine="simple" auth="false"
+        location="component://common/script/org/ofbiz/common/CommonServices.xml" invoke="getServerTimestamp">
+        <attribute name="serverTimestamp" mode="OUT" type="TimeStamp"/>
+    </service>
+    
     <service name="createJsLanguageFileMapping" engine="java" auth="false" use-transaction="false"
         location="org.ofbiz.common.JsLanguageFileMappingCreator" invoke="createJsLanguageFileMapping">
         <description>Create or update the JsLanguageFilesMapping.java. You still need to compile thereafter</description>

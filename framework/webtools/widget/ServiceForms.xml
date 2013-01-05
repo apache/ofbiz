@@ -57,7 +57,7 @@ under the License.
     <form name="FindJobs" type="single" target="FindJob" default-entity-name="JobSandbox">
         <field name="noConditionFind" position="1"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
         <field name="jobName" title="${uiLabelMap.WebtoolsJob}" position="1"><text-find/></field>
-        <field name="clock" position="2" title=" "><display description="" default-value="ok"/></field>
+        <field name="clock" position="2" title="${uiLabelMap.CommonServerHour}:"><display/></field>
         <field name="jobId" title="${uiLabelMap.CommonId}" position="1"><text-find/></field>
         <field name="serviceName" title="${uiLabelMap.WebtoolsServiceName}"><text-find/></field>
         <field name="statusId" title="${uiLabelMap.CommonStatus}" position="1">
