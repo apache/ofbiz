@@ -2425,9 +2425,14 @@ public class OrderServices {
             locale = Locale.getDefault();
         }
 
-        ResourceBundleMapWrapper uiLabelMap = (ResourceBundleMapWrapper) UtilProperties.getResourceBundleMap("EcommerceUiLabels", locale);
-        uiLabelMap.addBottomResourceBundle("OrderUiLabels");
-        uiLabelMap.addBottomResourceBundle("CommonUiLabels");
+        ResourceBundleMapWrapper uiLabelMap = null;
+        try {
+            uiLabelMap = (ResourceBundleMapWrapper) UtilProperties.getResourceBundleMap("CommonUiLabels", locale);
+            uiLabelMap.addBottomResourceBundle("EcommerceUiLabels");
+            uiLabelMap.addBottomResourceBundle("OrderUiLabels");
+        } catch (IllegalArgumentException e) {
+            Debug.logError(e, "Error adding resource bundle: " + e.toString(), module);
+        }
 
         Map bodyParameters = UtilMisc.toMap("orderId", orderId, "orderItemSeqId", orderItemSeqId, "userLogin", placingUserLogin, "uiLabelMap", uiLabelMap, "locale", locale);
         if (placingParty!= null) {
