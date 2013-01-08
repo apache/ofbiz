@@ -84,8 +84,6 @@ public class LoginWorker {
 
     /** This Map is keyed by the randomly generated externalLoginKey and the value is a UserLogin GenericValue object */
     public static Map<String, GenericValue> externalLoginKeys = FastMap.newInstance();
-    // This fast map is added as work around for repeated login issue
-    public static Map<String, GenericValue> externalLoginKeysWR = FastMap.newInstance();
 
     public static StringWrapper makeLoginUrl(PageContext pageContext) {
         return makeLoginUrl(pageContext, "checkLogin");
@@ -132,8 +130,6 @@ public class LoginWorker {
             // if the session has a previous key in place, remove it from the master list
             String sesExtKey = (String) session.getAttribute(EXTERNAL_LOGIN_KEY_ATTR);
             if (sesExtKey != null) {
-                // Work around for repeated login issue
-                externalLoginKeysWR.put(sesExtKey, userLogin);
                 externalLoginKeys.remove(sesExtKey);
             }
 
@@ -156,7 +152,6 @@ public class LoginWorker {
         String sesExtKey = (String) session.getAttribute(EXTERNAL_LOGIN_KEY_ATTR);
         if (sesExtKey != null) {
             externalLoginKeys.remove(sesExtKey);
-            externalLoginKeysWR.remove(sesExtKey);
         }
     }
 
@@ -527,7 +522,6 @@ public class LoginWorker {
     public static void doBasicLogin(GenericValue userLogin, HttpServletRequest request) {
         HttpSession session = request.getSession();
         session.setAttribute("userLogin", userLogin);
-        request.setAttribute("userLogin", userLogin);
 
         String javaScriptEnabled = null;
         try {
@@ -931,11 +925,6 @@ public class LoginWorker {
         if (externalKey == null) return "success";
 
         GenericValue userLogin = (GenericValue) LoginWorker.externalLoginKeys.get(externalKey);
-        // Work around for repeated login issue
-        if (userLogin == null) {
-            userLogin = (GenericValue) LoginWorker.externalLoginKeysWR.get(externalKey);
-            externalLoginKeysWR.remove(externalKey);
-        }
         if (userLogin != null) {
             //to check it's the right tenant
             //in case username and password are the same in different tenants
