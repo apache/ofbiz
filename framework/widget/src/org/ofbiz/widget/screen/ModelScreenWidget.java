@@ -415,7 +415,12 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         public String getTitle(Map<String, Object> context) {
-            return this.titleExdr.expandString(context);
+            String title = this.titleExdr.expandString(context);
+            StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+            if (simpleEncoder != null) {
+                title = simpleEncoder.encode(title);
+            }
+            return title;
         }
 
         public Menu getNavigationMenu() {
@@ -1549,7 +1554,12 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         public String getAlt(Map<String, Object> context) {
-            return this.alt.expandString(context);
+            String alt = this.alt.expandString(context);
+            StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+            if (simpleEncoder != null) {
+                alt = simpleEncoder.encode(alt);
+            }
+            return alt;
         }
 
         public String getUrlMode() {
