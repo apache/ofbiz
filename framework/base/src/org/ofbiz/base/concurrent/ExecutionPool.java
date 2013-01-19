@@ -38,7 +38,7 @@ import org.ofbiz.base.util.Debug;
 @SourceMonitored
 public final class ExecutionPool {
     public static final String module = ExecutionPool.class.getName();
-    public static final ScheduledExecutorService GLOBAL_EXECUTOR = getExecutor(null, "ofbiz-config", -1, true);
+    public static final ScheduledExecutorService GLOBAL_EXECUTOR = getExecutor(null, "OFBiz-config", -1, false);
 
     protected static class ExecutionPoolThreadFactory implements ThreadFactory {
         private final ThreadGroup group;
@@ -67,7 +67,7 @@ public final class ExecutionPool {
         if (threadCount == 0) {
             threadCount = 1;
         } else if (threadCount < 0) {
-            int numCpus = ManagementFactory.getOperatingSystemMXBean().getAvailableProcessors();
+            int numCpus = Runtime.getRuntime().availableProcessors();
             threadCount = Math.abs(threadCount) * numCpus;
         }
         ThreadFactory threadFactory = createThreadFactory(group, namePrefix);
@@ -113,7 +113,7 @@ public final class ExecutionPool {
 
     static {
         ExecutionPoolPulseWorker worker = new ExecutionPoolPulseWorker();
-        int processorCount = ManagementFactory.getOperatingSystemMXBean().getAvailableProcessors();
+        int processorCount = Runtime.getRuntime().availableProcessors();
         for (int i = 0; i < processorCount; i++) {
             Thread t = new Thread(worker);
             t.setDaemon(true);
