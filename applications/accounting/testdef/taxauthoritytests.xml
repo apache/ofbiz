@@ -1,4 +1,5 @@
-/*
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
 distributed with this work for additional information
@@ -15,20 +16,13 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-*/
-var validateNewShippingAdd = null;
-jQuery(document).ready( function() {
+-->
 
-    var addShippingAddress = jQuery('#addShippingAddress');
-    if (addShippingAddress.length) {
-        // add the form validator
-        addShippingAddress.validate();
-       
-       jQuery('#countryGeoId').change( function() {
-            getAssociatedStateList('countryGeoId', 'stateProvinceGeoId', 'advice-required-stateProvinceGeoId', 'states');
-        });
+<test-suite suite-name="taxauthoritytests"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/test-suite.xsd">
 
-        // Populate state list based on default country
-        getAssociatedStateList('countryGeoId', 'stateProvinceGeoId', 'advice-required-stateProvinceGeoId', 'states');
-    }
-});
+    <test-case case-name="tax-promotion-tests">
+        <simple-method-test location="component://accounting/script/org/ofbiz/accounting/test/TaxAuthorityTests.xml" name="calculateTaxBeforePromotion"/>
+    </test-case>
+</test-suite>
