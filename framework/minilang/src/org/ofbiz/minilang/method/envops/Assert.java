@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javolution.util.FastList;
+
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
@@ -84,7 +86,7 @@ public final class Assert extends MethodOperation {
                 messageBuffer.append("failed: ");
                 condition.prettyPrint(messageBuffer, methodContext);
                 if (messages == null) {
-                    messages = new ArrayList<Object>();
+                    messages = FastList.newInstance();
                     errorListFma.put(methodContext.getEnvMap(), messages);
                 }
                 messages.add(messageBuffer.toString());

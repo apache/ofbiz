@@ -19,9 +19,10 @@
 package org.ofbiz.minilang;
 
 import java.util.Map;
-import java.util.HashMap;
 import java.util.Set;
 import java.util.Vector;
+
+import javolution.util.FastMap;
 
 import org.apache.bsf.BSFDeclaredBean;
 import org.apache.bsf.BSFException;
@@ -42,7 +43,7 @@ public class SimpleMethodBsfEngine extends BSFEngineImpl {
 
     public static final String module = SimpleMethodBsfEngine.class.getName();
 
-    protected Map<String, Object> context = new HashMap<String, Object>();
+    protected Map<String, Object> context = FastMap.newInstance();
 
     /**
      * This is an implementation of the apply() method. It executes the funcBody text in an "anonymous" method call with arguments.

@@ -21,9 +21,10 @@ package org.ofbiz.minilang.method.callops;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javolution.util.FastMap;
 
 import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.Debug;
@@ -103,7 +104,7 @@ public final class CallSimpleMethod extends MethodOperation {
         }
         MethodContext localContext = methodContext;
         if ("function".equals(this.scope)) {
-            Map<String, Object> localEnv = new HashMap<String, Object>();
+            Map<String, Object> localEnv = FastMap.newInstance();
             localEnv.putAll(methodContext.getEnvMap());
             localEnv.remove(this.simpleMethod.getEventResponseCodeName());
             localEnv.remove(this.simpleMethod.getServiceResponseMessageName());

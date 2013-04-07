@@ -18,8 +18,9 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.envops;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import javolution.util.FastList;
 
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.minilang.MiniLangException;
@@ -58,7 +59,7 @@ public final class FieldToList extends MethodOperation {
         if (fieldVal != null) {
             List<Object> toList = listFma.get(methodContext.getEnvMap());
             if (toList == null) {
-                toList = new ArrayList<Object>();
+                toList = FastList.newInstance();
                 listFma.put(methodContext.getEnvMap(), toList);
             }
             toList.add(fieldVal);

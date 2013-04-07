@@ -18,8 +18,8 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.envops;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import javolution.util.FastList;
+import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.ObjectType;
@@ -163,9 +163,9 @@ public final class SetOperation extends MethodOperation {
         }
         if (this.type.length() > 0) {
             if ("NewMap".equals(this.type)) {
-                newValue = new HashMap<String, Object>();
+                newValue = FastMap.newInstance();
             } else if ("NewList".equals(this.type)) {
-                newValue = new ArrayList<Object>();
+                newValue = FastList.newInstance();
             } else {
                 try {
                     String format = null;

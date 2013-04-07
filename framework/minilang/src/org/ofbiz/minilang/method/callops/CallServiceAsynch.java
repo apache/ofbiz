@@ -18,9 +18,10 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.callops;
 
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
+import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
@@ -70,7 +71,7 @@ public final class CallServiceAsynch extends MethodOperation {
         String serviceName = serviceNameFse.expandString(methodContext.getEnvMap());
         Map<String, Object> inMap = inMapFma.get(methodContext.getEnvMap());
         if (inMap == null) {
-            inMap = new HashMap<String, Object>();
+            inMap = FastMap.newInstance();
         }
         if (includeUserLogin) {
             GenericValue userLogin = methodContext.getUserLogin();

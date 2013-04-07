@@ -20,8 +20,9 @@ package org.ofbiz.minilang.method.entityops;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
+
+import javolution.util.FastList;
 
 import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.Debug;
@@ -85,7 +86,7 @@ public final class EntityData extends MethodOperation {
     public boolean exec(MethodContext methodContext) throws MiniLangException {
         List<Object> messages = errorListFma.get(methodContext.getEnvMap());
         if (messages == null) {
-            messages = new ArrayList<Object>();
+            messages = FastList.newInstance();
             errorListFma.put(methodContext.getEnvMap(), messages);
         }
         String location = this.locationFse.expandString(methodContext.getEnvMap());

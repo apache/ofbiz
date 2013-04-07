@@ -18,10 +18,11 @@
  *******************************************************************************/
 package org.ofbiz.minilang.operation;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import javolution.util.FastList;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
@@ -36,7 +37,7 @@ public class SimpleMapProcess {
     public static final String module = SimpleMapProcess.class.getName();
 
     String field = "";
-    List<SimpleMapOperation> simpleMapOperations = new ArrayList<SimpleMapOperation>();
+    List<SimpleMapOperation> simpleMapOperations = FastList.newInstance();
 
     public SimpleMapProcess(Element simpleMapProcessElement) {
         this.field = simpleMapProcessElement.getAttribute("field");

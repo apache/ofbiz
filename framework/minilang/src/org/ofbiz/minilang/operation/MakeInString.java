@@ -18,10 +18,11 @@
  *******************************************************************************/
 package org.ofbiz.minilang.operation;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import javolution.util.FastList;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
@@ -36,7 +37,7 @@ public class MakeInString {
     public static final String module = MakeInString.class.getName();
 
     String fieldName;
-    List<MakeInStringOperation> operations = new ArrayList<MakeInStringOperation>();
+    List<MakeInStringOperation> operations = FastList.newInstance();
 
     public MakeInString(Element makeInStringElement) {
         fieldName = makeInStringElement.getAttribute("field");
