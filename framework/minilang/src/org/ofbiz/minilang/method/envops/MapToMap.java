@@ -61,8 +61,8 @@ public final class MapToMap extends MethodOperation {
                 if (toMap == null) {
                     toMap = FastMap.newInstance();
                     toMapFma.put(methodContext.getEnvMap(), toMap);
-                    toMap.putAll(fromMap);
                 }
+               toMap.putAll(fromMap);
             } else {
                 methodContext.putAllEnv(fromMap);
             }
